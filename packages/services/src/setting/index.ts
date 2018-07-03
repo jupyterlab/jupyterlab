@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ISettingRegistry, URLExt
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  ServerConnection
-} from '../serverconnection';
-
+import { ServerConnection } from '../serverconnection';
 
 /**
  * The url for the lab settings service.
  */
 const SERVICE_SETTINGS_URL = 'api/settings';
 
-
 /**
  * The settings API service manager.
  */
-export
-class SettingManager {
+export class SettingManager {
   /**
    * Create a new setting manager.
    */
-  constructor(options: SettingManager.IOptions = { }) {
-    this.serverSettings = options.serverSettings ||
-      ServerConnection.makeSettings();
+  constructor(options: SettingManager.IOptions = {}) {
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
   }
 
   /**
@@ -47,7 +40,7 @@ class SettingManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, { }, serverSettings);
+    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
     return promise.then(response => {
       if (response.status !== 200) {
@@ -89,17 +82,14 @@ class SettingManager {
   }
 }
 
-
 /**
  * A namespace for `SettingManager` statics.
  */
-export
-namespace SettingManager {
+export namespace SettingManager {
   /**
    * The instantiation options for a setting manager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings used to make API requests.
      */
@@ -107,19 +97,15 @@ namespace SettingManager {
   }
 }
 
-
 /**
  * A namespace for setting API interfaces.
  */
-export
-namespace Setting {
+export namespace Setting {
   /**
    * The interface for the setting system manager.
    */
-  export
-  interface IManager extends SettingManager { }
+  export interface IManager extends SettingManager {}
 }
-
 
 /**
  * A namespace for private data.
@@ -128,8 +114,7 @@ namespace Private {
   /**
    * Get the url for a plugin's settings.
    */
-  export
-  function url(base: string, id: string): string {
+  export function url(base: string, id: string): string {
     return URLExt.join(base, SERVICE_SETTINGS_URL, id);
   }
 }

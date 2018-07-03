@@ -1,44 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IStateDB
-} from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
-import {
-  ArrayExt, each, find
-} from '@phosphor/algorithm';
+import { ArrayExt, each, find } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { AttachedProperty } from '@phosphor/properties';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  FocusTracker, Widget
-} from '@phosphor/widgets';
-
+import { FocusTracker, Widget } from '@phosphor/widgets';
 
 /**
  * An object that tracks widget instances.
  */
-export
-interface IInstanceTracker<T extends Widget> extends IDisposable {
+export interface IInstanceTracker<T extends Widget> extends IDisposable {
   /**
    * A signal emitted when the current widget changes.
    *
@@ -119,7 +101,6 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
   inject(widget: T): void;
 }
 
-
 /**
  * A class that keeps track of widget instances on an Application shell.
  *
@@ -130,8 +111,8 @@ interface IInstanceTracker<T extends Widget> extends IDisposable {
  * wish to keep track of newly created widgets. This class, however, can be used
  * internally by plugins to restore state as well.
  */
-export
-class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposable {
+export class InstanceTracker<T extends Widget>
+  implements IInstanceTracker<T>, IDisposable {
   /**
    * Create a new instance tracker.
    *
@@ -277,7 +258,9 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * @param fn - The function to call on each widget.
    */
   forEach(fn: (widget: T) => void): void {
-    each(this._tracker.widgets, widget => { fn(widget); });
+    each(this._tracker.widgets, widget => {
+      fn(widget);
+    });
   }
 
   /**
@@ -334,22 +317,25 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     const { command, registry, state, when } = options;
     const namespace = this.namespace;
-    const promises = when ? [state.fetchNamespace(namespace)].concat(when)
+    const promises = when
+      ? [state.fetchNamespace(namespace)].concat(when)
       : [state.fetchNamespace(namespace)];
 
     this._restore = options;
 
     return Promise.all(promises).then(([saved]) => {
-      return Promise.all(saved.map(item => {
-        const { id, value } = item;
-        const args = value && (value as any).data;
-        if (args === undefined) {
-          return state.remove(item.id);
-        }
+      return Promise.all(
+        saved.map(item => {
+          const { id, value } = item;
+          const args = value && (value as any).data;
+          if (args === undefined) {
+            return state.remove(item.id);
+          }
 
-        // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args).catch(() => state.remove(id));
-      }));
+          // Execute the command and if it fails, delete the state restore data.
+          return registry.execute(command, args).catch(() => state.remove(id));
+        })
+      );
     });
   }
 
@@ -393,12 +379,17 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
    * #### Notes
    * The default implementation is a no-op.
    */
-  protected onCurrentChanged(value: T | null): void { /* no-op */ }
+  protected onCurrentChanged(value: T | null): void {
+    /* no-op */
+  }
 
   /**
    * Handle the current change signal from the internal focus tracker.
    */
-  private _onCurrentChanged(sender: any, args: FocusTracker.IChangedArgs<T>): void {
+  private _onCurrentChanged(
+    sender: any,
+    args: FocusTracker.IChangedArgs<T>
+  ): void {
     // Bail if the active widget did not change.
     if (args.newValue === this._currentWidget) {
       return;
@@ -424,11 +415,10 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
 
     // Handle the current widget being disposed.
     if (widget === this._currentWidget) {
-      this._currentWidget = (
+      this._currentWidget =
         this._tracker.currentWidget ||
         this._widgets[this._widgets.length - 1] ||
-        null
-      );
+        null;
       this._currentChanged.emit(this._currentWidget);
       this.onCurrentChanged(this._currentWidget);
     }
@@ -456,18 +446,14 @@ class InstanceTracker<T extends Widget> implements IInstanceTracker<T>, IDisposa
   private _isDisposed = false;
 }
 
-
-
 /**
  * A namespace for `InstanceTracker` statics.
  */
-export
-namespace InstanceTracker {
+export namespace InstanceTracker {
   /**
    * The instantiation options for an instance tracker.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A namespace for all tracked widgets, (e.g., `notebook`).
      */
@@ -477,8 +463,7 @@ namespace InstanceTracker {
   /**
    * The state restoration configuration options.
    */
-  export
-  interface IRestoreOptions<T extends Widget> {
+  export interface IRestoreOptions<T extends Widget> {
     /**
      * The command to execute when restoring instances.
      */
@@ -515,7 +500,6 @@ namespace InstanceTracker {
   }
 }
 
-
 /*
  * A namespace for private data.
  */
@@ -523,8 +507,7 @@ namespace Private {
   /**
    * An attached property to indicate whether a widget has been injected.
    */
-  export
-  const injectedProperty = new AttachedProperty<Widget, boolean>({
+  export const injectedProperty = new AttachedProperty<Widget, boolean>({
     name: 'injected',
     create: () => false
   });
@@ -532,8 +515,7 @@ namespace Private {
   /**
    * An attached property for a widget's ID in the state database.
    */
-  export
-  const nameProperty = new AttachedProperty<Widget, string>({
+  export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
     create: () => ''
   });

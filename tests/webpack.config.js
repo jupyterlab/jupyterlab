@@ -24,12 +24,15 @@ module.exports = {
   ],
   module: {
     rules: [
-      { test: /\.tsx?$/, use: [
-        { loader: 'cache-loader' },
-        { loader: 'thread-loader', options: {workers: threadCpus} },
-        { loader: 'ts-loader', options: {happyPackMode: true} },
-      ]},
-      { test: /\.js$/,
+      {
+        test: /\.tsx?$/,
+        use: [
+          { loader: 'thread-loader', options: { workers: threadCpus } },
+          { loader: 'ts-loader', options: { happyPackMode: true } }
+        ]
+      },
+      {
+        test: /\.js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
         // eslint-disable-next-line no-undef
@@ -42,11 +45,23 @@ module.exports = {
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
-      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/font-woff'
+      },
+      {
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/font-woff'
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+      },
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      }
     ]
-  },
+  }
 };

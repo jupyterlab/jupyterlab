@@ -3,17 +3,11 @@
 
 import expect = require('expect.js');
 
-import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/observables';
-
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
-
   describe('ObservableJSON', () => {
-
     describe('#constructor()', () => {
-
       it('should create an observable JSON object', () => {
         let item = new ObservableJSON();
         expect(item).to.be.an(ObservableJSON);
@@ -21,15 +15,13 @@ describe('@jupyterlab/observables', () => {
 
       it('should accept initial values', () => {
         let item = new ObservableJSON({
-          values: { 'foo': 1, 'bar': 'baz'}
+          values: { foo: 1, bar: 'baz' }
         });
         expect(item).to.be.an(ObservableJSON);
       });
-
     });
 
     describe('#toJSON()', () => {
-
       it('should serialize the model to JSON', () => {
         let item = new ObservableJSON();
         item.set('foo', 1);
@@ -38,20 +30,16 @@ describe('@jupyterlab/observables', () => {
 
       it('should return a copy of the data', () => {
         let item = new ObservableJSON();
-        item.set('foo', { 'bar': 1 });
+        item.set('foo', { bar: 1 });
         let value = item.toJSON();
         value['bar'] = 2;
         expect((item.get('foo') as any)['bar']).to.be(1);
       });
-
     });
-
   });
 
   describe('ObservableJSON.ChangeMessage', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new message', () => {
         let message = new ObservableJSON.ChangeMessage({
           key: 'foo',
@@ -61,11 +49,9 @@ describe('@jupyterlab/observables', () => {
         });
         expect(message).to.be.a(ObservableJSON.ChangeMessage);
       });
-
     });
 
     describe('#args', () => {
-
       it('should be the args of the message', () => {
         let args: IObservableJSON.IChangedArgs = {
           key: 'foo',
@@ -76,9 +62,6 @@ describe('@jupyterlab/observables', () => {
         let message = new ObservableJSON.ChangeMessage(args);
         expect(message.args).to.be(args);
       });
-
     });
-
   });
-
 });

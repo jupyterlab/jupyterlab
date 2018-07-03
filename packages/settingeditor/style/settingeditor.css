@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 :root {
   --jp-private-settingeditor-debug-height: 28px;
   --jp-private-settingeditor-key-width: 150px;
@@ -13,7 +12,6 @@
   --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
 }
-
 
 #setting-editor {
   min-width: 360px;
@@ -26,7 +24,6 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-
 #setting-editor > .p-Widget {
   position: absolute;
   top: 0;
@@ -35,16 +32,13 @@
   right: 0;
 }
 
-
 #setting-editor .p-SplitPanel-handle {
   background-color: var(--jp-border-color2);
 }
 
-
 #setting-editor .jp-SettingEditorInstructions {
   text-align: center;
 }
-
 
 #setting-editor .jp-SettingEditorInstructions-icon {
   display: inline-block;
@@ -52,9 +46,7 @@
   width: 60px;
   height: 78px;
   margin-right: 5px;
-
 }
-
 
 #setting-editor .jp-SettingEditorInstructions-title {
   color: var(--jp-ui-font-color0);
@@ -64,18 +56,15 @@
   vertical-align: top;
 }
 
-
 #setting-editor .jp-SettingEditorInstructions-text {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size2);
 }
 
-
 #setting-editor .jp-PluginList {
   min-width: 175px;
   width: 175px;
 }
-
 
 #setting-editor .jp-PluginList-switcher {
   height: var(--jp-private-settingeditor-switcher-height);
@@ -84,7 +73,6 @@
   left: 0;
   right: 0;
 }
-
 
 #setting-editor .jp-PluginList-switcher button {
   background: var(--jp-layout-color2);
@@ -97,17 +85,14 @@
   width: 50%;
 }
 
-
 #setting-editor .jp-PluginList-switcher button:first-child {
   border-right: 1px solid var(--jp-ui-font-color3);
 }
-
 
 #setting-editor .jp-PluginList-switcher button:disabled {
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color0);
 }
-
 
 #setting-editor .jp-PluginList ul {
   background-color: var(--jp-layout-color1);
@@ -124,7 +109,6 @@
   right: 0;
 }
 
-
 #setting-editor .jp-PluginList li {
   border: 1px solid transparent;
   overflow: hidden;
@@ -133,12 +117,10 @@
   white-space: nowrap;
 }
 
-
 #setting-editor .jp-PluginList li:hover {
   background-color: var(--jp-layout-color2);
   border: 1px solid var(--jp-border-color2);
 }
-
 
 #setting-editor .jp-PluginList li.jp-mod-selected {
   background-color: var(--jp-brand-color1);
@@ -146,11 +128,12 @@
   border: 1px solid var(--jp-brand-color1);
 }
 
-
-#setting-editor ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
+#setting-editor
+  ul.jp-PluginList
+  li.jp-mod-selected
+  span.jp-PluginList-icon.jp-FileIcon {
   background-image: var(--jp-icon-file-selected);
 }
-
 
 #setting-editor .jp-PluginList-icon {
   display: inline-block;
@@ -161,7 +144,6 @@
   top: 3px;
 }
 
-
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size1);
@@ -169,15 +151,15 @@
   max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
-
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
   margin-top: 2px;
 }
 
-
-#setting-editor .jp-SettingsRawEditor.jp-mod-error .jp-Toolbar-item.jp-BugIcon::after {
+#setting-editor
+  .jp-SettingsRawEditor.jp-mod-error
+  .jp-Toolbar-item.jp-BugIcon::after {
   color: red;
-  content: "\25CF"; /* Unicode circle character (error dot) */
+  content: '\25CF'; /* Unicode circle character (error dot) */
   font-size: 7px;
   width: 100%;
   height: 100%;
@@ -186,30 +168,32 @@
   left: 6px;
 }
 
-
 #setting-editor .jp-SettingsRawEditor .jp-Inspector {
   border-top: 2px solid var(--jp-layout-color2);
   max-height: var(--jp-private-settingeditor-debug-height);
 }
 
-
-#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon {
+#setting-editor
+  .jp-SettingsRawEditor
+  .jp-InspectorItem.jp-SettingsDebug
+  .jp-RenderedHTMLCommon {
   padding: 2px 5px 2px 0;
   width: 100%;
 }
 
-
-#setting-editor .jp-SettingsRawEditor .jp-InspectorItem.jp-SettingsDebug .jp-RenderedHTMLCommon p {
+#setting-editor
+  .jp-SettingsRawEditor
+  .jp-InspectorItem.jp-SettingsDebug
+  .jp-RenderedHTMLCommon
+  p {
   text-align: right;
 }
-
 
 #setting-editor .jp-SettingsTableEditor {
   border: 1px solid var(--jp-brand-color1);
   margin: 0;
   padding: 0;
 }
-
 
 #setting-editor .jp-SettingsTableEditor legend {
   color: var(--jp-brand-color1);
@@ -219,14 +203,12 @@
   height: var(--jp-private-settingeditor-legend-height);
 }
 
-
 #setting-editor .jp-SettingsTableEditor-wrapper {
   position: absolute;
   top: var(--jp-private-settingeditor-legend-height);
   bottom: 0;
   overflow-y: auto;
 }
-
 
 #setting-editor .jp-SettingsTableEditor table {
   table-layout: fixed;
@@ -237,37 +219,31 @@
   overflow: hidden;
 }
 
-
 #setting-editor .jp-SettingsTableEditor tr {
   color: var(--jp-ui-font-color2);
-  height: var( --jp-private-settingeditor-row-height);
+  height: var(--jp-private-settingeditor-row-height);
   overflow: hidden;
 }
-
 
 #setting-editor .jp-SettingsTableEditor th {
   background-color: var(--jp-layout-color3);
   border: 1px solid transparent;
   font-weight: bold;
-  height: var( --jp-private-settingeditor-row-height);
+  height: var(--jp-private-settingeditor-row-height);
 }
-
 
 #setting-editor .jp-SettingsTableEditor td {
   border: 1px solid transparent;
-  height: var( --jp-private-settingeditor-row-height);
+  height: var(--jp-private-settingeditor-row-height);
 }
-
 
 #setting-editor .jp-SettingsTableEditor th.jp-SettingsTableEditor-key {
   width: var(--jp-private-settingeditor-key-width);
 }
 
-
 #setting-editor .jp-SettingsTableEditor th.jp-SettingsTableEditor-type {
   width: var(--jp-private-settingeditor-type-width);
 }
-
 
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-key {
   overflow: hidden;
@@ -275,13 +251,11 @@
   text-overflow: ellipsis;
 }
 
-
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-value {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
 
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-type {
   text-align: right;

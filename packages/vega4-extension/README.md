@@ -51,7 +51,7 @@ chart = alt.Chart(cars).mark_point().encode(
 chart
 ```
 
-Provide vega-embed options via metadata: 
+Provide vega-embed options via metadata:
 
 ```python
 from IPython.display import display

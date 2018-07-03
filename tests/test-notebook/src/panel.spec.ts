@@ -3,27 +3,22 @@
 
 import expect = require('expect.js');
 
-import {
-  Context
-} from '@jupyterlab/docregistry';
+import { Context } from '@jupyterlab/docregistry';
+
+import { INotebookModel, NotebookPanel, Notebook } from '@jupyterlab/notebook';
+
+import { Toolbar } from '@jupyterlab/apputils';
+
+import { createNotebookContext } from '../../utils';
 
 import {
-  INotebookModel, NotebookPanel, Notebook
-} from '@jupyterlab/notebook';
-
-import {
-  Toolbar
-} from '@jupyterlab/apputils';
-
-import {
-  createNotebookContext
-} from '../../utils';
-
-import {
-  createNotebookPanelFactory, rendermime,
-  mimeTypeService, editorFactory, createNotebookPanel, createNotebook
+  createNotebookPanelFactory,
+  rendermime,
+  mimeTypeService,
+  editorFactory,
+  createNotebookPanel,
+  createNotebook
 } from '../../notebook-utils';
-
 
 /**
  * Default data.
@@ -31,9 +26,7 @@ import {
 const contentFactory = createNotebookPanelFactory();
 
 describe('@jupyterlab/notebook', () => {
-
   describe('NotebookPanel', () => {
-
     let context: Context<INotebookModel>;
 
     beforeEach(async () => {
@@ -46,7 +39,6 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should create a notebook panel', () => {
         const content = createNotebook();
         const panel = new NotebookPanel({ context, content });
@@ -61,38 +53,30 @@ describe('@jupyterlab/notebook', () => {
         await context.ready;
         expect(panel.content.mode).to.equal('edit');
       });
-
     });
 
     describe('#toolbar', () => {
-
       it('should be the toolbar used by the widget', () => {
         let panel = createNotebookPanel(context);
         expect(panel.toolbar).to.be.a(Toolbar);
       });
-
     });
 
     describe('#content', () => {
-
       it('should be the notebook content widget', () => {
         let panel = createNotebookPanel(context);
         expect(panel.content).to.be.a(Notebook);
       });
-
     });
 
     describe('#context', () => {
-
       it('should get the document context for the widget', () => {
         let panel = createNotebookPanel(context);
         expect(panel.context).to.be(context);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the widget', () => {
         let panel = createNotebookPanel(context);
         panel.dispose();
@@ -105,22 +89,17 @@ describe('@jupyterlab/notebook', () => {
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
       });
-
     });
 
     describe('.ContentFactory', () => {
-
       describe('#constructor', () => {
-
         it('should create a new ContentFactory', () => {
           let factory = new NotebookPanel.ContentFactory({ editorFactory });
           expect(factory).to.be.a(NotebookPanel.ContentFactory);
         });
-
       });
 
       describe('#createNotebook()', () => {
-
         it('should create a notebook widget', () => {
           let options = {
             contentFactory: contentFactory,
@@ -129,11 +108,7 @@ describe('@jupyterlab/notebook', () => {
           };
           expect(contentFactory.createNotebook(options)).to.be.a(Notebook);
         });
-
       });
-
     });
-
   });
-
 });

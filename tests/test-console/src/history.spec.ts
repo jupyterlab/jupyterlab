@@ -3,30 +3,17 @@
 
 import expect = require('expect.js');
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  CodeMirrorEditor
-} from '@jupyterlab/codemirror';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import {
-  ConsoleHistory
-} from '@jupyterlab/console';
+import { ConsoleHistory } from '@jupyterlab/console';
 
-import {
-  createClientSession
-} from '../../utils';
-
+import { createClientSession } from '../../utils';
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
   header: null,
@@ -35,21 +22,17 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
   buffers: null,
   channel: 'shell',
   content: {
-    history: [
-      [0, 0, 'foo'],
-      [0, 0, 'bar'],
-      [0, 0, 'baz'],
-      [0, 0, 'qux']
-    ]
+    history: [[0, 0, 'foo'], [0, 0, 'bar'], [0, 0, 'baz'], [0, 0, 'qux']]
   }
 };
 
-
 class TestHistory extends ConsoleHistory {
-
   methods: string[] = [];
 
-  onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
+  onEdgeRequest(
+    editor: CodeEditor.IEditor,
+    location: CodeEditor.EdgeLocation
+  ): void {
     this.methods.push('onEdgeRequest');
     super.onEdgeRequest(editor, location);
   }
@@ -65,9 +48,7 @@ class TestHistory extends ConsoleHistory {
   }
 }
 
-
 describe('console/history', () => {
-
   let session: IClientSession;
 
   beforeEach(() => {
@@ -81,38 +62,30 @@ describe('console/history', () => {
   });
 
   describe('ConsoleHistory', () => {
-
     describe('#constructor()', () => {
-
       it('should create a console history object', () => {
         let history = new ConsoleHistory({ session });
         expect(history).to.be.a(ConsoleHistory);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the object is disposed', () => {
         let history = new ConsoleHistory({ session });
         expect(history.isDisposed).to.be(false);
         history.dispose();
         expect(history.isDisposed).to.be(true);
       });
-
     });
 
     describe('#session', () => {
-
       it('should be the client session object', () => {
         let history = new ConsoleHistory({ session });
         expect(history.session).to.be(session);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose the history object', () => {
         let history = new ConsoleHistory({ session });
         expect(history.isDisposed).to.be(false);
@@ -127,11 +100,9 @@ describe('console/history', () => {
         history.dispose();
         expect(history.isDisposed).to.be(true);
       });
-
     });
 
     describe('#back()', () => {
-
       it('should return an empty string if no history exists', () => {
         let history = new ConsoleHistory({ session });
         return history.back('').then(result => {
@@ -139,7 +110,7 @@ describe('console/history', () => {
         });
       });
 
-      it('should return previous items if they exist', (done) => {
+      it('should return previous items if they exist', done => {
         let history = new TestHistory({ session });
         history.onHistory(mockHistory);
         history.back('').then(result => {
@@ -149,11 +120,9 @@ describe('console/history', () => {
           done();
         });
       });
-
     });
 
     describe('#forward()', () => {
-
       it('should return an emptry string if no history exists', () => {
         let history = new ConsoleHistory({ session });
         return history.forward('').then(result => {
@@ -161,7 +130,7 @@ describe('console/history', () => {
         });
       });
 
-      it('should return next items if they exist', (done) => {
+      it('should return next items if they exist', done => {
         let history = new TestHistory({ session });
         history.onHistory(mockHistory);
         Promise.all([history.back(''), history.back('')]).then(() => {
@@ -173,12 +142,10 @@ describe('console/history', () => {
           });
         });
       });
-
     });
 
     describe('#push()', () => {
-
-      it('should allow addition of history items', (done) => {
+      it('should allow addition of history items', done => {
         let history = new ConsoleHistory({ session });
         let item = 'foo';
         history.push(item);
@@ -187,11 +154,9 @@ describe('console/history', () => {
           done();
         });
       });
-
     });
 
     describe('#onTextChange()', () => {
-
       it('should be called upon an editor text change', () => {
         let history = new TestHistory({ session });
         expect(history.methods).to.not.contain('onTextChange');
@@ -202,12 +167,10 @@ describe('console/history', () => {
         model.value.text = 'foo';
         expect(history.methods).to.contain('onTextChange');
       });
-
     });
 
     describe('#onEdgeRequest()', () => {
-
-      it('should be called upon an editor edge request', (done) => {
+      it('should be called upon an editor edge request', done => {
         let history = new TestHistory({ session });
         expect(history.methods).to.not.contain('onEdgeRequest');
         let host = document.createElement('div');
@@ -222,9 +185,6 @@ describe('console/history', () => {
         editor.edgeRequested.emit('top');
         expect(history.methods).to.contain('onEdgeRequest');
       });
-
     });
-
   });
-
 });

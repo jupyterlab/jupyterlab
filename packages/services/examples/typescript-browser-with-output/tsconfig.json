@@ -5,8 +5,8 @@
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "ES2015",
-    "lib": ["ES2015", "DOM"],
+    "target": "es2015",
+    "lib": ["es2015", "dom"],
     "types": [],
     "outDir": "build"
   }

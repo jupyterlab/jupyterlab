@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-FAQ {
   font-family: var(--jp-content-font-family);
   line-height: var(--jp-content-line-height);
@@ -15,7 +14,6 @@
   min-width: 240px;
   min-height: 120px;
 }
-
 
 .jp-FAQ-content {
   overflow-y: auto;

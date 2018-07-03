@@ -8,7 +8,7 @@ and usage cases, rather than on the implementation details.
 
 ### Jon the Academic Data Scientist
 
-Jon is an academic researcher and data scientist. He has been using the Jupyter Notebook daily 
+Jon is an academic researcher and data scientist. He has been using the Jupyter Notebook daily
 for many years and is an advanced user, teacher and book author. He uses the Notebook
 exclusively on his local system and stores his notebooks on GitHub, in including blog posts
 and full length books.
@@ -18,11 +18,11 @@ on a wide range of projects. These projects involve the collaborative creation o
 markdown files, documentation (Sphinx) and source code files (Python, C, C++). His collaborators
 also run the notebook their local systems.
 
-Jon and his collaborators need the ability to do ad-hoc collaboration on particular documents. They 
+Jon and his collaborators need the ability to do ad-hoc collaboration on particular documents. They
 are already version controlling their code, documentation and notebooks, but at times, Git/GitHub
 don't provide fast enough collaborative interactions. They want to continue to work on their local
 systems, with their own local notebook servers, but need to be able to initiate the RTC of
-one or more files or a diretory of files with a group of individuals. 
+one or more files or a diretory of files with a group of individuals.
 
 During the RTC sessions, the participants are focused on the following aspects of their
 work:
@@ -44,10 +44,10 @@ of Physics. They are building a large experiment that will go live in a few year
 ten year observing cycle. Once operational, they will collect petabytes of data that will be
 accessed by thousands of scientific users.
 
-The collaboration has a software stack based on Python and C++ and is embracing modern, 
+The collaboration has a software stack based on Python and C++ and is embracing modern,
 software engieering practices (version control with Git/GitHub, Travis, Slack, etc.). They version
 control everything and run an extensive test suite on each commit. The collaboration is exploring the possibility of using JupyterHub to provide a unified user-experience for their users to access data
-and their analysis software. 
+and their analysis software.
 
 The collaboration would run JupyterLab with JuptyerHub, and build custom JupyterLab extensions that
 have custom front-end UIs that talk to their various backend services. They want to provide RTC
@@ -68,7 +68,7 @@ Git/GitHub is not used in the course; only a few of her classmates have ever use
 in the context of internships.
 
 Towards the end of the quarter, her professor assigns group projects. The students quickly realize
-that they will need the ability to easily share content. They appoint a single group member to 
+that they will need the ability to easily share content. They appoint a single group member to
 hold the master copies of all their files for the project and then create a persistent share RTC
 session that enables all project members to work with the files at the same time. This was all
 possible without the instructors involvement (other than installing the RTC JupyterLab extension).
@@ -76,15 +76,3 @@ possible without the instructors involvement (other than installing the RTC Jupy
 As the students work collaboratively, the master copies of the files are updated and at the end of the
 project, those master copies are turned in. During the project, students both run code in their
 own private kernels and a shared kernel.
-
-
-
-
-
-
-
-
-
-
-
-

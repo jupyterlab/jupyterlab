@@ -1,42 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  IDragEvent
-} from '@phosphor/dragdrop';
+import { IDragEvent } from '@phosphor/dragdrop';
 
-import {
-  ElementExt
-} from '@phosphor/domutils';
+import { ElementExt } from '@phosphor/domutils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  DOMUtils, showErrorMessage
-} from '@jupyterlab/apputils';
+import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {
-  renameFile
-} from '@jupyterlab/docmanager';
+import { renameFile } from '@jupyterlab/docmanager';
 
-import {
-  FileBrowserModel
-} from './model';
-
+import { FileBrowserModel } from './model';
 
 /**
  * The class name added to material icons
@@ -78,13 +59,10 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
  */
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
-
 /**
  * A class which hosts folder breadcrumbs.
  */
-export
-class BreadCrumbs extends Widget {
-
+export class BreadCrumbs extends Widget {
   /**
    * Construct a new file browser crumb widget.
    *
@@ -112,23 +90,23 @@ class BreadCrumbs extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'p-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'p-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'p-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'p-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      return;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'p-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'p-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'p-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'p-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        return;
     }
   }
 
@@ -182,10 +160,13 @@ class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_ITEM_CLASS)) {
-        let index = ArrayExt.findFirstIndex(this._crumbs, value => value === node);
-        this._model.cd(BREAD_CRUMB_PATHS[index]).catch(error =>
-          showErrorMessage('Open Error', error)
+        let index = ArrayExt.findFirstIndex(
+          this._crumbs,
+          value => value === node
         );
+        this._model
+          .cd(BREAD_CRUMB_PATHS[index])
+          .catch(error => showErrorMessage('Open Error', error));
 
         // Stop the event propagation.
         event.preventDefault();
@@ -201,7 +182,9 @@ class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
-      let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
+      let index = ArrayExt.findFirstIndex(this._crumbs, node =>
+        ElementExt.hitTest(node, event.clientX, event.clientY)
+      );
       if (index !== -1) {
         if (index !== Private.Crumb.Current) {
           this._crumbs[index].classList.add(DROP_TARGET_CLASS);
@@ -235,7 +218,9 @@ class BreadCrumbs extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
-    let index = ArrayExt.findFirstIndex(this._crumbs, node => ElementExt.hitTest(node, event.clientX, event.clientY));
+    let index = ArrayExt.findFirstIndex(this._crumbs, node =>
+      ElementExt.hitTest(node, event.clientX, event.clientY)
+    );
     if (index !== -1) {
       this._crumbs[index].classList.add(DROP_TARGET_CLASS);
     }
@@ -294,18 +279,14 @@ class BreadCrumbs extends Widget {
   private _crumbSeps: ReadonlyArray<HTMLElement>;
 }
 
-
-
 /**
  * The namespace for the `BreadCrumbs` class statics.
  */
-export
-namespace BreadCrumbs {
+export namespace BreadCrumbs {
   /**
    * An options object for initializing a bread crumb widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A file browser model instance.
      */
@@ -313,17 +294,14 @@ namespace BreadCrumbs {
   }
 }
 
-
 /**
  * The namespace for the crumbs private data.
  */
 namespace Private {
-
   /**
    * Breadcrumb item list enum.
    */
-  export
-  enum Crumb {
+  export enum Crumb {
     Home,
     Ellipsis,
     Parent,
@@ -333,8 +311,11 @@ namespace Private {
   /**
    * Populate the breadcrumb node.
    */
-  export
-  function updateCrumbs(breadcrumbs: ReadonlyArray<HTMLElement>, separators: ReadonlyArray<HTMLElement>, path: string) {
+  export function updateCrumbs(
+    breadcrumbs: ReadonlyArray<HTMLElement>,
+    separators: ReadonlyArray<HTMLElement>,
+    path: string
+  ) {
     let node = breadcrumbs[0].parentNode as HTMLElement;
 
     // Remove all but the home node.
@@ -369,13 +350,14 @@ namespace Private {
   /**
    * Create the breadcrumb nodes.
    */
-  export
-  function createCrumbs(): ReadonlyArray<HTMLElement> {
+  export function createCrumbs(): ReadonlyArray<HTMLElement> {
     let home = document.createElement('span');
-    home.className = MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
+    home.className =
+      MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
     home.title = 'Home';
     let ellipsis = document.createElement('span');
-    ellipsis.className = MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
+    ellipsis.className =
+      MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
@@ -386,8 +368,7 @@ namespace Private {
   /**
    * Create the breadcrumb separator nodes.
    */
-  export
-  function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
+  export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     let items: HTMLElement[] = [];
     for (let i = 0; i < 3; i++) {
       let item = document.createElement('i');

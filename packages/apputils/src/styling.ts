@@ -4,8 +4,7 @@
 /**
  * A namespace for node styling.
  */
-export
-namespace Styling {
+export namespace Styling {
   /**
    * Style a node and its child elements with the default tag names.
    *
@@ -13,14 +12,12 @@ namespace Styling {
    *
    * @param className - The optional CSS class to add to styled nodes.
    */
-  export
-  function styleNode(node: HTMLElement, className=''): void {
+  export function styleNode(node: HTMLElement, className = ''): void {
     styleNodeByTag(node, 'select', className);
     styleNodeByTag(node, 'textarea', className);
     styleNodeByTag(node, 'input', className);
     styleNodeByTag(node, 'button', className);
   }
-
 
   /**
    * Style a node and its elements that have a given tag name.
@@ -31,8 +28,11 @@ namespace Styling {
    *
    * @param className - The optional CSS class to add to styled nodes.
    */
-  export
-  function styleNodeByTag(node: HTMLElement, tagName: string, className=''): void {
+  export function styleNodeByTag(
+    node: HTMLElement,
+    tagName: string,
+    className = ''
+  ): void {
     if (node.localName === tagName) {
       node.classList.add('jp-mod-styled');
     }
@@ -55,8 +55,7 @@ namespace Styling {
   /**
    * Wrap a select node.
    */
-  export
-  function wrapSelect(node: HTMLSelectElement): HTMLElement {
+  export function wrapSelect(node: HTMLSelectElement): HTMLElement {
     let wrapper = document.createElement('div');
     wrapper.classList.add('jp-select-wrapper');
     node.addEventListener('focus', Private.onFocus);
@@ -70,7 +69,6 @@ namespace Styling {
   }
 }
 
-
 /**
  * The namespace for module private data.
  */
@@ -78,17 +76,16 @@ namespace Private {
   /**
    * Handle a focus event on a styled select.
    */
-   export
-   function onFocus(event: FocusEvent): void {
-      let target = event.target as Element;
-      let parent = target.parentElement;
-      if (!parent) {
-        return;
-      }
-      if (event.type === 'focus') {
-        parent.classList.add('jp-mod-focused');
-      } else {
-        parent.classList.remove('jp-mod-focused');
-     }
+  export function onFocus(event: FocusEvent): void {
+    let target = event.target as Element;
+    let parent = target.parentElement;
+    if (!parent) {
+      return;
     }
+    if (event.type === 'focus') {
+      parent.classList.add('jp-mod-focused');
+    } else {
+      parent.classList.remove('jp-mod-focused');
+    }
+  }
 }

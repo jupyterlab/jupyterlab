@@ -3,61 +3,53 @@
 
 import expect = require('expect.js');
 
-import {
-  ClientSession
-} from '@jupyterlab/apputils';
+import { ClientSession } from '@jupyterlab/apputils';
+
+import { each } from '@phosphor/algorithm';
+
+import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+
+import { NotebookModel } from '@jupyterlab/notebook';
+
+import { NotebookActions } from '@jupyterlab/notebook';
+
+import { Notebook } from '@jupyterlab/notebook';
 
 import {
-  each
-} from '@phosphor/algorithm';
-
-import {
-  CodeCell, MarkdownCell, RawCell
-} from '@jupyterlab/cells';
-
-import {
- NotebookModel
-} from '@jupyterlab/notebook';
-
-import {
-  NotebookActions
-} from '@jupyterlab/notebook';
-
-import {
-  Notebook
-} from '@jupyterlab/notebook';
-
-import {
-  acceptDialog, createClientSession, dismissDialog, moment
+  acceptDialog,
+  createClientSession,
+  dismissDialog,
+  moment
 } from '../../utils';
 
 import {
-  DEFAULT_CONTENT, createNotebookFactory, rendermime,
-  clipboard, mimeTypeService
+  DEFAULT_CONTENT,
+  createNotebookFactory,
+  rendermime,
+  clipboard,
+  mimeTypeService
 } from '../../notebook-utils';
-
 
 const ERROR_INPUT = 'a = foo';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
-
 describe('@jupyterlab/notebook', () => {
-
   describe('NotebookActions', () => {
-
     let widget: Notebook;
     let session: ClientSession;
     let ipySession: ClientSession;
 
     before(() => {
-      return createClientSession().then(s => {
-        session = s;
-        return createClientSession({ kernelPreference: { name: 'ipython' } });
-      }).then(s => {
-        ipySession = s;
-        return Promise.all([s.initialize(), session.initialize()]);
-      });
+      return createClientSession()
+        .then(s => {
+          session = s;
+          return createClientSession({ kernelPreference: { name: 'ipython' } });
+        })
+        .then(s => {
+          ipySession = s;
+          return Promise.all([s.initialize(), session.initialize()]);
+        });
     });
 
     beforeEach(() => {
@@ -83,7 +75,6 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#executed', () => {
-
       it('should emit when Markdown and code cells are run', () => {
         let cell = widget.activeCell as CodeCell;
         let next = widget.widgets[1] as MarkdownCell;
@@ -92,18 +83,18 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         cell.model.outputs.clear();
         next.rendered = false;
-        NotebookActions.executed.connect(() => { emitted += 1; });
+        NotebookActions.executed.connect(() => {
+          emitted += 1;
+        });
 
         return NotebookActions.run(widget, session).then(result => {
           expect(emitted).to.be(2);
           expect(next.rendered).to.be(true);
         });
       });
-
     });
 
     describe('#splitCell({})', () => {
-
       it('should split the active cell into two cells', () => {
         let cell = widget.activeCell;
         let source = 'thisisasamplestringwithnospaces';
@@ -113,7 +104,8 @@ describe('@jupyterlab/notebook', () => {
         editor.setCursorPosition(editor.getPositionAt(10));
         NotebookActions.splitCell(widget);
         let cells = widget.model.cells;
-        let newSource = cells.get(index).value.text + cells.get(index + 1).value.text;
+        let newSource =
+          cells.get(index).value.text + cells.get(index + 1).value.text;
         expect(newSource).to.be(source);
       });
 
@@ -184,11 +176,9 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.widgets[0];
         expect(cell.model.value.text).to.be(source);
       });
-
     });
 
     describe('#mergeCells', () => {
-
       it('should merge the selected cells', () => {
         let source = widget.activeCell.model.value.text + '\n\n';
         let next = widget.widgets[1];
@@ -258,11 +248,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).to.be.a(RawCell);
         expect(widget.mode).to.be('command');
       });
-
     });
 
     describe('#deleteCells()', () => {
-
       it('should delete the selected cells', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -330,11 +318,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).to.be(count);
         expect(widget.widgets[1].model.value.text).to.be(source);
       });
-
     });
 
     describe('#insertAbove()', () => {
-
       it('should insert a code cell above the active cell', () => {
         let count = widget.widgets.length;
         NotebookActions.insertAbove(widget);
@@ -381,11 +367,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.insertAbove(widget);
         expect(widget.activeCell.model.value.text).to.be('');
       });
-
     });
 
     describe('#insertBelow()', () => {
-
       it('should insert a code cell below the active cell', () => {
         let count = widget.widgets.length;
         NotebookActions.insertBelow(widget);
@@ -432,11 +416,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.insertBelow(widget);
         expect(widget.activeCell.model.value.text).to.be('');
       });
-
     });
 
     describe('#changeCellType()', () => {
-
       it('should change the selected cell type(s)', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -485,11 +467,9 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.activeCell as MarkdownCell;
         expect(cell.rendered).to.be(false);
       });
-
     });
 
     describe('#run()', () => {
-
       it('should run the selected cells', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
@@ -573,11 +553,9 @@ describe('@jupyterlab/notebook', () => {
           return ipySession.kernel.restart();
         });
       });
-
     });
 
     describe('#runAndAdvance()', () => {
-
       it('should run the selected cells ', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
@@ -601,11 +579,13 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the existing selection', () => {
         let next = widget.widgets[2];
         widget.select(next);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
-          expect(result).to.be(false);
-          expect(widget.isSelected(widget.widgets[0])).to.be(false);
-          return ipySession.kernel.restart();
-        });
+        return NotebookActions.runAndAdvance(widget, ipySession).then(
+          result => {
+            expect(result).to.be(false);
+            expect(widget.isSelected(widget.widgets[0])).to.be(false);
+            return ipySession.kernel.restart();
+          }
+        );
       });
 
       it('should change to command mode', () => {
@@ -651,11 +631,13 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
-          expect(result).to.be(false);
-          expect(cell.executionCount).to.be(null);
-          return ipySession.kernel.restart();
-        });
+        return NotebookActions.runAndAdvance(widget, ipySession).then(
+          result => {
+            expect(result).to.be(false);
+            expect(cell.executionCount).to.be(null);
+            return ipySession.kernel.restart();
+          }
+        );
       });
 
       it('should render all markdown cells on an error', () => {
@@ -663,18 +645,18 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(result => {
-          expect(result).to.be(false);
-          expect(cell.rendered).to.be(true);
-          expect(widget.activeCellIndex).to.be(2);
-          return ipySession.kernel.restart();
-        });
+        return NotebookActions.runAndAdvance(widget, ipySession).then(
+          result => {
+            expect(result).to.be(false);
+            expect(cell.rendered).to.be(true);
+            expect(widget.activeCellIndex).to.be(2);
+            return ipySession.kernel.restart();
+          }
+        );
       });
-
     });
 
     describe('#runAndInsert()', () => {
-
       it('should run the selected cells ', () => {
         let next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
@@ -753,11 +735,9 @@ describe('@jupyterlab/notebook', () => {
           return ipySession.kernel.restart();
         });
       });
-
     });
 
     describe('#runAll()', () => {
-
       beforeEach(() => {
         // Make sure all cells have valid code.
         widget.widgets[2].model.value.text = 'a = 1';
@@ -827,11 +807,9 @@ describe('@jupyterlab/notebook', () => {
           return ipySession.kernel.restart();
         });
       });
-
     });
 
     describe('#selectAbove(`)', () => {
-
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
@@ -857,11 +835,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectAbove(widget);
         expect(widget.mode).to.be('edit');
       });
-
     });
 
     describe('#selectBelow()', () => {
-
       it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).to.be(1);
@@ -887,11 +863,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.mode).to.be('edit');
       });
-
     });
 
     describe('#extendSelectionAbove()', () => {
-
       it('should extend the selection to the cell above', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
@@ -941,11 +915,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.be(0);
       });
-
     });
 
     describe('#extendSelectionBelow()', () => {
-
       it('should extend the selection to the cell below', () => {
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(widget.widgets[0])).to.be(true);
@@ -998,11 +970,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.be(1);
       });
-
     });
 
     describe('#moveUp()', () => {
-
       it('should move the selected cells up', () => {
         widget.activeCellIndex = 2;
         NotebookActions.extendSelectionAbove(widget);
@@ -1033,11 +1003,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.model.cells.get(1).value.text).to.be(source);
       });
-
     });
 
     describe('#moveDown()', () => {
-
       it('should move the selected cells down', () => {
         NotebookActions.extendSelectionBelow(widget);
         NotebookActions.moveDown(widget);
@@ -1066,11 +1034,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.model.cells.get(0).value.text).to.be(source);
       });
-
     });
 
     describe('#copy()', () => {
-
       it('should copy the selected cells to a clipboard', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -1091,11 +1057,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.copy(widget);
         expect(widget.mode).to.be('command');
       });
-
     });
 
     describe('#cut()', () => {
-
       it('should cut the selected cells to a clipboard', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -1132,11 +1096,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).to.be(1);
         expect(widget.activeCell).to.be.a(CodeCell);
       });
-
     });
 
     describe('#paste()', () => {
-
       it('should paste cells from a clipboard', () => {
         let source = widget.activeCell.model.value.text;
         let next = widget.widgets[1];
@@ -1180,11 +1142,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count - 2);
       });
-
     });
 
     describe('#undo()', () => {
-
       it('should undo a cell action', () => {
         let count = widget.widgets.length;
         let next = widget.widgets[1];
@@ -1213,11 +1173,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.be(count - 1);
       });
-
     });
 
     describe('#redo()', () => {
-
       it('should redo a cell action', () => {
         let count = widget.widgets.length;
         let next = widget.widgets[1];
@@ -1247,11 +1205,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.redo(widget);
         expect(widget.widgets.length).to.be(count);
       });
-
     });
 
     describe('#toggleAllLineNumbers()', () => {
-
       it('should toggle line numbers on all cells', () => {
         let state = widget.activeCell.editor.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
@@ -1286,11 +1242,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.toggleAllLineNumbers(widget);
         expect(widget.activeCellIndex).to.be(-1);
       });
-
     });
 
     describe('#clearOutputs()', () => {
-
       it('should clear the outputs on the selected cells', () => {
         // Select the next code cell that has outputs.
         let index = 0;
@@ -1322,11 +1276,9 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.clearOutputs(widget);
         expect(widget.activeCellIndex).to.be(-1);
       });
-
     });
 
     describe('#clearAllOutputs()', () => {
-
       it('should clear the outputs on all cells', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -1352,7 +1304,6 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.clearAllOutputs(widget);
         expect(widget.activeCellIndex).to.be(-1);
       });
-
     });
 
     describe('#persistViewState()', () => {
@@ -1375,7 +1326,7 @@ describe('@jupyterlab/notebook', () => {
             });
           } else {
             expect(cell.model.metadata.get('jupyter')).to.eql({
-              source_hidden: true,
+              source_hidden: true
             });
           }
         }
@@ -1400,7 +1351,6 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('input hidden, output shown and not scrolled', () => {
-
         for (const cell of widget.widgets) {
           cell.inputHidden = true;
           if (cell instanceof CodeCell) {
@@ -1422,7 +1372,6 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#setMarkdownHeader()', () => {
-
       it('should set the markdown header level of selected cells', () => {
         let next = widget.widgets[1];
         widget.select(next);
@@ -1465,12 +1414,10 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.setMarkdownHeader(widget, 1);
         expect((widget.activeCell as MarkdownCell).rendered).to.be(false);
       });
-
     });
 
     describe('#trust()', () => {
-
-      it('should trust the notebook cells if the user accepts', (done) => {
+      it('should trust the notebook cells if the user accepts', done => {
         let model = widget.model;
         widget.model.fromJSON(DEFAULT_CONTENT);
         let cell = model.cells.get(0);
@@ -1482,7 +1429,7 @@ describe('@jupyterlab/notebook', () => {
         acceptDialog();
       });
 
-      it('should not trust the notebook cells if the user aborts', (done) => {
+      it('should not trust the notebook cells if the user aborts', done => {
         let model = widget.model;
         model.fromJSON(DEFAULT_CONTENT);
         let cell = model.cells.get(0);
@@ -1494,12 +1441,14 @@ describe('@jupyterlab/notebook', () => {
         dismissDialog();
       });
 
-      it('should bail if the model is `null`', (done) => {
+      it('should bail if the model is `null`', done => {
         widget.model = null;
-        NotebookActions.trust(widget).then(() => { done(); });
+        NotebookActions.trust(widget).then(() => {
+          done();
+        });
       });
 
-      it('should show a dialog if all cells are trusted', (done) => {
+      it('should show a dialog if all cells are trusted', done => {
         let model = widget.model;
         widget.model.fromJSON(DEFAULT_CONTENT);
         model.fromJSON(DEFAULT_CONTENT);
@@ -1507,12 +1456,11 @@ describe('@jupyterlab/notebook', () => {
           let cell = model.cells.get(i);
           cell.trusted = true;
         }
-        NotebookActions.trust(widget).then(() => { done(); });
+        NotebookActions.trust(widget).then(() => {
+          done();
+        });
         acceptDialog();
       });
-
     });
-
   });
-
 });

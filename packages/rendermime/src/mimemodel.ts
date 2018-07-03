@@ -2,20 +2,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
-
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * The default mime model implementation.
  */
-export
-class MimeModel implements IRenderMime.IMimeModel {
+export class MimeModel implements IRenderMime.IMimeModel {
   /**
    * Construct a new mime model.
    */
@@ -63,17 +57,14 @@ class MimeModel implements IRenderMime.IMimeModel {
   private _metadata: ReadonlyJSONObject;
 }
 
-
 /**
  * The namespace for MimeModel class statics.
  */
-export
-namespace MimeModel {
+export namespace MimeModel {
   /**
    * The options used to create a mime model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * Whether the model is trusted.  Defaults to `false`.
      */
@@ -96,7 +87,6 @@ namespace MimeModel {
   }
 }
 
-
 /**
  * The namespace for module private data.
  */
@@ -104,6 +94,7 @@ namespace Private {
   /**
    * A no-op callback function.
    */
-  export
-  function noOp() { /* no-op */}
+  export function noOp() {
+    /* no-op */
+  }
 }

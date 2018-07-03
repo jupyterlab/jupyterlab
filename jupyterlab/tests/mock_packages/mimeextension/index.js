@@ -12,7 +12,6 @@ var factory = {
   }
 };
 
-
 module.exports = {
   mimeType: 'text/plain',
   rendererFactory: factory,

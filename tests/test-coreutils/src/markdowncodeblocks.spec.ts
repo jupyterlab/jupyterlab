@@ -1,28 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  MarkdownCodeBlocks
-} from '@jupyterlab/coreutils';
+import { MarkdownCodeBlocks } from '@jupyterlab/coreutils';
 
 const BLOCK1 = 'Here is text\n\n```\na = 10\nb = 20\n```\n\nMore text.';
 const BLOCK2 = 'Here is text\n\n```a = 10```\n\nMore text.';
 
-
 describe('@jupyterlab/coreutils', () => {
-
   describe('MarkdownCodeBlocks', () => {
-
     describe('.isMarkdown()', () => {
       it('should return true for a valid markdown extension', () => {
         let isMarkdown = MarkdownCodeBlocks.isMarkdown('.md');
         expect(isMarkdown).to.equal(true);
       });
-
     });
 
     describe('.findMarkdownCodeBlocks()', () => {
@@ -43,9 +35,6 @@ describe('@jupyterlab/coreutils', () => {
         expect(codeblocks.length).to.equal(1);
         expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
-
     });
-
   });
-
 });

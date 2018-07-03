@@ -1,37 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt, IIterator, iter
-} from '@phosphor/algorithm';
+import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  TerminalSession
-} from './terminal';
-
+import { TerminalSession } from './terminal';
 
 /**
  * A terminal session manager.
  */
-export
-class TerminalManager implements TerminalSession.IManager {
+export class TerminalManager implements TerminalSession.IManager {
   /**
    * Construct a new terminal manager.
    */
   constructor(options: TerminalManager.IOptions = {}) {
-    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
 
     // Set up state handling if terminals are available.
     if (TerminalSession.isAvailable()) {
@@ -122,7 +111,9 @@ class TerminalManager implements TerminalSession.IManager {
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  startNew(options?: TerminalSession.IOptions): Promise<TerminalSession.ISession> {
+  startNew(
+    options?: TerminalSession.IOptions
+  ): Promise<TerminalSession.ISession> {
     return TerminalSession.startNew(this._getOptions(options)).then(session => {
       this._onStarted(session);
       return session;
@@ -142,18 +133,26 @@ class TerminalManager implements TerminalSession.IManager {
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  connectTo(name: string, options?: TerminalSession.IOptions): Promise<TerminalSession.ISession> {
-    return TerminalSession.connectTo(name, this._getOptions(options)).then(session => {
-      this._onStarted(session);
-      return session;
-    });
+  connectTo(
+    name: string,
+    options?: TerminalSession.IOptions
+  ): Promise<TerminalSession.ISession> {
+    return TerminalSession.connectTo(name, this._getOptions(options)).then(
+      session => {
+        this._onStarted(session);
+        return session;
+      }
+    );
   }
 
   /**
    * Shut down a terminal session by name.
    */
   shutdown(name: string): Promise<void> {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
+    let index = ArrayExt.findFirstIndex(
+      this._models,
+      value => value.name === name
+    );
     if (index === -1) {
       return;
     }
@@ -170,7 +169,9 @@ class TerminalManager implements TerminalSession.IManager {
           toRemove.push(s);
         }
       });
-      toRemove.forEach(s => { this._sessions.delete(s); });
+      toRemove.forEach(s => {
+        this._sessions.delete(s);
+      });
     });
   }
 
@@ -188,16 +189,24 @@ class TerminalManager implements TerminalSession.IManager {
     }
 
     return this._refreshRunning().then(() => {
-      return Promise.all(models.map(model => {
-        return TerminalSession.shutdown(model.name, this.serverSettings).then(() => {
-          let toRemove: TerminalSession.ISession[] = [];
-          this._sessions.forEach(s => {
-            s.dispose();
-            toRemove.push(s);
-          });
-          toRemove.forEach(s => { this._sessions.delete(s); });
-        });
-      })).then(() => { return undefined; });
+      return Promise.all(
+        models.map(model => {
+          return TerminalSession.shutdown(model.name, this.serverSettings).then(
+            () => {
+              let toRemove: TerminalSession.ISession[] = [];
+              this._sessions.forEach(s => {
+                s.dispose();
+                toRemove.push(s);
+              });
+              toRemove.forEach(s => {
+                this._sessions.delete(s);
+              });
+            }
+          );
+        })
+      ).then(() => {
+        return undefined;
+      });
     });
   }
 
@@ -218,7 +227,10 @@ class TerminalManager implements TerminalSession.IManager {
    * Handle a session terminating.
    */
   private _onTerminated(name: string): void {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
+    let index = ArrayExt.findFirstIndex(
+      this._models,
+      value => value.name === name
+    );
     if (index !== -1) {
       this._models.splice(index, 1);
       this._runningChanged.emit(this._models.slice());
@@ -231,7 +243,10 @@ class TerminalManager implements TerminalSession.IManager {
   private _onStarted(session: TerminalSession.ISession): void {
     let name = session.name;
     this._sessions.add(session);
-    let index = ArrayExt.findFirstIndex(this._models, value => value.name === name);
+    let index = ArrayExt.findFirstIndex(
+      this._models,
+      value => value.name === name
+    );
     if (index === -1) {
       this._models.push(session.model);
       this._runningChanged.emit(this._models.slice());
@@ -256,7 +271,9 @@ class TerminalManager implements TerminalSession.IManager {
             toRemove.push(s);
           }
         });
-        toRemove.forEach(s => { this._sessions.delete(s); });
+        toRemove.forEach(s => {
+          this._sessions.delete(s);
+        });
         this._models = models.slice();
         this._runningChanged.emit(models);
       }
@@ -266,7 +283,9 @@ class TerminalManager implements TerminalSession.IManager {
   /**
    * Get a set of options to pass.
    */
-  private _getOptions(options: TerminalSession.IOptions = {}): TerminalSession.IOptions {
+  private _getOptions(
+    options: TerminalSession.IOptions = {}
+  ): TerminalSession.IOptions {
     return { ...options, serverSettings: this.serverSettings };
   }
 
@@ -279,18 +298,14 @@ class TerminalManager implements TerminalSession.IManager {
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
 }
 
-
-
 /**
  * The namespace for TerminalManager statics.
  */
-export
-namespace TerminalManager {
+export namespace TerminalManager {
   /**
    * The options used to initialize a terminal manager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings used by the manager.
      */

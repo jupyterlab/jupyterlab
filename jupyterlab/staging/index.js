@@ -9,7 +9,6 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-// eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 // This needs to come after __webpack_public_path__ is set.
@@ -68,7 +67,6 @@ function main() {
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
-  // eslint-disable-next-line semi
   {{#each jupyterlab_mime_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -105,11 +103,9 @@ function main() {
   } catch (e) {
     console.error(e);
   }
-  // eslint-disable-next-line semi
   {{/each}}
 
   // Handled the registered standard extensions.
-  // eslint-disable-next-line semi
   {{#each jupyterlab_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -146,7 +142,6 @@ function main() {
   } catch (e) {
     console.error(e);
   }
-  // eslint-disable-next-line semi
   {{/each}}
 
   var lab = new JupyterLab({

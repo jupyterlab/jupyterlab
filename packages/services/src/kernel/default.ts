@@ -1,47 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  URLExt, uuid
-} from '@jupyterlab/coreutils';
+import { URLExt, uuid } from '@jupyterlab/coreutils';
 
-import {
-  ArrayExt, each, find
-} from '@phosphor/algorithm';
+import { ArrayExt, each, find } from '@phosphor/algorithm';
 
-import {
-  JSONExt, JSONObject, PromiseDelegate
-} from '@phosphor/coreutils';
+import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  CommHandler
-} from './comm';
+import { CommHandler } from './comm';
 
-import {
-  Kernel
-} from './kernel';
+import { Kernel } from './kernel';
 
-import {
-  KernelMessage
-} from './messages';
+import { KernelMessage } from './messages';
 
-import {
-  KernelFutureHandler
-} from './future';
+import { KernelFutureHandler } from './future';
 
-import * as serialize
-  from './serialize';
+import * as serialize from './serialize';
 
-import * as validate
-  from './validate';
+import * as validate from './validate';
 
 /**
  * The url for the kernel service.
@@ -56,7 +36,6 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
 // Stub for requirejs.
 declare var requirejs: any;
 
-
 /**
  * Implementation of the Kernel object.
  *
@@ -65,15 +44,15 @@ declare var requirejs: any;
  * asynchronously. Any message handler can return a promise, and message
  * handling will pause until the promise is fulfilled.
  */
-export
-class DefaultKernel implements Kernel.IKernel {
+export class DefaultKernel implements Kernel.IKernel {
   /**
    * Construct a kernel object.
    */
   constructor(options: Kernel.IOptions, id: string) {
     this._name = options.name;
     this._id = id;
-    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || uuid();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
@@ -160,9 +139,9 @@ class DefaultKernel implements Kernel.IKernel {
   /**
    * The client username.
    */
-   get username(): string {
-     return this._username;
-   }
+  get username(): string {
+    return this._username;
+  }
 
   /**
    * The client unique id.
@@ -228,11 +207,14 @@ class DefaultKernel implements Kernel.IKernel {
    * Clone the current kernel with a new clientId.
    */
   clone(): Kernel.IKernel {
-    return new DefaultKernel({
-      name: this._name,
-      username: this._username,
-      serverSettings: this.serverSettings
-    }, this._id);
+    return new DefaultKernel(
+      {
+        name: this._name,
+        username: this._username,
+        serverSettings: this.serverSettings
+      },
+      this._id
+    );
   }
 
   /**
@@ -246,8 +228,12 @@ class DefaultKernel implements Kernel.IKernel {
     this._terminated.emit(void 0);
     this._status = 'dead';
     this._clearSocket();
-    this._futures.forEach(future => { future.dispose(); });
-    this._comms.forEach(comm => { comm.dispose(); });
+    this._futures.forEach(future => {
+      future.dispose();
+    });
+    this._comms.forEach(comm => {
+      comm.dispose();
+    });
     this._kernelSession = '';
     this._msgChain = null;
     this._displayIdToParentIds.clear();
@@ -274,7 +260,11 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * If the kernel status is `dead`, this will throw an error.
    */
-  sendShellMessage(msg: KernelMessage.IShellMessage, expectReply=false, disposeOnDone=true): Kernel.IFuture {
+  sendShellMessage(
+    msg: KernelMessage.IShellMessage,
+    expectReply = false,
+    disposeOnDone = true
+  ): Kernel.IFuture {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -287,32 +277,38 @@ class DefaultKernel implements Kernel.IKernel {
       }
       this._ws.send(serialize.serialize(msg));
     }
-    this._anyMessage.emit({msg, direction: 'send'});
-    let future = new KernelFutureHandler(() => {
-      let msgId = msg.header.msg_id;
-      this._futures.delete(msgId);
-      // Remove stored display id information.
-      let displayIds = this._msgIdToDisplayIds.get(msgId);
-      if (!displayIds) {
-        return;
-      }
-      displayIds.forEach(displayId => {
-        let msgIds = this._displayIdToParentIds.get(displayId);
-        if (msgIds) {
-          let idx = msgIds.indexOf(msgId);
-          if (idx === -1) {
-            return;
-          }
-          if (msgIds.length === 1) {
-            this._displayIdToParentIds.delete(displayId);
-          } else {
-            msgIds.splice(idx, 1);
-            this._displayIdToParentIds.set(displayId, msgIds);
-          }
+    this._anyMessage.emit({ msg, direction: 'send' });
+    let future = new KernelFutureHandler(
+      () => {
+        let msgId = msg.header.msg_id;
+        this._futures.delete(msgId);
+        // Remove stored display id information.
+        let displayIds = this._msgIdToDisplayIds.get(msgId);
+        if (!displayIds) {
+          return;
         }
-      });
-      this._msgIdToDisplayIds.delete(msgId);
-    }, msg, expectReply, disposeOnDone, this);
+        displayIds.forEach(displayId => {
+          let msgIds = this._displayIdToParentIds.get(displayId);
+          if (msgIds) {
+            let idx = msgIds.indexOf(msgId);
+            if (idx === -1) {
+              return;
+            }
+            if (msgIds.length === 1) {
+              this._displayIdToParentIds.delete(displayId);
+            } else {
+              msgIds.splice(idx, 1);
+              this._displayIdToParentIds.set(displayId, msgIds);
+            }
+          }
+        });
+        this._msgIdToDisplayIds.delete(msgId);
+      },
+      msg,
+      expectReply,
+      disposeOnDone,
+      this
+    );
     this._futures.set(msg.header.msg_id, future);
     return future;
   }
@@ -421,7 +417,10 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options);
-    let reply = (await Private.handleShellMessage(this, msg)) as KernelMessage.IInfoReplyMsg;
+    let reply = (await Private.handleShellMessage(
+      this,
+      msg
+    )) as KernelMessage.IInfoReplyMsg;
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
@@ -438,7 +437,9 @@ class DefaultKernel implements Kernel.IKernel {
    * Fulfills with the `complete_reply` content when the shell reply is
    * received and validated.
    */
-  requestComplete(content: KernelMessage.ICompleteRequest): Promise<KernelMessage.ICompleteReplyMsg> {
+  requestComplete(
+    content: KernelMessage.ICompleteRequest
+  ): Promise<KernelMessage.ICompleteReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'complete_request',
       channel: 'shell',
@@ -446,7 +447,9 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.ICompleteReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.ICompleteReplyMsg
+    >;
   }
 
   /**
@@ -458,7 +461,9 @@ class DefaultKernel implements Kernel.IKernel {
    * Fulfills with the `inspect_reply` content when the shell reply is
    * received and validated.
    */
-  requestInspect(content: KernelMessage.IInspectRequest): Promise<KernelMessage.IInspectReplyMsg> {
+  requestInspect(
+    content: KernelMessage.IInspectRequest
+  ): Promise<KernelMessage.IInspectReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'inspect_request',
       channel: 'shell',
@@ -466,7 +471,9 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IInspectReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IInspectReplyMsg
+    >;
   }
 
   /**
@@ -478,7 +485,9 @@ class DefaultKernel implements Kernel.IKernel {
    * Fulfills with the `history_reply` content when the shell reply is
    * received and validated.
    */
-  requestHistory(content: KernelMessage.IHistoryRequest): Promise<KernelMessage.IHistoryReplyMsg> {
+  requestHistory(
+    content: KernelMessage.IHistoryRequest
+  ): Promise<KernelMessage.IHistoryReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'history_request',
       channel: 'shell',
@@ -486,7 +495,9 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IHistoryReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IHistoryReplyMsg
+    >;
   }
 
   /**
@@ -504,7 +515,10 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * **See also:** [[IExecuteReply]]
    */
-  requestExecute(content: KernelMessage.IExecuteRequest, disposeOnDone: boolean = true): Kernel.IFuture {
+  requestExecute(
+    content: KernelMessage.IExecuteRequest,
+    disposeOnDone: boolean = true
+  ): Kernel.IFuture {
     let options: KernelMessage.IOptions = {
       msgType: 'execute_request',
       channel: 'shell',
@@ -512,11 +526,11 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let defaults: JSONObject = {
-      silent : false,
-      store_history : true,
-      user_expressions : {},
-      allow_stdin : true,
-      stop_on_error : false
+      silent: false,
+      store_history: true,
+      user_expressions: {},
+      allow_stdin: true,
+      stop_on_error: false
     };
     content = { ...defaults, ...content };
     let msg = KernelMessage.createShellMessage(options, content);
@@ -532,7 +546,9 @@ class DefaultKernel implements Kernel.IKernel {
    * Fulfills with the `is_complete_response` content when the shell reply is
    * received and validated.
    */
-  requestIsComplete(content: KernelMessage.IIsCompleteRequest): Promise<KernelMessage.IIsCompleteReplyMsg> {
+  requestIsComplete(
+    content: KernelMessage.IIsCompleteRequest
+  ): Promise<KernelMessage.IIsCompleteReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'is_complete_request',
       channel: 'shell',
@@ -540,7 +556,9 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.IIsCompleteReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.IIsCompleteReplyMsg
+    >;
   }
 
   /**
@@ -550,7 +568,9 @@ class DefaultKernel implements Kernel.IKernel {
    * Fulfills with the `comm_info_reply` content when the shell reply is
    * received and validated.
    */
-  requestCommInfo(content: KernelMessage.ICommInfoRequest): Promise<KernelMessage.ICommInfoReplyMsg> {
+  requestCommInfo(
+    content: KernelMessage.ICommInfoRequest
+  ): Promise<KernelMessage.ICommInfoReplyMsg> {
     let options: KernelMessage.IOptions = {
       msgType: 'comm_info_request',
       channel: 'shell',
@@ -558,7 +578,9 @@ class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createShellMessage(options, content);
-    return Private.handleShellMessage(this, msg) as Promise<KernelMessage.ICommInfoReplyMsg>;
+    return Private.handleShellMessage(this, msg) as Promise<
+      KernelMessage.ICommInfoReplyMsg
+    >;
   }
 
   /**
@@ -583,7 +605,7 @@ class DefaultKernel implements Kernel.IKernel {
     } else {
       this._ws.send(serialize.serialize(msg));
     }
-    this._anyMessage.emit({msg, direction: 'send'});
+    this._anyMessage.emit({ msg, direction: 'send' });
   }
 
   /**
@@ -596,12 +618,9 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._comms.has(commId)) {
       return this._comms.get(commId);
     }
-    let comm = new CommHandler(
-      targetName,
-      commId,
-      this,
-      () => { this._unregisterComm(commId); }
-    );
+    let comm = new CommHandler(targetName, commId, this, () => {
+      this._unregisterComm(commId);
+    });
     this._comms.set(commId, comm);
     return comm;
   }
@@ -624,7 +643,13 @@ class DefaultKernel implements Kernel.IKernel {
    * If the callback returns a promise, kernel message processing will pause
    * until the returned promise is fulfilled.
    */
-  registerCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
+  registerCommTarget(
+    targetName: string,
+    callback: (
+      comm: Kernel.IComm,
+      msg: KernelMessage.ICommOpenMsg
+    ) => void | PromiseLike<void>
+  ): void {
     this._targetRegistry[targetName] = callback;
   }
 
@@ -638,7 +663,13 @@ class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * The comm target is only removed the callback argument matches.
    */
-  removeCommTarget(targetName: string, callback: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void | PromiseLike<void>): void {
+  removeCommTarget(
+    targetName: string,
+    callback: (
+      comm: Kernel.IComm,
+      msg: KernelMessage.ICommOpenMsg
+    ) => void | PromiseLike<void>
+  ): void {
     if (!this.isDisposed && this._targetRegistry[targetName] === callback) {
       delete this._targetRegistry[targetName];
     }
@@ -667,7 +698,10 @@ class DefaultKernel implements Kernel.IKernel {
    *
    * See also [[IFuture.registerMessageHook]].
    */
-  registerMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
+  registerMessageHook(
+    msgId: string,
+    hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
+  ): void {
     let future = this._futures && this._futures.get(msgId);
     if (future) {
       future.registerMessageHook(hook);
@@ -682,20 +716,25 @@ class DefaultKernel implements Kernel.IKernel {
    * @param hook - The callback invoked for the message.
    *
    */
-  removeMessageHook(msgId: string, hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>): void {
+  removeMessageHook(
+    msgId: string,
+    hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
+  ): void {
     let future = this._futures && this._futures.get(msgId);
     if (future) {
       future.removeMessageHook(hook);
     }
   }
 
-
   /**
    * Handle a message with a display id.
    *
    * @returns Whether the message was handled.
    */
-  private async _handleDisplayId(displayId: string, msg: KernelMessage.IMessage): Promise<boolean> {
+  private async _handleDisplayId(
+    displayId: string,
+    msg: KernelMessage.IMessage
+  ): Promise<boolean> {
     let msgId = (msg.parent_header as KernelMessage.IHeader).msg_id;
     let parentIds = this._displayIdToParentIds.get(displayId);
     if (parentIds) {
@@ -703,7 +742,9 @@ class DefaultKernel implements Kernel.IKernel {
       // by handling display_data as update_display_data.
       let updateMsg: KernelMessage.IMessage = {
         header: JSONExt.deepCopy(msg.header) as KernelMessage.IHeader,
-        parent_header: JSONExt.deepCopy(msg.parent_header)  as KernelMessage.IHeader,
+        parent_header: JSONExt.deepCopy(
+          msg.parent_header
+        ) as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
         content: JSONExt.deepCopy(msg.content),
         channel: msg.channel,
@@ -711,12 +752,14 @@ class DefaultKernel implements Kernel.IKernel {
       };
       (updateMsg.header as any).msg_type = 'update_display_data';
 
-      await Promise.all(parentIds.map(async (parentId) => {
-        let future = this._futures && this._futures.get(parentId);
-        if (future) {
-          await future.handleMsg(updateMsg);
-        }
-      }));
+      await Promise.all(
+        parentIds.map(async parentId => {
+          let future = this._futures && this._futures.get(parentId);
+          if (future) {
+            await future.handleMsg(updateMsg);
+          }
+        })
+      );
     }
 
     // We're done here if it's update_display.
@@ -766,20 +809,20 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _updateStatus(status: Kernel.Status): void {
     switch (status) {
-    case 'starting':
-    case 'idle':
-    case 'busy':
-    case 'connected':
-      this._isReady = true;
-      break;
-    case 'restarting':
-    case 'reconnecting':
-    case 'dead':
-      this._isReady = false;
-      break;
-    default:
-      console.error('invalid kernel status:', status);
-      return;
+      case 'starting':
+      case 'idle':
+      case 'busy':
+      case 'connected':
+        this._isReady = true;
+        break;
+      case 'restarting':
+      case 'reconnecting':
+      case 'dead':
+        this._isReady = false;
+        break;
+      default:
+        console.error('invalid kernel status:', status);
+        return;
     }
     if (status !== this._status) {
       this._status = status;
@@ -814,8 +857,12 @@ class DefaultKernel implements Kernel.IKernel {
   private _clearState(): void {
     this._isReady = false;
     this._pendingMessages = [];
-    this._futures.forEach(future => { future.dispose(); });
-    this._comms.forEach(comm => { comm.dispose(); });
+    this._futures.forEach(future => {
+      future.dispose();
+    });
+    this._comms.forEach(comm => {
+      comm.dispose();
+    });
     this._msgChain = Promise.resolve();
     this._kernelSession = '';
     this._futures = new Map<string, KernelFutureHandler>();
@@ -840,40 +887,52 @@ class DefaultKernel implements Kernel.IKernel {
     }
 
     if (msg.header.session !== this._kernelSession) {
-      throw new Error(`Canceling handling of old message: ${msg.header.msg_type}`);
+      throw new Error(
+        `Canceling handling of old message: ${msg.header.msg_type}`
+      );
     }
   }
 
   /**
    * Handle a `comm_open` kernel message.
    */
-  private async _handleCommOpen(msg: KernelMessage.ICommOpenMsg): Promise<void> {
+  private async _handleCommOpen(
+    msg: KernelMessage.ICommOpenMsg
+  ): Promise<void> {
     this._assertCurrentMessage(msg);
     let content = msg.content;
     let comm = new CommHandler(
       content.target_name,
       content.comm_id,
       this,
-      () => { this._unregisterComm(content.comm_id); }
+      () => {
+        this._unregisterComm(content.comm_id);
+      }
     );
     this._comms.set(content.comm_id, comm);
 
     try {
-      let target = await Private.loadObject(content.target_name, content.target_module, this._targetRegistry);
+      let target = await Private.loadObject(
+        content.target_name,
+        content.target_module,
+        this._targetRegistry
+      );
       await target(comm, msg);
     } catch (e) {
       // Close the comm asynchronously. We cannot block message processing on
       // kernel messages to wait for another kernel message.
       comm.close();
       console.error('Exception opening new comm');
-      throw(e);
+      throw e;
     }
   }
 
   /**
    * Handle 'comm_close' kernel message.
    */
-  private async _handleCommClose(msg: KernelMessage.ICommCloseMsg): Promise<void> {
+  private async _handleCommClose(
+    msg: KernelMessage.ICommCloseMsg
+  ): Promise<void> {
     this._assertCurrentMessage(msg);
     let content = msg.content;
     let comm = this._comms.get(content.comm_id);
@@ -917,8 +976,11 @@ class DefaultKernel implements Kernel.IKernel {
    */
   private _createSocket = () => {
     let settings = this.serverSettings;
-    let partialUrl = URLExt.join(settings.wsUrl, KERNEL_SERVICE_URL,
-                                 encodeURIComponent(this._id));
+    let partialUrl = URLExt.join(
+      settings.wsUrl,
+      KERNEL_SERVICE_URL,
+      encodeURIComponent(this._id)
+    );
 
     // Strip any authentication from the display string.
     // TODO - Audit tests for extra websockets started
@@ -926,8 +988,8 @@ class DefaultKernel implements Kernel.IKernel {
     console.log('Starting WebSocket:', display);
 
     let url = URLExt.join(
-        partialUrl,
-        'channels?session_id=' + encodeURIComponent(this._clientId)
+      partialUrl,
+      'channels?session_id=' + encodeURIComponent(this._clientId)
     );
     // If token authentication is in use.
     let token = settings.token;
@@ -946,7 +1008,7 @@ class DefaultKernel implements Kernel.IKernel {
     this._ws.onopen = this._onWSOpen;
     this._ws.onclose = this._onWSClose;
     this._ws.onerror = this._onWSClose;
-  }
+  };
 
   /**
    * Handle a websocket open event.
@@ -959,13 +1021,15 @@ class DefaultKernel implements Kernel.IKernel {
     this._updateStatus('connected');
     // Get the kernel info, signaling that the kernel is ready.
     // TODO: requestKernelInfo shouldn't make a request, but should return cached info?
-    this.requestKernelInfo().then(() => {
-      this._connectionPromise.resolve(void 0);
-    }).catch(err => {
-      this._connectionPromise.reject(err);
-    });
+    this.requestKernelInfo()
+      .then(() => {
+        this._connectionPromise.resolve(void 0);
+      })
+      .catch(err => {
+        this._connectionPromise.reject(err);
+      });
     this._isReady = false;
-  }
+  };
 
   /**
    * Handle a websocket message, validating and routing appropriately.
@@ -991,19 +1055,21 @@ class DefaultKernel implements Kernel.IKernel {
     this._kernelSession = msg.header.session;
 
     // Handle the message asynchronously, in the order received.
-    this._msgChain = this._msgChain.then(() => {
-      // Return so that any promises from handling a message are fulfilled
-      // before proceeding to the next message.
-      return this._handleMessage(msg);
-    }).catch(error => {
-      // Log any errors in handling the message, thus resetting the _msgChain
-      // promise so we can process more messages.
-      console.error(error);
-    });
+    this._msgChain = this._msgChain
+      .then(() => {
+        // Return so that any promises from handling a message are fulfilled
+        // before proceeding to the next message.
+        return this._handleMessage(msg);
+      })
+      .catch(error => {
+        // Log any errors in handling the message, thus resetting the _msgChain
+        // promise so we can process more messages.
+        console.error(error);
+      });
 
     // Emit the message recieve signal
-    this._anyMessage.emit({msg, direction: 'recv'});
-  }
+    this._anyMessage.emit({ msg, direction: 'recv' });
+  };
 
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
@@ -1011,20 +1077,20 @@ class DefaultKernel implements Kernel.IKernel {
     // Check to see if we have a display_id we need to reroute.
     if (msg.parent_header && msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
-      case 'display_data':
-      case 'update_display_data':
-      case 'execute_result':
-        // display_data messages may re-route based on their display_id.
-        let transient = (msg.content.transient || {}) as JSONObject;
-        let displayId = transient['display_id'] as string;
-        if (displayId) {
-          handled = await this._handleDisplayId(displayId, msg);
-          // The await above may make this message out of date, so check again.
-          this._assertCurrentMessage(msg);
-        }
-        break;
-      default:
-        break;
+        case 'display_data':
+        case 'update_display_data':
+        case 'execute_result':
+          // display_data messages may re-route based on their display_id.
+          let transient = (msg.content.transient || {}) as JSONObject;
+          let displayId = transient['display_id'] as string;
+          if (displayId) {
+            handled = await this._handleDisplayId(displayId, msg);
+            // The await above may make this message out of date, so check again.
+            this._assertCurrentMessage(msg);
+          }
+          break;
+        default:
+          break;
       }
     }
 
@@ -1044,21 +1110,23 @@ class DefaultKernel implements Kernel.IKernel {
     }
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
-      case 'status':
-        // Updating the status is synchronous, and we call no async user code
-        this._updateStatus((msg as KernelMessage.IStatusMsg).content.execution_state);
-        break;
-      case 'comm_open':
-        await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
-        break;
-      case 'comm_msg':
-        await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
-        break;
-      case 'comm_close':
-        await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
-        break;
-      default:
-        break;
+        case 'status':
+          // Updating the status is synchronous, and we call no async user code
+          this._updateStatus(
+            (msg as KernelMessage.IStatusMsg).content.execution_state
+          );
+          break;
+        case 'comm_open':
+          await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          break;
+        case 'comm_msg':
+          await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          break;
+        case 'comm_close':
+          await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          break;
+        default:
+          break;
       }
       // If the message was a status dead message, we might have disposed ourselves.
       if (!this.isDisposed) {
@@ -1084,14 +1152,18 @@ class DefaultKernel implements Kernel.IKernel {
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateStatus('reconnecting');
       let timeout = Math.pow(2, this._reconnectAttempt);
-      console.error('Connection lost, reconnecting in ' + timeout + ' seconds.');
+      console.error(
+        'Connection lost, reconnecting in ' + timeout + ' seconds.'
+      );
       setTimeout(this._createSocket, 1e3 * timeout);
       this._reconnectAttempt += 1;
     } else {
       this._updateStatus('dead');
-      this._connectionPromise.reject(new Error('Could not establish connection'));
+      this._connectionPromise.reject(
+        new Error('Could not establish connection')
+      );
     }
-  }
+  };
 
   private _id = '';
   private _name = '';
@@ -1107,7 +1179,12 @@ class DefaultKernel implements Kernel.IKernel {
   private _isReady = false;
   private _futures: Map<string, KernelFutureHandler>;
   private _comms: Map<string, Kernel.IComm>;
-  private _targetRegistry: { [key: string]: (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => void; } = Object.create(null);
+  private _targetRegistry: {
+    [key: string]: (
+      comm: Kernel.IComm,
+      msg: KernelMessage.ICommOpenMsg
+    ) => void;
+  } = Object.create(null);
   private _info: KernelMessage.IInfoReply | null = null;
   private _pendingMessages: KernelMessage.IMessage[] = [];
   private _connectionPromise: PromiseDelegate<void>;
@@ -1120,15 +1197,15 @@ class DefaultKernel implements Kernel.IKernel {
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _terminated = new Signal<this, void>(this);
   private _msgChain: Promise<void> | null = Promise.resolve();
-  private _noOp = () => { /* no-op */};
+  private _noOp = () => {
+    /* no-op */
+  };
 }
-
 
 /**
  * The namespace for `DefaultKernel` statics.
  */
-export
-namespace DefaultKernel {
+export namespace DefaultKernel {
   /**
    * Find a kernel by id.
    *
@@ -1146,8 +1223,10 @@ namespace DefaultKernel {
    * server. The promise is fulfilled when the kernel is found, otherwise the
    * promise is rejected.
    */
-  export
-  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+  export function findById(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.IModel> {
     return Private.findById(id, settings);
   }
 
@@ -1161,8 +1240,9 @@ namespace DefaultKernel {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
-  export
-  function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+  export function getSpecs(
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.ISpecModels> {
     return Private.getSpecs(settings);
   }
 
@@ -1178,8 +1258,9 @@ namespace DefaultKernel {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
+  export function listRunning(
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.IModel[]> {
     return Private.listRunning(settings);
   }
 
@@ -1199,8 +1280,7 @@ namespace DefaultKernel {
    * Wraps the result in a Kernel object. The promise is fulfilled
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
-  export
-  function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
+  export function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
     return Private.startNew(options);
   }
 
@@ -1217,8 +1297,10 @@ namespace DefaultKernel {
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
    */
-  export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
+  export function connectTo(
+    model: Kernel.IModel,
+    settings?: ServerConnection.ISettings
+  ): Kernel.IKernel {
     return Private.connectTo(model, settings);
   }
 
@@ -1231,8 +1313,10 @@ namespace DefaultKernel {
    *
    * @returns A promise that resolves when the kernel is shut down.
    */
-  export
-  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdown(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return Private.shutdownKernel(id, settings);
   }
 
@@ -1243,12 +1327,12 @@ namespace DefaultKernel {
    *
    * @returns A promise that resolves when all the kernels are shut down.
    */
-  export
-  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdownAll(
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return Private.shutdownAll(settings);
   }
 }
-
 
 /**
  * A private namespace for the Kernel.
@@ -1257,24 +1341,26 @@ namespace Private {
   /**
    * A module private store for running kernels.
    */
-  export
-  const runningKernels: DefaultKernel[] = [];
+  export const runningKernels: DefaultKernel[] = [];
 
   /**
    * A module private store of kernel specs by base url.
    */
-  export
-  const specs: { [key: string]: Promise<Kernel.ISpecModels> } = Object.create(null);
+  export const specs: {
+    [key: string]: Promise<Kernel.ISpecModels>;
+  } = Object.create(null);
 
   /**
    * Find a kernel by id.
    *
    * Will reach out to the server if needed to find the kernel.
    */
-  export
-  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+  export function findById(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.IModel> {
     let kernel = find(runningKernels, value => {
-      return (value.id === id);
+      return value.id === id;
     });
     if (kernel) {
       return Promise.resolve(kernel.model);
@@ -1287,8 +1373,9 @@ namespace Private {
   /**
    * Get the cached kernel specs or fetch them.
    */
-  export
-  function findSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+  export function findSpecs(
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.ISpecModels> {
     settings = settings || ServerConnection.makeSettings();
     let promise = specs[settings.baseUrl];
     if (promise) {
@@ -1303,18 +1390,21 @@ namespace Private {
    * #### Notes
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
-  export
-  function getSpecs(settings?: ServerConnection.ISettings): Promise<Kernel.ISpecModels> {
+  export function getSpecs(
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.ISpecModels> {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
-    let promise = ServerConnection.makeRequest(url, {}, settings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then(data => {
-      return validate.validateSpecModels(data);
-    });
+    let promise = ServerConnection.makeRequest(url, {}, settings)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
+        }
+        return response.json();
+      })
+      .then(data => {
+        return validate.validateSpecModels(data);
+      });
     Private.specs[settings.baseUrl] = promise;
     return promise;
   }
@@ -1327,31 +1417,35 @@ namespace Private {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<Kernel.IModel[]> {
+  export function listRunning(
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.IModel[]> {
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
-    return ServerConnection.makeRequest(url, {}, settings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then(data => {
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid kernel list');
-      }
-      for (let i = 0; i < data.length; i++) {
-        validate.validateModel(data[i]);
-      }
-      return updateRunningKernels(data);
-    });
+    return ServerConnection.makeRequest(url, {}, settings)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid kernel list');
+        }
+        for (let i = 0; i < data.length; i++) {
+          validate.validateModel(data[i]);
+        }
+        return updateRunningKernels(data);
+      });
   }
 
   /**
    * Update the running kernels based on new data from the server.
    */
-  export
-  function updateRunningKernels(kernels: Kernel.IModel[]): Kernel.IModel[] {
+  export function updateRunningKernels(
+    kernels: Kernel.IModel[]
+  ): Kernel.IModel[] {
     each(runningKernels.slice(), kernel => {
       let updated = find(kernels, model => {
         return kernel.id === model.id;
@@ -1367,8 +1461,9 @@ namespace Private {
   /**
    * Start a new kernel.
    */
-  export
-  async function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
+  export async function startNew(
+    options: Kernel.IOptions
+  ): Promise<Kernel.IKernel> {
     let settings = options.serverSettings || ServerConnection.makeSettings();
     let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
     let init = {
@@ -1381,18 +1476,23 @@ namespace Private {
     }
     let data = await response.json();
     validate.validateModel(data);
-    return new DefaultKernel({
-      ...options,
-      name: data.name,
-      serverSettings: settings
-    }, data.id);
+    return new DefaultKernel(
+      {
+        ...options,
+        name: data.name,
+        serverSettings: settings
+      },
+      data.id
+    );
   }
 
   /**
    * Connect to a running kernel.
    */
-  export
-  function connectTo(model: Kernel.IModel, settings?: ServerConnection.ISettings): Kernel.IKernel {
+  export function connectTo(
+    model: Kernel.IModel,
+    settings?: ServerConnection.ISettings
+  ): Kernel.IKernel {
     let serverSettings = settings || ServerConnection.makeSettings();
     let kernel = find(runningKernels, value => {
       return value.id === model.id;
@@ -1401,23 +1501,25 @@ namespace Private {
       return kernel.clone();
     }
 
-    return new DefaultKernel(
-      { name: model.name, serverSettings }, model.id
-    );
+    return new DefaultKernel({ name: model.name, serverSettings }, model.id);
   }
 
   /**
    * Restart a kernel.
    */
-  export
-  async function restartKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
+  export async function restartKernel(
+    kernel: Kernel.IKernel,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     if (kernel.status === 'dead') {
       throw new Error('Kernel is dead');
     }
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
-      settings.baseUrl, KERNEL_SERVICE_URL,
-      encodeURIComponent(kernel.id), 'restart'
+      settings.baseUrl,
+      KERNEL_SERVICE_URL,
+      encodeURIComponent(kernel.id),
+      'restart'
     );
     let init = { method: 'POST' };
 
@@ -1450,15 +1552,19 @@ namespace Private {
   /**
    * Interrupt a kernel.
    */
-  export
-  async function interruptKernel(kernel: Kernel.IKernel, settings?: ServerConnection.ISettings): Promise<void> {
+  export async function interruptKernel(
+    kernel: Kernel.IKernel,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     if (kernel.status === 'dead') {
       throw new Error('Kernel is dead');
     }
     settings = settings || ServerConnection.makeSettings();
     let url = URLExt.join(
-      settings.baseUrl, KERNEL_SERVICE_URL,
-      encodeURIComponent(kernel.id), 'interrupt'
+      settings.baseUrl,
+      KERNEL_SERVICE_URL,
+      encodeURIComponent(kernel.id),
+      'interrupt'
     );
     let init = { method: 'POST' };
     let response = await ServerConnection.makeRequest(url, init, settings);
@@ -1470,11 +1576,16 @@ namespace Private {
   /**
    * Delete a kernel.
    */
-  export
-  async function shutdownKernel(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+  export async function shutdownKernel(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
-                                encodeURIComponent(id));
+    let url = URLExt.join(
+      settings.baseUrl,
+      KERNEL_SERVICE_URL,
+      encodeURIComponent(id)
+    );
     let init = { method: 'DELETE' };
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status === 404) {
@@ -1493,8 +1604,9 @@ namespace Private {
    *
    * @returns A promise that resolves when all the kernels are shut down.
    */
-  export
-  async function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  export async function shutdownAll(
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
     let running = await listRunning(settings);
     await Promise.all(running.map(k => shutdownKernel(k.id, settings)));
@@ -1515,11 +1627,16 @@ namespace Private {
   /**
    * Get a full kernel model from the server by kernel id string.
    */
-  export
-  async function getKernelModel(id: string, settings?: ServerConnection.ISettings): Promise<Kernel.IModel> {
+  export async function getKernelModel(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Kernel.IModel> {
     settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL,
-                                encodeURIComponent(id));
+    let url = URLExt.join(
+      settings.baseUrl,
+      KERNEL_SERVICE_URL,
+      encodeURIComponent(id)
+    );
     let response = await ServerConnection.makeRequest(url, {}, settings);
     if (response.status !== 200) {
       throw new ServerConnection.ResponseError(response);
@@ -1532,24 +1649,25 @@ namespace Private {
   /**
    * Log the current kernel status.
    */
-  export
-  function logKernelStatus(kernel: Kernel.IKernel): void {
+  export function logKernelStatus(kernel: Kernel.IKernel): void {
     switch (kernel.status) {
-    case 'idle':
-    case 'busy':
-    case 'unknown':
-      return;
-    default:
-      console.log(`Kernel: ${kernel.status} (${kernel.id})`);
-      break;
+      case 'idle':
+      case 'busy':
+      case 'unknown':
+        return;
+      default:
+        console.log(`Kernel: ${kernel.status} (${kernel.id})`);
+        break;
     }
   }
 
   /**
    * Send a kernel message to the kernel and resolve the reply message.
    */
-  export
-  async function handleShellMessage(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage): Promise<KernelMessage.IShellMessage> {
+  export async function handleShellMessage(
+    kernel: Kernel.IKernel,
+    msg: KernelMessage.IShellMessage
+  ): Promise<KernelMessage.IShellMessage> {
     let future = kernel.sendShellMessage(msg, true);
     return future.done;
   }
@@ -1561,22 +1679,29 @@ namespace Private {
    * is specified, otherwise tries to load an object from the global
    * registry, if the global registry is provided.
    */
-  export
-  function loadObject(name: string, moduleName: string | undefined, registry?: { [key: string]: any }): Promise<any> {
+  export function loadObject(
+    name: string,
+    moduleName: string | undefined,
+    registry?: { [key: string]: any }
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       // Try loading the view module using require.js
       if (moduleName) {
         if (typeof requirejs === 'undefined') {
           throw new Error('requirejs not found');
         }
-        requirejs([moduleName], (mod: any) => {
-          if (mod[name] === void 0) {
-            let msg = `Object '${name}' not found in module '${moduleName}'`;
-            reject(new Error(msg));
-          } else {
-            resolve(mod[name]);
-          }
-        }, reject);
+        requirejs(
+          [moduleName],
+          (mod: any) => {
+            if (mod[name] === void 0) {
+              let msg = `Object '${name}' not found in module '${moduleName}'`;
+              reject(new Error(msg));
+            } else {
+              resolve(mod[name]);
+            }
+          },
+          reject
+        );
       } else {
         if (registry && registry[name]) {
           resolve(registry[name]);

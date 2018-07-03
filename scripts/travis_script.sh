@@ -4,11 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 set -ex
-export DISPLAY=:99.0
-sh -e /etc/init.d/xvfb start || true
-
-export PATH="$MINICONDA_DIR/bin:$PATH"
-source activate test
+set -o pipefail
 
 
 if [[ $GROUP == python ]]; then
@@ -21,7 +17,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm test
+    jlpm test --loglevel success > /dev/null
     jlpm run clean
 fi
 
@@ -30,7 +26,7 @@ if [[ $GROUP == js_cov ]]; then
 
     jlpm run build:packages
     jlpm run build:test
-    jlpm run coverage
+    jlpm run coverage --loglevel success > /dev/null
 
     # Run the services node example.
     pushd packages/services/examples/node
@@ -59,11 +55,8 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    conda remove --name test_docs --all || true
-    conda env create -n test_docs -f environment.yml
-    source activate test_docs
+    pip install sphinx sphinx_rtd_theme recommonmark
     make html
-    source deactivate
     popd
 fi
 
@@ -103,23 +96,20 @@ if [[ $GROUP == integrity ]]; then
     jupyter labextension list
 
     # Make sure we can non-dev install.
-    conda remove --name test_install --all || true
-    conda create -n test_install notebook python=3.5
-    source activate test_install
-    pip install ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
-    python -m jupyterlab.selenium_check
+    virtualenv -p $(which python3) test_install
+    ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+    ./test_install/bin/python -m jupyterlab.selenium_check
     # Make sure we can run the build
-    jupyter lab build
+    ./test_install/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
-    source deactivate
 fi
 
 
@@ -172,7 +162,7 @@ if [[ $GROUP == cli ]]; then
 
     # Test theme creation - make sure we can add it as a package, build,
     # and run selenium
-    pip install pexpect
+    pip install -q pexpect
     python scripts/create_theme.py
     mv foo packages
     jlpm run integrity || exit 0

@@ -6,8 +6,7 @@
  *
  * @param length - The length of the hex string.
  */
-export
-function uuid(length: number=32): string {
+export function uuid(length: number = 32): string {
   let s = new Array<string>(length);
   let hexDigits = '0123456789abcdef';
   let nChars = hexDigits.length;

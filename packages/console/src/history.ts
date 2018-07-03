@@ -1,32 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 /**
  * The definition of a console history manager object.
  */
-export
-interface IConsoleHistory extends IDisposable {
+export interface IConsoleHistory extends IDisposable {
   /**
    * The client session used by the foreign handler.
    */
@@ -82,12 +70,10 @@ interface IConsoleHistory extends IDisposable {
   reset(): void;
 }
 
-
 /**
  * A console history manager object.
  */
-export
-class ConsoleHistory implements IConsoleHistory {
+export class ConsoleHistory implements IConsoleHistory {
   /**
    * Construct a new console history object.
    */
@@ -241,7 +227,7 @@ class ConsoleHistory implements IConsoleHistory {
     for (let i = 0; i < value.content.history.length; i++) {
       current = (value.content.history[i] as string[])[2];
       if (current !== last) {
-        this._history.push(last = current);
+        this._history.push((last = current));
       }
     }
     // Reset the history navigation cursor back to the bottom.
@@ -262,7 +248,10 @@ class ConsoleHistory implements IConsoleHistory {
   /**
    * Handle an edge requested signal.
    */
-  protected onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
+  protected onEdgeRequest(
+    editor: CodeEditor.IEditor,
+    location: CodeEditor.EdgeLocation
+  ): void {
     let model = editor.model;
     let source = model.value.text;
 
@@ -318,7 +307,6 @@ class ConsoleHistory implements IConsoleHistory {
    * @param filterStr - The string to use when filtering the data.
    */
   protected setFilter(filterStr: string = ''): void {
-
     // Apply the new filter and remove contiguous duplicates.
     this._filtered.length = 0;
 
@@ -327,8 +315,11 @@ class ConsoleHistory implements IConsoleHistory {
 
     for (let i = 0; i < this._history.length; i++) {
       current = this._history[i];
-      if (current !== last && filterStr === current.slice(0, filterStr.length)) {
-        this._filtered.push(last = current);
+      if (
+        current !== last &&
+        filterStr === current.slice(0, filterStr.length)
+      ) {
+        this._filtered.push((last = current));
       }
     }
 
@@ -345,17 +336,14 @@ class ConsoleHistory implements IConsoleHistory {
   private _filtered: string[] = [];
 }
 
-
 /**
  * A namespace for ConsoleHistory statics.
  */
-export
-namespace ConsoleHistory {
+export namespace ConsoleHistory {
   /**
    * The initialization options for a console history object.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The client session used by the foreign handler.
      */
@@ -363,13 +351,11 @@ namespace ConsoleHistory {
   }
 }
 
-
 /**
  * A namespace for private data.
  */
 namespace Private {
-  export
-  const initialRequest: KernelMessage.IHistoryRequest = {
+  export const initialRequest: KernelMessage.IHistoryRequest = {
     output: false,
     raw: true,
     hist_access_type: 'tail',

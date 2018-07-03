@@ -7,10 +7,7 @@
 // Polyfill for ES6 Promises
 import 'es6-promise';
 
-import {
-  Session
-} from '@jupyterlab/services';
-
+import { Session } from '@jupyterlab/services';
 
 function log(text: string): void {
   let el = document.getElementById('output');
@@ -27,30 +24,35 @@ function main() {
   let session: Session.ISession;
 
   log('Starting session');
-  Session.startNew(options).then(s => {
-    log('Session started');
-    session = s;
-    // Rename the session.
-    return session.setPath('bar.ipynb');
-  }).then(() => {
-    log(`Session renamed to ${session.path}`);
-    // Execute and handle replies on the kernel.
-    let future = session.kernel.requestExecute({ code: 'a = 1' });
-    future.onReply = (reply) => {
-      log('Got execute reply');
-    };
-    return future.done;
-  }).then(() => {
+  Session.startNew(options)
+    .then(s => {
+      log('Session started');
+      session = s;
+      // Rename the session.
+      return session.setPath('bar.ipynb');
+    })
+    .then(() => {
+      log(`Session renamed to ${session.path}`);
+      // Execute and handle replies on the kernel.
+      let future = session.kernel.requestExecute({ code: 'a = 1' });
+      future.onReply = reply => {
+        log('Got execute reply');
+      };
+      return future.done;
+    })
+    .then(() => {
       log('Future is fulfilled');
       // Shut down the session.
       return session.shutdown();
-  }).then(() => {
+    })
+    .then(() => {
       log('Session shut down');
       log('Test Complete!');
-  }).catch(err => {
-    console.error(err);
-    log('Test Failed! See the console output for details');
-  });
+    })
+    .catch(err => {
+      console.error(err);
+      log('Test Failed! See the console output for details');
+    });
 }
 
 window.onload = main;

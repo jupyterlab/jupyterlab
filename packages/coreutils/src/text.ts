@@ -4,16 +4,14 @@
 /**
  * The namespace for text-related functions.
  */
-export
-namespace Text {
-
+export namespace Text {
   // javascript stores text as utf16 and string indices use "code units",
   // which stores high-codepoint characters as "surrogate pairs",
   // which occupy two indices in the javascript string.
   // We need to translate cursor_pos in the Jupyter protocol (in characters)
   // to js offset (with surrogate pairs taking two spots).
 
-  const HAS_SURROGATES: boolean = ('𝐚'.length > 1);
+  const HAS_SURROGATES: boolean = '𝐚'.length > 1;
 
   /**
    * Convert a javascript string index into a unicode character offset
@@ -24,8 +22,7 @@ namespace Text {
    *
    * @returns The unicode character offset
    */
-  export
-  function jsIndexToCharIndex (jsIdx: number, text: string): number {
+  export function jsIndexToCharIndex(jsIdx: number, text: string): number {
     if (HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return jsIdx;
@@ -34,9 +31,9 @@ namespace Text {
     for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
       let charCode = text.charCodeAt(i);
       // check for surrogate pair
-      if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      if (charCode >= 0xd800 && charCode <= 0xdbff) {
         let nextCharCode = text.charCodeAt(i + 1);
-        if (nextCharCode >= 0xDC00 && nextCharCode <= 0xDFFF) {
+        if (nextCharCode >= 0xdc00 && nextCharCode <= 0xdfff) {
           charIdx--;
           i++;
         }
@@ -54,8 +51,7 @@ namespace Text {
    *
    * @returns The js-native index
    */
-  export
-  function charIndexToJsIndex (charIdx: number, text: string): number {
+  export function charIndexToJsIndex(charIdx: number, text: string): number {
     if (HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return charIdx;
@@ -64,9 +60,9 @@ namespace Text {
     for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
       let charCode = text.charCodeAt(i);
       // check for surrogate pair
-      if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      if (charCode >= 0xd800 && charCode <= 0xdbff) {
         let nextCharCode = text.charCodeAt(i + 1);
-        if (nextCharCode >= 0xDC00 && nextCharCode <= 0xDFFF) {
+        if (nextCharCode >= 0xdc00 && nextCharCode <= 0xdfff) {
           jsIdx++;
           i++;
         }

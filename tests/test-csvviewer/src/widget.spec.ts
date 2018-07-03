@@ -3,22 +3,17 @@
 
 import expect = require('expect.js');
 
-import {
-  uuid
-} from '@jupyterlab/coreutils';
+import { uuid } from '@jupyterlab/coreutils';
+
+import { ServiceManager } from '@jupyterlab/services';
+
+import { CSVViewer } from '@jupyterlab/csvviewer';
 
 import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
-  CSVViewer
-} from '@jupyterlab/csvviewer';
-
-import {
-  Context, DocumentRegistry, TextModelFactory
+  Context,
+  DocumentRegistry,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
-
 
 function createContext(): Context<DocumentRegistry.IModel> {
   let factory = new TextModelFactory();
@@ -27,34 +22,26 @@ function createContext(): Context<DocumentRegistry.IModel> {
   return new Context({ factory, manager, path });
 }
 
-
 describe('csvviewer/widget', () => {
-
   const context = createContext();
 
   describe('CSVViewer', () => {
-
     describe('#constructor()', () => {
-
       it('should instantiate a `CSVViewer`', () => {
         let widget = new CSVViewer({ context });
         expect(widget).to.be.a(CSVViewer);
         widget.dispose();
       });
-
     });
 
     describe('#context', () => {
-
       it('should be the context for the file', () => {
         let widget = new CSVViewer({ context });
         expect(widget.context).to.be(context);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the widget', () => {
         let widget = new CSVViewer({ context });
         expect(widget.isDisposed).to.be(false);
@@ -69,9 +56,6 @@ describe('csvviewer/widget', () => {
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
-
     });
-
   });
-
 });

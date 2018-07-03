@@ -2,52 +2,46 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  ICommandPalette, InstanceTracker
-} from '@jupyterlab/apputils';
+import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+
+import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+
+import { IConsoleTracker } from '@jupyterlab/console';
 
 import {
-  CodeEditor, IEditorServices
-} from '@jupyterlab/codeeditor';
-
-import {
-  IConsoleTracker
-} from '@jupyterlab/console';
-
-import {
-  ISettingRegistry, MarkdownCodeBlocks, PathExt
+  ISettingRegistry,
+  MarkdownCodeBlocks,
+  PathExt
 } from '@jupyterlab/coreutils';
 
-import {
-  IDocumentWidget
-} from '@jupyterlab/docregistry';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import {
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
-
-import {
-  FileEditor, FileEditorFactory, IEditorTracker
+  FileEditor,
+  FileEditorFactory,
+  IEditorTracker
 } from '@jupyterlab/fileeditor';
 
-import {
-  ILauncher
-} from '@jupyterlab/launcher';
+import { ILauncher } from '@jupyterlab/launcher';
 
 import {
-  IEditMenu, IFileMenu, IMainMenu, IRunMenu, IViewMenu
+  IEditMenu,
+  IFileMenu,
+  IMainMenu,
+  IRunMenu,
+  IViewMenu
 } from '@jupyterlab/mainmenu';
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  Menu
-} from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -59,39 +53,28 @@ const EDITOR_ICON_CLASS = 'jp-TextEditorIcon';
  */
 const FACTORY = 'Editor';
 
-
 /**
  * The command IDs used by the fileeditor plugin.
  */
 namespace CommandIDs {
-  export
-  const createNew = 'fileeditor:create-new';
+  export const createNew = 'fileeditor:create-new';
 
-  export
-  const lineNumbers = 'fileeditor:toggle-line-numbers';
+  export const lineNumbers = 'fileeditor:toggle-line-numbers';
 
-  export
-  const lineWrap = 'fileeditor:toggle-line-wrap';
+  export const lineWrap = 'fileeditor:toggle-line-wrap';
 
-  export
-  const changeTabs = 'fileeditor:change-tabs';
+  export const changeTabs = 'fileeditor:change-tabs';
 
-  export
-  const matchBrackets = 'fileeditor:toggle-match-brackets';
+  export const matchBrackets = 'fileeditor:toggle-match-brackets';
 
-  export
-  const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
+  export const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
 
-  export
-  const createConsole = 'fileeditor:create-console';
+  export const createConsole = 'fileeditor:create-console';
 
-  export
-  const runCode = 'fileeditor:run-code';
+  export const runCode = 'fileeditor:run-code';
 
-  export
-  const markdownPreview = 'fileeditor:markdown-preview';
+  export const markdownPreview = 'fileeditor:markdown-preview';
 }
-
 
 /**
  * The editor tracker extension.
@@ -99,23 +82,37 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [IConsoleTracker, IEditorServices, IFileBrowserFactory, ILayoutRestorer, ISettingRegistry],
+  requires: [
+    IConsoleTracker,
+    IEditorServices,
+    IFileBrowserFactory,
+    ILayoutRestorer,
+    ISettingRegistry
+  ],
   optional: [ICommandPalette, ILauncher, IMainMenu],
   provides: IEditorTracker,
   autoStart: true
 };
-
 
 /**
  * Export the plugins as default.
  */
 export default plugin;
 
-
 /**
  * Activate the editor tracker plugin.
  */
-function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServices: IEditorServices, browserFactory: IFileBrowserFactory, restorer: ILayoutRestorer, settingRegistry: ISettingRegistry, palette: ICommandPalette, launcher: ILauncher | null, menu: IMainMenu | null): IEditorTracker {
+function activate(
+  app: JupyterLab,
+  consoleTracker: IConsoleTracker,
+  editorServices: IEditorServices,
+  browserFactory: IFileBrowserFactory,
+  restorer: ILayoutRestorer,
+  settingRegistry: ISettingRegistry,
+  palette: ICommandPalette,
+  launcher: ILauncher | null,
+  menu: IMainMenu | null
+): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
   const factory = new FileEditorFactory({
@@ -123,9 +120,12 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
   });
   const { commands, restored } = app;
-  const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({ namespace });
-  const isEnabled = () => tracker.currentWidget !== null &&
-                          tracker.currentWidget === app.shell.currentWidget;
+  const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
+    namespace
+  });
+  const isEnabled = () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === app.shell.currentWidget;
 
   let config = { ...CodeEditor.defaultConfig };
 
@@ -140,11 +140,14 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached =
-      settings.get('editorConfig').composite as Partial<CodeEditor.IConfig>;
+    let cached = settings.get('editorConfig').composite as Partial<
+      CodeEditor.IConfig
+    >;
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      config[key] = (cached[key] === null || cached[key] === undefined) ?
-        CodeEditor.defaultConfig[key] : cached[key];
+      config[key] =
+        cached[key] === null || cached[key] === undefined
+          ? CodeEditor.defaultConfig[key]
+          : cached[key];
     });
     // Trigger a refresh of the rendered commands
     app.commands.notifyCommandChanged();
@@ -154,7 +157,9 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
-    tracker.forEach(widget => { updateWidget(widget.content); });
+    tracker.forEach(widget => {
+      updateWidget(widget.content);
+    });
   }
 
   /**
@@ -169,23 +174,27 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
 
   // Add a console creator to the File menu
   // Fetch the initial state of the settings.
-  Promise.all([settingRegistry.load(id), restored]).then(([settings]) => {
-    updateSettings(settings);
-    updateTracker();
-    settings.changed.connect(() => {
+  Promise.all([settingRegistry.load(id), restored])
+    .then(([settings]) => {
       updateSettings(settings);
       updateTracker();
+      settings.changed.connect(() => {
+        updateSettings(settings);
+        updateTracker();
+      });
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+      updateTracker();
     });
-  }).catch((reason: Error) => {
-    console.error(reason.message);
-    updateTracker();
-  });
 
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
 
     // Notify the instance tracker if restore data needs to update.
-    widget.context.pathChanged.connect(() => { tracker.save(widget); });
+    widget.context.pathChanged.connect(() => {
+      tracker.save(widget);
+    });
     tracker.add(widget);
     updateWidget(widget.content);
   });
@@ -199,10 +208,11 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       config.lineNumbers = !config.lineNumbers;
-      return settingRegistry.set(id, 'editorConfig', config)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${id}: ${reason.message}`);
-      });
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
     },
     isEnabled,
     isToggled: () => config.lineNumbers,
@@ -212,10 +222,11 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.lineWrap, {
     execute: () => {
       config.lineWrap = !config.lineWrap;
-      return settingRegistry.set(id, 'editorConfig', config)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${id}: ${reason.message}`);
-      });
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
     },
     isEnabled,
     isToggled: () => config.lineWrap,
@@ -225,17 +236,18 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.changeTabs, {
     label: args => args['name'] as string,
     execute: args => {
-      config.tabSize = args['size'] as number || 4;
+      config.tabSize = (args['size'] as number) || 4;
       config.insertSpaces = !!args['insertSpaces'];
-      return settingRegistry.set(id, 'editorConfig', config)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${id}: ${reason.message}`);
-      });
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
     },
     isEnabled,
     isToggled: args => {
       const insertSpaces = !!args['insertSpaces'];
-      const size = args['size'] as number || 4;
+      const size = (args['size'] as number) || 4;
       return config.insertSpaces === insertSpaces && config.tabSize === size;
     }
   });
@@ -243,10 +255,11 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.matchBrackets, {
     execute: () => {
       config.matchBrackets = !config.matchBrackets;
-      return settingRegistry.set(id, 'editorConfig', config)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${id}: ${reason.message}`);
-      });
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
     },
     label: 'Match Brackets',
     isEnabled,
@@ -256,10 +269,11 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   commands.addCommand(CommandIDs.autoClosingBrackets, {
     execute: () => {
       config.autoClosingBrackets = !config.autoClosingBrackets;
-      return settingRegistry.set(id, 'editorConfig', config)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${id}: ${reason.message}`);
-      });
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
     },
     label: 'Auto Close Brackets for Text Editor',
     isEnabled,
@@ -330,7 +344,10 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
           let text = editor.model.value.text;
           editor.model.value.text = text + '\n';
         }
-        editor.setCursorPosition({ line: cursor.line + 1, column: cursor.column });
+        editor.setCursorPosition({
+          line: cursor.line + 1,
+          column: cursor.column
+        });
       }
 
       const activate = false;
@@ -355,7 +372,9 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
-      return widget && PathExt.extname(widget.context.path) === '.md' || false;
+      return (
+        (widget && PathExt.extname(widget.context.path) === '.md') || false
+      );
     },
     label: 'Show Markdown Preview'
   });
@@ -363,13 +382,17 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   // Function to create a new untitled text file, given
   // the current working directory.
   const createNew = (cwd: string) => {
-    return commands.execute('docmanager:new-untitled', {
-      path: cwd, type: 'file'
-    }).then(model => {
-      return commands.execute('docmanager:open', {
-        path: model.path, factory: FACTORY
+    return commands
+      .execute('docmanager:new-untitled', {
+        path: cwd,
+        type: 'file'
+      })
+      .then(model => {
+        return commands.execute('docmanager:open', {
+          path: model.path,
+          factory: FACTORY
+        });
       });
-    });
   };
 
   // Add a command for creating a new text file.
@@ -388,20 +411,24 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     launcher.add({
       command: CommandIDs.createNew,
       category: 'Other',
-      rank: 1,
+      rank: 1
     });
   }
 
   if (palette) {
     let args: JSONObject = {
-      insertSpaces: false, size: 4, name: 'Indent with Tab'
+      insertSpaces: false,
+      size: 4,
+      name: 'Indent with Tab'
     };
     let command = 'fileeditor:change-tabs';
     palette.addItem({ command, args, category: 'Text Editor' });
 
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
-        insertSpaces: true, size, name: `Spaces: ${size} `
+        insertSpaces: true,
+        size,
+        name: `Spaces: ${size} `
       };
       palette.addItem({ command, args, category: 'Text Editor' });
     }
@@ -412,21 +439,28 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     const tabMenu = new Menu({ commands });
     tabMenu.title.label = 'Text Editor Indentation';
     let args: JSONObject = {
-      insertSpaces: false, size: 4, name: 'Indent with Tab'
+      insertSpaces: false,
+      size: 4,
+      name: 'Indent with Tab'
     };
     let command = 'fileeditor:change-tabs';
     tabMenu.addItem({ command, args });
 
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
-        insertSpaces: true, size, name: `Spaces: ${size} `
+        insertSpaces: true,
+        size,
+        name: `Spaces: ${size} `
       };
       tabMenu.addItem({ command, args });
     }
-    menu.settingsMenu.addGroup([
-      { type: 'submenu', submenu: tabMenu },
-      { command: CommandIDs.autoClosingBrackets }
-    ], 30);
+    menu.settingsMenu.addGroup(
+      [
+        { type: 'submenu', submenu: tabMenu },
+        { command: CommandIDs.autoClosingBrackets }
+      ],
+      30
+    );
 
     // Add new text file creation to the file menu.
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
@@ -434,8 +468,12 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
     // Add undo/redo hooks to the edit menu.
     menu.editMenu.undoers.add({
       tracker,
-      undo: widget => { widget.content.editor.undo(); },
-      redo: widget => { widget.content.editor.redo(); }
+      undo: widget => {
+        widget.content.editor.undo();
+      },
+      redo: widget => {
+        widget.content.editor.redo();
+      }
     } as IEditMenu.IUndoer<IDocumentWidget<FileEditor>>);
 
     // Add editor view options.
@@ -453,9 +491,11 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
         const matchBrackets = !widget.content.editor.getOption('matchBrackets');
         widget.content.editor.setOption('matchBrackets', matchBrackets);
       },
-      lineNumbersToggled: widget => widget.content.editor.getOption('lineNumbers'),
+      lineNumbersToggled: widget =>
+        widget.content.editor.getOption('lineNumbers'),
       wordWrapToggled: widget => widget.content.editor.getOption('lineWrap'),
-      matchBracketsToggled: widget => widget.content.editor.getOption('matchBrackets')
+      matchBracketsToggled: widget =>
+        widget.content.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);
 
     // Add a console creator the the Kernel menu.
@@ -489,10 +529,12 @@ function activate(app: JupyterLab, consoleTracker: IConsoleTracker, editorServic
   }
 
   app.contextMenu.addItem({
-    command: CommandIDs.createConsole, selector: '.jp-FileEditor'
+    command: CommandIDs.createConsole,
+    selector: '.jp-FileEditor'
   });
   app.contextMenu.addItem({
-    command: CommandIDs.markdownPreview, selector: '.jp-FileEditor'
+    command: CommandIDs.markdownPreview,
+    selector: '.jp-FileEditor'
   });
 
   return tracker;

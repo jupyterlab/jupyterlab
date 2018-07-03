@@ -2,13 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  RunningSessions
-} from '@jupyterlab/running';
-
+import { RunningSessions } from '@jupyterlab/running';
 
 /**
  * The default running sessions extension.
@@ -20,12 +19,10 @@ const plugin: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
-
 /**
  * Export the plugin as default.
  */
 export default plugin;
-
 
 /**
  * Activate the running plugin.

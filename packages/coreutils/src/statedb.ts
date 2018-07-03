@@ -2,32 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ReadonlyJSONObject, ReadonlyJSONValue, Token
+  ReadonlyJSONObject,
+  ReadonlyJSONValue,
+  Token
 } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  IDataConnector
-} from './interfaces';
-
+import { IDataConnector } from './interfaces';
 
 /* tslint:disable */
 /**
  * The default state database token.
  */
-export
-const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
+export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /* tslint:enable */
-
 
 /**
  * An object which holds an id/value pair.
  */
-export
-interface IStateItem {
+export interface IStateItem {
   /**
    * The identifier key for a state item.
    */
@@ -39,12 +33,10 @@ interface IStateItem {
   value: ReadonlyJSONValue;
 }
 
-
 /**
  * The description of a state database.
  */
-export
-interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
+export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -86,12 +78,10 @@ interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   toJSON(): Promise<ReadonlyJSONObject>;
 }
 
-
 /**
  * The default concrete implementation of a state database.
  */
-export
-class StateDB implements IStateDB {
+export class StateDB implements IStateDB {
   /**
    * Create a new state database.
    *
@@ -104,7 +94,6 @@ class StateDB implements IStateDB {
 
     this._window = windowName || '';
     this._ready = (transform || Promise.resolve(null)).then(transformation => {
-
       if (!transformation) {
         return;
       }
@@ -118,10 +107,10 @@ class StateDB implements IStateDB {
           this._clear();
           return;
         case 'merge':
-          this._merge(contents || { });
+          this._merge(contents || {});
           return;
         case 'overwrite':
-          this._overwrite(contents || { });
+          this._overwrite(contents || {});
           return;
         default:
           return;
@@ -287,23 +276,25 @@ class StateDB implements IStateDB {
    * Unlike the public `fetch` method, this method is synchronous.
    */
   private _fetch(id: string): ReadonlyJSONValue | undefined {
-      const key = `${this._window}:${this.namespace}:${id}`;
-      const value = window.localStorage.getItem(key);
+    const key = `${this._window}:${this.namespace}:${id}`;
+    const value = window.localStorage.getItem(key);
 
-      if (value) {
-        const envelope = JSON.parse(value) as Private.Envelope;
+    if (value) {
+      const envelope = JSON.parse(value) as Private.Envelope;
 
-        return envelope.v;
-      }
+      return envelope.v;
+    }
 
-      return undefined;
+    return undefined;
   }
 
   /**
    * Merge data into the state database.
    */
   private _merge(contents: ReadonlyJSONObject): void {
-    Object.keys(contents).forEach(key => { this._save(key, contents[key]); });
+    Object.keys(contents).forEach(key => {
+      this._save(key, contents[key]);
+    });
   }
 
   /**
@@ -354,13 +345,11 @@ class StateDB implements IStateDB {
 /**
  * A namespace for StateDB statics.
  */
-export
-namespace StateDB {
+export namespace StateDB {
   /**
    * A state database change.
    */
-  export
-  type Change = {
+  export type Change = {
     /**
      * The key of the database item that was changed.
      *
@@ -372,30 +361,28 @@ namespace StateDB {
     /**
      * The type of change.
      */
-    type: 'clear' | 'remove' | 'save'
+    type: 'clear' | 'remove' | 'save';
   };
 
   /**
    * A data transformation that can be applied to a state database.
    */
-  export
-  type DataTransform = {
+  export type DataTransform = {
     /*
      * The change operation being applied.
      */
-    type: 'cancel' | 'clear' | 'merge' | 'overwrite',
+    type: 'cancel' | 'clear' | 'merge' | 'overwrite';
 
     /**
      * The contents of the change operation.
      */
-    contents: ReadonlyJSONObject | null
+    contents: ReadonlyJSONObject | null;
   };
 
   /**
    * The instantiation options for a state database.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The namespace prefix for all state database entries.
      */
@@ -433,8 +420,10 @@ namespace StateDB {
    * If there are any errors in retrieving the data, they will be logged to the
    * console in order to optimistically return any extant data without failing.
    */
-  export
-  function fetchNamespace(namespace: string, mask: (key: string) => string = key => key): IStateItem[] {
+  export function fetchNamespace(
+    namespace: string,
+    mask: (key: string) => string = key => key
+  ): IStateItem[] {
     const { localStorage } = window;
 
     let items: IStateItem[] = [];
@@ -463,21 +452,24 @@ namespace StateDB {
     return items;
   }
 
-
   /**
    * Return a serialized copy of a namespace's contents from local storage.
    *
    * @returns The namespace contents as JSON.
    */
-  export
-  function toJSON(namespace: string, mask: (key: string) => string = key => key): ReadonlyJSONObject {
-    return fetchNamespace(namespace, mask).reduce((acc, val) => {
-      acc[val.id] = val.value;
-      return acc;
-    }, { } as Partial<ReadonlyJSONObject>);
+  export function toJSON(
+    namespace: string,
+    mask: (key: string) => string = key => key
+  ): ReadonlyJSONObject {
+    return fetchNamespace(namespace, mask).reduce(
+      (acc, val) => {
+        acc[val.id] = val.value;
+        return acc;
+      },
+      {} as Partial<ReadonlyJSONObject>
+    );
   }
 }
-
 
 /*
  * A namespace for private module data.
@@ -486,6 +478,5 @@ namespace Private {
   /**
    * An envelope around a JSON value stored in the state database.
    */
-  export
-  type Envelope = { readonly v: ReadonlyJSONValue };
+  export type Envelope = { readonly v: ReadonlyJSONValue };
 }

@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONValue
-} from '@phosphor/coreutils';
+import { JSONValue } from '@phosphor/coreutils';
 
-import {
-  IEditorMimeTypeService
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import CodeMirror from 'codemirror';
 
@@ -27,24 +23,19 @@ import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/shell/shell';
 import 'codemirror/mode/sql/sql';
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 // Stub for the require function.
 declare var require: any;
 
-
 /**
  * The namespace for CodeMirror Mode functionality.
  */
-export
-namespace Mode {
+export namespace Mode {
   /**
    * The interface of a codemirror modeInfo spec.
    */
-  export
-  interface ISpec {
+  export interface ISpec {
     ext?: string[];
     name?: string;
     mode: string;
@@ -54,8 +45,7 @@ namespace Mode {
   /**
    * The interface of a codemirror mode spec.
    */
-  export
-  interface IMode {
+  export interface IMode {
     name: string;
     [key: string]: JSONValue;
   }
@@ -63,16 +53,18 @@ namespace Mode {
   /**
    * Get the raw list of available modes specs.
    */
-  export
-  function getModeInfo(): ISpec[] {
+  export function getModeInfo(): ISpec[] {
     return CodeMirror.modeInfo;
   }
 
   /**
    * Running a CodeMirror mode outside of an editor.
    */
-  export
-  function run(code: string, mode: string | ISpec, el: HTMLElement): void {
+  export function run(
+    code: string,
+    mode: string | ISpec,
+    el: HTMLElement
+  ): void {
     CodeMirror.runMode(code, mode, el);
   }
 
@@ -84,8 +76,7 @@ namespace Mode {
    *
    * @returns A promise that resolves when the mode is available.
    */
-  export
-  function ensure(mode: string | ISpec): Promise<ISpec> {
+  export function ensure(mode: string | ISpec): Promise<ISpec> {
     let spec = findBest(mode);
 
     // Simplest, cheapest check by mode name.
@@ -106,12 +97,10 @@ namespace Mode {
   /**
    * Find a codemirror mode by name or CodeMirror spec.
    */
-  export
-  function findBest(mode: string | ISpec): ISpec {
-    let modename = (typeof mode === 'string') ? mode :
-        mode.mode || mode.name;
-    let mimetype = (typeof mode !== 'string') ? mode.mime : modename;
-    let ext = (typeof mode !== 'string') ? mode.ext : [];
+  export function findBest(mode: string | ISpec): ISpec {
+    let modename = typeof mode === 'string' ? mode : mode.mode || mode.name;
+    let mimetype = typeof mode !== 'string' ? mode.mime : modename;
+    let ext = typeof mode !== 'string' ? mode.ext : [];
 
     return (
       CodeMirror.findModeByName(modename || '') ||
@@ -125,24 +114,21 @@ namespace Mode {
   /**
    * Find a codemirror mode by MIME.
    */
-  export
-  function findByMIME(mime: string): ISpec {
+  export function findByMIME(mime: string): ISpec {
     return CodeMirror.findModeByMIME(mime);
   }
 
   /**
    * Find a codemirror mode by name.
    */
-  export
-  function findByName(name: string): ISpec {
+  export function findByName(name: string): ISpec {
     return CodeMirror.findModeByName(name);
   }
 
   /**
    * Find a codemirror mode by filename.
    */
-  export
-  function findByFileName(name: string): ISpec {
+  export function findByFileName(name: string): ISpec {
     let basename = PathExt.basename(name);
     return CodeMirror.findModeByFileName(basename);
   }
@@ -150,8 +136,7 @@ namespace Mode {
   /**
    * Find a codemirror mode by extension.
    */
-  export
-  function findByExtension(ext: string | string[]): ISpec {
+  export function findByExtension(ext: string | string[]): ISpec {
     if (typeof ext === 'string') {
       return CodeMirror.findModeByExtension(name);
     }

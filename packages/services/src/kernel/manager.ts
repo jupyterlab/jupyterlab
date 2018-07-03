@@ -1,41 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt, IIterator, iter
-} from '@phosphor/algorithm';
+import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  Kernel
-} from './kernel';
-
+import { Kernel } from './kernel';
 
 /**
  * An implementation of a kernel manager.
  */
-export
-class KernelManager implements Kernel.IManager {
+export class KernelManager implements Kernel.IManager {
   /**
    * Construct a new kernel manager.
    *
    * @param options - The default options for kernel.
    */
   constructor(options: KernelManager.IOptions = {}) {
-    this.serverSettings = (
-      options.serverSettings || ServerConnection.makeSettings()
-    );
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
     this._readyPromise = this._refreshSpecs().then(() => {
@@ -226,7 +213,9 @@ class KernelManager implements Kernel.IManager {
           toRemove.push(k);
         }
       });
-      toRemove.forEach(k => { this._kernels.delete(k); });
+      toRemove.forEach(k => {
+        this._kernels.delete(k);
+      });
     });
   }
 
@@ -244,16 +233,22 @@ class KernelManager implements Kernel.IManager {
     }
 
     return this._refreshRunning().then(() => {
-      return Promise.all(models.map(model => {
-        return Kernel.shutdown(model.id, this.serverSettings).then(() => {
-          let toRemove: Kernel.IKernel[] = [];
-          this._kernels.forEach(k => {
-            k.dispose();
-            toRemove.push(k);
+      return Promise.all(
+        models.map(model => {
+          return Kernel.shutdown(model.id, this.serverSettings).then(() => {
+            let toRemove: Kernel.IKernel[] = [];
+            this._kernels.forEach(k => {
+              k.dispose();
+              toRemove.push(k);
+            });
+            toRemove.forEach(k => {
+              this._kernels.delete(k);
+            });
           });
-          toRemove.forEach(k => { this._kernels.delete(k); });
-        });
-      })).then(() => { return undefined; });
+        })
+      ).then(() => {
+        return undefined;
+      });
     });
   }
 
@@ -311,7 +306,9 @@ class KernelManager implements Kernel.IManager {
             toRemove.push(k);
           }
         });
-        toRemove.forEach(s => { this._kernels.delete(s); });
+        toRemove.forEach(s => {
+          this._kernels.delete(s);
+        });
         this._models = models.slice();
         this._runningChanged.emit(models);
       }
@@ -330,17 +327,14 @@ class KernelManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
 }
 
-
 /**
  * The namespace for `KernelManager` class statics.
  */
-export
-namespace KernelManager {
+export namespace KernelManager {
   /**
    * The options used to initialize a KernelManager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings for the manager.
      */

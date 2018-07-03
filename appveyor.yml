@@ -39,8 +39,6 @@ install:
 
   # Install node:
   - ps: Install-Product node $env:nodejs_version
-  # Install newer Firefox
-  - choco install firefox
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:

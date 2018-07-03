@@ -3,34 +3,22 @@
 
 import expect = require('expect.js');
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  EditMenu, IEditMenu
-} from '@jupyterlab/mainmenu';
+import { EditMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
-import {
-  delegateExecute
-} from './util';
+import { delegateExecute } from './util';
 
 class Wodget extends Widget {
   state: string;
 }
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('EditMenu', () => {
-
     let commands: CommandRegistry;
     let menu: EditMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -53,16 +41,13 @@ describe('@jupyterlab/mainmenu', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new edit menu', () => {
         expect(menu).to.be.an(EditMenu);
         expect(menu.menu.title.label).to.be('Edit');
       });
-
     });
 
     describe('#undoers', () => {
-
       it('should allow setting of an IUndoer', () => {
         const undoer: IEditMenu.IUndoer<Wodget> = {
           tracker,
@@ -81,11 +66,9 @@ describe('@jupyterlab/mainmenu', () => {
         delegateExecute(wodget, menu.undoers, 'redo');
         expect(wodget.state).to.be('redo');
       });
-
     });
 
     describe('#clearers', () => {
-
       it('should allow setting of an IClearer', () => {
         const clearer: IEditMenu.IClearer<Wodget> = {
           tracker,
@@ -105,11 +88,9 @@ describe('@jupyterlab/mainmenu', () => {
         delegateExecute(wodget, menu.clearers, 'clearAll');
         expect(wodget.state).to.be('clearAll');
       });
-
     });
 
     describe('#findReplacers', () => {
-
       it('should allow setting of an IFindReplacer', () => {
         const finder: IEditMenu.IFindReplacer<Wodget> = {
           tracker,
@@ -120,7 +101,7 @@ describe('@jupyterlab/mainmenu', () => {
           findAndReplace: widget => {
             widget.state = 'findAndReplace';
             return;
-          },
+          }
         };
         menu.findReplacers.add(finder);
         delegateExecute(wodget, menu.findReplacers, 'find');
@@ -128,9 +109,6 @@ describe('@jupyterlab/mainmenu', () => {
         delegateExecute(wodget, menu.findReplacers, 'findAndReplace');
         expect(wodget.state).to.be('findAndReplace');
       });
-
     });
-
   });
-
 });

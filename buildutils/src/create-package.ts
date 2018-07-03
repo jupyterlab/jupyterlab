@@ -17,7 +17,7 @@ let questions = [
   {
     type: 'input',
     name: 'description',
-    message: 'description: ',
+    message: 'description: '
   }
 ];
 

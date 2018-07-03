@@ -3,35 +3,27 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import {
-  IObservableJSON, ObservableJSON
-} from '@jupyterlab/observables';
-
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
-
-import {
-  JSONExt, JSONObject, JSONValue, ReadonlyJSONObject
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  MimeModel
-} from './mimemodel';
+import { MimeModel } from './mimemodel';
 
 /**
  * The interface for an attachment model.
  */
-export
-interface IAttachmentModel extends IRenderMime.IMimeModel {
+export interface IAttachmentModel extends IRenderMime.IMimeModel {
   /**
    * A signal emitted when the attachment model changes.
    */
@@ -48,17 +40,14 @@ interface IAttachmentModel extends IRenderMime.IMimeModel {
   toJSON(): nbformat.IMimeBundle;
 }
 
-
 /**
  * The namespace for IAttachmentModel sub-interfaces.
  */
-export
-namespace IAttachmentModel {
+export namespace IAttachmentModel {
   /**
    * The options used to create a notebook attachment model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The raw attachment value.
      */
@@ -66,12 +55,10 @@ namespace IAttachmentModel {
   }
 }
 
-
 /**
  * The default implementation of a notebook attachment model.
  */
-export
-class AttachmentModel implements IAttachmentModel {
+export class AttachmentModel implements IAttachmentModel {
   /**
    * Construct a new attachment model.
    */
@@ -84,10 +71,10 @@ class AttachmentModel implements IAttachmentModel {
     for (let key in value) {
       // Ignore data and metadata that were stripped.
       switch (key) {
-      case 'data':
-        break;
-      default:
-        this._raw[key] = Private.extract(value, key);
+        case 'data':
+          break;
+        default:
+          this._raw[key] = Private.extract(value, key);
       }
     }
   }
@@ -153,7 +140,10 @@ class AttachmentModel implements IAttachmentModel {
   /**
    * Update an observable JSON object using a readonly JSON object.
    */
-  private _updateObservable(observable: IObservableJSON, data: ReadonlyJSONObject) {
+  private _updateObservable(
+    observable: IObservableJSON,
+    data: ReadonlyJSONObject
+  ) {
     let oldKeys = observable.keys();
     let newKeys = Object.keys(data);
 
@@ -180,12 +170,10 @@ class AttachmentModel implements IAttachmentModel {
   private _data: IObservableJSON;
 }
 
-
 /**
  * The namespace for AttachmentModel statics.
  */
-export
-namespace AttachmentModel {
+export namespace AttachmentModel {
   /**
    * Get the data for an attachment.
    *
@@ -193,12 +181,10 @@ namespace AttachmentModel {
    *
    * @returns - The data for the payload.
    */
-  export
-  function getData(bundle: nbformat.IMimeBundle): JSONObject {
+  export function getData(bundle: nbformat.IMimeBundle): JSONObject {
     return Private.getData(bundle);
   }
 }
-
 
 /**
  * The namespace for module private data.
@@ -207,16 +193,16 @@ namespace Private {
   /**
    * Get the data from a notebook attachment.
    */
-  export
-  function getData(bundle: nbformat.IMimeBundle): JSONObject {
+  export function getData(bundle: nbformat.IMimeBundle): JSONObject {
     return convertBundle(bundle);
   }
 
   /**
    * Get the bundle options given attachment model options.
    */
-  export
-  function getBundleOptions(options: IAttachmentModel.IOptions): MimeModel.IOptions {
+  export function getBundleOptions(
+    options: IAttachmentModel.IOptions
+  ): MimeModel.IOptions {
     let data = getData(options.value);
     return { data };
   }
@@ -224,8 +210,7 @@ namespace Private {
   /**
    * Extract a value from a JSONObject.
    */
-  export
-  function extract(value: JSONObject, key: string): JSONValue {
+  export function extract(value: JSONObject, key: string): JSONValue {
     let item = value[key];
     if (JSONExt.isPrimitive(item)) {
       return item;

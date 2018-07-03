@@ -1,24 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  IObservable
-} from './modeldb';
-
+import { IObservable } from './modeldb';
 
 /**
  * A string which can be observed for changes.
  */
-export
-interface IObservableString extends IDisposable, IObservable {
+export interface IObservableString extends IDisposable, IObservable {
   /**
    * The type of the Observable.
    */
@@ -63,37 +55,33 @@ interface IObservableString extends IDisposable, IObservable {
   dispose(): void;
 }
 
-
 /**
  * The namespace for `IObservableString` associate interfaces.
  */
-export
-namespace IObservableString {
+export namespace IObservableString {
   /**
    * The change types which occur on an observable string.
    */
-  export
-  type ChangeType =
+  export type ChangeType =
     /**
      * Text was inserted.
      */
-    'insert' |
+    | 'insert'
 
     /**
      * Text was removed.
      */
-    'remove' |
+    | 'remove'
 
     /**
      * Text was set.
      */
-    'set';
+    | 'set';
 
   /**
    * The changed args object which is emitted by an observable string.
    */
-  export
-  interface IChangedArgs {
+  export interface IChangedArgs {
     /**
      * The type of change undergone by the list.
      */
@@ -126,12 +114,10 @@ namespace IObservableString {
   }
 }
 
-
 /**
  * A concrete implementation of [[IObservableString]]
  */
-export
-class ObservableString implements IObservableString {
+export class ObservableString implements IObservableString {
   /**
    * Construct a new observable string.
    */
@@ -156,7 +142,7 @@ class ObservableString implements IObservableString {
   /**
    * Set the value of the string.
    */
-  set text( value: string ) {
+  set text(value: string) {
     if (value.length === this._text.length && value === this._text) {
       return;
     }
@@ -184,9 +170,7 @@ class ObservableString implements IObservableString {
    * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
-    this._text = this._text.slice(0, index) +
-                 text +
-                 this._text.slice(index);
+    this._text = this._text.slice(0, index) + text + this._text.slice(index);
     this._changed.emit({
       type: 'insert',
       start: index,
@@ -204,8 +188,7 @@ class ObservableString implements IObservableString {
    */
   remove(start: number, end: number): void {
     let oldValue: string = this._text.slice(start, end);
-    this._text = this._text.slice(0, start) +
-                 this._text.slice(end);
+    this._text = this._text.slice(0, start) + this._text.slice(end);
     this._changed.emit({
       type: 'remove',
       start: start,
@@ -241,6 +224,6 @@ class ObservableString implements IObservableString {
   }
 
   private _text = '';
-  private _isDisposed : boolean = false;
+  private _isDisposed: boolean = false;
   private _changed = new Signal<this, IObservableString.IChangedArgs>(this);
 }

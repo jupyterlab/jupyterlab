@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-Help {
   min-width: 240px;
   min-height: 240px;
@@ -11,11 +10,9 @@
   outline: none;
 }
 
-
 .jp-Help > iframe {
   border: none;
 }
-
 
 .jp-About-body {
   display: flex;
@@ -28,7 +25,6 @@
   overflow: visible;
 }
 
-
 .jp-Dialog .jp-Dialog-content div.jp-About-header-wordmark {
   flex: 0 0 auto;
   height: 44px;
@@ -39,34 +35,33 @@
   padding-bottom: 0px;
 }
 
-
 .jp-About-version-info {
   color: var(--jp-ui-font-color1);
   /* Dialog-header sets the font size to 3, we reset to 1 */
   font-size: var(--jp-ui-font-size1);
   width: 200px;
   font-weight: 400;
-  letter-spacing: .4px;
+  letter-spacing: 0.4px;
   text-align: left;
   padding-top: 8px;
   line-height: 1.12;
 }
 
-
-.jp-Dialog .jp-Dialog-content .jp-Dialog-footer .jp-Dialog-button.jp-About-button {
+.jp-Dialog
+  .jp-Dialog-content
+  .jp-Dialog-footer
+  .jp-Dialog-button.jp-About-button {
   margin-right: 0px;
 }
 
-
-.jp-About-release, .jp-About-version {
+.jp-About-release,
+.jp-About-version {
   display: block;
 }
-
 
 .jp-About-version {
   padding-top: 8px;
 }
-
 
 .jp-About-externalLinks {
   display: flex;
@@ -77,17 +72,14 @@
   margin-bottom: -15px;
 }
 
-
 .jp-About-externalLinks .jp-Button-flat {
-  color: #F37726;
+  color: #f37726;
 }
-
 
 .jp-About-copyright {
   position: relative;
   bottom: -44px;
 }
-
 
 .jp-About-header {
   display: flex;
@@ -104,7 +96,6 @@
   flex-direction: column;
   margin-left: 16px;
 }
-
 
 .jp-About-header-logo {
   height: 94px;

@@ -15,11 +15,9 @@
   overflow: auto;
 }
 
-
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
 |----------------------------------------------------------------------------*/
-
 
 .jp-mod-presentationMode .jp-MimeDocument .jp-RenderedHTMLCommon {
   --jp-content-font-size1: var(--jp-content-presentation-font-size1);

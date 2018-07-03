@@ -1,20 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  VDomModel, VDomRenderer
-} from '@jupyterlab/apputils';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
-
 
 class TestModel extends VDomModel {
   get value(): string {
@@ -41,13 +34,9 @@ class TestWidgetNoModel extends VDomRenderer<null> {
   }
 }
 
-
 describe('@jupyterlab/apputils', () => {
-
   describe('VDomModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a VDomModel', () => {
         let model = new VDomModel();
         expect(model).to.be.an.instanceof(VDomModel);
@@ -66,23 +55,20 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#stateChanged()', () => {
-
       it('should fire the stateChanged signal on a change', () => {
         let model = new TestModel();
         let changed = false;
-        model.stateChanged.connect(() => { changed = true; });
+        model.stateChanged.connect(() => {
+          changed = true;
+        });
         model.value = 'newvalue';
         expect(changed).to.equal(true);
       });
-
     });
-
   });
 
   describe('VDomRenderer', () => {
-
     describe('#constructor()', () => {
-
       it('should create a TestWidget', () => {
         let widget = new TestWidget();
         expect(widget).to.be.an.instanceof(TestWidget);
@@ -96,21 +82,20 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#modelChanged()', () => {
-
       it('should fire the stateChanged signal on a change', () => {
         let widget = new TestWidget();
         let model = new TestModel();
         let changed = false;
-        widget.modelChanged.connect(() => { changed = true; });
+        widget.modelChanged.connect(() => {
+          changed = true;
+        });
         widget.model = model;
         expect(changed).to.equal(true);
       });
-
     });
 
     describe('#render()', () => {
-
-      it('should render the contents after a model change', (done) => {
+      it('should render the contents after a model change', done => {
         let widget = new TestWidget();
         let model = new TestModel();
         widget.model = model;
@@ -121,12 +106,10 @@ describe('@jupyterlab/apputils', () => {
           done();
         });
       });
-
     });
 
     describe('#noModel()', () => {
-
-      it('should work with a null model', (done) => {
+      it('should work with a null model', done => {
         let widget = new TestWidgetNoModel();
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
@@ -135,9 +118,6 @@ describe('@jupyterlab/apputils', () => {
           done();
         });
       });
-
     });
-
   });
-
 });

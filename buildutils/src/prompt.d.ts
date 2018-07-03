@@ -3,9 +3,10 @@
 // Definitions by: Steven Silvester <https://github.com/blink1073>
 
 declare module 'prompt' {
-    export
-    function start(): void;
+  export function start(): void;
 
-    export
-    function get(items: string[], callback: (err: Error, result: any) => void): void;
+  export function get(
+    items: string[],
+    callback: (err: Error, result: any) => void
+  ): void;
 }
