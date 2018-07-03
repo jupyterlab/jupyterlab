@@ -9,18 +9,20 @@ export interface IObservableSet<T> extends IDisposable {
     readonly size: number;
 
     clear(): void;
-    add(value: T): boolean;
+    add(value: T): void;
+    addAll(values: Array<T>): void;
     delete(value: T): boolean;
-    has(value: T): boolean;
+    deleteAll(values: Array<T>): void;
+    has(value: T): void;
     dispose(): void;
 }
 
 export namespace IObservableSet {
-    export type ChangeType = 'add' | 'remove' | 'clear';
+    export type ChangeType = 'add' | 'remove';
 
     export interface IChangedArgs<T> {
         type: ChangeType;
-        value?: T;
+        values: ArrayLike<T>;
     }
 }
 
@@ -45,23 +47,34 @@ export class ObservableSet<T> implements IObservableSet<T> {
         return this._set.size;
     }
 
-    add(value: T): boolean {
-        let result = this._set.has(value);
-
+    add(value: T): void {
         this._set.add(value);
         this._changed.emit({
             type: 'add',
-            value
+            values: [value]
         });
+    }
 
-        return result;
+    addAll(values: Array<T>): void {
+        let newValues = Private.difference(new Set(values), this._set);
+
+        if (newValues.size > 0) {
+            newValues.forEach(element => {
+                this._set.add(element);
+            });
+
+            this._changed.emit({
+                type: 'add',
+                values: new Array(...newValues)
+            });
+        }
     }
 
     delete(value: T): boolean {
         if (this._set.delete(value)) {
             this._changed.emit({
                 type: 'remove',
-                value
+                values: [value]
             });
 
             return true;
@@ -70,10 +83,27 @@ export class ObservableSet<T> implements IObservableSet<T> {
         }
     }
 
+    deleteAll(values: Array<T>): void {
+        let toRemoveValues = Private.intersection(this._set, new Set(values));
+
+        if (toRemoveValues.size > 0) {
+            toRemoveValues.forEach(element => {
+                this._set.delete(element);
+            });
+
+            this._changed.emit({
+                type: 'remove',
+                values: new Array(...toRemoveValues)
+            });
+        }
+    }
+
     clear() {
+        let values = new Array(...this._set);
         this._set.clear();
         this._changed.emit({
-            type: 'clear'
+            type: 'remove',
+            values
         });
     }
 
@@ -99,5 +129,23 @@ export class ObservableSet<T> implements IObservableSet<T> {
 export namespace ObservableSet {
     export interface IOptions<T> {
         values?: IterableOrArrayLike<T>;
+    }
+}
+
+namespace Private {
+    export function union<T>(a: Set<T>, b: Set<T>): Set<T> {
+        return new Set([...a, ...b]);
+    }
+
+    export function intersection<T>(a: Set<T>, b: Set<T>): Set<T> {
+        return new Set([...a].filter(x => b.has(x)));
+    }
+
+    export function difference<T>(a: Set<T>, b: Set<T>): Set<T> {
+        return new Set([...a].filter(x => !b.has(x)));
+    }
+
+    export function symmetricDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
+        return difference(union(a, b), intersection(a, b));
     }
 }
