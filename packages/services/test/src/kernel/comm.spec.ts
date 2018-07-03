@@ -7,7 +7,7 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { KernelMessage, Kernel } from '../../../lib/kernel';
 
-import { init } from '../utils';
+import { expectFailure, init, isFulfilled } from '../utils';
 
 // Initialize fetch override.
 init();
@@ -86,25 +86,73 @@ describe('jupyter.services - Comm', () => {
 
     context('#registerCommTarget()', () => {
       it('should call the provided callback', async () => {
-        let promise = new PromiseDelegate<
+        const promise = new PromiseDelegate<
           [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
-        let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
         };
-        kernel.registerCommTarget('test', hook);
+        const registration = kernel.registerCommTarget('test', hook);
 
         // Request the comm creation.
         await kernel.requestExecute({ code: SEND }, true).done;
+        expect(await isFulfilled(promise.promise)).to.be(true);
 
         // Get the comm.
-        let [comm, msg] = await promise.promise;
+        const [comm, msg] = await promise.promise;
         expect(msg.content.data).to.be('hello');
 
         // Clean up
-        kernel.removeCommTarget('test', hook);
+        registration.dispose();
         comm.dispose();
       });
+
+      it('should return a disposable to unregister the callback', async () => {
+        const promise = new PromiseDelegate<
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        >();
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          promise.resolve([comm, msg]);
+        };
+        const registration = kernel.registerCommTarget('test', hook);
+        registration.dispose();
+
+        // Request the comm creation - should not call the hook.
+        let reply = await kernel.requestExecute({ code: SEND }, true).done;
+        expect(await isFulfilled(promise.promise)).to.be(false);
+      });
+
+      it('disposing registration disposable should only unregister if the callback is still current', async () => {
+        const promise = new PromiseDelegate<
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        >();
+        const promise2 = new PromiseDelegate<
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        >();
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          promise.resolve([comm, msg]);
+        };
+        const hook2 = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          promise2.resolve([comm, msg]);
+        };
+
+        const registration = kernel.registerCommTarget('test', hook);
+        const registration2 = kernel.registerCommTarget('test', hook2);
+        registration.dispose();
+
+        // Request the comm creation - should call the second hook.
+        let reply = await kernel.requestExecute({ code: SEND }, true).done;
+        expect(await isFulfilled(promise.promise)).to.be(false);
+
+        // Get the comm.
+        let [comm, msg] = await promise2.promise;
+        expect(msg.content.data).to.be('hello');
+
+        // Clean up
+        registration2.dispose();
+        comm.dispose();
+      });
+
     });
 
     context('#commInfo()', () => {
@@ -113,7 +161,7 @@ describe('jupyter.services - Comm', () => {
         let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           commPromise.resolve(comm);
         };
-        kernel.registerCommTarget('test', hook);
+        const registration = kernel.registerCommTarget('test', hook);
 
         // Request the comm creation.
         await kernel.requestExecute({ code: SEND }, true).done;
@@ -129,7 +177,7 @@ describe('jupyter.services - Comm', () => {
         expect(comms[comm.commId].target_name).to.be('test');
 
         // Clean up
-        kernel.removeCommTarget('test', hook);
+        registration.dispose();
         comm.dispose();
       });
 

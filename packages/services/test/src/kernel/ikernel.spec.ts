@@ -1145,11 +1145,11 @@ describe('Kernel.IKernel', () => {
           calls.push('delete');
           return true;
         };
-        kernel.registerMessageHook(parentHeader.msg_id, toDelete);
+        let registration = kernel.registerMessageHook(parentHeader.msg_id, toDelete);
         kernel.registerMessageHook(parentHeader.msg_id, msg => {
           if (calls.length > 0) {
             // delete the hook the second time around
-            kernel.removeMessageHook(parentHeader.msg_id, toDelete);
+            registration.dispose();
           }
           calls.push('first');
           return true;
