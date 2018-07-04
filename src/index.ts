@@ -8,11 +8,13 @@ import { StatusBar, IStatusBar } from './statusBar';
 // Export default status bar items
 import { runningSessionItem } from './defaults';
 
+export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar/statusbar';
+
 /**
  * Initialization data for the statusbar extension.
  */
 const statusBar: JupyterLabPlugin<IStatusBar> = {
-    id: 'jupyterlab-statusbar/statusbar',
+    id: STATUSBAR_PLUGIN_ID,
     provides: IStatusBar,
     autoStart: true,
     activate: (app: JupyterLab) => {

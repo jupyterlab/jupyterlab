@@ -17,14 +17,14 @@ export interface IStatusBar {
     registerStatusItem(
         id: string,
         widget: Widget,
-        opts: IStatusBar.IStatusItemOptions
+        opts: IStatusBar.IItemOptions
     ): void;
 }
 
 export namespace IStatusBar {
     export type Alignment = 'right' | 'left';
 
-    export interface IStatusItemOptions {
+    export interface IItemOptions {
         align?: IStatusBar.Alignment;
         priority?: number;
     }
@@ -67,7 +67,7 @@ export class StatusBar extends Widget implements IStatusBar {
     registerStatusItem(
         id: string,
         widget: Widget,
-        opts: IStatusBar.IStatusItemOptions = {}
+        opts: IStatusBar.IItemOptions = {}
     ) {
         if (id in this._statusItems) {
             throw new Error(`Status item ${id} already registered.`);
