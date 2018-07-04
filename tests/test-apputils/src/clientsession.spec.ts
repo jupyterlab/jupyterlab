@@ -11,9 +11,7 @@ import {
   ClientSession, IClientSession
 } from '@jupyterlab/apputils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   acceptDialog, dismissDialog
@@ -250,16 +248,20 @@ describe('@jupyterlab/apputils', () => {
       it('should connect to an existing kernel', () => {
         let other: Session.ISession;
         session.dispose();
-        return manager.startNew({ path: UUID.uuid4() }).then(o => {
-          other = o;
-          session = new ClientSession({
-            manager, kernelPreference: { id: other.kernel.id }
+        return manager
+          .startNew({ path: UUID.uuid4() })
+          .then(o => {
+            other = o;
+            session = new ClientSession({
+              manager,
+              kernelPreference: { id: other.kernel.id }
+            });
+            return session.initialize();
+          })
+          .then(() => {
+            expect(session.kernel.id).to.be(other.kernel.id);
+            return other.dispose();
           });
-          return session.initialize();
-        }).then(() => {
-          expect(session.kernel.id).to.be(other.kernel.id);
-          return other.dispose();
-        });
       });
 
       it('should present a dialog if there is no distinct kernel to start', () => {

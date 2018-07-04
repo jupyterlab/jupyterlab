@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 
 import {

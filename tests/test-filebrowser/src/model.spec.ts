@@ -3,13 +3,9 @@
 
 import expect = require('expect.js');
 
-import {
-  StateDB, PageConfig
-} from '@jupyterlab/coreutils';
+import { StateDB, PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   DocumentManager, IDocumentManager

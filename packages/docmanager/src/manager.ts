@@ -6,9 +6,7 @@ import {
   IClientSession
 } from '@jupyterlab/apputils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 
 import {

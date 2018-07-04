@@ -18,12 +18,13 @@ import {
 } from '@jupyterlab/codeeditor';
 
 import {
-  ISettingRegistry, IStateDB, PageConfig, URLExt
+  ISettingRegistry,
+  IStateDB,
+  PageConfig,
+  URLExt
 } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import  {
   IFileBrowserFactory

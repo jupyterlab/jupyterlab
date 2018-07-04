@@ -15,9 +15,7 @@ import {
   simulate
 } from 'simulate-event';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   ServiceManager

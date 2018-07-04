@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   Kernel, KernelMessage, ServerConnection, Session

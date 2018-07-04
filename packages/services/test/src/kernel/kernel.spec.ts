@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 
 import {
@@ -135,7 +133,10 @@ describe('kernel', () => {
     });
 
     it('should throw an error for another invalid kernel id', (done) => {
-      let serverSettings = getRequestHandler(201, { id: UUID.uuid4(), name: 1 });
+      let serverSettings = getRequestHandler(201, {
+        id: UUID.uuid4(),
+        name: 1
+      });
       let kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });

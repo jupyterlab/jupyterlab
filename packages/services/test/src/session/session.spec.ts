@@ -3,13 +3,9 @@
 
 import expect = require('expect.js');
 
-import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   toArray

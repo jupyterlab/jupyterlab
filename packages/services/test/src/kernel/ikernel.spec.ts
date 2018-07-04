@@ -3,13 +3,9 @@
 
 import expect = require('expect.js');
 
-import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   JSONObject, PromiseDelegate
@@ -709,7 +705,10 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should throw an error for an invalid response', async () => {
-      handleRequest(defaultKernel, 200, { id: UUID.uuid4(), name: 'foo' });
+      handleRequest(defaultKernel, 200, {
+        id: UUID.uuid4(),
+        name: 'foo'
+      });
       let shutdown = defaultKernel.shutdown();
       await expectFailure(shutdown, null, 'Invalid response: 200 OK');
     });

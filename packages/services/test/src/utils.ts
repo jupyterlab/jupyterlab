@@ -7,9 +7,7 @@ import WebSocket from 'ws';
 
 import expect from 'expect.js';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   JSONObject, JSONPrimitive, PromiseDelegate
@@ -504,7 +502,6 @@ class KernelTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-
   private _initialStatus = 'starting';
   private _kernel: Kernel.IKernel | null = null;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
@@ -548,7 +545,10 @@ class SessionTester extends SocketTester {
   async startSession(): Promise<Session.ISession> {
     handleRequest(this, 201, createSessionModel());
     let serverSettings = this.serverSettings;
-    this._session = await Session.startNew({ path: UUID.uuid4(), serverSettings });
+    this._session = await Session.startNew({
+      path: UUID.uuid4(),
+      serverSettings
+    });
     await this.ready;
     await this._session.kernel.ready;
     return this._session;

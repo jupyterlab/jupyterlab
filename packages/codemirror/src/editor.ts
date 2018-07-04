@@ -27,9 +27,7 @@ import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   IObservableMap, IObservableString, ICollaborator

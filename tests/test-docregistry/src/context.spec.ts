@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   Contents, ServiceManager
@@ -48,7 +46,11 @@ describe('docregistry/context', () => {
     let context: Context<DocumentRegistry.IModel>;
 
     beforeEach(() => {
-      context = new Context({ manager, factory, path: UUID.uuid4() + '.txt' });
+      context = new Context({
+        manager,
+        factory,
+        path: UUID.uuid4() + '.txt'
+      });
     });
 
     afterEach(() => {
@@ -60,7 +62,11 @@ describe('docregistry/context', () => {
     describe('#constructor()', () => {
 
       it('should create a new context', () => {
-        context = new Context({ manager, factory, path: UUID.uuid4() + '.txt' });
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt'
+        });
         expect(context).to.be.a(Context);
       });
 
@@ -431,7 +437,12 @@ describe('docregistry/context', () => {
         let opener = (widget: Widget) => {
           called = true;
         };
-        context = new Context({ manager, factory, path: UUID.uuid4() + '.txt', opener });
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt',
+          opener
+        });
         context.addSibling(new Widget());
         expect(called).to.be(true);
       });

@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 
 import {

@@ -18,13 +18,9 @@ import {
   ClientSession
 } from '@jupyterlab/apputils';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   TextModelFactory, DocumentRegistry, Context

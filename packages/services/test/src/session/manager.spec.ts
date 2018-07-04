@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   toArray
@@ -173,11 +171,14 @@ describe('session/manager', () => {
           manager.dispose();
           called = true;
         });
-        return session.setPath(UUID.uuid4()).then(() => {
-          return manager.refreshRunning();
-        }).then(() => {
-          expect(called).to.be(true);
-        });
+        return session
+          .setPath(UUID.uuid4())
+          .then(() => {
+            return manager.refreshRunning();
+          })
+          .then(() => {
+            expect(called).to.be(true);
+          });
       });
 
       it('should be emitted when a session changes kernels', () => {

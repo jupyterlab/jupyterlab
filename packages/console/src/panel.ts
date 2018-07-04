@@ -9,13 +9,9 @@ import {
   IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
 
-import {
-  PathExt, Time
-} from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   RenderMimeRegistry

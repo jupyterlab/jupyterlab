@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   ServiceManager
@@ -37,7 +35,11 @@ describe('docregistry/savehandler', () => {
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: UUID.uuid4() + '.txt' });
+    context = new Context({
+      manager,
+      factory,
+      path: UUID.uuid4() + '.txt'
+    });
     handler = new SaveHandler({ context });
     return context.initialize(true);
   });

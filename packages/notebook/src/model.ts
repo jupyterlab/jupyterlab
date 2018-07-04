@@ -10,13 +10,9 @@ import {
   CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
 } from '@jupyterlab/cells';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   IObservableJSON, IObservableUndoableList,

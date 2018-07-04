@@ -19,13 +19,9 @@ import {
   CodeEditor
 } from '@jupyterlab/codeeditor';
 
-import {
-  IChangedArgs, nbformat
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
-import {
-    UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   IObservableJSON, IModelDB, IObservableValue, ObservableValue

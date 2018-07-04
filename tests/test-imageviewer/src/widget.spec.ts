@@ -3,9 +3,7 @@
 
 import expect = require('expect.js');
 
-import {
-  UUID
-} from '@phosphor/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   Contents, ServiceManager
@@ -100,7 +98,7 @@ describe('ImageViewer', () => {
     });
 
     it('should keep the title in sync with the file name', (done) => {
-      let newPath = (IMAGE as any).path = UUID.uuid4() + '.png';
+      let newPath = ((IMAGE as any).path = UUID.uuid4() + '.png');
       expect(widget.title.label).to.be(context.path);
       context.pathChanged.connect(() => {
         expect(widget.title.label).to.be(newPath);
