@@ -5,7 +5,6 @@ import expect = require('expect.js');
 
 import { UUID } from '@phosphor/coreutils';
 
-
 import { toArray } from '@phosphor/algorithm';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';

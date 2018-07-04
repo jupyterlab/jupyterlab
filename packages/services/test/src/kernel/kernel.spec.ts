@@ -5,7 +5,6 @@ import expect = require('expect.js');
 
 import { UUID } from '@phosphor/coreutils';
 
-
 import { toArray } from '@phosphor/algorithm';
 
 import { Kernel } from '../../../lib/kernel';
@@ -65,7 +64,7 @@ describe('kernel', () => {
       });
     });
 
-    it('should throw an error for an invalid model', (done) => {
+    it('should throw an error for an invalid model', done => {
       let data = { id: UUID.uuid4(), name: 'test' };
       let settings = getRequestHandler(200, data);
       let promise = Kernel.listRunning(settings);
@@ -123,13 +122,13 @@ describe('kernel', () => {
         .catch(done);
     });
 
-    it('should throw an error for an invalid kernel id', (done) => {
+    it('should throw an error for an invalid kernel id', done => {
       let serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
       let kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });
 
-    it('should throw an error for another invalid kernel id', (done) => {
+    it('should throw an error for another invalid kernel id', done => {
       let serverSettings = getRequestHandler(201, {
         id: UUID.uuid4(),
         name: 1
@@ -138,7 +137,7 @@ describe('kernel', () => {
       expectFailure(kernelPromise, done);
     });
 
-    it('should throw an error for an invalid response', (done) => {
+    it('should throw an error for an invalid response', done => {
       let data = { id: UUID.uuid4(), name: 'foo' };
       let serverSettings = getRequestHandler(200, data);
       let kernelPromise = Kernel.startNew({ serverSettings });

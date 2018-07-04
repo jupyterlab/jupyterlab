@@ -150,9 +150,12 @@ describe('fileeditorcodewrapper', () => {
           expect(widget.editor.model.mimeType).to.be('text/x-julia');
           done();
         });
-        context.initialize(true).then(() => {
-          return manager.contents.rename(context.path, UUID.uuid4() + '.jl');
-        }).catch(done);
+        context
+          .initialize(true)
+          .then(() => {
+            return manager.contents.rename(context.path, UUID.uuid4() + '.jl');
+          })
+          .catch(done);
       });
     });
 

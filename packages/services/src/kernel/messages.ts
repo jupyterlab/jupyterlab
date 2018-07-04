@@ -5,7 +5,6 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-
 import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Kernel } from './kernel';

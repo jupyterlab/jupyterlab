@@ -27,9 +27,7 @@ import {
 
 import { UUID } from '@phosphor/coreutils';
 
-import  {
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
 

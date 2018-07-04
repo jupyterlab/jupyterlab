@@ -20,7 +20,6 @@ import {
 
 import { KERNELSPECS, handleRequest } from '../utils';
 
-
 /**
  * Start a new session on with a default name.
  */

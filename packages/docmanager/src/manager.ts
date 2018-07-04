@@ -3,12 +3,7 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
 import { UUID } from '@phosphor/coreutils';
-
 
 import {
   DocumentRegistry,

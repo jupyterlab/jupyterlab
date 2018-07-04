@@ -17,17 +17,9 @@ import {
 
 import { Response } from 'node-fetch';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Contents, TerminalSession, ServerConnection
-} from '../../lib';
-
-import {
-  Kernel, KernelMessage
-} from '../../lib/kernel';
+import { Contents, TerminalSession, ServerConnection } from '../../lib';
 
 import { Kernel, KernelMessage } from '../../lib/kernel';
 

@@ -64,8 +64,7 @@ describe('docregistry/context', () => {
     });
 
     describe('#pathChanged', () => {
-
-      it('should be emitted when the path changes', (done) => {
+      it('should be emitted when the path changes', done => {
         let newPath = UUID.uuid4() + '.txt';
         context.pathChanged.connect((sender, args) => {
           expect(sender).to.be(context);
@@ -249,49 +248,61 @@ describe('docregistry/context', () => {
 
       it('should bring up a conflict dialog', () => {
         const newPath = UUID.uuid4() + '.txt';
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let input = dialog.getElementsByTagName('input')[0];
-          input.value = newPath;
-          return acceptDialog();
-        }).then(() => {
-          return acceptDialog();
-        });
-        return manager.contents.save(newPath, {
-          type: factory.contentType,
-          format: factory.fileFormat,
-          content: 'foo'
-        }).then(() => {
-          return context.initialize(true);
-        }).then(() => {
-          return context.saveAs();
-        }).then(() => {
-          expect(context.path).to.be(newPath);
-        });
+        waitForDialog()
+          .then(() => {
+            let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+            let input = dialog.getElementsByTagName('input')[0];
+            input.value = newPath;
+            return acceptDialog();
+          })
+          .then(() => {
+            return acceptDialog();
+          });
+        return manager.contents
+          .save(newPath, {
+            type: factory.contentType,
+            format: factory.fileFormat,
+            content: 'foo'
+          })
+          .then(() => {
+            return context.initialize(true);
+          })
+          .then(() => {
+            return context.saveAs();
+          })
+          .then(() => {
+            expect(context.path).to.be(newPath);
+          });
       });
 
       it('should keep the file if overwrite is aborted', () => {
         let oldPath = context.path;
         let newPath = UUID.uuid4() + '.txt';
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let input = dialog.getElementsByTagName('input')[0];
-          input.value = newPath;
-          return acceptDialog();
-        }).then(() => {
-          return dismissDialog();
-        });
-        return manager.contents.save(newPath, {
-          type: factory.contentType,
-          format: factory.fileFormat,
-          content: 'foo'
-        }).then(() => {
-          return context.initialize(true);
-        }).then(() => {
-          return context.saveAs();
-        }).then(() => {
-          expect(context.path).to.be(oldPath);
-        });
+        waitForDialog()
+          .then(() => {
+            let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+            let input = dialog.getElementsByTagName('input')[0];
+            input.value = newPath;
+            return acceptDialog();
+          })
+          .then(() => {
+            return dismissDialog();
+          });
+        return manager.contents
+          .save(newPath, {
+            type: factory.contentType,
+            format: factory.fileFormat,
+            content: 'foo'
+          })
+          .then(() => {
+            return context.initialize(true);
+          })
+          .then(() => {
+            return context.saveAs();
+          })
+          .then(() => {
+            expect(context.path).to.be(oldPath);
+          });
       });
 
       it('should just save if the file name does not change', () => {

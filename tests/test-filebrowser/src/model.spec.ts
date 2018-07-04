@@ -300,28 +300,35 @@ describe('filebrowser/model', () => {
     });
 
     describe('#upload()', () => {
-
-      it('should upload a file object', (done) => {
+      it('should upload a file object', done => {
         let fname = UUID.uuid4() + '.html';
-        let file = new File(['<p>Hello world!</p>'], fname,
-                            { type: 'text/html' });
-        model.upload(file).then(contents => {
-          expect(contents.name).to.be(fname);
-          done();
-        }).catch(done);
+        let file = new File(['<p>Hello world!</p>'], fname, {
+          type: 'text/html'
+        });
+        model
+          .upload(file)
+          .then(contents => {
+            expect(contents.name).to.be(fname);
+            done();
+          })
+          .catch(done);
       });
 
       it('should overwrite', () => {
         let fname = UUID.uuid4() + '.html';
-        let file = new File(['<p>Hello world!</p>'], fname,
-                            { type: 'text/html' });
-        return model.upload(file).then(contents => {
-          expect(contents.name).to.be(fname);
-          acceptDialog();
-          return model.upload(file);
-        }).then(contents => {
-          expect(contents.name).to.be(fname);
+        let file = new File(['<p>Hello world!</p>'], fname, {
+          type: 'text/html'
         });
+        return model
+          .upload(file)
+          .then(contents => {
+            expect(contents.name).to.be(fname);
+            acceptDialog();
+            return model.upload(file);
+          })
+          .then(contents => {
+            expect(contents.name).to.be(fname);
+          });
         return model
           .upload(file)
           .then(contents => {
@@ -336,15 +343,19 @@ describe('filebrowser/model', () => {
 
       it('should not overwrite', () => {
         let fname = UUID.uuid4() + '.html';
-        let file = new File(['<p>Hello world!</p>'], fname,
-                            { type: 'text/html' });
-        return model.upload(file).then(contents => {
-          expect(contents.name).to.be(fname);
-          dismissDialog();
-          return model.upload(file);
-        }).catch(err => {
-          expect(err).to.be('File not uploaded');
+        let file = new File(['<p>Hello world!</p>'], fname, {
+          type: 'text/html'
         });
+        return model
+          .upload(file)
+          .then(contents => {
+            expect(contents.name).to.be(fname);
+            dismissDialog();
+            return model.upload(file);
+          })
+          .catch(err => {
+            expect(err).to.be('File not uploaded');
+          });
         return model
           .upload(file)
           .then(contents => {
@@ -357,7 +368,7 @@ describe('filebrowser/model', () => {
           });
       });
 
-      it('should emit the fileChanged signal', (done) => {
+      it('should emit the fileChanged signal', done => {
         let fname = UUID.uuid4() + '.html';
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.be(model);
