@@ -422,7 +422,7 @@ export class ClientSession implements IClientSession {
   restart(): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
-        return Promise.reject();
+        return Promise.reject('session already disposed');
       }
       let kernel = this.kernel;
       if (!kernel) {
