@@ -1,2 +1,2 @@
-export * from './runningSession';
 export * from './notebookTrust';
+export * from './runningKernels';
