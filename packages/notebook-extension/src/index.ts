@@ -98,6 +98,8 @@ namespace CommandIDs {
 
   export const runAndInsert = 'notebook:run-cell-and-insert-below';
 
+  export const runInConsole = 'notebook:run-in-console';
+
   export const runAll = 'notebook:run-all-cells';
 
   export const runAllAbove = 'notebook:run-all-above';
@@ -728,6 +730,66 @@ function addCommands(
 
         return NotebookActions.runAndInsert(content, context.session);
       }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.runInConsole, {
+    label: 'Run Selected Text or Current Line in Console',
+    execute: async args => {
+      // Default to not activating the notebook (thereby putting the notebook
+      // into command mode)
+      const current = getCurrent({ activate: false, ...args });
+
+      if (!current) {
+        return;
+      }
+
+      const { context, content } = current;
+
+      let cell = content.activeCell;
+      let path = context.path;
+      // ignore action in non-code cell
+      if (!cell || cell.model.type !== 'code') {
+        return;
+      }
+
+      let code: string;
+      const editor = cell.editor;
+      const selection = editor.getSelection();
+      const { start, end } = selection;
+      let selected = start.column !== end.column || start.line !== end.line;
+
+      if (selected) {
+        // Get the selected code from the editor.
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        code = editor.model.value.text.substring(start, end);
+      } else {
+        // no selection, submit whole line and advance
+        code = editor.getLine(selection.start.line);
+        const cursor = editor.getCursorPosition();
+        if (cursor.line + 1 !== editor.lineCount) {
+          editor.setCursorPosition({
+            line: cursor.line + 1,
+            column: cursor.column
+          });
+        }
+      }
+
+      if (!code) {
+        return;
+      }
+
+      await commands.execute('console:open', {
+        activate: false,
+        insertMode: 'split-bottom',
+        path
+      });
+      await commands.execute('console:inject', {
+        activate: false,
+        code,
+        path
+      });
     },
     isEnabled
   });
@@ -1539,6 +1601,7 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.run,
     CommandIDs.runAndAdvance,
     CommandIDs.runAndInsert,
+    CommandIDs.runInConsole,
     CommandIDs.clearOutputs,
     CommandIDs.toCode,
     CommandIDs.toMarkdown,
@@ -1771,7 +1834,11 @@ function populateMenus(
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
   // Add a run+insert and run+don't advance group to the run menu.
-  const runExtras = [CommandIDs.runAndInsert, CommandIDs.run].map(command => {
+  const runExtras = [
+    CommandIDs.runAndInsert,
+    CommandIDs.run,
+    CommandIDs.runInConsole
+  ].map(command => {
     return { command };
   });
 
