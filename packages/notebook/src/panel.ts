@@ -133,18 +133,16 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     sender: any,
     args: Session.IKernelChangedArgs
   ): void {
-    const kernel = args && args.newValue;
-
-    if (!this.model || !kernel) {
+    if (!this.model || !args.newValue) {
       return;
     }
-
-    kernel.ready.then(() => {
+    let { newValue } = args;
+    newValue.ready.then(() => {
       if (this.model) {
-        this._updateLanguage(kernel.info.language_info);
+        this._updateLanguage(newValue.info.language_info);
       }
     });
-    this._updateSpec(kernel);
+    this._updateSpec(newValue);
   }
 
   /**
