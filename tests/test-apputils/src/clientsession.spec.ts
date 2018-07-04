@@ -59,7 +59,7 @@ describe('@jupyterlab/apputils', () => {
       it('should be emitted when the kernel changes', done => {
         session.kernelChanged.connect((sender, args) => {
           expect(sender).to.be(session);
-          expect(args).to.be.ok();
+          expect(args).to.eql({ oldValue: null, newValue: sender.kernel });
           done();
         });
         session.initialize().catch(done);
