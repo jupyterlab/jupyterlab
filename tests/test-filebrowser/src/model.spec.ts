@@ -329,16 +329,6 @@ describe('filebrowser/model', () => {
           .then(contents => {
             expect(contents.name).to.be(fname);
           });
-        return model
-          .upload(file)
-          .then(contents => {
-            expect(contents.name).to.be(fname);
-            acceptDialog();
-            return model.upload(file);
-          })
-          .then(contents => {
-            expect(contents.name).to.be(fname);
-          });
       });
 
       it('should not overwrite', () => {
@@ -346,16 +336,6 @@ describe('filebrowser/model', () => {
         let file = new File(['<p>Hello world!</p>'], fname, {
           type: 'text/html'
         });
-        return model
-          .upload(file)
-          .then(contents => {
-            expect(contents.name).to.be(fname);
-            dismissDialog();
-            return model.upload(file);
-          })
-          .catch(err => {
-            expect(err).to.be('File not uploaded');
-          });
         return model
           .upload(file)
           .then(contents => {
