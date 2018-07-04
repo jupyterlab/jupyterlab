@@ -3,40 +3,31 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  JSONExt, JSONValue
-} from '@phosphor/coreutils';
+import { JSONExt, JSONValue } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  IAttachmentsModel, AttachmentsModel
-} from '@jupyterlab/attachments';
+import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
 import {
-  IObservableJSON, IModelDB, IObservableValue, ObservableValue
+  IObservableJSON,
+  IModelDB,
+  IObservableValue,
+  ObservableValue
 } from '@jupyterlab/observables';
 
-import {
-  IOutputAreaModel, OutputAreaModel
-} from '@jupyterlab/outputarea';
-
+import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
 /**
  * The definition of a model object for a cell.
  */
-export
-interface ICellModel extends CodeEditor.IModel {
+export interface ICellModel extends CodeEditor.IModel {
   /**
    * The type of the cell.
    */
@@ -76,20 +67,17 @@ interface ICellModel extends CodeEditor.IModel {
 /**
  * The definition of a model cell object for a cell with attachments.
  */
-export
-interface IAttachmentsCellModel extends ICellModel {
+export interface IAttachmentsCellModel extends ICellModel {
   /**
    * The cell attachments
    */
   readonly attachments: IAttachmentsModel;
 }
 
-
 /**
  * The definition of a code cell.
  */
-export
-interface ICodeCellModel extends ICellModel {
+export interface ICodeCellModel extends ICellModel {
   /**
    * The type of the cell.
    *
@@ -109,41 +97,35 @@ interface ICodeCellModel extends ICellModel {
   readonly outputs: IOutputAreaModel;
 }
 
-
 /**
  * The definition of a markdown cell.
  */
-export
-interface IMarkdownCellModel extends IAttachmentsCellModel {
+export interface IMarkdownCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
   readonly type: 'markdown';
- }
-
+}
 
 /**
  * The definition of a raw cell.
  */
-export
-interface IRawCellModel extends IAttachmentsCellModel {
+export interface IRawCellModel extends IAttachmentsCellModel {
   /**
    * The type of the cell.
    */
   readonly type: 'raw';
 }
 
-
 /**
  * An implementation of the cell model.
  */
-export
-class CellModel extends CodeEditor.Model implements ICellModel {
+export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({modelDB: options.modelDB});
+    super({ modelDB: options.modelDB });
 
     this.id = options.id || UUID.uuid4();
 
@@ -245,7 +227,7 @@ class CellModel extends CodeEditor.Model implements ICellModel {
     return {
       cell_type: this.type,
       source: this.value.text,
-      metadata,
+      metadata
     } as nbformat.ICell;
   }
 
@@ -254,7 +236,12 @@ class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * The default implementation is a no-op.
    */
-  onTrustedChanged(trusted: IObservableValue, args: ObservableValue.IChangedArgs): void { /* no-op */ }
+  onTrustedChanged(
+    trusted: IObservableValue,
+    args: ObservableValue.IChangedArgs
+  ): void {
+    /* no-op */
+  }
 
   /**
    * Handle a change to the observable value.
@@ -264,12 +251,10 @@ class CellModel extends CodeEditor.Model implements ICellModel {
   }
 }
 
-
 /**
  * The namespace for `CellModel` statics.
  */
-export
-namespace CellModel {
+export namespace CellModel {
   /**
    * The options used to initialize a `CellModel`.
    */
@@ -291,25 +276,22 @@ namespace CellModel {
   }
 }
 
-
 /**
  * A base implementation for cell models with attachments.
  */
-export
-class AttachmentsCellModel extends CellModel {
-
+export class AttachmentsCellModel extends CellModel {
   /**
    * Construct a new cell with optional attachments.
    */
   constructor(options: AttachmentsCellModel.IOptions) {
     super(options);
-    let factory = (options.contentFactory ||
-      AttachmentsCellModel.defaultContentFactory
-    );
+    let factory =
+      options.contentFactory || AttachmentsCellModel.defaultContentFactory;
     let attachments: nbformat.IAttachments | undefined;
     let cell = options.cell;
     if (cell && (cell.cell_type === 'raw' || cell.cell_type === 'markdown')) {
-      attachments = (cell as (nbformat.IRawCell | nbformat.IMarkdownCell)).attachments;
+      attachments = (cell as nbformat.IRawCell | nbformat.IMarkdownCell)
+        .attachments;
     }
 
     this._attachments = factory.createAttachmentsModel({
@@ -330,7 +312,7 @@ class AttachmentsCellModel extends CellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IRawCell | nbformat.IMarkdownCell {
-    let cell = super.toJSON() as (nbformat.IRawCell | nbformat.IMarkdownCell);
+    let cell = super.toJSON() as nbformat.IRawCell | nbformat.IMarkdownCell;
     if (this.attachments.length) {
       cell.attachments = this.attachments.toJSON();
     }
@@ -338,20 +320,16 @@ class AttachmentsCellModel extends CellModel {
   }
 
   private _attachments: IAttachmentsModel | null = null;
-
 }
-
 
 /**
  * The namespace for `AttachmentsCellModel` statics.
  */
-export
-namespace AttachmentsCellModel {
+export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export
-  interface IOptions extends CellModel.IOptions {
+  export interface IOptions extends CellModel.IOptions {
     /**
      * The factory for attachment model creation.
      */
@@ -361,23 +339,25 @@ namespace AttachmentsCellModel {
   /**
    * A factory for creating code cell model content.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * Create an output area.
      */
-    createAttachmentsModel(options: IAttachmentsModel.IOptions): IAttachmentsModel;
+    createAttachmentsModel(
+      options: IAttachmentsModel.IOptions
+    ): IAttachmentsModel;
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory implements IContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Create an attachments model.
      */
-    createAttachmentsModel(options: IAttachmentsModel.IOptions): IAttachmentsModel {
+    createAttachmentsModel(
+      options: IAttachmentsModel.IOptions
+    ): IAttachmentsModel {
       return new AttachmentsModel(options);
     }
   }
@@ -385,16 +365,13 @@ namespace AttachmentsCellModel {
   /**
    * The shared `ContentFactory` instance.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }
-
 
 /**
  * An implementation of a raw cell model.
  */
-export
-class RawCellModel extends AttachmentsCellModel {
+export class RawCellModel extends AttachmentsCellModel {
   /**
    * The type of the cell.
    */
@@ -403,12 +380,10 @@ class RawCellModel extends AttachmentsCellModel {
   }
 }
 
-
 /**
  * An implementation of a markdown cell model.
  */
-export
-class MarkdownCellModel extends AttachmentsCellModel {
+export class MarkdownCellModel extends AttachmentsCellModel {
   /**
    * Construct a markdown cell model from optional cell content.
    */
@@ -426,20 +401,16 @@ class MarkdownCellModel extends AttachmentsCellModel {
   }
 }
 
-
 /**
  * An implementation of a code cell Model.
  */
-export
-class CodeCellModel extends CellModel implements ICodeCellModel {
+export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Construct a new code cell with optional original cell content.
    */
   constructor(options: CodeCellModel.IOptions) {
     super(options);
-    let factory = (options.contentFactory ||
-      CodeCellModel.defaultContentFactory
-    );
+    let factory = options.contentFactory || CodeCellModel.defaultContentFactory;
     let trusted = this.trusted;
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
@@ -515,7 +486,10 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle a change to the trusted state.
    */
-  onTrustedChanged(trusted: IObservableValue, args: ObservableValue.IChangedArgs): void {
+  onTrustedChanged(
+    trusted: IObservableValue,
+    args: ObservableValue.IChangedArgs
+  ): void {
     if (this._outputs) {
       this._outputs.trusted = args.newValue as boolean;
     }
@@ -529,29 +503,29 @@ class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * Handle a change to the execution count.
    */
-  private _onExecutionCountChanged(count: IObservableValue, args: ObservableValue.IChangedArgs): void {
+  private _onExecutionCountChanged(
+    count: IObservableValue,
+    args: ObservableValue.IChangedArgs
+  ): void {
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',
       oldValue: args.oldValue,
-      newValue: args.newValue });
+      newValue: args.newValue
+    });
   }
-
 
   private _outputs: IOutputAreaModel = null;
 }
 
-
 /**
  * The namespace for `CodeCellModel` statics.
  */
-export
-namespace CodeCellModel {
+export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export
-  interface IOptions extends CellModel.IOptions {
+  export interface IOptions extends CellModel.IOptions {
     /**
      * The factory for output area model creation.
      */
@@ -561,8 +535,7 @@ namespace CodeCellModel {
   /**
    * A factory for creating code cell model content.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * Create an output area.
      */
@@ -572,8 +545,7 @@ namespace CodeCellModel {
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory implements IContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Create an output area.
      */
@@ -585,6 +557,5 @@ namespace CodeCellModel {
   /**
    * The shared `ContentFactory` instance.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }

@@ -1,14 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  validateModel as validateKernelModel
-} from '../kernel/validate';
+import { validateModel as validateKernelModel } from '../kernel/validate';
 
-import {
-  Session
-} from './session';
-
+import { Session } from './session';
 
 /**
  * Validate a property as being on an object, and optionally
@@ -22,14 +17,14 @@ function validateProperty(object: any, name: string, typeName?: string): void {
     let valid = true;
     let value = object[name];
     switch (typeName) {
-    case 'array':
-      valid = Array.isArray(value);
-      break;
-    case 'object':
-      valid = typeof value !== 'undefined';
-      break;
-    default:
-      valid = typeof value === typeName;
+      case 'array':
+        valid = Array.isArray(value);
+        break;
+      case 'object':
+        valid = typeof value !== 'undefined';
+        break;
+      default:
+        valid = typeof value === typeName;
     }
     if (!valid) {
       throw new Error(`Property '${name}' is not of type '${typeName}'`);
@@ -37,12 +32,10 @@ function validateProperty(object: any, name: string, typeName?: string): void {
   }
 }
 
-
 /**
  * Validate an `Session.IModel` object.
  */
-export
-function validateModel(data: any): Session.IModel {
+export function validateModel(data: any): Session.IModel {
   let model = {
     id: data.id,
     kernel: data.kernel,

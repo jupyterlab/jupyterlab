@@ -1,21 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
-
+import { URLExt } from '@jupyterlab/coreutils';
 
 describe('@jupyterlab/coreutils', () => {
-
   describe('URLExt', () => {
-
     describe('.parse()', () => {
-
       it('should parse a url into a URLExt object', () => {
         let obj = URLExt.parse('http://www.example.com');
         expect(obj.href).to.equal('http://www.example.com/');
@@ -26,7 +18,7 @@ describe('@jupyterlab/coreutils', () => {
       });
 
       it('should handle query and hash', () => {
-        let url = 'http://example.com/path?that\'s#all, folks';
+        let url = "http://example.com/path?that's#all, folks";
         let obj = URLExt.parse(url);
         try {
           expect(obj.href).to.equal(
@@ -50,27 +42,21 @@ describe('@jupyterlab/coreutils', () => {
           expect(obj.hash).to.equal('#all, folks');
         }
       });
-
     });
 
     describe('.join()', () => {
-
       it('should join a sequence of url components', () => {
         expect(URLExt.join('/foo/', 'bar/')).to.equal('/foo/bar/');
       });
-
     });
 
     describe('.encodeParts()', () => {
-
       it('should encode and join a sequence of url components', () => {
         expect(URLExt.encodeParts('>/>')).to.equal('%3E/%3E');
       });
-
     });
 
     describe('objectToQueryString()', () => {
-
       it('should return a serialized object string suitable for a query', () => {
         let obj = {
           name: 'foo',
@@ -78,11 +64,9 @@ describe('@jupyterlab/coreutils', () => {
         };
         expect(URLExt.objectToQueryString(obj)).to.equal('?name=foo&id=baz');
       });
-
     });
 
     describe('.isLocal()', () => {
-
       it('should test whether the url is a local url', () => {
         expect(URLExt.isLocal('https://foo/bar.txt')).to.equal(false);
         expect(URLExt.isLocal('http://foo/bar.txt')).to.equal(false);
@@ -95,10 +79,6 @@ describe('@jupyterlab/coreutils', () => {
         expect(URLExt.isLocal('file://foo/bar.txt')).to.equal(false);
         expect(URLExt.isLocal('data:text/plain,123ABC')).to.equal(false);
       });
-
     });
-
   });
-
-
 });

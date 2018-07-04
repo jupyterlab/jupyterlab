@@ -1,20 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
-} from './labmenu';
-
+import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for an Edit menu.
  */
-export
-interface IEditMenu extends IJupyterLabMenu {
+export interface IEditMenu extends IJupyterLabMenu {
   /**
    * A set storing IUndoers for the Edit menu.
    */
@@ -34,8 +28,7 @@ interface IEditMenu extends IJupyterLabMenu {
 /**
  * An extensible Edit menu for the application.
  */
-export
-class EditMenu extends JupyterLabMenu implements IEditMenu {
+export class EditMenu extends JupyterLabMenu implements IEditMenu {
   /**
    * Construct the edit menu.
    */
@@ -43,14 +36,11 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
     super(options);
     this.menu.title.label = 'Edit';
 
-    this.undoers =
-      new Set<IEditMenu.IUndoer<Widget>>();
+    this.undoers = new Set<IEditMenu.IUndoer<Widget>>();
 
-    this.clearers =
-      new Set<IEditMenu.IClearer<Widget>>();
+    this.clearers = new Set<IEditMenu.IClearer<Widget>>();
 
-    this.findReplacers =
-      new Set<IEditMenu.IFindReplacer<Widget>>();
+    this.findReplacers = new Set<IEditMenu.IFindReplacer<Widget>>();
   }
 
   /**
@@ -82,13 +72,11 @@ class EditMenu extends JupyterLabMenu implements IEditMenu {
 /**
  * Namespace for IEditMenu
  */
-export
-namespace IEditMenu {
+export namespace IEditMenu {
   /**
    * Interface for an activity that uses Undo/Redo.
    */
-  export
-  interface IUndoer<T extends Widget> extends IMenuExtender<T> {
+  export interface IUndoer<T extends Widget> extends IMenuExtender<T> {
     /**
      * Execute an undo command for the activity.
      */
@@ -103,8 +91,7 @@ namespace IEditMenu {
   /**
    * Interface for an activity that wants to register a 'Clear...' menu item
    */
-  export
-  interface IClearer<T extends Widget> extends IMenuExtender<T> {
+  export interface IClearer<T extends Widget> extends IMenuExtender<T> {
     /**
      * A name for the thing to be cleared, used for labeling `clearCurrent`.
      */
@@ -129,8 +116,7 @@ namespace IEditMenu {
   /**
    * Interface for an activity that uses Find/Find+Replace.
    */
-  export
-  interface IFindReplacer<T extends Widget> extends IMenuExtender<T> {
+  export interface IFindReplacer<T extends Widget> extends IMenuExtender<T> {
     /**
      * Execute a find command for the activity.
      */

@@ -5,23 +5,23 @@ import expect = require('expect.js');
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import {
-  ConfigSection, ConfigWithDefaults, IConfigSection
+  ConfigSection,
+  ConfigWithDefaults,
+  IConfigSection
 } from '../../../lib/config';
 
 import {
-  expectFailure, handleRequest, makeSettings, getRequestHandler
+  expectFailure,
+  handleRequest,
+  makeSettings,
+  getRequestHandler
 } from '../utils';
 
-
 describe('config', () => {
-
   describe('ConfigSection.create()', () => {
-
     it('should load a config', () => {
       return ConfigSection.create({ name: UUID.uuid4() }).then(config => {
         expect(Object.keys(config.data).length).to.be(0);
@@ -47,11 +47,9 @@ describe('config', () => {
       });
       expectFailure(configPromise, done, 'Invalid response: 201 Created');
     });
-
   });
 
   describe('#update()', () => {
-
     it('should update a config', () => {
       let config: IConfigSection;
       return ConfigSection.create({ name: UUID.uuid4() })
@@ -89,16 +87,11 @@ describe('config', () => {
         expectFailure(update, done, 'Invalid response: 201 Created');
       }).catch(done);
     });
-
   });
-
 });
 
-
 describe('jupyter.services - ConfigWithDefaults', () => {
-
   describe('#constructor()', () => {
-
     it('should complete properly', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
@@ -113,11 +106,9 @@ describe('jupyter.services - ConfigWithDefaults', () => {
         expect(config).to.be.a(ConfigWithDefaults);
       });
     });
-
   });
 
   describe('#get()', () => {
-
     it('should get a new config value', () => {
       let defaults: JSONObject = { foo: 'bar' };
       let className = 'testclass';
@@ -183,11 +174,9 @@ describe('jupyter.services - ConfigWithDefaults', () => {
         expect(data).to.not.be.ok();
       });
     });
-
   });
 
   describe('#set()', () => {
-
     it('should set a value in a class immediately', () => {
       let className = 'testclass';
       let section: IConfigSection;
@@ -217,7 +206,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
     });
 
-    it('should fail for an invalid response', (done) => {
+    it('should fail for an invalid response', done => {
       let serverSettings = getRequestHandler(200, {});
       ConfigSection.create({ name: UUID.uuid4(), serverSettings })
         .then(section => {
@@ -229,7 +218,5 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       }).catch(done);
 
     });
-
   });
-
 });

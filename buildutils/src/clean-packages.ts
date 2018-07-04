@@ -8,14 +8,12 @@ import * as path from 'path';
 import * as glob from 'glob';
 import { readJSONFile } from './utils';
 
-
 // Get all of the packages.
 let basePath = path.resolve('.');
 let baseConfig = readJSONFile(path.join(basePath, 'package.json'));
 let packageConfig = baseConfig.workspaces;
 let skipSource = process.argv.indexOf('packages') === -1;
 let skipExamples = process.argv.indexOf('examples') === -1;
-
 
 // Handle the packages
 for (let i = 0; i < packageConfig.length; i++) {
@@ -34,7 +32,6 @@ for (let i = 0; i < packageConfig.length; i++) {
     }
   }
 }
-
 
 /**
  * Handle an individual package on the path - update the dependency.

@@ -7,21 +7,13 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  TerminalSession
-} from '../../../lib/terminal';
+import { TerminalSession } from '../../../lib/terminal';
 
-import {
-  handleRequest
-} from '../utils';
-
+import { handleRequest } from '../utils';
 
 describe('terminal', () => {
-
   let defaultSession: TerminalSession.ISession;
   let session: TerminalSession.ISession;
 
@@ -38,33 +30,29 @@ describe('terminal', () => {
   });
 
   describe('TerminalSession', () => {
-
     describe('.isAvailable()', () => {
-
       it('should test whether terminal sessions are available', () => {
         expect(TerminalSession.isAvailable()).to.be(true);
       });
-
     });
 
     describe('.startNew()', () => {
-
       it('should startNew a terminal session', () => {
         return TerminalSession.startNew().then(s => {
           session = s;
           expect(session.name).to.be.ok();
         });
       });
-
     });
 
     describe('.connectTo', () => {
-
       it('should give back an existing session', () => {
-        return TerminalSession.connectTo(defaultSession.name).then(newSession => {
-          expect(newSession.name).to.be(defaultSession.name);
-          expect(newSession).to.not.be(defaultSession);
-       });
+        return TerminalSession.connectTo(defaultSession.name).then(
+          newSession => {
+            expect(newSession.name).to.be(defaultSession.name);
+            expect(newSession).to.not.be(defaultSession);
+          }
+        );
       });
 
       it('should reject if the session does not exist on the server', () => {
@@ -72,11 +60,9 @@ describe('terminal', () => {
           throw Error('should not get here');
         }, () => undefined);
       });
-
     });
 
     describe('.shutdown()', () => {
-
       it('should shut down a terminal session by name', () => {
         return TerminalSession.startNew().then(s => {
           session = s;
@@ -87,75 +73,67 @@ describe('terminal', () => {
       it('should handle a 404 status', () => {
         return TerminalSession.shutdown(UUID.uuid4());
       });
-
     });
 
     describe('.listRunning()', () => {
-
       it('should list the running session models', () => {
         return TerminalSession.listRunning().then(models => {
           expect(models.length).to.be.greaterThan(0);
         });
       });
-
     });
-
   });
 
   describe('.ISession', () => {
-
     describe('#terminated', () => {
-
-      it('should be emitted when the session is shut down', (done) => {
-        TerminalSession.startNew().then(s => {
-          session = s;
-          session.terminated.connect((sender, args) => {
-            expect(sender).to.be(session);
-            expect(args).to.be(void 0);
-            done();
-          });
-          return session.shutdown();
-        }).catch(done);
+      it('should be emitted when the session is shut down', done => {
+        TerminalSession.startNew()
+          .then(s => {
+            session = s;
+            session.terminated.connect((sender, args) => {
+              expect(sender).to.be(session);
+              expect(args).to.be(void 0);
+              done();
+            });
+            return session.shutdown();
+          })
+          .catch(done);
       });
-
     });
 
     describe('#messageReceived', () => {
-
-      it('should be emitted when a message is received', (done) => {
+      it('should be emitted when a message is received', done => {
         const object = {};
-        TerminalSession.startNew().then(s => {
-          session = s;
-          session.messageReceived.connect((sender, msg) => {
-            expect(sender).to.be(session);
-            if (msg.type === 'stdout') {
-              Signal.disconnectReceiver(object);
-              done();
-            }
-          }, object);
-        }).catch(done);
+        TerminalSession.startNew()
+          .then(s => {
+            session = s;
+            session.messageReceived.connect((sender, msg) => {
+              expect(sender).to.be(session);
+              if (msg.type === 'stdout') {
+                Signal.disconnectReceiver(object);
+                done();
+              }
+            }, object);
+          })
+          .catch(done);
       });
-
     });
 
     describe('#name', () => {
-
       it('should be the name of the session', () => {
         expect(defaultSession.name).to.be.ok();
       });
-
     });
 
     context('#serverSettings', () => {
-
       it('should be the server settings of the server', () => {
-        expect(defaultSession.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
+        expect(defaultSession.serverSettings.baseUrl).to.be(
+          PageConfig.getBaseUrl()
+        );
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the object is disposed', () => {
         return TerminalSession.startNew().then(session => {
           let name = session.name;
@@ -165,11 +143,9 @@ describe('terminal', () => {
           return TerminalSession.shutdown(name);
         });
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the session', () => {
         TerminalSession.startNew().then(session => {
           let name = session.name;
@@ -188,59 +164,53 @@ describe('terminal', () => {
           return TerminalSession.shutdown(name);
         });
       });
-
     });
 
     context('#isReady', () => {
-
       it('should test whether the terminal is ready', () => {
-        return TerminalSession.startNew().then(s => {
-          session = s;
-          expect(session.isReady).to.be(false);
-          return session.ready;
-        }).then(() => {
-          expect(session.isReady).to.be(true);
-        });
+        return TerminalSession.startNew()
+          .then(s => {
+            session = s;
+            expect(session.isReady).to.be(false);
+            return session.ready;
+          })
+          .then(() => {
+            expect(session.isReady).to.be(true);
+          });
       });
-
     });
 
     describe('#ready', () => {
-
       it('should resolve when the terminal is ready', () => {
         return defaultSession.ready;
       });
-
     });
 
     describe('#send()', () => {
-
       it('should send a message to the socket', () => {
         return defaultSession.ready.then(() => {
           session.send({ type: 'stdin', content: [1, 2] });
         });
       });
-
     });
 
     describe('#reconnect()', () => {
-
       it('should reconnect to the socket', () => {
         let session: TerminalSession.ISession;
-        return TerminalSession.startNew().then(s => {
-          session = s;
-          let promise = session.reconnect();
-          expect(session.isReady).to.be(false);
-          return promise;
-        }).then(() => {
-          expect(session.isReady).to.be(true);
-        });
+        return TerminalSession.startNew()
+          .then(s => {
+            session = s;
+            let promise = session.reconnect();
+            expect(session.isReady).to.be(false);
+            return promise;
+          })
+          .then(() => {
+            expect(session.isReady).to.be(true);
+          });
       });
-
     });
 
     describe('#shutdown()', () => {
-
       it('should shut down the terminal session', () => {
         TerminalSession.startNew().then(session => {
           return session.shutdown();
@@ -251,9 +221,6 @@ describe('terminal', () => {
         handleRequest(defaultSession, 404, {});
         return defaultSession.shutdown();
       });
-
     });
-
   });
-
 });

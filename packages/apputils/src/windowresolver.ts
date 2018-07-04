@@ -1,37 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PromiseDelegate, Token
-} from '@phosphor/coreutils';
-
+import { PromiseDelegate, Token } from '@phosphor/coreutils';
 
 /* tslint:disable */
 /**
  * The default window resolver token.
  */
-export
-const IWindowResolver = new Token<IWindowResolver>('@jupyterlab/apputils:IWindowResolver');
+export const IWindowResolver = new Token<IWindowResolver>(
+  '@jupyterlab/apputils:IWindowResolver'
+);
 /* tslint:enable */
-
 
 /**
  * The description of a window name resolver.
  */
-export
-interface IWindowResolver {
+export interface IWindowResolver {
   /**
    * A window name to use as a handle among shared resources.
    */
   readonly name: string;
 }
 
-
 /**
  * A concrete implementation of a window name resolver.
  */
-export
-class WindowResolver implements IWindowResolver {
+export class WindowResolver implements IWindowResolver {
   /**
    * The resolved window name.
    */
@@ -52,12 +46,13 @@ class WindowResolver implements IWindowResolver {
    * user intervention, which typically means navigation to a new URL.
    */
   resolve(candidate: string): Promise<void> {
-    return Private.resolve(candidate).then(name => { this._name = name; });
+    return Private.resolve(candidate).then(name => {
+      this._name = name;
+    });
   }
 
   private _name: string | null = null;
 }
-
 
 /*
  * A namespace for private module data.
@@ -102,7 +97,7 @@ namespace Private {
   /**
    * The known window names.
    */
-  let known: { [window: string]: null } = { };
+  let known: { [window: string]: null } = {};
 
   /**
    * The window name.
@@ -160,7 +155,7 @@ namespace Private {
 
     const { localStorage } = window;
 
-    localStorage.setItem(WINDOW, `${payload}-${(new Date().getTime())}`);
+    localStorage.setItem(WINDOW, `${payload}-${new Date().getTime()}`);
   }
 
   /**
@@ -174,8 +169,7 @@ namespace Private {
   /**
    * Returns a promise that resolves with the window name used for restoration.
    */
-  export
-  function resolve(potential: string): Promise<string> {
+  export function resolve(potential: string): Promise<string> {
     if (resolved) {
       return delegate.promise;
     }
@@ -203,16 +197,18 @@ namespace Private {
       }
 
       resolved = true;
-      delegate.resolve(name = candidate);
+      delegate.resolve((name = candidate));
       ping(name);
     }, TIMEOUT);
 
     // Fire the beacon to collect other windows' names.
-    localStorage.setItem(BEACON, `${Math.random()}-${(new Date()).getTime()}`);
+    localStorage.setItem(BEACON, `${Math.random()}-${new Date().getTime()}`);
 
     return delegate.promise;
   }
 
   // Initialize the storage listener at runtime.
-  (() => { initialize(); })();
+  (() => {
+    initialize();
+  })();
 }

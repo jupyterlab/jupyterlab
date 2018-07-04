@@ -3,34 +3,22 @@
 
 import expect = require('expect.js');
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  RunMenu, IRunMenu
-} from '@jupyterlab/mainmenu';
+import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
 
 class Wodget extends Widget {
   state: string;
 }
 
-import {
-  delegateExecute
-} from './util';
+import { delegateExecute } from './util';
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('RunMenu', () => {
-
     let commands: CommandRegistry;
     let menu: RunMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -53,16 +41,13 @@ describe('@jupyterlab/mainmenu', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new run menu', () => {
         expect(menu).to.be.an(RunMenu);
         expect(menu.menu.title.label).to.be('Run');
       });
-
     });
 
     describe('#codeRunners', () => {
-
       it('should allow setting of an ICodeRunner', () => {
         const runner: IRunMenu.ICodeRunner<Wodget> = {
           tracker,
@@ -88,9 +73,6 @@ describe('@jupyterlab/mainmenu', () => {
         delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
         expect(wodget.state).to.be('restartAndRunAll');
       });
-
     });
-
   });
-
 });

@@ -3,10 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The CSS class added to the cell header.
@@ -18,19 +15,15 @@ const CELL_HEADER_CLASS = 'jp-CellHeader';
  */
 const CELL_FOOTER_CLASS = 'jp-CellFooter';
 
-
 /**
  * The interface for a cell header.
  */
-export
-interface ICellHeader extends Widget {}
-
+export interface ICellHeader extends Widget {}
 
 /**
  * Default implementation of a cell header.
  */
-export
-class CellHeader extends Widget implements ICellHeader {
+export class CellHeader extends Widget implements ICellHeader {
   /**
    * Construct a new cell header.
    */
@@ -38,22 +31,17 @@ class CellHeader extends Widget implements ICellHeader {
     super();
     this.addClass(CELL_HEADER_CLASS);
   }
-
 }
-
 
 /**
  * The interface for a cell footer.
  */
-export
-interface ICellFooter extends Widget {}
-
+export interface ICellFooter extends Widget {}
 
 /**
  * Default implementation of a cell footer.
  */
-export
-class CellFooter extends Widget implements ICellFooter {
+export class CellFooter extends Widget implements ICellFooter {
   /**
    * Construct a new cell footer.
    */
@@ -61,5 +49,4 @@ class CellFooter extends Widget implements ICellFooter {
     super();
     this.addClass(CELL_FOOTER_CLASS);
   }
-
 }

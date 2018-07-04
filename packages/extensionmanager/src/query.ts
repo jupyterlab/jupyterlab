@@ -1,16 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IJupyterLabPackageData
-} from './companions';
-
+import { IJupyterLabPackageData } from './companions';
 
 /**
  * Information about a person in search results.
  */
-export
-interface IPerson {
+export interface IPerson {
   /**
    * The username of the person.
    */
@@ -22,21 +18,17 @@ interface IPerson {
   email: string;
 }
 
-
 /**
  * NPM registry search result structure (subset).
  *
  * See https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md
  * for full specification.
  */
-export
-interface ISearchResult {
-
+export interface ISearchResult {
   /**
    * A collection of search results.
    */
   objects: {
-
     /**
      * Metadata about the found package.
      */
@@ -74,7 +66,7 @@ interface ISearchResult {
       /**
        * Various metadata links for the package.
        */
-      links: {[key: string]: string};
+      links: { [key: string]: string };
 
       /**
        * Metadata about user who published the release.
@@ -91,7 +83,6 @@ interface ISearchResult {
      * Flags about the package.
      */
     flags: {
-
       /**
        * Package is insecure or have vulnerable dependencies (based on the nsp registry).
        */
@@ -107,7 +98,6 @@ interface ISearchResult {
      * Object detailing the normalized search score.
      */
     score: {
-
       /**
        * The final normalized search score.
        */
@@ -117,7 +107,6 @@ interface ISearchResult {
        * Break down of the search score.
        */
       detail: {
-
         /**
          * The normalized quality score.
          */
@@ -161,8 +150,7 @@ interface ISearchResult {
  * See https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md
  * for full specification.
  */
-export
-interface IPackageMetadata {
+export interface IPackageMetadata {
   /**
    * The package name.
    */
@@ -214,11 +202,9 @@ interface IPackageMetadata {
        * A short description of the package.
        */
       description: string;
-    }
+    };
   };
 }
-
-
 
 /**
  * An object for searching an NPM registry.
@@ -226,16 +212,17 @@ interface IPackageMetadata {
  * Searches the NPM registry via web API:
  * https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md
  */
-export
-class Searcher {
-
+export class Searcher {
   /**
    * Create a Searcher object.
    *
    * @param repoUri The URI of the NPM registry to use.
    * @param cdnUri The URI of the CDN to use for fetching full package data.
    */
-  constructor(repoUri='https://registry.npmjs.org/', cdnUri='https://unpkg.com') {
+  constructor(
+    repoUri = 'https://registry.npmjs.org/',
+    cdnUri = 'https://unpkg.com'
+  ) {
     this.repoUri = repoUri;
     this.cdnUri = cdnUri;
   }
@@ -247,7 +234,11 @@ class Searcher {
    * @param page The page of results to fetch.
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
    */
-  searchExtensions(query: string, page=0, pageination=250): Promise<ISearchResult> {
+  searchExtensions(
+    query: string,
+    page = 0,
+    pageination = 250
+  ): Promise<ISearchResult> {
     const uri = new URL('/-/v1/search', this.repoUri);
     // Note: Spaces are encoded to '+' signs!
     let text = `${query} keywords:"jupyterlab-extension"`;
@@ -268,7 +259,10 @@ class Searcher {
    * @param name The package name.
    * @param version The version of the package to fetch.
    */
-  fetchPackageData(name: string, version: string): Promise<IJupyterLabPackageData | null> {
+  fetchPackageData(
+    name: string,
+    version: string
+  ): Promise<IJupyterLabPackageData | null> {
     const uri = new URL(`/${name}@${version}/package.json`, this.cdnUri);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {

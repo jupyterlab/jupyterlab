@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import '../style/index.css';  // Why is this first?
+import '../style/index.css'; // Why is this first?
 
 export * from '@jupyterlab/rendermime-interfaces';
 export * from './attachmentmodel';

@@ -1,45 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator
-} from '@phosphor/algorithm';
+import { IIterator } from '@phosphor/algorithm';
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal
-} from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 
-import {
-  Kernel, KernelMessage
-} from '../kernel';
+import { Kernel, KernelMessage } from '../kernel';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  DefaultSession
-} from './default';
-
+import { DefaultSession } from './default';
 
 /**
  * A namespace for session interfaces and factory functions.
  */
-export
-namespace Session {
+export namespace Session {
   /**
    * Interface of a session object.
    */
-  export
-  interface ISession extends IDisposable {
+  export interface ISession extends IDisposable {
     /**
      * A signal emitted when the session is shut down.
      */
@@ -158,7 +141,9 @@ namespace Session {
      * This shuts down the existing kernel and creates a new kernel,
      * keeping the existing session ID and path.
      */
-    changeKernel(options: Partial<Kernel.IModel>): Promise<Kernel.IKernelConnection>;
+    changeKernel(
+      options: Partial<Kernel.IModel>
+    ): Promise<Kernel.IKernelConnection>;
 
     /**
      * Kill the kernel and shutdown the session.
@@ -186,8 +171,9 @@ namespace Session {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<Session.IModel[]> {
+  export function listRunning(
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel[]> {
     return DefaultSession.listRunning(settings);
   }
 
@@ -211,8 +197,7 @@ namespace Session {
    * when the session is created on the server, otherwise the promise is
    * rejected.
    */
-  export
-  function startNew(options: Session.IOptions): Promise<ISession> {
+  export function startNew(options: Session.IOptions): Promise<ISession> {
     return DefaultSession.startNew(options);
   }
 
@@ -233,8 +218,10 @@ namespace Session {
    * The promise is fulfilled when the session is found,
    * otherwise the promise is rejected.
    */
-  export
-  function findById(id: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+  export function findById(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel> {
     return DefaultSession.findById(id, settings);
   }
 
@@ -259,8 +246,10 @@ namespace Session {
    * If the session was not already started and no `options` are given,
    * the promise is rejected.
    */
-  export
-  function findByPath(path: string, settings?: ServerConnection.ISettings): Promise<Session.IModel> {
+  export function findByPath(
+    path: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel> {
     return DefaultSession.findByPath(path, settings);
   }
 
@@ -279,8 +268,10 @@ namespace Session {
    *
    * Otherwise, we attempt to connect to the existing session.
    */
-  export
-  function connectTo(model: Session.IModel, settings?: ServerConnection.ISettings): ISession {
+  export function connectTo(
+    model: Session.IModel,
+    settings?: ServerConnection.ISettings
+  ): ISession {
     return DefaultSession.connectTo(model, settings);
   }
 
@@ -294,8 +285,10 @@ namespace Session {
    * @returns A promise that resolves when the session is shut down.
    *
    */
-  export
-  function shutdown(id: string, settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdown(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return DefaultSession.shutdown(id, settings);
   }
 
@@ -304,16 +297,16 @@ namespace Session {
    *
    * @returns A promise that resolves when all of the sessions are shut down.
    */
-  export
-  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdownAll(
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return DefaultSession.shutdownAll(settings);
   }
 
   /**
    * The session initialization options.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The path (not including name) to the session.
      */
@@ -362,8 +355,7 @@ namespace Session {
    * The manager is responsible for maintaining the state of running
    * sessions and the initial fetch of kernel specs.
    */
-  export
-  interface IManager extends IDisposable {
+  export interface IManager extends IDisposable {
     /**
      * A signal emitted when the kernel specs change.
      */
@@ -500,8 +492,7 @@ namespace Session {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
    */
-  export
-  interface IModel extends JSONObject {
+  export interface IModel extends JSONObject {
     /**
      * The unique identifier for the session client.
      */

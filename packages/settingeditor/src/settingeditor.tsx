@@ -3,54 +3,31 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry, IStateDB
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  JSONExt, JSONObject, JSONValue
-} from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal
-} from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import {
-  PluginEditor
-} from './plugineditor';
+import { PluginEditor } from './plugineditor';
 
-import {
-  PluginList
-} from './pluginlist';
+import { PluginList } from './pluginlist';
 
-import {
-  SplitPanel
-} from './splitpanel';
-
+import { SplitPanel } from './splitpanel';
 
 /**
  * The ratio panes in the setting editor.
@@ -64,12 +41,10 @@ const DEFAULT_LAYOUT: SettingEditor.ILayoutState = {
   }
 };
 
-
 /**
  * An interface for modifying and saving application settings.
  */
-export
-class SettingEditor extends Widget {
+export class SettingEditor extends Widget {
   /**
    * Create a new setting editor.
    */
@@ -80,19 +55,22 @@ class SettingEditor extends Widget {
     this.state = options.state;
 
     const { commands, editorFactory, rendermime } = options;
-    const layout = this.layout = new PanelLayout();
-    const registry = this.registry = options.registry;
-    const panel = this._panel = new SplitPanel({
+    const layout = (this.layout = new PanelLayout());
+    const registry = (this.registry = options.registry);
+    const panel = (this._panel = new SplitPanel({
       orientation: 'horizontal',
       renderer: SplitPanel.defaultRenderer,
       spacing: 1
-    });
-    const instructions = this._instructions = new Widget();
-    const editor = this._editor = new PluginEditor({
-      commands, editorFactory, registry, rendermime
-    });
+    }));
+    const instructions = (this._instructions = new Widget());
+    const editor = (this._editor = new PluginEditor({
+      commands,
+      editorFactory,
+      registry,
+      rendermime
+    }));
     const confirm = () => editor.confirm();
-    const list = this._list = new PluginList({ confirm, registry });
+    const list = (this._list = new PluginList({ confirm, registry }));
     const when = options.when;
 
     instructions.addClass('jp-SettingEditorInstructions');
@@ -215,24 +193,31 @@ class SettingEditor extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this._panel.hide();
-    this._fetchState().then(() => {
-      this._panel.show();
-      this._setState();
-    }).catch(reason => {
-      console.error('Fetching setting editor state failed', reason);
-      this._panel.show();
-      this._setState();
-    });
+    this._fetchState()
+      .then(() => {
+        this._panel.show();
+        this._setState();
+      })
+      .catch(reason => {
+        console.error('Fetching setting editor state failed', reason);
+        this._panel.show();
+        this._setState();
+      });
   }
 
   /**
    * Handle `'close-request'` messages.
    */
   protected onCloseRequest(msg: Message): void {
-    this._editor.confirm().then(() => {
-      super.onCloseRequest(msg);
-      this.dispose();
-    }).catch(() => { /* no op */ });
+    this._editor
+      .confirm()
+      .then(() => {
+        super.onCloseRequest(msg);
+        this.dispose();
+      })
+      .catch(() => {
+        /* no op */
+      });
   }
 
   /**
@@ -246,7 +231,7 @@ class SettingEditor extends Widget {
     const { key, state } = this;
     const promises = [state.fetch(key), this._when];
 
-    return this._fetching = Promise.all(promises).then(([saved]) => {
+    return (this._fetching = Promise.all(promises).then(([saved]) => {
       this._fetching = null;
 
       if (this._saving) {
@@ -254,7 +239,7 @@ class SettingEditor extends Widget {
       }
 
       this._state = Private.normalizeState(saved, this._state);
-    });
+    }));
   }
 
   /**
@@ -266,7 +251,9 @@ class SettingEditor extends Widget {
     this._state.container.editor = this._list.editor;
     this._state.container.plugin = this._list.selection;
     this._saveState()
-      .then(() => { this._setState(); })
+      .then(() => {
+        this._setState();
+      })
       .catch(reason => {
         console.error('Saving setting editor state failed', reason);
         this._setState();
@@ -281,8 +268,11 @@ class SettingEditor extends Widget {
     const value = this._state;
 
     this._saving = true;
-    return state.save(key, value)
-      .then(() => { this._saving = false; })
+    return state
+      .save(key, value)
+      .then(() => {
+        this._saving = false;
+      })
       .catch((reason: any) => {
         this._saving = false;
         throw reason;
@@ -301,7 +291,9 @@ class SettingEditor extends Widget {
 
     // Allow the message queue (which includes fit requests that might disrupt
     // setting relative sizes) to clear before setting sizes.
-    requestAnimationFrame(() => { panel.setRelativeSizes(state.sizes); });
+    requestAnimationFrame(() => {
+      panel.setRelativeSizes(state.sizes);
+    });
   }
 
   /**
@@ -327,23 +319,26 @@ class SettingEditor extends Widget {
 
     const instructions = this._instructions;
 
-    this.registry.load(container.plugin).then(settings => {
-      if (instructions.isAttached) {
-        instructions.parent = null;
-      }
-      if (!editor.isAttached) {
-        panel.addWidget(editor);
-      }
-      editor.settings = settings;
-      list.editor = container.editor;
-      list.selection = container.plugin;
-      this._setLayout();
-    }).catch((reason: Error) => {
-      console.error(`Loading settings failed: ${reason.message}`);
-      list.selection = this._state.container.plugin = '';
-      editor.settings = null;
-      this._setLayout();
-    });
+    this.registry
+      .load(container.plugin)
+      .then(settings => {
+        if (instructions.isAttached) {
+          instructions.parent = null;
+        }
+        if (!editor.isAttached) {
+          panel.addWidget(editor);
+        }
+        editor.settings = settings;
+        list.editor = container.editor;
+        list.selection = container.plugin;
+        this._setLayout();
+      })
+      .catch((reason: Error) => {
+        console.error(`Loading settings failed: ${reason.message}`);
+        list.selection = this._state.container.plugin = '';
+        editor.settings = null;
+        this._setLayout();
+      });
   }
 
   private _editor: PluginEditor;
@@ -356,17 +351,14 @@ class SettingEditor extends Widget {
   private _when: Promise<any>;
 }
 
-
 /**
  * A namespace for `SettingEditor` statics.
  */
-export
-namespace SettingEditor {
+export namespace SettingEditor {
   /**
    * The instantiation options for a setting editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The toolbar commands and registry for the setting editor toolbar.
      */
@@ -426,8 +418,7 @@ namespace SettingEditor {
   /**
    * The layout state for the setting editor.
    */
-  export
-  interface ILayoutState extends JSONObject {
+  export interface ILayoutState extends JSONObject {
     /**
      * The layout state for a plugin editor container.
      */
@@ -442,8 +433,7 @@ namespace SettingEditor {
   /**
    * The layout information that is stored and restored from the state database.
    */
-  export
-  interface IPluginLayout extends JSONObject {
+  export interface IPluginLayout extends JSONObject {
     /**
      * The current plugin being displayed.
      */
@@ -455,7 +445,6 @@ namespace SettingEditor {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -463,28 +452,30 @@ namespace Private {
   /**
    * Populate the instructions text node.
    */
-  export
-  function populateInstructionsNode(node: HTMLElement): void {
+  export function populateInstructionsNode(node: HTMLElement): void {
     const iconClass = `jp-SettingEditorInstructions-icon jp-JupyterIcon`;
 
-    ReactDOM.render((
+    ReactDOM.render(
       <React.Fragment>
         <h2>
-          <span className={iconClass}></span>
-          <span className='jp-SettingEditorInstructions-title'>Settings</span>
+          <span className={iconClass} />
+          <span className="jp-SettingEditorInstructions-title">Settings</span>
         </h2>
-        <span className='jp-SettingEditorInstructions-text'>
+        <span className="jp-SettingEditorInstructions-text">
           Select a plugin from the list to view and edit its preferences.
         </span>
-      </React.Fragment>
-    ), node);
+      </React.Fragment>,
+      node
+    );
   }
 
   /**
    * Return a normalized restored layout state that defaults to the presets.
    */
-  export
-  function normalizeState(saved: JSONObject | null, current: SettingEditor.ILayoutState): SettingEditor.ILayoutState {
+  export function normalizeState(
+    saved: JSONObject | null,
+    current: SettingEditor.ILayoutState
+  ): SettingEditor.ILayoutState {
     if (!saved) {
       return JSONExt.deepCopy(DEFAULT_LAYOUT);
     }
@@ -497,17 +488,24 @@ namespace Private {
       return saved as SettingEditor.ILayoutState;
     }
 
-    const container = ('container' in saved) &&
+    const container =
+      'container' in saved &&
       saved.container &&
-      typeof saved.container === 'object' ? saved.container as JSONObject
-        : { };
+      typeof saved.container === 'object'
+        ? (saved.container as JSONObject)
+        : {};
 
     saved.container = {
-      editor: container.editor === 'raw' || container.editor === 'table' ?
-        container.editor : DEFAULT_LAYOUT.container.editor,
-      plugin: typeof container.plugin === 'string' ? container.plugin
-        : DEFAULT_LAYOUT.container.plugin,
-      sizes: numberArray(container.sizes) ? container.sizes
+      editor:
+        container.editor === 'raw' || container.editor === 'table'
+          ? container.editor
+          : DEFAULT_LAYOUT.container.editor,
+      plugin:
+        typeof container.plugin === 'string'
+          ? container.plugin
+          : DEFAULT_LAYOUT.container.plugin,
+      sizes: numberArray(container.sizes)
+        ? container.sizes
         : JSONExt.deepCopy(DEFAULT_LAYOUT.container.sizes)
     };
 

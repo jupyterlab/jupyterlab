@@ -2,25 +2,18 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * A namespace for rendermime associated interfaces.
  */
-export
-namespace IRenderMime {
+export namespace IRenderMime {
   /**
    * A model for mime data.
    */
-  export
-  interface IMimeModel {
+  export interface IMimeModel {
     /**
      * Whether the data in the model is trusted.
      */
@@ -50,13 +43,11 @@ namespace IRenderMime {
   /**
    * The namespace for IMimeModel associated interfaces.
    */
-  export
-  namespace IMimeModel {
+  export namespace IMimeModel {
     /**
      * The options used to update a mime model.
      */
-    export
-    interface ISetDataOptions {
+    export interface ISetDataOptions {
       /**
        * The new data object.
        */
@@ -75,8 +66,7 @@ namespace IRenderMime {
    * This interface is intended to be used by mime renderer extensions
    * to define a document opener that uses its renderer factory.
    */
-  export
-  interface IDocumentWidgetFactoryOptions {
+  export interface IDocumentWidgetFactoryOptions {
     /**
      * The name of the widget to display in dialogs.
      */
@@ -106,8 +96,7 @@ namespace IRenderMime {
   /**
    * A file type to associate with the renderer.
    */
-  export
-  interface IFileType {
+  export interface IFileType {
     /**
      * The name of the file type.
      */
@@ -153,8 +142,7 @@ namespace IRenderMime {
   /**
    * An interface for using a RenderMime.IRenderer for output and read-only documents.
    */
-  export
-  interface IExtension {
+  export interface IExtension {
     /**
      * The ID of the extension.
      *
@@ -189,7 +177,9 @@ namespace IRenderMime {
     /**
      * The options used to open a document with the renderer factory.
      */
-    readonly documentWidgetFactoryOptions?: IDocumentWidgetFactoryOptions | ReadonlyArray<IDocumentWidgetFactoryOptions>;
+    readonly documentWidgetFactoryOptions?:
+      | IDocumentWidgetFactoryOptions
+      | ReadonlyArray<IDocumentWidgetFactoryOptions>;
 
     /**
      * The optional file type associated with the extension.
@@ -201,8 +191,7 @@ namespace IRenderMime {
    * The interface for a module that exports an extension or extensions as
    * the default value.
    */
-  export
-  interface IExtensionModule {
+  export interface IExtensionModule {
     /**
      * The default export.
      */
@@ -212,8 +201,7 @@ namespace IRenderMime {
   /**
    * A widget which displays the contents of a mime model.
    */
-  export
-  interface IRenderer extends Widget {
+  export interface IRenderer extends Widget {
     /**
      * Render a mime model.
      *
@@ -231,8 +219,7 @@ namespace IRenderMime {
   /**
    * The interface for a renderer factory.
    */
-  export
-  interface IRendererFactory {
+  export interface IRendererFactory {
     /**
      * Whether the factory is a "safe" factory.
      *
@@ -266,8 +253,7 @@ namespace IRenderMime {
   /**
    * The options used to create a renderer.
    */
-  export
-  interface IRendererOptions {
+  export interface IRendererOptions {
     /**
      * The preferred mimeType to render.
      */
@@ -297,8 +283,7 @@ namespace IRenderMime {
   /**
    * An object that handles html sanitization.
    */
-  export
-  interface ISanitizer {
+  export interface ISanitizer {
     /**
      * Sanitize an HTML string.
      */
@@ -308,8 +293,7 @@ namespace IRenderMime {
   /**
    * An object that handles links on a node.
    */
-  export
-  interface ILinkHandler {
+  export interface ILinkHandler {
     /**
      * Add the link handler to the node.
      */
@@ -319,8 +303,7 @@ namespace IRenderMime {
   /**
    * An object that resolves relative URLs.
    */
-  export
-  interface IResolver {
+  export interface IResolver {
     /**
      * Resolve a relative url to a correct server path.
      */
@@ -346,8 +329,7 @@ namespace IRenderMime {
   /**
    * The interface for a LaTeX typesetter.
    */
-  export
-  interface ILatexTypesetter {
+  export interface ILatexTypesetter {
     /**
      * Typeset a DOM element.
      *

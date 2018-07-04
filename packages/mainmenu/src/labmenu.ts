@@ -1,22 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IInstanceTracker
-} from '@jupyterlab/apputils';
+import { IInstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
-
+import { Menu, Widget } from '@phosphor/widgets';
 
 /**
  * A common interface for extensible JupyterLab application menus.
@@ -26,8 +17,7 @@ import {
  * application menus that may be extended by plugins as well,
  * such as "Edit" and "View"
  */
-export
-interface IJupyterLabMenu extends IDisposable {
+export interface IJupyterLabMenu extends IDisposable {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
@@ -42,8 +32,7 @@ interface IJupyterLabMenu extends IDisposable {
  * is deciding which IMenuExtender to delegate to upon
  * selection of the menu item.
  */
-export
-interface IMenuExtender<T extends Widget> {
+export interface IMenuExtender<T extends Widget> {
   /**
    * A widget tracker for identifying the appropriate extender.
    */
@@ -62,8 +51,7 @@ interface IMenuExtender<T extends Widget> {
 /**
  * An extensible menu for JupyterLab application menus.
  */
-export
-class JupyterLabMenu implements IJupyterLabMenu {
+export class JupyterLabMenu implements IJupyterLabMenu {
   /**
    * Construct a new menu.
    *
@@ -89,7 +77,11 @@ class JupyterLabMenu implements IJupyterLabMenu {
     const rankGroup = { items, rank: rank === undefined ? 100 : rank };
 
     // Insert the plugin group into the list of groups.
-    const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
+    const groupIndex = ArrayExt.upperBound(
+      this._groups,
+      rankGroup,
+      Private.itemCmp
+    );
 
     // Determine the index of the menu at which to insert the group.
     let insertIndex = 0;
@@ -128,9 +120,13 @@ class JupyterLabMenu implements IJupyterLabMenu {
    */
   removeGroup(items: Menu.IItemOptions[]): void {
     // Get the index within the current groups.
-    const index = ArrayExt.findFirstIndex(this._groups,
-      (rankGroup) => rankGroup.items === items);
-    if (index === -1) { return; }
+    const index = ArrayExt.findFirstIndex(
+      this._groups,
+      rankGroup => rankGroup.items === items
+    );
+    if (index === -1) {
+      return;
+    }
 
     // Determine the index within the menu for removal.
     let removeIndex = 0;
@@ -158,8 +154,6 @@ class JupyterLabMenu implements IJupyterLabMenu {
     this._groups.splice(index);
   }
 
-
-
   /**
    * The underlying Phosphor menu.
    */
@@ -186,7 +180,6 @@ class JupyterLabMenu implements IJupyterLabMenu {
   private _includeSeparators: boolean;
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -194,8 +187,7 @@ namespace Private {
   /**
    * An object which holds a menu and its sort rank.
    */
-  export
-  interface IRankGroup {
+  export interface IRankGroup {
     /**
      * A menu grouping.
      */
@@ -210,8 +202,7 @@ namespace Private {
   /**
    * A comparator function for menu rank items.
    */
-  export
-  function itemCmp(first: IRankGroup, second: IRankGroup): number {
+  export function itemCmp(first: IRankGroup, second: IRankGroup): number {
     return first.rank - second.rank;
   }
 }

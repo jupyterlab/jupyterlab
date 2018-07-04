@@ -1,59 +1,46 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IInstanceTracker, InstanceTracker
-} from '@jupyterlab/apputils';
+import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
 
 import {
-  MimeDocumentFactory, DocumentRegistry, MimeDocument
+  MimeDocumentFactory,
+  DocumentRegistry,
+  MimeDocument
 } from '@jupyterlab/docregistry';
 
-import {
-  IRenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { AttachedProperty } from '@phosphor/properties';
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from './index';
+import { JupyterLab, JupyterLabPlugin } from './index';
 
-import {
-  ILayoutRestorer
-} from './layoutrestorer';
-
+import { ILayoutRestorer } from './layoutrestorer';
 
 /**
  * A class that tracks mime documents.
  */
-export
-interface IMimeDocumentTracker extends IInstanceTracker<MimeDocument> {}
+export interface IMimeDocumentTracker extends IInstanceTracker<MimeDocument> {}
 
 /* tslint:disable */
 /**
  * The mime document tracker token.
  */
-export
-const IMimeDocumentTracker = new Token<IMimeDocumentTracker>('@jupyterlab/application:IMimeDocumentTracker');
+export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
+  '@jupyterlab/application:IMimeDocumentTracker'
+);
 /* tslint:enable */
-
 
 /**
  * Create rendermime plugins for rendermime extension modules.
  */
-export
-function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
+export function createRendermimePlugins(
+  extensions: IRenderMime.IExtensionModule[]
+): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
   const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
@@ -69,10 +56,9 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
     if (!Array.isArray(data)) {
       data = [data] as ReadonlyArray<IRenderMime.IExtension>;
     }
-    (data as ReadonlyArray<IRenderMime.IExtension>)
-      .forEach(item => {
-        plugins.push(createRendermimePlugin(tracker, item));
-      });
+    (data as ReadonlyArray<IRenderMime.IExtension>).forEach(item => {
+      plugins.push(createRendermimePlugin(tracker, item));
+    });
   });
 
   // Also add a meta-plugin handling state restoration
@@ -99,22 +85,25 @@ function createRendermimePlugins(extensions: IRenderMime.IExtensionModule[]): Ju
   return plugins;
 }
 
-
 /**
  * Create rendermime plugins for rendermime extension modules.
  */
-export
-function createRendermimePlugin(tracker: InstanceTracker<MimeDocument>, item: IRenderMime.IExtension): JupyterLabPlugin<void> {
+export function createRendermimePlugin(
+  tracker: InstanceTracker<MimeDocument>,
+  item: IRenderMime.IExtension
+): JupyterLabPlugin<void> {
   return {
     id: item.id,
     requires: [ILayoutRestorer, IRenderMimeRegistry],
     autoStart: true,
-    activate: (app: JupyterLab, restorer: ILayoutRestorer, rendermime: IRenderMimeRegistry) => {
+    activate: (
+      app: JupyterLab,
+      restorer: ILayoutRestorer,
+      rendermime: IRenderMimeRegistry
+    ) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
-        rendermime.addFactory(
-          item.rendererFactory, item.rank
-        );
+        rendermime.addFactory(item.rendererFactory, item.rank);
       } else {
         rendermime.addFactory(item.rendererFactory);
       }
@@ -129,7 +118,9 @@ function createRendermimePlugin(tracker: InstanceTracker<MimeDocument>, item: IR
       if (Array.isArray(item.documentWidgetFactoryOptions)) {
         options = item.documentWidgetFactoryOptions;
       } else {
-        options = [item.documentWidgetFactoryOptions as IRenderMime.IDocumentWidgetFactoryOptions];
+        options = [
+          item.documentWidgetFactoryOptions as IRenderMime.IDocumentWidgetFactoryOptions
+        ];
       }
 
       if (item.fileTypes) {
@@ -150,7 +141,6 @@ function createRendermimePlugin(tracker: InstanceTracker<MimeDocument>, item: IR
           defaultFor: option.defaultFor
         });
         registry.addWidgetFactory(factory);
-
 
         factory.widgetCreated.connect((sender, widget) => {
           Private.factoryNameProperty.set(widget, factory.name);
@@ -173,9 +163,10 @@ namespace Private {
    * An attached property for keeping the factory name
    * that was used to create a mimedocument.
    */
-  export
-  const factoryNameProperty = new AttachedProperty<MimeDocument, string>({
-    name: 'factoryName',
-    create: () => undefined
-  });
+  export const factoryNameProperty = new AttachedProperty<MimeDocument, string>(
+    {
+      name: 'factoryName',
+      create: () => undefined
+    }
+  );
 }

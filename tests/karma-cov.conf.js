@@ -1,7 +1,7 @@
 var path = require('path');
 var baseConf = require('./karma.conf');
 
-module.exports = function (config) {
+module.exports = function(config) {
   baseConf(config);
   config.reporters = ['mocha', 'coverage-istanbul'];
   config.webpack.module.rules.push(

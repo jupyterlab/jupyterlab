@@ -1,25 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  JSONObject, JSONValue
-} from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
-import {
-  DisposableSet, IDisposable
-} from '@phosphor/disposable';
+import { DisposableSet, IDisposable } from '@phosphor/disposable';
 
 /**
  * The default shortcuts extension.
@@ -56,24 +46,25 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, settingReqistry: ISettingRegistry): void => {
     const { commands } = app;
 
-    settingReqistry.load(plugin.id).then(settings => {
-      Private.loadShortcuts(commands, settings.composite);
-      settings.changed.connect(() => {
+    settingReqistry
+      .load(plugin.id)
+      .then(settings => {
         Private.loadShortcuts(commands, settings.composite);
+        settings.changed.connect(() => {
+          Private.loadShortcuts(commands, settings.composite);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error('Loading shortcut settings failed.', reason.message);
       });
-    }).catch((reason: Error) => {
-      console.error('Loading shortcut settings failed.', reason.message);
-    });
   },
   autoStart: true
 };
-
 
 /**
  * Export the plugin as default.
  */
 export default plugin;
-
 
 /**
  * A namespace for private module data.
@@ -87,8 +78,10 @@ namespace Private {
   /**
    * Load the keyboard shortcuts from settings.
    */
-  export
-  function loadShortcuts(commands: CommandRegistry, composite: JSONObject): void {
+  export function loadShortcuts(
+    commands: CommandRegistry,
+    composite: JSONObject
+  ): void {
     if (disposables) {
       disposables.dispose();
     }
@@ -106,17 +99,20 @@ namespace Private {
   /**
    * Normalize potential keyboard shortcut options.
    */
-  function normalizeOptions(value: JSONValue | Partial<CommandRegistry.IKeyBindingOptions>): CommandRegistry.IKeyBindingOptions | undefined {
+  function normalizeOptions(
+    value: JSONValue | Partial<CommandRegistry.IKeyBindingOptions>
+  ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;
     }
 
     const { isArray } = Array;
-    const valid = 'command' in value &&
+    const valid =
+      'command' in value &&
       'keys' in value &&
       'selector' in value &&
       isArray((value as Partial<CommandRegistry.IKeyBindingOptions>).keys);
 
-    return valid ? value as CommandRegistry.IKeyBindingOptions : undefined;
+    return valid ? (value as CommandRegistry.IKeyBindingOptions) : undefined;
   }
 }

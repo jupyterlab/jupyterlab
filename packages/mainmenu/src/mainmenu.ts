@@ -1,69 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  Menu, MenuBar
-} from '@phosphor/widgets';
+import { Menu, MenuBar } from '@phosphor/widgets';
 
-import {
-  IFileMenu, FileMenu
-} from './file';
+import { IFileMenu, FileMenu } from './file';
 
-import {
-  IEditMenu, EditMenu
-} from './edit';
+import { IEditMenu, EditMenu } from './edit';
 
-import {
-  IHelpMenu, HelpMenu
-} from './help';
+import { IHelpMenu, HelpMenu } from './help';
 
-import {
-  IKernelMenu, KernelMenu
-} from './kernel';
+import { IKernelMenu, KernelMenu } from './kernel';
 
-import {
-  IRunMenu, RunMenu
-} from './run';
+import { IRunMenu, RunMenu } from './run';
 
-import {
-  ISettingsMenu, SettingsMenu
-} from './settings';
+import { ISettingsMenu, SettingsMenu } from './settings';
 
-import {
-  IViewMenu, ViewMenu
-} from './view';
+import { IViewMenu, ViewMenu } from './view';
 
-import {
-  ITabsMenu, TabsMenu
-} from './tabs';
-
+import { ITabsMenu, TabsMenu } from './tabs';
 
 /* tslint:disable */
 /**
  * The main menu token.
  */
-export
-const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
+export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
 /* tslint:enable */
-
 
 /**
  * The main menu interface.
  */
-export
-interface IMainMenu {
+export interface IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
@@ -110,30 +82,25 @@ interface IMainMenu {
   readonly tabsMenu: ITabsMenu;
 }
 
-
 /**
  * The namespace for IMainMenu attached interfaces.
  */
-export
-namespace IMainMenu {
+export namespace IMainMenu {
   /**
    * The options used to add a menu to the main menu.
    */
-  export
-  interface IAddOptions {
+  export interface IAddOptions {
     /**
      * The rank order of the menu among its siblings.
      */
     rank?: number;
   }
-
 }
 
 /**
  * The main menu class.  It is intended to be used as a singleton.
  */
-export
-class MainMenu extends MenuBar implements IMainMenu {
+export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Construct the main menu bar.
    */
@@ -198,7 +165,6 @@ class MainMenu extends MenuBar implements IMainMenu {
    */
   readonly tabsMenu: TabsMenu;
 
-
   /**
    * Add a new menu to the main menu bar.
    */
@@ -241,7 +207,10 @@ class MainMenu extends MenuBar implements IMainMenu {
    */
   private _onMenuDisposed(menu: Menu): void {
     this.removeMenu(menu);
-    let index = ArrayExt.findFirstIndex(this._items, item => item.menu === menu);
+    let index = ArrayExt.findFirstIndex(
+      this._items,
+      item => item.menu === menu
+    );
     if (index !== -1) {
       ArrayExt.removeAt(this._items, index);
     }
@@ -250,7 +219,6 @@ class MainMenu extends MenuBar implements IMainMenu {
   private _items: Private.IRankItem[] = [];
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -258,8 +226,7 @@ namespace Private {
   /**
    * An object which holds a menu and its sort rank.
    */
-  export
-  interface IRankItem {
+  export interface IRankItem {
     /**
      * The menu for the item.
      */
@@ -274,9 +241,7 @@ namespace Private {
   /**
    * A comparator function for menu rank items.
    */
-  export
-  function itemCmp(first: IRankItem, second: IRankItem): number {
+  export function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
   }
 }
-

@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-Collapser {
   flex: 0 0 var(--jp-cell-collapser-width);
   padding: 0px;
@@ -12,9 +11,8 @@
   outline: none;
   background: transparent;
   border-radius: var(--jp-border-radius);
-  opacity: 1.0;
+  opacity: 1;
 }
-
 
 .jp-Collapser-child {
   display: block;
@@ -25,6 +23,3 @@
   top: 0px;
   bottom: 0px;
 }
-
-
-

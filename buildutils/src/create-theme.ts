@@ -26,7 +26,6 @@ let questions = [
   }
 ];
 
-
 const template = `
 import {
   JupyterLab, JupyterLabPlugin
@@ -60,7 +59,6 @@ const plugin: JupyterLabPlugin<void> = {
 
 export default plugin;
 `;
-
 
 inquirer.prompt(questions).then(answers => {
   let { name, title, description } = answers;

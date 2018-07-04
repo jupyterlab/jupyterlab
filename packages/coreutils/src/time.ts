@@ -3,12 +3,10 @@
 
 import moment from 'moment';
 
-
 /**
  * The namespace for date functions.
  */
-export
-namespace Time {
+export namespace Time {
   /**
    * Convert a timestring to a human readable string (e.g. 'two minutes ago').
    *
@@ -16,8 +14,7 @@ namespace Time {
    *
    * @returns A formatted date.
    */
-  export
-  function formatHuman(value: string | Date): string {
+  export function formatHuman(value: string | Date): string {
     let time = moment(value).fromNow();
     time = time === 'a few seconds ago' ? 'seconds ago' : time;
     return time;
@@ -32,8 +29,10 @@ namespace Time {
    *
    * @returns A formatted date.
    */
-  export
-  function format(value: string | Date, format='YYYY-MM-DD HH:mm'): string {
+  export function format(
+    value: string | Date,
+    format = 'YYYY-MM-DD HH:mm'
+  ): string {
     return moment(value).format(format);
   }
 }

@@ -4,11 +4,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-HoverBox {
   position: fixed;
 }
-
 
 .jp-HoverBox.jp-mod-outofview {
   display: none;

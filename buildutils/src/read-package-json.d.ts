@@ -3,6 +3,6 @@
 // Definitions by: Steven Silvester <https://github.com/blink1073>
 
 declare module 'sort-package-json' {
-    function sort(value: any): any;
-    export = sort;
+  function sort(value: any): any;
+  export = sort;
 }

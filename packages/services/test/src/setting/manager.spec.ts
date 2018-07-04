@@ -3,25 +3,16 @@
 
 import expect = require('expect.js');
 
-import {
-  ServerConnection, SettingManager
-} from '../../../lib';
+import { ServerConnection, SettingManager } from '../../../lib';
 
-import {
-  init
-} from '../utils';
-
+import { init } from '../utils';
 
 // Initialize the fetch overrides.
 init();
 
-
 describe('setting', () => {
-
   describe('SettingManager', () => {
-
     describe('#constructor()', () => {
-
       it('should accept no options', () => {
         const manager = new SettingManager();
         expect(manager).to.be.a(SettingManager);
@@ -33,20 +24,15 @@ describe('setting', () => {
         });
         expect(manager).to.be.a(SettingManager);
       });
-
     });
 
     describe('#serverSettings', () => {
-
       it('should be the server settings', () => {
         const baseUrl = 'foo';
         const serverSettings = ServerConnection.makeSettings({ baseUrl });
         const manager = new SettingManager({ serverSettings });
         expect(manager.serverSettings.baseUrl).to.be(baseUrl);
       });
-
     });
-
   });
-
 });

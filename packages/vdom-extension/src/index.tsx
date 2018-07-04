@@ -1,13 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import * as React from 'react';
 
@@ -16,7 +12,6 @@ import * as ReactDOM from 'react-dom';
 import VDOM from '@nteract/transform-vdom';
 
 import '../style/index.css';
-
 
 /**
  * The CSS class to add to the VDOM Widget.
@@ -31,15 +26,12 @@ const CSS_ICON_CLASS = 'jp-MaterialIcon jp-VDOMIcon';
 /**
  * The MIME type for VDOM.
  */
-export
-const MIME_TYPE = 'application/vdom.v1+json';
-
+export const MIME_TYPE = 'application/vdom.v1+json';
 
 /**
  * A renderer for declarative virtual DOM content.
  */
-export
-class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
+export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   /**
    * Create a new widget for rendering DOM.
    */
@@ -65,17 +57,14 @@ class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   private _mimeType: string;
 }
 
-
 /**
  * A mime renderer factory for VDOM data.
  */
-export
-const rendererFactory: IRenderMime.IRendererFactory = {
+export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
   mimeTypes: [MIME_TYPE],
   createRenderer: options => new RenderedVDOM(options)
 };
-
 
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
@@ -83,12 +72,14 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     rendererFactory,
     rank: 0,
     dataType: 'json',
-    fileTypes: [{
-      name: 'vdom',
-      mimeTypes: [MIME_TYPE],
-      extensions: ['.vdom', '.vdom.json'],
-      iconClass: CSS_ICON_CLASS
-    }],
+    fileTypes: [
+      {
+        name: 'vdom',
+        mimeTypes: [MIME_TYPE],
+        extensions: ['.vdom', '.vdom.json'],
+        iconClass: CSS_ICON_CLASS
+      }
+    ],
     documentWidgetFactoryOptions: {
       name: 'VDOM',
       primaryFileType: 'vdom',

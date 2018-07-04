@@ -1,4 +1,3 @@
-
 /*-----------------------------------------------------------------------------
 | Copyright (c) 2014-2017, Jupyter Development Team.
 |
@@ -15,13 +14,12 @@ button.jp-mod-styled {
   line-height: 32px;
   height: 32px;
   padding: 0px 12px;
-  letter-spacing: .8px;
+  letter-spacing: 0.8px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
-
 
 input.jp-mod-styled {
   background: var(--jp-input-background);
@@ -38,16 +36,14 @@ input.jp-mod-styled {
   -moz-appearance: none;
 }
 
-
 input.jp-mod-styled:focus {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
-
 button.jp-mod-styled:focus {
   box-shadow: inset 0 0 0 1px #ffffff;
-  border: rgba(0,0,0,0) solid 1px;
+  border: rgba(0, 0, 0, 0) solid 1px;
 }
 
 .jp-select-wrapper {
@@ -60,13 +56,11 @@ button.jp-mod-styled:focus {
   margin-bottom: 12px;
 }
 
-
 .jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
   border: var(--jp-border-width) solid var(--jp-input-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
   background-color: var(--jp-input-active-background);
 }
-
 
 select.jp-mod-styled:hover {
   background-color: var(--jp-layout-color1);
@@ -75,7 +69,6 @@ select.jp-mod-styled:hover {
   background-color: var(--jp-input-hover-background);
   box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
 }
-
 
 select.jp-mod-styled {
   flex: 1 1 auto;

@@ -1,43 +1,23 @@
-
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Kernel, KernelMessage
-} from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  DocumentWidget
-} from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  INotebookModel
-} from './model';
+import { INotebookModel } from './model';
 
-import {
-  Notebook
-} from './widget';
-
+import { Notebook } from './widget';
 
 /**
  * The class name added to notebook panels.
@@ -55,8 +35,7 @@ const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
  * The widget keeps the document metadata in sync with the current
  * kernel on the context.
  */
-export
-class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
+export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Construct a new notebook panel.
    */
@@ -81,7 +60,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         }
       }
     });
-
   }
 
   /**
@@ -130,7 +108,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     return this.content ? this.content.model : null;
   }
 
-
   /**
    * Dispose of the resources used by the widget.
    */
@@ -152,7 +129,10 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  private _onKernelChanged(sender: any, kernel: Kernel.IKernelConnection): void {
+  private _onKernelChanged(
+    sender: any,
+    kernel: Kernel.IKernelConnection
+  ): void {
     if (!this.model || !kernel) {
       return;
     }
@@ -190,7 +170,6 @@ class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   private _activated = new Signal<this, void>(this);
 }
 
-
 /**
  * A namespace for `NotebookPanel` statics.
  */
@@ -198,20 +177,18 @@ export namespace NotebookPanel {
   /**
    * A content factory interface for NotebookPanel.
    */
-  export
-  interface IContentFactory extends Notebook.IContentFactory {
+  export interface IContentFactory extends Notebook.IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook;
-
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory extends Notebook.ContentFactory implements IContentFactory {
+  export class ContentFactory extends Notebook.ContentFactory
+    implements IContentFactory {
     /**
      * Create a new content area for the panel.
      */
@@ -223,14 +200,14 @@ export namespace NotebookPanel {
   /**
    * Default content factory for the notebook panel.
    */
-  export
-  const defaultContentFactory: ContentFactory = new ContentFactory();
+  export const defaultContentFactory: ContentFactory = new ContentFactory();
 
   /* tslint:disable */
   /**
    * The notebook renderer token.
    */
-  export
-  const IContentFactory = new Token<IContentFactory>('@jupyterlab/notebook:IContentFactory');
+  export const IContentFactory = new Token<IContentFactory>(
+    '@jupyterlab/notebook:IContentFactory'
+  );
   /* tslint:enable */
 }

@@ -3,25 +3,15 @@
 
 import expect = require('expect.js');
 
-import {
-  TerminalSession
-} from '@jupyterlab/services';
+import { TerminalSession } from '@jupyterlab/services';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  Terminal
-} from '@jupyterlab/terminal';
-
+import { Terminal } from '@jupyterlab/terminal';
 
 class LogTerminal extends Terminal {
-
   methods: string[] = [];
 
   protected onAfterAttach(msg: Message): void {
@@ -53,24 +43,22 @@ class LogTerminal extends Terminal {
     super.onActivateRequest(msg);
     this.methods.push('onActivateRequest');
   }
-
 }
 
-
 describe('terminal/index', () => {
-
   describe('Terminal', () => {
-
     let widget: LogTerminal;
     let session: TerminalSession.ISession;
 
-    before((done) => {
-      TerminalSession.startNew().then(s => {
-        session = s;
-      }).then(done, done);
+    before(done => {
+      TerminalSession.startNew()
+        .then(s => {
+          session = s;
+        })
+        .then(done, done);
     });
 
-    beforeEach((done) => {
+    beforeEach(done => {
       widget = new LogTerminal();
       Widget.attach(widget, document.body);
       requestAnimationFrame(() => {
@@ -83,15 +71,12 @@ describe('terminal/index', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should create a terminal widget', () => {
         expect(widget).to.be.a(Terminal);
       });
-
     });
 
     describe('#session', () => {
-
       it('should be `null` by default', () => {
         expect(widget.session).to.be(null);
       });
@@ -99,20 +84,20 @@ describe('terminal/index', () => {
       it('should set the title when ready', function(done) {
         widget.session = session;
         expect(widget.session).to.be(session);
-        session.ready.then(() => {
-          expect(widget.title.label).to.contain(session.name);
-        }).then(done, done);
+        session.ready
+          .then(() => {
+            expect(widget.title.label).to.contain(session.name);
+          })
+          .then(done, done);
       });
-
     });
 
     describe('#fontSize', () => {
-
       it('should be 13 by default', () => {
         expect(widget.fontSize).to.be(13);
       });
 
-      it('should trigger an update request', (done) => {
+      it('should trigger an update request', done => {
         widget.fontSize = 14;
         expect(widget.fontSize).to.be(14);
         requestAnimationFrame(() => {
@@ -120,11 +105,9 @@ describe('terminal/index', () => {
           done();
         });
       });
-
     });
 
     describe('#theme', () => {
-
       it('should be dark by default', () => {
         expect(widget.theme).to.be('dark');
       });
@@ -133,11 +116,9 @@ describe('terminal/index', () => {
         widget.theme = 'light';
         expect(widget.theme).to.be('light');
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the widget', () => {
         expect(widget.isDisposed).to.be(false);
         widget.dispose();
@@ -145,30 +126,24 @@ describe('terminal/index', () => {
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
-
     });
 
     describe('#refresh()', () => {
-
-      it('should refresh the widget', (done) => {
+      it('should refresh the widget', done => {
         widget.session = session;
         widget.refresh().then(done, done);
       });
-
     });
 
     describe('#processMessage()', () => {
-
       it('should handle fit requests', () => {
         widget.processMessage(Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onFitRequest');
       });
-
     });
 
     describe('#onAfterAttach()', () => {
-
-      it('should post an update request', (done) => {
+      it('should post an update request', done => {
         widget.session = session;
         Widget.detach(widget);
         Widget.attach(widget, document.body);
@@ -177,12 +152,10 @@ describe('terminal/index', () => {
           done();
         });
       });
-
     });
 
     describe('#onAfterShow()', () => {
-
-      it('should post an update request', (done) => {
+      it('should post an update request', done => {
         widget.session = session;
         widget.hide();
         Widget.detach(widget);
@@ -196,12 +169,10 @@ describe('terminal/index', () => {
           });
         });
       });
-
     });
 
     describe('#onResize()', () => {
-
-      it('should trigger an update request', (done) => {
+      it('should trigger an update request', done => {
         let msg = Widget.ResizeMessage.UnknownSize;
         MessageLoop.sendMessage(widget, msg);
         expect(widget.methods).to.contain('onResize');
@@ -210,11 +181,9 @@ describe('terminal/index', () => {
           done();
         });
       });
-
     });
 
     describe('#onUpdateRequest()', () => {
-
       it('should set the style of the terminal', () => {
         Widget.detach(widget);
         Widget.attach(widget, document.body);
@@ -223,20 +192,16 @@ describe('terminal/index', () => {
         let style = window.getComputedStyle(widget.node);
         expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
       });
-
     });
 
     describe('#onFitRequest', () => {
-
       it('should send a resize request', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.FitRequest);
         expect(widget.methods).to.contain('onResize');
       });
-
     });
 
     describe('#onActivateRequest', () => {
-
       it('should focus the terminal element', () => {
         Widget.detach(widget);
         Widget.attach(widget, document.body);
@@ -245,9 +210,6 @@ describe('terminal/index', () => {
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.node.contains(document.activeElement)).to.be(true);
       });
-
     });
-
   });
-
 });

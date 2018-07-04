@@ -1,28 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  DataConnector
-} from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/coreutils';
 
-import {
- KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
-import {
-  InspectionHandler
-} from './handler';
-
+import { InspectionHandler } from './handler';
 
 /**
  * The default connector for making inspection requests from the Jupyter API.
  */
-export
-class KernelConnector extends DataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest> {
+export class KernelConnector extends DataConnector<
+  InspectionHandler.IReply,
+  void,
+  InspectionHandler.IRequest
+> {
   /**
    * Create a new kernel connector for inspection requests.
    *
@@ -38,7 +32,9 @@ class KernelConnector extends DataConnector<InspectionHandler.IReply, void, Insp
    *
    * @param request - The inspection request text and details.
    */
-  fetch(request: InspectionHandler.IRequest): Promise<InspectionHandler.IReply> {
+  fetch(
+    request: InspectionHandler.IRequest
+  ): Promise<InspectionHandler.IReply> {
     const kernel = this._session.kernel;
 
     if (!kernel) {
@@ -65,17 +61,14 @@ class KernelConnector extends DataConnector<InspectionHandler.IReply, void, Insp
   private _session: IClientSession;
 }
 
-
 /**
  * A namespace for kernel connector statics.
  */
-export
-namespace KernelConnector {
+export namespace KernelConnector {
   /**
    * The instantiation options for an inspection handler.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The session used to make API requests to the kernel.
      */

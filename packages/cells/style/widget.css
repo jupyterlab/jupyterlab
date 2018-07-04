@@ -3,22 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 /*-----------------------------------------------------------------------------
 | Private CSS variables
 |----------------------------------------------------------------------------*/
-
 
 :root {
   --jp-private-cell-scrolling-output-offset: 5px;
 }
 
-
-
 /*-----------------------------------------------------------------------------
 | Cell
 |----------------------------------------------------------------------------*/
-
 
 .jp-Cell {
   padding: var(--jp-cell-padding);
@@ -28,13 +23,12 @@
   background: transparent;
 }
 
-
 /*-----------------------------------------------------------------------------
 | Common input/output
 |----------------------------------------------------------------------------*/
 
-
-.jp-Cell-inputWrapper, .jp-Cell-outputWrapper  {
+.jp-Cell-inputWrapper,
+.jp-Cell-outputWrapper {
   display: flex;
   flex-direction: row;
   padding: 0px;
@@ -43,17 +37,15 @@
   overflow: visible;
 }
 
-
 /* Only input/output areas inside cells */
-.jp-Cell-inputArea, .jp-Cell-outputArea {
+.jp-Cell-inputArea,
+.jp-Cell-outputArea {
   flex: 1 1 auto;
 }
-
 
 /*-----------------------------------------------------------------------------
 | Collapser
 |----------------------------------------------------------------------------*/
-
 
 /* Make the output collapser disappear when there is not output, but do so
  * in a manner that leaves it in the layout and preserves its width.
@@ -63,22 +55,18 @@
   background: transparent !important;
 }
 
-
 .jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputCollapser {
   min-height: var(--jp-cell-collapser-min-height);
 }
-
 
 /*-----------------------------------------------------------------------------
 | Output
 |----------------------------------------------------------------------------*/
 
-
 /* Put a space between input and output when there IS output */
 .jp-Cell:not(.jp-mod-noOutputs) .jp-Cell-outputWrapper {
   margin-top: 5px;
 }
-
 
 /* Text output with the Out[] prompt needs a top padding to match the
  * alignment of the Out[] prompt itself.
@@ -87,30 +75,28 @@
   padding-top: var(--jp-code-padding);
 }
 
-
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
   overflow-y: auto;
   max-height: 200px;
-  box-shadow: inset 0 0 6px 2px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 6px 2px rgba(0, 0, 0, 0.3);
   margin-left: var(--jp-private-cell-scrolling-output-offset);
 }
 
-
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-prompt {
-  flex: 0 0 calc( var(--jp-cell-prompt-width) - var(--jp-private-cell-scrolling-output-offset) );
+  flex: 0 0
+    calc(
+      var(--jp-cell-prompt-width) -
+        var(--jp-private-cell-scrolling-output-offset)
+    );
 }
-
 
 /*-----------------------------------------------------------------------------
 | CodeCell
 |----------------------------------------------------------------------------*/
 
-
-
 /*-----------------------------------------------------------------------------
 | MarkdownCell
 |----------------------------------------------------------------------------*/
-
 
 .jp-MarkdownOutput {
   flex: 1 1 auto;
@@ -118,7 +104,6 @@
   margin-bottom: 0;
   padding-left: var(--jp-code-padding);
 }
-
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: visible;

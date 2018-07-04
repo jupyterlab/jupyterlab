@@ -1,29 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Token
-} from '@phosphor/coreutils';
-
+import { Token } from '@phosphor/coreutils';
 
 /* tslint:disable */
 /**
  * The main menu token.
  */
-export
-const ISplashScreen = new Token<ISplashScreen>('@jupyterlab/apputils:ISplashScreen');
+export const ISplashScreen = new Token<ISplashScreen>(
+  '@jupyterlab/apputils:ISplashScreen'
+);
 /* tslint:enable */
-
 
 /**
  * The interface for an application splash screen.
  */
-export
-interface ISplashScreen {
+export interface ISplashScreen {
   /**
    * Show the application splash screen.
    *

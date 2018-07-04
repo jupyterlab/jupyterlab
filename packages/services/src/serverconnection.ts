@@ -1,10 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PageConfig, URLExt
-} from '@jupyterlab/coreutils';
-
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 /**
  * Handle the default `fetch` and `WebSocket` providers.
@@ -33,7 +30,6 @@ if (typeof window === 'undefined') {
   WEBSOCKET = WebSocket;
 }
 
-
 /**
  * The namespace for ServerConnection functions.
  *
@@ -48,59 +44,60 @@ if (typeof window === 'undefined') {
  * A content type of `'application/json'` is added when using authentication
  * and there is no body data to allow the server to prevent malicious forms.
  */
-export
-namespace ServerConnection {
+export namespace ServerConnection {
   /**
    * A Jupyter server settings object.
    * Note that all of the settings are optional when passed to
    * [[makeSettings]].  The default settings are given in [[defaultSettings]].
    */
-  export
-  interface ISettings {
-     /**
-      * The base url of the server.
-      */
-     readonly baseUrl: string;
+  export interface ISettings {
+    /**
+     * The base url of the server.
+     */
+    readonly baseUrl: string;
 
-     /**
-      * The page url of the JupyterLab application.
-      */
-     readonly pageUrl: string;
+    /**
+     * The page url of the JupyterLab application.
+     */
+    readonly pageUrl: string;
 
-     /**
-      * The base ws url of the server.
-      */
-     readonly wsUrl: string;
+    /**
+     * The base ws url of the server.
+     */
+    readonly wsUrl: string;
 
-     /**
-      * The default request init options.
-      */
-     readonly init: RequestInit;
+    /**
+     * The default request init options.
+     */
+    readonly init: RequestInit;
 
-     /**
-      * The authentication token for requests.  Use an empty string to disable.
-      */
-     readonly token: string;
+    /**
+     * The authentication token for requests.  Use an empty string to disable.
+     */
+    readonly token: string;
 
-     /**
-      * The `fetch` method to use.
-      */
-     readonly fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+    /**
+     * The `fetch` method to use.
+     */
+    readonly fetch: (
+      input: RequestInfo,
+      init?: RequestInit
+    ) => Promise<Response>;
 
-     /**
-      * The `Request` object constructor.
-      */
-     readonly Request: typeof Request;
+    /**
+     * The `Request` object constructor.
+     */
+    readonly Request: typeof Request;
 
-     /**
-      * The `Headers` object constructor.
-      */
-     readonly Headers: typeof Headers;
+    /**
+     * The `Headers` object constructor.
+     */
+    readonly Headers: typeof Headers;
 
-     /**
-      * The `WebSocket` object constructor.
-      */
-     readonly WebSocket: typeof WebSocket;
+    /**
+     * The `WebSocket` object constructor.
+     */
+    readonly WebSocket: typeof WebSocket;
   }
 
   /**
@@ -110,8 +107,7 @@ namespace ServerConnection {
    *
    * @returns The full settings object.
    */
-  export
-  function makeSettings(options?: Partial<ISettings>) {
+  export function makeSettings(options?: Partial<ISettings>) {
     return Private.makeSettings(options);
   }
 
@@ -135,23 +131,25 @@ namespace ServerConnection {
    * If there is no body data, we set the content type to `application/json`
    * because it is required by the Notebook server.
    */
-  export
-  function makeRequest(url: string, init: RequestInit, settings: ISettings): Promise<Response> {
+  export function makeRequest(
+    url: string,
+    init: RequestInit,
+    settings: ISettings
+  ): Promise<Response> {
     return Private.handleRequest(url, init, settings);
   }
 
   /**
    * A wrapped error for a fetch response.
    */
-  export
-  class ResponseError extends Error {
+  export class ResponseError extends Error {
     /**
      * Create a new response error.
      */
     constructor(response: Response, message?: string) {
-      message = (message ||
-        `Invalid response: ${response.status} ${response.statusText}`
-      );
+      message =
+        message ||
+        `Invalid response: ${response.status} ${response.statusText}`;
       super(message);
       this.response = response;
     }
@@ -165,8 +163,7 @@ namespace ServerConnection {
   /**
    * A wrapped error for a network error.
    */
-  export
-  class NetworkError extends TypeError {
+  export class NetworkError extends TypeError {
     /**
      * Create a new network error.
      */
@@ -179,20 +176,18 @@ namespace ServerConnection {
   /**
    * The default settings.
    */
-  export
-  const defaultSettings: ServerConnection.ISettings = {
+  export const defaultSettings: ServerConnection.ISettings = {
     baseUrl: PageConfig.getBaseUrl(),
     pageUrl: PageConfig.getOption('pageUrl'),
     wsUrl: PageConfig.getWsUrl(),
     token: PageConfig.getToken(),
-    init: { 'cache': 'no-store', 'credentials': 'same-origin' },
+    init: { cache: 'no-store', credentials: 'same-origin' },
     fetch: FETCH,
     Headers: HEADERS,
     Request: REQUEST,
     WebSocket: WEBSOCKET
   };
 }
-
 
 /**
  * The namespace for module private data.
@@ -201,8 +196,9 @@ namespace Private {
   /**
    * Handle the server connection settings, returning a new value.
    */
-  export
-  function makeSettings(options: Partial<ServerConnection.ISettings> = {}): ServerConnection.ISettings {
+  export function makeSettings(
+    options: Partial<ServerConnection.ISettings> = {}
+  ): ServerConnection.ISettings {
     let extra: Partial<ServerConnection.ISettings> = {};
     if (options.baseUrl && !options.wsUrl) {
       // Setting baseUrl to https://host... sets wsUrl to wss://host...
@@ -217,7 +213,7 @@ namespace Private {
         }
       }
       extra = {
-        wsUrl: 'ws' + baseUrl.slice(4),
+        wsUrl: 'ws' + baseUrl.slice(4)
       };
     }
     return {
@@ -240,9 +236,11 @@ namespace Private {
    * The `url` must start with `settings.baseUrl`.  The `init` settings
    * take precedence over `settings.init`.
    */
-  export
-  function handleRequest(url: string, init: RequestInit, settings: ServerConnection.ISettings): Promise<Response> {
-
+  export function handleRequest(
+    url: string,
+    init: RequestInit,
+    settings: ServerConnection.ISettings
+  ): Promise<Response> {
     // Handle notebook server requests.
     if (url.indexOf(settings.baseUrl) !== 0) {
       throw new Error('Can only be used for notebook server requests');
@@ -253,7 +251,7 @@ namespace Private {
     let cache = init.cache || settings.init.cache;
     if (cache === 'no-store') {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
-      url += ((/\?/).test(url) ? '&' : '?') + (new Date()).getTime();
+      url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
     }
 
     let request = new settings.Request(url, { ...settings.init, ...init });

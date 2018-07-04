@@ -1,14 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ToolbarButton, showErrorMessage
-} from '@jupyterlab/apputils';
+import { ToolbarButton, showErrorMessage } from '@jupyterlab/apputils';
 
-import {
-  FileBrowserModel
-} from './model';
-
+import { FileBrowserModel } from './model';
 
 /**
  * The class name added to a button content node.
@@ -35,12 +30,10 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
  */
 const UPLOAD_CLASS = 'jp-id-upload';
 
-
 /**
  * A widget which provides an upload button.
  */
-export
-class Uploader extends ToolbarButton {
+export class Uploader extends ToolbarButton {
   /**
    * Construct a new file browser buttons widget.
    */
@@ -55,7 +48,8 @@ class Uploader extends ToolbarButton {
     let uploadContent = document.createElement('span');
     let uploadIcon = document.createElement('span');
     uploadContent.className = CONTENT_CLASS;
-    uploadIcon.className = ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_UPLOAD;
+    uploadIcon.className =
+      ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_UPLOAD;
     uploadContent.appendChild(uploadIcon);
     this.node.appendChild(uploadContent);
     this.model = options.model;
@@ -77,7 +71,7 @@ class Uploader extends ToolbarButton {
     Promise.all(pending).catch(error => {
       showErrorMessage('Upload Error', error);
     });
-  }
+  };
 
   /**
    * The 'click' handler for the input field.
@@ -86,29 +80,25 @@ class Uploader extends ToolbarButton {
     // In order to allow repeated uploads of the same file (with delete in between),
     // we need to clear the input value to trigger a change event.
     this._input.value = '';
-  }
+  };
 
   private _input = Private.createUploadInput();
 }
 
-
 /**
  * The namespace for Uploader class statics.
  */
-export
-namespace Uploader {
+export namespace Uploader {
   /**
    * The options used to create an uploader.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A file browser model instance.
      */
     model: FileBrowserModel;
   }
 }
-
 
 /**
  * The namespace for module private data.
@@ -117,8 +107,7 @@ namespace Private {
   /**
    * Create the upload input node for a file buttons widget.
    */
-  export
-  function createUploadInput(): HTMLInputElement {
+  export function createUploadInput(): HTMLInputElement {
     let input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;

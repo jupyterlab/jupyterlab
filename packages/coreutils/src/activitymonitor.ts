@@ -1,20 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * A class that monitors activity on a signal.
  */
-export
-class ActivityMonitor<Sender, Args> implements IDisposable {
+export class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * Construct a new activity monitor.
    */
@@ -26,7 +20,10 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   /**
    * A signal emitted when activity has ceased.
    */
-  get activityStopped(): ISignal<this, ActivityMonitor.IArguments<Sender, Args>> {
+  get activityStopped(): ISignal<
+    this,
+    ActivityMonitor.IArguments<Sender, Args>
+  > {
     return this._activityStopped;
   }
 
@@ -81,20 +78,20 @@ class ActivityMonitor<Sender, Args> implements IDisposable {
   private _sender: Sender;
   private _args: Args;
   private _isDisposed = false;
-  private _activityStopped = new Signal<this, ActivityMonitor.IArguments<Sender, Args>>(this);
+  private _activityStopped = new Signal<
+    this,
+    ActivityMonitor.IArguments<Sender, Args>
+  >(this);
 }
-
 
 /**
  * The namespace for `ActivityMonitor` statics.
  */
-export
-namespace ActivityMonitor {
+export namespace ActivityMonitor {
   /**
    * The options used to construct a new `ActivityMonitor`.
    */
-  export
-  interface IOptions<Sender, Args> {
+  export interface IOptions<Sender, Args> {
     /**
      * The signal to monitor.
      */
@@ -112,8 +109,7 @@ namespace ActivityMonitor {
    * The argument object for an activity timeout.
    *
    */
-  export
-  interface IArguments<Sender, Args> {
+  export interface IArguments<Sender, Args> {
     /**
      * The most recent sender object.
      */

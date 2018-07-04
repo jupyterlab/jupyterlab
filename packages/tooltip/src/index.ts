@@ -1,62 +1,47 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Kernel
-} from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import  {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import '../style/index.css';
 
 export * from './widget';
 
-
 /* tslint:disable */
 /**
  * The tooltip manager token.
  */
-export
-const ITooltipManager = new Token<ITooltipManager>('@jupyterlab/tooltip:ITooltipManager');
+export const ITooltipManager = new Token<ITooltipManager>(
+  '@jupyterlab/tooltip:ITooltipManager'
+);
 /* tslint:enable */
-
 
 /**
  * A manager to register tooltips with parent widgets.
  */
-export
-interface ITooltipManager {
+export interface ITooltipManager {
   /**
    * Invoke a tooltip.
    */
   invoke(options: ITooltipManager.IOptions): void;
 }
 
-
 /**
  * A namespace for `ICompletionManager` interface specifications.
  */
-export
-namespace ITooltipManager {
+export namespace ITooltipManager {
   /**
    * An interface for tooltip-compatible objects.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The referent anchor the tooltip follows.
      */

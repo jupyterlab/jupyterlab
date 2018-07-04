@@ -1,45 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt, IIterator, iter
-} from '@phosphor/algorithm';
+import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Kernel
-} from '../kernel';
+import { Kernel } from '../kernel';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  Session
-} from './session';
-
+import { Session } from './session';
 
 /**
  * An implementation of a session manager.
  */
-export
-class SessionManager implements Session.IManager {
+export class SessionManager implements Session.IManager {
   /**
    * Construct a new session manager.
    *
    * @param options - The default options for each session.
    */
   constructor(options: SessionManager.IOptions = {}) {
-    this.serverSettings = (
-      options.serverSettings || ServerConnection.makeSettings()
-    );
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
     this._readyPromise = this._refreshSpecs().then(() => {
@@ -182,13 +167,17 @@ class SessionManager implements Session.IManager {
    * @returns A promise that resolves when the relevant sessions are stopped.
    */
   stopIfNeeded(path: string): Promise<void> {
-    return Session.listRunning(this.serverSettings).then(sessions => {
-      const matches = sessions.filter(value => value.path === path);
-      if (matches.length === 1) {
-        const id = matches[0].id;
-        return this.shutdown(id).catch(() => { /* no-op */ });
-      }
-    }).catch(() => Promise.resolve(void 0)); // Always succeed.
+    return Session.listRunning(this.serverSettings)
+      .then(sessions => {
+        const matches = sessions.filter(value => value.path === path);
+        if (matches.length === 1) {
+          const id = matches[0].id;
+          return this.shutdown(id).catch(() => {
+            /* no-op */
+          });
+        }
+      })
+      .catch(() => Promise.resolve(void 0)); // Always succeed.
   }
 
   /**
@@ -234,7 +223,9 @@ class SessionManager implements Session.IManager {
           toRemove.push(s);
         }
       });
-      toRemove.forEach(s => { this._sessions.delete(s); });
+      toRemove.forEach(s => {
+        this._sessions.delete(s);
+      });
     });
   }
 
@@ -252,16 +243,22 @@ class SessionManager implements Session.IManager {
     }
 
     return this._refreshRunning().then(() => {
-      return Promise.all(models.map(model => {
-        return Session.shutdown(model.id, this.serverSettings).then(() => {
-          let toRemove: Session.ISession[] = [];
-          this._sessions.forEach(s => {
-            s.dispose();
-            toRemove.push(s);
+      return Promise.all(
+        models.map(model => {
+          return Session.shutdown(model.id, this.serverSettings).then(() => {
+            let toRemove: Session.ISession[] = [];
+            this._sessions.forEach(s => {
+              s.dispose();
+              toRemove.push(s);
+            });
+            toRemove.forEach(s => {
+              this._sessions.delete(s);
+            });
           });
-          toRemove.forEach(s => { this._sessions.delete(s); });
-        });
-      })).then(() => { return undefined; });
+        })
+      ).then(() => {
+        return undefined;
+      });
     });
   }
 
@@ -287,7 +284,7 @@ class SessionManager implements Session.IManager {
       this._models.push(session.model);
       this._runningChanged.emit(this._models.slice());
     }
-    session.terminated.connect((s) => {
+    session.terminated.connect(s => {
       this._onTerminated(id);
     });
     session.propertyChanged.connect((sender, prop) => {
@@ -302,7 +299,10 @@ class SessionManager implements Session.IManager {
    * Handle a change to a session.
    */
   private _onChanged(model: Session.IModel): void {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === model.id);
+    let index = ArrayExt.findFirstIndex(
+      this._models,
+      value => value.id === model.id
+    );
     if (index !== -1) {
       this._models[index] = model;
       this._runningChanged.emit(this._models.slice());
@@ -335,7 +335,9 @@ class SessionManager implements Session.IManager {
             toRemove.push(s);
           }
         });
-        toRemove.forEach(s => { this._sessions.delete(s); });
+        toRemove.forEach(s => {
+          this._sessions.delete(s);
+        });
         this._models = models.slice();
         this._runningChanged.emit(models);
       }
@@ -353,18 +355,14 @@ class SessionManager implements Session.IManager {
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
 }
 
-
-
 /**
  * The namespace for `SessionManager` class statics.
  */
-export
-namespace SessionManager {
+export namespace SessionManager {
   /**
    * The options used to initialize a SessionManager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings for the manager.
      */

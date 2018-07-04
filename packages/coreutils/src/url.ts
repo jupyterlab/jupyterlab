@@ -1,17 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import urlparse from 'url-parse';
 
 /**
  * The namespace for URL-related functions.
  */
-export
-namespace URLExt {
+export namespace URLExt {
   /**
    * Parse a url into a URL object.
    *
@@ -19,8 +16,7 @@ namespace URLExt {
    *
    * @returns A URL object.
    */
-  export
-  function parse(url: string): IUrl {
+  export function parse(url: string): IUrl {
     if (typeof document !== 'undefined') {
       let a = document.createElement('a');
       a.href = url;
@@ -36,8 +32,7 @@ namespace URLExt {
    *
    * @returns the joined url.
    */
-  export
-  function join(...parts: string[]): string {
+  export function join(...parts: string[]): string {
     // Adapted from url-join.
     // Copyright (c) 2016 José F. Romaniello, MIT License.
     // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
@@ -69,8 +64,7 @@ namespace URLExt {
    * Preserves the `'/'` separators.
    * Should not include the base url, since all parts are escaped.
    */
-  export
-  function encodeParts(url: string): string {
+  export function encodeParts(url: string): string {
     return join(...url.split('/').map(encodeURIComponent));
   }
 
@@ -84,33 +78,44 @@ namespace URLExt {
    * #### Notes
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export
-  function objectToQueryString(value: JSONObject): string {
+  export function objectToQueryString(value: JSONObject): string {
     const keys = Object.keys(value);
 
     if (!keys.length) {
       return '';
     }
 
-    return '?' + keys.map(key => {
-      const content = encodeURIComponent(String(value[key]));
+    return (
+      '?' +
+      keys
+        .map(key => {
+          const content = encodeURIComponent(String(value[key]));
 
-      return key + (content ? '=' + content : '');
-    }).join('&');
+          return key + (content ? '=' + content : '');
+        })
+        .join('&')
+    );
   }
 
   /**
    * Return a parsed object that represents the values in a query string.
    */
-  export
-  function queryStringToObject(value: string): { [key: string]: string } {
-    return value.replace(/^\?/, '').split('&').reduce((acc, val) => {
-      const [key, value] = val.split('=');
+  export function queryStringToObject(
+    value: string
+  ): { [key: string]: string } {
+    return value
+      .replace(/^\?/, '')
+      .split('&')
+      .reduce(
+        (acc, val) => {
+          const [key, value] = val.split('=');
 
-      acc[key] = decodeURIComponent(value || '');
+          acc[key] = decodeURIComponent(value || '');
 
-      return acc;
-    }, { } as { [key: string]: string });
+          return acc;
+        },
+        {} as { [key: string]: string }
+      );
   }
 
   /**
@@ -120,8 +125,7 @@ namespace URLExt {
    * This function returns `false` for any fully qualified url, including
    * `data:`, `file:`, and `//` protocol URLs.
    */
-  export
-  function isLocal(url: string): boolean {
+  export function isLocal(url: string): boolean {
     const { protocol } = parse(url);
 
     return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
@@ -169,7 +173,6 @@ namespace URLExt {
      * `(#)` character
      */
     hash?: string;
-
 
     /**
      * The search element, including leading question mark (`'?'`), if any,

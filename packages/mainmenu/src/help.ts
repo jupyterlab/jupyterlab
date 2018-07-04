@@ -1,23 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Kernel
-} from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
-import {
-  IJupyterLabMenu, IMenuExtender, JupyterLabMenu
-} from './labmenu';
+import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 
 /**
  * An interface for a Help menu.
  */
-export
-interface IHelpMenu extends IJupyterLabMenu {
+export interface IHelpMenu extends IJupyterLabMenu {
   /**
    * A set of kernel users for the help menu.
    * This is used to populate additional help
@@ -29,8 +22,7 @@ interface IHelpMenu extends IJupyterLabMenu {
 /**
  * An extensible Help menu for the application.
  */
-export
-class HelpMenu extends JupyterLabMenu implements IHelpMenu {
+export class HelpMenu extends JupyterLabMenu implements IHelpMenu {
   /**
    * Construct the help menu.
    */
@@ -51,14 +43,12 @@ class HelpMenu extends JupyterLabMenu implements IHelpMenu {
 /**
  * Namespace for IHelpMenu
  */
-export
-namespace IHelpMenu {
+export namespace IHelpMenu {
   /**
    * Interface for a Kernel user to register itself
    * with the IHelpMenu's semantic extension points.
    */
-  export
-  interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
+  export interface IKernelUser<T extends Widget> extends IMenuExtender<T> {
     /**
      * A function to get the kernel for a widget.
      */

@@ -1,33 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import '../style/index.css';
 
 /**
  * The MIME type for PDF.
  */
-export
-const MIME_TYPE = 'application/pdf';
+export const MIME_TYPE = 'application/pdf';
 
-export
-const PDF_CLASS = 'jp-PDFViewer';
+export const PDF_CLASS = 'jp-PDFViewer';
 
-export
-const PDF_CONTAINER_CLASS = 'jp-PDFContainer';
+export const PDF_CONTAINER_CLASS = 'jp-PDFContainer';
 
 /**
  * A class for rendering a PDF document.
  */
-export
-class RenderedPDF extends Widget implements IRenderMime.IRenderer {
+export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   constructor() {
     super({ node: Private.createNode() });
   }
@@ -51,7 +43,9 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     if (oldUrl) {
       try {
         URL.revokeObjectURL(oldUrl);
-      } catch (error) { /* no-op */ }
+      } catch (error) {
+        /* no-op */
+      }
     }
     return Promise.resolve(void 0);
   }
@@ -62,38 +56,39 @@ class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   dispose() {
     try {
       URL.revokeObjectURL(this._objectUrl);
-    } catch (error) { /* no-op */ }
+    } catch (error) {
+      /* no-op */
+    }
     super.dispose();
   }
 
   private _objectUrl = '';
 }
 
-
 /**
  * A mime renderer factory for PDF data.
  */
-export
-const rendererFactory: IRenderMime.IRendererFactory = {
+export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: [MIME_TYPE],
   defaultRank: 75,
   createRenderer: options => new RenderedPDF()
 };
 
-
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     id: '@jupyterlab/pdf-extension:factory',
     rendererFactory,
     dataType: 'string',
-    fileTypes: [{
-      name: 'PDF',
-      displayName: 'PDF',
-      fileFormat: 'base64',
-      mimeTypes: [MIME_TYPE],
-      extensions: ['.pdf']
-    }],
+    fileTypes: [
+      {
+        name: 'PDF',
+        displayName: 'PDF',
+        fileFormat: 'base64',
+        mimeTypes: [MIME_TYPE],
+        extensions: ['.pdf']
+      }
+    ],
     documentWidgetFactoryOptions: {
       name: 'PDF',
       modelName: 'base64',
@@ -106,7 +101,6 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
 
 export default extensions;
 
-
 /**
  * A namespace for PDF widget private data.
  */
@@ -114,8 +108,7 @@ namespace Private {
   /**
    * Create the node for the PDF widget.
    */
-  export
-  function createNode(): HTMLElement {
+  export function createNode(): HTMLElement {
     let node = document.createElement('div');
     node.className = PDF_CONTAINER_CLASS;
     let pdf = document.createElement('embed');
@@ -138,8 +131,11 @@ namespace Private {
    *
    * @returns a Blob for the data.
    */
-  export
-  function b64toBlob(b64Data: string, contentType: string = '', sliceSize: number = 512): Blob {
+  export function b64toBlob(
+    b64Data: string,
+    contentType: string = '',
+    sliceSize: number = 512
+  ): Blob {
     const byteCharacters = atob(b64Data);
     let byteArrays: Uint8Array[] = [];
 
@@ -154,6 +150,6 @@ namespace Private {
       byteArrays.push(byteArray);
     }
 
-    return new Blob(byteArrays, {type: contentType});
+    return new Blob(byteArrays, { type: contentType });
   }
 }

@@ -3,40 +3,30 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  CommandPalette
-} from '@phosphor/widgets';
-
+import { CommandPalette } from '@phosphor/widgets';
 
 /* tslint:disable */
 /**
  * The command palette token.
  */
-export
-const ICommandPalette = new Token<ICommandPalette>('@jupyterlab/apputils:ICommandPalette');
+export const ICommandPalette = new Token<ICommandPalette>(
+  '@jupyterlab/apputils:ICommandPalette'
+);
 /* tslint:enable */
-
 
 /**
  * The options for creating a command palette item.
  */
-export
-interface IPaletteItem extends CommandPalette.IItemOptions {}
-
+export interface IPaletteItem extends CommandPalette.IItemOptions {}
 
 /**
  * The interface for a Jupyter Lab command palette.
  */
-export
-interface ICommandPalette {
+export interface ICommandPalette {
   /**
    * The placeholder text of the command palette's search input.
    */

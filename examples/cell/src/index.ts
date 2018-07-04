@@ -1,42 +1,33 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto';  // polyfill Promise on IE
+import 'es6-promise/auto'; // polyfill Promise on IE
 import '@jupyterlab/theme-light-extension/static/embed.css';
 import '../index.css';
 
-import {
-  ClientSession, Toolbar
-} from '@jupyterlab/apputils';
+import { ClientSession, Toolbar } from '@jupyterlab/apputils';
+
+import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
+
+import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
 
 import {
-  CodeCellModel, CodeCell
-} from '@jupyterlab/cells';
-
-import {
-  CodeMirrorMimeTypeService
-} from '@jupyterlab/codemirror';
-
-import {
-  CompleterModel, Completer, CompletionHandler, KernelConnector
+  CompleterModel,
+  Completer,
+  CompletionHandler,
+  KernelConnector
 } from '@jupyterlab/completer';
 
 import {
-  RenderMimeRegistry, standardRendererFactories as initialFactories
+  RenderMimeRegistry,
+  standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-import {
-  SessionManager
-} from '@jupyterlab/services';
+import { SessionManager } from '@jupyterlab/services';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  BoxPanel, Widget
-} from '@phosphor/widgets';
-
+import { BoxPanel, Widget } from '@phosphor/widgets';
 
 function main(): void {
   const manager = new SessionManager();
@@ -48,9 +39,13 @@ function main(): void {
   const useCapture = true;
 
   // Setup the keydown listener for the document.
-  document.addEventListener('keydown', event => {
-    commands.processKeydownEvent(event);
-  }, useCapture);
+  document.addEventListener(
+    'keydown',
+    event => {
+      commands.processKeydownEvent(event);
+    },
+    useCapture
+  );
 
   // Create the cell widget with a default rendermime instance.
   const rendermime = new RenderMimeRegistry({ initialFactories });
@@ -109,12 +104,16 @@ function main(): void {
   Widget.attach(panel, document.body);
 
   // Handle widget state.
-  window.addEventListener('resize', () => { panel.update(); });
+  window.addEventListener('resize', () => {
+    panel.update();
+  });
   cellWidget.activate();
 
   // Add the commands.
   commands.addCommand('invoke:completer', {
-    execute: () => { handler.invoke(); }
+    execute: () => {
+      handler.invoke();
+    }
   });
   commands.addCommand('run:cell', {
     execute: () => CodeCell.execute(cellWidget, session)
@@ -133,4 +132,3 @@ function main(): void {
 }
 
 window.addEventListener('load', main);
-

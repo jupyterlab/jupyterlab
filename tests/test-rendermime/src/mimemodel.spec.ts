@@ -3,17 +3,11 @@
 
 import expect = require('expect.js');
 
-import {
-  MimeModel
-} from '@jupyterlab/rendermime';
-
+import { MimeModel } from '@jupyterlab/rendermime';
 
 describe('rendermime/mimemodel', () => {
-
   describe('MimeModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new mime model', () => {
         let model = new MimeModel();
         expect(model).to.be.a(MimeModel);
@@ -21,36 +15,29 @@ describe('rendermime/mimemodel', () => {
 
       it('should accept arguments', () => {
         let model = new MimeModel({
-          data: { 'foo': 1},
-          metadata: { 'bar': 'baz' }
+          data: { foo: 1 },
+          metadata: { bar: 'baz' }
         });
         expect(model).to.be.a(MimeModel);
       });
-
     });
 
     describe('#data', () => {
-
       it('should be the data observable map', () => {
         let model = new MimeModel({
-          data: { 'bar': 'baz' }
+          data: { bar: 'baz' }
         });
         expect(model.data['bar']).to.be('baz');
       });
-
     });
 
     describe('#metadata', () => {
-
       it('should be the metadata observable map', () => {
         let model = new MimeModel({
-          metadata: { 'bar': 'baz' }
+          metadata: { bar: 'baz' }
         });
         expect(model.metadata['bar']).to.be('baz');
       });
-
     });
-
   });
-
 });

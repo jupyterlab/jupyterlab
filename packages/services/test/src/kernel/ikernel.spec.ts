@@ -7,22 +7,19 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  JSONObject, PromiseDelegate
-} from '@phosphor/coreutils';
+import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
+
+import { Signal } from '@phosphor/signaling';
+
+import { Kernel, KernelMessage } from '../../../lib/kernel';
 
 import {
-  Signal
-} from '@phosphor/signaling';
-
-import {
-  Kernel, KernelMessage
-} from '../../../lib/kernel';
-
-import {
-  expectFailure, KernelTester, handleRequest, createMsg, testEmission
+  expectFailure,
+  KernelTester,
+  handleRequest,
+  createMsg,
+  testEmission
 } from '../utils';
-
 
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernel;
@@ -49,7 +46,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#terminated', () => {
-
     it('should be emitted when the kernel is shut down', async () => {
       let called = false;
       defaultKernel.terminated.connect((sender, args) => {
@@ -60,11 +56,9 @@ describe('Kernel.IKernel', () => {
       await defaultKernel.shutdown();
       expect(called).to.be(true);
     });
-
   });
 
   context('#statusChanged', () => {
-
     it('should be a signal following the Kernel status', async () => {
       let called = false;
       defaultKernel.statusChanged.connect(() => {
@@ -75,11 +69,9 @@ describe('Kernel.IKernel', () => {
       await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
       expect(called).to.be(true);
     });
-
   });
 
   context('#iopubMessage', async () => {
-
     it('should be emitted for an iopub message', async () => {
       let called = false;
       defaultKernel.iopubMessage.connect((k, msg) => {
@@ -94,7 +86,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const msgId = UUID.uuid4();
       const emission = testEmission(kernel.iopubMessage, {
-        find: (k, msg) => (msg.header.msg_id === msgId)
+        find: (k, msg) => msg.header.msg_id === msgId
       });
       let msg = KernelMessage.createMessage({
         msgType: 'status',
@@ -112,7 +104,9 @@ describe('Kernel.IKernel', () => {
 
   context('#unhandledMessage', () => {
     let tester: KernelTester;
-    beforeEach(() => { tester = new KernelTester(); });
+    beforeEach(() => {
+      tester = new KernelTester();
+    });
     afterEach(async () => {
       await tester.shutdown();
       tester.dispose();
@@ -122,7 +116,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const msgId = UUID.uuid4();
       const emission = testEmission(kernel.unhandledMessage, {
-        find: (k, msg) => (msg.header.msg_id === msgId)
+        find: (k, msg) => msg.header.msg_id === msgId
       });
       let msg = KernelMessage.createShellMessage({
         msgType: 'foo',
@@ -130,7 +124,7 @@ describe('Kernel.IKernel', () => {
         session: tester.serverSessionId,
         msgId
       });
-      msg.parent_header = {session: kernel.clientId};
+      msg.parent_header = { session: kernel.clientId };
       tester.send(msg);
       await emission;
     });
@@ -142,7 +136,9 @@ describe('Kernel.IKernel', () => {
       // The unhandledMessage signal should only emit once for the shell message.
       const msgId = UUID.uuid4();
       const emission = testEmission(kernel.unhandledMessage, {
-        test: (k, msg) => { expect(msg.header.msg_id).to.be(msgId); }
+        test: (k, msg) => {
+          expect(msg.header.msg_id).to.be(msgId);
+        }
       });
 
       // Send an iopub message.
@@ -155,7 +151,7 @@ describe('Kernel.IKernel', () => {
         session: tester.serverSessionId,
         msgId
       });
-      msg.parent_header = {session: kernel.clientId};
+      msg.parent_header = { session: kernel.clientId };
       tester.send(msg);
 
       await emission;
@@ -170,7 +166,9 @@ describe('Kernel.IKernel', () => {
       const msgId = 'message from right session';
       const emission = testEmission(kernel.unhandledMessage, {
         test: (k, msg) => {
-          expect((msg.parent_header as KernelMessage.IHeader).session).to.be(kernel.clientId);
+          expect((msg.parent_header as KernelMessage.IHeader).session).to.be(
+            kernel.clientId
+          );
           expect(msg.header.msg_id).to.be(msgId);
         }
       });
@@ -182,7 +180,7 @@ describe('Kernel.IKernel', () => {
         session: tester.serverSessionId,
         msgId: 'message from wrong session'
       });
-      msg1.parent_header = {session: 'wrong session'};
+      msg1.parent_header = { session: 'wrong session' };
       tester.send(msg1);
 
       // Send a shell message with the right client (parent) session.
@@ -192,17 +190,18 @@ describe('Kernel.IKernel', () => {
         session: tester.serverSessionId,
         msgId: msgId
       });
-      msg2.parent_header = {session: kernel.clientId};
+      msg2.parent_header = { session: kernel.clientId };
       tester.send(msg2);
 
       await emission;
     });
-
   });
 
   context('#anyMessage', () => {
     let tester: KernelTester;
-    beforeEach(() => { tester = new KernelTester(); });
+    beforeEach(() => {
+      tester = new KernelTester();
+    });
     afterEach(async () => {
       await tester.shutdown();
       tester.dispose();
@@ -217,7 +216,7 @@ describe('Kernel.IKernel', () => {
           expect(args.msg.header.msg_id).to.be(msgId);
           expect(args.msg.header.msg_type).to.be('foo');
           expect(args.direction).to.be('recv');
-          }
+        }
       });
 
       let msg = KernelMessage.createShellMessage({
@@ -226,7 +225,7 @@ describe('Kernel.IKernel', () => {
         session: tester.serverSessionId,
         msgId
       });
-      msg.parent_header = {session: kernel.clientId};
+      msg.parent_header = { session: kernel.clientId };
       tester.send(msg);
       await emission;
     });
@@ -253,68 +252,57 @@ describe('Kernel.IKernel', () => {
           expect(args.direction).to.be('send');
         }
       });
-      kernel.sendInputReply({value: 'foo'});
+      kernel.sendInputReply({ value: 'foo' });
       await emission;
     });
-
   });
 
   context('#id', () => {
-
     it('should be a string', () => {
       expect(typeof defaultKernel.id).to.be('string');
     });
-
   });
 
   context('#name', () => {
-
     it('should be a string', () => {
       expect(typeof defaultKernel.name).to.be('string');
     });
-
   });
 
   context('#model', () => {
-
     it('should be an IModel', () => {
       let model = defaultKernel.model;
       expect(typeof model.name).to.be('string');
       expect(typeof model.id).to.be('string');
     });
-
   });
 
   context('#username', () => {
-
     it('should be a string', () => {
       expect(typeof defaultKernel.username).to.be('string');
     });
-
   });
 
   context('#serverSettings', () => {
-
     it('should be the server settings', () => {
-      expect(defaultKernel.serverSettings.baseUrl).to.be(PageConfig.getBaseUrl());
+      expect(defaultKernel.serverSettings.baseUrl).to.be(
+        PageConfig.getBaseUrl()
+      );
     });
-
   });
 
   context('#clientId', () => {
-
     it('should be a string', () => {
       expect(typeof defaultKernel.clientId).to.be('string');
     });
   });
 
   context('#status', () => {
-
     it('should get an idle status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'idle'
       });
-      await defaultKernel.requestExecute({ code: 'a=1'}).done;
+      await defaultKernel.requestExecute({ code: 'a=1' }).done;
       await emission;
     });
 
@@ -384,26 +372,21 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#info', () => {
-
     it('should get the kernel info', () => {
       let name = defaultKernel.info.language_info.name;
       let defaultSpecs = specs.kernelspecs[specs.default];
       expect(name).to.be(defaultSpecs.language);
     });
-
   });
 
   context('#getSpec()', () => {
-
     it('should resolve with the spec', async () => {
       let spec = await defaultKernel.getSpec();
       expect(spec.name).to.be(specs.default);
     });
-
   });
 
   context('#isReady', () => {
-
     it('should test whether the kernel is ready', async () => {
       let kernel = await Kernel.startNew();
       expect(kernel.isReady).to.be(false);
@@ -414,15 +397,12 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#ready', () => {
-
     it('should resolve when the kernel is ready', async () => {
       await defaultKernel.ready;
     });
-
   });
 
   context('#isDisposed', () => {
-
     it('should be true after we dispose of the kernel', () => {
       let kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.isDisposed).to.be(false);
@@ -441,7 +421,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#dispose()', () => {
-
     it('should dispose of the resources held by the kernel', () => {
       let kernel = Kernel.connectTo(defaultKernel.model);
       let future = kernel.requestExecute({ code: 'foo' });
@@ -464,7 +443,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#sendShellMessage()', () => {
-
     it('should send a message to the kernel', async () => {
       const tester = new KernelTester();
       let kernel = await tester.start();
@@ -522,7 +500,10 @@ describe('Kernel.IKernel', () => {
       };
       let encoder = new TextEncoder();
       let data = encoder.encode('hello');
-      let msg = KernelMessage.createShellMessage(options, {}, {}, [data, data.buffer]);
+      let msg = KernelMessage.createShellMessage(options, {}, {}, [
+        data,
+        data.buffer
+      ]);
       kernel.sendShellMessage(msg, true);
       await done;
       await tester.shutdown();
@@ -547,7 +528,9 @@ describe('Kernel.IKernel', () => {
         session: kernel.clientId
       };
       let msg = KernelMessage.createShellMessage(options);
-      expect(() => {kernel.sendShellMessage(msg, true); }).to.throwException(/Kernel is dead/);
+      expect(() => {
+        kernel.sendShellMessage(msg, true);
+      }).to.throwException(/Kernel is dead/);
       await tester.shutdown();
       tester.dispose();
     });
@@ -568,11 +551,13 @@ describe('Kernel.IKernel', () => {
       let future = kernel.sendShellMessage(msg, true);
 
       let newMsg: KernelMessage.IMessage;
-      tester.onMessage((msg) => {
+      tester.onMessage(msg => {
         // trigger onDone
         options.msgType = 'status';
         options.channel = 'iopub';
-        newMsg = KernelMessage.createMessage(options, { execution_state: 'idle' });
+        newMsg = KernelMessage.createMessage(options, {
+          execution_state: 'idle'
+        });
         newMsg.parent_header = msg.header;
         tester.send(newMsg);
 
@@ -591,7 +576,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#interrupt()', () => {
-
     it('should interrupt and resolve with a valid server response', async () => {
       let kernel = await Kernel.startNew();
       await kernel.ready;
@@ -600,13 +584,16 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should throw an error for an invalid response', async () => {
-      handleRequest(defaultKernel, 200,  { id: defaultKernel.id, name: defaultKernel.name });
+      handleRequest(defaultKernel, 200, {
+        id: defaultKernel.id,
+        name: defaultKernel.name
+      });
       let interrupt = defaultKernel.interrupt();
       await expectFailure(interrupt, null, 'Invalid response: 200 OK');
     });
 
     it('should throw an error for an error response', async () => {
-      handleRequest(defaultKernel, 500, { });
+      handleRequest(defaultKernel, 500, {});
       let interrupt = defaultKernel.interrupt();
       await expectFailure(interrupt, null, '');
     });
@@ -627,12 +614,11 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#restart()', () => {
-
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
     it('should restart and resolve with a valid server response', async () => {
-     defaultKernel.restart();
-     await defaultKernel.ready;
+      defaultKernel.restart();
+      await defaultKernel.ready;
     });
 
     it('should fail if the kernel does not restart', async () => {
@@ -644,17 +630,21 @@ describe('Kernel.IKernel', () => {
     it('should throw an error for an invalid response', async () => {
       let kernel = defaultKernel;
       handleRequest(kernel, 205, { id: kernel.id, name: kernel.name });
-      await expectFailure(kernel.restart(), null, 'Invalid response: 205 Reset Content');
+      await expectFailure(
+        kernel.restart(),
+        null,
+        'Invalid response: 205 Reset Content'
+      );
     });
 
     it('should throw an error for an error response', async () => {
-      handleRequest(defaultKernel, 500, { });
+      handleRequest(defaultKernel, 500, {});
       let restart = defaultKernel.restart();
       await expectFailure(restart);
     });
 
     it('should throw an error for an invalid id', async () => {
-      handleRequest(defaultKernel, 200, { });
+      handleRequest(defaultKernel, 200, {});
       let restart = defaultKernel.restart();
       await expectFailure(restart);
     });
@@ -670,11 +660,9 @@ describe('Kernel.IKernel', () => {
       expect(future.isDisposed).to.be(true);
       expect(comm.isDisposed).to.be(true);
     });
-
   });
 
   describe('#reconnect()', () => {
-
     it('should reconnect the websocket', () => {
       return defaultKernel.reconnect();
     });
@@ -694,11 +682,9 @@ describe('Kernel.IKernel', () => {
       await emission;
       await connectedEmission;
     });
-
   });
 
   context('#shutdown()', () => {
-
     it('should shut down and resolve with a valid server response', async () => {
       let kernel = await Kernel.startNew();
       await kernel.shutdown();
@@ -715,12 +701,12 @@ describe('Kernel.IKernel', () => {
 
     it('should handle a 404 error', async () => {
       let kernel = await Kernel.startNew();
-      handleRequest(kernel, 404, { });
+      handleRequest(kernel, 404, {});
       await kernel.shutdown();
     });
 
     it('should throw an error for an error response', async () => {
-      handleRequest(defaultKernel, 500, { });
+      handleRequest(defaultKernel, 500, {});
       let shutdown = defaultKernel.shutdown();
       await expectFailure(shutdown, null, '');
     });
@@ -748,11 +734,9 @@ describe('Kernel.IKernel', () => {
       expect(kernel0.isDisposed).to.be(true);
       expect(kernel1.isDisposed).to.be(true);
     });
-
   });
 
   context('#requestKernelInfo()', () => {
-
     it('should resolve the promise', async () => {
       const msg = await defaultKernel.requestKernelInfo();
       let name = msg.content.language_info.name;
@@ -761,7 +745,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#requestComplete()', () => {
-
     it('should resolve the promise', async () => {
       let options: KernelMessage.ICompleteRequest = {
         code: 'hello',
@@ -790,7 +773,6 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#requestInspect()', () => {
-
     it('should resolve the promise', async () => {
       let options: KernelMessage.IInspectRequest = {
         code: 'hello',
@@ -799,22 +781,18 @@ describe('Kernel.IKernel', () => {
       };
       await defaultKernel.requestInspect(options);
     });
-
   });
 
   context('#requestIsComplete()', () => {
-
     it('should resolve the promise', async () => {
       let options: KernelMessage.IIsCompleteRequest = {
         code: 'hello'
       };
       await defaultKernel.requestIsComplete(options);
     });
-
   });
 
   context('#requestHistory()', () => {
-
     it('should resolve the promise', async () => {
       let options: KernelMessage.IHistoryRequest = {
         output: true,
@@ -825,19 +803,18 @@ describe('Kernel.IKernel', () => {
         stop: 2,
         n: 1,
         pattern: '*',
-        unique: true,
+        unique: true
       };
       await defaultKernel.requestHistory(options);
     });
   });
 
   context('#sendInputReply()', () => {
-
     it('should send an input_reply message', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
       const done = new PromiseDelegate<void>();
-      tester.onMessage((msg) => {
+      tester.onMessage(msg => {
         expect(msg.header.msg_type).to.be('input_reply');
         done.resolve(null);
       });
@@ -857,13 +834,14 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
-      expect(() => { kernel.sendInputReply({ value: 'test' }); }).to.throwException(/Kernel is dead/);
+      expect(() => {
+        kernel.sendInputReply({ value: 'test' });
+      }).to.throwException(/Kernel is dead/);
       tester.dispose();
     });
   });
 
   context('#requestExecute()', () => {
-
     it('should send and handle incoming messages', async () => {
       let newMsg: KernelMessage.IMessage;
       let content: KernelMessage.IExecuteRequest = {
@@ -885,7 +863,7 @@ describe('Kernel.IKernel', () => {
       let future: Kernel.IFuture;
       const tester = new KernelTester();
 
-      tester.onMessage((msg) => {
+      tester.onMessage(msg => {
         expect(msg.channel).to.be('shell');
 
         // send a reply
@@ -912,16 +890,17 @@ describe('Kernel.IKernel', () => {
           tester.send(newMsg);
         };
 
-        future.onIOPub = (ioMsg) => {
+        future.onIOPub = ioMsg => {
           if (ioMsg.header.msg_type === 'stream') {
             // trigger onDone
             options.msgType = 'status';
-            newMsg = KernelMessage.createMessage(options, { execution_state: 'idle' });
+            newMsg = KernelMessage.createMessage(options, {
+              execution_state: 'idle'
+            });
             newMsg.parent_header = msg.header;
             tester.send(newMsg);
           }
         };
-
       });
 
       const kernel = await tester.start();
@@ -947,11 +926,9 @@ describe('Kernel.IKernel', () => {
       future.dispose();
       expect(future.isDisposed).to.be(true);
     });
-
   });
 
   context('#registerMessageHook()', () => {
-
     it('should have the most recently registered hook run first', async () => {
       let options: KernelMessage.IExecuteRequest = {
         code: 'test',
@@ -967,7 +944,7 @@ describe('Kernel.IKernel', () => {
       let kernel: Kernel.IKernel;
 
       const tester = new KernelTester();
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -977,22 +954,23 @@ describe('Kernel.IKernel', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parentHeader.msg_id, async (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, async msg => {
           // Make this hook call asynchronous
           await calls.push('last');
           return true;
         });
 
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('first');
           // not returning should also continue handling
           return void 0;
@@ -1007,7 +985,14 @@ describe('Kernel.IKernel', () => {
       future = kernel.requestExecute(options, false);
       await future.done;
       // the last hook was called for the stream and the status message.
-      expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
+      expect(calls).to.eql([
+        'first',
+        'last',
+        'iopub',
+        'first',
+        'last',
+        'iopub'
+      ]);
       await tester.shutdown();
       tester.dispose();
     });
@@ -1027,7 +1012,7 @@ describe('Kernel.IKernel', () => {
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -1037,21 +1022,22 @@ describe('Kernel.IKernel', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('last');
           return true;
         });
 
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('first');
           return false;
         });
@@ -1084,7 +1070,7 @@ describe('Kernel.IKernel', () => {
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -1094,18 +1080,19 @@ describe('Kernel.IKernel', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('last');
-          kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+          kernel.registerMessageHook(parentHeader.msg_id, msg => {
             calls.push('first');
             return true;
           });
@@ -1139,7 +1126,7 @@ describe('Kernel.IKernel', () => {
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -1149,12 +1136,13 @@ describe('Kernel.IKernel', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
@@ -1163,7 +1151,7 @@ describe('Kernel.IKernel', () => {
           return true;
         };
         kernel.registerMessageHook(parentHeader.msg_id, toDelete);
-        kernel.registerMessageHook(parentHeader.msg_id, (msg) => {
+        kernel.registerMessageHook(parentHeader.msg_id, msg => {
           if (calls.length > 0) {
             // delete the hook the second time around
             kernel.removeMessageHook(parentHeader.msg_id, toDelete);
@@ -1184,11 +1172,9 @@ describe('Kernel.IKernel', () => {
       await tester.shutdown();
       tester.dispose();
     });
-
   });
 
   context('handles messages asynchronously', () => {
-
     // TODO: Also check that messages are canceled appropriately. In particular, when
     // a kernel is restarted, then a message is sent for a comm open from the
     // old session, the comm open should be canceled.
@@ -1252,21 +1238,57 @@ describe('Kernel.IKernel', () => {
       let anyMessageDone = new PromiseDelegate();
       let handlingBlock = new PromiseDelegate();
 
-      tester.onMessage((message) => {
-        tester.onMessage(() => { return; });
+      tester.onMessage(message => {
+        tester.onMessage(() => {
+          return;
+        });
         tester.parentHeader = message.header;
 
         pushIopub(tester.sendStatus('busy', 'busy'));
-        pushIopub(tester.sendStream('stdout', { 'name': 'stdout', 'text': 'foo' }));
-        pushCommOpen(tester.sendCommOpen('comm open', {target_name: 'commtarget', comm_id: 'commid', data: {}}));
-        pushIopub(tester.sendDisplayData('display 1', {data: {}, metadata: {}}));
-        pushCommMsg(tester.sendCommMsg('comm 1', {comm_id: 'commid', data: {}}));
-        pushCommMsg(tester.sendCommMsg('comm 2', {comm_id: 'commid', data: {}}));
-        pushCommClose(tester.sendCommClose('comm close', {comm_id: 'commid', data: {}}));
-        pushStdin(tester.sendInputRequest('stdin', {prompt: '', password: false}));
-        pushIopub(tester.sendDisplayData('display 2', {data: {}, metadata: {}, transient: {display_id: 'displayid'} }));
-        pushIopub(tester.sendUpdateDisplayData('update display', {data: {}, metadata: {}, transient: {display_id: 'displayid'}}));
-        pushIopub(tester.sendExecuteResult('execute result', {execution_count: 1, data: {}, metadata: {}}));
+        pushIopub(tester.sendStream('stdout', { name: 'stdout', text: 'foo' }));
+        pushCommOpen(
+          tester.sendCommOpen('comm open', {
+            target_name: 'commtarget',
+            comm_id: 'commid',
+            data: {}
+          })
+        );
+        pushIopub(
+          tester.sendDisplayData('display 1', { data: {}, metadata: {} })
+        );
+        pushCommMsg(
+          tester.sendCommMsg('comm 1', { comm_id: 'commid', data: {} })
+        );
+        pushCommMsg(
+          tester.sendCommMsg('comm 2', { comm_id: 'commid', data: {} })
+        );
+        pushCommClose(
+          tester.sendCommClose('comm close', { comm_id: 'commid', data: {} })
+        );
+        pushStdin(
+          tester.sendInputRequest('stdin', { prompt: '', password: false })
+        );
+        pushIopub(
+          tester.sendDisplayData('display 2', {
+            data: {},
+            metadata: {},
+            transient: { display_id: 'displayid' }
+          })
+        );
+        pushIopub(
+          tester.sendUpdateDisplayData('update display', {
+            data: {},
+            metadata: {},
+            transient: { display_id: 'displayid' }
+          })
+        );
+        pushIopub(
+          tester.sendExecuteResult('execute result', {
+            execution_count: 1,
+            data: {},
+            metadata: {}
+          })
+        );
         pushIopub(tester.sendStatus('idle', 'idle'));
         pushReply(tester.sendExecuteReply('execute reply', {}));
 
@@ -1280,13 +1302,13 @@ describe('Kernel.IKernel', () => {
         }
       });
 
-      kernel.registerMessageHook(future.msg.header.msg_id, async (msg) => {
+      kernel.registerMessageHook(future.msg.header.msg_id, async msg => {
         // Make this hook call asynchronous
         await calls.push([msg.header.msg_id, 'kernel hook b']);
         return true;
       });
 
-      kernel.registerMessageHook(future.msg.header.msg_id, async (msg) => {
+      kernel.registerMessageHook(future.msg.header.msg_id, async msg => {
         calls.push([msg.header.msg_id, 'kernel hook a']);
         return true;
       });
@@ -1294,35 +1316,35 @@ describe('Kernel.IKernel', () => {
       kernel.registerCommTarget('commtarget', async (comm, msg) => {
         await calls.push([msg.header.msg_id, 'comm open']);
 
-        comm.onMsg = async (msg) => {
+        comm.onMsg = async msg => {
           await calls.push([msg.header.msg_id, 'comm msg']);
         };
-        comm.onClose = async (msg) => {
+        comm.onClose = async msg => {
           await calls.push([msg.header.msg_id, 'comm close']);
         };
       });
 
-      future.registerMessageHook(async (msg) => {
+      future.registerMessageHook(async msg => {
         await calls.push([msg.header.msg_id, 'future hook b']);
         return true;
       });
 
-      future.registerMessageHook(async (msg) => {
+      future.registerMessageHook(async msg => {
         // Delay processing until after we've checked the anyMessage results.
         await handlingBlock.promise;
         await calls.push([msg.header.msg_id, 'future hook a']);
         return true;
       });
 
-      future.onIOPub = async (msg) => {
+      future.onIOPub = async msg => {
         await calls.push([msg.header.msg_id, 'iopub']);
       };
 
-      future.onStdin = async (msg) => {
+      future.onStdin = async msg => {
         await calls.push([msg.header.msg_id, 'stdin']);
       };
 
-      future.onReply = async (msg) => {
+      future.onReply = async msg => {
         await calls.push([msg.header.msg_id, 'reply']);
       };
 
@@ -1343,8 +1365,5 @@ describe('Kernel.IKernel', () => {
       await tester.shutdown();
       tester.dispose();
     });
-
-
-
   });
 });

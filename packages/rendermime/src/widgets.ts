@@ -2,31 +2,21 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import * as renderers
-  from './renderers';
-
+import * as renderers from './renderers';
 
 /**
  * A common base class for mime renderers.
  */
-export
-abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
+export abstract class RenderedCommon extends Widget
+  implements IRenderMime.IRenderer {
   /**
    * Construct a new rendered common widget.
    *
@@ -94,12 +84,10 @@ abstract class RenderedCommon extends Widget implements IRenderMime.IRenderer {
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
 }
 
-
 /**
  * A common base class for HTML mime renderers.
  */
-export
-abstract class RenderedHTMLCommon extends RenderedCommon {
+export abstract class RenderedHTMLCommon extends RenderedCommon {
   /**
    * Construct a new rendered HTML common widget.
    *
@@ -111,12 +99,10 @@ abstract class RenderedHTMLCommon extends RenderedCommon {
   }
 }
 
-
 /**
  * A mime renderer for displaying HTML and math.
  */
-export
-class RenderedHTML extends RenderedHTMLCommon {
+export class RenderedHTML extends RenderedHTMLCommon {
   /**
    * Construct a new rendered HTML widget.
    *
@@ -157,12 +143,10 @@ class RenderedHTML extends RenderedHTMLCommon {
   }
 }
 
-
 /**
  * A mime renderer for displaying LaTeX output.
  */
-export
-class RenderedLatex extends RenderedCommon {
+export class RenderedLatex extends RenderedCommon {
   /**
    * Construct a new rendered LaTeX widget.
    *
@@ -199,12 +183,10 @@ class RenderedLatex extends RenderedCommon {
   }
 }
 
-
 /**
  * A mime renderer for displaying images.
  */
-export
-class RenderedImage extends RenderedCommon {
+export class RenderedImage extends RenderedCommon {
   /**
    * Construct a new rendered image widget.
    *
@@ -228,19 +210,17 @@ class RenderedImage extends RenderedCommon {
       host: this.node,
       mimeType: this.mimeType,
       source: String(model.data[this.mimeType]),
-      width: metadata && metadata.width as number | undefined,
-      height: metadata && metadata.height as number | undefined,
-      unconfined: metadata && metadata.unconfined as boolean | undefined
+      width: metadata && (metadata.width as number | undefined),
+      height: metadata && (metadata.height as number | undefined),
+      unconfined: metadata && (metadata.unconfined as boolean | undefined)
     });
   }
 }
 
-
 /**
  * A mime renderer for displaying Markdown with embeded latex.
  */
-export
-class RenderedMarkdown extends RenderedHTMLCommon {
+export class RenderedMarkdown extends RenderedHTMLCommon {
   /**
    * Construct a new rendered markdown widget.
    *
@@ -267,7 +247,7 @@ class RenderedMarkdown extends RenderedHTMLCommon {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter,
+      latexTypesetter: this.latexTypesetter
     });
   }
 
@@ -281,12 +261,10 @@ class RenderedMarkdown extends RenderedHTMLCommon {
   }
 }
 
-
 /**
  * A widget for displaying SVG content.
  */
-export
-class RenderedSVG extends RenderedCommon {
+export class RenderedSVG extends RenderedCommon {
   /**
    * Construct a new rendered SVG widget.
    *
@@ -310,7 +288,7 @@ class RenderedSVG extends RenderedCommon {
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
-      unconfined: metadata && metadata.unconfined as boolean | undefined
+      unconfined: metadata && (metadata.unconfined as boolean | undefined)
     });
   }
 
@@ -324,12 +302,10 @@ class RenderedSVG extends RenderedCommon {
   }
 }
 
-
 /**
  * A widget for displaying plain text and console text.
  */
-export
-class RenderedText extends RenderedCommon {
+export class RenderedText extends RenderedCommon {
   /**
    * Construct a new rendered text widget.
    *
@@ -355,12 +331,10 @@ class RenderedText extends RenderedCommon {
   }
 }
 
-
 /**
  * A widget for displaying deprecated JavaScript output.
  */
-export
-class RenderedJavaScript extends RenderedCommon {
+export class RenderedJavaScript extends RenderedCommon {
   /**
    * Construct a new rendered text widget.
    *

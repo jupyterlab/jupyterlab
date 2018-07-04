@@ -5,52 +5,39 @@ import expect = require('expect.js');
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  Contents, Drive, ServiceManager, Session
-} from '@jupyterlab/services';
+import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
+
+import { toArray } from '@phosphor/algorithm';
+
+import { JSONObject } from '@phosphor/coreutils';
+
+import { Widget } from '@phosphor/widgets';
+
+import { MathJaxTypesetter } from '@jupyterlab/mathjax2-extension';
 
 import {
-  toArray
-} from '@phosphor/algorithm';
-
-import {
-  JSONObject
-} from '@phosphor/coreutils';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  MathJaxTypesetter
-} from '@jupyterlab/mathjax2-extension';
-
-import {
-  MimeModel, IRenderMime, RenderedText, RenderMimeRegistry
+  MimeModel,
+  IRenderMime,
+  RenderedText,
+  RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import {
-  defaultRenderMime, createFileContext
-} from '../../utils';
-
+import { defaultRenderMime, createFileContext } from '../../utils';
 
 const RESOLVER: IRenderMime.IResolver = createFileContext().urlResolver;
-
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
 }
 
-const fooFactory: IRenderMime.IRendererFactory  = {
+const fooFactory: IRenderMime.IRendererFactory = {
   mimeTypes: ['text/foo'],
   safe: true,
   defaultRank: 1000,
   createRenderer: options => new RenderedText(options)
 };
 
-
 describe('rendermime/registry', () => {
-
   let r: RenderMimeRegistry;
 
   beforeEach(() => {
@@ -58,40 +45,34 @@ describe('rendermime/registry', () => {
   });
 
   describe('RenderMimeRegistry', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new rendermime instance', () => {
         expect(r instanceof RenderMimeRegistry).to.be(true);
       });
-
     });
 
     describe('#resolver', () => {
-
       it('should be the resolver used by the rendermime', () => {
         expect(r.resolver).to.be(null);
         let clone = r.clone({ resolver: RESOLVER });
         expect(clone.resolver).to.be(RESOLVER);
       });
-
     });
 
     describe('#linkHandler', () => {
-
       it('should be the link handler used by the rendermime', () => {
         expect(r.linkHandler).to.be(null);
         let handler = {
-          handleLink: () => { /* no-op */ }
+          handleLink: () => {
+            /* no-op */
+          }
         };
         let clone = r.clone({ linkHandler: handler });
         expect(clone.linkHandler).to.be(handler);
       });
-
     });
 
     describe('#latexTypesetter', () => {
-
       it('should be the null typesetter by default', () => {
         expect(r.latexTypesetter).to.be(null);
       });
@@ -104,23 +85,23 @@ describe('rendermime/registry', () => {
         let clone2 = r.clone({ latexTypesetter: typesetter2 });
         expect(clone2.latexTypesetter).to.be(typesetter2);
       });
-
     });
 
     describe('#createRenderer()', () => {
-
       it('should create a mime renderer', () => {
         let w = r.createRenderer('text/plain');
         expect(w instanceof Widget).to.be(true);
       });
 
       it('should raise an error for an unregistered mime type', () => {
-        expect(() => { r.createRenderer('text/fizz'); }).to.throwError();
+        expect(() => {
+          r.createRenderer('text/fizz');
+        }).to.throwError();
       });
 
       it('should render json data', () => {
         let model = createModel({
-          'application/json': { 'foo': 1 }
+          'application/json': { foo: 1 }
         });
         let w = r.createRenderer('application/json');
         return w.renderModel(model).then(() => {
@@ -128,7 +109,7 @@ describe('rendermime/registry', () => {
         });
       });
 
-      it('should send a url resolver', (done) => {
+      it('should send a url resolver', done => {
         let model = createModel({
           'text/html': '<img src="./foo">foo</img>'
         });
@@ -150,13 +131,13 @@ describe('rendermime/registry', () => {
         w.renderModel(model);
       });
 
-      it('should send a link handler', (done) => {
+      it('should send a link handler', done => {
         let model = createModel({
           'text/html': '<a href="./foo/bar.txt">foo</a>'
         });
         r = r.clone({
           resolver: RESOLVER,
-          linkHandler:  {
+          linkHandler: {
             handleLink: (node: HTMLElement, url: string) => {
               expect(url).to.be('foo/bar.txt');
               done();
@@ -169,7 +150,6 @@ describe('rendermime/registry', () => {
     });
 
     describe('#preferredMimeType()', () => {
-
       it('should find the preferred mimeType in a bundle', () => {
         let model = createModel({
           'text/plain': 'foo',
@@ -187,7 +167,8 @@ describe('rendermime/registry', () => {
         let model = createModel({
           'text/plain': 'foo',
           'text/javascript': 'window.x = 1',
-          'image/png': 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+          'image/png':
+            'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         });
         expect(r.preferredMimeType(model.data)).to.be('image/png');
       });
@@ -202,14 +183,14 @@ describe('rendermime/registry', () => {
 
       it('should return `undefined` if only unsafe options with default `ensure`', () => {
         let model = createModel({
-          'image/svg+xml': '',
+          'image/svg+xml': ''
         });
         expect(r.preferredMimeType(model.data)).to.be(void 0);
       });
 
       it('should return `undefined` if only unsafe options with `ensure`', () => {
         let model = createModel({
-          'image/svg+xml': '',
+          'image/svg+xml': ''
         });
         expect(r.preferredMimeType(model.data, 'ensure')).to.be(void 0);
       });
@@ -217,32 +198,31 @@ describe('rendermime/registry', () => {
       it('should return safe option if called with `prefer`', () => {
         let model = createModel({
           'image/svg+xml': '',
-          'text/plain': '',
+          'text/plain': ''
         });
         expect(r.preferredMimeType(model.data, 'prefer')).to.be('text/plain');
       });
 
       it('should return unsafe option if called with `prefer`, and no safe alternative', () => {
         let model = createModel({
-          'image/svg+xml': '',
+          'image/svg+xml': ''
         });
-        expect(r.preferredMimeType(model.data, 'prefer')).to.be('image/svg+xml');
+        expect(r.preferredMimeType(model.data, 'prefer')).to.be(
+          'image/svg+xml'
+        );
       });
     });
 
     describe('#clone()', () => {
-
       it('should clone the rendermime instance with shallow copies of data', () => {
         let c = r.clone();
         expect(toArray(c.mimeTypes)).to.eql(r.mimeTypes);
         c.addFactory(fooFactory);
         expect(r).to.not.be(c);
       });
-
     });
 
     describe('#addFactory()', () => {
-
       it('should add a factory', () => {
         r.addFactory(fooFactory);
         let index = r.mimeTypes.indexOf('text/foo');
@@ -256,11 +236,9 @@ describe('rendermime/registry', () => {
         expect(index).to.be(0);
         expect(r.mimeTypes.length).to.be(len + 1);
       });
-
     });
 
     describe('#removeMimeType()', () => {
-
       it('should remove a factory by mimeType', () => {
         r.removeMimeType('text/html');
         let model = createModel({ 'text/html': '<h1>foo</h1>' });
@@ -270,11 +248,9 @@ describe('rendermime/registry', () => {
       it('should be a no-op if the mimeType is not registered', () => {
         r.removeMimeType('text/foo');
       });
-
     });
 
     describe('#getFactory()', () => {
-
       it('should get a factory by mimeType', () => {
         let f = r.getFactory('text/plain');
         expect(f.mimeTypes).to.contain('text/plain');
@@ -283,15 +259,12 @@ describe('rendermime/registry', () => {
       it('should return undefined for missing mimeType', () => {
         expect(r.getFactory('hello/world')).to.be(undefined);
       });
-
     });
 
     describe('#mimeTypes', () => {
-
       it('should get the ordered list of mimeTypes', () => {
         expect(r.mimeTypes.indexOf('text/html')).to.not.be(-1);
       });
-
     });
 
     describe('.UrlResolver', () => {
@@ -312,7 +285,6 @@ describe('rendermime/registry', () => {
             session,
             contents: manager.contents
           });
-        });
       });
 
       after(() => {
@@ -320,15 +292,12 @@ describe('rendermime/registry', () => {
       });
 
       context('#constructor', () => {
-
         it('should create a UrlResolver instance', () => {
           expect(resolver).to.be.a(RenderMimeRegistry.UrlResolver);
         });
-
       });
 
       context('#resolveUrl()', () => {
-
         it('should resolve a relative url', () => {
           return resolver.resolveUrl('./foo').then(path => {
             expect(path).to.be('foo');
@@ -340,16 +309,13 @@ describe('rendermime/registry', () => {
             expect(path).to.be('http://foo');
           });
         });
-
       });
 
       context('#getDownloadUrl()', () => {
-
         it('should resolve an absolute server url to a download url', () => {
           let contextPromise = resolver.getDownloadUrl('foo');
           let contentsPromise = contents.getDownloadUrl('foo');
-          return Promise.all([contextPromise, contentsPromise])
-          .then(values => {
+          return Promise.all([contextPromise, contentsPromise]).then(values => {
             expect(values[0]).to.be(values[1]);
           });
         });
@@ -359,11 +325,9 @@ describe('rendermime/registry', () => {
             expect(path).to.be('http://foo');
           });
         });
-
       });
 
       context('#isLocal', () => {
-
         it('should return true for a registered IDrive`', () => {
           expect(resolver.isLocal('extra:path/to/file')).to.be(true);
         });
@@ -375,12 +339,7 @@ describe('rendermime/registry', () => {
         it('should return true for a normal filesystem-like path`', () => {
           expect(resolver.isLocal('path/to/file')).to.be(true);
         });
-
       });
-
     });
-
   });
-
-
 });

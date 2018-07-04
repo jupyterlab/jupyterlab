@@ -3,41 +3,27 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  ReadonlyJSONObject, Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /* tslint:disable */
 /**
  * The URL Router token.
  */
-export
-const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
+export const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
 /* tslint:enable */
-
 
 /**
  * A static class that routes URLs within the application.
  */
-export
-interface IRouter {
+export interface IRouter {
   /**
    * The base URL for the router.
    */
@@ -99,17 +85,14 @@ interface IRouter {
   route(url: string): void;
 }
 
-
 /**
  * A namespace for the `IRouter` specification.
  */
-export
-namespace IRouter {
+export namespace IRouter {
   /**
    * The parsed location currently being routed.
    */
-  export
-  interface ILocation extends ReadonlyJSONObject {
+  export interface ILocation extends ReadonlyJSONObject {
     /**
      * The location hash.
      */
@@ -138,8 +121,7 @@ namespace IRouter {
   /**
    * The options passed into a navigation request.
    */
-  export
-  interface INavOptions {
+  export interface INavOptions {
     /**
      * Whether the navigation should be hard URL change instead of an HTML
      * history API change.
@@ -155,8 +137,7 @@ namespace IRouter {
   /**
    * The specification for registering a route with the router.
    */
-  export
-  interface IRegisterOptions {
+  export interface IRegisterOptions {
     /**
      * The command string that will be invoked upon matching.
      */
@@ -175,12 +156,10 @@ namespace IRouter {
   }
 }
 
-
 /**
  * A static class that routes URLs within the application.
  */
-export
-class Router implements IRouter {
+export class Router implements IRouter {
   /**
    * Create a URL router.
    */
@@ -232,15 +211,15 @@ class Router implements IRouter {
    *
    * @param options - The navigation options.
    */
-  navigate(path: string, options: IRouter.INavOptions = { }): void {
+  navigate(path: string, options: IRouter.INavOptions = {}): void {
     const url = path ? URLExt.join(this.base, path) : this.base;
     const { history } = window;
     const { hard, silent } = options;
 
     if (silent) {
-      history.replaceState({ }, '', url);
+      history.replaceState({}, '', url);
     } else {
-      history.pushState({ }, '', url);
+      history.pushState({}, '', url);
     }
 
     if (hard) {
@@ -249,7 +228,9 @@ class Router implements IRouter {
 
     // Because a `route()` call may still be in the stack after having received
     // a `stop` token, wait for the next stack frame before calling `route()`.
-    requestAnimationFrame(() => { this.route(); });
+    requestAnimationFrame(() => {
+      this.route();
+    });
   }
 
   /**
@@ -266,7 +247,9 @@ class Router implements IRouter {
 
     rules.set(pattern, { command, rank });
 
-    return new DisposableDelegate(() => { rules.delete(pattern); });
+    return new DisposableDelegate(() => {
+      rules.delete(pattern);
+    });
   }
 
   /**
@@ -310,16 +293,19 @@ class Router implements IRouter {
 
       const { command } = queue.pop();
 
-      commands.execute(command, current).then(result => {
-        if (result === stop) {
-          queue.length = 0;
-          console.log(`Routing ${request} was short-circuited by ${command}`);
-        }
-        next();
-      }).catch(reason => {
-        console.warn(`Routing ${request} to ${command} failed`, reason);
-        next();
-      });
+      commands
+        .execute(command, current)
+        .then(result => {
+          if (result === stop) {
+            queue.length = 0;
+            console.log(`Routing ${request} was short-circuited by ${command}`);
+          }
+          next();
+        })
+        .catch(reason => {
+          console.warn(`Routing ${request} to ${command} failed`, reason);
+          next();
+        });
     })();
   }
 
@@ -327,17 +313,14 @@ class Router implements IRouter {
   private _rules = new Map<RegExp, Private.Rule>();
 }
 
-
 /**
  * A namespace for `Router` class statics.
  */
-export
-namespace Router {
+export namespace Router {
   /**
    * The options for instantiating a JupyterLab URL router.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The fully qualified base URL for the router.
      */
@@ -350,7 +333,6 @@ namespace Router {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -358,6 +340,5 @@ namespace Private {
   /**
    * The internal representation of a routing rule.
    */
-  export
-  type Rule = { command: string; rank: number };
+  export type Rule = { command: string; rank: number };
 }

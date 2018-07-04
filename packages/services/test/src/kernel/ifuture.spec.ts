@@ -3,17 +3,11 @@
 
 import expect = require('expect.js');
 
-import {
-  Kernel, KernelMessage
-} from '../../../lib/kernel';
+import { Kernel, KernelMessage } from '../../../lib/kernel';
 
-import {
-  KernelTester, createMsg
-} from '../utils';
-
+import { KernelTester, createMsg } from '../utils';
 
 describe('Kernel.IFuture', () => {
-
   let tester: KernelTester;
 
   afterEach(() => {
@@ -34,7 +28,6 @@ describe('Kernel.IFuture', () => {
   });
 
   describe('Message hooks', () => {
-
     it('should have the most recently registered hook run first', async () => {
       let options: KernelMessage.IExecuteRequest = {
         code: 'test',
@@ -49,7 +42,7 @@ describe('Kernel.IFuture', () => {
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -59,27 +52,30 @@ describe('Kernel.IFuture', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        future.registerMessageHook(async (msg) => {
+        future.registerMessageHook(async msg => {
           await calls.push('last');
           return true;
         });
 
-        future.registerMessageHook((msg) => {
+        future.registerMessageHook(msg => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
             expect((msg as KernelMessage.IStreamMsg).content.text).to.be('foo');
           } else {
-            expect((msg as KernelMessage.IStatusMsg).content.execution_state).to.be('idle');
+            expect(
+              (msg as KernelMessage.IStatusMsg).content.execution_state
+            ).to.be('idle');
           }
           // not returning should also continue handling
           return void 0;
@@ -95,7 +91,14 @@ describe('Kernel.IFuture', () => {
       await future.done;
 
       // the last hook was called for the stream and the status message.
-      expect(calls).to.eql(['first', 'last', 'iopub', 'first', 'last', 'iopub']);
+      expect(calls).to.eql([
+        'first',
+        'last',
+        'iopub',
+        'first',
+        'last',
+        'iopub'
+      ]);
     });
 
     it('should abort processing if a hook returns false, but the done logic should still work', () => {
@@ -112,31 +115,32 @@ describe('Kernel.IFuture', () => {
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
-        let msg = createMsg('shell',  parentHeader);
+        let msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        future.registerMessageHook((msg) => {
+        future.registerMessageHook(msg => {
           calls.push('last');
           return true;
         });
 
-        future.registerMessageHook(async (msg) => {
+        future.registerMessageHook(async msg => {
           calls.push('first');
           return false;
         });
@@ -146,14 +150,17 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester.start().then(k => {
-        kernel = k;
-        future = kernel.requestExecute(options, false);
-        return future.done;
-      }).then(() => {
-        // the last hook was called for the stream and the status message.
-        expect(calls).to.eql(['first', 'first']);
-      });
+      return tester
+        .start()
+        .then(k => {
+          kernel = k;
+          future = kernel.requestExecute(options, false);
+          return future.done;
+        })
+        .then(() => {
+          // the last hook was called for the stream and the status message.
+          expect(calls).to.eql(['first', 'first']);
+        });
     });
 
     it('should process additions on the next run', () => {
@@ -169,7 +176,7 @@ describe('Kernel.IFuture', () => {
       tester = new KernelTester();
       let future: Kernel.IFuture;
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -179,18 +186,19 @@ describe('Kernel.IFuture', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
-        future.registerMessageHook((msg) => {
+        future.registerMessageHook(msg => {
           calls.push('last');
-          future.registerMessageHook((msg) => {
+          future.registerMessageHook(msg => {
             calls.push('first');
             return true;
           });
@@ -202,12 +210,15 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester.start().then(kernel => {
-        future = kernel.requestExecute(options, false);
-        return future.done;
-      }).then(() => {
-        expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
-      });
+      return tester
+        .start()
+        .then(kernel => {
+          future = kernel.requestExecute(options, false);
+          return future.done;
+        })
+        .then(() => {
+          expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
+        });
     });
 
     it('should deactivate message hooks immediately on removal', () => {
@@ -236,7 +247,7 @@ describe('Kernel.IFuture', () => {
         return true;
       };
 
-      tester.onMessage((message) => {
+      tester.onMessage(message => {
         // send a reply
         let parentHeader = message.header;
         let msg = createMsg('shell', parentHeader);
@@ -246,12 +257,13 @@ describe('Kernel.IFuture', () => {
           // trigger onIOPub with a 'stream' message
           let msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
-          msgStream.content = { 'name': 'stdout', 'text': 'foo' };
+          msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
           let msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state = 'idle';
+          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
+            'idle';
           tester.send(msgDone);
         };
 
@@ -263,16 +275,17 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester.start().then(kernel => {
-        future = kernel.requestExecute(options, false);
-        return future.done;
-      }).then(() => {
-        expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
-        future.dispose();
-        future.removeMessageHook(first);
-      });
+      return tester
+        .start()
+        .then(kernel => {
+          future = kernel.requestExecute(options, false);
+          return future.done;
+        })
+        .then(() => {
+          expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
+          future.dispose();
+          future.removeMessageHook(first);
+        });
     });
-
   });
-
 });

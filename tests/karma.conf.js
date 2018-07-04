@@ -3,7 +3,7 @@ var webpack = require('./webpack.config');
 
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
     basePath: '.',
     frameworks: ['mocha'],
@@ -11,20 +11,20 @@ module.exports = function (config) {
     client: {
       captureConsole: true,
       mocha: {
-        timeout : 10000, // 10 seconds - upped from 2 seconds
+        timeout: 10000, // 10 seconds - upped from 2 seconds
         retries: 3 // Allow for slow server on CI.
       }
     },
     files: [
-      {pattern: path.resolve('./build/injector.js'), watched: false},
-      {pattern: process.env.KARMA_FILE_PATTERN, watched: false}
+      { pattern: path.resolve('./build/injector.js'), watched: false },
+      { pattern: process.env.KARMA_FILE_PATTERN, watched: false }
     ],
     preprocessors: {
       'build/injector.js': ['webpack'],
       'src/*.spec.ts': ['webpack', 'sourcemap']
     },
     mime: {
-      'text/x-typescript': ['ts','tsx']
+      'text/x-typescript': ['ts', 'tsx']
     },
     webpack: webpack,
     webpackMiddleware: {

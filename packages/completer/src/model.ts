@@ -2,31 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IIterator, IterableOrArrayLike, iter, map, toArray
+  IIterator,
+  IterableOrArrayLike,
+  iter,
+  map,
+  toArray
 } from '@phosphor/algorithm';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  StringExt
-} from '@phosphor/algorithm';
+import { StringExt } from '@phosphor/algorithm';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Completer
-} from './widget';
-
+import { Completer } from './widget';
 
 /**
  * An implementation of a completer model.
  */
-export
-class CompleterModel implements Completer.IModel {
+export class CompleterModel implements Completer.IModel {
   /**
    * A signal emitted when state of the completer menu changes.
    */
@@ -41,9 +35,11 @@ class CompleterModel implements Completer.IModel {
     return this._original;
   }
   set original(newValue: Completer.ITextState | null) {
-    let unchanged = this._original === newValue ||
-      this._original && newValue &&
-      JSONExt.deepEqual(newValue, this._original);
+    let unchanged =
+      this._original === newValue ||
+      (this._original &&
+        newValue &&
+        JSONExt.deepEqual(newValue, this._original));
     if (unchanged) {
       return;
     }
@@ -63,9 +59,9 @@ class CompleterModel implements Completer.IModel {
     return this._current;
   }
   set current(newValue: Completer.ITextState | null) {
-    const unchanged = this._current === newValue ||
-      this._current && newValue &&
-      JSONExt.deepEqual(newValue, this._current);
+    const unchanged =
+      this._current === newValue ||
+      (this._current && newValue && JSONExt.deepEqual(newValue, this._current));
 
     if (unchanged) {
       return;
@@ -88,7 +84,7 @@ class CompleterModel implements Completer.IModel {
       return;
     }
 
-    const current = this._current = newValue;
+    const current = (this._current = newValue);
 
     if (!current) {
       this._stateChanged.emit(undefined);
@@ -114,7 +110,6 @@ class CompleterModel implements Completer.IModel {
     this._query = query;
     this._stateChanged.emit(undefined);
   }
-
 
   /**
    * The cursor details that the API has used to return matching options.
@@ -221,12 +216,17 @@ class CompleterModel implements Completer.IModel {
   /**
    * Set the available options in the completer menu.
    */
-  setOptions(newValue: IterableOrArrayLike<string>, typeMap?: Completer.TypeMap) {
+  setOptions(
+    newValue: IterableOrArrayLike<string>,
+    typeMap?: Completer.TypeMap
+  ) {
     const values = toArray(newValue || []);
-    const types = typeMap || { };
+    const types = typeMap || {};
 
-    if (JSONExt.deepEqual(values, this._options) &&
-        JSONExt.deepEqual(types, this._typeMap)) {
+    if (
+      JSONExt.deepEqual(values, this._options) &&
+      JSONExt.deepEqual(types, this._typeMap)
+    ) {
       return;
     }
     if (values.length) {
@@ -384,9 +384,10 @@ class CompleterModel implements Completer.IModel {
         });
       }
     }
-    return map(results.sort(Private.scoreCmp), result =>
-      ({ text: result.text, raw: result.raw })
-    );
+    return map(results.sort(Private.scoreCmp), result => ({
+      text: result.text,
+      raw: result.raw
+    }));
   }
 
   /**
@@ -410,11 +411,10 @@ class CompleterModel implements Completer.IModel {
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
-  private _typeMap: Completer.TypeMap = { };
+  private _typeMap: Completer.TypeMap = {};
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
 }
-
 
 /**
  * A namespace for completer model private data.
@@ -428,16 +428,18 @@ namespace Private {
   /**
    * The map of known type annotations of completer matches.
    */
-  const KNOWN_MAP = KNOWN_TYPES.reduce((acc, type) => {
-    acc[type] = null;
-    return acc;
-  }, { } as Completer.TypeMap);
+  const KNOWN_MAP = KNOWN_TYPES.reduce(
+    (acc, type) => {
+      acc[type] = null;
+      return acc;
+    },
+    {} as Completer.TypeMap
+  );
 
   /**
    * A filtered completion menu matching result.
    */
-  export
-  interface IMatch {
+  export interface IMatch {
     /**
      * The raw text of a completion match.
      */
@@ -459,8 +461,7 @@ namespace Private {
   /**
    * Mark a highlighted chunk of text.
    */
-  export
-  function mark(value: string): string {
+  export function mark(value: string): string {
     return `<mark>${value}</mark>`;
   }
 
@@ -471,8 +472,7 @@ namespace Private {
    * This orders the items first based on score (lower is better), then
    * by locale order of the item text.
    */
-  export
-  function scoreCmp(a: IMatch, b: IMatch): number {
+  export function scoreCmp(a: IMatch, b: IMatch): number {
     let delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
@@ -490,8 +490,7 @@ namespace Private {
    * ```
    * followed by other types in alphabetical order.
    */
-  export
-  function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
+  export function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
     const filtered = Object.keys(typeMap)
       .map(key => typeMap[key])
       .filter(value => value && !(value in KNOWN_MAP))
@@ -499,5 +498,4 @@ namespace Private {
 
     return KNOWN_TYPES.concat(filtered);
   }
-
 }
