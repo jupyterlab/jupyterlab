@@ -35,9 +35,9 @@
     "vega-embed": "^3.15.0"
   },
   "devDependencies": {
+    "@types/webpack-env": "~1.13.6",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2",
-    "@types/webpack-env": "~1.13.6"
+    "typescript": "~2.9.2"
   },
   "jupyterlab": {
     "mimeExtension": true
