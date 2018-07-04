@@ -227,16 +227,20 @@ describe('session', () => {
 
     context('#kernelChanged', () => {
       it('should emit when the kernel changes', async () => {
-        let called = false;
+        let called: Session.IKernelChangedArgs | null = null;
         let object = {};
-        defaultSession.kernelChanged.connect((s, kernel) => {
-          called = true;
+        defaultSession.kernelChanged.connect((s, args) => {
+          called = args;
           Signal.disconnectReceiver(object);
         }, object);
         let previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
         await defaultSession.kernel.ready;
-        expect(called).to.be(true);
+        expect(previous).to.not.be(defaultSession.kernel);
+        expect(called).to.eql({
+          oldValue: previous,
+          newValue: defaultSession.kernel
+        });
         previous.dispose();
       });
     });

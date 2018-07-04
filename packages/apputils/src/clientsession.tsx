@@ -41,7 +41,7 @@ export interface IClientSession extends IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
-  readonly kernelChanged: ISignal<this, Kernel.IKernelConnection | null>;
+  readonly kernelChanged: ISignal<this, Session.IKernelChangedArgs>;
 
   /**
    * A signal emitted when the kernel status changes.
@@ -230,7 +230,7 @@ export class ClientSession implements IClientSession {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernelConnection | null> {
+  get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
     return this._kernelChanged;
   }
 
@@ -672,8 +672,11 @@ export class ClientSession implements IClientSession {
     session.statusChanged.connect(this._onStatusChanged, this);
     session.iopubMessage.connect(this._onIopubMessage, this);
     session.unhandledMessage.connect(this._onUnhandledMessage, this);
-    this._kernelChanged.emit(session.kernel);
     this._prevKernelName = session.kernel.name;
+
+    // The session kernel was disposed above when the session was disposed, so
+    // the oldValue should be null.
+    this._kernelChanged.emit({ oldValue: null, newValue: session.kernel });
     return session.kernel;
   }
 
@@ -743,8 +746,11 @@ export class ClientSession implements IClientSession {
   /**
    * Handle a change to the kernel.
    */
-  private _onKernelChanged(sender: Session.ISession): void {
-    this._kernelChanged.emit(sender.kernel);
+  private _onKernelChanged(
+    sender: Session.ISession,
+    args: Session.IKernelChangedArgs
+  ): void {
+    this._kernelChanged.emit(args);
   }
 
   /**
@@ -801,9 +807,7 @@ export class ClientSession implements IClientSession {
   private _initializing = false;
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Kernel.IKernelConnection | null>(
-    this
-  );
+  private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);

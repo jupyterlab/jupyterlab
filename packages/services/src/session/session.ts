@@ -31,7 +31,7 @@ export namespace Session {
     /**
      * A signal emitted when the kernel changes.
      */
-    kernelChanged: ISignal<this, Kernel.IKernelConnection>;
+    kernelChanged: ISignal<this, IKernelChangedArgs>;
 
     /**
      * A signal emitted when the session status changes.
@@ -346,6 +346,20 @@ export namespace Session {
      * The unique identifier for the session client.
      */
     clientId?: string;
+  }
+
+  /**
+   * An arguments object for the kernel changed signal.
+   */
+  export interface IKernelChangedArgs {
+    /**
+     * The old kernel.
+     */
+    oldValue: Kernel.IKernelConnection | null;
+    /**
+     * The new kernel.
+     */
+    newValue: Kernel.IKernelConnection | null;
   }
 
   /**

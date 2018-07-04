@@ -50,7 +50,7 @@ export class DefaultSession implements Session.ISession {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Kernel.IKernelConnection> {
+  get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
     return this._kernelChanged;
   }
 
@@ -196,9 +196,10 @@ export class DefaultSession implements Session.ISession {
     this._type = model.type;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      let kernel = Kernel.connectTo(model.kernel, this.serverSettings);
-      this.setupKernel(kernel);
-      this._kernelChanged.emit(kernel);
+      let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
+      let oldValue = this._kernel;
+      this.setupKernel(newValue);
+      this._kernelChanged.emit({ oldValue, newValue });
       this._handleModelChange(oldModel);
       return;
     }
@@ -404,7 +405,7 @@ export class DefaultSession implements Session.ISession {
   private _kernel: Kernel.IKernel;
   private _isDisposed = false;
   private _updating = false;
-  private _kernelChanged = new Signal<this, Kernel.IKernelConnection>(this);
+  private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);

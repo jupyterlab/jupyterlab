@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -131,17 +131,18 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   private _onKernelChanged(
     sender: any,
-    kernel: Kernel.IKernelConnection
+    args: Session.IKernelChangedArgs
   ): void {
-    if (!this.model || !kernel) {
+    if (!this.model || !args.newValue) {
       return;
     }
-    kernel.ready.then(() => {
+    let { newValue } = args;
+    newValue.ready.then(() => {
       if (this.model) {
-        this._updateLanguage(kernel.info.language_info);
+        this._updateLanguage(newValue.info.language_info);
       }
     });
-    this._updateSpec(kernel);
+    this._updateSpec(newValue);
   }
 
   /**
