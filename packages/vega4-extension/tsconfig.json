@@ -1,8 +1,7 @@
 {
-  "compilerOptions": {
-    "outDir": "./lib",
-    "types": ["node"]
-  },
   "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "./lib"
+  },
   "include": ["src/*"]
 }

@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/// <reference path="../../../node_modules/@types/webpack-env/index.d.ts"/>
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -74,7 +75,8 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const mode: VegaModuleType.Mode =
       this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
 
-    const vega: typeof VegaModuleType = await this._ensureVega();
+    const vega =
+      Private.vega != null ? Private.vega : await Private.ensureVega();
     const path = await this._resolver.resolveUrl('');
     const baseURL = await this._resolver.getDownloadUrl(path);
 
@@ -103,25 +105,6 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const imageURL = await result.view.toImageURL('png');
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }
-    });
-  }
-
-  /**
-   * Lazy-load the vega-embed library.
-   */
-  private _ensureVega(): Promise<typeof VegaModuleType> {
-    return new Promise((resolve, reject) => {
-      (require as any).ensure(
-        ['vega-embed'],
-        (require: any) => {
-          resolve(require('vega-embed') as typeof VegaModuleType);
-        },
-        (error: any) => {
-          console.error(error);
-          reject();
-        },
-        'vega'
-      );
     });
   }
 
@@ -174,3 +157,46 @@ const extension: IRenderMime.IExtension = {
 };
 
 export default extension;
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * A cached reference to the vega library.
+   */
+  export let vega: typeof VegaModuleType;
+
+  /**
+   * A Promise for the initial load of vega.
+   */
+  export let vegaReady: Promise<typeof VegaModuleType>;
+
+  /**
+   * Lazy-load and cache the vega-embed library
+   */
+  export function ensureVega(): Promise<typeof VegaModuleType> {
+    if (vegaReady) {
+      return vegaReady;
+    }
+
+    vegaReady = new Promise((resolve, reject) => {
+      require.ensure(
+        ['vega-embed'],
+        // see https://webpack.js.org/api/module-methods/#require-ensure
+        // this argument MUST be named `require` for the WebPack parser
+        require => {
+          vega = require('vega-embed') as typeof VegaModuleType;
+          resolve(vega);
+        },
+        (error: any) => {
+          console.error(error);
+          reject();
+        },
+        'vega'
+      );
+    });
+
+    return vegaReady;
+  }
+}
