@@ -277,13 +277,16 @@ describe('rendermime/registry', () => {
         const drive = new Drive({ name: 'extra' });
         contents = manager.contents;
         contents.addDrive(drive);
-        return manager.ready.then(() => {
-          return manager.sessions.startNew({ path: UUID.uuid4() });
-        }).then(s => {
-          session = s;
-          resolver = new RenderMimeRegistry.UrlResolver({
-            session,
-            contents: manager.contents
+        return manager.ready
+          .then(() => {
+            return manager.sessions.startNew({ path: UUID.uuid4() });
+          })
+          .then(s => {
+            session = s;
+            resolver = new RenderMimeRegistry.UrlResolver({
+              session,
+              contents: manager.contents
+            });
           });
       });
 
