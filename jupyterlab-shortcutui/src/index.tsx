@@ -30,6 +30,7 @@ export class ShortcutObject {
   source: string
   selector: string
   category: string
+  id: string
   constructor() {
     this.commandName = ''
     this.label = ''
@@ -37,6 +38,7 @@ export class ShortcutObject {
     this.source = ''
     this.selector = ''
     this.category = ''
+    this.id = ''
   }
 }
 
@@ -76,7 +78,7 @@ const plugin: JupyterLabPlugin<void> = {
         widget.addClass('jp-shortcutWidget');
         
         /** Add an application command */
-        const command: string = 'shortcutui:open';
+        const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
           label: 'Keyboard Shortcut Settings',
           execute: () => {

@@ -65,32 +65,26 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
     }));
   }
 
-  /** Hard-coded categories for displaying shortcuts */
-  private prettifyCategory = () : string => {
-    return this.props.shortcut.category[0].toUpperCase() 
-    + this.props.shortcut.category.substr(1)
-  }
-
   render() {
     return (
       <div className='jp-cmditem row'>
         <div className='cell'>
-          <div className='jp-shortcutitem-category'>{this.prettifyCategory()}</div>
+          <div className='jp-shortcutitem-category'>{this.props.shortcut.category}</div>
         </div>
         <div className='cell'>
           <div className='jp-label'>{this.props.shortcut.label}</div>
         </div>
         <div className='cell'>
-          {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key] !== '').map((key, index) => 
+          {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '').map((key, index) => 
             <ShortcutButton 
-              key={Object.keys(this.props.shortcut.keys).find(item => item === key)}
+              key={key}
               shortcutKeys={this.props.shortcut.keys[key]} 
-              commandId={Object.keys(this.props.shortcut.keys).find(item => item === key)} 
-              shortcutCommandName={this.props.shortcut.commandName}
-              shortcutSelector={this.props.shortcut.selector}
-              deleteShortcut={this.props.deleteShortcut} />
+              deleteShortcut={this.props.deleteShortcut}
+              shortcutObject={this.props.shortcut} 
+              shortcutId={key}
+            />
           )}
-          {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key] !== '').length < 2 &&
+          {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '').length < 2 &&
             <span className='jp-input-plus' onClick={this.toggleInput}>+</span>
           }
           {(this.state.displayInput ? (

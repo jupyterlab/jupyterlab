@@ -15,11 +15,11 @@ export class FilterSelector extends React.Component<FilterSelectorProps, FilterS
   }
 
   updateFilter = (event) => {
-    this.setState({value: event.target.value}, this.props.updateFilter(this.state.value))
+    this.setState({value: event.target.value}, this.props.updateFilter(event.target.value))
   }
   render() {
     return (
-      <select className="jp-shortcut-filter" onChange={(event) => this.updateFilter(event)} defaultValue={this.state.value}>
+      <select className="jp-shortcut-filter" onChange={(event) => this.updateFilter(event)} value={this.state.value}>
         <option value="category">Category</option>
         <option value="command">Command</option>
         <option value="source">Source</option>
