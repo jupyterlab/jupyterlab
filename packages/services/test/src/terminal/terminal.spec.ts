@@ -71,7 +71,7 @@ describe('terminal', () => {
       });
 
       it('should handle a 404 status', () => {
-        return TerminalSession.shutdown(UUID.uuid4());
+        return TerminalSession.shutdown('ThisTerminalDoesNotExist');
       });
     });
 
