@@ -405,7 +405,7 @@ export class ClientSession implements IClientSession {
   shutdown(): Promise<void> {
     const session = this._session;
     if (this.isDisposed || !session) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     this._session = null;
     return session.shutdown();
@@ -424,7 +424,7 @@ export class ClientSession implements IClientSession {
   restart(): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
-        return Promise.reject(void 0);
+        return Promise.reject('session already disposed');
       }
       let kernel = this.kernel;
       if (!kernel) {
@@ -453,14 +453,14 @@ export class ClientSession implements IClientSession {
    */
   setPath(path: string): Promise<void> {
     if (this.isDisposed || this._path === path) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     this._path = path;
     if (this._session) {
       return this._session.setPath(path);
     }
     this._propertyChanged.emit('path');
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
@@ -468,14 +468,14 @@ export class ClientSession implements IClientSession {
    */
   setName(name: string): Promise<void> {
     if (this.isDisposed || this._name === name) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     this._name = name;
     if (this._session) {
       return this._session.setName(name);
     }
     this._propertyChanged.emit('name');
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
@@ -483,14 +483,14 @@ export class ClientSession implements IClientSession {
    */
   setType(type: string): Promise<void> {
     if (this.isDisposed || this._type === type) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     this._type = type;
     if (this._session) {
       return this._session.setType(name);
     }
     this._propertyChanged.emit('type');
-    return Promise.resolve(void 0);
+    return Promise.resolve();
   }
 
   /**
@@ -538,14 +538,13 @@ export class ClientSession implements IClientSession {
       preference.shouldStart === false ||
       preference.canStart === false
     ) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
     // Try to use an existing kernel.
     if (preference.id) {
-      return this._changeKernel({ id: preference.id }).then(
-        () => void 0,
-        () => this._selectKernel(false)
-      );
+      return this._changeKernel({ id: preference.id })
+        .then(() => undefined)
+        .catch(() => this._selectKernel(false));
     }
     let name = ClientSession.getDefaultKernel({
       specs: this.manager.specs,
@@ -553,10 +552,9 @@ export class ClientSession implements IClientSession {
       preference
     });
     if (name) {
-      return this._changeKernel({ name }).then(
-        () => void 0,
-        () => this._selectKernel(false)
-      );
+      return this._changeKernel({ name })
+        .then(() => undefined)
+        .catch(() => this._selectKernel(false));
     }
     return this._selectKernel(false);
   }
@@ -581,13 +579,13 @@ export class ClientSession implements IClientSession {
   /**
    * Select a kernel.
    *
-   * @param cancellable: whether the dialog should have a cancel button.
+   * @param cancelable: whether the dialog should have a cancel button.
    */
-  private _selectKernel(cancellable: boolean): Promise<void> {
+  private _selectKernel(cancelable: boolean): Promise<void> {
     if (this.isDisposed) {
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }
-    const buttons = cancellable
+    const buttons = cancelable
       ? [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
       : [Dialog.okButton({ label: 'SELECT' })];
 
@@ -605,10 +603,12 @@ export class ClientSession implements IClientSession {
         }
         let model = result.value;
         if (model === null && this._session) {
-          return this.shutdown().then(() => this._kernelChanged.emit(null));
+          return this.shutdown().then(() => {
+            this._kernelChanged.emit({ oldValue: null, newValue: null });
+          });
         }
         if (model) {
-          return this._changeKernel(model).then(() => void 0);
+          return this._changeKernel(model).then(() => undefined);
         }
       })
       .then(() => {
@@ -718,9 +718,9 @@ export class ClientSession implements IClientSession {
       this._session.dispose();
     }
     this._session = null;
-    this._terminated.emit(void 0);
+    this._terminated.emit(undefined);
     if (kernel) {
-      this._kernelChanged.emit(null);
+      this._kernelChanged.emit({ oldValue: null, newValue: null });
     }
   }
 
