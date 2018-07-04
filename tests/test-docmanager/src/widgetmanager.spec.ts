@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -80,7 +80,7 @@ describe('@jupyterlab/docmanager', () => {
     context = new Context({
       manager: services,
       factory: textModelFactory,
-      path: uuid()
+      path: UUID.uuid4()
     });
   });
 

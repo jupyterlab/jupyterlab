@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PathExt, uuid } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import {
   Kernel,
@@ -213,7 +215,7 @@ export class ClientSession implements IClientSession {
    */
   constructor(options: ClientSession.IOptions) {
     this.manager = options.manager;
-    this._path = options.path || uuid();
+    this._path = options.path || UUID.uuid4();
     this._type = options.type || '';
     this._name = options.name || '';
     this._setBusy = options.setBusy;

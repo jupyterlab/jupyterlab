@@ -7,7 +7,7 @@ import { Session, SessionManager } from '@jupyterlab/services';
 
 import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { acceptDialog, dismissDialog } from '../../utils';
 
@@ -218,7 +218,7 @@ describe('@jupyterlab/apputils', () => {
         let other: Session.ISession;
         session.dispose();
         return manager
-          .startNew({ path: uuid() })
+          .startNew({ path: UUID.uuid4() })
           .then(o => {
             other = o;
             session = new ClientSession({

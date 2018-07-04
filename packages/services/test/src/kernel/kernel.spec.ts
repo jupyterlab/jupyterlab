@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -65,7 +65,7 @@ describe('kernel', () => {
     });
 
     it('should throw an error for an invalid model', done => {
-      let data = { id: uuid(), name: 'test' };
+      let data = { id: UUID.uuid4(), name: 'test' };
       let settings = getRequestHandler(200, data);
       let promise = Kernel.listRunning(settings);
       expectFailure(promise, done, 'Invalid kernel list');
@@ -123,19 +123,22 @@ describe('kernel', () => {
     });
 
     it('should throw an error for an invalid kernel id', done => {
-      let serverSettings = getRequestHandler(201, { id: uuid() });
+      let serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
       let kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });
 
     it('should throw an error for another invalid kernel id', done => {
-      let serverSettings = getRequestHandler(201, { id: uuid(), name: 1 });
+      let serverSettings = getRequestHandler(201, {
+        id: UUID.uuid4(),
+        name: 1
+      });
       let kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });
 
     it('should throw an error for an invalid response', done => {
-      let data = { id: uuid(), name: 'foo' };
+      let data = { id: UUID.uuid4(), name: 'foo' };
       let serverSettings = getRequestHandler(200, data);
       let kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done, 'Invalid response: 200 OK');
@@ -185,7 +188,7 @@ describe('kernel', () => {
     });
 
     it('should handle a 404 error', () => {
-      return Kernel.shutdown(uuid());
+      return Kernel.shutdown(UUID.uuid4());
     });
   });
 

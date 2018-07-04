@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -20,27 +20,46 @@ import {
   getRequestHandler
 } from '../utils';
 
+/**
+ * Generate a random config section name.
+ *
+ * #### Notes
+ * Config sections cannot have dashes (see
+ * https://github.com/jupyter/notebook/blob/b2edf8963cc017733f264cca35fd6584f328c8b6/notebook/services/config/handlers.py#L36),
+ * so we remove the dashes.
+ */
+function randomName() {
+  return UUID.uuid4().replace(/-/g, '');
+}
+
 describe('config', () => {
   describe('ConfigSection.create()', () => {
     it('should load a config', () => {
-      return ConfigSection.create({ name: uuid() }).then(config => {
+      return ConfigSection.create({ name: randomName() }).then(config => {
+        expect(Object.keys(config.data).length).to.be(0);
+      });
+    });
+
+    it('should load a config', () => {
+      return ConfigSection.create({ name: randomName() }).then(config => {
         expect(Object.keys(config.data).length).to.be(0);
       });
     });
 
     it('should accept server settings', () => {
       let serverSettings = makeSettings();
-      return ConfigSection.create({ name: uuid(), serverSettings }).then(
-        config => {
-          expect(Object.keys(config.data).length).to.be(0);
-        }
-      );
+      return ConfigSection.create({
+        name: randomName(),
+        serverSettings
+      }).then(config => {
+        expect(Object.keys(config.data).length).to.be(0);
+      });
     });
 
     it('should fail for an incorrect response', done => {
       let serverSettings = getRequestHandler(201, {});
       let configPromise = ConfigSection.create({
-        name: uuid(),
+        name: randomName(),
         serverSettings
       });
       expectFailure(configPromise, done, 'Invalid response: 201 Created');
@@ -50,7 +69,7 @@ describe('config', () => {
   describe('#update()', () => {
     it('should update a config', () => {
       let config: IConfigSection;
-      return ConfigSection.create({ name: uuid() })
+      return ConfigSection.create({ name: randomName() })
         .then(c => {
           config = c;
           return config.update({ foo: 'baz', spam: 'eggs' });
@@ -66,7 +85,7 @@ describe('config', () => {
     it('should accept server settings', () => {
       let config: IConfigSection;
       let serverSettings = makeSettings();
-      return ConfigSection.create({ name: uuid(), serverSettings })
+      return ConfigSection.create({ name: randomName(), serverSettings })
         .then(c => {
           config = c;
           return config.update({ foo: 'baz', spam: 'eggs' });
@@ -80,7 +99,7 @@ describe('config', () => {
     });
 
     it('should fail for an incorrect response', done => {
-      ConfigSection.create({ name: uuid() })
+      ConfigSection.create({ name: randomName() })
         .then(config => {
           handleRequest(config, 201, {});
           let update = config.update({ foo: 'baz' });
@@ -96,8 +115,14 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should complete properly', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      return ConfigSection.create({ name: uuid() }).then(section => {
-        let config = new ConfigWithDefaults({ section, defaults, className });
+      return ConfigSection.create({
+        name: randomName()
+      }).then(section => {
+        let config = new ConfigWithDefaults({
+          section,
+          defaults,
+          className
+        });
         expect(config).to.be.a(ConfigWithDefaults);
       });
     });
@@ -107,8 +132,14 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a new config value', () => {
       let defaults: JSONObject = { foo: 'bar' };
       let className = 'testclass';
-      return ConfigSection.create({ name: uuid() }).then(section => {
-        let config = new ConfigWithDefaults({ section, defaults, className });
+      return ConfigSection.create({
+        name: randomName()
+      }).then(section => {
+        let config = new ConfigWithDefaults({
+          section,
+          defaults,
+          className
+        });
         let data = config.get('foo');
         expect(data).to.be('bar');
       });
@@ -117,8 +148,14 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a default config value', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      return ConfigSection.create({ name: uuid() }).then(section => {
-        let config = new ConfigWithDefaults({ section, defaults, className });
+      return ConfigSection.create({
+        name: randomName()
+      }).then(section => {
+        let config = new ConfigWithDefaults({
+          section,
+          defaults,
+          className
+        });
         let data = config.get('spam');
         expect(data).to.be('eggs');
       });
@@ -127,8 +164,14 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a default config value with no class', () => {
       let defaults: JSONObject = { spam: 'eggs' };
       let className = 'testclass';
-      return ConfigSection.create({ name: uuid() }).then(section => {
-        let config = new ConfigWithDefaults({ section, defaults, className });
+      return ConfigSection.create({
+        name: randomName()
+      }).then(section => {
+        let config = new ConfigWithDefaults({
+          section,
+          defaults,
+          className
+        });
         let data = config.get('spam');
         expect(data).to.be('eggs');
       });
@@ -138,13 +181,18 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       let defaults: JSONObject = { foo: true };
       let className = 'testclass';
       let serverSettings = getRequestHandler(200, { foo: false });
-      return ConfigSection.create({ name: uuid(), serverSettings }).then(
-        section => {
-          let config = new ConfigWithDefaults({ section, defaults, className });
-          let data = config.get('foo');
-          expect(data).to.not.be.ok();
-        }
-      );
+      return ConfigSection.create({
+        name: randomName(),
+        serverSettings
+      }).then(section => {
+        let config = new ConfigWithDefaults({
+          section,
+          defaults,
+          className
+        });
+        let data = config.get('foo');
+        expect(data).to.not.be.ok();
+      });
     });
   });
 
@@ -152,7 +200,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should set a value in a class immediately', () => {
       let className = 'testclass';
       let section: IConfigSection;
-      return ConfigSection.create({ name: uuid() })
+      return ConfigSection.create({ name: randomName() })
         .then(s => {
           section = s;
           let config = new ConfigWithDefaults({ section, className });
@@ -166,7 +214,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
     it('should set a top level value', () => {
       let section: IConfigSection;
-      return ConfigSection.create({ name: uuid() })
+      return ConfigSection.create({ name: randomName() })
         .then(s => {
           section = s;
           let config = new ConfigWithDefaults({ section });
@@ -181,7 +229,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
 
     it('should fail for an invalid response', done => {
       let serverSettings = getRequestHandler(200, {});
-      ConfigSection.create({ name: uuid(), serverSettings })
+      ConfigSection.create({ name: randomName(), serverSettings })
         .then(section => {
           handleRequest(section, 201, { foo: 'bar' });
           let config = new ConfigWithDefaults({ section });

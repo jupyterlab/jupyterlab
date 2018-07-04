@@ -3,7 +3,7 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import {
   DocumentRegistry,
@@ -367,7 +367,7 @@ export class DocumentManager implements IDisposable {
   overwrite(oldPath: string, newPath: string): Promise<Contents.IModel> {
     // Cleanly overwrite the file by moving it, making sure the original does
     // not exist, and then renaming to the new path.
-    const tempPath = `${newPath}.${uuid()}`;
+    const tempPath = `${newPath}.${UUID.uuid4()}`;
     const cb = () => this.rename(tempPath, newPath);
     return this.rename(oldPath, tempPath)
       .then(() => {

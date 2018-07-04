@@ -3,7 +3,9 @@
 
 import expect = require('expect.js');
 
-import { PageConfig, uuid } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
@@ -54,7 +56,7 @@ describe('terminal', () => {
       });
 
       it('should reject if the session does not exist on the server', () => {
-        return TerminalSession.connectTo(uuid()).then(() => {
+        return TerminalSession.connectTo(UUID.uuid4()).then(() => {
           throw Error('should not get here');
         }, () => undefined);
       });
@@ -69,7 +71,7 @@ describe('terminal', () => {
       });
 
       it('should handle a 404 status', () => {
-        return TerminalSession.shutdown(uuid());
+        return TerminalSession.shutdown('ThisTerminalDoesNotExist');
       });
     });
 

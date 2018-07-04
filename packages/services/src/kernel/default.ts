@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt, uuid } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import { ArrayExt, each, find } from '@phosphor/algorithm';
 
@@ -53,7 +55,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._id = id;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
-    this._clientId = options.clientId || uuid();
+    this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
     this._comms = new Map<string, Kernel.IComm>();
@@ -614,7 +616,10 @@ export class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * If a client-side comm already exists with the given commId, it is returned.
    */
-  connectToComm(targetName: string, commId: string = uuid()): Kernel.IComm {
+  connectToComm(
+    targetName: string,
+    commId: string = UUID.uuid4()
+  ): Kernel.IComm {
     if (this._comms.has(commId)) {
       return this._comms.get(commId);
     }
