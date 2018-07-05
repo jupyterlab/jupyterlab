@@ -39,6 +39,7 @@
     "@jupyterlab/application": "^0.17.0-0",
     "@jupyterlab/apputils": "^0.17.0-0",
     "@jupyterlab/coreutils": "^2.0.0-0",
+    "@jupyterlab/filebrowser": "^0.17.0-1",
     "@jupyterlab/mainmenu": "^0.6.0-0",
     "@jupyterlab/notebook": "^0.17.0-0",
     "@jupyterlab/observables": "^2.0.0-1",

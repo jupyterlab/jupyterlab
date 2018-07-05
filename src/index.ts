@@ -6,11 +6,13 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { StatusBar, IStatusBar } from './statusBar';
 
 // Export default status bar items
+
 import {
     defaultsManager,
     runningKernelsItem,
     notebookTrustItem,
-    IDefaultStatusesManager
+    IDefaultStatusesManager,
+    fileUploadItem
 } from './defaults';
 
 export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar:plugin';
@@ -32,7 +34,8 @@ const plugins: JupyterLabPlugin<any>[] = [
     statusBar,
     defaultsManager,
     runningKernelsItem,
-    notebookTrustItem
+    notebookTrustItem,
+    fileUploadItem
 ];
 
 export default plugins;
