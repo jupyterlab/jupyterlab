@@ -1,10 +1,17 @@
+.jp-shortcutui {
+    font-size: var(--jp-ui-font-size1);
+    font-family: var(--jp-ui-font-family);
+    color: var(--jp-content-font-color1);
+}
+
 /* Top Whitespace */
 .jp-topwhitespace {
     content: " ";
     height:var(--jp-toolbar-micro-height); 
-    border-bottom: 1px solid var(--jp-toolbar-border-color);
+    border-bottom-width: var(--jp-border-width);
+    border-bottom-color: var(--jp-toolbar-border-color);
     box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 10;
+    z-index: 1;
     top: 0;
     left: 0;
     width: 100%;
@@ -22,6 +29,7 @@
 /* Top Navigation */
 .jp-shortcuttopnav {
     display: flex;
+    font-size: var(--jp-ui-font-size2);
     padding: 10px;
     padding-top: 30px;
     padding-bottom: 60px;
@@ -29,7 +37,7 @@
 
 /* Top Navigation links */
 .jp-link {
-    color: #64B5F6;
+    color: var(--jp-brand-color2);
     text-decoration: none;
 }
 
@@ -38,7 +46,7 @@
 }
 
 .jp-link:active {
-    color: #2916F3;
+    color: var(--jp-brand-color0);
 }
 
 .jp-link:nth-of-type(1) {
@@ -50,67 +58,19 @@
 }
 
 .jp-search {
-    border: solid #E0E0E0 0.75px;
-    border-radius: 3px;
+    border-width: var(--jp-border-width);
+    border-color: var(--jp-border-color2);
+    border-radius: var(--jp-border-radius);
     height: 20px;
     width: 50%;
 }
 
+.jp-search:focus{
+    outline:none;
+}
+
 .jp-searchcontainer {
     width: 50%;
-}
-
-/* Column labels */
-
-.jp-col1 {
-    width: 30%;
-    text-align: left;
-}
-
-.jp-col2 {
-    width: 50%;
-    text-align: left;
-}
-
-.jp-col3 {
-    width: 20%;
-    text-align: left;
-}
-
-/* Category Sidebar */
-.jp-shortcutmenu {
-    width: 15%;
-    height: 100%;
-    overflow-x: hidden;
-    padding-top: 10px;
-    border-right: solid 1px;
-    position: fixed;
-}
-
-.jp-shortcutmenuitem {
-    overflow: hidden;
-    padding: 15px 0px 0px 14px;
-    text-align: left;
-    font-size: var(--jp-ui-font-size1);
-    height: 35px;
-}
-
-.jp-shortcutmenuitem a {
-    font-weight: 400;
-    text-decoration: none;
-    color: black;
-    height: 100%;
-    width: 100%;
-}
-
-.jp-shortcutmenuitem:hover{
-    background-color: #ECEBEB;
-    border-color: #DCDBDC;
-    border-width: 0.5px;
-}
-
-.jp-shortcutmenuitem:active {
-    background-color: #2196F3;
 }
 
 /* Main Shortcut List */
@@ -119,20 +79,6 @@
     width: 100%;
     display: table;
     border-collapse: collapse;
-}
-
-.jp-shortcut-category h3 {
-    padding-left: 10px;
-    font-weight: 600;
-    font-size: 16px;
-}
-
-
-.jp-shortcutlistheader {
-    width: 100%;
-    height: 40px;
-    font-size: 16px;
-    font-weight: 600;
 }
 
 /* Shortcut command items */
@@ -145,34 +91,52 @@
 
 /* Command label */
 .jp-cmdlabel {
-        display: inline-block;
-        font: 'Moneserrat';
-        font-weight: 400;
-        size: 14px;
-        color: #616161;
-        padding-right: 10px;
-        align-self: left; 
+    display: inline-block;
+    font: 'Moneserrat';
+    font-weight: 400;
+    size: 14px;
+    color: var(--jp-content-font-color2);
+    padding-right: 10px;
+    align-self: left; 
+}
+
+
+.shortcut-cell-container {
+    display: -webkit-box;
+}
+
+.jp-shortcut-div p {
+    height: 25px;
+    display: contents;
 }
 
 /* Command shortcut */
-.jp-shortcut {
-        font: "Source Code Pro";
-        font-style: "Regular";
-        font-size: 13px;    
-        fill: solid;
-        background: #F4F3F4;
-        border-radius: 2px;
-        border-color: #BDBDBD;
-        margin-right: 15px;
-    }
+.jp-shortcut-div {
+    display: contents;
+}
+
+.jp-shortcut {    
+    background: var(--jp-layout-color2);
+    border-radius: var(--jp-border-radius);
+    border-width: var(--jp-border-width);
+    border-color: var(--jp-border-color2);
+    margin-right: 15px;
+    height: 25px;
+}
+
+.jp-shortcut-right{
+    margin-right: 0px;
+    margin-left: 15px;
+}
 
 .jp-shortcut:hover {
-    border-width: 1.25px;
+    border-width: var(--jp-border-width) + 0.05;
 }
     
 .jp-shortcut:active {
-    border-color: #828282;
-    background: #E0E0E0;
+    border-width: var(--jp-border-width) + 0.05;
+    border-color: var(--jp-border-color1);
+    background: var(--jp-layout-color3);
 }
 
 .jp-shortcut:focus {
@@ -180,7 +144,7 @@
 }
 
 .jp-shortcut::after {
-    content: '     ×';
+    content: '    ×';
 }
 
 /* Input area */
@@ -191,79 +155,65 @@
 
 .jp-input-plus {
     position: absolute;
-    font-family: Source Code Pro;
-    font-style: normal;
-    font-weight: normal;
-    line-height: normal;
-    font-size: 20px;
-    color: #64B5F6;
+    /* font-family: Source Code Pro; */
+    font-size: var(--jp-ui-font-size2);
+    color: var(--jp-brand-color2);
 }
 
 .jp-input {
-    background: #F4F4F4;
-    border-radius: 2px;
-    border-width: 0.75px;
-    border-color: #BDBDBD;
+    background: var(--jp-layout-color2);
+    border-radius: var(--jp-border-radius);
+    border-width: var(--jp-border-width);
+    border-color: var(--jp-border-color2);
     margin-right: 10px;
+    margin-left: 10px;
 }
     
 .jp-input:focus {
     outline: none;
 }
 
-.jp-submit:focus {
-    outline:none; 
+.jp-input-warning {
+    position: absolute;
+    color: var(--jp-error-color2);
+    font-size: var(--jp-ui-font-size0);
+    /* line-height: 14px; */
+    text-align: right;
 }
 
-/* .jp-label-container {
-    order: 1; 
-    flex-basis: 30%; 
-    width: 30%;
-} */
+.jp-submit:focus {
+    outline: none; 
+}
 
-.jp-label {
+/* .jp-label {
     display: inline-block;
-    font: 'Moneserrat';
-    font-weight: 400;
+    /* font: 'Moneserrat'; 
+    font-weight: var(--jp-content-heading-font-weight);
     size: 14px;
     color: #616161;
     padding-right: 10px;
     align-self: left; 
-}
-
-/* .jp-shortcut-container {
-    order: 2; 
-    flex-basis: 50%; 
-    width: 50%;
-}
-
-.jp-source-container {
-    order: 3; 
-    flex-basis: 20%; 
-    width: 20%;
 } */
 
 .jp-source {
     display: inline-block;
-    color: #616161;
 }
 
-p {
+/* p {
     font: 'Moneserrat';
     font-weight: 400;
     size: 14px;
     color: #616161;
-}
+} */
 
-input {
+/* input {
     padding: 2px;
     background: white;
     display: inline-block;
-}
+} */
 
 .jp-reset {
-    color: #64B5F6;
-    font-size: 12px;
+    color: var(--jp-brand-color2);
     padding-left: 10px;
 }
 
@@ -273,16 +223,18 @@ input {
 
 .row {
     display: table-row;
-    border-bottom: #BDBDBD 1px solid; 
+    border-bottom: solid;
+    border-bottom-color: var(--jp-layout-color3);
+    border-bottom-width: var(--jp-border-width);
 }
 
 .cell {
     padding: 6px 12px;
     display: table-cell;
-    width: 25%;
+    width: 20%;
 }
 
 .table-header {
-    font-weight: bold;
-    font-size: 20px;
+    font-weight: var(--jp-content-heading-font-weight);
+    font-size: var(--jp-ui-font-size2);
 }
