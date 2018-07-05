@@ -4,6 +4,7 @@ import * as React from 'react';
 import {
     JupyterLabPlugin, JupyterLab, ApplicationShell,
 } from '@jupyterlab/application';
+import { IDefaultStatusesManager } from './manager';
 
 import {
    Kernel, KernelManager
@@ -12,13 +13,6 @@ import {
 import {
     Widget,
 } from '@phosphor/widgets';
-
-import {
-    IStatusBar
-} from './../statusBar';
-
-
-
 
 export
 namespace RunningComponent {
@@ -85,9 +79,13 @@ export
 const runningKernelsItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:running-kernels',
     autoStart: true,
-    requires: [IStatusBar],
-    activate: (app: JupyterLab, statusBar: IStatusBar, manager: KernelManager) => {
-        statusBar.registerStatusItem('running-kernels-item', new RunningKernels( {host: app.shell} ), {align: 'left'});
+    requires: [IDefaultStatusesManager],
+    activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
+        manager.addDefaultStatus(
+            'running-kernels-item',
+            new RunningKernels({ host: app.shell }),
+            { align: 'left' }
+        );
     }
 };
 
