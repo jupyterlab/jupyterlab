@@ -3,6 +3,10 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 
 import { ApplicationShell } from '@jupyterlab/application';
+import { ArrayExt, each } from '@phosphor/algorithm';
+import { IDefaultStatusesManager } from './defaults';
+import { IObservableSet } from './util/observableset';
+import { IObservableMap } from '@jupyterlab/observables';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
@@ -16,14 +20,14 @@ export interface IStatusBar {
     registerStatusItem(
         id: string,
         widget: Widget,
-        opts: IStatusBar.IStatusItemOptions
+        opts: IStatusBar.IItemOptions
     ): void;
 }
 
 export namespace IStatusBar {
     export type Alignment = 'right' | 'left';
 
-    export interface IStatusItemOptions {
+    export interface IItemOptions {
         align?: IStatusBar.Alignment;
         priority?: number;
     }
@@ -42,6 +46,7 @@ export class StatusBar extends Widget implements IStatusBar {
         super();
 
         this._host = options.host;
+        this._defaultManager = options.defaultManager;
 
         this.id = STATUS_BAR_ID;
         this.addClass(STATUS_BAR_CLASS);
@@ -61,12 +66,22 @@ export class StatusBar extends Widget implements IStatusBar {
         rootLayout.addWidget(rightPanel);
 
         this._host.addToBottomArea(this);
+
+        this._defaultManager.enabledChanged.connect(
+            this.onEnabledDefaultItemChange
+        );
+        this._defaultManager.itemAdded.connect(this.onDefaultItemAdd);
+        this._defaultManager.allItems.forEach(elem => {
+            const { id, item, opts } = elem;
+
+            this.registerStatusItem(id, item, opts);
+        });
     }
 
     registerStatusItem(
         id: string,
         widget: Widget,
-        opts: IStatusBar.IStatusItemOptions = {}
+        opts: IStatusBar.IItemOptions = {}
     ) {
         if (id in this._statusItems) {
             throw new Error(`Status item ${id} already registered.`);
@@ -81,14 +96,31 @@ export class StatusBar extends Widget implements IStatusBar {
             priority
         };
 
+        let rankItem = {
+            id,
+            priority
+        };
+
         widget.addClass(STATUS_BAR_ITEM_CLASS);
 
         this._statusItems[id] = wrapper;
 
         if (align === 'left') {
-            this._leftSide.addWidget(widget);
+            let insertIndex = this._findInsertIndex(
+                this._leftRankItems,
+                rankItem
+            );
+
+            ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
+            this._leftSide.insertWidget(insertIndex, widget);
         } else {
-            this._rightSide.addWidget(widget);
+            let insertIndex = this._findInsertIndex(
+                this._rightRankItems,
+                rankItem
+            );
+
+            ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
+            this._rightSide.insertWidget(insertIndex, widget);
         }
 
         widget.show();
@@ -121,21 +153,71 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._host;
     }
 
+    get defaultManager(): IDefaultStatusesManager {
+        return this._defaultManager;
+    }
+
+    onEnabledDefaultItemChange = (
+        _allEnabled: IObservableSet<IDefaultStatusesManager.IItem>,
+        enableChange: IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
+    ) => {
+        const changeType = enableChange.type;
+
+        if (changeType === 'add') {
+            each(enableChange.values, element => {
+                this._statusItems[element.id].widget.show();
+            });
+        } else {
+            each(enableChange.values, element => {
+                this._statusItems[element.id].widget.hide();
+            });
+        }
+    };
+
+    onDefaultItemAdd = (
+        _allDefaults: IObservableMap<IDefaultStatusesManager.IItem>,
+        change: IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
+    ) => {
+        const { id, item, opts } = change.newValue;
+
+        this.registerStatusItem(id, item, opts);
+    };
+
+    private _findInsertIndex(
+        side: StatusBar.IRankItem[],
+        newItem: StatusBar.IRankItem
+    ): number {
+        return ArrayExt.findFirstIndex(
+            side,
+            item => item.priority > newItem.priority
+        );
+    }
+
+    private _leftRankItems: StatusBar.IRankItem[] = [];
+    private _rightRankItems: StatusBar.IRankItem[] = [];
     private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(
         null
     );
+
     private _host: ApplicationShell = null;
+    private _defaultManager: IDefaultStatusesManager = null;
 
     private _leftSide: Panel;
     private _rightSide: Panel;
 }
 
 export namespace StatusBar {
+    export interface IRankItem {
+        id: string;
+        priority: number;
+    }
+
     /**
      * Options for creating a new StatusBar instance
      */
     export interface IOptions {
         host: ApplicationShell;
+        defaultManager: IDefaultStatusesManager;
     }
 
     export interface IItem {

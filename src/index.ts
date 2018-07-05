@@ -6,22 +6,31 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { StatusBar, IStatusBar } from './statusBar';
 
 // Export default status bar items
-import { runningKernelsItem, notebookTrustItem } from './defaults';
+import {
+    defaultsManager,
+    runningKernelsItem,
+    notebookTrustItem,
+    IDefaultStatusesManager
+} from './defaults';
+
+export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar:plugin';
 
 /**
  * Initialization data for the statusbar extension.
  */
 const statusBar: JupyterLabPlugin<IStatusBar> = {
-    id: 'jupyterlab-statusbar/statusbar',
+    id: STATUSBAR_PLUGIN_ID,
     provides: IStatusBar,
     autoStart: true,
-    activate: (app: JupyterLab) => {
-        return new StatusBar({ host: app.shell });
+    requires: [IDefaultStatusesManager],
+    activate: (app: JupyterLab, defaultManager: IDefaultStatusesManager) => {
+        return new StatusBar({ host: app.shell, defaultManager });
     }
 };
 
 const plugins: JupyterLabPlugin<any>[] = [
     statusBar,
+    defaultsManager,
     runningKernelsItem,
     notebookTrustItem
 ];

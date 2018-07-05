@@ -2,14 +2,10 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
-import { IStatusBar } from './../statusBar';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { toArray } from '@phosphor/algorithm';
-
 import { Widget } from '@phosphor/widgets';
+import { IDefaultStatusesManager } from './manager';
 
 export class NotebookTrustStatus extends React.Component<
     NotebookTrustStatus.IProps,
@@ -111,14 +107,14 @@ export namespace NotebookTrust {
 export const notebookTrustItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:trusted-notebook',
     autoStart: true,
-    requires: [IStatusBar, INotebookTracker],
+    requires: [IDefaultStatusesManager, INotebookTracker],
     activate: (
         _app: JupyterLab,
-        statusBar: IStatusBar,
+        manager: IDefaultStatusesManager,
         tracker: INotebookTracker
     ) => {
-        statusBar.registerStatusItem(
-            'notebook-trust-status',
+        manager.addDefaultStatus(
+            'notebook-trust-item',
             new NotebookTrust({ tracker }),
             {}
         );
