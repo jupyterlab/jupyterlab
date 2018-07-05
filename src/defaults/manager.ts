@@ -70,40 +70,40 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
     }
 
     onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
-        let rawEnabledItems = settings.get('enabledItems').composite as
+        let rawEnabledItems = settings.get('enabledDefaultItems').composite as
             | string[]
             | null;
 
-        if (typeof rawEnabledItems !== null) {
-            let newEnabledItems = new Set(rawEnabledItems);
-
-            let toRemove = Private.difference(
-                this._enabledStatusNames,
-                newEnabledItems
-            );
-
-            let toAdd = Private.difference(
-                newEnabledItems,
-                this._enabledStatusNames
-            );
-
-            this._enabledStatusItems.deleteAll(
-                [...toRemove].map(element =>
-                    this._allDefaultStatusItems.get(element)
-                )
-            );
-
-            this._enabledStatusItems.deleteAll(
-                [...toAdd].map(element =>
-                    this._allDefaultStatusItems.get(element)
-                )
-            );
-
-            this._enabledStatusNames = newEnabledItems;
-        } else {
-            this._enabledStatusItems.clear();
-            this._enabledStatusNames.clear();
+        if (rawEnabledItems === null) {
+            rawEnabledItems = settings.default(
+                'enabledDefaultItems'
+            ) as string[];
         }
+
+        let newEnabledItems = new Set(rawEnabledItems);
+
+        let idsToRemove = Private.difference(
+            this._enabledStatusNames,
+            newEnabledItems
+        );
+
+        let idsToAdd = Private.difference(
+            newEnabledItems,
+            this._enabledStatusNames
+        );
+
+        let itemsToRemove = [...idsToRemove]
+            .map(element => this._allDefaultStatusItems.get(element))
+            .filter(elem => elem !== undefined);
+
+        let itemsToAdd = [...idsToAdd]
+            .map(element => this._allDefaultStatusItems.get(element))
+            .filter(elem => elem !== undefined);
+
+        this._enabledStatusItems.deleteAll(itemsToRemove);
+        this._enabledStatusItems.addAll(itemsToAdd);
+
+        this._enabledStatusNames = newEnabledItems;
     };
 
     get itemsChanged() {
@@ -142,6 +142,13 @@ export const defaultsManager: JupyterLabPlugin<IDefaultStatusesManager> = {
     autoStart: true,
     requires: [ISettingRegistry],
     activate: (_app: JupyterLab, settings: ISettingRegistry) => {
-        return new DefaultStatusesManager({ settings });
+        let manager = new DefaultStatusesManager({ settings });
+
+        manager.itemsChanged.connect((_allItems, itemChange) => {
+            console.log(`Items changed`);
+            console.log(itemChange);
+        });
+
+        return manager;
     }
 };
