@@ -1,0 +1,16 @@
+{
+    "jupyter.lab.setting-icon-class": "jp-StatusBarIcon",
+    "jupyter.lab.setting-icon-label": "Status Bar",
+    "title": "Status Bar",
+    "description": "Status Bar settings.",
+    "properties": {
+        "enabledDefaultItems": {
+            "type": "array",
+            "title": "Default Status Items",
+            "description": "Which default items should appear in the status bar",
+            "default": ["notebook-trust-item", "running-kernels-item"]
+        }
+    },
+    "additionalProperties": false,
+    "type": "object"
+}
