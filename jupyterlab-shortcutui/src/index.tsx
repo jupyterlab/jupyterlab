@@ -31,6 +31,7 @@ export class ShortcutObject {
   selector: string
   category: string
   id: string
+  numberOfShortcuts: number
   constructor() {
     this.commandName = ''
     this.label = ''
@@ -39,6 +40,7 @@ export class ShortcutObject {
     this.selector = ''
     this.category = ''
     this.id = ''
+    this.numberOfShortcuts = 0
   }
 }
 

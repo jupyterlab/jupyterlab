@@ -1,21 +1,26 @@
 import {
-    ShortcutObject
+  ShortcutObject
 } from '../index'
 
 import {
-    ShortcutButton
+  ShortcutButton
 } from './ShortcutButton'
+
+import {
+  ShortcutInput
+} from './ShortcutInput'
 
 import * as React from 'react';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
-    shortcut: ShortcutObject;
-    handleUpdate: Function;
-    resetShortcut: Function;
-    deleteShortcut: Function;
-    showSelectors: boolean;
-  }
+  shortcut: ShortcutObject;
+  handleUpdate: Function;
+  resetShortcut: Function;
+  deleteShortcut: Function;
+  showSelectors: boolean;
+  keyBindingsUsed: Object;
+}
   
 /** State for ShortcutItem component */
 export interface IShortcutItemState {
@@ -33,30 +38,6 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
     }
   }
   
-  /** Parse and normalize user input */
-  private handleInput = (event: any) : void => {
-    if (event.key == 'Backspace'){
-      this.setState({value: this.state.value.substr(0, 
-        this.state.value.lastIndexOf(' ') + 1)});
-    } else if (event.key == 'Control'){
-      this.setState({value: this.state.value + ' Ctrl'});
-    } else if (event.key == 'Meta'){
-      this.setState({value: this.state.value + ' Accel'});
-    } else if (event.key == 'Alt' || event.key == 'Shift'  
-      || event.key == 'Enter' || event.ctrlKey || event.metaKey) {
-      this.setState({value: this.state.value + ' ' + event.key});
-    } else {
-      this.setState({value: this.state.value + ' '});
-    }
-  }
-
-  /** Update input box's displayed value */
-  private updateInputValue = (event: any) : void => {
-    this.setState({
-      value: event.target.value
-    });
-  }
-
   /** Toggle display state of input area */
   private toggleInput = () : void => {
     this.setState(prevState => ({
@@ -65,7 +46,34 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
     }));
   }
 
+  toSymbols = (value: string): string => {
+    let display: string[] = []
+    let wordKeys = ['Tab', 'Enter', 'ArrowUp','ArrowDown','ArrowRight','ArrowLeft','Escape'];
+    for (let key of value.split(' ')) {
+      if (key === 'Ctrl') {
+        display.push('⌃')
+      }
+      else if (key === 'Accel') {
+        display.push('⌘')
+      }
+      else if (key === 'Shift') {
+        display.push('⇧')
+      }
+      else if (key === 'Alt') {
+        display.push('⌥')
+      }
+      else if (wordKeys.includes(key)) {
+        display.push(key)
+      }
+      else {
+        display.push(key.toUpperCase())
+      }
+    }
+    return display.join(' ')
+  }
+
   render() {
+    let first = true
     return (
       <div className='jp-cmditem row'>
         <div className='cell'>
@@ -76,37 +84,31 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
         </div>
         <div className='cell'>
           {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '').map((key, index) => 
-            <ShortcutButton 
-              key={key}
-              shortcutKeys={this.props.shortcut.keys[key]} 
-              deleteShortcut={this.props.deleteShortcut}
-              shortcutObject={this.props.shortcut} 
-              shortcutId={key}
-            />
+            <div className="jp-shortcut-div" key={key + '_' + index}>
+              <ShortcutButton 
+                shortcutKeys={this.props.shortcut.keys[key]} 
+                deleteShortcut={this.props.deleteShortcut}
+                shortcutObject={this.props.shortcut} 
+                shortcutId={key}
+                toSymbols={this.toSymbols}
+                index={index}
+                first={first}
+              />
+              {(first && Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '').length > 1) ? <p>or</p> : null}
+              {first = false}
+            </div>
           )}
           {Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '').length < 2 &&
             <span className='jp-input-plus' onClick={this.toggleInput}>+</span>
           }
-          {(this.state.displayInput ? (
-            <div className='cell'>
-              <input className='jp-input' 
-                value={this.state.value} 
-                onChange={this.updateInputValue} 
-                onKeyDown={this.handleInput}>
-              </input>
-              <button className='jp-submit' 
-                onClick= {() => {
-                    this.props.handleUpdate(this.props.shortcut, Object.keys(this.props.shortcut.keys).length, this.state.value); 
-                    this.toggleInput();
-                  }
-                }>
-                Submit
-              </button>
-            </div>
-          ) : (
-            null
-            )
-          )}
+          {this.state.displayInput && 
+            <ShortcutInput handleUpdate={this.props.handleUpdate}
+              toggleInput={this.toggleInput}
+              shortcut={this.props.shortcut}
+              toSymbols={this.toSymbols}
+              keyBindingsUsed={this.props.keyBindingsUsed}
+            />
+          }
         </div>
         <div className='cell'>
           <div className='jp-source'>{this.props.shortcut.source}</div>

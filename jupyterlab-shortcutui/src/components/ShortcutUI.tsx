@@ -43,6 +43,7 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentFilter: string;
+  keyBindingsUsed: Object
 }
 
 /** Top level React component for widget */
@@ -57,7 +58,8 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     shortcutsFetched: false,
     searchQuery: '',
     showSelectors: false,
-    currentFilter: 'category'
+    currentFilter: 'category',
+    keyBindingsUsed: undefined
   }
 
   /** Fetch shortcut list on mount */
@@ -82,15 +84,17 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       let key = shortcuts[shortcutKey]['command'] + "_" + shortcuts[shortcutKey]['selector']
       if(Object.keys(shortcutObjects).includes(key)) {
         shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys']
+        shortcutObjects[key].numberOfShortcuts = 2
       } else {
         let shortcutObject = new ShortcutObject()
         shortcutObject.commandName = shortcuts[shortcutKey]['command']
         shortcutObject.label = shortcuts[shortcutKey]['title']
         shortcutObject.category = shortcuts[shortcutKey]['category']
-        shortcutObject.keys[shortcutObject.commandName] = shortcuts[shortcutKey]['keys']
+        shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys']
         shortcutObject.selector = shortcuts[shortcutKey]['selector']
         shortcutObject.source = 'Default'
         shortcutObject.id = shortcutKey
+        shortcutObject.numberOfShortcuts = 1
 
         shortcutObjects[key] = shortcutObject;
       }
@@ -98,21 +102,31 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     return shortcutObjects
   }
 
+  /** Get list of all shortcut keybindings currently in use */
+  private _getKeyBindingsUsed(shortcuts: Object) : Object {
+    let keyBindingsUsed: Object = {};
+    Object.keys(shortcuts).forEach(shortcut => {
+      for (let key of Object.keys(shortcuts[shortcut].keys)) {
+        keyBindingsUsed[shortcuts[shortcut].keys[key].join(' ') + '_' + shortcuts[shortcut].selector] = 
+        shortcuts[shortcut].category
+        + ': ' + shortcuts[shortcut].label
+      }
+    })
+    return keyBindingsUsed
+  }
+
   /** Fetch shortcut list from SettingRegistry  */
   private _getShortcutList() : void {
-    // this.props.commandList.map(command => { 
-    //   return this.getCommandShortcut(command);
-    //   }
-    // )
     this.props.settingRegistry.reload(this.props.shortcutPlugin).then(shortcuts => {
       let shortcutObjects = this._getShortcutObjects(shortcuts)
+      let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
       this._getShortcutSource(shortcutObjects)
-      console.log(shortcutObjects)
 
       this.setState({
         shortcutList: shortcutObjects,
         filteredShortcutList: this.searchFilterShortcuts(shortcutObjects),
-        shortcutsFetched: true
+        shortcutsFetched: true,
+        keyBindingsUsed: keyBindingsUsed
       }, () => this.filterShortcuts())
     })
   }
@@ -140,19 +154,25 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   /** Set new shortcut for command, refresh state */
-  handleUpdate = (shortcutObject: ShortcutObject, length: number, value: string) : void => {
-    console.log(shortcutObject, length, value)
+  handleUpdate = (shortcutObject: ShortcutObject, keys: string[]) : void => {
     let commandId: string;
     commandId = shortcutObject.id
-    if(length > 0 && commandId.substr(commandId.length - 2) !== '-2' && commandId.substr(commandId.length - 2) !== '-1') {
+    if(shortcutObject.numberOfShortcuts === 1) {
       commandId = commandId + '-' + '2'
+    }
+    else {
+      Object.keys(shortcutObject.keys).forEach(key => {
+        if(shortcutObject.keys[key][0] === '') {
+          commandId = key
+        }
+      });
     }
     this.props.settingRegistry
     .set(this.props.shortcutPlugin, 
       commandId, 
       {
         command: shortcutObject.commandName, 
-        keys: [value], 
+        keys: keys, 
         selector: shortcutObject.selector,
         title: shortcutObject.label,
         category: shortcutObject.category
@@ -373,6 +393,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           handleUpdate={this.handleUpdate}
           deleteShortcut={this.deleteShortcut}
           showSelectors={this.state.showSelectors}
+          keyBindingsUsed={this.state.keyBindingsUsed}
         />
       </div>
     )
