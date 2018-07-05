@@ -4,14 +4,22 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusBar } from '../statusBar';
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { ISignal } from '@phosphor/signaling';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import { IObservableSet, ObservableSet } from '../util/observableset';
 import { STATUSBAR_PLUGIN_ID } from '..';
 
 export interface IDefaultStatusesManager {
-    readonly itemsChanged: ISignal<
+    readonly enabledChanged: ISignal<
         ObservableSet<IDefaultStatusesManager.IItem>,
         IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
     >;
+
+    readonly itemAdded: ISignal<
+        ObservableMap<IDefaultStatusesManager.IItem>,
+        IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
+    >;
+
+    readonly allItems: IDefaultStatusesManager.IItem[];
 
     addDefaultStatus(
         id: string,
@@ -106,14 +114,21 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
         this._enabledStatusNames = newEnabledItems;
     };
 
-    get itemsChanged() {
+    get enabledChanged() {
         return this._enabledStatusItems.changed;
     }
 
-    private _allDefaultStatusItems: Map<
-        string,
+    get itemAdded() {
+        return this._allDefaultStatusItems.changed;
+    }
+
+    get allItems(): IDefaultStatusesManager.IItem[] {
+        return this._allDefaultStatusItems.values();
+    }
+
+    private _allDefaultStatusItems: ObservableMap<
         IDefaultStatusesManager.IItem
-    > = new Map();
+    > = new ObservableMap();
     private _enabledStatusNames: Set<string> = new Set();
     private _enabledStatusItems: ObservableSet<
         IDefaultStatusesManager.IItem
@@ -143,11 +158,6 @@ export const defaultsManager: JupyterLabPlugin<IDefaultStatusesManager> = {
     requires: [ISettingRegistry],
     activate: (_app: JupyterLab, settings: ISettingRegistry) => {
         let manager = new DefaultStatusesManager({ settings });
-
-        manager.itemsChanged.connect((_allItems, itemChange) => {
-            console.log(`Items changed`);
-            console.log(itemChange);
-        });
 
         return manager;
     }
