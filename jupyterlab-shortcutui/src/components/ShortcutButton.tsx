@@ -6,15 +6,15 @@ import * as React from 'react';
 
 /** Props for ShortcutButton component */
 export interface IShortcutButtonProps {
-  shortcutKeys: string[];
-  deleteShortcut: Function;
-  shortcutObject: ShortcutObject;
-  shortcutId: string;
-  first: boolean;
-  index: number;
-  toSymbols: Function;
+  shortcutKeys: string[],
+  deleteShortcut: Function,
+  shortcutObject: ShortcutObject,
+  shortcutId: string,
+  index: number,
+  toSymbols: Function
 }
 
+/** React component for an interactive button displaying a command's keyboard shortcut */
 export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   constructor(props) {
     super(props)
@@ -22,7 +22,7 @@ export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   render() {
     return (
       <button 
-        className={this.props.first ? "jp-shortcut jp-shortcut-left" : "jp-shortcut jp-shortcut-right"} 
+        className={this.props.index === 0 ? "jp-shortcut jp-shortcut-left" : "jp-shortcut jp-shortcut-right"} 
         onClick={() => 
           this.props.deleteShortcut(this.props.shortcutObject, this.props.shortcutId)
         }

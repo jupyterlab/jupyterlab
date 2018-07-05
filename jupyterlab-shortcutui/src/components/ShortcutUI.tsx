@@ -1,6 +1,6 @@
 import {
   ISettingRegistry
-  } from '@jupyterlab/coreutils';
+} from '@jupyterlab/coreutils';
   
 import {
   CommandRegistry
@@ -31,7 +31,6 @@ export interface IShortcutUIProps {
   commandList: string[];
   settingRegistry: ISettingRegistry;
   shortcutPlugin: string;
-  categories: Array<string>;
   commandRegistry: CommandRegistry
 }
 
@@ -42,7 +41,7 @@ export interface IShortcutUIState {
   shortcutsFetched: boolean;
   searchQuery: string;
   showSelectors: boolean;
-  currentFilter: string;
+  currentSort: string;
   keyBindingsUsed: Object
 }
 
@@ -58,7 +57,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     shortcutsFetched: false,
     searchQuery: '',
     showSelectors: false,
-    currentFilter: 'category',
+    currentSort: 'category',
     keyBindingsUsed: undefined
   }
 
@@ -67,13 +66,13 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     this._getShortcutList();
   }
 
-  /** Flag all custom shortcuts as custom */
-  private _getShortcutSource(shortcutObjects: Object) : void {
-    this.props.settingRegistry.load(this.props.shortcutPlugin)
-    .then(settings => Object.keys(settings.user).forEach(key => {
-      shortcutObjects[settings.user[key]['command'] 
-      + "_" + settings.user[key]['selector']].source = 'Custom'
-    }))
+  /** Flag all user-set shortcuts as custom */
+  private async _getShortcutSource(shortcutObjects: Object) : Promise<void> {
+    let customShortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    Object.keys(customShortcuts.user).forEach(key => {
+      shortcutObjects[customShortcuts.user[key]['command'] 
+      + "_" + customShortcuts.user[key]['selector']].source = 'Custom'
+    })
   }
 
   /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
@@ -81,7 +80,9 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     shortcuts = shortcuts['composite']
     let shortcutObjects = {}
     Object.keys(shortcuts).forEach(shortcutKey => {
-      let key = shortcuts[shortcutKey]['command'] + "_" + shortcuts[shortcutKey]['selector']
+      let key = shortcuts[shortcutKey]['command'] 
+                + "_" 
+                + shortcuts[shortcutKey]['selector']
       if(Object.keys(shortcutObjects).includes(key)) {
         shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys']
         shortcutObjects[key].numberOfShortcuts = 2
@@ -107,28 +108,30 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     let keyBindingsUsed: Object = {};
     Object.keys(shortcuts).forEach(shortcut => {
       for (let key of Object.keys(shortcuts[shortcut].keys)) {
-        keyBindingsUsed[shortcuts[shortcut].keys[key].join(' ') + '_' + shortcuts[shortcut].selector] = 
-        shortcuts[shortcut].category
-        + ': ' + shortcuts[shortcut].label
+        keyBindingsUsed[shortcuts[shortcut]
+        .keys[key].join(' ') + '_' + shortcuts[shortcut].selector] = 
+        shortcuts[shortcut].category + ': ' + shortcuts[shortcut].label
       }
     })
     return keyBindingsUsed
   }
 
   /** Fetch shortcut list from SettingRegistry  */
-  private _getShortcutList() : void {
-    this.props.settingRegistry.reload(this.props.shortcutPlugin).then(shortcuts => {
-      let shortcutObjects = this._getShortcutObjects(shortcuts)
-      let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
-      this._getShortcutSource(shortcutObjects)
+  private async _getShortcutList() : Promise<void> {
+    let shortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    let shortcutObjects = this._getShortcutObjects(shortcuts)
+    await this._getShortcutSource(shortcutObjects)
+    let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
 
-      this.setState({
+    this.setState(
+      {
         shortcutList: shortcutObjects,
         filteredShortcutList: this.searchFilterShortcuts(shortcutObjects),
         shortcutsFetched: true,
         keyBindingsUsed: keyBindingsUsed
-      }, () => this.filterShortcuts())
-    })
+      }, 
+      () => this.sortShortcuts()
+    )
   }
 
   /** Set the current seach query */
@@ -199,16 +202,15 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     this._getShortcutList();
   }
 
-
-  /** Fetch shortcut from SettingRegistry */
-  // private getCommandShortcut(commandName: string) : Promise<Object> {
-  //   return this.props.settingRegistry.get(this.props.shortcutPlugin, commandName)
-  // }
-
   /** Reset a specific shortcut to its default settings */
-  resetShortcut = (commandName: string) : void => {
-    this.props.settingRegistry.remove(this.props.shortcutPlugin, commandName)
-      .then(() => this._getShortcutList());
+  resetShortcut = (shortcutObject: ShortcutObject) : void => {
+    if(Object.keys(shortcutObject.keys).length > 1) {
+      this.props.settingRegistry
+      .remove(this.props.shortcutPlugin, Object.keys(shortcutObject.keys)[1])
+    }
+    this.props.settingRegistry
+    .remove(this.props.shortcutPlugin, Object.keys(shortcutObject.keys)[0])
+    .then(() => this._getShortcutList())
   }
 
   /** Perform a fuzzy search on a single command item. */
@@ -354,14 +356,14 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   /** Set the current list sort order */
-  updateFilter = (value: string) : void => {
-    this.setState({currentFilter: value}, this.filterShortcuts)
+  updateSort = (value: string) : void => {
+    this.setState({currentSort: value}, this.sortShortcuts)
   }
 
   /** Sort shortcut list using current sort property  */
-  filterShortcuts() : void {
+  sortShortcuts() : void {
     let shortcuts = this.state.filteredShortcutList
-    let filterCritera = this.state.currentFilter
+    let filterCritera = this.state.currentSort
     if(filterCritera === 'command') {
       filterCritera = 'label'
     }
@@ -385,7 +387,6 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           resetShortcuts={this.resetShortcuts}
           openAdvanced={this.openAdvanced}
           toggleSelectors={this.toggleSelectors}
-          updateFilter={this.updateFilter}
         />
         <ShortcutList 
           shortcuts={this.state.filteredShortcutList} 
@@ -394,6 +395,8 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           deleteShortcut={this.deleteShortcut}
           showSelectors={this.state.showSelectors}
           keyBindingsUsed={this.state.keyBindingsUsed}
+          updateSort={this.updateSort}
+          currentSort={this.state.currentSort}
         />
       </div>
     )
