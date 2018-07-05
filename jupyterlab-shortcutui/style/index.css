@@ -35,10 +35,17 @@
     padding-bottom: 60px;
 }
 
+.advanced-options {
+    display: grid;
+    grid-row-gap: 6px;
+    width: 20%;
+}
+
 /* Top Navigation links */
 .jp-link {
     color: var(--jp-brand-color2);
     text-decoration: none;
+    display: block;
 }
 
 .jp-link:hover {
@@ -49,12 +56,8 @@
     color: var(--jp-brand-color0);
 }
 
-.jp-link:nth-of-type(1) {
+.jp-link-left {
     width: 30%;
-}
-
-.jp-link:nth-of-type(2) {
-    width: 20%;
 }
 
 .jp-search {
@@ -63,6 +66,9 @@
     border-radius: var(--jp-border-radius);
     height: 20px;
     width: 50%;
+    font-size: var(--jp-ui-font-size1);
+    padding: 3px;
+    padding-left: 6px;
 }
 
 .jp-search:focus{
@@ -81,9 +87,42 @@
     border-collapse: collapse;
 }
 
+/* Column titles and sort button div */
+.title-div {
+    display: flex;
+}
+
+/* sort button */
+.sort {
+    font-weight: regular;
+    transform: rotate(180deg);
+    padding-left: 10px;
+    color: var(--jp-ui-font-color2);
+    border: none;
+}
+
+.sort:focus {
+    outline: none;
+}
+
+.sort:active {
+    font-weight: 600;
+    color: var(--jp-ui-font-color0);
+}
+
+.sort:hover {
+    font-weight: 600;
+    color: var(--jp-ui-font-color0);
+}
+
+.selected-sort {
+    font-weight: bold;
+    color: var(--jp-ui-font-color0)
+}
+
 /* Shortcut command items */
 .jp-cmditem {
-    height: 20px;
+    height: 25px;
     padding: 10px;
     display: flex;
     width: 100%;
@@ -99,7 +138,6 @@
     padding-right: 10px;
     align-self: left; 
 }
-
 
 .shortcut-cell-container {
     display: -webkit-box;
@@ -158,6 +196,8 @@
     /* font-family: Source Code Pro; */
     font-size: var(--jp-ui-font-size2);
     color: var(--jp-brand-color2);
+    transform: rotate(270deg);
+    height: 2.5%;
 }
 
 .jp-input {
@@ -167,6 +207,7 @@
     border-color: var(--jp-border-color2);
     margin-right: 10px;
     margin-left: 10px;
+    height: 15px;
 }
     
 .jp-input:focus {
@@ -185,32 +226,9 @@
     outline: none; 
 }
 
-/* .jp-label {
-    display: inline-block;
-    /* font: 'Moneserrat'; 
-    font-weight: var(--jp-content-heading-font-weight);
-    size: 14px;
-    color: #616161;
-    padding-right: 10px;
-    align-self: left; 
-} */
-
 .jp-source {
     display: inline-block;
 }
-
-/* p {
-    font: 'Moneserrat';
-    font-weight: 400;
-    size: 14px;
-    color: #616161;
-} */
-
-/* input {
-    padding: 2px;
-    background: white;
-    display: inline-block;
-} */
 
 .jp-reset {
     color: var(--jp-brand-color2);
