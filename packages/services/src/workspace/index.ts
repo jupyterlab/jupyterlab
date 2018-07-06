@@ -59,13 +59,13 @@ export class WorkspaceManager {
   async list(): Promise<string[]> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
-    const { makeRequest } = ServerConnection;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, '');
     const response = await makeRequest(url, {}, serverSettings);
 
     if (response.status !== 200) {
-      throw new ServerConnection.ResponseError(response);
+      throw new ResponseError(response);
     }
 
     const result = await response.json();
@@ -83,14 +83,14 @@ export class WorkspaceManager {
   async remove(id: string): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
-    const { makeRequest } = ServerConnection;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
     const init = { method: 'DELETE' };
     const response = await makeRequest(url, init, serverSettings);
 
     if (response.status !== 204) {
-      throw new ServerConnection.ResponseError(response);
+      throw new ResponseError(response);
     }
   }
 
