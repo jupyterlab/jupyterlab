@@ -1,14 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt,
-  each,
-  find,
-  IIterator,
-  iter,
-  toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
@@ -561,9 +554,7 @@ export class ApplicationShell extends Widget {
     // Make a copy of all the widget in the dock panel (using `toArray()`)
     // before removing them because removing them while iterating through them
     // modifies the underlying data of the iterator.
-    each(toArray(this._dockPanel.widgets()), widget => {
-      widget.close();
-    });
+    toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
   }
 
   /**

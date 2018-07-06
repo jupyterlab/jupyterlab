@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { toArray, iter } from '@phosphor/algorithm';
+
+import { Widget, DockLayout } from '@phosphor/widgets';
+
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import {
@@ -41,6 +45,10 @@ namespace CommandIDs {
   export const close = 'docmanager:close';
 
   export const closeAllFiles = 'docmanager:close-all-files';
+
+  export const closeOtherTabs = 'docmanager:close-other-tabs';
+
+  export const closeRightTabs = 'docmanager:close-right-tabs';
 
   export const deleteFile = 'docmanager:delete-file';
 
@@ -162,14 +170,14 @@ function addCommands(
   opener: DocumentManager.IWidgetOpener,
   settingRegistry: ISettingRegistry
 ): void {
-  const { commands, docRegistry } = app;
+  const { commands, docRegistry, shell } = app;
   const category = 'File Operations';
   const isEnabled = () => {
-    const { currentWidget } = app.shell;
+    const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
   const fileType = () => {
-    const { currentWidget } = app.shell;
+    const { currentWidget } = shell;
     if (!currentWidget) {
       return 'File';
     }
@@ -180,10 +188,57 @@ function addCommands(
     const fts = docRegistry.getFileTypesForPath(context.path);
     return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
   };
+  const closeWidgets = (widgets: Array<Widget>): void => {
+    widgets.forEach(widget => widget.close());
+  };
+  const findTab = (
+    area: DockLayout.AreaConfig,
+    widget: Widget
+  ): DockLayout.ITabAreaConfig | null => {
+    switch (area.type) {
+      case 'split-area':
+        const iterator = iter(area.children);
+        let tab: DockLayout.ITabAreaConfig | null = null;
+        let value: DockLayout.AreaConfig | null = null;
+        do {
+          value = iterator.next();
+          if (value) {
+            tab = findTab(value, widget);
+          }
+        } while (!tab && value);
+        return tab;
+      case 'tab-area':
+        const { id } = widget;
+        return area.widgets.some(widget => widget.id === id) ? area : null;
+      default:
+        return null;
+    }
+  };
+  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
+    const { mainArea } = shell.saveLayout();
+    if (mainArea.mode !== 'multiple-document') {
+      return null;
+    }
+    let area = mainArea.dock.main;
+    if (!area) {
+      return null;
+    }
+    return findTab(area, widget);
+  };
+  const widgetsRightOf = (widget: Widget): Array<Widget> => {
+    const { id } = widget;
+    const tabArea = tabAreaFor(widget);
+    const widgets = tabArea ? tabArea.widgets || [] : [];
+    const index = widgets.findIndex(widget => widget.id === id);
+    if (index < 0) {
+      return [];
+    }
+    return widgets.slice(index + 1);
+  };
 
   commands.addCommand(CommandIDs.close, {
     label: () => {
-      const widget = app.shell.currentWidget;
+      const widget = shell.currentWidget;
       let name = 'File';
       if (widget) {
         const typeName = fileType();
@@ -192,10 +247,10 @@ function addCommands(
       return `Close ${name}`;
     },
     isEnabled: () =>
-      !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
+      !!shell.currentWidget && !!shell.currentWidget.title.closable,
     execute: () => {
-      if (app.shell.currentWidget) {
-        app.shell.currentWidget.close();
+      if (shell.currentWidget) {
+        shell.currentWidget.close();
       }
     }
   });
@@ -203,7 +258,40 @@ function addCommands(
   commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
     execute: () => {
-      app.shell.closeAll();
+      shell.closeAll();
+    }
+  });
+
+  commands.addCommand(CommandIDs.closeOtherTabs, {
+    label: () => `Close Other Tabs`,
+    isEnabled: () => {
+      // Ensure there are at least two widgets.
+      const iterator = shell.widgets('main');
+      return !!iterator.next() && !!iterator.next();
+    },
+    execute: () => {
+      const widget = shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const { id } = widget;
+      const otherWidgets = toArray(shell.widgets('main')).filter(
+        widget => widget.id !== id
+      );
+      closeWidgets(otherWidgets);
+    }
+  });
+
+  commands.addCommand(CommandIDs.closeRightTabs, {
+    label: () => `Close Tabs to Right`,
+    isEnabled: () =>
+      shell.currentWidget && widgetsRightOf(shell.currentWidget).length > 0,
+    execute: () => {
+      const widget = shell.currentWidget;
+      if (!widget) {
+        return;
+      }
+      closeWidgets(widgetsRightOf(widget));
     }
   });
 
@@ -310,7 +398,7 @@ function addCommands(
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.revert();
       }
     }
@@ -322,7 +410,7 @@ function addCommands(
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         if (context.model.readOnly) {
           return context.revert();
         }
@@ -337,7 +425,7 @@ function addCommands(
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         if (context.model.readOnly) {
           return showDialog({
             title: 'Cannot Save',
@@ -363,7 +451,7 @@ function addCommands(
     label: () => 'Save All',
     caption: 'Save all open documents',
     isEnabled: () => {
-      const iterator = app.shell.widgets('main');
+      const iterator = shell.widgets('main');
       let widget = iterator.next();
       while (widget) {
         if (docManager.contextForWidget(widget)) {
@@ -374,7 +462,7 @@ function addCommands(
       return false;
     },
     execute: () => {
-      const iterator = app.shell.widgets('main');
+      const iterator = shell.widgets('main');
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
       let widget = iterator.next();
@@ -396,7 +484,7 @@ function addCommands(
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.saveAs();
       }
     }
@@ -407,7 +495,7 @@ function addCommands(
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return renameDialog(docManager, context!.path);
       }
     }
@@ -417,7 +505,7 @@ function addCommands(
     label: () => `New View for ${fileType()}`,
     isEnabled,
     execute: args => {
-      const widget = app.shell.currentWidget;
+      const widget = shell.currentWidget;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       if (!widget) {
@@ -449,7 +537,7 @@ function addCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
-      let context = docManager.contextForWidget(app.shell.currentWidget);
+      let context = docManager.contextForWidget(shell.currentWidget);
       if (!context) {
         return;
       }
@@ -489,6 +577,16 @@ function addCommands(
     selector: '[data-type="document-title"]',
     rank: 3
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.closeOtherTabs,
+    selector: '[data-type="document-title"]',
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.closeRightTabs,
+    selector: '[data-type="document-title"]',
+    rank: 5
+  });
 
   [
     CommandIDs.openDirect,
@@ -499,6 +597,8 @@ function addCommands(
     CommandIDs.clone,
     CommandIDs.close,
     CommandIDs.closeAllFiles,
+    CommandIDs.closeOtherTabs,
+    CommandIDs.closeRightTabs,
     CommandIDs.toggleAutosave
   ].forEach(command => {
     palette.addItem({ command, category });
