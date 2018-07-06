@@ -4,6 +4,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "preserveWatchOutput": true,
     "module": "commonjs",

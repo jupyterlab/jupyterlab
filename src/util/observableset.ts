@@ -4,6 +4,8 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
+import { SetExt } from './set';
+
 export interface IObservableSet<T> extends IDisposable {
     readonly changed: ISignal<this, IObservableSet.IChangedArgs<T>>;
     readonly size: number;
@@ -56,7 +58,7 @@ export class ObservableSet<T> implements IObservableSet<T> {
     }
 
     addAll(values: Array<T>): void {
-        let newValues = Private.difference(new Set(values), this._set);
+        let newValues = SetExt.difference(new Set(values), this._set);
 
         if (newValues.size > 0) {
             newValues.forEach(element => {
@@ -84,7 +86,7 @@ export class ObservableSet<T> implements IObservableSet<T> {
     }
 
     deleteAll(values: Array<T>): void {
-        let toRemoveValues = Private.intersection(this._set, new Set(values));
+        let toRemoveValues = SetExt.intersection(this._set, new Set(values));
 
         if (toRemoveValues.size > 0) {
             toRemoveValues.forEach(element => {
@@ -129,15 +131,5 @@ export class ObservableSet<T> implements IObservableSet<T> {
 export namespace ObservableSet {
     export interface IOptions<T> {
         values?: IterableOrArrayLike<T>;
-    }
-}
-
-namespace Private {
-    export function intersection<T>(a: Set<T>, b: Set<T>): Set<T> {
-        return new Set([...a].filter(x => b.has(x)));
-    }
-
-    export function difference<T>(a: Set<T>, b: Set<T>): Set<T> {
-        return new Set([...a].filter(x => !b.has(x)));
     }
 }
