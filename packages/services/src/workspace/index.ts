@@ -78,6 +78,29 @@ export class WorkspaceManager {
   }
 
   /**
+   * Remove a workspace from the server.
+   *
+   * @param id - The workspaces's ID.
+   *
+   * @returns A promise that resolves with `undefined` or rejects with a
+   * `ServerConnection.IError`.
+   */
+  remove(id: string): Promise<void> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, id);
+    const init = { method: 'DELETE' };
+    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+
+    return promise.then(response => {
+      if (response.status !== 204) {
+        throw new ServerConnection.ResponseError(response);
+      }
+    });
+  }
+
+  /**
    * Save a workspace.
    *
    * @param id - The workspace's ID.
