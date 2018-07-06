@@ -112,3 +112,4 @@ node_modules/
 .ipynb_checkpoints
 .DS_Store
 package-lock.json
+schema/plugin.json
