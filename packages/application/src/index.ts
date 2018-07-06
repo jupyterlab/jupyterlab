@@ -43,6 +43,7 @@ export class JupyterLab extends Application<ApplicationShell> {
   constructor(options: JupyterLab.IOptions = {}) {
     super({ shell: new ApplicationShell() });
     this._busySignal = new Signal(this);
+    this._dirtySignal = new Signal(this);
     this._info = { ...JupyterLab.defaultInfo, ...options };
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
@@ -99,10 +100,17 @@ export class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * Returns a signal for when application changes it's busy status.
+   * Returns a signal for when application changes its busy status.
    */
   get busySignal(): ISignal<JupyterLab, boolean> {
     return this._busySignal;
+  }
+
+  /**
+   * Returns a signal for when application changes its dirty status.
+   */
+  get dirtySignal(): ISignal<JupyterLab, boolean> {
+    return this._dirtySignal;
   }
 
   /**
@@ -128,16 +136,24 @@ export class JupyterLab extends Application<ApplicationShell> {
    * @returns A disposable used to clear the dirty state for the caller.
    */
   setDirty(): IDisposable {
+    const oldDirty = this.isDirty;
     this._dirtyCount++;
+    if (this.isDirty !== oldDirty) {
+      this._dirtySignal.emit(this.isDirty);
+    }
     return new DisposableDelegate(() => {
+      const oldDirty = this.isDirty;
       this._dirtyCount = Math.max(0, this._dirtyCount - 1);
+      if (this.isDirty !== oldDirty) {
+        this._dirtySignal.emit(this.isDirty);
+      }
     });
   }
 
   /**
    * Set the application state to busy.
    *
-   * @returns A disposable used to clear the dirty state for the caller.
+   * @returns A disposable used to clear the busy state for the caller.
    */
   setBusy(): IDisposable {
     const oldBusy = this.isBusy;
@@ -192,6 +208,7 @@ export class JupyterLab extends Application<ApplicationShell> {
   private _dirtyCount = 0;
   private _busyCount = 0;
   private _busySignal: Signal<JupyterLab, boolean>;
+  private _dirtySignal: Signal<JupyterLab, boolean>;
 }
 
 /**
