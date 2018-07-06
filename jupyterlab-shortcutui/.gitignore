@@ -1,5 +1,0 @@
-*.bundle.*
-lib/
-node_modules/
-*.egg-info/
-.ipynb_checkpoints
