@@ -1,26 +1,26 @@
 import {
   JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application'
+} from '@jupyterlab/application';
 
 import {
   ISettingRegistry
-} from '@jupyterlab/coreutils'
+} from '@jupyterlab/coreutils';
 
 import {
   ICommandPalette
-} from '@jupyterlab/apputils'
+} from '@jupyterlab/apputils';
 
 import {
   ReactElementWidget
-} from '@jupyterlab/apputils'
+} from '@jupyterlab/apputils';
 
 import {
   ShortcutUI
 } from './components/ShortcutUI'
 
-import * as React from 'react'
+import * as React from 'react';
 
-import '../style/index.css'
+import '../style/index.css';
 
 /** Object for shortcut items */
 export class ShortcutObject {
@@ -43,18 +43,18 @@ export class ShortcutObject {
     this.numberOfShortcuts = 0
   }
 }
-
+ 
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette],
   activate: (app: JupyterLab, 
     settingRegistry: ISettingRegistry, 
     palette: ICommandPalette): void => {
-      let commandlist = new Array<string>()
-      /** Load keyboard shortcut settings from registry and create list of command id's */
-      settingRegistry.load('@jupyterlab/shortcuts-extension:plugin')
+    let commandlist = new Array<string>();
+    /** Load keyboard shortcut settings from registry and create list of command id's */
+    settingRegistry.load('@jupyterlab/shortcuts-extension:plugin')
       .then(settings => Object.keys(settings.composite).forEach(key => {
-        commandlist.push(key)
+        commandlist.push(key); 
       }))
       /** Create top-level component and associated widget */
       .then(() => {
@@ -64,31 +64,32 @@ const plugin: JupyterLabPlugin<void> = {
             settingRegistry: settingRegistry, 
             shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
             commandRegistry: app.commands
-          })
-        let widget: ReactElementWidget = new ReactElementWidget(shortcutUI)
-        widget.id = 'jupyterlab-shortcutui'
-        widget.title.label = 'Keyboard Shortcut Settings'
-        widget.title.closable = true
-        widget.addClass('jp-shortcutWidget')
+          });
+        let widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
+        widget.id = 'jupyterlab-shortcutui';
+        widget.title.label = 'Keyboard Shortcut Settings';
+        widget.title.closable = true;
+        widget.addClass('jp-shortcutWidget');
         
         /** Add a command to open extension widget */
-        const command: string = 'shortcutui:open-ui'
+        const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
           label: 'Keyboard Shortcut Settings',
           execute: () => {
             if (!widget.isAttached) {
               /** Attach the widget to the main work area if it's not there */
-              app.shell.addToMainArea(widget)
+              app.shell.addToMainArea(widget);
             }
             /** Activate the widget */
-            app.shell.activateById(widget.id)
+            app.shell.activateById(widget.id);
           }
-        })
-        palette.addItem({command, category: 'Settings'})
+        }); 
+        palette.addItem({command, category: 'Settings'});
       })
+      
     },
     autoStart: true
-}
+};
 
 /** Export the plugin as default */
-export default plugin
+export default plugin;

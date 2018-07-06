@@ -39,7 +39,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         let newKey = value.slice(splitsCopy[i] + 1, splitsCopy[i + 1])
         keys.push(newKey)
       }
-      if (keys.includes('')) {
+      if (keys.includes("")) {
         keys.pop()
       }
     }
@@ -56,8 +56,8 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     [
       'Tab', 
       'Shift', 
-      'Ctrl', 
-      'Alt', 
+      'Ctrl',
+      'Alt',
       'Accel', 
       'Enter', 
       'ArrowUp', 
@@ -167,10 +167,15 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   render() {
     return (
-      <div className='jp-input-box'>
-        <input className='jp-input'
+      <div className='jp-inbox-box'>
+        <input className={this.state.isAvailable 
+            ? 'jp-input' 
+            : 'jp-input jp-input-unavailable'
+          }
           value={this.state.value} 
-          onKeyDown={this.handleInput}>
+          onKeyDown={this.handleInput}
+          ref = {(input) => input && input.focus()}
+        >
         </input>
         {!this.state.isAvailable && 
           <div className='jp-input-warning'>
@@ -185,13 +190,13 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
             ) 
             this.setState(
               {
-                value: '', 
-                splits: [-1]
+                value:'', 
+                splits:[-1]
               }
             )
             this.props.toggleInput()
-            }
-          }>
+          }}
+          >
           Submit
         </button>
       </div>

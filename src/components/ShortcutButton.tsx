@@ -2,7 +2,7 @@ import {
   ShortcutObject
 } from '../index'
 
-import * as React from 'react'
+import * as React from 'react';
 
 /** Props for ShortcutButton component */
 export interface IShortcutButtonProps {
@@ -22,14 +22,14 @@ export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   render() {
     return (
       <button 
-        className={this.props.index === 0 ? 
-        "jp-shortcut jp-shortcut-left" 
-        : "jp-shortcut jp-shortcut-right"} 
+        className={this.props.index === 0 
+          ? "jp-shortcut jp-shortcut-left" 
+          : "jp-shortcut jp-shortcut-right"
+        } 
         onClick={() => 
           this.props.deleteShortcut(this.props.shortcutObject, this.props.shortcutId)
         }
       >
-      {this.props.toSymbols(this.props.shortcutKeys[0])}
       </button>
     )
   }
