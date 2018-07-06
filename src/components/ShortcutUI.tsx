@@ -355,9 +355,11 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     this.setState({showSelectors: !this.state.showSelectors})
   }
 
-  /** Set the current list sort order */
+  /** Set the current shortcut list sort order */
   updateSort = (value: string) : void => {
-    this.setState({currentSort: value}, this.sortShortcuts)
+    if(value !== this.state.currentSort) {
+      this.setState({currentSort: value}, this.sortShortcuts)
+    }
   }
 
   /** Sort shortcut list using current sort property  */

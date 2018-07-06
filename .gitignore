@@ -104,3 +104,11 @@ venv.bak/
 .mypy_cache/
 
 ./miniconda
+
+*.bundle.*
+lib/
+node_modules/
+*.egg-info/
+.ipynb_checkpoints
+.DS_Store
+package-lock.json

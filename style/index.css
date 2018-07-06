@@ -1,3 +1,8 @@
+/* Global/general */
+.jp-shortcutWidget {
+  overflow-y: scroll;
+}
+
 .jp-shortcutui {
   font-size: var(--jp-ui-font-size1);
   font-family: var(--jp-ui-font-family);
@@ -16,13 +21,6 @@
   z-index: 1;
 }
 
-/* Global/general */
-.jp-shortcutWidget {
-  display: flex;
-  flex-direction: column;
-  overflow-y: scroll;
-}
-
 /* Top Navigation */
 .jp-shortcuttopnav {
   display: flex;
@@ -32,6 +30,7 @@
   padding-bottom: 60px;
 }
 
+/* Top navigation advanced options area */
 .advanced-options {
   display: grid;
   grid-row-gap: 6px;
@@ -57,6 +56,7 @@
   width: 30%;
 }
 
+/* Top navigation search bar */
 .jp-search {
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color2);
@@ -76,6 +76,25 @@
   width: 50%;
 }
 
+/* Shortcut list table */
+.row {
+  display: table-row;
+  border-bottom: solid;
+  border-bottom-color: var(--jp-layout-color3);
+  border-bottom-width: var(--jp-border-width);
+}
+
+.cell {
+  padding: 6px 12px;
+  display: table-cell;
+  width: 20%;
+}
+
+.table-header {
+  font-weight: var(--jp-content-heading-font-weight);
+  font-size: var(--jp-ui-font-size2);
+}
+
 /* Main Shortcut List */
 .jp-shortcutlist {
   margin: 0 0 40px 0;
@@ -84,12 +103,12 @@
   border-collapse: collapse;
 }
 
-/* Column titles and sort button div */
+/* Column titles and sort button */
 .title-div {
   display: flex;
 }
 
-/* sort button */
+/* Sort button */
 .sort {
   font-weight: regular;
   transform: rotate(180deg);
@@ -117,25 +136,7 @@
   color: var(--jp-ui-font-color0)
 }
 
-/* Shortcut command items */
-.jp-cmditem {
-  height: 25px;
-  padding: 10px;
-  display: flex;
-  width: 100%;
-}
-
-/* Shortcut label */
-.jp-cmdlabel {
-  display: inline-block;
-  font: 'Moneserrat';
-  font-weight: 400;
-  size: 14px;
-  color: var(--jp-content-font-color2);
-  padding-right: 10px;
-  align-self: left; 
-}
-
+/* Shortcut button */
 .shortcut-cell-container {
   display: -webkit-box;
 }
@@ -145,7 +146,6 @@
   display: contents;
 }
 
-/* Command shortcut */
 .jp-shortcut-div {
   display: contents;
 }
@@ -194,7 +194,6 @@
 
 .jp-input-plus {
   position: absolute;
-  /* font-family: Source Code Pro; */
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-brand-color2);
   transform: rotate(270deg);
@@ -226,6 +225,7 @@
   outline: none; 
 }
 
+/* Shortcut source and reset link */
 .jp-source {
   display: inline-block;
 }
@@ -237,22 +237,4 @@
 
 .jp-reset:hover {
   text-decoration: underline;
-}
-
-.row {
-  display: table-row;
-  border-bottom: solid;
-  border-bottom-color: var(--jp-layout-color3);
-  border-bottom-width: var(--jp-border-width);
-}
-
-.cell {
-  padding: 6px 12px;
-  display: table-cell;
-  width: 20%;
-}
-
-.table-header {
-  font-weight: var(--jp-content-heading-font-weight);
-  font-size: var(--jp-ui-font-size2);
 }
