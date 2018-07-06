@@ -1,6 +1,6 @@
 import {
   ISettingRegistry
-} from '@jupyterlab/coreutils'
+} from '@jupyterlab/coreutils';
   
 import {
   CommandRegistry
@@ -8,7 +8,7 @@ import {
 
 import {
   ArrayExt, StringExt
-} from '@phosphor/algorithm'
+} from '@phosphor/algorithm';
 
 import {
   ShortcutList
@@ -22,33 +22,33 @@ import {
   ShortcutObject
 } from '../index'
 
-import * as React from 'react'
+import * as React from 'react';
 
 const enum MatchType { Label, Category, Split, Default }
 
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
-  commandList: string[]
-  settingRegistry: ISettingRegistry
-  shortcutPlugin: string
+  commandList: string[];
+  settingRegistry: ISettingRegistry;
+  shortcutPlugin: string;
   commandRegistry: CommandRegistry
 }
 
 /** State for ShortcutUI component */
 export interface IShortcutUIState {
-  shortcutList: Object
-  filteredShortcutList: Object[]
-  shortcutsFetched: boolean
-  searchQuery: string
-  showSelectors: boolean
-  currentSort: string
+  shortcutList: Object;
+  filteredShortcutList: Object[];
+  shortcutsFetched: boolean;
+  searchQuery: string;
+  showSelectors: boolean;
+  currentSort: string;
   keyBindingsUsed: Object
 }
 
 /** Top level React component for widget */
 export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUIState> {
   constructor(props) {
-    super(props)
+    super(props);
   }
 
   state = {
@@ -63,7 +63,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Fetch shortcut list on mount */
   componentDidMount() : void {
-    this._getShortcutList()
+    this._getShortcutList();
   }
 
   /** Flag all user-set shortcuts as custom */
@@ -97,7 +97,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         shortcutObject.id = shortcutKey
         shortcutObject.numberOfShortcuts = 1
 
-        shortcutObjects[key] = shortcutObject
+        shortcutObjects[key] = shortcutObject;
       }
     })
     return shortcutObjects
@@ -105,7 +105,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Get list of all shortcut keybindings currently in use */
   private _getKeyBindingsUsed(shortcuts: Object) : Object {
-    let keyBindingsUsed: Object = {}
+    let keyBindingsUsed: Object = {};
     Object.keys(shortcuts).forEach(shortcut => {
       for (let key of Object.keys(shortcuts[shortcut].keys)) {
         keyBindingsUsed[shortcuts[shortcut]
@@ -137,7 +137,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   /** Set the current seach query */
   updateSearchQuery = (event) : void => {
     this.setState({searchQuery: event.target.value})
-    this._getShortcutList()
+    this._getShortcutList();
   }
 
   /** Filter shortcut list using current search query */
@@ -151,14 +151,14 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   resetShortcuts = () : void => {
     this.props.settingRegistry.load(this.props.shortcutPlugin)
       .then(settings => Object.keys(settings.user).forEach(key => {
-        this.props.settingRegistry.remove(this.props.shortcutPlugin, key)
+        this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
       }))
       .then(() => this._getShortcutList())
   }
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = (shortcutObject: ShortcutObject, keys: string[]) : void => {
-    let commandId: string
+    let commandId: string;
     commandId = shortcutObject.id
     if(shortcutObject.numberOfShortcuts === 1) {
       commandId = commandId + '-' + '2'
@@ -168,7 +168,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         if(shortcutObject.keys[key][0] === '') {
           commandId = key
         }
-      })
+      });
     }
     this.props.settingRegistry
     .set(this.props.shortcutPlugin, 
@@ -186,7 +186,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   /** Delete shortcut for command, refresh state */
   deleteShortcut = (shortcutObject: ShortcutObject, shortcutId: string) : void => {
     let removeKeybindingPromise = this.props.settingRegistry
-      .remove(this.props.shortcutPlugin, shortcutId)
+      .remove(this.props.shortcutPlugin, shortcutId);
     let setKeybindingPromise = this.props.settingRegistry
       .set(this.props.shortcutPlugin, 
         shortcutId, 
@@ -197,9 +197,9 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           title: shortcutObject.label,
           category: shortcutObject.category
         }
-      )
-    Promise.all([removeKeybindingPromise, setKeybindingPromise])
-    this._getShortcutList()
+      );
+    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
+    this._getShortcutList();
   }
 
   /** Reset a specific shortcut to its default settings */
@@ -216,60 +216,60 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   /** Perform a fuzzy search on a single command item. */
   private fuzzySearch(item: any, query: string): any | null {
     // Create the source text to be searched.
-    let category = item.category.toLowerCase()
-    let label = item['label'].toLowerCase()
-    let source = `${category} ${label}`
+    let category = item.category.toLowerCase();
+    let label = item['label'].toLowerCase();
+    let source = `${category} ${label}`;
 
     // Set up the match score and indices array.
-    let score = Infinity
-    let indices: number[] | null = null
+    let score = Infinity;
+    let indices: number[] | null = null;
 
     // The regex for search word boundaries
-    let rgx = /\b\w/g
+    let rgx = /\b\w/g;
 
     // Search the source by word boundary.
     while (true) {
       // Find the next word boundary in the source.
-      let rgxMatch = rgx.exec(source)
+      let rgxMatch = rgx.exec(source);
 
       // Break if there is no more source context.
       if (!rgxMatch) {
-        break
+        break;
       }
 
       // Run the string match on the relevant substring.
-      let match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index)
+      let match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
 
       // Break if there is no match.
       if (!match) {
-        break
+        break;
       }
 
       // Update the match if the score is better.
       if (match && match.score <= score) {
-        score = match.score
-        indices = match.indices
+        score = match.score;
+        indices = match.indices;
       }
     }
 
     // Bail if there was no match.
     if (!indices || score === Infinity) {
-      return null
+      return null;
     }
 
     // Compute the pivot index between category and label text.
-    let pivot = category.length + 1
+    let pivot = category.length + 1;
 
     // Find the slice index to separate matched indices.
-    let j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b)
+    let j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
 
     // Extract the matched category and label indices.
-    let categoryIndices = indices.slice(0, j)
-    let labelIndices = indices.slice(j)
+    let categoryIndices = indices.slice(0, j);
+    let labelIndices = indices.slice(j);
 
     // Adjust the label indices for the pivot offset.
     for (let i = 0, n = labelIndices.length; i < n; ++i) {
-      labelIndices[i] -= pivot
+      labelIndices[i] -= pivot;
     }
 
     // Handle a pure label match.
@@ -279,7 +279,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         categoryIndices: null,
         labelIndices,
         score, item
-      }
+      };
     }
 
     // Handle a pure category match.
@@ -289,7 +289,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         categoryIndices,
         labelIndices: null,
         score, item
-      }
+      };
     }
 
     // Handle a split match.
@@ -298,21 +298,21 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       categoryIndices,
       labelIndices,
       score, item
-    }
+    };
   }
 
   /** Normalize the query text for a fuzzy search. */
   private normalizeQuery(text: string): string {
-    return text.replace(/\s+/g, '').toLowerCase()
+    return text.replace(/\s+/g, '').toLowerCase();
   }
 
   /** Perform a fuzzy match on an array of command items. */
   private matchItems(items: any, query: string): any {
     // Normalize the query text to lower case with no whitespace.
-    query = this.normalizeQuery(query)
+    query = this.normalizeQuery(query);
 
     // Create the array to hold the scores.
-    let scores: Object[] = []
+    let scores: Object[] = [];
     // Iterate over the items and match against the query.
     let itemList = Object.keys(items)
     for (let i = 0, n = itemList.length; i < n; ++i) {
@@ -325,29 +325,29 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           categoryIndices: null,
           labelIndices: null,
           score: 0, item
-        })
-        continue
+        });
+        continue;
       }
 
       // Run the fuzzy search for the item and query.
-      let score = this.fuzzySearch(item, query)
+      let score = this.fuzzySearch(item, query);
 
       // Ignore the item if it is not a match.
       if (!score) {
-        continue
+        continue;
       }
 
       // Add the score to the results.
-      scores.push(score)
+      scores.push(score);
   }
 
     // Return the final array of scores.
-    return scores
+    return scores;
   }
 
   /** Opens advanced setting registry */
   openAdvanced = () : void => {
-    this.props.commandRegistry.execute('settingeditor:open')
+    this.props.commandRegistry.execute('settingeditor:open');
   }
 
   /** Toggles showing command selectors */
@@ -355,7 +355,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     this.setState({showSelectors: !this.state.showSelectors})
   }
 
-  /** Set the current shortcut list sort order */
+  /** Set the current list sort order */
   updateSort = (value: string) : void => {
     if(value !== this.state.currentSort) {
       this.setState({currentSort: value}, this.sortShortcuts)

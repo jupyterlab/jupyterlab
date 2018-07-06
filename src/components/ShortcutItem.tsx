@@ -90,10 +90,21 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
         </div>
         <div className='cell'>
           <div className='shortcut-cell-container'>
+            {/** Create shortcut boxes and delete buttons for each shortcut */}
             {Object.keys(this.props.shortcut.keys).filter(key => 
               this.props.shortcut.keys[key][0] !== '')
               .map((key, index) => 
                 <div className="jp-shortcut-div" key={key + '_' + index}>
+                  {this.props.shortcut.keys[key]
+                    .map((keyBinding, index) =>  
+                      <div className='jp-shortcut-key-container' key={index}>
+                        <div className='jp-shortcut-key'>
+                          {this.toSymbols(keyBinding)}
+                        </div>
+                        {index === 0 && this.props.shortcut.keys[key].length > 1 ? <div className='comma'>,</div> : null}
+                      </div>
+                    )
+                  }
                   <ShortcutButton 
                     shortcutKeys={this.props.shortcut.keys[key]} 
                     deleteShortcut={this.props.deleteShortcut}
@@ -104,10 +115,12 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                   />
                   {(index === 0 && Object.keys(this.props.shortcut.keys).filter(key => 
                     this.props.shortcut.keys[key][0] !== '')
-                    .length > 1) ? <p>or</p> : null}
+                    .length > 1) ? <div className='or'>or</div> : null}
                 </div>
               )
             }
+
+            {/** Add a plus for adding new shortcuts if there are less than two set */}
             {Object.keys(this.props.shortcut.keys).filter(key => 
               this.props.shortcut.keys[key][0] !== '')
               .length < 2 &&
@@ -118,6 +131,8 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                 {this.state.displayInput ? '⌃' : '+'}
               </span>
             }
+
+            {/** Display input box when toggled */}
             {this.state.displayInput && 
               <ShortcutInput handleUpdate={this.props.handleUpdate}
                 toggleInput={this.toggleInput}
