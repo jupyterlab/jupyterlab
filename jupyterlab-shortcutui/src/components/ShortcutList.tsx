@@ -6,7 +6,7 @@ import {
   ShortcutTitleItem
 } from './ShortcutTitleItem'
 
-import * as React from 'react';
+import * as React from 'react'
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {

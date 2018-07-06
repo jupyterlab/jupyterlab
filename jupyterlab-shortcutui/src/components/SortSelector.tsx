@@ -3,11 +3,11 @@ import * as React from 'react';
 /** Props for SortSelector component */
 
 export interface SortSelectorState {
-    value: string;
+    value: string
 }
 /** Props for SortSelector component */
 export interface SortSelectorProps {
-    updateSort: Function;
+    updateSort: Function
 }
 
 /** A React component to filter the shortcut list */

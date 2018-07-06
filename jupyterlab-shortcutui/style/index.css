@@ -1,258 +1,258 @@
 .jp-shortcutui {
-    font-size: var(--jp-ui-font-size1);
-    font-family: var(--jp-ui-font-family);
-    color: var(--jp-content-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  color: var(--jp-content-font-color1);
 }
 
 /* Top Whitespace */
 .jp-topwhitespace {
-    content: " ";
-    height:var(--jp-toolbar-micro-height); 
-    border-bottom-width: var(--jp-border-width);
-    border-bottom-color: var(--jp-toolbar-border-color);
-    box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: var(--jp-toolbar-background);
-    position: static;
+  content: '';
+  display: block;
+  height: var(--jp-toolbar-micro-height);
+  width: 100%;
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 1;
 }
 
 /* Global/general */
 .jp-shortcutWidget {
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
 }
 
 /* Top Navigation */
 .jp-shortcuttopnav {
-    display: flex;
-    font-size: var(--jp-ui-font-size2);
-    padding: 10px;
-    padding-top: 30px;
-    padding-bottom: 60px;
+  display: flex;
+  font-size: var(--jp-ui-font-size2);
+  padding: 10px;
+  padding-top: 30px;
+  padding-bottom: 60px;
 }
 
 .advanced-options {
-    display: grid;
-    grid-row-gap: 6px;
-    width: 20%;
+  display: grid;
+  grid-row-gap: 6px;
+  width: 20%;
 }
 
 /* Top Navigation links */
 .jp-link {
-    color: var(--jp-brand-color2);
-    text-decoration: none;
-    display: block;
+  color: var(--jp-brand-color2);
+  text-decoration: none;
+  display: block;
 }
 
 .jp-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .jp-link:active {
-    color: var(--jp-brand-color0);
+  color: var(--jp-brand-color0);
 }
 
 .jp-link-left {
-    width: 30%;
+  width: 30%;
 }
 
 .jp-search {
-    border-width: var(--jp-border-width);
-    border-color: var(--jp-border-color2);
-    border-radius: var(--jp-border-radius);
-    height: 20px;
-    width: 50%;
-    font-size: var(--jp-ui-font-size1);
-    padding: 3px;
-    padding-left: 6px;
+  border-width: var(--jp-border-width);
+  border-color: var(--jp-border-color2);
+  border-radius: var(--jp-border-radius);
+  height: 20px;
+  width: 50%;
+  font-size: var(--jp-ui-font-size1);
+  padding: 3px;
+  padding-left: 6px;
 }
 
 .jp-search:focus{
-    outline:none;
+  outline:none;
 }
 
 .jp-searchcontainer {
-    width: 50%;
+  width: 50%;
 }
 
 /* Main Shortcut List */
 .jp-shortcutlist {
-    margin: 0 0 40px 0;
-    width: 100%;
-    display: table;
-    border-collapse: collapse;
+  margin: 0 0 40px 0;
+  width: 100%;
+  display: table;
+  border-collapse: collapse;
 }
 
 /* Column titles and sort button div */
 .title-div {
-    display: flex;
+  display: flex;
 }
 
 /* sort button */
 .sort {
-    font-weight: regular;
-    transform: rotate(180deg);
-    padding-left: 10px;
-    color: var(--jp-ui-font-color2);
-    border: none;
+  font-weight: regular;
+  transform: rotate(180deg);
+  padding-left: 10px;
+  color: var(--jp-ui-font-color2);
+  border: none;
 }
 
 .sort:focus {
-    outline: none;
+  outline: none;
 }
 
 .sort:active {
-    font-weight: 600;
-    color: var(--jp-ui-font-color0);
+  font-weight: 600;
+  color: var(--jp-ui-font-color0);
 }
 
 .sort:hover {
-    font-weight: 600;
-    color: var(--jp-ui-font-color0);
+  font-weight: 600;
+  color: var(--jp-ui-font-color0);
 }
 
 .selected-sort {
-    font-weight: bold;
-    color: var(--jp-ui-font-color0)
+  font-weight: bold;
+  color: var(--jp-ui-font-color0)
 }
 
 /* Shortcut command items */
 .jp-cmditem {
-    height: 25px;
-    padding: 10px;
-    display: flex;
-    width: 100%;
+  height: 25px;
+  padding: 10px;
+  display: flex;
+  width: 100%;
 }
 
-/* Command label */
+/* Shortcut label */
 .jp-cmdlabel {
-    display: inline-block;
-    font: 'Moneserrat';
-    font-weight: 400;
-    size: 14px;
-    color: var(--jp-content-font-color2);
-    padding-right: 10px;
-    align-self: left; 
+  display: inline-block;
+  font: 'Moneserrat';
+  font-weight: 400;
+  size: 14px;
+  color: var(--jp-content-font-color2);
+  padding-right: 10px;
+  align-self: left; 
 }
 
 .shortcut-cell-container {
-    display: -webkit-box;
+  display: -webkit-box;
 }
 
 .jp-shortcut-div p {
-    height: 25px;
-    display: contents;
+  height: 25px;
+  display: contents;
 }
 
 /* Command shortcut */
 .jp-shortcut-div {
-    display: contents;
+  display: contents;
 }
 
 .jp-shortcut {    
-    background: var(--jp-layout-color2);
-    border-radius: var(--jp-border-radius);
-    border-width: var(--jp-border-width);
-    border-color: var(--jp-border-color2);
-    margin-right: 15px;
-    height: 25px;
+  background: var(--jp-layout-color2);
+  border-radius: var(--jp-border-radius);
+  border-width: var(--jp-border-width);
+  border-color: var(--jp-border-color2);
+  margin-right: 15px;
+  height: 25px;
 }
 
 .jp-shortcut-right{
-    margin-right: 0px;
-    margin-left: 15px;
+  margin-right: 0px;
+  margin-left: 15px;
 }
 
 .jp-shortcut:hover {
-    border-width: var(--jp-border-width) + 0.05;
+  border-width: var(--jp-border-width) + 0.05;
 }
     
 .jp-shortcut:active {
-    border-width: var(--jp-border-width) + 0.05;
-    border-color: var(--jp-border-color1);
-    background: var(--jp-layout-color3);
+  border-width: var(--jp-border-width) + 0.05;
+  border-color: var(--jp-border-color1);
+  background: var(--jp-layout-color3);
 }
 
 .jp-shortcut:focus {
-    outline: none;
+  outline: none;
 }
 
 .jp-shortcut::after {
-    content: '    ×';
+  content: '    ×';
 }
 
 /* Input area */
 .jp-input-container {
-    display: inline-block;
-    margin-left: 30px;
+  display: inline-block;
+  margin-left: 30px;
+}
+
+.jp-input-box {
+  padding-top: 3px;
 }
 
 .jp-input-plus {
-    position: absolute;
-    /* font-family: Source Code Pro; */
-    font-size: var(--jp-ui-font-size2);
-    color: var(--jp-brand-color2);
-    transform: rotate(270deg);
-    height: 2.5%;
+  position: absolute;
+  /* font-family: Source Code Pro; */
+  font-size: var(--jp-ui-font-size2);
+  color: var(--jp-brand-color2);
+  transform: rotate(270deg);
+  height: 2.5%;
 }
 
 .jp-input {
-    background: var(--jp-layout-color2);
-    border-radius: var(--jp-border-radius);
-    border-width: var(--jp-border-width);
-    border-color: var(--jp-border-color2);
-    margin-right: 10px;
-    margin-left: 10px;
-    height: 15px;
+  background: var(--jp-layout-color2);
+  border-radius: var(--jp-border-radius);
+  border-width: var(--jp-border-width);
+  border-color: var(--jp-border-color2);
+  margin-right: 10px;
+  margin-left: 10px;
+  height: 15px;
 }
     
 .jp-input:focus {
-    outline: none;
+  outline: none;
 }
 
 .jp-input-warning {
-    position: absolute;
-    color: var(--jp-error-color2);
-    font-size: var(--jp-ui-font-size0);
-    /* line-height: 14px; */
-    text-align: right;
+  position: absolute;
+  color: var(--jp-error-color2);
+  font-size: var(--jp-ui-font-size0);
+  text-align: right;
 }
 
 .jp-submit:focus {
-    outline: none; 
+  outline: none; 
 }
 
 .jp-source {
-    display: inline-block;
+  display: inline-block;
 }
 
 .jp-reset {
-    color: var(--jp-brand-color2);
-    padding-left: 10px;
+  color: var(--jp-brand-color2);
+  padding-left: 10px;
 }
 
 .jp-reset:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .row {
-    display: table-row;
-    border-bottom: solid;
-    border-bottom-color: var(--jp-layout-color3);
-    border-bottom-width: var(--jp-border-width);
+  display: table-row;
+  border-bottom: solid;
+  border-bottom-color: var(--jp-layout-color3);
+  border-bottom-width: var(--jp-border-width);
 }
 
 .cell {
-    padding: 6px 12px;
-    display: table-cell;
-    width: 20%;
+  padding: 6px 12px;
+  display: table-cell;
+  width: 20%;
 }
 
 .table-header {
-    font-weight: var(--jp-content-heading-font-weight);
-    font-size: var(--jp-ui-font-size2);
+  font-weight: var(--jp-content-heading-font-weight);
+  font-size: var(--jp-ui-font-size2);
 }
