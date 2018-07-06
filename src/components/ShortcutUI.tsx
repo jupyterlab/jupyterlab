@@ -372,7 +372,13 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     shortcuts.sort((a, b) => {
       let compareA = a[filterCritera]
       let compareB = b[filterCritera]
-      return (compareA < compareB) ? -1 : (compareA > compareB) ? 1 : 0
+      if(compareA < compareB) {
+        return -1
+      } else if(compareA > compareB) {
+        return 1
+      } else {
+        return (a['label'] < b['label']) ? -1 : (a['label'] > b['label']) ? 1 : 0
+      }
     })
     this.setState({filteredShortcutList: shortcuts})
   }
