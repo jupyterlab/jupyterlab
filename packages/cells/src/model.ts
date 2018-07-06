@@ -11,7 +11,9 @@ import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs, nbformat, uuid } from '@jupyterlab/coreutils';
+import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import {
   IObservableJSON,
@@ -154,7 +156,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   constructor(options: CellModel.IOptions) {
     super({ modelDB: options.modelDB });
 
-    this.id = options.id || uuid();
+    this.id = options.id || UUID.uuid4();
 
     this.value.changed.connect(this.onGenericChange, this);
 

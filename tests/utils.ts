@@ -12,7 +12,9 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { ClientSession } from '@jupyterlab/apputils';
 
-import { nbformat, uuid } from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import {
   TextModelFactory,
@@ -65,7 +67,7 @@ export function createClientSession(
   return manager.ready.then(() => {
     return new ClientSession({
       manager,
-      path: options.path || uuid(),
+      path: options.path || UUID.uuid4(),
       name: options.name,
       type: options.type,
       kernelPreference: options.kernelPreference || {
@@ -86,7 +88,7 @@ export function createFileContext(
 ): Context<DocumentRegistry.IModel> {
   manager = manager || Private.manager;
   let factory = Private.textFactory;
-  path = path || uuid() + '.txt';
+  path = path || UUID.uuid4() + '.txt';
   return new Context({ manager, factory, path });
 }
 
@@ -100,7 +102,7 @@ export async function createNotebookContext(
   manager = manager || Private.manager;
   await manager.ready;
   const factory = Private.notebookFactory;
-  path = path || uuid() + '.ipynb';
+  path = path || UUID.uuid4() + '.ipynb';
   return new Context({
     manager,
     factory,

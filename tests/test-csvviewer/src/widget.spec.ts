@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -18,7 +18,7 @@ import {
 function createContext(): Context<DocumentRegistry.IModel> {
   let factory = new TextModelFactory();
   let manager = new ServiceManager();
-  let path = uuid() + '.csv';
+  let path = UUID.uuid4() + '.csv';
   return new Context({ factory, manager, path });
 }
 

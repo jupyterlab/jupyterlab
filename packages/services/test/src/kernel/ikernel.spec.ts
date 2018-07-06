@@ -3,7 +3,9 @@
 
 import expect = require('expect.js');
 
-import { PageConfig, uuid } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
@@ -82,7 +84,7 @@ describe('Kernel.IKernel', () => {
     it('should be emitted regardless of the sender', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
-      const msgId = uuid();
+      const msgId = UUID.uuid4();
       const emission = testEmission(kernel.iopubMessage, {
         find: (k, msg) => msg.header.msg_id === msgId
       });
@@ -112,7 +114,7 @@ describe('Kernel.IKernel', () => {
 
     it('should be emitted for an unhandled message', async () => {
       const kernel = await tester.start();
-      const msgId = uuid();
+      const msgId = UUID.uuid4();
       const emission = testEmission(kernel.unhandledMessage, {
         find: (k, msg) => msg.header.msg_id === msgId
       });
@@ -132,7 +134,7 @@ describe('Kernel.IKernel', () => {
 
       // We'll send two messages, first an iopub message, then a shell message.
       // The unhandledMessage signal should only emit once for the shell message.
-      const msgId = uuid();
+      const msgId = UUID.uuid4();
       const emission = testEmission(kernel.unhandledMessage, {
         test: (k, msg) => {
           expect(msg.header.msg_id).to.be(msgId);
@@ -140,7 +142,7 @@ describe('Kernel.IKernel', () => {
       });
 
       // Send an iopub message.
-      tester.sendStatus(uuid(), 'idle');
+      tester.sendStatus(UUID.uuid4(), 'idle');
 
       // Send a shell message.
       let msg = KernelMessage.createShellMessage({
@@ -207,7 +209,7 @@ describe('Kernel.IKernel', () => {
 
     it('should be emitted for an unhandled message', async () => {
       const kernel = await tester.start();
-      const msgId = uuid();
+      const msgId = UUID.uuid4();
 
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
@@ -342,7 +344,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       tester.dispose();
     });
@@ -359,10 +361,10 @@ describe('Kernel.IKernel', () => {
       });
 
       // This invalid status is not emitted.
-      tester.sendStatus(uuid(), 'invalid-status' as Kernel.Status);
+      tester.sendStatus(UUID.uuid4(), 'invalid-status' as Kernel.Status);
 
       // This valid status is emitted.
-      tester.sendStatus(uuid(), 'busy');
+      tester.sendStatus(UUID.uuid4(), 'busy');
 
       await emission;
       tester.dispose();
@@ -445,7 +447,7 @@ describe('Kernel.IKernel', () => {
       const tester = new KernelTester();
       let kernel = await tester.start();
       let done = new PromiseDelegate<void>();
-      let msgId = uuid();
+      let msgId = UUID.uuid4();
 
       tester.onMessage(msg => {
         try {
@@ -475,7 +477,7 @@ describe('Kernel.IKernel', () => {
       const tester = new KernelTester();
       let kernel = await tester.start();
       let done = new PromiseDelegate<void>();
-      let msgId = uuid();
+      let msgId = UUID.uuid4();
 
       tester.onMessage(msg => {
         try {
@@ -516,7 +518,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
 
       let options: KernelMessage.IOptions = {
@@ -604,7 +606,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       await expectFailure(kernel.interrupt(), null, 'Kernel is dead');
       tester.dispose();
@@ -689,7 +691,10 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should throw an error for an invalid response', async () => {
-      handleRequest(defaultKernel, 200, { id: uuid(), name: 'foo' });
+      handleRequest(defaultKernel, 200, {
+        id: UUID.uuid4(),
+        name: 'foo'
+      });
       let shutdown = defaultKernel.shutdown();
       await expectFailure(shutdown, null, 'Invalid response: 200 OK');
     });
@@ -714,7 +719,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       await expectFailure(kernel.shutdown(), null, 'Kernel is dead');
       tester.dispose();
@@ -760,7 +765,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       expectFailure(kernel.requestComplete(options), null, 'Kernel is dead');
       tester.dispose();
@@ -827,7 +832,7 @@ describe('Kernel.IKernel', () => {
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
-      tester.sendStatus(uuid(), 'dead');
+      tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
       expect(() => {
         kernel.sendInputReply({ value: 'test' });

@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
 
@@ -279,7 +279,7 @@ describe('rendermime/registry', () => {
         contents.addDrive(drive);
         return manager.ready
           .then(() => {
-            return manager.sessions.startNew({ path: uuid() });
+            return manager.sessions.startNew({ path: UUID.uuid4() });
           })
           .then(s => {
             session = s;

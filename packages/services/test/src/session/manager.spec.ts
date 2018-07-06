@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { uuid } from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -24,7 +24,7 @@ import { KERNELSPECS, handleRequest } from '../utils';
  * Start a new session on with a default name.
  */
 function startNew(manager: SessionManager): Promise<Session.ISession> {
-  return manager.startNew({ path: uuid() });
+  return manager.startNew({ path: UUID.uuid4() });
 }
 
 describe('session/manager', () => {
@@ -32,7 +32,7 @@ describe('session/manager', () => {
   let session: Session.ISession;
 
   before(async () => {
-    session = await Session.startNew({ path: uuid() });
+    session = await Session.startNew({ path: UUID.uuid4() });
     await session.kernel.ready;
   });
 
@@ -149,7 +149,7 @@ describe('session/manager', () => {
           called = true;
         });
         return session
-          .setPath(uuid())
+          .setPath(UUID.uuid4())
           .then(() => {
             return manager.refreshRunning();
           })
@@ -199,7 +199,7 @@ describe('session/manager', () => {
 
     describe('#startNew()', () => {
       it('should start a session', async () => {
-        let session = await manager.startNew({ path: uuid() });
+        let session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
         expect(session.id).to.be.ok();
         return session.shutdown();
@@ -210,7 +210,7 @@ describe('session/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        let session = await manager.startNew({ path: uuid() });
+        let session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
         expect(called).to.be(true);
       });

@@ -5,7 +5,9 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import { PathExt, Time, uuid } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -50,7 +52,7 @@ export class ConsolePanel extends Panel {
       options.contentFactory || ConsolePanel.defaultContentFactory);
     let count = Private.count++;
     if (!path) {
-      path = `${basePath || ''}/console-${count}-${uuid()}`;
+      path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
 
     let session = (this._session = new ClientSession({

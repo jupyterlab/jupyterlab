@@ -3,7 +3,9 @@
 
 import expect = require('expect.js');
 
-import { PageConfig, uuid } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -46,7 +48,7 @@ function createSessionOptions(
  * Start a new session with a unique name.
  */
 function startNew(): Promise<Session.ISession> {
-  return Session.startNew({ path: uuid() });
+  return Session.startNew({ path: UUID.uuid4() });
 }
 
 describe('session', () => {
@@ -115,7 +117,7 @@ describe('session', () => {
 
     it('should accept ajax options', done => {
       let serverSettings = makeSettings();
-      let options: Session.IOptions = { path: uuid(), serverSettings };
+      let options: Session.IOptions = { path: UUID.uuid4(), serverSettings };
       Session.startNew(options).then(s => {
         session = s;
         expect(session.id).to.ok();
@@ -206,7 +208,7 @@ describe('session', () => {
     });
 
     it('should handle a 404 status', () => {
-      return Session.shutdown(uuid());
+      return Session.shutdown(UUID.uuid4());
     });
   });
 
@@ -280,7 +282,7 @@ describe('session', () => {
         const tester = new SessionTester();
         const session = await tester.startSession();
         await session.kernel.ready;
-        const msgId = uuid();
+        const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
         });
@@ -300,7 +302,7 @@ describe('session', () => {
 
     context('#propertyChanged', () => {
       it('should be emitted when the session path changes', () => {
-        let newPath = uuid();
+        let newPath = UUID.uuid4();
         let called = false;
         let object = {};
         defaultSession.propertyChanged.connect((s, type) => {
@@ -412,7 +414,7 @@ describe('session', () => {
 
     context('#setPath()', () => {
       it('should set the path of the session', () => {
-        let newPath = uuid();
+        let newPath = UUID.uuid4();
         return defaultSession.setPath(newPath).then(() => {
           expect(defaultSession.path).to.be(newPath);
         });
@@ -420,30 +422,30 @@ describe('session', () => {
 
       it('should fail for improper response status', done => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setPath(uuid()), done);
+        expectFailure(defaultSession.setPath(UUID.uuid4()), done);
       });
 
       it('should fail for error response status', done => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setPath(uuid()), done, '');
+        expectFailure(defaultSession.setPath(UUID.uuid4()), done, '');
       });
 
       it('should fail for improper model', done => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setPath(uuid()), done);
+        expectFailure(defaultSession.setPath(UUID.uuid4()), done);
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(uuid());
+        let promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, null, 'Session is disposed');
       });
     });
 
     context('#setType()', () => {
       it('should set the type of the session', () => {
-        let type = uuid();
+        let type = UUID.uuid4();
         return defaultSession.setType(type).then(() => {
           expect(defaultSession.type).to.be(type);
         });
@@ -451,30 +453,30 @@ describe('session', () => {
 
       it('should fail for improper response status', done => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setType(uuid()), done);
+        expectFailure(defaultSession.setType(UUID.uuid4()), done);
       });
 
       it('should fail for error response status', done => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setType(uuid()), done, '');
+        expectFailure(defaultSession.setType(UUID.uuid4()), done, '');
       });
 
       it('should fail for improper model', done => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setType(uuid()), done);
+        expectFailure(defaultSession.setType(UUID.uuid4()), done);
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(uuid());
+        let promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, null, 'Session is disposed');
       });
     });
 
     context('#setName()', () => {
       it('should set the name of the session', () => {
-        let name = uuid();
+        let name = UUID.uuid4();
         return defaultSession.setName(name).then(() => {
           expect(defaultSession.name).to.be(name);
         });
@@ -482,23 +484,23 @@ describe('session', () => {
 
       it('should fail for improper response status', done => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setName(uuid()), done);
+        expectFailure(defaultSession.setName(UUID.uuid4()), done);
       });
 
       it('should fail for error response status', done => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setName(uuid()), done, '');
+        expectFailure(defaultSession.setName(UUID.uuid4()), done, '');
       });
 
       it('should fail for improper model', done => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setName(uuid()), done);
+        expectFailure(defaultSession.setName(UUID.uuid4()), done);
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(uuid());
+        let promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, null, 'Session is disposed');
       });
     });
