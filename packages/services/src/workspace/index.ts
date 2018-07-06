@@ -54,6 +54,30 @@ export class WorkspaceManager {
   }
 
   /**
+   * Fetch the list of workspace IDs that exist on the server.
+   *
+   * @returns A promise that resolves with the list of workspace IDs or rejects
+   * with a `ServerConnection.IError`.
+   */
+  list(): Promise<string[]> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, '');
+    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+
+    return promise
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
+        }
+
+        return response.json();
+      })
+      .then(result => result.workspaces);
+  }
+
+  /**
    * Save a workspace.
    *
    * @param id - The workspace's ID.
