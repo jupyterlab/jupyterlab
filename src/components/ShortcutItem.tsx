@@ -81,7 +81,11 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
 
   render() {
     return (
-      <div className='jp-cmditem row'>
+      <div 
+      className={this.state.displayInput 
+          ? 'jp-cmditem row expanded-row' 
+          : 'jp-cmditem row'
+      }>
         <div className='cell'>
           <div className='jp-shortcutitem-category'>{this.props.shortcut.category}</div>
         </div>

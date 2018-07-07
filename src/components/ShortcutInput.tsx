@@ -167,7 +167,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   render() {
     return (
-      <div className='jp-inbox-box'>
+      <div className='jp-input-box'>
         <input className={this.state.isAvailable 
             ? 'jp-input' 
             : 'jp-input jp-input-unavailable'
@@ -197,7 +197,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
             this.props.toggleInput()
           }}
           >
-          Submit
+          Apply
         </button>
       </div>
     )
