@@ -6,6 +6,7 @@ export namespace ProgressBar {
     }
 }
 
+// tslint:disable-next-line:variable-name
 export const ProgressBar = (props: ProgressBar.IProps) => {
     return (
         <div
@@ -27,6 +28,7 @@ export namespace Filler {
     }
 }
 
+// tslint:disable-next-line:variable-name
 export const Filler = (props: Filler.IProps) => {
     console.log(props.percentage);
     return (
