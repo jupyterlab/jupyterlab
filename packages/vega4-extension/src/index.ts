@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+// tslint:disable-next-line
+/// <reference path="../../../node_modules/@types/webpack-env/index.d.ts"/>
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -9,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import vegaEmbed, { Mode, EmbedOptions } from 'vega-embed';
+import * as VegaModuleType from 'vega-embed';
 
 import '../style/index.css';
 
@@ -64,43 +66,46 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
   /**
    * Render Vega/Vega-Lite into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const data = model.data[this._mimeType] as JSONObject;
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    const spec = model.data[this._mimeType] as JSONObject;
     const metadata = model.metadata[this._mimeType] as {
-      embed_options?: EmbedOptions;
+      embed_options?: VegaModuleType.EmbedOptions;
     };
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};
-    const mode: Mode = this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
-    return this._resolver.resolveUrl('').then((path: string) => {
-      return this._resolver.getDownloadUrl(path).then(baseURL => {
-        const options: EmbedOptions = {
-          actions: true,
-          defaultStyle: true,
-          ...embedOptions,
-          mode,
-          loader: {
-            baseURL,
-            http: { credentials: 'same-origin' }
-          }
-        };
-        const el = document.createElement('div');
-        this.node.innerHTML = ''; // clear the output before attaching a chart
-        this.node.appendChild(el);
-        return vegaEmbed(el, data, options).then(result => {
-          // Add png representation of vega chart to output
-          if (!model.data['image/png']) {
-            return result.view.toImageURL('png').then(imageData => {
-              const data = {
-                ...model.data,
-                'image/png': imageData.split(',')[1]
-              };
-              model.setData({ data });
-            });
-          }
-          return void 0;
-        });
-      });
+    const mode: VegaModuleType.Mode =
+      this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
+
+    const vega =
+      Private.vega != null ? Private.vega : await Private.ensureVega();
+    const path = await this._resolver.resolveUrl('');
+    const baseURL = await this._resolver.getDownloadUrl(path);
+
+    const el = document.createElement('div');
+
+    // clear the output before attaching a chart
+    this.node.innerHTML = '';
+    this.node.appendChild(el);
+
+    const result = await vega.default(el, spec, {
+      actions: true,
+      defaultStyle: true,
+      ...embedOptions,
+      mode,
+      loader: {
+        baseURL,
+        http: { credentials: 'same-origin' }
+      }
+    });
+
+    if (model.data['image/png']) {
+      return;
+    }
+
+    // Add png representation of vega chart to output
+    const imageURL = await result.view.toImageURL('png');
+    model.setData({
+      data: { ...model.data, 'image/png': imageURL.split(',')[1] }
     });
   }
 
@@ -153,3 +158,46 @@ const extension: IRenderMime.IExtension = {
 };
 
 export default extension;
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * A cached reference to the vega library.
+   */
+  export let vega: typeof VegaModuleType;
+
+  /**
+   * A Promise for the initial load of vega.
+   */
+  export let vegaReady: Promise<typeof VegaModuleType>;
+
+  /**
+   * Lazy-load and cache the vega-embed library
+   */
+  export function ensureVega(): Promise<typeof VegaModuleType> {
+    if (vegaReady) {
+      return vegaReady;
+    }
+
+    vegaReady = new Promise((resolve, reject) => {
+      require.ensure(
+        ['vega-embed'],
+        // see https://webpack.js.org/api/module-methods/#require-ensure
+        // this argument MUST be named `require` for the WebPack parser
+        require => {
+          vega = require('vega-embed') as typeof VegaModuleType;
+          resolve(vega);
+        },
+        (error: any) => {
+          console.error(error);
+          reject();
+        },
+        'vega'
+      );
+    });
+
+    return vegaReady;
+  }
+}
