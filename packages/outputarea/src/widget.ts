@@ -1,8 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-<<<<<<< HEAD
-import { JSONObject, PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import {
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -73,12 +76,6 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  * The class name added to stdin data input nodes.
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
-
-/**
- * The class name added to stdin rendered text nodes.
- */
-const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
-
 
 /******************************************************************************
  * OutputArea
@@ -184,7 +181,6 @@ export class OutputArea extends Widget {
         this.onInputRequest(msg, value);
       }
     };
-
   }
 
   /**
@@ -202,12 +198,10 @@ export class OutputArea extends Widget {
   /**
    * Follow changes on the model state.
    */
-<<<<<<< HEAD
   protected onModelChanged(
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
-    let layoutIndex;
     switch (args.type) {
       case 'add':
         this._insertOutput(args.newIndex, args.newValues[0]);
@@ -700,7 +694,7 @@ export class Stdin extends Widget implements IStdin {
         if (input.type === 'password') {
           this._value += Array(input.value.length + 1).join('·');
         } else {
-          this._value += input.value
+          this._value += input.value;
         }
         this._promise.resolve(void 0);
       }
