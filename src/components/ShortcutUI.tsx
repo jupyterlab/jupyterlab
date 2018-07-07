@@ -136,8 +136,13 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Set the current seach query */
   updateSearchQuery = (event) : void => {
-    this.setState({searchQuery: event.target.value})
-    this._getShortcutList();
+    this.setState({searchQuery: event.target.value}, 
+      () => this.setState(
+        {
+          filteredShortcutList: this.searchFilterShortcuts(this.state.shortcutList)
+        }
+      )
+    )
   }
 
   /** Filter shortcut list using current search query */
