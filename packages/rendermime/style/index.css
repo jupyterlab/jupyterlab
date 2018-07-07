@@ -311,7 +311,12 @@
   font-family: var(--jp-code-font-family);
   font-size: inherit;
   line-height: var(--jp-code-line-height);
-  padding: 0px;
+  padding: 0;
+}
+
+.jp-RenderedHTMLCommon p > code {
+  background-color: var(--jp-layout-color2);
+  padding: 1px 5px;
 }
 
 /* Tables */
