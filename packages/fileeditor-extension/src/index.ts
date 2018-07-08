@@ -210,12 +210,13 @@ function activate(
   // Add a command to change font size.
   commands.addCommand(CommandIDs.changeFontSize, {
     execute: args => {
-      const delta = args ['delta'] as number;
+      const delta = args['delta'] as number;
       const style = window.getComputedStyle(document.documentElement);
       const cssSize = parseInt(style.getPropertyValue('--jp-code-font-size'));
       const currentSize = config.fontSize || cssSize;
       config.fontSize = currentSize + delta;
-      return settingRegistry.set(id, 'editorConfig', config)
+      return settingRegistry
+        .set(id, 'editorConfig', config)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -494,7 +495,7 @@ function activate(
         },
         { type: 'submenu', submenu: tabMenu },
         { command: CommandIDs.autoClosingBrackets }
-      ], 
+      ],
       30
     );
 
