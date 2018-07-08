@@ -212,7 +212,10 @@ function activate(
     execute: args => {
       const delta = args['delta'] as number;
       const style = window.getComputedStyle(document.documentElement);
-      const cssSize = parseInt(style.getPropertyValue('--jp-code-font-size'));
+      const cssSize = parseInt(
+        style.getPropertyValue('--jp-code-font-size'),
+        10
+      );
       const currentSize = config.fontSize || cssSize;
       config.fontSize = currentSize + delta;
       return settingRegistry
