@@ -159,7 +159,7 @@
 }
 
 .jp-shortcut {    
-  margin: 4px 10px 0 4px;
+  margin: 4px 8px 0 4px;
   height: 16px;
   width: 16px;
   border: none;
@@ -217,7 +217,6 @@
 
 .jp-input-plus {
   position: absolute;
-  /* font-family: Source Code Pro; */
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-brand-color2);
   transform: rotate(270deg);
@@ -298,6 +297,7 @@ display: inline-block;
   border-bottom: solid;
   border-bottom-color: var(--jp-layout-color2);
   border-bottom-width: 2px;
+  max-height: 40px;
 }
 
 .expanded-row {
