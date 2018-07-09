@@ -48,6 +48,9 @@ export class LineColComponent extends React.Component<
             tracker.activeCell.editor.model.value.changed.connect(
                 this.valueChanged
             );
+            tracker.activeCell.editor.model.selections.changed.connect(
+                this.valueChanged
+            );
         }
     };
 
