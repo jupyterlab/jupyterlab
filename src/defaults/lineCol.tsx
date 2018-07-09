@@ -32,12 +32,12 @@ export class LineColComponent extends React.Component<
     constructor(props: LineColComponent.IProps) {
         super(props);
 
-        this.props.tracker.currentChanged.connect(this.posChange);
-        this.props.tracker.activeCellChanged.connect(this.posChange);
-        this.props.tracker.selectionChanged.connect(this.posChange);
+        this.props.tracker.currentChanged.connect(this.cellChange);
+        this.props.tracker.activeCellChanged.connect(this.cellChange);
+        this.props.tracker.selectionChanged.connect(this.cellChange);
     }
 
-    posChange = (tracker: INotebookTracker) => {
+    cellChange = (tracker: INotebookTracker) => {
         if (tracker.activeCell) {
             this.setState({
                 col: tracker.activeCell.editor.getCursorPosition().column
