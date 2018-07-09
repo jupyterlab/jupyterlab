@@ -5,29 +5,17 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
- Dialog, showDialog
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {
-  ServiceManager, Session, TerminalSession
-} from '@jupyterlab/services';
+import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
 
 import '../style/index.css';
 
@@ -51,12 +39,10 @@ const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
  */
 const SHUTDOWN_CLASS = 'jp-RunningSessions-shutdownAll';
 
-
 /**
  * The class name added to the running terminal sessions section.
  */
 const SECTION_CLASS = 'jp-RunningSessions-section';
-
 
 /**
  * The class name added to the running sessions section header.
@@ -114,51 +100,61 @@ const FILE_ICON_CLASS = 'jp-mod-file';
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
 type SessionProps<M> = {
-  openRequested: Signal<RunningSessions, M>,
+  openRequested: Signal<RunningSessions, M>;
   manager: {
     shutdownAll(): void;
     runningChanged: ISignal<any, M[]>;
-  }
+  };
   shutdown: (model: M) => void;
   filterRunning?: (model: M) => boolean;
-  name: string,
+  name: string;
   iconClass: (model: M) => string;
   label: (model: M) => string;
   labelTitle?: (model: M) => string;
   available: boolean;
 };
 
-function Item<M>(props: SessionProps<M> & {model: M}) {
-  const {model} = props;
+function Item<M>(props: SessionProps<M> & { model: M }) {
+  const { model } = props;
   return (
     <li className={ITEM_CLASS} onClick={() => props.openRequested.emit(model)}>
       <span className={`${ITEM_ICON_CLASS} ${props.iconClass(model)}`} />
-      <span className={ITEM_LABEL_CLASS} title={props.labelTitle ? props.labelTitle(model) : ''}>
+      <span
+        className={ITEM_LABEL_CLASS}
+        title={props.labelTitle ? props.labelTitle(model) : ''}
+      >
         {props.label(model)}
       </span>
-      <button className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`} onClick={() => props.shutdown(model)}>
+      <button
+        className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
+        onClick={() => props.shutdown(model)}
+      >
         SHUTDOWN
       </button>
     </li>
   );
 }
 
-class List<M> extends React.Component<SessionProps<M>, {models: M[]}> {
+class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
   constructor(props: SessionProps<M>) {
     super(props);
-    this.state = {models: []};
+    this.state = { models: [] };
   }
   render() {
     return (
       <ul className={LIST_CLASS}>
-        {this.state.models.map((m, i) => <Item key={i} model={m} {...this.props} />)}
+        {this.state.models.map((m, i) => (
+          <Item key={i} model={m} {...this.props} />
+        ))}
       </ul>
     );
   }
   componentDidMount() {
     if (this.props.available) {
-      this.props.manager.runningChanged.connect(
-        (_, models) => this.setState({models: models.filter(this.props.filterRunning || (_ => true))})
+      this.props.manager.runningChanged.connect((_, models) =>
+        this.setState({
+          models: models.filter(this.props.filterRunning || (_ => true))
+        })
       );
     }
   }
@@ -168,9 +164,7 @@ function Section<M>(props: SessionProps<M>) {
   function onShutdown() {
     showDialog({
       title: `Shutdown All ${props.name} Sessions?`,
-      buttons: [
-        Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
-      ]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
     }).then(result => {
       if (result.button.accept) {
         props.manager.shutdownAll();
@@ -179,7 +173,7 @@ function Section<M>(props: SessionProps<M>) {
   }
   return (
     <div className={SECTION_CLASS}>
-      {props.available &&
+      {props.available && (
         <>
           <div className={SECTION_HEADER_CLASS}>
             {props.name} Sessions
@@ -191,10 +185,10 @@ function Section<M>(props: SessionProps<M>) {
           </div>
 
           <div className={CONTAINER_CLASS}>
-            <List {...props}/>
+            <List {...props} />
           </div>
         </>
-      }
+      )}
     </div>
   );
 }
@@ -205,14 +199,18 @@ interface IRunningSessionsProps {
   terminalOpenRequested: Signal<RunningSessions, TerminalSession.IModel>;
 }
 
-function RunningSessionsComponent({manager, sessionOpenRequested, terminalOpenRequested}: IRunningSessionsProps) {
+function RunningSessionsComponent({
+  manager,
+  sessionOpenRequested,
+  terminalOpenRequested
+}: IRunningSessionsProps) {
   const terminalsAvailable = manager.terminals.isAvailable();
 
   return (
     <>
       <div className={HEADER_CLASS}>
         <button
-          title='Refresh List'
+          title="Refresh List"
           className={REFRESH_CLASS}
           onClick={() => {
             if (terminalsAvailable) {
@@ -225,7 +223,7 @@ function RunningSessionsComponent({manager, sessionOpenRequested, terminalOpenRe
       <Section
         openRequested={terminalOpenRequested}
         manager={manager.terminals}
-        name='Terminal'
+        name="Terminal"
         iconClass={() => `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`}
         label={m => `terminals/${m.name}`}
         available={terminalsAvailable}
@@ -234,8 +232,10 @@ function RunningSessionsComponent({manager, sessionOpenRequested, terminalOpenRe
       <Section
         openRequested={sessionOpenRequested}
         manager={manager.sessions}
-        filterRunning={m => !!((m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name)}
-        name='Kernel'
+        filterRunning={m =>
+          !!((m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name)
+        }
+        name="Kernel"
         iconClass={m => {
           if ((m.name || PathExt.basename(m.path)).indexOf('.ipynb') !== -1) {
             return NOTEBOOK_ICON_CLASS;
@@ -262,8 +262,7 @@ function RunningSessionsComponent({manager, sessionOpenRequested, terminalOpenRe
 /**
  * A class that exposes the running terminal and kernel sessions.
  */
-export
-class RunningSessions extends Widget {
+export class RunningSessions extends Widget {
   /**
    * Construct a new running widget.
    */
@@ -308,25 +307,23 @@ class RunningSessions extends Widget {
   }
 
   private _sessionOpenRequested = new Signal<this, Session.IModel>(this);
-  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(this);
+  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(
+    this
+  );
   private options: RunningSessions.IOptions;
 }
-
 
 /**
  * The namespace for the `RunningSessions` class statics.
  */
-export
-namespace RunningSessions {
+export namespace RunningSessions {
   /**
    * An options object for creating a running sessions widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A service manager instance.
      */
     manager: ServiceManager.IManager;
-
   }
 }
