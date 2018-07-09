@@ -99,18 +99,31 @@ const FILE_ICON_CLASS = 'jp-mod-file';
  */
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
+/**
+ * Props for a Session, with items of type M
+ */
 type SessionProps<M> = {
+  // A signal that ttracks when the `open` is clicked on a session item
   openRequested: Signal<RunningSessions, M>;
   manager: {
+    // called when the shutdown all button is pressed
     shutdownAll(): void;
+    // A signal that should emit a new list of items whenever they are changed
     runningChanged: ISignal<any, M[]>;
   };
+  // called when the shutdown button is pressed on a particular item
   shutdown: (model: M) => void;
+  // optitonal filter that is applied to the items from `runningChanged`
   filterRunning?: (model: M) => boolean;
+  // Name that is shown to the user
   name: string;
+  // Class for the icon
   iconClass: (model: M) => string;
+  // called to determine the label for each item
   label: (model: M) => string;
+  // called to determine the `title` attribute for each item, which is revealed on hover
   labelTitle?: (model: M) => string;
+  // flag that set's whether it should display
   available: boolean;
 };
 
@@ -160,6 +173,11 @@ class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
   }
 }
 
+/**
+ * The Section component contains the shared look and feel for an interactive list of kernels and sessions.
+ *
+ * It is specialized for each based on it's props.
+ */
 function Section<M>(props: SessionProps<M>) {
   function onShutdown() {
     showDialog({
