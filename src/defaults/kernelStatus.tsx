@@ -25,32 +25,30 @@ export class StatusComponent extends React.Component<
     StatusComponent.IState
 > {
     state = {
-        kernelStatus: 'waiting'
+        kernelStatus: ''
     };
     constructor(props: StatusComponent.IProps) {
         super(props);
-        this.props.tracker.currentChanged.connect(this.printed);
-        this.props.tracker.activeCellChanged.connect(this.printed);
+        this.props.tracker.currentChanged.connect(this.cellChanged);
+        this.props.tracker.activeCellChanged.connect(this.cellChanged);
     }
 
-    printed = () => {
-        console.log('bi');
+    cellChanged = () => {
         if (this.props.tracker.currentWidget.session.kernel) {
             this.setState({
                 kernelStatus: this.props.tracker.currentWidget.session.kernel
                     .status
             });
             this.props.tracker.currentWidget.session.statusChanged.connect(
-                this.printing
+                this.kernelChanged
             );
             this.props.tracker.currentWidget.session.kernelChanged.connect(
-                this.printing
+                this.kernelChanged
             );
         }
     };
 
-    printing = () => {
-        console.log('hi');
+    kernelChanged = () => {
         if (this.props.tracker.currentWidget.session.kernel) {
             this.setState({
                 kernelStatus: this.props.tracker.currentWidget.session.kernel
