@@ -3,42 +3,23 @@
 
 import expect = require('expect.js');
 
-import {
-  DocumentManager, IDocumentManager
-} from '@jupyterlab/docmanager';
+import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
-import {
-  DocumentRegistry, TextModelFactory
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  simulate
-} from 'simulate-event';
+import { simulate } from 'simulate-event';
 
-import {
-  BreadCrumbs, FileBrowserModel
-} from '@jupyterlab/filebrowser';
-
-
+import { BreadCrumbs, FileBrowserModel } from '@jupyterlab/filebrowser';
 
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
-
 
 class LogCrumbs extends BreadCrumbs {
   methods: string[] = [];
@@ -65,9 +46,7 @@ class LogCrumbs extends BreadCrumbs {
   }
 }
 
-
 describe('filebrowser/model', () => {
-
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -80,7 +59,9 @@ describe('filebrowser/model', () => {
 
   before(() => {
     let opener: DocumentManager.IWidgetOpener = {
-      open: widget => { /* no op */ }
+      open: widget => {
+        /* no op */
+      }
     };
 
     registry = new DocumentRegistry({
@@ -88,21 +69,26 @@ describe('filebrowser/model', () => {
     });
     serviceManager = new ServiceManager();
     manager = new DocumentManager({
-      registry, opener,
+      registry,
+      opener,
       manager: serviceManager
     });
 
     let contents = serviceManager.contents;
-    return contents.newUntitled({ type: 'directory' }).then(cModel => {
-      first = cModel.name;
-      return contents.newUntitled({ path: cModel.path, type: 'directory' });
-    }).then(cModel => {
-      second = cModel.name;
-      return contents.newUntitled({ path: cModel.path, type: 'directory' });
-    }).then(cModel => {
-      third = cModel.name;
-      path = cModel.path;
-    });
+    return contents
+      .newUntitled({ type: 'directory' })
+      .then(cModel => {
+        first = cModel.name;
+        return contents.newUntitled({ path: cModel.path, type: 'directory' });
+      })
+      .then(cModel => {
+        second = cModel.name;
+        return contents.newUntitled({ path: cModel.path, type: 'directory' });
+      })
+      .then(cModel => {
+        third = cModel.name;
+        path = cModel.path;
+      });
   });
 
   beforeEach(() => {
@@ -117,9 +103,7 @@ describe('filebrowser/model', () => {
   });
 
   describe('BreadCrumbs', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new BreadCrumbs instance', () => {
         let bread = new BreadCrumbs({ model });
         expect(bread).to.be.a(BreadCrumbs);
@@ -130,14 +114,11 @@ describe('filebrowser/model', () => {
       it('should add the jp-BreadCrumbs class', () => {
         expect(crumbs.hasClass('jp-BreadCrumbs')).to.be(true);
       });
-
     });
 
     describe('#handleEvent()', () => {
-
       context('click', () => {
-
-        it('should switch to the parent directory', (done) => {
+        it('should switch to the parent directory', done => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
@@ -154,7 +135,7 @@ describe('filebrowser/model', () => {
           simulate(items[2], 'click');
         });
 
-        it('should switch to the home directory', (done) => {
+        it('should switch to the home directory', done => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
@@ -170,7 +151,7 @@ describe('filebrowser/model', () => {
           simulate(items[0], 'click');
         });
 
-        it('should switch to the grandparent directory', (done) => {
+        it('should switch to the grandparent directory', done => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
@@ -186,7 +167,7 @@ describe('filebrowser/model', () => {
           simulate(items[1], 'click');
         });
 
-        it('should refresh the current directory', (done) => {
+        it('should refresh the current directory', done => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
@@ -202,14 +183,11 @@ describe('filebrowser/model', () => {
           expect(items[3].textContent).to.be(third);
           simulate(items[3], 'click');
         });
-
       });
-
     });
 
     describe('#onAfterAttach()', () => {
-
-      it('should post an update request', (done) => {
+      it('should post an update request', done => {
         Widget.attach(crumbs, document.body);
         expect(crumbs.methods).to.contain('onAfterAttach');
         requestAnimationFrame(() => {
@@ -223,40 +201,37 @@ describe('filebrowser/model', () => {
         simulate(crumbs.node, 'click');
         expect(crumbs.events).to.contain('click');
       });
-
     });
 
     describe('#onBeforeDetach()', () => {
-
       it('should remove event listeners', () => {
         Widget.attach(crumbs, document.body);
         Widget.detach(crumbs);
         simulate(crumbs.node, 'click');
         expect(crumbs.events).to.not.contain('click');
       });
-
     });
 
     describe('#onUpdateRequest()', () => {
-
-      it('should be called when the model updates', (done) => {
+      it('should be called when the model updates', done => {
         let model = new FileBrowserModel({ manager });
-        model.cd(path).then(() => {
-          crumbs = new LogCrumbs({ model });
-          return model.cd('..');
-        }).then(() => {
-          requestAnimationFrame(() => {
-            expect(crumbs.methods).to.contain('onUpdateRequest');
-            let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
-            expect(items.length).to.be(3);
-            model.dispose();
-            done();
-          });
-        }).catch(done);
+        model
+          .cd(path)
+          .then(() => {
+            crumbs = new LogCrumbs({ model });
+            return model.cd('..');
+          })
+          .then(() => {
+            requestAnimationFrame(() => {
+              expect(crumbs.methods).to.contain('onUpdateRequest');
+              let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+              expect(items.length).to.be(3);
+              model.dispose();
+              done();
+            });
+          })
+          .catch(done);
       });
-
     });
-
   });
-
 });

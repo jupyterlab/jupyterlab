@@ -1,29 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  MainAreaWidget, Toolbar
-} from '@jupyterlab/apputils';
+import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
-import {
-  MessageLoop
-} from '@phosphor/messaging';
+import { MessageLoop } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 describe('@jupyterlab/apputils', () => {
-
   describe('MainAreaWidget', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new main area widget', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
@@ -39,11 +27,9 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content, toolbar });
         expect(widget.hasClass('jp-MainAreaWidget')).to.equal(true);
       });
-
     });
 
     describe('#onActivateRequest()', () => {
-
       it('should focus on activation', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
@@ -51,11 +37,9 @@ describe('@jupyterlab/apputils', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(document.activeElement).to.equal(widget.content.node);
       });
-
     });
 
     describe('#onCloseRequest()', () => {
-
       it('should dispose on close', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
@@ -63,11 +47,9 @@ describe('@jupyterlab/apputils', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.CloseRequest);
         expect(widget.isDisposed).to.equal(true);
       });
-
     });
 
     context('title', () => {
-
       it('should proxy from content to main', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
@@ -81,20 +63,15 @@ describe('@jupyterlab/apputils', () => {
         widget.title.label = 'foo';
         expect(content.title.label).to.equal('foo');
       });
-
     });
 
     context('dispose', () => {
-
       it('should dispose of main', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
         content.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
-
     });
-
   });
-
 });

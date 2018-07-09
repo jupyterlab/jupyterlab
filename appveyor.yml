@@ -6,9 +6,8 @@ matrix:
 
 # environment variables
 environment:
-  nodejs_version: "6.9"
+  nodejs_version: "lts"
   matrix:
-
     - PYTHON: C:\Miniconda
       PYTHON_VERSION: 2.7
       NAME: javascript
@@ -40,8 +39,6 @@ install:
 
   # Install node:
   - ps: Install-Product node $env:nodejs_version
-  # Install newer Firefox
-  - choco install firefox
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:

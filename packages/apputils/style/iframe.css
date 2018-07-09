@@ -8,11 +8,9 @@
   height: 100%;
 }
 
-
 .jp-IFrame > iframe {
   border: none;
 }
-
 
 /*
 When drag events occur, `p-mod-override-cursor` is added to the body.

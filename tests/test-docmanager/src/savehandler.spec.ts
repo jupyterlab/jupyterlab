@@ -3,29 +3,21 @@
 
 import expect = require('expect.js');
 
-import {
-  uuid
-} from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
+
+import { ServiceManager } from '@jupyterlab/services';
 
 import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
-  Context, DocumentRegistry, TextModelFactory
+  Context,
+  DocumentRegistry,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
 
-import {
-  SaveHandler
-} from '@jupyterlab/docmanager';
+import { SaveHandler } from '@jupyterlab/docmanager';
 
-import {
-  acceptDialog, waitForDialog
-} from '../../utils';
-
+import { acceptDialog, waitForDialog } from '../../utils';
 
 describe('docregistry/savehandler', () => {
-
   let manager: ServiceManager.IManager;
   let factory = new TextModelFactory();
   let context: Context<DocumentRegistry.IModel>;
@@ -37,7 +29,11 @@ describe('docregistry/savehandler', () => {
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: uuid() + '.txt' });
+    context = new Context({
+      manager,
+      factory,
+      path: UUID.uuid4() + '.txt'
+    });
     handler = new SaveHandler({ context });
     return context.initialize(true);
   });
@@ -48,17 +44,13 @@ describe('docregistry/savehandler', () => {
   });
 
   describe('SaveHandler', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new save handler', () => {
         expect(handler).to.be.a(SaveHandler);
       });
-
     });
 
     describe('#saveInterval()', () => {
-
       it('should be the save interval of the handler', () => {
         expect(handler.saveInterval).to.be(120);
       });
@@ -67,21 +59,17 @@ describe('docregistry/savehandler', () => {
         handler.saveInterval = 200;
         expect(handler.saveInterval).to.be(200);
       });
-
     });
 
     describe('#isActive', () => {
-
       it('should test whether the handler is active', () => {
         expect(handler.isActive).to.be(false);
         handler.start();
         expect(handler.isActive).to.be(true);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the handler is disposed', () => {
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -92,11 +80,9 @@ describe('docregistry/savehandler', () => {
         context.dispose();
         expect(handler.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the handler', () => {
         expect(handler.isDisposed).to.be(false);
         handler.dispose();
@@ -104,17 +90,15 @@ describe('docregistry/savehandler', () => {
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
-
     });
 
     describe('#start()', () => {
-
       it('should start the save handler', () => {
         handler.start();
         expect(handler.isActive).to.be(true);
       });
 
-      it('should trigger a save', (done) => {
+      it('should trigger a save', done => {
         context.fileChanged.connect(() => {
           done();
         });
@@ -124,7 +108,7 @@ describe('docregistry/savehandler', () => {
         handler.start();
       });
 
-      it('should continue to save', (done) => {
+      it('should continue to save', done => {
         let called = 0;
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
@@ -142,49 +126,59 @@ describe('docregistry/savehandler', () => {
         handler.start();
       });
 
-      it('should overwrite the file on disk', (done) => {
+      it('should overwrite the file on disk', done => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
-        context.initialize(true).then(() => {
-          setTimeout(() => {
-            manager.contents.save(context.path, {
-              type: factory.contentType,
-              format: factory.fileFormat,
-              content: 'bar'
-            }).catch(done);
-            handler.saveInterval = 1;
-            handler.start();
-            context.model.fromString('baz');
-            context.fileChanged.connect(() => {
-              expect(context.model.toString()).to.be('baz');
-              done();
-            });
-          }, 1500);  // The server has a one second resolution for saves.
-        }).catch(done);
+        context
+          .initialize(true)
+          .then(() => {
+            setTimeout(() => {
+              manager.contents
+                .save(context.path, {
+                  type: factory.contentType,
+                  format: factory.fileFormat,
+                  content: 'bar'
+                })
+                .catch(done);
+              handler.saveInterval = 1;
+              handler.start();
+              context.model.fromString('baz');
+              context.fileChanged.connect(() => {
+                expect(context.model.toString()).to.be('baz');
+                done();
+              });
+            }, 1500); // The server has a one second resolution for saves.
+          })
+          .catch(done);
         acceptDialog().catch(done);
       });
 
-      it('should revert to the file on disk', (done) => {
+      it('should revert to the file on disk', done => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
-        context.initialize(true).then(() => {
-          context.fileChanged.connect(() => {
-            expect(context.model.toString()).to.be('bar');
-            done();
-          });
-          setTimeout(() => {
-            manager.contents.save(context.path, {
-              type: factory.contentType,
-              format: factory.fileFormat,
-              content: 'bar'
-            }).catch(done);
-            handler.saveInterval = 1;
-            handler.start();
-            context.model.fromString('baz');
-          }, 1500);  // The server has a one second resolution for saves.
-        }).catch(done);
+        context
+          .initialize(true)
+          .then(() => {
+            context.fileChanged.connect(() => {
+              expect(context.model.toString()).to.be('bar');
+              done();
+            });
+            setTimeout(() => {
+              manager.contents
+                .save(context.path, {
+                  type: factory.contentType,
+                  format: factory.fileFormat,
+                  content: 'bar'
+                })
+                .catch(done);
+              handler.saveInterval = 1;
+              handler.start();
+              context.model.fromString('baz');
+            }, 1500); // The server has a one second resolution for saves.
+          })
+          .catch(done);
         waitForDialog().then(() => {
           let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           let buttons = dialog.getElementsByTagName('button');
@@ -195,20 +189,15 @@ describe('docregistry/savehandler', () => {
           }
         });
       });
-
     });
 
     describe('#stop()', () => {
-
       it('should stop the save timer', () => {
         handler.start();
         expect(handler.isActive).to.be(true);
         handler.stop();
         expect(handler.isActive).to.be(false);
       });
-
     });
-
   });
-
 });

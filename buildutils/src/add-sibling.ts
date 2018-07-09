@@ -20,9 +20,9 @@ import * as utils from './utils';
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
-    let msg = '** Must supply a target extension';
-    process.stderr.write(msg);
-    process.exit(1);
+  let msg = '** Must supply a target extension';
+  process.stderr.write(msg);
+  process.exit(1);
 }
 
 // Extract the desired git repository and repository name.
@@ -32,12 +32,15 @@ let packageDirName = path.basename(target);
 
 let packagePath = path.resolve(target);
 if (fs.existsSync(packagePath)) {
-    // Copy the package directory contents to the sibling package.
+  // Copy the package directory contents to the sibling package.
   let newPackagePath = path.join(basePath, 'packages', packageDirName);
   fs.copySync(packagePath, newPackagePath);
 } else {
   // Otherwise treat it as a git reposotory and try to add it.
-  packageDirName = target.split('/').pop().split('.')[0];
+  packageDirName = target
+    .split('/')
+    .pop()
+    .split('.')[0];
   packagePath = path.join(basePath, 'packages', packageDirName);
   utils.run('git clone ' + target + ' ' + packagePath);
 }
@@ -51,9 +54,16 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
 let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
 
 // Add the extension path to packages/metapackage/tsconfig.json
-let tsconfigPath = path.join(basePath, 'packages', 'metapackage', 'tsconfig.json');
+let tsconfigPath = path.join(
+  basePath,
+  'packages',
+  'metapackage',
+  'tsconfig.json'
+);
 let tsconfig = utils.readJSONFile(tsconfigPath);
-tsconfig.compilerOptions.paths[data.name] = [path.join('..', packageDirName, 'src')];
+tsconfig.compilerOptions.paths[data.name] = [
+  path.join('..', packageDirName, 'src')
+];
 fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Update the core jupyterlab build dependencies.

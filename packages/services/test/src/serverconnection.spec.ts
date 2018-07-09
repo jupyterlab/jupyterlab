@@ -3,39 +3,29 @@
 
 import expect = require('expect.js');
 
-import {
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  ServerConnection
-} from '../../lib';
+import { ServerConnection } from '../../lib';
 
-import {
-  getRequestHandler
-} from './utils';
-
+import { getRequestHandler } from './utils';
 
 describe('@jupyterlab/services', () => {
-
   describe('ServerConnection', () => {
-
     describe('.makeRequest()', () => {
-
       it('should make a request to the server', () => {
         let settings = getRequestHandler(200, 'hello');
-        return ServerConnection.makeRequest(settings.baseUrl, {}, settings).then(response => {
-          expect(response.statusText).to.be('OK');
-          return response.json();
-        }).then(data => {
-          expect(data).to.be('hello');
-        });
+        return ServerConnection.makeRequest(settings.baseUrl, {}, settings)
+          .then(response => {
+            expect(response.statusText).to.be('OK');
+            return response.json();
+          })
+          .then(data => {
+            expect(data).to.be('hello');
+          });
       });
-
     });
 
     describe('.makeSettings()', () => {
-
       it('should use default settings', () => {
         let settings = ServerConnection.makeSettings();
         expect(settings.baseUrl).to.be(PageConfig.getBaseUrl());
@@ -59,7 +49,7 @@ describe('@jupyterlab/services', () => {
           init: {
             credentials: 'same-origin'
           },
-          token: 'baz',
+          token: 'baz'
         };
         let settings = ServerConnection.makeSettings(defaults);
         expect(settings.baseUrl).to.be(defaults.baseUrl);
@@ -67,22 +57,21 @@ describe('@jupyterlab/services', () => {
         expect(settings.token).to.be(defaults.token);
         expect(settings.init.credentials).to.be(defaults.init.credentials);
       });
-
     });
 
     describe('.makeError()', () => {
-
       it('should create a server error from a server response', () => {
         let settings = getRequestHandler(200, 'hi');
         let init = { body: 'hi' };
-        return ServerConnection.makeRequest(settings.baseUrl, init, settings).then(response => {
+        return ServerConnection.makeRequest(
+          settings.baseUrl,
+          init,
+          settings
+        ).then(response => {
           let err = new ServerConnection.ResponseError(response);
           expect(err.message).to.be('Invalid response: 200 OK');
         });
       });
-
     });
-
   });
-
 });

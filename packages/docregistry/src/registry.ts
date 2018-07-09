@@ -1,60 +1,45 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Contents, Kernel
-} from '@jupyterlab/services';
+import { Contents, Kernel } from '@jupyterlab/services';
 
 import {
-  ArrayExt, ArrayIterator, IIterator, each, empty, find, map
+  ArrayExt,
+  ArrayIterator,
+  IIterator,
+  each,
+  empty,
+  find,
+  map
 } from '@phosphor/algorithm';
 
-import {
-  JSONValue
-} from '@phosphor/coreutils';
+import { JSONValue } from '@phosphor/coreutils';
+
+import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { DockLayout, Widget } from '@phosphor/widgets';
+
+import { IClientSession, Toolbar } from '@jupyterlab/apputils';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import {
-  IDisposable, DisposableDelegate
-} from '@phosphor/disposable';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  DockLayout, Widget
-} from '@phosphor/widgets';
-
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
-
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
-
-import {
-  IChangedArgs as IChangedArgsGeneric, PathExt
+  IChangedArgs as IChangedArgsGeneric,
+  PathExt
 } from '@jupyterlab/coreutils';
 
-import {
-  IModelDB
-} from '@jupyterlab/observables';
+import { IModelDB } from '@jupyterlab/observables';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  TextModelFactory
-} from './default';
-
+import { TextModelFactory } from './default';
 
 /**
  * The document registry.
  */
-export
-class DocumentRegistry implements IDisposable {
+export class DocumentRegistry implements IDisposable {
   /**
    * Construct a new document registry.
    */
@@ -68,7 +53,8 @@ class DocumentRegistry implements IDisposable {
     let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
     fts.forEach(ft => {
       let value: DocumentRegistry.IFileType = {
-        ...DocumentRegistry.fileTypeDefaults, ...ft
+        ...DocumentRegistry.fileTypeDefaults,
+        ...ft
       };
       this._fileTypes.push(value);
     });
@@ -225,7 +211,10 @@ class DocumentRegistry implements IDisposable {
    * If the extension is already registered for the given
    * widget name, a warning will be logged and this will be a no-op.
    */
-  addWidgetExtension(widgetName: string, extension: DocumentRegistry.WidgetExtension): IDisposable {
+  addWidgetExtension(
+    widgetName: string,
+    extension: DocumentRegistry.WidgetExtension
+  ): IDisposable {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
       this._extenders[widgetName] = [];
@@ -264,7 +253,8 @@ class DocumentRegistry implements IDisposable {
    */
   addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
     let value: DocumentRegistry.IFileType = {
-      ...DocumentRegistry.fileTypeDefaults, ...fileType
+      ...DocumentRegistry.fileTypeDefaults,
+      ...fileType
     };
     this._fileTypes.push(value);
 
@@ -397,7 +387,9 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A new iterator over the widget extensions.
    */
-  widgetExtensions(widgetName: string): IIterator<DocumentRegistry.WidgetExtension> {
+  widgetExtensions(
+    widgetName: string
+  ): IIterator<DocumentRegistry.WidgetExtension> {
     widgetName = widgetName.toLowerCase();
     if (!(widgetName in this._extenders)) {
       return empty<DocumentRegistry.WidgetExtension>();
@@ -421,7 +413,9 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A widget factory instance.
    */
-  getWidgetFactory(widgetName: string): DocumentRegistry.WidgetFactory | undefined {
+  getWidgetFactory(
+    widgetName: string
+  ): DocumentRegistry.WidgetFactory | undefined {
     return this._widgetFactories[widgetName.toLowerCase()];
   }
 
@@ -457,7 +451,11 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns A kernel preference.
    */
-  getKernelPreference(path: string, widgetName: string, kernel?: Partial<Kernel.IModel>): IClientSession.IKernelPreference | undefined {
+  getKernelPreference(
+    path: string,
+    widgetName: string,
+    kernel?: Partial<Kernel.IModel>
+  ): IClientSession.IKernelPreference | undefined {
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
@@ -486,23 +484,30 @@ class DocumentRegistry implements IDisposable {
    *
    * @returns The best matching file type.
    */
-  getFileTypeForModel(model: Partial<Contents.IModel>): DocumentRegistry.IFileType {
+  getFileTypeForModel(
+    model: Partial<Contents.IModel>
+  ): DocumentRegistry.IFileType {
     switch (model.type) {
-    case 'directory':
-      return find(this._fileTypes, ft => ft.contentType === 'directory') || DocumentRegistry.defaultDirectoryFileType;
-    case 'notebook':
-      return find(this._fileTypes, ft => ft.contentType === 'notebook') ||
-        DocumentRegistry.defaultNotebookFileType;
-    default:
-      // Find the best matching extension.
-      if (model.name || model.path) {
-        let name = model.name || PathExt.basename(model.path);
-        let fts = this.getFileTypesForPath(name);
-        if (fts.length > 0) {
-          return fts[0];
+      case 'directory':
+        return (
+          find(this._fileTypes, ft => ft.contentType === 'directory') ||
+          DocumentRegistry.defaultDirectoryFileType
+        );
+      case 'notebook':
+        return (
+          find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+          DocumentRegistry.defaultNotebookFileType
+        );
+      default:
+        // Find the best matching extension.
+        if (model.name || model.path) {
+          let name = model.name || PathExt.basename(model.path);
+          let fts = this.getFileTypesForPath(name);
+          if (fts.length > 0) {
+            return fts[0];
+          }
         }
-      }
-      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+        return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -532,33 +537,45 @@ class DocumentRegistry implements IDisposable {
       if (ft) {
         fts.push(ft);
       }
-      ext = '.' + ext.split('.').slice(2).join('.');
+      ext =
+        '.' +
+        ext
+          .split('.')
+          .slice(2)
+          .join('.');
     }
     return fts;
   }
 
-  private _modelFactories: { [key: string]: DocumentRegistry.ModelFactory } = Object.create(null);
-  private _widgetFactories: { [key: string]: DocumentRegistry.WidgetFactory } = Object.create(null);
+  private _modelFactories: {
+    [key: string]: DocumentRegistry.ModelFactory;
+  } = Object.create(null);
+  private _widgetFactories: {
+    [key: string]: DocumentRegistry.WidgetFactory;
+  } = Object.create(null);
   private _defaultWidgetFactory = '';
-  private _defaultWidgetFactories: { [key: string]: string } = Object.create(null);
-  private _widgetFactoryExtensions: {[key: string]: string[] } = Object.create(null);
+  private _defaultWidgetFactories: { [key: string]: string } = Object.create(
+    null
+  );
+  private _widgetFactoryExtensions: { [key: string]: string[] } = Object.create(
+    null
+  );
   private _fileTypes: DocumentRegistry.IFileType[] = [];
-  private _extenders: { [key: string] : DocumentRegistry.WidgetExtension[] } = Object.create(null);
+  private _extenders: {
+    [key: string]: DocumentRegistry.WidgetExtension[];
+  } = Object.create(null);
   private _changed = new Signal<this, DocumentRegistry.IChangedArgs>(this);
   private _isDisposed = false;
 }
 
-
 /**
  * The namespace for the `DocumentRegistry` class statics.
  */
-export
-namespace DocumentRegistry {
+export namespace DocumentRegistry {
   /**
    * The options used to create a document registry.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The text model factory for the registry.  A default instance will
      * be used if not given.
@@ -575,8 +592,7 @@ namespace DocumentRegistry {
   /**
    * The interface for a document model.
    */
-  export
-  interface IModel extends IDisposable {
+  export interface IModel extends IDisposable {
     /**
      * A signal emitted when the document content changes.
      */
@@ -646,19 +662,26 @@ namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: any): void;
+
+    /**
+     * Initialize model state after initial data load.
+     *
+     * #### Notes
+     * This function must be called after the initial data is loaded to set up
+     * initial model state, such as an initial undo stack, etc.
+     */
+    initialize(): void;
   }
 
   /**
    * The interface for a document model that represents code.
    */
-  export
-  interface ICodeModel extends IModel, CodeEditor.IModel { }
+  export interface ICodeModel extends IModel, CodeEditor.IModel {}
 
   /**
    * The document context object.
    */
-  export
-  interface IContext<T extends IModel> extends IDisposable {
+  export interface IContext<T extends IModel> extends IDisposable {
     /**
      * A signal emitted when the path changes.
      */
@@ -675,7 +698,7 @@ namespace DocumentRegistry {
     disposed: ISignal<this, void>;
 
     /**
-     * Get the model associated with the document.
+     * The data model for the document.
      */
     readonly model: T;
 
@@ -697,11 +720,11 @@ namespace DocumentRegistry {
     readonly localPath: string;
 
     /**
-     * The current contents model associated with the document
+     * The document metadata, stored as a services contents model.
      *
      * #### Notes
-     * The contents model will be null until the context is ready.
-     * It will have an  empty `contents` field.
+     * This will be null until the context is 'ready'. Since we only store
+     * metadata here, the `.contents` attribute will always be empty.
      */
     readonly contentsModel: Contents.IModel | null;
 
@@ -789,21 +812,17 @@ namespace DocumentRegistry {
   /**
    * A type alias for a context.
    */
-  export
-  type Context = IContext<IModel>;
-
+  export type Context = IContext<IModel>;
 
   /**
    * A type alias for a code context.
    */
-  export
-  type CodeContext = IContext<ICodeModel>;
+  export type CodeContext = IContext<ICodeModel>;
 
   /**
    * The options used to initialize a widget factory.
    */
-  export
-  interface IWidgetFactoryOptions {
+  export interface IWidgetFactoryOptions {
     /**
      * The name of the widget to display in dialogs.
      */
@@ -841,21 +860,9 @@ namespace DocumentRegistry {
   }
 
   /**
-   * A widget for a document.
-   */
-  export
-  interface IReadyWidget extends Widget {
-    /**
-     * A promise that resolves when the widget is ready.
-     */
-    readonly ready: Promise<void>;
-  }
-
-  /**
    * The options used to open a widget.
    */
-  export
-  interface IOpenOptions {
+  export interface IOpenOptions {
     /**
      * The reference widget id for the insert location.
      *
@@ -880,10 +887,11 @@ namespace DocumentRegistry {
   /**
    * The interface for a widget factory.
    */
-  export
-  interface IWidgetFactory<T extends IReadyWidget, U extends IModel> extends IDisposable, IWidgetFactoryOptions {
+  export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
+    extends IDisposable,
+      IWidgetFactoryOptions {
     /**
-     * A signal emitted when a widget is created.
+     * A signal emitted when a new widget is created.
      */
     widgetCreated: ISignal<IWidgetFactory<T, U>, T>;
 
@@ -899,14 +907,12 @@ namespace DocumentRegistry {
   /**
    * A type alias for a standard widget factory.
    */
-  export
-  type WidgetFactory = IWidgetFactory<IReadyWidget, IModel>;
+  export type WidgetFactory = IWidgetFactory<IDocumentWidget, IModel>;
 
   /**
    * An interface for a widget extension.
    */
-  export
-  interface IWidgetExtension<T extends Widget, U extends IModel> {
+  export interface IWidgetExtension<T extends Widget, U extends IModel> {
     /**
      * Create a new extension for a given widget.
      */
@@ -916,14 +922,12 @@ namespace DocumentRegistry {
   /**
    * A type alias for a standard widget extension.
    */
-  export
-  type WidgetExtension = IWidgetExtension<Widget, IModel>;
+  export type WidgetExtension = IWidgetExtension<Widget, IModel>;
 
   /**
    * The interface for a model factory.
    */
-  export
-  interface IModelFactory<T extends IModel> extends IDisposable {
+  export interface IModelFactory<T extends IModel> extends IDisposable {
     /**
      * The name of the model.
      */
@@ -957,20 +961,17 @@ namespace DocumentRegistry {
   /**
    * A type alias for a standard model factory.
    */
-  export
-  type ModelFactory = IModelFactory<IModel>;
+  export type ModelFactory = IModelFactory<IModel>;
 
   /**
    * A type alias for a code model factory.
    */
-  export
-  type CodeModelFactory = IModelFactory<ICodeModel>;
+  export type CodeModelFactory = IModelFactory<ICodeModel>;
 
   /**
    * An interface for a file type.
    */
-  export
-  interface IFileType {
+  export interface IFileType {
     /**
      * The name of the file type.
      */
@@ -1021,8 +1022,7 @@ namespace DocumentRegistry {
   /**
    * The defaults used for a file type.
    */
-  export
-  const fileTypeDefaults: IFileType = {
+  export const fileTypeDefaults: IFileType = {
     name: 'default',
     extensions: [],
     mimeTypes: [],
@@ -1035,12 +1035,15 @@ namespace DocumentRegistry {
   /**
    * An arguments object for the `changed` signal.
    */
-  export
-  interface IChangedArgs {
+  export interface IChangedArgs {
     /**
      * The type of the changed item.
      */
-    readonly type: 'widgetFactory' | 'modelFactory' | 'widgetExtension' | 'fileType';
+    readonly type:
+      | 'widgetFactory'
+      | 'modelFactory'
+      | 'widgetExtension'
+      | 'fileType';
 
     /**
      * The name of the item or the widget factory being extended.
@@ -1056,8 +1059,7 @@ namespace DocumentRegistry {
   /**
    * The default text file type used by the document registry.
    */
-  export
-  const defaultTextFileType: IFileType = {
+  export const defaultTextFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
@@ -1067,8 +1069,7 @@ namespace DocumentRegistry {
   /**
    * The default notebook file type used by the document registry.
    */
-  export
-  const defaultNotebookFileType: IFileType = {
+  export const defaultNotebookFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'notebook',
     displayName: 'Notebook',
@@ -1082,8 +1083,7 @@ namespace DocumentRegistry {
   /**
    * The default directory file type used by the document registry.
    */
-  export
-  const defaultDirectoryFileType: IFileType = {
+  export const defaultDirectoryFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'directory',
     extensions: [],
@@ -1095,8 +1095,7 @@ namespace DocumentRegistry {
   /**
    * The default file types used by the document registry.
    */
-  export
-  const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
+  export const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
     defaultTextFileType,
     defaultNotebookFileType,
     defaultDirectoryFileType,
@@ -1105,7 +1104,7 @@ namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+      iconClass: 'jp-MaterialIcon jp-MarkdownIcon'
     },
     {
       name: 'python',
@@ -1125,6 +1124,13 @@ namespace DocumentRegistry {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+    },
+    {
+      name: 'tsv',
+      displayName: 'TSV File',
+      extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
       iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
     },
@@ -1189,10 +1195,37 @@ namespace DocumentRegistry {
       extensions: ['.bmp'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
       fileFormat: 'base64'
-    },
+    }
   ];
 }
 
+/**
+ * An interface for a document widget.
+ */
+export interface IDocumentWidget<
+  T extends Widget = Widget,
+  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+> extends Widget {
+  /**
+   * The content widget.
+   */
+  readonly content: T;
+
+  /**
+   * A promise resolving after the content widget is revealed.
+   */
+  readonly revealed: Promise<void>;
+
+  /**
+   * The context associated with the document.
+   */
+  readonly context: DocumentRegistry.IContext<U>;
+
+  /**
+   * The toolbar for the widget.
+   */
+  readonly toolbar: Toolbar<Widget>;
+}
 
 /**
  * A private namespace for DocumentRegistry data.
@@ -1206,8 +1239,7 @@ namespace Private {
    * #### Notes
    * Dotted filenames (e.g. `".table.json"` are allowed).
    */
-  export
-  function extname(path: string): string {
+  export function extname(path: string): string {
     let parts = PathExt.basename(path).split('.');
     parts.shift();
     let ext = '.' + parts.join('.');
@@ -1216,6 +1248,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export
-  function noOp() { /* no-op */}
+  export function noOp() {
+    /* no-op */
+  }
 }

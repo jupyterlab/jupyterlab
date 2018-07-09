@@ -7,13 +7,12 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-
 if (require.main === module) {
   // Make sure we have required command line arguments.
   if (process.argv.length !== 3) {
-      let msg = '** Must supply a source package name\n';
-      process.stderr.write(msg);
-      process.exit(1);
+    let msg = '** Must supply a source package name\n';
+    process.stderr.write(msg);
+    process.exit(1);
   }
   let name = process.argv[2];
   let pkgPath = path.resolve(path.join('.', 'packages', name));

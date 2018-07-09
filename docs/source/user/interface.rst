@@ -19,6 +19,14 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
    :align: center
    :class: jp-screenshot
 
+JupyterLab sessions always reside in a :ref:`workspace <url-workspaces>`.
+Workspaces contain the state of JupyterLab: the files that are currently open,
+the layout of the application areas and tabs, etc.
+Workspaces can be saved on the server with
+:ref:`named workspace URLs <url-workspaces>`.
+To learn more about URLs in Jupyterlab, visit :ref:`urls`.
+
+
 .. _menu-bar:
 
 Menu Bar

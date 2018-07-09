@@ -1,32 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-
 /**
  * Phosphor widget that encodes best practices for VDOM based rendering.
  */
-export
-abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget {
+export abstract class VDomRenderer<
+  T extends VDomRenderer.IModel | null
+> extends Widget {
   /**
    * A signal emited when the model changes.
    */
@@ -100,7 +92,10 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
    * Subclasses should define this method and use the current model state
    * to create a virtual node or nodes to render.
    */
-  protected abstract render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null;
+  protected abstract render():
+    | Array<React.ReactElement<any>>
+    | React.ReactElement<any>
+    | null;
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
@@ -111,34 +106,32 @@ abstract class VDomRenderer<T extends VDomRenderer.IModel | null> extends Widget
  *
  * All messages will re-render the element.
  */
-export
-class ReactElementWidget extends VDomRenderer<any> {
+export class ReactElementWidget extends VDomRenderer<any> {
   /**
    * Creates a Phosphor widget that renders the element(s) `es`.
    */
-  constructor(es: Array<React.ReactElement<any>> | React.ReactElement<any> | null) {
+  constructor(
+    es: Array<React.ReactElement<any>> | React.ReactElement<any> | null
+  ) {
     super();
     this._es = es;
   }
 
-  render():  Array<React.ReactElement<any>> | React.ReactElement<any> | null {
+  render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null {
     return this._es;
   }
 
   private _es: Array<React.ReactElement<any>> | React.ReactElement<any> | null;
 }
 
-
 /**
  * The namespace for VDomRenderer statics.
  */
-export
-namespace VDomRenderer {
+export namespace VDomRenderer {
   /**
    * An interface for a model to be used with vdom rendering.
    */
-  export
-  interface IModel extends IDisposable {
+  export interface IModel extends IDisposable {
     /**
      * A signal emited when any model state changes.
      */
@@ -146,12 +139,10 @@ namespace VDomRenderer {
   }
 }
 
-
 /**
  * Concrete implementation of VDomRenderer model.
  */
-export
-class VDomModel implements VDomRenderer.IModel {
+export class VDomModel implements VDomRenderer.IModel {
   /**
    * A signal emitted when any model state changes.
    */

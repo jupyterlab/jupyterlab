@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "1.1.2",
+  "version": "2.0.0-1",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -26,7 +26,7 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.1.2",
@@ -44,6 +44,6 @@
     "@types/comment-json": "^1.1.0",
     "@types/minimist": "~1.2.0",
     "rimraf": "~2.6.2",
-    "typescript": "~2.8.3"
+    "typescript": "~2.9.2"
   }
 }

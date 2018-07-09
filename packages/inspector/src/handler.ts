@@ -1,40 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  IDataConnector, Text
-} from '@jupyterlab/coreutils';
+import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  MimeModel, RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  IInspector
-} from './inspector';
-
+import { IInspector } from './inspector';
 
 /**
  * An object that handles code inspection.
  */
-export
-class InspectionHandler implements IDisposable, IInspector.IInspectable {
+export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   /**
    * Construct a new inspection handler for a widget.
    */
@@ -78,7 +62,7 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (this._editor && !this._editor.isDisposed) {
       this._editor.model.value.changed.disconnect(this.onTextChanged, this);
     }
-    let editor = this._editor = newValue;
+    let editor = (this._editor = newValue);
     if (editor) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this._ephemeralCleared.emit(void 0);
@@ -144,37 +128,45 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const update: IInspector.IInspectorUpdate = {
-      content: null, type: 'hints'
+      content: null,
+      type: 'hints'
     };
 
     const pending = ++this._pending;
 
-    this._connector.fetch({ offset, text }).then(reply => {
-      // If handler has been disposed or a newer request is pending, bail.
-      if (this.isDisposed || pending !== this._pending) {
+    this._connector
+      .fetch({ offset, text })
+      .then(reply => {
+        // If handler has been disposed or a newer request is pending, bail.
+        if (this.isDisposed || pending !== this._pending) {
+          this._inspected.emit(update);
+          return;
+        }
+
+        const { data } = reply;
+        const mimeType = this._rendermime.preferredMimeType(data);
+
+        if (mimeType) {
+          const widget = this._rendermime.createRenderer(mimeType);
+          const model = new MimeModel({ data });
+
+          widget.renderModel(model);
+          update.content = widget;
+        }
+
         this._inspected.emit(update);
-        return;
-      }
-
-      const { data } = reply;
-      const mimeType = this._rendermime.preferredMimeType(data);
-
-      if (mimeType) {
-        const widget = this._rendermime.createRenderer(mimeType);
-        const model = new MimeModel({ data });
-
-        widget.renderModel(model);
-        update.content = widget;
-      }
-
-      this._inspected.emit(update);
-    }).catch(reason => {
-      // Since almost all failures are benign, fail silently.
-      this._inspected.emit(update);
-    });
+      })
+      .catch(reason => {
+        // Since almost all failures are benign, fail silently.
+        this._inspected.emit(update);
+      });
   }
 
-  private _connector: IDataConnector<InspectionHandler.IReply, void, InspectionHandler.IRequest>;
+  private _connector: IDataConnector<
+    InspectionHandler.IReply,
+    void,
+    InspectionHandler.IRequest
+  >;
   private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor | null = null;
   private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
@@ -185,17 +177,14 @@ class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _standby = true;
 }
 
-
 /**
  * A namespace for inspection handler statics.
  */
-export
-namespace InspectionHandler {
+export namespace InspectionHandler {
   /**
    * The instantiation options for an inspection handler.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The connector used to make inspection requests.
      *
@@ -215,8 +204,7 @@ namespace InspectionHandler {
   /**
    * A reply to an inspection request.
    */
-  export
-  interface IReply {
+  export interface IReply {
     /**
      * The MIME bundle data returned from an inspection request.
      */
@@ -231,8 +219,7 @@ namespace InspectionHandler {
   /**
    * The details of an inspection request.
    */
-  export
-  interface IRequest {
+  export interface IRequest {
     /**
      * The cursor offset position within the text being inspected.
      */

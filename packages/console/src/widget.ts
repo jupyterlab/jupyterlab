@@ -1,59 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
 import {
-  Cell, CellModel, CodeCell, CodeCellModel, ICodeCellModel, IRawCellModel,
-  RawCell, RawCellModel
+  Cell,
+  CellModel,
+  CodeCell,
+  CodeCellModel,
+  ICodeCellModel,
+  isCodeCellModel,
+  IRawCellModel,
+  RawCell,
+  RawCellModel
 } from '@jupyterlab/cells';
 
-import {
-  IEditorMimeTypeService, CodeEditor
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  IObservableList, ObservableList
-} from '@jupyterlab/observables';
+import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
-import {
-  map, toArray
-} from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Panel, PanelLayout, Widget
-} from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import {
-  ForeignHandler
-} from './foreign';
+import { ForeignHandler } from './foreign';
 
-import {
-  ConsoleHistory, IConsoleHistory
-} from './history';
-
+import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -100,7 +82,6 @@ const INPUT_CLASS = 'jp-CodeConsole-input';
  */
 const EXECUTION_TIMEOUT = 250;
 
-
 /**
  * A widget containing a Jupyter console.
  *
@@ -108,8 +89,7 @@ const EXECUTION_TIMEOUT = 250;
  * The CodeConsole class is intended to be used within a ConsolePanel
  * instance. Under most circumstances, it is not instantiated by user code.
  */
-export
-class CodeConsole extends Widget {
+export class CodeConsole extends Widget {
   /**
    * Construct a console widget.
    */
@@ -118,20 +98,17 @@ class CodeConsole extends Widget {
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
-    this.node.tabIndex = -1;  // Allow the widget to take focus.
+    this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
-    let layout = this.layout = new PanelLayout();
+    const layout = (this.layout = new PanelLayout());
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
 
-    this.contentFactory = (
-      options.contentFactory || CodeConsole.defaultContentFactory
-    );
-    this.modelFactory = (
-      options.modelFactory || CodeConsole.defaultModelFactory
-    );
+    this.contentFactory =
+      options.contentFactory || CodeConsole.defaultContentFactory;
+    this.modelFactory = options.modelFactory || CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.session = options.session;
     this._mimeTypeService = options.mimeTypeService;
@@ -198,7 +175,8 @@ class CodeConsole extends Widget {
    * The list of content cells in the console.
    *
    * #### Notes
-   * This list does not include the banner or the prompt for a console.
+   * This list does not include the current banner or the prompt for a console.
+   * It may include previous banners as raw cells.
    */
   get cells(): IObservableList<Cell> {
     return this._cells;
@@ -208,8 +186,8 @@ class CodeConsole extends Widget {
    * The console input prompt cell.
    */
   get promptCell(): CodeCell | null {
-    let inputLayout = (this._input.layout as PanelLayout);
-    return inputLayout.widgets[0] as CodeCell || null;
+    let inputLayout = this._input.layout as PanelLayout;
+    return (inputLayout.widgets[0] as CodeCell) || null;
   }
 
   /**
@@ -239,10 +217,10 @@ class CodeConsole extends Widget {
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
     model.value.text = '...';
-    let banner = this._banner = new RawCell({
+    let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
-    });
+    }));
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
@@ -355,19 +333,24 @@ class CodeConsole extends Widget {
 
   /**
    * Serialize the output.
+   *
+   * #### Notes
+   * This only serializes the code cells and the prompt cell if it exists, and
+   * skips any old banner cells.
    */
   serialize(): nbformat.ICodeCell[] {
-    let promptCell = this.promptCell;
-    let layout = this._content.layout as PanelLayout;
-    // Serialize content.
-    let output = map(layout.widgets, widget => {
-      return (widget as CodeCell).model.toJSON() as nbformat.ICodeCell;
+    const cells: nbformat.ICodeCell[] = [];
+    each(this._cells, cell => {
+      let model = cell.model;
+      if (isCodeCellModel(model)) {
+        cells.push(model.toJSON());
+      }
     });
-    if (!promptCell) {
-      return toArray(output);
+
+    if (this.promptCell) {
+      cells.push(this.promptCell.model.toJSON());
     }
-    // Serialize prompt cell and return.
-    return toArray(output).concat(promptCell.model.toJSON() as nbformat.ICodeCell);
+    return cells;
   }
 
   /**
@@ -382,14 +365,14 @@ class CodeConsole extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeyDown(event as KeyboardEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -459,9 +442,6 @@ class CodeConsole extends Widget {
     editor.addKeydownHandler(this._onEditorKeydown);
 
     this._history.editor = editor;
-    if (this.isAttached) {
-      this.activate();
-    }
     this._promptCellCreated.emit(promptCell);
   }
 
@@ -490,7 +470,10 @@ class CodeConsole extends Widget {
    * Handle the `'click'` event for the widget.
    */
   private _evtClick(event: MouseEvent): void {
-    if (this.promptCell && this.promptCell.node.contains(event.target as HTMLElement)) {
+    if (
+      this.promptCell &&
+      this.promptCell.node.contains(event.target as HTMLElement)
+    ) {
       this.promptCell.editor.focus();
     }
   }
@@ -503,7 +486,7 @@ class CodeConsole extends Widget {
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
     // do in IPython or QtConsole.
-    if ( source === 'clear' || source === '%clear' ) {
+    if (source === 'clear' || source === '%clear') {
       this.clear();
       return Promise.resolve(void 0);
     }
@@ -571,7 +554,7 @@ class CodeConsole extends Widget {
   private _createCodeCellOptions(): CodeCell.IOptions {
     let contentFactory = this.contentFactory;
     let modelFactory = this.modelFactory;
-    let model = modelFactory.createCodeCell({ });
+    let model = modelFactory.createCodeCell({});
     let rendermime = this.rendermime;
     return { model, rendermime, contentFactory };
   }
@@ -579,9 +562,9 @@ class CodeConsole extends Widget {
   /**
    * Handle cell disposed signals.
    */
-  private _onCellDisposed(sender: Widget, args: void): void {
+  private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
-      this._cells.removeValue(sender as CodeCell);
+      this._cells.removeValue(sender);
     }
   }
 
@@ -596,23 +579,30 @@ class CodeConsole extends Widget {
     let model = promptCell.model;
     let code = model.value.text;
     return new Promise<boolean>((resolve, reject) => {
-      let timer = setTimeout(() => { resolve(true); }, timeout);
+      let timer = setTimeout(() => {
+        resolve(true);
+      }, timeout);
       let kernel = this.session.kernel;
       if (!kernel) {
         resolve(false);
         return;
       }
-      kernel.requestIsComplete({ code }).then(isComplete => {
-        clearTimeout(timer);
-        if (this.isDisposed) {
+      kernel
+        .requestIsComplete({ code })
+        .then(isComplete => {
+          clearTimeout(timer);
+          if (this.isDisposed) {
+            resolve(false);
+          }
+          if (isComplete.content.status !== 'incomplete') {
+            resolve(true);
+            return;
+          }
           resolve(false);
-        }
-        if (isComplete.content.status !== 'incomplete') {
+        })
+        .catch(() => {
           resolve(true);
-          return;
-        }
-        resolve(false);
-      }).catch(() => { resolve(true); });
+        });
     });
   }
 
@@ -633,6 +623,7 @@ class CodeConsole extends Widget {
       this._banner.dispose();
       this._banner = null;
     }
+    this.addBanner();
   }
 
   /**
@@ -645,15 +636,19 @@ class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
+      kernel
+        .requestKernelInfo()
+        .then(() => {
+          if (this.isDisposed || !kernel || !kernel.info) {
+            return;
+          }
+          this._handleInfo(this.session.kernel.info);
+        })
+        .catch(err => {
+          console.error('could not get kernel info');
+        });
+    } else if (this.session.status === 'restarting') {
       this.addBanner();
-      kernel.requestKernelInfo().then(() => {
-        if (this.isDisposed || !kernel || !kernel.info) {
-          return;
-        }
-        this._handleInfo(this.session.kernel.info);
-      }).catch(err => {
-        console.error('could not get kernel info');
-      });
     }
   }
 
@@ -662,24 +657,21 @@ class CodeConsole extends Widget {
   private _content: Panel;
   private _executed = new Signal<this, Date>(this);
   private _foreignHandler: ForeignHandler;
-  private _history: IConsoleHistory ;
+  private _history: IConsoleHistory;
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
   private _promptCellCreated = new Signal<this, CodeCell>(this);
 }
 
-
 /**
  * A namespace for CodeConsole statics.
  */
-export
-namespace CodeConsole {
+export namespace CodeConsole {
   /**
    * The initialization options for a console widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The content factory for the console widget.
      */
@@ -709,8 +701,7 @@ namespace CodeConsole {
   /**
    * A content factory for console children.
    */
-  export
-  interface IContentFactory extends Cell.IContentFactory {
+  export interface IContentFactory extends Cell.IContentFactory {
     /**
      * Create a new code cell widget.
      */
@@ -725,9 +716,8 @@ namespace CodeConsole {
   /**
    * Default implementation of `IContentFactory`.
    */
-  export
-  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
-
+  export class ContentFactory extends Cell.ContentFactory
+    implements IContentFactory {
     /**
      * Create a new code cell widget.
      *
@@ -760,29 +750,25 @@ namespace CodeConsole {
   /**
    * A namespace for the code console content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * An initialize options for `ContentFactory`.
      */
-    export
-    interface IOptions extends Cell.IContentFactory { }
+    export interface IOptions extends Cell.IContentFactory {}
   }
 
   /**
    * A default content factory for the code console.
    */
-  export
-  const defaultContentFactory: IContentFactory = new ContentFactory();
+  export const defaultContentFactory: IContentFactory = new ContentFactory();
 
   /**
    * A model factory for a console widget.
    */
-  export
-  interface IModelFactory {
-   /**
-    * The factory for code cell content.
-    */
+  export interface IModelFactory {
+    /**
+     * The factory for code cell content.
+     */
     readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
@@ -809,15 +795,13 @@ namespace CodeConsole {
   /**
    * The default implementation of an `IModelFactory`.
    */
-  export
-  class ModelFactory {
+  export class ModelFactory {
     /**
      * Create a new cell model factory.
      */
     constructor(options: IModelFactoryOptions = {}) {
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        CodeCellModel.defaultContentFactory
-      );
+      this.codeCellContentFactory =
+        options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
     }
 
     /**
@@ -851,15 +835,14 @@ namespace CodeConsole {
      *   new cell will be intialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
-     return new RawCellModel(options);
+      return new RawCellModel(options);
     }
   }
 
   /**
    * The options used to initialize a `ModelFactory`.
    */
-  export
-  interface IModelFactoryOptions {
+  export interface IModelFactoryOptions {
     /**
      * The factory for output area models.
      */
@@ -869,10 +852,8 @@ namespace CodeConsole {
   /**
    * The default `ModelFactory` instance.
    */
-  export
-  const defaultModelFactory = new ModelFactory({});
+  export const defaultModelFactory = new ModelFactory({});
 }
-
 
 /**
  * A namespace for console widget private data.
@@ -883,8 +864,7 @@ namespace Private {
    *
    * @param node - The scrollable element.
    */
-  export
-  function scrollToBottom(node: HTMLElement): void {
+  export function scrollToBottom(node: HTMLElement): void {
     node.scrollTop = node.scrollHeight - node.clientHeight;
   }
 }

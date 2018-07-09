@@ -5,10 +5,7 @@
 
 import * as React from 'react';
 
-import {
-  VDomRenderer
-} from '@jupyterlab/apputils';
-
+import { VDomRenderer } from '@jupyterlab/apputils';
 
 /**
  * The CSS class added to placeholders.
@@ -40,7 +37,6 @@ const INPUT_PLACEHOLDER_CLASS = 'jp-InputPlaceholder';
  */
 const OUTPUT_PLACEHOLDER_CLASS = 'jp-OutputPlaceholder';
 
-
 /**
  * An abstract base class for placeholders
  *
@@ -48,8 +44,7 @@ const OUTPUT_PLACEHOLDER_CLASS = 'jp-OutputPlaceholder';
  * A placeholder is the element that is shown when input/output
  * is hidden.
  */
-export
-abstract class Placeholder extends VDomRenderer<null> {
+export abstract class Placeholder extends VDomRenderer<null> {
   /**
    * Construct a new placeholder.
    */
@@ -70,12 +65,10 @@ abstract class Placeholder extends VDomRenderer<null> {
   private _callback: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-
 /**
  * The input placeholder class.
  */
-export
-class InputPlaceholder extends Placeholder {
+export class InputPlaceholder extends Placeholder {
   /**
    * Construct a new input placeholder.
    */
@@ -89,22 +82,22 @@ class InputPlaceholder extends Placeholder {
    */
   protected render(): React.ReactElement<any>[] {
     return [
-        <div className={INPUT_PROMPT_CLASS} key="input">
-        </div>,
-        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) } key="content">
-          <div className="jp-MoreHorizIcon" />
-        </div>
+      <div className={INPUT_PROMPT_CLASS} key="input" />,
+      <div
+        className={CONTENT_CLASS}
+        onClick={e => this.handleClick(e)}
+        key="content"
+      >
+        <div className="jp-MoreHorizIcon" />
+      </div>
     ];
   }
-
 }
-
 
 /**
  * The output placeholder class.
  */
-export
-class OutputPlaceholder extends Placeholder {
+export class OutputPlaceholder extends Placeholder {
   /**
    * Construct a new output placeholder.
    */
@@ -118,12 +111,14 @@ class OutputPlaceholder extends Placeholder {
    */
   protected render(): React.ReactElement<any>[] {
     return [
-        <div className={OUTPUT_PROMPT_CLASS} key="output">
-        </div>,
-        <div className={CONTENT_CLASS} onClick={ (e) => this.handleClick(e) } key="content">
-          <div className="jp-MoreHorizIcon" />
-        </div>
+      <div className={OUTPUT_PROMPT_CLASS} key="output" />,
+      <div
+        className={CONTENT_CLASS}
+        onClick={e => this.handleClick(e)}
+        key="content"
+      >
+        <div className="jp-MoreHorizIcon" />
+      </div>
     ];
   }
-
 }

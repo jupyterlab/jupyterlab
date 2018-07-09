@@ -3,50 +3,38 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
+
+import { IStateDB } from '@jupyterlab/coreutils';
+
+import { CommandRegistry } from '@phosphor/commands';
 
 import {
-  IStateDB
-} from '@jupyterlab/coreutils';
-
-import {
-  CommandRegistry
-} from '@phosphor/commands';
-
-import {
-  JSONObject, PromiseDelegate, ReadonlyJSONObject, Token
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  Token
 } from '@phosphor/coreutils';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { AttachedProperty } from '@phosphor/properties';
 
-import {
-  DockPanel, Widget
-} from '@phosphor/widgets';
+import { DockPanel, Widget } from '@phosphor/widgets';
 
-import {
-  ApplicationShell
-} from './shell';
-
-
+import { ApplicationShell } from './shell';
 
 /* tslint:disable */
 /**
  * The layout restorer token.
  */
-export
-const ILayoutRestorer = new Token<ILayoutRestorer>('@jupyterlab/application:ILayoutRestorer');
+export const ILayoutRestorer = new Token<ILayoutRestorer>(
+  '@jupyterlab/application:ILayoutRestorer'
+);
 /* tslint:enable */
-
 
 /**
  * A static class that restores the widgets of the application when it reloads.
  */
-export
-interface ILayoutRestorer {
+export interface ILayoutRestorer {
   /**
    * A promise resolved when the layout restorer is ready to receive signals.
    */
@@ -64,20 +52,20 @@ interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<any>, options: ILayoutRestorer.IRestoreOptions<any>): void;
+  restore(
+    tracker: InstanceTracker<any>,
+    options: ILayoutRestorer.IRestoreOptions<any>
+  ): void;
 }
-
 
 /**
  * A namespace for the layout restorer.
  */
-export
-namespace ILayoutRestorer {
+export namespace ILayoutRestorer {
   /**
    * The state restoration configuration options.
    */
-  export
-  interface IRestoreOptions<T extends Widget> {
+  export interface IRestoreOptions<T extends Widget> {
     /**
      * The command to execute when restoring instances.
      */
@@ -104,12 +92,10 @@ namespace ILayoutRestorer {
   }
 }
 
-
 /**
  * The state database key for restorer data.
  */
 const KEY = 'layout-restorer:data';
-
 
 /**
  * The default implementation of a layout restorer.
@@ -159,8 +145,7 @@ const KEY = 'layout-restorer:data';
  * the state of each plugin must return a promise that only resolves when the
  * widget has been created and added to the plugin's instance tracker.
  */
-export
-class LayoutRestorer implements ILayoutRestorer {
+export class LayoutRestorer implements ILayoutRestorer {
   /**
    * Create a layout restorer.
    */
@@ -170,7 +155,9 @@ class LayoutRestorer implements ILayoutRestorer {
     this._first = options.first;
 
     this._first
-      .then(() => { this._firstDone = true; })
+      .then(() => {
+        this._firstDone = true;
+      })
       .then(() => Promise.all(this._promises))
       .then(() => {
         this._promisesDone = true;
@@ -178,7 +165,9 @@ class LayoutRestorer implements ILayoutRestorer {
         // Release the tracker set.
         this._trackers.clear();
       })
-      .then(() => { this._restored.resolve(void 0); });
+      .then(() => {
+        this._restored.resolve(void 0);
+      });
   }
 
   /**
@@ -206,31 +195,36 @@ class LayoutRestorer implements ILayoutRestorer {
    */
   fetch(): Promise<ApplicationShell.ILayout> {
     const blank: ApplicationShell.ILayout = {
-      fresh: true, mainArea: null, leftArea: null, rightArea: null
+      fresh: true,
+      mainArea: null,
+      leftArea: null,
+      rightArea: null
     };
     let layout = this._state.fetch(KEY);
 
-    return Promise.all([layout, this.restored]).then(([data]) => {
-      if (!data) {
-        return blank;
-      }
+    return Promise.all([layout, this.restored])
+      .then(([data]) => {
+        if (!data) {
+          return blank;
+        }
 
-      const { main, left, right } = data as Private.ILayout;
+        const { main, left, right } = data as Private.ILayout;
 
-      // If any data exists, then this is not a fresh session.
-      const fresh = false;
+        // If any data exists, then this is not a fresh session.
+        const fresh = false;
 
-      // Rehydrate main area.
-      const mainArea = this._rehydrateMainArea(main);
+        // Rehydrate main area.
+        const mainArea = this._rehydrateMainArea(main);
 
-      // Rehydrate left area.
-      const leftArea = this._rehydrateSideArea(left);
+        // Rehydrate left area.
+        const leftArea = this._rehydrateSideArea(left);
 
-      // Rehydrate right area.
-      const rightArea = this._rehydrateSideArea(right);
+        // Rehydrate right area.
+        const rightArea = this._rehydrateSideArea(right);
 
-      return { fresh, mainArea, leftArea, rightArea };
-    }).catch(() => blank); // Let fetch fail gracefully; return blank slate.
+        return { fresh, mainArea, leftArea, rightArea };
+      })
+      .catch(() => blank); // Let fetch fail gracefully; return blank slate.
   }
 
   /**
@@ -240,7 +234,10 @@ class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(tracker: InstanceTracker<Widget>, options: ILayoutRestorer.IRestoreOptions<Widget>): Promise<any> {
+  restore(
+    tracker: InstanceTracker<Widget>,
+    options: ILayoutRestorer.IRestoreOptions<Widget>
+  ): Promise<any> {
     const warning = 'restore() can only be called before `first` has resolved.';
 
     if (this._firstDone) {
@@ -279,14 +276,18 @@ class LayoutRestorer implements ILayoutRestorer {
     });
 
     const first = this._first;
-    const promise = tracker.restore({
-      args, command, name,
-      registry: this._registry,
-      state: this._state,
-      when: when ? [first].concat(when) : first
-    }).catch(error => {
-      console.error(error);
-    });
+    const promise = tracker
+      .restore({
+        args,
+        command,
+        name,
+        registry: this._registry,
+        state: this._state,
+        when: when ? [first].concat(when) : first
+      })
+      .catch(error => {
+        console.error(error);
+      });
 
     this._promises.push(promise);
     return promise;
@@ -320,7 +321,9 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Dehydrate a main area description into a serializable object.
    */
-  private _dehydrateMainArea(area: ApplicationShell.IMainArea | null): Private.IMainArea | null {
+  private _dehydrateMainArea(
+    area: ApplicationShell.IMainArea | null
+  ): Private.IMainArea | null {
     if (!area) {
       return null;
     }
@@ -334,7 +337,9 @@ class LayoutRestorer implements ILayoutRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateMainArea(area?: Private.IMainArea | null): ApplicationShell.IMainArea | null {
+  private _rehydrateMainArea(
+    area?: Private.IMainArea | null
+  ): ApplicationShell.IMainArea | null {
     if (!area) {
       return null;
     }
@@ -344,7 +349,9 @@ class LayoutRestorer implements ILayoutRestorer {
   /**
    * Dehydrate a side area description into a serializable object.
    */
-  private _dehydrateSideArea(area?: ApplicationShell.ISideArea | null): Private.ISideArea | null {
+  private _dehydrateSideArea(
+    area?: ApplicationShell.ISideArea | null
+  ): Private.ISideArea | null {
     if (!area) {
       return null;
     }
@@ -370,18 +377,26 @@ class LayoutRestorer implements ILayoutRestorer {
    * This function consumes data that can become corrupted, so it uses type
    * coercion to guarantee the dehydrated object is safely processed.
    */
-  private _rehydrateSideArea(area?: Private.ISideArea | null): ApplicationShell.ISideArea {
+  private _rehydrateSideArea(
+    area?: Private.ISideArea | null
+  ): ApplicationShell.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
     let internal = this._widgets;
-    const collapsed = area.hasOwnProperty('collapsed') ? !!area.collapsed
+    const collapsed = area.hasOwnProperty('collapsed')
+      ? !!area.collapsed
       : false;
-    const currentWidget = area.current && internal.has(`${area.current}`) ?
-      internal.get(`${area.current}`) : null;
-    const widgets = !Array.isArray(area.widgets) ? null
+    const currentWidget =
+      area.current && internal.has(`${area.current}`)
+        ? internal.get(`${area.current}`)
+        : null;
+    const widgets = !Array.isArray(area.widgets)
+      ? null
       : area.widgets
-          .map(name => internal.has(`${name}`) ? internal.get(`${name}`) : null)
+          .map(
+            name => (internal.has(`${name}`) ? internal.get(`${name}`) : null)
+          )
           .filter(widget => !!widget);
     return {
       collapsed,
@@ -403,23 +418,20 @@ class LayoutRestorer implements ILayoutRestorer {
   private _promisesDone = false;
   private _promises: Promise<any>[] = [];
   private _restored = new PromiseDelegate<void>();
-  private _registry: CommandRegistry ;
+  private _registry: CommandRegistry;
   private _state: IStateDB;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
 
-
 /**
  * A namespace for `LayoutRestorer` statics.
  */
-export
-namespace LayoutRestorer {
+export namespace LayoutRestorer {
   /**
    * The configuration options for layout restorer instantiation.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The initial promise that has to be resolved before restoration.
      *
@@ -453,8 +465,7 @@ namespace Private {
    * `ApplicationShell.ILayout` data structure for consumption by
    * the application shell.
    */
-  export
-  interface ILayout extends JSONObject {
+  export interface ILayout extends JSONObject {
     /**
      * The main area of the user interface.
      */
@@ -474,8 +485,7 @@ namespace Private {
   /**
    * The restorable description of the main application area.
    */
-  export
-  interface IMainArea extends JSONObject {
+  export interface IMainArea extends JSONObject {
     /**
      * The current widget that has application focus.
      */
@@ -495,8 +505,7 @@ namespace Private {
   /**
    * The restorable description of a sidebar in the user interface.
    */
-  export
-  interface ISideArea extends JSONObject {
+  export interface ISideArea extends JSONObject {
     /**
      * A flag denoting whether the sidebar has been collapsed.
      */
@@ -516,8 +525,7 @@ namespace Private {
   /**
    * The restorable description of a tab area in the user interface.
    */
-  export
-  interface ITabArea extends JSONObject {
+  export interface ITabArea extends JSONObject {
     /**
      * The type indicator of the serialized tab area.
      */
@@ -537,8 +545,7 @@ namespace Private {
   /**
    * The restorable description of a split area in the user interface.
    */
-  export
-  interface ISplitArea extends JSONObject {
+  export interface ISplitArea extends JSONObject {
     /**
      * The type indicator of the serialized split area.
      */
@@ -563,8 +570,7 @@ namespace Private {
   /**
    * An attached property for a widget's ID in the state database.
    */
-  export
-  const nameProperty = new AttachedProperty<Widget, string>({
+  export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
     create: owner => ''
   });
@@ -572,7 +578,9 @@ namespace Private {
   /**
    * Serialize individual areas within the main area.
    */
-  function serializeArea(area: ApplicationShell.AreaConfig | null): ITabArea | ISplitArea | null {
+  function serializeArea(
+    area: ApplicationShell.AreaConfig | null
+  ): ITabArea | ISplitArea | null {
     if (!area || !area.type) {
       return null;
     }
@@ -591,18 +599,18 @@ namespace Private {
       type: 'split-area',
       orientation: area.orientation,
       sizes: area.sizes,
-      children: area.children.map(serializeArea)
-                  .filter(area => !!area) as (ITabArea | ISplitArea)[]
+      children: area.children.map(serializeArea).filter(area => !!area) as (
+        | ITabArea
+        | ISplitArea)[]
     };
   }
 
   /**
    * Return a dehydrated, serializable version of the main dock panel.
    */
-  export
-  function serializeMain(area: ApplicationShell.IMainArea): IMainArea {
+  export function serializeMain(area: ApplicationShell.IMainArea): IMainArea {
     let dehydrated: IMainArea = {
-      dock: area && area.dock && serializeArea(area.dock.main) || null
+      dock: (area && area.dock && serializeArea(area.dock.main)) || null
     };
     if (area) {
       dehydrated.mode = area.mode;
@@ -626,14 +634,17 @@ namespace Private {
    *
    * For fault tolerance, types are manually checked in deserialization.
    */
-  function deserializeArea(area: JSONObject, names: Map<string, Widget>): ApplicationShell.AreaConfig | null {
+  function deserializeArea(
+    area: JSONObject,
+    names: Map<string, Widget>
+  ): ApplicationShell.AreaConfig | null {
     if (!area) {
       return null;
     }
 
     // Because this data is saved to a foreign data source, its type safety is
     // not guaranteed when it is retrieved, so exhaustive checks are necessary.
-    const type = (area as any).type as string || 'unknown';
+    const type = ((area as any).type as string) || 'unknown';
     if (type === 'unknown' || (type !== 'tab-area' && type !== 'split-area')) {
       console.warn(`Attempted to deserialize unknown type: ${type}`);
       return null;
@@ -644,8 +655,12 @@ namespace Private {
       let hydrated: ApplicationShell.AreaConfig = {
         type: 'tab-area',
         currentIndex: currentIndex || 0,
-        widgets: widgets && widgets.map(widget => names.get(widget))
-            .filter(widget => !!widget) as Widget[] || []
+        widgets:
+          (widgets &&
+            (widgets
+              .map(widget => names.get(widget))
+              .filter(widget => !!widget) as Widget[])) ||
+          []
       };
 
       // Make sure the current index is within bounds.
@@ -661,9 +676,12 @@ namespace Private {
       type: 'split-area',
       orientation: orientation,
       sizes: sizes || [],
-      children: children &&
-        children.map(child => deserializeArea(child, names))
-           .filter(widget => !!widget) as ApplicationShell.AreaConfig[] || []
+      children:
+        (children &&
+          (children
+            .map(child => deserializeArea(child, names))
+            .filter(widget => !!widget) as ApplicationShell.AreaConfig[])) ||
+        []
     };
 
     return hydrated;
@@ -678,8 +696,10 @@ namespace Private {
    *
    * For fault tolerance, types are manually checked in deserialization.
    */
-  export
-  function deserializeMain(area: JSONObject, names: Map<string, Widget>): ApplicationShell.IMainArea | null {
+  export function deserializeMain(
+    area: JSONObject,
+    names: Map<string, Widget>
+  ): ApplicationShell.IMainArea | null {
     if (!area) {
       return null;
     }
@@ -689,10 +709,10 @@ namespace Private {
     const mode = (area as any).mode || null;
 
     return {
-      currentWidget: name && names.has(name) && names.get(name) || null,
+      currentWidget: (name && names.has(name) && names.get(name)) || null,
       dock: dock ? { main: deserializeArea(dock, names) } : null,
-      mode: mode === 'multiple-document' || mode === 'single-document' ? mode
-        : null
+      mode:
+        mode === 'multiple-document' || mode === 'single-document' ? mode : null
     };
   }
 }

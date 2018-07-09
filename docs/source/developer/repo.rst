@@ -34,9 +34,6 @@ NPM package: ``src/``, ``lib/``, ``typings/``, ``buildutils/``
    needs.
 -  ``buildutils/``: Utilities for managing the repo
 
-                            75b8171af... Fix clean:slate script and
-                            update docs
-
 Examples: ``examples/``
 ^^^^^^^^^^^^^^^^^^^^^^^
 

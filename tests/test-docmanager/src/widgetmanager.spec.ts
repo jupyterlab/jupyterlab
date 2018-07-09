@@ -3,55 +3,39 @@
 
 import expect = require('expect.js');
 
-import {
-  uuid
-} from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
+
+import { ServiceManager } from '@jupyterlab/services';
+
+import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
+
+import { DocumentWidgetManager } from '@jupyterlab/docmanager';
 
 import {
-  ServiceManager
-} from '@jupyterlab/services';
-
-import {
-  IMessageHandler, Message, MessageLoop
-} from '@phosphor/messaging';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  DocumentWidgetManager
-} from '@jupyterlab/docmanager';
-
-import {
-  DocumentRegistry, TextModelFactory, ABCWidgetFactory, Context
+  DocumentRegistry,
+  TextModelFactory,
+  ABCWidgetFactory,
+  Context,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import {
-  acceptDialog, dismissDialog
-} from '../../utils';
+import { acceptDialog, dismissDialog } from '../../utils';
 
-
-
-class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-}
-
-
-class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
-
-  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
-    let widget = new DocWidget();
+class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
+  protected createNewWidget(
+    context: DocumentRegistry.Context
+  ): IDocumentWidget {
+    const content = new Widget();
+    const widget = new DocumentWidget({ content, context });
     widget.addClass('WidgetFactory');
     return widget;
   }
 }
 
-
 class LoggingManager extends DocumentWidgetManager {
-
   methods: string[] = [];
 
   messageHook(handler: IMessageHandler, msg: Message): boolean {
@@ -70,9 +54,7 @@ class LoggingManager extends DocumentWidgetManager {
   }
 }
 
-
 describe('@jupyterlab/docmanager', () => {
-
   let manager: LoggingManager;
   let services: ServiceManager.IManager;
   let textModelFactory = new TextModelFactory();
@@ -98,7 +80,7 @@ describe('@jupyterlab/docmanager', () => {
     context = new Context({
       manager: services,
       factory: textModelFactory,
-      path: uuid()
+      path: UUID.uuid4()
     });
   });
 
@@ -108,27 +90,21 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   describe('DocumentWidgetManager', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new document widget manager', () => {
         expect(manager).to.be.a(DocumentWidgetManager);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the manager is disposed', () => {
         expect(manager.isDisposed).to.be(false);
         manager.dispose();
         expect(manager.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the manager', () => {
         expect(manager.isDisposed).to.be(false);
         manager.dispose();
@@ -136,11 +112,9 @@ describe('@jupyterlab/docmanager', () => {
         manager.dispose();
         expect(manager.isDisposed).to.be(true);
       });
-
     });
 
     describe('#createWidget()', () => {
-
       it('should create a widget', () => {
         let widget = manager.createWidget(widgetFactory, context);
         expect(widget).to.be.a(Widget);
@@ -154,34 +128,33 @@ describe('@jupyterlab/docmanager', () => {
         manager.createWidget(widgetFactory, context);
         expect(called).to.be(true);
       });
-
     });
 
     describe('#adoptWidget()', () => {
-
       it('should install a message hook', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
       });
 
       it('should add the document class', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         expect(widget.hasClass('jp-Document')).to.be(true);
       });
 
       it('should be retrievable', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         expect(manager.contextForWidget(widget)).to.be(context);
       });
-
     });
 
     describe('#findWidget()', () => {
-
       it('should find a registered widget', () => {
         let widget = manager.createWidget(widgetFactory, context);
         expect(manager.findWidget(context, 'test')).to.be(widget);
@@ -190,11 +163,9 @@ describe('@jupyterlab/docmanager', () => {
       it('should return undefined if not found', () => {
         expect(manager.findWidget(context, 'test')).to.be(void 0);
       });
-
     });
 
     describe('#contextForWidget()', () => {
-
       it('should return the context for a widget', () => {
         let widget = manager.createWidget(widgetFactory, context);
         expect(manager.contextForWidget(widget)).to.be(context);
@@ -203,11 +174,9 @@ describe('@jupyterlab/docmanager', () => {
       it('should return undefined if not tracked', () => {
         expect(manager.contextForWidget(new Widget())).to.be(undefined);
       });
-
     });
 
     describe('#cloneWidget()', () => {
-
       it('should create a new widget with the same context using the same factory', () => {
         let widget = manager.createWidget(widgetFactory, context);
         let clone = manager.cloneWidget(widget);
@@ -219,28 +188,29 @@ describe('@jupyterlab/docmanager', () => {
       it('should return undefined if the source widget is not managed', () => {
         expect(manager.cloneWidget(new Widget())).to.be(void 0);
       });
-
     });
 
     describe('#closeWidgets()', () => {
-
       it('should close all of the widgets associated with a context', () => {
         let called = 0;
         let widget = manager.createWidget(widgetFactory, context);
         let clone = manager.cloneWidget(widget);
-        widget.disposed.connect(() => { called++; });
-        clone.disposed.connect(() => { called++; });
+        widget.disposed.connect(() => {
+          called++;
+        });
+        clone.disposed.connect(() => {
+          called++;
+        });
         return manager.closeWidgets(context).then(() => {
           expect(called).to.be(2);
         });
       });
-
     });
 
     describe('#messageHook()', () => {
-
       it('should be called for a message to a tracked widget', () => {
-        let widget = new DocWidget();
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
@@ -257,12 +227,10 @@ describe('@jupyterlab/docmanager', () => {
         let msg = new Message('foo');
         expect(manager.messageHook(widget, msg)).to.be(true);
       });
-
     });
 
     describe('#setCaption()', () => {
-
-      it('should set the title of the widget', (done) => {
+      it('should set the title of the widget', done => {
         context.initialize(true).then(() => {
           let widget = manager.createWidget(widgetFactory, context);
           widget.title.changed.connect(() => {
@@ -272,12 +240,10 @@ describe('@jupyterlab/docmanager', () => {
           });
         });
       });
-
     });
 
     describe('#onClose()', () => {
-
-      it('should be called when a widget is closed', (done) => {
+      it('should be called when a widget is closed', done => {
         let widget = manager.createWidget(widgetFactory, context);
         widget.disposed.connect(() => {
           expect(manager.methods).to.contain('onClose');
@@ -286,7 +252,7 @@ describe('@jupyterlab/docmanager', () => {
         widget.close();
       });
 
-      it('should prompt the user before closing', (done) => {
+      it('should prompt the user before closing', done => {
         context.model.fromString('foo');
         let widget = manager.createWidget(widgetFactory, context);
         manager.onClose(widget).then(() => {
@@ -314,7 +280,7 @@ describe('@jupyterlab/docmanager', () => {
         });
       });
 
-      it('should prompt if the only other widget has a readonly factory', (done) => {
+      it('should prompt if the only other widget has a readonly factory', done => {
         context.model.fromString('foo');
         let widget0 = manager.createWidget(widgetFactory, context);
         let widget1 = manager.createWidget(readOnlyFactory, context);
@@ -326,7 +292,7 @@ describe('@jupyterlab/docmanager', () => {
         acceptDialog();
       });
 
-      it('should close the widget', (done) => {
+      it('should close the widget', done => {
         context.model.fromString('foo');
         let widget = manager.createWidget(widgetFactory, context);
         manager.onClose(widget).then(() => {
@@ -335,9 +301,6 @@ describe('@jupyterlab/docmanager', () => {
         });
         dismissDialog();
       });
-
     });
-
   });
-
 });

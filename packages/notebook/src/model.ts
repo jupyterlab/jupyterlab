@@ -1,38 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
-  DocumentModel, DocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
-  ICellModel, ICodeCellModel, IRawCellModel, IMarkdownCellModel,
-  CodeCellModel, RawCellModel, MarkdownCellModel, CellModel
+  ICellModel,
+  ICodeCellModel,
+  IRawCellModel,
+  IMarkdownCellModel,
+  CodeCellModel,
+  RawCellModel,
+  MarkdownCellModel,
+  CellModel
 } from '@jupyterlab/cells';
 
-import {
-  nbformat, uuid
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { UUID } from '@phosphor/coreutils';
 
 import {
-  IObservableJSON, IObservableUndoableList,
-  IObservableList, IModelDB
+  IObservableJSON,
+  IObservableUndoableList,
+  IObservableList,
+  IModelDB
 } from '@jupyterlab/observables';
 
-import {
-  CellList
-} from './celllist';
-
+import { CellList } from './celllist';
 
 /**
  * The definition of a model object for a notebook widget.
  */
-export
-interface INotebookModel extends DocumentRegistry.IModel {
+export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The list of cells in the notebook.
    */
@@ -59,20 +57,16 @@ interface INotebookModel extends DocumentRegistry.IModel {
   readonly metadata: IObservableJSON;
 }
 
-
 /**
  * An implementation of a notebook Model.
  */
-export
-class NotebookModel extends DocumentModel implements INotebookModel {
+export class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference, options.modelDB);
-    let factory = (
-      options.contentFactory || NotebookModel.defaultContentFactory
-    );
+    let factory = options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
@@ -136,7 +130,9 @@ class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+    let info = this.metadata.get(
+      'language_info'
+    ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -204,17 +200,17 @@ class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = this.contentFactory;
     for (let cell of value.cells) {
       switch (cell.cell_type) {
-      case 'code':
-        cells.push(factory.createCodeCell({ cell }));
-        break;
-      case 'markdown':
-        cells.push(factory.createMarkdownCell({ cell }));
-        break;
-      case 'raw':
-        cells.push(factory.createRawCell({ cell }));
-        break;
-      default:
-        continue;
+        case 'code':
+          cells.push(factory.createCodeCell({ cell }));
+          break;
+        case 'markdown':
+          cells.push(factory.createMarkdownCell({ cell }));
+          break;
+        case 'raw':
+          cells.push(factory.createRawCell({ cell }));
+          break;
+        default:
+          continue;
       }
     }
     this.cells.beginCompoundOperation();
@@ -252,28 +248,35 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Initialize the model with its current state.
+   */
+  initialize(): void {
+    super.initialize();
+    this.cells.clearUndo();
+  }
+
+  /**
    * Handle a change in the cells list.
    */
-  private _onCellsChanged(list: IObservableList<ICellModel>, change: IObservableList.IChangedArgs<ICellModel>): void {
+  private _onCellsChanged(
+    list: IObservableList<ICellModel>,
+    change: IObservableList.IChangedArgs<ICellModel>
+  ): void {
     switch (change.type) {
-    case 'add':
-      each(change.newValues, cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      break;
-    case 'remove':
-      each(change.oldValues, cell => { /* no op */
-      });
-      break;
-    case 'set':
-      each(change.newValues, cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      each(change.oldValues, cell => { /* no op */
-      });
-      break;
-    default:
-      return;
+      case 'add':
+        change.newValues.forEach(cell => {
+          cell.contentChanged.connect(this.triggerContentChange, this);
+        });
+        break;
+      case 'remove':
+        break;
+      case 'set':
+        change.newValues.forEach(cell => {
+          cell.contentChanged.connect(this.triggerContentChange, this);
+        });
+        break;
+      default:
+        break;
     }
     let factory = this.contentFactory;
     // Add code cell if there are no cells remaining.
@@ -307,17 +310,14 @@ class NotebookModel extends DocumentModel implements INotebookModel {
   private _nbformatMinor = nbformat.MINOR_VERSION;
 }
 
-
 /**
  * The namespace for the `NotebookModel` class statics.
  */
-export
-namespace NotebookModel {
+export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The language preference for the model.
      */
@@ -339,8 +339,7 @@ namespace NotebookModel {
   /**
    * A factory for creating notebook model content.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * The factory for output area models.
      */
@@ -390,15 +389,13 @@ namespace NotebookModel {
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory {
+  export class ContentFactory {
     /**
      * Create a new cell model factory.
      */
     constructor(options: ContentFactory.IOptions) {
-      this.codeCellContentFactory = (options.codeCellContentFactory ||
-        CodeCellModel.defaultContentFactory
-      );
+      this.codeCellContentFactory =
+        options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
       this.modelDB = options.modelDB;
     }
 
@@ -428,7 +425,7 @@ namespace NotebookModel {
       }
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }
@@ -446,7 +443,7 @@ namespace NotebookModel {
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }
@@ -464,7 +461,7 @@ namespace NotebookModel {
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if (this.modelDB) {
         if (!options.id) {
-          options.id = uuid();
+          options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
       }
@@ -485,13 +482,11 @@ namespace NotebookModel {
   /**
    * A namespace for the notebook model content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * The options used to initialize a `ContentFactory`.
      */
-    export
-    interface IOptions {
+    export interface IOptions {
       /**
        * The factory for code cell model content.
        */
@@ -507,6 +502,5 @@ namespace NotebookModel {
   /**
    * The default `ContentFactory` instance.
    */
-  export
-  const defaultContentFactory = new ContentFactory({});
+  export const defaultContentFactory = new ContentFactory({});
 }

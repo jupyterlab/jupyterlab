@@ -2,59 +2,46 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker, MainAreaWidget
+  ICommandPalette,
+  InstanceTracker,
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
-import {
-  ILauncher
-} from '@jupyterlab/launcher';
+import { ILauncher } from '@jupyterlab/launcher';
 
-import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  ServiceManager
-} from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
-import {
-  ITerminalTracker, Terminal
-} from '@jupyterlab/terminal';
-
+import { ITerminalTracker, Terminal } from '@jupyterlab/terminal';
 
 /**
  * The command IDs used by the terminal plugin.
  */
 namespace CommandIDs {
-  export
-  const createNew = 'terminal:create-new';
+  export const createNew = 'terminal:create-new';
 
-  export
-  const open = 'terminal:open';
+  export const open = 'terminal:open';
 
-  export
-  const refresh = 'terminal:refresh';
+  export const refresh = 'terminal:refresh';
 
-  export
-  const increaseFont = 'terminal:increase-font';
+  export const increaseFont = 'terminal:increase-font';
 
-  export
-  const decreaseFont = 'terminal:decrease-font';
+  export const decreaseFont = 'terminal:decrease-font';
 
-  export
-  const toggleTheme = 'terminal:toggle-theme';
+  export const toggleTheme = 'terminal:toggle-theme';
 }
-
 
 /**
  * The class name for the terminal icon in the default theme.
  */
 const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
-
 
 /**
  * The default terminal extension.
@@ -68,25 +55,31 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   autoStart: true
 };
 
-
 /**
  * Export the plugin as default.
  */
 export default plugin;
 
-
 /**
  * Activate the terminal plugin.
  */
-function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette, restorer: ILayoutRestorer, launcher: ILauncher | null): ITerminalTracker {
-  const { commands, serviceManager } = app;
+function activate(
+  app: JupyterLab,
+  mainMenu: IMainMenu,
+  palette: ICommandPalette,
+  restorer: ILayoutRestorer,
+  launcher: ILauncher | null
+): ITerminalTracker {
+  const { serviceManager } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<MainAreaWidget<Terminal>>({ namespace });
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
-    console.log('Disabling terminals plugin because they are not available on the server');
+    console.log(
+      'Disabling terminals plugin because they are not available on the server'
+    );
     return tracker;
   }
 
@@ -104,7 +97,9 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.increaseFont,
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
-  ].map(command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
   mainMenu.viewMenu.addGroup(viewGroup, 30);
 
   // Add command palette items.
@@ -115,7 +110,7 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
     CommandIDs.decreaseFont,
     CommandIDs.toggleTheme
   ].forEach(command => {
-    palette.addItem({ command, category, args: { 'isPalette': true } });
+    palette.addItem({ command, category, args: { isPalette: true } });
   });
 
   // Add terminal creation to the file menu.
@@ -124,44 +119,52 @@ function activate(app: JupyterLab, mainMenu: IMainMenu, palette: ICommandPalette
   // Add a launcher item if the launcher is available.
   if (launcher) {
     launcher.add({
-      displayName: 'Terminal',
+      command: CommandIDs.createNew,
       category: 'Other',
-      rank: 0,
-      iconClass: TERMINAL_ICON_CLASS,
-      callback: () => commands.execute(CommandIDs.createNew)
+      rank: 0
     });
   }
 
-  app.contextMenu.addItem({command: CommandIDs.refresh, selector: '.jp-Terminal', rank: 1});
+  app.contextMenu.addItem({
+    command: CommandIDs.refresh,
+    selector: '.jp-Terminal',
+    rank: 1
+  });
 
   return tracker;
 }
 
-
 /**
  * Add the commands for the terminal.
  */
-export
-function addCommands(app: JupyterLab, services: ServiceManager, tracker: InstanceTracker<MainAreaWidget<Terminal>>) {
+export function addCommands(
+  app: JupyterLab,
+  services: ServiceManager,
+  tracker: InstanceTracker<MainAreaWidget<Terminal>>
+) {
   let { commands, shell } = app;
 
   /**
    * Whether there is an active terminal.
    */
   function isEnabled(): boolean {
-    return tracker.currentWidget !== null &&
-           tracker.currentWidget === app.shell.currentWidget;
+    return (
+      tracker.currentWidget !== null &&
+      tracker.currentWidget === app.shell.currentWidget
+    );
   }
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
-    label: args => args['isPalette'] ? 'New Terminal' : 'Terminal',
+    label: args => (args['isPalette'] ? 'New Terminal' : 'Terminal'),
     caption: 'Start a new terminal session',
+    iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
     execute: args => {
       const name = args['name'] as string;
       const initialCommand = args['initialCommand'] as string;
       const term = new Terminal({ initialCommand });
-      const promise = name ? services.terminals.connectTo(name)
+      const promise = name
+        ? services.terminals.connectTo(name)
         : services.terminals.startNew();
 
       term.title.icon = TERMINAL_ICON_CLASS;
@@ -169,13 +172,17 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       let main = new MainAreaWidget({ content: term });
       shell.addToMainArea(main);
 
-      return promise.then(session => {
-        term.session = session;
-        tracker.add(main);
-        shell.activateById(main.id);
+      return promise
+        .then(session => {
+          term.session = session;
+          tracker.add(main);
+          shell.activateById(main.id);
 
-        return main;
-      }).catch(() => { term.dispose(); });
+          return main;
+        })
+        .catch(() => {
+          term.dispose();
+        });
     }
   });
 
@@ -185,7 +192,7 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
       // Check for a running terminal with the given name.
       const widget = tracker.find(value => {
         let content = value.content;
-        return content.session && content.session.name === name || false;
+        return (content.session && content.session.name === name) || false;
       });
       if (widget) {
         shell.activateById(widget.id);
@@ -262,4 +269,3 @@ function addCommands(app: JupyterLab, services: ServiceManager, tracker: Instanc
     isEnabled
   });
 }
-

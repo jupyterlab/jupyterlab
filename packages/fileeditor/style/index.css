@@ -3,24 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 .jp-FileEditor {
-    
 }
-
-.jp-FileEditor > .jp-Toolbar {
-    min-height: var(--jp-toolbar-micro-height);
-    background: var(--jp-toolbar-background);
-    border-bottom: 1px solid var(--jp-toolbar-border-color);
-    box-shadow: var(--jp-toolbar-box-shadow);
-    z-index: 10;
-}
-
 
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
 |----------------------------------------------------------------------------*/
-
 
 .jp-mod-presentationMode .jp-FileEditor {
   --jp-code-font-size: var(--jp-code-presentation-font-size);

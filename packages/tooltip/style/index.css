@@ -14,11 +14,9 @@
   display: flex;
 }
 
-
 .jp-Tooltip-content {
   overflow: auto;
 }
-
 
 .jp-Tooltip:focus {
   outline: 0;

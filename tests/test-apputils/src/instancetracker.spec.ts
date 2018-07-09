@@ -3,25 +3,15 @@
 
 import expect = require('expect.js');
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
 
-import {
-  Panel, Widget
-} from '@phosphor/widgets';
+import { Panel, Widget } from '@phosphor/widgets';
 
-import {
-  simulate
-} from 'simulate-event';
-
+import { simulate } from 'simulate-event';
 
 const namespace = 'instance-tracker-test';
-
 
 class TestTracker<T extends Widget> extends InstanceTracker<T> {
   methods: string[] = [];
@@ -32,8 +22,6 @@ class TestTracker<T extends Widget> extends InstanceTracker<T> {
   }
 }
 
-
-
 function createWidget(): Widget {
   let widget = new Widget();
   widget.node.style.minHeight = '20px';
@@ -42,28 +30,24 @@ function createWidget(): Widget {
   return widget;
 }
 
-
 describe('@jupyterlab/apputils', () => {
-
   describe('InstanceTracker', () => {
-
     describe('#constructor()', () => {
-
       it('should create an InstanceTracker', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker).to.be.an(InstanceTracker);
       });
-
     });
 
     describe('#currentChanged', () => {
-
       it('should emit when the current widget has been updated', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
         widget.node.tabIndex = -1;
         let called = false;
-        tracker.currentChanged.connect(() => { called = true; });
+        tracker.currentChanged.connect(() => {
+          called = true;
+        });
         Widget.attach(widget, document.body);
         widget.node.focus();
         simulate(widget.node, 'focus');
@@ -71,11 +55,9 @@ describe('@jupyterlab/apputils', () => {
         expect(called).to.be(true);
         Widget.detach(widget);
       });
-
     });
 
     describe('#widgetAdded', () => {
-
       it('should emit when a widget has been added', done => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
@@ -92,7 +74,9 @@ describe('@jupyterlab/apputils', () => {
         let two = new Widget();
         two.node.tabIndex = -1;
         let total = 0;
-        tracker.widgetAdded.connect(() => { total++; });
+        tracker.widgetAdded.connect(() => {
+          total++;
+        });
         tracker.currentChanged.connect(() => {
           expect(total).to.be(1);
           done();
@@ -104,11 +88,9 @@ describe('@jupyterlab/apputils', () => {
         simulate(two.node, 'focus');
         Widget.detach(two);
       });
-
     });
 
     describe('#currentWidget', () => {
-
       it('should default to null', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.currentWidget).to.be(null);
@@ -168,7 +150,9 @@ describe('@jupyterlab/apputils', () => {
         expect(tracker.currentWidget).to.be(widgets[0]);
 
         let called = false;
-        tracker.currentChanged.connect(() => { called = true; });
+        tracker.currentChanged.connect(() => {
+          called = true;
+        });
         widgets[2].dispose();
         expect(tracker.currentWidget).to.be(widgets[0]);
         expect(called).to.be(false);
@@ -189,7 +173,9 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(panel, document.body);
 
         let called = false;
-        tracker.currentChanged.connect(() => { called = true; });
+        tracker.currentChanged.connect(() => {
+          called = true;
+        });
         widgets[2].dispose();
         expect(tracker.currentWidget).to.be(widgets[1]);
         expect(called).to.be(true);
@@ -198,22 +184,18 @@ describe('@jupyterlab/apputils', () => {
           widget.dispose();
         });
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the tracker is disposed', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.be(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
       });
-
     });
 
     describe('#add()', () => {
-
       it('should add a widget to the tracker', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
@@ -230,11 +212,9 @@ describe('@jupyterlab/apputils', () => {
         widget.dispose();
         expect(tracker.has(widget)).to.be(false);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources used by the tracker', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.be(false);
@@ -249,11 +229,9 @@ describe('@jupyterlab/apputils', () => {
         tracker.dispose();
         expect(tracker.isDisposed).to.be(true);
       });
-
     });
 
     describe('#find()', () => {
-
       it('should find a tracked item that matches a filter function', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widgetA = new Widget();
@@ -281,11 +259,43 @@ describe('@jupyterlab/apputils', () => {
         tracker.add(widgetC);
         expect(tracker.find(widget => widget.id === 'D')).to.not.be.ok();
       });
-
     });
 
-    describe('#forEach()', () => {
+    describe('#filter()', () => {
+      it('should filter according to a predicate function', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace });
+        let widgetA = new Widget();
+        let widgetB = new Widget();
+        let widgetC = new Widget();
+        widgetA.id = 'include-A';
+        widgetB.id = 'include-B';
+        widgetC.id = 'exclude-C';
+        tracker.add(widgetA);
+        tracker.add(widgetB);
+        tracker.add(widgetC);
+        let list = tracker.filter(
+          widget => widget.id.indexOf('include') !== -1
+        );
+        expect(list.length).to.be(2);
+        expect(list[0]).to.be(widgetA);
+        expect(list[1]).to.be(widgetB);
+      });
 
+      it('should return an empty array if no item is found', () => {
+        let tracker = new InstanceTracker<Widget>({ namespace });
+        let widgetA = new Widget();
+        let widgetB = new Widget();
+        let widgetC = new Widget();
+        widgetA.id = 'A';
+        widgetB.id = 'B';
+        widgetC.id = 'C';
+        tracker.add(widgetA);
+        tracker.add(widgetB);
+        tracker.add(widgetC);
+        expect(tracker.filter(widget => widget.id === 'D').length).to.be(0);
+      });
+    });
+    describe('#forEach()', () => {
       it('should iterate through all the tracked items', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widgetA = new Widget();
@@ -298,14 +308,14 @@ describe('@jupyterlab/apputils', () => {
         tracker.add(widgetA);
         tracker.add(widgetB);
         tracker.add(widgetC);
-        tracker.forEach(widget => { visited += widget.id; });
+        tracker.forEach(widget => {
+          visited += widget.id;
+        });
         expect(visited).to.be('ABC');
       });
-
     });
 
     describe('#has()', () => {
-
       it('should return `true` if an item exists in the tracker', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
@@ -313,11 +323,9 @@ describe('@jupyterlab/apputils', () => {
         tracker.add(widget);
         expect(tracker.has(widget)).to.be(true);
       });
-
     });
 
     describe('#inject()', () => {
-
       it('should inject a widget into the tracker', () => {
         let tracker = new InstanceTracker<Widget>({ namespace });
         let widget = new Widget();
@@ -334,20 +342,15 @@ describe('@jupyterlab/apputils', () => {
         widget.dispose();
         expect(tracker.has(widget)).to.be(false);
       });
-
     });
 
     describe('#onCurrentChanged()', () => {
-
       it('should be called when the current widget is changed', () => {
         let tracker = new TestTracker<Widget>({ namespace });
         let widget = new Widget();
         tracker.add(widget);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });
-
     });
-
   });
-
 });

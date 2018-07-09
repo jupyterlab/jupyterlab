@@ -3,26 +3,20 @@
 
 import expect = require('expect.js');
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
-
-import {
-  CodeMirrorEditor
-} from '@jupyterlab/codemirror';
-
-import {
-  Completer, CompletionHandler, CompleterModel, KernelConnector
+  Completer,
+  CompletionHandler,
+  CompleterModel,
+  KernelConnector
 } from '@jupyterlab/completer';
 
-import {
-  createClientSession
-} from '../../utils';
-
+import { createClientSession } from '../../utils';
 
 function createEditorWidget(): CodeEditorWrapper {
   let model = new CodeEditor.Model();
@@ -31,7 +25,6 @@ function createEditorWidget(): CodeEditorWrapper {
   };
   return new CodeEditorWrapper({ factory, model });
 }
-
 
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
@@ -47,7 +40,6 @@ class TestCompleterModel extends CompleterModel {
   }
 }
 
-
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
@@ -62,9 +54,7 @@ class TestCompletionHandler extends CompletionHandler {
   }
 }
 
-
 describe('@jupyterlab/completer', () => {
-
   let connector: KernelConnector;
   let session: IClientSession;
 
@@ -80,9 +70,7 @@ describe('@jupyterlab/completer', () => {
   after(() => session.shutdown());
 
   describe('CompletionHandler', () => {
-
     describe('#constructor()', () => {
-
       it('should create a completer handler', () => {
         let handler = new CompletionHandler({
           connector,
@@ -90,11 +78,9 @@ describe('@jupyterlab/completer', () => {
         });
         expect(handler).to.be.a(CompletionHandler);
       });
-
     });
 
     describe('#connector', () => {
-
       it('should be a data connector', () => {
         let handler = new CompletionHandler({
           connector,
@@ -104,12 +90,9 @@ describe('@jupyterlab/completer', () => {
         expect(handler.connector).to.have.property('remove');
         expect(handler.connector).to.have.property('save');
       });
-
     });
 
-
     describe('#editor', () => {
-
       it('should default to null', () => {
         let handler = new CompletionHandler({
           connector,
@@ -142,11 +125,9 @@ describe('@jupyterlab/completer', () => {
         handler.editor = two.editor;
         expect(handler.editor).to.be(two.editor);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should be true if handler has been disposed', () => {
         let handler = new CompletionHandler({
           connector,
@@ -156,11 +137,9 @@ describe('@jupyterlab/completer', () => {
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the handler resources', () => {
         let handler = new CompletionHandler({
           connector,
@@ -181,11 +160,9 @@ describe('@jupyterlab/completer', () => {
         handler.dispose();
         expect(handler.isDisposed).to.be(true);
       });
-
     });
 
     describe('#onTextChanged()', () => {
-
       it('should fire when the active editor emits a text change', () => {
         let handler = new TestCompletionHandler({
           connector,
@@ -215,11 +192,9 @@ describe('@jupyterlab/completer', () => {
         (editor.model.value.changed as any).emit(void 0);
         expect(model.methods).to.contain('handleTextChange');
       });
-
     });
 
     describe('#onCompletionSelected()', () => {
-
       it('should fire when the completer widget emits a signal', () => {
         let completer = new Completer({ editor: null });
         let handler = new TestCompletionHandler({ completer, connector });
@@ -267,9 +242,6 @@ describe('@jupyterlab/completer', () => {
         (completer.selected as any).emit(patch);
         expect(handler.editor.model.value.text).to.equal(want);
       });
-
     });
-
   });
-
 });

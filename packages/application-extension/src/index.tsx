@@ -2,83 +2,84 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab, JupyterLabPlugin, ILayoutRestorer, IRouter, LayoutRestorer, Router
+  JupyterLab,
+  JupyterLabPlugin,
+  ILayoutRestorer,
+  IRouter,
+  LayoutRestorer,
+  Router
 } from '@jupyterlab/application';
 
 import {
-  Dialog, ICommandPalette, showDialog
+  Dialog,
+  ICommandPalette,
+  IWindowResolver,
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
-import {
-  IStateDB, PageConfig
-} from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
-
 
 /**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
-  export
-  const activateNextTab: string = 'application:activate-next-tab';
+  export const activateNextTab: string = 'application:activate-next-tab';
 
-  export
-  const activatePreviousTab: string = 'application:activate-previous-tab';
+  export const activatePreviousTab: string =
+    'application:activate-previous-tab';
 
-  export
-  const closeAll: string = 'application:close-all';
+  export const closeAll: string = 'application:close-all';
 
-  export
-  const setMode: string = 'application:set-mode';
+  export const setMode: string = 'application:set-mode';
 
-  export
-  const toggleMode: string = 'application:toggle-mode';
+  export const toggleMode: string = 'application:toggle-mode';
 
-  export
-  const toggleLeftArea: string = 'application:toggle-left-area';
+  export const toggleLeftArea: string = 'application:toggle-left-area';
 
-  export
-  const toggleRightArea: string = 'application:toggle-right-area';
+  export const toggleRightArea: string = 'application:toggle-right-area';
 
-  export
-  const togglePresentationMode: string = 'application:toggle-presentation-mode';
+  export const togglePresentationMode: string =
+    'application:toggle-presentation-mode';
 
-  export
-  const tree: string = 'router:tree';
+  export const tree: string = 'router:tree';
 }
-
 
 /**
  * The routing regular expressions used by the application plugin.
  */
 namespace Patterns {
-  export
-  const tree = /^\/tree\/(.+)/;
+  export const tree = /[^?]*(\/tree\/([^?]+))/;
 }
-
 
 /**
  * The main extension.
  */
 const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette) => {
+  requires: [ICommandPalette, IRouter, IWindowResolver],
+  activate: (
+    app: JupyterLab,
+    palette: ICommandPalette,
+    router: IRouter,
+    resolver: IWindowResolver
+  ) => {
+    // Requiring the window resolver guarantees that the application extension
+    // only loads if there is a viable window name. Otherwise, the application
+    // will short-circuit and ask the user to navigate away.
+    const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
+
+    console.log(`Starting application in workspace: ${workspace}`);
+
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
       const body = (
-        <pre>
-          {app.registerPluginErrors.map(e => e.message).join('\n')}
-        </pre>
+        <pre>{app.registerPluginErrors.map(e => e.message).join('\n')}</pre>
       );
-      let options = {
-        title: 'Error Registering Plugins',
-        body,
-        buttons: [Dialog.okButton()],
-        okText: 'DISMISS'
-      };
-      showDialog(options).then(() => { /* no-op */ });
+
+      showErrorMessage('Error Registering Plugins', { message: body });
     }
 
     addCommands(app, palette);
@@ -89,57 +90,63 @@ const main: JupyterLabPlugin<void> = {
       app.commands.notifyCommandChanged();
     });
 
-    let builder = app.serviceManager.builder;
-
-    let doBuild = () => {
-      return builder.build().then(() => {
-        return showDialog({
-          title: 'Build Complete',
-          body: 'Build successfully completed, reload page?',
-          buttons: [Dialog.cancelButton(),
-                    Dialog.warnButton({ label: 'RELOAD' })]
+    const builder = app.serviceManager.builder;
+    const build = () => {
+      return builder
+        .build()
+        .then(() => {
+          return showDialog({
+            title: 'Build Complete',
+            body: 'Build successfully completed, reload page?',
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.warnButton({ label: 'RELOAD' })
+            ]
+          });
+        })
+        .then(result => {
+          if (result.button.accept) {
+            router.reload();
+          }
+        })
+        .catch(err => {
+          showErrorMessage('Build Failed', {
+            message: <pre>{err.message}</pre>
+          });
         });
-      }).then(result => {
-        if (result.button.accept) {
-          location.reload();
-        }
-      }).catch(err => {
-        showDialog({
-          title: 'Build Failed',
-          body: (<pre>{err.message}</pre>)
-        });
-      });
     };
 
     if (builder.isAvailable && builder.shouldCheck) {
       builder.getStatus().then(response => {
         if (response.status === 'building') {
-          return doBuild();
+          return build();
         }
+
         if (response.status !== 'needed') {
           return;
         }
-        let body = (<div>
-          <p>
-            JupyterLab build is suggested:
-            <br />
-            <pre>{response.message}</pre>
-          </p>
-        </div>);
+
+        const body = (
+          <div>
+            <p>
+              JupyterLab build is suggested:
+              <br />
+              <pre>{response.message}</pre>
+            </p>
+          </div>
+        );
+
         showDialog({
           title: 'Build Recommended',
           body,
           buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
-        }).then(result => {
-          if (result.button.accept) {
-            return doBuild();
-          }
-        });
+        }).then(result => (result.button.accept ? build() : undefined));
       });
     }
 
-    const message = 'Are you sure you want to exit JupyterLab?\n' +
-                    'Any unsaved changes will be lost.';
+    const message =
+      'Are you sure you want to exit JupyterLab?\n' +
+      'Any unsaved changes will be lost.';
 
     // The spec for the `beforeunload` event is implemented differently by
     // the different browser vendors. Consequently, the `event.returnValue`
@@ -148,13 +155,12 @@ const main: JupyterLabPlugin<void> = {
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
       if (app.isDirty) {
-        return (event as any).returnValue = message;
+        return ((event as any).returnValue = message);
       }
     });
   },
   autoStart: true
 };
-
 
 /**
  * The default layout restorer provider.
@@ -180,7 +186,6 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
   provides: ILayoutRestorer
 };
 
-
 /**
  * The default URL router provider.
  */
@@ -191,29 +196,14 @@ const router: JupyterLabPlugin<IRouter> = {
     const base = PageConfig.getOption('pageUrl');
     const router = new Router({ base, commands });
 
-    commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ILocation) => {
-        const path = decodeURIComponent((args.path.match(Patterns.tree)[1]));
-
-        // File browser navigation waits for the application to be restored.
-        // As a result, this command cannot return a promise because it would
-        // create a circular dependency on the restored promise that would
-        // cause the application to never restore.
-        const opened = commands.execute('filebrowser:navigate-main', { path });
-
-        // Change the URL back to the base application URL without adding the
-        // URL change to the browser history.
-        opened.then(() => { router.navigate('', { silent: true }); });
-      }
-    });
-
-    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
     app.started.then(() => {
       // Route the very first request on load.
       router.route();
 
       // Route all pop state events.
-      window.addEventListener('popstate', () => { router.route(); });
+      window.addEventListener('popstate', () => {
+        router.route();
+      });
     });
 
     return router;
@@ -222,6 +212,38 @@ const router: JupyterLabPlugin<IRouter> = {
   provides: IRouter
 };
 
+/**
+ * The tree route handler provider.
+ */
+const tree: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:tree',
+  autoStart: true,
+  requires: [IRouter],
+  activate: (app: JupyterLab, router: IRouter) => {
+    const { commands } = app;
+
+    commands.addCommand(CommandIDs.tree, {
+      execute: (args: IRouter.ILocation) => {
+        const { request } = args;
+        const path = decodeURIComponent(args.path.match(Patterns.tree)[2]);
+        const url = request.replace(request.match(Patterns.tree)[1], '');
+        const immediate = true;
+
+        // Silently remove the tree portion of the URL leaving the rest intact.
+        router.navigate(url, { silent: true });
+
+        return commands
+          .execute('filebrowser:navigate-main', { path })
+          .then(() => commands.execute('apputils:save-statedb', { immediate }))
+          .catch(reason => {
+            console.warn(`Tree routing failed:`, reason);
+          });
+      }
+    });
+
+    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+  }
+};
 
 /**
  * The default URL not found extension.
@@ -231,6 +253,9 @@ const notfound: JupyterLabPlugin<void> = {
   activate: (app: JupyterLab, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
     const base = router.base;
+    const message = `
+      The path: ${bad} was not found. JupyterLab redirected to: ${base}
+    `;
 
     if (!bad) {
       return;
@@ -240,16 +265,29 @@ const notfound: JupyterLabPlugin<void> = {
     // URL change to the browser history.
     router.navigate('', { silent: true });
 
-    showDialog({
-      title: 'Path Not Found',
-      body: `The path: ${bad} was not found. JupyterLab redirected to: ${base}`,
-      buttons: [Dialog.okButton()]
-    });
+    showErrorMessage('Path Not Found', { message });
   },
   requires: [IRouter],
   autoStart: true
 };
 
+/**
+ * Change the favicon changing based on the busy status;
+ */
+const busy: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:faviconbusy',
+  activate: async (app: JupyterLab) => {
+    app.busySignal.connect((_, isBusy) => {
+      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
+      const favicon = document.querySelector(
+        'link[rel="shortcut icon"]'
+      ) as HTMLLinkElement;
+      favicon.href = `/static/base/images/${filename}`;
+    });
+  },
+  requires: [],
+  autoStart: true
+};
 
 /**
  * Add the main application commands.
@@ -260,21 +298,27 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   app.commands.addCommand(command, {
     label: 'Activate Next Tab',
-    execute: () => { app.shell.activateNextTab(); }
+    execute: () => {
+      app.shell.activateNextTab();
+    }
   });
   palette.addItem({ command, category });
 
   command = CommandIDs.activatePreviousTab;
   app.commands.addCommand(command, {
     label: 'Activate Previous Tab',
-    execute: () => { app.shell.activatePreviousTab(); }
+    execute: () => {
+      app.shell.activatePreviousTab();
+    }
   });
   palette.addItem({ command, category });
 
   command = CommandIDs.closeAll;
   app.commands.addCommand(command, {
     label: 'Close All Widgets',
-    execute: () => { app.shell.closeAll(); }
+    execute: () => {
+      app.shell.closeAll();
+    }
   });
   palette.addItem({ command, category });
 
@@ -346,18 +390,26 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     label: 'Single-Document Mode',
     isToggled: () => app.shell.mode === 'single-document',
     execute: () => {
-      const args = app.shell.mode === 'multiple-document' ?
-        { mode: 'single-document' } : { mode: 'multiple-document' };
+      const args =
+        app.shell.mode === 'multiple-document'
+          ? { mode: 'single-document' }
+          : { mode: 'multiple-document' };
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
   palette.addItem({ command, category });
 }
 
-
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [main, layout, router, notfound];
+const plugins: JupyterLabPlugin<any>[] = [
+  main,
+  layout,
+  router,
+  tree,
+  notfound,
+  busy
+];
 
 export default plugins;

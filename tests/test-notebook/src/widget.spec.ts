@@ -3,42 +3,43 @@
 
 import expect = require('expect.js');
 
-import {
-  MessageLoop, Message
-} from '@phosphor/messaging';
+import { MessageLoop, Message } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
+
+import { generate, simulate } from 'simulate-event';
 
 import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  generate, simulate
-} from 'simulate-event';
-
-import {
-  CodeCellModel, CodeCell, MarkdownCellModel, MarkdownCell,
-  RawCellModel, RawCell, Cell
+  CodeCellModel,
+  CodeCell,
+  MarkdownCellModel,
+  MarkdownCell,
+  RawCellModel,
+  RawCell,
+  Cell
 } from '@jupyterlab/cells';
 
-import {
-  INotebookModel, NotebookModel
-} from '@jupyterlab/notebook';
+import { INotebookModel, NotebookModel } from '@jupyterlab/notebook';
+
+import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 
 import {
-  Notebook, StaticNotebook
-} from '@jupyterlab/notebook';
-
-import {
-  DEFAULT_CONTENT, createNotebookFactory, rendermime, mimeTypeService,
-  editorFactory, defaultEditorConfig
+  DEFAULT_CONTENT,
+  createNotebookFactory,
+  rendermime,
+  mimeTypeService,
+  editorFactory,
+  defaultEditorConfig
 } from '../../notebook-utils';
-
+import { moment } from '../../utils';
 
 const contentFactory = createNotebookFactory();
 const options: Notebook.IOptions = {
-  rendermime, contentFactory, mimeTypeService, editorConfig: defaultEditorConfig
+  rendermime,
+  contentFactory,
+  mimeTypeService,
+  editorConfig: defaultEditorConfig
 };
-
 
 function createWidget(): LogStaticNotebook {
   let model = new NotebookModel();
@@ -47,9 +48,7 @@ function createWidget(): LogStaticNotebook {
   return widget;
 }
 
-
 class LogStaticNotebook extends StaticNotebook {
-
   methods: string[] = [];
 
   protected onUpdateRequest(msg: Message): void {
@@ -57,7 +56,10 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+  protected onModelChanged(
+    oldValue: INotebookModel,
+    newValue: INotebookModel
+  ): void {
     super.onModelChanged(oldValue, newValue);
     this.methods.push('onModelChanged');
   }
@@ -83,9 +85,7 @@ class LogStaticNotebook extends StaticNotebook {
   }
 }
 
-
 class LogNotebook extends Notebook {
-
   events: string[] = [];
 
   methods: string[] = [];
@@ -131,7 +131,6 @@ class LogNotebook extends Notebook {
   }
 }
 
-
 function createActiveWidget(): LogNotebook {
   let model = new NotebookModel();
   let widget = new LogNotebook(options);
@@ -139,25 +138,20 @@ function createActiveWidget(): LogNotebook {
   return widget;
 }
 
-
 function selected(nb: Notebook): number[] {
-    const selected = [];
-    const cells = nb.widgets;
-    for (let i = 0; i < cells.length; i++) {
-      if (nb.isSelected(cells[i])) {
-        selected.push(i);
-      }
+  const selected = [];
+  const cells = nb.widgets;
+  for (let i = 0; i < cells.length; i++) {
+    if (nb.isSelected(cells[i])) {
+      selected.push(i);
     }
-    return selected;
+  }
+  return selected;
 }
 
-
-describe('notebook/widget', () => {
-
+describe('@jupyter/notebook', () => {
   describe('StaticNotebook', () => {
-
     describe('#constructor()', () => {
-
       it('should create a notebook widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget).to.be.a(StaticNotebook);
@@ -180,7 +174,6 @@ describe('notebook/widget', () => {
     });
 
     describe('#modelChanged', () => {
-
       it('should be emitted when the model changes', () => {
         let widget = new StaticNotebook(options);
         let model = new NotebookModel();
@@ -193,16 +186,16 @@ describe('notebook/widget', () => {
         widget.model = model;
         expect(called).to.be(true);
       });
-
     });
 
     describe('#modelContentChanged', () => {
-
       it('should be emitted when a cell is added', () => {
         let widget = new StaticNotebook(options);
         widget.model = new NotebookModel();
         let called = false;
-        widget.modelContentChanged.connect(() => { called = true; });
+        widget.modelContentChanged.connect(() => {
+          called = true;
+        });
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         expect(called).to.be(true);
@@ -212,15 +205,15 @@ describe('notebook/widget', () => {
         let widget = new StaticNotebook(options);
         widget.model = new NotebookModel();
         let called = false;
-        widget.modelContentChanged.connect(() => { called = true; });
+        widget.modelContentChanged.connect(() => {
+          called = true;
+        });
         widget.model.metadata.set('foo', 1);
         expect(called).to.be(true);
       });
-
     });
 
     describe('#model', () => {
-
       it('should get the model for the widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget.model).to.be(null);
@@ -238,7 +231,9 @@ describe('notebook/widget', () => {
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
-        widget.modelChanged.connect(() => { called = true; });
+        widget.modelChanged.connect(() => {
+          called = true;
+        });
         widget.model = new NotebookModel();
         expect(called).to.be(true);
       });
@@ -248,7 +243,9 @@ describe('notebook/widget', () => {
         let model = new NotebookModel();
         widget.model = model;
         let called = false;
-        widget.modelChanged.connect(() => { called = true; });
+        widget.modelChanged.connect(() => {
+          called = true;
+        });
         widget.model = model;
         expect(called).to.be(false);
       });
@@ -272,7 +269,6 @@ describe('notebook/widget', () => {
       });
 
       context('`cells.changed` signal', () => {
-
         let widget: LogStaticNotebook;
 
         beforeEach(() => {
@@ -284,14 +280,11 @@ describe('notebook/widget', () => {
           widget.dispose();
         });
 
-        it('should handle changes to the model cell list', (done) => {
+        it('should handle changes to the model cell list', async () => {
           widget = createWidget();
           widget.model.cells.clear();
-          // The model should add a single code cell.
-          requestAnimationFrame(() => {
-            expect(widget.widgets.length).to.be(1);
-            done();
-          });
+          await moment();
+          expect(widget.widgets.length).to.be(1);
         });
 
         it('should handle a remove', () => {
@@ -322,31 +315,24 @@ describe('notebook/widget', () => {
           widget.model.cells.clear();
           expect(widget.widgets.length).to.be(0);
         });
-
       });
-
     });
 
     describe('#rendermime', () => {
-
       it('should be the rendermime instance used by the widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget.rendermime).to.be(rendermime);
       });
-
     });
 
     describe('#contentFactory', () => {
-
       it('should be the cell widget contentFactory used by the widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget.contentFactory).to.be.a(StaticNotebook.ContentFactory);
       });
-
     });
 
     describe('#editorConfig', () => {
-
       it('should be the cell widget contentFactory used by the widget', () => {
         let widget = new StaticNotebook(options);
         expect(widget.editorConfig).to.be(options.editorConfig);
@@ -354,8 +340,9 @@ describe('notebook/widget', () => {
 
       it('should be settable', () => {
         let widget = createWidget();
-        expect(widget.widgets[0].editor.getOption('autoClosingBrackets'))
-        .to.be(true);
+        expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).to.be(
+          true
+        );
         let newConfig = {
           raw: defaultEditorConfig.raw,
           markdown: defaultEditorConfig.markdown,
@@ -365,14 +352,13 @@ describe('notebook/widget', () => {
           }
         };
         widget.editorConfig = newConfig;
-        expect(widget.widgets[0].editor.getOption('autoClosingBrackets'))
-        .to.be(false);
+        expect(widget.widgets[0].editor.getOption('autoClosingBrackets')).to.be(
+          false
+        );
       });
-
     });
 
     describe('#codeMimetype', () => {
-
       it('should get the mime type for code cells', () => {
         let widget = new StaticNotebook(options);
         expect(widget.codeMimetype).to.be('text/plain');
@@ -386,11 +372,9 @@ describe('notebook/widget', () => {
         widget.model = model;
         expect(widget.codeMimetype).to.be('text/x-python');
       });
-
     });
 
     describe('#widgets', () => {
-
       it('should get the child widget at a specified index', () => {
         let widget = createWidget();
         let child = widget.widgets[0];
@@ -409,11 +393,9 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         expect(widget.widgets.length).to.be(6);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the widget', () => {
         let widget = createWidget();
         widget.dispose();
@@ -426,11 +408,9 @@ describe('notebook/widget', () => {
         widget.dispose();
         expect(widget.isDisposed).to.be(true);
       });
-
     });
 
     describe('#onModelChanged()', () => {
-
       it('should be called when the model changes', () => {
         let widget = new LogStaticNotebook(options);
         widget.model = new NotebookModel();
@@ -443,11 +423,9 @@ describe('notebook/widget', () => {
         widget.model = widget.model;
         expect(widget.methods).to.not.contain('onModelChanged');
       });
-
     });
 
     describe('#onMetadataChanged()', () => {
-
       it('should be called when the metadata on the notebook changes', () => {
         let widget = createWidget();
         widget.model.metadata.set('foo', 1);
@@ -470,54 +448,43 @@ describe('notebook/widget', () => {
         let child = widget.widgets[0];
         expect(child.model.mimeType).to.be('text/x-python');
       });
-
     });
 
     describe('#onCellInserted()', () => {
-
       it('should be called when a cell is inserted', () => {
         let widget = createWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         expect(widget.methods).to.contain('onCellInserted');
       });
-
     });
 
     describe('#onCellMoved()', () => {
-
       it('should be called when a cell is moved', () => {
         let widget = createWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         widget.model.cells.move(0, 1);
         expect(widget.methods).to.contain('onCellMoved');
       });
-
     });
 
     describe('#onCellRemoved()', () => {
-
       it('should be called when a cell is removed', () => {
         let widget = createWidget();
         let cell = widget.model.cells.get(0);
         widget.model.cells.removeValue(cell);
         expect(widget.methods).to.contain('onCellRemoved');
       });
-
     });
 
     describe('.ContentFactory', () => {
-
       describe('#constructor', () => {
-
         it('should create a new ContentFactory', () => {
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           expect(factory).to.be.a(StaticNotebook.ContentFactory);
         });
-
       });
 
       describe('#createCodeCell({})', () => {
-
         it('should create a `CodeCell`', () => {
           let contentFactory = new StaticNotebook.ContentFactory();
           let model = new CodeCellModel({});
@@ -526,11 +493,9 @@ describe('notebook/widget', () => {
           let widget = contentFactory.createCodeCell(codeOptions, parent);
           expect(widget).to.be.a(CodeCell);
         });
-
       });
 
       describe('#createMarkdownCell({})', () => {
-
         it('should create a `MarkdownCell`', () => {
           let contentFactory = new StaticNotebook.ContentFactory();
           let model = new MarkdownCellModel({});
@@ -539,11 +504,9 @@ describe('notebook/widget', () => {
           let widget = contentFactory.createMarkdownCell(mdOptions, parent);
           expect(widget).to.be.a(MarkdownCell);
         });
-
       });
 
       describe('#createRawCell()', () => {
-
         it('should create a `RawCell`', () => {
           let contentFactory = new StaticNotebook.ContentFactory();
           let model = new RawCellModel({});
@@ -552,17 +515,12 @@ describe('notebook/widget', () => {
           let widget = contentFactory.createRawCell(rawOptions, parent);
           expect(widget).to.be.a(RawCell);
         });
-
       });
-
     });
-
   });
 
   describe('Notebook', () => {
-
     describe('#stateChanged', () => {
-
       it('should be emitted when the state of the notebook changes', () => {
         let widget = createActiveWidget();
         let called = false;
@@ -576,11 +534,9 @@ describe('notebook/widget', () => {
         widget.mode = 'edit';
         expect(called).to.be(true);
       });
-
     });
 
     describe('#activeCellChanged', () => {
-
       it('should be emitted when the active cell changes', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -598,15 +554,15 @@ describe('notebook/widget', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         let called = false;
-        widget.activeCellChanged.connect(() => { called = true; });
+        widget.activeCellChanged.connect(() => {
+          called = true;
+        });
         widget.activeCellIndex = widget.activeCellIndex;
         expect(called).to.be(false);
       });
-
     });
 
     describe('#selectionChanged', () => {
-
       it('should be emitted when the selection changes', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -625,15 +581,15 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
         let called = false;
         widget.select(widget.widgets[1]);
-        widget.selectionChanged.connect(() => { called = true; });
+        widget.selectionChanged.connect(() => {
+          called = true;
+        });
         widget.select(widget.widgets[1]);
         expect(called).to.be(false);
       });
-
     });
 
     describe('#mode', () => {
-
       it('should get the interactivity mode of the notebook', () => {
         let widget = createActiveWidget();
         expect(widget.mode).to.be('command');
@@ -662,33 +618,31 @@ describe('notebook/widget', () => {
       it('should be a no-op if the value does not change', () => {
         let widget = createActiveWidget();
         let called = false;
-        widget.stateChanged.connect(() => { called = true; });
+        widget.stateChanged.connect(() => {
+          called = true;
+        });
         widget.mode = 'command';
         expect(called).to.be(false);
       });
 
-      it('should post an update request', (done) => {
+      it('should post an update request', async () => {
         let widget = createActiveWidget();
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
         widget.mode = 'edit';
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
 
-      it('should deselect all cells if switching to edit mode', (done) => {
+      it('should deselect all cells if switching to edit mode', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          widget.extendContiguousSelectionTo(widget.widgets.length - 1);
-          let selectedRange = Array.from(Array(widget.widgets.length).keys());
-          expect(selected(widget)).to.eql(selectedRange);
-          widget.mode = 'edit';
-          expect(selected(widget)).to.eql([]);
-          widget.dispose();
-          done();
-        });
+        await moment();
+        widget.extendContiguousSelectionTo(widget.widgets.length - 1);
+        let selectedRange = Array.from(Array(widget.widgets.length).keys());
+        expect(selected(widget)).to.eql(selectedRange);
+        widget.mode = 'edit';
+        expect(selected(widget)).to.eql([]);
+        widget.dispose();
       });
 
       it('should unrender a markdown cell when switching to edit mode', () => {
@@ -703,11 +657,9 @@ describe('notebook/widget', () => {
         widget.mode = 'edit';
         expect(child.rendered).to.be(false);
       });
-
     });
 
     describe('#activeCellIndex', () => {
-
       it('should get the active cell index of the notebook', () => {
         let widget = createActiveWidget();
         expect(widget.activeCellIndex).to.be(0);
@@ -748,18 +700,18 @@ describe('notebook/widget', () => {
         let widget = createActiveWidget();
         let called = false;
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.stateChanged.connect(() => { called = true; });
+        widget.stateChanged.connect(() => {
+          called = true;
+        });
         widget.activeCellIndex = 0;
         expect(called).to.be(false);
       });
 
-      it('should post an update request', (done) => {
+      it('should post an update request', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
         widget.activeCellIndex = 1;
       });
 
@@ -769,20 +721,16 @@ describe('notebook/widget', () => {
         widget.activeCellIndex = 1;
         expect(widget.activeCell).to.be(widget.widgets[1]);
       });
-
     });
 
     describe('#activeCell', () => {
-
       it('should get the active cell widget', () => {
         let widget = createActiveWidget();
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
-
     });
 
     describe('#select()', () => {
-
       it('should select a cell widget', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -794,15 +742,15 @@ describe('notebook/widget', () => {
       it('should allow multiple widgets to be selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
-        widget.widgets.forEach(cell => { widget.select(cell); });
+        widget.widgets.forEach(cell => {
+          widget.select(cell);
+        });
         let expectSelected = Array.from(Array(widget.widgets.length).keys());
         expect(selected(widget)).to.eql(expectSelected);
       });
-
     });
 
     describe('#deselect()', () => {
-
       it('should deselect a cell', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -824,12 +772,9 @@ describe('notebook/widget', () => {
         widget.deselect(cell);
         expect(widget.isSelected(cell)).to.be(false);
       });
-
-
     });
 
     describe('#isSelected()', () => {
-
       it('should get whether the cell is selected', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -845,11 +790,9 @@ describe('notebook/widget', () => {
         widget.select(widget.activeCell);
         expect(selected(widget)).to.eql([widget.activeCellIndex]);
       });
-
     });
 
     describe('#deselectAll()', () => {
-
       it('should deselect all cells', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -861,21 +804,28 @@ describe('notebook/widget', () => {
         widget.deselectAll();
         expect(selected(widget)).to.eql([]);
       });
-
     });
 
     describe('#extendContiguousSelectionTo()', () => {
-
       // Test a permutation for extending a selection.
-      let checkSelection = (widget: Notebook, anchor: number, head: number, index: number, select = true) => {
-
+      let checkSelection = (
+        widget: Notebook,
+        anchor: number,
+        head: number,
+        index: number,
+        select = true
+      ) => {
         if (!select && anchor !== head) {
           throw new Error('anchor must equal head if select is false');
         }
 
         // Set up the test by pre-selecting appropriate cells if select is true.
         if (select) {
-          for (let i = Math.min(anchor, head); i <= Math.max(anchor, head); i++) {
+          for (
+            let i = Math.min(anchor, head);
+            i <= Math.max(anchor, head);
+            i++
+          ) {
             widget.select(widget.widgets[i]);
           }
         }
@@ -1034,11 +984,9 @@ describe('notebook/widget', () => {
         expect(widget.activeCellIndex).to.be(-1);
         expect(selectionChanged).to.be(0);
       });
-
     });
 
     describe('#getContiguousSelection()', () => {
-
       it('throws an error when the selection is not contiguous', () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
@@ -1047,7 +995,9 @@ describe('notebook/widget', () => {
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
 
-        expect(() => widget.getContiguousSelection()).to.throwError(/Selection not contiguous/);
+        expect(() => widget.getContiguousSelection()).to.throwError(
+          /Selection not contiguous/
+        );
       });
 
       it('throws an error if the active cell is not at an endpoint', () => {
@@ -1060,11 +1010,15 @@ describe('notebook/widget', () => {
 
         // Check if active cell is outside selection.
         widget.activeCellIndex = 0;
-        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+        expect(() => widget.getContiguousSelection()).to.throwError(
+          /Active cell not at endpoint of selection/
+        );
 
         // Check if active cell is inside selection.
         widget.activeCellIndex = 2;
-        expect(() => widget.getContiguousSelection()).to.throwError(/Active cell not at endpoint of selection/);
+        expect(() => widget.getContiguousSelection()).to.throwError(
+          /Active cell not at endpoint of selection/
+        );
       });
 
       it('returns null values if there is no selection', () => {
@@ -1072,7 +1026,7 @@ describe('notebook/widget', () => {
         widget.model.fromJSON(DEFAULT_CONTENT);
 
         let selection = widget.getContiguousSelection();
-        expect(selection).to.eql({head: null, anchor: null});
+        expect(selection).to.eql({ head: null, anchor: null });
       });
 
       it('handles the case of no cells', () => {
@@ -1081,7 +1035,7 @@ describe('notebook/widget', () => {
         expect(widget.widgets.length).to.be(0);
 
         let selection = widget.getContiguousSelection();
-        expect(selection).to.eql({head: null, anchor: null});
+        expect(selection).to.eql({ head: null, anchor: null });
       });
 
       it('works if head is before the anchor', () => {
@@ -1094,7 +1048,7 @@ describe('notebook/widget', () => {
         widget.activeCellIndex = 1;
 
         let selection = widget.getContiguousSelection();
-        expect(selection).to.eql({head: 1, anchor: 3});
+        expect(selection).to.eql({ head: 1, anchor: 3 });
       });
 
       it('works if head is after the anchor', () => {
@@ -1107,7 +1061,7 @@ describe('notebook/widget', () => {
         widget.activeCellIndex = 3;
 
         let selection = widget.getContiguousSelection();
-        expect(selection).to.eql({head: 3, anchor: 1});
+        expect(selection).to.eql({ head: 3, anchor: 1 });
       });
 
       it('works if head and anchor are the same', () => {
@@ -1118,20 +1072,18 @@ describe('notebook/widget', () => {
         widget.activeCellIndex = 3;
 
         let selection = widget.getContiguousSelection();
-        expect(selection).to.eql({head: 3, anchor: 3});
+        expect(selection).to.eql({ head: 3, anchor: 3 });
       });
-
     });
 
     describe('#handleEvent()', () => {
-
       let widget: LogNotebook;
 
-      beforeEach((done) => {
+      beforeEach(async () => {
         widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => { done(); });
+        await moment();
       });
 
       afterEach(() => {
@@ -1139,7 +1091,6 @@ describe('notebook/widget', () => {
       });
 
       context('mousedown', () => {
-
         it('should set the active cell index', () => {
           let child = widget.widgets[1];
           simulate(child.node, 'mousedown');
@@ -1169,22 +1120,22 @@ describe('notebook/widget', () => {
           widget.activeCellIndex = 3;
 
           // shift click below
-          simulate(widget.widgets[4].node, 'mousedown', {shiftKey: true});
+          simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).to.be(4);
           expect(selected(widget)).to.eql([3, 4]);
 
           // shift click above
-          simulate(widget.widgets[1].node, 'mousedown', {shiftKey: true});
+          simulate(widget.widgets[1].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).to.be(1);
           expect(selected(widget)).to.eql([1, 2, 3]);
 
           // shift click expand
-          simulate(widget.widgets[0].node, 'mousedown', {shiftKey: true});
+          simulate(widget.widgets[0].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).to.be(0);
           expect(selected(widget)).to.eql([0, 1, 2, 3]);
 
           // shift click contract
-          simulate(widget.widgets[2].node, 'mousedown', {shiftKey: true});
+          simulate(widget.widgets[2].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).to.be(2);
           expect(selected(widget)).to.eql([2, 3]);
         });
@@ -1239,16 +1190,15 @@ describe('notebook/widget', () => {
           widget.select(mdChild);
           widget.activeCellIndex = count - 2;
           simulate(codeChild.editorWidget.node, 'mousedown', {
-            shiftKey: true, button: 2
+            shiftKey: true,
+            button: 2
           });
           expect(widget.isSelected(mdChild)).to.be(true);
           expect(widget.mode).to.be('command');
         });
-
       });
 
       context('dblclick', () => {
-
         it('should unrender a markdown cell', () => {
           let cell = widget.model.contentFactory.createMarkdownCell({});
           widget.model.cells.push(cell);
@@ -1259,11 +1209,9 @@ describe('notebook/widget', () => {
           expect(widget.mode).to.be('command');
           expect(child.rendered).to.be(false);
         });
-
       });
 
       context('focusin', () => {
-
         it('should change to edit mode if a child cell takes focus', () => {
           let child = widget.widgets[0];
           simulate(child.editorWidget.node, 'focusin');
@@ -1281,11 +1229,9 @@ describe('notebook/widget', () => {
           expect(widget.events).to.contain('focusin');
           expect(widget.mode).to.be('command');
         });
-
       });
 
       context('focusout', () => {
-
         it('should switch to command mode', () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
@@ -1306,107 +1252,87 @@ describe('notebook/widget', () => {
           widget.node.dispatchEvent(evt);
           expect(widget.mode).to.be('command');
         });
-
       });
-
     });
 
     describe('#onAfterAttach()', () => {
-
-      it('should add event listeners', (done) => {
+      it('should add event listeners', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         let child = widget.widgets[0];
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onAfterAttach');
-          simulate(widget.node, 'mousedown');
-          expect(widget.events).to.contain('mousedown');
-          simulate(widget.node, 'dblclick');
-          expect(widget.events).to.contain('dblclick');
-          simulate(child.node, 'focusin');
-          expect(widget.events).to.contain('focusin');
-          widget.dispose();
-          done();
-        });
+        await moment();
+        expect(widget.methods).to.contain('onAfterAttach');
+        simulate(widget.node, 'mousedown');
+        expect(widget.events).to.contain('mousedown');
+        simulate(widget.node, 'dblclick');
+        expect(widget.events).to.contain('dblclick');
+        simulate(child.node, 'focusin');
+        expect(widget.events).to.contain('focusin');
+        widget.dispose();
       });
 
-      it('should post an update request', (done) => {
+      it('should post an update request', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onAfterAttach');
-          requestAnimationFrame(() => {
-            expect(widget.methods).to.contain('onUpdateRequest');
-            widget.dispose();
-            done();
-          });
-        });
+        await moment();
+        expect(widget.methods).to.contain('onAfterAttach');
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
+        widget.dispose();
       });
-
     });
 
     describe('#onBeforeDetach()', () => {
-
-      it('should remove event listeners', (done) => {
+      it('should remove event listeners', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         let child = widget.widgets[0];
-        requestAnimationFrame(() => {
-          Widget.detach(widget);
-          expect(widget.methods).to.contain('onBeforeDetach');
-          widget.events = [];
-          simulate(widget.node, 'mousedown');
-          expect(widget.events).to.not.contain('mousedown');
-          simulate(widget.node, 'dblclick');
-          expect(widget.events).to.not.contain('dblclick');
-          simulate(child.node, 'focusin');
-          expect(widget.events).to.not.contain('focusin');
-          widget.dispose();
-          done();
-        });
+        await moment();
+        Widget.detach(widget);
+        expect(widget.methods).to.contain('onBeforeDetach');
+        widget.events = [];
+        simulate(widget.node, 'mousedown');
+        expect(widget.events).to.not.contain('mousedown');
+        simulate(widget.node, 'dblclick');
+        expect(widget.events).to.not.contain('dblclick');
+        simulate(child.node, 'focusin');
+        expect(widget.events).to.not.contain('focusin');
+        widget.dispose();
       });
-
     });
 
     describe('#onActivateRequest()', () => {
-
-      it('should focus the node after an update', (done) => {
+      it('should focus the node after an update', async () => {
         let widget = createActiveWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        requestAnimationFrame(() => {
-          expect(document.activeElement).to.be(widget.node);
-          widget.dispose();
-          done();
-        });
+        await moment();
+        expect(document.activeElement).to.be(widget.node);
+        widget.dispose();
       });
 
-      it('should post an `update-request', (done) => {
+      it('should post an `update-request', async () => {
         let widget = createActiveWidget();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          widget.dispose();
-          done();
-        });
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
+        widget.dispose();
       });
-
     });
 
     describe('#onUpdateRequest()', () => {
-
       let widget: LogNotebook;
 
-      beforeEach((done) => {
+      beforeEach(async () => {
         widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {  done(); });
+        await moment();
       });
 
       afterEach(() => {
@@ -1418,12 +1344,10 @@ describe('notebook/widget', () => {
         expect(widget.hasClass('jp-mod-commandMode')).to.be(true);
       });
 
-      it('should apply the edit class if in edit mode', (done) => {
+      it('should apply the edit class if in edit mode', async () => {
         widget.mode = 'edit';
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-mod-editMode')).to.be(true);
-          done();
-        });
+        await moment();
+        expect(widget.hasClass('jp-mod-editMode')).to.be(true);
       });
 
       it('should add the active class to the active widget', () => {
@@ -1431,38 +1355,30 @@ describe('notebook/widget', () => {
         expect(cell.hasClass('jp-mod-active')).to.be(true);
       });
 
-      it('should set the selected class on the selected widgets', (done) => {
+      it('should set the selected class on the selected widgets', async () => {
         widget.select(widget.widgets[1]);
-        requestAnimationFrame(() => {
-          for (let i = 0; i < 2; i++) {
-            let cell = widget.widgets[i];
-            expect(cell.hasClass('jp-mod-selected')).to.be(true);
-            done();
-          }
-        });
+        await moment();
+        for (let i = 0; i < 2; i++) {
+          let cell = widget.widgets[i];
+          expect(cell.hasClass('jp-mod-selected')).to.be(true);
+        }
       });
 
-      it('should add the multi select class if there is more than one widget', (done) => {
+      it('should add the multi select class if there is more than one widget', async () => {
         widget.select(widget.widgets[1]);
         expect(widget.hasClass('jp-mod-multSelected')).to.be(false);
-        requestAnimationFrame(() => {
-          expect(widget.hasClass('jp-mod-multSelected')).to.be(false);
-          done();
-        });
+        await moment();
+        expect(widget.hasClass('jp-mod-multSelected')).to.be(false);
       });
-
     });
 
     describe('#onCellInserted()', () => {
-
-      it('should post an `update-request', (done) => {
+      it('should post an `update-request', async () => {
         let widget = createActiveWidget();
         widget.model.fromJSON(DEFAULT_CONTENT);
         expect(widget.methods).to.contain('onCellInserted');
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
 
       it('should update the active cell if necessary', () => {
@@ -1481,7 +1397,6 @@ describe('notebook/widget', () => {
       });
 
       context('`edgeRequested` signal', () => {
-
         it('should activate the previous cell if top is requested', () => {
           let widget = createActiveWidget();
           widget.model.fromJSON(DEFAULT_CONTENT);
@@ -1491,20 +1406,17 @@ describe('notebook/widget', () => {
           expect(widget.activeCellIndex).to.be(0);
         });
 
-        it('should activate the next cell if bottom is requested', ()  => {
+        it('should activate the next cell if bottom is requested', () => {
           let widget = createActiveWidget();
           widget.model.fromJSON(DEFAULT_CONTENT);
           let child = widget.widgets[widget.activeCellIndex];
           (child.editor.edgeRequested as any).emit('bottom');
           expect(widget.activeCellIndex).to.be(1);
         });
-
       });
-
     });
 
     describe('#onCellMoved()', () => {
-
       it('should update the active cell index if necessary', () => {
         let widget = createActiveWidget();
 
@@ -1521,7 +1433,7 @@ describe('notebook/widget', () => {
           [4, 5, 3]
         ];
 
-        moves.forEach((m) => {
+        moves.forEach(m => {
           let [fromIndex, toIndex, activeIndex] = m;
           widget.model.fromJSON(DEFAULT_CONTENT);
           let cell = widget.widgets[3];
@@ -1531,20 +1443,16 @@ describe('notebook/widget', () => {
           expect(widget.widgets[activeIndex]).to.be(cell);
         });
       });
-
     });
 
     describe('#onCellRemoved()', () => {
-
-      it('should post an `update-request', (done) => {
+      it('should post an `update-request', async () => {
         let widget = createActiveWidget();
         let cell = widget.model.cells.get(0);
         widget.model.cells.removeValue(cell);
         expect(widget.methods).to.contain('onCellRemoved');
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await moment();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
 
       it('should update the active cell if necessary', () => {
@@ -1561,9 +1469,6 @@ describe('notebook/widget', () => {
         widget.model.cells.remove(1);
         expect(widget.activeCell).to.be(widget.widgets[1]);
       });
-
     });
-
   });
-
 });

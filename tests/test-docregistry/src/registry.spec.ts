@@ -3,66 +3,50 @@
 
 import expect = require('expect.js');
 
-import {
-  uuid
-} from '@jupyterlab/coreutils';
+import { UUID } from '@phosphor/coreutils';
+
+import { toArray } from '@phosphor/algorithm';
+
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
+import { Widget } from '@phosphor/widgets';
 
 import {
-  toArray
-} from '@phosphor/algorithm';
-
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
-
-import {
-  Widget
-} from '@phosphor/widgets';
-
-import {
-  ABCWidgetFactory, Base64ModelFactory, DocumentRegistry
+  ABCWidgetFactory,
+  Base64ModelFactory,
+  DocumentRegistry,
+  DocumentWidget,
+  IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-
-class DocWidget extends Widget implements DocumentRegistry.IReadyWidget {
-  get ready(): Promise<void> {
-    return Promise.resolve(undefined);
-  }
-}
-
-
-class WidgetFactory extends ABCWidgetFactory<DocumentRegistry.IReadyWidget, DocumentRegistry.IModel> {
-
-  protected createNewWidget(context: DocumentRegistry.Context): DocumentRegistry.IReadyWidget {
-    let widget = new DocWidget();
+class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
+  protected createNewWidget(
+    context: DocumentRegistry.Context
+  ): IDocumentWidget {
+    const content = new Widget();
+    const widget = new DocumentWidget({ content, context });
     widget.addClass('WidgetFactory');
     return widget;
   }
 }
 
-
 class WidgetExtension implements DocumentRegistry.WidgetExtension {
-
-   createNew(widget: Widget, context: DocumentRegistry.Context): IDisposable {
-     return new DisposableDelegate(null);
-   }
+  createNew(widget: Widget, context: DocumentRegistry.Context): IDisposable {
+    return new DisposableDelegate(null);
+  }
 }
-
 
 function createFactory(modelName?: string) {
   return new WidgetFactory({
-    name: uuid(),
+    name: UUID.uuid4(),
     modelName: modelName || 'text',
     fileTypes: ['text', 'foobar'],
     defaultFor: ['text', 'foobar']
   });
 }
 
-
 describe('docregistry/registry', () => {
-
   describe('DocumentRegistry', () => {
-
     let registry: DocumentRegistry;
 
     beforeEach(() => {
@@ -78,17 +62,14 @@ describe('docregistry/registry', () => {
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the registry has been disposed', () => {
         expect(registry.isDisposed).to.be(false);
         registry.dispose();
         expect(registry.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the registry', () => {
         registry.addFileType({ name: 'notebook', extensions: ['.ipynb'] });
         registry.dispose();
@@ -100,16 +81,16 @@ describe('docregistry/registry', () => {
         registry.dispose();
         expect(registry.isDisposed).to.be(true);
       });
-
     });
 
     describe('#addWidgetFactory()', () => {
-
       it('should add the widget factory to the registry', () => {
         let factory = createFactory();
         registry.addWidgetFactory(factory);
         expect(registry.getWidgetFactory(factory.name)).to.be(factory);
-        expect(registry.getWidgetFactory(factory.name.toUpperCase())).to.be(factory);
+        expect(registry.getWidgetFactory(factory.name.toUpperCase())).to.be(
+          factory
+        );
       });
 
       it('should become the global default if `*` is given as a defaultFor', () => {
@@ -123,11 +104,13 @@ describe('docregistry/registry', () => {
       });
 
       it('should override an existing global default', () => {
-        registry.addWidgetFactory(new WidgetFactory({
-          name: 'global',
-          fileTypes: ['*'],
-          defaultFor: ['*']
-        }));
+        registry.addWidgetFactory(
+          new WidgetFactory({
+            name: 'global',
+            fileTypes: ['*'],
+            defaultFor: ['*']
+          })
+        );
         let factory = new WidgetFactory({
           name: 'bar',
           fileTypes: ['*'],
@@ -150,11 +133,9 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(registry.getWidgetFactory('test')).to.be(void 0);
       });
-
     });
 
     describe('#addModelFactory()', () => {
-
       it('should add the model factory to the registry', () => {
         let factory = new Base64ModelFactory();
         registry.addModelFactory(factory);
@@ -179,11 +160,9 @@ describe('docregistry/registry', () => {
         let disposable = registry.addModelFactory(factory);
         disposable.dispose();
       });
-
     });
 
     describe('#addWidgetExtension()', () => {
-
       it('should add a widget extension to the registry', () => {
         let extension = new WidgetExtension();
         registry.addWidgetExtension('foo', extension);
@@ -204,11 +183,9 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(toArray(registry.widgetExtensions('foo')).length).to.be(0);
       });
-
     });
 
     describe('#addFileType()', () => {
-
       it('should add a file type to the document registry', () => {
         registry = new DocumentRegistry({ initialFileTypes: [] });
         let fileType = { name: 'notebook', extensions: ['.ipynb'] };
@@ -232,11 +209,9 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(registry.fileTypes().next().name).to.be(fileType.name);
       });
-
     });
 
     describe('#preferredWidgetFactories()', () => {
-
       beforeEach(() => {
         registry.addFileType({
           name: 'tablejson',
@@ -245,7 +220,9 @@ describe('docregistry/registry', () => {
       });
 
       it('should give the valid registered widget factories', () => {
-        expect(toArray(registry.preferredWidgetFactories('foo.txt'))).to.eql([]);
+        expect(toArray(registry.preferredWidgetFactories('foo.txt'))).to.eql(
+          []
+        );
         let factory = createFactory();
         registry.addWidgetFactory(factory);
         let gFactory = new WidgetFactory({
@@ -268,7 +245,7 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(factory);
         let mdFactory = new WidgetFactory({
           name: 'markdown',
-          fileTypes: ['markdown'],
+          fileTypes: ['markdown']
         });
         registry.addWidgetFactory(mdFactory);
         expect(registry.preferredWidgetFactories('a.txt')[0]).to.be(factory);
@@ -286,7 +263,7 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(gFactory);
         let mdFactory = new WidgetFactory({
           name: 'markdown',
-          fileTypes: ['markdown'],
+          fileTypes: ['markdown']
         });
         registry.addWidgetFactory(mdFactory);
         let factories = registry.preferredWidgetFactories('a.txt');
@@ -298,12 +275,12 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(factory);
         let tFactory = new WidgetFactory({
           name: 'table',
-          fileTypes: ['tablejson'],
+          fileTypes: ['tablejson']
         });
         registry.addWidgetFactory(tFactory);
         let jFactory = new WidgetFactory({
           name: 'json',
-          fileTypes: ['json'],
+          fileTypes: ['json']
         });
         registry.addWidgetFactory(jFactory);
         let factories = registry.preferredWidgetFactories('foo.table.json');
@@ -315,7 +292,7 @@ describe('docregistry/registry', () => {
       it('should handle just a multi-part extension', () => {
         let factory = new WidgetFactory({
           name: 'table',
-          fileTypes: ['tablejson'],
+          fileTypes: ['tablejson']
         });
         registry.addWidgetFactory(factory);
         let factories = registry.preferredWidgetFactories('foo.table.json');
@@ -323,11 +300,9 @@ describe('docregistry/registry', () => {
         factories = registry.preferredWidgetFactories('foo.json');
         expect(toArray(factories)).to.eql([]);
       });
-
     });
 
     describe('#defaultWidgetFactory()', () => {
-
       it('should get the default widget factory for a given extension', () => {
         let factory = createFactory();
         registry.addWidgetFactory(factory);
@@ -347,11 +322,9 @@ describe('docregistry/registry', () => {
         expect(registry.defaultWidgetFactory('a.md')).to.be(mdFactory);
         expect(registry.defaultWidgetFactory()).to.be(gFactory);
       });
-
     });
 
     describe('#fileTypes()', () => {
-
       it('should get the registered file types', () => {
         registry = new DocumentRegistry({ initialFileTypes: [] });
         expect(toArray(registry.fileTypes()).length).to.be(0);
@@ -368,11 +341,9 @@ describe('docregistry/registry', () => {
         expect(values.next().name).to.be(fileTypes[1].name);
         expect(values.next().name).to.be(fileTypes[2].name);
       });
-
     });
 
     describe('#getFileType()', () => {
-
       it('should get a file type by name', () => {
         expect(registry.getFileType('notebook')).to.be.ok();
         expect(registry.getFileType('python')).to.be.ok();
@@ -381,20 +352,23 @@ describe('docregistry/registry', () => {
     });
 
     describe('#getKernelPreference()', () => {
-
       it('should get a kernel preference', () => {
         registry.addWidgetFactory(createFactory());
-        registry.addWidgetFactory(new WidgetFactory({
-          name: 'python',
-          fileTypes: ['python'],
-          preferKernel: true,
-          canStartKernel: true
-        }));
-        registry.addWidgetFactory(new WidgetFactory({
-          name: 'global',
-          fileTypes: ['*'],
-          defaultFor: ['*']
-        }));
+        registry.addWidgetFactory(
+          new WidgetFactory({
+            name: 'python',
+            fileTypes: ['python'],
+            preferKernel: true,
+            canStartKernel: true
+          })
+        );
+        registry.addWidgetFactory(
+          new WidgetFactory({
+            name: 'global',
+            fileTypes: ['*'],
+            defaultFor: ['*']
+          })
+        );
         let pref = registry.getKernelPreference('.c', 'global');
         expect(pref.language).to.be('clike');
         expect(pref.shouldStart).to.be(false);
@@ -408,39 +382,33 @@ describe('docregistry/registry', () => {
         pref = registry.getKernelPreference('.py', 'baz');
         expect(pref).to.be(void 0);
       });
-
     });
 
     describe('#getModelFactory()', () => {
-
       it('should get a registered model factory by name', () => {
         let mFactory = new Base64ModelFactory();
         registry.addModelFactory(mFactory);
         expect(registry.getModelFactory('base64')).to.be(mFactory);
       });
-
     });
 
     describe('#getWidgetFactory()', () => {
-
       it('should get a widget factory by name', () => {
         registry.addModelFactory(new Base64ModelFactory());
         let factory = createFactory();
         registry.addWidgetFactory(factory);
         let mdFactory = new WidgetFactory({
           name: 'markdown',
-          fileTypes: ['markdown'],
+          fileTypes: ['markdown']
         });
         registry.addWidgetFactory(mdFactory);
         expect(registry.getWidgetFactory(factory.name)).to.be(factory);
         expect(registry.getWidgetFactory('markdown')).to.be(mdFactory);
         expect(registry.getWidgetFactory('baz')).to.be(void 0);
       });
-
     });
 
     describe('#widgetExtensions()', () => {
-
       it('should get the registered extensions for a given widget', () => {
         let foo = new WidgetExtension();
         let bar = new WidgetExtension();
@@ -456,11 +424,9 @@ describe('docregistry/registry', () => {
         expect(toArray(buzz).length).to.be(1);
         expect(registry.widgetExtensions('baz').next()).to.be(void 0);
       });
-
     });
 
     describe('#getFileTypeForModel()', () => {
-
       beforeEach(() => {
         DocumentRegistry.defaultFileTypes.forEach(ft => {
           registry.addFileType(ft);
@@ -499,7 +465,9 @@ describe('docregistry/registry', () => {
         [
           { name: 'json', extensions: ['.json'] },
           { name: 'vega', extensions: ['.vg.json'] }
-        ].forEach(ft => {registry.addFileType(ft); });
+        ].forEach(ft => {
+          registry.addFileType(ft);
+        });
         let ft = registry.getFileTypeForModel({
           name: 'foo.vg.json'
         });
@@ -512,11 +480,9 @@ describe('docregistry/registry', () => {
         });
         expect(ft.name).to.be('python');
       });
-
     });
 
     describe('#getFileTypesForPath()', () => {
-
       beforeEach(() => {
         DocumentRegistry.defaultFileTypes.forEach(ft => {
           registry.addFileType(ft);
@@ -542,7 +508,9 @@ describe('docregistry/registry', () => {
         [
           { name: 'json', extensions: ['.json'] },
           { name: 'vega', extensions: ['.vg.json'] }
-        ].forEach(ft => {registry.addFileType(ft); });
+        ].forEach(ft => {
+          registry.addFileType(ft);
+        });
         let ft = registry.getFileTypesForPath('foo/bar/baz.vg.json');
         expect(ft[0].name).to.be('vega');
         expect(ft[1].name).to.be('json');
@@ -552,9 +520,6 @@ describe('docregistry/registry', () => {
         let ft = registry.getFileTypesForPath('foo/bar/baz.PY');
         expect(ft[0].name).to.be('python');
       });
-
     });
-
   });
-
 });

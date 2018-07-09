@@ -4,31 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ICON_CLASS_KEY, ICON_LABEL_KEY, ISettingRegistry
+  ICON_CLASS_KEY,
+  ICON_LABEL_KEY,
+  ISettingRegistry
 } from '@jupyterlab/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-
 /**
  * A list of plugins with editable settings.
  */
-export
-class PluginList extends Widget {
+export class PluginList extends Widget {
   /**
    * Create a new plugin list.
    */
@@ -37,7 +31,9 @@ class PluginList extends Widget {
     this.registry = options.registry;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
-    this.registry.pluginChanged.connect(() => { this.update(); }, this);
+    this.registry.pluginChanged.connect(() => {
+      this.update();
+    }, this);
   }
 
   /**
@@ -100,11 +96,11 @@ class PluginList extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'mousedown':
-      this._evtMousedown(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._evtMousedown(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -170,12 +166,16 @@ class PluginList extends Widget {
       return;
     }
 
-    this._confirm().then(() => {
-      this._scrollTop = this.scrollTop;
-      this._selection = id;
-      this._changed.emit(undefined);
-      this.update();
-    }).catch(() => { /* no op */ });
+    this._confirm()
+      .then(() => {
+        this._scrollTop = this.scrollTop;
+        this._selection = id;
+        this._changed.emit(undefined);
+        this.update();
+      })
+      .catch(() => {
+        /* no op */
+      });
   }
 
   private _changed = new Signal<this, void>(this);
@@ -185,17 +185,14 @@ class PluginList extends Widget {
   private _selection = '';
 }
 
-
 /**
  * A namespace for `PluginList` statics.
  */
-export
-namespace PluginList {
+export namespace PluginList {
   /**
    * The instantiation options for a plugin list.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A function that allows for asynchronously confirming a selection.
      *
@@ -213,7 +210,6 @@ namespace PluginList {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -228,7 +224,11 @@ namespace Private {
    * 2. Data set by the plugin author as a schema default.
    * 3. Data set by the plugin author as a top-level key of the schema.
    */
-  function getHint(key: string, registry: ISettingRegistry, plugin: ISettingRegistry.IPlugin): string {
+  function getHint(
+    key: string,
+    registry: ISettingRegistry,
+    plugin: ISettingRegistry.IPlugin
+  ): string {
     // First, give priorty to checking if the hint exists in the user data.
     let hint = plugin.data.user[key];
 
@@ -256,8 +256,12 @@ namespace Private {
   /**
    * Populate the plugin list.
    */
-  export
-  function populateList(registry: ISettingRegistry, type: 'raw' | 'table', selection: string, node: HTMLElement): void {
+  export function populateList(
+    registry: ISettingRegistry,
+    type: 'raw' | 'table',
+    selection: string,
+    node: HTMLElement
+  ): void {
     const plugins = sortPlugins(registry.plugins);
     const items = plugins.map(plugin => {
       const itemTitle = `(${plugin.id}) ${plugin.schema.description}`;
@@ -265,36 +269,41 @@ namespace Private {
       const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
       return (
-        <li className={plugin.id === selection ? 'jp-mod-selected' : ''}
-            data-id={plugin.id}
-            key={plugin.id}
-            title={itemTitle}>
-          <span className={iconClass} title={iconTitle}></span>
+        <li
+          className={plugin.id === selection ? 'jp-mod-selected' : ''}
+          data-id={plugin.id}
+          key={plugin.id}
+          title={itemTitle}
+        >
+          <span className={iconClass} title={iconTitle} />
           <span>{plugin.schema.title || plugin.id}</span>
         </li>
       );
     });
 
     ReactDOM.unmountComponentAtNode(node);
-    ReactDOM.render((
+    ReactDOM.render(
       <React.Fragment>
-        <div className='jp-PluginList-switcher'>
-          <button data-editor='raw' disabled={type === 'raw'}>
+        <div className="jp-PluginList-switcher">
+          <button data-editor="raw" disabled={type === 'raw'}>
             Raw View
           </button>
-          <button data-editor='table' disabled={type === 'table'}>
+          <button data-editor="table" disabled={type === 'table'}>
             Table View
           </button>
         </div>
         <ul>{items}</ul>
-      </React.Fragment>
-    ), node);
+      </React.Fragment>,
+      node
+    );
   }
 
   /**
    * Sort a list of plugins by ID.
    */
-  function sortPlugins(plugins: ISettingRegistry.IPlugin[]): ISettingRegistry.IPlugin[] {
+  function sortPlugins(
+    plugins: ISettingRegistry.IPlugin[]
+  ): ISettingRegistry.IPlugin[] {
     return plugins.sort((a, b) => {
       return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
     });

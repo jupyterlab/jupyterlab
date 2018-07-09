@@ -1,26 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  each, zip
-} from '@phosphor/algorithm';
+import { each, zip } from '@phosphor/algorithm';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  Styling
-} from '@jupyterlab/apputils';
-
+import { Styling } from '@jupyterlab/apputils';
 
 /**
  * The supported parsing delimiters.
@@ -30,33 +19,30 @@ const DELIMITERS = [',', ';', '\t'];
 /**
  * The labels for each delimiter as they appear in the dropdown menu.
  */
-const LABELS = [',', ';', '\\t'];
+const LABELS = [',', ';', 'tab'];
 
 /**
  * The class name added to a csv toolbar widget.
  */
-const CSV_TOOLBAR_CLASS = 'jp-CSVToolbar';
+const CSV_DELIMITER_CLASS = 'jp-CSVDelimiter';
 
-const CSV_TOOLBAR_LABEL_CLASS = 'jp-CSVToolbar-label';
+const CSV_DELIMITER_LABEL_CLASS = 'jp-CSVDelimiter-label';
 
 /**
  * The class name added to a csv toolbar's dropdown element.
  */
-const CSV_TOOLBAR_DROPDOWN_CLASS = 'jp-CSVToolbar-dropdown';
-
-
+const CSV_DELIMITER_DROPDOWN_CLASS = 'jp-CSVDelimiter-dropdown';
 
 /**
- * A widget for CSV widget toolbars.
+ * A widget for selecting a delimiter.
  */
-export
-class CSVToolbar extends Widget {
+export class CSVDelimiter extends Widget {
   /**
    * Construct a new csv table widget.
    */
   constructor(options: CSVToolbar.IOptions) {
     super({ node: Private.createNode(options.selected) });
-    this.addClass(CSV_TOOLBAR_CLASS);
+    this.addClass(CSV_DELIMITER_CLASS);
   }
 
   /**
@@ -85,11 +71,11 @@ class CSVToolbar extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'change':
-      this._delimiterChanged.emit(this.selectNode.value);
-      break;
-    default:
-      break;
+      case 'change':
+        this._delimiterChanged.emit(this.selectNode.value);
+        break;
+      default:
+        break;
     }
   }
 
@@ -110,24 +96,20 @@ class CSVToolbar extends Widget {
   private _delimiterChanged = new Signal<this, string>(this);
 }
 
-
 /**
  * A namespace for `CSVToolbar` statics.
  */
-export
-namespace CSVToolbar {
+export namespace CSVToolbar {
   /**
    * The instantiation options for a CSV toolbar.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The initially selected delimiter.
      */
     selected: string;
   }
 }
-
 
 /**
  * A namespace for private toolbar methods.
@@ -136,13 +118,12 @@ namespace Private {
   /**
    * Create the node for the delimiter switcher.
    */
-  export
-  function createNode(selected: string): HTMLElement {
+  export function createNode(selected: string): HTMLElement {
     let div = document.createElement('div');
     let label = document.createElement('span');
     let select = document.createElement('select');
     label.textContent = 'Delimiter: ';
-    label.className = CSV_TOOLBAR_LABEL_CLASS;
+    label.className = CSV_DELIMITER_LABEL_CLASS;
     each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
       let option = document.createElement('option');
       option.value = delimiter;
@@ -154,7 +135,7 @@ namespace Private {
     });
     div.appendChild(label);
     let node = Styling.wrapSelect(select);
-    node.classList.add(CSV_TOOLBAR_DROPDOWN_CLASS);
+    node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);
     div.appendChild(node);
     return div;
   }

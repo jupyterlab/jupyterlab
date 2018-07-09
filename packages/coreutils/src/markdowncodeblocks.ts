@@ -5,10 +5,8 @@
  * The namespace for code block functions which help
  * in extract code from markdown text
  */
-export
-namespace MarkdownCodeBlocks {
-  export
-  const CODE_BLOCK_MARKER = '```';
+export namespace MarkdownCodeBlocks {
+  export const CODE_BLOCK_MARKER = '```';
   const markdownExtensions: string[] = [
     '.markdown',
     '.mdown',
@@ -23,8 +21,7 @@ namespace MarkdownCodeBlocks {
     '.Rmd'
   ];
 
-  export
-  class MarkdownCodeBlock {
+  export class MarkdownCodeBlock {
     startLine: number;
     endLine: number;
     code: string;
@@ -35,26 +32,24 @@ namespace MarkdownCodeBlocks {
     }
   }
 
- /**
-  * Check whether the given file extension is a markdown extension
-  * @param extension - A file extension
-  *
-  * @returns true/false depending on whether this is a supported markdown extension
-  */
-  export
-  function isMarkdown(extension: string): boolean {
+  /**
+   * Check whether the given file extension is a markdown extension
+   * @param extension - A file extension
+   *
+   * @returns true/false depending on whether this is a supported markdown extension
+   */
+  export function isMarkdown(extension: string): boolean {
     return markdownExtensions.indexOf(extension) > -1;
   }
 
- /**
-  * Construct all code snippets from current text
-  * (this could be potentially optimized if we can cache and detect differences)
-  * @param text - A string to parse codeblocks from
-  *
-  * @returns An array of MarkdownCodeBlocks.
-  */
-  export
-  function findMarkdownCodeBlocks(text: string): MarkdownCodeBlock[] {
+  /**
+   * Construct all code snippets from current text
+   * (this could be potentially optimized if we can cache and detect differences)
+   * @param text - A string to parse codeblocks from
+   *
+   * @returns An array of MarkdownCodeBlocks.
+   */
+  export function findMarkdownCodeBlocks(text: string): MarkdownCodeBlock[] {
     if (!text || text === '') {
       return [];
     }
@@ -81,7 +76,10 @@ namespace MarkdownCodeBlocks {
         const lastIndex = line.lastIndexOf(CODE_BLOCK_MARKER);
         const isSingleLine = firstIndex !== lastIndex;
         if (isSingleLine) {
-          currentBlock.code = line.substring(firstIndex + CODE_BLOCK_MARKER.length, lastIndex);
+          currentBlock.code = line.substring(
+            firstIndex + CODE_BLOCK_MARKER.length,
+            lastIndex
+          );
           currentBlock.endLine = lineIndex;
           codeBlocks.push(currentBlock);
           currentBlock = null;
@@ -100,5 +98,4 @@ namespace MarkdownCodeBlocks {
     }
     return codeBlocks;
   }
-
 }

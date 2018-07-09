@@ -3,26 +3,16 @@
 
 import expect = require('expect.js');
 
-import {
-  Router
-} from '@jupyterlab/application';
+import { Router } from '@jupyterlab/application';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Token
-} from '@phosphor/coreutils';
-
+import { Token } from '@phosphor/coreutils';
 
 const base = '/';
 
-
 describe('apputils', () => {
-
   describe('Router', () => {
-
     let commands: CommandRegistry;
     let router: Router;
 
@@ -32,31 +22,24 @@ describe('apputils', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new router', () => {
         expect(router).to.be.a(Router);
       });
-
     });
 
     describe('#base', () => {
-
       it('should be the base URL of the application', () => {
         expect(router.base).to.be(base);
       });
-
     });
 
     describe('#commands', () => {
-
       it('should be the command registry used by the router', () => {
         expect(router.commands).to.be(commands);
       });
-
     });
 
     describe('#current', () => {
-
       it('should return the current window location as an object', () => {
         // The karma test window location is a file called `context.html`
         // without any query string parameters or hash.
@@ -67,15 +50,17 @@ describe('apputils', () => {
 
         expect(router.current).to.eql({ hash, path, request, search });
       });
-
     });
 
     describe('#routed', () => {
-
       it('should emit a signal when a path is routed', done => {
         let routed = false;
 
-        commands.addCommand('a', { execute: () => { routed = true; } });
+        commands.addCommand('a', {
+          execute: () => {
+            routed = true;
+          }
+        });
         router.register({ command: 'a', pattern: /.*/, rank: 10 });
 
         router.routed.connect(() => {
@@ -84,11 +69,9 @@ describe('apputils', () => {
         });
         router.route();
       });
-
     });
 
     describe('#stop', () => {
-
       it('should be a unique token', () => {
         expect(router.stop).to.be.a(Token);
       });
@@ -97,10 +80,22 @@ describe('apputils', () => {
         const wanted = ['a', 'b'];
         let recorded: string[] = [];
 
-        commands.addCommand('a', { execute: () => { recorded.push('a'); } });
-        commands.addCommand('b', { execute: () => { recorded.push('b'); } });
+        commands.addCommand('a', {
+          execute: () => {
+            recorded.push('a');
+          }
+        });
+        commands.addCommand('b', {
+          execute: () => {
+            recorded.push('b');
+          }
+        });
         commands.addCommand('c', { execute: () => router.stop });
-        commands.addCommand('d', { execute: () => { recorded.push('d'); } });
+        commands.addCommand('d', {
+          execute: () => {
+            recorded.push('d');
+          }
+        });
 
         router.register({ command: 'a', pattern: /.*/, rank: 10 });
         router.register({ command: 'b', pattern: /.*/, rank: 20 });
@@ -113,25 +108,25 @@ describe('apputils', () => {
         });
         router.route();
       });
-
     });
 
     describe('#navigate()', () => {
-
       it('cannot be tested since changing location is a security risk', () => {
         // Router#navigate() changes window.location.href but karma tests
         // disallow changing the window location.
       });
-
     });
 
     describe('#register()', () => {
-
       it('should register a command with a route pattern', done => {
         const wanted = ['a'];
         let recorded: string[] = [];
 
-        commands.addCommand('a', { execute: () => { recorded.push('a'); } });
+        commands.addCommand('a', {
+          execute: () => {
+            recorded.push('a');
+          }
+        });
         router.register({ command: 'a', pattern: /.*/ });
 
         router.routed.connect(() => {
@@ -140,16 +135,18 @@ describe('apputils', () => {
         });
         router.route();
       });
-
     });
 
     describe('#route()', () => {
-
       it('should route the location to a command', done => {
         const wanted = ['a'];
         let recorded: string[] = [];
 
-        commands.addCommand('a', { execute: () => { recorded.push('a'); } });
+        commands.addCommand('a', {
+          execute: () => {
+            recorded.push('a');
+          }
+        });
         router.register({ command: 'a', pattern: /#a/, rank: 10 });
         expect(recorded).to.be.empty();
 
@@ -163,9 +160,6 @@ describe('apputils', () => {
         });
         router.route();
       });
-
     });
-
   });
-
 });

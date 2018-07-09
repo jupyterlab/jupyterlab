@@ -22,6 +22,8 @@ declare module 'url-parse' {
     origin: string;
   }
   function parse(url: string, parseQuery?: boolean): IURL;
-  namespace parse { }
+  namespace parse {
+
+  }
   export = parse;
 }

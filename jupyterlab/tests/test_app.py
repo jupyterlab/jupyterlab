@@ -13,6 +13,7 @@ import os
 import shutil
 import sys
 import tempfile
+import logging
 
 try:
     from unittest.mock import patch
@@ -24,7 +25,7 @@ from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 
-from jupyterlab.process_app import ProcessApp
+from jupyterlab_launcher.process_app import ProcessApp
 
 
 HERE = osp.realpath(osp.dirname(__file__))
@@ -145,9 +146,6 @@ class KarmaTestApp(ProcessTestApp):
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
-        print('\n\nNotebook config:')
-        print(json.dumps(config))
-
         cwd = self.karma_base_dir
 
         karma_inject_file = pjoin(cwd, 'build', 'injector.js')
@@ -202,6 +200,7 @@ class KarmaTestApp(ProcessTestApp):
 def run_karma(base_dir):
     """Run a karma test in the given base directory.
     """
+    logging.disable(logging.ERROR)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
     app.initialize([])

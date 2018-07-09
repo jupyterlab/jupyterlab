@@ -1,30 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Dialog, showDialog, showErrorMessage
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
-import {
-  PathExt
-} from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
-import {
-  Contents
-} from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  IDocumentManager
-} from './';
-
+import { IDocumentManager } from './';
 
 /**
  * The class name added to file dialogs.
@@ -36,12 +23,10 @@ const FILE_DIALOG_CLASS = 'jp-FileDialog';
  */
 const RENAME_NEWNAME_TITLE_CLASS = 'jp-new-name-title';
 
-
 /**
  * A stripped-down interface for a file container.
  */
-export
-interface IFileContainer extends JSONObject {
+export interface IFileContainer extends JSONObject {
   /**
    * The list of item names in the current working directory.
    */
@@ -52,12 +37,13 @@ interface IFileContainer extends JSONObject {
   path: string;
 }
 
-
 /**
  * Rename a file with a dialog.
  */
-export
-function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Contents.IModel | null> {
+export function renameDialog(
+  manager: IDocumentManager,
+  oldPath: string
+): Promise<Contents.IModel | null> {
   return showDialog({
     title: 'Rename File',
     body: new RenameHandler(oldPath),
@@ -65,11 +51,14 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
   }).then(result => {
     if (!isValidFileName(result.value)) {
-      showErrorMessage('Rename Error', Error(
+      showErrorMessage(
+        'Rename Error',
+        Error(
           `"${result.value}" is not a valid name for a file. ` +
-          `Names must have nonzero length, ` +
-          `and cannot include "/", "\\", or ":"`
-      ));
+            `Names must have nonzero length, ` +
+            `and cannot include "/", "\\", or ":"`
+        )
+      );
       return null;
     }
     let basePath = PathExt.dirname(oldPath);
@@ -78,12 +67,14 @@ function renameDialog(manager: IDocumentManager, oldPath: string): Promise<Conte
   });
 }
 
-
 /**
  * Rename a file, asking for confirmation if it is overwriting another.
  */
-export
-function renameFile(manager: IDocumentManager, oldPath: string, newPath: string): Promise<Contents.IModel | null> {
+export function renameFile(
+  manager: IDocumentManager,
+  oldPath: string,
+  newPath: string
+): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(error => {
     if (error.message.indexOf('409') === -1) {
       throw error;
@@ -97,12 +88,10 @@ function renameFile(manager: IDocumentManager, oldPath: string, newPath: string)
   });
 }
 
-
 /**
  * Ask the user whether to overwrite a file.
  */
-export
-function shouldOverwrite(path: string): Promise<boolean> {
+export function shouldOverwrite(path: string): Promise<boolean> {
   let options = {
     title: 'Overwrite file?',
     body: `"${path}" already exists, overwrite?`,
@@ -118,12 +107,10 @@ function shouldOverwrite(path: string): Promise<boolean> {
  *
  * Disallows "/", "\", and ":" in file names, as well as names with zero length.
  */
-export
-function isValidFileName(name: string): boolean {
+export function isValidFileName(name: string): boolean {
   const validNameExp = /[\/\\:]/;
   return name.length > 0 && !validNameExp.test(name);
 }
-
 
 /**
  * A widget used to rename a file.
@@ -136,7 +123,7 @@ class RenameHandler extends Widget {
     super({ node: Private.createRenameNode(oldPath) });
     this.addClass(FILE_DIALOG_CLASS);
     let ext = PathExt.extname(oldPath);
-    let value = this.inputNode.value = PathExt.basename(oldPath);
+    let value = (this.inputNode.value = PathExt.basename(oldPath));
     this.inputNode.setSelectionRange(0, value.length - ext.length);
   }
 
@@ -154,7 +141,6 @@ class RenameHandler extends Widget {
     return this.inputNode.value;
   }
 }
-
 
 /*
  * A widget used to open a file directly.
@@ -182,18 +168,16 @@ class OpenDirectWidget extends Widget {
   }
 }
 
-
 /**
  * Create the node for the open handler.
  */
-export
-function getOpenPath(contentsManager: any): Promise<string | undefined> {
+export function getOpenPath(contentsManager: any): Promise<string | undefined> {
   return showDialog({
     title: 'Open File',
     body: new OpenDirectWidget(),
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })],
     focusNodeSelector: 'input'
-  }).then( (result: any) => {
+  }).then((result: any) => {
     if (result.button.label === 'OPEN') {
       return result.value;
     }
@@ -208,8 +192,7 @@ namespace Private {
   /**
    * Create the node for a rename handler.
    */
-  export
-  function createRenameNode(oldPath: string): HTMLElement {
+  export function createRenameNode(oldPath: string): HTMLElement {
     let body = document.createElement('div');
     let existingLabel = document.createElement('label');
     existingLabel.textContent = 'File Path';
@@ -231,8 +214,7 @@ namespace Private {
   /**
    * Create the node for a open widget.
    */
-  export
-  function createOpenNode(): HTMLElement {
+  export function createOpenNode(): HTMLElement {
     let body = document.createElement('div');
     let existingLabel = document.createElement('label');
     existingLabel.textContent = 'File Path:';

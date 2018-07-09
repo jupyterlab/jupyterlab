@@ -1,68 +1,44 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt, each
-} from '@phosphor/algorithm';
+import { ArrayExt, each } from '@phosphor/algorithm';
+
+import { JSONValue } from '@phosphor/coreutils';
+
+import { Message } from '@phosphor/messaging';
+
+import { MimeData } from '@phosphor/coreutils';
+
+import { AttachedProperty } from '@phosphor/properties';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
+
+import { PanelLayout, Widget } from '@phosphor/widgets';
+
+import { h, VirtualDOM } from '@phosphor/virtualdom';
 
 import {
-  JSONValue
-} from '@phosphor/coreutils';
-
-import {
-  Message
-} from '@phosphor/messaging';
-
-import {
-  MimeData
-} from '@phosphor/coreutils';
-
-import {
-  AttachedProperty
-} from '@phosphor/properties';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  Drag, IDragEvent
-} from '@phosphor/dragdrop';
-
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
-
-import {
-  h, VirtualDOM
-} from '@phosphor/virtualdom';
-
-import {
-  ICellModel, Cell, IMarkdownCellModel,
-  CodeCell, MarkdownCell,
-  ICodeCellModel, RawCell, IRawCellModel
+  ICellModel,
+  Cell,
+  IMarkdownCellModel,
+  CodeCell,
+  MarkdownCell,
+  ICodeCellModel,
+  RawCell,
+  IRawCellModel
 } from '@jupyterlab/cells';
 
-import {
-  IEditorMimeTypeService, CodeEditor
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  IChangedArgs, nbformat
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
-import {
-  IObservableMap, IObservableList
-} from '@jupyterlab/observables';
+import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  INotebookModel
-} from './model';
-
+import { INotebookModel } from './model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -167,9 +143,7 @@ const DRAG_THRESHOLD = 5;
 /**
  * The interactivity modes for the notebook.
  */
-export
-type NotebookMode = 'command' | 'edit';
-
+export type NotebookMode = 'command' | 'edit';
 
 /**
  * A widget which renders static non-interactive notebooks.
@@ -180,8 +154,7 @@ type NotebookMode = 'command' | 'edit';
  * `null` model, and may want to listen to the `modelChanged`
  * signal.
  */
-export
-class StaticNotebook extends Widget {
+export class StaticNotebook extends Widget {
   /**
    * Construct a notebook widget.
    */
@@ -192,11 +165,10 @@ class StaticNotebook extends Widget {
     this.node.dataset[UNDOER] = 'true';
     this.rendermime = options.rendermime;
     this.layout = new Private.NotebookPanelLayout();
-    this.contentFactory = (
-      options.contentFactory || StaticNotebook.defaultContentFactory
-    );
-    this.editorConfig = options.editorConfig ||
-                        StaticNotebook.defaultEditorConfig;
+    this.contentFactory =
+      options.contentFactory || StaticNotebook.defaultContentFactory;
+    this.editorConfig =
+      options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -244,13 +216,17 @@ class StaticNotebook extends Widget {
     if (oldValue && oldValue.modelDB.isCollaborative) {
       oldValue.modelDB.connected.then(() => {
         oldValue.modelDB.collaborators.changed.disconnect(
-          this._onCollaboratorsChanged, this);
+          this._onCollaboratorsChanged,
+          this
+        );
       });
     }
     if (newValue && newValue.modelDB.isCollaborative) {
       newValue.modelDB.connected.then(() => {
         newValue.modelDB.collaborators.changed.connect(
-          this._onCollaboratorsChanged, this);
+          this._onCollaboratorsChanged,
+          this
+        );
       });
     }
 
@@ -305,7 +281,10 @@ class StaticNotebook extends Widget {
    * internally and before the `modelChanged` signal is emitted.
    * The default implementation is a no-op.
    */
-  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+  protected onModelChanged(
+    oldValue: INotebookModel,
+    newValue: INotebookModel
+  ): void {
     // No-op.
   }
 
@@ -326,13 +305,16 @@ class StaticNotebook extends Widget {
    * The default implementation updates the mimetypes of the code cells
    * when the `language_info` metadata changes.
    */
-  protected onMetadataChanged(sender: IObservableMap<JSONValue>, args: IObservableMap.IChangedArgs<JSONValue>): void {
+  protected onMetadataChanged(
+    sender: IObservableMap<JSONValue>,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ): void {
     switch (args.key) {
-    case 'language_info':
-      this._updateMimetype();
-      break;
-    default:
-      break;
+      case 'language_info':
+        this._updateMimetype();
+        break;
+      default:
+        break;
     }
   }
 
@@ -366,13 +348,17 @@ class StaticNotebook extends Widget {
   /**
    * Handle a new model on the widget.
    */
-  private _onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+  private _onModelChanged(
+    oldValue: INotebookModel,
+    newValue: INotebookModel
+  ): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
       oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
-      // TODO: reuse existing cell widgets if possible.
+      // TODO: reuse existing cell widgets if possible. Remember to initially
+      // clear the history of each cell if we do this.
       while (layout.widgets.length) {
         this._removeCell(0);
       }
@@ -394,37 +380,40 @@ class StaticNotebook extends Widget {
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(sender: IObservableList<ICellModel>, args: IObservableList.IChangedArgs<ICellModel>) {
+  private _onCellsChanged(
+    sender: IObservableList<ICellModel>,
+    args: IObservableList.IChangedArgs<ICellModel>
+  ) {
     let index = 0;
     switch (args.type) {
-    case 'add':
-      index = args.newIndex;
-      each(args.newValues, value => {
-        this._insertCell(index++, value);
-      });
-      break;
-    case 'move':
-      this._moveCell(args.oldIndex, args.newIndex);
-      break;
-    case 'remove':
-      each(args.oldValues, value => {
-        this._removeCell(args.oldIndex);
-      });
-      break;
-    case 'set':
-      // TODO: reuse existing widgets if possible.
-      index = args.newIndex;
-      each(args.newValues, value => {
-        // Note: this ordering (insert then remove)
-        // is important for getting the active cell
-        // index for the editable notebook correct.
-        this._insertCell(index, value);
-        this._removeCell(index + 1);
-        index++;
-      });
-      break;
-    default:
-      return;
+      case 'add':
+        index = args.newIndex;
+        each(args.newValues, value => {
+          this._insertCell(index++, value);
+        });
+        break;
+      case 'move':
+        this._moveCell(args.oldIndex, args.newIndex);
+        break;
+      case 'remove':
+        each(args.oldValues, value => {
+          this._removeCell(args.oldIndex);
+        });
+        break;
+      case 'set':
+        // TODO: reuse existing widgets if possible.
+        index = args.newIndex;
+        each(args.newValues, value => {
+          // Note: this ordering (insert then remove)
+          // is important for getting the active cell
+          // index for the editable notebook correct.
+          this._insertCell(index, value);
+          this._removeCell(index + 1);
+          index++;
+        });
+        break;
+      default:
+        return;
     }
   }
 
@@ -434,15 +423,15 @@ class StaticNotebook extends Widget {
   private _insertCell(index: number, cell: ICellModel): void {
     let widget: Cell;
     switch (cell.type) {
-    case 'code':
-      widget = this._createCodeCell(cell as ICodeCellModel);
-      widget.model.mimeType = this._mimetype;
-      break;
-    case 'markdown':
-      widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-      break;
-    default:
-      widget = this._createRawCell(cell as IRawCellModel);
+      case 'code':
+        widget = this._createCodeCell(cell as ICodeCellModel);
+        widget.model.mimeType = this._mimetype;
+        break;
+      case 'markdown':
+        widget = this._createMarkdownCell(cell as IMarkdownCellModel);
+        break;
+      default:
+        widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
@@ -506,7 +495,9 @@ class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    let info = this._model.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+    let info = this._model.metadata.get(
+      'language_info'
+    ) as nbformat.ILanguageInfoMetadata;
     if (!info) {
       return;
     }
@@ -566,17 +557,14 @@ class StaticNotebook extends Widget {
   private _modelContentChanged = new Signal<this, void>(this);
 }
 
-
 /**
  * The namespace for the `StaticNotebook` class statics.
  */
-export
-namespace StaticNotebook {
+export namespace StaticNotebook {
   /**
    * An options object for initializing a static notebook.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The rendermime instance used by the widget.
      */
@@ -611,18 +599,22 @@ namespace StaticNotebook {
    * factory of the output area and input area. The result is that there is a single
    * factory for creating all child content of a notebook.
    */
-  export
-  interface IContentFactory extends Cell.IContentFactory {
-
+  export interface IContentFactory extends Cell.IContentFactory {
     /**
      * Create a new code cell widget.
      */
-    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell;
+    createCodeCell(
+      options: CodeCell.IOptions,
+      parent: StaticNotebook
+    ): CodeCell;
 
     /**
      * Create a new markdown cell widget.
      */
-    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell;
+    createMarkdownCell(
+      options: MarkdownCell.IOptions,
+      parent: StaticNotebook
+    ): MarkdownCell;
 
     /**
      * Create a new raw cell widget.
@@ -633,8 +625,7 @@ namespace StaticNotebook {
   /**
    * A config object for the cell editors.
    */
-  export
-  interface IEditorConfig {
+  export interface IEditorConfig {
     /**
      * Config options for code cells.
      */
@@ -652,8 +643,7 @@ namespace StaticNotebook {
   /**
    * Default configuration options for cell editors.
    */
-  export
-  const defaultEditorConfig: IEditorConfig = {
+  export const defaultEditorConfig: IEditorConfig = {
     code: {
       ...CodeEditor.defaultConfig,
       lineWrap: false,
@@ -677,9 +667,8 @@ namespace StaticNotebook {
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory extends Cell.ContentFactory implements IContentFactory {
-
+  export class ContentFactory extends Cell.ContentFactory
+    implements IContentFactory {
     /**
      * Create a new code cell widget.
      *
@@ -687,7 +676,10 @@ namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createCodeCell(options: CodeCell.IOptions, parent: StaticNotebook): CodeCell {
+    createCodeCell(
+      options: CodeCell.IOptions,
+      parent: StaticNotebook
+    ): CodeCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
@@ -701,7 +693,10 @@ namespace StaticNotebook {
      * If no cell content factory is passed in with the options, the one on the
      * notebook content factory is used.
      */
-    createMarkdownCell(options: MarkdownCell.IOptions, parent: StaticNotebook): MarkdownCell {
+    createMarkdownCell(
+      options: MarkdownCell.IOptions,
+      parent: StaticNotebook
+    ): MarkdownCell {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
@@ -726,34 +721,29 @@ namespace StaticNotebook {
   /**
    * A namespace for the staic notebook content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * Options for the content factory.
      */
-    export
-    interface IOptions extends Cell.ContentFactory.IOptions { }
+    export interface IOptions extends Cell.ContentFactory.IOptions {}
   }
 
   /**
    * Default content factory for the static notebook widget.
    */
-  export
-  const defaultContentFactory: IContentFactory = new ContentFactory();
-
+  export const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 /**
  * A notebook widget that supports interactivity.
  */
-export
-class Notebook extends StaticNotebook {
+export class Notebook extends StaticNotebook {
   /**
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
-    super( Private.processNotebookOptions(options) );
-    this.node.tabIndex = -1;  // Allow the widget to take focus.
+    super(Private.processNotebookOptions(options));
+    this.node.tabIndex = -1; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-p-dragscroll', 'true');
   }
@@ -805,7 +795,9 @@ class Notebook extends StaticNotebook {
 
     if (newValue === 'edit') {
       // Edit mode deselects all cells.
-      each(this.widgets, widget => { this.deselect(widget); });
+      each(this.widgets, widget => {
+        this.deselect(widget);
+      });
       //  Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
@@ -861,8 +853,11 @@ class Notebook extends StaticNotebook {
 
   /**
    * Get the active cell widget.
+   *
+   * #### Notes
+   * This is a cell or undefined if there is no active cell.
    */
-  get activeCell(): Cell {
+  get activeCell(): Cell | undefined {
     return this._activeCell;
   }
 
@@ -870,10 +865,10 @@ class Notebook extends StaticNotebook {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    if (this._activeCell === null) {
+    if (this.isDisposed) {
       return;
     }
-    this._activeCell = null;
+    this._activeCell = undefined;
     super.dispose();
   }
 
@@ -960,7 +955,7 @@ class Notebook extends StaticNotebook {
    * There is no change if there are no cells (i.e., activeCellIndex is -1).
    */
   extendContiguousSelectionTo(index: number): void {
-    let {head, anchor} = this.getContiguousSelection();
+    let { head, anchor } = this.getContiguousSelection();
     let i: number;
 
     // Handle the case of no current selection.
@@ -999,11 +994,13 @@ class Notebook extends StaticNotebook {
       // Toggle everything strictly between head and index except anchor.
       for (i = head + 1; i < index; i++) {
         if (i !== anchor) {
-          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          Private.selectedProperty.set(
+            this.widgets[i],
+            !Private.selectedProperty.get(this.widgets[i])
+          );
           selectionChanged = true;
         }
       }
-
     } else if (index < head) {
       if (anchor < head) {
         Private.selectedProperty.set(this.widgets[head], false);
@@ -1013,7 +1010,10 @@ class Notebook extends StaticNotebook {
       // Toggle everything strictly between index and head except anchor.
       for (i = index + 1; i < head; i++) {
         if (i !== anchor) {
-          Private.selectedProperty.set(this.widgets[i], !Private.selectedProperty.get(this.widgets[i]));
+          Private.selectedProperty.set(
+            this.widgets[i],
+            !Private.selectedProperty.get(this.widgets[i])
+          );
           selectionChanged = true;
         }
       }
@@ -1045,16 +1045,21 @@ class Notebook extends StaticNotebook {
    * Throws an error if the currently selected cells do not form a contiguous
    * selection.
    */
-  getContiguousSelection(): {head: number | null, anchor: number | null} {
+  getContiguousSelection(): { head: number | null; anchor: number | null } {
     let cells = this.widgets;
     let first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
 
     // Return early if no cells are selected.
     if (first === -1) {
-      return {head: null, anchor: null};
+      return { head: null, anchor: null };
     }
 
-    let last = ArrayExt.findLastIndex(cells, c => this.isSelected(c), -1, first);
+    let last = ArrayExt.findLastIndex(
+      cells,
+      c => this.isSelected(c),
+      -1,
+      first
+    );
 
     // Check that the selection is contiguous.
     for (let i = first; i <= last; i++) {
@@ -1071,9 +1076,9 @@ class Notebook extends StaticNotebook {
 
     // Determine the head and anchor of the selection.
     if (first === activeIndex) {
-      return {head: first, anchor: last};
+      return { head: first, anchor: last };
     } else {
-      return {head: last, anchor: first};
+      return { head: last, anchor: first };
     }
   }
 
@@ -1092,7 +1097,7 @@ class Notebook extends StaticNotebook {
    * centered, and a threshold of 50 means scrolling only happens if position is
    * outside the current window.
    */
-  scrollToPosition(position: number, threshold=25): void {
+  scrollToPosition(position: number, threshold = 25): void {
     let node = this.node;
     let ar = node.getBoundingClientRect();
     let delta = position - ar.top - ar.height / 2;
@@ -1117,54 +1122,54 @@ class Notebook extends StaticNotebook {
     }
 
     switch (event.type) {
-    case 'contextmenu':
-      if (event.eventPhase === Event.CAPTURING_PHASE) {
-        this._evtContextMenuCapture(event as PointerEvent);
-      }
-      break;
-    case 'mousedown':
-      if (event.eventPhase === Event.CAPTURING_PHASE) {
-        this._evtMouseDownCapture(event as MouseEvent);
-      } else {
-        this._evtMouseDown(event as MouseEvent);
-      }
-      break;
-    case 'mouseup':
-      if (event.currentTarget === document) {
-        this._evtDocumentMouseup(event as MouseEvent);
-      }
-      break;
-    case 'mousemove':
-      if (event.currentTarget === document) {
-        this._evtDocumentMousemove(event as MouseEvent);
-      }
-      break;
-    case 'keydown':
-      this._ensureFocus(true);
-      break;
-    case 'dblclick':
-      this._evtDblClick(event as MouseEvent);
-      break;
-    case 'focusin':
-      this._evtFocusIn(event as MouseEvent);
-      break;
-    case 'focusout':
-      this._evtFocusOut(event as MouseEvent);
-      break;
-    case 'p-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'p-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'p-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'p-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      break;
+      case 'contextmenu':
+        if (event.eventPhase === Event.CAPTURING_PHASE) {
+          this._evtContextMenuCapture(event as PointerEvent);
+        }
+        break;
+      case 'mousedown':
+        if (event.eventPhase === Event.CAPTURING_PHASE) {
+          this._evtMouseDownCapture(event as MouseEvent);
+        } else {
+          this._evtMouseDown(event as MouseEvent);
+        }
+        break;
+      case 'mouseup':
+        if (event.currentTarget === document) {
+          this._evtDocumentMouseup(event as MouseEvent);
+        }
+        break;
+      case 'mousemove':
+        if (event.currentTarget === document) {
+          this._evtDocumentMousemove(event as MouseEvent);
+        }
+        break;
+      case 'keydown':
+        this._ensureFocus(true);
+        break;
+      case 'dblclick':
+        this._evtDblClick(event as MouseEvent);
+        break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
+      case 'p-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'p-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'p-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'p-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -1271,8 +1276,10 @@ class Notebook extends StaticNotebook {
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
-    this.activeCellIndex = index <= this.activeCellIndex ?
-      this.activeCellIndex + 1 : this.activeCellIndex ;
+    this.activeCellIndex =
+      index <= this.activeCellIndex
+        ? this.activeCellIndex + 1
+        : this.activeCellIndex;
   }
 
   /**
@@ -1295,8 +1302,10 @@ class Notebook extends StaticNotebook {
   protected onCellRemoved(index: number, cell: Cell): void {
     // If the removal happened above, decrement the active
     // cell index, otherwise it stays the same.
-    this.activeCellIndex = index <= this.activeCellIndex ?
-      this.activeCellIndex - 1 : this.activeCellIndex ;
+    this.activeCellIndex =
+      index <= this.activeCellIndex
+        ? this.activeCellIndex - 1
+        : this.activeCellIndex;
     if (this.isSelected(cell)) {
       this._selectionChanged.emit(void 0);
     }
@@ -1305,7 +1314,12 @@ class Notebook extends StaticNotebook {
   /**
    * Handle a new model.
    */
-  protected onModelChanged(oldValue: INotebookModel, newValue: INotebookModel): void {
+  protected onModelChanged(
+    oldValue: INotebookModel,
+    newValue: INotebookModel
+  ): void {
+    super.onModelChanged(oldValue, newValue);
+
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
@@ -1314,7 +1328,10 @@ class Notebook extends StaticNotebook {
   /**
    * Handle edge request signals from cells.
    */
-  private _onEdgeRequest(editor: CodeEditor.IEditor, location: CodeEditor.EdgeLocation): void {
+  private _onEdgeRequest(
+    editor: CodeEditor.IEditor,
+    location: CodeEditor.EdgeLocation
+  ): void {
     let prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
@@ -1338,7 +1355,7 @@ class Notebook extends StaticNotebook {
   /**
    * Ensure that the notebook has proper focus.
    */
-  private _ensureFocus(force=false): void {
+  private _ensureFocus(force = false): void {
     let activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       if (!activeCell.editor.hasFocus()) {
@@ -1361,7 +1378,10 @@ class Notebook extends StaticNotebook {
     // Then find the corresponding child and select it.
     while (node && node !== this.node) {
       if (node.classList.contains(NB_CELL_CLASS)) {
-        let i = ArrayExt.findFirstIndex(this.widgets, widget => widget.node === node);
+        let i = ArrayExt.findFirstIndex(
+          this.widgets,
+          widget => widget.node === node
+        );
         if (i !== -1) {
           return i;
         }
@@ -1376,6 +1396,12 @@ class Notebook extends StaticNotebook {
    * Handle `contextmenu` event.
    */
   private _evtContextMenuCapture(event: PointerEvent): void {
+    // Allow the event to propagate un-modified if the user
+    // is holding the shift-key (and probably requesting
+    // the native context menu).
+    if (event.shiftKey) {
+      return;
+    }
     // `event.target` sometimes gives an orphaned node in Firefox 57, which
     // can have `null` anywhere in its parent tree. If we fail to find a
     // cell using `event.target`, try again using a target reconstructed from
@@ -1383,7 +1409,10 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
     if (index === -1) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
       index = this._findCell(target);
     }
     let widget = this.widgets[index];
@@ -1408,7 +1437,10 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let index = this._findCell(target);
     if (index === -1) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
       index = this._findCell(target);
     }
     let widget = this.widgets[index];
@@ -1416,7 +1448,12 @@ class Notebook extends StaticNotebook {
     // On OS X, the context menu may be triggered with ctrl-left-click. In
     // Firefox, ctrl-left-click gives an event with button 2, but in Chrome,
     // ctrl-left-click gives an event with button 0 with the ctrl modifier.
-    if (button === 2 && !shiftKey && widget && widget.editorWidget.node.contains(target)) {
+    if (
+      button === 2 &&
+      !shiftKey &&
+      widget &&
+      widget.editorWidget.node.contains(target)
+    ) {
       this.mode = 'command';
 
       // Prevent CodeMirror from focusing the editor.
@@ -1429,7 +1466,6 @@ class Notebook extends StaticNotebook {
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
-
     const { button, shiftKey } = event;
 
     // We only handle main or secondary button actions.
@@ -1450,7 +1486,10 @@ class Notebook extends StaticNotebook {
       // Firefox 57, which can have `null` anywhere in its parent line. If we fail
       // to find a cell using `event.target`, try again using a target
       // reconstructed from the position of the click event.
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
       index = this._findCell(target);
     }
     let widget = this.widgets[index];
@@ -1498,7 +1537,11 @@ class Notebook extends StaticNotebook {
         // Prepare to start a drag if we are on the drag region. TODO: If there is no drag, we'll deselect on mouseup.
         if (targetArea === 'prompt' && this.isSelectedOrActive(widget)) {
           // Prepare for a drag start
-          this._dragData = { pressX: event.clientX, pressY: event.clientY, index: index};
+          this._dragData = {
+            pressX: event.clientX,
+            pressY: event.clientY,
+            index: index
+          };
 
           // Enter possible drag mode
           this._mouseMode = 'couldDrag';
@@ -1546,7 +1589,10 @@ class Notebook extends StaticNotebook {
         // Firefox 57, which can have `null` anywhere in its parent line. If we fail
         // to find a cell using `event.target`, try again using a target
         // reconstructed from the position of the click event.
-        target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+        target = document.elementFromPoint(
+          event.clientX,
+          event.clientY
+        ) as HTMLElement;
         index = this._findCell(target);
       }
 
@@ -1563,31 +1609,30 @@ class Notebook extends StaticNotebook {
    * Handle the `'mousemove'` event for the widget.
    */
   private _evtDocumentMousemove(event: MouseEvent): void {
-
     event.preventDefault();
     event.stopPropagation();
 
     // If in select mode, update the selection
     switch (this._mouseMode) {
-    case 'select':
-      let target = event.target as HTMLElement;
-      let index = this._findCell(target);
-      if (index !== -1) {
-        this.extendContiguousSelectionTo(index);
-      }
-      break;
-    case 'couldDrag':
-      // Check for a drag initialization.
-      let data = this._dragData;
-      let dx = Math.abs(event.clientX - data.pressX);
-      let dy = Math.abs(event.clientY - data.pressY);
-      if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
-        this._mouseMode = null;
-        this._startDrag(data.index, event.clientX, event.clientY);
-      }
-      break;
-    default:
-      break;
+      case 'select':
+        let target = event.target as HTMLElement;
+        let index = this._findCell(target);
+        if (index !== -1) {
+          this.extendContiguousSelectionTo(index);
+        }
+        break;
+      case 'couldDrag':
+        // Check for a drag initialization.
+        let data = this._dragData;
+        let dx = Math.abs(event.clientX - data.pressX);
+        let dy = Math.abs(event.clientY - data.pressY);
+        if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
+          this._mouseMode = null;
+          this._startDrag(data.index, event.clientX, event.clientY);
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -1698,11 +1743,11 @@ class Notebook extends StaticNotebook {
       // Move the cells one by one
       this.model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
-        each(toMove, (cellWidget) => {
+        each(toMove, cellWidget => {
           this.model.cells.move(fromIndex, toIndex);
         });
       } else if (fromIndex > toIndex) {
-        each(toMove, (cellWidget) => {
+        each(toMove, cellWidget => {
           this.model.cells.move(fromIndex++, toIndex++);
         });
       }
@@ -1726,15 +1771,15 @@ class Notebook extends StaticNotebook {
       each(values, (cell: nbformat.ICell) => {
         let value: ICellModel;
         switch (cell.cell_type) {
-        case 'code':
-          value = factory.createCodeCell({ cell });
-          break;
-        case 'markdown':
-          value = factory.createMarkdownCell({ cell });
-          break;
-        default:
-          value = factory.createRawCell({ cell });
-          break;
+          case 'code':
+            value = factory.createCodeCell({ cell });
+            break;
+          case 'markdown':
+            value = factory.createMarkdownCell({ cell });
+            break;
+          default:
+            value = factory.createRawCell({ cell });
+            break;
         }
         model.cells.insert(index++, value);
       });
@@ -1776,7 +1821,11 @@ class Notebook extends StaticNotebook {
     }
 
     // Create the drag image.
-    dragImage = Private.createDragImage(selected.length, countString, activeCell.model.value.text.split('\n')[0].slice(0, 26));
+    dragImage = Private.createDragImage(
+      selected.length,
+      countString,
+      activeCell.model.value.text.split('\n')[0].slice(0, 26)
+    );
 
     // Set up the drag event.
     this._drag = new Drag({
@@ -1801,9 +1850,10 @@ class Notebook extends StaticNotebook {
         return;
       }
       this._drag = null;
-      each(toMove, widget => { widget.removeClass(DROP_SOURCE_CLASS); });
+      each(toMove, widget => {
+        widget.removeClass(DROP_SOURCE_CLASS);
+      });
     });
-
   }
 
   /**
@@ -1879,7 +1929,10 @@ class Notebook extends StaticNotebook {
     let target = event.target as HTMLElement;
     let i = this._findCell(target);
     if (i === -1) {
-      target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
       i = this._findCell(target);
     }
 
@@ -1908,35 +1961,30 @@ class Notebook extends StaticNotebook {
     }
   }
 
-
   private _activeCellIndex = -1;
-  private _activeCell: Cell = null;
+  private _activeCell: Cell | undefined = undefined;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
-  private _dragData: { pressX: number, pressY: number, index: number } = null;
+  private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 }
 
-
 /**
  * The namespace for the `Notebook` class statics.
  */
-export
-namespace Notebook {
+export namespace Notebook {
   /**
    * An options object for initializing a notebook widget.
    */
-  export
-  interface IOptions extends StaticNotebook.IOptions { }
+  export interface IOptions extends StaticNotebook.IOptions {}
 
   /**
    * The content factory for the notebook widget.
    */
-  export
-  interface IContentFactory extends StaticNotebook.IContentFactory { }
+  export interface IContentFactory extends StaticNotebook.IContentFactory {}
 
   /**
    * The default implementation of a notebook content factory..
@@ -1945,25 +1993,20 @@ namespace Notebook {
    * Override methods on this class to customize the default notebook factory
    * methods that create notebook content.
    */
-  export
-  class ContentFactory extends StaticNotebook.ContentFactory { }
+  export class ContentFactory extends StaticNotebook.ContentFactory {}
 
   /**
    * A namespace for the notebook content factory.
    */
-  export
-  namespace ContentFactory {
+  export namespace ContentFactory {
     /**
      * An options object for initializing a notebook content factory.
      */
-    export
-    interface IOptions extends StaticNotebook.ContentFactory.IOptions { }
+    export interface IOptions extends StaticNotebook.ContentFactory.IOptions {}
   }
 
-  export
-  const defaultContentFactory: IContentFactory = new ContentFactory();
+  export const defaultContentFactory: IContentFactory = new ContentFactory();
 }
-
 
 /**
  * A namespace for private data.
@@ -1972,8 +2015,7 @@ namespace Private {
   /**
    * An attached property for the selected state of a cell.
    */
-  export
-  const selectedProperty = new AttachedProperty<Cell, boolean>({
+  export const selectedProperty = new AttachedProperty<Cell, boolean>({
     name: 'selected',
     create: () => false
   });
@@ -1981,8 +2023,7 @@ namespace Private {
   /**
    * A custom panel layout for the notebook.
    */
-  export
-  class NotebookPanelLayout extends PanelLayout {
+  export class NotebookPanelLayout extends PanelLayout {
     /**
      * A message handler invoked on an `'update-request'` message.
      *
@@ -1998,25 +2039,35 @@ namespace Private {
   /**
    * Create a cell drag image.
    */
-  export
-  function createDragImage(count: number, promptNumber: string, cellContent: string): HTMLElement {
+  export function createDragImage(
+    count: number,
+    promptNumber: string,
+    cellContent: string
+  ): HTMLElement {
     if (count > 1) {
       if (promptNumber !== '') {
         return VirtualDOM.realize(
           h.div(
-            h.div({className: DRAG_IMAGE_CLASS},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}, 'In [' + promptNumber + ']:'),
-              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
-            h.div({className: CELL_DRAG_MULTIPLE_BACK}, '')
+            h.div(
+              { className: DRAG_IMAGE_CLASS },
+              h.span(
+                { className: CELL_DRAG_PROMPT_CLASS },
+                'In [' + promptNumber + ']:'
+              ),
+              h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
+            ),
+            h.div({ className: CELL_DRAG_MULTIPLE_BACK }, '')
           )
         );
       } else {
         return VirtualDOM.realize(
           h.div(
-            h.div({className: DRAG_IMAGE_CLASS},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}),
-              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)),
-            h.div({className: CELL_DRAG_MULTIPLE_BACK}, '')
+            h.div(
+              { className: DRAG_IMAGE_CLASS },
+              h.span({ className: CELL_DRAG_PROMPT_CLASS }),
+              h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
+            ),
+            h.div({ className: CELL_DRAG_MULTIPLE_BACK }, '')
           )
         );
       }
@@ -2024,18 +2075,23 @@ namespace Private {
       if (promptNumber !== '') {
         return VirtualDOM.realize(
           h.div(
-            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}, 'In [' + promptNumber + ']:'),
-              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            h.div(
+              { className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}` },
+              h.span(
+                { className: CELL_DRAG_PROMPT_CLASS },
+                'In [' + promptNumber + ']:'
+              ),
+              h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             )
           )
         );
       } else {
         return VirtualDOM.realize(
           h.div(
-            h.div({className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}`},
-              h.span({className: CELL_DRAG_PROMPT_CLASS}),
-              h.span({className: CELL_DRAG_CONTENT_CLASS}, cellContent)
+            h.div(
+              { className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}` },
+              h.span({ className: CELL_DRAG_PROMPT_CLASS }),
+              h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             )
           )
         );
@@ -2049,8 +2105,7 @@ namespace Private {
    * #### Notes
    * This defaults the content factory to that in the `Notebook` namespace.
    */
-  export
-  function processNotebookOptions(options: Notebook.IOptions) {
+  export function processNotebookOptions(options: Notebook.IOptions) {
     if (options.contentFactory) {
       return options;
     } else {

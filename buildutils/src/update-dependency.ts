@@ -7,7 +7,6 @@ import * as path from 'path';
 import * as childProcess from 'child_process';
 import * as utils from './utils';
 
-
 // Make sure we have required command line arguments.
 if (process.argv.length !== 3) {
   let msg = '** Must supply an update specifier\n';
@@ -28,14 +27,12 @@ if (parts.length === 1 || parts[1] === 'latest') {
 let name = parts[0];
 let specifier = parts[1];
 
-
 // Handle the packages
 utils.getLernaPaths().forEach(pkgPath => {
   handlePackage(pkgPath);
 });
 handlePackage(path.resolve('.'));
 utils.run('yarn');
-
 
 /**
  * Handle an individual package on the path - update the dependency.

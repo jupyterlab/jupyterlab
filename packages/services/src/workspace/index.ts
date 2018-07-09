@@ -1,36 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
-import {
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  ServerConnection
-} from '../serverconnection';
-
+import { ServerConnection } from '../serverconnection';
 
 /**
  * The url for the lab workspaces service.
  */
 const SERVICE_WORKSPACES_URL = 'api/workspaces';
 
-
 /**
  * The workspaces API service manager.
  */
-export
-class WorkspaceManager {
+export class WorkspaceManager {
   /**
    * Create a new workspace manager.
    */
-  constructor(options: WorkspaceManager.IOptions = { }) {
-    this.serverSettings = options.serverSettings ||
-      ServerConnection.makeSettings();
+  constructor(options: WorkspaceManager.IOptions = {}) {
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
   }
 
   /**
@@ -51,7 +42,7 @@ class WorkspaceManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, { }, serverSettings);
+    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
 
     return promise.then(response => {
       if (response.status !== 200) {
@@ -77,10 +68,7 @@ class WorkspaceManager {
     const { baseUrl, pageUrl } = serverSettings;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const init = {
-      body: JSON.stringify(workspace),
-      method: 'PUT'
-    };
+    const init = { body: JSON.stringify(workspace), method: 'PUT' };
     const promise = ServerConnection.makeRequest(url, init, serverSettings);
 
     return promise.then(response => {
@@ -93,17 +81,14 @@ class WorkspaceManager {
   }
 }
 
-
 /**
  * A namespace for `WorkspaceManager` statics.
  */
-export
-namespace WorkspaceManager {
+export namespace WorkspaceManager {
   /**
    * The instantiation options for a workspace manager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings used to make API requests.
      */
@@ -111,23 +96,19 @@ namespace WorkspaceManager {
   }
 }
 
-
 /**
  * A namespace for workspace API interfaces.
  */
-export
-namespace Workspace {
+export namespace Workspace {
   /**
    * The interface for the workspace API manager.
    */
-  export
-  interface IManager extends WorkspaceManager { }
+  export interface IManager extends WorkspaceManager {}
 
   /**
    * The interface describing a workspace API response.
    */
-  export
-  interface IWorkspace {
+  export interface IWorkspace {
     /**
      * The workspace data.
      */
@@ -145,7 +126,6 @@ namespace Workspace {
   }
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -153,8 +133,7 @@ namespace Private {
   /**
    * Get the url for a workspace.
    */
-  export
-  function url(base: string, id: string): string {
+  export function url(base: string, id: string): string {
     return URLExt.join(base, SERVICE_WORKSPACES_URL, id);
   }
 }

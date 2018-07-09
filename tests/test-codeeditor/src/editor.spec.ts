@@ -3,12 +3,9 @@
 
 import expect = require('expect.js');
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 describe('CodeEditor.Model', () => {
-
   let model: CodeEditor.Model;
 
   beforeEach(() => {
@@ -20,31 +17,31 @@ describe('CodeEditor.Model', () => {
   });
 
   describe('#constructor()', () => {
-
     it('should create a CodeEditor Model', () => {
       expect(model).to.be.a(CodeEditor.Model);
       expect(model.value.text).to.equal('');
     });
 
     it('should create a CodeEditor Model with an initial value', () => {
-      let other = new CodeEditor.Model({value: 'Initial text here'});
+      let other = new CodeEditor.Model({ value: 'Initial text here' });
       expect(other).to.be.a(CodeEditor.Model);
       expect(other.value.text).to.equal('Initial text here');
       other.dispose();
     });
 
     it('should create a CodeEditor Model with an initial mimetype', () => {
-      let other = new CodeEditor.Model({value: 'import this', mimeType: 'text/x-python'});
+      let other = new CodeEditor.Model({
+        value: 'import this',
+        mimeType: 'text/x-python'
+      });
       expect(other).to.be.a(CodeEditor.Model);
       expect(other.mimeType).to.equal('text/x-python');
       expect(other.value.text).to.equal('import this');
       other.dispose();
     });
-
   });
 
   describe('#mimeTypeChanged', () => {
-
     it('should be emitted when the mime type changes', () => {
       let called = false;
       model.mimeTypeChanged.connect((sender, args) => {
@@ -56,11 +53,9 @@ describe('CodeEditor.Model', () => {
       model.mimeType = 'text/foo';
       expect(called).to.be(true);
     });
-
   });
 
   describe('#value', () => {
-
     it('should be the observable value of the model', () => {
       let called = false;
       model.value.changed.connect((sender, args) => {
@@ -96,43 +91,33 @@ describe('CodeEditor.Model', () => {
       model.value.remove(0, 1);
       expect(called).to.be(true);
     });
-
   });
 
   describe('#selections', () => {
-
     it('should be the selections associated with the model', () => {
       expect(model.selections.keys().length).to.be(0);
     });
-
   });
 
   describe('#mimeType', () => {
-
     it('should be the mime type of the model', () => {
       expect(model.mimeType).to.be('text/plain');
       model.mimeType = 'text/foo';
       expect(model.mimeType).to.be('text/foo');
     });
-
   });
 
   describe('#modelDB', () => {
-
     it('should get the modelDB object associated with the model', () => {
       expect(model.modelDB.has('value')).to.be(true);
     });
-
   });
 
   describe('#isDisposed', () => {
-
     it('should test whether the model is disposed', () => {
       expect(model.isDisposed).to.be(false);
       model.dispose();
       expect(model.isDisposed).to.be(true);
     });
-
   });
-
 });

@@ -4,47 +4,40 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer, JupyterLab, JupyterLabPlugin
+  ILayoutRestorer,
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, InstanceTracker, MainAreaWidget
+  ICommandPalette,
+  InstanceTracker,
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
-import {
-  IEditorServices
-} from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
+
+import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import {
-  ISettingRegistry, IStateDB
-} from '@jupyterlab/coreutils';
-
-import {
-  IRenderMimeRegistry
-} from '@jupyterlab/rendermime';
-
-import {
-  ISettingEditorTracker, SettingEditor
+  ISettingEditorTracker,
+  SettingEditor
 } from '@jupyterlab/settingeditor';
-
 
 /**
  * The command IDs used by the setting editor.
  */
 namespace CommandIDs {
-  export
-  const debug = 'settingeditor:debug';
+  export const debug = 'settingeditor:debug';
 
-  export
-  const open = 'settingeditor:open';
+  export const open = 'settingeditor:open';
 
-  export
-  const revert = 'settingeditor:revert';
+  export const revert = 'settingeditor:revert';
 
-  export
-  const save = 'settingeditor:save';
+  export const save = 'settingeditor:save';
 }
-
 
 /**
  * The default setting editor extension.
@@ -64,27 +57,38 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
   activate
 };
 
-
 /**
  * Activate the setting editor extension.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISettingRegistry, editorServices: IEditorServices, state: IStateDB, rendermime: IRenderMimeRegistry, palette: ICommandPalette): ISettingEditorTracker {
+function activate(
+  app: JupyterLab,
+  restorer: ILayoutRestorer,
+  registry: ISettingRegistry,
+  editorServices: IEditorServices,
+  state: IStateDB,
+  rendermime: IRenderMimeRegistry,
+  palette: ICommandPalette
+): ISettingEditorTracker {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new InstanceTracker<MainAreaWidget<SettingEditor>>({ namespace });
+  const tracker = new InstanceTracker<MainAreaWidget<SettingEditor>>({
+    namespace
+  });
   let editor: SettingEditor;
 
   // Handle state restoration.
   restorer.restore(tracker, {
     command: CommandIDs.open,
-    args: widget => ({ }),
+    args: widget => ({}),
     name: widget => namespace
   });
 
   commands.addCommand(CommandIDs.debug, {
-    execute: () => { tracker.currentWidget.content.toggleDebug(); },
+    execute: () => {
+      tracker.currentWidget.content.toggleDebug();
+    },
     iconClass: 'jp-MaterialIcon jp-BugIcon',
     label: 'Debug User Settings In Inspector',
     isToggled: () => tracker.currentWidget.content.isDebugVisible
@@ -107,14 +111,21 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorFactory, key, registry, rendermime, state, when
+        editorFactory,
+        key,
+        registry,
+        rendermime,
+        state,
+        when
       });
 
       // Notify the command registry when the visibility status of the setting
       // editor's commands change. The setting editor toolbar listens for this
       // signal from the command registry.
       editor.commandsChanged.connect((sender: any, args: string[]) => {
-        args.forEach(id => { commands.notifyCommandChanged(id); });
+        args.forEach(id => {
+          commands.notifyCommandChanged(id);
+        });
       });
 
       editor.id = namespace;
@@ -130,7 +141,9 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer, registry: ISetting
   palette.addItem({ category: 'Settings', command: CommandIDs.open });
 
   commands.addCommand(CommandIDs.revert, {
-    execute: () => { tracker.currentWidget.content.revert(); },
+    execute: () => {
+      tracker.currentWidget.content.revert();
+    },
     iconClass: 'jp-MaterialIcon jp-UndoIcon',
     label: 'Revert User Settings',
     isEnabled: () => tracker.currentWidget.content.canRevertRaw

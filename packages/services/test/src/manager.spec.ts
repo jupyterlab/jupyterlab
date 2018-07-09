@@ -4,27 +4,16 @@
 
 import expect = require('expect.js');
 
-import {
-  ContentsManager
-} from '../../lib/contents';
+import { ContentsManager } from '../../lib/contents';
 
-import {
-  ServiceManager
-} from '../../lib/manager';
+import { ServiceManager } from '../../lib/manager';
 
-import {
-  SessionManager
-} from '../../lib/session';
+import { SessionManager } from '../../lib/session';
 
-import {
-  TerminalManager
-} from '../../lib/terminal';
-
+import { TerminalManager } from '../../lib/terminal';
 
 describe('manager', () => {
-
   describe('ServiceManager', () => {
-
     let manager: ServiceManager.IManager;
 
     beforeEach(() => {
@@ -37,39 +26,30 @@ describe('manager', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should create a new service manager', () => {
         expect(manager).to.be.a(ServiceManager);
       });
-
     });
 
     describe('#sessions', () => {
-
       it('should be the sessions manager instance', () => {
         expect(manager.sessions).to.be.a(SessionManager);
       });
-
     });
 
     describe('#contents', () => {
-
       it('should be the contents manager instance', () => {
         expect(manager.contents).to.be.a(ContentsManager);
       });
-
     });
 
     describe('#terminals', () => {
-
       it('should be the terminal manager instance', () => {
         expect(manager.terminals).to.be.a(TerminalManager);
       });
-
     });
 
     describe('#isReady', () => {
-
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new ServiceManager();
@@ -78,9 +58,6 @@ describe('manager', () => {
           expect(manager.isReady).to.be(true);
         });
       });
-
     });
-
   });
-
 });

@@ -3,16 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  VDomRenderer
-} from '@jupyterlab/apputils';
+import { VDomRenderer } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
-import {
-  Cell, CodeCell
-} from './widget';
-
+import { Cell, CodeCell } from './widget';
 
 /**
  * The CSS class added to all collapsers.
@@ -39,7 +34,6 @@ const OUTPUT_COLLAPSER = 'jp-OutputCollapser';
  */
 const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
 
-
 /**
  * Abstract collapser base class.
  *
@@ -48,8 +42,7 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
  * input/output that a user can click on to collapse the
  * input/output.
  */
-export
-abstract class Collapser extends VDomRenderer<null> {
+export abstract class Collapser extends VDomRenderer<null> {
   /**
    * Construct a new collapser.
    */
@@ -73,24 +66,19 @@ abstract class Collapser extends VDomRenderer<null> {
     if (this.collapsed) {
       childClass += ` ${MOD_COLLAPSED_CLASS}`;
     }
-    return (
-      <div className={childClass}  onClick={ (e) => this.handleClick(e) } >
-      </div>
-    );
+    return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }
 
   /**
    * Handle the click event.
    */
   protected abstract handleClick(e: React.MouseEvent<HTMLDivElement>): void;
-
 }
 
 /**
  * A collapser subclass to collapse a cell's input area.
  */
-export
-class InputCollapser extends Collapser {
+export class InputCollapser extends Collapser {
   /**
    * Construct a new input collapser.
    */
@@ -122,21 +110,19 @@ class InputCollapser extends Collapser {
     /* We need this until we watch the cell state */
     this.update();
   }
-
 }
 
 /**
  * A collapser subclass to collapse a cell's output area.
  */
-export
-class OutputCollapser extends Collapser {
-    /**
-     * Construct a new output collapser.
-     */
-    constructor() {
-      super();
-      this.addClass(OUTPUT_COLLAPSER);
-    }
+export class OutputCollapser extends Collapser {
+  /**
+   * Construct a new output collapser.
+   */
+  constructor() {
+    super();
+    this.addClass(OUTPUT_COLLAPSER);
+  }
 
   /**
    * Is the cell's output collapsed?

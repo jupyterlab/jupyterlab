@@ -1,0 +1,15 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2017, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-RedirectForm input {
+  display: block;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.jp-RedirectForm-warning {
+  color: var(--jp-warn-color0);
+}

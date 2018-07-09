@@ -10,6 +10,7 @@ dev_mode/schemas
 dev_mode/static
 dev_mode/themes
 dev_mode/workspaces
+dev_mode/stats.json
 
 packages/theme-*/static
 node_modules
@@ -31,6 +32,7 @@ __pycache__
 .idea/
 
 tests/**/coverage
+tests/**/.cache-loader
 docs/_build
 docs/api
 packages/services/examples/node/config.json

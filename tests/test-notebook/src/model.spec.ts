@@ -3,37 +3,23 @@
 
 import expect = require('expect.js');
 
-import {
-  ArrayExt, toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, toArray } from '@phosphor/algorithm';
 
-import {
-  CodeCellModel
-} from '@jupyterlab/cells';
+import { CodeCellModel } from '@jupyterlab/cells';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  NotebookModel
-} from '@jupyterlab/notebook';
+import { NotebookModel } from '@jupyterlab/notebook';
 
-import {
-  ModelDB
-} from '@jupyterlab/observables';
+import { ModelDB } from '@jupyterlab/observables';
 
-import {
-  DEFAULT_CONTENT
-} from '../../notebook-utils';
+import { DEFAULT_CONTENT } from '../../notebook-utils';
 
+import { moment } from '../../utils';
 
-describe('notebook/notebook/model', () => {
-
+describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
-
     describe('#constructor()', () => {
-
       it('should create a notebook model', () => {
         let model = new NotebookModel();
         expect(model).to.be.a(NotebookModel);
@@ -41,7 +27,9 @@ describe('notebook/notebook/model', () => {
 
       it('should accept an optional language preference', () => {
         let model = new NotebookModel({ languagePreference: 'python' });
-        let lang = model.metadata.get('language_info') as nbformat.ILanguageInfoMetadata;
+        let lang = model.metadata.get(
+          'language_info'
+        ) as nbformat.ILanguageInfoMetadata;
         expect(lang.name).to.be('python');
       });
 
@@ -54,14 +42,13 @@ describe('notebook/notebook/model', () => {
       it('should accept an optional factory', () => {
         let contentFactory = new NotebookModel.ContentFactory({});
         let model = new NotebookModel({ contentFactory });
-        expect(model.contentFactory.codeCellContentFactory)
-        .to.be(contentFactory.codeCellContentFactory);
+        expect(model.contentFactory.codeCellContentFactory).to.be(
+          contentFactory.codeCellContentFactory
+        );
       });
-
     });
 
     describe('#metadataChanged', () => {
-
       it('should be emitted when a metadata field changes', () => {
         let model = new NotebookModel();
         let called = false;
@@ -80,15 +67,15 @@ describe('notebook/notebook/model', () => {
         let model = new NotebookModel();
         let called = false;
         model.metadata.set('foo', 1);
-        model.metadata.changed.connect(() => { called = true; });
+        model.metadata.changed.connect(() => {
+          called = true;
+        });
         model.metadata.set('foo', 1);
         expect(called).to.be(false);
       });
-
     });
 
     describe('#cells', () => {
-
       it('should add an empty code cell by default', () => {
         let model = new NotebookModel();
         expect(model.cells.length).to.be(1);
@@ -113,17 +100,44 @@ describe('notebook/notebook/model', () => {
         model.cells.undo();
         expect(model.cells.length).to.be(2);
         expect(model.cells.get(1).value.text).to.be('foo');
-        expect(model.cells.get(1)).to.be(cell);  // should be ===.
+        expect(model.cells.get(1)).to.be(cell); // should be ===.
       });
 
       context('cells `changed` signal', () => {
-
-        it('should emit a `contentChanged` signal', () => {
+        it('should emit a `contentChanged` signal upon cell addition', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
           let called = false;
-          model.contentChanged.connect(() => { called = true; });
+          model.contentChanged.connect(() => {
+            called = true;
+          });
           model.cells.push(cell);
+          expect(called).to.be(true);
+        });
+
+        it('should emit a `contentChanged` signal upon cell removal', () => {
+          let model = new NotebookModel();
+          let cell = model.contentFactory.createCodeCell({});
+          model.cells.push(cell);
+          let called = false;
+          model.contentChanged.connect(() => {
+            called = true;
+          });
+          model.cells.remove(0);
+          expect(called).to.be(true);
+        });
+
+        it('should emit a `contentChanged` signal upon cell move', () => {
+          let model = new NotebookModel();
+          let cell0 = model.contentFactory.createCodeCell({});
+          let cell1 = model.contentFactory.createCodeCell({});
+          model.cells.push(cell0);
+          model.cells.push(cell1);
+          let called = false;
+          model.contentChanged.connect(() => {
+            called = true;
+          });
+          model.cells.move(0, 1);
           expect(called).to.be(true);
         });
 
@@ -134,20 +148,16 @@ describe('notebook/notebook/model', () => {
           expect(model.dirty).to.be(true);
         });
 
-        it('should add a new code cell when cells are cleared', (done) => {
+        it('should add a new code cell when cells are cleared', async () => {
           let model = new NotebookModel();
           model.cells.clear();
-          requestAnimationFrame(() => {
-            expect(model.cells.length).to.be(1);
-            expect(model.cells.get(0)).to.be.a(CodeCellModel);
-            done();
-          });
+          await moment();
+          expect(model.cells.length).to.be(1);
+          expect(model.cells.get(0)).to.be.a(CodeCellModel);
         });
-
       });
 
       describe('cell `changed` signal', () => {
-
         it('should be called when a cell content changes', () => {
           let model = new NotebookModel();
           let cell = model.contentFactory.createCodeCell({});
@@ -160,7 +170,9 @@ describe('notebook/notebook/model', () => {
           let cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
           let called = false;
-          model.contentChanged.connect(() => { called = true; });
+          model.contentChanged.connect(() => {
+            called = true;
+          });
           model.metadata.set('foo', 'bar');
           expect(called).to.be(true);
         });
@@ -173,43 +185,35 @@ describe('notebook/notebook/model', () => {
           cell.value.text = 'foo';
           expect(model.dirty).to.be(true);
         });
-
       });
-
     });
 
     describe('#contentFactory', () => {
-
       it('should be the cell model factory used by the model', () => {
         let model = new NotebookModel();
-        expect(model.contentFactory.codeCellContentFactory)
-        .to.be(NotebookModel.defaultContentFactory.codeCellContentFactory);
+        expect(model.contentFactory.codeCellContentFactory).to.be(
+          NotebookModel.defaultContentFactory.codeCellContentFactory
+        );
       });
-
     });
 
     describe('#nbformat', () => {
-
       it('should get the major version number of the nbformat', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.nbformat).to.be(DEFAULT_CONTENT.nbformat);
       });
-
     });
 
     describe('#nbformatMinor', () => {
-
       it('should get the minor version number of the nbformat', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.nbformatMinor).to.be(nbformat.MINOR_VERSION);
       });
-
     });
 
     describe('#defaultKernelName()', () => {
-
       it('should get the default kernel name of the document', () => {
         let model = new NotebookModel();
         model.metadata.set('kernelspec', { name: 'python3' });
@@ -220,11 +224,9 @@ describe('notebook/notebook/model', () => {
         let model = new NotebookModel();
         expect(model.defaultKernelName).to.be('');
       });
-
     });
 
     describe('#defaultKernelLanguage', () => {
-
       it('should get the default kernel language of the document', () => {
         let model = new NotebookModel();
         model.metadata.set('language_info', { name: 'python' });
@@ -240,11 +242,9 @@ describe('notebook/notebook/model', () => {
         let model = new NotebookModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).to.be('foo');
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the model', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
@@ -259,11 +259,9 @@ describe('notebook/notebook/model', () => {
         model.dispose();
         expect(model.isDisposed).to.be(true);
       });
-
     });
 
     describe('#toString()', () => {
-
       it('should serialize the model to a string', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
@@ -271,11 +269,9 @@ describe('notebook/notebook/model', () => {
         let data = JSON.parse(text);
         expect(data.cells.length).to.be(6);
       });
-
     });
 
     describe('#fromString()', () => {
-
       it('should deserialize the model from a string', () => {
         let model = new NotebookModel();
         model.fromString(JSON.stringify(DEFAULT_CONTENT));
@@ -288,22 +284,18 @@ describe('notebook/notebook/model', () => {
         model.fromString(JSON.stringify(DEFAULT_CONTENT));
         expect(model.dirty).to.be(true);
       });
-
     });
 
     describe('#toJSON()', () => {
-
       it('should serialize the model to JSON', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
         let data = model.toJSON();
         expect(data.cells.length).to.be(6);
       });
-
     });
 
     describe('#fromJSON()', () => {
-
       it('should serialize the model from JSON', () => {
         let model = new NotebookModel();
         model.fromJSON(DEFAULT_CONTENT);
@@ -318,11 +310,9 @@ describe('notebook/notebook/model', () => {
         model.fromJSON(DEFAULT_CONTENT);
         expect(model.dirty).to.be(true);
       });
-
     });
 
     describe('#metadata', () => {
-
       it('should have default values', () => {
         let model = new NotebookModel();
         let metadata = model.metadata;
@@ -341,7 +331,9 @@ describe('notebook/notebook/model', () => {
       it('should emit the `contentChanged` signal', () => {
         let model = new NotebookModel();
         let called = false;
-        model.contentChanged.connect(() => { called = true; });
+        model.contentChanged.connect(() => {
+          called = true;
+        });
         model.metadata.set('foo', 'bar');
         expect(called).to.be(true);
       });
@@ -359,29 +351,28 @@ describe('notebook/notebook/model', () => {
         model.metadata.set('foo', 'bar');
         expect(called).to.be(true);
       });
-
     });
 
     describe('.ContentFactory', () => {
-
       let factory = new NotebookModel.ContentFactory({});
 
       context('#codeCellContentFactory', () => {
-
         it('should be a code cell content factory', () => {
-          expect(factory.codeCellContentFactory).to.be(CodeCellModel.defaultContentFactory);
+          expect(factory.codeCellContentFactory).to.be(
+            CodeCellModel.defaultContentFactory
+          );
         });
 
         it('should be settable in the constructor', () => {
           let codeCellContentFactory = new CodeCellModel.ContentFactory();
-          factory = new NotebookModel.ContentFactory({ codeCellContentFactory });
+          factory = new NotebookModel.ContentFactory({
+            codeCellContentFactory
+          });
           expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
         });
-
       });
 
       context('#createCodeCell()', () => {
-
         it('should create a new code cell', () => {
           let cell = factory.createCodeCell({});
           expect(cell.type).to.be('code');
@@ -402,11 +393,9 @@ describe('notebook/notebook/model', () => {
           let newCell = factory.createCodeCell({ cell });
           expect(newCell.value.text).to.be('foo');
         });
-
       });
 
       context('#createRawCell()', () => {
-
         it('should create a new raw cell', () => {
           let cell = factory.createRawCell({});
           expect(cell.type).to.be('raw');
@@ -427,11 +416,9 @@ describe('notebook/notebook/model', () => {
           let newCell = factory.createRawCell({ cell });
           expect(newCell.value.text).to.be('foo');
         });
-
       });
 
       describe('#createMarkdownCell()', () => {
-
         it('should create a new markdown cell', () => {
           let cell = factory.createMarkdownCell({});
           expect(cell.type).to.be('markdown');
@@ -452,19 +439,15 @@ describe('notebook/notebook/model', () => {
           let newCell = factory.createMarkdownCell({ cell });
           expect(newCell.value.text).to.be('foo');
         });
-
       });
 
       describe('#modelDB', () => {
-
         it('should be undefined by default', () => {
           expect(factory.modelDB).to.be(undefined);
         });
-
       });
 
       describe('#clone()', () => {
-
         it('should create a new content factory with a new IModelDB', () => {
           let modelDB = new ModelDB();
           let factory = new NotebookModel.ContentFactory({ modelDB });
@@ -472,22 +455,19 @@ describe('notebook/notebook/model', () => {
           let newModelDB = new ModelDB();
           let newFactory = factory.clone(newModelDB);
           expect(newFactory.modelDB).to.be(newModelDB);
-          expect(newFactory.codeCellContentFactory)
-          .to.be(factory.codeCellContentFactory);
+          expect(newFactory.codeCellContentFactory).to.be(
+            factory.codeCellContentFactory
+          );
         });
-
       });
-
     });
 
     describe('.defaultContentFactory', () => {
-
       it('should be a ContentFactory', () => {
-        expect(NotebookModel.defaultContentFactory).to.be.a(NotebookModel.ContentFactory);
+        expect(NotebookModel.defaultContentFactory).to.be.a(
+          NotebookModel.ContentFactory
+        );
       });
-
     });
-
   });
-
 });

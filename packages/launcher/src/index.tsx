@@ -2,33 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  showErrorMessage, VDomModel, VDomRenderer
+  showErrorMessage,
+  VDomModel,
+  VDomRenderer
 } from '@jupyterlab/apputils';
 
 import {
-  ArrayExt, ArrayIterator, IIterator, map, each, toArray
+  ArrayExt,
+  ArrayIterator,
+  IIterator,
+  map,
+  each,
+  toArray
 } from '@phosphor/algorithm';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { Token, ReadonlyJSONObject } from '@phosphor/coreutils';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { AttachedProperty } from '@phosphor/properties';
+
+import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import '../style/index.css';
-
 
 /**
  * The class name added to Launcher instances.
@@ -46,32 +46,17 @@ const KNOWN_CATEGORIES = ['Notebook', 'Console', 'Other'];
  */
 const KERNEL_CATEGORIES = ['Notebook', 'Console'];
 
-
-/**
- * The command IDs used by the launcher plugin.
- */
-export
-namespace CommandIDs {
-  export
-  const show: string = 'launcher:show';
-}
-
-
-
 /* tslint:disable */
 /**
  * The launcher token.
  */
-export
-const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
+export const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
 /* tslint:enable */
-
 
 /**
  * The launcher interface.
  */
-export
-interface ILauncher {
+export interface ILauncher {
   /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
@@ -82,100 +67,14 @@ interface ILauncher {
    * re-render event for parent widget.
    *
    */
-  add(options: ILauncherItem): IDisposable;
+  add(options: ILauncher.IItemOptions): IDisposable;
 }
-
-
-/**
- * The specification for a launcher item.
- */
-export
-interface ILauncherItem {
-  /**
-   * The display name for the launcher item.
-   */
-  displayName: string;
-
-  /**
-   * The callback invoked to launch the item.
-   *
-   * The callback is invoked with a current working directory and the
-   * name of the selected launcher item.  When the function returns
-   * the launcher will close.
-   *
-   * #### Notes
-   * The callback must return the widget that was created so the launcher
-   * can replace itself with the created widget.
-   */
-  callback: (cwd: string, name: string) => Widget | Promise<Widget>;
-
-  /**
-   * The icon class for the launcher item.
-   *
-   * #### Notes
-   * This class name will be added to the icon node for the visual
-   * representation of the launcher item.
-   *
-   * Multiple class names can be separated with white space.
-   *
-   * The default value is an empty string.
-   */
-  iconClass?: string;
-
-  /**
-   * The icon label for the launcher item.
-   *
-   * #### Notes
-   * This label will be added as text to the icon node for the visual
-   * representation of the launcher item.
-   *
-   * The default value is an empty string.
-   */
-  iconLabel?: string;
-
-  /**
-   * The identifier for the launcher item.
-   *
-   * The default value is the displayName.
-   */
-  name?: string;
-
-  /**
-   * The category for the launcher item.
-   *
-   * The default value is the an empty string.
-   */
-  category?: string;
-
-  /**
-   * The rank for the launcher item.
-   *
-   * The rank is used when ordering launcher items for display. After grouping
-   * into categories, items are sorted in the following order:
-   *   1. Rank (lower is better)
-   *   3. Display Name (locale order)
-   *
-   * The default rank is `Infinity`.
-   */
-  rank?: number;
-
-  /**
-   * For items that have a kernel associated with them, the URL of the kernel
-   * icon.
-   *
-   * This is not a CSS class, but the URL that points to the icon in the kernel
-   * spec.
-   */
-  kernelIconUrl?: string;
-}
-
 
 /**
  * LauncherModel keeps track of the path to working directory and has a list of
  * LauncherItems, which the Launcher will render.
  */
-export
-class LauncherModel extends VDomModel implements ILauncher {
+export class LauncherModel extends VDomModel implements ILauncher {
   /**
    * Create a new launcher model.
    */
@@ -193,7 +92,7 @@ class LauncherModel extends VDomModel implements ILauncher {
    * re-render event for parent widget.
    *
    */
-  add(options: ILauncherItem): IDisposable {
+  add(options: ILauncher.IItemOptions): IDisposable {
     // Create a copy of the options to circumvent mutations to the original.
     let item = Private.createItem(options);
 
@@ -209,26 +108,25 @@ class LauncherModel extends VDomModel implements ILauncher {
   /**
    * Return an iterator of launcher items.
    */
-  items(): IIterator<ILauncherItem> {
+  items(): IIterator<ILauncher.IItemOptions> {
     return new ArrayIterator(this._items);
   }
 
-  private _items: ILauncherItem[] = [];
+  private _items: ILauncher.IItemOptions[] = [];
 }
-
 
 /**
  * A virtual-DOM-based widget for the Launcher.
  */
-export
-class Launcher extends VDomRenderer<LauncherModel> {
+export class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Construct a new launcher widget.
    */
-  constructor(options: Launcher.IOptions) {
+  constructor(options: ILauncher.IOptions) {
     super();
     this._cwd = options.cwd;
     this._callback = options.callback;
+    this._commands = options.commands;
     this.addClass(LAUNCHER_CLASS);
   }
 
@@ -273,7 +171,11 @@ class Launcher extends VDomRenderer<LauncherModel> {
     });
     // Within each category sort by rank
     for (let cat in categories) {
-      categories[cat] = categories[cat].sort(Private.sortCmp);
+      categories[cat] = categories[cat].sort(
+        (a: ILauncher.IItemOptions, b: ILauncher.IItemOptions) => {
+          return Private.sortCmp(a, b, this._cwd, this._commands);
+        }
+      );
     }
 
     // Variable to help create sections
@@ -293,21 +195,33 @@ class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Now create the sections for each category
-    each(orderedCategories, cat => {
-      let iconClass = `${(categories[cat][0] as ILauncherItem).iconClass} ` +
-        'jp-Launcher-sectionIcon jp-Launcher-icon';
+    orderedCategories.forEach(cat => {
+      const item = categories[cat][0] as ILauncher.IItemOptions;
+      let iconClass =
+        `${this._commands.iconClass(item.command, {
+          ...item.args,
+          cwd: this.cwd
+        })} ` + 'jp-Launcher-sectionIcon jp-Launcher-icon';
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
-          <div className='jp-Launcher-section' key={cat}>
-            <div className='jp-Launcher-sectionHeader'>
+          <div className="jp-Launcher-section" key={cat}>
+            <div className="jp-Launcher-sectionHeader">
               {kernel && <div className={iconClass} />}
-              <h2 className='jp-Launcher-sectionTitle'>{cat}</h2>
+              <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
-            <div className='jp-Launcher-cardContainer'>
-              {toArray(map(categories[cat], (item: ILauncherItem) => {
-                return Card(kernel, item, this, this._callback);
-              }))}
+            <div className="jp-Launcher-cardContainer">
+              {toArray(
+                map(categories[cat], (item: ILauncher.IItemOptions) => {
+                  return Card(
+                    kernel,
+                    item,
+                    this,
+                    this._commands,
+                    this._callback
+                  );
+                })
+              )}
             </div>
           </div>
         );
@@ -317,9 +231,9 @@ class Launcher extends VDomRenderer<LauncherModel> {
 
     // Wrap the sections in body and content divs.
     return (
-      <div className='jp-Launcher-body'>
-        <div className='jp-Launcher-content'>
-          <div className='jp-Launcher-cwd'>
+      <div className="jp-Launcher-body">
+        <div className="jp-Launcher-content">
+          <div className="jp-Launcher-cwd">
             <h3>{this.cwd}</h3>
           </div>
           {sections}
@@ -328,34 +242,94 @@ class Launcher extends VDomRenderer<LauncherModel> {
     );
   }
 
+  private _commands: CommandRegistry;
   private _callback: (widget: Widget) => void;
   private _pending = false;
   private _cwd = '';
 }
 
-
 /**
- * The namespace for `Launcher` class statics.
+ * The namespace for `ILauncher` class statics.
  */
-export
-namespace Launcher {
+export namespace ILauncher {
   /**
    * The options used to create a Launcher.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The cwd of the launcher.
      */
     cwd: string;
 
     /**
+     * The command registry used by the launcher.
+     */
+    commands: CommandRegistry;
+
+    /**
      * The callback used when an item is launched.
      */
     callback: (widget: Widget) => void;
   }
-}
 
+  /**
+   * The options used to create a launcher item.
+   */
+  export interface IItemOptions {
+    /**
+     * The command ID for the launcher item.
+     *
+     * #### Notes
+     * If the command's `execute` method returns a `Widget` or
+     * a promise that resolves with a `Widget`, then that widget will
+     * replace the launcher in the same location of the application
+     * shell. If the `execute` method does something else
+     * (i.e., create a modal dialog), then the launcher will not be
+     * disposed.
+     */
+    command: string;
+
+    /**
+     * The arguments given to the command for
+     * creating the launcher item.
+     *
+     * ### Notes
+     * The launcher will also add the current working
+     * directory of the filebrowser in the `cwd` field
+     * of the args, which a command may use to create
+     * the activity with respect to the right directory.
+     */
+    args?: ReadonlyJSONObject;
+
+    /**
+     * The category for the launcher item.
+     *
+     * The default value is the an empty string.
+     */
+    category?: string;
+
+    /**
+     * The rank for the launcher item.
+     *
+     * The rank is used when ordering launcher items for display. After grouping
+     * into categories, items are sorted in the following order:
+     *   1. Rank (lower is better)
+     *   3. Display Name (locale order)
+     *
+     * The default rank is `Infinity`.
+     */
+    rank?: number;
+
+    /**
+     * For items that have a kernel associated with them, the URL of the kernel
+     * icon.
+     *
+     * This is not a CSS class, but the URL that points to the icon in the kernel
+     * spec.
+     */
+    kernelIconUrl?: string;
+  }
+}
 
 /**
  * A pure tsx component for a launcher card.
@@ -370,7 +344,18 @@ namespace Launcher {
  *
  * @returns a vdom `VirtualElement` for the launcher card.
  */
-function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcherCallback: (widget: Widget) => void): React.ReactElement<any> {
+function Card(
+  kernel: boolean,
+  item: ILauncher.IItemOptions,
+  launcher: Launcher,
+  commands: CommandRegistry,
+  launcherCallback: (widget: Widget) => void
+): React.ReactElement<any> {
+  // Get some properties of the command
+  const command = item.command;
+  const args = { ...item.args, cwd: launcher.cwd };
+  const label = commands.label(command, args);
+
   // Build the onclick handler.
   let onclick = () => {
     // If an item has already been launched,
@@ -379,44 +364,60 @@ function Card(kernel: boolean, item: ILauncherItem, launcher: Launcher, launcher
       return;
     }
     launcher.pending = true;
-    let callback = item.callback as any;
-    let value = callback(launcher.cwd, item.name);
-    Promise.resolve(value).then(widget => {
-      if (!widget) {
-        throw new Error('Launcher callbacks must resolve with a widget');
-      }
-      launcherCallback(widget);
-      launcher.dispose();
-    }).catch(err => {
-      launcher.pending = false;
-      showErrorMessage('Launcher Error', err);
-    });
+    commands
+      .execute(command, {
+        ...item.args,
+        cwd: launcher.cwd
+      })
+      .then(value => {
+        launcher.pending = false;
+        if (value instanceof Widget) {
+          launcherCallback(value);
+          launcher.dispose();
+        }
+      })
+      .catch(err => {
+        launcher.pending = false;
+        showErrorMessage('Launcher Error', err);
+      });
   };
 
   // Return the VDOM element.
   return (
-    <div className='jp-LauncherCard'
-      title={item.displayName}
+    <div
+      className="jp-LauncherCard"
+      title={label}
       onClick={onclick}
       data-category={item.category || 'Other'}
-      key={Private.keyProperty.get(item)}>
-      <div className='jp-LauncherCard-icon'>
-          {(item.kernelIconUrl && kernel) &&
-            <img src={item.kernelIconUrl} className='jp-Launcher-kernelIcon' />}
-          {(!item.kernelIconUrl && !kernel) &&
-            <div className={`${item.iconClass} jp-Launcher-icon`} />}
-          {(!item.kernelIconUrl && kernel) &&
-            <div className='jp-LauncherCard-noKernelIcon'>
-              {item.displayName[0].toUpperCase()}
-            </div>}
+      key={Private.keyProperty.get(item)}
+    >
+      <div className="jp-LauncherCard-icon">
+        {item.kernelIconUrl &&
+          kernel && (
+            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+          )}
+        {!item.kernelIconUrl &&
+          !kernel && (
+            <div
+              className={`${commands.iconClass(
+                command,
+                args
+              )} jp-Launcher-icon`}
+            />
+          )}
+        {!item.kernelIconUrl &&
+          kernel && (
+            <div className="jp-LauncherCard-noKernelIcon">
+              {label[0].toUpperCase()}
+            </div>
+          )}
       </div>
-      <div className='jp-LauncherCard-label' title={item.displayName}>
-        {item.displayName}
+      <div className="jp-LauncherCard-label" title={label}>
+        {label}
       </div>
     </div>
   );
 }
-
 
 /**
  * The namespace for module private data.
@@ -430,23 +431,23 @@ namespace Private {
   /**
    * An attached property for an item's key.
    */
-  export
-  const keyProperty = new AttachedProperty<ILauncherItem, number>({
+  export const keyProperty = new AttachedProperty<
+    ILauncher.IItemOptions,
+    number
+  >({
     name: 'key',
     create: () => id++
   });
 
   /**
-   * Create an item given item options.
+   * Create a fully specified item given item options.
    */
-  export
-  function createItem(options: ILauncherItem): ILauncherItem {
+  export function createItem(
+    options: ILauncher.IItemOptions
+  ): ILauncher.IItemOptions {
     return {
       ...options,
       category: options.category || '',
-      name: options.name || options.name,
-      iconClass: options.iconClass || '',
-      iconLabel: options.iconLabel || '',
       rank: options.rank !== undefined ? options.rank : Infinity
     };
   }
@@ -454,16 +455,22 @@ namespace Private {
   /**
    * A sort comparison function for a launcher item.
    */
-  export
-  function sortCmp(a: ILauncherItem, b: ILauncherItem): number {
+  export function sortCmp(
+    a: ILauncher.IItemOptions,
+    b: ILauncher.IItemOptions,
+    cwd: string,
+    commands: CommandRegistry
+  ): number {
     // First, compare by rank.
     let r1 = a.rank;
     let r2 = b.rank;
     if (r1 !== r2 && r1 !== undefined && r2 !== undefined) {
-      return r1 < r2 ? -1 : 1;  // Infinity safe
+      return r1 < r2 ? -1 : 1; // Infinity safe
     }
 
     // Finally, compare by display name.
-    return a.displayName.localeCompare(b.displayName);
+    const aLabel = commands.label(a.command, { ...a.args, cwd });
+    const bLabel = commands.label(a.command, { ...b.args, cwd });
+    return aLabel.localeCompare(bLabel);
   }
 }

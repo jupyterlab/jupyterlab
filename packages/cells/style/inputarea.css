@@ -3,11 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 /*-----------------------------------------------------------------------------
 | Input
 |----------------------------------------------------------------------------*/
-
 
 /* All input areas */
 .jp-InputArea {
@@ -15,11 +13,9 @@
   flex-direction: row;
 }
 
-
 .jp-InputArea-editor {
-  flex: 1 1 auto;;
+  flex: 1 1 auto;
 }
-
 
 .jp-InputArea-editor {
   /* This is the non-active, default styling */
@@ -27,7 +23,6 @@
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
 }
-
 
 .jp-InputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);

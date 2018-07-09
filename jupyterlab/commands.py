@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 from __future__ import print_function
 
+import contextlib
 from distutils.version import LooseVersion
 import errno
 import glob
@@ -22,20 +23,19 @@ from threading import Event
 
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
+from jupyterlab_launcher.process import which, Process, WatchHelper
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
-from .jlpmapp import YARN_PATH, HERE, which
-from .process import Process, WatchHelper
+from .jlpmapp import YARN_PATH, HERE
 
 if sys.version_info.major < 3:
     from urllib2 import Request, urlopen, quote
-    from urllib2 import URLError
+    from urllib2 import URLError, HTTPError
     from urlparse import urljoin
-
 else:
     from urllib.request import Request, urlopen, urljoin, quote
-    from urllib.error import URLError
+    from urllib.error import URLError, HTTPError
 
 
 # The regex for expecting the webpack output.
@@ -161,8 +161,8 @@ def watch_packages(logger=None):
     logger = logger or logging.getLogger('jupyterlab')
     ts_dir = osp.realpath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
-    # Run typescript watch and wait for compilation.
-    ts_regex = r'.* Compilation complete\. Watching for file changes\.'
+    # Run typescript watch and wait for the string indicating it is done.
+    ts_regex = r'.* Found 0 errors\. Watching for file changes\.'
     ts_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
         cwd=ts_dir, logger=logger, startup_regex=ts_regex)
 
@@ -221,6 +221,8 @@ def install_extension(extension, app_dir=None, logger=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
@@ -229,10 +231,27 @@ def install_extension(extension, app_dir=None, logger=None):
 
 def uninstall_extension(name, app_dir=None, logger=None):
     """Uninstall an extension by name or path.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger)
     return handler.uninstall_extension(name)
+
+
+def update_extension(name=None, all_=False, app_dir=None, logger=None):
+    """Update an extension by name, or all extensions.
+
+    Either `name` must be given as a string, or `all_` must be `True`.
+    If `all_` is `True`, the value of `name` is ignored.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
+    """
+    _node_check()
+    handler = _AppHandler(app_dir, logger)
+    if all_ is True:
+        return handler.update_all_extensions()
+    return handler.update_extension(name)
 
 
 def clean(app_dir=None):
@@ -268,6 +287,8 @@ def get_app_info(app_dir=None, logger=None):
 
 def enable_extension(extension, app_dir=None, logger=None):
     """Enable a JupyterLab extension.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.toggle_extension(extension, False)
@@ -275,6 +296,8 @@ def enable_extension(extension, app_dir=None, logger=None):
 
 def disable_extension(extension, app_dir=None, logger=None):
     """Disable a JupyterLab package.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.toggle_extension(extension, True)
@@ -305,13 +328,18 @@ def list_extensions(app_dir=None, logger=None):
 
 
 def link_package(path, app_dir=None, logger=None):
-    """Link a package against the JupyterLab build."""
+    """Link a package against the JupyterLab build.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
+    """
     handler = _AppHandler(app_dir, logger)
     return handler.link_package(path)
 
 
 def unlink_package(package, app_dir=None, logger=None):
     """Unlink a package from JupyterLab by path or name.
+
+    Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_dir, logger)
     return handler.unlink_package(package)
@@ -324,6 +352,27 @@ def get_app_version(app_dir=None):
     return handler.info['version']
 
 
+def get_latest_compatible_package_versions(names, app_dir=None, logger=None):
+    """Get the latest compatible version of a list of packages.
+    """
+    app_dir = app_dir or get_app_dir()
+    handler = _AppHandler(app_dir, logger)
+    return handler.latest_compatible_package_versions(names)
+
+
+def read_package(target):
+    """Read the package data in a given target tarball.
+    """
+    tar = tarfile.open(target, "r")
+    f = tar.extractfile('package/package.json')
+    data = json.loads(f.read().decode('utf8'))
+    data['jupyterlab_extracted_files'] = [
+        f.path[len('package/'):] for f in tar.getmembers()
+    ]
+    tar.close()
+    return data
+
+
 # ----------------------------------------------------------------------
 # Implementation details
 # ----------------------------------------------------------------------
@@ -332,6 +381,8 @@ def get_app_version(app_dir=None):
 class _AppHandler(object):
 
     def __init__(self, app_dir, logger=None, kill_event=None):
+        """Create a new _AppHandler object
+        """
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = logger or logging.getLogger('jupyterlab')
@@ -344,6 +395,8 @@ class _AppHandler(object):
         """Install an extension package into JupyterLab.
 
         The extension is first validated.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         extension = _normalize_path(extension)
         extensions = self.info['extensions']
@@ -353,10 +406,12 @@ class _AppHandler(object):
             config = self._read_build_config()
             uninstalled = config.get('uninstalled_core_extensions', [])
             if extension in uninstalled:
+                self.logger.info('Installing core extension %s' % extension)
                 uninstalled.remove(extension)
                 config['uninstalled_core_extensions'] = uninstalled
                 self._write_build_config(config)
-            return
+                return True
+            return False
 
         # Create the app dirs if needed.
         self._ensure_app_dirs()
@@ -536,18 +591,21 @@ class _AppHandler(object):
 
     def uninstall_extension(self, name):
         """Uninstall an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         # Allow for uninstalled core extensions.
         data = self.info['core_data']
         if name in self.info['core_extensions']:
-            self.logger.info('Uninstalling core extension %s' % name)
             config = self._read_build_config()
             uninstalled = config.get('uninstalled_core_extensions', [])
             if name not in uninstalled:
+                self.logger.info('Uninstalling core extension %s' % name)
                 uninstalled.append(name)
                 config['uninstalled_core_extensions'] = uninstalled
                 self._write_build_config(config)
-            return True
+                return True
+            return False
 
         local = self.info['local_extensions']
 
@@ -568,8 +626,52 @@ class _AppHandler(object):
         self.logger.warn('No labextension named "%s" installed' % name)
         return False
 
+    def update_all_extensions(self):
+        """Update all non-local extensions.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
+        should_rebuild = False
+        for (extname, _) in self.info['extensions'].items():
+            if extname in self.info['local_extensions']:
+                continue
+            updated = self._update_extension(extname)
+            # Rebuild if at least one update happens:
+            should_rebuild = should_rebuild or updated
+        return should_rebuild
+
+    def update_extension(self, name):
+        """Update an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
+        if name not in self.info['extensions']:
+            self.logger.warn('No labextension named "%s" installed' % name)
+            return False
+        return self._update_extension(name)
+
+    def _update_extension(self, name):
+        """Update an extension by name.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
+        """
+        try:
+            latest = self._latest_compatible_package_version(name)
+        except URLError:
+            return False
+        if latest is None:
+            return False
+        if latest == self.info['extensions'][name]['version']:
+            self.logger.info('Extension %r already up to date' % name)
+            return False
+        self.logger.info('Updating %s to version %s' % (name, latest))
+        return self.install_extension('%s@%s' % (name, latest))
+
+
     def link_package(self, path):
         """Link a package at the given path.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         path = _normalize_path(path)
         if not osp.exists(path) or not osp.isdir(path):
@@ -596,7 +698,11 @@ class _AppHandler(object):
         return True
 
     def unlink_package(self, path):
-        """Link a package by name or at the given path.
+        """Unlink a package by name or at the given path.
+
+        A ValueError is raised if the path is not an unlinkable package.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         path = _normalize_path(path)
         config = self._read_build_config()
@@ -623,17 +729,25 @@ class _AppHandler(object):
             raise ValueError('No linked package for %s' % path)
 
         self._write_build_config(config)
+        return True
 
     def toggle_extension(self, extension, value):
         """Enable or disable a lab extension.
+
+        Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         config = self._read_page_config()
         disabled = config.setdefault('disabledExtensions', [])
+        did_something = False
         if value and extension not in disabled:
             disabled.append(extension)
-        if not value and extension in disabled:
+            did_something = True
+        elif not value and extension in disabled:
             disabled.remove(extension)
-        self._write_page_config(config)
+            did_something = True
+        if did_something:
+            self._write_page_config(config)
+        return did_something
 
     def check_extension(self, extension, check_installed_only=False):
         """Check if a lab extension is enabled or disabled
@@ -838,6 +952,19 @@ class _AppHandler(object):
                 path = path.lower()
             return path
 
+        jlab['linkedPackages'] = dict()
+
+        # Handle local extensions.
+        for (key, source) in local.items():
+            jlab['linkedPackages'][key] = source
+
+        # Handle linked packages.
+        for (key, item) in linked.items():
+            path = pjoin(self.app_dir, 'staging', 'linked_packages')
+            path = pjoin(path, item['filename'])
+            data['dependencies'][key] = format_path(path)
+            jlab['linkedPackages'][key] = item['source']
+
         # Handle extensions
         compat_errors = self._get_extension_compat()
         for (key, value) in extensions.items():
@@ -862,19 +989,6 @@ class _AppHandler(object):
                     ext = ''
                 jlab[item + 's'][key] = ext
 
-        jlab['linkedPackages'] = dict()
-
-        # Handle local extensions.
-        for (key, source) in local.items():
-            jlab['linkedPackages'][key] = source
-
-        # Handle linked packages.
-        for (key, item) in linked.items():
-            path = pjoin(self.app_dir, 'staging', 'linked_packages')
-            path = pjoin(path, item['filename'])
-            data['dependencies'][key] = format_path(path)
-            jlab['linkedPackages'][key] = item['source']
-
         # Handle uninstalled core extensions.
         for item in self.info['uninstalled_core']:
             if item in jlab['extensions']:
@@ -887,10 +1001,17 @@ class _AppHandler(object):
         return data
 
     def _check_local(self, name, source, dname):
+        """Check if a local package has changed.
+
+        `dname` is the directory name of existing package tar archives.
+        """
         # Extract the package in a temporary directory.
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(source, tempdir)
             # Test if the file content has changed.
+            # This relies on `_extract_package` adding the hashsum
+            # to the filename, allowing a simple exist check to
+            # compare the hash to the "cache" in dname.
             target = pjoin(dname, info['filename'])
             return not osp.exists(target)
 
@@ -943,7 +1064,7 @@ class _AppHandler(object):
         extensions = dict()
         location = 'app' if dname == self.app_dir else 'sys'
         for target in glob.glob(pjoin(dname, 'extensions', '*.tgz')):
-            data = _read_package(target)
+            data = read_package(target)
             deps = data.get('dependencies', dict())
             name = data['name']
             jlab = data.get('jupyterlab', dict())
@@ -985,7 +1106,7 @@ class _AppHandler(object):
 
         for path in glob.glob(pjoin(dname, '*.tgz')):
             path = osp.realpath(path)
-            data = _read_package(path)
+            data = read_package(path)
             name = data['name']
             if name not in info:
                 self.logger.warn('Removing orphaned linked package %s' % name)
@@ -1166,21 +1287,26 @@ class _AppHandler(object):
         info['path'] = target
         return info
 
-    def _extract_package(self, source, tempdir):
-        # npm pack the extension
+    def _extract_package(self, source, tempdir, quiet=False):
+        """Call `npm pack` for an extension.
+
+        The pack command will download the package tar if `source` is
+        a package name, or run `npm pack` locally if `source` is a
+        directory.
+        """
         is_dir = osp.exists(source) and osp.isdir(source)
         if is_dir and not osp.exists(pjoin(source, 'node_modules')):
-            self._run(['node', YARN_PATH, 'install'], cwd=source)
+            self._run(['node', YARN_PATH, 'install'], cwd=source, quiet=quiet)
 
         info = dict(source=source, is_dir=is_dir)
 
-        ret = self._run([which('npm'), 'pack', source], cwd=tempdir)
+        ret = self._run([which('npm'), 'pack', source], cwd=tempdir, quiet=quiet)
         if ret != 0:
             msg = '"%s" is not a valid npm package'
             raise ValueError(msg % source)
 
         path = glob.glob(pjoin(tempdir, '*.tgz'))[0]
-        info['data'] = _read_package(path)
+        info['data'] = read_package(path)
         if is_dir:
             info['sha'] = sha = _tarsum(path)
             target = path.replace('.tgz', '-%s.tgz' % sha)
@@ -1199,7 +1325,10 @@ class _AppHandler(object):
     def _latest_compatible_package_version(self, name):
         """Get the latest compatible version of a package"""
         core_data = self.info['core_data']
-        metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        try:
+            metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        except URLError:
+            return
         versions = metadata.get('versions', [])
 
         # Sort pre-release first, as we will reverse the sort:
@@ -1215,39 +1344,92 @@ class _AppHandler(object):
                 # Found a compatible version
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
-                    info = self._extract_package('%s@%s' % (name, version), tempdir)
+                    info = self._extract_package(
+                        '%s@%s' % (name, version), tempdir, quiet=True)
                 if _validate_extension(info['data']):
                     # Invalid, do not consider other versions
                     return
                 # Valid
                 return version
 
+    def latest_compatible_package_versions(self, names):
+        """Get the latest compatible versions of several packages
+
+        Like _latest_compatible_package_version, but optimized for
+        retrieving the latest version for several packages in one go.
+        """
+        core_data = self.info['core_data']
+
+        keys = []
+        for name in names:
+            try:
+                metadata = _fetch_package_metadata(self.registry, name, self.logger)
+            except URLError:
+                continue
+            versions = metadata.get('versions', [])
+
+            # Sort pre-release first, as we will reverse the sort:
+            def sort_key(key_value):
+                return _semver_key(key_value[0], prerelease_first=True)
+
+            for version, data in sorted(versions.items(),
+                                        key=sort_key,
+                                        reverse=True):
+                deps = data.get('dependencies', {})
+                errors = _validate_compatibility(name, deps, core_data)
+                if not errors:
+                    # Found a compatible version
+                    keys.append('%s@%s' % (name, version))
+                    break  # break inner for
+
+
+        versions = {}
+        if not keys:
+            return versions
+        with TemporaryDirectory() as tempdir:
+            ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir, quiet=True)
+            if ret != 0:
+                msg = '"%s" is not a valid npm package'
+                raise ValueError(msg % keys)
+
+            for key in keys:
+                fname = key[0].replace('@', '') + key[1:].replace('@', '-').replace('/', '-') + '.tgz'
+                data = read_package(os.path.join(tempdir, fname))
+                # Verify that the version is a valid extension.
+                if not _validate_extension(data):
+                    # Valid
+                    versions[key] = data['version']
+        return versions
+
     def _format_no_compatible_package_version(self, name):
         """Get the latest compatible version of a package"""
         core_data = self.info['core_data']
-        metadata = _fetch_package_metadata(self.registry, name, self.logger)
-        versions = metadata.get('versions', [])
-
-        # Sort pre-release first, as we will reverse the sort:
-        def sort_key(key_value):
-            return _semver_key(key_value[0], prerelease_first=True)
-
-        store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
-        latest_deps = store[0][1].get('dependencies', {})
-        core_deps = core_data['dependencies']
-        singletons = core_data['jupyterlab']['singletonPackages']
-
         # Whether lab version is too new:
         lab_newer_than_latest = False
         # Whether the latest version of the extension depend on a "future" version
         # of a singleton package (from the perspective of current lab version):
         latest_newer_than_lab = False
+        try:
+            metadata = _fetch_package_metadata(self.registry, name, self.logger)
+        except URLError:
+            pass
+        else:
+            versions = metadata.get('versions', [])
 
-        for (key, value) in latest_deps.items():
-            if key in singletons:
-                c = _compare_ranges(core_deps[key], value)
-                lab_newer_than_latest = lab_newer_than_latest or c < 0
-                latest_newer_than_lab = latest_newer_than_lab or c > 0
+            # Sort pre-release first, as we will reverse the sort:
+            def sort_key(key_value):
+                return _semver_key(key_value[0], prerelease_first=True)
+
+            store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
+            latest_deps = store[0][1].get('dependencies', {})
+            core_deps = core_data['dependencies']
+            singletons = core_data['jupyterlab']['singletonPackages']
+
+            for (key, value) in latest_deps.items():
+                if key in singletons:
+                    c = _compare_ranges(core_deps[key], value)
+                    lab_newer_than_latest = lab_newer_than_latest or c < 0
+                    latest_newer_than_lab = latest_newer_than_lab or c > 0
 
         if lab_newer_than_latest:
             # All singleton deps in current version of lab are newer than those
@@ -1296,19 +1478,6 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
-
-
-def _read_package(target):
-    """Read the package data in a given target tarball.
-    """
-    tar = tarfile.open(target, "r")
-    f = tar.extractfile('package/package.json')
-    data = json.loads(f.read().decode('utf8'))
-    data['jupyterlab_extracted_files'] = [
-        f.path[len('package/'):] for f in tar.getmembers()
-    ]
-    tar.close()
-    return data
 
 
 def _validate_extension(data):
@@ -1557,6 +1726,18 @@ def _semver_prerelease_key(prerelease):
 
 
 def _semver_key(version, prerelease_first=False):
+    """A sort key-function for sorting semver verion string.
+
+    The default sorting order is ascending (0.x -> 1.x -> 2.x).
+
+    If `prerelease_first`, pre-releases will come before
+    ALL other semver keys (not just those with same version).
+    I.e (1.0-pre, 2.0-pre -> 0.x -> 1.x -> 2.x).
+
+    Otherwise it will sort in the standard way that it simply
+    comes before any release with shared version string
+    (0.x -> 1.0-pre -> 1.x -> 2.0-pre -> 2.x).
+    """
     v = make_semver(version, True)
     if prerelease_first:
         key = (0,) if v.prerelease else (1,)
@@ -1582,9 +1763,12 @@ def _fetch_package_metadata(registry, name, logger):
                         ' q=1.0, application/json; q=0.8, */*')
         }
     )
-    logger.debug('Fetching URL: %s' % (req.full_url))
     try:
-        with urlopen(req) as response:
+        logger.debug('Fetching URL: %s' % (req.full_url))
+    except AttributeError:
+        logger.debug('Fetching URL: %s' % (req.get_full_url()))
+    try:
+        with contextlib.closing(urlopen(req)) as response:
             return json.load(response)
     except URLError as exc:
         logger.warning(

@@ -1,26 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
+import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal
-} from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 
-import {
-  PanelLayout, TabPanel, Widget
-} from '@phosphor/widgets';
-
+import { PanelLayout, TabPanel, Widget } from '@phosphor/widgets';
 
 /**
  * The class name added to inspector panels.
@@ -52,21 +41,19 @@ const BACK_CLASS = 'jp-InspectorItem-back';
  */
 const FORWARD_CLASS = 'jp-InspectorItem-forward';
 
-
 /* tslint:disable */
 /**
  * The inspector panel token.
  */
-export
-const IInspector = new Token<IInspector>('@jupyterlab/inspector:IInspector');
+export const IInspector = new Token<IInspector>(
+  '@jupyterlab/inspector:IInspector'
+);
 /* tslint:enable */
-
 
 /**
  * An interface for an inspector.
  */
-export
-interface IInspector {
+export interface IInspector {
   /**
    * Create an inspector child item and return a disposable to remove it.
    *
@@ -82,17 +69,14 @@ interface IInspector {
   source: IInspector.IInspectable | null;
 }
 
-
 /**
  * A namespace for inspector interfaces.
  */
-export
-namespace IInspector {
+export namespace IInspector {
   /**
    * The definition of an inspectable source.
    */
-  export
-  interface IInspectable {
+  export interface IInspectable {
     /**
      * A signal emitted when the handler is disposed.
      */
@@ -121,8 +105,7 @@ namespace IInspector {
   /**
    * The definition of a child item of an inspector.
    */
-  export
-  interface IInspectorItem {
+  export interface IInspectorItem {
     /**
      * The optional class name added to the inspector child widget.
      */
@@ -155,8 +138,7 @@ namespace IInspector {
   /**
    * An update value for code inspectors.
    */
-  export
-  interface IInspectorUpdate {
+  export interface IInspectorUpdate {
     /**
      * The content being sent to the inspector for display.
      */
@@ -169,12 +151,10 @@ namespace IInspector {
   }
 }
 
-
 /**
  * A panel which contains a set of inspectors.
  */
-export
-class InspectorPanel extends TabPanel implements IInspector {
+export class InspectorPanel extends TabPanel implements IInspector {
   /**
    * Construct an inspector.
    */
@@ -202,7 +182,9 @@ class InspectorPanel extends TabPanel implements IInspector {
     }
 
     // Clear the inspector child items (but maintain history) if necessary.
-    Object.keys(this._items).forEach(i => { this._items[i].content = null; });
+    Object.keys(this._items).forEach(i => {
+      this._items[i].content = null;
+    });
 
     this._source = source;
 
@@ -234,7 +216,7 @@ class InspectorPanel extends TabPanel implements IInspector {
     this._items[item.type] = widget;
     this.addWidget(widget);
 
-    if ((Object.keys(this._items)).length < 2) {
+    if (Object.keys(this._items).length < 2) {
       this.tabBar.hide();
     } else {
       this.tabBar.show();
@@ -248,7 +230,7 @@ class InspectorPanel extends TabPanel implements IInspector {
       widget.dispose();
       delete this._items[item.type];
 
-      if ((Object.keys(this._items)).length < 2) {
+      if (Object.keys(this._items).length < 2) {
         this.tabBar.hide();
       } else {
         this.tabBar.show();
@@ -267,14 +249,19 @@ class InspectorPanel extends TabPanel implements IInspector {
     let items = this._items;
 
     // Dispose the inspector child items.
-    Object.keys(items).forEach(i => { items[i].dispose(); });
+    Object.keys(items).forEach(i => {
+      items[i].dispose();
+    });
     super.dispose();
   }
 
   /**
    * Handle inspector update signals.
    */
-  protected onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
+  protected onInspectorUpdate(
+    sender: any,
+    args: IInspector.IInspectorUpdate
+  ): void {
     let widget = this._items[args.type];
     if (!widget) {
       return;
@@ -322,7 +309,6 @@ class InspectorPanel extends TabPanel implements IInspector {
   private _items: { [type: string]: InspectorItem } = Object.create(null);
   private _source: IInspector.IInspectable | null = null;
 }
-
 
 /**
  * A code inspector child widget.
@@ -445,21 +431,27 @@ class InspectorItem extends Widget {
 
     let clear = new ToolbarButton({
       className: CLEAR_CLASS,
-      onClick: () => { this._clear(); },
+      onClick: () => {
+        this._clear();
+      },
       tooltip: 'Clear history.'
     });
     toolbar.addItem('clear', clear);
 
     let back = new ToolbarButton({
       className: BACK_CLASS,
-      onClick: () => { this._back(); },
+      onClick: () => {
+        this._back();
+      },
       tooltip: 'Navigate back in history.'
     });
     toolbar.addItem('back', back);
 
     let forward = new ToolbarButton({
       className: FORWARD_CLASS,
-      onClick: () => { this._forward(); },
+      onClick: () => {
+        this._forward();
+      },
       tooltip: 'Navigate forward in history.'
     });
     toolbar.addItem('forward', forward);

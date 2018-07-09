@@ -2,6 +2,8 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+set -ex
+set -o pipefail
 
 if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_BRANCH == "master" && $GROUP == "docs" ]]
 then

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "0.15.2",
+  "version": "0.16.0-1",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,27 +8,28 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.16.3",
-    "@jupyterlab/cells": "^0.16.2",
-    "@jupyterlab/codemirror": "^0.16.2",
-    "@jupyterlab/completer": "^0.16.2",
-    "@jupyterlab/rendermime": "^0.16.2",
-    "@jupyterlab/services": "^2.0.2",
-    "@jupyterlab/theme-light-extension": "^0.16.2",
+    "@jupyterlab/apputils": "^0.17.0-1",
+    "@jupyterlab/cells": "^0.17.0-1",
+    "@jupyterlab/codemirror": "^0.17.0-1",
+    "@jupyterlab/completer": "^0.17.0-1",
+    "@jupyterlab/rendermime": "^0.17.0-1",
+    "@jupyterlab/services": "^3.0.0-1",
+    "@jupyterlab/theme-light-extension": "^0.17.0-1",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/widgets": "^1.6.0",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
     "css-loader": "~0.28.7",
-    "file-loader": "~0.10.1",
+    "file-loader": "~1.1.11",
     "raw-loader": "~0.5.1",
     "rimraf": "~2.6.2",
-    "style-loader": "~0.13.2",
-    "typescript": "~2.8.3",
-    "url-loader": "~0.5.9",
+    "style-loader": "~0.21.0",
+    "typescript": "~2.9.2",
+    "url-loader": "~1.0.1",
     "watch": "~1.0.2",
-    "webpack": "~2.7.0",
+    "webpack": "~4.12.0",
+    "webpack-cli": "^3.0.3",
     "whatwg-fetch": "~2.0.3"
   }
 }

@@ -1,23 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IEditorMimeTypeService
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import {
-  nbformat, PathExt
-} from '@jupyterlab/coreutils';
+import { nbformat, PathExt } from '@jupyterlab/coreutils';
 
-import {
-  Mode
-} from './mode';
+import { Mode } from './mode';
 
 /**
  * The mime type service for CodeMirror.
  */
-export
-class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
+export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
   /**
    * Returns a mime type for the given language info.
    *
@@ -26,11 +19,13 @@ class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
    */
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     let ext = info.file_extension || '';
-    return Mode.findBest(info.codemirror_mode as any || {
-      mimetype: info.mimetype,
-      name: info.name,
-      ext: [ext.split('.').slice(-1)[0]]
-    }).mime;
+    return Mode.findBest(
+      (info.codemirror_mode as any) || {
+        mimetype: info.mimetype,
+        name: info.name,
+        ext: [ext.split('.').slice(-1)[0]]
+      }
+    ).mime;
   }
 
   /**

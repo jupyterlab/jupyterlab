@@ -3,37 +3,26 @@
 
 import expect = require('expect.js');
 
-import {
-  toArray
-} from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
+
+import { INotebookModel } from '@jupyterlab/notebook';
+
+import { NotebookPanel } from '@jupyterlab/notebook';
+
+import { NotebookWidgetFactory } from '@jupyterlab/notebook';
+
+import { Context } from '@jupyterlab/docregistry';
+
+import { createNotebookContext } from '../../utils';
 
 import {
-  INotebookModel
-} from '@jupyterlab/notebook';
-
-import {
-  NotebookPanel
-} from '@jupyterlab/notebook';
-
-import {
-  NotebookWidgetFactory
-} from '@jupyterlab/notebook';
-
-import {
-  Context
-} from '@jupyterlab/docregistry';
-
-import {
-  createNotebookContext
-} from '../../utils';
-
-import {
-  createNotebookPanelFactory, defaultEditorConfig, rendermime, mimeTypeService
+  createNotebookPanelFactory,
+  defaultEditorConfig,
+  rendermime,
+  mimeTypeService
 } from '../../notebook-utils';
 
-
 const contentFactory = createNotebookPanelFactory();
-
 
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
@@ -46,47 +35,36 @@ function createFactory(): NotebookWidgetFactory {
   });
 }
 
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookWidgetFactory', () => {
+    let context: Context<INotebookModel>;
 
-describe('notebook/notebook/widgetfactory', () => {
-
-  let context: Context<INotebookModel>;
-
-  beforeEach(() => {
-    return createNotebookContext().then(c => {
-      context = c;
+    beforeEach(async () => {
+      context = await createNotebookContext();
     });
-  });
 
-  afterEach(() => {
-    return context.session.shutdown().then(() => {
+    afterEach(async () => {
+      await context.session.shutdown();
       context.dispose();
     });
-  });
-
-  describe('NotebookWidgetFactory', () => {
 
     describe('#constructor()', () => {
-
       it('should create a notebook widget factory', () => {
         let factory = createFactory();
         expect(factory).to.be.a(NotebookWidgetFactory);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should get whether the factory has been disposed', () => {
         let factory = createFactory();
         expect(factory.isDisposed).to.be(false);
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#dispose()', () => {
-
       it('should dispose of the resources held by the factory', () => {
         let factory = createFactory();
         factory.dispose();
@@ -99,11 +77,9 @@ describe('notebook/notebook/widgetfactory', () => {
         factory.dispose();
         expect(factory.isDisposed).to.be(true);
       });
-
     });
 
     describe('#editorConfig', () => {
-
       it('should be the editor config passed into the constructor', () => {
         let factory = createFactory();
         expect(factory.editorConfig).to.be(defaultEditorConfig);
@@ -115,11 +91,9 @@ describe('notebook/notebook/widgetfactory', () => {
         factory.editorConfig = newConfig;
         expect(factory.editorConfig).to.be(newConfig);
       });
-
     });
 
     describe('#createNew()', () => {
-
       it('should create a new `NotebookPanel` widget', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
@@ -135,7 +109,7 @@ describe('notebook/notebook/widgetfactory', () => {
       it('should pass the editor config to the notebook', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        expect(panel.notebook.editorConfig).to.be(defaultEditorConfig);
+        expect(panel.content.editorConfig).to.be(defaultEditorConfig);
       });
 
       it('should populate the default toolbar items', () => {
@@ -146,9 +120,6 @@ describe('notebook/notebook/widgetfactory', () => {
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');
       });
-
     });
-
   });
-
 });

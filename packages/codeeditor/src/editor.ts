@@ -1,27 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
-  IDisposable
-} from '@phosphor/disposable';
-
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
-import {
-  IChangedArgs
-} from '@jupyterlab/coreutils';
-
-import {
-  IModelDB, ModelDB, IObservableValue, ObservableValue,
-  IObservableMap, IObservableString
+  IModelDB,
+  ModelDB,
+  IObservableValue,
+  ObservableValue,
+  IObservableMap,
+  IObservableString
 } from '@jupyterlab/observables';
-
 
 /**
  * A namespace for code editors.
@@ -31,13 +26,11 @@ import {
  * - Changes in implementations of the code editor should only be caused by changes in concrete editors.
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
-export
-namespace CodeEditor {
+export namespace CodeEditor {
   /**
    * A zero-based position in the editor.
    */
-  export
-  interface IPosition extends JSONObject {
+  export interface IPosition extends JSONObject {
     /**
      * The cursor line number.
      */
@@ -52,8 +45,7 @@ namespace CodeEditor {
   /**
    * The dimension of an element.
    */
-  export
-  interface IDimension {
+  export interface IDimension {
     /**
      * The width of an element in pixels.
      */
@@ -68,14 +60,12 @@ namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export
-  interface ICoordinate extends JSONObject, ClientRect {}
+  export interface ICoordinate extends JSONObject, ClientRect {}
 
   /**
    * A range.
    */
-  export
-  interface IRange extends JSONObject {
+  export interface IRange extends JSONObject {
     /**
      * The position of the first character in the current range.
      *
@@ -98,8 +88,7 @@ namespace CodeEditor {
   /**
    * A selection style.
    */
-  export
-  interface ISelectionStyle extends JSONObject {
+  export interface ISelectionStyle extends JSONObject {
     /**
      * A class name added to a selection.
      */
@@ -119,8 +108,7 @@ namespace CodeEditor {
   /**
    * The default selection style.
    */
-  export
-  const defaultSelectionStyle: ISelectionStyle = {
+  export const defaultSelectionStyle: ISelectionStyle = {
     className: '',
     displayName: '',
     color: 'black'
@@ -129,8 +117,7 @@ namespace CodeEditor {
   /**
    * A text selection.
    */
-  export
-  interface ITextSelection extends IRange {
+  export interface ITextSelection extends IRange {
     /**
      * The uuid of the text selection owner.
      */
@@ -162,8 +149,7 @@ namespace CodeEditor {
   /**
    * An editor model.
    */
-  export
-  interface IModel extends IDisposable {
+  export interface IModel extends IDisposable {
     /**
      * A signal emitted when a property changes.
      */
@@ -197,8 +183,7 @@ namespace CodeEditor {
   /**
    * The default implementation of the editor model.
    */
-  export
-  class Model implements IModel {
+  export class Model implements IModel {
     /**
      * Construct a new Model.
      */
@@ -280,7 +265,10 @@ namespace CodeEditor {
       Signal.clearData(this);
     }
 
-    private _onMimeTypeChanged(mimeType: IObservableValue, args: ObservableValue.IChangedArgs): void {
+    private _onMimeTypeChanged(
+      mimeType: IObservableValue,
+      args: ObservableValue.IChangedArgs
+    ): void {
       this._mimeTypeChanged.emit({
         name: 'mimeType',
         oldValue: args.oldValue as string,
@@ -295,8 +283,7 @@ namespace CodeEditor {
   /**
    * A selection owner.
    */
-  export
-  interface ISelectionOwner {
+  export interface ISelectionOwner {
     /**
      * The uuid of this selection owner.
      */
@@ -357,8 +344,10 @@ namespace CodeEditor {
    * Return `true` to prevent the default handling of the event by the
    * editor.
    */
-  export
-  type KeydownHandler = (instance: IEditor, event: KeyboardEvent) => boolean;
+  export type KeydownHandler = (
+    instance: IEditor,
+    event: KeyboardEvent
+  ) => boolean;
 
   /**
    * The location of requested edges.
@@ -368,16 +357,15 @@ namespace CodeEditor {
   /**
    * A widget that provides a code editor.
    */
-  export
-  interface IEditor extends ISelectionOwner, IDisposable {
+  export interface IEditor extends ISelectionOwner, IDisposable {
     /**
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
 
-   /**
-    * The default selection style for the editor.
-    */
+    /**
+     * The default selection style for the editor.
+     */
     selectionStyle: CodeEditor.ISelectionStyle;
 
     /**
@@ -399,7 +387,6 @@ namespace CodeEditor {
      * The widget of a character in the editor in pixels.
      */
     readonly charWidth: number;
-
 
     /**
      * Get the number of lines in the eidtor.
@@ -553,14 +540,27 @@ namespace CodeEditor {
   /**
    * A factory used to create a code editor.
    */
-  export
-  type Factory = (options: IOptions) => CodeEditor.IEditor;
+  export type Factory = (options: IOptions) => CodeEditor.IEditor;
 
   /**
    * The configuration options for an editor.
    */
-  export
-  interface IConfig {
+  export interface IConfig {
+    /**
+     * User preferred font family for text editors.
+     */
+    fontFamily: string | null;
+
+    /**
+     * User preferred size in pixel of the font used in text editors.
+     */
+    fontSize: number | null;
+
+    /**
+     * User preferred text line height, as a multiplier of font size.
+     */
+    lineHeight: number | null;
+
     /**
      * Whether line numbers should be displayed.
      */
@@ -600,8 +600,10 @@ namespace CodeEditor {
   /**
    * The default configuration options for an editor.
    */
-  export
-  let defaultConfig: IConfig = {
+  export let defaultConfig: IConfig = {
+    fontFamily: null,
+    fontSize: null,
+    lineHeight: null,
     lineNumbers: false,
     lineWrap: true,
     readOnly: false,
@@ -614,8 +616,7 @@ namespace CodeEditor {
   /**
    * The options used to initialize an editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The host widget used by the editor.
      */
@@ -642,10 +643,8 @@ namespace CodeEditor {
     config?: Partial<IConfig>;
   }
 
-  export
-  namespace Model {
-    export
-    interface IOptions {
+  export namespace Model {
+    export interface IOptions {
       /**
        * The initial value of the model.
        */

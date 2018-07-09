@@ -3,17 +3,11 @@
 
 import expect = require('expect.js');
 
-import {
-  ObservableString
-} from '@jupyterlab/observables';
-
+import { ObservableString } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
-
   describe('ObservableString', () => {
-
     describe('#constructor()', () => {
-
       it('should accept no arguments', () => {
         let value = new ObservableString();
         expect(value instanceof ObservableString).to.be(true);
@@ -28,11 +22,9 @@ describe('@jupyterlab/observables', () => {
         let value = new ObservableString('hello');
         expect(value.text).to.eql('hello');
       });
-
     });
 
     describe('#type', () => {
-
       it('should return `String`', () => {
         let value = new ObservableString();
         expect(value.type).to.be('String');
@@ -40,11 +32,12 @@ describe('@jupyterlab/observables', () => {
     });
 
     describe('#changed', () => {
-
       it('should be emitted when the string changes', () => {
         let called = false;
         let value = new ObservableString();
-        value.changed.connect(() => { called = true; });
+        value.changed.connect(() => {
+          called = true;
+        });
         value.text = 'change';
         expect(called).to.be(true);
       });
@@ -63,22 +56,18 @@ describe('@jupyterlab/observables', () => {
         value.text = 'new';
         expect(called).to.be(true);
       });
-
     });
 
     describe('#isDisposed', () => {
-
       it('should test whether the string is disposed', () => {
         let value = new ObservableString();
         expect(value.isDisposed).to.be(false);
         value.dispose();
         expect(value.isDisposed).to.be(true);
       });
-
     });
 
     describe('#setter()', () => {
-
       it('should set the item at a specific index', () => {
         let value = new ObservableString('old');
         value.text = 'new';
@@ -99,11 +88,9 @@ describe('@jupyterlab/observables', () => {
         value.text = 'new';
         expect(called).to.be(true);
       });
-
     });
 
     describe('#insert()', () => {
-
       it('should insert an substring into the string at a specific index', () => {
         let value = new ObservableString('one three');
         value.insert(4, 'two ');
@@ -124,11 +111,9 @@ describe('@jupyterlab/observables', () => {
         value.insert(4, 'two ');
         expect(called).to.be(true);
       });
-
     });
 
     describe('#remove()', () => {
-
       it('should remove a substring from the string', () => {
         let value = new ObservableString('one two two three');
         value.remove(4, 8);
@@ -149,11 +134,9 @@ describe('@jupyterlab/observables', () => {
         value.remove(4, 8);
         expect(called).to.be(true);
       });
-
     });
 
     describe('#clear()', () => {
-
       it('should empty the string', () => {
         let value = new ObservableString('full');
         value.clear();
@@ -175,9 +158,6 @@ describe('@jupyterlab/observables', () => {
         value.clear();
         expect(called).to.be(true);
       });
-
     });
-
   });
-
 });

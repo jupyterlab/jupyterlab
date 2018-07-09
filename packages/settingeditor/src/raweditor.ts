@@ -1,46 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Toolbar
-} from '@jupyterlab/apputils';
+import { Toolbar } from '@jupyterlab/apputils';
 
-import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  BoxLayout, Widget
-} from '@phosphor/widgets';
+import { BoxLayout, Widget } from '@phosphor/widgets';
 
-import {
-  createInspector
-} from './inspector';
+import { createInspector } from './inspector';
 
-import {
-  SplitPanel
-} from './splitpanel';
-
+import { SplitPanel } from './splitpanel';
 
 /**
  * A class name added to all raw editors.
@@ -67,12 +46,10 @@ const DEFAULT_TITLE = 'System Defaults';
  */
 const USER_TITLE = 'User Overrides';
 
-
 /**
  * A raw JSON settings editor.
  */
-export
-class RawEditor extends SplitPanel {
+export class RawEditor extends SplitPanel {
   /**
    * Create a new plugin editor.
    */
@@ -89,21 +66,21 @@ class RawEditor extends SplitPanel {
     this._commands = commands;
 
     // Create read-only defaults editor.
-    const defaults = this._defaults = new CodeEditorWrapper({
+    const defaults = (this._defaults = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
       factory: editorFactory
-    });
+    }));
 
     defaults.editor.model.value.text = '';
     defaults.editor.model.mimeType = 'text/javascript';
     defaults.editor.setOption('readOnly', true);
 
     // Create read-write user settings editor.
-    const user = this._user = new CodeEditorWrapper({
+    const user = (this._user = new CodeEditorWrapper({
       model: new CodeEditor.Model(),
       factory: editorFactory,
       config: { lineNumbers: true }
-    });
+    }));
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
@@ -169,8 +146,8 @@ class RawEditor extends SplitPanel {
       return;
     }
 
-    const samePlugin = (settings && this._settings) &&
-      settings.plugin === this._settings.plugin;
+    const samePlugin =
+      settings && this._settings && settings.plugin === this._settings.plugin;
 
     if (samePlugin) {
       return;
@@ -246,8 +223,11 @@ class RawEditor extends SplitPanel {
     const settings = this._settings;
     const source = this._user.editor.model.value.text;
 
-    return settings.save(source)
-      .then(() => { this._updateToolbar(false, false); })
+    return settings
+      .save(source)
+      .then(() => {
+        this._updateToolbar(false, false);
+      })
       .catch(reason => {
         this._updateToolbar(true, false);
         this._onSaveError(reason);
@@ -352,17 +332,14 @@ class RawEditor extends SplitPanel {
   private _user: CodeEditorWrapper;
 }
 
-
 /**
  * A namespace for `RawEditor` statics.
  */
-export
-namespace RawEditor {
+export namespace RawEditor {
   /**
    * The toolbar commands and registry for the setting editor toolbar.
    */
-  export
-  interface ICommandBundle {
+  export interface ICommandBundle {
     /**
      * The command registry.
      */
@@ -387,8 +364,7 @@ namespace RawEditor {
   /**
    * The instantiation options for a raw editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The toolbar commands and registry for the setting editor toolbar.
      */
@@ -416,7 +392,6 @@ namespace RawEditor {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -424,10 +399,9 @@ namespace Private {
   /**
    * Returns the wrapped setting defaults editor.
    */
-  export
-  function defaultsEditor(editor: Widget): Widget {
+  export function defaultsEditor(editor: Widget): Widget {
     const widget = new Widget();
-    const layout = widget.layout = new BoxLayout({ spacing: 0 });
+    const layout = (widget.layout = new BoxLayout({ spacing: 0 }));
     const banner = new Widget();
     const bar = new Toolbar();
 
@@ -442,8 +416,10 @@ namespace Private {
   /**
    * Populate the raw editor toolbar.
    */
-  export
-  function populateToolbar(commands: RawEditor.ICommandBundle, toolbar: Toolbar<Widget>): void {
+  export function populateToolbar(
+    commands: RawEditor.ICommandBundle,
+    toolbar: Toolbar<Widget>
+  ): void {
     const { debug, registry, revert, save } = commands;
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
@@ -463,10 +439,13 @@ namespace Private {
   /**
    * Returns the wrapped user overrides editor.
    */
-  export
-  function userEditor(editor: Widget, toolbar: Toolbar<Widget>, inspector: Widget): Widget {
+  export function userEditor(
+    editor: Widget,
+    toolbar: Toolbar<Widget>,
+    inspector: Widget
+  ): Widget {
     const widget = new Widget();
-    const layout = widget.layout = new BoxLayout({ spacing: 0 });
+    const layout = (widget.layout = new BoxLayout({ spacing: 0 }));
     const banner = new Widget();
 
     banner.node.innerText = USER_TITLE;
