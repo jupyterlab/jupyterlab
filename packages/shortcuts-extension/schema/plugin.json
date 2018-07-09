@@ -89,7 +89,7 @@
         "selector": {
           "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
         },
-        "title": { "default": "New Console" },
+        "title": { "default": "Invoke Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -102,7 +102,7 @@
         "selector": {
           "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
         },
-        "title": { "default": "New Notebook" },
+        "title": { "default": "Invoke Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -135,7 +135,7 @@
         "command": { "default": "docmanager:close" },
         "keys": { "default": ["Ctrl Q"] },
         "selector": { "default": ".jp-Activity" },
-        "title": { "default": "Close Launcher" },
+        "title": { "default": "Close Activity" },
         "category": { "default": "File Operations" }
       },
       "type": "object"
@@ -333,7 +333,7 @@
         "command": { "default": "imageviewer:invert-colors" },
         "keys": { "default": ["I"] },
         "selector": { "default": ".jp-ImageViewer" },
-        "title": { "default": "Inverty Colors" },
+        "title": { "default": "Invert Colors" },
         "category": { "default": "Image Viewer" }
       },
       "type": "object"
@@ -355,7 +355,7 @@
         "command": { "default": "kernelmenu:interrupt" },
         "keys": { "default": ["I", "I"] },
         "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Shutdown All Kernels" },
+        "title": { "default": "Interrupt Kernel" },
         "category": { "default": "Kernel Operations" }
       },
       "type": "object"
@@ -366,7 +366,7 @@
         "command": { "default": "kernelmenu:restart" },
         "keys": { "default": ["0", "0"] },
         "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Restart Kernels" },
+        "title": { "default": "Restart Kernel" },
         "category": { "default": "Kernel Operations" }
       },
       "type": "object"
@@ -509,7 +509,7 @@
         "command": { "default": "notebook:copy-cell" },
         "keys": { "default": ["C"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Copy Cells" },
+        "title": { "default": "Copy Cell(s)" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -520,7 +520,7 @@
         "command": { "default": "notebook:cut-cell" },
         "keys": { "default": ["X"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Cut Cells" },
+        "title": { "default": "Cut Cell(s)" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -531,7 +531,7 @@
         "command": { "default": "notebook:delete-cell" },
         "keys": { "default": ["D", "D"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Delete Cells" },
+        "title": { "default": "Delete Cell(s)" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -696,7 +696,7 @@
         "command": { "default": "notebook:paste-cell-below" },
         "keys": { "default": ["V"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Paste Cells Below" },
+        "title": { "default": "Paste Cell(s) Below" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -718,7 +718,7 @@
         "command": { "default": "notebook:run-cell" },
         "keys": { "default": ["Ctrl Enter"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Run Cell" },
+        "title": { "default": "Run Cell(s)" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -729,7 +729,7 @@
         "command": { "default": "notebook:run-cell" },
         "keys": { "default": ["Ctrl Enter"] },
         "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
-        "title": { "default": "Run Cell" },
+        "title": { "default": "Run Cell(s)" },
         "category": { "default": "Notebook Operations" }
       },
       "type": "object"
@@ -740,7 +740,7 @@
         "command": { "default": "notebook:run-cell-and-insert-below" },
         "keys": { "default": ["Alt Enter"] },
         "selector": { "default": ".jp-Notebook:focus" },
-        "title": { "default": "Run Cell and Insert Below" },
+        "title": { "default": "Run Cell(s) and Insert Below" },
         "category": { "default": "Notebook Cell Operations" }
       },
       "type": "object"
@@ -929,7 +929,7 @@
         "selector": {
           "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell"
         },
-        "title": { "default": "Dismiss Console" },
+        "title": { "default": "Dismiss Completer" },
         "category": { "default": "Tooltips" }
       },
       "type": "object"
@@ -940,7 +940,7 @@
         "command": { "default": "tooltip:dismiss" },
         "keys": { "default": ["Escape"] },
         "selector": { "default": "body.jp-mod-tooltip .jp-Notebook" },
-        "title": { "default": "Dismiss Notebook" },
+        "title": { "default": "Dismiss Completer" },
         "category": { "default": "Tooltips" }
       },
       "type": "object"
@@ -954,7 +954,7 @@
           "default":
             ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
         },
-        "title": { "default": "New Console" },
+        "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
       },
       "type": "object"
@@ -968,7 +968,7 @@
           "default":
             ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
         },
-        "title": { "default": "New Notebook" },
+        "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
       },
       "type": "object"
