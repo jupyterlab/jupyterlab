@@ -42,6 +42,7 @@
     "test:ie": "lerna run test:ie --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:services": "cd packages/services && jlpm test && cd examples/node && python main.py",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
+    "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "update:dependency": "node buildutils/lib/update-dependency.js",
     "watch": "run-p watch:dev watch:themes",
     "watch:dev": "python scripts/watch_dev.py",
