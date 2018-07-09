@@ -317,7 +317,7 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools);
+      app.shell.addToRightArea(celltools);
       if (open) {
         app.shell.activateById(celltools.id);
       }
@@ -329,7 +329,7 @@ function activateCellTools(
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools);
+          app.shell.addToRightArea(celltools);
         }
         return;
       }
