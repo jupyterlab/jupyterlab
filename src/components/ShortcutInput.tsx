@@ -9,7 +9,9 @@ export interface IShortcutInputProps {
   toggleInput: Function,
   shortcut: ShortcutObject,
   toSymbols: Function,
-  keyBindingsUsed: Object
+  keyBindingsUsed: Object,
+  sortConflict: Function,
+  clearConflicts: Function
 }
 
 export interface IShortcutInputState {
@@ -17,7 +19,7 @@ export interface IShortcutInputState {
   userInput: string,
   isAvailable: boolean,
   takenBy: string,
-  splits: number[]
+  splits: number[],
 }
 
 export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcutInputState> {
@@ -26,7 +28,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     userInput: '',
     isAvailable: true,
     takenBy: '',
-    splits: [-1]
+    splits: [-1],
   }
 
   /** Get array of keys from user input */
@@ -143,6 +145,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     return takenBy
   }
 
+  checkConflict(takenBy: ShortcutObject | string) : void {
+    if(takenBy instanceof ShortcutObject) {
+      this.props.sortConflict(this.props.shortcut, takenBy)
+    } else {
+      this.props.clearConflicts()
+    }
+  }
+
   /** Parse and normalize user input */
   handleInput = (event: any) : void => {
     let splits = this.state.splits
@@ -154,13 +164,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     value = this.props.toSymbols(userInput)
     let keys = this.keysFromValue(userInput, splits)
     let takenBy = this.checkShortcutAvailability(userInput, keys)
+    this.checkConflict(takenBy)
 
     this.setState(
       {
         value: value, 
         userInput: userInput, 
         splits: splits, 
-        takenBy: takenBy
+        takenBy: takenBy,
       }
     )
   }
@@ -179,14 +190,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         </input>
         {!this.state.isAvailable && 
           <div className='jp-input-warning'>
-          Shortcut already in use by {this.state.takenBy}
+            Already in use
           </div>
         }
         <button className='jp-submit'
           disabled={!this.state.isAvailable} 
           onClick= {() => {
-            this.props.handleUpdate(this.props.shortcut, 
-              this.keysFromValue(this.state.userInput, this.state.splits)
+              this.props.handleUpdate(this.props.shortcut, 
+              this.keysFromValue(this.state.userInput, this.state.splits),
             ) 
             this.setState(
               {

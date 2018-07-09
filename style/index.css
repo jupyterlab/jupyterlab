@@ -286,7 +286,7 @@ display: inline-block;
 .jp-reset {
   color: var(--jp-brand-color2);
   padding-left: 10px;
-}
+}     
 
 .jp-reset:hover {
   text-decoration: underline;
@@ -295,13 +295,17 @@ display: inline-block;
 .row {
   display: table-row;
   border-bottom: solid;
-  border-bottom-color: var(--jp-layout-color2);
-  border-bottom-width: 2px;
+  border-bottom-color: var(--jp-border-color1);
+  border-bottom-width: var(--jp-border-width);
   max-height: 40px;
 }
 
 .expanded-row {
   height: 60px;
+}
+
+.conflict-row {
+  background-color: var(--jp-error-color3);
 }
 
 .cell {

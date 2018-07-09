@@ -110,7 +110,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       for (let key of Object.keys(shortcuts[shortcut].keys)) {
         keyBindingsUsed[shortcuts[shortcut]
         .keys[key].join(' ') + '_' + shortcuts[shortcut].selector] = 
-        shortcuts[shortcut].category + ': ' + shortcuts[shortcut].label
+        shortcuts[shortcut]
       }
     })
     return keyBindingsUsed
@@ -385,7 +385,34 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         return (a['label'] < b['label']) ? -1 : (a['label'] > b['label']) ? 1 : 0
       }
     })
+    shortcuts.forEach(shortcut => {
+      shortcut.index = shortcuts.indexOf(shortcut)
+    });
     this.setState({filteredShortcutList: shortcuts})
+  }
+
+  /** Sort shortcut list so that the conflicting shortcut is right below the one currently being set */
+  sortConflict = (newShortcut: ShortcutObject, oldShortcut: ShortcutObject): void => {
+    let newSortedList = this.state.filteredShortcutList
+    newSortedList.forEach(shortcut => {
+      shortcut.hasConflict = false
+    });
+    oldShortcut.hasConflict = true
+    newSortedList.splice(newSortedList.filter(shortcut => shortcut.id === oldShortcut.id)[0].index, 1)
+    newSortedList.splice(newShortcut.index + 1, 0, oldShortcut)
+    newSortedList.forEach(shortcut => {
+      shortcut.index = newSortedList.indexOf(shortcut)
+    });
+    this.setState({filteredShortcutList: newSortedList})
+  }
+
+  /** Remove conflict flag from all shortcuts */
+  clearConflicts = () : void => {
+    let newSortedList = this.state.filteredShortcutList
+    newSortedList.forEach(shortcut => {
+      shortcut.hasConflict = false
+    });
+    this.setState({filteredShortcutList: newSortedList})
   }
 
   render() {
@@ -409,6 +436,8 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           deleteShortcut={this.deleteShortcut}
           showSelectors={this.state.showSelectors}
           keyBindingsUsed={this.state.keyBindingsUsed}
+          sortConflict={this.sortConflict}
+          clearConflicts={this.clearConflicts}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
         />

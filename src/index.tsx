@@ -31,6 +31,8 @@ export class ShortcutObject {
   selector: string
   category: string
   id: string
+  index: number
+  hasConflict: boolean
   numberOfShortcuts: number
   constructor() {
     this.commandName = ''
@@ -41,6 +43,8 @@ export class ShortcutObject {
     this.category = ''
     this.id = ''
     this.numberOfShortcuts = 0
+    this.index = 0
+    this.hasConflict = false
   }
 }
  

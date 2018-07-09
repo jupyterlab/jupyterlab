@@ -17,7 +17,9 @@ export interface IShortcutListProps {
   showSelectors: boolean,
   keyBindingsUsed: Object,
   updateSort: Function,
-  currentSort: string
+  currentSort: string,
+  sortConflict: Function,
+  clearConflicts: Function
 }
 
 /** React component for list of shortcuts */
@@ -70,6 +72,8 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
             deleteShortcut={this.props.deleteShortcut}
             showSelectors={this.props.showSelectors}
             keyBindingsUsed={this.props.keyBindingsUsed}
+            sortConflict={this.props.sortConflict}
+            clearConflicts={this.props.clearConflicts}
           />
         )}
       </div>
