@@ -33,9 +33,12 @@
   }
   
   .jp-search {
-    border-width: var(--jp-border-width);
+    /* border-width: var(--jp-border-width);  this is 1px */
+    border-width: 0.5px;
+    border-style: solid;
     border-color: var(--jp-layout-color2);
-    border-radius: var(--jp-border-radius);
+    /* border-radius: var(--jp-border-radius);   this is 2px */
+    border-radius: 3px;
     height: 20px;
     width: 50%;
     font-size: var(--jp-ui-font-size1);
@@ -53,6 +56,10 @@
   
   .jp-search:focus{
     outline:none;
+  }
+
+  .jp-search::placeholder {
+    color: var(--jp-ui-font-color2)
   }
   
   .jp-searchcontainer {
