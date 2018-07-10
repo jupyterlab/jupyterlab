@@ -1,0 +1,34 @@
+.jp-shortcut {    
+    margin: 4px 8px 0 4px;
+    height: 16px;
+    width: 16px;
+    border: none;
+    background-image: var(--jp-icon-close);
+    opacity: 0.5;
+}
+
+.or {
+    margin-right: 12px;
+    margin-top: 4px;
+}
+  
+.comma {
+    height: 16px;
+    margin-top: 10px;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+  
+.jp-shortcut:hover {
+    border-width: var(--jp-border-width) + 0.05;
+}
+    
+.jp-shortcut:active {
+    border-width: var(--jp-border-width) + 0.05;
+    border-color: var(--jp-border-color1);
+    color: var(--jp-layout-color3);
+}
+  
+.jp-shortcut:focus {
+    outline: none;
+}

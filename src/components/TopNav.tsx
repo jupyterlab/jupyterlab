@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import '../../style/TopNav.css';
+
 /** State for TopNav component */
 export interface ITopNavProps {
   resetShortcuts: Function;

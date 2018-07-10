@@ -12,6 +12,8 @@ import {
 
 import * as React from 'react'
 
+import '../../style/ShortcutItem.css';
+
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
   shortcut: ShortcutObject,
@@ -19,7 +21,9 @@ export interface IShortcutItemProps {
   resetShortcut: Function,
   deleteShortcut: Function,
   showSelectors: boolean,
-  keyBindingsUsed: Object
+  keyBindingsUsed: Object,
+  sortConflict: Function,
+  clearConflicts: Function
 }
   
 /** State for ShortcutItem component */
@@ -80,12 +84,13 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
   }
 
   render() {
+    const hasConflict = this.props.shortcut.hasConflict ? 'conflict-row' : ''
+    const isExpanded = this.state.displayInput ? 
+      'jp-cmditem row expanded-row' 
+      : 'jp-cmditem row'
     return (
       <div 
-      className={this.state.displayInput 
-          ? 'jp-cmditem row expanded-row' 
-          : 'jp-cmditem row'
-      }>
+      className={`${isExpanded} ${hasConflict}`}>
         <div className='cell'>
           <div className='jp-shortcutitem-category'>{this.props.shortcut.category}</div>
         </div>
@@ -105,7 +110,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                         <div className='jp-shortcut-key'>
                           {this.toSymbols(keyBinding)}
                         </div>
-                        {index === 0 && this.props.shortcut.keys[key].length > 1 ? <div className='comma'>,</div> : null}
+                        {index + 1 < this.props.shortcut.keys[key].length ? <div className='comma'>,</div> : null}
                       </div>
                     )
                   }
@@ -130,9 +135,9 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
               .length < 2 &&
               <span 
                 className='jp-input-plus' 
-                onClick={this.toggleInput}
+                onClick={() => {this.toggleInput(), this.props.clearConflicts()}}
               >
-                {this.state.displayInput ? '⌃' : '+'}
+                {!this.state.displayInput && '+'}
               </span>
             }
 
@@ -143,6 +148,9 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                 shortcut={this.props.shortcut}
                 toSymbols={this.toSymbols}
                 keyBindingsUsed={this.props.keyBindingsUsed}
+                sortConflict={this.props.sortConflict}
+                clearConflicts={this.props.clearConflicts}
+                displayInput={this.state.displayInput}
               />
             }
           </div>

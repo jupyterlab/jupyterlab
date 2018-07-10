@@ -1,0 +1,85 @@
+/* Shortcut command items */
+.jp-cmditem {
+    height: 25px;
+    padding: 10px;
+    display: flex;
+    width: 100%;
+  }
+  
+/* Command label */
+.jp-cmdlabel {
+    display: inline-block;
+    font: 'Moneserrat';
+    font-weight: 400;
+    size: 14px;
+    color: var(--jp-content-font-color2);
+    padding-right: 10px;
+    align-self: left; 
+}
+  
+.shortcut-cell-container {
+    display: -webkit-box;
+    height: 25px;
+}
+  
+.jp-shortcut-div p {
+    height: 25px;
+    display: contents;
+}
+  
+/* Command shortcut */
+.jp-shortcut-div {
+    display: contents;
+}
+  
+.jp-shortcut {    
+    margin: 4px 8px 0 4px;
+    height: 16px;
+    width: 16px;
+    border: none;
+    background-image: var(--jp-icon-close);
+    opacity: 0.5;
+}
+  
+  
+.jp-shortcut-key {
+    border-width: var(--jp-border-width);
+    border-color: var(--jp-border-color1);
+    background: var(--jp-layout-color2);
+    padding: 4px 6px 4px 6px;
+    border-radius: var(--jp-border-radius);
+}
+  
+.jp-shortcut-key-container {
+    font-family: var(--jp-code-font-family);
+    font-size: var(--jp-code-font-size);
+    line-height: var(--jp-code-line-height);
+    display: -webkit-box;
+}
+  
+.jp-source {
+    display: inline-block;
+}
+
+.jp-reset {
+    color: var(--jp-brand-color2);
+    padding-left: 10px;
+}     
+
+.jp-reset:hover {
+    text-decoration: underline;
+}
+
+/* .expanded-row {
+    height: 60px;
+} */
+
+.conflict-row {
+    background-color: var(--jp-error-color3);
+}
+
+.cell {
+    padding: 6px 12px;
+    display: table-cell;
+    width: 20%;
+}

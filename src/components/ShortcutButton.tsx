@@ -4,6 +4,8 @@ import {
 
 import * as React from 'react';
 
+import '../../style/ShortcutButton.css';
+
 /** Props for ShortcutButton component */
 export interface IShortcutButtonProps {
   shortcutKeys: string[],
@@ -22,9 +24,9 @@ export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   render() {
     return (
       <button 
-        className={this.props.index === 0 
+        className={(this.props.index === 0 
           ? "jp-shortcut jp-shortcut-left" 
-          : "jp-shortcut jp-shortcut-right"
+          : "jp-shortcut jp-shortcut-right")
         } 
         onClick={() => 
           this.props.deleteShortcut(this.props.shortcutObject, this.props.shortcutId)
