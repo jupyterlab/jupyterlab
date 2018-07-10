@@ -13,7 +13,8 @@ export interface IShortcutInputProps {
   toSymbols: Function,
   keyBindingsUsed: Object,
   sortConflict: Function,
-  clearConflicts: Function
+  clearConflicts: Function,
+  displayInput: boolean
 }
 
 export interface IShortcutInputState {
@@ -21,7 +22,6 @@ export interface IShortcutInputState {
   userInput: string,
   isAvailable: boolean,
   takenBy: string,
-  splits: number[],
 }
 
 export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcutInputState> {
@@ -30,31 +30,16 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     userInput: '',
     isAvailable: true,
     takenBy: '',
-    splits: [-1],
   }
 
   /** Get array of keys from user input */
-  keysFromValue = (value, splits) => {
-    let keys: string[] = new Array<string>()
-    let splitsCopy = splits.slice()
-    splitsCopy.push(value.length)
-    if (splitsCopy.length > 2) {
-      for (let i = 0; i < splitsCopy.length; i++) {
-        let newKey = value.slice(splitsCopy[i] + 1, splitsCopy[i + 1])
-        keys.push(newKey)
-      }
-      if (keys.includes("")) {
-        keys.pop()
-      }
-    }
-    else {
-      keys = [value]
-    }
+  keysFromValue = (value) => {
+    let keys: string[] = value.split(',')
     return keys
   }
 
   /** Parse user input for chained shortcuts */
-  parseChaining = (event: any, splits: number[], value: string, userInput: string) : string => {
+  parseChaining = (event: any, value: string, userInput: string) : string => {
     event.preventDefault()
     let wordKeys = 
     [
@@ -73,18 +58,16 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     if (event.key === 'Backspace') {
       userInput = ''
       value = ''
-      splits = [-1]
       this.setState(
         {
           value: value, 
           userInput: userInput, 
-          splits: splits
         } 
       )
     } else {
       let lastKey = (userInput.substr(userInput.lastIndexOf(' ') + 1, userInput.length)).trim()
       if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
-        splits.push(userInput.length)
+        userInput = (userInput + ',');
         if (event.ctrlKey) {
           userInput = (userInput + ' Ctrl').trim()
         }
@@ -157,14 +140,13 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   /** Parse and normalize user input */
   handleInput = (event: any) : void => {
-    let splits = this.state.splits
     let value = this.state.value
     let userInput = this.state.userInput
 
-    userInput = this.parseChaining(event, splits, value, userInput)
+    userInput = this.parseChaining(event, value, userInput)
 
     value = this.props.toSymbols(userInput)
-    let keys = this.keysFromValue(userInput, splits)
+    let keys = this.keysFromValue(userInput)
     let takenBy = this.checkShortcutAvailability(userInput, keys)
     this.checkConflict(takenBy)
 
@@ -172,45 +154,53 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
       {
         value: value, 
         userInput: userInput, 
-        splits: splits, 
         takenBy: takenBy,
       }
     )
   }
 
+  Blur = (event) => {
+    if (event.relatedTarget === null || event.relatedTarget.className !== 'jp-submit') {
+      this.props.toggleInput();
+    }
+  }
+
   render() {
+    let className = 'jp-input';
+    if (!this.state.isAvailable) {className += ' jp-input-unavailable'}
+    if (!this.props.displayInput) {className += ' jp-input-hidden'}
+
     return (
-      <div className='jp-input-box'>
-        <input className={this.state.isAvailable 
-            ? 'jp-input' 
-            : 'jp-input jp-input-unavailable'
-          }
+      <div className={this.props.displayInput ? 'jp-input-box' : 'jp-input-box jp-input-box-hidden'}
+        onBlur={(event) => this.Blur(event)}
+      >
+        <input className={className}
           value={this.state.value} 
           onKeyDown={this.handleInput}
           ref = {(input) => input && input.focus()}
+          placeholder = 'press keys'
         >
         </input>
         {!this.state.isAvailable && 
           <div className='jp-input-warning'>
-            Already in use
+          Already in use
           </div>
         }
         <button className='jp-submit'
           disabled={!this.state.isAvailable} 
           onClick= {() => {
-              this.props.handleUpdate(this.props.shortcut, 
-              this.keysFromValue(this.state.userInput, this.state.splits),
+            this.props.handleUpdate(this.props.shortcut, 
+              this.keysFromValue(this.state.userInput)
             ) 
             this.setState(
               {
                 value:'', 
-                splits:[-1]
               }
             )
             this.props.toggleInput()
           }}
-          >
-          Apply
+          data-tooltip= 'test'
+        >
         </button>
       </div>
     )
