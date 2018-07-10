@@ -15,7 +15,7 @@ import { Widget } from '@phosphor/widgets';
 
 export namespace CommandEditComponent {
     export interface IState {
-        mode: string;
+        notebookMode: string;
     }
     export interface IProps {
         tracker: INotebookTracker;
@@ -27,7 +27,7 @@ export class CommandEditComponent extends React.Component<
     CommandEditComponent.IState
 > {
     state = {
-        mode: ''
+        notebookMode: ''
     };
     constructor(props: CommandEditComponent.IProps) {
         super(props);
@@ -37,7 +37,7 @@ export class CommandEditComponent extends React.Component<
     notebookChanged = (tracker: INotebookTracker, panel: NotebookPanel) => {
         if (panel) {
             this.setState({
-                mode: panel.content.mode
+                notebookMode: panel.content.mode
             });
             panel.content.stateChanged.connect(this.notebookStateChanged);
         }
@@ -45,31 +45,32 @@ export class CommandEditComponent extends React.Component<
 
     notebookStateChanged = (notebook: Notebook) => {
         this.setState({
-            mode: notebook.mode
+            notebookMode: notebook.mode
         });
     };
-    // onClick = {this.handleClick}
 
     handleClick = () => {
-        if (this.props.tracker.currentWidget.content.mode === 'edit') {
-            this.props.tracker.currentWidget.content.mode = 'command';
-        } else if (
-            this.props.tracker.currentWidget.content.mode === 'command'
-        ) {
-            this.props.tracker.currentWidget.content.mode = 'edit';
+        if (this.props.tracker.currentWidget) {
+            if (this.props.tracker.currentWidget.content.mode === 'edit') {
+                this.props.tracker.currentWidget.content.mode = 'command';
+            } else if (
+                this.props.tracker.currentWidget.content.mode === 'command'
+            ) {
+                this.props.tracker.currentWidget.content.mode = 'edit';
+            }
         }
     };
     render() {
-        if (this.state.mode === 'edit') {
+        if (this.state.notebookMode === 'edit') {
             return (
                 <div onClick={this.handleClick}>
-                    <img className={'edit-item icon-item'} />
+                    <div className={'edit-item icon-item'} />
                 </div>
             );
         } else {
             return (
                 <div onClick={this.handleClick}>
-                    <img className={'command-item icon-item'} />
+                    <div className={'command-item icon-item'} />
                 </div>
             );
         }
