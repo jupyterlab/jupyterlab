@@ -104,6 +104,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   /** Get list of all shortcut keybindings currently in use */
+  /** An object where keys are unique keyBinding_selector and values are shortcut objects */
   private _getKeyBindingsUsed(shortcuts: Object) : Object {
     let keyBindingsUsed: Object = {};
     Object.keys(shortcuts).forEach(shortcut => {
