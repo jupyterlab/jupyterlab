@@ -1,10 +1,13 @@
 .jp-shortcut {    
-    margin: 4px 8px 0 4px;
+    margin-left: 4px;
+    padding-top: 8px;
+    background-size: 16px;
     height: 16px;
     width: 16px;
-    border: none;
     background-image: var(--jp-icon-close);
-    opacity: 0.5;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--jp-layout-color0)
 }
 
 .or {

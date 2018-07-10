@@ -74,10 +74,6 @@
     height: 60px;
 } */
 
-.conflict-row {
-    background-color: var(--jp-error-color3);
-}
-
 .cell {
     padding: 6px 12px;
     display: table-cell;

@@ -13,11 +13,11 @@
   
 /* Sort button */
 .sort {
-    font-weight: regular;
     transform: rotate(180deg);
     padding-left: 10px;
     color: var(--jp-ui-font-color2);
     border: none;
+    background-color: var(--jp-layout-color0)
 }
   
 .sort:focus {
@@ -51,4 +51,14 @@
     border-bottom-width: var(--jp-border-width);
     line-height: 30px;
     vertical-align: middle;
-  }
+    background-color: var(--jp-layout-color0)
+}
+
+.conflict-row {
+    background-color: var(--jp-error-color2);
+}
+
+.conflict-row .jp-shortcut {
+    background-color: var(--jp-error-color2);
+    opacity: 1;
+}

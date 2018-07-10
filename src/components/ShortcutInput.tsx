@@ -169,7 +169,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
   render() {
     let className = 'jp-input';
     if (!this.state.isAvailable) {className += ' jp-input-unavailable'}
-    if (!this.props.displayInput) {className += ' jp-input-hidden'}
+    if (this.state.value === '') {className += ' jp-input-empty'}
 
     return (
       <div className={this.props.displayInput ? 'jp-input-box' : 'jp-input-box jp-input-box-hidden'}
@@ -187,7 +187,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
           Already in use
           </div>
         }
-        <button className='jp-submit'
+        <button className={this.state.value === '' ? 'jp-submit jp-submit-empty' : 'jp-submit'}
           disabled={!this.state.isAvailable} 
           onClick= {() => {
             this.props.handleUpdate(this.props.shortcut, 

@@ -107,6 +107,11 @@
   border: none;
 }
 
+.jp-submit-empty {
+  background: var(--jp-layout-color2);
+  background-image: var( --jp-icon-checkmark-disabled);
+}
+
 .jp-submit:focus {
   outline: none; 
 }
