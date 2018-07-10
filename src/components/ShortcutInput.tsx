@@ -106,42 +106,35 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   /** Check if shortcut being typed is already taken */
   checkShortcutAvailability = (userInput: string, keys: string[]) : ShortcutObject => {
-    let isAvailable = !Object.keys(this.props.keyBindingsUsed)
-                      .includes(userInput + '_' + this.props.shortcut.selector)
+    let isAvailable = (!Object.keys(this.props.keyBindingsUsed)
+                      .includes(userInput + '_' + this.props.shortcut.selector)) 
                       || userInput === ''
-    let takenBy = new ShortcutObject();
+    let takenBy = new ShortcutObject()
     if (isAvailable) {
       for (let binding of keys) {
         if (Object.keys(this.props.keyBindingsUsed)
             .includes(binding + '_' + this.props.shortcut.selector) 
             && userInput !== '') {
+          isAvailable = false
           takenBy = this.props.keyBindingsUsed[
             binding + '_' + this.props.shortcut.selector
           ]
-          if (takenBy.commandName !== this.props.shortcut.commandName) {
-            isAvailable = false
-          }
-          else {
-            isAvailable = true
-            console.log('same thing');
-          }
         }
       }
     } else {
       takenBy = this.props.keyBindingsUsed[
         userInput + '_' + this.props.shortcut.selector
       ]
-      if (takenBy.commandName !== this.props.shortcut.commandName) {
-        isAvailable = false
-      }
     }
     this.setState({isAvailable: isAvailable})
     return takenBy
   }
 
-  checkConflict(isAvailable: boolean, takenBy: ShortcutObject) : void {
-    if(!isAvailable) {
+  checkConflict(takenBy: ShortcutObject) : void {
+    if(takenBy.id !== '' && takenBy.id !== this.props.shortcut.id) {
       this.props.sortConflict(this.props.shortcut, takenBy)
+    } else {
+      this.props.clearConflicts()
     }
   }
 
@@ -155,7 +148,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     value = this.props.toSymbols(userInput)
     let keys = this.keysFromValue(userInput)
     let takenBy = this.checkShortcutAvailability(userInput, keys)
-    this.checkConflict(this.state.isAvailable, takenBy)
+    this.checkConflict(takenBy)
 
     this.setState(
       {
@@ -166,9 +159,10 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     )
   }
 
-  Blur = (event) => {
+  handleBlur = (event) => {
     if (event.relatedTarget === null || event.relatedTarget.className !== 'jp-submit') {
       this.props.toggleInput();
+      this.props.clearConflicts();
     }
   }
 
@@ -179,7 +173,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
     return (
       <div className={this.props.displayInput ? 'jp-input-box' : 'jp-input-box jp-input-box-hidden'}
-        onBlur={(event) => this.Blur(event)}
+        onBlur={(event) => this.handleBlur(event)}
       >
         <input className={className}
           value={this.state.value} 
