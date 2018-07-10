@@ -13,7 +13,7 @@ export interface IShortcutButtonProps {
   shortcutObject: ShortcutObject,
   shortcutId: string,
   index: number,
-  toSymbols: Function
+  toSymbols: Function,
 }
 
 /** React component for an interactive button displaying a command's keyboard shortcut */

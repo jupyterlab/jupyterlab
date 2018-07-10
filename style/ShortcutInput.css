@@ -58,15 +58,12 @@
   display: inline-flex;  
 }
 
-/* .jp-input-hidden {
-  display: none;
-  opacity: 0;
+.jp-input-hidden {
+  /* opacity: 0; */
   animation: 0.5s ease-out 0s 1 slideCloseToLeft, opacity 2s linear;
 }
-.jp-input-box-hidden {
-  visibility: hidden;
-  opacity: 0;
-  animation: 0.5s ease-out 0s 1 slideCloseToLeft, opacity 2s linear;
+
+/* .jp-input-box-hidden {
 } */
 
 .jp-input::placeholder {

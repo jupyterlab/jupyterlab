@@ -121,7 +121,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                     shortcutId={key}
                     toSymbols={this.toSymbols}
                     index={index}
-                  />
+                  / >
                   {(index === 0 && Object.keys(this.props.shortcut.keys).filter(key => 
                     this.props.shortcut.keys[key][0] !== '')
                     .length > 1) ? <div className='or'>or</div> : null}
