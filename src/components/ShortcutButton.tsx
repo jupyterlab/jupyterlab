@@ -11,7 +11,7 @@ export interface IShortcutButtonProps {
   shortcutObject: ShortcutObject,
   shortcutId: string,
   index: number,
-  toSymbols: Function
+  toSymbols: Function,
 }
 
 /** React component for an interactive button displaying a command's keyboard shortcut */
@@ -22,9 +22,9 @@ export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   render() {
     return (
       <button 
-        className={this.props.index === 0 
+        className={(this.props.index === 0 
           ? "jp-shortcut jp-shortcut-left" 
-          : "jp-shortcut jp-shortcut-right"
+          : "jp-shortcut jp-shortcut-right")
         } 
         onClick={() => 
           this.props.deleteShortcut(this.props.shortcutObject, this.props.shortcutId)

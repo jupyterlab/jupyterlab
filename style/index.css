@@ -216,11 +216,10 @@
 }
 
 .jp-input-plus {
-  position: absolute;
   font-size: var(--jp-ui-font-size2);
   color: var(--jp-brand-color2);
   transform: rotate(270deg);
-  height: 2.5%;
+  line-height: var(--jp-code-line-height);
 }
 
 .jp-input-plus:hover {
@@ -231,20 +230,59 @@
   color: var(--jp-brand-color0);
 }
 
-.jp-input-box {
-display: inline-block;
+@keyframes slideInFromLeft {
+  from {
+    width: 0%;
+    left:0;
+  }
+  to {
+    width:100%;
+    left: 0;
+  }
+}
+
+@keyframes slideCloseToLeft {
+  from {
+    width: 100%;
+    left: 0;
+  }
+  to {
+    width: 0%;
+    left: 0;
+  }
 }
 
 .jp-input {
+  animation: 0.5s ease-out 0s 1 slideInFromLeft;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
   border-style: solid;
   background-color: var(--jp-layout-color0);
-  color: var(--jp-content-font-color1);
   margin-left: 10px;
+  padding-left:10px;
   width: 120px;
   height: 20px;
   display: block;
+}
+
+.jp-input-box {
+  display: inline-flex;  
+}
+
+/* .jp-input-hidden {
+  display: none;
+  opacity: 0;
+  animation: 0.5s ease-out 0s 1 slideCloseToLeft, opacity 2s linear;
+}
+
+.jp-input-box-hidden {
+  visibility: hidden;
+  opacity: 0;
+  animation: 0.5s ease-out 0s 1 slideCloseToLeft, opacity 2s linear;
+} */
+
+.jp-input::placeholder {
+  color: (--jp-content-font-color3);
 }
 
 .jp-input-unavailable {
@@ -253,9 +291,11 @@ display: inline-block;
 
 .jp-input:focus {
   outline: none;
+  color: var(--jp-content-font-color1);
 }
 
 .jp-input-warning {
+  display: none;
   position: absolute;
   color: var(--jp-error-color2);
   font-size: var(--jp-ui-font-size0);
@@ -265,14 +305,21 @@ display: inline-block;
 
 .jp-submit {
   background: var(--jp-brand-color1);
-  border-radius: 1px;
-  border-style: solid;
+  border-radius: 0px;
   color: var(--jp-layout-color0);
-  border-color: var(--jp-brand-color1);
   font-family: var(--jp-ui-font-family);
   display: block;
-  margin-top: 5px;
-  float: right;
+  height: 24px;
+  background-image: var( --jp-icon-checkmark);
+  background-repeat: no-repeat;
+  width: 26px;
+}
+
+.jp-submit:disabled {
+  /* background-image: var( --jp-icon-checkmark-disabled); */
+  /* background-image: var(--md-priority_high); */
+  background: var(--jp-error-color1);
+  border: none;
 }
 
 .jp-submit:focus {
@@ -280,7 +327,7 @@ display: inline-block;
 }
 
 .jp-source {
-display: inline-block;
+  display: inline-block;
 }
 
 .jp-reset {
@@ -300,9 +347,9 @@ display: inline-block;
   max-height: 40px;
 }
 
-.expanded-row {
+/* .expanded-row {
   height: 60px;
-}
+} */
 
 .cell {
   padding: 6px 12px;

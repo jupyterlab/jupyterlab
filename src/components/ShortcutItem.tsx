@@ -85,7 +85,9 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
       className={this.state.displayInput 
           ? 'jp-cmditem row expanded-row' 
           : 'jp-cmditem row'
-      }>
+      }
+      onClick={() => {console.log('click in div '+this.props.shortcut.commandName)}}
+      >
         <div className='cell'>
           <div className='jp-shortcutitem-category'>{this.props.shortcut.category}</div>
         </div>
@@ -105,7 +107,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                         <div className='jp-shortcut-key'>
                           {this.toSymbols(keyBinding)}
                         </div>
-                        {index === 0 && this.props.shortcut.keys[key].length > 1 ? <div className='comma'>,</div> : null}
+                        {index +1 < this.props.shortcut.keys[key].length ? <div className='comma'>,</div> : null}
                       </div>
                     )
                   }
@@ -116,7 +118,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                     shortcutId={key}
                     toSymbols={this.toSymbols}
                     index={index}
-                  />
+                  / >
                   {(index === 0 && Object.keys(this.props.shortcut.keys).filter(key => 
                     this.props.shortcut.keys[key][0] !== '')
                     .length > 1) ? <div className='or'>or</div> : null}
@@ -132,19 +134,20 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                 className='jp-input-plus' 
                 onClick={this.toggleInput}
               >
-                {this.state.displayInput ? '⌃' : '+'}
+                {/* {this.state.displayInput ? '⌃' : '+'} */}
+                {!this.state.displayInput && '+'}
               </span>
             }
 
             {/** Display input box when toggled */}
-            {this.state.displayInput && 
-              <ShortcutInput handleUpdate={this.props.handleUpdate}
-                toggleInput={this.toggleInput}
-                shortcut={this.props.shortcut}
-                toSymbols={this.toSymbols}
-                keyBindingsUsed={this.props.keyBindingsUsed}
-              />
-            }
+            <ShortcutInput 
+              handleUpdate={this.props.handleUpdate}
+              toggleInput={this.toggleInput}
+              shortcut={this.props.shortcut}
+              toSymbols={this.toSymbols}
+              keyBindingsUsed={this.props.keyBindingsUsed}
+              displayInput={this.state.displayInput}
+            />
           </div>
         </div>
         <div className='cell'>
