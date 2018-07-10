@@ -12,6 +12,8 @@ import {
 
 import * as React from 'react'
 
+import '../../style/ShortcutItem.css';
+
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
   shortcut: ShortcutObject,

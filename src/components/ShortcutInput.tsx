@@ -4,6 +4,8 @@ import {
 
 import * as React from 'react'
 
+import '../../style/ShortcutInput.css';
+
 export interface IShortcutInputProps {
   handleUpdate: Function,
   toggleInput: Function,

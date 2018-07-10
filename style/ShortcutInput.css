@@ -1,0 +1,69 @@
+/* Input area */
+.jp-input-container {
+    display: inline-block;
+    margin-left: 30px;
+  }
+  
+  .jp-input-plus {
+    position: absolute;
+    font-size: var(--jp-ui-font-size2);
+    color: var(--jp-brand-color2);
+    transform: rotate(270deg);
+    height: 2.5%;
+  }
+  
+  .jp-input-plus:hover {
+    color: var(--jp-brand-color0);
+  }
+  
+  .jp-input-plus:focus {
+    color: var(--jp-brand-color0);
+  }
+  
+  .jp-input-box {
+  display: inline-block;
+  }
+  
+  .jp-input {
+    border-width: var(--jp-border-width);
+    border-color: var(--jp-border-color3);
+    border-style: solid;
+    background-color: var(--jp-layout-color0);
+    color: var(--jp-content-font-color1);
+    margin-left: 10px;
+    width: 120px;
+    height: 20px;
+    display: block;
+  }
+  
+  .jp-input-unavailable {
+    border-color: var(--jp-error-color2);
+  }
+  
+  .jp-input:focus {
+    outline: none;
+  }
+  
+  .jp-input-warning {
+    position: absolute;
+    color: var(--jp-error-color2);
+    font-size: var(--jp-ui-font-size0);
+    text-align: left;
+    margin-left: 8px;
+  }
+  
+  .jp-submit {
+    background: var(--jp-brand-color1);
+    border-radius: 1px;
+    border-style: solid;
+    color: var(--jp-layout-color0);
+    border-color: var(--jp-brand-color1);
+    font-family: var(--jp-ui-font-family);
+    display: block;
+    margin-top: 5px;
+    float: right;
+  }
+  
+  .jp-submit:focus {
+    outline: none; 
+  }

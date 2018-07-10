@@ -8,6 +8,8 @@ import {
 
 import * as React from 'react';
 
+import '../../style/ShortcutList.css';
+
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
   shortcuts: Object,
