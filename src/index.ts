@@ -12,7 +12,7 @@ import {
     runningKernelsItem,
     notebookTrustItem,
     IDefaultStatusesManager,
-    lineColItem
+    lineColItem,
     fileUploadItem,
     kernelStatusItem
 } from './defaults';
@@ -37,7 +37,7 @@ const plugins: JupyterLabPlugin<any>[] = [
     defaultsManager,
     runningKernelsItem,
     notebookTrustItem,
-    lineColItem
+    lineColItem,
     fileUploadItem,
     kernelStatusItem
 ];
