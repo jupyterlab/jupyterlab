@@ -30,3 +30,26 @@
 .jp-status-bar-item {
     margin: 0 var(--jp-statusbar-margin);
 }
+
+.edit-item {
+    --edit-image-icon: './images/edit.svg';
+    background-image: url('./images/edit.svg');
+}
+
+.command-item {
+    background-image: url('./images/command.svg');
+}
+.icon-item {
+    background-repeat: no-repeat;
+    background-size: 28px;
+    background-position-x: 0px;
+    background-position-y: 2px;
+    min-height: 28px;
+    border: 0cm;
+    min-width: 28px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-left: 2px;
+    margin-bottom: 2px;
+    padding-right: 0px;
+}
