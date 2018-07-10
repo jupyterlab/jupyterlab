@@ -4,6 +4,8 @@ import {
 
 import * as React from 'react';
 
+import '../../style/ShortcutButton.css';
+
 /** Props for ShortcutButton component */
 export interface IShortcutButtonProps {
   shortcutKeys: string[],

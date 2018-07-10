@@ -4,12 +4,16 @@ import {
 
 import * as React from 'react'
 
+import '../../style/ShortcutInput.css';
+
 export interface IShortcutInputProps {
   handleUpdate: Function,
   toggleInput: Function,
   shortcut: ShortcutObject,
   toSymbols: Function,
   keyBindingsUsed: Object,
+  sortConflict: Function,
+  clearConflicts: Function,
   displayInput: boolean
 }
 
@@ -25,9 +29,10 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     value: '',
     userInput: '',
     isAvailable: true,
-    takenBy: ''
+    takenBy: '',
   }
 
+  /** Get array of keys from user input */
   keysFromValue = (value) => {
     let keys: string[] = value.split(',')
     return keys
@@ -125,6 +130,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     return takenBy
   }
 
+  checkConflict(takenBy: ShortcutObject | string) : void {
+    if(takenBy instanceof ShortcutObject) {
+      this.props.sortConflict(this.props.shortcut, takenBy)
+    } else {
+      this.props.clearConflicts()
+    }
+  }
+
   /** Parse and normalize user input */
   handleInput = (event: any) : void => {
     let value = this.state.value
@@ -135,12 +148,13 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     value = this.props.toSymbols(userInput)
     let keys = this.keysFromValue(userInput)
     let takenBy = this.checkShortcutAvailability(userInput, keys)
+    this.checkConflict(takenBy)
 
     this.setState(
       {
         value: value, 
         userInput: userInput, 
-        takenBy: takenBy
+        takenBy: takenBy,
       }
     )
   }
@@ -169,7 +183,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         </input>
         {/* {!this.state.isAvailable && 
           <div className='jp-input-warning'>
-          Shortcut already in use by {this.state.takenBy}
+          Already in use
           </div>
         } */}
         <button className='jp-submit'
