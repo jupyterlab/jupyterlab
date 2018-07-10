@@ -49,5 +49,6 @@
     border-bottom: solid;
     border-bottom-color: var(--jp-border-color1);
     border-bottom-width: var(--jp-border-width);
-    max-height: 40px;
+    line-height: 30px;
+    vertical-align: middle;
   }
