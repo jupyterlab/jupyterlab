@@ -32,7 +32,6 @@
 }
 
 .edit-item {
-    --edit-image-icon: './images/edit.svg';
     background-image: url('./images/edit.svg');
 }
 
