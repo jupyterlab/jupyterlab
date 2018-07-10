@@ -38,15 +38,11 @@ export class StatusComponent extends React.Component<
         this.props.consoleTracker.currentChanged.connect(this.consoleChanged);
     }
 
-    consoleChanged = (tracker: IConsoleTracker, consoler: ConsolePanel) => {
-        if (consoler.session.kernel) {
-            this.setState({ kernelStatus: consoler.session.kernel.status });
-            tracker.currentWidget.session.statusChanged.connect(
-                this.kernelChanged
-            );
-            tracker.currentWidget.session.kernelChanged.connect(
-                this.kernelChanged
-            );
+    consoleChanged = (tracker: IConsoleTracker, consolePanel: ConsolePanel) => {
+        if (consolePanel.session.kernel) {
+            this.setState({ kernelStatus: consolePanel.session.kernel.status });
+            consolePanel.session.statusChanged.connect(this.kernelChanged);
+            consolePanel.session.kernelChanged.connect(this.kernelChanged);
         }
     };
     cellChanged = (tracker: INotebookTracker) => {
