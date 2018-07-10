@@ -42,6 +42,7 @@
         "@jupyterlab/filebrowser": "^0.17.0-1",
         "@jupyterlab/mainmenu": "^0.6.0-0",
         "@jupyterlab/notebook": "^0.17.0-0",
+        "@jupyterlab/console": "^0.17.0-0",
         "@jupyterlab/observables": "^2.0.0-1",
         "@jupyterlab/services": "^3.0.0-0",
         "@phosphor/algorithm": "^1.1.2",
