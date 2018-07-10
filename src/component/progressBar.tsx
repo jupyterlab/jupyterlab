@@ -5,6 +5,7 @@ export namespace ProgressBar {
         percentage: number;
     }
 }
+
 // tslint:disable-next-line:variable-name
 export const ProgressBar = (props: ProgressBar.IProps) => {
     return (
