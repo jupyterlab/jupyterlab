@@ -141,6 +141,10 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       () => this.setState(
         {
           filteredShortcutList: this.searchFilterShortcuts(this.state.shortcutList)
+        },
+        () => {
+          if (this.state.searchQuery == '')
+            this.sortShortcuts();
         }
       )
     )

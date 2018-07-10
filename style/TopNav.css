@@ -39,11 +39,15 @@
     height: 20px;
     width: 50%;
     font-size: var(--jp-ui-font-size1);
+    color: var(--jp-ui-font-color0);
     padding: 3px;
     padding-left: 6px;
-    text-indent: 16px;
+    text-indent: 4px;
     background-color: var(--jp-layout-color1);
     background-image: var(--jp-icon-search);
+    background-size: 18px;
+    background-position-y: 4px;
+    background-position-x: 98%;
     background-repeat: no-repeat;
   }
   
