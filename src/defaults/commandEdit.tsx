@@ -12,6 +12,7 @@ import {
 import { IDefaultStatusesManager } from './manager';
 
 import { Widget } from '@phosphor/widgets';
+import { CommandRegistry } from '@phosphor/commands';
 
 export namespace CommandEditComponent {
     export interface IState {
@@ -19,6 +20,7 @@ export namespace CommandEditComponent {
     }
     export interface IProps {
         tracker: INotebookTracker;
+        commands: CommandRegistry;
     }
 }
 
@@ -52,11 +54,11 @@ export class CommandEditComponent extends React.Component<
     handleClick = () => {
         if (this.props.tracker.currentWidget) {
             if (this.props.tracker.currentWidget.content.mode === 'edit') {
-                this.props.tracker.currentWidget.content.mode = 'command';
+                this.props.commands.execute('notebook:enter-command-mode');
             } else if (
                 this.props.tracker.currentWidget.content.mode === 'command'
             ) {
-                this.props.tracker.currentWidget.content.mode = 'edit';
+                this.props.commands.execute('notebook:enter-edit-mode');
             }
         }
     };
@@ -81,15 +83,20 @@ export class CommandEditStatus extends Widget {
     constructor(opts: CommandEditStatus.IOptions) {
         super();
         this._tracker = opts.tracker;
+        this._commands = opts.commands;
     }
     onBeforeAttach() {
         ReactDOM.render(
-            <CommandEditComponent tracker={this._tracker} />,
+            <CommandEditComponent
+                tracker={this._tracker}
+                commands={this._commands}
+            />,
             this.node
         );
     }
 
     private _tracker: INotebookTracker;
+    private _commands: CommandRegistry;
 }
 
 /*
@@ -107,7 +114,7 @@ export const commandEditStatusItem: JupyterLabPlugin<void> = {
     ) => {
         manager.addDefaultStatus(
             'command-edit-status-item',
-            new CommandEditStatus({ tracker }),
+            new CommandEditStatus({ tracker, commands: app.commands }),
             { align: 'left' }
         );
     }
@@ -119,5 +126,6 @@ export namespace CommandEditStatus {
      */
     export interface IOptions {
         tracker: INotebookTracker;
+        commands: CommandRegistry;
     }
 }
