@@ -33,10 +33,11 @@
     "@jupyterlab/apputils": "^0.17.0-1",
     "@jupyterlab/coreutils": "^2.0.0-1",
     "@jupyterlab/services": "^3.0.0-1",
-    "@phosphor/domutils": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "react": "~16.4.0",
+    "react-dom": "~16.4.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
