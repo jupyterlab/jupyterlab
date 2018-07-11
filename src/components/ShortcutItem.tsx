@@ -28,7 +28,6 @@ export interface IShortcutItemProps {
   
 /** State for ShortcutItem component */
 export interface IShortcutItemState {
-  value: string,
   displayInput: boolean
 }
 
@@ -37,17 +36,16 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
   constructor(props) {
     super(props)
     this.state = {
-      value: '',
       displayInput: false
     }
   }
   
   /** Toggle display state of input box */
   private toggleInput = () : void => {
+    console.log('toggling')
     this.setState(
       {
         displayInput: !this.state.displayInput,
-        value: ''
       }
     )
   }
@@ -121,7 +119,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                     shortcutId={key}
                     toSymbols={this.toSymbols}
                     index={index}
-                  / >
+                  />
                   {(index === 0 && Object.keys(this.props.shortcut.keys).filter(key => 
                     this.props.shortcut.keys[key][0] !== '')
                     .length > 1) ? <div className='or'>or</div> : null}
@@ -143,7 +141,8 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
 
             {/** Display input box when toggled */}
             {this.state.displayInput && 
-              <ShortcutInput handleUpdate={this.props.handleUpdate}
+              <ShortcutInput 
+                handleUpdate={this.props.handleUpdate}
                 toggleInput={this.toggleInput}
                 shortcut={this.props.shortcut}
                 toSymbols={this.toSymbols}

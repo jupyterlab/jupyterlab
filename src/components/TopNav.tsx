@@ -16,9 +16,16 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
   render() {
     return (
     <div className='jp-shortcuttopnav'>
-      <a className='jp-link jp-link-left' onClick={() => this.props.resetShortcuts()}>
-        Reset All
-      </a>
+      <div className='jp-shortcut-symbols'>
+        <div className='nav-row'>
+          <div>Command ⌘</div>
+          <div>Alt ⌥</div>
+        </div>
+        <div className='nav-row'>
+          <div>Shift ⇧</div>
+          <div>Control ⌃</div>
+        </div>
+      </div>
       <div className = 'jp-searchcontainer'>
         <input 
           onChange={(event) => this.props.updateSearchQuery(event)} 
@@ -26,12 +33,18 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
           placeholder='Search'
         />
       </div>
-      <div className='advanced-options'>
+
+      <div className='advanced-options advanced-options-left'>
         <a className='jp-link' onClick={() => this.props.openAdvanced()}>
           Advanced Editor
         </a>
         <a className='jp-link' onClick={() => this.props.toggleSelectors()}>
           {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
+        </a>
+      </div>
+      <div className='advanced-options advanced-options-right'>
+        <a className='jp-link' onClick={() => this.props.resetShortcuts()}>
+          Reset All
         </a>
       </div>
     </div>

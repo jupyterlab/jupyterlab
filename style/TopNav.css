@@ -5,63 +5,88 @@
     padding: 10px;
     padding-top: 30px;
     padding-bottom: 60px;
-  }
-  
-  .advanced-options {
-    display: grid;
-    grid-row-gap: 6px;
-    width: 20%;
-  }
-  
-  /* Top Navigation links */
-  .jp-link {
-    color: var(--jp-brand-color2);
-    text-decoration: none;
-    display: block;
-  }
-  
-  .jp-link:hover {
-    text-decoration: underline;
-  }
-  
-  .jp-link:active {
-    color: var(--jp-brand-color0);
-  }
-  
-  .jp-link-left {
-    width: 30%;
-  }
-  
-  .jp-search {
-    /* border-width: var(--jp-border-width);  this is 1px */
-    border-width: 0.5px;
-    border-style: solid;
-    border-color: var(--jp-layout-color2);
-    /* border-radius: var(--jp-border-radius);   this is 2px */
-    border-radius: 3px;
-    height: 20px;
-    width: 50%;
-    font-size: var(--jp-ui-font-size1);
-    color: var(--jp-ui-font-color0);
-    padding: 3px;
-    padding-left: 6px;
-    text-indent: 4px;
-    background-color: var(--jp-layout-color1);
-    background-image: var(--jp-icon-search);
-    background-size: 18px;
-    background-position-y: 4px;
-    background-position-x: 98%;
-    background-repeat: no-repeat;
-  }
-  
-  .jp-search:focus{
-    outline:none;
-  }
+}
 
-  .jp-search::placeholder {
-    color: var(--jp-ui-font-color2)
-  }
-  
-  .jp-searchcontainer {
-    width: 50%;
-  }
+.jp-shortcut-symbols {
+  width: 20%;
+}
+
+.jp-shortcut-symbols .nav-row {
+  display: flex;
+  justify-content: center;
+  padding-left: 20%;
+}
+
+.jp-shortcut-symbols .nav-row div {
+  margin: 0px 10px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-searchcontainer {
+  width: 50%;
+  text-align: center;
+}
+
+.jp-search {
+  /* border-width: var(--jp-border-width);  this is 1px */
+  border-width: 0.5px;
+  border-style: solid;
+  border-color: var(--jp-layout-color2);
+  /* border-radius: var(--jp-border-radius);   this is 2px */
+  border-radius: 3px;
+  height: 20px;
+  width: 65%;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  padding: 3px;
+  padding-left: 6px;
+  text-indent: 4px;
+  background-color: var(--jp-layout-color1);
+  background-image: var(--jp-icon-search);
+  background-size: 18px;
+  background-position-y: 4px;
+  background-position-x: 98%;
+  background-repeat: no-repeat;
+  margin-top: 8px;
+}
+
+.jp-search:focus{
+  outline:none;
+}
+
+.jp-search::placeholder {
+  color: var(--jp-ui-font-color2)
+}
+
+.jp-link {
+  color: var(--jp-brand-color2);
+  text-decoration: none;
+  display: block;
+  text-align: center;
+}
+
+.jp-link:hover {
+  text-decoration: underline;
+}
+
+.jp-link:active {
+  color: var(--jp-brand-color0);
+}
+
+.advanced-options {
+  display: block;
+  grid-row-gap: 6px;
+}
+
+.advanced-options-left {
+  width: 15%;
+}
+
+.advanced-options-right {
+  width: 15%;
+  margin-top: 8px;
+}
+
+.advanced-options-right .jp-link {
+  text-align: left;
+}

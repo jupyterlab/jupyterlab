@@ -137,7 +137,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Set the current seach query */
   updateSearchQuery = (event) : void => {
-    this.setState({searchQuery: event.target.value}, 
+    this.setState({searchQuery: event.target.value, currentSort: ''}, 
       () => this.setState(
         {
           filteredShortcutList: this.searchFilterShortcuts(this.state.shortcutList)
@@ -168,29 +168,31 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = (shortcutObject: ShortcutObject, keys: string[]) : void => {
-    let commandId: string;
-    commandId = shortcutObject.id
-    if(shortcutObject.numberOfShortcuts === 1) {
-      commandId = commandId + '-' + '2'
-    }
-    else {
-      Object.keys(shortcutObject.keys).forEach(key => {
-        if(shortcutObject.keys[key][0] === '') {
-          commandId = key
-        }
-      });
-    }
-    this.props.settingRegistry
-    .set(this.props.shortcutPlugin, 
-      commandId, 
-      {
-        command: shortcutObject.commandName, 
-        keys: keys, 
-        selector: shortcutObject.selector,
-        title: shortcutObject.label,
-        category: shortcutObject.category
+    if (keys[0] !== '') {
+      let commandId: string;
+      commandId = shortcutObject.id
+      if(shortcutObject.numberOfShortcuts === 1) {
+        commandId = commandId + '-' + '2'
       }
-    ).then(() => this._getShortcutList())
+      else {
+        Object.keys(shortcutObject.keys).forEach(key => {
+          if(shortcutObject.keys[key][0] === '') {
+            commandId = key
+          }
+        });
+      }
+      this.props.settingRegistry
+      .set(this.props.shortcutPlugin, 
+        commandId, 
+        {
+          command: shortcutObject.commandName, 
+          keys: keys, 
+          selector: shortcutObject.selector,
+          title: shortcutObject.label,
+          category: shortcutObject.category
+        }
+      ).then(() => this._getShortcutList())
+    }
   }
 
   /** Delete shortcut for command, refresh state */
