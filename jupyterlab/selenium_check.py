@@ -12,7 +12,6 @@ from tornado.ioloop import IOLoop
 from notebook.notebookapp import flags, aliases
 from traitlets import Bool, Unicode
 
-from selenium import webdriver
 from .labapp import LabApp
 
 
