@@ -96,7 +96,7 @@ export const runningTerminalsItem: JupyterLabPlugin<void> = {
                 host: app.shell,
                 terminalManager: app.serviceManager.terminals
             }),
-            { align: 'left' }
+            { align: 'left', priority: 2 }
         );
     }
 };
