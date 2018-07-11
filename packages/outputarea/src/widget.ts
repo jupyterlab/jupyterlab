@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
+import {
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -72,11 +76,6 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  * The class name added to stdin data input nodes.
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
-
-/**
- * The class name added to stdin rendered text nodes.
- */
-const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
 
 /******************************************************************************
  * OutputArea
@@ -203,11 +202,9 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
-    let layoutIndex;
     switch (args.type) {
       case 'add':
-        layoutIndex = this._modelToLayoutIndex(args.newIndex);
-        this._insertOutput(layoutIndex, args.newValues[0]);
+        this._insertOutput(args.newIndex, args.newValues[0]);
         this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
@@ -218,8 +215,7 @@ export class OutputArea extends Widget {
         }
         break;
       case 'set':
-        layoutIndex = this._modelToLayoutIndex(args.newIndex);
-        this._setOutput(layoutIndex, args.newValues[0]);
+        this._setOutput(args.newIndex, args.newValues[0]);
         this.outputLengthChanged.emit(this.model.length);
         break;
       default:
@@ -301,6 +297,20 @@ export class OutputArea extends Widget {
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(panel);
+
+    /**
+     * Wait for the stdin to complete, add it to the model (so it persists)
+     * and remove the stdin widget.
+     */
+    input.value.then(value => {
+      // Use stdin as the stream so it does not get combined with stdout.
+      this.model.add({
+        output_type: 'stream',
+        name: 'stdin',
+        text: value + '\n'
+      });
+      panel.dispose();
+    });
   }
 
   /**
@@ -328,25 +338,6 @@ export class OutputArea extends Widget {
     output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
-  }
-
-  /**
-   * Adjust the model index to the widgets index (skipping stdin widgets).
-   */
-  private _modelToLayoutIndex(index: number) {
-    let widgets = this.widgets;
-    let modelOutputs = -1;
-    let i;
-
-    for (i = 0; i < widgets.length; i++) {
-      if (!widgets[i].hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS)) {
-        modelOutputs++;
-        if (modelOutputs === index) {
-          break;
-        }
-      }
-    }
-    return i;
   }
 
   /**
@@ -571,7 +562,7 @@ export namespace OutputArea {
     /**
      * Create an stdin widget.
      */
-    createStdin(options: Stdin.IOptions): Widget;
+    createStdin(options: Stdin.IOptions): IStdin;
   }
 
   /**
@@ -650,7 +641,12 @@ export class OutputPrompt extends Widget implements IOutputPrompt {
 /**
  * The stdin interface
  */
-export interface IStdin extends Widget {}
+export interface IStdin extends Widget {
+  /**
+   * The stdin value.
+   */
+  readonly value: Promise<string>;
+}
 
 /**
  * The default stdin widget.
@@ -667,6 +663,14 @@ export class Stdin extends Widget implements IStdin {
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     this._future = options.future;
+    this._value = options.prompt + ' ';
+  }
+
+  /**
+   * The value of the widget.
+   */
+  get value() {
+    return this._promise.promise.then(() => this._value);
   }
 
   /**
@@ -687,14 +691,12 @@ export class Stdin extends Widget implements IStdin {
         this._future.sendInputReply({
           value: input.value
         });
-        let rendered = document.createElement('span');
-        rendered.className = STDIN_RENDERED_CLASS;
         if (input.type === 'password') {
-          rendered.textContent = Array(input.value.length + 1).join('·');
+          this._value += Array(input.value.length + 1).join('·');
         } else {
-          rendered.textContent = input.value;
+          this._value += input.value;
         }
-        input.parentElement.replaceChild(rendered, input);
+        this._promise.resolve(void 0);
       }
     }
   }
@@ -723,6 +725,8 @@ export class Stdin extends Widget implements IStdin {
 
   private _future: Kernel.IFuture = null;
   private _input: HTMLInputElement = null;
+  private _value: string;
+  private _promise = new PromiseDelegate<void>();
 }
 
 export namespace Stdin {
