@@ -1,110 +1,244 @@
-import * as ReactDOM from 'react-dom';
-import * as React from 'react';
+import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
-import { INotebookTracker } from '@jupyterlab/notebook';
-
-import { Widget } from '@phosphor/widgets';
-
-import { IStatusBar } from './../statusBar';
+import {
+    JupyterLabPlugin,
+    JupyterLab,
+    ApplicationShell
+} from '@jupyterlab/application';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import { VDomRenderer } from '@jupyterlab/apputils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+import { ISignal, Signal } from '@phosphor/signaling';
+import { Cell } from '@jupyterlab/cells';
+import { IObservableMap } from '@jupyterlab/observables';
+import {
+    DocumentRegistry,
+    IDocumentWidget,
+    DocumentWidget
+} from '@jupyterlab/docregistry';
+import { IDisposable } from '@phosphor/disposable';
+import { Token } from '@phosphor/coreutils';
+import { IDefaultStatusesManager } from './manager';
 
 export namespace LineColComponent {
-    export interface IState {
-        line: number;
-        col: number;
-    }
-
     export interface IProps {
-        tracker: INotebookTracker;
+        line: number;
+        column: number;
     }
 }
 
-export class LineColComponent extends React.Component<
-    LineColComponent.IProps,
-    LineColComponent.IState
-> {
-    state = {
-        line: 0,
-        col: 0
-    };
+// tslint:disable-next-line:variable-name
+const LineColComponent = (
+    props: LineColComponent.IProps
+): React.ReactElement<LineColComponent.IProps> => {
+    return (
+        <div>
+            Ln {props.line}, Col {props.column}
+        </div>
+    );
+};
 
-    constructor(props: LineColComponent.IProps) {
-        super(props);
+export class LineCol extends VDomRenderer<LineCol.Model> {
+    constructor(opts: LineCol.IOptions) {
+        super();
 
-        this.props.tracker.currentChanged.connect(this.cellChange);
-        this.props.tracker.activeCellChanged.connect(this.cellChange);
-        this.props.tracker.selectionChanged.connect(this.cellChange);
+        this._notebookTracker = opts.notebookTracker;
+        this._editorTracker = opts.editorTracker;
+        this._shell = opts.shell;
+
+        this._notebookTracker.currentChanged.connect(this._onNotebookChange);
+        this._notebookTracker.activeCellChanged.connect(
+            this._onActiveCellChange
+        );
+        this._notebookTracker.selectionChanged.connect(this._onNotebookChange);
+
+        this._editorTracker.currentChanged.connect(this._onEditorChange);
+
+        this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
+
+        this.model = new LineCol.Model(
+            this._notebookTracker.activeCell &&
+                this._notebookTracker.activeCell.editor
+        );
     }
 
-    cellChange = (tracker: INotebookTracker) => {
-        if (tracker.activeCell) {
-            this.setState({
-                col: tracker.activeCell.editor.getCursorPosition().column
-            });
-            this.setState({
-                line: tracker.activeCell.editor.getCursorPosition().line
-            });
-            tracker.activeCell.editor.model.value.changed.connect(
-                this.valueChanged
+    protected render(): React.ReactElement<LineColComponent.IProps> | null {
+        if (this.model === null) {
+            return null;
+        } else {
+            return (
+                <LineColComponent
+                    line={this.model.line}
+                    column={this.model.column}
+                />
             );
-            tracker.activeCell.editor.model.selections.changed.connect(
-                this.valueChanged
-            );
+        }
+    }
+
+    private _onNotebookChange = (tracker: INotebookTracker) => {
+        this.model!.editor = tracker.activeCell.editor;
+    };
+
+    private _onActiveCellChange = (
+        _tracker: INotebookTracker,
+        cell: Cell | null
+    ) => {
+        this.model!.editor = cell && cell.editor;
+    };
+
+    private _onEditorChange = (
+        _tracker: IEditorTracker,
+        document: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
+    ) => {
+        this.model!.editor = document && document.content.editor;
+    };
+
+    private _onMainAreaCurrentChange = (
+        shell: ApplicationShell,
+        change: ApplicationShell.IChangedArgs
+    ) => {
+        const { newValue } = change;
+        if (newValue !== null) {
+            if (newValue instanceof NotebookPanel) {
+                const currentCell = this._notebookTracker.activeCell;
+                this.model!.editor = currentCell && currentCell.editor;
+            } else if (
+                newValue instanceof DocumentWidget &&
+                newValue.content instanceof FileEditor
+            ) {
+                const currentEditor = this._editorTracker.currentWidget;
+                this.model!.editor =
+                    currentEditor && currentEditor.content.editor;
+            }
         }
     };
 
-    valueChanged = () => {
-        this.setState({
-            col: this.props.tracker.activeCell.editor.getCursorPosition().column
-        });
-        this.setState({
-            line: this.props.tracker.activeCell.editor.getCursorPosition().line
-        });
-    };
-
-    render() {
-        return (
-            <div>
-                Line:{this.state.line} Col:{this.state.col}
-            </div>
-        );
-    }
+    private _notebookTracker: INotebookTracker;
+    private _editorTracker: IEditorTracker;
+    private _shell: ApplicationShell;
 }
-
-export class LineCol extends Widget {
-    constructor(opts: LineCol.IOptions) {
-        super();
-        this._tracker = opts.tracker;
-    }
-
-    onBeforeAttach() {
-        ReactDOM.render(
-            <LineColComponent tracker={this._tracker} />,
-            this.node
-        );
-    }
-    private _tracker: INotebookTracker;
-}
-export const lineColItem: JupyterLabPlugin<void> = {
-    id: 'jupyterlab-statusbar/default-items:line-col',
-    autoStart: true,
-    requires: [IStatusBar, INotebookTracker],
-    activate: (
-        app: JupyterLab,
-        statusBar: IStatusBar,
-        tracker: INotebookTracker
-    ) => {
-        statusBar.registerStatusItem(
-            'line-col-item',
-            new LineCol({ tracker }),
-            { align: 'left' }
-        );
-    }
-};
 
 export namespace LineCol {
+    export class Model implements VDomRenderer.IModel, ILineCol.IModel {
+        constructor(editor?: CodeEditor.IEditor) {
+            if (editor !== undefined && editor !== null) {
+                this._editor = editor;
+                const pos = editor.getCursorPosition();
+                this._column = pos.column;
+                this._line = pos.line;
+            } else {
+                this._editor = null;
+                this._column = 0;
+                this._line = 0;
+            }
+        }
+
+        get stateChanged(): ISignal<this, void> {
+            return this._stateChanged;
+        }
+
+        get editor(): CodeEditor.IEditor | null {
+            return this._editor;
+        }
+
+        set editor(editor: CodeEditor.IEditor | null) {
+            this._editor = editor;
+            this._stateChanged.emit(void 0);
+
+            if (this._editor === null) {
+                this._column = 0;
+                this._line = 0;
+            } else {
+                this._editor.model.selections.changed.connect(
+                    this._onSelectionChanged
+                );
+            }
+        }
+
+        get line(): number {
+            return this._line;
+        }
+
+        get column(): number {
+            return this._column;
+        }
+
+        get isDisposed() {
+            return this._isDisposed;
+        }
+
+        dispose() {
+            if (this._isDisposed) {
+                return;
+            }
+
+            Signal.clearData(this);
+            this._isDisposed = true;
+        }
+
+        private _onSelectionChanged = (
+            selections: IObservableMap<CodeEditor.ITextSelection[]>,
+            change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
+        ) => {
+            let pos = this.editor!.getCursorPosition();
+            this._line = pos.line;
+            this._column = pos.column;
+
+            this._stateChanged.emit(void 0);
+        };
+
+        private _stateChanged: Signal<this, void> = new Signal(this);
+        private _isDisposed: boolean = false;
+        private _line: number;
+        private _column: number;
+        private _editor: CodeEditor.IEditor | null;
+    }
+
     export interface IOptions {
-        tracker: INotebookTracker;
+        notebookTracker: INotebookTracker;
+        editorTracker: IEditorTracker;
+        shell: ApplicationShell;
     }
 }
+
+export interface ILineCol extends IDisposable {
+    readonly model: ILineCol.IModel | null;
+    readonly modelChanged: ISignal<this, void>;
+}
+
+export namespace ILineCol {
+    export interface IModel {
+        readonly line: number;
+        readonly column: number;
+        readonly editor: CodeEditor.IEditor | null;
+    }
+}
+
+// tslint:disable-next-line:variable-name
+export const ILineCol = new Token<ILineCol>('jupyterlab-statusbar/ILineCol');
+
+export const lineColItem: JupyterLabPlugin<ILineCol> = {
+    id: 'jupyterlab-statusbar/default-items:line-col',
+    autoStart: true,
+    provides: ILineCol,
+    requires: [IDefaultStatusesManager, INotebookTracker, IEditorTracker],
+    activate: (
+        app: JupyterLab,
+        defaultsManager: IDefaultStatusesManager,
+        notebookTracker: INotebookTracker,
+        editorTracker: IEditorTracker
+    ) => {
+        let item = new LineCol({
+            shell: app.shell,
+            notebookTracker,
+            editorTracker
+        });
+
+        defaultsManager.addDefaultStatus('line-col-item', item, {
+            align: 'left'
+        });
+
+        return item;
+    }
+};
