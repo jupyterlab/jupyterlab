@@ -307,7 +307,7 @@ export class OutputArea extends Widget {
       this.model.add({
         output_type: 'stream',
         name: 'stdin',
-        text: value
+        text: value + '\n'
       });
       panel.dispose();
     });
