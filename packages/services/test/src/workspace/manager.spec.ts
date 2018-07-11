@@ -13,7 +13,7 @@ init();
 describe('workspace', () => {
   describe('WorkspaceManager', () => {
     const manager: WorkspaceManager = new WorkspaceManager({
-      serverSettings: ServerConnection.makeSettings()
+      serverSettings: ServerConnection.makeSettings({ pageUrl: 'lab' })
     });
 
     describe('#constructor()', () => {
@@ -49,17 +49,14 @@ describe('workspace', () => {
       });
     });
 
-    describe('#list()', () => {
+    describe('#list()', async () => {
       it('should fetch a list of workspaces', async () => {
         const ids = ['foo', 'bar', 'baz'];
 
-        for (let id of ids) {
+        ids.forEach(async id => {
           await manager.save(id, { data: {}, metadata: { id } });
-        }
+        });
         expect((await manager.list()).sort()).to.eql(ids.sort());
-        for (let id of ids) {
-          await manager.save(id, { data: {}, metadata: { id } });
-        }
       });
     });
 
