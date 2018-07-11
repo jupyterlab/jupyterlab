@@ -98,7 +98,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
         statusBar.registerStatusItem(
             'line-col-item',
             new LineCol({ tracker }),
-            { align: 'left' }
+            { align: 'right', priority: 0 }
         );
     }
 };

@@ -115,7 +115,7 @@ export const commandEditStatusItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'command-edit-status-item',
             new CommandEditStatus({ tracker, commands: app.commands }),
-            { align: 'left' }
+            { align: 'right', priority: 2 }
         );
     }
 };
