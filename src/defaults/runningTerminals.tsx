@@ -64,7 +64,7 @@ export class RunningTerminalComponent extends React.Component<
 export class RunningTerminals extends Widget {
     constructor(opts: RunningTerminals.IOptions) {
         super();
-        this._manager = new TerminalManager();
+        this._manager = opts.terminalManager;
         this._host = opts.host;
     }
     onBeforeAttach() {
@@ -92,7 +92,10 @@ export const runningTerminalsItem: JupyterLabPlugin<void> = {
     activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
         manager.addDefaultStatus(
             'running-terminals-item',
-            new RunningTerminals({ host: app.shell }),
+            new RunningTerminals({
+                host: app.shell,
+                terminalManager: app.serviceManager.terminals
+            }),
             { align: 'left' }
         );
     }
@@ -104,5 +107,6 @@ export namespace RunningTerminals {
      */
     export interface IOptions {
         host: ApplicationShell;
+        terminalManager: TerminalManager;
     }
 }
