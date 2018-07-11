@@ -32,17 +32,27 @@
 }
 
 .edit-item {
-    background-image: url('./images/edit.svg');
+    background-image: url('./images/edit-icon.svg');
 }
 
 .command-item {
-    background-image: url('./images/command.svg');
+    background-image: url('./images/command-icon.svg');
 }
 .icon-item {
     background-repeat: no-repeat;
     background-size: 28px;
     background-position-x: 0px;
     background-position-y: 2px;
+    padding-top: 2px;
     min-height: 28px;
     min-width: 28px;
+    display: inline-block;
+}
+
+.kernel-item {
+    background-image: url('./images/kernel-icon.svg');
+}
+
+.terminal-item {
+    background-image: url('./images/terminal-icon.svg');
 }
