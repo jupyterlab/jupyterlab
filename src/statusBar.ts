@@ -110,17 +110,25 @@ export class StatusBar extends Widget implements IStatusBar {
                 this._leftRankItems,
                 rankItem
             );
-
-            ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
-            this._leftSide.insertWidget(insertIndex, widget);
+            if (insertIndex === -1) {
+                this._leftSide.addWidget(widget);
+                this._leftRankItems.push(rankItem);
+            } else {
+                ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
+                this._leftSide.insertWidget(insertIndex, widget);
+            }
         } else {
             let insertIndex = this._findInsertIndex(
                 this._rightRankItems,
                 rankItem
             );
-
-            ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
-            this._rightSide.insertWidget(insertIndex, widget);
+            if (insertIndex === -1) {
+                this._rightSide.addWidget(widget);
+                this._rightRankItems.push(rankItem);
+            } else {
+                ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
+                this._rightSide.insertWidget(insertIndex, widget);
+            }
         }
 
         widget.show();

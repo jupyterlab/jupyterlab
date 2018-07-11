@@ -93,7 +93,7 @@ export const runningKernelsItem: JupyterLabPlugin<void> = {
                 host: app.shell,
                 sessionManager: app.serviceManager.sessions
             }),
-            { align: 'left' }
+            { align: 'left', priority: 1 }
         );
     }
 };
