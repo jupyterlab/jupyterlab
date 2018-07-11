@@ -27,6 +27,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
+    "precommit": "lint-staged",
+    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -49,11 +51,23 @@
   "devDependencies": {
     "@types/react": "~16.0.19",
     "@types/react-dom": "~16.0.5",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
+    "prettier": "^1.13.7",
     "rimraf": "^2.6.1",
+    "tslint": "^5.10.0",
+    "tslint-config-prettier": "^1.13.0",
+    "tslint-plugin-prettier": "^1.3.0",
     "typescript": "~2.9.2"
   },
   "resolutions": {
     "@types/react": "~16.0.19"
+  },
+  "lint-staged": {
+    "**/*{.ts,.tsx,.css,.json,.md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "jupyterlab": {
     "extension": "lib/extension.js"

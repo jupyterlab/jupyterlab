@@ -7,12 +7,11 @@ to the heading in question.
 
 Here is an animation showing the extension's use, with a notebook from the
 [Python Data Science Handbook](https://github.com/jakevdp/PythonDataScienceHandbook):
-![Table of Contents](toc.gif "Table of Contents")
-
+![Table of Contents](toc.gif 'Table of Contents')
 
 ## Prerequisites
 
-* JupyterLab v0.33
+- JupyterLab v0.33
 
 ## Installation
 
@@ -32,13 +31,17 @@ jupyter labextension install .
 
 You can then run JupyterLab in watch mode to automatically pick up changes to `@jupyterlab/toc`.
 Open a terminal in the `@jupyterlab/toc` repository directory and enter
+
 ```bash
 jlpm run watch
 ```
+
 Then launch JupyterLab using
+
 ```bash
 jupyter lab --watch
 ```
+
 This will automatically recompile `@jupyterlab/toc` upon changes,
 and JupyterLab will rebuild itself. You should then be able to refresh the
 page and see your changes.
