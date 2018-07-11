@@ -97,3 +97,13 @@
   font-family: MJXTEX-T;
   src: url("~mathjax3/mathjax2/css/woff/MathJax_Typewriter-Regular.woff") format("woff");
 }
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("~mathjax3/mathjax2/css/woff/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("~mathjax3/mathjax2/css/woff/MathJax_Vector-Bold.woff") format("woff");
+}
