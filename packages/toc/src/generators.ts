@@ -275,7 +275,7 @@ namespace Private {
       // It should do a decent job of catching many, though.
       match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
-        const level = parseInt(match[1]);
+        const level = parseInt(match[1], 10);
         const text = match[2];
         headings.push({ text, level, onClick });
       }
@@ -296,8 +296,8 @@ namespace Private {
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
     for (let i = 0; i < headingNodes.length; i++) {
       const heading = headingNodes[i];
-      const level = parseInt(heading.tagName[1]);
-      const text = heading.textContent;
+      const level = parseInt(heading.tagName[1], 10);
+      const text = heading.textContent || '';
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
 
