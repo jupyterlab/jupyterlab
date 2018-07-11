@@ -275,6 +275,26 @@ describe('docregistry/registry', () => {
         expect(toArray(factories)).to.eql([factory, gFactory]);
       });
 
+      it('should list a default rendered factory after the default factory', () => {
+        let factory = createFactory();
+        registry.addWidgetFactory(factory);
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(mdFactory);
+
+        let factories = registry.preferredWidgetFactories('a.md');
+        expect(factories).to.eql([mdFactory, gFactory]);
+      });
+
       it('should handle multi-part extensions', () => {
         let factory = createFactory();
         registry.addWidgetFactory(factory);

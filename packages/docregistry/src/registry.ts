@@ -297,6 +297,7 @@ export class DocumentRegistry implements IDisposable {
    * The first item is considered the default. The returned array
    * has widget factories in the following order:
    * - path-specific default factory
+   * - path-specific default rendered factory
    * - global default factory
    * - all other path-specific factories
    * - all other global factories
@@ -311,6 +312,13 @@ export class DocumentRegistry implements IDisposable {
     fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ft.name]);
+      }
+    });
+
+    // Add the file type default rendered factories.
+    fts.forEach(ft => {
+      if (ft.name in this._defaultRenderedWidgetFactories) {
+        factories.add(this._defaultRenderedWidgetFactories[ft.name]);
       }
     });
 
