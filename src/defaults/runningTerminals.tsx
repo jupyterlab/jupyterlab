@@ -36,9 +36,9 @@ export class RunningTerminalComponent extends React.Component<
     }
 
     componentDidMount() {
-        TerminalSession.listRunning().then(value =>
-            this.setState({ terminalSession: value.length })
-        );
+        this.setState({
+            terminalSession: this.props.terminalManager.running.length
+        });
     }
 
     updateTerminal = (
