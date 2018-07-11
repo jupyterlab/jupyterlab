@@ -87,7 +87,7 @@ export class RunningKernels extends Widget {
 export const runningKernelsItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:running-kernels',
     autoStart: true,
-    rrequires: [IDefaultStatusesManager],
+    requires: [IDefaultStatusesManager],
     activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
         manager.addDefaultStatus(
             'running-kernels-item',
