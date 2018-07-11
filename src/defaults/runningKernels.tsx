@@ -6,6 +6,7 @@ import {
     JupyterLab,
     ApplicationShell
 } from '@jupyterlab/application';
+import { IDefaultStatusesManager } from './manager';
 
 import { Kernel, SessionManager } from '@jupyterlab/services';
 
@@ -86,14 +87,11 @@ export class RunningKernels extends Widget {
 export const runningKernelsItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:running-kernels',
     autoStart: true,
-    requires: [IStatusBar],
-    activate: (app: JupyterLab, statusBar: IStatusBar) => {
-        statusBar.registerStatusItem(
+    rrequires: [IDefaultStatusesManager],
+    activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
+        manager.addDefaultStatus(
             'running-kernels-item',
-            new RunningKernels({
-                host: app.shell,
-                sessionManager: app.serviceManager.sessions
-            }),
+            new RunningKernels({ host: app.shell, sessionManager: app.serviceManager.sessions }),
             { align: 'left' }
         );
     }
