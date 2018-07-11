@@ -16,6 +16,7 @@ import {
 
 import {
   CellStyle,
+  CellTextStyle,
   ShortcutCellStyle,
   RowStyle,
   ConflictRowStyle,
@@ -30,8 +31,6 @@ import {
 } from './ShortcutItemStyle'
 
 import * as React from 'react'
-
-import '../../style/ShortcutItem.css';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -108,7 +107,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
       <div 
       className={this.props.shortcut.hasConflict ? classes(RowStyle, ConflictRowStyle) : RowStyle}>
         <div className={CellStyle}>
-          <div className='jp-shortcutitem-category'>{this.props.shortcut.category}</div>
+          <div className={CellTextStyle}>{this.props.shortcut.category}</div>
         </div>
         <div className={CellStyle}>
           <div className='jp-label'>{this.props.shortcut.label}</div>

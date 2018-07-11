@@ -1,10 +1,10 @@
 import {
   style
-} from 'typestyle'
+} from 'typestyle/lib'
 
 export const shortcutStyle = style(
   {
-    margin: '4px 8px 0 4px',
+    margin: '9px 12px 0px 4px',
     paddingTop: '8px',
     backgroundSize: '16px',
     height: '16px',

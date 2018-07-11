@@ -13,17 +13,12 @@ import {
 } from './ShortcutItemStyle'
 
 import {
-  classes, style
+  ShortcutListStyle, HeaderRowStyle
+} from './ShortcutListStyle'
+
+import {
+  classes
 } from 'typestyle'
-
-import '../../style/ShortcutList.css';
-
-export const TableHeaderStyle = style(
-  {
-    fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
-    fontSize: 'var(--jp-ui-font-size2)'
-  }
-)
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
@@ -43,8 +38,8 @@ export interface IShortcutListProps {
 export class ShortcutList extends React.Component<IShortcutListProps, {}> {
   render() {
     return (
-      <div className='jp-shortcutlist'>
-        <div className={classes(RowStyle, TableHeaderStyle)}>
+      <div className={ShortcutListStyle}>
+        <div className={classes(RowStyle, HeaderRowStyle)}>
         <div className={CellStyle}>
           <ShortcutTitleItem 
             title = 'Category'

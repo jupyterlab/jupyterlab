@@ -22,6 +22,10 @@ import {
   ShortcutObject
 } from '../index'
 
+import {
+  TopWhitespaceStyle
+} from './ShortcutUIStyle'
+
 import * as React from 'react';
 
 const enum MatchType { Label, Category, Split, Default }
@@ -437,7 +441,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     }
     return (
       <div className = 'jp-shortcutui'>
-        <div className = 'jp-topwhitespace'></div>
+        <div className = {TopWhitespaceStyle}></div>
         <TopNav 
           updateSearchQuery={this.updateSearchQuery} 
           resetShortcuts={this.resetShortcuts}
