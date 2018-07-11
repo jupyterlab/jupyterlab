@@ -1,28 +1,18 @@
-.jp-shortcut {    
-    margin-left: 4px;
+/* .jp-shortcut {    
     padding-top: 8px;
     background-size: 16px;
-    height: 16px;
-    width: 16px;
     background-image: var(--jp-icon-close);
     background-position: center;
     background-repeat: no-repeat;
     background-color: var(--jp-layout-color0)
-}
-
-.or {
-    margin-right: 12px;
-    margin-top: 4px;
-}
-  
-.comma {
+    margin: 4px 8px 0 4px;
     height: 16px;
-    margin-top: 10px;
-    margin-right: 2px;
-    margin-left: 2px;
-}
+    width: 16px;
+    border: none;
+    opacity: 0.5;
+} */
   
-.jp-shortcut:hover {
+/* .jp-shortcut:hover {
     border-width: var(--jp-border-width) + 0.05;
 }
     
@@ -34,4 +24,4 @@
   
 .jp-shortcut:focus {
     outline: none;
-}
+} */

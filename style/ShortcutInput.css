@@ -1,24 +1,4 @@
-/* Input area */
-.jp-input-container {
-  display: inline-block;
-  margin-left: 30px;
-}
-
-.jp-input-plus {
-  font-size: var(--jp-ui-font-size2);
-  color: var(--jp-brand-color2);
-  transform: rotate(270deg);
-  line-height: var(--jp-code-line-height);
-}
-
-.jp-input-plus:hover {
-  color: var(--jp-brand-color0);
-}
-
-.jp-input-plus:focus {
-  color: var(--jp-brand-color0);
-}
-
+/* Input area
 @keyframes slideInFromLeft {
   from {
     width: 0%;
@@ -28,20 +8,9 @@
     width:100%;
     left: 0;
   }
-}
+} */
 
-@keyframes slideCloseToLeft {
-  from {
-    width: 100%;
-    left: 0;
-  }
-  to {
-    width: 0%;
-    left: 0;
-  }
-}
-
-.jp-input {
+/* .jp-input {
   animation: 0.5s ease-out 0s 1 slideInFromLeft;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
@@ -52,34 +21,31 @@
   width: 120px;
   height: 20px;
   display: block;
-}
+} */
 
+/* 
 .jp-input-box {
   display: inline-flex;  
-}
+} */
 
-.jp-input-hidden {
-  /* animation: 0.5s ease-out 0s 1 slideCloseToLeft; */
-}
-
-.jp-input-box-hidden {
+/* .jp-input-box-hidden {
   display: none;
-}
+} */
 
-.jp-input::placeholder {
-  color: (--jp-content-font-color3);
-}
+/* .jp-input::placeholder {
+  color: var(--jp-content-font-color3);
+} */
 
-.jp-input-unavailable {
+/* .jp-input-unavailable {
   border-color: var(--jp-error-color2);
-}
+} */
 
-.jp-input:focus {
+/* .jp-input:focus {
   outline: none;
   color: var(--jp-content-font-color1);
-}
+} */
 
-.jp-submit {
+/* .jp-submit {
   background: var(--jp-brand-color1);
   border-radius: 0px;
   color: var(--jp-layout-color0);
@@ -89,20 +55,20 @@
   background-image: var( --jp-icon-checkmark);
   background-repeat: no-repeat;
   width: 26px;
-}
+} */
 
-.jp-submit:disabled {
-  /* background-image: var( --jp-icon-checkmark-disabled); */
-  /* background-image: var(--md-priority_high); */
+/* .jp-submit:disabled {
+  //background-image: var( --jp-icon-checkmark-disabled); 
+  //background-image: var(--md-priority_high);
   background: var(--jp-error-color1);
   border: none;
-}
+} */
 
-.jp-submit-empty {
+/* .jp-submit-empty {
   background: var(--jp-layout-color2);
   background-image: var( --jp-icon-checkmark-disabled);
-}
+} */
 
-.jp-submit:focus {
+/* .jp-submit:focus {
   outline: none; 
-}
+} */

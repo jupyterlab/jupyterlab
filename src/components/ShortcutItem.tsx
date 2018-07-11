@@ -42,7 +42,6 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
   
   /** Toggle display state of input box */
   private toggleInput = () : void => {
-    console.log('toggling')
     this.setState(
       {
         displayInput: !this.state.displayInput,

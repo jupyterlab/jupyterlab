@@ -32,15 +32,6 @@
     display: contents;
 }
   
-.jp-shortcut {    
-    margin: 4px 8px 0 4px;
-    height: 16px;
-    width: 16px;
-    border: none;
-    background-image: var(--jp-icon-close);
-    opacity: 0.5;
-}
-  
   
 .jp-shortcut-key {
     border-width: var(--jp-border-width);
@@ -56,6 +47,34 @@
     line-height: var(--jp-code-line-height);
     display: -webkit-box;
 }
+
+.or {
+    margin-right: 12px;
+    margin-top: 4px;
+    line-height: var(--jp-code-line-height);
+}
+  
+.comma {
+    height: 16px;
+    margin-top: 10px;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+
+.jp-input-plus {
+    font-size: var(--jp-ui-font-size2);
+    color: var(--jp-brand-color2);
+    transform: rotate(270deg);
+    line-height: var(--jp-code-line-height);
+  }
+  
+  .jp-input-plus:hover {
+    color: var(--jp-brand-color0);
+  }
+  
+  .jp-input-plus:focus {
+    color: var(--jp-brand-color0);
+  }
   
 .jp-source {
     display: inline-block;

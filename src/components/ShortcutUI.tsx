@@ -122,16 +122,18 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     let shortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
     let shortcutObjects = this._getShortcutObjects(shortcuts)
     await this._getShortcutSource(shortcutObjects)
-    let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
 
     this.setState(
       {
         shortcutList: shortcutObjects,
         filteredShortcutList: this.searchFilterShortcuts(shortcutObjects),
         shortcutsFetched: true,
-        keyBindingsUsed: keyBindingsUsed
       }, 
-      () => this.sortShortcuts()
+      () => {
+        let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
+        this.setState({keyBindingsUsed: keyBindingsUsed})
+        this.sortShortcuts()
+      }
     )
   }
 

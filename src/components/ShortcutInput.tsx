@@ -4,7 +4,100 @@ import {
 
 import * as React from 'react'
 
+import {
+  style, classes, keyframes
+} from 'typestyle'
+
 import '../../style/ShortcutInput.css';
+
+const InputBoxStyle = style(
+  {
+    display: 'inline-flex'
+  }
+)
+
+const InputBoxHiddenStyle = style(
+  {
+    display: 'hidden'
+  }
+)
+
+const slideAnimation = keyframes(
+  {
+    from: {
+      width: '0%',
+      left: '0'
+    },
+    to: {
+      width: '100%',
+      left: '0'
+    }
+  }
+)
+
+const InputStyle = style (
+  {
+    animationDuration: '0.5s',
+    animationTimingFunction: 'ease-out',
+    animationName: slideAnimation,
+    borderWidth: 'var(--jp-border-width)',
+    borderColor: 'var(--jp-border-color3)',
+    borderStyle: 'solid',
+    backgroundColor: 'var(--jp-layout-color0)',
+    marginLeft: '10px',
+    paddingLeft:'10px',
+    width: '120px',
+    height: '20px',
+    display: 'block',
+
+    $nest: {
+      '&:focus': {
+        outline: 'none',
+        color: 'var(--jp-content-font-color1)'
+      },
+      '&::placeholder': {
+        color: 'var(--jp-content-font-color3)'
+      }
+    }
+  }
+)
+
+const InputUnavailableStyle = style (
+  {
+    borderColor: 'var(--jp-error-color2)'
+  }
+)
+
+const SubmitStyle = style (
+  {
+    background: 'var(--jp-brand-color1)',
+    borderRadius: '0px',
+    color: 'var(--jp-layout-color0)',
+    fontFamily: 'var(--jp-ui-font-family)',
+    display: 'block',
+    height: '24px',
+    backgroundImage: 'var( --jp-icon-checkmark)',
+    backgroundRepeat: 'no-repeat',
+    width: '26px',
+
+    $nest: {
+      '&:disabled': {
+        background: 'var(--jp-error-color1)',
+        border: 'none'
+      },
+      '&:focus': {
+        outline: 'none' 
+      }
+    }
+  }
+)
+
+const SubmitEmptyStyle = style (
+  {
+    background: 'var(--jp-layout-color2)',
+    backgroundImage: 'var( --jp-icon-checkmark-disabled)'
+  }
+)
 
 export interface IShortcutInputProps {
   handleUpdate: Function,
@@ -168,8 +261,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
   }
 
   handleBlur = (event) => {
-    console.log(event.relatedTarget)
-    if (event.relatedTarget === null || event.relatedTarget.className.split(' ')[0] !== 'jp-submit') {
+    if (event.relatedTarget === null || event.relatedTarget.id !== 'no-blur') {
       this.props.toggleInput();
       this.setState(
         {
@@ -182,15 +274,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
   }
 
   render() {
-    let inputClassName = 'jp-input';
-    if (!this.state.isAvailable) {inputClassName += ' jp-input-unavailable'}
-    if (this.state.value === '') {inputClassName += ' jp-input-empty'}
+    let inputClassName = InputStyle;
+    if (!this.state.isAvailable) {inputClassName = classes(inputClassName, InputUnavailableStyle)}
 
-    let divClassName = 'jp-input-box'
-    if (!this.props.displayInput) {divClassName += ' jp-input-box-hidden'}
+    // let divClassName = 'jp-input-box'
+    // if (!this.props.displayInput) {divClassName += ' jp-input-box-hidden'}
 
     return (
-      <div className={divClassName}
+      <div className={this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle}
         onBlur={(event) => this.handleBlur(event)}
       >
         <input className={inputClassName}
@@ -200,7 +291,12 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
           placeholder = 'press keys'
         >
         </input>
-        <button className={this.state.value === '' ? 'jp-submit jp-submit-empty' : 'jp-submit'}
+        <button 
+          className={this.state.value === '' ? 
+            classes(SubmitStyle,SubmitEmptyStyle) 
+            : SubmitStyle
+          }
+          id = {this.state.value !== '' ? 'no-blur' : 'blur'}
           disabled={!this.state.isAvailable} 
           onClick= {() => {
             this.props.handleUpdate(
