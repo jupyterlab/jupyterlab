@@ -210,7 +210,13 @@ function activate(
   // Add a command to change font size.
   commands.addCommand(CommandIDs.changeFontSize, {
     execute: args => {
-      const delta = args['delta'] as number;
+      const delta = Number(args['delta']);
+      if (Number.isNaN(delta)) {
+        console.error(
+          `${CommandIDs.changeFontSize}: delta arg must be a number`
+        );
+        return;
+      }
       const style = window.getComputedStyle(document.documentElement);
       const cssSize = parseInt(
         style.getPropertyValue('--jp-code-font-size'),
