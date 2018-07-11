@@ -37,9 +37,9 @@ export class RunningKernelsComponent extends React.Component<
     }
 
     componentDidMount() {
-        Kernel.listRunning().then(value =>
-            this.setState({ kernelSession: value.length })
-        );
+        this.setState({
+            kernelSession: this.props.sessionManager.running.length
+        });
     }
 
     updateKernel = (kernelManage: SessionManager, kernels: Kernel.IModel[]) => {
