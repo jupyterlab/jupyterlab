@@ -135,6 +135,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                   <ShortcutButton 
                     shortcutKeys={this.props.shortcut.keys[key]} 
                     deleteShortcut={this.props.deleteShortcut}
+                    hasConflict={this.props.shortcut.hasConflict}
                     shortcutObject={this.props.shortcut} 
                     shortcutId={key}
                     toSymbols={this.toSymbols}

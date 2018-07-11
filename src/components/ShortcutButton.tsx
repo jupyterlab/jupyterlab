@@ -5,13 +5,19 @@ import {
 import * as React from 'react';
 
 import {
-  shortcutStyle
+  shortcutStyle,
+  shortcutConflictStyle
 } from './ShortcutButtonStyle'
+
+import {
+  classes
+} from 'typestyle'
 
 /** Props for ShortcutButton component */
 export interface IShortcutButtonProps {
   shortcutKeys: string[],
   deleteShortcut: Function,
+  hasConflict: boolean,
   shortcutObject: ShortcutObject,
   shortcutId: string,
   index: number,
@@ -26,7 +32,7 @@ export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
   render() {
     return (
       <button 
-        className={shortcutStyle} 
+        className={this.props.hasConflict ? classes(shortcutStyle, shortcutConflictStyle) : shortcutStyle} 
         onClick={() => 
           this.props.deleteShortcut(this.props.shortcutObject, this.props.shortcutId)
         }

@@ -29,3 +29,10 @@ export const shortcutStyle = style(
     }
   }
 )
+
+export const shortcutConflictStyle = style (
+  {
+    backgroundColor: 'var(--jp-error-color2)',
+    opacity: 0.75
+  }
+)
