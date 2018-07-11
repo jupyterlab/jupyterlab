@@ -30,7 +30,6 @@ export namespace Filler {
 
 // tslint:disable-next-line:variable-name
 export const Filler = (props: Filler.IProps) => {
-    console.log(props.percentage);
     return (
         <div
             className="filler"
@@ -39,8 +38,6 @@ export const Filler = (props: Filler.IProps) => {
                 height: 10,
                 width: props.percentage
             }}
-        >
-            {' '}
-        </div>
+        />
     );
 };
