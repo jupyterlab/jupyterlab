@@ -99,10 +99,6 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
   }
 
   render() {
-    // const hasConflict = this.props.shortcut.hasConflict ? 'conflict-row' : ''
-    // const isExpanded = this.state.displayInput ? 
-    //   'jp-cmditem row expanded-row' 
-    //   : 'jp-cmditem row'
     return (
       <div 
       className={this.props.shortcut.hasConflict ? classes(RowStyle, ConflictRowStyle) : RowStyle}>
