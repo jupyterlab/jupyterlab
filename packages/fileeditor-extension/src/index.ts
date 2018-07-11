@@ -117,7 +117,11 @@ function activate(
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
+    factoryOptions: {
+      name: FACTORY,
+      fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
+      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+    }
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({

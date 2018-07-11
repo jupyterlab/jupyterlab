@@ -20,7 +20,8 @@ const extension: IRenderMime.IExtension = {
   documentWidgetFactoryOptions: {
     name: FACTORY,
     primaryFileType: 'markdown',
-    fileTypes: ['markdown']
+    fileTypes: ['markdown'],
+    defaultRendered: ['markdown']
   }
 };
 

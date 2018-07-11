@@ -128,6 +128,12 @@ export class DocumentRegistry implements IDisposable {
         this._defaultWidgetFactories[ft] = name;
       }
     }
+    for (let ft of factory.defaultRendered || []) {
+      if (factory.fileTypes.indexOf(ft) === -1) {
+        continue;
+      }
+      this._defaultRenderedWidgetFactories[ft] = name;
+    }
     // For convenience, store a mapping of file type name -> name
     for (let ft of factory.fileTypes) {
       if (!this._widgetFactoryExtensions[ft]) {
@@ -148,6 +154,11 @@ export class DocumentRegistry implements IDisposable {
       for (let ext of Object.keys(this._defaultWidgetFactories)) {
         if (this._defaultWidgetFactories[ext] === name) {
           delete this._defaultWidgetFactories[ext];
+        }
+      }
+      for (let ext of Object.keys(this._defaultRenderedWidgetFactories)) {
+        if (this._defaultRenderedWidgetFactories[ext] === name) {
+          delete this._defaultRenderedWidgetFactories[ext];
         }
       }
       for (let ext of Object.keys(this._widgetFactoryExtensions)) {
@@ -283,9 +294,10 @@ export class DocumentRegistry implements IDisposable {
    * #### Notes
    * Only the widget factories whose associated model factory have
    * been registered will be returned.
-   * The first item is considered the default. The returned iterator
+   * The first item is considered the default. The returned array
    * has widget factories in the following order:
    * - path-specific default factory
+   * - path-specific default rendered factory
    * - global default factory
    * - all other path-specific factories
    * - all other global factories
@@ -300,6 +312,13 @@ export class DocumentRegistry implements IDisposable {
     fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ft.name]);
+      }
+    });
+
+    // Add the file type default rendered factories.
+    fts.forEach(ft => {
+      if (ft.name in this._defaultRenderedWidgetFactories) {
+        factories.add(this._defaultRenderedWidgetFactories[ft.name]);
       }
     });
 
@@ -342,11 +361,41 @@ export class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Get the default widget factory for an extension.
+   * Get the default rendered widget factory for a path.
    *
-   * @param ext - An optional file path to filter the results.
+   * @param path - The path to for which to find a widget factory.
    *
-   * @returns The default widget factory for an extension.
+   * @returns The default rendered widget factory for the path.
+   *
+   * ### Notes
+   * If the widget factory has registered a separate set of `defaultRendered`
+   * file types and there is a match in that set, this returns that.
+   * Otherwise, this returns the same widget factory as
+   * [[defaultWidgetFactory]].
+   */
+  defaultRenderedWidgetFactory(path: string): DocumentRegistry.WidgetFactory {
+    // Get the matching file types.
+    let fts = this.getFileTypesForPath(PathExt.basename(path));
+
+    let factory: DocumentRegistry.WidgetFactory = undefined;
+    // Find if a there is a default rendered factory for this type.
+    for (let ft of fts) {
+      if (ft.name in this._defaultRenderedWidgetFactories) {
+        factory = this._widgetFactories[
+          this._defaultRenderedWidgetFactories[ft.name]
+        ];
+        break;
+      }
+    }
+    return factory || this.defaultWidgetFactory(path);
+  }
+
+  /**
+   * Get the default widget factory for a path.
+   *
+   * @param path - An optional file path to filter the results.
+   *
+   * @returns The default widget factory for an path.
    *
    * #### Notes
    * This is equivalent to the first value in [[preferredWidgetFactories]].
@@ -557,6 +606,9 @@ export class DocumentRegistry implements IDisposable {
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(
     null
   );
+  private _defaultRenderedWidgetFactories: {
+    [key: string]: string;
+  } = Object.create(null);
   private _widgetFactoryExtensions: { [key: string]: string[] } = Object.create(
     null
   );
@@ -837,6 +889,13 @@ export namespace DocumentRegistry {
      * The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default for rendering,
+     * if that is different than the default factory (which may be for editing).
+     * If undefined, then it will fall back on the default file type.
+     */
+    readonly defaultRendered?: ReadonlyArray<string>;
 
     /**
      * Whether the widget factory is read only.

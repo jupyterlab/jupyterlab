@@ -40,8 +40,9 @@ function createFactory(modelName?: string) {
   return new WidgetFactory({
     name: UUID.uuid4(),
     modelName: modelName || 'text',
-    fileTypes: ['text', 'foobar'],
-    defaultFor: ['text', 'foobar']
+    fileTypes: ['text', 'foobar', 'baz'],
+    defaultFor: ['text', 'foobar'],
+    defaultRendered: ['baz']
   });
 }
 
@@ -54,6 +55,10 @@ describe('docregistry/registry', () => {
       registry.addFileType({
         name: 'foobar',
         extensions: ['.foo.bar']
+      });
+      registry.addFileType({
+        name: 'baz',
+        extensions: ['.baz']
       });
     });
 
@@ -270,6 +275,26 @@ describe('docregistry/registry', () => {
         expect(toArray(factories)).to.eql([factory, gFactory]);
       });
 
+      it('should list a default rendered factory after the default factory', () => {
+        let factory = createFactory();
+        registry.addWidgetFactory(factory);
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(mdFactory);
+
+        let factories = registry.preferredWidgetFactories('a.md');
+        expect(factories).to.eql([mdFactory, gFactory]);
+      });
+
       it('should handle multi-part extensions', () => {
         let factory = createFactory();
         registry.addWidgetFactory(factory);
@@ -321,6 +346,31 @@ describe('docregistry/registry', () => {
         expect(registry.defaultWidgetFactory('a.foo.bar')).to.be(factory);
         expect(registry.defaultWidgetFactory('a.md')).to.be(mdFactory);
         expect(registry.defaultWidgetFactory()).to.be(gFactory);
+      });
+    });
+
+    describe('#defaultRenderedWidgetFactory()', () => {
+      it('should get the default rendered widget factory for a given extension', () => {
+        let factory = createFactory();
+        registry.addWidgetFactory(factory);
+        let mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(mdFactory);
+        expect(registry.defaultRenderedWidgetFactory('a.baz')).to.be(factory);
+        expect(registry.defaultRenderedWidgetFactory('a.md')).to.be(mdFactory);
+      });
+
+      it('should get the default widget factory if no default rendered factory is registered', () => {
+        let gFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(gFactory);
+        expect(registry.defaultRenderedWidgetFactory('a.md')).to.be(gFactory);
       });
     });
 

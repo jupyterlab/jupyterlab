@@ -81,6 +81,25 @@ describe('docregistry/default', () => {
       });
     });
 
+    describe('#defaultRendered', () => {
+      it('should default to an empty array', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text']
+        });
+        expect(factory.defaultRendered).to.eql([]);
+      });
+
+      it('should be the value passed in', () => {
+        let factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text'],
+          defaultRendered: ['text']
+        });
+        expect(factory.defaultRendered).to.eql(['text']);
+      });
+    });
+
     describe('#readOnly', () => {
       it('should default to false', () => {
         let factory = new WidgetFactory({
