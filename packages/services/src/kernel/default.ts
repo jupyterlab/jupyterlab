@@ -1029,11 +1029,12 @@ export class DefaultKernel implements Kernel.IKernel {
     this.requestKernelInfo()
       .then(() => {
         this._connectionPromise.resolve(void 0);
+        this._isReady = true;
       })
       .catch(err => {
         this._connectionPromise.reject(err);
+        this._isReady = false;
       });
-    this._isReady = false;
   };
 
   /**
