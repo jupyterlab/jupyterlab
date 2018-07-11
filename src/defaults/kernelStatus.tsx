@@ -9,6 +9,9 @@ import { IDefaultStatusesManager } from './manager';
 
 import { Widget } from '@phosphor/widgets';
 
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+import { IClientSession } from '@jupyterlab/apputils';
+
 // import { Kernel, KernelManager } from '@jupyterlab/services';
 
 export namespace StatusComponent {
@@ -16,7 +19,8 @@ export namespace StatusComponent {
         kernelStatus: string;
     }
     export interface IProps {
-        tracker: INotebookTracker;
+        notebookTracker: INotebookTracker;
+        consoleTracker: IConsoleTracker;
     }
 }
 
@@ -29,30 +33,36 @@ export class StatusComponent extends React.Component<
     };
     constructor(props: StatusComponent.IProps) {
         super(props);
-        this.props.tracker.currentChanged.connect(this.cellChanged);
-        this.props.tracker.activeCellChanged.connect(this.cellChanged);
+        this.props.notebookTracker.currentChanged.connect(this.cellChanged);
+        this.props.notebookTracker.activeCellChanged.connect(this.cellChanged);
+        this.props.consoleTracker.currentChanged.connect(this.consoleChanged);
     }
 
-    cellChanged = () => {
-        if (this.props.tracker.currentWidget.session.kernel) {
+    consoleChanged = (tracker: IConsoleTracker, consolePanel: ConsolePanel) => {
+        if (consolePanel.session.kernel) {
+            this.setState({ kernelStatus: consolePanel.session.kernel.status });
+            consolePanel.session.statusChanged.connect(this.kernelChanged);
+            consolePanel.session.kernelChanged.connect(this.kernelChanged);
+        }
+    };
+    cellChanged = (tracker: INotebookTracker) => {
+        if (tracker.currentWidget.session.kernel) {
             this.setState({
-                kernelStatus: this.props.tracker.currentWidget.session.kernel
-                    .status
+                kernelStatus: tracker.currentWidget.session.kernel.status
             });
-            this.props.tracker.currentWidget.session.statusChanged.connect(
+            tracker.currentWidget.session.statusChanged.connect(
                 this.kernelChanged
             );
-            this.props.tracker.currentWidget.session.kernelChanged.connect(
+            tracker.currentWidget.session.kernelChanged.connect(
                 this.kernelChanged
             );
         }
     };
 
-    kernelChanged = () => {
-        if (this.props.tracker.currentWidget.session.kernel) {
+    kernelChanged = (session: IClientSession) => {
+        if (session.kernel) {
             this.setState({
-                kernelStatus: this.props.tracker.currentWidget.session.kernel
-                    .status
+                kernelStatus: session.kernel.status
             });
         } else {
             this.setState({ kernelStatus: 'dead' });
@@ -67,13 +77,21 @@ export class StatusComponent extends React.Component<
 export class KernelStatus extends Widget {
     constructor(opts: KernelStatus.IOptions) {
         super();
-        this._tracker = opts.tracker;
+        this._notebookTracker = opts.notebookTracker;
+        this._consoleTracker = opts.consoleTracker;
     }
     onBeforeAttach() {
-        ReactDOM.render(<StatusComponent tracker={this._tracker} />, this.node);
+        ReactDOM.render(
+            <StatusComponent
+                notebookTracker={this._notebookTracker}
+                consoleTracker={this._consoleTracker}
+            />,
+            this.node
+        );
     }
 
-    private _tracker: INotebookTracker;
+    private _notebookTracker: INotebookTracker;
+    private _consoleTracker: IConsoleTracker;
 }
 
 /*
@@ -83,15 +101,16 @@ export class KernelStatus extends Widget {
 export const kernelStatusItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:kernel-status',
     autoStart: true,
-    requires: [IDefaultStatusesManager, INotebookTracker],
+    requires: [IDefaultStatusesManager, INotebookTracker, IConsoleTracker],
     activate: (
         app: JupyterLab,
         manager: IDefaultStatusesManager,
-        tracker: INotebookTracker
+        notebookTracker: INotebookTracker,
+        consoleTracker: IConsoleTracker
     ) => {
         manager.addDefaultStatus(
             'kernel-status-item',
-            new KernelStatus({ tracker }),
+            new KernelStatus({ notebookTracker, consoleTracker }),
             { align: 'left' }
         );
     }
@@ -102,6 +121,7 @@ export namespace KernelStatus {
      * Options for creating a new StatusBar instance
      */
     export interface IOptions {
-        tracker: INotebookTracker;
+        notebookTracker: INotebookTracker;
+        consoleTracker: IConsoleTracker;
     }
 }
