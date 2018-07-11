@@ -12,8 +12,6 @@ import { Kernel, SessionManager } from '@jupyterlab/services';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IStatusBar } from './../statusBar';
-
 export namespace RunningKernelsComponent {
     export interface IState {
         kernelSession: number;
@@ -87,11 +85,14 @@ export class RunningKernels extends Widget {
 export const runningKernelsItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:running-kernels',
     autoStart: true,
-    rrequires: [IDefaultStatusesManager],
+    requires: [IDefaultStatusesManager],
     activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
         manager.addDefaultStatus(
             'running-kernels-item',
-            new RunningKernels({ host: app.shell, sessionManager: app.serviceManager.sessions }),
+            new RunningKernels({
+                host: app.shell,
+                sessionManager: app.serviceManager.sessions
+            }),
             { align: 'left' }
         );
     }
