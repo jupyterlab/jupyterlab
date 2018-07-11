@@ -8,7 +8,22 @@ import {
 
 import * as React from 'react';
 
+import {
+  CellStyle, RowStyle
+} from './ShortcutItemStyle'
+
+import {
+  classes, style
+} from 'typestyle'
+
 import '../../style/ShortcutList.css';
+
+export const TableHeaderStyle = style(
+  {
+    fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
+    fontSize: 'var(--jp-ui-font-size2)'
+  }
+)
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
@@ -29,27 +44,27 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
   render() {
     return (
       <div className='jp-shortcutlist'>
-        <div className='row table-header'>
-        <div className='cell category-cell'>
+        <div className={classes(RowStyle, TableHeaderStyle)}>
+        <div className={CellStyle}>
           <ShortcutTitleItem 
             title = 'Category'
             updateSort = {this.props.updateSort}
             active = {this.props.currentSort}
           />
         </div>
-        <div className='cell command-cell'>
+        <div className={CellStyle}>
           <ShortcutTitleItem 
             title = 'Command'
             updateSort = {this.props.updateSort}
             active = {this.props.currentSort}
           />
         </div>
-        <div className='cell'>
+        <div className={CellStyle}>
           <div className='title-div'>
             Shortcut
           </div>
         </div>
-        <div className='cell source-cell'>
+        <div className={CellStyle}>
           <ShortcutTitleItem 
             title = 'Source'
             updateSort = {this.props.updateSort}
@@ -57,7 +72,7 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
           />
         </div>
         {this.props.showSelectors && 
-          <div className='cell selector-cell'>
+          <div className={CellStyle}>
             <ShortcutTitleItem 
               title = 'Selectors'
               updateSort = {this.props.updateSort}

@@ -407,8 +407,15 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       shortcut.hasConflict = false
     });
     oldShortcut.hasConflict = true
-    newSortedList.splice(newSortedList.filter(shortcut => shortcut.id === oldShortcut.id)[0].index, 1)
-    newSortedList.splice(newShortcut.index + 1, 0, oldShortcut)
+    newSortedList.splice(oldShortcut.index, 1)
+    newSortedList.splice(
+      (oldShortcut.index < newShortcut.index 
+        ? newShortcut.index 
+        : newShortcut.index + 1
+      ), 
+      0, 
+      oldShortcut
+    )
     newSortedList.forEach(shortcut => {
       shortcut.index = newSortedList.indexOf(shortcut)
     });

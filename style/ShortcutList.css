@@ -44,21 +44,3 @@
     font-size: var(--jp-ui-font-size2);
 }
 
-.row {
-    display: table-row;
-    border-bottom: solid;
-    border-bottom-color: var(--jp-border-color1);
-    border-bottom-width: var(--jp-border-width);
-    line-height: 30px;
-    vertical-align: middle;
-    background-color: var(--jp-layout-color0)
-}
-
-.conflict-row {
-    background-color: var(--jp-error-color2);
-}
-
-.conflict-row .jp-shortcut {
-    background-color: var(--jp-error-color2);
-    opacity: 1;
-}
