@@ -1,8 +1,7 @@
 {
   "name": "@jupyterlab/metapackage",
   "version": "0.17.0-1",
-  "private": true,
-  "description": "JupyterLab - All Packages",
+  "description": "JupyterLab - Meta Package.  All of the packages used by the core JupyterLab application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
