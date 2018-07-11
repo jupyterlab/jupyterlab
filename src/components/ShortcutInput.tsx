@@ -4,7 +4,18 @@ import {
 
 import * as React from 'react'
 
-import '../../style/ShortcutInput.css';
+import {
+  classes
+} from 'typestyle'
+
+import {
+  InputStyle, 
+  InputUnavailableStyle, 
+  InputBoxHiddenStyle, 
+  InputBoxStyle, 
+  SubmitEmptyStyle, 
+  SubmitStyle
+} from './ShortcutInputStyle'
 
 export interface IShortcutInputProps {
   handleUpdate: Function,
@@ -46,8 +57,10 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
       'Tab', 
       'Shift', 
       'Ctrl',
+      'Control',
       'Alt',
-      'Accel', 
+      'Accel',
+      'Meta',
       'Enter', 
       'ArrowUp', 
       'ArrowDown', 
@@ -68,22 +81,28 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
       let lastKey = (userInput.substr(userInput.lastIndexOf(' ') + 1, userInput.length)).trim()
       if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = (userInput + ',');
-        if (event.ctrlKey) {
+        if (event.ctrlKey && event.key != 'Control') {
           userInput = (userInput + ' Ctrl').trim()
         }
-        if (event.metaKey) {
+        if (event.metaKey && event.key != 'Meta') {
           userInput = (userInput + ' Accel').trim()
         }
-        if (event.altKey) {
+        if (event.altKey && event.key != 'Alt') {
           userInput = (userInput + ' Alt').trim()
         }
-        if (event.shiftKey) {
+        if (event.shiftKey && event.key != 'Shift') {
           userInput = (userInput + ' Shift').trim()
         }
         if (wordKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + event.key.toUpperCase()).trim()
         } else {
-          userInput = (userInput + ' ' + event.key).trim()
+          if (event.key === 'Meta') {
+            userInput = (userInput + ' Accel').trim()
+          } else if (event.key === 'Control') {
+            userInput = (userInput + ' Ctrl').trim()
+          } else {
+            userInput = (userInput + ' ' + event.key).trim()
+          }
         }
       } else {
         if (event.key === 'Control') {
@@ -160,39 +179,48 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
   }
 
   handleBlur = (event) => {
-    if (event.relatedTarget === null || event.relatedTarget.className !== 'jp-submit') {
+    if (event.relatedTarget === null || event.relatedTarget.id !== 'no-blur') {
       this.props.toggleInput();
+      this.setState(
+        {
+          value: '',
+          userInput: ''
+        }
+      )
       this.props.clearConflicts();
     }
   }
 
   render() {
-    let className = 'jp-input';
-    if (!this.state.isAvailable) {className += ' jp-input-unavailable'}
-    if (!this.props.displayInput) {className += ' jp-input-hidden'}
+    let inputClassName = InputStyle;
+    if (!this.state.isAvailable) {inputClassName = classes(inputClassName, InputUnavailableStyle)}
+
+    // let divClassName = 'jp-input-box'
+    // if (!this.props.displayInput) {divClassName += ' jp-input-box-hidden'}
 
     return (
-      <div className={this.props.displayInput ? 'jp-input-box' : 'jp-input-box jp-input-box-hidden'}
+      <div className={this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle}
         onBlur={(event) => this.handleBlur(event)}
       >
-        <input className={className}
+        <input className={inputClassName}
           value={this.state.value} 
           onKeyDown={this.handleInput}
           ref = {(input) => input && input.focus()}
           placeholder = 'press keys'
         >
         </input>
-        {!this.state.isAvailable && 
-          <div className='jp-input-warning'>
-          Already in use
-          </div>
-        }
-        <button className='jp-submit'
+        <button 
+          className={this.state.value === '' ? 
+            classes(SubmitStyle,SubmitEmptyStyle) 
+            : SubmitStyle
+          }
+          id = {this.state.value !== '' ? 'no-blur' : 'blur'}
           disabled={!this.state.isAvailable} 
           onClick= {() => {
-            this.props.handleUpdate(this.props.shortcut, 
+            this.props.handleUpdate(
+              this.props.shortcut, 
               this.keysFromValue(this.state.userInput)
-            ) 
+            )
             this.setState(
               {
                 value:'', 
@@ -200,7 +228,6 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
             )
             this.props.toggleInput()
           }}
-          data-tooltip= 'test'
         >
         </button>
       </div>

@@ -22,6 +22,10 @@ import {
   ShortcutObject
 } from '../index'
 
+import {
+  TopWhitespaceStyle
+} from './ShortcutUIStyle'
+
 import * as React from 'react';
 
 const enum MatchType { Label, Category, Split, Default }
@@ -122,25 +126,31 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     let shortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
     let shortcutObjects = this._getShortcutObjects(shortcuts)
     await this._getShortcutSource(shortcutObjects)
-    let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
 
     this.setState(
       {
         shortcutList: shortcutObjects,
         filteredShortcutList: this.searchFilterShortcuts(shortcutObjects),
         shortcutsFetched: true,
-        keyBindingsUsed: keyBindingsUsed
       }, 
-      () => this.sortShortcuts()
+      () => {
+        let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects)
+        this.setState({keyBindingsUsed: keyBindingsUsed})
+        this.sortShortcuts()
+      }
     )
   }
 
   /** Set the current seach query */
   updateSearchQuery = (event) : void => {
-    this.setState({searchQuery: event.target.value}, 
+    this.setState({searchQuery: event.target.value, currentSort: ''}, 
       () => this.setState(
         {
           filteredShortcutList: this.searchFilterShortcuts(this.state.shortcutList)
+        },
+        () => {
+          if (this.state.searchQuery == '')
+            this.sortShortcuts();
         }
       )
     )
@@ -164,29 +174,31 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = (shortcutObject: ShortcutObject, keys: string[]) : void => {
-    let commandId: string;
-    commandId = shortcutObject.id
-    if(shortcutObject.numberOfShortcuts === 1) {
-      commandId = commandId + '-' + '2'
-    }
-    else {
-      Object.keys(shortcutObject.keys).forEach(key => {
-        if(shortcutObject.keys[key][0] === '') {
-          commandId = key
-        }
-      });
-    }
-    this.props.settingRegistry
-    .set(this.props.shortcutPlugin, 
-      commandId, 
-      {
-        command: shortcutObject.commandName, 
-        keys: keys, 
-        selector: shortcutObject.selector,
-        title: shortcutObject.label,
-        category: shortcutObject.category
+    if (keys[0] !== '') {
+      let commandId: string;
+      commandId = shortcutObject.id
+      if(shortcutObject.numberOfShortcuts === 1) {
+        commandId = commandId + '-' + '2'
       }
-    ).then(() => this._getShortcutList())
+      else {
+        Object.keys(shortcutObject.keys).forEach(key => {
+          if(shortcutObject.keys[key][0] === '') {
+            commandId = key
+          }
+        });
+      }
+      this.props.settingRegistry
+      .set(this.props.shortcutPlugin, 
+        commandId, 
+        {
+          command: shortcutObject.commandName, 
+          keys: keys, 
+          selector: shortcutObject.selector,
+          title: shortcutObject.label,
+          category: shortcutObject.category
+        }
+      ).then(() => this._getShortcutList())
+    }
   }
 
   /** Delete shortcut for command, refresh state */
@@ -399,8 +411,15 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       shortcut.hasConflict = false
     });
     oldShortcut.hasConflict = true
-    newSortedList.splice(newSortedList.filter(shortcut => shortcut.id === oldShortcut.id)[0].index, 1)
-    newSortedList.splice(newShortcut.index + 1, 0, oldShortcut)
+    newSortedList.splice(oldShortcut.index, 1)
+    newSortedList.splice(
+      (oldShortcut.index < newShortcut.index 
+        ? newShortcut.index 
+        : newShortcut.index + 1
+      ), 
+      0, 
+      oldShortcut
+    )
     newSortedList.forEach(shortcut => {
       shortcut.index = newSortedList.indexOf(shortcut)
     });
@@ -422,7 +441,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     }
     return (
       <div className = 'jp-shortcutui'>
-        <div className = 'jp-topwhitespace'></div>
+        <div className = {TopWhitespaceStyle}></div>
         <TopNav 
           updateSearchQuery={this.updateSearchQuery} 
           resetShortcuts={this.resetShortcuts}

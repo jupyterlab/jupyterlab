@@ -1,6 +1,20 @@
 import * as React from 'react';
 
-import '../../style/TopNav.css';
+import {
+  classes
+} from 'typestyle'
+
+import {
+  TopNavStyle,
+  SymbolsStyle,
+  SymbolsRowStyle,
+  SearchContainerStyle,
+  SearchStyle,
+  AdvancedOptionsStyle,
+  AdvancedOptionsRightStyle,
+  AdvancedOptionsLinkStyle,
+  AdvancedOptionsLinkRightStyle,
+} from './TopNavStyle'
 
 /** State for TopNav component */
 export interface ITopNavProps {
@@ -15,23 +29,36 @@ export interface ITopNavProps {
 export class TopNav extends React.Component<ITopNavProps, {}> {
   render() {
     return (
-    <div className='jp-shortcuttopnav'>
-      <a className='jp-link jp-link-left' onClick={() => this.props.resetShortcuts()}>
-        Reset All
-      </a>
-      <div className = 'jp-searchcontainer'>
+    <div className={TopNavStyle}>
+      <div className={SymbolsStyle}>
+        <div className={SymbolsRowStyle}>
+          <div>Command ⌘</div>
+          <div>Alt ⌥</div>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <div>Shift ⇧</div>
+          <div>Control ⌃</div>
+        </div>
+      </div>
+      <div className = {SearchContainerStyle}>
         <input 
           onChange={(event) => this.props.updateSearchQuery(event)} 
-          className='jp-search'
+          className={SearchStyle}
           placeholder='Search'
         />
       </div>
-      <div className='advanced-options'>
-        <a className='jp-link' onClick={() => this.props.openAdvanced()}>
+
+      <div className={AdvancedOptionsStyle}>
+        <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.openAdvanced()}>
           Advanced Editor
         </a>
-        <a className='jp-link' onClick={() => this.props.toggleSelectors()}>
+        <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.toggleSelectors()}>
           {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
+        </a>
+      </div>
+      <div className={classes(AdvancedOptionsStyle, AdvancedOptionsRightStyle)}>
+        <a className={classes(AdvancedOptionsLinkStyle, AdvancedOptionsLinkRightStyle)} onClick={() => this.props.resetShortcuts()}>
+          Reset All
         </a>
       </div>
     </div>
