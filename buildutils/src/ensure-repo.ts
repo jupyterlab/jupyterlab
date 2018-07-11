@@ -135,7 +135,7 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    if (data.private === true) {
+    if (data.private === true || data.name === '@jupyterlab/metapackage') {
       return;
     }
 
