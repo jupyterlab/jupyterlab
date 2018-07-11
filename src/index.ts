@@ -15,7 +15,8 @@ import {
     lineColItem,
     fileUploadItem,
     kernelStatusItem,
-    commandEditStatusItem
+    commandEditStatusItem,
+    runningTerminalsItem
 } from './defaults';
 
 export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar:plugin';
@@ -41,7 +42,8 @@ const plugins: JupyterLabPlugin<any>[] = [
     notebookTrustItem,
     fileUploadItem,
     kernelStatusItem,
-    commandEditStatusItem
+    commandEditStatusItem,
+    runningTerminalsItem
 ];
 
 export default plugins;
