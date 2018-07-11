@@ -1052,7 +1052,9 @@ export namespace Private {
     schema: ISettingRegistry.ISchema,
     key: string
   ): string {
-    const { description, title } = schema.properties[key];
+    const props = schema.properties && schema.properties[key];
+    const description = (props && props['description']) || nondescript;
+    const title = (props && props['title']) || untitled;
     const reified = reifyDefault(schema, key);
     const defaults =
       reified === undefined
@@ -1074,17 +1076,15 @@ export namespace Private {
     key: string,
     value: JSONValue
   ): string {
-    const { description, title } = schema.properties[key];
+    const props = schema.properties && schema.properties[key];
+    const description = (props && props['description']) || nondescript;
+    const title = (props && props['title']) || untitled;
     const attribute = prefix(
       `"${key}": ${JSON.stringify(value, null, 2)}`,
       indent
     );
 
-    return [
-      prefix(`${title || untitled}`),
-      prefix(description || nondescript),
-      attribute
-    ].join('\n');
+    return [prefix(title), prefix(description), attribute].join('\n');
   }
   /**
    * Returns a line of a specified length.
