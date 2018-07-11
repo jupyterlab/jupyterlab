@@ -12,8 +12,6 @@ import { Widget } from '@phosphor/widgets';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { IClientSession } from '@jupyterlab/apputils';
 
-// import { Kernel, KernelManager } from '@jupyterlab/services';
-
 export namespace StatusComponent {
     export interface IState {
         kernelStatus: string;
