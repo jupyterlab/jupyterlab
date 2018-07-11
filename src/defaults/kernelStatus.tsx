@@ -109,7 +109,7 @@ export const kernelStatusItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'kernel-status-item',
             new KernelStatus({ notebookTracker, consoleTracker }),
-            { align: 'left' }
+            { align: 'left', priority: 0 }
         );
     }
 };

@@ -133,7 +133,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         manager.addDefaultStatus(
             'notebook-trust-item',
             new NotebookTrust({ tracker }),
-            {}
+            { align: 'right', priority: 1 }
         );
     }
 };
