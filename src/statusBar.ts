@@ -129,8 +129,6 @@ export class StatusBar extends Widget implements IStatusBar {
                 ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
                 this._rightSide.insertWidget(insertIndex, widget);
             }
-
-            // console.log(id + ' ' + insertIndex + ' ' + priority);
         }
 
         widget.show();
