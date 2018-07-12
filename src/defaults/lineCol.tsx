@@ -236,7 +236,8 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
         });
 
         defaultsManager.addDefaultStatus('line-col-item', item, {
-            align: 'left'
+            align: 'left',
+            priority: 0
         });
 
         return item;
