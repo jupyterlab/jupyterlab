@@ -200,7 +200,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
  *      activate: (
  *        inspector: IInspector
  *
- *  Get a info handler:
+ *  Get an info handler:
  *
  *     let handler = InfoHandler(inspector);
  *
@@ -245,7 +245,7 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
    * The info panel is always on, regardless if the notebook has focus
    */
   get standby(): boolean {
-    return true;
+    return false;
   }
   set standby(value: boolean) {}
 
@@ -296,11 +296,15 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
       //widget.output.clear();
       widget.model.value.text = title;
     }
-    // now process the display_data
+    // store the widget in _pages so that they can be appended to later on.
+    // FIXME: we should get _pages from the inspector itself so there is no need
+    // to save them separately. Furthermore, using tabs from inspector allows
+    // users to close tabs manually.
     this._pages.set(page, widget);
 
     if (!inputMsg.content.data) return;
 
+    // now process the display_data
     widget.model.outputs.add({
       output_type: 'display_data',
       data: inputMsg.content.data,
