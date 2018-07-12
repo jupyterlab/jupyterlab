@@ -63,7 +63,7 @@ export class RunningSessionsComponent extends React.Component<
     };
     render() {
         return (
-            <div onClick={this.handleClick} style={{ minWidth: '20em' }}>
+            <div onClick={this.handleClick}>
                 <div className={'kernel-item icon-item'} />
                 {this.state.kernelSession}
                 <div className={'terminal-item icon-item'} />
