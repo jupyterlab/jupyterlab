@@ -49,17 +49,14 @@ export class StatusComponent extends React.Component<
         }
     };
     cellChanged = (tracker: INotebookTracker) => {
-        if (tracker.currentWidget.session.kernel) {
+        const currentWidget = tracker.currentWidget;
+        if (currentWidget && currentWidget.session.kernel) {
             this.setState({
-                kernelStatus: tracker.currentWidget.session.kernel.status,
-                kernelType: tracker.currentWidget.session.kernel.name
+                kernelStatus: currentWidget.session.kernel.status,
+                kernelType: currentWidget.session.kernel.name
             });
-            tracker.currentWidget.session.statusChanged.connect(
-                this.kernelChanged
-            );
-            tracker.currentWidget.session.kernelChanged.connect(
-                this.kernelChanged
-            );
+            currentWidget.session.statusChanged.connect(this.kernelChanged);
+            currentWidget.session.kernelChanged.connect(this.kernelChanged);
         }
     };
 

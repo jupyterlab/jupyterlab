@@ -89,7 +89,7 @@ export class RunningSessions extends Widget {
         );
     }
 
-    private _host: ApplicationShell = null;
+    private _host: ApplicationShell;
     private _serviceManager: ServiceManager;
 }
 
