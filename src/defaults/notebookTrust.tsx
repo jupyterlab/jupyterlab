@@ -26,14 +26,14 @@ const NotebookTrustComponent = (
     }
 };
 
-export namespace NotebookTrustComponent {
+namespace NotebookTrustComponent {
     export interface IProps {
         allCellsTrusted: boolean;
         activeCellTrusted: boolean;
     }
 }
 
-export class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
+class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
     implements INotebookTrust {
     constructor(opts: NotebookTrust.IOptions) {
         super();
@@ -75,7 +75,7 @@ export class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
     private _tracker: INotebookTracker;
 }
 
-export namespace NotebookTrust {
+namespace NotebookTrust {
     export class Model implements VDomRenderer.IModel, INotebookTrust.IModel {
         constructor(notebook: Notebook | null) {
             this._notebook = notebook;

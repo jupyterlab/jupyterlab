@@ -21,7 +21,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 
-export namespace LineColComponent {
+namespace LineColComponent {
     export interface IProps {
         line: number;
         column: number;
@@ -39,7 +39,7 @@ const LineColComponent = (
     );
 };
 
-export class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
+class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     constructor(opts: LineCol.IOptions) {
         super();
 
@@ -119,7 +119,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     private _shell: ApplicationShell;
 }
 
-export namespace LineCol {
+namespace LineCol {
     export class Model implements VDomRenderer.IModel, ILineCol.IModel {
         constructor(editor: CodeEditor.IEditor) {
             if (editor !== undefined && editor !== null) {
