@@ -17,7 +17,22 @@ questions about these issues.
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+All source code is written in
+[TypeScript](http://www.typescriptlang.org/Handbook). See the [Style
+Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+
+All source code is formatted using [prettier](https://prettier.io).
+When code is modified and committed, all staged files will be automtically
+formatted using pre-commit git hooks (with help from the
+[lint-staged](https://github.com/okonet/lint-staged) and
+[husky](https://github.com/typicode/husky) libraries). The benefit of using a
+code formatter like prettier is that it removes the topic of code style from the conversation
+when reviewing pull requests, thereby speeding up the review process.
+
+You may also use the prettier npm script (e.g. `npm run prettier` or `yarn prettier` or `jlpm prettier`) to format the entire code base. We recommend
+installing a prettier
+extension for your code editor and configuring it to format your code with
+a keyboard shortcut or automatically on save.
 
 ## Setting Up a Development Environment
 
