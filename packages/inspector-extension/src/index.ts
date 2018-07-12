@@ -7,11 +7,8 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  ICommandPalette,
-  InstanceTracker,
-  MainAreaWidget
-} from '@jupyterlab/apputils';
+// FIXME: Not sure how to handle restore of this side panel
+// import { InstanceTracker } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
@@ -27,39 +24,24 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { InspectorManager } from './manager';
 
 /**
- * The command IDs used by the inspector plugin.
- */
-namespace CommandIDs {
-  export const open = 'inspector:open';
-}
-
-/**
  * A service providing code introspection.
  */
 const inspector: JupyterLabPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
-  requires: [ICommandPalette, ILayoutRestorer],
+  requires: [ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
-  activate: (
-    app: JupyterLab,
-    palette: ICommandPalette,
-    restorer: ILayoutRestorer
-  ): IInspector => {
-    const { commands, shell } = app;
+  activate: (app: JupyterLab, restorer: ILayoutRestorer): IInspector => {
+    const { shell } = app;
     const manager = new InspectorManager();
-    const category = 'Inspector';
-    const command = CommandIDs.open;
-    const label = 'Open Inspector';
-    const namespace = 'inspector';
-    const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
-      namespace
-    });
-
+    // const namespace = 'inspector';
+    // const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
+    //     namespace
+    // });
     /**
      * Create and track a new inspector.
      */
-    function newInspectorPanel(): InspectorPanel {
+    if (!manager.inspector || manager.inspector.isDisposed) {
       const inspector = new InspectorPanel();
 
       inspector.id = 'jp-inspector';
@@ -70,39 +52,28 @@ const inspector: JupyterLabPlugin<IInspector> = {
         }
       });
 
-      // Track the inspector.
-      let widget = new MainAreaWidget({ content: inspector });
-      tracker.add(widget);
-
       // Add the default inspector child items.
       Private.defaultInspectorItems.forEach(item => {
         inspector.add(item);
       });
 
-      return inspector;
+      manager.inspector = inspector;
+
+      if (!manager.inspector.isAttached) {
+        shell.addToLeftArea(manager.inspector, { rank: 300 });
+      }
+    }
+
+    if (manager.inspector.isAttached) {
+      shell.activateById(manager.inspector.id);
     }
 
     // Handle state restoration.
-    restorer.restore(tracker, {
-      command,
-      args: () => null,
-      name: () => 'inspector'
-    });
-
-    // Add command to registry and palette.
-    commands.addCommand(command, {
-      label,
-      execute: () => {
-        if (!manager.inspector || manager.inspector.isDisposed) {
-          manager.inspector = newInspectorPanel();
-        }
-        if (!manager.inspector.isAttached) {
-          shell.addToMainArea(manager.inspector.parent, { activate: false });
-        }
-        shell.activateById(manager.inspector.parent.id);
-      }
-    });
-    palette.addItem({ command, category });
+    // restorer.restore(tracker, {
+    //   command,
+    //   args: () => null,
+    //   name: () => 'inspector'
+    // });
 
     return manager;
   }
@@ -160,11 +131,6 @@ const consoles: JupyterLabPlugin<void> = {
         manager.source = source;
       }
     });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-CodeConsole-promptCell'
-    });
   }
 };
 
@@ -219,11 +185,6 @@ const notebooks: JupyterLabPlugin<void> = {
       if (source) {
         manager.source = source;
       }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.open,
-      selector: '.jp-Notebook'
     });
   }
 };
