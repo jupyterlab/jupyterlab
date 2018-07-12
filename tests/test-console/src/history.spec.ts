@@ -123,7 +123,7 @@ describe('console/history', () => {
     });
 
     describe('#forward()', () => {
-      it('should return an emptry string if no history exists', () => {
+      it('should return an empty string if no history exists', () => {
         let history = new ConsoleHistory({ session });
         return history.forward('').then(result => {
           expect(result).to.be('');

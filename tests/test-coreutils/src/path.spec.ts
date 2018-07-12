@@ -48,7 +48,7 @@ describe('@jupyterlab/coreutils', () => {
         expect(PathExt.extname(TESTPATH)).to.equal('.js');
       });
 
-      it('should only take the last occurance of a dot', () => {
+      it('should only take the last occurrence of a dot', () => {
         expect(PathExt.extname('foo.tar.gz')).to.equal('.gz');
       });
     });

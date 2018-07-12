@@ -35,7 +35,7 @@ import { DocumentRegistry } from './registry';
 /**
  * An implementation of a document context.
  *
- * This class is typically instantiated by the document manger.
+ * This class is typically instantiated by the document manager.
  */
 export class Context<T extends DocumentRegistry.IModel>
   implements DocumentRegistry.IContext<T> {
@@ -659,7 +659,7 @@ export class Context<T extends DocumentRegistry.IModel>
   ): Promise<Contents.IModel> {
     let tDisk = new Date(model.last_modified);
     console.warn(
-      `Last saving peformed ${tClient} ` +
+      `Last saving performed ${tClient} ` +
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );

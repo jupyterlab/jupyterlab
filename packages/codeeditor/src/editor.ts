@@ -141,8 +141,8 @@ export namespace CodeEditor {
    *
    * #### Write access
    * - if a user code is a selection owner then:
-   *   - it can change selections beloging to it
-   *   - but it must not change selections beloging to other selection owners
+   *   - it can change selections belonging to it
+   *   - but it must not change selections belonging to other selection owners
    * - otherwise it must not change any selection
    */
 
@@ -255,7 +255,7 @@ export namespace CodeEditor {
     }
 
     /**
-     * Dipose of the resources used by the model.
+     * Dispose of the resources used by the model.
      */
     dispose(): void {
       if (this._isDisposed) {

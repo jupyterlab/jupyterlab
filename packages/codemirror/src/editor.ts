@@ -286,7 +286,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Find a position fot the given offset.
+   * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
     const { ch, line } = this.doc.posFromIndex(offset);

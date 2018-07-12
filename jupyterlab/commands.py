@@ -1726,7 +1726,7 @@ def _semver_prerelease_key(prerelease):
 
 
 def _semver_key(version, prerelease_first=False):
-    """A sort key-function for sorting semver verion string.
+    """A sort key-function for sorting semver version string.
 
     The default sorting order is ascending (0.x -> 1.x -> 2.x).
 

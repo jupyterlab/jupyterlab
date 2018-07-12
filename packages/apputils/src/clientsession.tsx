@@ -71,12 +71,12 @@ export interface IClientSession extends IDisposable {
   readonly kernel: Kernel.IKernelConnection | null;
 
   /**
-   * The current path associated with the client sesssion.
+   * The current path associated with the client session.
    */
   readonly path: string;
 
   /**
-   * The current name associated with the client sesssion.
+   * The current name associated with the client session.
    */
   readonly name: string;
 

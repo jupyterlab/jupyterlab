@@ -176,7 +176,7 @@ subsequently reversed by running
 
     jlpm run remove:package <extension-dir-name>
 
-This will remove the package metadata from the source tree, but wil
+This will remove the package metadata from the source tree, but will
 **not** remove any files added by the ``addsibling`` script, which
 should be removed manually.
 

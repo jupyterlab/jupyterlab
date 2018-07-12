@@ -218,7 +218,7 @@ export class RenderedImage extends RenderedCommon {
 }
 
 /**
- * A mime renderer for displaying Markdown with embeded latex.
+ * A mime renderer for displaying Markdown with embedded latex.
  */
 export class RenderedMarkdown extends RenderedHTMLCommon {
   /**
