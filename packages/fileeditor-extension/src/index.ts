@@ -59,6 +59,8 @@ const FACTORY = 'Editor';
 namespace CommandIDs {
   export const createNew = 'fileeditor:create-new';
 
+  export const changeFontSize = 'fileeditor:change-font-size';
+
   export const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export const lineWrap = 'fileeditor:toggle-line-wrap';
@@ -207,6 +209,33 @@ function activate(
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
     updateWidget(widget.content);
+  });
+
+  // Add a command to change font size.
+  commands.addCommand(CommandIDs.changeFontSize, {
+    execute: args => {
+      const delta = Number(args['delta']);
+      if (Number.isNaN(delta)) {
+        console.error(
+          `${CommandIDs.changeFontSize}: delta arg must be a number`
+        );
+        return;
+      }
+      const style = window.getComputedStyle(document.documentElement);
+      const cssSize = parseInt(
+        style.getPropertyValue('--jp-code-font-size'),
+        10
+      );
+      const currentSize = config.fontSize || cssSize;
+      config.fontSize = currentSize + delta;
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    isEnabled,
+    label: args => args['name'] as string
   });
 
   commands.addCommand(CommandIDs.lineNumbers, {
@@ -436,6 +465,14 @@ function activate(
       };
       palette.addItem({ command, args, category: 'Text Editor' });
     }
+
+    args = { name: 'Increase Font Size', delta: 1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category: 'Text Editor' });
+
+    args = { name: 'Decrease Font Size', delta: -1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category: 'Text Editor' });
   }
 
   if (menu) {
@@ -458,8 +495,17 @@ function activate(
       };
       tabMenu.addItem({ command, args });
     }
+
     menu.settingsMenu.addGroup(
       [
+        {
+          command: CommandIDs.changeFontSize,
+          args: { name: 'Increase Text Editor Font Size', delta: +1 }
+        },
+        {
+          command: CommandIDs.changeFontSize,
+          args: { name: 'Decrease Text Editor Font Size', delta: -1 }
+        },
         { type: 'submenu', submenu: tabMenu },
         { command: CommandIDs.autoClosingBrackets }
       ],
