@@ -78,25 +78,7 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
 namespace NotebookTrust {
     export class Model implements VDomRenderer.IModel, INotebookTrust.IModel {
         constructor(notebook: Notebook | null) {
-            this._notebook = notebook;
-            if (notebook === null) {
-                this._trustedCells = 0;
-                this._totalCells = 0;
-                this._activeCellTrusted = false;
-            } else {
-                if (this._notebook!.activeCell !== undefined) {
-                    this._activeCellTrusted = this._notebook!.activeCell!.model.trusted;
-                } else {
-                    this._activeCellTrusted = false;
-                }
-
-                const { total, trusted } = this._deriveCellTrustState(
-                    this._notebook!.model
-                );
-
-                this._totalCells = total;
-                this._trustedCells = trusted;
-            }
+            this.notebook = notebook;
         }
 
         get trustedCells() {
@@ -124,6 +106,7 @@ namespace NotebookTrust {
                 this._totalCells = 0;
                 this._activeCellTrusted = false;
             } else {
+                // Add listeners
                 this._notebook.activeCellChanged.connect(
                     this._onActiveCellChanged
                 );
@@ -131,7 +114,23 @@ namespace NotebookTrust {
                 this._notebook.modelContentChanged.connect(
                     this._onModelChanged
                 );
+
+                // Derive values
+                if (this._notebook!.activeCell !== undefined) {
+                    this._activeCellTrusted = this._notebook!.activeCell!.model.trusted;
+                } else {
+                    this._activeCellTrusted = false;
+                }
+
+                const { total, trusted } = this._deriveCellTrustState(
+                    this._notebook.model
+                );
+
+                this._totalCells = total;
+                this._trustedCells = trusted;
             }
+
+            this._stateChanged.emit(void 0);
         }
 
         get stateChanged(): ISignal<this, void> {
