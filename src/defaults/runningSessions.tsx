@@ -124,6 +124,7 @@ namespace RunningSessions {
             }
 
             Signal.clearData(this);
+            this._isDisposed = true;
         }
 
         private _terminals: number = 0;
@@ -146,8 +147,8 @@ export interface IRunningSessions extends IDisposable {
 
 export namespace IRunningSessions {
     export interface IModel {
-        terminals: number;
-        kernels: number;
+        readonly terminals: number;
+        readonly kernels: number;
     }
 }
 

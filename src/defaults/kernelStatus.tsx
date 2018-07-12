@@ -1,111 +1,226 @@
-import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+import {
+    JupyterLabPlugin,
+    JupyterLab,
+    ApplicationShell
+} from '@jupyterlab/application';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IDefaultStatusesManager } from './manager';
 
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+import { IClientSession, VDomRenderer } from '@jupyterlab/apputils';
+import { Signal, ISignal } from '@phosphor/signaling';
+import { Token } from '@phosphor/coreutils';
+import { IDisposable } from '@phosphor/disposable';
+import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
-import { IClientSession } from '@jupyterlab/apputils';
+// tslint:disable-next-line:variable-name
+const KernelStatusComponent = (
+    props: KernelStatusComponent.IProps
+): React.ReactElement<KernelStatusComponent.IProps> => {
+    return (
+        <div>
+            {props.name} | {props.status}
+        </div>
+    );
+};
 
-export namespace StatusComponent {
-    export interface IState {
-        kernelStatus: string;
-        kernelType: string;
-    }
+namespace KernelStatusComponent {
     export interface IProps {
-        notebookTracker: INotebookTracker;
-        consoleTracker: IConsoleTracker;
+        name: string;
+        status: Kernel.Status;
     }
 }
-
-export class StatusComponent extends React.Component<
-    StatusComponent.IProps,
-    StatusComponent.IState
-> {
-    state = {
-        kernelStatus: '',
-        kernelType: ''
-    };
-    constructor(props: StatusComponent.IProps) {
-        super(props);
-        this.props.notebookTracker.currentChanged.connect(this.cellChanged);
-        this.props.notebookTracker.activeCellChanged.connect(this.cellChanged);
-        this.props.consoleTracker.currentChanged.connect(this.consoleChanged);
-    }
-
-    consoleChanged = (tracker: IConsoleTracker, consolePanel: ConsolePanel) => {
-        if (consolePanel.session.kernel) {
-            this.setState({
-                kernelStatus: consolePanel.session.kernel.status,
-                kernelType: consolePanel.session.kernel.name
-            });
-            consolePanel.session.statusChanged.connect(this.kernelChanged);
-            consolePanel.session.kernelChanged.connect(this.kernelChanged);
-        }
-    };
-    cellChanged = (tracker: INotebookTracker) => {
-        const currentWidget = tracker.currentWidget;
-        if (currentWidget && currentWidget.session.kernel) {
-            this.setState({
-                kernelStatus: currentWidget.session.kernel.status,
-                kernelType: currentWidget.session.kernel.name
-            });
-            currentWidget.session.statusChanged.connect(this.kernelChanged);
-            currentWidget.session.kernelChanged.connect(this.kernelChanged);
-        }
-    };
-
-    kernelChanged = (session: IClientSession) => {
-        if (session.kernel) {
-            this.setState({
-                kernelStatus: session.kernel.status,
-                kernelType: session.kernel.name
-            });
-        } else {
-            this.setState({ kernelStatus: 'dead' });
-        }
-    };
-
-    render() {
-        return (
-            <div>
-                {' '}
-                {this.state.kernelType} | {this.state.kernelStatus}{' '}
-            </div>
-        );
-    }
-}
-
-export class KernelStatus extends Widget {
+class KernelStatus extends VDomRenderer<KernelStatus.Model>
+    implements IKernelStatus {
     constructor(opts: KernelStatus.IOptions) {
         super();
+
         this._notebookTracker = opts.notebookTracker;
         this._consoleTracker = opts.consoleTracker;
-    }
-    onBeforeAttach() {
-        ReactDOM.render(
-            <StatusComponent
-                notebookTracker={this._notebookTracker}
-                consoleTracker={this._consoleTracker}
-            />,
-            this.node
+        this._shell = opts.shell;
+
+        this._notebookTracker.currentChanged.connect(this._onNotebookChange);
+        this._consoleTracker.currentChanged.connect(this._onConsoleChange);
+
+        this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
+
+        this.model = new KernelStatus.Model(
+            this._getFocusedSession(this._shell.currentWidget)
         );
     }
+
+    render() {
+        if (this.model === null) {
+            return null;
+        } else {
+            return (
+                <KernelStatusComponent
+                    status={this.model!.status}
+                    name={this.model!.name}
+                />
+            );
+        }
+    }
+
+    private _onNotebookChange = (
+        _tracker: INotebookTracker,
+        panel: NotebookPanel
+    ) => {
+        this.model!.session = panel.session;
+    };
+
+    private _onConsoleChange = (
+        _tracker: IConsoleTracker,
+        panel: ConsolePanel
+    ) => {
+        this.model!.session = panel.session;
+    };
+
+    private _getFocusedSession(val: Widget | null): IClientSession | null {
+        if (val === null) {
+            return null;
+        } else {
+            if (val instanceof NotebookPanel) {
+                return (val as NotebookPanel).session;
+            } else if (val instanceof ConsolePanel) {
+                return (val as ConsolePanel).session;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    private _onMainAreaCurrentChange = (
+        shell: ApplicationShell,
+        change: ApplicationShell.IChangedArgs
+    ) => {
+        const { newValue } = change;
+        const editor = this._getFocusedSession(newValue);
+        this.model!.session = editor;
+    };
 
     private _notebookTracker: INotebookTracker;
     private _consoleTracker: IConsoleTracker;
+    private _shell: ApplicationShell;
 }
 
-/*
- * Initialization data for the statusbar extension.
- */
+namespace KernelStatus {
+    export class Model implements VDomRenderer.IModel, IKernelStatus.IModel {
+        constructor(session: IClientSession | null) {
+            this.session = session;
+        }
 
-export const kernelStatusItem: JupyterLabPlugin<void> = {
+        get name() {
+            return this._kernelName;
+        }
+
+        get status() {
+            return this._kernelStatus;
+        }
+
+        get session() {
+            return this._session;
+        }
+
+        set session(session: IClientSession | null) {
+            this._session = session;
+
+            if (this._session === null) {
+                this._kernelStatus = 'unknown';
+                this._kernelName = 'unknown';
+            } else {
+                this._kernelStatus = this._session.status;
+                this._kernelName = this._session.kernelDisplayName.toLowerCase();
+
+                this._session.statusChanged.connect(
+                    this._onKernelStatusChanged
+                );
+                this._session.kernelChanged.connect(this._onKernelChanged);
+            }
+
+            this._stateChanged.emit(void 0);
+        }
+
+        get stateChanged() {
+            return this._stateChanged;
+        }
+
+        get isDisposed() {
+            return this._isDisposed;
+        }
+
+        dispose() {
+            if (this._isDisposed) {
+                return;
+            }
+
+            Signal.clearData(this);
+            this._isDisposed = true;
+        }
+
+        private _onKernelStatusChanged = (
+            _session: IClientSession,
+            status: Kernel.Status
+        ) => {
+            this._kernelStatus = status;
+            this._stateChanged.emit(void 0);
+        };
+
+        private _onKernelChanged = (
+            _session: IClientSession,
+            change: Session.IKernelChangedArgs
+        ) => {
+            const { newValue } = change;
+            if (newValue !== null) {
+                this._kernelStatus = newValue.status;
+                this._kernelName = newValue.model.name.toLowerCase();
+            } else {
+                this._kernelStatus = 'unknown';
+                this._kernelName = 'unknown';
+            }
+
+            this._stateChanged.emit(void 0);
+        };
+
+        private _kernelName: string;
+        private _kernelStatus: Kernel.Status;
+        private _session: IClientSession | null;
+
+        private _isDisposed: boolean = false;
+        private _stateChanged: Signal<this, void> = new Signal(this);
+    }
+
+    export interface IOptions {
+        notebookTracker: INotebookTracker;
+        consoleTracker: IConsoleTracker;
+        shell: ApplicationShell;
+    }
+}
+
+export interface IKernelStatus extends IDisposable {
+    readonly model: IKernelStatus.IModel | null;
+    readonly modelChanged: ISignal<this, void>;
+}
+
+export namespace IKernelStatus {
+    export interface IModel {
+        readonly name: string;
+        readonly status: Kernel.Status;
+        readonly session: IClientSession | null;
+    }
+}
+
+// tslint:disable-next-line:variable-name
+export const IKernelStatus = new Token<IKernelStatus>(
+    'jupyterlab-statusbar/IKernelStatus'
+);
+
+export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
     id: 'jupyterlab-statusbar/default-items:kernel-status',
     autoStart: true,
     requires: [IDefaultStatusesManager, INotebookTracker, IConsoleTracker],
@@ -115,20 +230,17 @@ export const kernelStatusItem: JupyterLabPlugin<void> = {
         notebookTracker: INotebookTracker,
         consoleTracker: IConsoleTracker
     ) => {
-        manager.addDefaultStatus(
-            'kernel-status-item',
-            new KernelStatus({ notebookTracker, consoleTracker }),
-            { align: 'left', priority: 0 }
-        );
+        const item = new KernelStatus({
+            shell: app.shell,
+            notebookTracker,
+            consoleTracker
+        });
+
+        manager.addDefaultStatus('kernel-status-item', item, {
+            align: 'left',
+            priority: 0
+        });
+
+        return item;
     }
 };
-
-export namespace KernelStatus {
-    /**
-     * Options for creating a new StatusBar instance
-     */
-    export interface IOptions {
-        notebookTracker: INotebookTracker;
-        consoleTracker: IConsoleTracker;
-    }
-}

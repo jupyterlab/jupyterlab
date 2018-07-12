@@ -20,6 +20,7 @@ import {
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
+import { Widget } from '../../node_modules/@phosphor/widgets';
 
 namespace LineColComponent {
     export interface IProps {
@@ -58,8 +59,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new LineCol.Model(
-            this._notebookTracker.activeCell &&
-                this._notebookTracker.activeCell.editor
+            this._getFocusedEditor(this._shell.currentWidget)
         );
     }
 
@@ -94,24 +94,35 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this.model!.editor = document && document.content.editor;
     };
 
+    private _getFocusedEditor(val: Widget | null): CodeEditor.IEditor | null {
+        if (val === null) {
+            return null;
+        } else {
+            if (val instanceof NotebookPanel) {
+                const activeCell = (val as NotebookPanel).content.activeCell;
+                if (activeCell === undefined) {
+                    return null;
+                } else {
+                    return activeCell.editor;
+                }
+            } else if (
+                val instanceof DocumentWidget &&
+                val.content instanceof FileEditor
+            ) {
+                return (val as DocumentWidget<FileEditor>).content.editor;
+            } else {
+                return null;
+            }
+        }
+    }
+
     private _onMainAreaCurrentChange = (
         shell: ApplicationShell,
         change: ApplicationShell.IChangedArgs
     ) => {
         const { newValue } = change;
-        if (newValue !== null) {
-            if (newValue instanceof NotebookPanel) {
-                const currentCell = this._notebookTracker.activeCell;
-                this.model!.editor = currentCell && currentCell.editor;
-            } else if (
-                newValue instanceof DocumentWidget &&
-                newValue.content instanceof FileEditor
-            ) {
-                const currentEditor = this._editorTracker.currentWidget;
-                this.model!.editor =
-                    currentEditor && currentEditor.content.editor;
-            }
-        }
+        const editor = this._getFocusedEditor(newValue);
+        this.model!.editor = editor;
     };
 
     private _notebookTracker: INotebookTracker;
@@ -121,17 +132,8 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
 namespace LineCol {
     export class Model implements VDomRenderer.IModel, ILineCol.IModel {
-        constructor(editor: CodeEditor.IEditor) {
-            if (editor !== undefined && editor !== null) {
-                this._editor = editor;
-                const pos = editor.getCursorPosition();
-                this._column = pos.column;
-                this._line = pos.line;
-            } else {
-                this._editor = null;
-                this._column = 0;
-                this._line = 0;
-            }
+        constructor(editor: CodeEditor.IEditor | null) {
+            this.editor = editor;
         }
 
         get stateChanged(): ISignal<this, void> {
@@ -144,7 +146,6 @@ namespace LineCol {
 
         set editor(editor: CodeEditor.IEditor | null) {
             this._editor = editor;
-            this._stateChanged.emit(void 0);
 
             if (this._editor === null) {
                 this._column = 0;
@@ -153,7 +154,13 @@ namespace LineCol {
                 this._editor.model.selections.changed.connect(
                     this._onSelectionChanged
                 );
+
+                const pos = this._editor.getCursorPosition();
+                this._column = pos.column;
+                this._line = pos.line;
             }
+
+            this._stateChanged.emit(void 0);
         }
 
         get line(): number {
