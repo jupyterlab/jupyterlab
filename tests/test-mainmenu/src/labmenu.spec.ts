@@ -100,15 +100,13 @@ describe('@jupyterlab/mainmenu', () => {
         expect(idx4 < idx1).to.be(true);
         expect(idx1 < idx2).to.be(true);
       });
-    });
 
-    describe('#removeGroup()', () => {
-      it('should remove a group from the menu', () => {
+      it('should return a disposable that can be used to remove the group', () => {
         const group1 = [{ command: 'run1' }, { command: 'run2' }];
         const group2 = [{ command: 'run3' }, { command: 'run4' }];
-        menu.addGroup(group1);
+        const disposable = menu.addGroup(group1);
         menu.addGroup(group2);
-        menu.removeGroup(group1);
+        disposable.dispose();
 
         let idx1 = ArrayExt.findFirstIndex(
           menu.menu.items,
