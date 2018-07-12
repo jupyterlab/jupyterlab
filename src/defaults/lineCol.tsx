@@ -121,7 +121,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
 
 export namespace LineCol {
     export class Model implements VDomRenderer.IModel, ILineCol.IModel {
-        constructor(editor?: CodeEditor.IEditor) {
+        constructor(editor: CodeEditor.IEditor) {
             if (editor !== undefined && editor !== null) {
                 this._editor = editor;
                 const pos = editor.getCursorPosition();
