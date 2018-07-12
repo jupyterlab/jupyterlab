@@ -39,7 +39,7 @@ const LineColComponent = (
     );
 };
 
-export class LineCol extends VDomRenderer<LineCol.Model> {
+export class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     constructor(opts: LineCol.IOptions) {
         super();
 

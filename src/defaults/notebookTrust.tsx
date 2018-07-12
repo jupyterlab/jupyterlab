@@ -33,7 +33,8 @@ export namespace NotebookTrustComponent {
     }
 }
 
-export class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
+export class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
+    implements INotebookTrust {
     constructor(opts: NotebookTrust.IOptions) {
         super();
 
