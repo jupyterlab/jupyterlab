@@ -166,6 +166,29 @@ export namespace KernelMessage {
   }
 
   /**
+   * A `'transient_display_data'` message on the `'iopub'` channel.
+   *
+   * See https://github.com/jupyter/jupyter_client/pull/378 for a proposal and
+   * https://github.com/jupyter/jupyter_client/issues/376 for related discussions.
+   */
+  export interface ITransientDisplayDataMsg extends IIOPubMessage {
+    content: {
+      title: string;
+      data: nbformat.IMimeBundle;
+      metadata: nbformat.OutputMetadata;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an `'transient_display_data'` message.
+   */
+  export function isTransientDisplayDataMsg(
+    msg: IMessage
+  ): msg is ITransientDisplayDataMsg {
+    return msg.header.msg_type === 'transient_display_data';
+  }
+
+  /**
    * An `'execute_input'` message on the `'iopub'` channel.
    *
    * See [Code inputs](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-inputs).
