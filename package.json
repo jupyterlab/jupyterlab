@@ -60,7 +60,8 @@
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.6.0",
     "react": "~16.4.0",
-    "react-dom": "~16.4.0"
+    "react-dom": "~16.4.0",
+    "typestyle": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",

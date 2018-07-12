@@ -14,15 +14,16 @@ import { VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
+import { IconItem } from '../component/icon';
 
 // tslint:disable-next-line:variable-name
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
     if (props.allCellsTrusted || props.activeCellTrusted) {
-        return <div className="icon-item trusted-item" />;
+        return <IconItem source={'trusted-item'} />;
     } else {
-        return <div className="icon-item not-trusted-item" />;
+        return <IconItem source={'not-trusted-item'} />;
     }
 };
 
