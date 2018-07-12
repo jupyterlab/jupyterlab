@@ -103,3 +103,16 @@
   line-height: var(--jp-code-line-height);
   margin: 0;
 }
+
+/*-----------------------------------------------------------------------------
+| Info Inspector
+|----------------------------------------------------------------------------*/
+.jp-InspectorItem.jp-InfoInspectorItem,
+.jp-InspectorItem.jp-InfoInspectorItem .p-Widget {
+  background: var(--jp-layout-color1);
+}
+
+.jp-InfoInspectorItem .jp-InputPrompt,
+.jp-InfoInspectorItem .jp-OutputPrompt {
+  display: none;
+}
