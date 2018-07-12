@@ -64,10 +64,10 @@ export class RunningSessionsComponent extends React.Component<
     render() {
         return (
             <div onClick={this.handleClick}>
+                <div className={'text-item'}>{this.state.kernelSession}</div>
                 <div className={'kernel-item icon-item'} />
-                {this.state.kernelSession}
+                <div className={'text-item'}>{this.state.terminalSession}</div>
                 <div className={'terminal-item icon-item'} />
-                {this.state.terminalSession}
             </div>
         );
     }
