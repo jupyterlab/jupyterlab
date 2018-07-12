@@ -263,7 +263,13 @@ export class InspectorPanel extends TabPanel implements IInspector {
   onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
     let widget = this._items[args.type];
     if (!widget) {
-      return;
+      this.add({
+        className: 'jp-InfoInspectorItem',
+        name: args.type,
+        rank: 30,
+        type: args.type
+      });
+      widget = this._items[args.type];
     }
 
     // Update the content of the inspector widget.
