@@ -148,7 +148,7 @@ export interface IEnsurePackageOptions {
   depCache?: { [key: string]: string };
 
   /**
-   * A list of depedencies that can be unused.
+   * A list of dependencies that can be unused.
    */
   unused?: string[];
 

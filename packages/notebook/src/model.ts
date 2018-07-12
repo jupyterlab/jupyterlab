@@ -356,7 +356,7 @@ export namespace NotebookModel {
      * @param options - The options used to create the cell.
      *
      * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
 
@@ -366,7 +366,7 @@ export namespace NotebookModel {
      * @param options - The options used to create the cell.
      *
      * @returns A new markdown cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
 
@@ -376,7 +376,7 @@ export namespace NotebookModel {
      * @param options - The options used to create the cell.
      *
      * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel;
 
@@ -415,7 +415,7 @@ export namespace NotebookModel {
      * @param source - The data to use for the original source data.
      *
      * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      *   If the contentFactory is not provided, the instance
      *   `codeCellContentFactory` will be used.
      */
@@ -438,7 +438,7 @@ export namespace NotebookModel {
      * @param source - The data to use for the original source data.
      *
      * @returns A new markdown cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
       if (this.modelDB) {
@@ -456,7 +456,7 @@ export namespace NotebookModel {
      * @param source - The data to use for the original source data.
      *
      * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       if (this.modelDB) {

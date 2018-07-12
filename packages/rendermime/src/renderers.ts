@@ -325,7 +325,7 @@ export function renderMarkdown(
 
       let originalContent = content;
 
-      // Santize the content it is not trusted.
+      // Sanitize the content it is not trusted.
       if (!trusted) {
         originalContent = `${content}`;
         content = sanitizer.sanitize(content);

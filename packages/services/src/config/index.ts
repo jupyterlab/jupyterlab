@@ -26,7 +26,7 @@ export interface IConfigSection {
    *
    * #### Notes
    * Updates the local data immediately, sends the change to the server,
-   * and updates the local data with the response, and fullfils the promise
+   * and updates the local data with the response, and fulfils the promise
    * with that data.
    */
   update(newdata: JSONObject): Promise<JSONObject>;

@@ -67,12 +67,12 @@ export namespace Session {
     readonly id: string;
 
     /**
-     * The current path associated with the sesssion.
+     * The current path associated with the session.
      */
     readonly path: string;
 
     /**
-     * The current name associated with the sesssion.
+     * The current name associated with the session.
      */
     readonly name: string;
 

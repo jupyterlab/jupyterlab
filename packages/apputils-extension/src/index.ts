@@ -126,7 +126,7 @@ class SettingsConnector extends DataConnector<
 }
 
 /**
- * The default commmand palette extension.
+ * The default command palette extension.
  */
 const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
@@ -136,7 +136,7 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
 };
 
 /**
- * The default commmand palette's restoration extension.
+ * The default command palette's restoration extension.
  *
  * #### Notes
  * The command palette's restoration logic is handled separately from the

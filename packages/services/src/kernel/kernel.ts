@@ -333,7 +333,7 @@ export namespace Kernel {
      *
      * #### Notes
      * Only one comm target can be registered to a target name at a time, an
-     * existing callback for the same target name will be overidden.  A registered
+     * existing callback for the same target name will be overridden.  A registered
      * comm target handler will take precedence over a comm which specifies a
      * `target_module`.
      *

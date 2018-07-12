@@ -325,7 +325,7 @@ export namespace ObservableMap {
    */
   export interface IOptions<T> {
     /**
-     * An optional intial set of values.
+     * An optional initial set of values.
      */
     values?: { [key: string]: T };
 

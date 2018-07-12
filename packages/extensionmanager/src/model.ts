@@ -320,7 +320,7 @@ export class ListModel extends VDomModel {
    *
    * This will query the NPM repository, and the notebook server.
    *
-   * Emits the `stateChanged` signal on succesfull completion.
+   * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false) {
     let search = this.searcher.searchExtensions(

@@ -1372,13 +1372,13 @@ namespace Private {
   ): ICellModel {
     switch (cell.type) {
       case 'code':
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
       case 'markdown':
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
       default:
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createRawCell({ cell: cell.toJSON() });
     }
   }

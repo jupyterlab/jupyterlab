@@ -229,7 +229,7 @@ namespace Private {
     registry: ISettingRegistry,
     plugin: ISettingRegistry.IPlugin
   ): string {
-    // First, give priorty to checking if the hint exists in the user data.
+    // First, give priority to checking if the hint exists in the user data.
     let hint = plugin.data.user[key];
 
     // Second, check to see if the hint exists in composite data, which folds

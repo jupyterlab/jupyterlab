@@ -304,7 +304,7 @@ export namespace Contents {
      *
      * @param path - The desired file path.
      *
-     * @param options - Optional overrrides to the model.
+     * @param options - Optional overrides to the model.
      *
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
@@ -448,7 +448,7 @@ export namespace Contents {
      *
      * @param localPath - The desired file path.
      *
-     * @param options - Optional overrrides to the model.
+     * @param options - Optional overrides to the model.
      *
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
@@ -1346,7 +1346,7 @@ export class Drive implements Contents.IDrive {
  */
 export namespace ContentsManager {
   /**
-   * The options used to intialize a contents manager.
+   * The options used to initialize a contents manager.
    */
   export interface IOptions {
     /**
@@ -1366,7 +1366,7 @@ export namespace ContentsManager {
  */
 export namespace Drive {
   /**
-   * The options used to intialize a `Drive`.
+   * The options used to initialize a `Drive`.
    */
   export interface IOptions {
     /**
