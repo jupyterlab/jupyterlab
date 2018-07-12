@@ -4,7 +4,8 @@ import {
 
 export const InputBoxStyle = style(
     {
-      display: 'inline-flex'
+      display: 'inline-flex',
+      paddingTop: '5px'
     }
   )
   

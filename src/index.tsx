@@ -7,12 +7,13 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-  ICommandPalette
+  ICommandPalette,
+  ReactElementWidget
 } from '@jupyterlab/apputils';
 
 import {
-  ReactElementWidget
-} from '@jupyterlab/apputils';
+  IMainMenu
+} from '@jupyterlab/mainmenu';
 
 import {
   ShortcutUI
@@ -50,10 +51,14 @@ export class ShortcutObject {
  
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
-  requires: [ISettingRegistry, ICommandPalette],
-  activate: (app: JupyterLab, 
+  requires: [ISettingRegistry, ICommandPalette, IMainMenu],
+  activate: (
+    app: JupyterLab, 
     settingRegistry: ISettingRegistry, 
-    palette: ICommandPalette): void => {
+    palette: ICommandPalette,
+    menu: IMainMenu
+  ): void => {
+  
     let commandlist = new Array<string>();
     /** Load keyboard shortcut settings from registry and create list of command id's */
     settingRegistry.load('@jupyterlab/shortcuts-extension:plugin')
@@ -75,7 +80,7 @@ const plugin: JupyterLabPlugin<void> = {
         widget.title.closable = true;
         widget.addClass('jp-shortcutWidget');
         
-        /** Add a command to open extension widget */
+        /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
           label: 'Keyboard Shortcut Settings',
@@ -87,12 +92,26 @@ const plugin: JupyterLabPlugin<void> = {
             /** Activate the widget */
             app.shell.activateById(widget.id);
           }
-        }); 
+        });
+
+        /** Add command to command palette */
         palette.addItem({command, category: 'Settings'});
+        
+        // OVERRIDES ANOTHER COMMAND <work in progress>
+        /** Add command to settings menu */
+        menu.settingsMenu.addGroup(
+          [{ command: command }],
+          999
+        );
+
+        /** Add command to help menu */
+        menu.helpMenu.addGroup(
+          [{ command: command }],
+          7
+        )
       })
-      
-    },
-    autoStart: true
+  },
+  autoStart: true
 };
 
 /** Export the plugin as default */
