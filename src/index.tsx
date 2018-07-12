@@ -98,11 +98,11 @@ const plugin: JupyterLabPlugin<void> = {
         palette.addItem({command, category: 'Settings'});
         
         // OVERRIDES ANOTHER COMMAND <work in progress>
-        // /** Add command to settings menu */
-        // menu.settingsMenu.addGroup(
-        //   [{ command: command }],
-        //   999
-        // );
+        /** Add command to settings menu */
+        menu.settingsMenu.addGroup(
+          [{ command: command }],
+          999
+        );
 
         /** Add command to help menu */
         menu.helpMenu.addGroup(
