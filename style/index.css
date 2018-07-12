@@ -39,6 +39,7 @@
 .command-item {
     background-image: url('./images/command-icon.svg');
 }
+
 .icon-item {
     background-repeat: no-repeat;
     background-size: 28px;
@@ -64,4 +65,12 @@
 
 .terminal-item {
     background-image: url('./images/terminal-icon.svg');
+}
+
+.not-trusted-item {
+    background-image: url('./images/not-trusted-icon.svg');
+}
+
+.trusted-item {
+    background-image: url('./images/trusted-icon.svg');
 }
