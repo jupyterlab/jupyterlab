@@ -15,6 +15,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 export namespace StatusComponent {
     export interface IState {
         kernelStatus: string;
+        kernelType: string;
     }
     export interface IProps {
         notebookTracker: INotebookTracker;
@@ -27,7 +28,8 @@ export class StatusComponent extends React.Component<
     StatusComponent.IState
 > {
     state = {
-        kernelStatus: ''
+        kernelStatus: '',
+        kernelType: ''
     };
     constructor(props: StatusComponent.IProps) {
         super(props);
@@ -38,7 +40,10 @@ export class StatusComponent extends React.Component<
 
     consoleChanged = (tracker: IConsoleTracker, consolePanel: ConsolePanel) => {
         if (consolePanel.session.kernel) {
-            this.setState({ kernelStatus: consolePanel.session.kernel.status });
+            this.setState({
+                kernelStatus: consolePanel.session.kernel.status,
+                kernelType: consolePanel.session.kernel.name
+            });
             consolePanel.session.statusChanged.connect(this.kernelChanged);
             consolePanel.session.kernelChanged.connect(this.kernelChanged);
         }
@@ -46,7 +51,8 @@ export class StatusComponent extends React.Component<
     cellChanged = (tracker: INotebookTracker) => {
         if (tracker.currentWidget.session.kernel) {
             this.setState({
-                kernelStatus: tracker.currentWidget.session.kernel.status
+                kernelStatus: tracker.currentWidget.session.kernel.status,
+                kernelType: tracker.currentWidget.session.kernel.name
             });
             tracker.currentWidget.session.statusChanged.connect(
                 this.kernelChanged
@@ -60,7 +66,8 @@ export class StatusComponent extends React.Component<
     kernelChanged = (session: IClientSession) => {
         if (session.kernel) {
             this.setState({
-                kernelStatus: session.kernel.status
+                kernelStatus: session.kernel.status,
+                kernelType: session.kernel.name
             });
         } else {
             this.setState({ kernelStatus: 'dead' });
@@ -68,7 +75,12 @@ export class StatusComponent extends React.Component<
     };
 
     render() {
-        return <div> Kernel Status: {this.state.kernelStatus} </div>;
+        return (
+            <div>
+                {' '}
+                {this.state.kernelType} | {this.state.kernelStatus}{' '}
+            </div>
+        );
     }
 }
 
