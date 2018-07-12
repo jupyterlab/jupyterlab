@@ -19,17 +19,17 @@ import { Token } from '@phosphor/coreutils';
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
-    return (
-        <div>
-            Trusting {props.numTrustedCells} of {props.numCells} cells.
-        </div>
-    );
+    if (props.allCellsTrusted || props.activeCellTrusted) {
+        return <div className="icon-item trusted-item" />;
+    } else {
+        return <div className="icon-item not-trusted-item" />;
+    }
 };
 
 export namespace NotebookTrustComponent {
     export interface IProps {
-        numTrustedCells: number;
-        numCells: number;
+        allCellsTrusted: boolean;
+        activeCellTrusted: boolean;
     }
 }
 
@@ -62,8 +62,10 @@ export class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
         } else {
             return (
                 <NotebookTrustComponent
-                    numTrustedCells={this.model.trustedCells}
-                    numCells={this.model.totalCells}
+                    allCellsTrusted={
+                        this.model.trustedCells === this.model.totalCells
+                    }
+                    activeCellTrusted={this.model.activeCellTrusted}
                 />
             );
         }
