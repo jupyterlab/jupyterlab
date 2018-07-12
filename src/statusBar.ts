@@ -131,7 +131,9 @@ export class StatusBar extends Widget implements IStatusBar {
             }
         }
 
-        widget.show();
+        if (widget.id !== Private.convertItemId(id)) {
+            widget.id = Private.convertItemId(id);
+        }
     }
 
     /**
@@ -234,5 +236,11 @@ export namespace StatusBar {
         align: IStatusBar.Alignment;
         priority: number;
         widget: Widget;
+    }
+}
+
+namespace Private {
+    export function convertItemId(itemId: string): string {
+        return `jp-${itemId}`;
     }
 }
