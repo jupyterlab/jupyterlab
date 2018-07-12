@@ -67,7 +67,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Fetch shortcut list on mount */
   componentDidMount() : void {
-    this._getShortcutList();
+    this._getShortcutList()
   }
 
   /** Flag all user-set shortcuts as custom */
@@ -440,7 +440,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       return null
     }
     return (
-      <div className = 'jp-shortcutui'>
+      <div className = 'jp-shortcutui' id = 'jp-shortcutui'>
         <div className = {TopWhitespaceStyle}></div>
         <TopNav 
           updateSearchQuery={this.updateSearchQuery} 
