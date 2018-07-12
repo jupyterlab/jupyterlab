@@ -281,6 +281,9 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
     let page = (meta['page'] ? meta['page'] : 'Info') as string;
 
     // get the widget with the page
+    // It is easy to use a CodeCell here but a codecell has prompt areas
+    // that we do not really need (css is used to hide them). It is perhaps
+    // better to use an input widget and an OutputArea widget directly.
     let widget: CodeCell = this._pages.has(page)
       ? this._pages.get(page)
       : new CodeCell({
@@ -292,7 +295,7 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
     let existing_title = widget.model.value.text;
     // if not append
     if (title !== existing_title || !append) {
-      //widget.output.clear();
+      widget.model.outputs.clear();
       widget.model.value.text = title;
     }
     // store the widget in _pages so that they can be appended to later on.
