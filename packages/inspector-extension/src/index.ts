@@ -12,17 +12,22 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
+import { ICommandPalette } from '@jupyterlab/apputils';
+
 import {
   IInspector,
   InspectionHandler,
   InspectorPanel,
   KernelConnector,
+  InfoHandler,
   KernelInfoHandler
 } from '@jupyterlab/inspector';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { InspectorManager } from './manager';
+
+import { KernelMessage } from '@jupyterlab/services';
 
 /**
  * A service providing code introspection.
@@ -227,13 +232,72 @@ const infopanels: JupyterLabPlugin<void> = {
 };
 
 /**
+ * The command IDs used by the inspector plugin.
+ */
+namespace CommandIDs {
+  export const display = 'inspector:test_transient_message';
+}
+/**
+ * An extension that allows notebooks to display transient_display_data
+ * message in tabs of the inspection panel.
+ */
+const testpanels: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/inspector-extension:testpanels',
+  requires: [ICommandPalette, IInspector, INotebookTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterLab,
+    palette: ICommandPalette,
+    inspector: IInspector,
+    notebooks: INotebookTracker
+  ): void => {
+    const { commands } = app;
+
+    const handler = new InfoHandler({ inspector });
+
+    const category = 'Inspector';
+    const command = CommandIDs.display;
+    const label = 'Send as transient_display_data';
+
+    commands.addCommand(command, {
+      label,
+      execute: () => {
+        // get the current notebook and cell
+        let widget = notebooks.currentWidget;
+        if (!widget) return;
+        let cell = widget.content.activeCell;
+        if (!cell) return;
+        let content = cell.model.value.text;
+        let transient_msg = KernelMessage.createMessage(
+          {
+            msgType: 'transient_display_data',
+            channel: 'iopub',
+            session: 'whatever'
+          },
+          eval('(' + content + ')')
+        );
+        handler.displayTransientMessage(
+          transient_msg as KernelMessage.ITransientDisplayDataMsg
+        );
+      }
+    });
+    palette.addItem({ command, category });
+    app.contextMenu.addItem({
+      command: CommandIDs.display,
+      selector: '.jp-Notebook .jp-Cell'
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
   inspector,
   consoles,
   notebooks,
-  infopanels
+  infopanels,
+  testpanels
 ];
 export default plugins;
 
