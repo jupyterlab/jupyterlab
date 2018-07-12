@@ -7,6 +7,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import { IObservableSet, ObservableSet } from '../util/observableset';
 import { STATUSBAR_PLUGIN_ID } from '..';
+import { SetExt } from '../util/set';
 
 export interface IDefaultStatusesManager {
     readonly enabledChanged: ISignal<
@@ -90,23 +91,23 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
 
         let newEnabledItems = new Set(rawEnabledItems);
 
-        let idsToRemove = Private.difference(
+        let idsToRemove = SetExt.difference(
             this._enabledStatusNames,
             newEnabledItems
         );
 
-        let idsToAdd = Private.difference(
+        let idsToAdd = SetExt.difference(
             newEnabledItems,
             this._enabledStatusNames
         );
 
         let itemsToRemove = [...idsToRemove]
             .map(element => this._allDefaultStatusItems.get(element))
-            .filter(elem => elem !== undefined);
+            .filter(Private.notEmpty);
 
         let itemsToAdd = [...idsToAdd]
             .map(element => this._allDefaultStatusItems.get(element))
-            .filter(elem => elem !== undefined);
+            .filter(Private.notEmpty);
 
         this._enabledStatusItems.deleteAll(itemsToRemove);
         this._enabledStatusItems.addAll(itemsToAdd);
@@ -142,12 +143,6 @@ export namespace DefaultStatusesManager {
     }
 }
 
-namespace Private {
-    export function difference<T>(a: Set<T>, b: Set<T>): Set<T> {
-        return new Set([...a].filter(x => !b.has(x)));
-    }
-}
-
 /**
  * Initialization data for the statusbar extension.
  */
@@ -157,8 +152,14 @@ export const defaultsManager: JupyterLabPlugin<IDefaultStatusesManager> = {
     autoStart: true,
     requires: [ISettingRegistry],
     activate: (_app: JupyterLab, settings: ISettingRegistry) => {
-        let manager = new DefaultStatusesManager({ settings });
-
-        return manager;
+        return new DefaultStatusesManager({ settings });
     }
 };
+
+export namespace Private {
+    export function notEmpty<TValue>(
+        value: TValue | null | undefined
+    ): value is TValue {
+        return value !== null && value !== undefined;
+    }
+}

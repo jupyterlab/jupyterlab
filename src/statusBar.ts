@@ -186,9 +186,11 @@ export class StatusBar extends Widget implements IStatusBar {
         _allDefaults: IObservableMap<IDefaultStatusesManager.IItem>,
         change: IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
     ) => {
-        const { id, item, opts } = change.newValue;
+        if (change.newValue !== undefined) {
+            const { id, item, opts } = change.newValue;
 
-        this.registerStatusItem(id, item, opts);
+            this.registerStatusItem(id, item, opts);
+        }
     };
 
     private _findInsertIndex(
@@ -207,8 +209,8 @@ export class StatusBar extends Widget implements IStatusBar {
         null
     );
 
-    private _host: ApplicationShell = null;
-    private _defaultManager: IDefaultStatusesManager = null;
+    private _host: ApplicationShell;
+    private _defaultManager: IDefaultStatusesManager;
 
     private _leftSide: Panel;
     private _rightSide: Panel;
