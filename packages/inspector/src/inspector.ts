@@ -67,6 +67,11 @@ export interface IInspector {
    * The source of events the inspector listens for.
    */
   source: IInspector.IInspectable | null;
+
+  /**
+   * IInspector reacts to IInspectorUpdate
+   */
+  onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void;
 }
 
 /**
@@ -216,11 +221,8 @@ export class InspectorPanel extends TabPanel implements IInspector {
     this._items[item.type] = widget;
     this.addWidget(widget);
 
-    if (Object.keys(this._items).length < 2) {
-      this.tabBar.hide();
-    } else {
-      this.tabBar.show();
-    }
+    // display the tabBar even if there is only one tab
+    this.tabBar.show();
 
     return new DisposableDelegate(() => {
       if (widget.isDisposed || this.isDisposed) {
@@ -258,10 +260,7 @@ export class InspectorPanel extends TabPanel implements IInspector {
   /**
    * Handle inspector update signals.
    */
-  protected onInspectorUpdate(
-    sender: any,
-    args: IInspector.IInspectorUpdate
-  ): void {
+  onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
     let widget = this._items[args.type];
     if (!widget) {
       return;

@@ -16,7 +16,8 @@ import {
   IInspector,
   InspectionHandler,
   InspectorPanel,
-  KernelConnector
+  KernelConnector,
+  KernelInfoHandler
 } from '@jupyterlab/inspector';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
@@ -190,9 +191,50 @@ const notebooks: JupyterLabPlugin<void> = {
 };
 
 /**
+ * An extension that allows notebooks to display transient_display_data
+ * message in tabs of the inspection panel.
+ */
+const infopanels: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/inspector-extension:infopanels',
+  requires: [IInspector, INotebookTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterLab,
+    inspector: IInspector,
+    notebooks: INotebookTracker
+  ): void => {
+    // Maintain association of new notebooks with their respective handlers.
+    const handlers: { [id: string]: KernelInfoHandler } = {};
+
+    // Create a handler for each notebook that is created.
+    notebooks.widgetAdded.connect((sender, parent) => {
+      const session = parent.session;
+      const handler = new KernelInfoHandler({ inspector, session });
+
+      // Associate the handler to the widget.
+      handlers[parent.id] = handler;
+
+      // Listen for parent disposal.
+      parent.disposed.connect(() => {
+        delete handlers[parent.id];
+        handler.dispose();
+      });
+    });
+
+    // Unlike notebook widget, even inactive kernels could send
+    // transient message so there is no need to switch sources
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [inspector, consoles, notebooks];
+const plugins: JupyterLabPlugin<any>[] = [
+  inspector,
+  consoles,
+  notebooks,
+  infopanels
+];
 export default plugins;
 
 /**

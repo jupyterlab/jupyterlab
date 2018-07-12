@@ -11,9 +11,19 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  MimeModel,
+  RenderMimeRegistry,
+  standardRendererFactories as initialFactories
+} from '@jupyterlab/rendermime';
 
 import { IInspector } from './inspector';
+
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { KernelMessage } from '@jupyterlab/services';
 
 /**
  * An object that handles code inspection.
@@ -178,6 +188,167 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 }
 
 /**
+ * An object that displays transient_display_message. It is defined separately
+ * from KernelInfoHandler so that an extension module can use the following
+ * code to display transient_display_data message without a kernel
+ *
+ *  import:
+ *      import { IInspector, InfoHandler } from '@jupyterlab/inspector'
+ *
+ *  extension definition:
+ *      requires: [IInspector, INotebookTracker],
+ *      activate: (
+ *        inspector: IInspector
+ *
+ *  Get a info handler:
+ *
+ *     let handler = InfoHandler(inspector);
+ *
+ *  Display transient_display_data message:
+ *
+ *     handler.displayTransientMessage(msg);
+ */
+export class InfoHandler implements IDisposable, IInspector.IInspectable {
+  /**
+   * Construct a new handler
+   */
+  constructor(options: InfoHandler.IOptions) {
+    // connect the IInspectable to Inspector
+    this.inspected.connect(
+      options.inspector.onInspectorUpdate,
+      options.inspector
+    );
+  }
+
+  /**
+   * A signal emitted when the handler is disposed.
+   */
+  get disposed(): ISignal<InfoHandler, void> {
+    return this._disposed;
+  }
+
+  /**
+   * A signal emitted when inspector should clear all items with no history.
+   */
+  get ephemeralCleared(): ISignal<InfoHandler, void> {
+    return this._ephemeralCleared;
+  }
+
+  /**
+   * A signal emitted when an inspector value is generated.
+   */
+  get inspected(): ISignal<InfoHandler, IInspector.IInspectorUpdate> {
+    return this._inspected;
+  }
+
+  /**
+   * The info panel is always on, regardless if the notebook has focus
+   */
+  get standby(): boolean {
+    return true;
+  }
+  set standby(value: boolean) {}
+
+  /**
+   * Get whether the inspection handler is disposed.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources used by the handler.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._disposed.emit(void 0);
+    Signal.clearData(this);
+  }
+
+  /**
+   * display a transiant_display_data message
+   */
+  displayTransientMessage(msg: KernelMessage.IIOPubMessage): void {
+    let inputMsg = msg as KernelMessage.ITransientDisplayDataMsg;
+    let title = inputMsg.content.title || '';
+    let meta = inputMsg.content.metadata || {};
+    let append = (meta['append'] ? meta['append'] : false) as boolean;
+    let page = (meta['page'] ? meta['page'] : 'Info') as string;
+
+    // get the widget with the page
+    let widget: CodeCell = this._pages.has(page)
+      ? this._pages.get(page)
+      : new CodeCell({
+          rendermime: new RenderMimeRegistry({ initialFactories }),
+          model: new CodeCellModel({})
+        });
+
+    // title of existing code cell widget
+    let existing_title = widget.model.value.text;
+    // if not append
+    if (title !== existing_title || !append) {
+      //widget.output.clear();
+      widget.model.value.text = title;
+    }
+    // now process the display_data
+    this._pages.set(page, widget);
+
+    if (!inputMsg.content.data) return;
+
+    widget.model.outputs.add({
+      output_type: 'display_data',
+      data: inputMsg.content.data,
+      metadata: meta
+    });
+
+    this._inspected.emit({
+      content: widget,
+      type: page
+    });
+  }
+
+  private _disposed = new Signal<this, void>(this);
+  private _ephemeralCleared = new Signal<InfoHandler, void>(this);
+  private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
+  private _isDisposed = false;
+  private _pages = new Map<string, CodeCell>();
+}
+
+/**
+ * An object that handles transient_display_data sent from a kernel
+ */
+export class KernelInfoHandler extends InfoHandler
+  implements IDisposable, IInspector.IInspectable {
+  /**
+   * Construct a new inspection handler for a widget.
+   */
+  constructor(options: InfoHandler.IOptions) {
+    super(options);
+    // connect the iopub channel of the session to this handler
+    options.session.iopubMessage.connect(this.onIopubMessage, this);
+  }
+
+  /**
+   * Handle ioPub messages from a kernel
+   */
+  protected onIopubMessage(
+    sender: IClientSession,
+    msg: KernelMessage.IIOPubMessage
+  ): void {
+    // displays transient_display_data message. All others are
+    // silently ignored.
+    if (msg.header.msg_type === 'transient_display_data')
+      this.displayTransientMessage(msg);
+  }
+}
+
+/**
  * A namespace for inspection handler statics.
  */
 export namespace InspectionHandler {
@@ -229,5 +400,23 @@ export namespace InspectionHandler {
      * The text being inspected.
      */
     text: string;
+  }
+}
+
+/**
+ * A namespace for info inspection handler.
+ */
+export namespace InfoHandler {
+  export interface IOptions {
+    /**
+     * An inspector that displays the transient_display_data message
+     */
+    inspector: IInspector;
+
+    /**
+     * An optional session with kernel for KernelInfoHandler to automatically
+     * display transient_display_data message from its ioPub channel.
+     */
+    session?: IClientSession;
   }
 }

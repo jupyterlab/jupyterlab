@@ -68,6 +68,14 @@ export class InspectorManager implements IInspector {
   }
 
   /**
+   * Allow an IInspectable to be connected an inspector directly, and the
+   * manager will just pass the function to the underlying panel.
+   */
+  onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
+    this._inspector.onInspectorUpdate(sender, args);
+  }
+
+  /**
    * Handle the source disposed signal.
    */
   private _onSourceDisposed() {
