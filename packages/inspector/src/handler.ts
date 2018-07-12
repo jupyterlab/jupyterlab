@@ -274,10 +274,9 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
   /**
    * display a transiant_display_data message
    */
-  displayTransientMessage(msg: KernelMessage.IIOPubMessage): void {
-    let inputMsg = msg as KernelMessage.ITransientDisplayDataMsg;
-    let title = inputMsg.content.title || '';
-    let meta = inputMsg.content.metadata || {};
+  displayTransientMessage(msg: KernelMessage.ITransientDisplayDataMsg): void {
+    let title = msg.content.title || '';
+    let meta = msg.content.metadata || {};
     let append = (meta['append'] ? meta['append'] : false) as boolean;
     let page = (meta['page'] ? meta['page'] : 'Info') as string;
 
@@ -302,12 +301,12 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
     // users to close tabs manually.
     this._pages.set(page, widget);
 
-    if (!inputMsg.content.data) return;
+    if (!msg.content.data) return;
 
     // now process the display_data
     widget.model.outputs.add({
       output_type: 'display_data',
-      data: inputMsg.content.data,
+      data: msg.content.data,
       metadata: meta
     });
 
@@ -348,7 +347,9 @@ export class KernelInfoHandler extends InfoHandler
     // displays transient_display_data message. All others are
     // silently ignored.
     if (msg.header.msg_type === 'transient_display_data')
-      this.displayTransientMessage(msg);
+      this.displayTransientMessage(
+        msg as KernelMessage.ITransientDisplayDataMsg
+      );
   }
 }
 
