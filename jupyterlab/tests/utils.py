@@ -13,7 +13,6 @@ except ImportError:
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyterlab.labapp import LabApp
 from notebook.tests.launchnotebook import NotebookTestBase
-from notebook.utils import url_path_join
 import jupyter_core
 from traitlets.config import Config
 from tornado.ioloop import IOLoop
@@ -112,24 +111,3 @@ class LabTestBase(NotebookTestBase):
         cls.notebook_thread.start()
         started.wait()
         cls.wait_until_alive()
-
-
-class APITester(object):
-    """Wrapper for REST API requests"""
-    url = '/'
-
-    def __init__(self, request):
-        self.request = request
-
-    def _req(self, verb, path, body=None):
-        response = self.request(verb,
-                url_path_join(self.url, path), data=body)
-
-        if 400 <= response.status_code < 600:
-            try:
-                response.reason = response.json()['message']
-            except Exception:
-                pass
-        response.raise_for_status()
-
-        return response

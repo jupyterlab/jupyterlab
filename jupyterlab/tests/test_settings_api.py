@@ -1,9 +1,10 @@
 """Test the kernels service API."""
 import json
 
-from jupyterlab.tests.utils import LabTestBase, APITester
-from notebook.tests.launchnotebook import assert_http_error
 from jupyterlab.commands import build
+from jupyterlab.tests.utils import LabTestBase
+from jupyterlab_launcher.tests.utils import APITester
+from notebook.tests.launchnotebook import assert_http_error
 
 
 class SettingsAPI(APITester):
