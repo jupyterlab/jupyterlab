@@ -27,7 +27,7 @@ import {
   CommaStyle,
   PlusStyle,
   SourceCellStyle,
-  ResetStyle
+  ResetStyle,
 } from './ShortcutItemStyle'
 
 import * as React from 'react'
@@ -151,10 +151,12 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
               this.props.shortcut.keys[key][0] !== '')
               .length < 2 &&
               <span 
-                className={PlusStyle} 
+                className={(!this.state.displayInput) 
+                  ? PlusStyle
+                  : ''
+                } 
                 onClick={() => {this.toggleInput(), this.props.clearConflicts()}}
               >
-                {!this.state.displayInput && '+'}
               </span>
             }
 

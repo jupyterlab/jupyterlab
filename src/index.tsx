@@ -76,14 +76,16 @@ const plugin: JupyterLabPlugin<void> = {
           });
         let widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
         widget.id = 'jupyterlab-shortcutui';
-        widget.title.label = 'Keyboard Shortcut Settings';
+        widget.title.label = 'Keyboard Shortcut Editor';
         widget.title.closable = true;
         widget.addClass('jp-shortcutWidget');
         
+        // console.log(widget.node.style)
+
         /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
-          label: 'Keyboard Shortcut Settings',
+          label: 'Keyboard Shortcut Editor',
           execute: () => {
             if (!widget.isAttached) {
               /** Attach the widget to the main work area if it's not there */

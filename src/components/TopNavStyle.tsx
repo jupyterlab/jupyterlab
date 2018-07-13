@@ -33,6 +33,45 @@ export const SymbolsRowStyle = style (
   }
 )
 
+// export const SymbolsRowStyle = style (
+//   {transition: 'padding-left .5s'},
+//   media(
+//     {
+//       minWidth:0, 
+//       maxWidth:1000
+//     }, 
+//     {
+//       paddingLeft:'5%',
+//       display: 'flex',
+//       justifyContent: 'center',
+
+//       $nest: {
+//         '& div': {
+//           margin: '0px 10px',
+//           fontSize: 'var(--jp-ui-font-size1)'
+//         }
+//       }
+//     }
+//   ),
+//   media(
+//     {
+//       minWidth:1001
+//     },
+//     {
+//       paddingLeft: '20%',
+//       display: 'flex',
+//       justifyContent: 'center',
+
+//       $nest: {
+//         '& div': {
+//           margin: '0px 10px',
+//           fontSize: 'var(--jp-ui-font-size1)'
+//         }
+//       }
+//     }
+//   )
+// )
+
 export const SearchContainerStyle = style (
   {
     width:' 50%',
@@ -44,7 +83,7 @@ export const SearchStyle = style (
   {
     borderWidth: 'var(--jp-border-width)',
     borderStyle: 'solid',
-    borderColor: 'var(--jp-layout-color2)',
+    borderColor: 'var(--jp-layout-color4)',
     /* border-radius: var(--jp-border-radius);   this is 2px */
     borderRadius: '3px',
     height: '20px',

@@ -1,0 +1,9 @@
+:root {
+  --jp-icon-add-blue: url('icons/add-blue.svg');
+  --jp-icon-add-light-blue: url('icons/add-light-blue.svg');
+  --jp-icon-checkmark-white: url('icons/checkmark-white.svg');
+  --jp-icon-error-white: url('icons/error-white.svg');
+  --jp-icon-remove: url('icons/remove.svg');
+  --jp-icon-remove-med: url('icons/remove-med.svg');
+  --jp-icon-remove-light: url('icons/remove-light.svg');
+}
