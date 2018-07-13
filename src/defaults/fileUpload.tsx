@@ -1,12 +1,12 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
+import { TextItem } from '../component/text';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IStatusBar } from './../statusBar';
-
+import { IDefaultStatusesManager } from './manager';
 import {
     IUploadModel,
     FileBrowserModel,
@@ -61,7 +61,7 @@ export class FileUploadComponent extends React.Component<
         if (this.state.present === true) {
             return (
                 <div>
-                    Uploading...
+                    <TextItem source={'Uploading'} />
                     <ProgressBar percentage={this.state.upload * 100} />
                 </div>
             );
@@ -95,16 +95,16 @@ export namespace FileUpload {
 export const fileUploadItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:file-upload',
     autoStart: true,
-    requires: [IStatusBar, IFileBrowserFactory],
+    requires: [IDefaultStatusesManager, IFileBrowserFactory],
     activate: (
         app: JupyterLab,
-        statusBar: IStatusBar,
+        manager: IDefaultStatusesManager,
         browser: IFileBrowserFactory
     ) => {
-        statusBar.registerStatusItem(
+        manager.addDefaultStatus(
             'file-upload-item',
             new FileUpload({ browser }),
-            { align: 'left' }
+            { align: 'middle' }
         );
     }
 };
