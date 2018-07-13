@@ -67,7 +67,6 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Fetch shortcut list on mount */
   componentDidMount() : void {
-    console.log(this)
     this._getShortcutList()
   }
 

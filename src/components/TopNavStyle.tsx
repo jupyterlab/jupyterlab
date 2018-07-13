@@ -9,6 +9,10 @@ export const TopNavStyle = style (
     padding: '10px',
     paddingTop: '30px',
     paddingBottom: '60px',
+    position: 'fixed',
+    backgroundColor: 'var(--jp-layout-color0)',
+    width: '94.5%',
+    zIndex: 1
   }
 )
 

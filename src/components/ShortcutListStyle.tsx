@@ -4,7 +4,7 @@ import {
 
 export const ShortcutListStyle = style (
   {
-    margin: '0 0 40px 0',
+    marginTop: '126px',
     width: '100%',
     display: 'table',
     borderCollapse: 'collapse',
