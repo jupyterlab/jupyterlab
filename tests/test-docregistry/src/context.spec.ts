@@ -132,7 +132,7 @@ describe('docregistry/context', () => {
 
       it('should initialize the model when the file is reverted for the first time', async () => {
         const context = await createNotebookContext();
-        manager.contents.save(context.path, {
+        await manager.contents.save(context.path, {
           type: 'notebook',
           format: 'json',
           content: DEFAULT_CONTENT
