@@ -32,6 +32,7 @@
     "@jupyterlab/apputils": "^0.17.0-1",
     "@jupyterlab/mainmenu": "^0.6.0-1",
     "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/disposable": "^1.1.2",
     "@phosphor/widgets": "^1.6.0"
   },
   "devDependencies": {
