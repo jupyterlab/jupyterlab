@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { progressBarItem, fillerItem } from './style/progressBar';
 
 export namespace ProgressBar {
     export interface IProps {
@@ -9,14 +10,7 @@ export namespace ProgressBar {
 // tslint:disable-next-line:variable-name
 export const ProgressBar = (props: ProgressBar.IProps) => {
     return (
-        <div
-            className="progress-bar"
-            style={{
-                background: 'black',
-                height: 10,
-                width: 100
-            }}
-        >
+        <div className={progressBarItem}>
             <Filler percentage={props.percentage} />
         </div>
     );
@@ -32,10 +26,8 @@ export namespace Filler {
 export const Filler = (props: Filler.IProps) => {
     return (
         <div
-            className="filler"
+            className={fillerItem}
             style={{
-                background: 'lightgreen',
-                height: 10,
                 width: props.percentage
             }}
         />

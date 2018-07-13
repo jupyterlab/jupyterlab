@@ -25,7 +25,7 @@ export interface IStatusBar {
 }
 
 export namespace IStatusBar {
-    export type Alignment = 'right' | 'left';
+    export type Alignment = 'right' | 'left' | 'middle';
 
     export interface IItemOptions {
         align?: IStatusBar.Alignment;
@@ -38,6 +38,7 @@ const STATUS_BAR_ID = 'jp-main-status-bar';
 const STATUS_BAR_CLASS = 'jp-status-bar';
 const STATUS_BAR_SIDE_CLASS = 'jp-status-bar-side';
 const STATUS_BAR_LEFT_SIDE_CLASS = 'jp-status-bar-left';
+const STATUS_BAR_MIDDLE_PANEL_CLASS = 'jp-status-bar-middle';
 const STATUS_BAR_RIGHT_SIDE_CLASS = 'jp-status-bar-right';
 const STATUS_BAR_ITEM_CLASS = 'jp-status-bar-item';
 
@@ -54,15 +55,19 @@ export class StatusBar extends Widget implements IStatusBar {
         let rootLayout = (this.layout = new PanelLayout());
 
         let leftPanel = (this._leftSide = new Panel());
+        let middlePanel = (this._middlePanel = new Panel());
         let rightPanel = (this._rightSide = new Panel());
 
         leftPanel.addClass(STATUS_BAR_SIDE_CLASS);
         leftPanel.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
 
+        middlePanel.addClass(STATUS_BAR_MIDDLE_PANEL_CLASS);
+
         rightPanel.addClass(STATUS_BAR_SIDE_CLASS);
         rightPanel.addClass(STATUS_BAR_RIGHT_SIDE_CLASS);
 
         rootLayout.addWidget(leftPanel);
+        rootLayout.addWidget(middlePanel);
         rootLayout.addWidget(rightPanel);
 
         this._host.addToBottomArea(this);
@@ -117,7 +122,7 @@ export class StatusBar extends Widget implements IStatusBar {
                 ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
                 this._leftSide.insertWidget(insertIndex, widget);
             }
-        } else {
+        } else if (align === 'right') {
             let insertIndex = this._findInsertIndex(
                 this._rightRankItems,
                 rankItem
@@ -129,6 +134,8 @@ export class StatusBar extends Widget implements IStatusBar {
                 ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
                 this._rightSide.insertWidget(insertIndex, widget);
             }
+        } else {
+            this._middlePanel.addWidget(widget);
         }
 
         if (widget.id !== Private.convertItemId(id)) {
@@ -215,6 +222,7 @@ export class StatusBar extends Widget implements IStatusBar {
     private _defaultManager: IDefaultStatusesManager;
 
     private _leftSide: Panel;
+    private _middlePanel: Panel;
     private _rightSide: Panel;
 }
 
