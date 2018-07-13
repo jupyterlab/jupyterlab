@@ -9,18 +9,18 @@ import { STATUSBAR_PLUGIN_ID } from '..';
 import { SetExt } from '../util/set';
 import { Widget } from '@phosphor/widgets';
 
-export interface IDefaultStatusesManager {
+export interface IDefaultsManager {
     readonly enabledChanged: ISignal<
-        ObservableSet<IDefaultStatusesManager.IItem>,
-        IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
+        ObservableSet<IDefaultsManager.IItem>,
+        IObservableSet.IChangedArgs<IDefaultsManager.IItem>
     >;
 
     readonly itemAdded: ISignal<
-        ObservableMap<IDefaultStatusesManager.IItem>,
-        IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
+        ObservableMap<IDefaultsManager.IItem>,
+        IObservableMap.IChangedArgs<IDefaultsManager.IItem>
     >;
 
-    readonly allItems: IDefaultStatusesManager.IItem[];
+    readonly allItems: IDefaultsManager.IItem[];
 
     addDefaultStatus(
         id: string,
@@ -29,7 +29,7 @@ export interface IDefaultStatusesManager {
     ): void;
 }
 
-export namespace IDefaultStatusesManager {
+export namespace IDefaultsManager {
     export interface IItem {
         id: string;
         item: Widget;
@@ -38,11 +38,11 @@ export namespace IDefaultStatusesManager {
 }
 
 // tslint:disable-next-line:variable-name
-export const IDefaultStatusesManager = new Token<IDefaultStatusesManager>(
+export const IDefaultsManager = new Token<IDefaultsManager>(
     'jupyterlab-statusbar/IDefaultStatusesManager'
 );
 
-export class DefaultStatusesManager implements IDefaultStatusesManager {
+export class DefaultsManager implements IDefaultsManager {
     constructor(opts: DefaultStatusesManager.IOptions) {
         this._settings = opts.settings;
 
@@ -123,16 +123,16 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
         return this._allDefaultStatusItems.changed;
     }
 
-    get allItems(): IDefaultStatusesManager.IItem[] {
+    get allItems(): IDefaultsManager.IItem[] {
         return this._allDefaultStatusItems.values();
     }
 
     private _allDefaultStatusItems: ObservableMap<
-        IDefaultStatusesManager.IItem
+        IDefaultsManager.IItem
     > = new ObservableMap();
     private _enabledStatusNames: Set<string> = new Set();
     private _enabledStatusItems: ObservableSet<
-        IDefaultStatusesManager.IItem
+        IDefaultsManager.IItem
     > = new ObservableSet();
     private _settings: ISettingRegistry;
 }
@@ -146,13 +146,13 @@ export namespace DefaultStatusesManager {
 /**
  * Initialization data for the statusbar extension.
  */
-export const defaultsManager: JupyterLabPlugin<IDefaultStatusesManager> = {
+export const defaultsManager: JupyterLabPlugin<IDefaultsManager> = {
     id: 'jupyterlab-statusbar/defaults-manager',
-    provides: IDefaultStatusesManager,
+    provides: IDefaultsManager,
     autoStart: true,
     requires: [ISettingRegistry],
     activate: (_app: JupyterLab, settings: ISettingRegistry) => {
-        return new DefaultStatusesManager({ settings });
+        return new DefaultsManager({ settings });
     }
 };
 

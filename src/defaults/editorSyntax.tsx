@@ -4,7 +4,7 @@ import { TextItem } from '../component';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { IStatusContext } from '../contexts';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
@@ -131,10 +131,10 @@ export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
     id: 'jupyterlab-statusbar/default-items:editor-syntax-item',
     autoStart: true,
     provides: IEditorSyntax,
-    requires: [IDefaultStatusesManager, IEditorTracker],
+    requires: [IDefaultsManager, IEditorTracker],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         tracker: IEditorTracker
     ) => {
         let item = new EditorSyntax({ tracker });

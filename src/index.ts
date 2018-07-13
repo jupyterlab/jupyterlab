@@ -10,7 +10,7 @@ import { StatusBar, IStatusBar } from './statusBar';
 import {
     defaultsManager,
     notebookTrustItem,
-    IDefaultStatusesManager,
+    IDefaultsManager,
     lineColItem,
     fileUploadItem,
     kernelStatusItem,
@@ -30,8 +30,8 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
     id: STATUSBAR_PLUGIN_ID,
     provides: IStatusBar,
     autoStart: true,
-    requires: [IDefaultStatusesManager],
-    activate: (app: JupyterLab, defaultManager: IDefaultStatusesManager) => {
+    requires: [IDefaultsManager],
+    activate: (app: JupyterLab, defaultManager: IDefaultsManager) => {
         return new StatusBar({ host: app.shell, defaultManager });
     }
 };

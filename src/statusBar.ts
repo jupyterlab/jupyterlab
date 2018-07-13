@@ -4,7 +4,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { ApplicationShell } from '@jupyterlab/application';
 import { ArrayExt, each } from '@phosphor/algorithm';
-import { IDefaultStatusesManager } from './defaults';
+import { IDefaultsManager } from './defaults';
 import { IObservableSet } from './util/observableset';
 import { IObservableMap } from '@jupyterlab/observables';
 import { ISignal } from '@phosphor/signaling';
@@ -161,13 +161,13 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._host;
     }
 
-    get defaultManager(): IDefaultStatusesManager {
+    get defaultManager(): IDefaultsManager {
         return this._defaultManager;
     }
 
     onEnabledDefaultItemChange = (
-        _allEnabled: IObservableSet<IDefaultStatusesManager.IItem>,
-        enableChange: IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
+        _allEnabled: IObservableSet<IDefaultsManager.IItem>,
+        enableChange: IObservableSet.IChangedArgs<IDefaultsManager.IItem>
     ) => {
         const changeType = enableChange.type;
 
@@ -183,8 +183,8 @@ export class StatusBar extends Widget implements IStatusBar {
     };
 
     onDefaultItemAdd = (
-        _allDefaults: IObservableMap<IDefaultStatusesManager.IItem>,
-        change: IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
+        _allDefaults: IObservableMap<IDefaultsManager.IItem>,
+        change: IObservableMap.IChangedArgs<IDefaultsManager.IItem>
     ) => {
         if (change.newValue !== undefined) {
             const { id, item, opts } = change.newValue;
@@ -231,7 +231,7 @@ export class StatusBar extends Widget implements IStatusBar {
     private _statusIds: Array<string> = [];
 
     private _host: ApplicationShell;
-    private _defaultManager: IDefaultStatusesManager;
+    private _defaultManager: IDefaultsManager;
 
     private _leftSide: Panel;
     private _middlePanel: Panel;
@@ -249,7 +249,7 @@ export namespace StatusBar {
      */
     export interface IOptions {
         host: ApplicationShell;
-        defaultManager: IDefaultStatusesManager;
+        defaultManager: IDefaultsManager;
     }
 
     export interface IItem {

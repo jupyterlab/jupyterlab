@@ -3,7 +3,6 @@ import { TextItem } from '../component/text';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
-import { IDefaultStatusesManager } from './manager';
 import {
     IUploadModel,
     FileBrowserModel,
@@ -20,6 +19,7 @@ import { ProgressBar } from '../component/progressBar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { GroupItem } from '../component/group';
 import { ArrayExt } from '@phosphor/algorithm';
+import { IDefaultsManager } from './manager';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
@@ -165,10 +165,10 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
     id: 'jupyterlab-statusbar/default-items:file-upload',
     autoStart: true,
     provides: IFileUpload,
-    requires: [IDefaultStatusesManager, IFileBrowserFactory],
+    requires: [IDefaultsManager, IFileBrowserFactory],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         browser: IFileBrowserFactory
     ) => {
         const item = new FileUpload({
