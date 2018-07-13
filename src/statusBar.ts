@@ -3,9 +3,8 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 
 import { ApplicationShell } from '@jupyterlab/application';
-import { ArrayExt, each } from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 import { IDefaultsManager } from './defaults';
-import { IObservableSet } from './util/observableset';
 import { IObservableMap } from '@jupyterlab/observables';
 import { ISignal } from '@phosphor/signaling';
 
@@ -73,10 +72,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
         this._host.addToBottomArea(this);
 
-        this._defaultManager.enabledChanged.connect(
-            this.onEnabledDefaultItemChange
-        );
-        this._defaultManager.itemAdded.connect(this.onDefaultItemAdd);
+        this._defaultManager.itemAdded.connect(this._onDefaultItemAdd);
         this._defaultManager.allItems.forEach(elem => {
             const { id, item, opts } = elem;
 
@@ -165,25 +161,8 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._defaultManager;
     }
 
-    onEnabledDefaultItemChange = (
-        _allEnabled: IObservableSet<IDefaultsManager.IItem>,
-        enableChange: IObservableSet.IChangedArgs<IDefaultsManager.IItem>
-    ) => {
-        const changeType = enableChange.type;
-
-        if (changeType === 'add') {
-            each(enableChange.values, element => {
-                this._statusItems[element.id].widget.show();
-            });
-        } else {
-            each(enableChange.values, element => {
-                this._statusItems[element.id].widget.hide();
-            });
-        }
-    };
-
-    onDefaultItemAdd = (
-        _allDefaults: IObservableMap<IDefaultsManager.IItem>,
+    private _onDefaultItemAdd = (
+        manager: IDefaultsManager,
         change: IObservableMap.IChangedArgs<IDefaultsManager.IItem>
     ) => {
         if (change.newValue !== undefined) {

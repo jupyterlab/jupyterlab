@@ -2,21 +2,22 @@ import { Token } from '@phosphor/coreutils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IStatusBar } from '../statusBar';
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ISignal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import { IObservableSet, ObservableSet } from '../util/observableset';
 import { STATUSBAR_PLUGIN_ID } from '..';
 import { SetExt } from '../util/set';
 import { Widget } from '@phosphor/widgets';
+import { IDisposable } from '@phosphor/disposable';
 
-export interface IDefaultsManager {
+export interface IDefaultsManager extends IDisposable {
     readonly enabledChanged: ISignal<
-        ObservableSet<IDefaultsManager.IItem>,
+        this,
         IObservableSet.IChangedArgs<IDefaultsManager.IItem>
     >;
 
     readonly itemAdded: ISignal<
-        ObservableMap<IDefaultsManager.IItem>,
+        this,
         IObservableMap.IChangedArgs<IDefaultsManager.IItem>
     >;
 
@@ -49,13 +50,16 @@ export class DefaultsManager implements IDefaultsManager {
         this._settings
             .load(STATUSBAR_PLUGIN_ID)
             .then(settings => {
-                settings.changed.connect(this.onSettingsUpdated);
+                settings.changed.connect(this._onSettingsUpdated);
 
-                this.onSettingsUpdated(settings);
+                this._onSettingsUpdated(settings);
             })
             .catch((reason: Error) => {
                 console.error(reason.message);
             });
+
+        this._allDefaultStatusItems.changed.connect(this._onItemAdd);
+        this._enabledStatusItems.changed.connect(this._onItemStatusChange);
     }
 
     addDefaultStatus(
@@ -78,7 +82,21 @@ export class DefaultsManager implements IDefaultsManager {
         }
     }
 
-    onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+    private _onItemAdd = (
+        allItems: ObservableMap<IDefaultsManager.IItem>,
+        change: IObservableMap.IChangedArgs<IDefaultsManager.IItem>
+    ) => {
+        this._itemAdded.emit(change);
+    };
+
+    private _onItemStatusChange = (
+        enabledItems: ObservableSet<IDefaultsManager.IItem>,
+        change: IObservableSet.IChangedArgs<IDefaultsManager.IItem>
+    ) => {
+        this._enabledChanged.emit(change);
+    };
+
+    private _onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
         let rawEnabledItems = settings.get('enabledDefaultItems').composite as
             | string[]
             | null;
@@ -116,15 +134,28 @@ export class DefaultsManager implements IDefaultsManager {
     };
 
     get enabledChanged() {
-        return this._enabledStatusItems.changed;
+        return this._enabledChanged;
     }
 
     get itemAdded() {
-        return this._allDefaultStatusItems.changed;
+        return this._itemAdded;
     }
 
     get allItems(): IDefaultsManager.IItem[] {
         return this._allDefaultStatusItems.values();
+    }
+
+    get isDisposed() {
+        return this._isDisposed;
+    }
+
+    dispose() {
+        if (this._isDisposed) {
+            return;
+        }
+
+        Signal.clearData(this);
+        this._isDisposed = true;
     }
 
     private _allDefaultStatusItems: ObservableMap<
@@ -135,6 +166,16 @@ export class DefaultsManager implements IDefaultsManager {
         IDefaultsManager.IItem
     > = new ObservableSet();
     private _settings: ISettingRegistry;
+
+    private _isDisposed: boolean = false;
+    private _enabledChanged: Signal<
+        this,
+        IObservableSet.IChangedArgs<IDefaultsManager.IItem>
+    > = new Signal(this);
+    private _itemAdded: Signal<
+        this,
+        IObservableMap.IChangedArgs<IDefaultsManager.IItem>
+    > = new Signal(this);
 }
 
 export namespace DefaultStatusesManager {
