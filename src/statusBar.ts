@@ -61,6 +61,7 @@ export class StatusBar extends Widget implements IStatusBar {
         leftPanel.addClass(STATUS_BAR_SIDE_CLASS);
         leftPanel.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
 
+        middlePanel.addClass(STATUS_BAR_SIDE_CLASS);
         middlePanel.addClass(STATUS_BAR_MIDDLE_PANEL_CLASS);
 
         rightPanel.addClass(STATUS_BAR_SIDE_CLASS);
