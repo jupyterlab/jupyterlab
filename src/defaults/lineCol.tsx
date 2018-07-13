@@ -21,7 +21,7 @@ import {
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
-import { Widget } from '../../node_modules/@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 namespace LineColComponent {
     export interface IProps {
