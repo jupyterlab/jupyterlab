@@ -18,11 +18,11 @@ export const InputBoxHiddenStyle = style(
 export  const slideAnimation = keyframes(
   {
     from: {
-      width: '0%',
+      width: '0',
       left: '0'
     },
     to: {
-      width: '100%',
+      width: '120px',
       left: '0'
     }
   }
@@ -69,15 +69,11 @@ export const SubmitStyle = style (
     fontFamily: 'var(--jp-ui-font-family)',
     display: 'block',
     height: '24px',
-    backgroundImage: 'var( --jp-icon-checkmark)',
+    backgroundImage: 'var( --jp-icon-checkmark-white )',
     backgroundRepeat: 'no-repeat',
     width: '26px',
 
     $nest: {
-      '&:disabled': {
-        background: 'var(--jp-error-color1)',
-        border: 'none'
-      },
       '&:focus': {
         outline: 'none' 
       }
@@ -85,9 +81,21 @@ export const SubmitStyle = style (
   }
 )
   
-export const SubmitEmptyStyle = style (
+export const SubmitNonFunctionalStyle = style (
   {
-    background: 'var(--jp-layout-color2)',
-    backgroundImage: 'var( --jp-icon-checkmark-disabled)'
+    backgroundImage: 'var( --jp-icon-checkmark-white )',
+    background: 'var(--jp-layout-color3)'
+  }
+)
+
+export const SubmitConflictStyle = style (
+  {
+    background: 'var(--jp-error-color1)',
+    backgroundImage: 'var(--jp-icon-error-white )',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '20px',
+    backgroundPositionX: '2px',
+    backgroundPositionY: '2px',
+    border: 'none'
   }
 )

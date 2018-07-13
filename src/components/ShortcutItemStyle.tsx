@@ -13,8 +13,8 @@ export const CellStyle = style (
 
 export const CellTextStyle = style (
   {
-    lineHeight: '30px',
-    height: '30px'
+    lineHeight: '34px',
+    height: '34px'
   }
 )
   
@@ -74,7 +74,7 @@ export const ShortcutKeysStyle = style (
 export const OrStyle = style (
   {
     marginRight: '12px',
-    marginTop: '4px',
+    marginTop: '8px',
   }
 )
 
@@ -88,17 +88,20 @@ export const CommaStyle = style (
 
 export const PlusStyle = style (
   {
-    fontSize: 'var(--jp-ui-font-size2)',
-    color: 'var(--jp-brand-color2)',
-    transform: 'rotate(270deg)',
+    backgroundImage: 'var(--jp-icon-add-light-blue)',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '16px',
+    width: '16px',
+    height: '21px',
+    marginTop: '9px',
 
     $nest: {
       '&:hover': {
-        color: 'var(--jp-brand-color0)'
+        backgroundImage: 'var(--jp-icon-add-blue)',
       },
 
       '&:focus': {
-        color: 'var(--jp-brand-color0)'  
+        backgroundImage: 'var(--jp-icon-add-blue)',
       }
     }
   }

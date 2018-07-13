@@ -4,26 +4,26 @@ import {
 
 export const shortcutStyle = style(
   {
-    margin: '9px 12px 0px 4px',
+    margin: '9px 5px 0px 4px',
     paddingTop: '8px',
     backgroundSize: '16px',
     height: '16px',
     width: '16px',
-    backgroundImage: 'var(--jp-icon-close)',
+    backgroundImage: 'var(--jp-icon-remove-med)',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundColor: 'var(--jp-layout-color0)',
     border: 'none',
-    opacity: 0.5,
 
     $nest: {
       '&:hover': {
-        opacity: 1
+        backgroundImage: 'var(--jp-icon-remove)'
       },
       '&:active': {
-        color: 'var(--jp-layout-color3)'
+        backgroundImage: 'var(--jp-icon-remove)'
       },
       '&:focus': {
+        backgroundImage: 'var(--jp-icon-remove)',
         outline: 'none'
       }
     }
@@ -32,7 +32,19 @@ export const shortcutStyle = style(
 
 export const shortcutConflictStyle = style (
   {
+    backgroundImage: 'var(--jp-icon-remove-light)',
     backgroundColor: 'var(--jp-error-color2)',
-    opacity: 0.75
+
+    $nest: {
+      '&:hover': {
+        backgroundImage: 'var(--jp-icon-remove-med)'
+      },
+      '&:active': {
+        backgroundImage: 'var(--jp-icon-remove-med)'
+      },
+      '&:focus': {
+        backgroundImage: 'var(--jp-icon-remove-med)',
+      }
+    }
   }
 )

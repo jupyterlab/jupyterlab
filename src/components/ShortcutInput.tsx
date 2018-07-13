@@ -13,7 +13,8 @@ import {
   InputUnavailableStyle, 
   InputBoxHiddenStyle, 
   InputBoxStyle, 
-  SubmitEmptyStyle, 
+  SubmitNonFunctionalStyle, 
+  SubmitConflictStyle,
   SubmitStyle
 } from './ShortcutInputStyle'
 
@@ -32,7 +33,8 @@ export interface IShortcutInputState {
   value: string,
   userInput: string,
   isAvailable: boolean,
-  takenBy: ShortcutObject,
+  isFunctional: boolean,
+  takenBy: ShortcutObject
 }
 
 export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcutInputState> {
@@ -40,6 +42,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
     value: '',
     userInput: '',
     isAvailable: true,
+    isFunctional: false,
     takenBy: new ShortcutObject(),
   }
 
@@ -77,7 +80,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
           userInput: userInput, 
         } 
       )
-    } else {
+    } else if (event.key !== 'CapsLock') {
       let lastKey = (userInput.substr(userInput.lastIndexOf(' ') + 1, userInput.length)).trim()
       if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = (userInput + ',');
@@ -121,6 +124,19 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
       }
     }
     return userInput
+  }
+
+  /** 
+   * Check if shorcut being typed will work 
+   * (does not end with ctrl, alt, command, or shift) 
+   * */
+  checkNonFunctional = (shortcut: string) : boolean =>
+  {
+    let dontEnd = ['Ctrl','Alt','Accel','Shift']
+    let shortcutKeys = shortcut.split(', ')
+    let last = shortcutKeys[shortcutKeys.length-1]
+    this.setState({isFunctional: !(dontEnd.includes(last) || shortcut==='')})
+    return (dontEnd.includes(last) || shortcut==='')
   }
 
   /** Check if shortcut being typed is already taken */
@@ -174,7 +190,8 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         value: value, 
         userInput: userInput, 
         takenBy: takenBy,
-      }
+      },
+      () => this.checkNonFunctional(this.state.userInput)
     )
   }
 
@@ -194,10 +211,6 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
   render() {
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {inputClassName = classes(inputClassName, InputUnavailableStyle)}
-
-    // let divClassName = 'jp-input-box'
-    // if (!this.props.displayInput) {divClassName += ' jp-input-box-hidden'}
-
     return (
       <div className={this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle}
         onBlur={(event) => this.handleBlur(event)}
@@ -210,12 +223,18 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         >
         </input>
         <button 
-          className={this.state.value === '' ? 
-            classes(SubmitStyle,SubmitEmptyStyle) 
+          className={
+            !this.state.isFunctional 
+            ? classes(SubmitStyle,SubmitNonFunctionalStyle) 
+            : !this.state.isAvailable 
+            ? classes(SubmitStyle,SubmitConflictStyle)
             : SubmitStyle
           }
           id = {this.state.value !== '' ? 'no-blur' : 'blur'}
-          disabled={!this.state.isAvailable} 
+          disabled={
+            !this.state.isAvailable || 
+            !this.state.isFunctional
+          } 
           onClick= {() => {
             this.props.handleUpdate(
               this.props.shortcut, 
