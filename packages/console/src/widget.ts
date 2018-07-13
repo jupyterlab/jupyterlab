@@ -298,6 +298,7 @@ export class CodeConsole extends Widget {
       if (should) {
         // Create a new prompt cell before kernel execution to allow typeahead.
         this.newPromptCell();
+        this.promptCell!.editor.focus();
         return this._execute(promptCell);
       } else {
         // add a newline if we shouldn't execute
@@ -440,7 +441,6 @@ export class CodeConsole extends Widget {
     // Suppress the default "Enter" key handling.
     let editor = promptCell.editor;
     editor.addKeydownHandler(this._onEditorKeydown);
-    editor.focus();
 
     this._history.editor = editor;
     this._promptCellCreated.emit(promptCell);
