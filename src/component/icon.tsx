@@ -1,21 +1,12 @@
 import * as React from 'react';
-import { style } from 'typestyle';
 
-const iconitem = style({
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '24px',
-    backgroundPositionX: '0px',
-    backgroundPositionY: '5px',
-    minHeight: '28px',
-    minWidth: '35px',
-    display: 'inline-block'
-});
+import { iconitem } from './style/icon';
 
-export interface IProps {
+export interface IIconProps {
     source: string;
 }
 
-export class IconItem extends React.Component<IProps, {}> {
+export class IconItem extends React.Component<IIconProps, {}> {
     render() {
         return <div className={this.props.source + ' ' + iconitem} />;
     }

@@ -10,6 +10,7 @@ import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 
 import { IConsoleTracker } from '@jupyterlab/console';
+import { TextItem } from '../component/text';
 
 export namespace FilePathComponent {
     export interface IState {
@@ -37,7 +38,7 @@ export class FilePathComponent extends React.Component<
     };
 
     render() {
-        return <div>{this.state.path}</div>;
+        return <TextItem source={this.state.path} />;
     }
 }
 

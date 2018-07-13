@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { IconItem } from '../component/icon';
+import { TextItem } from '../component/text';
 
 import {
     JupyterLabPlugin,
@@ -24,10 +25,17 @@ const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
-            <div className={'text-item'}>{props.kernels}</div>
+        <div
+            onClick={props.handleClick}
+            style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center'
+            }}
+        >
+            <TextItem source={props.kernels} />
             <IconItem source={'kernel-item'} />
-            <div className={'text-item'}>{props.terminals}</div>
+            <TextItem source={props.terminals} />
             <IconItem source={'terminal-item'} />
         </div>
     );
