@@ -265,7 +265,7 @@ repository root folder install the dependency and save it to your
 
 .. code:: bash
 
-    npm install --save @jupyterlab/apputils
+    npm install --save @jupyterlab/apputils@0.16.0
 
 Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
 definition so that it reads like so:
