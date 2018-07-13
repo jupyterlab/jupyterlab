@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  /* overflow-x: scroll; */
+  overflow-x: scroll;
   font-size: var(--jp-ui-font-size1);
   font-family: var(--jp-ui-font-family);
   color: var(--jp-content-font-color1);
