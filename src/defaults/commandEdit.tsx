@@ -11,6 +11,8 @@ import {
 
 import { IDefaultStatusesManager } from './manager';
 
+import { IconItem } from '../component/icon';
+
 import { Widget } from '@phosphor/widgets';
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -66,13 +68,13 @@ export class CommandEditComponent extends React.Component<
         if (this.state.notebookMode === 'edit') {
             return (
                 <div onClick={this.handleClick}>
-                    <div className={'edit-item icon-item'} />
+                    <IconItem source={'edit-item'} />
                 </div>
             );
         } else {
             return (
                 <div onClick={this.handleClick}>
-                    <div className={'command-item icon-item'} />
+                    <IconItem source={'command-item'} />
                 </div>
             );
         }

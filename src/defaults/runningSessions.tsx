@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { IconItem } from '../component/icon';
 
 import {
     JupyterLabPlugin,
@@ -25,9 +26,9 @@ const RunningSessionsComponent = (
     return (
         <div onClick={props.handleClick}>
             <div className={'text-item'}>{props.kernels}</div>
-            <div className={'kernel-item icon-item'} />
+            <IconItem source={'kernel-item'} />
             <div className={'text-item'}>{props.terminals}</div>
-            <div className={'terminal-item icon-item'} />
+            <IconItem source={'terminal-item'} />
         </div>
     );
 };
