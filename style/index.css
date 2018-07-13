@@ -4,7 +4,7 @@
     --jp-statusbar-margin: 8px;
 
     border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
-    background: var(--jp-toolbar-background);
+    background: #828282;
     min-height: var(--jp-private-menubar-height);
     min-width: 400px;
     width: 100%;
@@ -40,25 +40,6 @@
     background-image: url('./images/command-icon.svg');
 }
 
-.icon-item {
-    background-repeat: no-repeat;
-    background-size: 28px;
-    background-position-x: 0px;
-    background-position-y: 5px;
-    padding-top: 1px;
-    min-height: 28px;
-    min-width: 35px;
-    display: inline-block;
-}
-
-.text-item {
-    display: inline-block;
-    padding-top: 1px;
-    min-height: 28px;
-    position: relative;
-    top: 25%;
-    transform: translateY(-25%);
-}
 .kernel-item {
     background-image: url('./images/kernel-icon.svg');
 }

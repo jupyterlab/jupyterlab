@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { TextItem } from '../component/text';
 
 import {
     JupyterLabPlugin,
@@ -22,11 +23,7 @@ import { Widget } from '@phosphor/widgets';
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
-    return (
-        <div>
-            {props.name} | {props.status}
-        </div>
-    );
+    return <TextItem source={props.name + ' | ' + props.status} />;
 };
 
 namespace KernelStatusComponent {

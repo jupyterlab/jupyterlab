@@ -1,4 +1,5 @@
 import React from 'react';
+import { TextItem } from '../component/text';
 
 import {
     JupyterLabPlugin,
@@ -33,11 +34,7 @@ namespace LineColComponent {
 const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
-    return (
-        <div>
-            Ln {props.line}, Col {props.column}
-        </div>
-    );
+    return <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />;
 };
 
 class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
