@@ -66,16 +66,13 @@ if [[ $GROUP == integrity ]]; then
     jlpm run integrity
 
     # Lint our JavaScript files.
-    ./node_modules/.bin/eslint .
+    jlpm run lint:check
 
     # Build the packages individually.
     jlpm run build:src
 
     # Make sure the examples build
     jlpm run build:examples
-
-    # Run a tslint check
-    ./node_modules/.bin/tslint -c tslint.json -e '**/*.d.ts' -e 'node_modules/**/*.ts' -e 'jupyterlab/**/*.ts' '**/*.ts'
 
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
