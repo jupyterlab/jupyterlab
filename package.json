@@ -43,6 +43,7 @@
     "test:services": "cd packages/services && jlpm test && cd examples/node && python main.py",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "update:dependency": "node buildutils/lib/update-dependency.js",
+    "update:dist-tag": "node buildutils/lib/update-dist-tag.js",
     "watch": "run-p watch:dev watch:themes",
     "watch:dev": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
