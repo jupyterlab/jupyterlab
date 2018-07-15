@@ -44,7 +44,7 @@ Building JupyterLab from its GitHub source code requires Node.js version
 If you use `conda`, you can get it with:
 
 ```bash
-conda install -c conda-forge nodejs=9.11.1
+conda install -c conda-forge 'nodejs<10'
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
