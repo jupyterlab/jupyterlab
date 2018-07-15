@@ -32,6 +32,7 @@
     "postinstall": "node scripts/ensure-buildutils.js",
     "integrity": "node buildutils/lib/ensure-repo.js",
     "patch:release": "node buildutils/lib/patch-release.js",
+    "prerelease": "jlpm run clean:slate && jlpm run build:packages && jlpm integrity && lerna publish --npm-tag=next --force-publish=* -m \"Publish Prerelease\"",
     "publish": "jlpm run clean:slate && jlpm run build:packages && jlpm integrity && lerna publish --force-publish=* -m \"Publish\"",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
