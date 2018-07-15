@@ -4,7 +4,7 @@
       "prettier --write"
     ],
     "**/*{.ts,.tsx}": [
-      "tslint -c tslint.json --fix",
+      "tslint --fix",
       "git add"
     ],
     "**/*{.js,.jsx}": [
