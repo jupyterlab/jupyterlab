@@ -105,5 +105,8 @@
       "check-separator",
       "check-type"
     ]
+  },
+  "linterOptions": {
+    "exclude": ["node_modules"]
   }
 }
