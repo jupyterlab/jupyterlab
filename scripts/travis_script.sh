@@ -65,7 +65,7 @@ if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity
 
-    # Lint our JavaScript files.
+    # Lint our files.
     jlpm run lint:check
 
     # Build the packages individually.
