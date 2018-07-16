@@ -100,7 +100,6 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         shortcutObject.source = 'Default'
         shortcutObject.id = shortcutKey
         shortcutObject.numberOfShortcuts = 1
-
         shortcutObjects[key] = shortcutObject;
       }
     })
@@ -164,16 +163,16 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   /** Reset all shortcuts to their defaults */
-  resetShortcuts = () : void => {
-    this.props.settingRegistry.load(this.props.shortcutPlugin)
-      .then(settings => Object.keys(settings.user).forEach(key => {
-        this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
-      }))
-      .then(() => this._getShortcutList())
+  resetShortcuts = async () => {
+    let settings = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    for (const key of Object.keys(settings.user)) {
+      await this.props.settingRegistry.remove(this.props.shortcutPlugin, key)
+    }
+    this._getShortcutList()
   }
 
   /** Set new shortcut for command, refresh state */
-  handleUpdate = (shortcutObject: ShortcutObject, keys: string[]) : void => {
+  handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
     if (keys[0] !== '') {
       let commandId: string;
       commandId = shortcutObject.id
@@ -187,7 +186,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           }
         });
       }
-      this.props.settingRegistry
+      await this.props.settingRegistry
       .set(this.props.shortcutPlugin, 
         commandId, 
         {
@@ -197,17 +196,15 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           title: shortcutObject.label,
           category: shortcutObject.category
         }
-      ).then(() => this._getShortcutList())
+      )
+      this._getShortcutList()
     }
   }
 
   /** Delete shortcut for command, refresh state */
-  deleteShortcut = (shortcutObject: ShortcutObject, shortcutId: string) : void => {
-    let removeKeybindingPromise = this.props.settingRegistry
-      .remove(this.props.shortcutPlugin, shortcutId);
-    let setKeybindingPromise = this.props.settingRegistry
-      .set(this.props.shortcutPlugin, 
-        shortcutId, 
+  deleteShortcut = async (shortcutObject: ShortcutObject, shortcutId: string) => {
+    await this.props.settingRegistry.remove(this.props.shortcutPlugin, shortcutId)
+    await this.props.settingRegistry.set(this.props.shortcutPlugin, shortcutId, 
         {
           command: shortcutObject.commandName, 
           keys: [''], 
@@ -215,20 +212,19 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           title: shortcutObject.label,
           category: shortcutObject.category
         }
-      );
-    Promise.all([removeKeybindingPromise, setKeybindingPromise]);
-    this._getShortcutList();
+      )
+    this._getShortcutList()
   }
 
   /** Reset a specific shortcut to its default settings */
-  resetShortcut = (shortcutObject: ShortcutObject) : void => {
+  resetShortcut = async (shortcutObject: ShortcutObject) => {
     if(Object.keys(shortcutObject.keys).length > 1) {
-      this.props.settingRegistry
+      await this.props.settingRegistry
       .remove(this.props.shortcutPlugin, Object.keys(shortcutObject.keys)[1])
     }
-    this.props.settingRegistry
+    await this.props.settingRegistry
     .remove(this.props.shortcutPlugin, Object.keys(shortcutObject.keys)[0])
-    .then(() => this._getShortcutList())
+    this._getShortcutList()
   }
 
   /** Perform a fuzzy search on a single command item. */
@@ -398,41 +394,25 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
         return (a['label'] < b['label']) ? -1 : (a['label'] > b['label']) ? 1 : 0
       }
     })
-    shortcuts.forEach(shortcut => {
-      shortcut.index = shortcuts.indexOf(shortcut)
-    });
     this.setState({filteredShortcutList: shortcuts})
   }
 
   /** Sort shortcut list so that the conflicting shortcut is right below the one currently being set */
   sortConflict = (newShortcut: ShortcutObject, oldShortcut: ShortcutObject): void => {
-    let newSortedList = this.state.filteredShortcutList
-    newSortedList.forEach(shortcut => {
-      shortcut.hasConflict = false
-    });
+    let shortcutList = this.state.filteredShortcutList
     oldShortcut.hasConflict = true
-    newSortedList.splice(oldShortcut.index, 1)
-    newSortedList.splice(
-      (oldShortcut.index < newShortcut.index 
-        ? newShortcut.index 
-        : newShortcut.index + 1
-      ), 
-      0, 
-      oldShortcut
-    )
-    newSortedList.forEach(shortcut => {
-      shortcut.index = newSortedList.indexOf(shortcut)
-    });
-    this.setState({filteredShortcutList: newSortedList})
+    shortcutList = shortcutList.filter(shortcut => shortcut.id !== oldShortcut.id)
+    shortcutList.splice(shortcutList.indexOf(newShortcut) + 1, 0, oldShortcut)
+    this.setState({filteredShortcutList: shortcutList})
   }
 
   /** Remove conflict flag from all shortcuts */
   clearConflicts = () : void => {
-    let newSortedList = this.state.filteredShortcutList
-    newSortedList.forEach(shortcut => {
+    let shortcutList = this.state.filteredShortcutList
+    shortcutList.forEach(shortcut => {
       shortcut.hasConflict = false
     });
-    this.setState({filteredShortcutList: newSortedList})
+    this.setState({filteredShortcutList: shortcutList})
   }
 
   render() {
