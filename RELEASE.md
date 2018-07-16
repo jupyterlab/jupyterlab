@@ -82,7 +82,7 @@ twine upload dist/*
       xckd repo
 * [ ] Publish to conda-forge (see below)
 * [ ] Update `jupyterlab/_version.py` with a `dev` version
-* [ ] Run jlpm integrity to update the dev_mode version
+* [ ] Run `jlpm integrity` to update the `dev_mode` version
 * [ ] Commit and push the version update to master
 * [ ] Release the other repos as appropriate
 * [ ] Update version for binder (see below)
