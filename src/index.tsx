@@ -32,7 +32,6 @@ export class ShortcutObject {
   selector: string
   category: string
   id: string
-  index: number
   hasConflict: boolean
   numberOfShortcuts: number
   constructor() {
@@ -44,7 +43,6 @@ export class ShortcutObject {
     this.category = ''
     this.id = ''
     this.numberOfShortcuts = 0
-    this.index = 0
     this.hasConflict = false
   }
 }
@@ -80,8 +78,6 @@ const plugin: JupyterLabPlugin<void> = {
         widget.title.closable = true;
         widget.addClass('jp-shortcutWidget');
         
-        // console.log(widget.node.style)
-
         /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
