@@ -118,15 +118,23 @@ export function waitForDialog(
   host: HTMLElement = document.body
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    let refresh = () => {
-      let node = host.getElementsByClassName('jp-Dialog')[0];
-      if (node) {
-        resolve(void 0);
+    let counter = 0;
+    const limit = 10;
+    const seek = () => {
+      if (++counter === limit) {
+        reject(undefined);
         return;
       }
-      setTimeout(refresh, 10);
+
+      if (host.getElementsByClassName('jp-Dialog')[0]) {
+        resolve(undefined);
+        return;
+      }
+
+      setTimeout(seek, 25);
     };
-    refresh();
+
+    seek();
   });
 }
 
@@ -135,7 +143,8 @@ export function waitForDialog(
  */
 export function acceptDialog(host: HTMLElement = document.body): Promise<void> {
   return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog')[0];
+    const node = host.getElementsByClassName('jp-Dialog')[0];
+
     if (node) {
       simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
     }
@@ -144,16 +153,22 @@ export function acceptDialog(host: HTMLElement = document.body): Promise<void> {
 
 /**
  * Dismiss a dialog after it is attached.
+ *
+ * #### Notes
+ * This promise will always resolve successfully.
  */
 export function dismissDialog(
   host: HTMLElement = document.body
 ): Promise<void> {
-  return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog')[0];
-    if (node) {
-      simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-    }
-  });
+  return waitForDialog(host)
+    .then(() => {
+      const node = host.getElementsByClassName('jp-Dialog')[0];
+
+      if (node) {
+        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+      }
+    })
+    .catch(() => undefined);
 }
 
 /**
