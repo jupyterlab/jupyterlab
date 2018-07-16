@@ -1174,7 +1174,11 @@ namespace Private {
     if (/^\s*$/.test(before)) {
       CodeMirror.commands['indentMore'](cm);
     } else {
-      CodeMirror.commands['insertSoftTab'](cm);
+      if (cm.getOption('indentWithTabs')) {
+        CodeMirror.commands['insertTab'](cm);
+      } else {
+        CodeMirror.commands['insertSoftTab'](cm);
+      }
     }
   }
 
