@@ -42,7 +42,6 @@ class BuildAPITest(LabTestBase):
             for d in self.tempdirs:
                 d.cleanup()
 
-        os.environ['JUPYTERLAB_DIR'] = self.tempdir()
         self.build_api = BuildAPITester(self.request)
 
     def test_get_status(self):
