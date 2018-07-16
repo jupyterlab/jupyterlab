@@ -19,6 +19,10 @@ import {
   ShortcutUI
 } from './components/ShortcutUI'
 
+// import {
+//   ResizeMessage
+// } from '@phosphor/widgets'
+
 import * as React from 'react';
 
 import '../style/index.css';
@@ -77,7 +81,7 @@ const plugin: JupyterLabPlugin<void> = {
         widget.title.label = 'Keyboard Shortcut Editor';
         widget.title.closable = true;
         widget.addClass('jp-shortcutWidget');
-        
+
         /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {

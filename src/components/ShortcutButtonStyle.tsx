@@ -4,7 +4,7 @@ import {
 
 export const shortcutStyle = style(
   {
-    margin: '9px 5px 0px 4px',
+    margin: '9px 5px 5px 4px',
     paddingTop: '8px',
     backgroundSize: '16px',
     height: '16px',

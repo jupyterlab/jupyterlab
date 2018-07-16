@@ -2,13 +2,23 @@ import {
   style
 } from 'typestyle'
 
+export const TopStyle = style (
+  {
+    display: 'block',
+  }
+)
+
 export const TopNavStyle = style (
   {
     display: 'flex',
     fontSize: 'var(--jp-ui-font-size2)',
-    padding: '10px',
+    position: 'fixed',
+    backgroundColor: 'var(--jp-layout-color0)',
+    width: '96%',
+    zIndex: 1,
     paddingTop: '30px',
     paddingBottom: '60px',
+    minWidth: '1000px'
   }
 )
 
@@ -33,45 +43,6 @@ export const SymbolsRowStyle = style (
   }
 )
 
-// export const SymbolsRowStyle = style (
-//   {transition: 'padding-left .5s'},
-//   media(
-//     {
-//       minWidth:0, 
-//       maxWidth:1000
-//     }, 
-//     {
-//       paddingLeft:'5%',
-//       display: 'flex',
-//       justifyContent: 'center',
-
-//       $nest: {
-//         '& div': {
-//           margin: '0px 10px',
-//           fontSize: 'var(--jp-ui-font-size1)'
-//         }
-//       }
-//     }
-//   ),
-//   media(
-//     {
-//       minWidth:1001
-//     },
-//     {
-//       paddingLeft: '20%',
-//       display: 'flex',
-//       justifyContent: 'center',
-
-//       $nest: {
-//         '& div': {
-//           margin: '0px 10px',
-//           fontSize: 'var(--jp-ui-font-size1)'
-//         }
-//       }
-//     }
-//   )
-// )
-
 export const SearchContainerStyle = style (
   {
     width:' 50%',
@@ -83,7 +54,7 @@ export const SearchStyle = style (
   {
     borderWidth: 'var(--jp-border-width)',
     borderStyle: 'solid',
-    borderColor: 'var(--jp-layout-color4)',
+    borderColor: 'var(--jp-layout-color3)',
     /* border-radius: var(--jp-border-radius);   this is 2px */
     borderRadius: '3px',
     height: '20px',
@@ -146,5 +117,19 @@ export const AdvancedOptionsLinkStyle = style (
 export const AdvancedOptionsLinkRightStyle = style (
   {
     textAlign: 'left'
+  }
+)
+
+export const HeaderRowStyle = style(
+  {
+    fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
+    fontSize: 'var(--jp-ui-font-size2)',
+    position: 'fixed',
+    backgroundColor: 'var(--jp-layout-color0)',
+    width: '94%',
+    zIndex: 1,
+    display: 'table',
+    marginTop: '85px',
+    minWidth: '1000px'
   }
 )

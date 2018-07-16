@@ -40,7 +40,7 @@ export const InputStyle = style (
     marginLeft: '10px',
     paddingLeft:'10px',
     width: '120px',
-    height: '20px',
+    height: '25px',
     display: 'block',
 
     $nest: {
@@ -68,7 +68,7 @@ export const SubmitStyle = style (
     color: 'var(--jp-layout-color0)',
     fontFamily: 'var(--jp-ui-font-family)',
     display: 'block',
-    height: '24px',
+    height: '29px',
     backgroundImage: 'var( --jp-icon-checkmark-white )',
     backgroundRepeat: 'no-repeat',
     width: '26px',

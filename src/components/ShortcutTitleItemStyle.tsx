@@ -4,27 +4,17 @@ import {
 
 export const HeaderStyle = style (
   {
-    display: 'flex'
-  }
-)
-
-export const SortButtonStyle = style (
-  {
-    transform: 'rotate(180deg)',
-    paddingLeft: '10px',
-    color: 'var(--jp-ui-font-color2)',
-    border: 'none',
-    backgroundColor: 'var(--jp-layout-color0)',
+    display: 'flex',
 
     $nest: {
-      '&:hover': {
+      '&:hover div': {
         fontWeight: 600,
         color: 'var(--jp-ui-font-color0)'
       },
-      '&:focus': {
+      '&:focus div': {
         outline: 'none'
       },
-      '&:active': {
+      '&:active div': {
         fontWeight: 600,
         color: 'var(--jp-ui-font-color0)'
       }
@@ -32,9 +22,24 @@ export const SortButtonStyle = style (
   }
 )
 
-export const CurrentSortButtonStyle = style (
+export const CurrentHeaderStyle = style (
   {
-    fontWeight: 'bold',
-    color: 'var(--jp-ui-font-color0)'
+    $nest: {
+      '& div': {
+        color: 'var(--jp-ui-font-color0)',
+        fontWeight: 'bold'
+      }
+    }
+  }
+)
+
+export const SortButtonStyle = style (
+  {
+    transform: 'rotate(180deg)',
+    marginLeft: '10px',
+    color: 'var(--jp-ui-font-color2)',
+    border: 'none',
+    backgroundColor: 'var(--jp-layout-color0)',
+    fontSize: 'var(--jp-ui-font-size1)',
   }
 )

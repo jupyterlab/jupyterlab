@@ -7,7 +7,7 @@ import {
 import {
   HeaderStyle,
   SortButtonStyle,
-  CurrentSortButtonStyle
+  CurrentHeaderStyle
 } from './ShortcutTitleItemStyle'
 
 export interface IShortcutTitleItemProps {
@@ -19,17 +19,18 @@ export interface IShortcutTitleItemProps {
 export class ShortcutTitleItem extends React.Component<IShortcutTitleItemProps> {
   render() {
     return (
-      <div className={HeaderStyle}>
+      <div className={
+          this.props.title.toLowerCase() === this.props.active 
+          ? classes(HeaderStyle, CurrentHeaderStyle)
+          : HeaderStyle
+        }
+        onClick= {() => 
+          this.props.updateSort(this.props.title.toLowerCase())
+        }>
         {this.props.title}
-        <button 
-          className={this.props.title.toLowerCase() === this.props.active 
-            ? classes(SortButtonStyle, CurrentSortButtonStyle) 
-            : SortButtonStyle
-          }
-          onClick={() => this.props.updateSort(this.props.title.toLowerCase())}
-        >
-          ⌃
-        </button>
+        <div className={SortButtonStyle}>
+            ⌃
+        </div>
       </div>
     )
   }

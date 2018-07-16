@@ -428,6 +428,8 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           openAdvanced={this.openAdvanced}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
+          updateSort={this.updateSort}
+          currentSort={this.state.currentSort}
         />
         <ShortcutList 
           shortcuts={this.state.filteredShortcutList} 
@@ -438,8 +440,6 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
           keyBindingsUsed={this.state.keyBindingsUsed}
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
-          updateSort={this.updateSort}
-          currentSort={this.state.currentSort}
         />
       </div>
     )
