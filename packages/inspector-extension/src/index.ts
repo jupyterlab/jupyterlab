@@ -232,14 +232,15 @@ const infopanels: JupyterLabPlugin<void> = {
 };
 
 /**
- * The command IDs used by the inspector plugin.
+ * The command IDs used by the testpanels plugin.
  */
 namespace CommandIDs {
   export const display = 'inspector:test_transient_message';
 }
 /**
- * An extension that allows notebooks to display transient_display_data
- * message in tabs of the inspection panel.
+ * An extension that is added temporarily to test the infopanels extension.
+ * It adds a command to send content of a cell as content of a transient_display_data
+ * messages to the inspector.
  */
 const testpanels: JupyterLabPlugin<void> = {
   id: '@jupyterlab/inspector-extension:testpanels',

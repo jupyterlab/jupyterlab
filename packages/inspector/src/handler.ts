@@ -304,14 +304,14 @@ export class InfoHandler implements IDisposable, IInspector.IInspectable {
     // users to close tabs manually.
     this._pages.set(page, widget);
 
-    if (!msg.content.data) return;
-
     // now process the display_data
-    widget.model.outputs.add({
-      output_type: 'display_data',
-      data: msg.content.data,
-      metadata: meta
-    });
+    if (msg.content.data) {
+      widget.model.outputs.add({
+        output_type: 'display_data',
+        data: msg.content.data,
+        metadata: {}
+      });
+    }
 
     this._inspected.emit({
       content: widget,
