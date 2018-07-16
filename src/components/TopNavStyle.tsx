@@ -4,7 +4,7 @@ import {
 
 export const TopStyle = style (
   {
-    display: 'block'
+    display: 'block',
   }
 )
 
@@ -17,7 +17,8 @@ export const TopNavStyle = style (
     width: '96%',
     zIndex: 1,
     paddingTop: '30px',
-    paddingBottom: '60px'
+    paddingBottom: '60px',
+    minWidth: '1000px'
   }
 )
 
@@ -128,6 +129,7 @@ export const HeaderRowStyle = style(
     width: '94%',
     zIndex: 1,
     display: 'table',
-    marginTop: '85px'
+    marginTop: '85px',
+    minWidth: '1000px'
   }
 )
