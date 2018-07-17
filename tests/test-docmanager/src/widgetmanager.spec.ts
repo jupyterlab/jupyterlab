@@ -3,13 +3,7 @@
 
 import expect = require('expect.js');
 
-import { UUID } from '@phosphor/coreutils';
-
 import { ServiceManager } from '@jupyterlab/services';
-
-import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
-
-import { Widget } from '@phosphor/widgets';
 
 import { DocumentWidgetManager } from '@jupyterlab/docmanager';
 
@@ -21,6 +15,12 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+
+import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+
+import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
 
 import { acceptDialog, dismissDialog } from '../../utils';
 
@@ -116,12 +116,14 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#createWidget()', () => {
       it('should create a widget', () => {
-        let widget = manager.createWidget(widgetFactory, context);
+        const widget = manager.createWidget(widgetFactory, context);
+
         expect(widget).to.be.a(Widget);
       });
 
       it('should emit the widgetCreated signal', () => {
         let called = false;
+
         widgetFactory.widgetCreated.connect(() => {
           called = true;
         });
@@ -134,6 +136,7 @@ describe('@jupyterlab/docmanager', () => {
       it('should install a message hook', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
+
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
@@ -142,6 +145,7 @@ describe('@jupyterlab/docmanager', () => {
       it('should add the document class', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
+
         manager.adoptWidget(context, widget);
         expect(widget.hasClass('jp-Document')).to.be(true);
       });
@@ -149,6 +153,7 @@ describe('@jupyterlab/docmanager', () => {
       it('should be retrievable', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
+
         manager.adoptWidget(context, widget);
         expect(manager.contextForWidget(widget)).to.be(context);
       });
@@ -156,18 +161,20 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#findWidget()', () => {
       it('should find a registered widget', () => {
-        let widget = manager.createWidget(widgetFactory, context);
+        const widget = manager.createWidget(widgetFactory, context);
+
         expect(manager.findWidget(context, 'test')).to.be(widget);
       });
 
       it('should return undefined if not found', () => {
-        expect(manager.findWidget(context, 'test')).to.be(void 0);
+        expect(manager.findWidget(context, 'test')).to.be(undefined);
       });
     });
 
     describe('#contextForWidget()', () => {
       it('should return the context for a widget', () => {
-        let widget = manager.createWidget(widgetFactory, context);
+        const widget = manager.createWidget(widgetFactory, context);
+
         expect(manager.contextForWidget(widget)).to.be(context);
       });
 
@@ -178,8 +185,9 @@ describe('@jupyterlab/docmanager', () => {
 
     describe('#cloneWidget()', () => {
       it('should create a new widget with the same context using the same factory', () => {
-        let widget = manager.createWidget(widgetFactory, context);
-        let clone = manager.cloneWidget(widget);
+        const widget = manager.createWidget(widgetFactory, context);
+        const clone = manager.cloneWidget(widget);
+
         expect(clone.hasClass('WidgetFactory')).to.be(true);
         expect(clone.hasClass('jp-Document')).to.be(true);
         expect(manager.contextForWidget(clone)).to.be(context);
@@ -191,19 +199,13 @@ describe('@jupyterlab/docmanager', () => {
     });
 
     describe('#closeWidgets()', () => {
-      it('should close all of the widgets associated with a context', () => {
-        let called = 0;
-        let widget = manager.createWidget(widgetFactory, context);
-        let clone = manager.cloneWidget(widget);
-        widget.disposed.connect(() => {
-          called++;
-        });
-        clone.disposed.connect(() => {
-          called++;
-        });
-        return manager.closeWidgets(context).then(() => {
-          expect(called).to.be(2);
-        });
+      it('should close all of the widgets associated with a context', async () => {
+        const widget = manager.createWidget(widgetFactory, context);
+        const clone = manager.cloneWidget(widget);
+
+        await manager.closeWidgets(context);
+        expect(widget.isDisposed).to.be(true);
+        expect(clone.isDisposed).to.be(true);
       });
     });
 
@@ -211,85 +213,106 @@ describe('@jupyterlab/docmanager', () => {
       it('should be called for a message to a tracked widget', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
+
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
         expect(manager.methods).to.contain('messageHook');
       });
 
       it('should return false for close-request messages', () => {
-        let widget = manager.createWidget(widgetFactory, context);
-        let msg = new Message('close-request');
+        const widget = manager.createWidget(widgetFactory, context);
+        const msg = new Message('close-request');
+
         expect(manager.messageHook(widget, msg)).to.be(false);
       });
 
       it('should return true for other messages', () => {
-        let widget = manager.createWidget(widgetFactory, context);
-        let msg = new Message('foo');
+        const widget = manager.createWidget(widgetFactory, context);
+        const msg = new Message('foo');
+
         expect(manager.messageHook(widget, msg)).to.be(true);
       });
     });
 
     describe('#setCaption()', () => {
-      it('should set the title of the widget', done => {
-        context.initialize(true).then(() => {
-          let widget = manager.createWidget(widgetFactory, context);
-          widget.title.changed.connect(() => {
-            expect(manager.methods).to.contain('setCaption');
-            expect(widget.title.caption).to.contain('Last Checkpoint');
-            done();
-          });
+      it('should set the title of the widget', async () => {
+        await context.initialize(true);
+
+        const widget = manager.createWidget(widgetFactory, context);
+        const delegate = new PromiseDelegate();
+
+        widget.title.changed.connect(async () => {
+          expect(manager.methods).to.contain('setCaption');
+          expect(widget.title.caption).to.contain('Last Checkpoint');
+          await dismissDialog();
+          delegate.resolve(undefined);
         });
+        await delegate.promise;
       });
     });
 
     describe('#onClose()', () => {
-      it('should be called when a widget is closed', done => {
-        let widget = manager.createWidget(widgetFactory, context);
-        widget.disposed.connect(() => {
+      it('should be called when a widget is closed', async () => {
+        const widget = manager.createWidget(widgetFactory, context);
+        const delegate = new PromiseDelegate();
+
+        widget.disposed.connect(async () => {
           expect(manager.methods).to.contain('onClose');
-          done();
+          await dismissDialog();
+          delegate.resolve(undefined);
         });
         widget.close();
       });
 
-      it('should prompt the user before closing', done => {
+      it('should prompt the user before closing', async () => {
+        // Populate the model with content.
         context.model.fromString('foo');
-        let widget = manager.createWidget(widgetFactory, context);
-        manager.onClose(widget).then(() => {
-          expect(widget.isDisposed).to.be(true);
-          done();
-        });
-        acceptDialog();
+
+        const widget = manager.createWidget(widgetFactory, context);
+        const closed = manager.onClose(widget);
+
+        await acceptDialog();
+        await closed;
+
+        expect(widget.isDisposed).to.be(true);
       });
 
-      it('should not prompt if the factory is readonly', () => {
-        context.model.fromString('foo');
-        let widget = manager.createWidget(readOnlyFactory, context);
-        return manager.onClose(widget).then(() => {
-          expect(widget.isDisposed).to.be(true);
-        });
+      it('should not prompt if the factory is readonly', async () => {
+        const readonly = manager.createWidget(readOnlyFactory, context);
+
+        await manager.onClose(readonly);
+
+        expect(readonly.isDisposed).to.be(true);
       });
 
-      it('should not prompt if the other widget is writable', () => {
+      it('should not prompt if the other widget is writable', async () => {
+        // Populate the model with content.
         context.model.fromString('foo');
-        let widget0 = manager.createWidget(widgetFactory, context);
-        let widget1 = manager.createWidget(widgetFactory, context);
-        return manager.onClose(widget0).then(() => {
-          expect(widget0.isDisposed).to.be(true);
-          widget1.dispose();
-        });
+
+        const one = manager.createWidget(widgetFactory, context);
+        const two = manager.createWidget(widgetFactory, context);
+
+        await manager.onClose(one);
+
+        expect(one.isDisposed).to.be(true);
+        expect(two.isDisposed).to.be(false);
+        two.dispose();
       });
 
-      it('should prompt if the only other widget has a readonly factory', done => {
+      it('should prompt if the only other widget has a readonly factory', async () => {
+        // Populate the model with content.
         context.model.fromString('foo');
-        let widget0 = manager.createWidget(widgetFactory, context);
-        let widget1 = manager.createWidget(readOnlyFactory, context);
-        manager.onClose(widget1).then(() => {
-          expect(widget1.isDisposed).to.be(true);
-          widget0.dispose();
-          done();
-        });
-        acceptDialog();
+
+        const writable = manager.createWidget(widgetFactory, context);
+        const readonly = manager.createWidget(readOnlyFactory, context);
+        const closed = manager.onClose(writable);
+
+        await acceptDialog();
+        await closed;
+
+        expect(writable.isDisposed).to.be(true);
+        expect(readonly.isDisposed).to.be(false);
+        readonly.dispose();
       });
 
       it('should close the widget', done => {

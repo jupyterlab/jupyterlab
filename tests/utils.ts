@@ -124,7 +124,7 @@ export function waitForDialog(
     const limit = Math.floor((timeout || 250) / interval);
     const seek = () => {
       if (++counter === limit) {
-        reject(undefined);
+        reject(new Error('Dialog not found'));
         return;
       }
 
