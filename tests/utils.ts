@@ -115,23 +115,25 @@ export async function createNotebookContext(
  * Wait for a dialog to be attached to an element.
  */
 export function waitForDialog(
-  host: HTMLElement = document.body
+  host?: HTMLElement,
+  timeout?: number
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let counter = 0;
-    const limit = 10;
+    const interval = 25;
+    const limit = Math.floor((timeout || 250) / interval);
     const seek = () => {
       if (++counter === limit) {
         reject(undefined);
         return;
       }
 
-      if (host.getElementsByClassName('jp-Dialog')[0]) {
+      if ((host || document.body).getElementsByClassName('jp-Dialog')[0]) {
         resolve(undefined);
         return;
       }
 
-      setTimeout(seek, 25);
+      setTimeout(seek, interval);
     };
 
     seek();
@@ -141,8 +143,12 @@ export function waitForDialog(
 /**
  * Accept a dialog after it is attached by accepting the default button.
  */
-export function acceptDialog(host: HTMLElement = document.body): Promise<void> {
-  return waitForDialog(host).then(() => {
+export function acceptDialog(
+  host?: HTMLElement,
+  timeout?: number
+): Promise<void> {
+  host = host || document.body;
+  return waitForDialog(host, timeout).then(() => {
     const node = host.getElementsByClassName('jp-Dialog')[0];
 
     if (node) {
@@ -158,9 +164,11 @@ export function acceptDialog(host: HTMLElement = document.body): Promise<void> {
  * This promise will always resolve successfully.
  */
 export function dismissDialog(
-  host: HTMLElement = document.body
+  host?: HTMLElement,
+  timeout?: number
 ): Promise<void> {
-  return waitForDialog(host)
+  host = host || document.body;
+  return waitForDialog(host, timeout)
     .then(() => {
       const node = host.getElementsByClassName('jp-Dialog')[0];
 
