@@ -3,7 +3,7 @@
 
 import expect = require('expect.js');
 
-import { Session, SessionManager } from '@jupyterlab/services';
+import { SessionManager } from '@jupyterlab/services';
 
 import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
@@ -16,9 +16,7 @@ describe('@jupyterlab/apputils', () => {
     const manager = new SessionManager();
     let session: ClientSession;
 
-    before(() => {
-      return manager.ready;
-    });
+    before(() => manager.ready);
 
     beforeEach(() => {
       session = new ClientSession({
@@ -27,10 +25,9 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    afterEach(() => {
-      return session.shutdown().then(() => {
-        session.dispose();
-      });
+    afterEach(async () => {
+      await session.shutdown();
+      session.dispose();
     });
 
     describe('#constructor()', () => {
@@ -40,127 +37,113 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#terminated', () => {
-      it('should be emitted when the session is terminated', done => {
-        session
-          .initialize()
-          .then(() => {
-            session.terminated.connect((sender, args) => {
-              expect(sender).to.be(session);
-              expect(args).to.be(undefined);
-              done();
-            });
-            return session.shutdown();
-          })
-          .catch(done);
+      it('should be emitted when the session is terminated', async () => {
+        await session.initialize();
+        session.terminated.connect((sender, args) => {
+          expect(sender).to.be(session);
+          expect(args).to.be(undefined);
+        });
+        await session.shutdown();
       });
     });
 
     describe('#kernelChanged', () => {
-      it('should be emitted when the kernel changes', done => {
-        session.kernelChanged.connect((sender, args) => {
+      it('should be emitted when the kernel changes', async () => {
+        session.kernelChanged.connect((sender, { oldValue, newValue }) => {
           expect(sender).to.be(session);
-          expect(args).to.eql({ oldValue: null, newValue: sender.kernel });
-          done();
+          expect(oldValue).to.be(null);
+          expect(newValue).to.be(session.kernel);
         });
-        session.initialize().catch(done);
+        await session.initialize();
       });
     });
 
     describe('#statusChanged', () => {
-      it('should be emitted when the status changes', done => {
+      it('should be emitted when the status changes', async () => {
         session.statusChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(typeof args).to.be('string');
-          done();
         });
-        session.initialize().catch(done);
+        await session.initialize();
       });
     });
 
     describe('#iopubMessage', () => {
-      it('should be emitted for iopub kernel messages', done => {
+      it('should be emitted for iopub kernel messages', async () => {
         session.iopubMessage.connect((sender, args) => {
           expect(sender).to.be(session);
-          done();
         });
-        session.initialize().catch(done);
+        await session.initialize();
       });
     });
 
     describe('#propertyChanged', () => {
-      it('should be emitted when a session path changes', done => {
+      it('should be emitted when a session path changes', async () => {
         session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('path');
-          done();
         });
-        session.setPath('foo').catch(done);
+        await session.setPath('foo');
       });
 
-      it('should be emitted when a session name changes', done => {
+      it('should be emitted when a session name changes', async () => {
         session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('name');
-          done();
         });
-        session.setName('foo').catch(done);
+        await session.setName('foo');
       });
 
-      it('should be emitted when a session type changes', done => {
+      it('should be emitted when a session type changes', async () => {
         session.kernelPreference = { canStart: false };
         session.propertyChanged.connect((sender, args) => {
           expect(sender).to.be(session);
           expect(args).to.be('type');
-          done();
         });
-        session.setType('foo').catch(done);
+        await session.setType('foo');
       });
     });
 
     describe('#kernel', () => {
-      it('should be the current kernel of the the session', () => {
+      it('should be the current kernel of the the session', async () => {
         expect(session.kernel).to.be(null);
-        return session.initialize().then(() => {
-          expect(session.kernel).to.be.ok();
-        });
+        await session.initialize();
+        expect(session.kernel).to.be.ok();
       });
     });
 
     describe('#path', () => {
-      it('should current path of the the session', () => {
+      it('should current path of the the session', async () => {
         session.kernelPreference = { canStart: false };
         expect(typeof session.path).to.be('string');
-        return session.setPath('foo').then(() => {
-          expect(session.path).to.be('foo');
-        });
+        await session.setPath('foo');
+        expect(session.path).to.be('foo');
       });
     });
 
     describe('#name', () => {
-      it('should the current name of the the session', () => {
+      it('should the current name of the the session', async () => {
         session.kernelPreference = { canStart: false };
         expect(typeof session.name).to.be('string');
-        return session.setName('foo').then(() => {
-          expect(session.name).to.be('foo');
-        });
+        await session.setName('foo');
+        expect(session.name).to.be('foo');
       });
     });
 
     describe('#type', () => {
-      it('should the current type of the the session', () => {
+      it('should the current type of the the session', async () => {
         session.kernelPreference = { canStart: false };
         expect(typeof session.type).to.be('string');
-        return session.setType('foo').then(() => {
-          expect(session.type).to.be('foo');
-        });
+        await session.setType('foo');
+        expect(session.type).to.be('foo');
       });
     });
 
     describe('#kernelPreference', () => {
       it('should be the kernel preference of the session', () => {
-        let preference: IClientSession.IKernelPreference = {
+        const preference: IClientSession.IKernelPreference = {
           name: 'foo',
           language: 'bar',
           id: '1234',
@@ -185,83 +168,69 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#isReady', () => {
-      it('should be false until ready', () => {
+      it('should be false until ready', async () => {
         expect(session.isReady).to.be(false);
-        return session.initialize().then(() => {
-          expect(session.isReady).to.be(true);
-        });
+        await session.initialize();
+        expect(session.isReady).to.be(true);
       });
     });
 
     describe('#initialize()', () => {
-      it('should start the default kernel', () => {
-        return session.initialize().then(() => {
-          expect(session.kernel.name).to.be(manager.specs.default);
-        });
+      it('should start the default kernel', async () => {
+        await session.initialize();
+        expect(session.kernel.name).to.be(manager.specs.default);
       });
 
-      it('should connect to an existing session on the path', () => {
-        let other: Session.ISession;
-        return manager
-          .startNew({ path: session.path })
-          .then(o => {
-            other = o;
-            return session.initialize();
-          })
-          .then(() => {
-            expect(session.kernel.id).to.be(other.kernel.id);
-            return other.dispose();
-          });
+      it('should connect to an existing session on the path', async () => {
+        const other = await manager.startNew({ path: session.path });
+
+        await session.initialize();
+        expect(other.kernel.id).to.be(session.kernel.id);
+        other.dispose();
       });
 
-      it('should connect to an existing kernel', () => {
-        let other: Session.ISession;
+      it('should connect to an existing kernel', async () => {
+        // Dispose the session so it can be re-instantiated.
         session.dispose();
-        return manager
-          .startNew({ path: UUID.uuid4() })
-          .then(o => {
-            other = o;
-            session = new ClientSession({
-              manager,
-              kernelPreference: { id: other.kernel.id }
-            });
-            return session.initialize();
-          })
-          .then(() => {
-            expect(session.kernel.id).to.be(other.kernel.id);
-            return other.dispose();
-          });
+
+        const other = await manager.startNew({ path: UUID.uuid4() });
+        const kernelPreference = { id: other.kernel.id };
+
+        session = new ClientSession({ manager, kernelPreference });
+        await session.initialize();
+        expect(session.kernel.id).to.be(other.kernel.id);
+        other.dispose();
       });
 
-      it('should present a dialog if there is no distinct kernel to start', () => {
+      it('should present a dialog if there is no distinct kernel to start', async () => {
+        // Remove the kernel preference before initializing.
         session.kernelPreference = {};
-        acceptDialog();
-        return session.initialize().then(() => {
-          expect(session.kernel.name).to.be(manager.specs.default);
-        });
+
+        const accept = acceptDialog();
+
+        await session.initialize();
+        await accept;
+        expect(session.kernel.name).to.be(manager.specs.default);
       });
 
-      it('should be a no-op if if the shouldStart kernelPreference is false', () => {
+      it('should be a no-op if if the shouldStart kernelPreference is false', async () => {
         session.kernelPreference = { shouldStart: false };
-        return session.initialize().then(() => {
-          expect(session.kernel).to.not.be.ok();
-        });
+        await session.initialize();
+        expect(session.kernel).to.not.be.ok();
       });
 
-      it('should be a no-op if if the canStart kernelPreference is false', () => {
+      it('should be a no-op if if the canStart kernelPreference is false', async () => {
         session.kernelPreference = { canStart: false };
-        return session.initialize().then(() => {
-          expect(session.kernel).to.not.be.ok();
-        });
+        await session.initialize();
+        expect(session.kernel).to.not.be.ok();
       });
     });
 
     describe('#kernelDisplayName', () => {
-      it('should be the display name of the current kernel', () => {
+      it('should be the display name of the current kernel', async () => {
         expect(session.kernelDisplayName).to.be('No Kernel!');
-        return session.initialize().then(() => {
-          expect(session.kernelDisplayName).to.not.be('No Kernel!');
-        });
+        await session.initialize();
+        expect(session.kernelDisplayName).to.not.be('No Kernel!');
       });
     });
 
@@ -283,181 +252,159 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#changeKernel()', () => {
-      it('should change the current kernel', () => {
-        let id = '';
-        let name = '';
-        return session
-          .initialize()
-          .then(() => {
-            name = session.kernel.name;
-            id = session.kernel.id;
-            return session.changeKernel({ name });
-          })
-          .then(kernel => {
-            expect(kernel.id).to.not.be(id);
-            expect(kernel.name).to.be(name);
-          });
+      it('should change the current kernel', async () => {
+        await session.initialize();
+
+        const name = session.kernel.name;
+        const id = session.kernel.id;
+        const kernel = await session.changeKernel({ name });
+
+        expect(kernel.id).to.not.be(id);
+        expect(kernel.name).to.be(name);
       });
     });
 
     describe('#selectKernel()', () => {
-      it('should select a kernel for the session', () => {
-        return session.initialize().then(() => {
-          let { id, name } = session.kernel;
-          acceptDialog();
-          return session.selectKernel().then(() => {
-            expect(session.kernel.id).to.not.be(id);
-            expect(session.kernel.name).to.be(name);
-          });
-        });
+      it('should select a kernel for the session', async () => {
+        await session.initialize();
+
+        const { id, name } = session.kernel;
+        const accept = acceptDialog();
+
+        await session.selectKernel();
+        await accept;
+
+        expect(session.kernel.id).to.not.be(id);
+        expect(session.kernel.name).to.be(name);
       });
 
-      it('should keep the existing kernel', () => {
-        return session.initialize().then(() => {
-          let { id, name } = session.kernel;
-          dismissDialog();
-          return session.selectKernel().then(() => {
-            expect(session.kernel.id).to.be(id);
-            expect(session.kernel.name).to.be(name);
-          });
-        });
+      it('should keep the existing kernel if dismissed', async () => {
+        await session.initialize();
+
+        const { id, name } = session.kernel;
+        const dismiss = dismissDialog();
+
+        await session.selectKernel();
+        await dismiss;
+
+        expect(session.kernel.id).to.be(id);
+        expect(session.kernel.name).to.be(name);
       });
     });
 
     describe('#shutdown', () => {
-      it('should kill the kernel and shut down the session', () => {
-        return session
-          .initialize()
-          .then(() => {
-            return session.shutdown();
-          })
-          .then(() => {
-            expect(session.kernel).to.be(null);
-          });
+      it('should kill the kernel and shut down the session', async () => {
+        await session.initialize();
+        expect(session.kernel).to.not.be(null);
+        await session.shutdown();
+        expect(session.kernel).to.be(null);
       });
     });
 
     describe('#restart()', () => {
-      it('should restart if the user accepts the dialog', () => {
+      it('should restart if the user accepts the dialog', async () => {
         let called = false;
-        return session
-          .initialize()
-          .then(() => {
-            acceptDialog();
-            session.statusChanged.connect((sender, args) => {
-              if (args === 'restarting') {
-                called = true;
-              }
-            });
-            return session.restart();
-          })
-          .then(restarted => {
-            expect(restarted).to.be(true);
-            expect(called).to.be(true);
-          });
+
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
+
+        const restart = session.restart();
+
+        await acceptDialog();
+        expect(await restart).to.be(true);
+        expect(called).to.be(true);
       });
 
-      it('should not restart if the user rejects the dialog', () => {
+      it('should not restart if the user rejects the dialog', async () => {
         let called = false;
-        return session
-          .initialize()
-          .then(() => {
-            dismissDialog();
-            session.statusChanged.connect((sender, args) => {
-              if (args === 'restarting') {
-                called = true;
-              }
-            });
-            return session.restart();
-          })
-          .then(restarted => {
-            expect(restarted).to.be(false);
-            expect(called).to.be(false);
-          });
+
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
+
+        const restart = session.restart();
+
+        await dismissDialog();
+        expect(await restart).to.be(false);
+        expect(called).to.be(false);
       });
 
-      it('should start the same kernel as the previously started kernel', () => {
-        return session
-          .initialize()
-          .then(() => {
-            return session.shutdown();
-          })
-          .then(() => {
-            return session.restart();
-          })
-          .then(() => {
-            expect(session.kernel).to.be.ok();
-          });
+      it('should start the same kernel as the previously started kernel', async () => {
+        await session.initialize();
+        await session.shutdown();
+        await session.restart();
+        expect(session.kernel).to.be.ok();
       });
     });
 
     describe('#setPath()', () => {
-      it('should change the session path', () => {
+      it('should change the session path', async () => {
         session.kernelPreference = { canStart: false };
-        return session.setPath('foo').then(() => {
-          expect(session.path).to.be('foo');
-        });
+        await session.setPath('foo');
+        expect(session.path).to.be('foo');
       });
     });
 
     describe('#setName', () => {
-      it('should change the session name', () => {
+      it('should change the session name', async () => {
         session.kernelPreference = { canStart: false };
-        return session.setName('foo').then(() => {
-          expect(session.name).to.be('foo');
-        });
+        await session.setName('foo');
+        expect(session.name).to.be('foo');
       });
     });
 
     describe('#setType()', () => {
-      it('should set the session type', () => {
+      it('should set the session type', async () => {
         session.kernelPreference = { canStart: false };
-        return session.setType('foo').then(() => {
-          expect(session.type).to.be('foo');
+        await session.setType('foo');
+        expect(session.type).to.be('foo');
+      });
+    });
+
+    describe('#restartKernel()', () => {
+      it('should restart if the user accepts the dialog', async () => {
+        let called = false;
+
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
         });
+
+        const restart = ClientSession.restartKernel(session.kernel);
+
+        await acceptDialog();
+        await restart;
+        expect(called).to.be(true);
+      });
+
+      it('should not restart if the user rejects the dialog', async () => {
+        let called = false;
+
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
+
+        const restart = ClientSession.restartKernel(session.kernel);
+
+        await dismissDialog();
+        await restart;
+        expect(called).to.be(false);
       });
     });
 
-    describe('.restartKernel()', () => {
-      it('should restart if the user accepts the dialog', () => {
-        let called = false;
-
-        return session
-          .initialize()
-          .then(() => {
-            session.statusChanged.connect((sender, args) => {
-              if (args === 'restarting') {
-                called = true;
-              }
-            });
-            acceptDialog();
-            return ClientSession.restartKernel(session.kernel);
-          })
-          .then(() => {
-            expect(called).to.be(true);
-          });
-      });
-
-      it('should not restart if the user rejects the dialog', () => {
-        let called = false;
-        return session
-          .initialize()
-          .then(() => {
-            session.statusChanged.connect((sender, args) => {
-              if (args === 'restarting') {
-                called = true;
-              }
-            });
-            dismissDialog();
-            return ClientSession.restartKernel(session.kernel);
-          })
-          .then(() => {
-            expect(called).to.be(false);
-          });
-      });
-    });
-
-    describe('.getDefaultKernel()', () => {
+    describe('#getDefaultKernel()', () => {
       beforeEach(() => {
         session.dispose();
       });
@@ -472,7 +419,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        let spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = manager.specs.kernelspecs[manager.specs.default];
+
         expect(
           ClientSession.getDefaultKernel({
             specs: manager.specs,
@@ -491,8 +439,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        let spec = manager.specs.kernelspecs[manager.specs.default];
-        let kernelspecs: any = {};
+        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const kernelspecs: any = {};
+
         kernelspecs[spec.name] = spec;
         expect(
           ClientSession.getDefaultKernel({
@@ -506,8 +455,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        let spec = manager.specs.kernelspecs[manager.specs.default];
-        let kernelspecs: any = {};
+        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const kernelspecs: any = {};
+
         kernelspecs['foo'] = spec;
         kernelspecs['bar'] = spec;
         expect(
@@ -522,13 +472,14 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('.populateKernelSelect()', () => {
+    describe('#populateKernelSelect()', () => {
       beforeEach(() => {
         session.dispose();
       });
 
       it('should populate the select div', () => {
-        let div = document.createElement('select');
+        const div = document.createElement('select');
+
         ClientSession.populateKernelSelect(div, {
           specs: manager.specs,
           preference: {}
@@ -538,7 +489,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should select the null option', () => {
-        let div = document.createElement('select');
+        const div = document.createElement('select');
+
         ClientSession.populateKernelSelect(div, {
           specs: manager.specs,
           preference: { shouldStart: false }
@@ -548,7 +500,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should disable the node', () => {
-        let div = document.createElement('select');
+        const div = document.createElement('select');
+
         ClientSession.populateKernelSelect(div, {
           specs: manager.specs,
           preference: { canStart: false }
