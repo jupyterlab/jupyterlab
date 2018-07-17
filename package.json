@@ -34,7 +34,7 @@
     "postinstall": "node scripts/ensure-buildutils.js",
     "integrity": "node buildutils/lib/ensure-repo.js",
     "lint": "pretter && eslint && tslint",
-    "lint:check": "pretter:check && eslint:check && tslint:check",
+    "lint:check": "prettier:check && eslint:check && tslint:check",
     "patch:release": "node buildutils/lib/patch-release.js",
     "publish": "jlpm run clean:slate && jlpm run build:packages && jlpm integrity && lerna publish --force-publish=* -m \"Publish\"",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
