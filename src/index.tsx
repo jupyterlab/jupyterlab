@@ -61,22 +61,19 @@ const plugin: JupyterLabPlugin<void> = {
     menu: IMainMenu
   ): void => {
   
-    let commandlist = new Array<string>();
     /** Load keyboard shortcut settings from registry and create list of command id's */
     settingRegistry.load('@jupyterlab/shortcuts-extension:plugin')
-      .then(settings => Object.keys(settings.composite).forEach(key => {
-        commandlist.push(key); 
-      }))
+      .then(settings => Object.keys(settings.composite))
       /** Create top-level component and associated widget */
-      .then(() => {
-        let shortcutUI = React.createElement(ShortcutUI, 
+      .then(commandlist => {
+        const shortcutUI = React.createElement(ShortcutUI, 
           {
             commandList: commandlist, 
             settingRegistry: settingRegistry, 
             shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
             commandRegistry: app.commands
           });
-        let widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
+        const widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
         widget.id = 'jupyterlab-shortcutui';
         widget.title.label = 'Keyboard Shortcut Editor';
         widget.title.closable = true;

@@ -48,14 +48,14 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   /** Get array of keys from user input */
   keysFromValue = (value) => {
-    let keys: string[] = value.split(',')
+    const keys: string[] = value.split(',')
     return keys
   }
 
   /** Parse user input for chained shortcuts */
   parseChaining = (event: any, value: string, userInput: string) : string => {
     event.preventDefault()
-    let wordKeys = 
+    const wordKeys = 
     [
       'Tab', 
       'Shift', 
@@ -81,7 +81,7 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
         } 
       )
     } else if (event.key !== 'CapsLock') {
-      let lastKey = (userInput.substr(userInput.lastIndexOf(' ') + 1, userInput.length)).trim()
+      const lastKey = (userInput.substr(userInput.lastIndexOf(' ') + 1, userInput.length)).trim()
       if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = (userInput + ',');
         if (event.ctrlKey && event.key != 'Control') {
@@ -132,11 +132,11 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
    * */
   checkNonFunctional = (shortcut: string) : boolean =>
   {
-    let dontEnd = ['Ctrl','Alt','Accel','Shift']
-    let shortcutKeys = shortcut.split(', ')
-    let last = shortcutKeys[shortcutKeys.length-1]
-    this.setState({isFunctional: !(dontEnd.includes(last) || shortcut==='')})
-    return (dontEnd.includes(last) || shortcut==='')
+    const dontEnd = ['Ctrl','Alt','Accel','Shift']
+    const shortcutKeys = shortcut.split(', ')
+    const last = shortcutKeys[shortcutKeys.length-1]
+    this.setState({isFunctional: !(dontEnd.includes(last) || shortcut === '')})
+    return (dontEnd.includes(last) || shortcut === '')
   }
 
   /** Check if shortcut being typed is already taken */
@@ -175,12 +175,8 @@ export class ShortcutInput extends React.Component<IShortcutInputProps, IShortcu
 
   /** Parse and normalize user input */
   handleInput = (event: any) : void => {
-    let value = this.state.value
-    let userInput = this.state.userInput
-
-    userInput = this.parseChaining(event, value, userInput)
-
-    value = this.props.toSymbols(userInput)
+    const userInput = this.parseChaining(event, this.state.value, this.state.userInput)
+    const value = this.props.toSymbols(userInput)
     let keys = this.keysFromValue(userInput)
     let takenBy = this.checkShortcutAvailability(userInput, keys)
     this.checkConflict(takenBy)

@@ -51,11 +51,8 @@ export interface IShortcutItemState {
 
 /** React component for each command shortcut item */
 export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutItemState> {
-  constructor(props) {
-    super(props)
-    this.state = {
-      displayInput: false
-    }
+  state = {
+    displayInput: false
   }
   
   /** Toggle display state of input box */
@@ -69,8 +66,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
   
   /** Transform special key names into unicode characters */
   toSymbols = (value: string): string => {
-    let display: string[] = new Array<string>()
-    let wordKeys = 
+    const wordKeys = 
       [
         'Tab', 
         'Enter', 
@@ -80,25 +76,41 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
         'ArrowLeft', 
         'Escape'
       ]
-    for (let key of value.split(' ')) {
+    // const display = value.split(' ').map(key => {
+    //   if (key === 'Ctrl') {
+    //     return '⌃'
+    //   } else if (key === 'Accel') {
+    //     return '⌘'
+    //   } else if (key === 'Shift') {
+    //     return '⇧'
+    //   } else if (key === 'Alt') {
+    //     return '⌥'
+    //   } else if (wordKeys.includes(key)) {
+    //     return key
+    //   } else {
+    //     return key.toUpperCase()
+    //   }
+    // })
+    // return display.join(' ')
+    return value.split(' ').reduce((result, key) => {
       if (key === 'Ctrl') {
-        display.push('⌃')
+        return result + '⌃'
       } else if (key === 'Accel') {
-        display.push('⌘')
+        return result + '⌘'
       } else if (key === 'Shift') {
-        display.push('⇧')
+        return result + '⇧'
       } else if (key === 'Alt') {
-        display.push('⌥')
+        return result + '⌥'
       } else if (wordKeys.includes(key)) {
-        display.push(key)
+        return result + key
       } else {
-        display.push(key.toUpperCase())
+        return result + key.toUpperCase()
       }
-    }
-    return display.join(' ')
+    }, '')
   }
 
   render() {
+    const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(key => this.props.shortcut.keys[key][0] !== '')
     return (
       <div 
       className={this.props.shortcut.hasConflict ? classes(RowStyle, ConflictRowStyle) : RowStyle}>
@@ -111,9 +123,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
         <div className={CellStyle}>
           <div className={ShortcutCellStyle}>
             {/** Create shortcut boxes and delete buttons for each shortcut */}
-            {Object.keys(this.props.shortcut.keys).filter(key => 
-              this.props.shortcut.keys[key][0] !== '')
-              .map((key, index) => 
+            {nonEmptyKeys.map((key, index) => 
                 <div className={ShortcutContainerStyle} key={key + '_' + index}>
                   {this.props.shortcut.keys[key]
                     .map((keyBinding, index) =>  
@@ -137,8 +147,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
                     toSymbols={this.toSymbols}
                     index={index}
                   />
-                  {(index === 0 && Object.keys(this.props.shortcut.keys).filter(key => 
-                    this.props.shortcut.keys[key][0] !== '').length > 1) 
+                  {(index === 0 && nonEmptyKeys.length > 1) 
                       ? <div className={OrStyle}>or</div> 
                       : null
                   }
@@ -147,9 +156,7 @@ export class ShortcutItem extends React.Component<IShortcutItemProps, IShortcutI
             }
 
             {/** Add a plus for adding new shortcuts if there are less than two set */}
-            {Object.keys(this.props.shortcut.keys).filter(key => 
-              this.props.shortcut.keys[key][0] !== '')
-              .length < 2 &&
+            {nonEmptyKeys.length < 2 &&
               <span 
                 className={(!this.state.displayInput) 
                   ? PlusStyle

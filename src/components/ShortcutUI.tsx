@@ -56,13 +56,13 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   state = {
-    shortcutList: undefined,
-    filteredShortcutList: undefined,
+    shortcutList: {},
+    filteredShortcutList: [],
     shortcutsFetched: false,
     searchQuery: '',
     showSelectors: false,
     currentSort: 'category',
-    keyBindingsUsed: undefined
+    keyBindingsUsed: null
   }
 
   /** Fetch shortcut list on mount */
@@ -72,7 +72,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Flag all user-set shortcuts as custom */
   private async _getShortcutSource(shortcutObjects: Object) : Promise<void> {
-    let customShortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    const customShortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
     Object.keys(customShortcuts.user).forEach(key => {
       shortcutObjects[customShortcuts.user[key]['command'] 
       + "_" + customShortcuts.user[key]['selector']].source = 'Custom'
@@ -80,8 +80,8 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   }
 
   /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
-  private _getShortcutObjects(shortcuts: Object) : Object {
-    shortcuts = shortcuts['composite']
+  private _getShortcutObjects(shortcutsObj: Object) : Object {
+    const shortcuts = shortcutsObj['composite']
     let shortcutObjects = {}
     Object.keys(shortcuts).forEach(shortcutKey => {
       let key = shortcuts[shortcutKey]['command'] 
@@ -122,10 +122,9 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Fetch shortcut list from SettingRegistry  */
   private async _getShortcutList() : Promise<void> {
-    let shortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
-    let shortcutObjects = this._getShortcutObjects(shortcuts)
+    const shortcuts = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    const shortcutObjects = this._getShortcutObjects(shortcuts)
     await this._getShortcutSource(shortcutObjects)
-
     this.setState(
       {
         shortcutList: shortcutObjects,
@@ -157,31 +156,30 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Filter shortcut list using current search query */
   private searchFilterShortcuts(shortcutObjects: Object) : Object[] {
-    let filteredShortcuts = this.matchItems(shortcutObjects, this.state.searchQuery)
+    const filteredShortcuts = this.matchItems(shortcutObjects, this.state.searchQuery)
     .map(item => {return item.item})
     return filteredShortcuts
   }
 
   /** Reset all shortcuts to their defaults */
   resetShortcuts = async () => {
-    let settings = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
-    for (const key of Object.keys(settings.user)) {
+    const settings = await this.props.settingRegistry.reload(this.props.shortcutPlugin)
+    Object.keys(settings.user).forEach(async key => {
       await this.props.settingRegistry.remove(this.props.shortcutPlugin, key)
-    }
+    })
     this._getShortcutList()
   }
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
     if (keys[0] !== '') {
-      let commandId: string;
-      commandId = shortcutObject.id
-      if(shortcutObject.numberOfShortcuts === 1) {
+      let commandId = shortcutObject.id;
+      if (shortcutObject.numberOfShortcuts === 1) {
         commandId = commandId + '-' + '2'
       }
       else {
         Object.keys(shortcutObject.keys).forEach(key => {
-          if(shortcutObject.keys[key][0] === '') {
+          if (shortcutObject.keys[key][0] === '') {
             commandId = key
           }
         });
@@ -218,7 +216,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Reset a specific shortcut to its default settings */
   resetShortcut = async (shortcutObject: ShortcutObject) => {
-    if(Object.keys(shortcutObject.keys).length > 1) {
+    if (Object.keys(shortcutObject.keys).length > 1) {
       await this.props.settingRegistry
       .remove(this.props.shortcutPlugin, Object.keys(shortcutObject.keys)[1])
     }
@@ -230,21 +228,21 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
   /** Perform a fuzzy search on a single command item. */
   private fuzzySearch(item: any, query: string): any | null {
     // Create the source text to be searched.
-    let category = item.category.toLowerCase();
-    let label = item['label'].toLowerCase();
-    let source = `${category} ${label}`;
+    const category = item.category.toLowerCase();
+    const label = item['label'].toLowerCase();
+    const source = `${category} ${label}`;
 
     // Set up the match score and indices array.
     let score = Infinity;
     let indices: number[] | null = null;
 
     // The regex for search word boundaries
-    let rgx = /\b\w/g;
+    const rgx = /\b\w/g;
 
     // Search the source by word boundary.
     while (true) {
       // Find the next word boundary in the source.
-      let rgxMatch = rgx.exec(source);
+      const rgxMatch = rgx.exec(source);
 
       // Break if there is no more source context.
       if (!rgxMatch) {
@@ -252,7 +250,7 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
       }
 
       // Run the string match on the relevant substring.
-      let match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
+      const match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
 
       // Break if there is no match.
       if (!match) {
@@ -272,14 +270,14 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
     }
 
     // Compute the pivot index between category and label text.
-    let pivot = category.length + 1;
+    const pivot = category.length + 1;
 
     // Find the slice index to separate matched indices.
-    let j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
+    const j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
 
     // Extract the matched category and label indices.
-    let categoryIndices = indices.slice(0, j);
-    let labelIndices = indices.slice(j);
+    const categoryIndices = indices.slice(0, j);
+    const labelIndices = indices.slice(j);
 
     // Adjust the label indices for the pivot offset.
     for (let i = 0, n = labelIndices.length; i < n; ++i) {
@@ -371,22 +369,22 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Set the current list sort order */
   updateSort = (value: string) : void => {
-    if(value !== this.state.currentSort) {
+    if (value !== this.state.currentSort) {
       this.setState({currentSort: value}, this.sortShortcuts)
     }
   }
 
   /** Sort shortcut list using current sort property  */
   sortShortcuts() : void {
-    let shortcuts = this.state.filteredShortcutList
+    const shortcuts = this.state.filteredShortcutList
     let filterCritera = this.state.currentSort
-    if(filterCritera === 'command') {
+    if (filterCritera === 'command') {
       filterCritera = 'label'
     }
     shortcuts.sort((a, b) => {
-      let compareA = a[filterCritera]
-      let compareB = b[filterCritera]
-      if(compareA < compareB) {
+      const compareA = a[filterCritera]
+      const compareB = b[filterCritera]
+      if (compareA < compareB) {
         return -1
       } else if(compareA > compareB) {
         return 1
@@ -399,16 +397,16 @@ export class ShortcutUI extends React.Component<IShortcutUIProps, IShortcutUISta
 
   /** Sort shortcut list so that the conflicting shortcut is right below the one currently being set */
   sortConflict = (newShortcut: ShortcutObject, oldShortcut: ShortcutObject): void => {
-    let shortcutList = this.state.filteredShortcutList
-    oldShortcut.hasConflict = true
-    shortcutList = shortcutList.filter(shortcut => shortcut.id !== oldShortcut.id)
-    shortcutList.splice(shortcutList.indexOf(newShortcut) + 1, 0, oldShortcut)
-    this.setState({filteredShortcutList: shortcutList})
-  }
+    const shortcutList = this.state.filteredShortcutList
+      .filter(shortcut => shortcut.id !== oldShortcut.id)
+      .splice(this.state.filteredShortcutList.indexOf(newShortcut) + 1, 0, oldShortcut);
+    oldShortcut.hasConflict = true;
+    this.setState({ filteredShortcutList: shortcutList });
+  };
 
   /** Remove conflict flag from all shortcuts */
   clearConflicts = () : void => {
-    let shortcutList = this.state.filteredShortcutList
+    const shortcutList = this.state.filteredShortcutList
     shortcutList.forEach(shortcut => {
       shortcut.hasConflict = false
     });
