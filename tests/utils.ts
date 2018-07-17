@@ -42,14 +42,6 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
   });
 }
 
-export function moment<T>(value?: T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    requestAnimationFrame(() => {
-      resolve(value);
-    });
-  });
-}
-
 /**
  * Get a copy of the default rendermime instance.
  */
@@ -60,22 +52,22 @@ export function defaultRenderMime(): RenderMimeRegistry {
 /**
  * Create a client session object.
  */
-export function createClientSession(
+export async function createClientSession(
   options: Partial<ClientSession.IOptions> = {}
 ): Promise<ClientSession> {
-  let manager = options.manager || Private.manager.sessions;
-  return manager.ready.then(() => {
-    return new ClientSession({
-      manager,
-      path: options.path || UUID.uuid4(),
-      name: options.name,
-      type: options.type,
-      kernelPreference: options.kernelPreference || {
-        shouldStart: true,
-        canStart: true,
-        name: manager.specs.default
-      }
-    });
+  const manager = options.manager || Private.manager.sessions;
+
+  await manager.ready;
+  return new ClientSession({
+    manager,
+    path: options.path || UUID.uuid4(),
+    name: options.name,
+    type: options.type,
+    kernelPreference: options.kernelPreference || {
+      shouldStart: true,
+      canStart: true,
+      name: manager.specs.default
+    }
   });
 }
 
@@ -86,9 +78,11 @@ export function createFileContext(
   path?: string,
   manager?: ServiceManager.IManager
 ): Context<DocumentRegistry.IModel> {
+  const factory = Private.textFactory;
+
   manager = manager || Private.manager;
-  let factory = Private.textFactory;
   path = path || UUID.uuid4() + '.txt';
+
   return new Context({ manager, factory, path });
 }
 
@@ -99,10 +93,12 @@ export async function createNotebookContext(
   path?: string,
   manager?: ServiceManager.IManager
 ): Promise<Context<INotebookModel>> {
-  manager = manager || Private.manager;
-  await manager.ready;
   const factory = Private.notebookFactory;
+
+  manager = manager || Private.manager;
   path = path || UUID.uuid4() + '.ipynb';
+  await manager.ready;
+
   return new Context({
     manager,
     factory,
@@ -143,18 +139,18 @@ export function waitForDialog(
 /**
  * Accept a dialog after it is attached by accepting the default button.
  */
-export function acceptDialog(
+export async function acceptDialog(
   host?: HTMLElement,
   timeout?: number
 ): Promise<void> {
   host = host || document.body;
-  return waitForDialog(host, timeout).then(() => {
-    const node = host.getElementsByClassName('jp-Dialog')[0];
+  await waitForDialog(host, timeout);
 
-    if (node) {
-      simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
-    }
-  });
+  const node = host.getElementsByClassName('jp-Dialog')[0];
+
+  if (node) {
+    simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
+  }
 }
 
 /**
@@ -163,20 +159,23 @@ export function acceptDialog(
  * #### Notes
  * This promise will always resolve successfully.
  */
-export function dismissDialog(
+export async function dismissDialog(
   host?: HTMLElement,
   timeout?: number
 ): Promise<void> {
   host = host || document.body;
-  return waitForDialog(host, timeout)
-    .then(() => {
-      const node = host.getElementsByClassName('jp-Dialog')[0];
 
-      if (node) {
-        simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-      }
-    })
-    .catch(() => undefined);
+  try {
+    await waitForDialog(host, timeout);
+  } catch (error) {
+    return; // Ignore calls to dismiss the dialog if there is no dialog.
+  }
+
+  const node = host.getElementsByClassName('jp-Dialog')[0];
+
+  if (node) {
+    simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+  }
 }
 
 /**

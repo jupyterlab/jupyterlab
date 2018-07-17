@@ -175,11 +175,11 @@ describe('docregistry/context', () => {
     });
 
     describe('#contentsModel', () => {
-      it('should be `null` before poulation', () => {
+      it('should be `null` before population', () => {
         expect(context.contentsModel).to.be(null);
       });
 
-      it('should be set after poulation', async () => {
+      it('should be set after population', async () => {
         const { path } = context;
 
         context.initialize(true);

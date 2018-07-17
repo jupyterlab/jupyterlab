@@ -22,7 +22,7 @@ import {
 
 import { createNotebookPanel, populateNotebook } from '../../notebook-utils';
 
-import { createNotebookContext, moment } from '../../utils';
+import { createNotebookContext, sleep } from '../../utils';
 
 class LogTool extends CellTools.Tool {
   methods: string[] = [];
@@ -108,7 +108,7 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
       // Give the posted messages a chance to be handled.
-      await moment();
+      await sleep();
     });
 
     afterEach(() => {

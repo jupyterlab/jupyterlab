@@ -15,7 +15,7 @@ import { ModelDB } from '@jupyterlab/observables';
 
 import { DEFAULT_CONTENT } from '../../notebook-utils';
 
-import { moment } from '../../utils';
+import { sleep } from '../../utils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
@@ -151,7 +151,7 @@ describe('@jupyterlab/notebook', () => {
         it('should add a new code cell when cells are cleared', async () => {
           let model = new NotebookModel();
           model.cells.clear();
-          await moment();
+          await sleep();
           expect(model.cells.length).to.be(1);
           expect(model.cells.get(0)).to.be.a(CodeCellModel);
         });
