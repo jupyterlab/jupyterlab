@@ -149,9 +149,20 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
+  let title = entry.name;
+  if (Private.isJupyterOrg(entry.name)) {
+    flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
+    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
   return (
-    <li className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}>
-      <div className="jp-extensionmanager-entry-name">{entry.name}</div>
+    <li
+      className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
+      title={title}
+    >
+      <div className="jp-extensionmanager-entry-title">
+        <div className="jp-extensionmanager-entry-name">{entry.name}</div>
+        <div className="jp-extensionmanager-entry-jupyter-org" />
+      </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">
           {entry.description}
@@ -508,5 +519,29 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _toggleFocused(): void {
     let focused = document.activeElement === this.inputNode;
     this.toggleClass('p-mod-focused', focused);
+  }
+}
+
+/**
+ * A namespace for private functions.
+ */
+namespace Private {
+  /**
+   * A list of whitelisted NPM orgs.
+   */
+  const whitelist = ['jupyterlab', 'jupyter-widgets'];
+
+  /**
+   * Check whether the org is a Jupyter one.
+   */
+  export function isJupyterOrg(name: string): boolean {
+    const parts = name.split('/');
+    const first = parts[0];
+    return (
+      parts.length > 1 && // Has a first part
+      first && // with a finite length
+      first[0] === '@' && // corresponding to an org name
+      whitelist.indexOf(first.slice(1)) !== -1 // in the org whitelist.
+    );
   }
 }
