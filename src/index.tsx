@@ -8,10 +8,6 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ShortcutUI } from './components/ShortcutUI';
 
-// import {
-//   ResizeMessage
-// } from '@phosphor/widgets'
-
 import * as React from 'react';
 
 import '../style/index.css';
@@ -61,6 +57,7 @@ const plugin: JupyterLabPlugin<void> = {
           shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
           commandRegistry: app.commands
         });
+
         const widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
         widget.id = 'jupyterlab-shortcutui';
         widget.title.label = 'Keyboard Shortcut Editor';
@@ -90,6 +87,8 @@ const plugin: JupyterLabPlugin<void> = {
 
         /** Add command to help menu */
         menu.helpMenu.addGroup([{ command: command }], 7);
+
+
       });
   },
   autoStart: true

@@ -7,7 +7,6 @@ export const TopStyle = style({
 export const TopNavStyle = style({
   display: 'flex',
   fontSize: 'var(--jp-ui-font-size2)',
-  position: 'fixed',
   backgroundColor: 'var(--jp-layout-color0)',
   width: '96%',
   zIndex: 1,
@@ -101,11 +100,10 @@ export const AdvancedOptionsLinkRightStyle = style({
 export const HeaderRowStyle = style({
   fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
   fontSize: 'var(--jp-ui-font-size2)',
-  position: 'fixed',
   backgroundColor: 'var(--jp-layout-color0)',
-  width: '94%',
+  width: '100%',
   zIndex: 1,
   display: 'table',
-  marginTop: '85px',
-  minWidth: '1000px'
+  minWidth: '1000px',
+  padding: '10px 0'
 });
