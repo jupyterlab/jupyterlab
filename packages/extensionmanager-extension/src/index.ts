@@ -8,6 +8,8 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { ExtensionView } from '@jupyterlab/extensionmanager';
@@ -55,9 +57,14 @@ const plugin: JupyterLabPlugin<void> = {
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
     app.restored.then(() => {
-      settings.changed.connect(() => {
+      settings.changed.connect(async () => {
         enabled = settings.composite['enabled'] === true;
         if (enabled && !view.isAttached) {
+          const accepted = await Private.showWarning();
+          if (!accepted) {
+            settings.set('enabled', false);
+            return;
+          }
           shell.addToLeftArea(view);
         } else if (!enabled && view.isAttached) {
           view.close();
@@ -107,3 +114,33 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
  * Export the plugin as the default.
  */
 export default plugin;
+
+/**
+ * A namespace for module-private functions.
+ */
+namespace Private {
+  /**
+   * Show a warning dialog about extension security.
+   *
+   * @returns whether the user accepted the dialog.
+   */
+  export async function showWarning(): Promise<boolean> {
+    return showDialog({
+      title: 'Enable Extension Manager?',
+      body:
+        "Thanks for trying out JupyterLab's extension manager. " +
+        'The JupyterLab development team is excited to have a robust ' +
+        'third-party extension community. ' +
+        'However, we cannot vouch for every extension, ' +
+        'and some may introduce security risks. ' +
+        'Do you want to continue?',
+      buttons: [Dialog.cancelButton(), Dialog.okButton()]
+    }).then(result => {
+      if (result.button.accept) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+}
