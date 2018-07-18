@@ -22,6 +22,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
+import { IStatusContext } from '../contexts';
 
 namespace LineColComponent {
     export interface IProps {
@@ -81,7 +82,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     }
 
     private _onNotebookChange = (tracker: INotebookTracker) => {
-        this.model!.editor = tracker.activeCell.editor;
+        this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };
 
     private _onActiveCellChange = (
@@ -201,9 +202,9 @@ namespace LineCol {
 
         private _stateChanged: Signal<this, void> = new Signal(this);
         private _isDisposed: boolean = false;
-        private _line: number;
-        private _column: number;
-        private _editor: CodeEditor.IEditor | null;
+        private _line: number = 0;
+        private _column: number = 0;
+        private _editor: CodeEditor.IEditor | null = null;
     }
 
     export interface IOptions {
@@ -248,7 +249,11 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
 
         defaultsManager.addDefaultStatus('line-col-item', item, {
             align: 'right',
-            priority: 2
+            priority: 2,
+            isActive: IStatusContext.delegateActive(app.shell, [
+                { tracker: notebookTracker },
+                { tracker: editorTracker }
+            ])
         });
 
         return item;
