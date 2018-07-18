@@ -23,29 +23,21 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 
-namespace LineColComponent {
+namespace TabSpaceComponent {
     export interface IProps {
-        line: number;
-        column: number;
+        tabSpace: number;
     }
 }
 
 // tslint:disable-next-line:variable-name
-const LineColComponent = (
-    props: LineColComponent.IProps
-): React.ReactElement<LineColComponent.IProps> => {
-    return (
-        <div alt-text="Line-Column">
-            {' '}
-            <TextItem
-                source={'Ln ' + props.line + ', Col ' + props.column}
-            />{' '}
-        </div>
-    );
+const TabSpaceComponent = (
+    props: TabSpaceComponent.IProps
+): React.ReactElement<TabSpaceComponent.IProps> => {
+    return <TextItem source={'Spaces: ' + props.tabSpace} />;
 };
 
-class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
-    constructor(opts: LineCol.IOptions) {
+class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
+    constructor(opts: TabSpace.IOptions) {
         super();
 
         this._notebookTracker = opts.notebookTracker;
@@ -62,21 +54,16 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
-        this.model = new LineCol.Model(
+        this.model = new TabSpace.Model(
             this._getFocusedEditor(this._shell.currentWidget)
         );
     }
 
-    protected render(): React.ReactElement<LineColComponent.IProps> | null {
+    protected render(): React.ReactElement<TabSpaceComponent.IProps> | null {
         if (this.model === null) {
             return null;
         } else {
-            return (
-                <LineColComponent
-                    line={this.model.line}
-                    column={this.model.column}
-                />
-            );
+            return <TabSpaceComponent tabSpace={this.model.tabSpace} />;
         }
     }
 
@@ -134,8 +121,8 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     private _shell: ApplicationShell;
 }
 
-namespace LineCol {
-    export class Model implements VDomRenderer.IModel, ILineCol.IModel {
+namespace TabSpace {
+    export class Model implements VDomRenderer.IModel, ITabSpace.IModel {
         constructor(editor: CodeEditor.IEditor | null) {
             this.editor = editor;
         }
@@ -152,27 +139,22 @@ namespace LineCol {
             this._editor = editor;
 
             if (this._editor === null) {
-                this._column = 0;
-                this._line = 0;
+                this._tabSpace = 4;
             } else {
                 this._editor.model.selections.changed.connect(
                     this._onSelectionChanged
                 );
 
-                const pos = this._editor.getCursorPosition();
-                this._column = pos.column;
-                this._line = pos.line;
+                this._editor.model.value.changed.connect(this._onValueChanged);
+
+                this._tabSpace = this.editor!.getOption('tabSize');
             }
 
             this._stateChanged.emit(void 0);
         }
 
-        get line(): number {
-            return this._line;
-        }
-
-        get column(): number {
-            return this._column;
+        get tabSpace() {
+            return this._tabSpace;
         }
 
         get isDisposed() {
@@ -192,17 +174,17 @@ namespace LineCol {
             selections: IObservableMap<CodeEditor.ITextSelection[]>,
             change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
         ) => {
-            let pos = this.editor!.getCursorPosition();
-            this._line = pos.line;
-            this._column = pos.column;
-
+            this._tabSpace = this.editor!.getOption('tabSize');
             this._stateChanged.emit(void 0);
         };
 
+        private _onValueChanged = () => {
+            this._tabSpace = this.editor!.getOption('tabSize');
+            this._stateChanged.emit(void 0);
+        };
         private _stateChanged: Signal<this, void> = new Signal(this);
         private _isDisposed: boolean = false;
-        private _line: number;
-        private _column: number;
+        private _tabSpace: number;
         private _editor: CodeEditor.IEditor | null;
     }
 
@@ -213,26 +195,25 @@ namespace LineCol {
     }
 }
 
-export interface ILineCol extends IDisposable {
-    readonly model: ILineCol.IModel | null;
+export interface ITabSpace extends IDisposable {
+    readonly model: ITabSpace.IModel | null;
     readonly modelChanged: ISignal<this, void>;
 }
 
-export namespace ILineCol {
+export namespace ITabSpace {
     export interface IModel {
-        readonly line: number;
-        readonly column: number;
+        readonly tabSpace: number;
         readonly editor: CodeEditor.IEditor | null;
     }
 }
 
 // tslint:disable-next-line:variable-name
-export const ILineCol = new Token<ILineCol>('jupyterlab-statusbar/ILineCol');
+export const ITabSpace = new Token<ITabSpace>('jupyterlab-statusbar/ITabSpace');
 
-export const lineColItem: JupyterLabPlugin<ILineCol> = {
-    id: 'jupyterlab-statusbar/default-items:line-col',
+export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
+    id: 'jupyterlab-statusbar/default-items:tab-space',
     autoStart: true,
-    provides: ILineCol,
+    provides: ITabSpace,
     requires: [IDefaultStatusesManager, INotebookTracker, IEditorTracker],
     activate: (
         app: JupyterLab,
@@ -240,15 +221,15 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
         notebookTracker: INotebookTracker,
         editorTracker: IEditorTracker
     ) => {
-        let item = new LineCol({
+        let item = new TabSpace({
             shell: app.shell,
             notebookTracker,
             editorTracker
         });
 
-        defaultsManager.addDefaultStatus('line-col-item', item, {
+        defaultsManager.addDefaultStatus('tab-space-item', item, {
             align: 'right',
-            priority: 2
+            priority: 1
         });
 
         return item;

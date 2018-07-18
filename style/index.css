@@ -4,7 +4,7 @@
     --jp-statusbar-margin: 8px;
 
     border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
-    background: #828282;
+    background: #757575;
     min-height: var(--jp-private-menubar-height);
     min-width: 400px;
     width: 100%;
@@ -28,7 +28,6 @@
 }
 
 .jp-status-bar-item {
-    margin: 0 var(--jp-statusbar-margin);
     max-height: 28px;
 }
 
@@ -43,6 +42,7 @@
 .kernel-item {
     background-image: url('./images/kernel-icon.svg');
 }
+
 
 .terminal-item {
     background-image: url('./images/terminal-icon.svg');

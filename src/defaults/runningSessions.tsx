@@ -30,7 +30,8 @@ const RunningSessionsComponent = (
             style={{
                 display: 'flex',
                 flexDirection: 'row',
-                alignItems: 'center'
+                alignItems: 'center',
+                marginRight: '20px'
             }}
         >
             <TextItem source={props.kernels} />

@@ -21,14 +21,34 @@ const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
     if (props.allCellsTrusted || props.activeCellTrusted) {
-        return <IconItem source={'trusted-item'} />;
+        return (
+            <div onMouseOver={props.handleClick}>
+                {' '}
+                <IconItem source={'trusted-item'} />{' '}
+            </div>
+        );
     } else {
-        return <IconItem source={'not-trusted-item'} />;
+        return (
+            <div onMouseOver={props.handleClick}>
+                {' '}
+                <IconItem source={'not-trusted-item'} />{' '}
+            </div>
+        );
     }
+};
+
+// tslint:disable-next-line:variable-name
+const NotebookTrustPopUp = () => {
+    return (
+        <div style={{ position: 'absolute', zIndex: 100 }}>
+            <label> this cell is trusted </label>
+        </div>
+    );
 };
 
 namespace NotebookTrustComponent {
     export interface IProps {
+        handleClick: () => void;
         allCellsTrusted: boolean;
         activeCellTrusted: boolean;
     }
@@ -42,6 +62,7 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         this._tracker = opts.tracker;
 
         this._tracker.currentChanged.connect(this._onNotebookChange);
+        this._handleItemClick = this._handleItemClick.bind(this);
         this.model = new NotebookTrust.Model(
             this._tracker.currentWidget && this._tracker.currentWidget.content
         );
@@ -59,20 +80,28 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
     };
 
     render() {
+        const overlay = this.model!.hover ? <NotebookTrustPopUp /> : null;
         if (this.model === null) {
             return null;
         } else {
             return (
-                <NotebookTrustComponent
-                    allCellsTrusted={
-                        this.model.trustedCells === this.model.totalCells
-                    }
-                    activeCellTrusted={this.model.activeCellTrusted}
-                />
+                <div>
+                    {overlay}
+                    <NotebookTrustComponent
+                        allCellsTrusted={
+                            this.model.trustedCells === this.model.totalCells
+                        }
+                        handleClick={this._handleItemClick}
+                        activeCellTrusted={this.model.activeCellTrusted}
+                    />
+                </div>
             );
         }
     }
 
+    _handleItemClick = () => {
+        this.model!.hover = true;
+    };
     private _tracker: INotebookTracker;
 }
 
@@ -98,6 +127,16 @@ namespace NotebookTrust {
             return this._notebook;
         }
 
+        get hover() {
+            return this._hover;
+        }
+
+        set hover(hover: boolean) {
+            this._hover = hover;
+
+            this._stateChanged.emit(void 0);
+        }
+
         set notebook(model: Notebook | null) {
             this._notebook = model;
             this._stateChanged.emit(void 0);
@@ -106,6 +145,7 @@ namespace NotebookTrust {
                 this._trustedCells = 0;
                 this._totalCells = 0;
                 this._activeCellTrusted = false;
+                this._hover = false;
             } else {
                 // Add listeners
                 this._notebook.activeCellChanged.connect(
@@ -126,7 +166,7 @@ namespace NotebookTrust {
                 const { total, trusted } = this._deriveCellTrustState(
                     this._notebook.model
                 );
-
+                this._hover = false;
                 this._totalCells = total;
                 this._trustedCells = trusted;
             }
@@ -195,6 +235,7 @@ namespace NotebookTrust {
         private _totalCells: number;
         private _activeCellTrusted: boolean;
         private _notebook: Notebook | null;
+        private _hover: boolean;
 
         private _stateChanged: Signal<this, void> = new Signal(this);
         private _isDisposed: boolean = false;
@@ -217,6 +258,7 @@ export namespace INotebookTrust {
         readonly activeCellTrusted: boolean;
 
         readonly notebook: Notebook | null;
+        readonly hover: boolean;
     }
 }
 
@@ -239,7 +281,7 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
 
         manager.addDefaultStatus('notebook-trust-item', item, {
             align: 'right',
-            priority: 1
+            priority: 3
         });
 
         return item;
