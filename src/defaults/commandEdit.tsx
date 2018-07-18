@@ -18,6 +18,7 @@ import { VDomRenderer } from '@jupyterlab/apputils';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
+import { IStatusContext } from '../contexts';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -130,8 +131,8 @@ namespace CommandEdit {
             this._stateChanged.emit(void 0);
         };
 
-        private _notebookMode: NotebookMode;
-        private _notebook: Notebook | null;
+        private _notebookMode: NotebookMode = 'command';
+        private _notebook: Notebook | null = null;
 
         private _isDisposed: boolean = false;
         private _stateChanged: Signal<this, void> = new Signal(this);
@@ -176,7 +177,8 @@ export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
 
         manager.addDefaultStatus('command-edit-item', item, {
             align: 'right',
-            priority: 4
+            priority: 4,
+            isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
         });
 
         return item;

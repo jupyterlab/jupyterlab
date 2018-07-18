@@ -18,6 +18,7 @@ import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
+import { IStatusContext } from '../contexts';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -66,16 +67,16 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 
     private _onNotebookChange = (
         _tracker: INotebookTracker,
-        panel: NotebookPanel
+        panel: NotebookPanel | null
     ) => {
-        this.model!.session = panel.session;
+        this.model!.session = panel && panel.session;
     };
 
     private _onConsoleChange = (
         _tracker: IConsoleTracker,
-        panel: ConsolePanel
+        panel: ConsolePanel | null
     ) => {
-        this.model!.session = panel.session;
+        this.model!.session = panel && panel.session;
     };
 
     private _getFocusedSession(val: Widget | null): IClientSession | null {
@@ -184,9 +185,9 @@ namespace KernelStatus {
             this._stateChanged.emit(void 0);
         };
 
-        private _kernelName: string;
-        private _kernelStatus: Kernel.Status;
-        private _session: IClientSession | null;
+        private _kernelName: string = 'unknown';
+        private _kernelStatus: Kernel.Status = 'unknown';
+        private _session: IClientSession | null = null;
 
         private _isDisposed: boolean = false;
         private _stateChanged: Signal<this, void> = new Signal(this);
@@ -235,7 +236,11 @@ export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
 
         manager.addDefaultStatus('kernel-status-item', item, {
             align: 'left',
-            priority: 0
+            priority: 0,
+            isActive: IStatusContext.delegateActive(app.shell, [
+                { tracker: notebookTracker },
+                { tracker: consoleTracker }
+            ])
         });
 
         return item;
