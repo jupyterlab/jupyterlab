@@ -7,6 +7,7 @@ import { ArrayExt, each } from '@phosphor/algorithm';
 import { IDefaultStatusesManager } from './defaults';
 import { IObservableSet } from './util/observableset';
 import { IObservableMap } from '@jupyterlab/observables';
+import { ISignal } from '@phosphor/signaling';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
@@ -14,9 +15,6 @@ export const IStatusBar = new Token<IStatusBar>(
 );
 
 export interface IStatusBar {
-    listItems(): string[];
-    hasItem(id: string): boolean;
-
     registerStatusItem(
         id: string,
         widget: Widget,
@@ -30,6 +28,8 @@ export namespace IStatusBar {
     export interface IItemOptions {
         align?: IStatusBar.Alignment;
         priority?: number;
+        isActive?: () => boolean;
+        stateChanged?: ISignal<any, void>;
     }
 }
 
@@ -82,6 +82,8 @@ export class StatusBar extends Widget implements IStatusBar {
 
             this.registerStatusItem(id, item, opts);
         });
+
+        this._host.currentChanged.connect(this._onAppShellCurrentChanged);
     }
 
     registerStatusItem(
@@ -95,11 +97,16 @@ export class StatusBar extends Widget implements IStatusBar {
 
         let align = opts.align ? opts.align : 'left';
         let priority = opts.priority !== undefined ? opts.priority : 0;
+        let isActive = opts.isActive !== undefined ? opts.isActive : () => true;
+        let stateChanged =
+            opts.stateChanged !== undefined ? opts.stateChanged : null;
 
         let wrapper = {
             widget,
             align,
-            priority
+            priority,
+            isActive,
+            stateChanged
         };
 
         let rankItem = {
@@ -110,6 +117,13 @@ export class StatusBar extends Widget implements IStatusBar {
         widget.addClass(STATUS_BAR_ITEM_CLASS);
 
         this._statusItems[id] = wrapper;
+        this._statusIds.push(id);
+
+        if (stateChanged) {
+            stateChanged.connect(() => {
+                this._onIndividualStateChange(id);
+            });
+        }
 
         if (align === 'left') {
             let insertIndex = this._findInsertIndex(
@@ -138,30 +152,6 @@ export class StatusBar extends Widget implements IStatusBar {
         } else {
             this._middlePanel.addWidget(widget);
         }
-
-        if (widget.id !== Private.convertItemId(id)) {
-            widget.id = Private.convertItemId(id);
-        }
-    }
-
-    /**
-     * List the ids of the status bar items;
-     *
-     * @returns A new array of the status bar item ids.
-     */
-    listItems(): string[] {
-        return Object.keys(this._statusItems);
-    }
-
-    /**
-     * Test whether a specific status item is present in the status bar.
-     *
-     * @param id The id of the status item of interest
-     *
-     * @returns `true` if the status item is in the status bar, `false` otherwise.
-     */
-    hasItem(id: string): boolean {
-        return id in this._statusItems;
     }
 
     /**
@@ -213,11 +203,32 @@ export class StatusBar extends Widget implements IStatusBar {
         );
     }
 
+    private _onAppShellCurrentChanged = () => {
+        this._statusIds.forEach(statusId => {
+            const { widget, isActive } = this._statusItems[statusId];
+            if (isActive()) {
+                widget.show();
+            } else {
+                widget.hide();
+            }
+        });
+    };
+
+    private _onIndividualStateChange = (statusId: string) => {
+        const { widget, isActive } = this._statusItems[statusId];
+        if (isActive()) {
+            widget.show();
+        } else {
+            widget.hide();
+        }
+    };
+
     private _leftRankItems: StatusBar.IRankItem[] = [];
     private _rightRankItems: StatusBar.IRankItem[] = [];
     private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(
         null
     );
+    private _statusIds: Array<string> = [];
 
     private _host: ApplicationShell;
     private _defaultManager: IDefaultStatusesManager;
@@ -245,11 +256,7 @@ export namespace StatusBar {
         align: IStatusBar.Alignment;
         priority: number;
         widget: Widget;
-    }
-}
-
-namespace Private {
-    export function convertItemId(itemId: string): string {
-        return `jp-${itemId}`;
+        isActive: () => boolean;
+        stateChanged: ISignal<any, void> | null;
     }
 }
