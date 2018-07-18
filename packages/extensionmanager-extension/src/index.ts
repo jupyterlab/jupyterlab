@@ -39,18 +39,7 @@ const plugin: JupyterLabPlugin<void> = {
     router: IRouter
   ) => {
     const settings = await registry.load(plugin.id);
-    const enabled = settings.composite['enabled'] === true;
-
-    // If the extension is enabled or disabled, refresh the page.
-    app.restored.then(() => {
-      settings.changed.connect(() => {
-        router.reload();
-      });
-    });
-
-    if (!enabled) {
-      return;
-    }
+    let enabled = settings.composite['enabled'] === true;
 
     const { shell, serviceManager } = app;
     const view = new ExtensionView(serviceManager);
@@ -58,7 +47,24 @@ const plugin: JupyterLabPlugin<void> = {
     view.id = 'extensionmanager.main-view';
     view.title.label = 'Extensions';
     restorer.add(view, view.id);
-    shell.addToLeftArea(view);
+
+    if (enabled) {
+      shell.addToLeftArea(view);
+    }
+
+    // If the extension is enabled or disabled,
+    // add or remove it from the left area.
+    app.restored.then(() => {
+      settings.changed.connect(() => {
+        enabled = settings.composite['enabled'] === true;
+        if (enabled && !view.isAttached) {
+          shell.addToLeftArea(view);
+        } else if (!enabled && view.isAttached) {
+          view.close();
+        }
+      });
+    });
+
     addCommands(app, view);
   }
 };
