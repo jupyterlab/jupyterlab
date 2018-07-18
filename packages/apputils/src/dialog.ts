@@ -5,7 +5,7 @@ import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
@@ -88,13 +88,7 @@ export class Dialog<T> extends Widget {
     content.addWidget(footer);
 
     this._primary = this._buttonNodes[this._defaultButton];
-
-    if (options.focusNodeSelector) {
-      let el = body.node.querySelector(options.focusNodeSelector);
-      if (el) {
-        this._primary = el as HTMLElement;
-      }
-    }
+    this._focusNodeSelector = options.focusNodeSelector;
   }
 
   /**
@@ -193,7 +187,7 @@ export class Dialog<T> extends Widget {
   }
 
   /**
-   *  A message handler invoked on a `'before-attach'` message.
+   *  A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
@@ -203,11 +197,19 @@ export class Dialog<T> extends Widget {
     document.addEventListener('focus', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
+    if (this._focusNodeSelector) {
+      let body = this.node.querySelector('.jp-Dialog-body');
+      let el = body.querySelector(this._focusNodeSelector);
+
+      if (el) {
+        this._primary = el as HTMLElement;
+      }
+    }
     this._primary.focus();
   }
 
   /**
-   *  A message handler invoked on a `'after-detach'` message.
+   *  A message handler invoked on an `'after-detach'` message.
    */
   protected onAfterDetach(msg: Message): void {
     let node = this.node;
@@ -329,6 +331,7 @@ export class Dialog<T> extends Widget {
   private _defaultButton: number;
   private _host: HTMLElement;
   private _body: Dialog.BodyType<T>;
+  private _focusNodeSelector = '';
 }
 
 /**
@@ -589,6 +592,9 @@ export namespace Dialog {
         body = value;
       } else {
         body = new ReactElementWidget(value);
+        // Immediately update the body even though it has not yet attached in
+        // order to trigger a render of the DOM nodes from the React element.
+        MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
