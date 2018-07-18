@@ -4,9 +4,17 @@ export const iconitem = style({
     backgroundRepeat: 'no-repeat',
     backgroundSize: '18px',
     backgroundPositionY: '5px',
-    minHeight: '28px',
-    minWidth: '28px',
+    minHeight: 'var(--jp-private-menubar-height)',
+    width: '20px',
     display: 'inline-block',
-    paddingRight: '5px',
-    paddingLeft: '5px'
+    alignContent: 'center',
+    marginRight: '5px',
+    marginLeft: '5px',
+    $nest: {
+        '&:hover': {
+            backgroundColor: '#000000'
+        }
+    }
 });
+
+// split into stand alone and together

@@ -9,15 +9,18 @@ import { IDefaultStatusesManager } from './manager';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IConsoleTracker } from '@jupyterlab/console';
 import { TextItem } from '../component/text';
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 export namespace FilePathComponent {
     export interface IState {
         path: string;
     }
     export interface IProps {
-        tracker: INotebookTracker;
+        notebookTracker: INotebookTracker;
+        // imageTracker: IImageTracker;
+        editorTracker: IEditorTracker;
     }
 }
 export class FilePathComponent extends React.Component<
@@ -29,14 +32,29 @@ export class FilePathComponent extends React.Component<
     };
     constructor(props: FilePathComponent.IProps) {
         super(props);
-        this.props.tracker.currentChanged.connect(this.notebookChanged);
+        this.props.notebookTracker.currentChanged.connect(this.notebookChanged);
+        // this.props.imageTracker.currentChanged.connect(this.imageChanged);
+        this.props.editorTracker.currentChanged.connect(this.textChanged);
     }
 
     notebookChanged = (tracker: INotebookTracker, panel: NotebookPanel) => {
-        this.setState({ path: panel.context.path });
-        console.log(panel.context.path);
+        if (panel) {
+            this.setState({ path: panel.context.path });
+        } else {
+            this.setState({ path: '' });
+        }
     };
 
+    textChanged = (
+        {},
+        text: IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+    ) => {
+        if (text) {
+            this.setState({ path: text.context.path });
+        } else {
+            this.setState({ path: '' });
+        }
+    };
     render() {
         return <TextItem source={this.state.path} />;
     }
@@ -45,36 +63,57 @@ export class FilePathComponent extends React.Component<
 export class FilePath extends Widget {
     constructor(opts: FilePath.IOptions) {
         super();
-        this._tracker = opts.tracker;
+        this._notebookTracker = opts.notebookTracker;
+        // this._imageTracker = opts.imageTracker;
+        this._editorTracker = opts.editorTracker;
     }
 
     onBeforeAttach() {
         ReactDOM.render(
-            <FilePathComponent tracker={this._tracker} />,
+            <FilePathComponent
+                notebookTracker={this._notebookTracker}
+                editorTracker={this._editorTracker}
+                // imageTracker={this._imageTracker}
+            />,
             this.node
         );
     }
 
-    private _tracker: INotebookTracker;
+    private _notebookTracker: INotebookTracker;
+    // private _imageTracker: IImageTracker;
+    private _editorTracker: IEditorTracker;
 }
 export const filePathItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:file-path-item',
     autoStart: true,
-    requires: [IDefaultStatusesManager, INotebookTracker, IConsoleTracker],
+    requires: [
+        IDefaultStatusesManager,
+        INotebookTracker,
+        IEditorTracker
+        // IImageTracker
+    ],
     activate: (
         app: JupyterLab,
         manager: IDefaultStatusesManager,
-        tracker: INotebookTracker
+        notebookTracker: INotebookTracker,
+        editorTracker: IEditorTracker
+        // imageTracker: IImageTracker
     ) => {
-        manager.addDefaultStatus('file-path-item', new FilePath({ tracker }), {
-            align: 'right',
-            priority: 0
-        });
+        manager.addDefaultStatus(
+            'file-path-item',
+            new FilePath({ notebookTracker, editorTracker }),
+            {
+                align: 'right',
+                priority: 0
+            }
+        );
     }
 };
 
 export namespace FilePath {
     export interface IOptions {
-        tracker: INotebookTracker;
+        notebookTracker: INotebookTracker;
+        // imageTracker: IImageTracker;
+        editorTracker: IEditorTracker;
     }
 }
