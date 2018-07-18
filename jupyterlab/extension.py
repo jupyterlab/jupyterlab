@@ -56,7 +56,7 @@ def load_jupyter_server_extension(nbapp):
     )
 
     # Print messages.
-    logger.info('JupyterLab beta preview extension loaded from %s' % HERE)
+    logger.info('JupyterLab extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
     config.app_name = 'JupyterLab Beta'
