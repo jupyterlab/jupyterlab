@@ -15,6 +15,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { IconItem } from '../component/icon';
+import { IStatusContext } from '../contexts';
 
 // tslint:disable-next-line:variable-name
 const NotebookTrustComponent = (
@@ -231,11 +232,11 @@ namespace NotebookTrust {
             };
         }
 
-        private _trustedCells: number;
-        private _totalCells: number;
-        private _activeCellTrusted: boolean;
-        private _notebook: Notebook | null;
-        private _hover: boolean;
+        private _trustedCells: number = 0;
+        private _totalCells: number = 0;
+        private _activeCellTrusted: boolean = false;
+        private _notebook: Notebook | null = null;
+        private _hover: boolean = false;
 
         private _stateChanged: Signal<this, void> = new Signal(this);
         private _isDisposed: boolean = false;
@@ -273,7 +274,7 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
     provides: INotebookTrust,
     requires: [IDefaultStatusesManager, INotebookTracker],
     activate: (
-        _app: JupyterLab,
+        app: JupyterLab,
         manager: IDefaultStatusesManager,
         tracker: INotebookTracker
     ) => {
@@ -281,7 +282,8 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
 
         manager.addDefaultStatus('notebook-trust-item', item, {
             align: 'right',
-            priority: 3
+            priority: 3,
+            isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
         });
 
         return item;
