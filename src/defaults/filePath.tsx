@@ -12,6 +12,7 @@ import { Widget } from '@phosphor/widgets';
 import { TextItem } from '../component/text';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IStatusContext } from '../contexts';
 
 export namespace FilePathComponent {
     export interface IState {
@@ -32,12 +33,17 @@ export class FilePathComponent extends React.Component<
     };
     constructor(props: FilePathComponent.IProps) {
         super(props);
-        this.props.notebookTracker.currentChanged.connect(this.notebookChanged);
+        this.props.notebookTracker.currentChanged.connect(
+            this._onNotebookChanged
+        );
         // this.props.imageTracker.currentChanged.connect(this.imageChanged);
-        this.props.editorTracker.currentChanged.connect(this.textChanged);
+        this.props.editorTracker.currentChanged.connect(this._onTextChanged);
     }
 
-    notebookChanged = (tracker: INotebookTracker, panel: NotebookPanel) => {
+    private _onNotebookChanged = (
+        tracker: INotebookTracker,
+        panel: NotebookPanel | null
+    ) => {
         if (panel) {
             this.setState({ path: panel.context.path });
         } else {
@@ -45,9 +51,9 @@ export class FilePathComponent extends React.Component<
         }
     };
 
-    textChanged = (
+    private _onTextChanged = (
         {},
-        text: IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+        text: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
     ) => {
         if (text) {
             this.setState({ path: text.context.path });
@@ -55,6 +61,7 @@ export class FilePathComponent extends React.Component<
             this.setState({ path: '' });
         }
     };
+
     render() {
         return <TextItem source={this.state.path} />;
     }
@@ -83,6 +90,7 @@ export class FilePath extends Widget {
     // private _imageTracker: IImageTracker;
     private _editorTracker: IEditorTracker;
 }
+
 export const filePathItem: JupyterLabPlugin<void> = {
     id: 'jupyterlab-statusbar/default-items:file-path-item',
     autoStart: true,
@@ -104,7 +112,11 @@ export const filePathItem: JupyterLabPlugin<void> = {
             new FilePath({ notebookTracker, editorTracker }),
             {
                 align: 'right',
-                priority: 0
+                priority: 0,
+                isActive: IStatusContext.delegateActive(app.shell, [
+                    { tracker: notebookTracker },
+                    { tracker: editorTracker }
+                ])
             }
         );
     }
