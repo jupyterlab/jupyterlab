@@ -1,5 +1,7 @@
 # jupyterlab-shortcutui
 
+[![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-shortcutui/master?urlpath=lab)
+
 A JupyterLab extension for managing keyboard shortcuts
 
 ## Prerequisites
