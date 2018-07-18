@@ -12,12 +12,13 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Signal } from '@phosphor/signaling';
+import { Signal, ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, InstanceTracker } from '@jupyterlab/apputils';
+import { ArrayExt } from '@phosphor/algorithm';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
@@ -39,61 +40,69 @@ const FileUploadComponent = (
 
 namespace FileUploadComponent {
     export interface IProps {
-        upload: IUploadModel['progress'];
+        upload: number;
     }
 }
 
 class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
     constructor(opts: FileUpload.IOptions) {
         super();
-        this._browser = opts.browser;
-        this._browser.tracker.currentChanged.connect(this._onDefaultChange);
+        this._tracker = opts.tracker;
+        this._tracker.currentChanged.connect(this._onBrowserChange);
 
-        this.model = new FileUpload.Model(this._browser.defaultBrowser);
+        this.model = new FileUpload.Model(
+            this._tracker.currentWidget && this._tracker.currentWidget.model
+        );
     }
 
     render() {
-        if (
-            this.model === null ||
-            this.model === undefined ||
-            this.model.upload === undefined ||
-            this.model.upload === 100
-        ) {
-            return null;
+        const uploadPaths = this.model!.paths;
+        if (uploadPaths.length > 0) {
+            return <FileUploadComponent upload={this.model!.progress[0]} />;
         } else {
-            return <FileUploadComponent upload={this.model.upload} />;
+            return <FileUploadComponent upload={100} />;
         }
     }
 
-    private _onDefaultChange = ({}, defaultBrowser: FileBrowser | null) => {
-        if (defaultBrowser === null) {
-            this.model!.defaultBrowser = null;
+    private _onBrowserChange = (
+        tracker: InstanceTracker<FileBrowser>,
+        browser: FileBrowser | null
+    ) => {
+        if (browser === null) {
+            this.model!.browserModel = null;
         } else {
-            this.model!.defaultBrowser = defaultBrowser;
+            this.model!.browserModel = browser.model;
         }
     };
 
-    private _browser: IFileBrowserFactory;
+    private _tracker: InstanceTracker<FileBrowser>;
 }
 
 namespace FileUpload {
     export class Model implements VDomRenderer.IModel, IFileUpload.IModel {
-        constructor(defaultBrowser: FileBrowser | null) {
-            this.defaultBrowser = defaultBrowser;
-        }
-        get upload() {
-            return this._upload;
+        constructor(browserModel: FileBrowserModel | null) {
+            this.browserModel = browserModel;
         }
 
-        set defaultBrowser(defaultBrowser: FileBrowser | null) {
-            this._defaultBrowser = defaultBrowser;
+        get progress() {
+            return this._progress;
+        }
 
-            if (this._defaultBrowser === null) {
-                this._upload = 0;
-            } else {
-                this._defaultBrowser.model.uploadChanged.connect(
-                    this._uploadChanged
-                );
+        get paths() {
+            return this._paths;
+        }
+
+        get browserModel() {
+            return this._browserModel;
+        }
+
+        set browserModel(browserModel: FileBrowserModel | null) {
+            this._browserModel = browserModel;
+            this._progress = Object.create(null);
+            this._paths = [];
+
+            if (this._browserModel !== null) {
+                this._browserModel.uploadChanged.connect(this._uploadChanged);
             }
 
             this._stateChanged.emit(void 0);
@@ -120,28 +129,45 @@ namespace FileUpload {
             browse: FileBrowserModel,
             uploads: IChangedArgs<IUploadModel>
         ) => {
-            if (uploads.newValue) {
-                this._upload = uploads.newValue.progress * 100;
-            } else {
-                this._upload = 100;
+            if (uploads.name === 'start' || uploads.name === 'update') {
+                if (uploads.name === 'start') {
+                    this._paths.push(uploads.newValue.path);
+                }
+
+                const idx = ArrayExt.findFirstIndex(
+                    this._paths,
+                    val => val === uploads.newValue.path
+                );
+
+                this._progress[idx] = uploads.newValue.progress * 100;
+            } else if (uploads.name === 'finish') {
+                const idx = ArrayExt.findFirstIndex(
+                    this._paths,
+                    val => val === uploads.oldValue.path
+                );
+
+                ArrayExt.removeAt(this._paths, idx);
+                ArrayExt.removeAt(this._progress, idx);
             }
 
             this._stateChanged.emit(void 0);
         };
 
         private _isDisposed: boolean = false;
-        private _upload: IUploadModel['progress'];
-        private _defaultBrowser: FileBrowser | null;
+        private _progress: Array<number> = [];
+        private _paths: Array<string> = [];
+        private _browserModel: FileBrowserModel | null = null;
         private _stateChanged: Signal<this, void> = new Signal(this);
     }
 
     export interface IOptions {
-        readonly browser: IFileBrowserFactory;
+        readonly tracker: InstanceTracker<FileBrowser>;
     }
 }
 
 export interface IFileUpload extends IDisposable {
     readonly model: IFileUpload.IModel | null;
+    readonly modelChanged: ISignal<this, void>;
 }
 
 // tslint:disable-next-line:variable-name
@@ -151,7 +177,9 @@ export const IFileUpload = new Token<IFileUpload>(
 
 export namespace IFileUpload {
     export interface IModel {
-        readonly upload: IUploadModel['progress'];
+        readonly paths: Array<string>;
+        readonly progress: Array<number>;
+        readonly browserModel: FileBrowserModel | null;
     }
 }
 
@@ -166,11 +194,15 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
         browser: IFileBrowserFactory
     ) => {
         const item = new FileUpload({
-            browser
+            tracker: browser.tracker
         });
 
         manager.addDefaultStatus('file-upload-item', item, {
-            align: 'middle'
+            align: 'middle',
+            isActive: () => {
+                return !!item.model && item.model.paths.length > 0;
+            },
+            stateChanged: item.model!.stateChanged
         });
 
         return item;
