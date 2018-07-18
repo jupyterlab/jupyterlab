@@ -1,5 +1,5 @@
 {
-  "rulesDirectory": ["tslint-plugin-prettier"],
+  "rulesDirectory": ["tslint-plugin-prettier", "tslint-react"],
   "rules": {
     "prettier": [true, { "singleQuote": true }],
     "align": [true, "parameters", "statements"],
@@ -60,7 +60,10 @@
       "check-whitespace"
     ],
     "one-variable-per-declaration": [true, "ignore-for-loop"],
-    "quotemark": [true, "single", "avoid-escape"],
+    "quotemark": {
+      "options": [true, "single", "avoid-escape"],
+      "severity": "off"
+    },
     "radix": true,
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
@@ -107,6 +110,6 @@
     ]
   },
   "linterOptions": {
-    "exclude": ["*/node_modules/**/*"]
+    "exclude": ["node_modules/**/*.ts", "**/*.d.ts", "jupyterlab/**/*.ts"]
   }
 }
