@@ -141,7 +141,6 @@ describe('docregistry/context', () => {
         await context.initialize(false);
         await context.ready;
         expect(context.model.cells.canUndo).to.be(false);
-        await dismissDialog();
       });
     });
 
