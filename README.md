@@ -4,11 +4,19 @@
 
 A JupyterLab extension for managing keyboard shortcuts
 
+![](http://g.recordit.co/b044WByFQP.gif)
+
 ## Prerequisites
 
 - JupyterLab
 
-## Installation
+## Usage
+
+- Open the keyboard shortcuts editor from the *Settings* or *Help* menu
+- Open the keyboard shortcuts editor from the command palette by searching for
+  "Keyboard Shortcut Editor"
+
+## Install
 
 ```bash
 jupyter labextension install jupyterlab-shortcutui
@@ -22,14 +30,22 @@ If you would like to contribute to the project, please read our [contributor doc
 
 JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-### Development Install
+### Install
 
-For a development install (requires npm version 4 or later), do the following in the repository directory:
+Requires node 4+ and npm 4+
 
 ```bash
-npm install
-npm run build
+# Clone the repo to your local environment
+git clone https://github.com/jupyterlab/jupyterlab-shortcutui.git
+cd jupyterlab-shortcutui
+# Install dependencies
+npm install # or yarn
+# Build Typescript source
+npm run build # or yarn build
+# Link your development version of the extension with JupyterLab
 jupyter labextension link .
+# Rebuild Typescript source after making changes
+npm run build # or yarn build
 ```
 
 To rebuild the package and the JupyterLab app:
