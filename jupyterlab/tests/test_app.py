@@ -134,7 +134,7 @@ class ProcessTestApp(ProcessApp):
 class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
-    karma_pattern = Unicode('src/*.spec.ts')
+    karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
 
     def get_command(self):
@@ -168,12 +168,11 @@ class KarmaTestApp(ProcessTestApp):
         parser = argparse.ArgumentParser()
         parser.add_argument('--pattern', action='store')
         args, argv = parser.parse_known_args()
-        pattern = args.pattern or 'src/*.spec.ts'
+        pattern = args.pattern or self.karma_pattern
         files = glob.glob(pjoin(cwd, pattern))
         if not files:
             msg = 'No files matching "%s" found in "%s"'
-            raise ValueError(msg % (pattern, msg))
-
+            raise ValueError(msg % (pattern, cwd))
         # Find and validate the coverage folder
         with open(pjoin(cwd, 'package.json')) as fid:
             data = json.load(fid)
