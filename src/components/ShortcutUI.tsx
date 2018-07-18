@@ -40,6 +40,187 @@ export interface IShortcutUIState {
   keyBindingsUsed: Object;
 }
 
+/** Normalize the query text for a fuzzy search. */
+function normalizeQuery(text: string): string {
+  return text.replace(/\s+/g, '').toLowerCase();
+}
+
+/** Perform a fuzzy search on a single command item. */
+function fuzzySearch(item: any, query: string): any | null {
+  // Create the source text to be searched.
+  const category = item.category.toLowerCase();
+  const label = item['label'].toLowerCase();
+  const source = `${category} ${label}`;
+
+  // Set up the match score and indices array.
+  let score = Infinity;
+  let indices: number[] | null = null;
+
+  // The regex for search word boundaries
+  const rgx = /\b\w/g;
+
+  // Search the source by word boundary.
+  while (true) {
+    // Find the next word boundary in the source.
+    const rgxMatch = rgx.exec(source);
+
+    // Break if there is no more source context.
+    if (!rgxMatch) {
+      break;
+    }
+
+    // Run the string match on the relevant substring.
+    const match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
+
+    // Break if there is no match.
+    if (!match) {
+      break;
+    }
+
+    // Update the match if the score is better.
+    if (match && match.score <= score) {
+      score = match.score;
+      indices = match.indices;
+    }
+  }
+
+  // Bail if there was no match.
+  if (!indices || score === Infinity) {
+    return null;
+  }
+
+  // Compute the pivot index between category and label text.
+  const pivot = category.length + 1;
+
+  // Find the slice index to separate matched indices.
+  const j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
+
+  // Extract the matched category and label indices.
+  const categoryIndices = indices.slice(0, j);
+  const labelIndices = indices.slice(j);
+
+  // Adjust the label indices for the pivot offset.
+  for (let i = 0, n = labelIndices.length; i < n; ++i) {
+    labelIndices[i] -= pivot;
+  }
+
+  // Handle a pure label match.
+  if (categoryIndices.length === 0) {
+    return {
+      matchType: MatchType.Label,
+      categoryIndices: null,
+      labelIndices,
+      score,
+      item
+    };
+  }
+
+  // Handle a pure category match.
+  if (labelIndices.length === 0) {
+    return {
+      matchType: MatchType.Category,
+      categoryIndices,
+      labelIndices: null,
+      score,
+      item
+    };
+  }
+
+  // Handle a split match.
+  return {
+    matchType: MatchType.Split,
+    categoryIndices,
+    labelIndices,
+    score,
+    item
+  };
+}
+
+/** Perform a fuzzy match on an array of command items. */
+function matchItems(items: any, query: string): any {
+  // Normalize the query text to lower case with no whitespace.
+  query = normalizeQuery(query);
+
+  // Create the array to hold the scores.
+  let scores: Object[] = [];
+  // Iterate over the items and match against the query.
+  let itemList = Object.keys(items);
+  for (let i = 0, n = itemList.length; i < n; ++i) {
+    let item = items[itemList[i]];
+
+    // If the query is empty, all items are matched by default.
+    if (!query) {
+      scores.push({
+        matchType: MatchType.Default,
+        categoryIndices: null,
+        labelIndices: null,
+        score: 0,
+        item
+      });
+      continue;
+    }
+
+    // Run the fuzzy search for the item and query.
+    let score = fuzzySearch(item, query);
+
+    // Ignore the item if it is not a match.
+    if (!score) {
+      continue;
+    }
+
+    // Add the score to the results.
+    scores.push(score);
+  }
+
+  // Return the final array of scores.
+  return scores;
+}
+
+/** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
+function getShortcutObjects(shortcutsObj: Object): Object {
+  const shortcuts = shortcutsObj['composite'];
+  let shortcutObjects = {};
+  Object.keys(shortcuts).forEach(shortcutKey => {
+    let key =
+      shortcuts[shortcutKey]['command'] +
+      '_' +
+      shortcuts[shortcutKey]['selector'];
+    if (Object.keys(shortcutObjects).includes(key)) {
+      shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+      shortcutObjects[key].numberOfShortcuts = 2;
+    } else {
+      let shortcutObject = new ShortcutObject();
+      shortcutObject.commandName = shortcuts[shortcutKey]['command'];
+      shortcutObject.label = shortcuts[shortcutKey]['title'];
+      shortcutObject.category = shortcuts[shortcutKey]['category'];
+      shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+      shortcutObject.selector = shortcuts[shortcutKey]['selector'];
+      shortcutObject.source = 'Default';
+      shortcutObject.id = shortcutKey;
+      shortcutObject.numberOfShortcuts = 1;
+      shortcutObjects[key] = shortcutObject;
+    }
+  });
+  return shortcutObjects;
+}
+
+/** Get list of all shortcut keybindings currently in use */
+/** An object where keys are unique keyBinding_selector and values are shortcut objects */
+function getKeyBindingsUsed(shortcuts: Object): Object {
+  let keyBindingsUsed: Object = {};
+  Object.keys(shortcuts).forEach(shortcut => {
+    for (let key of Object.keys(shortcuts[shortcut].keys)) {
+      keyBindingsUsed[
+        shortcuts[shortcut].keys[key].join(' ') +
+          '_' +
+          shortcuts[shortcut].selector
+      ] =
+        shortcuts[shortcut];
+    }
+  });
+  return keyBindingsUsed;
+}
+
 /** Top level React component for widget */
 export class ShortcutUI extends React.Component<
   IShortcutUIProps,
@@ -79,57 +260,12 @@ export class ShortcutUI extends React.Component<
     });
   }
 
-  /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
-  private _getShortcutObjects(shortcutsObj: Object): Object {
-    const shortcuts = shortcutsObj['composite'];
-    let shortcutObjects = {};
-    Object.keys(shortcuts).forEach(shortcutKey => {
-      let key =
-        shortcuts[shortcutKey]['command'] +
-        '_' +
-        shortcuts[shortcutKey]['selector'];
-      if (Object.keys(shortcutObjects).includes(key)) {
-        shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-        shortcutObjects[key].numberOfShortcuts = 2;
-      } else {
-        let shortcutObject = new ShortcutObject();
-        shortcutObject.commandName = shortcuts[shortcutKey]['command'];
-        shortcutObject.label = shortcuts[shortcutKey]['title'];
-        shortcutObject.category = shortcuts[shortcutKey]['category'];
-        shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-        shortcutObject.selector = shortcuts[shortcutKey]['selector'];
-        shortcutObject.source = 'Default';
-        shortcutObject.id = shortcutKey;
-        shortcutObject.numberOfShortcuts = 1;
-        shortcutObjects[key] = shortcutObject;
-      }
-    });
-    return shortcutObjects;
-  }
-
-  /** Get list of all shortcut keybindings currently in use */
-  /** An object where keys are unique keyBinding_selector and values are shortcut objects */
-  private _getKeyBindingsUsed(shortcuts: Object): Object {
-    let keyBindingsUsed: Object = {};
-    Object.keys(shortcuts).forEach(shortcut => {
-      for (let key of Object.keys(shortcuts[shortcut].keys)) {
-        keyBindingsUsed[
-          shortcuts[shortcut].keys[key].join(' ') +
-            '_' +
-            shortcuts[shortcut].selector
-        ] =
-          shortcuts[shortcut];
-      }
-    });
-    return keyBindingsUsed;
-  }
-
   /** Fetch shortcut list from SettingRegistry  */
   private async _getShortcutList(): Promise<void> {
     const shortcuts = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    const shortcutObjects = this._getShortcutObjects(shortcuts);
+    const shortcutObjects = getShortcutObjects(shortcuts);
     await this._getShortcutSource(shortcutObjects);
     this.setState(
       {
@@ -138,7 +274,7 @@ export class ShortcutUI extends React.Component<
         shortcutsFetched: true
       },
       () => {
-        let keyBindingsUsed = this._getKeyBindingsUsed(shortcutObjects);
+        let keyBindingsUsed = getKeyBindingsUsed(shortcutObjects);
         this.setState({ keyBindingsUsed: keyBindingsUsed });
         this.sortShortcuts();
       }
@@ -163,7 +299,7 @@ export class ShortcutUI extends React.Component<
 
   /** Filter shortcut list using current search query */
   private searchFilterShortcuts(shortcutObjects: Object): Object[] {
-    const filteredShortcuts = this.matchItems(
+    const filteredShortcuts = matchItems(
       shortcutObjects,
       this.state.searchQuery
     ).map(item => {
@@ -248,142 +384,6 @@ export class ShortcutUI extends React.Component<
     );
     this._getShortcutList();
   };
-
-  /** Perform a fuzzy search on a single command item. */
-  private fuzzySearch(item: any, query: string): any | null {
-    // Create the source text to be searched.
-    const category = item.category.toLowerCase();
-    const label = item['label'].toLowerCase();
-    const source = `${category} ${label}`;
-
-    // Set up the match score and indices array.
-    let score = Infinity;
-    let indices: number[] | null = null;
-
-    // The regex for search word boundaries
-    const rgx = /\b\w/g;
-
-    // Search the source by word boundary.
-    while (true) {
-      // Find the next word boundary in the source.
-      const rgxMatch = rgx.exec(source);
-
-      // Break if there is no more source context.
-      if (!rgxMatch) {
-        break;
-      }
-
-      // Run the string match on the relevant substring.
-      const match = StringExt.matchSumOfDeltas(source, query, rgxMatch.index);
-
-      // Break if there is no match.
-      if (!match) {
-        break;
-      }
-
-      // Update the match if the score is better.
-      if (match && match.score <= score) {
-        score = match.score;
-        indices = match.indices;
-      }
-    }
-
-    // Bail if there was no match.
-    if (!indices || score === Infinity) {
-      return null;
-    }
-
-    // Compute the pivot index between category and label text.
-    const pivot = category.length + 1;
-
-    // Find the slice index to separate matched indices.
-    const j = ArrayExt.lowerBound(indices, pivot, (a, b) => a - b);
-
-    // Extract the matched category and label indices.
-    const categoryIndices = indices.slice(0, j);
-    const labelIndices = indices.slice(j);
-
-    // Adjust the label indices for the pivot offset.
-    for (let i = 0, n = labelIndices.length; i < n; ++i) {
-      labelIndices[i] -= pivot;
-    }
-
-    // Handle a pure label match.
-    if (categoryIndices.length === 0) {
-      return {
-        matchType: MatchType.Label,
-        categoryIndices: null,
-        labelIndices,
-        score,
-        item
-      };
-    }
-
-    // Handle a pure category match.
-    if (labelIndices.length === 0) {
-      return {
-        matchType: MatchType.Category,
-        categoryIndices,
-        labelIndices: null,
-        score,
-        item
-      };
-    }
-
-    // Handle a split match.
-    return {
-      matchType: MatchType.Split,
-      categoryIndices,
-      labelIndices,
-      score,
-      item
-    };
-  }
-
-  /** Normalize the query text for a fuzzy search. */
-  private normalizeQuery(text: string): string {
-    return text.replace(/\s+/g, '').toLowerCase();
-  }
-
-  /** Perform a fuzzy match on an array of command items. */
-  private matchItems(items: any, query: string): any {
-    // Normalize the query text to lower case with no whitespace.
-    query = this.normalizeQuery(query);
-
-    // Create the array to hold the scores.
-    let scores: Object[] = [];
-    // Iterate over the items and match against the query.
-    let itemList = Object.keys(items);
-    for (let i = 0, n = itemList.length; i < n; ++i) {
-      let item = items[itemList[i]];
-
-      // If the query is empty, all items are matched by default.
-      if (!query) {
-        scores.push({
-          matchType: MatchType.Default,
-          categoryIndices: null,
-          labelIndices: null,
-          score: 0,
-          item
-        });
-        continue;
-      }
-
-      // Run the fuzzy search for the item and query.
-      let score = this.fuzzySearch(item, query);
-
-      // Ignore the item if it is not a match.
-      if (!score) {
-        continue;
-      }
-
-      // Add the score to the results.
-      scores.push(score);
-    }
-
-    // Return the final array of scores.
-    return scores;
-  }
 
   /** Opens advanced setting registry */
   openAdvanced = (): void => {
