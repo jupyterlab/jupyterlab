@@ -1,20 +1,26 @@
 import { style } from 'typestyle';
 
-export const iconitem = style({
+const icon = {
     backgroundRepeat: 'no-repeat',
     backgroundSize: '18px',
     backgroundPositionY: '5px',
     minHeight: 'var(--jp-private-menubar-height)',
     width: '20px',
     display: 'inline-block',
-    alignContent: 'center',
+    alignContent: 'center'
+};
+
+const individual = {
     marginRight: '5px',
     marginLeft: '5px',
     $nest: {
         '&:hover': {
-            backgroundColor: '#000000'
+            backgroundColor: '#8a8a8a'
         }
     }
-});
-
+};
 // split into stand alone and together
+
+export const individualIcon = style(icon, individual);
+
+export const iconitem = style(icon);
