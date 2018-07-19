@@ -216,8 +216,6 @@
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
-  border-left: solid 8px var(--jp-warn-color2);
-  padding-left: 4px;
 }
 
 .jp-extensionmanager-entry-name {
