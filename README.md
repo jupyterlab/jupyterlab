@@ -14,21 +14,20 @@
 [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/18a9793b58ba86660b5ab964e1aeaf7324d667c8?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb)
 
 An extensible environment for interactive and reproducible computing, based on the
-Jupyter Notebook and Architecture. [Currently in beta.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
+Jupyter Notebook and Architecture. [Currently ready for users.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
 
 [JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org). It offers
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
 terminal, text editor, file browser, rich outputs, etc.) in a flexible and
 powerful user interface.
-Eventually, JupyterLab will replace the classic Jupyter Notebook after
-JupyterLab reaches 1.0.
+Eventually, JupyterLab will replace the classic Jupyter Notebook.
 
 JupyterLab can be extended using extensions that are [npm](https://www.npmjs.com/) packages
 and use our public APIs. You can search for the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension) to find extensions. To learn more about extensions, see our [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
 
-The beta releases are suitable for general
+The current JupyterLab releases are suitable for general
 usage. For JupyterLab extension developers, the extension APIs will continue to
-evolve until the 1.0 release.
+evolve.
 
 Read the latest version of our documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/latest/).
 

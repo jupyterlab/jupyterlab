@@ -1,13 +1,13 @@
 # Frequently Asked Questions (FAQ)
 
-Below are some frequently asked questions regarding the beta release series.
+Below are some frequently asked questions.
 Click on a question to be directed to relevant information in our documentation or our GitHub repo.
 
 ## General
 
 * [What is JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
 * [How stable is JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
-* [What will happen to the classic Jupyter Notebook?](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#beta)
+* [What will happen to the classic Jupyter Notebook?](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html#releases)
 * [Where is the documentation for JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/)
 
 ## Development

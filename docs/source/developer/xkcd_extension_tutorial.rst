@@ -5,8 +5,8 @@ Let's Make an xkcd JupyterLab Extension
 
 .. warning::
 
-   The extension developer API is not stable and will evolve in JupyterLab beta
-   releases. The extension developer API will be stable in JupyterLab 1.0.
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,

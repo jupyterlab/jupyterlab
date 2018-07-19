@@ -23,8 +23,7 @@ information about developing extensions, see the :ref:`developer documentation
 .. note::
 
    If you are a JupyterLab extension developer, please note that the extension
-   developer API is not stable and will evolve in JupyterLab beta releases. The
-   extension developer API will be stable in JupyterLab 1.0.
+   developer API is not stable and will evolve in the near future.
 
 
 In order to install JupyterLab extensions, you need to have `Node.js

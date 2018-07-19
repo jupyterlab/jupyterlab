@@ -22,9 +22,9 @@ from setuptools.command.develop import develop
 NAME = 'jupyterlab'
 DESCRIPTION = 'The JupyterLab notebook server extension.'
 LONG_DESCRIPTION = """
-This is a beta release of JupyterLab.
+An extensible, comprehensive Jupyter web application.
 Development happens on https://github.com/jupyter/jupyterlab, with chat on
-https://gitter.im/jupyter/jupyterlab.
+https://gitter.im/jupyterlab/jupyterlab.
 """
 
 ensure_python(['2.7', '>=3.3'])
