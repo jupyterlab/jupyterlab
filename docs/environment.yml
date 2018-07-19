@@ -2,7 +2,6 @@ name: jupyterlab_documentation
 channels:
   - conda-forge
 dependencies:
-- nodejs
 - python=3.5
 - sphinx>=1.6
 - sphinx_rtd_theme
