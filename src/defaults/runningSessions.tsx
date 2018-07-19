@@ -19,25 +19,20 @@ import { VDomRenderer } from '@jupyterlab/apputils';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
+import { GroupItem } from '../component/group';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <div
-            onClick={props.handleClick}
-            style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginRight: '20px'
-            }}
-        >
-            <TextItem source={props.kernels} />
-            <IconItem source={'kernel-item'} />
-            <TextItem source={props.terminals} />
-            <IconItem source={'terminal-item'} />
+        <div onClick={props.handleClick}>
+            <GroupItem>
+                <TextItem source={props.kernels} />
+                <IconItem source={'kernel-item'} />
+                <TextItem source={props.terminals} />
+                <IconItem source={'terminal-item'} />
+            </GroupItem>
         </div>
     );
 };

@@ -17,6 +17,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
+import { GroupItem } from '../component/group';
 import { VDomRenderer, InstanceTracker } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 
@@ -25,16 +26,10 @@ const FileUploadComponent = (
     props: FileUploadComponent.IProps
 ): React.ReactElement<FileUploadComponent.IProps> => {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center'
-            }}
-        >
+        <GroupItem>
             <TextItem source={'Uploading'} />
             <ProgressBar percentage={props.upload} />
-        </div>
+        </GroupItem>
     );
 };
 
