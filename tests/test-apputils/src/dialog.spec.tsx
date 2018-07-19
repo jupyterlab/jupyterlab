@@ -3,6 +3,8 @@
 
 import { expect } from 'chai';
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+
 import { each, map, toArray } from '@phosphor/algorithm';
 
 import { Message } from '@phosphor/messaging';
@@ -10,8 +12,6 @@ import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 
 import { generate, simulate } from 'simulate-event';
-
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
@@ -66,145 +66,131 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should accept options', () => {
-        dialog = new TestDialog({
+        const dialog = new TestDialog({
           title: 'foo',
           body: 'Hello',
           buttons: [Dialog.okButton()]
         });
+
         expect(dialog).to.be.an.instanceof(Dialog);
+        dialog.dispose();
       });
     });
 
     describe('#launch()', () => {
-      it('should attach the dialog to the host', () => {
-        let host = document.createElement('div');
+      it('should attach the dialog to the host', async () => {
+        const host = document.createElement('div');
+        const dialog = new TestDialog({ host });
+
         document.body.appendChild(host);
-        dialog = new TestDialog({ host });
         dialog.launch();
-        return waitForDialog().then(() => {
-          expect(host.firstChild).to.equal(dialog.node);
-          dialog.dispose();
-          document.body.removeChild(host);
-        });
+        await waitForDialog();
+        expect(host.firstChild).to.equal(dialog.node);
+        dialog.dispose();
+        document.body.removeChild(host);
       });
 
-      it('should resolve with `true` when accepted', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(true);
-        });
-        waitForDialog().then(() => {
-          dialog.resolve();
-        });
-        return promise;
+      it('should resolve with `true` when accepted', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.resolve();
+        expect((await prompt).button.accept).to.equal(true);
       });
 
-      it('should resolve with `false` when accepted', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(false);
-        });
-        waitForDialog().then(() => {
-          dialog.reject();
-        });
-        return promise;
+      it('should resolve with `false` when accepted', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.reject();
+        expect((await prompt).button.accept).to.equal(false);
       });
 
-      it('should resolve with `false` when closed', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(false);
-        });
-        waitForDialog().then(() => {
-          dialog.close();
-        });
-        return promise;
+      it('should resolve with `false` when closed', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.close();
+        expect((await prompt).button.accept).to.equal(false);
       });
 
-      it('should return focus to the original focused element', () => {
-        let input = document.createElement('input');
+      it('should return focus to the original focused element', async () => {
+        const input = document.createElement('input');
+
         document.body.appendChild(input);
         input.focus();
         expect(document.activeElement).to.equal(input);
-        let promise = dialog.launch().then(() => {
-          expect(document.activeElement).to.equal(input);
-          document.body.removeChild(input);
-        });
-        waitForDialog().then(() => {
-          expect(document.activeElement).to.not.equal(input);
-          dialog.resolve();
-        });
-        return promise;
+
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        expect(document.activeElement).to.not.equal(input);
+        dialog.resolve();
+        await prompt;
+        expect(document.activeElement).to.equal(input);
+        document.body.removeChild(input);
       });
     });
 
     describe('#resolve()', () => {
-      it('should resolve with the default item', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(true);
-        });
-        waitForDialog().then(() => {
-          dialog.resolve();
-        });
-        return promise;
+      it('should resolve with the default item', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.resolve();
+        expect((await prompt).button.accept).to.equal(true);
       });
 
-      it('should resolve with the item at the given index', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(false);
-        });
-        waitForDialog().then(() => {
-          dialog.resolve(0);
-        });
-        return promise;
+      it('should resolve with the item at the given index', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.resolve(0);
+        expect((await prompt).button.accept).to.equal(false);
       });
     });
 
     describe('#reject()', () => {
-      it('should reject with the default reject item', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.label).to.equal('CANCEL');
-          expect(result.button.accept).to.equal(false);
-        });
-        waitForDialog().then(() => {
-          dialog.reject();
-        });
-        return promise;
+      it('should reject with the default reject item', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.reject();
+
+        const result = await prompt;
+
+        expect(result.button.label).to.equal('CANCEL');
+        expect(result.button.accept).to.equal(false);
       });
     });
 
     describe('#handleEvent()', () => {
       context('keydown', () => {
-        it('should reject on escape key', () => {
-          let promise = dialog.launch().then(result => {
-            expect(result.button.accept).to.equal(false);
-          });
-          waitForDialog().then(() => {
-            simulate(dialog.node, 'keydown', { keyCode: 27 });
-          });
-          return promise;
+        it('should reject on escape key', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          expect((await prompt).button.accept).to.equal(false);
         });
 
-        it('should accept on enter key', () => {
-          let promise = dialog.launch().then(result => {
-            expect(result.button.accept).to.equal(true);
-          });
-          waitForDialog().then(() => {
-            simulate(dialog.node, 'keydown', { keyCode: 13 });
-          });
-          return promise;
+        it('should accept on enter key', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          expect((await prompt).button.accept).to.equal(true);
         });
 
-        it('should cycle to the first button on a tab key', () => {
-          let promise = dialog.launch().then(result => {
-            expect(result.button.accept).to.equal(false);
-          });
-          waitForDialog().then(() => {
-            let node = document.activeElement;
-            expect(node.className).to.contain('jp-mod-accept');
-            simulate(dialog.node, 'keydown', { keyCode: 9 });
-            node = document.activeElement;
-            expect(node.className).to.contain('jp-mod-reject');
-            simulate(node, 'click');
-          });
-          return promise;
+        it('should cycle to the first button on a tab key', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          expect(document.activeElement.className).to.contain('jp-mod-accept');
+          simulate(dialog.node, 'keydown', { keyCode: 9 });
+          expect(document.activeElement.className).to.contain('jp-mod-reject');
+          simulate(document.activeElement, 'click');
+          expect((await prompt).button.accept).to.equal(false);
         });
       });
 

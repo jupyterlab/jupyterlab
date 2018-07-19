@@ -1,5 +1,4 @@
 """Test the kernels service API."""
-import os
 import threading
 
 from ipython_genutils.tempdir import TemporaryDirectory
