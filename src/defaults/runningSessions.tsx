@@ -26,12 +26,14 @@ const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <GroupItem>
-            <TextItem source={props.kernels} />
-            <IconItem source={'kernel-item'} />
-            <TextItem source={props.terminals} />
-            <IconItem source={'terminal-item'} />
-        </GroupItem>
+        <div onClick={props.handleClick}>
+            <GroupItem>
+                <TextItem source={props.kernels} />
+                <IconItem source={'kernel-item'} />
+                <TextItem source={props.terminals} />
+                <IconItem source={'terminal-item'} />
+            </GroupItem>
+        </div>
     );
 };
 
