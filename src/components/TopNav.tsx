@@ -33,6 +33,10 @@ export interface ITopNavProps {
 
 /** React component for top navigation */
 export class TopNav extends React.Component<ITopNavProps, {}> {
+  constructor(props: any) {
+    super(props)
+  }
+
   render() {
     return (
       <div className={TopStyle}>

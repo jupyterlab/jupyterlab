@@ -31,13 +31,13 @@ export interface IShortcutUIProps {
 
 /** State for ShortcutUI component */
 export interface IShortcutUIState {
-  shortcutList: Object;
-  filteredShortcutList: Object[];
+  shortcutList: {[index:string]: ShortcutObject};
+  filteredShortcutList: ShortcutObject[];
   shortcutsFetched: boolean;
   searchQuery: string;
   showSelectors: boolean;
   currentSort: string;
-  keyBindingsUsed: Object;
+  keyBindingsUsed:  { [index: string] : ShortcutObject };
 }
 
 /** Normalize the query text for a fuzzy search. */
@@ -177,15 +177,17 @@ function matchItems(items: any, query: string): any {
 }
 
 /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
-function getShortcutObjects(shortcutsObj: Object): Object {
-  const shortcuts = shortcutsObj['composite'];
-  let shortcutObjects = {};
+function getShortcutObjects(
+  shortcutsObj: ISettingRegistry.ISettings
+): {[index: string]: ShortcutObject} {
+  const shortcuts: any = shortcutsObj['composite'];
+  let shortcutObjects: {[index: string]: ShortcutObject} = {};
   Object.keys(shortcuts).forEach(shortcutKey => {
     let key =
       shortcuts[shortcutKey]['command'] +
       '_' +
       shortcuts[shortcutKey]['selector'];
-    if (Object.keys(shortcutObjects).includes(key)) {
+    if (Object.keys(shortcutObjects).indexOf(key)!==-1) {
       shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
       shortcutObjects[key].numberOfShortcuts = 2;
     } else {
@@ -206,16 +208,18 @@ function getShortcutObjects(shortcutsObj: Object): Object {
 
 /** Get list of all shortcut keybindings currently in use */
 /** An object where keys are unique keyBinding_selector and values are shortcut objects */
-function getKeyBindingsUsed(shortcuts: Object): Object {
-  let keyBindingsUsed: Object = {};
-  Object.keys(shortcuts).forEach(shortcut => {
-    for (let key of Object.keys(shortcuts[shortcut].keys)) {
+function getKeyBindingsUsed(
+  shortcutObjects: {[index: string]: ShortcutObject}
+):  { [index: string] : ShortcutObject } {
+  let keyBindingsUsed:  { [index: string] : ShortcutObject } = {};
+  Object.keys(shortcutObjects).forEach((shortcut: string) => {
+    for (let key of Object.keys(shortcutObjects[shortcut].keys)) {
       keyBindingsUsed[
-        shortcuts[shortcut].keys[key].join(' ') +
+        shortcutObjects[shortcut].keys[key].join(' ') +
           '_' +
-          shortcuts[shortcut].selector
+          shortcutObjects[shortcut].selector
       ] =
-        shortcuts[shortcut];
+      shortcutObjects[shortcut];
     }
   });
   return keyBindingsUsed;
@@ -226,18 +230,18 @@ export class ShortcutUI extends React.Component<
   IShortcutUIProps,
   IShortcutUIState
 > {
-  constructor(props) {
+  constructor(props: any) {
     super(props);
   }
 
   state = {
     shortcutList: {},
-    filteredShortcutList: [],
+    filteredShortcutList: new Array<ShortcutObject>(),
     shortcutsFetched: false,
     searchQuery: '',
     showSelectors: false,
     currentSort: 'category',
-    keyBindingsUsed: null
+    keyBindingsUsed: {}
   };
 
   /** Fetch shortcut list on mount */
@@ -246,15 +250,16 @@ export class ShortcutUI extends React.Component<
   }
 
   /** Flag all user-set shortcuts as custom */
-  private async _getShortcutSource(shortcutObjects: Object): Promise<void> {
-    const customShortcuts = await this.props.settingRegistry.reload(
+  private async _getShortcutSource(shortcutObjects: {[index: string]: ShortcutObject}): Promise<void> {
+    const customShortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    Object.keys(customShortcuts.user).forEach(key => {
+    Object.keys(customShortcuts.user).forEach((key: string) => {
+      const userSettings: Object = customShortcuts.user[key]
+      const command: string = (userSettings as any)['command']
+      const selector: string = (userSettings as any)['selector']
       shortcutObjects[
-        customShortcuts.user[key]['command'] +
-          '_' +
-          customShortcuts.user[key]['selector']
+          command + '_' + selector
       ].source =
         'Custom';
     });
@@ -262,10 +267,10 @@ export class ShortcutUI extends React.Component<
 
   /** Fetch shortcut list from SettingRegistry  */
   private async _getShortcutList(): Promise<void> {
-    const shortcuts = await this.props.settingRegistry.reload(
+    const shortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    const shortcutObjects = getShortcutObjects(shortcuts);
+    const shortcutObjects: {[index:string]: ShortcutObject} = getShortcutObjects(shortcuts);
     await this._getShortcutSource(shortcutObjects);
     this.setState(
       {
@@ -282,8 +287,8 @@ export class ShortcutUI extends React.Component<
   }
 
   /** Set the current seach query */
-  updateSearchQuery = (event): void => {
-    this.setState({ searchQuery: event.target.value, currentSort: '' }, () =>
+  updateSearchQuery = (event: MouseEvent): void => {
+    this.setState({ searchQuery: (event.target as any)['value'], currentSort: '' }, () =>
       this.setState(
         {
           filteredShortcutList: this.searchFilterShortcuts(
@@ -298,11 +303,11 @@ export class ShortcutUI extends React.Component<
   };
 
   /** Filter shortcut list using current search query */
-  private searchFilterShortcuts(shortcutObjects: Object): Object[] {
+  private searchFilterShortcuts(shortcutObjects: Object): ShortcutObject[] {
     const filteredShortcuts = matchItems(
       shortcutObjects,
       this.state.searchQuery
-    ).map(item => {
+    ).map((item: any) => {
       return item.item;
     });
     return filteredShortcuts;
@@ -404,14 +409,14 @@ export class ShortcutUI extends React.Component<
 
   /** Sort shortcut list using current sort property  */
   sortShortcuts(): void {
-    const shortcuts = this.state.filteredShortcutList;
+    const shortcuts: ShortcutObject[] = this.state.filteredShortcutList;
     let filterCritera = this.state.currentSort;
     if (filterCritera === 'command') {
       filterCritera = 'label';
     }
-    shortcuts.sort((a, b) => {
-      const compareA = a[filterCritera];
-      const compareB = b[filterCritera];
+    shortcuts.sort((a: ShortcutObject, b: ShortcutObject) => {
+      const compareA: string = a.get(filterCritera);
+      const compareB: string = b.get(filterCritera);
       if (compareA < compareB) {
         return -1;
       } else if (compareA > compareB) {
@@ -429,7 +434,7 @@ export class ShortcutUI extends React.Component<
     oldShortcut: ShortcutObject
   ): void => {
     const shortcutList = this.state.filteredShortcutList
-      .filter(shortcut => shortcut.id !== oldShortcut.id)
+      .filter((shortcut: ShortcutObject) => shortcut.id !== oldShortcut.id)
       .splice(
         this.state.filteredShortcutList.indexOf(newShortcut) + 1,
         0,
@@ -442,7 +447,7 @@ export class ShortcutUI extends React.Component<
   /** Remove conflict flag from all shortcuts */
   clearConflicts = (): void => {
     const shortcutList = this.state.filteredShortcutList;
-    shortcutList.forEach(shortcut => {
+    shortcutList.forEach((shortcut: ShortcutObject) => {
       shortcut.hasConflict = false;
     });
     this.setState({ filteredShortcutList: shortcutList });

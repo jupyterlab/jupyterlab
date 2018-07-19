@@ -8,6 +8,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ShortcutUI } from './components/ShortcutUI';
 
+import { Widget } from '@phosphor/widgets'
+
 import * as React from 'react';
 
 import '../style/index.css';
@@ -16,13 +18,14 @@ import '../style/index.css';
 export class ShortcutObject {
   commandName: string;
   label: string;
-  keys: Object;
+  keys: {[index: string]: string[]};
   source: string;
   selector: string;
   category: string;
   id: string;
   hasConflict: boolean;
   numberOfShortcuts: number;
+
   constructor() {
     this.commandName = '';
     this.label = '';
@@ -33,6 +36,34 @@ export class ShortcutObject {
     this.id = '';
     this.numberOfShortcuts = 0;
     this.hasConflict = false;
+  }
+
+  get(sortCriteria: string): string {
+    if (sortCriteria === 'label') {
+      return this.label
+    } else if (sortCriteria === 'selector') {
+      return this.selector
+    } else if (sortCriteria === 'category') {
+      return this.category
+    } else if (sortCriteria === 'source') {
+      return this.source
+    }
+  }
+}
+
+class ShortcutWidget extends ReactElementWidget {
+  constructor(es: Array<React.ReactElement<any>> | React.ReactElement<any> | null) {
+    super(es);
+    this.id = 'jupyterlab-shortcutui';
+    this.title.label = 'Keyboard Shortcut Editor';
+    this.title.closable = true;
+    this.addClass('jp-shortcutWidget');
+  }
+
+  protected onResize(msg: Widget.ResizeMessage) {
+    super.onResize(msg);
+    console.log('resize');
+    console.log(msg.width, msg.height)
   }
 }
 
@@ -58,11 +89,7 @@ const plugin: JupyterLabPlugin<void> = {
           commandRegistry: app.commands
         });
 
-        const widget: ReactElementWidget = new ReactElementWidget(shortcutUI);
-        widget.id = 'jupyterlab-shortcutui';
-        widget.title.label = 'Keyboard Shortcut Editor';
-        widget.title.closable = true;
-        widget.addClass('jp-shortcutWidget');
+        const widget = new ShortcutWidget(shortcutUI);
 
         /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';

@@ -19,7 +19,7 @@ export interface IShortcutInputProps {
   toggleInput: Function;
   shortcut: ShortcutObject;
   toSymbols: Function;
-  keyBindingsUsed: Object;
+  keyBindingsUsed: { [index: string] : ShortcutObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
@@ -37,6 +37,10 @@ export class ShortcutInput extends React.Component<
   IShortcutInputProps,
   IShortcutInputState
 > {
+  constructor(props: any) {
+    super(props)
+  }
+
   state = {
     value: '',
     userInput: '',
@@ -46,7 +50,7 @@ export class ShortcutInput extends React.Component<
   };
 
   /** Get array of keys from user input */
-  keysFromValue = value => {
+  keysFromValue = (value: string) => {
     const keys: string[] = value.split(',');
     return keys;
   };
@@ -133,9 +137,9 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = shortcut.split(', ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.includes(last) || shortcut === '')
+      isFunctional: !(dontEnd.indexOf(last) !== -1 || shortcut === '')
     });
-    return dontEnd.includes(last) || shortcut === '';
+    return dontEnd.indexOf(last) !== -1 || shortcut === '';
   };
 
   /** Check if shortcut being typed is already taken */
@@ -144,16 +148,16 @@ export class ShortcutInput extends React.Component<
     keys: string[]
   ): ShortcutObject => {
     let isAvailable =
-      !Object.keys(this.props.keyBindingsUsed).includes(
+      !(Object.keys(this.props.keyBindingsUsed).indexOf(
         userInput + '_' + this.props.shortcut.selector
-      ) || userInput === '';
-    let takenBy = new ShortcutObject();
+      ) !== -1) || userInput === '';
+    let takenBy: ShortcutObject = new ShortcutObject();
     if (isAvailable) {
       for (let binding of keys) {
         if (
-          Object.keys(this.props.keyBindingsUsed).includes(
+          Object.keys(this.props.keyBindingsUsed).indexOf(
             binding + '_' + this.props.shortcut.selector
-          ) &&
+          ) !== -1 &&
           userInput !== ''
         ) {
           isAvailable = false;
@@ -201,8 +205,8 @@ export class ShortcutInput extends React.Component<
     );
   };
 
-  handleBlur = event => {
-    if (event.relatedTarget === null || event.relatedTarget.id !== 'no-blur') {
+  handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur') {
       this.props.toggleInput();
       this.setState({
         value: '',
@@ -222,7 +226,7 @@ export class ShortcutInput extends React.Component<
         className={
           this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle
         }
-        onBlur={event => this.handleBlur(event)}
+        onBlur={(event) => this.handleBlur(event)}
       >
         <input
           className={inputClassName}
