@@ -2,9 +2,7 @@ import { style } from 'typestyle';
 
 const text = {
     minHeight: 'var(--jp-private-menubar-height)',
-    top: '25%',
     display: 'inline-block',
-    verticalAlign: 'middle',
     lineHeight: 'var(--jp-private-menubar-height)',
     alignContent: 'center',
     color: '#EEEEEE',
