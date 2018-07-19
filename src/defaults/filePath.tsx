@@ -1,131 +1,158 @@
-import * as ReactDOM from 'react-dom';
-import * as React from 'react';
+import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
+import {
+    JupyterLabPlugin,
+    JupyterLab,
+    ApplicationShell
+} from '@jupyterlab/application';
 import { IDefaultStatusesManager } from './manager';
-
-import { Widget } from '@phosphor/widgets';
-
 import { TextItem } from '../component/text';
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { IStatusContext } from '../contexts';
+import {
+    DocumentRegistry,
+    IDocumentWidget,
+    DocumentWidget
+} from '@jupyterlab/docregistry';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { IDisposable } from '@phosphor/disposable';
+import { ISignal } from '@phosphor/signaling';
+import { Token } from '@phosphor/coreutils';
 
-export namespace FilePathComponent {
-    export interface IState {
+namespace FilePathComponent {
+    export interface IProps {
         path: string;
     }
-    export interface IProps {
-        notebookTracker: INotebookTracker;
-        // imageTracker: IImageTracker;
-        editorTracker: IEditorTracker;
-    }
-}
-export class FilePathComponent extends React.Component<
-    FilePathComponent.IProps,
-    FilePathComponent.IState
-> {
-    state = {
-        path: ''
-    };
-    constructor(props: FilePathComponent.IProps) {
-        super(props);
-        this.props.notebookTracker.currentChanged.connect(
-            this._onNotebookChanged
-        );
-        // this.props.imageTracker.currentChanged.connect(this.imageChanged);
-        this.props.editorTracker.currentChanged.connect(this._onTextChanged);
-    }
-
-    private _onNotebookChanged = (
-        tracker: INotebookTracker,
-        panel: NotebookPanel | null
-    ) => {
-        if (panel) {
-            this.setState({ path: panel.context.path });
-        } else {
-            this.setState({ path: '' });
-        }
-    };
-
-    private _onTextChanged = (
-        {},
-        text: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
-    ) => {
-        if (text) {
-            this.setState({ path: text.context.path });
-        } else {
-            this.setState({ path: '' });
-        }
-    };
-
-    render() {
-        return <TextItem source={this.state.path} />;
-    }
 }
 
-export class FilePath extends Widget {
-    constructor(opts: FilePath.IOptions) {
-        super();
-        this._notebookTracker = opts.notebookTracker;
-        // this._imageTracker = opts.imageTracker;
-        this._editorTracker = opts.editorTracker;
-    }
-
-    onBeforeAttach() {
-        ReactDOM.render(
-            <FilePathComponent
-                notebookTracker={this._notebookTracker}
-                editorTracker={this._editorTracker}
-                // imageTracker={this._imageTracker}
-            />,
-            this.node
-        );
-    }
-
-    private _notebookTracker: INotebookTracker;
-    // private _imageTracker: IImageTracker;
-    private _editorTracker: IEditorTracker;
-}
-
-export const filePathItem: JupyterLabPlugin<void> = {
-    id: 'jupyterlab-statusbar/default-items:file-path-item',
-    autoStart: true,
-    requires: [
-        IDefaultStatusesManager,
-        INotebookTracker,
-        IEditorTracker
-        // IImageTracker
-    ],
-    activate: (
-        app: JupyterLab,
-        manager: IDefaultStatusesManager,
-        notebookTracker: INotebookTracker,
-        editorTracker: IEditorTracker
-        // imageTracker: IImageTracker
-    ) => {
-        manager.addDefaultStatus(
-            'file-path-item',
-            new FilePath({ notebookTracker, editorTracker }),
-            {
-                align: 'right',
-                priority: 0,
-                isActive: IStatusContext.delegateActive(app.shell, [
-                    { tracker: notebookTracker },
-                    { tracker: editorTracker }
-                ])
-            }
-        );
-    }
+// tslint:disable-next-line:variable-name
+const FilePathComponent = (
+    props: FilePathComponent.IProps
+): React.ReactElement<FilePathComponent.IProps> => {
+    return <TextItem source={props.path} />;
 };
 
-export namespace FilePath {
+class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
+    constructor(opts: FilePath.IOptions) {
+        super();
+
+        this._shell = opts.shell;
+
+        this._shell.currentChanged.connect(this._onShellCurrentChanged);
+
+        const currentWidget = this._shell.currentWidget;
+        this.model = new FilePath.Model(
+            currentWidget && currentWidget instanceof DocumentWidget
+                ? currentWidget
+                : null
+        );
+    }
+
+    render() {
+        if (this.model === null) {
+            return null;
+        } else {
+            return <FilePathComponent path={this.model.path} />;
+        }
+    }
+
+    private _onShellCurrentChanged = (
+        shell: ApplicationShell,
+        change: ApplicationShell.IChangedArgs
+    ) => {
+        if (
+            change.newValue !== null &&
+            change.newValue instanceof DocumentWidget
+        ) {
+            this.model!.document = change.newValue;
+        } else {
+            this.model!.document = null;
+        }
+    };
+
+    private _shell: ApplicationShell;
+}
+
+namespace FilePath {
+    export class Model extends VDomModel implements IFilePath.IModel {
+        constructor(document: IDocumentWidget | null) {
+            super();
+
+            this.document = document;
+        }
+
+        get path() {
+            return this._path;
+        }
+
+        get document() {
+            return this._document;
+        }
+
+        set document(document: IDocumentWidget | null) {
+            this._document = document;
+
+            if (this._document === null) {
+                this._path = '';
+            } else {
+                this._path = this._document.context.path;
+
+                this._document.context.pathChanged.connect(this._onPathChange);
+            }
+
+            this.stateChanged.emit(void 0);
+        }
+
+        private _onPathChange = (
+            _documentModel: DocumentRegistry.IContext<DocumentRegistry.IModel>,
+            newPath: string
+        ) => {
+            this._path = newPath;
+
+            this.stateChanged.emit(void 0);
+        };
+
+        private _path: string = '';
+        private _document: IDocumentWidget | null = null;
+    }
+
     export interface IOptions {
-        notebookTracker: INotebookTracker;
-        // imageTracker: IImageTracker;
-        editorTracker: IEditorTracker;
+        shell: ApplicationShell;
     }
 }
+
+export interface IFilePath extends IDisposable {
+    readonly model: IFilePath.IModel | null;
+    readonly modelChanged: ISignal<this, void>;
+}
+
+export namespace IFilePath {
+    export interface IModel {
+        readonly path: string;
+        readonly document: IDocumentWidget | null;
+    }
+}
+
+// tslint:disable-next-line:variable-name
+export const IFilePath = new Token<IFilePath>('jupyterlab-statusbar/IFilePath');
+
+export const filePathItem: JupyterLabPlugin<IFilePath> = {
+    id: 'jupyterlab-statusbar/default-items:file-path-item',
+    autoStart: true,
+    provides: IFilePath,
+    requires: [IDefaultStatusesManager],
+    activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
+        let item = new FilePath({ shell: app.shell });
+
+        manager.addDefaultStatus('file-path-item', item, {
+            align: 'right',
+            priority: 0,
+            isActive: () => {
+                const currentWidget = app.shell.currentWidget;
+                return (
+                    !!currentWidget && currentWidget instanceof DocumentWidget
+                );
+            }
+        });
+
+        return item;
+    }
+};
