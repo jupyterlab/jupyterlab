@@ -7,10 +7,10 @@ import {
     ApplicationShell
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
 import { IObservableMap } from '@jupyterlab/observables';
 import {
@@ -123,13 +123,11 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 }
 
 namespace TabSpace {
-    export class Model implements VDomRenderer.IModel, ITabSpace.IModel {
+    export class Model extends VDomModel implements ITabSpace.IModel {
         constructor(editor: CodeEditor.IEditor | null) {
-            this.editor = editor;
-        }
+            super();
 
-        get stateChanged(): ISignal<this, void> {
-            return this._stateChanged;
+            this.editor = editor;
         }
 
         get editor(): CodeEditor.IEditor | null {
@@ -151,24 +149,11 @@ namespace TabSpace {
                 this._tabSpace = this.editor!.getOption('tabSize');
             }
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         }
 
         get tabSpace() {
             return this._tabSpace;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
         }
 
         private _onSelectionChanged = (
@@ -176,15 +161,14 @@ namespace TabSpace {
             change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
         ) => {
             this._tabSpace = this.editor!.getOption('tabSize');
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _onValueChanged = () => {
             this._tabSpace = this.editor!.getOption('tabSize');
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
-        private _stateChanged: Signal<this, void> = new Signal(this);
-        private _isDisposed: boolean = false;
+
         private _tabSpace: number = 4;
         private _editor: CodeEditor.IEditor | null = null;
     }

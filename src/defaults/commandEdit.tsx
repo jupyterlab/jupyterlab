@@ -13,9 +13,9 @@ import { IDefaultStatusesManager } from './manager';
 
 import { TextItem } from '../component/text';
 
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 // import { CommandRegistry } from '@phosphor/commands';
-import { Signal, ISignal } from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
@@ -76,8 +76,10 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
 }
 
 namespace CommandEdit {
-    export class Model implements VDomRenderer.IModel, ICommandEdit.IModel {
+    export class Model extends VDomModel implements ICommandEdit.IModel {
         constructor(notebook: Notebook | null) {
+            super();
+
             this.notebook = notebook;
         }
 
@@ -103,23 +105,7 @@ namespace CommandEdit {
                 this._notebook.modelContentChanged.connect(this._onChanged);
             }
 
-            this._stateChanged.emit(void 0);
-        }
-        get stateChanged() {
-            return this._stateChanged;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
+            this.stateChanged.emit(void 0);
         }
 
         private _onChanged = (_notebook: Notebook) => {
@@ -128,14 +114,11 @@ namespace CommandEdit {
             } else {
                 this._notebookMode = 'command';
             }
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _notebookMode: NotebookMode = 'command';
         private _notebook: Notebook | null = null;
-
-        private _isDisposed: boolean = false;
-        private _stateChanged: Signal<this, void> = new Signal(this);
     }
 
     export interface IOptions {
