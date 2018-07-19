@@ -134,7 +134,7 @@ namespace Private {
         'However, we cannot vouch for every extension, ' +
         'and some may introduce security risks. ' +
         'Do you want to continue?',
-      buttons: [Dialog.cancelButton(), Dialog.okButton()]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
       if (result.button.accept) {
         return true;
