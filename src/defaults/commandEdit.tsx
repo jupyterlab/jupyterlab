@@ -24,7 +24,15 @@ import { IStatusContext } from '../contexts';
 const CommandEditComponent = (
     props: CommandEditComponent.IProps
 ): React.ReactElement<CommandEditComponent.IProps> => {
-    return <TextItem source={'Mode: ' + props.notebookMode} />;
+    return (
+        <TextItem
+            source={
+                'Mode: ' +
+                props.notebookMode.charAt(0).toUpperCase() +
+                props.notebookMode.slice(1)
+            }
+        />
+    );
 };
 
 namespace CommandEditComponent {

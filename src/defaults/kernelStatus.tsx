@@ -24,7 +24,16 @@ import { IStatusContext } from '../contexts';
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
-    return <TextItem source={props.name + ' | ' + props.status} />;
+    return (
+        <TextItem
+            source={
+                props.name.charAt(0).toUpperCase() +
+                props.name.slice(1) +
+                ' | ' +
+                props.status
+            }
+        />
+    );
 };
 
 namespace KernelStatusComponent {

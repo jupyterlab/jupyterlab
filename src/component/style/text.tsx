@@ -8,7 +8,7 @@ const text = {
     color: '#EEEEEE',
     fontSize: '12px',
     fontFamily:
-        '"HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;',
+        '"HelveticaNeue-Medium", "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;',
     $nest: {
         '&:hover': {
             backgroundColor: '#8A8A8A'
