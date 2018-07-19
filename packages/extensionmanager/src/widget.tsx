@@ -372,7 +372,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </div>
       );
     } else if (!model.query && model.installed.length) {
-      content.push(
+      elements.push(
         <header key="installed-header">
           Installed<button
             className="jp-extensionmanager-refresh"
@@ -382,7 +382,9 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           >
             &#8635;
           </button>
-        </header>,
+        </header>
+      );
+      content.push(
         <ListView
           key="installed"
           entries={model.installed}
@@ -394,8 +396,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         />
       );
     } else if (model.searchError === null) {
+      elements.push(<header key="installable-header">Search results</header>);
       content.push(
-        <header key="installable-header">Search results</header>,
         <ListView
           key="installable"
           entries={model.searchResult}
