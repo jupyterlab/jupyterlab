@@ -301,7 +301,9 @@ function activate(
         </span>
       );
       let copyright = (
-        <span className="jp-About-copyright">© 2018 Project Jupyter</span>
+        <span className="jp-About-copyright">
+          © 2015 Project Jupyter Contributors
+        </span>
       );
       let body = (
         <div className="jp-About-body">
