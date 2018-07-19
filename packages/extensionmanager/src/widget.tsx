@@ -13,6 +13,8 @@ import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
 
+import { isJupyterOrg } from './query';
+
 // TODO: Replace pagination with lazy loading of lower search results
 
 /**
@@ -150,7 +152,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
-  if (Private.isJupyterOrg(entry.name)) {
+  if (isJupyterOrg(entry.name)) {
     flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
     title = `${entry.name} (Developed by Project Jupyter)`;
   }
@@ -519,29 +521,5 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _toggleFocused(): void {
     let focused = document.activeElement === this.inputNode;
     this.toggleClass('p-mod-focused', focused);
-  }
-}
-
-/**
- * A namespace for private functions.
- */
-namespace Private {
-  /**
-   * A list of whitelisted NPM orgs.
-   */
-  const whitelist = ['jupyterlab', 'jupyter-widgets'];
-
-  /**
-   * Check whether the org is a Jupyter one.
-   */
-  export function isJupyterOrg(name: string): boolean {
-    const parts = name.split('/');
-    const first = parts[0];
-    return (
-      parts.length > 1 && // Has a first part
-      first && // with a finite length
-      first[0] === '@' && // corresponding to an org name
-      whitelist.indexOf(first.slice(1)) !== -1 // in the org whitelist.
-    );
   }
 }
