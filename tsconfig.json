@@ -7,6 +7,7 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "preserveWatchOutput": true,
+    "noImplicitThis": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es2015",
@@ -14,7 +15,8 @@
     "lib": ["dom", "es2015"],
     "types": [],
     "jsx": "react",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strict": true
   },
   "include": [
     "./src/**/*.*"

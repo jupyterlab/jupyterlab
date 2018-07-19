@@ -22,6 +22,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
+import { IStatusContext } from '../contexts';
 
 namespace TabSpaceComponent {
     export interface IProps {
@@ -68,7 +69,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     }
 
     private _onNotebookChange = (tracker: INotebookTracker) => {
-        this.model!.editor = tracker.activeCell.editor;
+        this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };
 
     private _onActiveCellChange = (
@@ -184,8 +185,8 @@ namespace TabSpace {
         };
         private _stateChanged: Signal<this, void> = new Signal(this);
         private _isDisposed: boolean = false;
-        private _tabSpace: number;
-        private _editor: CodeEditor.IEditor | null;
+        private _tabSpace: number = 4;
+        private _editor: CodeEditor.IEditor | null = null;
     }
 
     export interface IOptions {
@@ -229,7 +230,11 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
 
         defaultsManager.addDefaultStatus('tab-space-item', item, {
             align: 'right',
-            priority: 1
+            priority: 1,
+            isActive: IStatusContext.delegateActive(app.shell, [
+                { tracker: notebookTracker },
+                { tracker: editorTracker }
+            ])
         });
 
         return item;

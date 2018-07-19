@@ -1,6 +1,5 @@
 import { Token } from '@phosphor/coreutils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
-import { Widget } from '@phosphor/widgets';
 import { IStatusBar } from '../statusBar';
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { ISignal } from '@phosphor/signaling';
@@ -8,6 +7,7 @@ import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import { IObservableSet, ObservableSet } from '../util/observableset';
 import { STATUSBAR_PLUGIN_ID } from '..';
 import { SetExt } from '../util/set';
+import { Widget } from '@phosphor/widgets';
 
 export interface IDefaultStatusesManager {
     readonly enabledChanged: ISignal<
