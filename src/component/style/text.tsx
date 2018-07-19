@@ -1,13 +1,12 @@
 import { style } from 'typestyle';
 
-export const textitem = style({
+const text = {
     minHeight: 'var(--jp-private-menubar-height)',
-    position: 'relative',
     top: '25%',
     display: 'inline-block',
-    textAlign: 'center',
     verticalAlign: 'middle',
     lineHeight: 'var(--jp-private-menubar-height)',
+    alignContent: 'center',
     color: '#EEEEEE',
     fontSize: '12px',
     fontFamily:
@@ -16,12 +15,19 @@ export const textitem = style({
         '&:hover': {
             backgroundColor: '#8A8A8A'
         }
-    },
-    // backgroundPositionY: '5px',
-    // paddingTop: '6px',
-    alignContent: 'center',
-    // marginRight: '4px',
-    // marginLeft: '4px'
+    }
+};
+
+const individual = {
     paddingRight: '10px',
-    paddingLeft: '10px'
-});
+    paddingLeft: '10px',
+    $nest: {
+        '&:hover': {
+            backgroundColor: '#8a8a8a'
+        }
+    }
+};
+
+export const individualText = style(individual, text);
+
+export const textitem = style(text);

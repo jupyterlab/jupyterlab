@@ -8,5 +8,6 @@ export const groupitem = style({
     },
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: '5px'
 });

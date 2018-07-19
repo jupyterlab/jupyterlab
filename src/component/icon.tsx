@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { iconitem } from './style/icon';
+import { individualIcon } from './style/icon';
 
 export namespace IconItem {
     export interface IProps {
@@ -10,6 +10,6 @@ export namespace IconItem {
 
 export class IconItem extends React.Component<IconItem.IProps, {}> {
     render() {
-        return <div className={this.props.source + ' ' + iconitem} />;
+        return <div className={this.props.source + ' ' + individualIcon} />;
     }
 }

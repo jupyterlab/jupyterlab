@@ -26,7 +26,7 @@ const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <GroupItem onClick={props.handleClick}>
+        <GroupItem>
             <TextItem source={props.kernels} />
             <IconItem source={'kernel-item'} />
             <TextItem source={props.terminals} />
