@@ -270,11 +270,9 @@ function activate(
       // Create the header of the about dialog
       let headerLogo = <div className="jp-About-header-logo" />;
       let headerWordmark = <div className="jp-About-header-wordmark" />;
-      let release = 'Beta Release Series';
       let versionNumber = `Version ${info.version}`;
       let versionInfo = (
         <span className="jp-About-version-info">
-          <span className="jp-About-release">{release}</span>
           <span className="jp-About-version">{versionNumber}</span>
         </span>
       );
