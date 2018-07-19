@@ -12,13 +12,13 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { Signal, ISignal } from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
+import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { GroupItem } from '../component/group';
-import { VDomRenderer, InstanceTracker } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 
 // tslint:disable-next-line:variable-name
@@ -74,8 +74,10 @@ class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
 }
 
 namespace FileUpload {
-    export class Model implements VDomRenderer.IModel, IFileUpload.IModel {
+    export class Model extends VDomModel implements IFileUpload.IModel {
         constructor(browserModel: FileBrowserModel | null) {
+            super();
+
             this.browserModel = browserModel;
         }
 
@@ -100,24 +102,7 @@ namespace FileUpload {
                 this._browserModel.uploadChanged.connect(this._uploadChanged);
             }
 
-            this._stateChanged.emit(void 0);
-        }
-
-        get stateChanged() {
-            return this._stateChanged;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
+            this.stateChanged.emit(void 0);
         }
 
         private _uploadChanged = (
@@ -145,14 +130,12 @@ namespace FileUpload {
                 ArrayExt.removeAt(this._progress, idx);
             }
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
-        private _isDisposed: boolean = false;
         private _progress: Array<number> = [];
         private _paths: Array<string> = [];
         private _browserModel: FileBrowserModel | null = null;
-        private _stateChanged: Signal<this, void> = new Signal(this);
     }
 
     export interface IOptions {

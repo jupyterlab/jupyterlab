@@ -7,10 +7,10 @@ import {
     ApplicationShell
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
 import { IObservableMap } from '@jupyterlab/observables';
 import {
@@ -37,10 +37,7 @@ const LineColComponent = (
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
         <div alt-text="Line-Column">
-            {' '}
-            <TextItem
-                source={'Ln ' + props.line + ', Col ' + props.column}
-            />{' '}
+            <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
         </div>
     );
 };
@@ -136,13 +133,11 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 }
 
 namespace LineCol {
-    export class Model implements VDomRenderer.IModel, ILineCol.IModel {
+    export class Model extends VDomModel implements ILineCol.IModel {
         constructor(editor: CodeEditor.IEditor | null) {
-            this.editor = editor;
-        }
+            super();
 
-        get stateChanged(): ISignal<this, void> {
-            return this._stateChanged;
+            this.editor = editor;
         }
 
         get editor(): CodeEditor.IEditor | null {
@@ -165,7 +160,7 @@ namespace LineCol {
                 this._line = pos.line;
             }
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         }
 
         get line(): number {
@@ -176,19 +171,6 @@ namespace LineCol {
             return this._column;
         }
 
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
-        }
-
         private _onSelectionChanged = (
             selections: IObservableMap<CodeEditor.ITextSelection[]>,
             change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
@@ -197,11 +179,9 @@ namespace LineCol {
             this._line = pos.line;
             this._column = pos.column;
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
-        private _stateChanged: Signal<this, void> = new Signal(this);
-        private _isDisposed: boolean = false;
         private _line: number = 0;
         private _column: number = 0;
         private _editor: CodeEditor.IEditor | null = null;

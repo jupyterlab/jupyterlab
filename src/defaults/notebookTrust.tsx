@@ -10,9 +10,9 @@ import {
 import { toArray } from '@phosphor/algorithm';
 import { IDefaultStatusesManager } from './manager';
 import { Cell } from '@jupyterlab/cells';
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { IconItem } from '../component/icon';
 import { IStatusContext } from '../contexts';
@@ -23,33 +23,21 @@ const NotebookTrustComponent = (
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
     if (props.allCellsTrusted || props.activeCellTrusted) {
         return (
-            <div onMouseOver={props.handleClick}>
-                {' '}
-                <IconItem source={'trusted-item'} />{' '}
+            <div>
+                <IconItem source={'trusted-item'} />
             </div>
         );
     } else {
         return (
-            <div onMouseOver={props.handleClick}>
-                {' '}
-                <IconItem source={'not-trusted-item'} />{' '}
+            <div>
+                <IconItem source={'not-trusted-item'} />
             </div>
         );
     }
 };
 
-// tslint:disable-next-line:variable-name
-const NotebookTrustPopUp = () => {
-    return (
-        <div style={{ position: 'absolute', zIndex: 100 }}>
-            <label> this cell is trusted </label>
-        </div>
-    );
-};
-
 namespace NotebookTrustComponent {
     export interface IProps {
-        handleClick: () => void;
         allCellsTrusted: boolean;
         activeCellTrusted: boolean;
     }
@@ -63,7 +51,6 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         this._tracker = opts.tracker;
 
         this._tracker.currentChanged.connect(this._onNotebookChange);
-        this._handleItemClick = this._handleItemClick.bind(this);
         this.model = new NotebookTrust.Model(
             this._tracker.currentWidget && this._tracker.currentWidget.content
         );
@@ -81,18 +68,15 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
     };
 
     render() {
-        const overlay = this.model!.hover ? <NotebookTrustPopUp /> : null;
         if (this.model === null) {
             return null;
         } else {
             return (
                 <div>
-                    {overlay}
                     <NotebookTrustComponent
                         allCellsTrusted={
                             this.model.trustedCells === this.model.totalCells
                         }
-                        handleClick={this._handleItemClick}
                         activeCellTrusted={this.model.activeCellTrusted}
                     />
                 </div>
@@ -100,15 +84,14 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         }
     }
 
-    _handleItemClick = () => {
-        this.model!.hover = true;
-    };
     private _tracker: INotebookTracker;
 }
 
 namespace NotebookTrust {
-    export class Model implements VDomRenderer.IModel, INotebookTrust.IModel {
+    export class Model extends VDomModel implements INotebookTrust.IModel {
         constructor(notebook: Notebook | null) {
+            super();
+
             this.notebook = notebook;
         }
 
@@ -128,25 +111,14 @@ namespace NotebookTrust {
             return this._notebook;
         }
 
-        get hover() {
-            return this._hover;
-        }
-
-        set hover(hover: boolean) {
-            this._hover = hover;
-
-            this._stateChanged.emit(void 0);
-        }
-
         set notebook(model: Notebook | null) {
             this._notebook = model;
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
 
             if (this._notebook === null) {
                 this._trustedCells = 0;
                 this._totalCells = 0;
                 this._activeCellTrusted = false;
-                this._hover = false;
             } else {
                 // Add listeners
                 this._notebook.activeCellChanged.connect(
@@ -167,28 +139,12 @@ namespace NotebookTrust {
                 const { total, trusted } = this._deriveCellTrustState(
                     this._notebook.model
                 );
-                this._hover = false;
+
                 this._totalCells = total;
                 this._trustedCells = trusted;
             }
 
-            this._stateChanged.emit(void 0);
-        }
-
-        get stateChanged(): ISignal<this, void> {
-            return this._stateChanged;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
+            this.stateChanged.emit(void 0);
         }
 
         private _onModelChanged = (notebook: Notebook) => {
@@ -198,7 +154,7 @@ namespace NotebookTrust {
 
             this._totalCells = total;
             this._trustedCells = trusted;
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _onActiveCellChanged = (model: Notebook, cell: Cell | null) => {
@@ -208,7 +164,7 @@ namespace NotebookTrust {
                 this._activeCellTrusted = false;
             }
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _deriveCellTrustState(
@@ -236,10 +192,6 @@ namespace NotebookTrust {
         private _totalCells: number = 0;
         private _activeCellTrusted: boolean = false;
         private _notebook: Notebook | null = null;
-        private _hover: boolean = false;
-
-        private _stateChanged: Signal<this, void> = new Signal(this);
-        private _isDisposed: boolean = false;
     }
 
     export interface IOptions {
@@ -259,7 +211,6 @@ export namespace INotebookTrust {
         readonly activeCellTrusted: boolean;
 
         readonly notebook: Notebook | null;
-        readonly hover: boolean;
     }
 }
 

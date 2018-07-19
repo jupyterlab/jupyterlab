@@ -12,8 +12,8 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { IDefaultStatusesManager } from './manager';
 
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
-import { IClientSession, VDomRenderer } from '@jupyterlab/apputils';
-import { Signal, ISignal } from '@phosphor/signaling';
+import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
@@ -108,8 +108,10 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 }
 
 namespace KernelStatus {
-    export class Model implements VDomRenderer.IModel, IKernelStatus.IModel {
+    export class Model extends VDomModel implements IKernelStatus.IModel {
         constructor(session: IClientSession | null) {
+            super();
+
             this.session = session;
         }
 
@@ -141,24 +143,7 @@ namespace KernelStatus {
                 this._session.kernelChanged.connect(this._onKernelChanged);
             }
 
-            this._stateChanged.emit(void 0);
-        }
-
-        get stateChanged() {
-            return this._stateChanged;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
+            this.stateChanged.emit(void 0);
         }
 
         private _onKernelStatusChanged = (
@@ -166,7 +151,7 @@ namespace KernelStatus {
             status: Kernel.Status
         ) => {
             this._kernelStatus = status;
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _onKernelChanged = (
@@ -182,15 +167,12 @@ namespace KernelStatus {
                 this._kernelName = 'unknown';
             }
 
-            this._stateChanged.emit(void 0);
+            this.stateChanged.emit(void 0);
         };
 
         private _kernelName: string = 'unknown';
         private _kernelStatus: Kernel.Status = 'unknown';
         private _session: IClientSession | null = null;
-
-        private _isDisposed: boolean = false;
-        private _stateChanged: Signal<this, void> = new Signal(this);
     }
 
     export interface IOptions {

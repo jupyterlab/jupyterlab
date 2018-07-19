@@ -15,8 +15,8 @@ import {
     TerminalManager,
     SessionManager
 } from '@jupyterlab/services';
-import { VDomRenderer } from '@jupyterlab/apputils';
-import { Signal, ISignal } from '@phosphor/signaling';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { GroupItem } from '../component/group';
@@ -96,14 +96,15 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
 }
 
 namespace RunningSessions {
-    export class Model implements VDomRenderer.IModel, IRunningSessions.IModel {
+    export class Model extends VDomModel implements IRunningSessions.IModel {
         get kernels() {
             return this._kernels;
         }
 
         set kernels(kernels: number) {
             this._kernels = kernels;
-            this._stateChanged.emit(void 0);
+
+            this.stateChanged.emit(void 0);
         }
 
         get terminals() {
@@ -112,31 +113,12 @@ namespace RunningSessions {
 
         set terminals(terminals: number) {
             this._terminals = terminals;
-            this._stateChanged.emit(void 0);
-        }
 
-        get stateChanged() {
-            return this._stateChanged;
-        }
-
-        get isDisposed() {
-            return this._isDisposed;
-        }
-
-        dispose() {
-            if (this._isDisposed) {
-                return;
-            }
-
-            Signal.clearData(this);
-            this._isDisposed = true;
+            this.stateChanged.emit(void 0);
         }
 
         private _terminals: number = 0;
         private _kernels: number = 0;
-
-        private _isDisposed: boolean = false;
-        private _stateChanged: Signal<this, void> = new Signal(this);
     }
 
     export interface IOptions {
