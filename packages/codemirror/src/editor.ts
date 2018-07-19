@@ -823,6 +823,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this.refresh();
     }
     this.host.classList.add('jp-mod-focused');
+
+    // Update the selections on editor gaining focus because
+    // the onCursorActivity function filters usual cursor events
+    // based on the editor's focus.
+    this._onCursorActivity();
   }
 
   /**
