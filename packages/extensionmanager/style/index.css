@@ -197,6 +197,8 @@
   background-repeat: no-repeat;
   width: 1em;
   display: none;
+  position: relative;
+  top: 3px;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
