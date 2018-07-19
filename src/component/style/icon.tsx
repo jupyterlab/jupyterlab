@@ -12,7 +12,7 @@ export const iconitem = style({
     marginLeft: '5px',
     $nest: {
         '&:hover': {
-            backgroundColor: '#000000'
+            backgroundColor: '#8a8a8a'
         }
     }
 });

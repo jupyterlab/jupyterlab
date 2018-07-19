@@ -18,22 +18,17 @@ import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
 import { VDomRenderer } from '@jupyterlab/apputils';
+import { GroupItem } from '../component/group';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
     props: FileUploadComponent.IProps
 ): React.ReactElement<FileUploadComponent.IProps> => {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center'
-            }}
-        >
+        <GroupItem>
             <TextItem source={'Uploading'} />
             <ProgressBar percentage={props.upload} />
-        </div>
+        </GroupItem>
     );
 };
 
