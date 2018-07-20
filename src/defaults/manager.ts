@@ -2,26 +2,14 @@ import { Token } from '@phosphor/coreutils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IStatusBar } from '../statusBar';
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ISignal } from '@phosphor/signaling';
-import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
-import { IObservableSet, ObservableSet } from '../util/observableset';
 import { STATUSBAR_PLUGIN_ID } from '..';
 import { SetExt } from '../util/set';
 import { Widget } from '@phosphor/widgets';
+import { Signal } from '@phosphor/signaling';
+import { IDisposable } from '@phosphor/disposable';
+import { SignalExt } from '../util/signal';
 
-export interface IDefaultStatusesManager {
-    readonly enabledChanged: ISignal<
-        ObservableSet<IDefaultStatusesManager.IItem>,
-        IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
-    >;
-
-    readonly itemAdded: ISignal<
-        ObservableMap<IDefaultStatusesManager.IItem>,
-        IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
-    >;
-
-    readonly allItems: IDefaultStatusesManager.IItem[];
-
+export interface IDefaultsManager {
     addDefaultStatus(
         id: string,
         widget: Widget,
@@ -29,7 +17,7 @@ export interface IDefaultStatusesManager {
     ): void;
 }
 
-export namespace IDefaultStatusesManager {
+export namespace IDefaultsManager {
     export interface IItem {
         id: string;
         item: Widget;
@@ -38,20 +26,21 @@ export namespace IDefaultStatusesManager {
 }
 
 // tslint:disable-next-line:variable-name
-export const IDefaultStatusesManager = new Token<IDefaultStatusesManager>(
+export const IDefaultsManager = new Token<IDefaultsManager>(
     'jupyterlab-statusbar/IDefaultStatusesManager'
 );
 
-export class DefaultStatusesManager implements IDefaultStatusesManager {
-    constructor(opts: DefaultStatusesManager.IOptions) {
+class DefaultsManager implements IDefaultsManager, IDisposable {
+    constructor(opts: DefaultsManager.IOptions) {
         this._settings = opts.settings;
+        this._statusBar = opts.statusBar;
 
         this._settings
             .load(STATUSBAR_PLUGIN_ID)
             .then(settings => {
-                settings.changed.connect(this.onSettingsUpdated);
+                settings.changed.connect(this._onSettingsUpdated);
 
-                this.onSettingsUpdated(settings);
+                this._onSettingsUpdated(settings);
             })
             .catch((reason: Error) => {
                 console.error(reason.message);
@@ -60,25 +49,58 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
 
     addDefaultStatus(
         id: string,
-        widget: Widget,
+        item: Widget,
         opts: IStatusBar.IItemOptions
     ): void {
-        let defaultItem = {
+        // Combine settings and provided isActive function
+        if (opts.isActive === undefined) {
+            opts.isActive = () => {
+                return this._enabledStatusIds.has(id);
+            };
+        } else {
+            const prevIsActive = opts.isActive;
+            opts.isActive = () => {
+                return prevIsActive() && this._enabledStatusIds.has(id);
+            };
+        }
+
+        // Combine stateChanged of settings with provided stateChanged
+        const stateChanged: Signal<Widget, void> = new Signal(item);
+        if (opts.stateChanged === undefined) {
+            opts.stateChanged = stateChanged;
+        } else {
+            opts.stateChanged = SignalExt.combine(
+                this,
+                opts.stateChanged,
+                stateChanged
+            );
+        }
+
+        const defaultItem = {
             id,
-            item: widget,
-            opts
+            item,
+            opts,
+            stateChanged
         };
 
+        this._statusBar.registerStatusItem(id, item, opts);
         this._allDefaultStatusItems.set(id, defaultItem);
-
-        // If the current list of default names contains the new name,
-        // then add the new item to the enabled list
-        if (this._enabledStatusNames.has(id)) {
-            this._enabledStatusItems.add(defaultItem);
-        }
     }
 
-    onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+    get isDisposed() {
+        return this._isDisposed;
+    }
+
+    dispose() {
+        if (this.isDisposed) {
+            return;
+        }
+
+        Signal.clearData(this);
+        this._isDisposed = true;
+    }
+
+    private _onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
         let rawEnabledItems = settings.get('enabledDefaultItems').composite as
             | string[]
             | null;
@@ -92,74 +114,58 @@ export class DefaultStatusesManager implements IDefaultStatusesManager {
         let newEnabledItems = new Set(rawEnabledItems);
 
         let idsToRemove = SetExt.difference(
-            this._enabledStatusNames,
+            this._enabledStatusIds,
             newEnabledItems
         );
 
         let idsToAdd = SetExt.difference(
             newEnabledItems,
-            this._enabledStatusNames
+            this._enabledStatusIds
         );
 
-        let itemsToRemove = [...idsToRemove]
-            .map(element => this._allDefaultStatusItems.get(element))
-            .filter(Private.notEmpty);
+        SetExt.deleteAll(this._enabledStatusIds, [...idsToRemove]);
+        SetExt.addAll(this._enabledStatusIds, [...idsToAdd]);
 
-        let itemsToAdd = [...idsToAdd]
-            .map(element => this._allDefaultStatusItems.get(element))
-            .filter(Private.notEmpty);
-
-        this._enabledStatusItems.deleteAll(itemsToRemove);
-        this._enabledStatusItems.addAll(itemsToAdd);
-
-        this._enabledStatusNames = newEnabledItems;
+        [...idsToAdd, ...idsToRemove].forEach(val => {
+            this._allDefaultStatusItems.get(val)!.stateChanged.emit(void 0);
+        });
     };
 
-    get enabledChanged() {
-        return this._enabledStatusItems.changed;
-    }
+    private _allDefaultStatusItems: Map<
+        string,
+        DefaultsManager.IItem
+    > = new Map();
+    private _enabledStatusIds: Set<string> = new Set();
+    private _isDisposed: boolean = false;
 
-    get itemAdded() {
-        return this._allDefaultStatusItems.changed;
-    }
-
-    get allItems(): IDefaultStatusesManager.IItem[] {
-        return this._allDefaultStatusItems.values();
-    }
-
-    private _allDefaultStatusItems: ObservableMap<
-        IDefaultStatusesManager.IItem
-    > = new ObservableMap();
-    private _enabledStatusNames: Set<string> = new Set();
-    private _enabledStatusItems: ObservableSet<
-        IDefaultStatusesManager.IItem
-    > = new ObservableSet();
     private _settings: ISettingRegistry;
+    private _statusBar: IStatusBar;
 }
 
-export namespace DefaultStatusesManager {
+namespace DefaultsManager {
     export interface IOptions {
         settings: ISettingRegistry;
+        statusBar: IStatusBar;
+    }
+
+    export interface IItem extends IDefaultsManager.IItem {
+        stateChanged: Signal<any, void>;
     }
 }
 
 /**
  * Initialization data for the statusbar extension.
  */
-export const defaultsManager: JupyterLabPlugin<IDefaultStatusesManager> = {
+export const defaultsManager: JupyterLabPlugin<IDefaultsManager> = {
     id: 'jupyterlab-statusbar/defaults-manager',
-    provides: IDefaultStatusesManager,
+    provides: IDefaultsManager,
     autoStart: true,
-    requires: [ISettingRegistry],
-    activate: (_app: JupyterLab, settings: ISettingRegistry) => {
-        return new DefaultStatusesManager({ settings });
+    requires: [ISettingRegistry, IStatusBar],
+    activate: (
+        _app: JupyterLab,
+        settings: ISettingRegistry,
+        statusBar: IStatusBar
+    ) => {
+        return new DefaultsManager({ settings, statusBar });
     }
 };
-
-export namespace Private {
-    export function notEmpty<TValue>(
-        value: TValue | null | undefined
-    ): value is TValue {
-        return value !== null && value !== undefined;
-    }
-}

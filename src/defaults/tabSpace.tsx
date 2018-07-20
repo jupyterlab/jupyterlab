@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 
@@ -204,10 +204,10 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
     id: 'jupyterlab-statusbar/default-items:tab-space',
     autoStart: true,
     provides: ITabSpace,
-    requires: [IDefaultStatusesManager, INotebookTracker, IEditorTracker],
+    requires: [IDefaultsManager, INotebookTracker, IEditorTracker],
     activate: (
         app: JupyterLab,
-        defaultsManager: IDefaultStatusesManager,
+        defaultsManager: IDefaultsManager,
         notebookTracker: INotebookTracker,
         editorTracker: IEditorTracker
     ) => {

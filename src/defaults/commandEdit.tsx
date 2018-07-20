@@ -9,7 +9,7 @@ import {
     NotebookMode
 } from '@jupyterlab/notebook';
 
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 
 import { TextItem } from '../component/text';
 
@@ -148,10 +148,10 @@ export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
     id: 'jupyterlab-statusbar/default-items:command-edit',
     autoStart: true,
     provides: ICommandEdit,
-    requires: [IDefaultStatusesManager, INotebookTracker],
+    requires: [IDefaultsManager, INotebookTracker],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         tracker: INotebookTracker
     ) => {
         const item = new CommandEdit({

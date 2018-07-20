@@ -5,7 +5,7 @@ import {
     JupyterLab,
     ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 import { TextItem } from '../component/text';
 import {
     DocumentRegistry,
@@ -141,8 +141,8 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
     id: 'jupyterlab-statusbar/default-items:file-path-item',
     autoStart: true,
     provides: IFilePath,
-    requires: [IDefaultStatusesManager],
-    activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
+    requires: [IDefaultsManager],
+    activate: (app: JupyterLab, manager: IDefaultsManager) => {
         let item = new FilePath({ shell: app.shell });
 
         manager.addDefaultStatus('file-path-item', item, {
