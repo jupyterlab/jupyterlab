@@ -19,6 +19,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -27,7 +28,7 @@ const CommandEditComponent = (
     return (
         <TextItem
             title={`Notebook is in ${props.notebookMode} mode`}
-            source={'Mode: ' + props.notebookMode}
+            source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
         />
     );
 };

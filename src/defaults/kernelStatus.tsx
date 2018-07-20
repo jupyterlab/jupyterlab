@@ -19,6 +19,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -27,7 +28,11 @@ const KernelStatusComponent = (
     return (
         <TextItem
             title="Current active kernel"
-            source={props.name + ' | ' + props.status}
+            source={
+                TextFunctions.titleCase(props.name) +
+                ' | ' +
+                TextFunctions.titleCase(props.status)
+            }
         />
     );
 };
@@ -70,7 +75,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
             );
         }
     }
-
     private _onNotebookChange = (
         _tracker: INotebookTracker,
         panel: NotebookPanel | null
