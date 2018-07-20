@@ -127,7 +127,10 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
         SetExt.addAll(this._enabledStatusIds, [...idsToAdd]);
 
         [...idsToAdd, ...idsToRemove].forEach(val => {
-            this._allDefaultStatusItems.get(val)!.stateChanged.emit(void 0);
+            const statusItem = this._allDefaultStatusItems.get(val);
+            if (statusItem !== undefined) {
+                statusItem.stateChanged.emit(void 0);
+            }
         });
     };
 
