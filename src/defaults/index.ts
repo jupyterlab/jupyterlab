@@ -7,3 +7,4 @@ export * from './commandEdit';
 export * from './runningSessions';
 export * from './filePath';
 export * from './tabSpace';
+export * from './editorSyntax';
