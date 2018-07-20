@@ -17,7 +17,8 @@ import {
     commandEditItem,
     runningSessionsItem,
     filePathItem,
-    tabSpaceItem
+    tabSpaceItem,
+    editorSyntax
 } from './defaults';
 
 export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar:plugin';
@@ -45,7 +46,8 @@ const plugins: JupyterLabPlugin<any>[] = [
     commandEditItem,
     runningSessionsItem,
     filePathItem,
-    tabSpaceItem
+    tabSpaceItem,
+    editorSyntax
 ];
 
 export default plugins;

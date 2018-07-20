@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { IconItem } from '../component/icon';
 import { TextItem } from '../component/text';
 
