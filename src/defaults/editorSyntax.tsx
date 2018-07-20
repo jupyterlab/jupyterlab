@@ -81,7 +81,7 @@ namespace EditorSyntax {
                 this._mode = '';
             } else {
                 const spec = Mode.findByMIME(this._editor.model.mimeType);
-                this._mode = spec.mode;
+                this._mode = spec.name || spec.mode;
 
                 this._editor.model.mimeTypeChanged.connect(
                     this._onMIMETypeChange
@@ -96,7 +96,7 @@ namespace EditorSyntax {
             change: IChangedArgs<string>
         ) => {
             const spec = Mode.findByMIME(change.newValue);
-            this._mode = spec.mode;
+            this._mode = spec.name || spec.mode;
 
             this.stateChanged.emit(void 0);
         };

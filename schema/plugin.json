@@ -9,12 +9,15 @@
             "title": "Default Status Items",
             "description": "Which default items should appear in the status bar",
             "default": [
-                "command-edit-status-item",
+                "command-edit-item",
+                "editor-syntax-item",
+                "file-path-item",
                 "file-upload-item",
-                "notebook-trust-item",
                 "kernel-status-item",
                 "line-col-item",
-                "running-sessions-item"
+                "notebook-trust-item",
+                "running-sessions-item",
+                "tab-space-item"
             ]
         }
     },
