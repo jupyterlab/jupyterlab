@@ -87,9 +87,9 @@
 
 .jp-HomeIcon {
   background-image: var(--jp-icon-home);
-  min-width: 14px;
-  min-height: 14px;
-  background-size: 14px;
+  min-width: 16px;
+  min-height: 16px;
+  background-size: 16px;
   vertical-align: sub;
 }
 
