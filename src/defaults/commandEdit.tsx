@@ -27,6 +27,7 @@ const CommandEditComponent = (
 ): React.ReactElement<CommandEditComponent.IProps> => {
     return (
         <TextItem
+            title={`Notebook is in ${props.notebookMode} mode`}
             source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
         />
     );
@@ -34,10 +35,7 @@ const CommandEditComponent = (
 
 namespace CommandEditComponent {
     export interface IProps {
-        // handleClick: () => void;
         notebookMode: NotebookMode;
-        // tracker: INotebookTracker;
-        // commands: CommandRegistry;
     }
 }
 
@@ -46,7 +44,6 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
     constructor(opts: CommandEdit.IOptions) {
         super();
         this._tracker = opts.tracker;
-        // this._commands = opts.commands;
 
         this._tracker.currentChanged.connect(this._onNotebookChange);
 
@@ -77,7 +74,6 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
     };
 
     private _tracker: INotebookTracker;
-    // private _commands: CommandRegistry;
 }
 
 namespace CommandEdit {
@@ -128,7 +124,6 @@ namespace CommandEdit {
 
     export interface IOptions {
         tracker: INotebookTracker;
-        // commands: CommandRegistry;
     }
 }
 

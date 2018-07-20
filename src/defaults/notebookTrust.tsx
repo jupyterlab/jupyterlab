@@ -21,15 +21,33 @@ import { IStatusContext } from '../contexts';
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
-    if (props.allCellsTrusted || props.activeCellTrusted) {
+    if (props.allCellsTrusted) {
         return (
-            <div>
+            <div
+                title={`Notebook trusted: ${props.trustedCells} of ${
+                    props.totalCells
+                } cells trusted`}
+            >
+                <IconItem source={'trusted-item'} />
+            </div>
+        );
+    } else if (props.activeCellTrusted) {
+        return (
+            <div
+                title={`Active cell trusted: ${props.trustedCells} of ${
+                    props.totalCells
+                } cells trusted`}
+            >
                 <IconItem source={'trusted-item'} />
             </div>
         );
     } else {
         return (
-            <div>
+            <div
+                title={`Notebook not trusted: ${props.trustedCells} of ${
+                    props.totalCells
+                } cells trusted`}
+            >
                 <IconItem source={'not-trusted-item'} />
             </div>
         );
@@ -40,6 +58,8 @@ namespace NotebookTrustComponent {
     export interface IProps {
         allCellsTrusted: boolean;
         activeCellTrusted: boolean;
+        totalCells: number;
+        trustedCells: number;
     }
 }
 
@@ -78,6 +98,8 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
                             this.model.trustedCells === this.model.totalCells
                         }
                         activeCellTrusted={this.model.activeCellTrusted}
+                        totalCells={this.model.totalCells}
+                        trustedCells={this.model.trustedCells}
                     />
                 </div>
             );

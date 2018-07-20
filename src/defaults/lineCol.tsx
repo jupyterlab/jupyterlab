@@ -36,7 +36,7 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div alt-text="Line-Column">
+        <div title="Go to line number">
             <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
         </div>
     );
