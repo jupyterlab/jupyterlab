@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { each, map, toArray } from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
 
 import { Message } from '@phosphor/messaging';
 
@@ -195,63 +195,62 @@ describe('@jupyterlab/apputils', () => {
       });
 
       context('contextmenu', () => {
-        it('should cancel context menu events', () => {
-          let promise = dialog.launch().then(result => {
-            expect(result.button.accept).to.equal(false);
-          });
-          waitForDialog().then(() => {
-            let node = document.body.getElementsByClassName('jp-Dialog')[0];
-            let evt = generate('contextmenu');
-            let cancelled = !node.dispatchEvent(evt);
-            expect(cancelled).to.equal(true);
-            simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-          });
-          return promise;
+        it('should cancel context menu events', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+
+          const canceled = !dialog.node.dispatchEvent(generate('contextmenu'));
+
+          expect(canceled).to.equal(true);
+          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          expect((await prompt).button.accept).to.equal(false);
         });
       });
 
       context('click', () => {
-        it('should prevent clicking outside of the content area', () => {
-          let promise = dialog.launch();
-          waitForDialog().then(() => {
-            let evt = generate('click');
-            let cancelled = !dialog.node.dispatchEvent(evt);
-            expect(cancelled).to.equal(true);
-            dialog.resolve();
-          });
-          return promise;
+        it('should prevent clicking outside of the content area', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+
+          const canceled = !dialog.node.dispatchEvent(generate('click'));
+
+          expect(canceled).to.equal(true);
+          dialog.resolve();
+          await prompt;
         });
 
-        it('should resolve a clicked button', () => {
-          let promise = dialog.launch().then(result => {
-            expect(result.button.accept).to.equal(false);
-          });
-          waitForDialog().then(() => {
-            let node = dialog.node.querySelector('.jp-mod-reject');
-            simulate(node, 'click');
-          });
-          return promise;
+        it('should resolve a clicked button', async () => {
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          simulate(dialog.node.querySelector('.jp-mod-reject'), 'click');
+          expect((await prompt).button.accept).to.equal(false);
         });
       });
 
       context('focus', () => {
-        it('should focus the default button when focus leaves the dialog', () => {
-          let target = document.createElement('div');
+        it('should focus the default button when focus leaves the dialog', async () => {
+          const host = document.createElement('div');
+          const target = document.createElement('div');
+          const dialog = new TestDialog({ host });
+
           target.tabIndex = -1;
           document.body.appendChild(target);
-          let host = document.createElement('div');
           document.body.appendChild(host);
-          dialog = new TestDialog({ host });
-          let promise = dialog.launch();
-          waitForDialog().then(() => {
-            simulate(target, 'focus');
-            expect(document.activeElement).to.not.equal(target);
-            expect(document.activeElement.className).to.contain(
-              'jp-mod-accept'
-            );
-            dialog.resolve();
-          });
-          return promise;
+          target.focus();
+          expect(document.activeElement).to.equal(target);
+
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          simulate(target, 'focus');
+          expect(document.activeElement).to.not.equal(target);
+          expect(document.activeElement.className).to.contain('jp-mod-accept');
+          dialog.resolve();
+          await prompt;
+          dialog.dispose();
         });
       });
     });
@@ -260,10 +259,9 @@ describe('@jupyterlab/apputils', () => {
       it('should attach event listeners', () => {
         Widget.attach(dialog, document.body);
         expect(dialog.methods).to.contain('onAfterAttach');
-        let events = ['keydown', 'contextmenu', 'click', 'focus'];
-        each(events, evt => {
-          simulate(dialog.node, evt);
-          expect(dialog.events).to.contain(evt);
+        ['keydown', 'contextmenu', 'click', 'focus'].forEach(event => {
+          simulate(dialog.node, event);
+          expect(dialog.events).to.contain(event);
         });
       });
 
@@ -273,16 +271,16 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should focus the primary element', () => {
-        let body = (
+        const body = (
           <div>
             <input type={'text'} />
           </div>
         );
-        dialog = new TestDialog({ body, focusNodeSelector: 'input' });
+        const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
+
         Widget.attach(dialog, document.body);
-        expect((document.activeElement as HTMLElement).localName).to.equal(
-          'input'
-        );
+        expect(document.activeElement.localName).to.equal('input');
+        dialog.dispose();
       });
     });
 
@@ -292,15 +290,15 @@ describe('@jupyterlab/apputils', () => {
         Widget.detach(dialog);
         expect(dialog.methods).to.contain('onAfterDetach');
         dialog.events = [];
-        let events = ['keydown', 'contextmenu', 'click', 'focus'];
-        each(events, evt => {
-          simulate(dialog.node, evt);
-          expect(dialog.events).to.not.contain(evt);
+        ['keydown', 'contextmenu', 'click', 'focus'].forEach(event => {
+          simulate(dialog.node, event);
+          expect(dialog.events).to.not.contain(event);
         });
       });
 
       it('should return focus to the original focused element', () => {
-        let input = document.createElement('input');
+        const input = document.createElement('input');
+
         document.body.appendChild(input);
         input.focus();
         Widget.attach(dialog, document.body);
@@ -311,14 +309,12 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#onCloseRequest()', () => {
-      it('should reject an existing promise', () => {
-        let promise = dialog.launch().then(result => {
-          expect(result.button.accept).to.equal(false);
-        });
-        waitForDialog().then(() => {
-          dialog.close();
-        });
-        return promise;
+      it('should reject an existing promise', async () => {
+        const prompt = dialog.launch();
+
+        await waitForDialog();
+        dialog.close();
+        expect((await prompt).button.accept).to.equal(false);
       });
     });
 
@@ -343,21 +339,22 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#createHeader()', () => {
         it('should create the header of the dialog', () => {
-          let widget = renderer.createHeader('foo');
+          const widget = renderer.createHeader('foo');
+
           expect(widget.hasClass('jp-Dialog-header')).to.equal(true);
         });
       });
 
       describe('#createBody()', () => {
         it('should create the body from a string', () => {
-          let widget = renderer.createBody('foo');
+          const widget = renderer.createBody('foo');
+
           expect(widget.hasClass('jp-Dialog-body')).to.equal(true);
-          let node = widget.node.firstChild;
-          expect(node.textContent).to.equal('foo');
+          expect(widget.node.firstChild.textContent).to.equal('foo');
         });
 
         it('should create the body from a virtual node', () => {
-          let vnode = (
+          const vnode = (
             <div>
               <input type={'text'} />
               <select>
@@ -366,19 +363,21 @@ describe('@jupyterlab/apputils', () => {
               <button />
             </div>
           );
-          let widget = renderer.createBody(vnode);
+          const widget = renderer.createBody(vnode);
+          const button = widget.node.querySelector('button');
+          const input = widget.node.querySelector('input');
+          const select = widget.node.querySelector('select');
+
           Widget.attach(widget, document.body);
-          let button = widget.node.querySelector('button');
           expect(button.className).to.contain('jp-mod-styled');
-          let input = widget.node.querySelector('input');
           expect(input.className).to.contain('jp-mod-styled');
-          let select = widget.node.querySelector('select');
           expect(select.className).to.contain('jp-mod-styled');
           widget.dispose();
         });
 
         it('should create the body from a widget', () => {
-          let body = new Widget();
+          const body = new Widget();
+
           renderer.createBody(body);
           expect(body.hasClass('jp-Dialog-body')).to.equal(true);
         });
@@ -386,17 +385,17 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#createFooter()', () => {
         it('should create the footer of the dialog', () => {
-          let buttons = [Dialog.okButton, { label: 'foo' }] as Dialog.IButton[];
-          let nodes = toArray(
-            map(buttons, button => {
-              return renderer.createButtonNode(button);
-            })
-          );
-          let footer = renderer.createFooter(nodes);
+          const buttons = [Dialog.okButton, { label: 'foo' }];
+          const nodes = buttons.map((button: Dialog.IButton) => {
+            return renderer.createButtonNode(button);
+          });
+          const footer = renderer.createFooter(nodes);
+          const buttonNodes = footer.node.querySelectorAll('button');
+
           expect(footer.hasClass('jp-Dialog-footer')).to.equal(true);
           expect(footer.node.contains(nodes[0])).to.equal(true);
           expect(footer.node.contains(nodes[1])).to.equal(true);
-          let buttonNodes = footer.node.querySelectorAll('button');
+
           // tslint:disable-next-line
           expect(buttonNodes.length).to.be.ok;
           each(buttonNodes, (node: Element) => {
@@ -460,57 +459,65 @@ describe('@jupyterlab/apputils', () => {
       expect((await dialog).button.accept).to.equal(false);
     });
 
-    it('should accept dialog options', () => {
-      let node = document.createElement('div');
+    it('should accept dialog options', async () => {
+      const node = document.createElement('div');
+
       document.body.appendChild(node);
-      let options = {
+
+      const prompt = showDialog({
         title: 'foo',
         body: 'Hello',
         host: node,
         defaultButton: 0,
         buttons: [Dialog.cancelButton(), Dialog.okButton()]
-      };
-      let promise = showDialog(options).then(result => {
-        expect(result.button.accept).to.equal(false);
-        expect(result.value).to.equal(null);
       });
-      acceptDialog();
-      return promise;
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).to.equal(false);
+      expect(result.value).to.equal(null);
+      document.body.removeChild(node);
     });
 
-    it('should accept a virtualdom body', () => {
-      let body = (
+    it('should accept a virtualdom body', async () => {
+      const body = (
         <div>
           <input />
           <select />
         </div>
       );
-      let promise = showDialog({ body }).then(result => {
-        expect(result.button.accept).to.equal(true);
-        expect(result.value).to.equal(null);
-      });
-      acceptDialog();
-      return promise;
+      const prompt = showDialog({ body });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).to.equal(true);
+      expect(result.value).to.equal(null);
     });
 
-    it('should accept a widget body', () => {
-      let body = new Widget();
-      let promise = showDialog({ body }).then(result => {
-        expect(result.button.accept).to.equal(true);
-        expect(result.value).to.equal(null);
-      });
-      acceptDialog();
-      return promise;
+    it('should accept a widget body', async () => {
+      const prompt = showDialog({ body: new Widget() });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).to.equal(true);
+      expect(result.value).to.equal(null);
     });
 
-    it('should give the value from the widget', () => {
-      let body = new ValueWidget();
-      let promise = showDialog({ body }).then(result => {
-        expect(result.button.accept).to.equal(true);
-        expect(result.value).to.equal('foo');
-      });
-      acceptDialog();
-      return promise;
+    it('should give the value from the widget', async () => {
+      const prompt = showDialog({ body: new ValueWidget() });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).to.equal(true);
+      expect(result.value).to.equal('foo');
     });
   });
 });
