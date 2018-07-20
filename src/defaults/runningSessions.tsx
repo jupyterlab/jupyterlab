@@ -26,7 +26,7 @@ const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
+        <div onClick={props.handleClick} title="Number of active sessions">
             <GroupItem>
                 <TextItem source={props.kernels} />
                 <IconItem source={'kernel-item'} />

@@ -16,6 +16,7 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 namespace FilePathComponent {
     export interface IProps {
@@ -27,7 +28,9 @@ namespace FilePathComponent {
 const FilePathComponent = (
     props: FilePathComponent.IProps
 ): React.ReactElement<FilePathComponent.IProps> => {
-    return <TextItem source={props.path} />;
+    return (
+        <TextItem title={props.path} source={PathExt.basename(props.path)} />
+    );
 };
 
 class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {

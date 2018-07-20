@@ -24,7 +24,12 @@ import { IStatusContext } from '../contexts';
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
-    return <TextItem source={props.name + ' | ' + props.status} />;
+    return (
+        <TextItem
+            title="Current active kernel"
+            source={props.name + ' | ' + props.status}
+        />
+    );
 };
 
 namespace KernelStatusComponent {
@@ -33,6 +38,7 @@ namespace KernelStatusComponent {
         status: Kernel.Status;
     }
 }
+
 class KernelStatus extends VDomRenderer<KernelStatus.Model>
     implements IKernelStatus {
     constructor(opts: KernelStatus.IOptions) {

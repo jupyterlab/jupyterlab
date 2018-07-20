@@ -34,7 +34,12 @@ namespace TabSpaceComponent {
 const TabSpaceComponent = (
     props: TabSpaceComponent.IProps
 ): React.ReactElement<TabSpaceComponent.IProps> => {
-    return <TextItem source={'Spaces: ' + props.tabSpace} />;
+    return (
+        <TextItem
+            title="Set indentation spacing"
+            source={'Spaces: ' + props.tabSpace}
+        />
+    );
 };
 
 class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
