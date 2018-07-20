@@ -368,7 +368,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#restartKernel()', () => {
+    describe('.restartKernel()', () => {
       it('should restart if the user accepts the dialog', async () => {
         let called = false;
 
@@ -404,7 +404,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#getDefaultKernel()', () => {
+    describe('.getDefaultKernel()', () => {
       beforeEach(() => {
         session.dispose();
       });
@@ -472,7 +472,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#populateKernelSelect()', () => {
+    describe('.populateKernelSelect()', () => {
       beforeEach(() => {
         session.dispose();
       });

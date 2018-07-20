@@ -1,5 +1,5 @@
 {
-  "rulesDirectory": ["tslint-plugin-prettier", "tslint-react"],
+  "rulesDirectory": ["tslint-plugin-prettier"],
   "rules": {
     "prettier": [true, { "singleQuote": true }],
     "align": [true, "parameters", "statements"],
