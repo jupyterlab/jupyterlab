@@ -11,7 +11,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
-import { IChangedArgs } from '../../node_modules/@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 namespace EditorSyntaxComponent {
     export interface IProps {
