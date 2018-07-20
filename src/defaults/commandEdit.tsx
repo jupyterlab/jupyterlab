@@ -19,12 +19,17 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
     props: CommandEditComponent.IProps
 ): React.ReactElement<CommandEditComponent.IProps> => {
-    return <TextItem source={'Mode: ' + props.notebookMode} />;
+    return (
+        <TextItem
+            source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
+        />
+    );
 };
 
 namespace CommandEditComponent {

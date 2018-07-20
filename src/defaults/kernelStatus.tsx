@@ -19,12 +19,21 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
-    return <TextItem source={props.name + ' | ' + props.status} />;
+    return (
+        <TextItem
+            source={
+                TextFunctions.titleCase(props.name) +
+                ' | ' +
+                TextFunctions.titleCase(props.status)
+            }
+        />
+    );
 };
 
 namespace KernelStatusComponent {
@@ -64,7 +73,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
             );
         }
     }
-
     private _onNotebookChange = (
         _tracker: INotebookTracker,
         panel: NotebookPanel | null
