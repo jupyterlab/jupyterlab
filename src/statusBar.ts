@@ -4,8 +4,6 @@ import { Token } from '@phosphor/coreutils';
 
 import { ApplicationShell } from '@jupyterlab/application';
 import { ArrayExt } from '@phosphor/algorithm';
-import { IDefaultsManager } from './defaults';
-import { IObservableMap } from '@jupyterlab/observables';
 import { ISignal } from '@phosphor/signaling';
 
 // tslint:disable-next-line:variable-name
@@ -46,7 +44,6 @@ export class StatusBar extends Widget implements IStatusBar {
         super();
 
         this._host = options.host;
-        this._defaultManager = options.defaultManager;
 
         this.id = STATUS_BAR_ID;
         this.addClass(STATUS_BAR_CLASS);
@@ -71,14 +68,6 @@ export class StatusBar extends Widget implements IStatusBar {
         rootLayout.addWidget(rightPanel);
 
         this._host.addToBottomArea(this);
-
-        this._defaultManager.itemAdded.connect(this._onDefaultItemAdd);
-        this._defaultManager.allItems.forEach(elem => {
-            const { id, item, opts } = elem;
-
-            this.registerStatusItem(id, item, opts);
-        });
-
         this._host.currentChanged.connect(this._onAppShellCurrentChanged);
     }
 
@@ -157,21 +146,6 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._host;
     }
 
-    get defaultManager(): IDefaultsManager {
-        return this._defaultManager;
-    }
-
-    private _onDefaultItemAdd = (
-        manager: IDefaultsManager,
-        change: IObservableMap.IChangedArgs<IDefaultsManager.IItem>
-    ) => {
-        if (change.newValue !== undefined) {
-            const { id, item, opts } = change.newValue;
-
-            this.registerStatusItem(id, item, opts);
-        }
-    };
-
     private _findInsertIndex(
         side: StatusBar.IRankItem[],
         newItem: StatusBar.IRankItem
@@ -210,7 +184,6 @@ export class StatusBar extends Widget implements IStatusBar {
     private _statusIds: Array<string> = [];
 
     private _host: ApplicationShell;
-    private _defaultManager: IDefaultsManager;
 
     private _leftSide: Panel;
     private _middlePanel: Panel;
@@ -228,7 +201,6 @@ export namespace StatusBar {
      */
     export interface IOptions {
         host: ApplicationShell;
-        defaultManager: IDefaultsManager;
     }
 
     export interface IItem {
