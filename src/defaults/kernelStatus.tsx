@@ -19,6 +19,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -27,10 +28,9 @@ const KernelStatusComponent = (
     return (
         <TextItem
             source={
-                props.name.charAt(0).toUpperCase() +
-                props.name.slice(1) +
+                TextFunctions.titleCase(props.name) +
                 ' | ' +
-                props.status
+                TextFunctions.titleCase(props.status)
             }
         />
     );
@@ -73,7 +73,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
             );
         }
     }
-
     private _onNotebookChange = (
         _tracker: INotebookTracker,
         panel: NotebookPanel | null

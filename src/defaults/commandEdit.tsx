@@ -19,6 +19,7 @@ import { Signal, ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
+import { TextFunctions } from '../util/format';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -26,11 +27,7 @@ const CommandEditComponent = (
 ): React.ReactElement<CommandEditComponent.IProps> => {
     return (
         <TextItem
-            source={
-                'Mode: ' +
-                props.notebookMode.charAt(0).toUpperCase() +
-                props.notebookMode.slice(1)
-            }
+            source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
         />
     );
 };
