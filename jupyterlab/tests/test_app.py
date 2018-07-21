@@ -42,6 +42,13 @@ def _create_notebook_dir():
     return root_dir
 
 
+def _create_workspaces_dir():
+    """Create a temporary directory for workspaces."""
+    root_dir = tempfile.mkdtemp(prefix='mock_workspaces')
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
 def _install_kernels():
     # Install echo and ipython kernels - should be done after env patch
     kernel_json = {
@@ -103,8 +110,9 @@ class _test_env(object):
 class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
-    notebook_dir = Unicode(_create_notebook_dir())
     allow_origin = Unicode('*')
+    notebook_dir = Unicode(_create_notebook_dir())
+    workspaces_dir = Unicode(_create_workspaces_dir())
 
     def __init__(self):
         self.env_patch = _test_env()
@@ -118,6 +126,7 @@ class ProcessTestApp(ProcessApp):
     def start(self):
         _install_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
+        self.lab_config.workspaces_dir = self.workspaces_dir
         ProcessApp.start(self)
 
     def _process_finished(self, future):
