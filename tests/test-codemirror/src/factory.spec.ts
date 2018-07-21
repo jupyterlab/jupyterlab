@@ -21,7 +21,7 @@ describe('CodeMirrorEditorFactory', () => {
 
   const options: Partial<CodeMirrorEditor.IConfig> = {
     lineNumbers: false,
-    lineWrap: true,
+    lineWrap: 'on',
     extraKeys: {
       'Ctrl-Tab': 'indentAuto'
     }
