@@ -1,25 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {IInstanceTracker} from '@jupyterlab/apputils';
+import { IInstanceTracker } from '@jupyterlab/apputils';
 
-import {Token} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {Widget} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {IHeading} from './toc';
+import { IHeading } from './toc';
 
 /**
  * An interface for a TableOfContentsRegistry.
  */
-export interface ITableOfContentsRegistry extends TableOfContentsRegistry {};
+export interface ITableOfContentsRegistry extends TableOfContentsRegistry {}
 
 /* tslint:disable */
 /**
  * The TableOfContentsRegistry token.
  */
-export
-const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>('jupyterlab-toc:ITableOfContentsRegistry');
+export const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>(
+  'jupyterlab-toc:ITableOfContentsRegistry'
+);
 /* tslint:enable */
 
 /**
@@ -32,7 +33,7 @@ export class TableOfContentsRegistry {
    * or undefined if none can be found.
    */
   findGeneratorForWidget(
-    widget: Widget,
+    widget: Widget
   ): TableOfContentsRegistry.IGenerator | undefined {
     let generator: TableOfContentsRegistry.IGenerator | undefined;
     this._generators.forEach(gen => {
@@ -80,7 +81,7 @@ export namespace TableOfContentsRegistry {
      * additional checks. For instance, this can be used to generate
      * a ToC for text files only if they have a given mimeType.
      */
-    isEnabled ?: (widget: W) => boolean;
+    isEnabled?: (widget: W) => boolean;
 
     /**
      * Whether the document uses LaTeX typesetting.
