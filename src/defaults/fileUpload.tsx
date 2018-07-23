@@ -3,7 +3,6 @@ import { TextItem } from '../component/text';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
-import { IDefaultStatusesManager } from './manager';
 import {
     IUploadModel,
     FileBrowserModel,
@@ -20,6 +19,7 @@ import { ProgressBar } from '../component/progressBar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { GroupItem } from '../component/group';
 import { ArrayExt } from '@phosphor/algorithm';
+import { IDefaultsManager } from './manager';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
@@ -39,6 +39,8 @@ namespace FileUploadComponent {
     }
 }
 
+const UPLOAD_COMPLETE_MESSAGE_MILLIS: number = 2000;
+
 class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
     constructor(opts: FileUpload.IOptions) {
         super();
@@ -51,9 +53,19 @@ class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
     }
 
     render() {
-        const uploadPaths = this.model!.paths;
+        const uploadPaths = this.model!.items;
         if (uploadPaths.length > 0) {
-            return <FileUploadComponent upload={this.model!.progress[0]} />;
+            const item = this.model!.items[0];
+
+            if (item.complete) {
+                return <TextItem source="Complete!" />;
+            } else {
+                return (
+                    <FileUploadComponent
+                        upload={this.model!.items[0].progress}
+                    />
+                );
+            }
         } else {
             return <FileUploadComponent upload={100} />;
         }
@@ -81,12 +93,8 @@ namespace FileUpload {
             this.browserModel = browserModel;
         }
 
-        get progress() {
-            return this._progress;
-        }
-
-        get paths() {
-            return this._paths;
+        get items() {
+            return this._items;
         }
 
         get browserModel() {
@@ -95,8 +103,7 @@ namespace FileUpload {
 
         set browserModel(browserModel: FileBrowserModel | null) {
             this._browserModel = browserModel;
-            this._progress = Object.create(null);
-            this._paths = [];
+            this._items = [];
 
             if (this._browserModel !== null) {
                 this._browserModel.uploadChanged.connect(this._uploadChanged);
@@ -109,32 +116,36 @@ namespace FileUpload {
             browse: FileBrowserModel,
             uploads: IChangedArgs<IUploadModel>
         ) => {
-            if (uploads.name === 'start' || uploads.name === 'update') {
-                if (uploads.name === 'start') {
-                    this._paths.push(uploads.newValue.path);
-                }
-
+            if (uploads.name === 'start') {
+                this._items.push({
+                    path: uploads.newValue.path,
+                    progress: uploads.newValue.progress * 100,
+                    complete: false
+                });
+            } else if (uploads.name === 'update') {
                 const idx = ArrayExt.findFirstIndex(
-                    this._paths,
-                    val => val === uploads.newValue.path
+                    this._items,
+                    val => val.path === uploads.oldValue.path
                 );
 
-                this._progress[idx] = uploads.newValue.progress * 100;
+                this._items[idx].progress = uploads.newValue.progress * 100;
             } else if (uploads.name === 'finish') {
                 const idx = ArrayExt.findFirstIndex(
-                    this._paths,
-                    val => val === uploads.oldValue.path
+                    this._items,
+                    val => val.path === uploads.oldValue.path
                 );
 
-                ArrayExt.removeAt(this._paths, idx);
-                ArrayExt.removeAt(this._progress, idx);
+                this._items[idx].complete = true;
+                setTimeout(() => {
+                    ArrayExt.removeAt(this._items, idx);
+                    this.stateChanged.emit(void 0);
+                }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
             }
 
             this.stateChanged.emit(void 0);
         };
 
-        private _progress: Array<number> = [];
-        private _paths: Array<string> = [];
+        private _items: Array<IFileUpload.IItem> = [];
         private _browserModel: FileBrowserModel | null = null;
     }
 
@@ -155,9 +166,14 @@ export const IFileUpload = new Token<IFileUpload>(
 
 export namespace IFileUpload {
     export interface IModel {
-        readonly paths: Array<string>;
-        readonly progress: Array<number>;
+        readonly items: Array<IFileUpload.IItem>;
         readonly browserModel: FileBrowserModel | null;
+    }
+
+    export interface IItem {
+        path: string;
+        progress: number;
+        complete: boolean;
     }
 }
 
@@ -165,10 +181,10 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
     id: 'jupyterlab-statusbar/default-items:file-upload',
     autoStart: true,
     provides: IFileUpload,
-    requires: [IDefaultStatusesManager, IFileBrowserFactory],
+    requires: [IDefaultsManager, IFileBrowserFactory],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         browser: IFileBrowserFactory
     ) => {
         const item = new FileUpload({
@@ -178,7 +194,7 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
         manager.addDefaultStatus('file-upload-item', item, {
             align: 'middle',
             isActive: () => {
-                return !!item.model && item.model.paths.length > 0;
+                return !!item.model && item.model.items.length > 0;
             },
             stateChanged: item.model!.stateChanged
         });

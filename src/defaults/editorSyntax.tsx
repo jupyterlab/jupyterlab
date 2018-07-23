@@ -4,7 +4,7 @@ import { TextItem } from '../component';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { IStatusContext } from '../contexts';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
@@ -81,7 +81,7 @@ namespace EditorSyntax {
                 this._mode = '';
             } else {
                 const spec = Mode.findByMIME(this._editor.model.mimeType);
-                this._mode = spec.mode;
+                this._mode = spec.name || spec.mode;
 
                 this._editor.model.mimeTypeChanged.connect(
                     this._onMIMETypeChange
@@ -96,7 +96,7 @@ namespace EditorSyntax {
             change: IChangedArgs<string>
         ) => {
             const spec = Mode.findByMIME(change.newValue);
-            this._mode = spec.mode;
+            this._mode = spec.name || spec.mode;
 
             this.stateChanged.emit(void 0);
         };
@@ -131,10 +131,10 @@ export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
     id: 'jupyterlab-statusbar/default-items:editor-syntax-item',
     autoStart: true,
     provides: IEditorSyntax,
-    requires: [IDefaultStatusesManager, IEditorTracker],
+    requires: [IDefaultsManager, IEditorTracker],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         tracker: IEditorTracker
     ) => {
         let item = new EditorSyntax({ tracker });

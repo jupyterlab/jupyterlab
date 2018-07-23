@@ -3,10 +3,7 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 
 import { ApplicationShell } from '@jupyterlab/application';
-import { ArrayExt, each } from '@phosphor/algorithm';
-import { IDefaultStatusesManager } from './defaults';
-import { IObservableSet } from './util/observableset';
-import { IObservableMap } from '@jupyterlab/observables';
+import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
 
 // tslint:disable-next-line:variable-name
@@ -47,7 +44,6 @@ export class StatusBar extends Widget implements IStatusBar {
         super();
 
         this._host = options.host;
-        this._defaultManager = options.defaultManager;
 
         this.id = STATUS_BAR_ID;
         this.addClass(STATUS_BAR_CLASS);
@@ -72,17 +68,6 @@ export class StatusBar extends Widget implements IStatusBar {
         rootLayout.addWidget(rightPanel);
 
         this._host.addToBottomArea(this);
-
-        this._defaultManager.enabledChanged.connect(
-            this.onEnabledDefaultItemChange
-        );
-        this._defaultManager.itemAdded.connect(this.onDefaultItemAdd);
-        this._defaultManager.allItems.forEach(elem => {
-            const { id, item, opts } = elem;
-
-            this.registerStatusItem(id, item, opts);
-        });
-
         this._host.currentChanged.connect(this._onAppShellCurrentChanged);
     }
 
@@ -161,38 +146,6 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._host;
     }
 
-    get defaultManager(): IDefaultStatusesManager {
-        return this._defaultManager;
-    }
-
-    onEnabledDefaultItemChange = (
-        _allEnabled: IObservableSet<IDefaultStatusesManager.IItem>,
-        enableChange: IObservableSet.IChangedArgs<IDefaultStatusesManager.IItem>
-    ) => {
-        const changeType = enableChange.type;
-
-        if (changeType === 'add') {
-            each(enableChange.values, element => {
-                this._statusItems[element.id].widget.show();
-            });
-        } else {
-            each(enableChange.values, element => {
-                this._statusItems[element.id].widget.hide();
-            });
-        }
-    };
-
-    onDefaultItemAdd = (
-        _allDefaults: IObservableMap<IDefaultStatusesManager.IItem>,
-        change: IObservableMap.IChangedArgs<IDefaultStatusesManager.IItem>
-    ) => {
-        if (change.newValue !== undefined) {
-            const { id, item, opts } = change.newValue;
-
-            this.registerStatusItem(id, item, opts);
-        }
-    };
-
     private _findInsertIndex(
         side: StatusBar.IRankItem[],
         newItem: StatusBar.IRankItem
@@ -231,7 +184,6 @@ export class StatusBar extends Widget implements IStatusBar {
     private _statusIds: Array<string> = [];
 
     private _host: ApplicationShell;
-    private _defaultManager: IDefaultStatusesManager;
 
     private _leftSide: Panel;
     private _middlePanel: Panel;
@@ -249,7 +201,6 @@ export namespace StatusBar {
      */
     export interface IOptions {
         host: ApplicationShell;
-        defaultManager: IDefaultStatusesManager;
     }
 
     export interface IItem {

@@ -7,7 +7,6 @@ import {
     JupyterLab,
     ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultStatusesManager } from './manager';
 import {
     ServiceManager,
     Kernel,
@@ -20,6 +19,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { GroupItem } from '../component/group';
+import { IDefaultsManager } from './manager';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
@@ -151,8 +151,8 @@ export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
     id: 'jupyterlab-statusbar/default-items:running-sessions',
     autoStart: true,
     provides: IRunningSessions,
-    requires: [IDefaultStatusesManager],
-    activate: (app: JupyterLab, manager: IDefaultStatusesManager) => {
+    requires: [IDefaultsManager],
+    activate: (app: JupyterLab, manager: IDefaultsManager) => {
         const item = new RunningSessions({
             host: app.shell,
             serviceManager: app.serviceManager
