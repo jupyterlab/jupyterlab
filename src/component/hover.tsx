@@ -39,7 +39,6 @@ export class Popup extends Widget {
             privilege: 'forceAbove',
             style
         });
-        console.log(this.node.getBoundingClientRect());
     }
 
     protected onUpdateRequest(msg: Message): void {
