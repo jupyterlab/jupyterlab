@@ -3,8 +3,6 @@
 
 import expect = require('expect.js');
 
-import { UUID } from '@phosphor/coreutils';
-
 import { ServiceManager } from '@jupyterlab/services';
 
 import {
@@ -14,6 +12,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import { SaveHandler } from '@jupyterlab/docmanager';
+
+import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
 import { acceptDialog, waitForDialog } from '../../utils';
 
@@ -126,68 +126,75 @@ describe('docregistry/savehandler', () => {
         handler.start();
       });
 
-      it('should overwrite the file on disk', done => {
+      it('should overwrite the file on disk', async () => {
+        const delegate = new PromiseDelegate();
+
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         context.model.fromString('foo');
-        context
-          .initialize(true)
-          .then(() => {
-            setTimeout(() => {
-              manager.contents
-                .save(context.path, {
-                  type: factory.contentType,
-                  format: factory.fileFormat,
-                  content: 'bar'
-                })
-                .catch(done);
-              handler.saveInterval = 1;
-              handler.start();
-              context.model.fromString('baz');
-              context.fileChanged.connect(() => {
-                expect(context.model.toString()).to.be('baz');
-                done();
-              });
-            }, 1500); // The server has a one second resolution for saves.
-          })
-          .catch(done);
-        acceptDialog().catch(done);
+        await context.initialize(true);
+
+        // The server has a one second resolution for saves.
+        setTimeout(async () => {
+          await manager.contents.save(context.path, {
+            type: factory.contentType,
+            format: factory.fileFormat,
+            content: 'bar'
+          });
+          handler.saveInterval = 1;
+          handler.start();
+          context.model.fromString('baz');
+          context.fileChanged.connect(() => {
+            expect(context.model.toString()).to.be('baz');
+            delegate.resolve(undefined);
+          });
+        }, 1500);
+
+        // Extend the timeout to wait for the dialog because of the setTimeout.
+        await acceptDialog(document.body, 3000);
+        await delegate.promise;
       });
 
-      it('should revert to the file on disk', done => {
-        // Lower the duration multiplier.
-        (handler as any)._multiplier = 1;
-        context.model.fromString('foo');
-        context
-          .initialize(true)
-          .then(() => {
-            context.fileChanged.connect(() => {
-              expect(context.model.toString()).to.be('bar');
-              done();
-            });
-            setTimeout(() => {
-              manager.contents
-                .save(context.path, {
-                  type: factory.contentType,
-                  format: factory.fileFormat,
-                  content: 'bar'
-                })
-                .catch(done);
-              handler.saveInterval = 1;
-              handler.start();
-              context.model.fromString('baz');
-            }, 1500); // The server has a one second resolution for saves.
-          })
-          .catch(done);
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let buttons = dialog.getElementsByTagName('button');
+      it('should revert to the file on disk', async () => {
+        const delegate = new PromiseDelegate();
+        const revert = () => {
+          const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          const buttons = dialog.getElementsByTagName('button');
+
           for (let i = 0; i < buttons.length; i++) {
             if (buttons[i].textContent === 'REVERT') {
               buttons[i].click();
+              return;
             }
           }
+        };
+
+        // Lower the duration multiplier.
+        (handler as any)._multiplier = 1;
+
+        await context.initialize(true);
+        context.model.fromString('foo');
+        context.fileChanged.connect(() => {
+          expect(context.model.toString()).to.be('bar');
+          delegate.resolve(undefined);
         });
+
+        // The server has a one second resolution for saves.
+        setTimeout(async () => {
+          await manager.contents.save(context.path, {
+            type: factory.contentType,
+            format: factory.fileFormat,
+            content: 'bar'
+          });
+          handler.saveInterval = 1;
+          handler.start();
+          context.model.fromString('baz');
+        }, 1500);
+
+        // Extend the timeout to wait for the dialog because of the setTimeout.
+        await waitForDialog(document.body, 3000);
+        revert();
+        await delegate.promise;
       });
     });
 

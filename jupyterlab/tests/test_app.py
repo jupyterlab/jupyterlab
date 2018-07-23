@@ -42,6 +42,13 @@ def _create_notebook_dir():
     return root_dir
 
 
+def _create_workspaces_dir():
+    """Create a temporary directory for workspaces."""
+    root_dir = tempfile.mkdtemp(prefix='mock_workspaces')
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
 def _install_kernels():
     # Install echo and ipython kernels - should be done after env patch
     kernel_json = {
@@ -103,8 +110,9 @@ class _test_env(object):
 class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
-    notebook_dir = Unicode(_create_notebook_dir())
     allow_origin = Unicode('*')
+    notebook_dir = Unicode(_create_notebook_dir())
+    workspaces_dir = Unicode(_create_workspaces_dir())
 
     def __init__(self):
         self.env_patch = _test_env()
@@ -118,6 +126,7 @@ class ProcessTestApp(ProcessApp):
     def start(self):
         _install_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
+        self.lab_config.workspaces_dir = self.workspaces_dir
         ProcessApp.start(self)
 
     def _process_finished(self, future):
@@ -134,7 +143,7 @@ class ProcessTestApp(ProcessApp):
 class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
-    karma_pattern = Unicode('src/*.spec.ts')
+    karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
 
     def get_command(self):
@@ -168,12 +177,11 @@ class KarmaTestApp(ProcessTestApp):
         parser = argparse.ArgumentParser()
         parser.add_argument('--pattern', action='store')
         args, argv = parser.parse_known_args()
-        pattern = args.pattern or 'src/*.spec.ts'
+        pattern = args.pattern or self.karma_pattern
         files = glob.glob(pjoin(cwd, pattern))
         if not files:
             msg = 'No files matching "%s" found in "%s"'
-            raise ValueError(msg % (pattern, msg))
-
+            raise ValueError(msg % (pattern, cwd))
         # Find and validate the coverage folder
         with open(pjoin(cwd, 'package.json')) as fid:
             data = json.load(fid)
@@ -200,7 +208,7 @@ class KarmaTestApp(ProcessTestApp):
 def run_karma(base_dir):
     """Run a karma test in the given base directory.
     """
-    logging.disable(logging.ERROR)
+    logging.disable(logging.WARNING)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
     app.initialize([])
