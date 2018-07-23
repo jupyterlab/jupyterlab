@@ -9,7 +9,7 @@ import {
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
@@ -225,10 +225,10 @@ export const IKernelStatus = new Token<IKernelStatus>(
 export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
     id: 'jupyterlab-statusbar/default-items:kernel-status',
     autoStart: true,
-    requires: [IDefaultStatusesManager, INotebookTracker, IConsoleTracker],
+    requires: [IDefaultsManager, INotebookTracker, IConsoleTracker],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         notebookTracker: INotebookTracker,
         consoleTracker: IConsoleTracker
     ) => {

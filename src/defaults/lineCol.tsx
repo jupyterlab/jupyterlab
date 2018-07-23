@@ -24,11 +24,12 @@ import {
 } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
-import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+
 import { showPopup, Popup } from '../component/hover';
 import { lineForm } from '../component/style/lineForm';
+import { IDefaultsManager } from './manager';
 
 export namespace LineForm {
     export interface IProps {
@@ -282,10 +283,10 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
     id: 'jupyterlab-statusbar/default-items:line-col',
     autoStart: true,
     provides: ILineCol,
-    requires: [IDefaultStatusesManager, INotebookTracker, IEditorTracker],
+    requires: [IDefaultsManager, INotebookTracker, IEditorTracker],
     activate: (
         app: JupyterLab,
-        defaultsManager: IDefaultStatusesManager,
+        defaultsManager: IDefaultsManager,
         notebookTracker: INotebookTracker,
         editorTracker: IEditorTracker
     ) => {

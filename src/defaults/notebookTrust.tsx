@@ -8,7 +8,7 @@ import {
     Notebook
 } from '@jupyterlab/notebook';
 import { toArray } from '@phosphor/algorithm';
-import { IDefaultStatusesManager } from './manager';
+import { IDefaultsManager } from './manager';
 import { Cell } from '@jupyterlab/cells';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
@@ -245,10 +245,10 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
     id: 'jupyterlab-statusbar/default-items:trusted-notebook',
     autoStart: true,
     provides: INotebookTrust,
-    requires: [IDefaultStatusesManager, INotebookTracker],
+    requires: [IDefaultsManager, INotebookTracker],
     activate: (
         app: JupyterLab,
-        manager: IDefaultStatusesManager,
+        manager: IDefaultsManager,
         tracker: INotebookTracker
     ) => {
         const item = new NotebookTrust({ tracker });
