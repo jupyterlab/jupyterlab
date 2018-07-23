@@ -1,10 +1,15 @@
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
-
 import { Token } from '@phosphor/coreutils';
-
 import { ApplicationShell } from '@jupyterlab/application';
 import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
+import {
+    statusBar as barStyle,
+    side as sideStyle,
+    item as itemStyle,
+    leftSide as leftSideStyle,
+    rightSide as rightSideStyle
+} from './style/statusBar';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
@@ -32,13 +37,6 @@ export namespace IStatusBar {
 
 const STATUS_BAR_ID = 'jp-main-status-bar';
 
-const STATUS_BAR_CLASS = 'jp-status-bar';
-const STATUS_BAR_SIDE_CLASS = 'jp-status-bar-side';
-const STATUS_BAR_LEFT_SIDE_CLASS = 'jp-status-bar-left';
-const STATUS_BAR_MIDDLE_PANEL_CLASS = 'jp-status-bar-middle';
-const STATUS_BAR_RIGHT_SIDE_CLASS = 'jp-status-bar-right';
-const STATUS_BAR_ITEM_CLASS = 'jp-status-bar-item';
-
 export class StatusBar extends Widget implements IStatusBar {
     constructor(options: StatusBar.IOptions) {
         super();
@@ -46,7 +44,7 @@ export class StatusBar extends Widget implements IStatusBar {
         this._host = options.host;
 
         this.id = STATUS_BAR_ID;
-        this.addClass(STATUS_BAR_CLASS);
+        this.addClass(barStyle);
 
         let rootLayout = (this.layout = new PanelLayout());
 
@@ -54,14 +52,13 @@ export class StatusBar extends Widget implements IStatusBar {
         let middlePanel = (this._middlePanel = new Panel());
         let rightPanel = (this._rightSide = new Panel());
 
-        leftPanel.addClass(STATUS_BAR_SIDE_CLASS);
-        leftPanel.addClass(STATUS_BAR_LEFT_SIDE_CLASS);
+        leftPanel.addClass(sideStyle);
+        leftPanel.addClass(leftSideStyle);
 
-        middlePanel.addClass(STATUS_BAR_SIDE_CLASS);
-        middlePanel.addClass(STATUS_BAR_MIDDLE_PANEL_CLASS);
+        middlePanel.addClass(sideStyle);
 
-        rightPanel.addClass(STATUS_BAR_SIDE_CLASS);
-        rightPanel.addClass(STATUS_BAR_RIGHT_SIDE_CLASS);
+        rightPanel.addClass(sideStyle);
+        rightPanel.addClass(rightSideStyle);
 
         rootLayout.addWidget(leftPanel);
         rootLayout.addWidget(middlePanel);
@@ -99,7 +96,7 @@ export class StatusBar extends Widget implements IStatusBar {
             priority
         };
 
-        widget.addClass(STATUS_BAR_ITEM_CLASS);
+        widget.addClass(itemStyle);
 
         this._statusItems[id] = wrapper;
         this._statusIds.push(id);
