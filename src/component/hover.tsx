@@ -3,7 +3,7 @@ import { HoverBox } from '@jupyterlab/apputils';
 
 import { Message } from '@phosphor/messaging';
 import { ElementExt } from '@phosphor/domutils';
-import { hoverItem } from './style/lineForm';
+import { hoverItem } from '../style/lineForm';
 
 export function showPopup(options: Popup.IOptions) {
     let dialog = new Popup(options);

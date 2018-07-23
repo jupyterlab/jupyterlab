@@ -1,12 +1,12 @@
-import { style } from 'typestyle';
+import { style } from 'typestyle/lib';
 
 export const progressBarItem = style({
     background: 'black',
-    height: 10,
-    width: 100
+    height: '10px',
+    width: '100px'
 });
 
 export const fillerItem = style({
     background: 'lightgreen',
-    height: 10
+    height: '10px'
 });

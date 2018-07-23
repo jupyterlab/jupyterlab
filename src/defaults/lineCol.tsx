@@ -1,6 +1,5 @@
 import React from 'react';
 import { TextItem } from '../component/text';
-
 import {
     JupyterLabPlugin,
     JupyterLab,
@@ -26,10 +25,10 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-
 import { showPopup, Popup } from '../component/hover';
-import { lineForm } from '../component/style/lineForm';
 import { IDefaultsManager } from './manager';
+import { style } from 'typestyle/lib';
+import { baseText } from '../style/text';
 
 export namespace LineForm {
     export interface IProps {
@@ -40,6 +39,7 @@ export namespace LineForm {
         value: number;
     }
 }
+
 class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
         value: 0
@@ -60,7 +60,13 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     render() {
         return (
             <div>
-                <form onSubmit={this.handleSubmit} className={lineForm}>
+                <form
+                    onSubmit={this.handleSubmit}
+                    className={style(baseText, {
+                        color: 'var(--jp-ui-font-color1)',
+                        margin: '5px'
+                    })}
+                >
                     <label>
                         <input
                             type="text"

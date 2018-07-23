@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { individualText } from './style/text';
+import { textItem } from '../style/text';
 
 export namespace TextItem {
     export interface IProps {
@@ -12,9 +12,9 @@ export namespace TextItem {
 export class TextItem extends React.Component<TextItem.IProps, {}> {
     render() {
         return (
-            <div className={individualText} title={this.props.title}>
+            <span className={textItem} title={this.props.title}>
                 {this.props.source}
-            </div>
+            </span>
         );
     }
 }

@@ -17,16 +17,17 @@ import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
-import { GroupItem } from '../component/group';
 import { ArrayExt } from '@phosphor/algorithm';
 import { IDefaultsManager } from './manager';
+import { GroupItem } from '../component/group';
+import vars from '../style/variables';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
     props: FileUploadComponent.IProps
 ): React.ReactElement<FileUploadComponent.IProps> => {
     return (
-        <GroupItem>
+        <GroupItem spacing={vars.interItemHalfSpacing}>
             <TextItem source={'Uploading'} />
             <ProgressBar percentage={props.upload} />
         </GroupItem>

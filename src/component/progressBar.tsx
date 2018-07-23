@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { progressBarItem, fillerItem } from './style/progressBar';
+import { progressBarItem, fillerItem } from '../style/progressBar';
 
 export namespace ProgressBar {
     export interface IProps {
@@ -28,7 +28,7 @@ export const Filler = (props: Filler.IProps) => {
         <div
             className={fillerItem}
             style={{
-                width: props.percentage
+                width: `${props.percentage}px`
             }}
         />
     );
