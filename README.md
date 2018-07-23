@@ -43,6 +43,8 @@ Instructions on how to install the project from the git sources are available in
 
 #### conda
 
+Conda is an open source package management system and environment management system that runs on Windows, macOS and Linux. It can package and distribute software for any language, and by default uses the Anaconda repository managed by Anaconda, Inc.  If you wish to use conda and do not have it, [see the conda installation instructions](https://conda.io/docs/user-guide/install/index.html).
+
 If you use `conda`, you can install as:
 
 ```bash
@@ -51,17 +53,25 @@ conda install -c conda-forge jupyterlab
 
 #### pip
 
+pip is a package management system for installing and updating Python packages. pip comes with Python, so you get pip simply by installing Python.  On Ubuntu and Fedora Linux, you can simply use your package manager to install the `python3-pip` package.  [*The Hitchhiker's Guide to Python* provides some guidance on how to install Python on your system if it isn't already](https://docs.python-guide.org/starting/installation/); you can also [install Python directly from python.org](https://www.python.org/getit/).  You might want to [upgrade pip](https://pip.pypa.io/en/stable/installing/) before using it to install other programs.   [Colin Harkins]
+
+JupyterLab is implemented in Python, and as of 2018-07 JupyterLab can run on either Python2 or Python3.  However, it's recommended that you install JupyterLab on Python3, even when running Python2 code.  Thus, it's recommended that you install Python3, and then use `pip3` to install JupyterLab (`pip3` is the version of `pip` that always uses Python3; in many cases the command `pip` will use Python2, and that is not recommended).
+
 If you use `pip`, you can install it as:
 
 ```bash
-pip install jupyterlab
+pip3 install jupyterlab
 ```
 
-If installing using `pip install --user`, you must add the user-level
+If installing using `pip3 install --user`, you must add the user-level
 `bin` directory to your `PATH` environment variable in order to launch
 `jupyter lab`.
 
+You can use `python3 -m pip install` instead of `pip3 install` if for some reason you cannot run `pip3`.
+
 #### pipenv
+
+`Pipenv` is intended to provide users and developers of applications with an easy method to setup a working environment.  You must have Python installed first.  See the [pipenv installation documentation](https://docs.pipenv.org/install) if you wish to use it but do not have it installed.
 
 If you use `pipenv`, you can install it as:
 
