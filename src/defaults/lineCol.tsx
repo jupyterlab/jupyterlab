@@ -1,13 +1,16 @@
 import React from 'react';
 import { TextItem } from '../component/text';
-
 import {
     JupyterLabPlugin,
     JupyterLab,
     ApplicationShell
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import {
+    VDomRenderer,
+    VDomModel,
+    ReactElementWidget
+} from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
@@ -22,12 +25,67 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
+import { style } from 'typestyle/lib';
+import { baseText } from '../style/text';
+
+export namespace LineForm {
+    export interface IProps {
+        // editor: CodeEditor.IEditor | null;
+        handleSubmit: (value: number) => void;
+    }
+    export interface IState {
+        value: number;
+    }
+}
+
+class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
+    state = {
+        value: 0
+    };
+    constructor(props: LineForm.IProps) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+    handleChange(event: any) {
+        this.setState({ value: event.target.value });
+    }
+    handleSubmit(event: any) {
+        event.preventDefault();
+        this.props.handleSubmit(this.state.value);
+    }
+
+    render() {
+        return (
+            <div>
+                <form
+                    onSubmit={this.handleSubmit}
+                    className={style(baseText, {
+                        color: 'var(--jp-ui-font-color1)',
+                        margin: '5px'
+                    })}
+                >
+                    <label>
+                        <input
+                            type="text"
+                            value={this.state.value}
+                            onChange={this.handleChange}
+                        />
+                        <div>Go to Line number</div>
+                    </label>
+                </form>
+            </div>
+        );
+    }
+}
 
 namespace LineColComponent {
     export interface IProps {
         line: number;
         column: number;
+        handleClick: () => void;
     }
 }
 
@@ -36,7 +94,7 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div title="Go to line number">
+        <div title="Go to line number" onClick={props.handleClick}>
             <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
         </div>
     );
@@ -73,11 +131,27 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
                 <LineColComponent
                     line={this.model.line}
                     column={this.model.column}
+                    handleClick={this._handleClick}
                 />
             );
         }
     }
 
+    private _handleClick = () => {
+        const body = new ReactElementWidget(
+            <LineForm handleSubmit={this._handleSubmit} />
+        );
+        this._popup = showPopup({
+            body: body,
+            position: this.node.getBoundingClientRect()
+        });
+    };
+
+    private _handleSubmit = (value: number) => {
+        this.model!.editor!.setCursorPosition({ line: value - 1, column: 0 });
+        this._popup!.dispose();
+        this.model!.editor!.focus();
+    };
     private _onNotebookChange = (tracker: INotebookTracker) => {
         this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };
@@ -130,6 +204,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
     private _shell: ApplicationShell;
+    private _popup: Popup | undefined;
 }
 
 namespace LineCol {
