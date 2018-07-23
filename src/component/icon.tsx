@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { individualIcon } from './style/icon';
+import icon from '../style/icon';
+import { classes, style } from 'typestyle/lib';
 
 export namespace IconItem {
     export interface IProps {
@@ -10,6 +11,13 @@ export namespace IconItem {
 
 export class IconItem extends React.Component<IconItem.IProps, {}> {
     render() {
-        return <div className={this.props.source + ' ' + individualIcon} />;
+        return (
+            <div
+                className={classes(
+                    this.props.source,
+                    style(icon({ x: 0, y: 5 }))
+                )}
+            />
+        );
     }
 }
