@@ -7,7 +7,11 @@ import {
     ApplicationShell
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import {
+    VDomRenderer,
+    VDomModel,
+    ReactElementWidget
+} from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
@@ -23,11 +27,60 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { showPopup } from '../component/hover';
+
+export namespace LineForm {
+    export interface IProps {
+        editor: CodeEditor.IEditor | null;
+    }
+    export interface IState {
+        value: number;
+    }
+}
+class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
+    state = {
+        value: 0
+    };
+    constructor(props: LineForm.IProps) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+    handleChange(event: any) {
+        this.setState({ value: event.target.value });
+    }
+    handleSubmit(event: any) {
+        event.preventDefault();
+        this.props.editor!.focus();
+        this.props.editor!.setCursorPosition({
+            line: this.state.value,
+            column: 0
+        });
+        console.log(this.props.editor!.getCursorPosition().line);
+    }
+
+    render() {
+        return (
+            <form onSubmit={this.handleSubmit}>
+                <label>
+                    Line:
+                    <input
+                        type="text"
+                        value={this.state.value}
+                        onChange={this.handleChange}
+                    />
+                </label>
+                <input type="submit" value="Submit" />
+            </form>
+        );
+    }
+}
 
 namespace LineColComponent {
     export interface IProps {
         line: number;
         column: number;
+        handleClick: () => void;
     }
 }
 
@@ -36,7 +89,7 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div title="Go to line number">
+        <div title="Go to line number" onClick={props.handleClick}>
             <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
         </div>
     );
@@ -73,10 +126,19 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
                 <LineColComponent
                     line={this.model.line}
                     column={this.model.column}
+                    handleClick={this._handleClick}
                 />
             );
         }
     }
+
+    private _handleClick = () => {
+        const body = new ReactElementWidget(
+            <LineForm editor={this.model!.editor} />
+        );
+        console.log(body);
+        showPopup({ body: body, position: this.node.getBoundingClientRect() });
+    };
 
     private _onNotebookChange = (tracker: INotebookTracker) => {
         this.model!.editor = tracker.activeCell && tracker.activeCell.editor;

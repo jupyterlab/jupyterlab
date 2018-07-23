@@ -23,10 +23,16 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
+import { CommandRegistry } from '@phosphor/commands';
+import { Menu } from '@phosphor/widgets';
+
+import { JSONObject } from '@phosphor/coreutils';
+import { showPopup } from '../component/hover';
 
 namespace TabSpaceComponent {
     export interface IProps {
         tabSpace: number;
+        handleClick: () => void;
     }
 }
 
@@ -35,10 +41,12 @@ const TabSpaceComponent = (
     props: TabSpaceComponent.IProps
 ): React.ReactElement<TabSpaceComponent.IProps> => {
     return (
-        <TextItem
-            title="Set indentation spacing"
-            source={'Spaces: ' + props.tabSpace}
-        />
+        <div onClick={props.handleClick}>
+            <TextItem
+                title="Set indentation spacing"
+                source={'Spaces: ' + props.tabSpace}
+            />
+        </div>
     );
 };
 
@@ -49,6 +57,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this._notebookTracker = opts.notebookTracker;
         this._editorTracker = opts.editorTracker;
         this._shell = opts.shell;
+        this._commands = opts.commands;
 
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._notebookTracker.activeCellChanged.connect(
@@ -65,11 +74,35 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         );
     }
 
+    private _handleClick = () => {
+        const tabMenu = new Menu({ commands: this._commands });
+        let command = 'fileeditor:change-tabs';
+
+        for (let size of [1, 2, 4, 8]) {
+            let args: JSONObject = {
+                insertSpaces: true,
+                size,
+                name: `Spaces: ${size} `
+            };
+            tabMenu.addItem({ command, args });
+        }
+
+        showPopup({
+            body: tabMenu,
+            position: this.node.getBoundingClientRect()
+        });
+    };
+
     protected render(): React.ReactElement<TabSpaceComponent.IProps> | null {
         if (this.model === null) {
             return null;
         } else {
-            return <TabSpaceComponent tabSpace={this.model.tabSpace} />;
+            return (
+                <TabSpaceComponent
+                    tabSpace={this.model.tabSpace}
+                    handleClick={this._handleClick}
+                />
+            );
         }
     }
 
@@ -125,6 +158,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
     private _shell: ApplicationShell;
+    private _commands: CommandRegistry;
 }
 
 namespace TabSpace {
@@ -182,6 +216,7 @@ namespace TabSpace {
         notebookTracker: INotebookTracker;
         editorTracker: IEditorTracker;
         shell: ApplicationShell;
+        commands: CommandRegistry;
     }
 }
 
@@ -214,7 +249,8 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
         let item = new TabSpace({
             shell: app.shell,
             notebookTracker,
-            editorTracker
+            editorTracker,
+            commands: app.commands
         });
 
         defaultsManager.addDefaultStatus('tab-space-item', item, {
