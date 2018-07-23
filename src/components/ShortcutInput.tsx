@@ -4,6 +4,8 @@ import * as React from 'react';
 
 import { classes } from 'typestyle';
 
+import { EN_US } from '@phosphor/keyboard'
+
 import {
   InputStyle,
   InputUnavailableStyle,
@@ -80,21 +82,18 @@ export class ShortcutInput extends React.Component<
     currentChain: string
   ): Array<any> => {
     event.preventDefault();
-    const wordKeys = [
-      'Tab',
-      'Shift',
-      'Ctrl',
-      'Control',
-      'Alt',
-      'Accel',
-      'Meta',
-      'Enter',
-      'ArrowUp',
-      'ArrowDown',
-      'ArrowRight',
-      'ArrowLeft',
-      'Escape'
-    ];
+    let key = EN_US.keyForKeydownEvent(event)
+    console.log(key)
+
+    const modKeys = [
+      "Shift",
+      "Control",
+      "Alt",
+      "Meta",
+      "Ctrl",
+      "Accel"
+    ]
+
     if (event.key === 'Backspace') {
       userInput = '';
       value = '';
@@ -110,10 +109,14 @@ export class ShortcutInput extends React.Component<
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
         .trim();
-      if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
+
+      /** if last key was not a modefier key then there is a chain */
+      if (modKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = userInput + ',';
         keys.push(currentChain);
         currentChain = '';
+
+        /** check if a modefier key was held down through chain */
         if (event.ctrlKey && event.key != 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -130,22 +133,36 @@ export class ShortcutInput extends React.Component<
           userInput = (userInput + ' Shift').trim();
           currentChain = (currentChain + ' Shift').trim();
         }
-        if (wordKeys.lastIndexOf(event.key) === -1) {
-          userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
-          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
+
+        /** if key is not a modefier key, add its name to user input and current chain */
+        if (modKeys.lastIndexOf(key) === -1) {
+          userInput = (userInput + ' ' + key).trim();
+          currentChain = (currentChain + ' ' + key).trim();
+
+        /** if key is a modefier key, add its translated name to user input and current chain */
         } else {
           if (event.key === 'Meta') {
             userInput = (userInput + ' Accel').trim();
             currentChain = (currentChain + ' Accel').trim();
-          } else if (event.key === ' Control') {
+          } else if (event.key === 'Control') {
             userInput = (userInput + ' Ctrl').trim();
             currentChain = (currentChain + ' Ctrl').trim();
-          } else {
+          } else if (event.key === 'Shift') {
+            userInput = (userInput + ' Shift').trim();
+            currentChain = (currentChain + ' Shift').trim();
+          } else if (event.key === 'Alt') {
+            userInput = (userInput + ' Alt').trim();
+            currentChain = (currentChain + ' Alt').trim();
+          } else{
             userInput = (userInput + ' ' + event.key).trim();
             currentChain = (currentChain + ' ' + event.key).trim();
           }
         }
+
+      /** if there is not a chain, add the key to user input and current chain */
       } else {
+
+        /** if modefier key, rename */
         if (event.key === 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -158,15 +175,16 @@ export class ShortcutInput extends React.Component<
         } else if (event.key === 'Alt') {
           userInput = (userInput + ' Alt').trim();
           currentChain = (currentChain + ' Alt').trim();
-        } else if (wordKeys.lastIndexOf(event.key) === -1) {
-          userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
-          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
-        } else {
-          userInput = (userInput + ' ' + event.key).trim();
-          currentChain = (currentChain + ' ' + event.key).trim();
+
+        /** if not a modefier key, add it regularly */
+        } else  {
+          userInput = (userInput + ' ' + key).trim();
+          currentChain = (currentChain + ' ' + key).trim();
         }
       }
     }
+
+    /** update state of keys and currentChain */
     this.setState({
       keys: keys,
       currentChain: currentChain
@@ -297,6 +315,7 @@ export class ShortcutInput extends React.Component<
           className={inputClassName}
           value={this.state.value}
           onKeyDown={this.handleInput}
+          onKeyPress={this.onKeyPress}
           ref={input => input && input.focus()}
           placeholder="press keys"
         />

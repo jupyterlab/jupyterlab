@@ -58,16 +58,6 @@ export class ShortcutItem extends React.Component<
 
   /** Transform special key names into unicode characters */
   toSymbols = (value: string): string => {
-    const wordKeys = [
-      'Tab',
-      'Enter',
-      'ArrowUp',
-      'ArrowDown',
-      'ArrowRight',
-      'ArrowLeft',
-      'Escape'
-    ];
-    
     return value.split(' ').reduce((result, key) => {
       if (key === 'Ctrl') {
         return (result + ' ⌃').trim();
@@ -77,10 +67,8 @@ export class ShortcutItem extends React.Component<
         return (result + ' ⇧').trim();
       } else if (key === 'Alt') {
         return (result + ' ⌥').trim();
-      } else if (wordKeys.indexOf(key) !== -1) {
-        return (result + ' ' + key).trim();
       } else {
-        return (result + ' ' + key.toUpperCase()).trim();
+        return (result + ' ' + key).trim();
       }
     }, '');
   };
