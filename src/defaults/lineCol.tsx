@@ -27,11 +27,13 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultStatusesManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-import { showPopup } from '../component/hover';
+import { showPopup, Popup } from '../component/hover';
+import { lineForm } from '../component/style/lineForm';
 
 export namespace LineForm {
     export interface IProps {
-        editor: CodeEditor.IEditor | null;
+        // editor: CodeEditor.IEditor | null;
+        handleSubmit: (value: number) => void;
     }
     export interface IState {
         value: number;
@@ -51,27 +53,23 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     }
     handleSubmit(event: any) {
         event.preventDefault();
-        this.props.editor!.focus();
-        this.props.editor!.setCursorPosition({
-            line: this.state.value,
-            column: 0
-        });
-        console.log(this.props.editor!.getCursorPosition().line);
+        this.props.handleSubmit(this.state.value);
     }
 
     render() {
         return (
-            <form onSubmit={this.handleSubmit}>
-                <label>
-                    Line:
-                    <input
-                        type="text"
-                        value={this.state.value}
-                        onChange={this.handleChange}
-                    />
-                </label>
-                <input type="submit" value="Submit" />
-            </form>
+            <div>
+                <form onSubmit={this.handleSubmit} className={lineForm}>
+                    <label>
+                        <input
+                            type="text"
+                            value={this.state.value}
+                            onChange={this.handleChange}
+                        />
+                        <div>Go to Line number</div>
+                    </label>
+                </form>
+            </div>
         );
     }
 }
@@ -134,12 +132,19 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
     private _handleClick = () => {
         const body = new ReactElementWidget(
-            <LineForm editor={this.model!.editor} />
+            <LineForm handleSubmit={this._handleSubmit} />
         );
-        console.log(body);
-        showPopup({ body: body, position: this.node.getBoundingClientRect() });
+        this._popup = showPopup({
+            body: body,
+            position: this.node.getBoundingClientRect()
+        });
     };
 
+    private _handleSubmit = (value: number) => {
+        this.model!.editor!.setCursorPosition({ line: value - 1, column: 0 });
+        this._popup!.dispose();
+        this.model!.editor!.focus();
+    };
     private _onNotebookChange = (tracker: INotebookTracker) => {
         this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };
@@ -192,6 +197,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
     private _shell: ApplicationShell;
+    private _popup: Popup | undefined;
 }
 
 namespace LineCol {

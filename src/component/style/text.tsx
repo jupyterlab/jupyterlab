@@ -6,7 +6,7 @@ const text = {
     lineHeight: 'var(--jp-private-menubar-height)',
     alignContent: 'center',
     color: '#EEEEEE',
-    fontSize: '12px',
+    fontSize: 'var(--jp-ui-font-size1)',
     fontFamily:
         '"HelveticaNeue-Medium", "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;',
     $nest: {

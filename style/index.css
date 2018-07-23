@@ -55,12 +55,13 @@
     background-image: url('./images/trusted-icon.svg');
 }
 
-.jp-hover-content {
+.jp-popup-content {
     display: flex;
     flex-direction: column;
     margin-left: auto;
     margin-right: auto;
     background: 'aqua';
+    background-color: aliceblue;
     max-width: 500px;
     max-height: 500px;
     box-sizing: border-box;

@@ -20,25 +20,29 @@ import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { TextFunctions } from '../util/format';
+import { CommandRegistry } from '@phosphor/commands';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
     return (
-        <TextItem
-            title="Current active kernel"
-            source={
-                TextFunctions.titleCase(props.name) +
-                ' | ' +
-                TextFunctions.titleCase(props.status)
-            }
-        />
+        <div onClick={props.handleClick}>
+            <TextItem
+                title="Current active kernel"
+                source={
+                    TextFunctions.titleCase(props.name) +
+                    ' | ' +
+                    TextFunctions.titleCase(props.status)
+                }
+            />
+        </div>
     );
 };
 
 namespace KernelStatusComponent {
     export interface IProps {
+        handleClick: () => void;
         name: string;
         status: Kernel.Status;
     }
@@ -51,6 +55,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 
         this._notebookTracker = opts.notebookTracker;
         this._consoleTracker = opts.consoleTracker;
+        this._commands = opts.commands;
         this._shell = opts.shell;
 
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
@@ -71,10 +76,16 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
                 <KernelStatusComponent
                     status={this.model!.status}
                     name={this.model!.name}
+                    handleClick={this._handleClick}
                 />
             );
         }
     }
+
+    private _handleClick = () => {
+        this._commands.execute('notebook:change-kernel');
+    };
+
     private _onNotebookChange = (
         _tracker: INotebookTracker,
         panel: NotebookPanel | null
@@ -115,13 +126,13 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     private _notebookTracker: INotebookTracker;
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
+    private _commands: CommandRegistry;
 }
 
 namespace KernelStatus {
     export class Model extends VDomModel implements IKernelStatus.IModel {
         constructor(session: IClientSession | null) {
             super();
-
             this.session = session;
         }
 
@@ -189,6 +200,7 @@ namespace KernelStatus {
         notebookTracker: INotebookTracker;
         consoleTracker: IConsoleTracker;
         shell: ApplicationShell;
+        commands: CommandRegistry;
     }
 }
 
@@ -223,7 +235,8 @@ export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
         const item = new KernelStatus({
             shell: app.shell,
             notebookTracker,
-            consoleTracker
+            consoleTracker,
+            commands: app.commands
         });
 
         manager.addDefaultStatus('kernel-status-item', item, {
