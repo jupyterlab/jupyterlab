@@ -131,7 +131,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should get whether horizontally scrolling should be used', () => {
-      expect(editor.getOption('lineWrap')).to.be(true);
+      expect(editor.getOption('lineWrap')).to.be('on');
     });
 
     it('should get whether the editor is readonly', () => {
@@ -146,8 +146,8 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should set whether horizontally scrolling should be used', () => {
-      editor.setOption('lineWrap', false);
-      expect(editor.getOption('lineWrap')).to.be(false);
+      editor.setOption('lineWrap', 'off');
+      expect(editor.getOption('lineWrap')).to.be('off');
     });
 
     it('should set whether the editor is readonly', () => {

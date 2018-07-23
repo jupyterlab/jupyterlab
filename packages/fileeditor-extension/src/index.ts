@@ -252,9 +252,12 @@ function activate(
     label: 'Line Numbers'
   });
 
+  type wrappingMode = 'on' | 'off' | 'wordWrapColumn' | 'bounded';
+
   commands.addCommand(CommandIDs.lineWrap, {
-    execute: () => {
-      config.lineWrap = !config.lineWrap;
+    execute: args => {
+      const lineWrap = (args['mode'] as wrappingMode) || 'off';
+      config.lineWrap = lineWrap;
       return settingRegistry
         .set(id, 'editorConfig', config)
         .catch((reason: Error) => {
@@ -262,7 +265,10 @@ function activate(
         });
     },
     isEnabled,
-    isToggled: () => config.lineWrap,
+    isToggled: args => {
+      const lineWrap = (args['mode'] as wrappingMode) || 'off';
+      return config.lineWrap === lineWrap;
+    },
     label: 'Word Wrap'
   });
 
@@ -534,8 +540,9 @@ function activate(
         widget.content.editor.setOption('lineNumbers', lineNumbers);
       },
       toggleWordWrap: widget => {
-        const wordWrap = !widget.content.editor.getOption('lineWrap');
-        widget.content.editor.setOption('lineWrap', wordWrap);
+        const oldValue = widget.content.editor.getOption('lineWrap');
+        const newValue = oldValue === 'off' ? 'on' : 'off';
+        widget.content.editor.setOption('lineWrap', newValue);
       },
       toggleMatchBrackets: widget => {
         const matchBrackets = !widget.content.editor.getOption('matchBrackets');
@@ -543,7 +550,8 @@ function activate(
       },
       lineNumbersToggled: widget =>
         widget.content.editor.getOption('lineNumbers'),
-      wordWrapToggled: widget => widget.content.editor.getOption('lineWrap'),
+      wordWrapToggled: widget =>
+        widget.content.editor.getOption('lineWrap') !== 'off',
       matchBracketsToggled: widget =>
         widget.content.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);

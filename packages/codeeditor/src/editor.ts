@@ -567,9 +567,13 @@ export namespace CodeEditor {
     lineNumbers: boolean;
 
     /**
-     * Set to false for horizontal scrolling.
+     * Control the line wrapping of the editor. Possible values are:
+     * - "off", lines will never wrap.
+     * - "on", lines will wrap at the viewport border.
+     * - "wordWrapColumn", lines will wrap at `wordWrapColumn`.
+     * - "bounded", lines will wrap at minimum between viewport width and wordWrapColumn.
      */
-    lineWrap: boolean;
+    lineWrap: 'off' | 'on' | 'wordWrapColumn' | 'bounded';
 
     /**
      * Whether the editor is read-only.
@@ -595,6 +599,11 @@ export namespace CodeEditor {
      * Whether to automatically close brackets after opening them.
      */
     autoClosingBrackets: boolean;
+
+    /**
+     * The column where to break text line.
+     */
+    wordWrapColumn: number;
   }
 
   /**
@@ -605,7 +614,8 @@ export namespace CodeEditor {
     fontSize: null,
     lineHeight: null,
     lineNumbers: false,
-    lineWrap: true,
+    lineWrap: 'on',
+    wordWrapColumn: 80,
     readOnly: false,
     tabSize: 4,
     insertSpaces: true,
