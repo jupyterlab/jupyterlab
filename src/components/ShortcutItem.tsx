@@ -8,7 +8,6 @@ import { classes } from 'typestyle';
 
 import {
   CellStyle,
-  CellTextStyle,
   ShortcutCellStyle,
   RowStyle,
   ConflictRowStyle,
@@ -20,7 +19,7 @@ import {
   PlusStyle,
   SourceCellStyle,
   ResetStyle
-} from './ShortcutItemStyle';
+} from '../componentStyle/ShortcutItemStyle';
 
 import * as React from 'react';
 
@@ -71,17 +70,17 @@ export class ShortcutItem extends React.Component<
     
     return value.split(' ').reduce((result, key) => {
       if (key === 'Ctrl') {
-        return result + '⌃';
+        return (result + ' ⌃').trim();
       } else if (key === 'Accel') {
-        return result + '⌘';
+        return (result + ' ⌘').trim();
       } else if (key === 'Shift') {
-        return result + '⇧';
+        return (result + ' ⇧').trim();
       } else if (key === 'Alt') {
-        return result + '⌥';
+        return (result + ' ⌥').trim();
       } else if (wordKeys.indexOf(key) !== -1) {
-        return result + key;
+        return (result + ' ' + key).trim();
       } else {
-        return result + key.toUpperCase();
+        return (result + ' ' + key.toUpperCase()).trim();
       }
     }, '');
   };
@@ -99,7 +98,7 @@ export class ShortcutItem extends React.Component<
         }
       >
         <div className={CellStyle}>
-          <div className={CellTextStyle}>{this.props.shortcut.category}</div>
+          {this.props.shortcut.category}
         </div>
         <div className={CellStyle}>
           <div className="jp-label">{this.props.shortcut.label}</div>

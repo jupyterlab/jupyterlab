@@ -5,9 +5,11 @@ import * as React from 'react';
 import { 
   ShortcutListStyle, 
   ShortcutListContainerStyle 
-} from './ShortcutListStyle';
+} from '../componentStyle/ShortcutListStyle';
 
 import { ShortcutObject } from '..';
+
+const TOPNAV_HEIGHT: number = 174
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
@@ -19,13 +21,17 @@ export interface IShortcutListProps {
   keyBindingsUsed: { [index: string] : ShortcutObject };
   sortConflict: Function;
   clearConflicts: Function;
+  height: number;
 }
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps, {}> {
   render() {
     return (
-      <div className={ShortcutListContainerStyle}>
+      <div 
+        className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)} 
+        id='shortcutListContainer'
+      >
         <div className={ShortcutListStyle}>
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
             //const shortcut: ShortcutObject = this.props.shortcuts[key];

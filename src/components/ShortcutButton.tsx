@@ -2,7 +2,7 @@ import { ShortcutObject } from '../index';
 
 import * as React from 'react';
 
-import { shortcutStyle, shortcutConflictStyle } from './ShortcutButtonStyle';
+import { shortcutStyle, shortcutConflictStyle } from '../componentStyle/ShortcutButtonStyle';
 
 import { classes } from 'typestyle';
 

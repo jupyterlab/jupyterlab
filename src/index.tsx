@@ -2,15 +2,19 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { ICommandPalette, ReactElementWidget } from '@jupyterlab/apputils';
+import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { ShortcutUI } from './components/ShortcutUI';
+// import { ShortcutUI } from './components/ShortcutUI';
 
 import { Widget } from '@phosphor/widgets'
 
-import * as React from 'react';
+// import { Message } from '@phosphor/messaging'
+
+import ShortcutWidget from './ShortcutWidget'
+
+// import * as React from 'react';
 
 import '../style/index.css';
 
@@ -51,21 +55,57 @@ export class ShortcutObject {
   }
 }
 
-class ShortcutWidget extends ReactElementWidget {
-  constructor(es: Array<React.ReactElement<any>> | React.ReactElement<any> | null) {
-    super(es);
-    this.id = 'jupyterlab-shortcutui';
-    this.title.label = 'Keyboard Shortcut Editor';
-    this.title.closable = true;
-    this.addClass('jp-shortcutWidget');
-  }
+// class ShortcutWidget extends ReactElementWidget {
+//   height: number;
+//   width: number;
+//   private TOPNAV_HEIGHT: number = 185;
+//   private ShortcutListContainer: { [key:string]: any } = undefined;
 
-  protected onResize(msg: Widget.ResizeMessage) {
-    super.onResize(msg);
-    console.log('resize');
-    console.log(msg.width, msg.height)
-  }
-}
+//   constructor(element: React.ReactElement<any>) {
+//     super(element);
+//     console.log(element)
+//     this.id = 'jupyterlab-shortcutui';
+//     this.title.label = 'Keyboard Shortcut Editor';
+//     this.title.closable = true;
+//     this.addClass('jp-shortcutWidget');
+
+//     if (this.ShortcutListContainer !== undefined) {
+//       this.ShortcutListContainer.setAttribute(
+//         'style', 
+//         "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
+//       )
+//     }
+//   }
+
+//   protected onAfterShow(msg: Message) {
+//     //console.log('attached! node: ', this.node, this.node.childNodes.querySelectorAll('#shortcutListContainer'))
+//     super.onAfterShow(msg);
+//     if (this.node.childNodes[0] !== undefined) {
+//       this.ShortcutListContainer = this.node.childNodes[0].childNodes[2];
+//     }
+//     this.ShortcutListContainer.setAttribute(
+//       'style', 
+//       "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
+//     )
+//   }
+
+//   protected onResize(msg: Widget.ResizeMessage) {
+//     super.onResize(msg);
+//     this.height = msg.height;
+//     this.width = msg.width;
+//     this.ShortcutListContainer = this.node.childNodes[0].childNodes[2];
+
+//     if (this.node.childNodes[0] !== undefined) {
+//       this.ShortcutListContainer.setAttribute(
+//         'style', 
+//         "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
+//       )
+//     } else {
+//       console.log('nope');
+//       console.log(this.height, this.width)
+//     }
+//   }
+// }
 
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
@@ -82,14 +122,27 @@ const plugin: JupyterLabPlugin<void> = {
       .then(settings => Object.keys(settings.composite))
       /** Create top-level component and associated widget */
       .then(commandlist => {
-        const shortcutUI = React.createElement(ShortcutUI, {
-          commandList: commandlist,
-          settingRegistry: settingRegistry,
-          shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
-          commandRegistry: app.commands
-        });
+        // const shortcutUI = React.createElement(ShortcutUI, {
+        //   commandList: commandlist,
+        //   settingRegistry: settingRegistry,
+        //   shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
+        //   commandRegistry: app.commands,
+        //   height: 0,
+        //   width: 0
+        // });
 
-        const widget = new ShortcutWidget(shortcutUI);
+        const widget = new ShortcutWidget(
+          -1,
+          -1,
+          commandlist,
+          settingRegistry,
+          app.commands,
+          '@jupyterlab/shortcuts-extension:plugin',
+        );
+
+        widget.id = 'jupyterlab-shortcutui';
+        widget.title.label = 'Keyboard Shortcut Editor';
+        widget.title.closable = true;
 
         /** Add command to open extension widget */
         const command: string = 'shortcutui:open-ui';
@@ -98,7 +151,7 @@ const plugin: JupyterLabPlugin<void> = {
           execute: () => {
             if (!widget.isAttached) {
               /** Attach the widget to the main work area if it's not there */
-              app.shell.addToMainArea(widget);
+              app.shell.addToMainArea(widget as Widget);
             }
             /** Activate the widget */
             app.shell.activateById(widget.id);

@@ -10,7 +10,7 @@ import { TopNav } from './TopNav';
 
 import { ShortcutObject } from '../index';
 
-import { TopWhitespaceStyle } from './ShortcutUIStyle';
+import { TopWhitespaceStyle, ShortcutUIStyle } from '../componentStyle/ShortcutUIStyle';
 
 import * as React from 'react';
 
@@ -27,6 +27,8 @@ export interface IShortcutUIProps {
   settingRegistry: ISettingRegistry;
   shortcutPlugin: string;
   commandRegistry: CommandRegistry;
+  height: number;
+  width: number;
 }
 
 /** State for ShortcutUI component */
@@ -327,9 +329,9 @@ export class ShortcutUI extends React.Component<
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
     if (keys[0] !== '') {
-      let commandId = shortcutObject.id;
+      let commandId: string = shortcutObject.id;
       if (shortcutObject.numberOfShortcuts === 1) {
-        commandId = commandId + '-' + '2';
+        commandId = commandId + '-2';
       } else {
         Object.keys(shortcutObject.keys).forEach(key => {
           if (shortcutObject.keys[key][0] === '') {
@@ -433,13 +435,17 @@ export class ShortcutUI extends React.Component<
     newShortcut: ShortcutObject,
     oldShortcut: ShortcutObject
   ): void => {
+    /*** */
+    console.log('sorting conflict')
     const shortcutList = this.state.filteredShortcutList
       .filter((shortcut: ShortcutObject) => shortcut.id !== oldShortcut.id)
-      .splice(
-        this.state.filteredShortcutList.indexOf(newShortcut) + 1,
+      
+    shortcutList.splice(
+        shortcutList.indexOf(newShortcut) + 1,
         0,
         oldShortcut
       );
+    console.log(shortcutList)
     oldShortcut.hasConflict = true;
     this.setState({ filteredShortcutList: shortcutList });
   };
@@ -458,7 +464,7 @@ export class ShortcutUI extends React.Component<
       return null;
     }
     return (
-      <div className="jp-shortcutui" id="jp-shortcutui">
+      <div className={ShortcutUIStyle} id="jp-shortcutui">
         <div className={TopWhitespaceStyle} />
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
@@ -468,6 +474,7 @@ export class ShortcutUI extends React.Component<
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
+          width={this.props.width}
         />
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
@@ -478,6 +485,7 @@ export class ShortcutUI extends React.Component<
           keyBindingsUsed={this.state.keyBindingsUsed}
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
+          height={this.props.height}
         />
       </div>
     );
