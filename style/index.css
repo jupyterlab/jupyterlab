@@ -43,7 +43,6 @@
     background-image: url('./images/kernel-icon.svg');
 }
 
-
 .terminal-item {
     background-image: url('./images/terminal-icon.svg');
 }
@@ -54,4 +53,23 @@
 
 .trusted-item {
     background-image: url('./images/trusted-icon.svg');
+}
+
+.jp-popup-content {
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+    background: 'aqua';
+    background-color: aliceblue;
+    max-width: 500px;
+    max-height: 500px;
+    box-sizing: border-box;
+    box-shadow: var(--jp-elevation-z20);
+    word-wrap: break-word;
+    border-radius: var(--jp-border-radius);
+    /* This is needed so that all font sizing of children done in ems is
+     * relative to this base size */
+    font-size: var(--jp-ui-font-size1);
+    color: var(--jp-ui-font-color1);
 }
