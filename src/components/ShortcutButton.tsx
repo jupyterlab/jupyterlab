@@ -2,7 +2,7 @@ import { ShortcutObject } from '../index';
 
 import * as React from 'react';
 
-import { shortcutStyle, shortcutConflictStyle } from './ShortcutButtonStyle';
+import { shortcutStyle, shortcutConflictStyle } from '../componentStyle/ShortcutButtonStyle';
 
 import { classes } from 'typestyle';
 
@@ -19,6 +19,10 @@ export interface IShortcutButtonProps {
 
 /** React component for an interactive button displaying a command's keyboard shortcut */
 export class ShortcutButton extends React.Component<IShortcutButtonProps, {}> {
+  constructor(props: any) {
+    super(props)
+  }
+
   render() {
     return (
       <button

@@ -7,11 +7,6 @@ export const CellStyle = style({
   verticalAlign: 'middle'
 });
 
-export const CellTextStyle = style({
-  lineHeight: '34px',
-  height: '34px'
-});
-
 export const ShortcutCellStyle = style({
   display: 'flex',
   minWidth: '100px',

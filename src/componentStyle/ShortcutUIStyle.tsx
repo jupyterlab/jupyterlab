@@ -7,7 +7,16 @@ export const TopWhitespaceStyle = style({
   borderBottomColor: 'var(--jp-toolbar-border-color)',
   boxShadow: 'var(--jp-toolbar-box-shadow)',
   zIndex: 2,
-  width: '96.253%',
+  width: '100%',
   background: 'var(--jp-toolbar-background)',
-  position: 'fixed'
+  position: 'relative',
 });
+
+export const ShortcutUIStyle  = style({
+  display: 'flex',
+  flexDirection: 'column',
+  fontSize: 'var(--jp-ui-font-size1)',
+  fontFamily: 'var(--jp-ui-font-family)',
+  color: 'var(--jp-content-font-color1)',
+  minWidth: '450px',
+})

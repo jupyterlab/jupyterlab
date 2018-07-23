@@ -17,6 +17,10 @@ export interface IShortcutTitleItemProps {
 export class ShortcutTitleItem extends React.Component<
   IShortcutTitleItemProps
 > {
+  constructor(props: any) {
+    super(props)
+  }
+  
   render() {
     return (
       <div

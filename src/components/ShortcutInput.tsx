@@ -12,14 +12,14 @@ import {
   SubmitNonFunctionalStyle,
   SubmitConflictStyle,
   SubmitStyle
-} from './ShortcutInputStyle';
+} from '../componentStyle/ShortcutInputStyle';
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
   toggleInput: Function;
   shortcut: ShortcutObject;
   toSymbols: Function;
-  keyBindingsUsed: Object;
+  keyBindingsUsed: { [index: string] : ShortcutObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
@@ -31,28 +31,54 @@ export interface IShortcutInputState {
   isAvailable: boolean;
   isFunctional: boolean;
   takenBy: ShortcutObject;
+  keys: Array<string>;
+  currentChain: string;
 }
 
 export class ShortcutInput extends React.Component<
   IShortcutInputProps,
   IShortcutInputState
 > {
+  constructor(props: any) {
+    super(props)
+  }
+
   state = {
     value: '',
     userInput: '',
     isAvailable: true,
     isFunctional: false,
-    takenBy: new ShortcutObject()
+    takenBy: new ShortcutObject(),
+    keys: new Array<string>(),
+    currentChain: ''
   };
 
-  /** Get array of keys from user input */
-  keysFromValue = value => {
-    const keys: string[] = value.split(',');
-    return keys;
-  };
+  handleUpdate = () => {
+    let keys = this.state.keys
+    keys.push(this.state.currentChain)
+    this.setState(
+      {keys: keys}
+    )
+    this.props.handleUpdate(
+      this.props.shortcut,
+      this.state.keys
+    );
+  }
+
+  onKeyPress = (
+    event: any
+  ): void => {
+    event.preventDefault()
+  }
 
   /** Parse user input for chained shortcuts */
-  parseChaining = (event: any, value: string, userInput: string): string => {
+  parseChaining = (
+    event: any, 
+    value: string, 
+    userInput: string, 
+    keys: Array<string>, 
+    currentChain: string
+  ): Array<any> => {
     event.preventDefault();
     const wordKeys = [
       'Tab',
@@ -72,9 +98,13 @@ export class ShortcutInput extends React.Component<
     if (event.key === 'Backspace') {
       userInput = '';
       value = '';
+      keys = [];
+      currentChain = '';
       this.setState({
         value: value,
-        userInput: userInput
+        userInput: userInput,
+        keys: keys,
+        currentChain: currentChain
       });
     } else if (event.key !== 'CapsLock') {
       const lastKey = userInput
@@ -82,46 +112,66 @@ export class ShortcutInput extends React.Component<
         .trim();
       if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = userInput + ',';
+        keys.push(currentChain);
+        currentChain = '';
         if (event.ctrlKey && event.key != 'Control') {
           userInput = (userInput + ' Ctrl').trim();
+          currentChain = (currentChain + ' Ctrl').trim();
         }
         if (event.metaKey && event.key != 'Meta') {
           userInput = (userInput + ' Accel').trim();
+          currentChain = (currentChain + ' Accel').trim();
         }
         if (event.altKey && event.key != 'Alt') {
           userInput = (userInput + ' Alt').trim();
+          currentChain = (currentChain + ' Alt').trim();
         }
         if (event.shiftKey && event.key != 'Shift') {
           userInput = (userInput + ' Shift').trim();
+          currentChain = (currentChain + ' Shift').trim();
         }
         if (wordKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
+          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
         } else {
           if (event.key === 'Meta') {
             userInput = (userInput + ' Accel').trim();
-          } else if (event.key === 'Control') {
+            currentChain = (currentChain + ' Accel').trim();
+          } else if (event.key === ' Control') {
             userInput = (userInput + ' Ctrl').trim();
+            currentChain = (currentChain + ' Ctrl').trim();
           } else {
             userInput = (userInput + ' ' + event.key).trim();
+            currentChain = (currentChain + ' ' + event.key).trim();
           }
         }
       } else {
         if (event.key === 'Control') {
           userInput = (userInput + ' Ctrl').trim();
+          currentChain = (currentChain + ' Ctrl').trim();
         } else if (event.key === 'Meta') {
           userInput = (userInput + ' Accel').trim();
+          currentChain = (currentChain + ' Accel').trim();
         } else if (event.key === 'Shift') {
           userInput = (userInput + ' Shift').trim();
+          currentChain = (currentChain + ' Shift').trim();
         } else if (event.key === 'Alt') {
           userInput = (userInput + ' Alt').trim();
+          currentChain = (currentChain + ' Alt').trim();
         } else if (wordKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
+          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
         } else {
           userInput = (userInput + ' ' + event.key).trim();
+          currentChain = (currentChain + ' ' + event.key).trim();
         }
       }
     }
-    return userInput;
+    this.setState({
+      keys: keys,
+      currentChain: currentChain
+    })
+    return [userInput, keys, currentChain];
   };
 
   /**
@@ -133,28 +183,29 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = shortcut.split(', ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.includes(last) || shortcut === '')
+      isFunctional: !(dontEnd.indexOf(last) !== -1 || shortcut === '')
     });
-    return dontEnd.includes(last) || shortcut === '';
+    return dontEnd.indexOf(last) !== -1 || shortcut === '';
   };
 
   /** Check if shortcut being typed is already taken */
   checkShortcutAvailability = (
     userInput: string,
-    keys: string[]
+    keys: string[],
+    currentChain: string
   ): ShortcutObject => {
     let isAvailable =
-      !Object.keys(this.props.keyBindingsUsed).includes(
-        userInput + '_' + this.props.shortcut.selector
-      ) || userInput === '';
-    let takenBy = new ShortcutObject();
+      (Object.keys(this.props.keyBindingsUsed).indexOf(
+        keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
+      ) === -1) || userInput === '';
+    let takenBy: ShortcutObject = new ShortcutObject();
     if (isAvailable) {
       for (let binding of keys) {
         if (
-          Object.keys(this.props.keyBindingsUsed).includes(
+          Object.keys(this.props.keyBindingsUsed).indexOf(
             binding + '_' + this.props.shortcut.selector
-          ) &&
-          userInput !== ''
+          ) !== -1 &&
+          binding !== ''
         ) {
           isAvailable = false;
           takenBy = this.props.keyBindingsUsed[
@@ -162,9 +213,20 @@ export class ShortcutInput extends React.Component<
           ];
         }
       }
+      if (
+        Object.keys(this.props.keyBindingsUsed).indexOf(
+          currentChain + '_' + this.props.shortcut.selector
+        ) !== -1 &&
+        currentChain !== ''
+      ) {
+        isAvailable = false;
+        takenBy = this.props.keyBindingsUsed[
+          currentChain + '_' + this.props.shortcut.selector
+        ];
+      }
     } else {
       takenBy = this.props.keyBindingsUsed[
-        userInput + '_' + this.props.shortcut.selector
+        keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
     this.setState({ isAvailable: isAvailable });
@@ -181,28 +243,35 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: any): void => {
-    const userInput = this.parseChaining(
+    const parsed = this.parseChaining(
       event,
       this.state.value,
-      this.state.userInput
+      this.state.userInput,
+      this.state.keys,
+      this.state.currentChain
     );
+    const userInput = parsed[0]
+    const keys = parsed[1]
+    const currentChain = parsed[2]
+
     const value = this.props.toSymbols(userInput);
-    let keys = this.keysFromValue(userInput);
-    let takenBy = this.checkShortcutAvailability(userInput, keys);
+    let takenBy = this.checkShortcutAvailability(userInput, keys, currentChain);
     this.checkConflict(takenBy);
 
     this.setState(
       {
         value: value,
         userInput: userInput,
-        takenBy: takenBy
+        takenBy: takenBy,
+        keys: keys,
+        currentChain: currentChain
       },
       () => this.checkNonFunctional(this.state.userInput)
     );
   };
 
-  handleBlur = event => {
-    if (event.relatedTarget === null || event.relatedTarget.id !== 'no-blur') {
+  handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur') {
       this.props.toggleInput();
       this.setState({
         value: '',
@@ -222,7 +291,7 @@ export class ShortcutInput extends React.Component<
         className={
           this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle
         }
-        onBlur={event => this.handleBlur(event)}
+        onBlur={(event) => this.handleBlur(event)}
       >
         <input
           className={inputClassName}
@@ -242,12 +311,11 @@ export class ShortcutInput extends React.Component<
           id={this.state.value !== '' ? 'no-blur' : 'blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
-            this.props.handleUpdate(
-              this.props.shortcut,
-              this.keysFromValue(this.state.userInput)
-            );
+            this.handleUpdate();
             this.setState({
-              value: ''
+              value: '',
+              keys: [],
+              currentChain: ''
             });
             this.props.toggleInput();
           }}

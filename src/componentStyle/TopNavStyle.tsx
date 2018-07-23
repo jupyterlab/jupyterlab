@@ -6,14 +6,13 @@ export const TopStyle = style({
 
 export const TopNavStyle = style({
   display: 'flex',
+  boxSizing: 'border-box',
   fontSize: 'var(--jp-ui-font-size2)',
-  position: 'fixed',
   backgroundColor: 'var(--jp-layout-color0)',
-  width: '96%',
   zIndex: 1,
   paddingTop: '30px',
-  paddingBottom: '60px',
-  minWidth: '1000px'
+  paddingBottom: '30px',
+  height: 110
 });
 
 export const SymbolsStyle = style({
@@ -69,13 +68,23 @@ export const SearchStyle = style({
   }
 });
 
+export const AdvancedOptionsContainerStyle = style (
+  {
+    display: 'contents'
+  }
+)
+
 export const AdvancedOptionsStyle = style({
   display: 'block',
   width: '15%'
 });
 
+export const AdvancedOptionsSmallStyle = style ({
+  width: '30%'
+})
+
 export const AdvancedOptionsRightStyle = style({
-  marginTop: '8px'
+  marginTop: '8px',
 });
 
 export const AdvancedOptionsLinkStyle = style({
@@ -94,18 +103,21 @@ export const AdvancedOptionsLinkStyle = style({
   }
 });
 
-export const AdvancedOptionsLinkRightStyle = style({
-  textAlign: 'left'
-});
+export const AdvancedOptionsRightLinkStyle = style({
+  textAlign: 'left',
+  paddingLeft: '30px'
+})
+
+export const HeaderRowContainerStyle = style({
+  paddingRight: '14px',
+})
 
 export const HeaderRowStyle = style({
   fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
   fontSize: 'var(--jp-ui-font-size2)',
-  position: 'fixed',
   backgroundColor: 'var(--jp-layout-color0)',
-  width: '94%',
+  width: '100%',
   zIndex: 1,
   display: 'table',
-  marginTop: '85px',
-  minWidth: '1000px'
+  padding: '10px 0',
 });

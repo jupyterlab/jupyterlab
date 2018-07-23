@@ -8,7 +8,6 @@ import { classes } from 'typestyle';
 
 import {
   CellStyle,
-  CellTextStyle,
   ShortcutCellStyle,
   RowStyle,
   ConflictRowStyle,
@@ -20,7 +19,7 @@ import {
   PlusStyle,
   SourceCellStyle,
   ResetStyle
-} from './ShortcutItemStyle';
+} from '../componentStyle/ShortcutItemStyle';
 
 import * as React from 'react';
 
@@ -31,7 +30,7 @@ export interface IShortcutItemProps {
   resetShortcut: Function;
   deleteShortcut: Function;
   showSelectors: boolean;
-  keyBindingsUsed: Object;
+  keyBindingsUsed: { [index: string] : ShortcutObject };
   sortConflict: Function;
   clearConflicts: Function;
 }
@@ -68,42 +67,27 @@ export class ShortcutItem extends React.Component<
       'ArrowLeft',
       'Escape'
     ];
-    // const display = value.split(' ').map(key => {
-    //   if (key === 'Ctrl') {
-    //     return '⌃'
-    //   } else if (key === 'Accel') {
-    //     return '⌘'
-    //   } else if (key === 'Shift') {
-    //     return '⇧'
-    //   } else if (key === 'Alt') {
-    //     return '⌥'
-    //   } else if (wordKeys.includes(key)) {
-    //     return key
-    //   } else {
-    //     return key.toUpperCase()
-    //   }
-    // })
-    // return display.join(' ')
+    
     return value.split(' ').reduce((result, key) => {
       if (key === 'Ctrl') {
-        return result + '⌃';
+        return (result + ' ⌃').trim();
       } else if (key === 'Accel') {
-        return result + '⌘';
+        return (result + ' ⌘').trim();
       } else if (key === 'Shift') {
-        return result + '⇧';
+        return (result + ' ⇧').trim();
       } else if (key === 'Alt') {
-        return result + '⌥';
-      } else if (wordKeys.includes(key)) {
-        return result + key;
+        return (result + ' ⌥').trim();
+      } else if (wordKeys.indexOf(key) !== -1) {
+        return (result + ' ' + key).trim();
       } else {
-        return result + key.toUpperCase();
+        return (result + ' ' + key.toUpperCase()).trim();
       }
     }, '');
   };
 
   render() {
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
-      key => this.props.shortcut.keys[key][0] !== ''
+      (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
     return (
       <div
@@ -114,7 +98,7 @@ export class ShortcutItem extends React.Component<
         }
       >
         <div className={CellStyle}>
-          <div className={CellTextStyle}>{this.props.shortcut.category}</div>
+          {this.props.shortcut.category}
         </div>
         <div className={CellStyle}>
           <div className="jp-label">{this.props.shortcut.label}</div>
@@ -124,7 +108,7 @@ export class ShortcutItem extends React.Component<
             {/** Create shortcut boxes and delete buttons for each shortcut */}
             {nonEmptyKeys.map((key, index) => (
               <div className={ShortcutContainerStyle} key={key + '_' + index}>
-                {this.props.shortcut.keys[key].map((keyBinding, index) => (
+                {this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
                   <div className={ShortcutKeysContainerStyle} key={index}>
                     <div className={ShortcutKeysStyle}>
                       {this.toSymbols(keyBinding)}
