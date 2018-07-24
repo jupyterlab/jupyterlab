@@ -29,12 +29,14 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
+  needNumbering = true,
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
     usesLatex: true,
     generate: panel => {
       let headings: IHeading[] = [];
+      let numberingDict: { [level: number]: number } = { };
       each(panel.notebook.widgets, cell => {
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
@@ -65,6 +67,7 @@ export function createNotebookGenerator(
                 outputWidget.node,
                 onClickFactory,
                 sanitizer,
+                numberingDict
               ),
             );
           }
@@ -87,6 +90,7 @@ export function createNotebookGenerator(
                 cell.node,
                 onClickFactory,
                 sanitizer,
+                numberingDict
               ),
             );
           } else {
@@ -99,7 +103,7 @@ export function createNotebookGenerator(
               };
             };
             headings = headings.concat(
-              Private.getMarkdownHeadings(model.value.text, onClickFactory),
+              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict),
             );
           }
         }
@@ -134,7 +138,7 @@ export function createMarkdownGenerator(
           editor.editor.setCursorPosition({line, column: 0});
         };
       };
-      return Private.getMarkdownHeadings(model.value.text, onClickFactory);
+      return Private.getMarkdownHeadings(model.value.text, onClickFactory, null);
     },
   };
 }
@@ -193,6 +197,33 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+
+  export function incrementNumberingDict(dict: any, level: number) {
+    if (dict[level + 1] != undefined) {
+      dict[level + 1] = undefined;
+    }
+    if (dict[level] === undefined) {
+      dict[level] = 1;
+    } else {
+      dict[level]++;
+    }
+  }
+
+  export function generateNumbering(numberingDict: any, level: number) {
+    let numbering = undefined;
+    if (numberingDict != null) {
+      Private.incrementNumberingDict(numberingDict, level);
+      numbering = '';
+      for (var j=1; j<=level; j++) {
+        numbering += numberingDict[j] + '.';
+        if (j == level) {
+          numbering += ' ';
+        }
+      }
+    }
+    return numbering;
+  }
+
   /**
    * Given a string of markdown, get the markdown headings
    * in that string.
@@ -200,6 +231,7 @@ namespace Private {
   export function getMarkdownHeadings(
     text: string,
     onClickFactory: (line: number) => (() => void),
+    numberingDict: any
   ): IHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
@@ -217,7 +249,8 @@ namespace Private {
         const level = match[1].length;
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-        headings.push({text, level, onClick});
+        let numbering = Private.generateNumbering(numberingDict, level);
+        headings.push({text, level, numbering, onClick});
         return;
       }
 
@@ -227,7 +260,8 @@ namespace Private {
         const level = match[1][0] === '=' ? 1 : 2;
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
-        headings.push({text, level, onClick});
+        let numbering = Private.generateNumbering(numberingDict, level);
+        headings.push({text, level, numbering, onClick});
         return;
       }
 
@@ -238,7 +272,8 @@ namespace Private {
       if (match) {
         const level = parseInt(match[1]);
         const text = match[2];
-        headings.push({text, level, onClick});
+        let numbering = Private.generateNumbering(numberingDict, level);
+        headings.push({text, level, numbering, onClick});
       }
     });
     return headings;
@@ -252,6 +287,7 @@ namespace Private {
     node: HTMLElement,
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
+    numberingDict: any
   ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -259,11 +295,15 @@ namespace Private {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1]);
       const text = heading.textContent;
+      if (heading.getElementsByClassName('numbering-entry').length > 0) {
+        heading.removeChild((heading.getElementsByClassName('numbering-entry')[0]));
+      }
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
-
       const onClick = onClickFactory(heading);
-      headings.push({level, text, html, onClick});
+      let numbering = Private.generateNumbering(numberingDict, level);
+      heading.innerHTML = '<span class="numbering-entry">' + numbering + '</span>' + html;
+      headings.push({level, text, numbering, html, onClick});
     }
     return headings;
   }
