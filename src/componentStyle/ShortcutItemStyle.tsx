@@ -24,12 +24,27 @@ export const RowStyle = style({
   backgroundColor: 'var(--jp-layout-color0)'
 });
 
-export const ConflictContainerStyle = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  padding:'6px 12px',
-  marginLeft: '25%'
-})
+export function ConflictContainerStyle(showSelectors: boolean) {
+  if (showSelectors) {
+    return(
+      style({
+        display: 'flex',
+        flexWrap: 'wrap',
+        padding:'6px 12px',
+        marginLeft: '20%'
+      })
+    )
+  } else {
+    return (
+      style({
+        display: 'flex',
+        flexWrap: 'wrap',
+        padding:'6px 12px',
+        marginLeft: '25%'
+      })
+    )
+  }
+}
 
 export const ErrorMessageStyle = style({
   color:'var(--jp-error-color1)',
@@ -46,6 +61,7 @@ export const ErrorButtonStyle = style({
       marginRight:'5px',
       backgroundColor:'var(--jp-border-color0)',
       color:'white',
+      outline: 'none',
 
       $nest: {
         '&:hover':{
@@ -65,6 +81,7 @@ export const ErrorButtonStyle = style({
       height:'25px',
       backgroundColor:'var(--jp-error-color1)',
       color:'white',
+      outline: 'none',
 
       $nest: {
         '&:hover':{

@@ -56,15 +56,25 @@ export class ShortcutObject {
 }
 
 export class ErrorObject extends ShortcutObject {
-  takenByObject: ShortcutObject;
-  takenByLabel: string;
-  takenByKey: string;
+  takenBy: TakenByObject;
 
   constructor() {
     super();
-    this.takenByObject = new ShortcutObject();
-    this.takenByLabel = '';
+    this.takenBy = new TakenByObject();
+  }
+}
+
+export class TakenByObject {
+  takenBy: ShortcutObject;
+  takenByKey: string;
+  takenByLabel: string;
+  id: string;
+
+  constructor() {
+    this.takenBy = new ShortcutObject();
     this.takenByKey = '';
+    this.takenByLabel = '';
+    this.id = '';
   }
 }
 

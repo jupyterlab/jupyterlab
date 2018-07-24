@@ -1,4 +1,4 @@
-import { ShortcutObject } from '../index';
+import { ShortcutObject, TakenByObject } from '../index';
 
 import * as React from 'react';
 
@@ -18,10 +18,11 @@ import {
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
+  deleteShortcut:Function;
   toggleInput: Function;
   shortcut: ShortcutObject;
   toSymbols: Function;
-  keyBindingsUsed: { [index: string] : ShortcutObject };
+  keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
@@ -32,7 +33,7 @@ export interface IShortcutInputState {
   userInput: string;
   isAvailable: boolean;
   isFunctional: boolean;
-  takenBy: ShortcutObject;
+  takenByObject: TakenByObject;
   keys: Array<string>;
   currentChain: string;
 }
@@ -50,7 +51,7 @@ export class ShortcutInput extends React.Component<
     userInput: '',
     isAvailable: true,
     isFunctional: false,
-    takenBy: new ShortcutObject(),
+    takenByObject: new TakenByObject(),
     keys: new Array<string>(),
     currentChain: ''
   };
@@ -65,6 +66,11 @@ export class ShortcutInput extends React.Component<
       this.props.shortcut,
       this.state.keys
     );
+  }
+
+  handleOverwrite = async () => {
+    await this.props.deleteShortcut(this.state.takenByObject.takenBy, this.state.takenByObject.takenByKey);
+    this.handleUpdate()
   }
 
   onKeyPress = (
@@ -83,7 +89,6 @@ export class ShortcutInput extends React.Component<
   ): Array<any> => {
     event.preventDefault();
     let key = EN_US.keyForKeydownEvent(event)
-    console.log(key)
 
     const modKeys = [
       "Shift",
@@ -211,12 +216,12 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: string[],
     currentChain: string
-  ): ShortcutObject => {
+  ): TakenByObject => {
     let isAvailable =
       (Object.keys(this.props.keyBindingsUsed).indexOf(
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ) === -1) || userInput === '';
-    let takenBy: ShortcutObject = new ShortcutObject();
+    let takenByObject: TakenByObject = new TakenByObject();
     if (isAvailable) {
       for (let binding of keys) {
         if (
@@ -226,7 +231,7 @@ export class ShortcutInput extends React.Component<
           binding !== ''
         ) {
           isAvailable = false;
-          takenBy = this.props.keyBindingsUsed[
+          takenByObject = this.props.keyBindingsUsed[
             binding + '_' + this.props.shortcut.selector
           ];
         }
@@ -238,26 +243,22 @@ export class ShortcutInput extends React.Component<
         currentChain !== ''
       ) {
         isAvailable = false;
-        takenBy = this.props.keyBindingsUsed[
+        takenByObject = this.props.keyBindingsUsed[
           currentChain + '_' + this.props.shortcut.selector
         ];
       }
     } else {
-      takenBy = this.props.keyBindingsUsed[
+      takenByObject = this.props.keyBindingsUsed[
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
     this.setState({ isAvailable: isAvailable });
-    return takenBy;
+    return takenByObject;
   };
 
-  checkConflict(takenBy: ShortcutObject, keys: string): void {
-    if (takenBy.id !== '' && takenBy.id !== this.props.shortcut.id) {
-      const takenByLabel = takenBy.category + ": " + takenBy.label
-      console.log(takenBy.keys)
-      console.log(keys)
-      //const takenByKey = takenBy.id + "_" + takenBy.keys.indexOf(keys)
-      this.props.sortConflict(this.props.shortcut, takenBy, takenByLabel, '');
+  checkConflict(takenByObject: TakenByObject, keys: string): void {
+    if (takenByObject.id !== '' && takenByObject.id !== this.props.shortcut.id) {
+      this.props.sortConflict(this.props.shortcut, takenByObject, takenByObject.takenByLabel, '');
     } else {
       this.props.clearConflicts();
     }
@@ -277,14 +278,14 @@ export class ShortcutInput extends React.Component<
     const currentChain = parsed[2]
 
     const value = this.props.toSymbols(userInput);
-    let takenBy = this.checkShortcutAvailability(userInput, keys, currentChain);
-    this.checkConflict(takenBy, keys);
+    let takenByObject = this.checkShortcutAvailability(userInput, keys, currentChain);
+    this.checkConflict(takenByObject, keys);
 
     this.setState(
       {
         value: value,
         userInput: userInput,
-        takenBy: takenBy,
+        takenByObject: takenByObject,
         keys: keys,
         currentChain: currentChain
       },
@@ -293,7 +294,7 @@ export class ShortcutInput extends React.Component<
   };
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur') {
+    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur' && (event.relatedTarget as HTMLElement).id !== 'overwrite') {
       this.props.toggleInput();
       this.setState({
         value: '',
@@ -313,7 +314,7 @@ export class ShortcutInput extends React.Component<
         className={
           this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle
         }
-        //onBlur={(event) => this.handleBlur(event)}
+        onBlur={(event) => this.handleBlur(event)}
       >
         <input
           className={inputClassName}
@@ -343,6 +344,17 @@ export class ShortcutInput extends React.Component<
             this.props.toggleInput();
           }}
         />
+        {!this.state.isAvailable &&
+          <button
+            hidden
+            id='overwrite'
+            onClick={()=>{
+              this.handleOverwrite();
+              this.props.clearConflicts();
+              this.props.toggleInput();
+            }}
+          >Overwrite</button>
+        }
       </div>
     );
   }

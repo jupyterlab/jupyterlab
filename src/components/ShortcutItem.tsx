@@ -1,4 +1,4 @@
-import { ShortcutObject, ErrorObject } from '../index';
+import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
 import { ShortcutButton } from './ShortcutButton';
 
@@ -32,7 +32,7 @@ export interface IShortcutItemProps {
   resetShortcut: Function;
   deleteShortcut: Function;
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string] : ShortcutObject };
+  keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
 }
@@ -80,17 +80,19 @@ export class ShortcutItem extends React.Component<
       (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
     if (this.props.shortcut.id === 'error_row') {
-      console.log('error obj')
       return (
         <tr 
           className = {classes(RowStyle)}
         >
           <td colSpan={this.props.showSelectors ? 5 : 4}>
-            <div className = {ConflictContainerStyle}>
-              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenByLabel + ' Overwrite it?'}</div>
+            <div className = {ConflictContainerStyle(this.props.showSelectors)}>
+              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenBy.takenByLabel + ' Overwrite it?'}</div>
               <div className={ErrorButtonStyle}>
                 <button>Cancel</button>
-                <button>Overwrite</button>
+                <button 
+                  id='no-blur'
+                  onClick={()=>{document.getElementById('overwrite').click()}}
+                >Overwrite</button>
               </div>
             </div>
           </td>
@@ -151,6 +153,7 @@ export class ShortcutItem extends React.Component<
               {this.state.displayInput && (
                 <ShortcutInput
                   handleUpdate={this.props.handleUpdate}
+                  deleteShortcut={this.props.deleteShortcut}
                   toggleInput={this.toggleInput}
                   shortcut={this.props.shortcut}
                   toSymbols={this.toSymbols}
