@@ -19,13 +19,14 @@ import {
 export interface IShortcutInputProps {
   handleUpdate: Function;
   deleteShortcut:Function;
-  toggleInput: Function;
+  toggleInputNew: Function;
   shortcut: ShortcutObject;
   toSymbols: Function;
   keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
+  newOrReplace: string;
 }
 
 export interface IShortcutInputState {
@@ -295,7 +296,7 @@ export class ShortcutInput extends React.Component<
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur' && (event.relatedTarget as HTMLElement).id !== 'overwrite') {
-      this.props.toggleInput();
+      this.props.toggleInputNew();
       this.setState({
         value: '',
         userInput: ''
@@ -341,7 +342,7 @@ export class ShortcutInput extends React.Component<
               keys: [],
               currentChain: ''
             });
-            this.props.toggleInput();
+            this.props.toggleInputNew();
           }}
         />
         {!this.state.isAvailable &&
@@ -351,7 +352,7 @@ export class ShortcutInput extends React.Component<
             onClick={()=>{
               this.handleOverwrite();
               this.props.clearConflicts();
-              this.props.toggleInput();
+              this.props.toggleInputNew();
             }}
           >Overwrite</button>
         }
