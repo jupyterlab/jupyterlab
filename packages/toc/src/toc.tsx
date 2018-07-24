@@ -167,6 +167,8 @@ export interface IHeading {
    */
   level: number;
 
+  numbering?: string;
+
   /**
    * A function to execute when clicking the ToC
    * item. Typically this will be used to scroll
@@ -236,10 +238,11 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
 
     let content;
     console.log('iiejwfa');
+    let numbering = heading.numbering ? heading.numbering : '';
     if (heading.html) {
       content = (
         <span
-          dangerouslySetInnerHTML={{ __html: heading.html }}
+          dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
           style={{ paddingLeft }}
         />
       );
@@ -251,8 +254,7 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
       );
       content = (
         <span style={{ paddingLeft }}>
-          {collapse}
-          {heading.text}
+          {collapse}{ numbering + heading.text }
         </span>
       );
     }
