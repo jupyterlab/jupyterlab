@@ -19,7 +19,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-import { TextFunctions } from '../util/format';
+import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
 import { interactiveHover } from '../style/statusBar';
 
@@ -32,9 +32,9 @@ const KernelStatusComponent = (
             <TextItem
                 title="Current active kernel"
                 source={
-                    TextFunctions.titleCase(props.name) +
+                    TextExt.titleCase(props.name) +
                     ' | ' +
-                    TextFunctions.titleCase(props.status)
+                    TextExt.titleCase(props.status)
                 }
             />
         </div>

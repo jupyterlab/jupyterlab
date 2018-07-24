@@ -1,4 +1,4 @@
-export namespace TextFunctions {
+export namespace TextExt {
     export function titleCase(str: string) {
         return str
             .toLowerCase()
