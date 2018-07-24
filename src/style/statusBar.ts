@@ -24,12 +24,24 @@ export const rightSide = style(rightToLeft);
 export const item = style({
     maxHeight: vars.height,
     marginLeft: vars.itemMargin,
-    marginRight: vars.itemMargin,
-    paddingLeft: vars.itemPadding,
-    paddingRight: vars.itemPadding,
-    $nest: {
-        '&:hover': {
-            backgroundColor: vars.hoverColor
-        }
-    }
+    marginRight: vars.itemMargin
 });
+
+const itemPadding = {
+    paddingLeft: vars.itemPadding,
+    paddingRight: vars.itemPadding
+};
+
+export const interactiveHover = style(
+    {
+        $nest: {
+            '&:hover': {
+                backgroundColor: vars.hoverColor,
+                cursor: 'pointer'
+            }
+        }
+    },
+    itemPadding
+);
+
+export const nonInteractiveItem = style(itemPadding);

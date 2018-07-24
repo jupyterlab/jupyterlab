@@ -28,6 +28,7 @@ import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup } from '../component/hover';
+import { interactiveHover } from '../style/statusBar';
 
 namespace TabSpaceComponent {
     export interface IProps {
@@ -41,11 +42,12 @@ const TabSpaceComponent = (
     props: TabSpaceComponent.IProps
 ): React.ReactElement<TabSpaceComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
-            <TextItem
-                title="Set indentation spacing"
-                source={'Spaces: ' + props.tabSpace}
-            />
+        <div
+            onClick={props.handleClick}
+            title="Set indentation spacing"
+            className={interactiveHover}
+        >
+            <TextItem source={'Spaces: ' + props.tabSpace} />
         </div>
     );
 };

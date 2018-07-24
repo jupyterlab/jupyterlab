@@ -16,42 +16,37 @@ import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { IconItem } from '../component/icon';
 import { IStatusContext } from '../contexts';
+import { nonInteractiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
+    let title: string;
+    let source: string;
+
     if (props.allCellsTrusted) {
-        return (
-            <div
-                title={`Notebook trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'trusted-item'} />
-            </div>
-        );
+        title = `Notebook trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'trusted-item';
     } else if (props.activeCellTrusted) {
-        return (
-            <div
-                title={`Active cell trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'trusted-item'} />
-            </div>
-        );
+        title = `Active cell trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'trusted-item';
     } else {
-        return (
-            <div
-                title={`Notebook not trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'not-trusted-item'} />
-            </div>
-        );
+        title = `Notebook not trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'not-trusted-item';
     }
+
+    return (
+        <div title={title} className={nonInteractiveItem}>
+            <IconItem source={source} />
+        </div>
+    );
 };
 
 namespace NotebookTrustComponent {

@@ -21,13 +21,14 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { TextFunctions } from '../util/format';
 import { CommandRegistry } from '@phosphor/commands';
+import { interactiveHover } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
+        <div onClick={props.handleClick} className={interactiveHover}>
             <TextItem
                 title="Current active kernel"
                 source={

@@ -21,13 +21,17 @@ import { ArrayExt } from '@phosphor/algorithm';
 import { IDefaultsManager } from './manager';
 import { GroupItem } from '../component/group';
 import vars from '../style/variables';
+import { nonInteractiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
     props: FileUploadComponent.IProps
 ): React.ReactElement<FileUploadComponent.IProps> => {
     return (
-        <GroupItem spacing={vars.interItemHalfSpacing}>
+        <GroupItem
+            spacing={vars.textIconHalfSpacing}
+            className={nonInteractiveItem}
+        >
             <TextItem source={'Uploading'} />
             <ProgressBar percentage={props.upload} />
         </GroupItem>

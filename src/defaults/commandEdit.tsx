@@ -20,6 +20,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
 import { TextFunctions } from '../util/format';
+import { nonInteractiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -29,6 +30,7 @@ const CommandEditComponent = (
         <TextItem
             title={`Notebook is in ${props.notebookMode} mode`}
             source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
+            className={nonInteractiveItem}
         />
     );
 };

@@ -29,6 +29,7 @@ import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
 import { style } from 'typestyle/lib';
 import { baseText } from '../style/text';
+import { interactiveHover } from '../style/statusBar';
 
 export namespace LineForm {
     export interface IProps {
@@ -94,7 +95,11 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div title="Go to line number" onClick={props.handleClick}>
+        <div
+            title="Go to line number"
+            onClick={props.handleClick}
+            className={interactiveHover}
+        >
             <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
         </div>
     );
