@@ -1,6 +1,8 @@
+import warnings
+
 from .browser_check import *
 
-raise DeprecationWarning("Should switch to using `browser_check.py` instead of `selenium_check.py`")
+warnings.warn("Should switch to using `browser_check.py` instead of `selenium_check.py`", DeprecationWarning)
 
 if __name__ == '__main__':
     BrowserApp.launch_instance()
