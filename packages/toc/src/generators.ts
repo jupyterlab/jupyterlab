@@ -1,19 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {ISanitizer} from '@jupyterlab/apputils';
+import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
-import {CodeCell, CodeCellModel, MarkdownCell} from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 
-import {FileEditor, IEditorTracker} from '@jupyterlab/fileeditor';
+import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
 
-import {INotebookTracker, NotebookPanel} from '@jupyterlab/notebook';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
-import {each} from '@phosphor/algorithm';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import {TableOfContentsRegistry} from './registry';
+import { each } from '@phosphor/algorithm';
 
-import {IHeading} from './toc';
+import { TableOfContentsRegistry } from './registry';
+
+import { IHeading } from './toc';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
@@ -37,7 +39,7 @@ export function createNotebookGenerator(
     generate: panel => {
       let headings: IHeading[] = [];
       let numberingDict: { [level: number]: number } = { };
-      each(panel.notebook.widgets, cell => {
+      each(panel.content.widgets, cell => {
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
@@ -49,7 +51,7 @@ export function createNotebookGenerator(
             const outputModel = (model as CodeCellModel).outputs.get(i);
             const dataTypes = Object.keys(outputModel.data);
             const htmlData = dataTypes.filter(
-              t => Private.isMarkdown(t) || Private.isDOM(t),
+              t => Private.isMarkdown(t) || Private.isDOM(t)
             );
             if (!htmlData.length) {
               continue;
@@ -68,7 +70,7 @@ export function createNotebookGenerator(
                 onClickFactory,
                 sanitizer,
                 numberingDict
-              ),
+              )
             );
           }
         } else if (model.type === 'markdown') {
@@ -91,25 +93,25 @@ export function createNotebookGenerator(
                 onClickFactory,
                 sanitizer,
                 numberingDict
-              ),
+              )
             );
           } else {
             const onClickFactory = (line: number) => {
               return () => {
                 cell.node.scrollIntoView();
                 if (!(cell as MarkdownCell).rendered) {
-                  cell.editor.setCursorPosition({line, column: 0});
+                  cell.editor.setCursorPosition({ line, column: 0 });
                 }
               };
             };
             headings = headings.concat(
-              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict),
+              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict)
             );
           }
         }
       });
       return headings;
-    },
+    }
   };
 }
 
@@ -121,25 +123,59 @@ export function createNotebookGenerator(
  * @returns A TOC generator that can parse markdown files.
  */
 export function createMarkdownGenerator(
-  tracker: IEditorTracker,
-): TableOfContentsRegistry.IGenerator<FileEditor> {
+  tracker: IEditorTracker
+): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
-      return Private.isMarkdown(editor.model.mimeType);
+      return Private.isMarkdown(editor.content.model.mimeType);
     },
     generate: editor => {
-      let model = editor.model;
+      let model = editor.content.model;
       let onClickFactory = (line: number) => {
         return () => {
-          editor.editor.setCursorPosition({line, column: 0});
+          editor.content.editor.setCursorPosition({ line, column: 0 });
         };
       };
       return Private.getMarkdownHeadings(model.value.text, onClickFactory, null);
+    }
+  };
+}
+
+/**
+ * Create a TOC generator for rendered markdown files.
+ *
+ * @param tracker: A file editor tracker.
+ *
+ * @returns A TOC generator that can parse markdown files.
+ */
+export function createRenderedMarkdownGenerator(
+  tracker: IInstanceTracker<MimeDocument>,
+  sanitizer: ISanitizer
+): TableOfContentsRegistry.IGenerator<MimeDocument> {
+  return {
+    tracker,
+    usesLatex: true,
+    isEnabled: widget => {
+      // Only enable this if the editor mimetype matches
+      // one of a few markdown variants.
+      return Private.isMarkdown(widget.content.mimeType);
     },
+    generate: widget => {
+      const onClickFactory = (el: Element) => {
+        return () => {
+          el.scrollIntoView();
+        };
+      };
+      return Private.getRenderedHTMLHeadings(
+        widget.content.node,
+        onClickFactory,
+        sanitizer
+      );
+    }
   };
 }
 
@@ -151,45 +187,48 @@ export function createMarkdownGenerator(
  * @returns A TOC generator that can parse LaTeX files.
  */
 export function createLatexGenerator(
-  tracker: IEditorTracker,
-): TableOfContentsRegistry.IGenerator<FileEditor> {
+  tracker: IEditorTracker
+): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few LaTeX variants.
-      let mime = editor.model.mimeType;
+      let mime = editor.content.model.mimeType;
       return mime === 'text/x-latex' || mime === 'text/x-stex';
     },
     generate: editor => {
       let headings: IHeading[] = [];
-      let model = editor.model;
+      let model = editor.content.model;
 
       // Split the text into lines, with the line number for each.
       // We will use the line number to scroll the editor upon
       // TOC item click.
       const lines = model.value.text.split('\n').map((value, idx) => {
-        return {value, idx};
+        return { value, idx };
       });
 
       // Iterate over the lines to get the header level and
       // the text for the line.
       lines.forEach(line => {
         const match = line.value.match(
-          /^\s*\\(section|subsection|subsubsection){(.+)}/,
+          /^\s*\\(section|subsection|subsubsection){(.+)}/
         );
         if (match) {
           const level = Private.latexLevels[match[1]];
           const text = match[2];
           const onClick = () => {
-            editor.editor.setCursorPosition({line: line.idx, column: 0});
+            editor.content.editor.setCursorPosition({
+              line: line.idx,
+              column: 0
+            });
           };
-          headings.push({text, level, onClick});
+          headings.push({ text, level, onClick });
         }
       });
       return headings;
-    },
+    }
   };
 }
 
@@ -270,7 +309,7 @@ namespace Private {
       // It should do a decent job of catching many, though.
       match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
-        const level = parseInt(match[1]);
+        const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
         headings.push({text, level, numbering, onClick});
@@ -324,10 +363,7 @@ namespace Private {
    * Return whether the mime type is DOM-ish (html or vdom).
    */
   export function isDOM(mime: string): boolean {
-    return (
-      mime === VDOM_MIME_TYPE ||
-      mime === HTML_MIME_TYPE
-    );
+    return mime === VDOM_MIME_TYPE || mime === HTML_MIME_TYPE;
   }
 
   /**
@@ -335,14 +371,14 @@ namespace Private {
    * levels. `part` and `chapter` are less common in my experience,
    * so assign them to header level 1.
    */
-  export const latexLevels: {[label: string]: number} = {
+  export const latexLevels: { [label: string]: number } = {
     part: 1, // Only available for report and book classes
     chapter: 1, // Only available for report and book classes
     section: 1,
     subsection: 2,
     subsubsection: 3,
     paragraph: 4,
-    subparagraph: 5,
+    subparagraph: 5
   };
 
   /**
@@ -364,7 +400,7 @@ namespace Private {
       'div',
       'span',
       'pre',
-      'del',
+      'del'
     ],
     allowedAttributes: {
       // Allow "class" attribute for <code> tags.
@@ -376,7 +412,7 @@ namespace Private {
       // Allow "class" attribute for <p> tags.
       p: ['class'],
       // Allow "class" attribute for <pre> tags.
-      pre: ['class'],
-    },
+      pre: ['class']
+    }
   };
 }
