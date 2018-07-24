@@ -89,7 +89,7 @@
         "selector": {
           "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Console Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -102,7 +102,7 @@
         "selector": {
           "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Notebook Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
