@@ -173,7 +173,8 @@ export function createRenderedMarkdownGenerator(
       return Private.getRenderedHTMLHeadings(
         widget.content.node,
         onClickFactory,
-        sanitizer
+        sanitizer,
+        null
       );
     }
   };
