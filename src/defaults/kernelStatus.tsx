@@ -22,6 +22,7 @@ import { IStatusContext } from '../contexts';
 import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
 import { interactiveItem } from '../style/statusBar';
+import { Message } from '@phosphor/messaging';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -65,7 +66,9 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
             this._getFocusedSession(this._shell.currentWidget)
         );
 
-        this.addClass(interactiveItem);
+        if (this.model!.type === 'notebook') {
+            this.addClass(interactiveItem);
+        }
     }
 
     render() {
@@ -82,8 +85,24 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         }
     }
 
+    protected onUpdateRequest(msg: Message) {
+        this.model!.session = this._getFocusedSession(
+            this._shell.currentWidget
+        );
+
+        if (this.model!.type === 'notebook') {
+            this.addClass(interactiveItem);
+        } else {
+            this.removeClass(interactiveItem);
+        }
+
+        super.onUpdateRequest(msg);
+    }
+
     private _handleClick = () => {
-        this._commands.execute('notebook:change-kernel');
+        if (this.model!.type === 'notebook') {
+            this._commands.execute('notebook:change-kernel');
+        }
     };
 
     private _onNotebookChange = (
@@ -91,6 +110,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         panel: NotebookPanel | null
     ) => {
         this.model!.session = panel && panel.session;
+        this.addClass(interactiveItem);
     };
 
     private _onConsoleChange = (
@@ -98,6 +118,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         panel: ConsolePanel | null
     ) => {
         this.model!.session = panel && panel.session;
+        this.removeClass(interactiveItem);
     };
 
     private _getFocusedSession(val: Widget | null): IClientSession | null {
@@ -142,6 +163,10 @@ namespace KernelStatus {
 
         get status() {
             return this._kernelStatus;
+        }
+
+        get type() {
+            return this._session && this._session.type;
         }
 
         get session() {
@@ -213,6 +238,7 @@ export namespace IKernelStatus {
     export interface IModel {
         readonly name: string;
         readonly status: Kernel.Status;
+        readonly type: string | null;
         readonly session: IClientSession | null;
     }
 }

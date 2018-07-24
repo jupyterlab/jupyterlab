@@ -10,6 +10,7 @@ import {
     leftSide as leftSideStyle,
     rightSide as rightSideStyle
 } from './style/statusBar';
+import { Message } from '@phosphor/messaging';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
@@ -66,6 +67,13 @@ export class StatusBar extends Widget implements IStatusBar {
 
         this._host.addToBottomArea(this);
         this._host.currentChanged.connect(this._onAppShellCurrentChanged);
+        this._host.restored
+            .then(() => {
+                this.update();
+            })
+            .catch(() => {
+                console.error(`Failed to refresh statusbar items`);
+            });
     }
 
     registerStatusItem(
@@ -143,6 +151,15 @@ export class StatusBar extends Widget implements IStatusBar {
         return this._host;
     }
 
+    protected onUpdateRequest(msg: Message) {
+        this._statusIds.forEach(statusId => {
+            this._statusItems[statusId].widget.update();
+        });
+
+        this._refreshAll();
+        super.onUpdateRequest(msg);
+    }
+
     private _findInsertIndex(
         side: StatusBar.IRankItem[],
         newItem: StatusBar.IRankItem
@@ -153,24 +170,26 @@ export class StatusBar extends Widget implements IStatusBar {
         );
     }
 
-    private _onAppShellCurrentChanged = () => {
-        this._statusIds.forEach(statusId => {
-            const { widget, isActive } = this._statusItems[statusId];
-            if (isActive()) {
-                widget.show();
-            } else {
-                widget.hide();
-            }
-        });
-    };
-
-    private _onIndividualStateChange = (statusId: string) => {
-        const { widget, isActive } = this._statusItems[statusId];
+    private _refreshItem({ isActive, widget }: StatusBar.IItem) {
         if (isActive()) {
             widget.show();
         } else {
             widget.hide();
         }
+    }
+
+    private _refreshAll(): void {
+        this._statusIds.forEach(statusId => {
+            this._refreshItem(this._statusItems[statusId]);
+        });
+    }
+
+    private _onAppShellCurrentChanged = () => {
+        this._refreshAll();
+    };
+
+    private _onIndividualStateChange = (statusId: string) => {
+        this._refreshItem(this._statusItems[statusId]);
     };
 
     private _leftRankItems: StatusBar.IRankItem[] = [];
