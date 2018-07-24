@@ -13,7 +13,7 @@ import {each} from '@phosphor/algorithm';
 
 import {TableOfContentsRegistry} from './registry';
 
-import {IHeading} from './toc';
+import {IHeading, TableOfContents} from './toc';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
@@ -29,7 +29,7 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  needNumbering = true,
+  widget: TableOfContents = null,
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -68,7 +68,7 @@ export function createNotebookGenerator(
                 onClickFactory,
                 sanitizer,
                 numberingDict
-              ),
+              )
             );
           }
         } else if (model.type === 'markdown') {
@@ -85,13 +85,18 @@ export function createNotebookGenerator(
                 }
               };
             };
+            let numbering = true;
+            if (widget != null) {
+              numbering = widget.needNumbering;
+            }
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 cell.node,
                 onClickFactory,
                 sanitizer,
-                numberingDict
-              ),
+                numberingDict,
+                numbering
+              )
             );
           } else {
             const onClickFactory = (line: number) => {
@@ -103,7 +108,7 @@ export function createNotebookGenerator(
               };
             };
             headings = headings.concat(
-              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict),
+              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict)
             );
           }
         }
@@ -287,7 +292,8 @@ namespace Private {
     node: HTMLElement,
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
-    numberingDict: any
+    numberingDict: any,
+    needNumbering = true
   ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -295,6 +301,7 @@ namespace Private {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1]);
       const text = heading.textContent;
+      let shallHide = !needNumbering;
       if (heading.getElementsByClassName('numbering-entry').length > 0) {
         heading.removeChild((heading.getElementsByClassName('numbering-entry')[0]));
       }
@@ -302,7 +309,10 @@ namespace Private {
       html = html.replace('¶', ''); // Remove the anchor symbol.
       const onClick = onClickFactory(heading);
       let numbering = Private.generateNumbering(numberingDict, level);
-      heading.innerHTML = '<span class="numbering-entry">' + numbering + '</span>' + html;
+      let numberingElement = '<span class="numbering-entry" ' 
+                           + (shallHide ? ' hidden="true"' : '') 
+                           + '>' + numbering + '</span>';
+      heading.innerHTML = numberingElement + html;
       headings.push({level, text, numbering, html, onClick});
     }
     return headings;
