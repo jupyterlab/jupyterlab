@@ -29,7 +29,7 @@ import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
 import { style } from 'typestyle/lib';
 import { baseText } from '../style/text';
-import { interactiveHover } from '../style/statusBar';
+import { interactiveItem } from '../style/statusBar';
 
 export namespace LineForm {
     export interface IProps {
@@ -95,13 +95,11 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div
+        <TextItem
             title="Go to line number"
             onClick={props.handleClick}
-            className={interactiveHover}
-        >
-            <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
-        </div>
+            source={'Ln ' + props.line + ', Col ' + props.column}
+        />
     );
 };
 
@@ -126,6 +124,8 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this.model = new LineCol.Model(
             this._getFocusedEditor(this._shell.currentWidget)
         );
+
+        this.addClass(interactiveItem);
     }
 
     protected render(): React.ReactElement<LineColComponent.IProps> | null {

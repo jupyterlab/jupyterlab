@@ -21,7 +21,7 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
 import { GroupItem } from '../component/group';
 import vars from '../style/variables';
-import { interactiveHover } from '../style/statusBar';
+import { interactiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
@@ -32,7 +32,6 @@ const RunningSessionsComponent = (
             spacing="5px"
             onClick={props.handleClick}
             title={'Number of active sessions'}
-            className={interactiveHover}
         >
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.kernels} />
@@ -69,6 +68,8 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
+
+        this.addClass(interactiveItem);
     }
 
     render() {

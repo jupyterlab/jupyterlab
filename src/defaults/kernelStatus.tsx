@@ -21,23 +21,20 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
-import { interactiveHover } from '../style/statusBar';
+import { interactiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
     return (
-        <div onClick={props.handleClick} className={interactiveHover}>
-            <TextItem
-                title="Current active kernel"
-                source={
-                    TextExt.titleCase(props.name) +
-                    ' | ' +
-                    TextExt.titleCase(props.status)
-                }
-            />
-        </div>
+        <TextItem
+            onClick={props.handleClick}
+            title="Current active kernel"
+            source={`${TextExt.titleCase(props.name)} | ${TextExt.titleCase(
+                props.status
+            )}`}
+        />
     );
 };
 
@@ -67,6 +64,8 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         this.model = new KernelStatus.Model(
             this._getFocusedSession(this._shell.currentWidget)
         );
+
+        this.addClass(interactiveItem);
     }
 
     render() {
@@ -75,8 +74,8 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         } else {
             return (
                 <KernelStatusComponent
-                    status={this.model!.status}
-                    name={this.model!.name}
+                    status={this.model.status}
+                    name={this.model.name}
                     handleClick={this._handleClick}
                 />
             );
