@@ -116,7 +116,7 @@ export class TableOfContents extends Widget {
   }
 
   private changeNumberingStateForAllCells(showNumbering: boolean) {
-    each(this._notebook.currentWidget.notebook.widgets, cell => {
+    each(this._notebook.currentWidget.content.widgets, cell => {
       let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
       each(headingNodes, heading => {
         if (heading.getElementsByClassName('numbering-entry').length > 0) {
