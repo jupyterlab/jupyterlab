@@ -251,9 +251,13 @@ export class ShortcutInput extends React.Component<
     return takenBy;
   };
 
-  checkConflict(takenBy: ShortcutObject): void {
+  checkConflict(takenBy: ShortcutObject, keys: string): void {
     if (takenBy.id !== '' && takenBy.id !== this.props.shortcut.id) {
-      this.props.sortConflict(this.props.shortcut, takenBy);
+      const takenByLabel = takenBy.category + ": " + takenBy.label
+      console.log(takenBy.keys)
+      console.log(keys)
+      //const takenByKey = takenBy.id + "_" + takenBy.keys.indexOf(keys)
+      this.props.sortConflict(this.props.shortcut, takenBy, takenByLabel, '');
     } else {
       this.props.clearConflicts();
     }
@@ -274,7 +278,7 @@ export class ShortcutInput extends React.Component<
 
     const value = this.props.toSymbols(userInput);
     let takenBy = this.checkShortcutAvailability(userInput, keys, currentChain);
-    this.checkConflict(takenBy);
+    this.checkConflict(takenBy, keys);
 
     this.setState(
       {
@@ -309,7 +313,7 @@ export class ShortcutInput extends React.Component<
         className={
           this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle
         }
-        onBlur={(event) => this.handleBlur(event)}
+        //onBlur={(event) => this.handleBlur(event)}
       >
         <input
           className={inputClassName}

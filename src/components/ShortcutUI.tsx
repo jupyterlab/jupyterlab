@@ -8,7 +8,7 @@ import { ShortcutList } from './ShortcutList';
 
 import { TopNav } from './TopNav';
 
-import { ShortcutObject } from '../index';
+import { ShortcutObject, ErrorObject } from '../index';
 
 import { TopWhitespaceStyle, ShortcutUIStyle } from '../componentStyle/ShortcutUIStyle';
 
@@ -185,24 +185,26 @@ function getShortcutObjects(
   const shortcuts: any = shortcutsObj['composite'];
   let shortcutObjects: {[index: string]: ShortcutObject} = {};
   Object.keys(shortcuts).forEach(shortcutKey => {
-    let key =
-      shortcuts[shortcutKey]['command'] +
-      '_' +
-      shortcuts[shortcutKey]['selector'];
-    if (Object.keys(shortcutObjects).indexOf(key)!==-1) {
-      shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-      shortcutObjects[key].numberOfShortcuts = 2;
-    } else {
-      let shortcutObject = new ShortcutObject();
-      shortcutObject.commandName = shortcuts[shortcutKey]['command'];
-      shortcutObject.label = shortcuts[shortcutKey]['title'];
-      shortcutObject.category = shortcuts[shortcutKey]['category'];
-      shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-      shortcutObject.selector = shortcuts[shortcutKey]['selector'];
-      shortcutObject.source = 'Default';
-      shortcutObject.id = shortcutKey;
-      shortcutObject.numberOfShortcuts = 1;
-      shortcutObjects[key] = shortcutObject;
+    if (shortcuts[shortcutKey]['selector'] !== '') {
+      let key =
+        shortcuts[shortcutKey]['command'] +
+        '_' +
+        shortcuts[shortcutKey]['selector'];
+      if (Object.keys(shortcutObjects).indexOf(key)!==-1) {
+        shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+        shortcutObjects[key].numberOfShortcuts = 2;
+      } else {
+        let shortcutObject = new ShortcutObject();
+        shortcutObject.commandName = shortcuts[shortcutKey]['command'];
+        shortcutObject.label = shortcuts[shortcutKey]['title'];
+        shortcutObject.category = shortcuts[shortcutKey]['category'];
+        shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+        shortcutObject.selector = shortcuts[shortcutKey]['selector'];
+        shortcutObject.source = 'Default';
+        shortcutObject.id = shortcutKey;
+        shortcutObject.numberOfShortcuts = 1;
+        shortcutObjects[key] = shortcutObject;
+      }
     }
   });
   return shortcutObjects;
@@ -215,14 +217,18 @@ function getKeyBindingsUsed(
 ):  { [index: string] : ShortcutObject } {
   let keyBindingsUsed:  { [index: string] : ShortcutObject } = {};
   Object.keys(shortcutObjects).forEach((shortcut: string) => {
-    for (let key of Object.keys(shortcutObjects[shortcut].keys)) {
+    Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
+      console.log('=====================')
+      console.log(shortcutObjects[shortcut])
+      console.log(shortcutObjects[shortcut].keys[key].join(" "))
+      const keyBinding = shortcutObjects[shortcut].keys[key].join(" ")
       keyBindingsUsed[
-        shortcutObjects[shortcut].keys[key].join(' ') +
-          '_' +
-          shortcutObjects[shortcut].selector
+        keyBinding +
+        '_' +
+        shortcutObjects[shortcut].selector
       ] =
       shortcutObjects[shortcut];
-    }
+    })
   });
   return keyBindingsUsed;
 }
@@ -433,29 +439,40 @@ export class ShortcutUI extends React.Component<
   /** Sort shortcut list so that the conflicting shortcut is right below the one currently being set */
   sortConflict = (
     newShortcut: ShortcutObject,
-    oldShortcut: ShortcutObject
+    takenBy: ShortcutObject,
+    takenByLabel: string,
+    takenByKey: string
   ): void => {
-    /*** */
     console.log('sorting conflict')
-    const shortcutList = this.state.filteredShortcutList
-      .filter((shortcut: ShortcutObject) => shortcut.id !== oldShortcut.id)
-      
+    
+    const shortcutList = this.state.filteredShortcutList 
+    const errorRow = new ErrorObject()
+    errorRow.takenByObject = takenBy
+    errorRow.takenByKey = takenByKey
+    errorRow.takenByLabel = takenByLabel
+    errorRow.id = 'error_row'
+    console.log(takenByLabel)
+
     shortcutList.splice(
         shortcutList.indexOf(newShortcut) + 1,
         0,
-        oldShortcut
+        errorRow
       );
-    console.log(shortcutList)
-    oldShortcut.hasConflict = true;
+    
+    errorRow.hasConflict = true;
     this.setState({ filteredShortcutList: shortcutList });
   };
 
   /** Remove conflict flag from all shortcuts */
   clearConflicts = (): void => {
-    const shortcutList = this.state.filteredShortcutList;
+    /** Remove error row */
+    const shortcutList = this.state.filteredShortcutList
+      .filter(shortcut => shortcut.selector != '')
+
     shortcutList.forEach((shortcut: ShortcutObject) => {
       shortcut.hasConflict = false;
     });
+
     this.setState({ filteredShortcutList: shortcutList });
   };
 

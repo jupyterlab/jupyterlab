@@ -22,7 +22,7 @@ import '../style/index.css';
 export class ShortcutObject {
   commandName: string;
   label: string;
-  keys: {[index: string]: string[]};
+  keys: {[index: string]: Array<string>};
   source: string;
   selector: string;
   category: string;
@@ -55,57 +55,18 @@ export class ShortcutObject {
   }
 }
 
-// class ShortcutWidget extends ReactElementWidget {
-//   height: number;
-//   width: number;
-//   private TOPNAV_HEIGHT: number = 185;
-//   private ShortcutListContainer: { [key:string]: any } = undefined;
+export class ErrorObject extends ShortcutObject {
+  takenByObject: ShortcutObject;
+  takenByLabel: string;
+  takenByKey: string;
 
-//   constructor(element: React.ReactElement<any>) {
-//     super(element);
-//     console.log(element)
-//     this.id = 'jupyterlab-shortcutui';
-//     this.title.label = 'Keyboard Shortcut Editor';
-//     this.title.closable = true;
-//     this.addClass('jp-shortcutWidget');
-
-//     if (this.ShortcutListContainer !== undefined) {
-//       this.ShortcutListContainer.setAttribute(
-//         'style', 
-//         "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
-//       )
-//     }
-//   }
-
-//   protected onAfterShow(msg: Message) {
-//     //console.log('attached! node: ', this.node, this.node.childNodes.querySelectorAll('#shortcutListContainer'))
-//     super.onAfterShow(msg);
-//     if (this.node.childNodes[0] !== undefined) {
-//       this.ShortcutListContainer = this.node.childNodes[0].childNodes[2];
-//     }
-//     this.ShortcutListContainer.setAttribute(
-//       'style', 
-//       "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
-//     )
-//   }
-
-//   protected onResize(msg: Widget.ResizeMessage) {
-//     super.onResize(msg);
-//     this.height = msg.height;
-//     this.width = msg.width;
-//     this.ShortcutListContainer = this.node.childNodes[0].childNodes[2];
-
-//     if (this.node.childNodes[0] !== undefined) {
-//       this.ShortcutListContainer.setAttribute(
-//         'style', 
-//         "height: "+ (this.height - this.TOPNAV_HEIGHT) + 'px;'
-//       )
-//     } else {
-//       console.log('nope');
-//       console.log(this.height, this.width)
-//     }
-//   }
-// }
+  constructor() {
+    super();
+    this.takenByObject = new ShortcutObject();
+    this.takenByLabel = '';
+    this.takenByKey = '';
+  }
+}
 
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
@@ -122,14 +83,6 @@ const plugin: JupyterLabPlugin<void> = {
       .then(settings => Object.keys(settings.composite))
       /** Create top-level component and associated widget */
       .then(commandlist => {
-        // const shortcutUI = React.createElement(ShortcutUI, {
-        //   commandList: commandlist,
-        //   settingRegistry: settingRegistry,
-        //   shortcutPlugin: '@jupyterlab/shortcuts-extension:plugin',
-        //   commandRegistry: app.commands,
-        //   height: 0,
-        //   width: 0
-        // });
 
         const widget = new ShortcutWidget(
           -1,

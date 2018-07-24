@@ -1,16 +1,16 @@
-import { ShortcutObject } from '../index';
+import { ShortcutObject, ErrorObject } from '../index';
 
 import { ShortcutButton } from './ShortcutButton';
 
 import { ShortcutInput } from './ShortcutInput';
 
-import { classes } from 'typestyle';
-
 import {
   CellStyle,
   ShortcutCellStyle,
   RowStyle,
-  ConflictRowStyle,
+  ErrorButtonStyle,
+  ErrorMessageStyle,
+  ConflictContainerStyle,
   ShortcutContainerStyle,
   ShortcutKeysContainerStyle,
   ShortcutKeysStyle,
@@ -21,11 +21,13 @@ import {
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
 
+import { classes } from 'typestyle'
+
 import * as React from 'react';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
-  shortcut: ShortcutObject;
+  shortcut: ShortcutObject | ErrorObject;
   handleUpdate: Function;
   resetShortcut: Function;
   deleteShortcut: Function;
@@ -77,92 +79,107 @@ export class ShortcutItem extends React.Component<
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
-    return (
-      <div
-        className={
-          this.props.shortcut.hasConflict
-            ? classes(RowStyle, ConflictRowStyle)
-            : RowStyle
-        }
-      >
-        <div className={CellStyle}>
-          {this.props.shortcut.category}
-        </div>
-        <div className={CellStyle}>
-          <div className="jp-label">{this.props.shortcut.label}</div>
-        </div>
-        <div className={CellStyle}>
-          <div className={ShortcutCellStyle}>
-            {/** Create shortcut boxes and delete buttons for each shortcut */}
-            {nonEmptyKeys.map((key, index) => (
-              <div className={ShortcutContainerStyle} key={key + '_' + index}>
-                {this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
-                  <div className={ShortcutKeysContainerStyle} key={index}>
-                    <div className={ShortcutKeysStyle}>
-                      {this.toSymbols(keyBinding)}
-                    </div>
-                    {index + 1 < this.props.shortcut.keys[key].length ? (
-                      <div className={CommaStyle}>,</div>
-                    ) : null}
-                  </div>
-                ))}
-                <ShortcutButton
-                  shortcutKeys={this.props.shortcut.keys[key]}
-                  deleteShortcut={this.props.deleteShortcut}
-                  hasConflict={this.props.shortcut.hasConflict}
-                  shortcutObject={this.props.shortcut}
-                  shortcutId={key}
-                  toSymbols={this.toSymbols}
-                  index={index}
-                />
-                {index === 0 && nonEmptyKeys.length > 1 ? (
-                  <div className={OrStyle}>or</div>
-                ) : null}
+    if (this.props.shortcut.id === 'error_row') {
+      console.log('error obj')
+      return (
+        <tr 
+          className = {classes(RowStyle)}
+        >
+          <td colSpan={this.props.showSelectors ? 5 : 4}>
+            <div className = {ConflictContainerStyle}>
+              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenByLabel + ' Overwrite it?'}</div>
+              <div className={ErrorButtonStyle}>
+                <button>Cancel</button>
+                <button>Overwrite</button>
               </div>
-            ))}
+            </div>
+          </td>
+        </tr>
+      )
+    } else {
+      return (
+        <div
+          className={ RowStyle }
+        >
+          <div className={CellStyle}>
+            {this.props.shortcut.category}
+          </div>
+          <div className={CellStyle}>
+            <div className="jp-label">{this.props.shortcut.label}</div>
+          </div>
+          <div className={CellStyle}>
+            <div className={ShortcutCellStyle}>
+              {/** Create shortcut boxes and delete buttons for each shortcut */}
+              {nonEmptyKeys.map((key, index) => (
+                <div className={ShortcutContainerStyle} key={key + '_' + index}>
+                  {this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
+                    <div className={ShortcutKeysContainerStyle} key={index}>
+                      <div className={ShortcutKeysStyle}>
+                        {this.toSymbols(keyBinding)}
+                      </div>
+                      {index + 1 < this.props.shortcut.keys[key].length ? (
+                        <div className={CommaStyle}>,</div>
+                      ) : null}
+                    </div>
+                  ))}
+                  <ShortcutButton
+                    shortcutKeys={this.props.shortcut.keys[key]}
+                    deleteShortcut={this.props.deleteShortcut}
+                    hasConflict={this.props.shortcut.hasConflict}
+                    shortcutObject={this.props.shortcut}
+                    shortcutId={key}
+                    toSymbols={this.toSymbols}
+                    index={index}
+                  />
+                  {index === 0 && nonEmptyKeys.length > 1 ? (
+                    <div className={OrStyle}>or</div>
+                  ) : null}
+                </div>
+              ))}
 
-            {/** Add a plus for adding new shortcuts if there are less than two set */}
-            {nonEmptyKeys.length < 2 && (
-              <span
-                className={!this.state.displayInput ? PlusStyle : ''}
-                onClick={() => {
-                  this.toggleInput(), this.props.clearConflicts();
-                }}
-              />
-            )}
+              {/** Add a plus for adding new shortcuts if there are less than two set */}
+              {nonEmptyKeys.length < 2 && (
+                <span
+                  className={!this.state.displayInput ? PlusStyle : ''}
+                  onClick={() => {
+                    this.toggleInput(), this.props.clearConflicts();
+                  }}
+                />
+              )}
 
-            {/** Display input box when toggled */}
-            {this.state.displayInput && (
-              <ShortcutInput
-                handleUpdate={this.props.handleUpdate}
-                toggleInput={this.toggleInput}
-                shortcut={this.props.shortcut}
-                toSymbols={this.toSymbols}
-                keyBindingsUsed={this.props.keyBindingsUsed}
-                sortConflict={this.props.sortConflict}
-                clearConflicts={this.props.clearConflicts}
-                displayInput={this.state.displayInput}
-              />
+              {/** Display input box when toggled */}
+              {this.state.displayInput && (
+                <ShortcutInput
+                  handleUpdate={this.props.handleUpdate}
+                  toggleInput={this.toggleInput}
+                  shortcut={this.props.shortcut}
+                  toSymbols={this.toSymbols}
+                  keyBindingsUsed={this.props.keyBindingsUsed}
+                  sortConflict={this.props.sortConflict}
+                  clearConflicts={this.props.clearConflicts}
+                  displayInput={this.state.displayInput}
+                />
+              )}
+            </div>
+          </div>
+          <div className={CellStyle}>
+            <div className={SourceCellStyle}>{this.props.shortcut.source}</div>
+            {this.props.shortcut.source === 'Custom' && (
+              <a
+                className={ResetStyle}
+                onClick={() => this.props.resetShortcut(this.props.shortcut)}
+              >
+                reset
+              </a>
             )}
           </div>
-        </div>
-        <div className={CellStyle}>
-          <div className={SourceCellStyle}>{this.props.shortcut.source}</div>
-          {this.props.shortcut.source === 'Custom' && (
-            <a
-              className={ResetStyle}
-              onClick={() => this.props.resetShortcut(this.props.shortcut)}
-            >
-              reset
-            </a>
+          {this.props.showSelectors && (
+            <div className={CellStyle}>
+              <div className="jp-selector">{this.props.shortcut.selector}</div>
+            </div>
           )}
         </div>
-        {this.props.showSelectors && (
-          <div className={CellStyle}>
-            <div className="jp-selector">{this.props.shortcut.selector}</div>
-          </div>
-        )}
-      </div>
-    );
+      );
+    }
   }
 }

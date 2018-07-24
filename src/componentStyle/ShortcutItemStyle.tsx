@@ -24,9 +24,65 @@ export const RowStyle = style({
   backgroundColor: 'var(--jp-layout-color0)'
 });
 
-export const ConflictRowStyle = style({
-  backgroundColor: 'var(--jp-error-color2)'
-});
+export const ConflictContainerStyle = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  padding:'6px 12px',
+  marginLeft: '25%'
+})
+
+export const ErrorMessageStyle = style({
+  color:'var(--jp-error-color1)',
+  lineHeight: '34px'
+})
+
+export const ErrorButtonStyle = style({
+  lineHeight: '34px',
+  marginLeft: '10px',
+
+  $nest: {
+    '& button:nth-of-type(1)':{
+      height: '25px',
+      marginRight:'5px',
+      backgroundColor:'var(--jp-border-color0)',
+      color:'white',
+
+      $nest: {
+        '&:hover':{
+          
+        },
+        '&:active':{
+          outline: 'none',
+          border: 'none'
+        },
+        '&focus':{
+          outline: 'none',
+          border: 'none'
+        }
+      }
+    },
+    '& button:nth-of-type(2)':{
+      height:'25px',
+      backgroundColor:'var(--jp-error-color1)',
+      color:'white',
+
+      $nest: {
+        '&:hover':{
+          
+        },
+        '&:active':{
+          outline: 'none',
+          border: 'none'
+        },
+        '&focus':{
+          outline: 'none',
+          border: 'none'
+        }
+      }
+    }
+  }
+
+})
 
 export const ShortcutContainerStyle = style({
   display: 'flex',
