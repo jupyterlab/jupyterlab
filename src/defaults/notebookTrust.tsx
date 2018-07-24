@@ -16,7 +16,6 @@ import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { IconItem } from '../component/icon';
 import { IStatusContext } from '../contexts';
-import { nonInteractiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const NotebookTrustComponent = (
@@ -42,11 +41,7 @@ const NotebookTrustComponent = (
         source = 'not-trusted-item';
     }
 
-    return (
-        <div title={title} className={nonInteractiveItem}>
-            <IconItem source={source} />
-        </div>
-    );
+    return <IconItem title={title} source={source} />;
 };
 
 namespace NotebookTrustComponent {

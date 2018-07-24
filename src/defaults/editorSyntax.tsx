@@ -12,7 +12,6 @@ import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { nonInteractiveItem } from '../style/statusBar';
 
 namespace EditorSyntaxComponent {
     export interface IProps {
@@ -24,13 +23,7 @@ namespace EditorSyntaxComponent {
 const EditorSyntaxComponent = (
     props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> => {
-    return (
-        <TextItem
-            title="Set programming language"
-            source={props.mode}
-            className={nonInteractiveItem}
-        />
-    );
+    return <TextItem title="Set programming language" source={props.mode} />;
 };
 
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>

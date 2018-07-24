@@ -17,7 +17,6 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { nonInteractiveItem } from '../style/statusBar';
 
 namespace FilePathComponent {
     export interface IProps {
@@ -30,11 +29,7 @@ const FilePathComponent = (
     props: FilePathComponent.IProps
 ): React.ReactElement<FilePathComponent.IProps> => {
     return (
-        <TextItem
-            title={props.path}
-            source={PathExt.basename(props.path)}
-            className={nonInteractiveItem}
-        />
+        <TextItem title={props.path} source={PathExt.basename(props.path)} />
     );
 };
 

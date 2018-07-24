@@ -19,7 +19,6 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
-import { nonInteractiveItem } from '../style/statusBar';
 import { TextExt } from '../util/text';
 
 // tslint:disable-next-line:variable-name
@@ -29,8 +28,7 @@ const CommandEditComponent = (
     return (
         <TextItem
             title={`Notebook is in ${props.notebookMode} mode`}
-            className={nonInteractiveItem}
-            source={'Mode: ' + TextExt.titleCase(props.notebookMode)}
+            source={`Mode: ${TextExt.titleCase(props.notebookMode)}`}
         />
     );
 };

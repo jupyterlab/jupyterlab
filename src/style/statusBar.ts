@@ -2,6 +2,24 @@ import { style } from 'typestyle/lib';
 import vars from './variables';
 import { rightToLeft, leftToRight, centeredFlex } from './layout';
 
+const itemPadding = {
+    paddingLeft: vars.itemPadding,
+    paddingRight: vars.itemPadding
+};
+
+const interactiveHover = {
+    $nest: {
+        '&:hover': {
+            backgroundColor: vars.hoverColor,
+            cursor: 'pointer'
+        }
+    }
+};
+
+const clicked = {
+    backgroundColor: `${vars.clickColor}`
+};
+
 export const statusBar = style(
     {
         borderTop:
@@ -21,27 +39,14 @@ export const leftSide = style(leftToRight);
 
 export const rightSide = style(rightToLeft);
 
-export const item = style({
-    maxHeight: vars.height,
-    marginLeft: vars.itemMargin,
-    marginRight: vars.itemMargin
-});
-
-const itemPadding = {
-    paddingLeft: vars.itemPadding,
-    paddingRight: vars.itemPadding
-};
-
-export const interactiveHover = style(
+export const item = style(
     {
-        $nest: {
-            '&:hover': {
-                backgroundColor: vars.hoverColor,
-                cursor: 'pointer'
-            }
-        }
+        maxHeight: vars.height,
+        marginLeft: vars.itemMargin,
+        marginRight: vars.itemMargin
     },
     itemPadding
 );
 
-export const nonInteractiveItem = style(itemPadding);
+export const clickedItem = style(clicked);
+export const interactiveItem = style(interactiveHover);
