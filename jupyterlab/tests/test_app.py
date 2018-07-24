@@ -21,6 +21,7 @@ except ImportError:
     from mock import patch  # py2
 
 from traitlets import Unicode
+from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
@@ -198,7 +199,7 @@ class KarmaTestApp(ProcessTestApp):
             folder = folder.encode('utf-8')
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
-        env.setdefault('KARMA_FILE_PATTERN', pattern)
+        env.setdefault('KARMA_FILE_PATTERN', py3compat.unicode_to_str(pattern))
         env.setdefault('KARMA_COVER_FOLDER', folder)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
