@@ -139,7 +139,7 @@ setup_args['install_requires'] = [
 
 setup_args['extras_require'] = {
     'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest', 'requests', 'pytest-check-links', 'selenium'],
+    'test': ['pytest', 'requests', 'pytest-check-links'],
     'docs': [
         'sphinx',
         'recommonmark',
