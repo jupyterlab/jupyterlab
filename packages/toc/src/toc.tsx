@@ -235,7 +235,7 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
     };
 
     let content;
-
+    console.log('iiejwfa');
     if (heading.html) {
       content = (
         <span
@@ -244,7 +244,17 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
         />
       );
     } else {
-      content = <span style={{ paddingLeft }}>{heading.text}</span>;
+      let collapse = this.props.children ? (
+        <img src={require('../static/rightarrow.svg')} />
+      ) : (
+        <div>no</div>
+      );
+      content = (
+        <span style={{ paddingLeft }}>
+          {collapse}
+          {heading.text}
+        </span>
+      );
     }
 
     return <li onClick={handleClick}>{content}</li>;
