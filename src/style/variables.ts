@@ -6,6 +6,6 @@ export default {
     textColor: '#EEEEEE',
     itemMargin: '2px',
     itemPadding: '6px',
-    statusBarPadding: '10px',
-    interItemHalfSpacing: '4px' // this amount accounts for half the spacing between items
+    statusBarPadding: '12px',
+    textIconHalfSpacing: '3px'
 };

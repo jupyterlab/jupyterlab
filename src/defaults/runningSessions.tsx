@@ -28,14 +28,18 @@ const RunningSessionsComponent = (
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
         <GroupItem
-            spacing={vars.interItemHalfSpacing}
+            spacing="5px"
             onClick={props.handleClick}
             title={'Number of active sessions'}
         >
-            <TextItem source={props.kernels} />
-            <IconItem source={'kernel-item'} />
-            <TextItem source={props.terminals} />
-            <IconItem source={'terminal-item'} />
+            <GroupItem spacing={vars.textIconHalfSpacing}>
+                <TextItem source={props.kernels} />
+                <IconItem source={'kernel-item'} />
+            </GroupItem>
+            <GroupItem spacing={vars.textIconHalfSpacing}>
+                <TextItem source={props.terminals} />
+                <IconItem source={'terminal-item'} />
+            </GroupItem>
         </GroupItem>
     );
 };
