@@ -132,11 +132,12 @@ export const ShortcutKeysStyle = style({
   background: 'var(--jp-layout-color0)',
   padding: '5px 6px',
   borderRadius: 'var(--jp-border-radius)',
-  margin: '3px 8px 3px 0'
+  margin: '3px 0'
 });
 
 export const OrStyle = style({
   marginRight: '12px',
+  marginLeft: '12px',
   marginTop: '8px',
   color: 'var(--jp-content-font-color3)'
 });

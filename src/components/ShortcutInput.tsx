@@ -19,14 +19,16 @@ import {
 export interface IShortcutInputProps {
   handleUpdate: Function;
   deleteShortcut:Function;
-  toggleInputNew: Function;
+  toggleInput: Function;
   shortcut: ShortcutObject;
+  shortcutId: string;
   toSymbols: Function;
   keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
   newOrReplace: string;
+  placeholder: string;
 }
 
 export interface IShortcutInputState {
@@ -48,7 +50,7 @@ export class ShortcutInput extends React.Component<
   }
 
   state = {
-    value: '',
+    value: this.props.placeholder,
     userInput: '',
     isAvailable: true,
     isFunctional: false,
@@ -72,6 +74,18 @@ export class ShortcutInput extends React.Component<
   handleOverwrite = async () => {
     await this.props.deleteShortcut(this.state.takenByObject.takenBy, this.state.takenByObject.takenByKey);
     this.handleUpdate()
+  }
+
+  handleReplace = async() => {
+    let keys = this.state.keys
+    keys.push(this.state.currentChain)
+    const shortcut = this.props.shortcut
+    this.props.toggleInput();
+    await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
+    this.props.handleUpdate(
+      shortcut,
+      keys
+    );
   }
 
   onKeyPress = (
@@ -296,7 +310,7 @@ export class ShortcutInput extends React.Component<
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur' && (event.relatedTarget as HTMLElement).id !== 'overwrite') {
-      this.props.toggleInputNew();
+      this.props.toggleInput();
       this.setState({
         value: '',
         userInput: ''
@@ -336,13 +350,17 @@ export class ShortcutInput extends React.Component<
           id={this.state.value !== '' ? 'no-blur' : 'blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
-            this.handleUpdate();
-            this.setState({
-              value: '',
-              keys: [],
-              currentChain: ''
-            });
-            this.props.toggleInputNew();
+            if (this.props.newOrReplace === 'new') {
+              this.handleUpdate();
+              this.setState({
+                value: '',
+                keys: [],
+                currentChain: ''
+              });
+              this.props.toggleInput();
+            } else {
+              this.handleReplace();
+            }
           }}
         />
         {!this.state.isAvailable &&
@@ -352,7 +370,7 @@ export class ShortcutInput extends React.Component<
             onClick={()=>{
               this.handleOverwrite();
               this.props.clearConflicts();
-              this.props.toggleInputNew();
+              this.props.toggleInput();
             }}
           >Overwrite</button>
         }
