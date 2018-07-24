@@ -7,20 +7,18 @@ import {
 } from '@jupyterlab/application';
 import { IDefaultsManager } from './manager';
 import { TextItem } from '../component/text';
-import {
-    DocumentRegistry,
-    IDocumentWidget,
-    DocumentWidget
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { Widget, Title } from '@phosphor/widgets';
 
 namespace FilePathComponent {
     export interface IProps {
-        path: string;
+        fullPath: string;
+        name: string;
     }
 }
 
@@ -28,9 +26,7 @@ namespace FilePathComponent {
 const FilePathComponent = (
     props: FilePathComponent.IProps
 ): React.ReactElement<FilePathComponent.IProps> => {
-    return (
-        <TextItem title={props.path} source={PathExt.basename(props.path)} />
-    );
+    return <TextItem title={props.fullPath} source={props.name} />;
 };
 
 class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
@@ -41,19 +37,19 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
 
         this._shell.currentChanged.connect(this._onShellCurrentChanged);
 
-        const currentWidget = this._shell.currentWidget;
-        this.model = new FilePath.Model(
-            currentWidget && currentWidget instanceof DocumentWidget
-                ? currentWidget
-                : null
-        );
+        this.model = new FilePath.Model(this._shell.currentWidget);
     }
 
     render() {
         if (this.model === null) {
             return null;
         } else {
-            return <FilePathComponent path={this.model.path} />;
+            return (
+                <FilePathComponent
+                    fullPath={this.model.path}
+                    name={this.model.name!}
+                />
+            );
         }
     }
 
@@ -61,14 +57,7 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
         shell: ApplicationShell,
         change: ApplicationShell.IChangedArgs
     ) => {
-        if (
-            change.newValue !== null &&
-            change.newValue instanceof DocumentWidget
-        ) {
-            this.model!.document = change.newValue;
-        } else {
-            this.model!.document = null;
-        }
+        this.model!.widget = change.newValue;
     };
 
     private _shell: ApplicationShell;
@@ -76,45 +65,64 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
 
 namespace FilePath {
     export class Model extends VDomModel implements IFilePath.IModel {
-        constructor(document: IDocumentWidget | null) {
+        constructor(widget: Widget | null) {
             super();
 
-            this.document = document;
+            this.widget = widget;
         }
 
         get path() {
             return this._path;
         }
 
-        get document() {
-            return this._document;
+        get name() {
+            return this._name;
         }
 
-        set document(document: IDocumentWidget | null) {
-            this._document = document;
+        get widget() {
+            return this._widget;
+        }
 
-            if (this._document === null) {
+        set widget(widget: Widget | null) {
+            this._widget = widget;
+
+            if (this._widget === null) {
                 this._path = '';
-            } else {
-                this._path = this._document.context.path;
+                this._name = '';
+            } else if (this._widget instanceof DocumentWidget) {
+                this._path = this._widget.context.path;
+                this._name = PathExt.basename(this._widget.context.path);
 
-                this._document.context.pathChanged.connect(this._onPathChange);
+                this._widget.context.pathChanged.connect(this._onPathChange);
+            } else {
+                this._path = '';
+                this._name = this._widget.title.label;
+
+                this._widget.title.changed.connect(this._onTitleChange);
             }
 
             this.stateChanged.emit(void 0);
         }
+
+        private _onTitleChange = (title: Title<Widget>) => {
+            this._name = title.label;
+
+            this.stateChanged.emit(void 0);
+        };
 
         private _onPathChange = (
             _documentModel: DocumentRegistry.IContext<DocumentRegistry.IModel>,
             newPath: string
         ) => {
             this._path = newPath;
+            this._name = PathExt.basename(newPath);
 
             this.stateChanged.emit(void 0);
         };
 
         private _path: string = '';
-        private _document: IDocumentWidget | null = null;
+        private _name: string = '';
+        private _widget: Widget | null = null;
     }
 
     export interface IOptions {
@@ -130,7 +138,8 @@ export interface IFilePath extends IDisposable {
 export namespace IFilePath {
     export interface IModel {
         readonly path: string;
-        readonly document: IDocumentWidget | null;
+        readonly name: string;
+        readonly widget: Widget | null;
     }
 }
 
@@ -149,10 +158,11 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
             align: 'right',
             priority: 0,
             isActive: () => {
-                const currentWidget = app.shell.currentWidget;
-                return (
-                    !!currentWidget && currentWidget instanceof DocumentWidget
-                );
+                // const currentWidget = app.shell.currentWidget;
+                // return (
+                //     !!currentWidget && currentWidget instanceof DocumentWidget
+                // );
+                return true;
             }
         });
 
