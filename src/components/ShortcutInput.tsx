@@ -140,7 +140,7 @@ export class ShortcutInput extends React.Component<
         }
 
         /** if key is not a modefier key, add its name to user input and current chain */
-        if (modKeys.lastIndexOf(key) === -1) {
+        if (modKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + key).trim();
           currentChain = (currentChain + ' ' + key).trim();
 
