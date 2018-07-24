@@ -45,7 +45,7 @@ const TabSpaceComponent = (
         <TextItem
             onClick={props.handleClick}
             title="Set indentation spacing"
-            source={'Spaces: ' + props.tabSpace}
+            source={`Spaces: ${props.tabSpace}`}
         />
     );
 };
@@ -84,14 +84,14 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             let args: JSONObject = {
                 insertSpaces: true,
                 size,
-                name: `Spaces: ${size} `
+                name: `Spaces: ${size}`
             };
             tabMenu.addItem({ command, args });
         }
 
         showPopup({
             body: tabMenu,
-            position: this.node.getBoundingClientRect()
+            anchor: this
         });
     };
 

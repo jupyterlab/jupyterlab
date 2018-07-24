@@ -98,7 +98,7 @@ const LineColComponent = (
         <TextItem
             title="Go to line number"
             onClick={props.handleClick}
-            source={'Ln ' + props.line + ', Col ' + props.column}
+            source={`Ln ${props.line}, Col ${props.column}`}
         />
     );
 };
@@ -148,7 +148,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         );
         this._popup = showPopup({
             body: body,
-            position: this.node.getBoundingClientRect()
+            anchor: this
         });
     };
 
