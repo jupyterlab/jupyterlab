@@ -237,8 +237,8 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
     };
 
     let content;
+    console.log('iiejwfa');
     let numbering = heading.numbering ? heading.numbering : '';
-
     if (heading.html) {
       content = (
         <span
@@ -247,9 +247,14 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
         />
       );
     } else {
+      let collapse = this.props.children ? (
+        <img src={require('../static/rightarrow.svg')} />
+      ) : (
+        <div>no</div>
+      );
       content = (
         <span style={{ paddingLeft }}>
-          { numbering + heading.text }
+          {collapse}{ numbering + heading.text }
         </span>
       );
     }
