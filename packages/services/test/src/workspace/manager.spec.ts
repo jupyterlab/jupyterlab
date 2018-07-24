@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { WorkspaceManager, ServerConnection } from '../../../lib';
 
@@ -19,14 +19,14 @@ describe('workspace', () => {
     describe('#constructor()', () => {
       it('should accept no options', () => {
         const manager = new WorkspaceManager();
-        expect(manager).to.be.a(WorkspaceManager);
+        expect(manager).to.be.an.instanceof(WorkspaceManager);
       });
 
       it('should accept options', () => {
         const manager = new WorkspaceManager({
           serverSettings: ServerConnection.makeSettings()
         });
-        expect(manager).to.be.a(WorkspaceManager);
+        expect(manager).to.be.an.instanceof(WorkspaceManager);
       });
     });
 
@@ -35,7 +35,7 @@ describe('workspace', () => {
         const baseUrl = 'foo';
         const serverSettings = ServerConnection.makeSettings({ baseUrl });
         const manager = new WorkspaceManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be(baseUrl);
+        expect(manager.serverSettings.baseUrl).to.equal(baseUrl);
       });
     });
 
@@ -44,7 +44,7 @@ describe('workspace', () => {
         const id = 'foo';
 
         await manager.save(id, { data: {}, metadata: { id } });
-        expect((await manager.fetch(id)).metadata.id).to.be(id);
+        expect((await manager.fetch(id)).metadata.id).to.equal(id);
         await manager.remove(id);
       });
     });
@@ -65,7 +65,7 @@ describe('workspace', () => {
         const id = 'foo';
 
         await manager.save(id, { data: {}, metadata: { id } });
-        expect((await manager.fetch(id)).metadata.id).to.be(id);
+        expect((await manager.fetch(id)).metadata.id).to.equal(id);
         await manager.remove(id);
       });
     });
@@ -75,7 +75,7 @@ describe('workspace', () => {
         const id = 'foo';
 
         await manager.save(id, { data: {}, metadata: { id } });
-        expect((await manager.fetch(id)).metadata.id).to.be(id);
+        expect((await manager.fetch(id)).metadata.id).to.equal(id);
         await manager.remove(id);
       });
     });
