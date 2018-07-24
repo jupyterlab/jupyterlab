@@ -3,27 +3,29 @@
 
 import {
   ILayoutRestorer,
+  IMimeDocumentTracker,
   JupyterLab,
-  JupyterLabPlugin,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {IDocumentManager} from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import {IEditorTracker} from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 
-import {INotebookTracker} from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
-import {IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {TableOfContents} from './toc';
+import { TableOfContents } from './toc';
 
 import {
   createLatexGenerator,
   createNotebookGenerator,
   createMarkdownGenerator,
+  createRenderedMarkdownGenerator
 } from './generators';
 
-import {ITableOfContentsRegistry, TableOfContentsRegistry} from './registry';
+import { ITableOfContentsRegistry, TableOfContentsRegistry } from './registry';
 
 import '../style/index.css';
 
@@ -38,10 +40,11 @@ const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
     IDocumentManager,
     IEditorTracker,
     ILayoutRestorer,
+    IMimeDocumentTracker,
     INotebookTracker,
-    IRenderMimeRegistry,
+    IRenderMimeRegistry
   ],
-  activate: activateTOC,
+  activate: activateTOC
 };
 
 /**
@@ -52,8 +55,9 @@ function activateTOC(
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
   restorer: ILayoutRestorer,
+  mimeDocumentTracker: IMimeDocumentTracker,
   notebookTracker: INotebookTracker,
-  rendermime: IRenderMimeRegistry,
+  rendermime: IRenderMimeRegistry
 ): ITableOfContentsRegistry {
   // Create the ToC widget.
   const toc = new TableOfContents({docmanager, rendermime, notebookTracker});
@@ -64,7 +68,7 @@ function activateTOC(
   // Add the ToC to the left area.
   toc.title.label = 'Contents';
   toc.id = 'table-of-contents';
-  app.shell.addToLeftArea(toc, {rank: 700});
+  app.shell.addToLeftArea(toc, { rank: 700 });
 
   // Add the ToC widget to the application restorer.
   restorer.add(toc, 'juputerlab-toc');
@@ -80,6 +84,13 @@ function activateTOC(
   // Create an markdown editor TableOfContentsRegistry.IGenerator
   const markdownGenerator = createMarkdownGenerator(editorTracker);
   registry.addGenerator(markdownGenerator);
+
+  // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
+  const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
+    mimeDocumentTracker,
+    rendermime.sanitizer
+  );
+  registry.addGenerator(renderedMarkdownGenerator);
 
   // Create a latex editor TableOfContentsRegistry.IGenerator
   const latexGenerator = createLatexGenerator(editorTracker);
@@ -100,7 +111,7 @@ function activateTOC(
       }
       return;
     }
-    toc.current = {widget, generator};
+    toc.current = { widget, generator };
   });
 
   return registry;
