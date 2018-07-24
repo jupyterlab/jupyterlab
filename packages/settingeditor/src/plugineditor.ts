@@ -139,7 +139,7 @@ export class PluginEditor extends Widget {
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
       if (!result.button.accept) {
-        throw new Error('User cancelled.');
+        throw new Error('User canceled.');
       }
     });
   }

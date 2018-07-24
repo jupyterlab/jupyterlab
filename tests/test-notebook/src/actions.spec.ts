@@ -19,7 +19,7 @@ import {
   acceptDialog,
   createClientSession,
   dismissDialog,
-  moment
+  sleep
 } from '../../utils';
 
 import {
@@ -290,7 +290,7 @@ describe('@jupyterlab/notebook', () => {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.deleteCells(widget);
-        await moment();
+        await sleep();
         expect(widget.widgets.length).to.be(1);
         expect(widget.activeCell).to.be.a(CodeCell);
       });
@@ -1092,7 +1092,7 @@ describe('@jupyterlab/notebook', () => {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.cut(widget);
-        await moment();
+        await sleep();
         expect(widget.widgets.length).to.be(1);
         expect(widget.activeCell).to.be.a(CodeCell);
       });

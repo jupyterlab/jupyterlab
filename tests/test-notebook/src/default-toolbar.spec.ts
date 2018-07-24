@@ -21,7 +21,7 @@ import { INotebookModel } from '@jupyterlab/notebook';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { createNotebookContext, moment } from '../../utils';
+import { createNotebookContext, sleep } from '../../utils';
 
 import {
   DEFAULT_CONTENT,
@@ -123,7 +123,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         NotebookActions.copy(panel.content);
         button.node.click();
-        await moment();
+        await sleep();
         expect(panel.content.widgets.length).to.be(count + 1);
         button.dispose();
       });

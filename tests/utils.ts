@@ -42,14 +42,6 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
   });
 }
 
-export function moment<T>(value?: T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    requestAnimationFrame(() => {
-      resolve(value);
-    });
-  });
-}
-
 /**
  * Get a copy of the default rendermime instance.
  */
@@ -60,22 +52,22 @@ export function defaultRenderMime(): RenderMimeRegistry {
 /**
  * Create a client session object.
  */
-export function createClientSession(
+export async function createClientSession(
   options: Partial<ClientSession.IOptions> = {}
 ): Promise<ClientSession> {
-  let manager = options.manager || Private.manager.sessions;
-  return manager.ready.then(() => {
-    return new ClientSession({
-      manager,
-      path: options.path || UUID.uuid4(),
-      name: options.name,
-      type: options.type,
-      kernelPreference: options.kernelPreference || {
-        shouldStart: true,
-        canStart: true,
-        name: manager.specs.default
-      }
-    });
+  const manager = options.manager || Private.manager.sessions;
+
+  await manager.ready;
+  return new ClientSession({
+    manager,
+    path: options.path || UUID.uuid4(),
+    name: options.name,
+    type: options.type,
+    kernelPreference: options.kernelPreference || {
+      shouldStart: true,
+      canStart: true,
+      name: manager.specs.default
+    }
   });
 }
 
@@ -86,9 +78,11 @@ export function createFileContext(
   path?: string,
   manager?: ServiceManager.IManager
 ): Context<DocumentRegistry.IModel> {
+  const factory = Private.textFactory;
+
   manager = manager || Private.manager;
-  let factory = Private.textFactory;
   path = path || UUID.uuid4() + '.txt';
+
   return new Context({ manager, factory, path });
 }
 
@@ -99,10 +93,12 @@ export async function createNotebookContext(
   path?: string,
   manager?: ServiceManager.IManager
 ): Promise<Context<INotebookModel>> {
-  manager = manager || Private.manager;
-  await manager.ready;
   const factory = Private.notebookFactory;
+
+  manager = manager || Private.manager;
   path = path || UUID.uuid4() + '.ipynb';
+  await manager.ready;
+
   return new Context({
     manager,
     factory,
@@ -115,45 +111,71 @@ export async function createNotebookContext(
  * Wait for a dialog to be attached to an element.
  */
 export function waitForDialog(
-  host: HTMLElement = document.body
+  host?: HTMLElement,
+  timeout?: number
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    let refresh = () => {
-      let node = host.getElementsByClassName('jp-Dialog')[0];
-      if (node) {
-        resolve(void 0);
+    let counter = 0;
+    const interval = 25;
+    const limit = Math.floor((timeout || 250) / interval);
+    const seek = () => {
+      if (++counter === limit) {
+        reject(new Error('Dialog not found'));
         return;
       }
-      setTimeout(refresh, 10);
+
+      if ((host || document.body).getElementsByClassName('jp-Dialog')[0]) {
+        resolve(undefined);
+        return;
+      }
+
+      setTimeout(seek, interval);
     };
-    refresh();
+
+    seek();
   });
 }
 
 /**
  * Accept a dialog after it is attached by accepting the default button.
  */
-export function acceptDialog(host: HTMLElement = document.body): Promise<void> {
-  return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog')[0];
-    if (node) {
-      simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
-    }
-  });
+export async function acceptDialog(
+  host?: HTMLElement,
+  timeout?: number
+): Promise<void> {
+  host = host || document.body;
+  await waitForDialog(host, timeout);
+
+  const node = host.getElementsByClassName('jp-Dialog')[0];
+
+  if (node) {
+    simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
+  }
 }
 
 /**
  * Dismiss a dialog after it is attached.
+ *
+ * #### Notes
+ * This promise will always resolve successfully.
  */
-export function dismissDialog(
-  host: HTMLElement = document.body
+export async function dismissDialog(
+  host?: HTMLElement,
+  timeout?: number
 ): Promise<void> {
-  return waitForDialog(host).then(() => {
-    let node = host.getElementsByClassName('jp-Dialog')[0];
-    if (node) {
-      simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
-    }
-  });
+  host = host || document.body;
+
+  try {
+    await waitForDialog(host, timeout);
+  } catch (error) {
+    return; // Ignore calls to dismiss the dialog if there is no dialog.
+  }
+
+  const node = host.getElementsByClassName('jp-Dialog')[0];
+
+  if (node) {
+    simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
+  }
 }
 
 /**

@@ -32,23 +32,21 @@ export class SettingManager {
    *
    * @param id - The plugin's ID.
    *
-   * @returns A promise that resolves with the plugin settings or rejects
-   * with a `ServerConnection.IError`.
+   * @returns A promise that resolves if successful.
    */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+    const response = await makeRequest(url, {}, serverSettings);
 
-    return promise.then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
+    if (response.status !== 200) {
+      throw new ResponseError(response);
+    }
 
-      return response.json();
-    });
+    return response.json();
   }
 
   /**
@@ -58,27 +56,20 @@ export class SettingManager {
    *
    * @param raw - The user setting values as a raw string of JSON with comments.
    *
-   * @returns A promise that resolves when saving is complete or rejects with
-   * a `ServerConnection.IError`.
+   * @returns A promise that resolves if successful.
    */
-  save(id: string, raw: string): Promise<void> {
+  async save(id: string, raw: string): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const init = {
-      body: raw,
-      method: 'PUT'
-    };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+    const init = { body: raw, method: 'PUT' };
+    const response = await makeRequest(url, init, serverSettings);
 
-    return promise.then(response => {
-      if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-
-      return undefined;
-    });
+    if (response.status !== 204) {
+      throw new ResponseError(response);
+    }
   }
 }
 
