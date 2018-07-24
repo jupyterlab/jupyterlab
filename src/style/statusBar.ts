@@ -22,8 +22,6 @@ const clicked = {
 
 export const statusBar = style(
     {
-        borderTop:
-            'var(--jp-border-width) solid var(--jp-toolbar-border-color)',
         background: vars.backgroundColor,
         minHeight: vars.height,
         justifyContent: 'space-between',
