@@ -7,6 +7,7 @@
 We added new workspace support, which enables you to have multiple saved layouts, including in different browser windows. See the [workspace documentation](https://jupyterlab.readthedocs.io/en/stable/user/urls.html) for more details. ([#4502](https://github.com/jupyterlab/jupyterlab/issues/4502), [#4708](https://github.com/jupyterlab/jupyterlab/pull/4708), [#4088](https://github.com/jupyterlab/jupyterlab/issues/4088), [#4041](https://github.com/jupyterlab/jupyterlab/pull/4041) [#3673](https://github.com/jupyterlab/jupyterlab/issues/3673), [#4780](https://github.com/jupyterlab/jupyterlab/pull/4780))
 
 We also added new menu items, keyboard shortcuts, commands, and settings:
+
 * "Activate Previously Used Tab" added to the Tab menu (`Ctrl/Cmd Shift '`) to toggle between the previously active tabs in the main area. ([#4296](https://github.com/jupyterlab/jupyterlab/pull/4296)).
 * "Reload From Disk" added to File menu to reload an open file from the state saved on disk ([#4615](https://github.com/jupyterlab/jupyterlab/pull/4615)).
 * "Increase/Decrease Font Size" added to the text editor settings menu ([#4811](https://github.com/jupyterlab/jupyterlab/pull/4811)).
@@ -19,8 +20,8 @@ We also added new menu items, keyboard shortcuts, commands, and settings:
 * `notebook:run-in-console` added to the command palette to run the selected text or current line from a notebook in a console. A default shortcut for this command is not yet provided, but can be added by users. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
 * "fontFamily", "fontSize", and "lineHeight" settings added to the text editor advanced settings ([#4673](https://github.com/jupyterlab/jupyterlab/pull/4673)).
 
-
 Other changes for users include:
+
 * A command for persisting collapsed and scrolling state of notebook cells with a default keybinding of `Ctrl Shift S`. We also added a generic way for different widgets to register a "Save with extras" command that appears in the File menu under save. We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981)).
 * Support for larger file uploads (>15MB) when using Jupyter notebook server version >= 5.1. ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224)).
 * Solarized dark and light text editor themes from CodeMirror ([#4445](https://github.com/jupyterlab/jupyterlab/pull/4445)).
@@ -33,8 +34,8 @@ Other changes for users include:
 * Initial kernel selection for a notebook or console can no longer be canceled: the user must select a kernel. ([#4596](https://github.com/jupyterlab/jupyterlab/pull/4596)).
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510)).
 
-
 Changes for developers include:
+
 * The JupyterLab codebase is now compiled to ES6 rather than ES5. Extension authors may have some minor compatibility updates to make. If you are writing an extension in Typescript, we recommend changing it to ES6 as well. ([#4462](https://github.com/jupyterlab/jupyterlab/pull/4462)).
 * The JupyterLab codebase is now formatted using [Prettier](https://github.com/prettier/prettier). By default the development environment installs a pre-commit hook that auto-formats your staged changes. ([#4090](https://github.com/jupyterlab/jupyterlab/pull/4090)).
 * A new signal for observing application dirty status state changes ([#4840](https://github.com/jupyterlab/jupyterlab/issues/4840))
@@ -45,9 +46,10 @@ Changes for developers include:
 * Rendermime extensions can now indicate that they are the default rendered widget factory for a file-type. For instance, the default widget for a markdown file is a text editor, but the default rendered widget is the markdown viewer. ([#4692](https://github.com/jupyterlab/jupyterlab/pull/4692)).
 * Add new workplace REST endpoints to `jupyterlab_launcher` and make them available in `@jupyterlab/services` ([#4841](https://github.com/jupyterlab/jupyterlab/pull/4841)).
 * Documents created with a mimerenderer extension can now be accessed using an `IInstanceTracker` which tracks them. Include the token `IMimeDocumentTracker` in your plugin to access this. The `IInstanceTracker` interface has also gained convenience functions `find` and `filter` to simplify iterating over instances. ([#4762](https://github.com/jupyterlab/jupyterlab/pull/4762)).
-* `getNotebookVersion` is added to the `PageConfig` ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224)).
+* `getNotebookVersion` is added to the `PageConfig` object ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224)).
 
-**Fixes**
+Other fixes include:
+
 * Fixed a rendering bug with the Launcher in single-document mode. ([#4805](https://github.com/jupyterlab/jupyterlab/pull/4805))
 * Fixed a bug where the native context menu could not be triggered in a notebook cell in Chrome. ([#4720](https://github.com/jupyterlab/jupyterlab/pull/4720)).
 * Fixed a bug where the cursor would not show up in the dark theme. ([#4699](https://github.com/jupyterlab/jupyterlab/pull/4699)).
@@ -60,7 +62,6 @@ Changes for developers include:
 * Fix default settings JSON in setting editor ([#4591](https://github.com/jupyterlab/jupyterlab/issues/4591), [#4595](https://github.com/jupyterlab/jupyterlab/pull/4595)).
 * Fix setting editor pane layout's stretch factor ([#2971](https://github.com/jupyterlab/jupyterlab/issues/2971), [#4772](https://github.com/jupyterlab/jupyterlab/pull/4772)).
 * Programmatically set settings are now output with nicer formatting. ([#4870](https://github.com/jupyterlab/jupyterlab/pull/4870))
-
 
 ## [Beta 2 (v0.32.0)](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.32.0)
 
