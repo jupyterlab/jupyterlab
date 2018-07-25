@@ -27,58 +27,74 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
-import { style } from 'typestyle/lib';
-import { baseText } from '../style/text';
+// import { baseText } from '../style/text';
+import {
+    lineFormSearch,
+    lineFormWrapper,
+    lineFormInput
+} from '../style/lineForm';
+import { classes } from 'typestyle/lib';
 
 export namespace LineForm {
     export interface IProps {
         // editor: CodeEditor.IEditor | null;
         handleSubmit: (value: number) => void;
+        currentLine: number;
     }
     export interface IState {
-        value: number;
+        value: number | undefined;
     }
 }
 
 class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
-        value: 0
+        value: this.props.currentLine + 1
     };
     constructor(props: LineForm.IProps) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this._textInput = null;
     }
     handleChange(event: any) {
         this.setState({ value: event.target.value });
     }
     handleSubmit(event: any) {
-        event.preventDefault();
-        this.props.handleSubmit(this.state.value);
+        if (!isNaN(event.target.value) && isFinite(event.target.value)) {
+            event.preventDefault();
+            this.props.handleSubmit(this.state.value);
+        } else {
+            event.preventDefault();
+        }
+    }
+
+    componentDidMount() {
+        this._textInput!.focus();
     }
 
     render() {
         return (
-            <div>
+            <div className={lineFormSearch}>
                 <form
                     onSubmit={this.handleSubmit}
-                    className={style(baseText, {
-                        color: 'var(--jp-ui-font-color1)',
-                        margin: '5px'
-                    })}
+                    className={classes(lineFormWrapper, 'p-lineForm-wrapper')}
                 >
-                    <label>
-                        <input
-                            type="text"
-                            value={this.state.value}
-                            onChange={this.handleChange}
-                        />
-                        <div>Go to Line number</div>
-                    </label>
+                    <input
+                        type="text"
+                        className={classes(lineFormInput)}
+                        placeholder="Go to Line"
+                        onChange={this.handleChange}
+                        value={this.state.value}
+                        ref={input => {
+                            this._textInput = input;
+                        }}
+                    />
                 </form>
             </div>
         );
     }
+
+    private _textInput: HTMLInputElement | null;
 }
 
 namespace LineColComponent {
@@ -139,7 +155,12 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
     private _handleClick = () => {
         const body = new ReactElementWidget(
-            <LineForm handleSubmit={this._handleSubmit} />
+            (
+                <LineForm
+                    handleSubmit={this._handleSubmit}
+                    currentLine={this.model!.line}
+                />
+            )
         );
         this._popup = showPopup({
             body: body,

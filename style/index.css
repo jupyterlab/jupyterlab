@@ -21,3 +21,7 @@
 .trusted-item {
     background-image: url('./images/trusted-icon.svg');
 }
+
+.p-lineForm-wrapper::after {
+    background-image: url('./images/line-form.svg');
+}
