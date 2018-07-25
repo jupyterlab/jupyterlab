@@ -21,6 +21,8 @@ const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
 
+let currentLevel = 1;
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -53,7 +55,12 @@ export function createNotebookGenerator(
             };
           };
           headings = headings.concat(
-            Private.getCodeCells(text, onClickFactory2, numberingDict)
+            Private.getCodeCells(
+              text,
+              onClickFactory2,
+              numberingDict,
+              currentLevel
+            )
           );
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
@@ -109,6 +116,7 @@ export function createNotebookGenerator(
                 numbering
               )
             );
+            currentLevel = headings[headings.length - 1]['level'];
           } else {
             const onClickFactory = (line: number) => {
               return () => {
@@ -349,21 +357,16 @@ namespace Private {
   export function getCodeCells(
     text: string,
     onClickFactory: (line: number) => (() => void),
-    numberingDict: any
+    numberingDict: any,
+    lastLevel: number
   ): IHeading[] {
-    console.log('entered the function');
-    // Split the text into lines.
-    const lines = text.split('\n');
     let headings: IHeading[] = [];
-
-    lines.forEach((line, idx) => {
-      // Make an onClick handler for this line.
-      const onClick = onClickFactory(idx);
-      const level = 6;
+    if (text) {
+      const onClick = onClickFactory(0);
+      const level = lastLevel + 1;
       let numbering = Private.generateNumbering(numberingDict, level);
-      console.log({ text, level, numbering, onClick });
       headings.push({ text, level, numbering, onClick });
-    });
+    }
     return headings;
   }
   /**
