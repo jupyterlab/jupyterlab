@@ -134,9 +134,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
             this._onActiveCellChange
         );
         this._notebookTracker.selectionChanged.connect(this._onNotebookChange);
-
         this._editorTracker.currentChanged.connect(this._onEditorChange);
-
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new LineCol.Model(
@@ -146,7 +144,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this.addClass(interactiveItem);
     }
 
-    protected render(): React.ReactElement<LineColComponent.IProps> | null {
+    render(): React.ReactElement<LineColComponent.IProps> | null {
         if (this.model === null) {
             return null;
         } else {
@@ -158,6 +156,20 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
                 />
             );
         }
+    }
+
+    dispose() {
+        super.dispose();
+
+        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
+        this._notebookTracker.activeCellChanged.disconnect(
+            this._onActiveCellChange
+        );
+        this._notebookTracker.selectionChanged.disconnect(
+            this._onNotebookChange
+        );
+        this._editorTracker.currentChanged.disconnect(this._onEditorChange);
+        this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
     private _handleClick = () => {
@@ -248,6 +260,13 @@ namespace LineCol {
         }
 
         set editor(editor: CodeEditor.IEditor | null) {
+            const oldEditor = this._editor;
+            if (oldEditor !== null) {
+                oldEditor.model.selections.changed.disconnect(
+                    this._onSelectionChanged
+                );
+            }
+
             this._editor = editor;
 
             if (this._editor === null) {

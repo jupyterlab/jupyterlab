@@ -90,13 +90,20 @@ export class StatusBar extends Widget implements IStatusBar {
         let isActive = opts.isActive !== undefined ? opts.isActive : () => true;
         let stateChanged =
             opts.stateChanged !== undefined ? opts.stateChanged : null;
+        let changeCallback =
+            opts.stateChanged !== undefined
+                ? () => {
+                      this._onIndividualStateChange(id);
+                  }
+                : null;
 
         let wrapper = {
             widget,
             align,
             priority,
             isActive,
-            stateChanged
+            stateChanged,
+            changeCallback
         };
 
         let rankItem = {
@@ -110,9 +117,7 @@ export class StatusBar extends Widget implements IStatusBar {
         this._statusIds.push(id);
 
         if (stateChanged) {
-            stateChanged.connect(() => {
-                this._onIndividualStateChange(id);
-            });
+            stateChanged.connect(changeCallback!);
         }
 
         if (align === 'left') {
@@ -144,11 +149,21 @@ export class StatusBar extends Widget implements IStatusBar {
         }
     }
 
-    /**
-     * Get the parent ApplicationShell
-     */
-    get host(): ApplicationShell {
-        return this._host;
+    dispose() {
+        super.dispose();
+
+        this._host.currentChanged.disconnect(this._onAppShellCurrentChanged);
+        this._statusIds.forEach(id => {
+            const { stateChanged, changeCallback, widget } = this._statusItems[
+                id
+            ];
+
+            if (stateChanged) {
+                stateChanged.disconnect(changeCallback!);
+            }
+
+            widget.dispose();
+        });
     }
 
     protected onUpdateRequest(msg: Message) {
@@ -225,5 +240,6 @@ export namespace StatusBar {
         widget: Widget;
         isActive: () => boolean;
         stateChanged: ISignal<any, void> | null;
+        changeCallback: (() => void) | null;
     }
 }
