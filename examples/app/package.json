@@ -34,7 +34,7 @@
     "@jupyterlab/shortcuts-extension": "^0.17.1",
     "@jupyterlab/tabmanager-extension": "^0.17.1",
     "@jupyterlab/terminal-extension": "^0.17.1",
-    "@jupyterlab/theme-dark-extension": "^0.17.1",
+    "@jupyterlab/theme-dark-extension": "^0.17.3",
     "@jupyterlab/theme-light-extension": "^0.17.1",
     "@jupyterlab/tooltip-extension": "^0.17.1",
     "es6-promise": "~4.1.1"

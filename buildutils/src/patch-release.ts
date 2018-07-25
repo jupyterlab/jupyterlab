@@ -28,6 +28,7 @@ if (!fs.existsSync(packagePath)) {
 console.log('Patching', target, '...');
 // Use npm here so this file can be used outside of JupyterLab.
 utils.run('npm run build:packages');
+utils.run('npm run build:themes');
 utils.run('npm version patch', { cwd: packagePath });
 utils.run('npm publish', { cwd: packagePath });
 
