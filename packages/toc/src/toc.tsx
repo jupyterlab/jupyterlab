@@ -120,22 +120,24 @@ export class TableOfContents extends Widget {
   }
 
   private changeNumberingStateForAllCells(showNumbering: boolean) {
-    each(this._notebook.currentWidget.content.widgets, cell => {
-      let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      each(headingNodes, heading => {
-        if (heading.getElementsByClassName('numbering-entry').length > 0) {
-          if (!showNumbering) {
-            heading
-              .getElementsByClassName('numbering-entry')[0]
-              .setAttribute('hidden', 'true');
-          } else {
-            heading
-              .getElementsByClassName('numbering-entry')[0]
-              .removeAttribute('hidden');
+    if (this._notebook.currentWidget) {
+      each(this._notebook.currentWidget.content.widgets, cell => {
+        let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        each(headingNodes, heading => {
+          if (heading.getElementsByClassName('numbering-entry').length > 0) {
+            if (!showNumbering) {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .setAttribute('hidden', 'true');
+            } else {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .removeAttribute('hidden');
+            }
           }
-        }
+        });
       });
-    });
+    }
   }
 
   /**
@@ -200,14 +202,14 @@ export interface IHeading {
   /**
    * The text of the heading.
    */
-  text: string;
+  text: string | null;
 
   /**
    * The HTML header level for the heading.
    */
   level: number;
 
-  numbering?: string;
+  numbering?: string | null;
 
   /**
    * A function to execute when clicking the ToC
@@ -224,7 +226,7 @@ export interface IHeading {
    * For instance, this can be used to render
    * already-renderd-to-html markdown headings.
    */
-  html?: string;
+  html?: string | null;
 }
 
 /**

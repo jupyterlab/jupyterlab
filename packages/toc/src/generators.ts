@@ -31,8 +31,8 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  needNumbering = true,
-  widget: TableOfContents = null
+  widget: TableOfContents | null = null,
+  needNumbering = true
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -47,7 +47,6 @@ export function createNotebookGenerator(
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
           let text = (model as CodeCellModel).value.text;
-          console.log(text);
           const onClickFactory2 = (line: number) => {
             return () => {
               cell.node.scrollIntoView();
@@ -282,7 +281,8 @@ namespace Private {
       Private.incrementNumberingDict(numberingDict, level);
       numbering = '';
       for (var j = 1; j <= level; j++) {
-        numbering += ((numberingDict[j] == undefined) ? '0' : numberingDict[j]) + '.';
+        numbering +=
+          (numberingDict[j] == undefined ? '0' : numberingDict[j]) + '.';
         if (j == level) {
           numbering += ' ';
         }
