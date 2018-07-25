@@ -22,3 +22,52 @@ export const hoverItem = style({
     fontSize: variables.fontSize,
     color: 'var(--jp-ui-font-color1)'
 });
+
+export const lineFormSearch = style({
+    padding: '8px',
+    backgroundColor: 'var(--jp-layout-color2)',
+    borderBottom: '1px solid var(--jp-border-color1)',
+    boxShadow: 'var(--jp-toolbar-box-shadow)',
+    zIndex: 2
+});
+
+export const lineFormWrapper = style({
+    overflow: 'overlay',
+    border: '1px solid var(--jp-border-color0)',
+    backgroundColor: 'var(--jp-input-active-background)',
+    height: '30px',
+    $nest: {
+        '&::after': {
+            content: `' '`,
+            color: 'white',
+            backgroundColor: 'var(--jp-brand-color1)',
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            height: '32px',
+            width: '12px',
+            padding: '0px 12px',
+            backgroundSize: '20px',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center'
+        }
+    }
+});
+
+export const lineFormInput = style({
+    background: 'transparent',
+    width: 'calc(100% - 18px)',
+    height: 'calc(100% - 8.5px)',
+    border: 'none',
+    outline: 'none',
+    fontSize: 'var(--jp-ui-font-size1)',
+    color: 'var(--jp-ui-font-color0)',
+    lineHeight: 'var(--jp-private-lineForm-search-height)',
+    paddingTop: '5px',
+    $nest: {
+        '&:focus': {
+            border: 'var(--jp-border-width) solid var(--md-blue-500)',
+            boxShadow: 'inset 0 0 4px var(--md-blue-300)'
+        }
+    }
+});
