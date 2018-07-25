@@ -217,12 +217,16 @@ export class ShortcutInput extends React.Component<
     keys: string[],
     currentChain: string
   ): TakenByObject => {
+
+    /** First, check whole shortcut */
     let isAvailable =
       (Object.keys(this.props.keyBindingsUsed).indexOf(
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ) === -1) || userInput === '';
     let takenByObject: TakenByObject = new TakenByObject();
     if (isAvailable) {
+
+      /** Next, check each piece of a chain */
       for (let binding of keys) {
         if (
           Object.keys(this.props.keyBindingsUsed).indexOf(
@@ -234,9 +238,13 @@ export class ShortcutInput extends React.Component<
           takenByObject = this.props.keyBindingsUsed[
             binding + '_' + this.props.shortcut.selector
           ];
+          break;
         }
       }
+
+      /** Check current chain */
       if (
+        isAvailable &&
         Object.keys(this.props.keyBindingsUsed).indexOf(
           currentChain + '_' + this.props.shortcut.selector
         ) !== -1 &&
@@ -247,17 +255,20 @@ export class ShortcutInput extends React.Component<
           currentChain + '_' + this.props.shortcut.selector
         ];
       }
+
+    /** If unavailable set takenByObject */
     } else {
       takenByObject = this.props.keyBindingsUsed[
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
+    console.log('available', isAvailable)
     this.setState({ isAvailable: isAvailable });
     return takenByObject;
   };
 
   checkConflict(takenByObject: TakenByObject, keys: string): void {
-    if (takenByObject.id !== '' && takenByObject.id !== this.props.shortcut.id) {
+    if (takenByObject.id !== '' && takenByObject.takenBy.id !== this.props.shortcut.id) {
       this.props.sortConflict(this.props.shortcut, takenByObject, takenByObject.takenByLabel, '');
     } else {
       this.props.clearConflicts();
