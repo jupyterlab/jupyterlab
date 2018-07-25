@@ -274,7 +274,7 @@ namespace Private {
       Private.incrementNumberingDict(numberingDict, level);
       numbering = '';
       for (var j = 1; j <= level; j++) {
-        numbering += numberingDict[j] + '.';
+        numbering += ((numberingDict[j] == undefined) ? '0' : numberingDict[j]) + '.';
         if (j == level) {
           numbering += ' ';
         }
