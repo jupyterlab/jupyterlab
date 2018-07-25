@@ -41,7 +41,6 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
     }
 
     render() {
-        console.log(`Rendering!`);
         if (this.model === null) {
             return null;
         } else {

@@ -29,47 +29,53 @@ import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
 import { interactiveItem } from '../style/statusBar';
 import {
-    lineFormSearch,
     lineFormWrapper,
-    lineFormInput
+    lineFormInput,
+    lineFormSearch,
+    lineFormWrapperFocusWithin,
+    lineFormCaption
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
 
-export namespace LineForm {
+namespace LineForm {
     export interface IProps {
-        // editor: CodeEditor.IEditor | null;
         handleSubmit: (value: number) => void;
         currentLine: number;
     }
+
     export interface IState {
         value: number | undefined;
+        hasFocus: boolean;
     }
 }
 
 class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
-        value: this.props.currentLine + 1
+        value: 1,
+        hasFocus: false
     };
 
-    constructor(props: LineForm.IProps) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this._textInput = null;
-    }
+    private _handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({ value: parseInt(event.currentTarget.value, 10) });
+    };
 
-    handleChange(event: any) {
-        this.setState({ value: event.target.value });
-    }
-
-    handleSubmit(event: any) {
-        if (!isNaN(event.target.value) && isFinite(event.target.value)) {
+    private _handleSubmit = (event: React.FormEvent<HTMLInputElement>) => {
+        const value = parseInt(event.currentTarget.value, 10);
+        if (!isNaN(value) && isFinite(value)) {
             event.preventDefault();
             this.props.handleSubmit(this.state.value);
         } else {
             event.preventDefault();
         }
-    }
+    };
+
+    private _handleFocus = () => {
+        this.setState({ hasFocus: true });
+    };
+
+    private _handleBlur = () => {
+        this.setState({ hasFocus: false });
+    };
 
     componentDidMount() {
         this._textInput!.focus();
@@ -78,26 +84,34 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     render() {
         return (
             <div className={lineFormSearch}>
-                <form
-                    onSubmit={this.handleSubmit}
-                    className={classes(lineFormWrapper, 'p-lineForm-wrapper')}
+                <div
+                    className={classes(
+                        lineFormWrapper,
+                        'p-lineForm-wrapper',
+                        this.state.hasFocus
+                            ? lineFormWrapperFocusWithin
+                            : undefined
+                    )}
                 >
                     <input
-                        type="text"
-                        className={classes(lineFormInput)}
-                        placeholder="Go to Line"
-                        onChange={this.handleChange}
+                        className={lineFormInput}
+                        spellCheck={false}
+                        onChange={this._handleChange}
+                        onSubmit={this._handleSubmit}
+                        onFocus={this._handleFocus}
+                        onBlur={this._handleBlur}
                         value={this.state.value}
                         ref={input => {
                             this._textInput = input;
                         }}
                     />
-                </form>
+                </div>
+                <div className={lineFormCaption}>Go to line number</div>
             </div>
         );
     }
 
-    private _textInput: HTMLInputElement | null;
+    private _textInput: HTMLInputElement | null = null;
 }
 
 namespace LineColComponent {
