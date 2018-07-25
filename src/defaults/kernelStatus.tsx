@@ -59,7 +59,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._consoleTracker.currentChanged.connect(this._onConsoleChange);
-
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new KernelStatus.Model(
@@ -83,6 +82,14 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
                 />
             );
         }
+    }
+
+    dispose() {
+        super.dispose();
+
+        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
+        this._consoleTracker.currentChanged.disconnect(this._onConsoleChange);
+        this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
     protected onUpdateRequest(msg: Message) {
@@ -174,6 +181,14 @@ namespace KernelStatus {
         }
 
         set session(session: IClientSession | null) {
+            const oldSession = this._session;
+            if (oldSession !== null) {
+                oldSession.statusChanged.disconnect(
+                    this._onKernelStatusChanged
+                );
+                oldSession.kernelChanged.disconnect(this._onKernelChanged);
+            }
+
             this._session = session;
 
             if (this._session === null) {

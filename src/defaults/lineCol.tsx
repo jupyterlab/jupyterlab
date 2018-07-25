@@ -50,15 +50,18 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
         value: this.props.currentLine + 1
     };
+
     constructor(props: LineForm.IProps) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this._textInput = null;
     }
+
     handleChange(event: any) {
         this.setState({ value: event.target.value });
     }
+
     handleSubmit(event: any) {
         if (!isNaN(event.target.value) && isFinite(event.target.value)) {
             event.preventDefault();

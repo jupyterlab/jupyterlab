@@ -96,6 +96,12 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._tracker.currentChanged.disconnect(this._onNotebookChange);
+    }
+
     private _tracker: INotebookTracker;
 }
 
@@ -124,6 +130,17 @@ namespace NotebookTrust {
         }
 
         set notebook(model: Notebook | null) {
+            const oldNotebook = this._notebook;
+            if (oldNotebook !== null) {
+                oldNotebook.activeCellChanged.disconnect(
+                    this._onActiveCellChanged
+                );
+
+                oldNotebook.modelContentChanged.disconnect(
+                    this._onModelChanged
+                );
+            }
+
             this._notebook = model;
             this.stateChanged.emit(void 0);
 

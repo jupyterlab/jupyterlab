@@ -82,6 +82,17 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
     }
 
+    dispose() {
+        super.dispose();
+
+        this._serviceManager.sessions.runningChanged.disconnect(
+            this._onKernelsRunningChanged
+        );
+        this._serviceManager.terminals.runningChanged.disconnect(
+            this._onTerminalsRunningChanged
+        );
+    }
+
     private _onKernelsRunningChanged = (
         manager: SessionManager,
         kernels: Kernel.IModel[]

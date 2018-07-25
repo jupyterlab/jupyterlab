@@ -48,6 +48,12 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._tracker.currentChanged.disconnect(this._onEditorChange);
+    }
+
     private _onEditorChange = (
         tracker: IEditorTracker,
         editor: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
@@ -75,6 +81,13 @@ namespace EditorSyntax {
         }
 
         set editor(editor: CodeEditor.IEditor | null) {
+            const oldEditor = this._editor;
+            if (oldEditor !== null) {
+                oldEditor.model.mimeTypeChanged.disconnect(
+                    this._onMIMETypeChange
+                );
+            }
+
             this._editor = editor;
 
             if (this._editor === null) {

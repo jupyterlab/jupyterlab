@@ -72,6 +72,12 @@ class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._tracker.currentChanged.disconnect(this._onBrowserChange);
+    }
+
     private _onBrowserChange = (
         tracker: InstanceTracker<FileBrowser>,
         browser: FileBrowser | null
@@ -103,6 +109,11 @@ namespace FileUpload {
         }
 
         set browserModel(browserModel: FileBrowserModel | null) {
+            const oldBrowserModel = this._browserModel;
+            if (oldBrowserModel) {
+                oldBrowserModel.uploadChanged.disconnect(this._uploadChanged);
+            }
+
             this._browserModel = browserModel;
             this._items = [];
 

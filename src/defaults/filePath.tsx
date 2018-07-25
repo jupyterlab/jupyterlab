@@ -41,6 +41,7 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
     }
 
     render() {
+        console.log(`Rendering!`);
         if (this.model === null) {
             return null;
         } else {
@@ -51,6 +52,12 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
                 />
             );
         }
+    }
+
+    dispose() {
+        super.dispose();
+
+        this._shell.currentChanged.disconnect(this._onShellCurrentChanged);
     }
 
     private _onShellCurrentChanged = (
@@ -84,6 +91,17 @@ namespace FilePath {
         }
 
         set widget(widget: Widget | null) {
+            const oldWidget = this._widget;
+            if (oldWidget !== null) {
+                if (oldWidget instanceof DocumentWidget) {
+                    oldWidget.context.pathChanged.disconnect(
+                        this._onPathChange
+                    );
+                } else {
+                    oldWidget.title.changed.disconnect(this._onTitleChange);
+                }
+            }
+
             this._widget = widget;
 
             if (this._widget === null) {
