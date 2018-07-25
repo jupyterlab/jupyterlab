@@ -290,8 +290,6 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     let numbering = (heading.numbering && this.state.needNumbering)
                   ? heading.numbering
                   : '';
-
-    console.log('iiejwfa');
     let numbering = heading.numbering ? heading.numbering : '';
     if (heading.html) {
       content = (
@@ -301,16 +299,10 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
         />
       );
     } else {
-      let collapse = this.props.children ? (
-        <img src={require('../static/rightarrow.svg')} />
-      ) : (
-        <div>no</div>
-      );
-      content = (
-        <span style={{ paddingLeft }}>
-          {collapse}{ numbering + heading.text }
-        </span>
-      );
+      // let collapse = this.props.children ? (
+      //   <img src={require('../static/rightarrow.svg')} />
+      // ) : "";
+      content = <span style={{ paddingLeft }}>{numbering + heading.text}</span>;
     }
 
     return <li onClick={handleClick}>{content}</li>;
