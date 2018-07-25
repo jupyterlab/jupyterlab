@@ -34,12 +34,12 @@ const RunningSessionsComponent = (
             title={'Number of active sessions'}
         >
             <GroupItem spacing={vars.textIconHalfSpacing}>
-                <TextItem source={props.kernels} />
-                <IconItem source={'kernel-item'} />
-            </GroupItem>
-            <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.terminals} />
                 <IconItem source={'terminal-item'} />
+            </GroupItem>
+            <GroupItem spacing={vars.textIconHalfSpacing}>
+                <TextItem source={props.kernels} />
+                <IconItem source={'kernel-item'} />
             </GroupItem>
         </GroupItem>
     );
