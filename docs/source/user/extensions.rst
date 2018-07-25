@@ -126,9 +126,9 @@ You can re-enable an extension using the command:
 Advanced Usage
 ~~~~~~~~~~~~~~
 
-Any information that JupyterLab persists is stored in it's application directory,
+Any information that JupyterLab persists is stored in its application directory,
 including settings and built assets.
-This is seperate from where the Python package is installed (like in ``site_packages``),
+This is separate from where the Python package is installed (like in ``site_packages``)
 so that this folder is immutable.
 
 The application directory can be overridden using ``--app-dir`` in
