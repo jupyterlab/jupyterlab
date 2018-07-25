@@ -9,17 +9,21 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Message } from '@phosphor/messaging';
 
+import { each } from '@phosphor/algorithm';
+
 import { Widget } from '@phosphor/widgets';
 
 import { TableOfContentsRegistry } from './registry';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * Timeout for throttling TOC rendering.
  */
 const RENDER_TIMEOUT = 1000;
+const NEED_NUMBERING_BY_DEFAULT = true;
 
 /**
  * A widget for hosting a notebook table-of-contents.
@@ -32,6 +36,7 @@ export class TableOfContents extends Widget {
     super();
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
+    this._notebook = options.notebookTracker;
   }
 
   /**
@@ -99,7 +104,7 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node, () => {
+    ReactDOM.render(<TOCTree widget={this} title={title} toc={toc} />, this.node, () => {
       if (
         this._current &&
         this._current.generator.usesLatex === true &&
@@ -110,6 +115,21 @@ export class TableOfContents extends Widget {
     });
   }
 
+  private changeNumberingStateForAllCells(showNumbering: boolean) {
+    each(this._notebook.currentWidget.content.widgets, cell => {
+      let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      each(headingNodes, heading => {
+        if (heading.getElementsByClassName('numbering-entry').length > 0) {
+          if (!showNumbering) {
+            heading.getElementsByClassName('numbering-entry')[0].setAttribute('hidden', 'true');
+          } else {
+            heading.getElementsByClassName('numbering-entry')[0].removeAttribute('hidden');
+          }
+        }
+      });
+    });
+  }
+
   /**
    * Rerender after showing.
    */
@@ -117,10 +137,22 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
+  get needNumbering() {
+    return this._needNumbering;
+  }
+
+  set needNumbering(value: boolean) {
+    this._needNumbering = value;
+    this.changeNumberingStateForAllCells(value);
+  }
+
+  private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
+  private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
+
 }
 
 /**
@@ -140,6 +172,8 @@ export namespace TableOfContents {
      * The rendermime for the application.
      */
     rendermime: IRenderMimeRegistry;
+    notebookTracker: INotebookTracker;
+
   }
 
   /**
@@ -200,6 +234,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    * A list of IHeadings to render.
    */
   toc: IHeading[];
+  widget: TableOfContents;
 }
 
 /**
@@ -210,12 +245,27 @@ export interface ITOCItemProps extends React.Props<TOCItem> {
    * An IHeading to render.
    */
   heading: IHeading;
+  needNumbering: boolean;
+}
+
+export interface ITOCItemStates {
+  needNumbering: boolean;
 }
 
 /**
  * A React component for a table of contents entry.
  */
-export class TOCItem extends React.Component<ITOCItemProps, {}> {
+export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
+
+  constructor(props: ITOCItemProps) {
+    super(props);
+    this.state = { needNumbering: this.props.needNumbering };
+  }
+
+  componentWillReceiveProps(nextProps: ITOCItemProps) {
+    this.setState({ needNumbering: nextProps.needNumbering });
+  }
+
   /**
    * Render the item.
    */
@@ -237,6 +287,9 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
     };
 
     let content;
+    let numbering = (heading.numbering && this.state.needNumbering)
+                  ? heading.numbering
+                  : '';
     let numbering = heading.numbering ? heading.numbering : '';
     if (heading.html) {
       content = (
@@ -256,24 +309,42 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
   }
 }
 
+export interface ITOCTreeStates {
+  needNumbering: boolean;
+}
+
 /**
  * A React component for a table of contents.
  */
-export class TOCTree extends React.Component<ITOCTreeProps, {}> {
+export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
   /**
    * Render the TOCTree.
    */
+
+  constructor(props: ITOCTreeProps) {
+    super(props);
+    this.state = { needNumbering: this.props.widget.needNumbering };
+  }
+
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      return <TOCItem heading={el} key={`${el.text}-${el.level}-${i++}`} />;
+      return <TOCItem needNumbering={this.state.needNumbering} heading={el} key={`${el.text}-${el.level}-${i++}`} />;
     });
+
+    const handleClick = (event: React.SyntheticEvent<HTMLButtonElement>) => {
+      this.props.widget.needNumbering = !this.props.widget.needNumbering;
+      this.setState({ needNumbering: this.props.widget.needNumbering });
+    };
 
     // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
+        <button onClick={ (event) => handleClick(event) }>
+          Show/Hide Numbering
+        </button>
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );
