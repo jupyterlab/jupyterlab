@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-observables",
-  "version": "0.3.0-1",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -16,7 +16,7 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/observables": "^2.0.0-1",
+    "@jupyterlab/observables": "^2.0.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "expect.js": "~0.3.1"
