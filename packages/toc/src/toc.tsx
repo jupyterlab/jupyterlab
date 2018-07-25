@@ -104,15 +104,19 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    ReactDOM.render(<TOCTree widget={this} title={title} toc={toc} />, this.node, () => {
-      if (
-        this._current &&
-        this._current.generator.usesLatex === true &&
-        this._rendermime.latexTypesetter
-      ) {
-        this._rendermime.latexTypesetter.typeset(this.node);
+    ReactDOM.render(
+      <TOCTree widget={this} title={title} toc={toc} />,
+      this.node,
+      () => {
+        if (
+          this._current &&
+          this._current.generator.usesLatex === true &&
+          this._rendermime.latexTypesetter
+        ) {
+          this._rendermime.latexTypesetter.typeset(this.node);
+        }
       }
-    });
+    );
   }
 
   private changeNumberingStateForAllCells(showNumbering: boolean) {
@@ -121,9 +125,13 @@ export class TableOfContents extends Widget {
       each(headingNodes, heading => {
         if (heading.getElementsByClassName('numbering-entry').length > 0) {
           if (!showNumbering) {
-            heading.getElementsByClassName('numbering-entry')[0].setAttribute('hidden', 'true');
+            heading
+              .getElementsByClassName('numbering-entry')[0]
+              .setAttribute('hidden', 'true');
           } else {
-            heading.getElementsByClassName('numbering-entry')[0].removeAttribute('hidden');
+            heading
+              .getElementsByClassName('numbering-entry')[0]
+              .removeAttribute('hidden');
           }
         }
       });
@@ -152,7 +160,6 @@ export class TableOfContents extends Widget {
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
-
 }
 
 /**
@@ -173,7 +180,6 @@ export namespace TableOfContents {
      */
     rendermime: IRenderMimeRegistry;
     notebookTracker: INotebookTracker;
-
   }
 
   /**
@@ -256,7 +262,6 @@ export interface ITOCItemStates {
  * A React component for a table of contents entry.
  */
 export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
-
   constructor(props: ITOCItemProps) {
     super(props);
     this.state = { needNumbering: this.props.needNumbering };
@@ -287,10 +292,8 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     };
 
     let content;
-    let numbering = (heading.numbering && this.state.needNumbering)
-                  ? heading.numbering
-                  : '';
-    let numbering = heading.numbering ? heading.numbering : '';
+    let numbering =
+      heading.numbering && this.state.needNumbering ? heading.numbering : '';
     if (heading.html) {
       content = (
         <span
@@ -330,7 +333,13 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      return <TOCItem needNumbering={this.state.needNumbering} heading={el} key={`${el.text}-${el.level}-${i++}`} />;
+      return (
+        <TOCItem
+          needNumbering={this.state.needNumbering}
+          heading={el}
+          key={`${el.text}-${el.level}-${i++}`}
+        />
+      );
     });
 
     const handleClick = (event: React.SyntheticEvent<HTMLButtonElement>) => {
@@ -342,7 +351,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
-        <button onClick={ (event) => handleClick(event) }>
+        <button onClick={event => handleClick(event)}>
           Show/Hide Numbering
         </button>
         <ul className="jp-TableOfContents-content">{listing}</ul>
