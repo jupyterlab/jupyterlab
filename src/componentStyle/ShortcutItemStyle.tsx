@@ -31,8 +31,8 @@ export const RowStyle = style({
   }
 });
 
-export function ConflictContainerStyle(showSelectors: boolean) {
-  if (showSelectors) {
+export function ConflictContainerStyle(showSelectors: boolean, errorSize: string) {
+  if (showSelectors && errorSize === 'regular') {
     return(
       style({
         display: 'flex',
@@ -41,13 +41,22 @@ export function ConflictContainerStyle(showSelectors: boolean) {
         marginLeft: '20%'
       })
     )
-  } else {
+  } else if (!showSelectors && errorSize === 'regular') {
     return (
       style({
         display: 'flex',
         flexWrap: 'wrap',
         padding:'6px 12px',
         marginLeft: '25%'
+      })
+    )
+  } else {
+    return (
+      style({
+        display: 'flex',
+        flexWrap: 'wrap',
+        padding:'6px 12px',
+        marginLeft: '0'
       })
     )
   }

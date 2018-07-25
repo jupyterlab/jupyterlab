@@ -536,6 +536,7 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
+          errorSize={this.props.width < 775 ? 'small' : 'regular'}
         />
       </div>
     );

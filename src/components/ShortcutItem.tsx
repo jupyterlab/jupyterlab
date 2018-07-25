@@ -35,6 +35,7 @@ export interface IShortcutItemProps {
   keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
+  errorSize: string;
 }
 
 /** State for ShortcutItem component */
@@ -101,8 +102,8 @@ export class ShortcutItem extends React.Component<
           className = {classes(RowStyle)}
         >
           <td colSpan={this.props.showSelectors ? 5 : 4}>
-            <div className = {ConflictContainerStyle(this.props.showSelectors)}>
-              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenBy.takenByLabel + ' Overwrite it?'}</div>
+            <div className = {ConflictContainerStyle(this.props.showSelectors, this.props.errorSize)}>
+              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenBy.takenByLabel + '. Overwrite it?'}</div>
               <div className={ErrorButtonStyle}>
                 <button>Cancel</button>
                 <button 
