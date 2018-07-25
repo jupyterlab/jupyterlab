@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {ActivityMonitor, PathExt} from '@jupyterlab/coreutils';
+import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 
-import {IDocumentManager} from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import {IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {Message} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {Widget} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {TableOfContentsRegistry} from './registry';
+import { TableOfContentsRegistry } from './registry';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -72,9 +72,12 @@ export class TableOfContents extends Widget {
     // Throttle the rendering rate of the table of contents.
     this._monitor = new ActivityMonitor({
       signal: context.model.contentChanged,
-      timeout: RENDER_TIMEOUT,
+      timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
+    this._monitor.activityStopped.connect(
+      this.update,
+      this
+    );
     this.update();
   }
 
@@ -221,7 +224,7 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
 
-    const paddingLeft = (level -1) * 12;
+    const paddingLeft = (level - 1) * 12;
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
@@ -241,11 +244,7 @@ export class TOCItem extends React.Component<ITOCItemProps, {}> {
         />
       );
     } else {
-      content = (
-        <span style={{ paddingLeft }}>
-          {heading.text}
-        </span>
-      );
+      content = <span style={{ paddingLeft }}>{heading.text}</span>;
     }
 
     return <li onClick={handleClick}>{content}</li>;
