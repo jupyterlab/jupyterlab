@@ -72,8 +72,10 @@ export class ShortcutInput extends React.Component<
   }
 
   handleOverwrite = async () => {
-    await this.props.deleteShortcut(this.state.takenByObject.takenBy, this.state.takenByObject.takenByKey);
-    this.handleUpdate()
+    this.props.deleteShortcut(
+      this.state.takenByObject.takenBy, 
+      this.state.takenByObject.takenByKey
+    ).then(this.handleUpdate())
   }
 
   handleReplace = async() => {
@@ -81,6 +83,7 @@ export class ShortcutInput extends React.Component<
     keys.push(this.state.currentChain)
     const shortcut = this.props.shortcut
     this.props.toggleInput();
+    console.log('deleting  ', this.props.shortcutId)
     await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
     this.props.handleUpdate(
       shortcut,
@@ -221,9 +224,9 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = shortcut.split(', ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1 || shortcut === '')
+      isFunctional: !(dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/)
     });
-    return dontEnd.indexOf(last) !== -1 || shortcut === '';
+    return dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/;
   };
 
   /** Check if shortcut being typed is already taken */
@@ -320,6 +323,8 @@ export class ShortcutInput extends React.Component<
   };
 
   render() {
+    console.log(this.props.shortcutId)
+
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {
       inputClassName = classes(inputClassName, InputUnavailableStyle);
@@ -347,7 +352,7 @@ export class ShortcutInput extends React.Component<
                 ? classes(SubmitStyle, SubmitConflictStyle)
                 : SubmitStyle
           }
-          id={this.state.value !== '' ? 'no-blur' : 'blur'}
+          id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
             if (this.props.newOrReplace === 'new') {

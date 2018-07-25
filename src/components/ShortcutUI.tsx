@@ -334,30 +334,66 @@ export class ShortcutUI extends React.Component<
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    if (keys[0] !== '') {
-      let commandId: string = shortcutObject.id;
-      if (shortcutObject.numberOfShortcuts === 1) {
-        commandId = commandId + '-2';
-      } else {
-        Object.keys(shortcutObject.keys).forEach(key => {
-          if (shortcutObject.keys[key][0] === '') {
-            commandId = key;
-          }
-        });
-      }
-      await this.props.settingRegistry.set(
-        this.props.shortcutPlugin,
-        commandId,
-        {
-          command: shortcutObject.commandName,
-          keys: keys,
-          selector: shortcutObject.selector,
-          title: shortcutObject.label,
-          category: shortcutObject.category
+    await this._getShortcutList()
+    console.log(shortcutObject)
+    
+    let shortcut: ShortcutObject = this.state.filteredShortcutList.filter((s:ShortcutObject) => (
+      s.commandName === shortcutObject.commandName &&
+      s.selector === shortcutObject.selector
+    ))[0]
+
+    shortcutObject = shortcut;
+
+    console.log(shortcutObject)
+
+    let nonEmptyKeys: string[] = Object.keys(shortcutObject.keys)
+    nonEmptyKeys = nonEmptyKeys.filter((key: string) => {
+      console.log(shortcutObject.keys[key])
+      console.log(shortcutObject.keys[key][0] !== "")
+      return shortcutObject.keys[key][0] !== ""
+    })
+    let nonEmptyKey:string = nonEmptyKeys[0]
+    console.log('not empty', nonEmptyKeys, nonEmptyKey)
+    console.log('this things id', shortcutObject.id)
+    console.log(shortcutObject.keys)
+
+    let commandId: string = shortcutObject.id;
+    if (commandId === nonEmptyKey) {
+      console.log(nonEmptyKey.split('-')[nonEmptyKey.split('-').length -1])
+      if (nonEmptyKey.split('-')[nonEmptyKey.split('-').length -1] !== '2'){
+        /** either command-name or command-name-1 is taken */
+        if (commandId.split('-').indexOf('1') !== -1) {
+          commandId = shortcutObject.id.replace('-1','-2')
+        } else if (commandId.split('-').indexOf('2') === -1) {
+          commandId = shortcutObject.id + '-2';
         }
-      );
-      this._getShortcutList();
+      } else if (shortcutObject.numberOfShortcuts == 2) {
+        /** there are 2 by default, -1 is not taken */
+        if (commandId.split('-').indexOf('2') !== -1) {
+          commandId = shortcutObject.id.replace('-2','-1')
+        } else if (commandId.split('-').indexOf('1') === -1) {
+          commandId = shortcutObject.id + '-1';
+        }
+      } else {
+        /** there is 1 by default, it is not taken */
+        commandId = shortcutObject.id
+      }
     }
+
+    console.log('adding to ', commandId)
+
+    await this.props.settingRegistry.set(
+      this.props.shortcutPlugin,
+      commandId,
+      {
+        command: shortcutObject.commandName,
+        keys: keys,
+        selector: shortcutObject.selector,
+        title: shortcutObject.label,
+        category: shortcutObject.category
+      }
+    );
+    this._getShortcutList();
   };
 
   /** Delete shortcut for command, refresh state */
@@ -380,7 +416,7 @@ export class ShortcutUI extends React.Component<
         category: shortcutObject.category
       }
     );
-    this._getShortcutList();
+    this._getShortcutList().then(() => console.log('done'));
   };
 
   /** Reset a specific shortcut to its default settings */
