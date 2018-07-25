@@ -140,9 +140,10 @@ export class ShortcutItem extends React.Component<
                     }
                   }}
                 >
-                  {this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
-                    !((index === 0 && this.state.displayReplaceInputLeft) || 
+                  {!((index === 0 && this.state.displayReplaceInputLeft) || 
                       (index === 1 && this.state.displayReplaceInputRight)) ? 
+                      
+                      this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
                       <div className={ShortcutKeysContainerStyle} key={index}>
                         <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
                           {this.toSymbols(keyBinding)}
@@ -151,6 +152,8 @@ export class ShortcutItem extends React.Component<
                           <div className={CommaStyle}>,</div>
                         ) : null}
                       </div>
+                      ))
+
                     : <ShortcutInput
                         handleUpdate={this.props.handleUpdate}
                         deleteShortcut={this.props.deleteShortcut}
@@ -169,10 +172,9 @@ export class ShortcutItem extends React.Component<
                           : this.state.displayReplaceInputRight
                         }
                         newOrReplace={'replace'}
-                        placeholder={this.toSymbols(keyBinding)}
+                        placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
                       />
-                    )
-                  )}
+                  }
                   {index === 0 && (
                     <div className={OrStyle}>or</div>
                   )}
