@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-terminal",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -16,8 +16,8 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/services": "^3.0.0",
-    "@jupyterlab/terminal": "^0.17.0",
+    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/terminal": "^0.17.1",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "expect.js": "~0.3.1"
