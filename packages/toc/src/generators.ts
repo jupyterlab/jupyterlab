@@ -31,14 +31,14 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  needNumbering = true,
+  needNumbering = true
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
     usesLatex: true,
     generate: panel => {
       let headings: IHeading[] = [];
-      let numberingDict: { [level: number]: number } = { };
+      let numberingDict: { [level: number]: number } = {};
       each(panel.content.widgets, cell => {
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
@@ -105,11 +105,20 @@ export function createNotebookGenerator(
               };
             };
             headings = headings.concat(
-              Private.getMarkdownHeadings(model.value.text, onClickFactory, numberingDict)
+              Private.getMarkdownHeadings(
+                model.value.text,
+                onClickFactory,
+                numberingDict
+              )
             );
           }
         }
       });
+      for (let i = 0; i < headings.length - 1; i++) {
+        if (headings[i + 1].level < headings[i].level) {
+          console.log('has a child!');
+        }
+      }
       return headings;
     }
   };
@@ -140,7 +149,11 @@ export function createMarkdownGenerator(
           editor.content.editor.setCursorPosition({ line, column: 0 });
         };
       };
-      return Private.getMarkdownHeadings(model.value.text, onClickFactory, null);
+      return Private.getMarkdownHeadings(
+        model.value.text,
+        onClickFactory,
+        null
+      );
     }
   };
 }
@@ -237,7 +250,6 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
-
   export function incrementNumberingDict(dict: any, level: number) {
     if (dict[level + 1] != undefined) {
       dict[level + 1] = undefined;
@@ -254,7 +266,7 @@ namespace Private {
     if (numberingDict != null) {
       Private.incrementNumberingDict(numberingDict, level);
       numbering = '';
-      for (var j=1; j<=level; j++) {
+      for (var j = 1; j <= level; j++) {
         numbering += numberingDict[j] + '.';
         if (j == level) {
           numbering += ' ';
@@ -290,7 +302,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({text, level, numbering, onClick});
+        headings.push({ text, level, numbering, onClick });
         return;
       }
 
@@ -301,7 +313,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({text, level, numbering, onClick});
+        headings.push({ text, level, numbering, onClick });
         return;
       }
 
@@ -313,7 +325,7 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({text, level, numbering, onClick});
+        headings.push({ text, level, numbering, onClick });
       }
     });
     return headings;
@@ -336,14 +348,17 @@ namespace Private {
       const level = parseInt(heading.tagName[1]);
       const text = heading.textContent;
       if (heading.getElementsByClassName('numbering-entry').length > 0) {
-        heading.removeChild((heading.getElementsByClassName('numbering-entry')[0]));
+        heading.removeChild(
+          heading.getElementsByClassName('numbering-entry')[0]
+        );
       }
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
       const onClick = onClickFactory(heading);
       let numbering = Private.generateNumbering(numberingDict, level);
-      heading.innerHTML = '<span class="numbering-entry">' + numbering + '</span>' + html;
-      headings.push({level, text, numbering, html, onClick});
+      heading.innerHTML =
+        '<span class="numbering-entry">' + numbering + '</span>' + html;
+      headings.push({ level, text, numbering, html, onClick });
     }
     return headings;
   }
