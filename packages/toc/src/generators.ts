@@ -31,8 +31,8 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  needNumbering = true
-  widget: TableOfContents = null,
+  needNumbering = true,
+  widget: TableOfContents = null
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -46,6 +46,7 @@ export function createNotebookGenerator(
         if (model.type === 'code') {
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
+          console.log((model as CodeCellModel).value);
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
@@ -364,11 +365,14 @@ namespace Private {
       html = html.replace('¶', ''); // Remove the anchor symbol.
       const onClick = onClickFactory(heading);
       let numbering = Private.generateNumbering(numberingDict, level);
-      let numberingElement = '<span class="numbering-entry" ' 
-                           + (shallHide ? ' hidden="true"' : '') 
-                           + '>' + numbering + '</span>';
+      let numberingElement =
+        '<span class="numbering-entry" ' +
+        (shallHide ? ' hidden="true"' : '') +
+        '>' +
+        numbering +
+        '</span>';
       heading.innerHTML = numberingElement + html;
-      headings.push({level, text, numbering, html, onClick});
+      headings.push({ level, text, numbering, html, onClick });
     }
     return headings;
   }
