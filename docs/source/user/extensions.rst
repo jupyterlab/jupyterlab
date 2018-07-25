@@ -129,7 +129,7 @@ Advanced Usage
 Any information that JupyterLab persists is stored in its application directory,
 including settings and built assets.
 This is separate from where the Python package is installed (like in ``site_packages``)
-so that this folder is immutable.
+so that the install directory is immutable.
 
 The application directory can be overridden using ``--app-dir`` in
 any of the JupyterLab commands, or by setting the ``JUPYTERLAB_DIR``
