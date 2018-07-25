@@ -44,7 +44,7 @@ Changes for developers include:
 * The `Launcher` now uses commands from the application `CommandRegistry` to launch new activities. Extension authors that add items to the launcher will need to update them to use commands. ([#4757](https://github.com/jupyterlab/jupyterlab/pull/4757)).
 * There is now a top-level `addToBottomArea` function in the application, allowing extension authors to add bottom panel items like status bars. ([#4752](https://github.com/jupyterlab/jupyterlab/pull/4752)).
 * Rendermime extensions can now indicate that they are the default rendered widget factory for a file-type. For instance, the default widget for a markdown file is a text editor, but the default rendered widget is the markdown viewer. ([#4692](https://github.com/jupyterlab/jupyterlab/pull/4692)).
-* Add new workplace REST endpoints to `jupyterlab_launcher` and make them available in `@jupyterlab/services` ([#4841](https://github.com/jupyterlab/jupyterlab/pull/4841)).
+* Add new workspace REST endpoints to `jupyterlab_launcher` and make them available in `@jupyterlab/services` ([#4841](https://github.com/jupyterlab/jupyterlab/pull/4841)).
 * Documents created with a mimerenderer extension can now be accessed using an `IInstanceTracker` which tracks them. Include the token `IMimeDocumentTracker` in your plugin to access this. The `IInstanceTracker` interface has also gained convenience functions `find` and `filter` to simplify iterating over instances. ([#4762](https://github.com/jupyterlab/jupyterlab/pull/4762)).
 * `getNotebookVersion` is added to the `PageConfig` object ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224)).
 
