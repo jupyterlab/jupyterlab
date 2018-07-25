@@ -479,18 +479,21 @@ export class ShortcutUI extends React.Component<
   ): void => {
     
     const shortcutList = this.state.filteredShortcutList 
-    const errorRow = new ErrorObject()
-    errorRow.takenBy = takenBy
-    errorRow.id = 'error_row'
 
-    shortcutList.splice(
-        shortcutList.indexOf(newShortcut) + 1,
-        0,
-        errorRow
-      );
-    
-    errorRow.hasConflict = true;
-    this.setState({ filteredShortcutList: shortcutList });
+    if (shortcutList.filter(shortcut => shortcut.id === 'error_row').length === 0) {
+      const errorRow = new ErrorObject()
+      errorRow.takenBy = takenBy
+      errorRow.id = 'error_row'
+
+      shortcutList.splice(
+          shortcutList.indexOf(newShortcut) + 1,
+          0,
+          errorRow
+        );
+      
+      errorRow.hasConflict = true;
+      this.setState({ filteredShortcutList: shortcutList });
+      }
   };
 
   /** Remove conflict flag from all shortcuts */

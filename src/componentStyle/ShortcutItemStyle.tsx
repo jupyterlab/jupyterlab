@@ -55,7 +55,7 @@ export function ConflictContainerStyle(showSelectors: boolean) {
 
 export const ErrorMessageStyle = style({
   color:'var(--jp-error-color1)',
-  lineHeight: '34px'
+  marginTop: '9px'
 })
 
 export const ErrorButtonStyle = style({

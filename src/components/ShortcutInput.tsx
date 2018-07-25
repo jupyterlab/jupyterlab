@@ -252,9 +252,11 @@ export class ShortcutInput extends React.Component<
           takenByObject = this.props.keyBindingsUsed[
             binding + '_' + this.props.shortcut.selector
           ];
+          break;
         }
       }
       if (
+        isAvailable &&
         Object.keys(this.props.keyBindingsUsed).indexOf(
           currentChain + '_' + this.props.shortcut.selector
         ) !== -1 &&
@@ -275,7 +277,7 @@ export class ShortcutInput extends React.Component<
   };
 
   checkConflict(takenByObject: TakenByObject, keys: string): void {
-    if (takenByObject.id !== '' && takenByObject.id !== this.props.shortcut.id) {
+    if (takenByObject.id !== '' && takenByObject.takenBy.id !== this.props.shortcut.id) {
       this.props.sortConflict(this.props.shortcut, takenByObject, takenByObject.takenByLabel, '');
     } else {
       this.props.clearConflicts();
