@@ -46,7 +46,16 @@ export function createNotebookGenerator(
         if (model.type === 'code') {
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
-          console.log((model as CodeCellModel).value);
+          let text = (model as CodeCellModel).value.text;
+          console.log(text);
+          const onClickFactory2 = (line: number) => {
+            return () => {
+              cell.node.scrollIntoView();
+            };
+          };
+          headings = headings.concat(
+            Private.getCodeCells(text, onClickFactory2, numberingDict)
+          );
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
@@ -58,7 +67,6 @@ export function createNotebookGenerator(
             if (!htmlData.length) {
               continue;
             }
-
             // If the output has rendered HTML, parse it for headers.
             const outputWidget = (cell as CodeCell).outputArea.widgets[i];
             const onClickFactory = (el: Element) => {
@@ -121,11 +129,11 @@ export function createNotebookGenerator(
           }
         }
       });
-      for (let i = 0; i < headings.length - 1; i++) {
-        if (headings[i + 1].level < headings[i].level) {
-          console.log('has a child!');
-        }
-      }
+      // for (let i = 0; i < headings.length - 1; i++) {
+      //   if (headings[i + 1].level < headings[i].level) {
+      //     console.log('has a child!');
+      //   }
+      // }
       return headings;
     }
   };
@@ -338,6 +346,26 @@ namespace Private {
     return headings;
   }
 
+  export function getCodeCells(
+    text: string,
+    onClickFactory: (line: number) => (() => void),
+    numberingDict: any
+  ): IHeading[] {
+    console.log('entered the function');
+    // Split the text into lines.
+    const lines = text.split('\n');
+    let headings: IHeading[] = [];
+
+    lines.forEach((line, idx) => {
+      // Make an onClick handler for this line.
+      const onClick = onClickFactory(idx);
+      const level = 6;
+      let numbering = Private.generateNumbering(numberingDict, level);
+      console.log({ text, level, numbering, onClick });
+      headings.push({ text, level, numbering, onClick });
+    });
+    return headings;
+  }
   /**
    * Given an HTML element, generate ToC headings
    * by finding all the headers and making IHeading objects for them.
