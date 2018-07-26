@@ -46,6 +46,9 @@ export function createNotebookGenerator(
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
+          let executionCount = cell.node.getElementsByClassName(
+            'jp-InputArea-prompt'
+          )[0].innerHTML;
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
           let text = (model as CodeCellModel).value.text;
@@ -59,6 +62,7 @@ export function createNotebookGenerator(
               text,
               onClickFactory2,
               numberingDict,
+              executionCount,
               currentLevel
             )
           );
@@ -358,6 +362,7 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
+    executionCount: string,
     lastLevel: number
   ): IHeading[] {
     let headings: IHeading[] = [];
@@ -366,7 +371,7 @@ namespace Private {
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       headings.push({
-        text: lines[0],
+        text: executionCount + ' ' + lines[0],
         level,
         onClick,
         type: 'code'
