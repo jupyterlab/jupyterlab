@@ -10,8 +10,6 @@ import { Widget } from '@phosphor/widgets'
 
 import ShortcutWidget from './ShortcutWidget'
 
-import '../style/index.css';
-
 /** Object for shortcut items */
 export class ShortcutObject {
   commandName: string;
