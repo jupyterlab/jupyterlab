@@ -9,6 +9,7 @@ set -o pipefail
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
+    python -c 'import jupyterlab_launcher; print("jupyterlab_launcher %s" % jupyterlab_launcher.__version__)'
     py.test -v
 fi
 
