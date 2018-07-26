@@ -278,11 +278,23 @@ const busy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
   activate: async (app: JupyterLab) => {
     app.busySignal.connect((_, isBusy) => {
-      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
       const favicon = document.querySelector(
-        'link[rel="shortcut icon"]'
+        `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
-      favicon.href = `/static/base/images/${filename}`;
+      if (!favicon) {
+        return;
+      }
+      const newFavicon = document.querySelector(
+        `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
+      ) as HTMLLinkElement;
+      if (!newFavicon) {
+        return;
+      }
+      // If we have the two icons with the special classes, then toggle them.
+      if (favicon !== newFavicon) {
+        favicon.rel = '';
+        newFavicon.rel = 'icon';
+      }
     });
   },
   requires: [],
