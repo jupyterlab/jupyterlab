@@ -21,6 +21,7 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
 import { GroupItem } from '../component/group';
 import vars from '../style/variables';
+import { interactiveItem } from '../style/statusBar';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
@@ -28,14 +29,18 @@ const RunningSessionsComponent = (
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
         <GroupItem
-            spacing={vars.interItemHalfSpacing}
+            spacing="5px"
             onClick={props.handleClick}
             title={'Number of active sessions'}
         >
-            <TextItem source={props.kernels} />
-            <IconItem source={'kernel-item'} />
-            <TextItem source={props.terminals} />
-            <IconItem source={'terminal-item'} />
+            <GroupItem spacing={vars.textIconHalfSpacing}>
+                <TextItem source={props.terminals} />
+                <IconItem source={'terminal-item'} />
+            </GroupItem>
+            <GroupItem spacing={vars.textIconHalfSpacing}>
+                <TextItem source={props.kernels} />
+                <IconItem source={'kernel-item'} />
+            </GroupItem>
         </GroupItem>
     );
 };
@@ -63,6 +68,8 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
+
+        this.addClass(interactiveItem);
     }
 
     render() {
@@ -72,6 +79,17 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
                 terminals={this.model!.terminals}
                 handleClick={this._handleItemClick}
             />
+        );
+    }
+
+    dispose() {
+        super.dispose();
+
+        this._serviceManager.sessions.runningChanged.disconnect(
+            this._onKernelsRunningChanged
+        );
+        this._serviceManager.terminals.runningChanged.disconnect(
+            this._onTerminalsRunningChanged
         );
     }
 

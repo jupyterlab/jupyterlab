@@ -21,37 +21,27 @@ import { IStatusContext } from '../contexts';
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
+    let title: string;
+    let source: string;
+
     if (props.allCellsTrusted) {
-        return (
-            <div
-                title={`Notebook trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'trusted-item'} />
-            </div>
-        );
+        title = `Notebook trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'trusted-item';
     } else if (props.activeCellTrusted) {
-        return (
-            <div
-                title={`Active cell trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'trusted-item'} />
-            </div>
-        );
+        title = `Active cell trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'trusted-item';
     } else {
-        return (
-            <div
-                title={`Notebook not trusted: ${props.trustedCells} of ${
-                    props.totalCells
-                } cells trusted`}
-            >
-                <IconItem source={'not-trusted-item'} />
-            </div>
-        );
+        title = `Notebook not trusted: ${props.trustedCells} of ${
+            props.totalCells
+        } cells trusted`;
+        source = 'not-trusted-item';
     }
+
+    return <IconItem title={title} source={source} />;
 };
 
 namespace NotebookTrustComponent {
@@ -106,6 +96,12 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._tracker.currentChanged.disconnect(this._onNotebookChange);
+    }
+
     private _tracker: INotebookTracker;
 }
 
@@ -134,6 +130,17 @@ namespace NotebookTrust {
         }
 
         set notebook(model: Notebook | null) {
+            const oldNotebook = this._notebook;
+            if (oldNotebook !== null) {
+                oldNotebook.activeCellChanged.disconnect(
+                    this._onActiveCellChanged
+                );
+
+                oldNotebook.modelContentChanged.disconnect(
+                    this._onModelChanged
+                );
+            }
+
             this._notebook = model;
             this.stateChanged.emit(void 0);
 

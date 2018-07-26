@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { style } from 'typestyle/lib';
+import { style, classes } from 'typestyle/lib';
 import { centeredFlex, leftToRight } from '../style/layout';
 
 const groupItemLayout = style(centeredFlex, leftToRight);
@@ -8,11 +8,11 @@ const groupItemLayout = style(centeredFlex, leftToRight);
 export const GroupItem = (
     props: GroupItem.IProps & React.HTMLAttributes<HTMLDivElement>
 ): React.ReactElement<GroupItem.IProps> => {
-    const { spacing, children, ...rest } = props;
+    const { spacing, children, className, ...rest } = props;
     const numChildren = React.Children.count(children);
 
     return (
-        <div className={groupItemLayout} {...rest}>
+        <div className={classes(groupItemLayout, className)} {...rest}>
             {React.Children.map(children, (child, i) => {
                 if (i === 0) {
                     return <div style={{ marginRight: spacing }}>{child}</div>;

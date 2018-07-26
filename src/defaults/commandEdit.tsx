@@ -19,7 +19,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
-import { TextFunctions } from '../util/format';
+import { TextExt } from '../util/text';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -28,7 +28,7 @@ const CommandEditComponent = (
     return (
         <TextItem
             title={`Notebook is in ${props.notebookMode} mode`}
-            source={'Mode: ' + TextFunctions.titleCase(props.notebookMode)}
+            source={`Mode: ${TextExt.titleCase(props.notebookMode)}`}
         />
     );
 };
@@ -62,6 +62,12 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._tracker.currentChanged.disconnect(this._onNotebookChange);
+    }
+
     private _onNotebookChange = (
         tracker: INotebookTracker,
         notebook: NotebookPanel | null
@@ -93,6 +99,13 @@ namespace CommandEdit {
         }
 
         set notebook(notebook: Notebook | null) {
+            const oldNotebook = this._notebook;
+            if (oldNotebook !== null) {
+                oldNotebook.stateChanged.disconnect(this._onChanged);
+                oldNotebook.activeCellChanged.disconnect(this._onChanged);
+                oldNotebook.modelContentChanged.disconnect(this._onChanged);
+            }
+
             this._notebook = notebook;
 
             if (this._notebook === null) {
@@ -100,9 +113,7 @@ namespace CommandEdit {
             } else {
                 this._notebookMode = this._notebook.mode;
                 this._notebook.stateChanged.connect(this._onChanged);
-
                 this._notebook.activeCellChanged.connect(this._onChanged);
-
                 this._notebook.modelContentChanged.connect(this._onChanged);
             }
 

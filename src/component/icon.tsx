@@ -9,15 +9,15 @@ export namespace IconItem {
     }
 }
 
-export class IconItem extends React.Component<IconItem.IProps, {}> {
-    render() {
-        return (
-            <div
-                className={classes(
-                    this.props.source,
-                    style(icon({ x: 0, y: 5 }))
-                )}
-            />
-        );
-    }
-}
+// tslint:disable-next-line:variable-name
+export const IconItem = (
+    props: IconItem.IProps & React.HTMLAttributes<HTMLDivElement>
+): React.ReactElement<IconItem.IProps> => {
+    const { source, className, ...rest } = props;
+    return (
+        <div
+            className={classes(className, source, style(icon({ x: 0, y: 5 })))}
+            {...rest}
+        />
+    );
+};

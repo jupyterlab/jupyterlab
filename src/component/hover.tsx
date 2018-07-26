@@ -4,6 +4,7 @@ import { HoverBox } from '@jupyterlab/apputils';
 import { Message } from '@phosphor/messaging';
 import { ElementExt } from '@phosphor/domutils';
 import { hoverItem } from '../style/lineForm';
+import { clickedItem, interactiveItem } from '../style/statusBar';
 
 export function showPopup(options: Popup.IOptions) {
     let dialog = new Popup(options);
@@ -16,7 +17,7 @@ export class Popup extends Widget {
         super();
         this._body = options.body;
         this._body.addClass(hoverItem);
-        this._position = options.position;
+        this._anchor = options.anchor;
         let layout = (this.layout = new PanelLayout());
         layout.addWidget(options.body);
     }
@@ -25,17 +26,23 @@ export class Popup extends Widget {
         this.setGeometry();
         Widget.attach(this, document.body);
         this.update();
+        this._anchor.toggleClass(clickedItem);
+        this._anchor.toggleClass(interactiveItem);
     }
 
     setGeometry() {
+        const anchorRect = this._anchor.node.getBoundingClientRect();
+        const bodyRect = this._body.node.getBoundingClientRect();
         const style = window.getComputedStyle(this._body.node);
         HoverBox.setGeometry({
-            anchor: this._position,
+            anchor: anchorRect,
             host: document.body,
             maxHeight: 500,
             minHeight: 20,
             node: this._body.node,
-            offset: {},
+            offset: {
+                horizontal: -(bodyRect.width - anchorRect.width)
+            },
             privilege: 'forceAbove',
             style
         });
@@ -61,6 +68,8 @@ export class Popup extends Widget {
         } else {
             super.dispose();
             this.dispose();
+            this._anchor.toggleClass(clickedItem);
+            this._anchor.toggleClass(interactiveItem);
         }
     }
 
@@ -68,14 +77,13 @@ export class Popup extends Widget {
         this._evtClick(event as MouseEvent);
     }
 
-    // private _original: HTMLElement;
     private _body: Widget;
-    private _position: ClientRect;
+    private _anchor: Widget;
 }
 
 export namespace Popup {
     export interface IOptions {
         body: Widget;
-        position: ClientRect | DOMRect;
+        anchor: Widget;
     }
 }

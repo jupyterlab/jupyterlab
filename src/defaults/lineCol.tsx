@@ -27,46 +27,52 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
-// import { baseText } from '../style/text';
+import { interactiveItem } from '../style/statusBar';
 import {
-    lineFormSearch,
     lineFormWrapper,
-    lineFormInput
+    lineFormInput,
+    lineFormSearch,
+    lineFormWrapperFocusWithin,
+    lineFormCaption,
+    lineFormButton
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
 
-export namespace LineForm {
+namespace LineForm {
     export interface IProps {
-        // editor: CodeEditor.IEditor | null;
         handleSubmit: (value: number) => void;
         currentLine: number;
     }
+
     export interface IState {
-        value: number | undefined;
+        value: string;
+        hasFocus: boolean;
     }
 }
 
 class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
-        value: this.props.currentLine + 1
+        value: '',
+        hasFocus: false
     };
-    constructor(props: LineForm.IProps) {
-        super(props);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this._textInput = null;
-    }
-    handleChange(event: any) {
-        this.setState({ value: event.target.value });
-    }
-    handleSubmit(event: any) {
-        if (!isNaN(event.target.value) && isFinite(event.target.value)) {
-            event.preventDefault();
-            this.props.handleSubmit(this.state.value);
-        } else {
-            event.preventDefault();
-        }
-    }
+
+    private _handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({ value: event.currentTarget.value });
+    };
+
+    private _handleSubmit = <T extends HTMLElement>(
+        event: React.FormEvent<T>
+    ) => {
+        event.preventDefault();
+    };
+
+    private _handleFocus = () => {
+        this.setState({ hasFocus: true });
+    };
+
+    private _handleBlur = () => {
+        this.setState({ hasFocus: false });
+    };
 
     componentDidMount() {
         this._textInput!.focus();
@@ -74,27 +80,46 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
     render() {
         return (
-            <div className={lineFormSearch}>
-                <form
-                    onSubmit={this.handleSubmit}
-                    className={classes(lineFormWrapper, 'p-lineForm-wrapper')}
-                >
-                    <input
-                        type="text"
-                        className={classes(lineFormInput)}
-                        placeholder="Go to Line"
-                        onChange={this.handleChange}
-                        value={this.state.value}
-                        ref={input => {
-                            this._textInput = input;
-                        }}
-                    />
+            <div className={lineFormSearch} onSubmit={this._handleSubmit}>
+                <form>
+                    <div
+                        className={classes(
+                            lineFormWrapper,
+                            'p-lineForm-wrapper',
+                            this.state.hasFocus
+                                ? lineFormWrapperFocusWithin
+                                : undefined
+                        )}
+                    >
+                        <input
+                            type="text"
+                            className={lineFormInput}
+                            spellCheck={false}
+                            onChange={this._handleChange}
+                            onFocus={this._handleFocus}
+                            onBlur={this._handleBlur}
+                            value={this.state.value}
+                            ref={input => {
+                                this._textInput = input;
+                            }}
+                        />
+
+                        <input
+                            type="submit"
+                            value=""
+                            className={classes(
+                                lineFormButton,
+                                'lineForm-enter-icon'
+                            )}
+                        />
+                    </div>
+                    <label className={lineFormCaption}>Go to line number</label>
                 </form>
             </div>
         );
     }
 
-    private _textInput: HTMLInputElement | null;
+    private _textInput: HTMLInputElement | null = null;
 }
 
 namespace LineColComponent {
@@ -110,9 +135,11 @@ const LineColComponent = (
     props: LineColComponent.IProps
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
-        <div title="Go to line number" onClick={props.handleClick}>
-            <TextItem source={'Ln ' + props.line + ', Col ' + props.column} />
-        </div>
+        <TextItem
+            title="Go to line number"
+            onClick={props.handleClick}
+            source={`Ln ${props.line}, Col ${props.column}`}
+        />
     );
 };
 
@@ -129,17 +156,17 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
             this._onActiveCellChange
         );
         this._notebookTracker.selectionChanged.connect(this._onNotebookChange);
-
         this._editorTracker.currentChanged.connect(this._onEditorChange);
-
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new LineCol.Model(
             this._getFocusedEditor(this._shell.currentWidget)
         );
+
+        this.addClass(interactiveItem);
     }
 
-    protected render(): React.ReactElement<LineColComponent.IProps> | null {
+    render(): React.ReactElement<LineColComponent.IProps> | null {
         if (this.model === null) {
             return null;
         } else {
@@ -153,6 +180,20 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
+        this._notebookTracker.activeCellChanged.disconnect(
+            this._onActiveCellChange
+        );
+        this._notebookTracker.selectionChanged.disconnect(
+            this._onNotebookChange
+        );
+        this._editorTracker.currentChanged.disconnect(this._onEditorChange);
+        this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
+    }
+
     private _handleClick = () => {
         const body = new ReactElementWidget(
             (
@@ -164,7 +205,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         );
         this._popup = showPopup({
             body: body,
-            position: this.node.getBoundingClientRect()
+            anchor: this
         });
     };
 
@@ -241,19 +282,26 @@ namespace LineCol {
         }
 
         set editor(editor: CodeEditor.IEditor | null) {
+            const oldEditor = this._editor;
+            if (oldEditor !== null) {
+                oldEditor.model.selections.changed.disconnect(
+                    this._onSelectionChanged
+                );
+            }
+
             this._editor = editor;
 
             if (this._editor === null) {
-                this._column = 0;
-                this._line = 0;
+                this._column = 1;
+                this._line = 1;
             } else {
                 this._editor.model.selections.changed.connect(
                     this._onSelectionChanged
                 );
 
                 const pos = this._editor.getCursorPosition();
-                this._column = pos.column;
-                this._line = pos.line;
+                this._column = pos.column + 1;
+                this._line = pos.line + 1;
             }
 
             this.stateChanged.emit(void 0);
@@ -272,14 +320,14 @@ namespace LineCol {
             change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
         ) => {
             let pos = this.editor!.getCursorPosition();
-            this._line = pos.line;
-            this._column = pos.column;
+            this._line = pos.line + 1;
+            this._column = pos.column + 1;
 
             this.stateChanged.emit(void 0);
         };
 
-        private _line: number = 0;
-        private _column: number = 0;
+        private _line: number = 1;
+        private _column: number = 1;
         private _editor: CodeEditor.IEditor | null = null;
     }
 

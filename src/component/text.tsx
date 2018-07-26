@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { textItem } from '../style/text';
+import { classes } from 'typestyle/lib';
 
 export namespace TextItem {
     export interface IProps {
@@ -9,12 +10,14 @@ export namespace TextItem {
     }
 }
 
-export class TextItem extends React.Component<TextItem.IProps, {}> {
-    render() {
-        return (
-            <span className={textItem} title={this.props.title}>
-                {this.props.source}
-            </span>
-        );
-    }
-}
+// tslint:disable-next-line:variable-name
+export const TextItem = (
+    props: TextItem.IProps & React.HTMLAttributes<HTMLSpanElement>
+): React.ReactElement<TextItem.IProps> => {
+    const { title, source, className, ...rest } = props;
+    return (
+        <span className={classes(textItem, className)} title={title} {...rest}>
+            {source}
+        </span>
+    );
+};

@@ -19,24 +19,23 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-import { TextFunctions } from '../util/format';
+import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
+import { interactiveItem } from '../style/statusBar';
+import { Message } from '@phosphor/messaging';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
     props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
-            <TextItem
-                title="Current active kernel"
-                source={
-                    TextFunctions.titleCase(props.name) +
-                    ' | ' +
-                    TextFunctions.titleCase(props.status)
-                }
-            />
-        </div>
+        <TextItem
+            onClick={props.handleClick}
+            title="Current active kernel"
+            source={`${TextExt.titleCase(props.name)} | ${TextExt.titleCase(
+                props.status
+            )}`}
+        />
     );
 };
 
@@ -60,12 +59,15 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._consoleTracker.currentChanged.connect(this._onConsoleChange);
-
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new KernelStatus.Model(
             this._getFocusedSession(this._shell.currentWidget)
         );
+
+        if (this.model!.type === 'notebook') {
+            this.addClass(interactiveItem);
+        }
     }
 
     render() {
@@ -74,16 +76,40 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         } else {
             return (
                 <KernelStatusComponent
-                    status={this.model!.status}
-                    name={this.model!.name}
+                    status={this.model.status}
+                    name={this.model.name}
                     handleClick={this._handleClick}
                 />
             );
         }
     }
 
+    dispose() {
+        super.dispose();
+
+        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
+        this._consoleTracker.currentChanged.disconnect(this._onConsoleChange);
+        this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
+    }
+
+    protected onUpdateRequest(msg: Message) {
+        this.model!.session = this._getFocusedSession(
+            this._shell.currentWidget
+        );
+
+        if (this.model!.type === 'notebook') {
+            this.addClass(interactiveItem);
+        } else {
+            this.removeClass(interactiveItem);
+        }
+
+        super.onUpdateRequest(msg);
+    }
+
     private _handleClick = () => {
-        this._commands.execute('notebook:change-kernel');
+        if (this.model!.type === 'notebook') {
+            this._commands.execute('notebook:change-kernel');
+        }
     };
 
     private _onNotebookChange = (
@@ -91,6 +117,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         panel: NotebookPanel | null
     ) => {
         this.model!.session = panel && panel.session;
+        this.addClass(interactiveItem);
     };
 
     private _onConsoleChange = (
@@ -98,6 +125,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         panel: ConsolePanel | null
     ) => {
         this.model!.session = panel && panel.session;
+        this.removeClass(interactiveItem);
     };
 
     private _getFocusedSession(val: Widget | null): IClientSession | null {
@@ -144,11 +172,23 @@ namespace KernelStatus {
             return this._kernelStatus;
         }
 
+        get type() {
+            return this._session && this._session.type;
+        }
+
         get session() {
             return this._session;
         }
 
         set session(session: IClientSession | null) {
+            const oldSession = this._session;
+            if (oldSession !== null) {
+                oldSession.statusChanged.disconnect(
+                    this._onKernelStatusChanged
+                );
+                oldSession.kernelChanged.disconnect(this._onKernelChanged);
+            }
+
             this._session = session;
 
             if (this._session === null) {
@@ -213,6 +253,7 @@ export namespace IKernelStatus {
     export interface IModel {
         readonly name: string;
         readonly status: Kernel.Status;
+        readonly type: string | null;
         readonly session: IClientSession | null;
     }
 }

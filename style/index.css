@@ -22,6 +22,6 @@
     background-image: url('./images/trusted-icon.svg');
 }
 
-.p-lineForm-wrapper::after {
+.lineForm-enter-icon {
     background-image: url('./images/line-form.svg');
 }

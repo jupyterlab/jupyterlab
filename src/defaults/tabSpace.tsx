@@ -28,6 +28,9 @@ import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup } from '../component/hover';
+import { interactiveItem } from '../style/statusBar';
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 namespace TabSpaceComponent {
     export interface IProps {
@@ -41,12 +44,11 @@ const TabSpaceComponent = (
     props: TabSpaceComponent.IProps
 ): React.ReactElement<TabSpaceComponent.IProps> => {
     return (
-        <div onClick={props.handleClick}>
-            <TextItem
-                title="Set indentation spacing"
-                source={'Spaces: ' + props.tabSpace}
-            />
-        </div>
+        <TextItem
+            onClick={props.handleClick}
+            title="Set indentation spacing"
+            source={`Spaces: ${props.tabSpace}`}
+        />
     );
 };
 
@@ -56,6 +58,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
         this._notebookTracker = opts.notebookTracker;
         this._editorTracker = opts.editorTracker;
+        this._consoleTracker = opts.consoleTracker;
         this._shell = opts.shell;
         this._commands = opts.commands;
 
@@ -67,11 +70,15 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
         this._editorTracker.currentChanged.connect(this._onEditorChange);
 
+        this._consoleTracker.currentChanged.connect(this._onConsoleChange);
+
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new TabSpace.Model(
             this._getFocusedEditor(this._shell.currentWidget)
         );
+
+        this.addClass(interactiveItem);
     }
 
     private _handleClick = () => {
@@ -82,14 +89,14 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             let args: JSONObject = {
                 insertSpaces: true,
                 size,
-                name: `Spaces: ${size} `
+                name: `Spaces: ${size}`
             };
             tabMenu.addItem({ command, args });
         }
 
         showPopup({
             body: tabMenu,
-            position: this.node.getBoundingClientRect()
+            anchor: this
         });
     };
 
@@ -124,6 +131,12 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this.model!.editor = document && document.content.editor;
     };
 
+    private _onConsoleChange = (tracker: IConsoleTracker) => {
+        const prompt =
+            tracker.currentWidget && tracker.currentWidget.console.promptCell;
+        this.model!.editor = prompt && prompt.editor;
+    };
+
     private _getFocusedEditor(val: Widget | null): CodeEditor.IEditor | null {
         if (val === null) {
             return null;
@@ -140,6 +153,13 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                 val.content instanceof FileEditor
             ) {
                 return (val as DocumentWidget<FileEditor>).content.editor;
+            } else if (val instanceof ConsolePanel) {
+                const prompt = val.console.promptCell;
+                if (prompt !== null) {
+                    return prompt.editor;
+                } else {
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -157,6 +177,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
+    private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
     private _commands: CommandRegistry;
 }
@@ -215,6 +236,7 @@ namespace TabSpace {
     export interface IOptions {
         notebookTracker: INotebookTracker;
         editorTracker: IEditorTracker;
+        consoleTracker: IConsoleTracker;
         shell: ApplicationShell;
         commands: CommandRegistry;
     }
@@ -239,17 +261,26 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
     id: 'jupyterlab-statusbar/default-items:tab-space',
     autoStart: true,
     provides: ITabSpace,
-    requires: [IDefaultsManager, INotebookTracker, IEditorTracker],
+    requires: [
+        IDefaultsManager,
+        INotebookTracker,
+        IEditorTracker,
+        IConsoleTracker,
+        ISettingRegistry
+    ],
     activate: (
         app: JupyterLab,
         defaultsManager: IDefaultsManager,
         notebookTracker: INotebookTracker,
-        editorTracker: IEditorTracker
+        editorTracker: IEditorTracker,
+        consoleTracker: IConsoleTracker,
+        settings: ISettingRegistry
     ) => {
         let item = new TabSpace({
             shell: app.shell,
             notebookTracker,
             editorTracker,
+            consoleTracker,
             commands: app.commands
         });
 
@@ -258,7 +289,8 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
             priority: 1,
             isActive: IStatusContext.delegateActive(app.shell, [
                 { tracker: notebookTracker },
-                { tracker: editorTracker }
+                { tracker: editorTracker },
+                { tracker: consoleTracker }
             ])
         });
 
