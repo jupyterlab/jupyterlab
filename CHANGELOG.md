@@ -25,7 +25,6 @@ We also added new menu items, keyboard shortcuts, commands, and settings:
 * "notebook:change-to-cell-heading-X" keyboard shortcuts (and commands) renamed to "notebook:change-cell-to-heading-X" for X=1...6. This fixes the notebook command-mode keyboard shortcuts for changing headings. ([#4430](https://github.com/jupyterlab/jupyterlab/pull/4430))
 * Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity in a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
 
-
 Other changes for users include:
 
 * A command for persisting collapsed and scrolling state of notebook cells with a default keybinding of `Ctrl Shift S`. We also added a generic way for different widgets to register a "Save with extras" command that appears in the File menu under save. We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981)).
@@ -64,15 +63,17 @@ Changes for extension developers include:
 * The `KernelFutureHandler` class `expectShell` constructor argument is renamed to `expectReply`. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The kernel future `done` returned promise now resolves to undefined if there is no reply message. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The `IDisplayDataMsg` is updated to have the optional `transient` key, and a new `IUpdateDisplayDataMsg` type was added for update display messages. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
-* The  `uuid` function from `@jupyterlab/coreutils` is removed. Instead import `UUID` from `@phosphor/coreutils` and use `UUID.uuid4()` . ([#4604](https://github.com/jupyterlab/jupyterlab/pull/4604))
+* The `uuid` function from `@jupyterlab/coreutils` is removed. Instead import `UUID` from `@phosphor/coreutils` and use `UUID.uuid4()` . ([#4604](https://github.com/jupyterlab/jupyterlab/pull/4604))
 * Main area widgets like the notebook, editor, console, and launcher now inherit from a common `MainAreaWidget` class. The `MainAreaWidget` class provides a consistent interface with a content area (`.content`) and a toolbar (`.toolbar`), and consistent focus handling and activation. Extension authors may consider inheriting from the `MainAreaWidget` for consistency. Several changes this caused include:
-  - The notebook panel `.notebook` attribute is renamed to `.content`.
-  - The text editor widget's editor is `.content.editor` rather than just `.editor`.
-  - Document widgets implement `IDocumentWidget<ContentType>`, instead of using `DocumentRegistry.IReadyWidget`. An `DocumentWidget` has the `.toolbar` and `.content` attributes from `MainAreaWidget` and adds a context attribute.
-  - Mime documents use a `MimeContent` widget embedded inside of a `DocumentWidget` now.
-  
+
+  * The notebook panel `.notebook` attribute is renamed to `.content`.
+  * The text editor widget's editor is `.content.editor` rather than just `.editor`.
+  * Document widgets implement `IDocumentWidget<ContentType>`, instead of using `DocumentRegistry.IReadyWidget`. A `DocumentWidget` has the `.toolbar` and `.content` attributes from `MainAreaWidget` and adds a context attribute.
+  * Mime documents use a `MimeContent` widget embedded inside of a `DocumentWidget` now.
+
   ([#3499](https://github.com/jupyterlab/jupyterlab/pull/3499), [4453](https://github.com/jupyterlab/jupyterlab/pull/4453))
-* The notebook panel `.notebook` attribute has been renamed to `.content` for consistency with other main area widgets. 
+
+* The notebook panel `.notebook` attribute has been renamed to `.content` for consistency with other main area widgets.
 
 Changes in the JupyterLab code infrastructure include:
 
