@@ -31,14 +31,18 @@ export class Popup extends Widget {
     }
 
     setGeometry() {
+        const anchorRect = this._anchor.node.getBoundingClientRect();
+        const bodyRect = this._body.node.getBoundingClientRect();
         const style = window.getComputedStyle(this._body.node);
         HoverBox.setGeometry({
-            anchor: this._anchor.node.getBoundingClientRect(),
+            anchor: anchorRect,
             host: document.body,
             maxHeight: 500,
             minHeight: 20,
             node: this._body.node,
-            offset: {},
+            offset: {
+                horizontal: -(bodyRect.width - anchorRect.width)
+            },
             privilege: 'forceAbove',
             style
         });
