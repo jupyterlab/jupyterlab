@@ -2,7 +2,7 @@
 
 ## [0.33](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.33.0)
 
-#### Jul 24, 2018
+#### July 26, 2018
 
 To see the full list of pull requests and issues closed, see the [JupyterLab 0.33](https://github.com/jupyterlab/jupyterlab/milestone/12?closed=1) milestone on GitHub.
 
