@@ -51,7 +51,7 @@ const NotebookTrustComponent = (
 
     source = cellStatus(props)[1];
 
-    return <IconItem source={source} />;
+    return <IconItem source={source} offset={{ x: 0, y: 2 }} />;
 };
 
 namespace NotebookTrustComponent {

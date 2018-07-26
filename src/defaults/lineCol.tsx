@@ -37,11 +37,13 @@ import {
     lineFormButton
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
+import { Message } from '@phosphor/messaging';
 
 namespace LineForm {
     export interface IProps {
         handleSubmit: (value: number) => void;
         currentLine: number;
+        maxLine: number;
     }
 
     export interface IState {
@@ -60,10 +62,20 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
         this.setState({ value: event.currentTarget.value });
     };
 
-    private _handleSubmit = <T extends HTMLElement>(
-        event: React.FormEvent<T>
-    ) => {
+    private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        const value = parseInt(this._textInput!.value, 10);
+        if (
+            !isNaN(value) &&
+            isFinite(value) &&
+            1 <= value &&
+            value <= this.props.maxLine
+        ) {
+            this.props.handleSubmit(value);
+        }
+
+        return false;
     };
 
     private _handleFocus = () => {
@@ -80,8 +92,12 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
     render() {
         return (
-            <div className={lineFormSearch} onSubmit={this._handleSubmit}>
-                <form>
+            <div className={lineFormSearch}>
+                <form
+                    name="lineColumnForm"
+                    onSubmit={this._handleSubmit}
+                    noValidate
+                >
                     <div
                         className={classes(
                             lineFormWrapper,
@@ -94,7 +110,6 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
                         <input
                             type="text"
                             className={lineFormInput}
-                            spellCheck={false}
                             onChange={this._handleChange}
                             onFocus={this._handleFocus}
                             onBlur={this._handleBlur}
@@ -106,14 +121,16 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
                         <input
                             type="submit"
-                            value=""
                             className={classes(
                                 lineFormButton,
                                 'lineForm-enter-icon'
                             )}
+                            value=""
                         />
                     </div>
-                    <label className={lineFormCaption}>Go to line number</label>
+                    <label className={lineFormCaption}>
+                        Go to line number between 1 and {this.props.maxLine}
+                    </label>
                 </form>
             </div>
         );
@@ -194,15 +211,23 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
+    protected onUpdateRequest(msg: Message) {
+        this.model!.editor = this._getFocusedEditor(this._shell.currentWidget);
+
+        super.onUpdateRequest(msg);
+    }
+
     private _handleClick = () => {
         const body = new ReactElementWidget(
             (
                 <LineForm
                     handleSubmit={this._handleSubmit}
                     currentLine={this.model!.line}
+                    maxLine={this.model!.editor!.lineCount}
                 />
             )
         );
+
         this._popup = showPopup({
             body: body,
             anchor: this
@@ -214,6 +239,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this._popup!.dispose();
         this.model!.editor!.focus();
     };
+
     private _onNotebookChange = (tracker: INotebookTracker) => {
         this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };

@@ -11,12 +11,15 @@ export namespace IconItem {
 
 // tslint:disable-next-line:variable-name
 export const IconItem = (
-    props: IconItem.IProps & React.HTMLAttributes<HTMLDivElement>
+    props: IconItem.IProps &
+        React.HTMLAttributes<HTMLDivElement> & {
+            offset: { x: number; y: number };
+        }
 ): React.ReactElement<IconItem.IProps> => {
-    const { source, className, ...rest } = props;
+    const { source, className, offset, ...rest } = props;
     return (
         <div
-            className={classes(className, source, style(icon({ x: 0, y: 5 })))}
+            className={classes(className, source, style(icon(offset)))}
             {...rest}
         />
     );

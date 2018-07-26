@@ -9,12 +9,13 @@ export const lineFormSearch = style({
     padding: '4px 12px',
     backgroundColor: 'var(--jp-layout-color2)',
     boxShadow: 'var(--jp-toolbar-box-shadow)',
-    zIndex: 2
+    zIndex: 2,
+    fontSize: 'var(--jp-ui-font-size1)'
 });
 
 export const lineFormCaption = style({
-    fontSize: '11px',
-    lineHeight: '13px',
+    fontSize: 'var(--jp-ui-font-size0)',
+    lineHeight: 'var(--jp-ui-font-size1)',
     marginTop: '4px'
 });
 
@@ -54,7 +55,6 @@ export const lineFormInput = style({
     height: '100%',
     border: 'none',
     outline: 'none',
-    fontSize: 'var(--jp-ui-font-size1)',
     color: 'var(--jp-ui-font-color0)',
     lineHeight: '28px'
 });
