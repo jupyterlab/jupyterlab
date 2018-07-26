@@ -1,11 +1,3 @@
-.edit-item {
-    background-image: url('./images/edit-icon.svg');
-}
-
-.command-item {
-    background-image: url('./images/command-icon.svg');
-}
-
 .kernel-item {
     background-image: url('./images/kernel-icon.svg');
 }
