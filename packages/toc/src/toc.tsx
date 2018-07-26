@@ -157,6 +157,7 @@ export class TableOfContents extends Widget {
   }
 
   private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
+  public showCode = true;
   private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
@@ -317,6 +318,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
 
 export interface ITOCTreeStates {
   needNumbering: boolean;
+  showCode: boolean;
 }
 
 /**
@@ -329,7 +331,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
 
   constructor(props: ITOCTreeProps) {
     super(props);
-    this.state = { needNumbering: this.props.widget.needNumbering };
+    this.state = {
+      needNumbering: this.props.widget.needNumbering,
+      showCode: this.props.widget.showCode
+    };
   }
 
   render() {
@@ -350,6 +355,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       this.setState({ needNumbering: this.props.widget.needNumbering });
     };
 
+    const toggleCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.props.widget.showCode = event.target.checked;
+    };
+
     // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
@@ -357,6 +366,8 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         <button onClick={event => handleClick(event)}>
           Show/Hide Numbering
         </button>
+        <input type="checkbox" onChange={event => toggleCode(event)} /> Show
+        code cells
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );

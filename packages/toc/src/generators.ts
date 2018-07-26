@@ -33,7 +33,7 @@ let currentLevel = 1;
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  widget: TableOfContents | null = null,
+  widget: TableOfContents,
   needNumbering = true
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
@@ -48,20 +48,27 @@ export function createNotebookGenerator(
         if (model.type === 'code') {
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
-          let text = (model as CodeCellModel).value.text;
-          const onClickFactory2 = (line: number) => {
-            return () => {
-              cell.node.scrollIntoView();
+          let showCode = true;
+          if (widget) {
+            console.log('widget:' + widget.showCode);
+            showCode = widget.showCode;
+          }
+          if (showCode) {
+            let text = (model as CodeCellModel).value.text;
+            const onClickFactory2 = (line: number) => {
+              return () => {
+                cell.node.scrollIntoView();
+              };
             };
-          };
-          headings = headings.concat(
-            Private.getCodeCells(
-              text,
-              onClickFactory2,
-              numberingDict,
-              currentLevel
-            )
-          );
+            headings = headings.concat(
+              Private.getCodeCells(
+                text,
+                onClickFactory2,
+                numberingDict,
+                currentLevel
+              )
+            );
+          }
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
