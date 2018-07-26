@@ -4,7 +4,7 @@
 
 A JupyterLab extension for managing keyboard shortcuts
 
-![](http://g.recordit.co/b044WByFQP.gif)
+![](http://g.recordit.co/8qiMfgjQfV.gif)
 
 ## Prerequisites
 
