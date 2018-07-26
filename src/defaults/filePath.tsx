@@ -27,7 +27,7 @@ namespace FilePathComponent {
 const FilePathComponent = (
     props: FilePathComponent.IProps
 ): React.ReactElement<FilePathComponent.IProps> => {
-    return <TextItem title={props.fullPath} source={props.name} />;
+    return <TextItem source={props.name} />;
 };
 
 class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
@@ -43,12 +43,15 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
             this._shell.currentWidget,
             this._docManager
         );
+
+        this.node.title = this.model.path;
     }
 
     render() {
         if (this.model === null) {
             return null;
         } else {
+            this.node.title = this.model.path;
             return (
                 <FilePathComponent
                     fullPath={this.model.path}
@@ -170,6 +173,7 @@ export namespace IFilePath {
         readonly path: string;
         readonly name: string;
         readonly widget: Widget | null;
+        readonly stateChanged: ISignal<this, void>;
     }
 }
 

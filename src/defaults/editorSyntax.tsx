@@ -12,10 +12,16 @@ import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { CommandRegistry } from '@phosphor/commands';
+import { JSONObject } from '@phosphor/coreutils';
+import { Menu } from '@phosphor/widgets';
+import { showPopup } from '../component/hover';
+import { interactiveItem } from '../style/statusBar';
 
 namespace EditorSyntaxComponent {
     export interface IProps {
         mode: string;
+        handleClick: () => void;
     }
 }
 
@@ -23,7 +29,12 @@ namespace EditorSyntaxComponent {
 const EditorSyntaxComponent = (
     props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> => {
-    return <TextItem title="Set programming language" source={props.mode} />;
+    return (
+        <TextItem
+            source={props.mode}
+            onClick={props.handleClick}
+        />
+     );
 };
 
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
@@ -32,19 +43,28 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         super();
 
         this._tracker = opts.tracker;
+        this._commands = opts.commands;
 
         this._tracker.currentChanged.connect(this._onEditorChange);
         this.model = new EditorSyntax.Model(
             this._tracker.currentWidget &&
                 this._tracker.currentWidget.content.editor
         );
+
+        this.addClass(interactiveItem);
+        this.node.title = 'Set programming language';
     }
 
     render() {
         if (this.model === null) {
             return null;
         } else {
-            return <EditorSyntaxComponent mode={this.model.mode} />;
+            return (
+                <EditorSyntaxComponent
+                    mode={this.model.mode}
+                    handleClick={this._handleClick}
+                />
+            );
         }
     }
 
@@ -54,6 +74,29 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         this._tracker.currentChanged.disconnect(this._onEditorChange);
     }
 
+    private _handleClick = () => {
+        const modeMenu = new Menu({ commands: this._commands });
+        let command = 'codemirror:change-mode';
+        Mode.getModeInfo()
+            .sort((a, b) => {
+                let aName = a.name || '';
+                let bName = b.name || '';
+                return aName.localeCompare(bName);
+            })
+            .forEach(spec => {
+                let args: JSONObject = {
+                    insertSpaces: true,
+                    name: spec.name!
+                };
+
+                modeMenu.addItem({
+                    command,
+                    args
+                });
+            });
+        showPopup({ body: modeMenu, anchor: this, align: 'left' });
+    };
+
     private _onEditorChange = (
         tracker: IEditorTracker,
         editor: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
@@ -62,6 +105,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     };
 
     private _tracker: IEditorTracker;
+    private _commands: CommandRegistry;
 }
 
 namespace EditorSyntax {
@@ -120,6 +164,7 @@ namespace EditorSyntax {
 
     export interface IOptions {
         tracker: IEditorTracker;
+        commands: CommandRegistry;
     }
 }
 
@@ -150,8 +195,7 @@ export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
         manager: IDefaultsManager,
         tracker: IEditorTracker
     ) => {
-        let item = new EditorSyntax({ tracker });
-
+        let item = new EditorSyntax({ tracker, commands: app.commands });
         manager.addDefaultStatus('editor-syntax-item', item, {
             align: 'left',
             priority: 0,

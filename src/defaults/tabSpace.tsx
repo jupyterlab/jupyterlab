@@ -42,7 +42,6 @@ const TabSpaceComponent = (
     return (
         <TextItem
             onClick={props.handleClick}
-            title="Set indentation spacing"
             source={`Spaces: ${props.tabSpace}`}
         />
     );
@@ -74,6 +73,8 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             this._getFocusedEditor(this._shell.currentWidget)
         );
 
+        this.node.title = 'Change tab spacing';
+
         this.addClass(interactiveItem);
     }
 
@@ -92,7 +93,8 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
         showPopup({
             body: tabMenu,
-            anchor: this
+            anchor: this,
+            align: 'right'
         });
     };
 

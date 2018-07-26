@@ -26,10 +26,7 @@ const CommandEditComponent = (
     props: CommandEditComponent.IProps
 ): React.ReactElement<CommandEditComponent.IProps> => {
     return (
-        <TextItem
-            title={`Notebook is in ${props.notebookMode} mode`}
-            source={`Mode: ${TextExt.titleCase(props.notebookMode)}`}
-        />
+        <TextItem source={`Mode: ${TextExt.titleCase(props.notebookMode)}`} />
     );
 };
 
@@ -50,12 +47,14 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
         this.model = new CommandEdit.Model(
             this._tracker.currentWidget && this._tracker.currentWidget.content
         );
+        this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
     }
 
     render() {
         if (this.model === null) {
             return null;
         } else {
+            this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
             return (
                 <CommandEditComponent notebookMode={this.model.notebookMode} />
             );
