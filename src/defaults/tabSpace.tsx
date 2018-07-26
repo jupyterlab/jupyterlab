@@ -77,7 +77,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             this._getFocusedEditor(this._shell.currentWidget)
         );
 
-        this.node.title = 'Set indentation spacing';
+        this.node.title = 'Change tab spacing';
 
         this.addClass(interactiveItem);
     }

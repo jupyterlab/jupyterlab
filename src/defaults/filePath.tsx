@@ -160,6 +160,7 @@ export namespace IFilePath {
         readonly path: string;
         readonly name: string;
         readonly widget: Widget | null;
+        readonly stateChanged: ISignal<this, void>;
     }
 }
 
@@ -178,10 +179,6 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
             align: 'right',
             priority: 0,
             isActive: () => {
-                // const currentWidget = app.shell.currentWidget;
-                // return (
-                //     !!currentWidget && currentWidget instanceof DocumentWidget
-                // );
                 return true;
             }
         });

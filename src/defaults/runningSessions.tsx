@@ -64,7 +64,7 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-        this.node.title = 'Number of active sessions';
+        this.node.title = 'Open running sessions tab';
         this.addClass(interactiveItem);
     }
 

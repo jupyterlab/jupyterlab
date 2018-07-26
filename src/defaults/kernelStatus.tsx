@@ -23,6 +23,7 @@ import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
 import { interactiveItem } from '../style/statusBar';
 import { Message } from '@phosphor/messaging';
+import { IFilePath } from './filePath';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -55,11 +56,12 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         this._consoleTracker = opts.consoleTracker;
         this._commands = opts.commands;
         this._shell = opts.shell;
+        this._filePath = opts.filePath;
 
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._consoleTracker.currentChanged.connect(this._onConsoleChange);
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
-        this.node.title = 'Current active kernel';
+        this._filePath.model!.stateChanged.connect(this._onFilePathChange);
 
         this.model = new KernelStatus.Model(
             this._getFocusedSession(this._shell.currentWidget)
@@ -68,6 +70,8 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         if (this.model!.type === 'notebook') {
             this.addClass(interactiveItem);
         }
+
+        this._onFilePathChange();
     }
 
     render() {
@@ -109,6 +113,18 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     private _handleClick = () => {
         if (this.model!.type === 'notebook') {
             this._commands.execute('notebook:change-kernel');
+        }
+    };
+
+    private _onFilePathChange = () => {
+        if (this.model!.type === 'notebook') {
+            this.node.title = `Change active kernel for ${
+                this._filePath.model!.name
+            }`;
+        } else {
+            this.node.title = `Active kernel type for ${
+                this._filePath.model!.name
+            }`;
         }
     };
 
@@ -155,6 +171,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
     private _commands: CommandRegistry;
+    private _filePath: IFilePath;
 }
 
 namespace KernelStatus {
@@ -241,6 +258,7 @@ namespace KernelStatus {
         consoleTracker: IConsoleTracker;
         shell: ApplicationShell;
         commands: CommandRegistry;
+        filePath: IFilePath;
     }
 }
 
@@ -266,18 +284,20 @@ export const IKernelStatus = new Token<IKernelStatus>(
 export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
     id: 'jupyterlab-statusbar/default-items:kernel-status',
     autoStart: true,
-    requires: [IDefaultsManager, INotebookTracker, IConsoleTracker],
+    requires: [IDefaultsManager, INotebookTracker, IConsoleTracker, IFilePath],
     activate: (
         app: JupyterLab,
         manager: IDefaultsManager,
         notebookTracker: INotebookTracker,
-        consoleTracker: IConsoleTracker
+        consoleTracker: IConsoleTracker,
+        filePath: IFilePath
     ) => {
         const item = new KernelStatus({
             shell: app.shell,
             notebookTracker,
             consoleTracker,
-            commands: app.commands
+            commands: app.commands,
+            filePath
         });
 
         manager.addDefaultStatus('kernel-status-item', item, {
