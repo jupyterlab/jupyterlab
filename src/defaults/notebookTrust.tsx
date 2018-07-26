@@ -41,7 +41,7 @@ const NotebookTrustComponent = (
         source = 'not-trusted-item';
     }
 
-    return <IconItem title={title} source={source} />;
+    return <IconItem title={title} source={source} offset={{ x: 0, y: 2 }} />;
 };
 
 namespace NotebookTrustComponent {
