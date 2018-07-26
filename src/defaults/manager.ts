@@ -65,11 +65,14 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
         }
 
         // Combine stateChanged of settings with provided stateChanged
-        const stateChanged: Signal<Widget, void> = new Signal(item);
+        const stateChanged: SignalExt.CombinedSignal<
+            Widget,
+            void
+        > = new SignalExt.CombinedSignal(item);
         if (opts.stateChanged === undefined) {
             opts.stateChanged = stateChanged;
         } else {
-            opts.stateChanged = SignalExt.combine(
+            opts.stateChanged = new SignalExt.CombinedSignal(
                 this,
                 opts.stateChanged,
                 stateChanged
@@ -97,6 +100,9 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
         }
 
         Signal.clearData(this);
+        this._allDefaultStatusItems.forEach(item => {
+            item.stateChanged.dispose();
+        });
         this._isDisposed = true;
     }
 
@@ -152,7 +158,7 @@ namespace DefaultsManager {
     }
 
     export interface IItem extends IDefaultsManager.IItem {
-        stateChanged: Signal<any, void>;
+        stateChanged: SignalExt.CombinedSignal<any, void>;
     }
 }
 
