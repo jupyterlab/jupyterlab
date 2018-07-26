@@ -742,17 +742,17 @@
     "@phosphor/widgets" "^1.6.0"
     xterm "~3.3.0"
 
-"@jupyterlab/theme-dark-extension@^0.17.3":
-  version "0.17.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.17.3.tgz#c74cac51ee27be9fcabd190ad7bc89e1bc6dac81"
+"@jupyterlab/theme-dark-extension@^0.17.4":
+  version "0.17.4"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.17.4.tgz#297551b48c096807755521956854be5424359122"
   dependencies:
     "@jupyterlab/application" "^0.17.1"
     "@jupyterlab/apputils" "^0.17.1"
     font-awesome "~4.7.0"
 
-"@jupyterlab/theme-light-extension@^0.17.1":
-  version "0.17.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.17.1.tgz#4e915e7e910b0da5318615837187b5b5af32d370"
+"@jupyterlab/theme-light-extension@^0.17.2":
+  version "0.17.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.17.2.tgz#c45a31ef7b73497c900870e5b8d93b3d2910adf3"
   dependencies:
     "@jupyterlab/application" "^0.17.1"
     "@jupyterlab/apputils" "^0.17.1"
