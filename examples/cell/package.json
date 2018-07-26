@@ -10,10 +10,10 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.17.1",
     "@jupyterlab/cells": "^0.17.1",
-    "@jupyterlab/codemirror": "^0.17.1",
+    "@jupyterlab/codemirror": "^0.17.2",
     "@jupyterlab/completer": "^0.17.1",
     "@jupyterlab/rendermime": "^0.17.1",
-    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/services": "^3.0.2",
     "@jupyterlab/theme-light-extension": "^0.17.2",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/widgets": "^1.6.0",

@@ -33,7 +33,7 @@
     "@jupyterlab/apputils": "^0.17.1",
     "@jupyterlab/launcher": "^0.17.1",
     "@jupyterlab/mainmenu": "^0.6.1",
-    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/services": "^3.0.2",
     "@jupyterlab/terminal": "^0.17.1"
   },
   "devDependencies": {

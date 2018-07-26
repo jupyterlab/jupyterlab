@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@jupyterlab/application-extension@^0.17.1":
-  version "0.17.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.17.1.tgz#6c359ac3957ab0d6384a2b924f771dd18c068444"
+"@jupyterlab/application-extension@^0.17.2":
+  version "0.17.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.17.2.tgz#284cbc5e35945757b57643a9287cdf989aeac7ce"
   dependencies:
     "@jupyterlab/application" "^0.17.1"
     "@jupyterlab/apputils" "^0.17.1"
@@ -137,9 +137,9 @@
     "@phosphor/widgets" "^1.6.0"
     codemirror "~5.39.0"
 
-"@jupyterlab/codemirror@^0.17.1":
-  version "0.17.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-0.17.1.tgz#c3dab6e72b36cf4d9a5b7716aecf393bbd95cdec"
+"@jupyterlab/codemirror@^0.17.1", "@jupyterlab/codemirror@^0.17.2":
+  version "0.17.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-0.17.2.tgz#502c75a5fa09b568e743e3894b1662c9c26d2546"
   dependencies:
     "@jupyterlab/apputils" "^0.17.1"
     "@jupyterlab/codeeditor" "^0.17.1"
@@ -661,9 +661,9 @@
     react "~16.4.0"
     react-dom "~16.4.0"
 
-"@jupyterlab/services@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-3.0.1.tgz#8e4ef103b10a389cf7cab4b2b5b6105f5793642f"
+"@jupyterlab/services@^3.0.1", "@jupyterlab/services@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-3.0.2.tgz#a7ba1cb55a1554022ed4ef9ac191e4fa47f2afa4"
   dependencies:
     "@jupyterlab/coreutils" "^2.0.1"
     "@jupyterlab/observables" "^2.0.1"
