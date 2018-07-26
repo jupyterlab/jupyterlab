@@ -2,7 +2,7 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { ICommandPalette, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -10,7 +10,7 @@ import { Widget } from '@phosphor/widgets'
 
 import ShortcutWidget from './ShortcutWidget'
 
-import '../style/index.css';
+import '../style/variables.css';
 
 /** Object for shortcut items */
 export class ShortcutObject {
@@ -89,7 +89,7 @@ const plugin: JupyterLabPlugin<void> = {
 
       /** Create top-level component and associated widget */
       .then(commandlist => {
-        const widget = new ShortcutWidget(
+        const widget: VDomRenderer<VDomModel> = new ShortcutWidget(
           -1,
           -1,
           commandlist,
