@@ -92,6 +92,18 @@
   --jp-icon-caretright: url('icons/md/caretright.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
   --jp-icon-settings: url('icons/jupyter/settings.svg');
+  --jp-icon-discard-file: url('icons/md/discard-changes.svg');
+  --jp-icon-discard-file-selected: url('icons/md/discard-changes-selected.svg');
+  --jp-icon-insertions-made: url('icons/md/insertions-made.svg');
+  --jp-icon-deletions-made: url('icons/md/deletions-made.svg');
+  --jp-icon-move-file-down: url('icons/md/move-file-down.svg');
+  --jp-icon-move-file-up: url('icons/md/move-file-up.svg');
+  --jp-icon-move-file-down-hover: url('icons/md/move-file-down-hover.svg');
+  --jp-icon-move-file-up-hover: url('icons/md/move-file-up-hover.svg');
+  --jp-icon-arrow-down: url('icons/md/arrow-down.svg');
+  --jp-icon-plus: url('icons/md/plus.svg');
+  --jp-icon-plus-white: url('icons/md/plus-white.svg');
+  --jp-icon-clear-white: url('icons/md/clear-white.svg');
   --jp-about-header-logo: url('icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('images/jupyterlab-wordmark.svg');
 }
