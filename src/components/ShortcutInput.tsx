@@ -11,6 +11,9 @@ import {
   InputUnavailableStyle,
   InputBoxHiddenStyle,
   InputBoxStyle,
+  InputTextStyle,
+  InputWaitingStyle,
+  InputSelectedTextStyle,
   SubmitNonFunctionalStyle,
   SubmitConflictStyle,
   SubmitStyle
@@ -21,11 +24,14 @@ export interface IShortcutInputProps {
   deleteShortcut:Function;
   toggleInput: Function;
   shortcut: ShortcutObject;
+  shortcutId: string;
   toSymbols: Function;
   keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
+  newOrReplace: string;
+  placeholder: string;
 }
 
 export interface IShortcutInputState {
@@ -36,6 +42,7 @@ export interface IShortcutInputState {
   takenByObject: TakenByObject;
   keys: Array<string>;
   currentChain: string;
+  selected: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -47,13 +54,14 @@ export class ShortcutInput extends React.Component<
   }
 
   state = {
-    value: '',
+    value: this.props.placeholder,
     userInput: '',
     isAvailable: true,
-    isFunctional: false,
+    isFunctional: this.props.newOrReplace === 'replace',
     takenByObject: new TakenByObject(),
     keys: new Array<string>(),
-    currentChain: ''
+    currentChain: '',
+    selected: true,
   };
 
   handleUpdate = () => {
@@ -69,14 +77,23 @@ export class ShortcutInput extends React.Component<
   }
 
   handleOverwrite = async () => {
-    await this.props.deleteShortcut(this.state.takenByObject.takenBy, this.state.takenByObject.takenByKey);
-    this.handleUpdate()
+    this.props.deleteShortcut(
+      this.state.takenByObject.takenBy, 
+      this.state.takenByObject.takenByKey
+    ).then(this.handleUpdate())
   }
 
-  onKeyPress = (
-    event: any
-  ): void => {
-    event.preventDefault()
+  handleReplace = async() => {
+    let keys = this.state.keys
+    keys.push(this.state.currentChain)
+    const shortcut = this.props.shortcut
+    this.props.toggleInput();
+    console.log('deleting  ', this.props.shortcutId)
+    await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
+    this.props.handleUpdate(
+      shortcut,
+      keys
+    );
   }
 
   /** Parse user input for chained shortcuts */
@@ -206,9 +223,9 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = shortcut.split(', ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1 || shortcut === '')
+      isFunctional: !(dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/)
     });
-    return dontEnd.indexOf(last) !== -1 || shortcut === '';
+    return dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/;
   };
 
   /** Check if shortcut being typed is already taken */
@@ -262,7 +279,15 @@ export class ShortcutInput extends React.Component<
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
-    console.log('available', isAvailable)
+
+    /** allow to set shortcut to what it initially was if replacing */
+    if (!isAvailable) {
+      if (takenByObject.takenBy.id === this.props.shortcut.id && this.props.newOrReplace === 'replace') {
+        isAvailable = true;
+        takenByObject = new TakenByObject();
+      }
+    }
+
     this.setState({ isAvailable: isAvailable });
     return takenByObject;
   };
@@ -277,6 +302,7 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: any): void => {
+    this.setState({selected: false})
     const parsed = this.parseChaining(
       event,
       this.state.value,
@@ -316,6 +342,8 @@ export class ShortcutInput extends React.Component<
   };
 
   render() {
+    console.log(this.props.shortcutId)
+
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {
       inputClassName = classes(inputClassName, InputUnavailableStyle);
@@ -327,14 +355,20 @@ export class ShortcutInput extends React.Component<
         }
         onBlur={(event) => this.handleBlur(event)}
       >
-        <input
+        <div tabIndex={0}
+          id='no-blur'
           className={inputClassName}
-          value={this.state.value}
           onKeyDown={this.handleInput}
-          onKeyPress={this.onKeyPress}
           ref={input => input && input.focus()}
-          placeholder="press keys"
-        />
+        >
+          <p className={
+            (this.state.selected && this.props.newOrReplace==='replace') 
+            ? classes(InputTextStyle, InputSelectedTextStyle) 
+            : (this.state.value === '' ? classes(InputTextStyle, InputWaitingStyle) : InputTextStyle)
+          }>
+            {this.state.value === '' ? 'press keys' : this.state.value}
+          </p>
+        </div>
         <button
           className={
             !this.state.isFunctional
@@ -343,16 +377,30 @@ export class ShortcutInput extends React.Component<
                 ? classes(SubmitStyle, SubmitConflictStyle)
                 : SubmitStyle
           }
-          id={this.state.value !== '' ? 'no-blur' : 'blur'}
+          id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
-            this.handleUpdate();
-            this.setState({
-              value: '',
-              keys: [],
-              currentChain: ''
-            });
-            this.props.toggleInput();
+            if (this.props.newOrReplace === 'new') {
+              this.handleUpdate();
+              this.setState({
+                value: '',
+                keys: [],
+                currentChain: ''
+              });
+              this.props.toggleInput();
+            } else {
+              /** don't replace if field has not been edited */
+              if (this.state.selected) {
+                this.props.toggleInput();
+                this.setState({
+                  value: '',
+                  userInput: ''
+                });
+                this.props.clearConflicts();
+              } else {
+                this.handleReplace();
+              }
+            }
           }}
         />
         {!this.state.isAvailable &&

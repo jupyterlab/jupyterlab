@@ -6,6 +6,7 @@ import {
   TopStyle,
   TopNavStyle,
   SymbolsStyle,
+  SymbolsSmallStyle,
   SymbolsRowStyle,
   SearchContainerStyle,
   SearchStyle,
@@ -41,34 +42,34 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
       return (
         <div className={SymbolsStyle}>
           <div className={SymbolsRowStyle}>
-            <div>Command ⌘</div>
-            <div>Alt ⌥</div>
+            <div>Command   ⌘</div>
+            <div>Alt  ⌥</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Shift ⇧</div>
-            <div>Control ⌃</div>
+            <div>Shift  ⇧</div>
+            <div>Control   ⌃</div>
           </div>
         </div>
       )
     } else {
       return (
-        <div className={SymbolsStyle}>
+        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
           <div className={SymbolsRowStyle}>
             <div>{this.props.size === 'tiny'
-              ? 'Cmd ⌘'
-              :'Command ⌘'
+              ? 'Cmd  ⌘'
+              :'Command  ⌘'
             }</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Alt ⌥</div>
+            <div>Alt  ⌥</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Shift ⇧</div>
+            <div>Shift  ⇧</div>
           </div>
           <div className={SymbolsRowStyle}>
             <div>{this.props.size === 'tiny'
-              ? 'Ctrl ⌃'
-              :'Control ⌃'
+              ? 'Ctrl  ⌃'
+              :'Control  ⌃'
             }</div>
           </div>
         </div>
@@ -142,7 +143,7 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     let size: string = 'regular'
     if (width < 620) {
       size = 'tiny'
-    } else if (width < 955) {
+    } else if (width < 980) {
       size = 'small'
     }
     return size

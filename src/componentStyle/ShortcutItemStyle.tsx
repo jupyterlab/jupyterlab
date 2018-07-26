@@ -21,11 +21,21 @@ export const RowStyle = style({
   borderBottomColor: 'var(--jp-border-color1)',
   borderBottomWidth: 'var(--jp-border-width)',
   verticalAlign: 'middle',
-  backgroundColor: 'var(--jp-layout-color0)'
+  backgroundColor: 'var(--jp-layout-color0)',
+
+  $nest: {
+    '&:hover #shortcut-keys': {
+      borderColor: 'var(--jp-border-color1)',
+      background: 'var(--jp-layout-color2)',
+    },
+    '&:hover #add-link': {
+      color: 'var(--jp-brand-color1)'
+    }
+  }
 });
 
-export function ConflictContainerStyle(showSelectors: boolean) {
-  if (showSelectors) {
+export function ConflictContainerStyle(showSelectors: boolean, errorSize: string) {
+  if (showSelectors && errorSize === 'regular') {
     return(
       style({
         display: 'flex',
@@ -34,13 +44,22 @@ export function ConflictContainerStyle(showSelectors: boolean) {
         marginLeft: '20%'
       })
     )
-  } else {
+  } else if (!showSelectors && errorSize === 'regular') {
     return (
       style({
         display: 'flex',
         flexWrap: 'wrap',
         padding:'6px 12px',
         marginLeft: '25%'
+      })
+    )
+  } else {
+    return (
+      style({
+        display: 'flex',
+        flexWrap: 'wrap',
+        padding:'6px 12px',
+        marginLeft: '0'
       })
     )
   }
@@ -103,7 +122,14 @@ export const ErrorButtonStyle = style({
 
 export const ShortcutContainerStyle = style({
   display: 'flex',
-  flexWrap: 'wrap'
+  flexWrap: 'wrap',
+
+  $nest: {
+    '&:hover #shortcut-keys': {
+      borderColor: 'var(--jp-border-color3)',
+      background: 'var(--jp-layout-color3)'
+    }
+  }
 });
 
 export const ShortcutKeysContainerStyle = style({
@@ -114,16 +140,18 @@ export const ShortcutKeysContainerStyle = style({
 
 export const ShortcutKeysStyle = style({
   borderWidth: 'var(--jp-border-width)',
-  borderColor: 'var(--jp-border-color1)',
-  background: 'var(--jp-layout-color2)',
-  padding: '7px 6px 4px 6px',
+  borderColor: 'var(--jp-layout-color0)',
+  background: 'var(--jp-layout-color0)',
+  padding: '5px 6px',
   borderRadius: 'var(--jp-border-radius)',
   margin: '3px 0'
 });
 
 export const OrStyle = style({
   marginRight: '12px',
-  marginTop: '8px'
+  marginLeft: '12px',
+  marginTop: '8px',
+  color: 'var(--jp-content-font-color3)'
 });
 
 export const CommaStyle = style({
@@ -133,20 +161,20 @@ export const CommaStyle = style({
 });
 
 export const PlusStyle = style({
-  backgroundImage: 'var(--jp-icon-add-light-blue)',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: '16px',
-  width: '16px',
-  height: '21px',
-  marginTop: '9px',
+  color: 'var(--jp-brand-color2)',
+  textDecoration: 'none',
+  display: 'block',
+  textAlign: 'center',
+  paddingLeft: '5px',
+  height: '31px',
+  lineHeight: '31px',
 
   $nest: {
     '&:hover': {
-      backgroundImage: 'var(--jp-icon-add-blue)'
+      color: 'var(--jp-brand-color0)'
     },
-
-    '&:focus': {
-      backgroundImage: 'var(--jp-icon-add-blue)'
+    '&:active': {
+      color: 'var(--jp-brand-color0)'
     }
   }
 });
@@ -157,7 +185,7 @@ export const ResetStyle = style({
 
   $nest: {
     '&:hover': {
-      textDecoration: 'underline'
+      color: 'var(--jp-brand-color1)'
     }
   }
 });
