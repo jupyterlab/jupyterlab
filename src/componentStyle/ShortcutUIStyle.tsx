@@ -12,7 +12,7 @@ export const TopWhitespaceStyle = style({
   position: 'relative',
 });
 
-export const ShortcutUIStyle  = style({
+export const ShortcutUIStyle = style({
   display: 'flex',
   flexDirection: 'column',
   fontSize: 'var(--jp-ui-font-size1)',

@@ -6,15 +6,9 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-// import { ShortcutUI } from './components/ShortcutUI';
-
 import { Widget } from '@phosphor/widgets'
 
-// import { Message } from '@phosphor/messaging'
-
 import ShortcutWidget from './ShortcutWidget'
-
-// import * as React from 'react';
 
 import '../style/index.css';
 
@@ -22,7 +16,7 @@ import '../style/index.css';
 export class ShortcutObject {
   commandName: string;
   label: string;
-  keys: {[index: string]: Array<string>};
+  keys: { [index: string]: Array<string> };
   source: string;
   selector: string;
   category: string;
@@ -87,13 +81,14 @@ const plugin: JupyterLabPlugin<void> = {
     palette: ICommandPalette,
     menu: IMainMenu
   ): void => {
+
     /** Load keyboard shortcut settings from registry and create list of command id's */
     settingRegistry
       .load('@jupyterlab/shortcuts-extension:plugin')
       .then(settings => Object.keys(settings.composite))
+
       /** Create top-level component and associated widget */
       .then(commandlist => {
-
         const widget = new ShortcutWidget(
           -1,
           -1,
@@ -113,6 +108,7 @@ const plugin: JupyterLabPlugin<void> = {
           label: 'Keyboard Shortcut Editor',
           execute: () => {
             if (!widget.isAttached) {
+
               /** Attach the widget to the main work area if it's not there */
               app.shell.addToMainArea(widget as Widget);
             }
@@ -124,7 +120,6 @@ const plugin: JupyterLabPlugin<void> = {
         /** Add command to command palette */
         palette.addItem({ command, category: 'Settings' });
 
-        // OVERRIDES ANOTHER COMMAND <work in progress>
         /** Add command to settings menu */
         menu.settingsMenu.addGroup([{ command: command }], 999);
 

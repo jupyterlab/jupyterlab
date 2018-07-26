@@ -1,8 +1,10 @@
 import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
-// import { ShortcutButton } from './ShortcutButton';
-
 import { ShortcutInput } from './ShortcutInput';
+
+import { classes } from 'typestyle'
+
+import * as React from 'react';
 
 import {
   CellStyle,
@@ -21,10 +23,6 @@ import {
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
 
-import { classes } from 'typestyle'
-
-import * as React from 'react';
-
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
   shortcut: ShortcutObject | ErrorObject;
@@ -32,7 +30,7 @@ export interface IShortcutItemProps {
   resetShortcut: Function;
   deleteShortcut: Function;
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string] : TakenByObject };
+  keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   errorSize: string;
@@ -49,7 +47,7 @@ export interface IShortcutItemState {
 export class ShortcutItem extends React.Component<
   IShortcutItemProps,
   IShortcutItemState
-> {
+  > {
   state = {
     displayNewInput: false,
     displayReplaceInputLeft: false,
@@ -98,17 +96,28 @@ export class ShortcutItem extends React.Component<
     );
     if (this.props.shortcut.id === 'error_row') {
       return (
-        <tr 
-          className = {classes(RowStyle)}
+        <tr
+          className={classes(RowStyle)}
         >
           <td colSpan={this.props.showSelectors ? 5 : 4}>
-            <div className = {ConflictContainerStyle(this.props.showSelectors, this.props.errorSize)}>
-              <div className = {ErrorMessageStyle}>{'Shortcut already in use by ' + (this.props.shortcut as ErrorObject).takenBy.takenByLabel + '. Overwrite it?'}</div>
+            <div
+              className={ConflictContainerStyle(
+                this.props.showSelectors,
+                this.props.errorSize
+              )}
+            >
+              <div className={ErrorMessageStyle}>
+                {
+                  'Shortcut already in use by ' +
+                  (this.props.shortcut as ErrorObject).takenBy.takenByLabel +
+                  '. Overwrite it?'
+                }
+              </div>
               <div className={ErrorButtonStyle}>
                 <button>Cancel</button>
-                <button 
+                <button
                   id='no-blur'
-                  onClick={()=>{document.getElementById('overwrite').click()}}
+                  onClick={() => { document.getElementById('overwrite').click() }}
                 >Overwrite</button>
               </div>
             </div>
@@ -118,7 +127,7 @@ export class ShortcutItem extends React.Component<
     } else {
       return (
         <div
-          className={ RowStyle }
+          className={RowStyle}
         >
           <div className={CellStyle}>
             {this.props.shortcut.category}
@@ -128,10 +137,9 @@ export class ShortcutItem extends React.Component<
           </div>
           <div className={CellStyle}>
             <div className={ShortcutCellStyle}>
-              {/** Create shortcut boxes and delete buttons for each shortcut */}
               {nonEmptyKeys.map((key, index) => (
-                <div 
-                  className={ShortcutContainerStyle} 
+                <div
+                  className={ShortcutContainerStyle}
                   key={key + '_' + index}
                   onClick={() => {
                     if (index == 0) {
@@ -141,40 +149,43 @@ export class ShortcutItem extends React.Component<
                     }
                   }}
                 >
-                  {!((index === 0 && this.state.displayReplaceInputLeft) || 
-                      (index === 1 && this.state.displayReplaceInputRight)) ? 
-                      
-                      this.props.shortcut.keys[key].map((keyBinding: string, index: number) => (
-                      <div className={ShortcutKeysContainerStyle} key={index}>
-                        <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
-                          {this.toSymbols(keyBinding)}
+                  {!((index === 0 && this.state.displayReplaceInputLeft) ||
+                    (index === 1 && this.state.displayReplaceInputRight)) ?
+
+                    this.props.shortcut.keys[key]
+                      .map((keyBinding: string, index: number) => (
+                        <div className={ShortcutKeysContainerStyle} key={index}>
+                          <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
+                            {this.toSymbols(keyBinding)}
+                          </div>
+                          {index + 1 < this.props.shortcut.keys[key].length ? (
+                            <div className={CommaStyle}>,</div>
+                          ) : null}
                         </div>
-                        {index + 1 < this.props.shortcut.keys[key].length ? (
-                          <div className={CommaStyle}>,</div>
-                        ) : null}
-                      </div>
                       ))
 
                     : <ShortcutInput
-                        handleUpdate={this.props.handleUpdate}
-                        deleteShortcut={this.props.deleteShortcut}
-                        toggleInput={index === 0 
-                          ? this.toggleInputReplaceLeft 
-                          : this.toggleInputReplaceRight
-                        }
-                        shortcut={this.props.shortcut}
-                        shortcutId={key}
-                        toSymbols={this.toSymbols}
-                        keyBindingsUsed={this.props.keyBindingsUsed}
-                        sortConflict={this.props.sortConflict}
-                        clearConflicts={this.props.clearConflicts}
-                        displayInput={index === 0
-                          ? this.state.displayReplaceInputLeft
-                          : this.state.displayReplaceInputRight
-                        }
-                        newOrReplace={'replace'}
-                        placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
-                      />
+                      handleUpdate={this.props.handleUpdate}
+                      deleteShortcut={this.props.deleteShortcut}
+                      toggleInput={index === 0
+                        ? this.toggleInputReplaceLeft
+                        : this.toggleInputReplaceRight
+                      }
+                      shortcut={this.props.shortcut}
+                      shortcutId={key}
+                      toSymbols={this.toSymbols}
+                      keyBindingsUsed={this.props.keyBindingsUsed}
+                      sortConflict={this.props.sortConflict}
+                      clearConflicts={this.props.clearConflicts}
+                      displayInput={index === 0
+                        ? this.state.displayReplaceInputLeft
+                        : this.state.displayReplaceInputRight
+                      }
+                      newOrReplace={'replace'}
+                      placeholder={
+                        this.toSymbols(this.props.shortcut.keys[key].join(', '))
+                      }
+                    />
                   }
                   {index === 0 && (
                     <div className={OrStyle}>or</div>
@@ -182,8 +193,7 @@ export class ShortcutItem extends React.Component<
                 </div>
               ))}
 
-              {/** Add a plus for adding new shortcuts if there are less than two set */}
-              {nonEmptyKeys.length ===1 && !this.state.displayNewInput && (
+              {nonEmptyKeys.length === 1 && !this.state.displayNewInput && (
                 <a
                   className={!this.state.displayNewInput ? PlusStyle : ''}
                   onClick={() => {
@@ -196,13 +206,13 @@ export class ShortcutItem extends React.Component<
               )}
               {nonEmptyKeys.length === 0 && !this.state.displayNewInput && (
                 <a
-                className={!this.state.displayNewInput ? PlusStyle : ''}
-                onClick={() => {
-                  this.toggleInputNew(), this.props.clearConflicts();
-                }}
-                id='add-link'
-              >
-                Add New
+                  className={!this.state.displayNewInput ? PlusStyle : ''}
+                  onClick={() => {
+                    this.toggleInputNew(), this.props.clearConflicts();
+                  }}
+                  id='add-link'
+                >
+                  Add New
               </a>
               )}
 

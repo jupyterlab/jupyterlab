@@ -21,12 +21,12 @@ import {
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
-  deleteShortcut:Function;
+  deleteShortcut: Function;
   toggleInput: Function;
   shortcut: ShortcutObject;
   shortcutId: string;
   toSymbols: Function;
-  keyBindingsUsed: { [index: string] : TakenByObject };
+  keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
@@ -48,7 +48,7 @@ export interface IShortcutInputState {
 export class ShortcutInput extends React.Component<
   IShortcutInputProps,
   IShortcutInputState
-> {
+  > {
   constructor(props: any) {
     super(props)
   }
@@ -68,7 +68,7 @@ export class ShortcutInput extends React.Component<
     let keys = this.state.keys
     keys.push(this.state.currentChain)
     this.setState(
-      {keys: keys}
+      { keys: keys }
     )
     this.props.handleUpdate(
       this.props.shortcut,
@@ -78,30 +78,31 @@ export class ShortcutInput extends React.Component<
 
   handleOverwrite = async () => {
     this.props.deleteShortcut(
-      this.state.takenByObject.takenBy, 
+      this.state.takenByObject.takenBy,
       this.state.takenByObject.takenByKey
     ).then(this.handleUpdate())
   }
 
-  handleReplace = async() => {
+  handleReplace = async () => {
     let keys = this.state.keys
     keys.push(this.state.currentChain)
-    const shortcut = this.props.shortcut
     this.props.toggleInput();
-    console.log('deleting  ', this.props.shortcutId)
-    await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
+    await this.props.deleteShortcut(
+      this.props.shortcut,
+      this.props.shortcutId
+    );
     this.props.handleUpdate(
-      shortcut,
+      this.props.shortcut,
       keys
     );
   }
 
   /** Parse user input for chained shortcuts */
   parseChaining = (
-    event: any, 
-    value: string, 
-    userInput: string, 
-    keys: Array<string>, 
+    event: any,
+    value: string,
+    userInput: string,
+    keys: Array<string>,
     currentChain: string
   ): Array<any> => {
     event.preventDefault();
@@ -132,7 +133,7 @@ export class ShortcutInput extends React.Component<
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
         .trim();
 
-      /** if last key was not a modefier key then there is a chain */
+      /** if last key was not a modefier then there is a chain */
       if (modKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = userInput + ',';
         keys.push(currentChain);
@@ -156,12 +157,12 @@ export class ShortcutInput extends React.Component<
           currentChain = (currentChain + ' Shift').trim();
         }
 
-        /** if key is not a modefier key, add its name to user input and current chain */
+        /** if not a modefier key, add to user input and current chain */
         if (modKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + key).trim();
           currentChain = (currentChain + ' ' + key).trim();
 
-        /** if key is a modefier key, add its translated name to user input and current chain */
+          /** if a modefier key, add to user input and current chain */
         } else {
           if (event.key === 'Meta') {
             userInput = (userInput + ' Accel').trim();
@@ -175,13 +176,13 @@ export class ShortcutInput extends React.Component<
           } else if (event.key === 'Alt') {
             userInput = (userInput + ' Alt').trim();
             currentChain = (currentChain + ' Alt').trim();
-          } else{
+          } else {
             userInput = (userInput + ' ' + event.key).trim();
             currentChain = (currentChain + ' ' + event.key).trim();
           }
         }
 
-      /** if there is not a chain, add the key to user input and current chain */
+        /** if not a chain, add the key to user input and current chain */
       } else {
 
         /** if modefier key, rename */
@@ -198,8 +199,8 @@ export class ShortcutInput extends React.Component<
           userInput = (userInput + ' Alt').trim();
           currentChain = (currentChain + ' Alt').trim();
 
-        /** if not a modefier key, add it regularly */
-        } else  {
+          /** if not a modefier key, add it regularly */
+        } else {
           userInput = (userInput + ' ' + key).trim();
           currentChain = (currentChain + ' ' + key).trim();
         }
@@ -273,7 +274,7 @@ export class ShortcutInput extends React.Component<
         ];
       }
 
-    /** If unavailable set takenByObject */
+      /** If unavailable set takenByObject */
     } else {
       takenByObject = this.props.keyBindingsUsed[
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
@@ -282,7 +283,9 @@ export class ShortcutInput extends React.Component<
 
     /** allow to set shortcut to what it initially was if replacing */
     if (!isAvailable) {
-      if (takenByObject.takenBy.id === this.props.shortcut.id && this.props.newOrReplace === 'replace') {
+      if (takenByObject.takenBy.id === this.props.shortcut.id
+        && this.props.newOrReplace === 'replace'
+      ) {
         isAvailable = true;
         takenByObject = new TakenByObject();
       }
@@ -293,8 +296,15 @@ export class ShortcutInput extends React.Component<
   };
 
   checkConflict(takenByObject: TakenByObject, keys: string): void {
-    if (takenByObject.id !== '' && takenByObject.takenBy.id !== this.props.shortcut.id) {
-      this.props.sortConflict(this.props.shortcut, takenByObject, takenByObject.takenByLabel, '');
+    if (takenByObject.id !== ''
+      && takenByObject.takenBy.id !== this.props.shortcut.id
+    ) {
+      this.props.sortConflict(
+        this.props.shortcut,
+        takenByObject,
+        takenByObject.takenByLabel,
+        ''
+      );
     } else {
       this.props.clearConflicts();
     }
@@ -302,7 +312,7 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: any): void => {
-    this.setState({selected: false})
+    this.setState({ selected: false })
     const parsed = this.parseChaining(
       event,
       this.state.value,
@@ -315,7 +325,11 @@ export class ShortcutInput extends React.Component<
     const currentChain = parsed[2]
 
     const value = this.props.toSymbols(userInput);
-    let takenByObject = this.checkShortcutAvailability(userInput, keys, currentChain);
+    let takenByObject = this.checkShortcutAvailability(
+      userInput,
+      keys,
+      currentChain
+    );
     this.checkConflict(takenByObject, keys);
 
     this.setState(
@@ -331,7 +345,10 @@ export class ShortcutInput extends React.Component<
   };
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur' && (event.relatedTarget as HTMLElement).id !== 'overwrite') {
+    if (event.relatedTarget === null
+      || (event.relatedTarget as HTMLElement).id !== 'no-blur'
+      && (event.relatedTarget as HTMLElement).id !== 'overwrite'
+    ) {
       this.props.toggleInput();
       this.setState({
         value: '',
@@ -342,8 +359,6 @@ export class ShortcutInput extends React.Component<
   };
 
   render() {
-    console.log(this.props.shortcutId)
-
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {
       inputClassName = classes(inputClassName, InputUnavailableStyle);
@@ -362,9 +377,12 @@ export class ShortcutInput extends React.Component<
           ref={input => input && input.focus()}
         >
           <p className={
-            (this.state.selected && this.props.newOrReplace==='replace') 
-            ? classes(InputTextStyle, InputSelectedTextStyle) 
-            : (this.state.value === '' ? classes(InputTextStyle, InputWaitingStyle) : InputTextStyle)
+            (this.state.selected && this.props.newOrReplace === 'replace')
+              ? classes(InputTextStyle, InputSelectedTextStyle)
+              : (this.state.value === ''
+                ? classes(InputTextStyle, InputWaitingStyle)
+                : InputTextStyle
+              )
           }>
             {this.state.value === '' ? 'press keys' : this.state.value}
           </p>
@@ -407,7 +425,7 @@ export class ShortcutInput extends React.Component<
           <button
             hidden
             id='overwrite'
-            onClick={()=>{
+            onClick={() => {
               this.handleOverwrite();
               this.props.clearConflicts();
               this.props.toggleInput();

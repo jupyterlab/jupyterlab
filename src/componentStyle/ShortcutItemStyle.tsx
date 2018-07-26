@@ -36,11 +36,11 @@ export const RowStyle = style({
 
 export function ConflictContainerStyle(showSelectors: boolean, errorSize: string) {
   if (showSelectors && errorSize === 'regular') {
-    return(
+    return (
       style({
         display: 'flex',
         flexWrap: 'wrap',
-        padding:'6px 12px',
+        padding: '6px 12px',
         marginLeft: '20%'
       })
     )
@@ -49,7 +49,7 @@ export function ConflictContainerStyle(showSelectors: boolean, errorSize: string
       style({
         display: 'flex',
         flexWrap: 'wrap',
-        padding:'6px 12px',
+        padding: '6px 12px',
         marginLeft: '25%'
       })
     )
@@ -58,7 +58,7 @@ export function ConflictContainerStyle(showSelectors: boolean, errorSize: string
       style({
         display: 'flex',
         flexWrap: 'wrap',
-        padding:'6px 12px',
+        padding: '6px 12px',
         marginLeft: '0'
       })
     )
@@ -66,7 +66,7 @@ export function ConflictContainerStyle(showSelectors: boolean, errorSize: string
 }
 
 export const ErrorMessageStyle = style({
-  color:'var(--jp-error-color1)',
+  color: 'var(--jp-error-color1)',
   marginTop: '9px'
 })
 
@@ -75,42 +75,42 @@ export const ErrorButtonStyle = style({
   marginLeft: '10px',
 
   $nest: {
-    '& button:nth-of-type(1)':{
+    '& button:nth-of-type(1)': {
       height: '25px',
-      marginRight:'5px',
-      backgroundColor:'var(--jp-border-color0)',
-      color:'white',
+      marginRight: '5px',
+      backgroundColor: 'var(--jp-border-color0)',
+      color: 'white',
       outline: 'none',
 
       $nest: {
-        '&:hover':{
-          
+        '&:hover': {
+
         },
-        '&:active':{
+        '&:active': {
           outline: 'none',
           border: 'none'
         },
-        '&focus':{
+        '&focus': {
           outline: 'none',
           border: 'none'
         }
       }
     },
-    '& button:nth-of-type(2)':{
-      height:'25px',
-      backgroundColor:'var(--jp-error-color1)',
-      color:'white',
+    '& button:nth-of-type(2)': {
+      height: '25px',
+      backgroundColor: 'var(--jp-error-color1)',
+      color: 'white',
       outline: 'none',
 
       $nest: {
-        '&:hover':{
-          
+        '&:hover': {
+
         },
-        '&:active':{
+        '&:active': {
           outline: 'none',
           border: 'none'
         },
-        '&focus':{
+        '&focus': {
           outline: 'none',
           border: 'none'
         }

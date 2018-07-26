@@ -7,7 +7,7 @@ export const ShortcutListStyle = style({
 });
 
 export function ShortcutListContainerStyle(
-  topNavHeight: number, 
+  topNavHeight: number,
   widgetHeight: number
 ) {
   return style({

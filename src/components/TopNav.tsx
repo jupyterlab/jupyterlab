@@ -57,7 +57,7 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
           <div className={SymbolsRowStyle}>
             <div>{this.props.size === 'tiny'
               ? 'Cmd  ⌘'
-              :'Command  ⌘'
+              : 'Command  ⌘'
             }</div>
           </div>
           <div className={SymbolsRowStyle}>
@@ -69,7 +69,7 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
           <div className={SymbolsRowStyle}>
             <div>{this.props.size === 'tiny'
               ? 'Ctrl  ⌃'
-              :'Control  ⌃'
+              : 'Control  ⌃'
             }</div>
           </div>
         </div>
@@ -84,17 +84,23 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
       return (
         <div className={AdvancedOptionsContainerStyle}>
           <div className={AdvancedOptionsStyle}>
-            <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.openAdvanced()}>
+            <a className={AdvancedOptionsLinkStyle}
+              onClick={() => this.props.openAdvanced()
+              }>
               Advanced Editor
             </a>
-            <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.toggleSelectors()}>
+            <a className={AdvancedOptionsLinkStyle}
+              onClick={() => this.props.toggleSelectors()}
+            >
               {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
             </a>
           </div>
-          <div className={classes(AdvancedOptionsStyle, AdvancedOptionsRightStyle)}>
-            <a className={classes(AdvancedOptionsLinkStyle, AdvancedOptionsRightLinkStyle)} 
-              onClick={() => this.props.resetShortcuts()
-            }>
+          <div
+            className={classes(AdvancedOptionsStyle, AdvancedOptionsRightStyle)}
+          >
+            <a className={classes(AdvancedOptionsLinkStyle, AdvancedOptionsRightLinkStyle)}
+              onClick={() => this.props.resetShortcuts()}
+            >
               Reset All
             </a>
           </div>
@@ -103,15 +109,19 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
     } else {
       return (
         <div className={classes(AdvancedOptionsStyle, AdvancedOptionsSmallStyle)}>
-          <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.openAdvanced()}>
+          <a className={AdvancedOptionsLinkStyle}
+            onClick={() => this.props.openAdvanced()}
+          >
             Advanced Editor
           </a>
-          <a className={AdvancedOptionsLinkStyle} onClick={() => this.props.toggleSelectors()}>
+          <a className={AdvancedOptionsLinkStyle}
+            onClick={() => this.props.toggleSelectors()}
+          >
             {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
           </a>
-          <a className={classes(AdvancedOptionsLinkStyle)} 
+          <a className={classes(AdvancedOptionsLinkStyle)}
             onClick={() => this.props.resetShortcuts()
-          }>
+            }>
             Reset All
           </a>
         </div>
