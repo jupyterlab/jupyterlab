@@ -8,7 +8,6 @@ export const hoverItem = style({
 export const lineFormSearch = style({
     padding: '4px 12px',
     backgroundColor: 'var(--jp-layout-color2)',
-    borderBottom: '1px solid var(--jp-border-color1)',
     boxShadow: 'var(--jp-toolbar-box-shadow)',
     zIndex: 2
 });
@@ -19,28 +18,29 @@ export const lineFormCaption = style({
     marginTop: '4px'
 });
 
+export const lineFormButton = style({
+    color: 'white',
+    border: 'none',
+    borderRadius: '0px',
+    backgroundColor: 'var(--jp-brand-color1)',
+    position: 'absolute',
+    top: '4px',
+    right: '8px',
+    height: '24px',
+    width: '12px',
+    padding: '0px 12px',
+    backgroundSize: '16px',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    outline: 'none'
+});
+
 export const lineFormWrapper = style({
     overflow: 'hidden',
     padding: '0px 8px',
     border: '1px solid var(--jp-border-color0)',
     backgroundColor: 'var(--jp-input-active-background)',
-    height: '30px',
-    $nest: {
-        '&::after': {
-            content: `' '`,
-            color: 'white',
-            backgroundColor: 'var(--jp-brand-color1)',
-            position: 'absolute',
-            top: '4px',
-            right: '8px',
-            height: '32px',
-            width: '12px',
-            padding: '0px 12px',
-            backgroundSize: '20px',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center'
-        }
-    }
+    height: '22px'
 });
 
 export const lineFormWrapperFocusWithin = style({
@@ -50,9 +50,8 @@ export const lineFormWrapperFocusWithin = style({
 
 export const lineFormInput = style({
     background: 'transparent',
-    width: 'calc(100% - 18px)',
+    width: '200px',
     height: '100%',
-    float: 'left',
     border: 'none',
     outline: 'none',
     fontSize: 'var(--jp-ui-font-size1)',

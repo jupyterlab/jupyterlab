@@ -33,7 +33,8 @@ import {
     lineFormInput,
     lineFormSearch,
     lineFormWrapperFocusWithin,
-    lineFormCaption
+    lineFormCaption,
+    lineFormButton
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
 
@@ -44,29 +45,25 @@ namespace LineForm {
     }
 
     export interface IState {
-        value: number | undefined;
+        value: string;
         hasFocus: boolean;
     }
 }
 
 class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     state = {
-        value: 1,
+        value: '',
         hasFocus: false
     };
 
     private _handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({ value: parseInt(event.currentTarget.value, 10) });
+        this.setState({ value: event.currentTarget.value });
     };
 
-    private _handleSubmit = (event: React.FormEvent<HTMLInputElement>) => {
-        const value = parseInt(event.currentTarget.value, 10);
-        if (!isNaN(value) && isFinite(value)) {
-            event.preventDefault();
-            this.props.handleSubmit(this.state.value);
-        } else {
-            event.preventDefault();
-        }
+    private _handleSubmit = <T extends HTMLElement>(
+        event: React.FormEvent<T>
+    ) => {
+        event.preventDefault();
     };
 
     private _handleFocus = () => {
@@ -83,30 +80,41 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
     render() {
         return (
-            <div className={lineFormSearch}>
-                <div
-                    className={classes(
-                        lineFormWrapper,
-                        'p-lineForm-wrapper',
-                        this.state.hasFocus
-                            ? lineFormWrapperFocusWithin
-                            : undefined
-                    )}
-                >
-                    <input
-                        className={lineFormInput}
-                        spellCheck={false}
-                        onChange={this._handleChange}
-                        onSubmit={this._handleSubmit}
-                        onFocus={this._handleFocus}
-                        onBlur={this._handleBlur}
-                        value={this.state.value}
-                        ref={input => {
-                            this._textInput = input;
-                        }}
-                    />
-                </div>
-                <div className={lineFormCaption}>Go to line number</div>
+            <div className={lineFormSearch} onSubmit={this._handleSubmit}>
+                <form>
+                    <div
+                        className={classes(
+                            lineFormWrapper,
+                            'p-lineForm-wrapper',
+                            this.state.hasFocus
+                                ? lineFormWrapperFocusWithin
+                                : undefined
+                        )}
+                    >
+                        <input
+                            type="text"
+                            className={lineFormInput}
+                            spellCheck={false}
+                            onChange={this._handleChange}
+                            onFocus={this._handleFocus}
+                            onBlur={this._handleBlur}
+                            value={this.state.value}
+                            ref={input => {
+                                this._textInput = input;
+                            }}
+                        />
+
+                        <input
+                            type="submit"
+                            value=""
+                            className={classes(
+                                lineFormButton,
+                                'lineForm-enter-icon'
+                            )}
+                        />
+                    </div>
+                    <label className={lineFormCaption}>Go to line number</label>
+                </form>
             </div>
         );
     }
@@ -284,16 +292,16 @@ namespace LineCol {
             this._editor = editor;
 
             if (this._editor === null) {
-                this._column = 0;
-                this._line = 0;
+                this._column = 1;
+                this._line = 1;
             } else {
                 this._editor.model.selections.changed.connect(
                     this._onSelectionChanged
                 );
 
                 const pos = this._editor.getCursorPosition();
-                this._column = pos.column;
-                this._line = pos.line;
+                this._column = pos.column + 1;
+                this._line = pos.line + 1;
             }
 
             this.stateChanged.emit(void 0);
@@ -312,14 +320,14 @@ namespace LineCol {
             change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
         ) => {
             let pos = this.editor!.getCursorPosition();
-            this._line = pos.line;
-            this._column = pos.column;
+            this._line = pos.line + 1;
+            this._column = pos.column + 1;
 
             this.stateChanged.emit(void 0);
         };
 
-        private _line: number = 0;
-        private _column: number = 0;
+        private _line: number = 1;
+        private _column: number = 1;
         private _editor: CodeEditor.IEditor | null = null;
     }
 
