@@ -273,10 +273,6 @@ export class DefaultKernel implements Kernel.IKernel {
     if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
-      let msgType = msg.header.msg_type;
-      if (msgType === 'status') {
-        msgType += ' ' + (msg.content as any).execution_state;
-      }
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({ msg, direction: 'send' });
