@@ -168,11 +168,11 @@ shasum -a 256 dist/*.tar.gz
 * Create a PR with the version bump
 * Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
 
-## Making a patch release of a JavaScript package
+## Making a patch release JavaScript package(s)
 
 * Backport the change to the previous release branch
 * Make a new PR against the previous branch
-* Run the following script, where the package is in `/packages/package-folder-name`:
+* Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given):
 
 ```bash
 jlpm run patch:release package-folder-name
