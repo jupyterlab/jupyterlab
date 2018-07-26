@@ -3,7 +3,7 @@
 
 import { IDisposable } from '@phosphor/disposable';
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -80,7 +80,7 @@ export abstract class VDomRenderer<
    * Make sure the widget is rendered, even if the model has not changed.
    */
   protected onAfterAttach(msg: Message): void {
-    this.update();
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
   }
 
   /**

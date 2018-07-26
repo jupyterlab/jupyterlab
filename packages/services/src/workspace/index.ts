@@ -34,23 +34,64 @@ export class WorkspaceManager {
    *
    * @param id - The workspaces's ID.
    *
-   * @returns A promise that resolves with the workspace or rejects with a
-   * `ServerConnection.IError`.
+   * @returns A promise that resolves if successful.
    */
-  fetch(id: string): Promise<Workspace.IWorkspace> {
+  async fetch(id: string): Promise<Workspace.IWorkspace> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+    const response = await makeRequest(url, {}, serverSettings);
 
-    return promise.then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
+    if (response.status !== 200) {
+      throw new ResponseError(response);
+    }
 
-      return response.json();
-    });
+    return response.json();
+  }
+
+  /**
+   * Fetch the list of workspace IDs that exist on the server.
+   *
+   * @returns A promise that resolves if successful.
+   */
+  async list(): Promise<string[]> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, '');
+    const response = await makeRequest(url, {}, serverSettings);
+
+    if (response.status !== 200) {
+      throw new ResponseError(response);
+    }
+
+    const result = await response.json();
+
+    return result.workspaces;
+  }
+
+  /**
+   * Remove a workspace from the server.
+   *
+   * @param id - The workspaces's ID.
+   *
+   * @returns A promise that resolves if successful.
+   */
+  async remove(id: string): Promise<void> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, id);
+    const init = { method: 'DELETE' };
+    const response = await makeRequest(url, init, serverSettings);
+
+    if (response.status !== 204) {
+      throw new ResponseError(response);
+    }
   }
 
   /**
@@ -60,24 +101,20 @@ export class WorkspaceManager {
    *
    * @param workspace - The workspace being saved.
    *
-   * @returns A promise that resolves when saving is complete or rejects with
-   * a `ServerConnection.IError`.
+   * @returns A promise that resolves if successful.
    */
-  save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
+  async save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + pageUrl;
     const url = Private.url(base, id);
     const init = { body: JSON.stringify(workspace), method: 'PUT' };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+    const response = await makeRequest(url, init, serverSettings);
 
-    return promise.then(response => {
-      if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-
-      return undefined;
-    });
+    if (response.status !== 204) {
+      throw new ResponseError(response);
+    }
   }
 }
 

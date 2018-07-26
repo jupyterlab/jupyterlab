@@ -131,7 +131,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.11.0,<0.12.0',
+    'jupyterlab_launcher>=0.11.2,<0.12.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
     'subprocess32;python_version<"3.0"'
@@ -139,7 +139,7 @@ setup_args['install_requires'] = [
 
 setup_args['extras_require'] = {
     'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest', 'requests', 'pytest-check-links', 'selenium'],
+    'test': ['pytest', 'requests', 'pytest-check-links'],
     'docs': [
         'sphinx',
         'recommonmark',

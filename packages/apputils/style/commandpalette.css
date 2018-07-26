@@ -59,7 +59,7 @@
   height: 32px;
   width: 12px;
   padding: 0px 12px;
-  background-image: var(--jp-icon-search);
+  background-image: var(--jp-icon-search-white);
   background-size: 20px;
   background-repeat: no-repeat;
   background-position: center;

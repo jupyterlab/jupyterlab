@@ -45,7 +45,7 @@ Instructions on how to install the project from the git sources are available in
 
 Conda is an open source package management system and environment management system that runs on Windows, macOS and Linux. It can package and distribute software for any language, and by default uses the Anaconda repository managed by Anaconda, Inc.  If you wish to use conda and do not have it, [see the conda installation instructions](https://conda.io/docs/user-guide/install/index.html).
 
-If you use `conda`, you can install as:
+If you use [`conda`](https://anaconda.org/conda-forge/jupyterlab), you can install as:
 
 ```bash
 conda install -c conda-forge jupyterlab
@@ -57,7 +57,7 @@ pip is a package management system for installing and updating Python packages. 
 
 JupyterLab is implemented in Python, and as of 2018-07 JupyterLab can run on either Python2 or Python3.  However, it's recommended that you install JupyterLab on Python3, even when running Python2 code.  Thus, it's recommended that you install Python3, and then use `pip3` to install JupyterLab (`pip3` is the version of `pip` that always uses Python3; in many cases the command `pip` will use Python2, and that is not recommended).
 
-If you use `pip`, you can install it as:
+If you use [`pip`](https://pypi.org/project/jupyterlab/), you can install it as:
 
 ```bash
 pip3 install jupyterlab

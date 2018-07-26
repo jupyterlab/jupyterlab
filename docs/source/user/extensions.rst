@@ -126,8 +126,12 @@ You can re-enable an extension using the command:
 Advanced Usage
 ~~~~~~~~~~~~~~
 
-The JupyterLab application directory (where the application assets are
-built and the settings reside) can be overridden using ``--app-dir`` in
+Any information that JupyterLab persists is stored in its application directory,
+including settings and built assets.
+This is separate from where the Python package is installed (like in ``site_packages``)
+so that the install directory is immutable.
+
+The application directory can be overridden using ``--app-dir`` in
 any of the JupyterLab commands, or by setting the ``JUPYTERLAB_DIR``
 environment variable. If not specified, it will default to
 ``<sys-prefix>/share/jupyter/lab``, where ``<sys-prefix>`` is the

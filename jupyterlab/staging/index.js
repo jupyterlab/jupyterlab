@@ -157,9 +157,9 @@ function main() {
     window.lab = lab;
   }
 
-  // Handle a selenium test.
-  var seleniumTest = PageConfig.getOption('seleniumTest');
-  if (seleniumTest.toLowerCase() === 'true') {
+  // Handle a browser test.
+  var browserTest = PageConfig.getOption('browserTest');
+  if (browserTest.toLowerCase() === 'true') {
     var caught_errors = [];
     window.onerror = function(msg, url, line, col, error) {
       caught_errors.push(String(error));
@@ -169,7 +169,7 @@ function main() {
     };
     lab.restored.then(function() {
       var el = document.createElement('div');
-      el.id = 'seleniumResult';
+      el.id = 'browserResult';
       el.textContent = JSON.stringify(caught_errors);
       document.body.appendChild(el);
     });

@@ -73,9 +73,7 @@ describe('docregistry/context', () => {
         });
         context
           .initialize(true)
-          .then(() => {
-            return manager.contents.rename(context.path, newPath);
-          })
+          .then(() => manager.contents.rename(context.path, newPath))
           .catch(done);
       });
     });
@@ -128,6 +126,7 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         await context.ready;
         expect(context.model.cells.canUndo).to.be(false);
+        await dismissDialog();
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
@@ -149,7 +148,7 @@ describe('docregistry/context', () => {
       it('should be emitted when the context is disposed', done => {
         context.disposed.connect((sender, args) => {
           expect(sender).to.be(context);
-          expect(args).to.be(void 0);
+          expect(args).to.be(undefined);
           done();
         });
         context.dispose();
@@ -175,17 +174,16 @@ describe('docregistry/context', () => {
     });
 
     describe('#contentsModel', () => {
-      it('should be `null` before poulation', () => {
+      it('should be `null` before population', () => {
         expect(context.contentsModel).to.be(null);
       });
 
-      it('should be set after poulation', done => {
-        let path = context.path;
-        context.ready.then(() => {
-          expect(context.contentsModel.path).to.be(path);
-          done();
-        });
-        context.initialize(true).catch(done);
+      it('should be set after population', async () => {
+        const { path } = context;
+
+        context.initialize(true);
+        await context.ready;
+        expect(context.contentsModel.path).to.be(path);
       });
     });
 
@@ -217,33 +215,35 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         context.model.fromString('foo');
         await context.save();
-        let opts: Contents.IFetchOptions = {
+
+        const opts: Contents.IFetchOptions = {
           format: factory.fileFormat,
           type: factory.contentType,
           content: true
         };
         const model = await manager.contents.get(context.path, opts);
+
         expect(model.content).to.be('foo');
+        await dismissDialog();
       });
     });
 
     describe('#saveAs()', () => {
       it('should save the document to a different path chosen by the user', () => {
+        const initialize = context.initialize(true);
         const newPath = UUID.uuid4() + '.txt';
-        waitForDialog().then(() => {
-          let dialog = document.body.getElementsByClassName('jp-Dialog')[0];
-          let input = dialog.getElementsByTagName('input')[0];
+
+        initialize.then(() => waitForDialog()).then(() => {
+          const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          const input = dialog.getElementsByTagName('input')[0];
+
           input.value = newPath;
           acceptDialog();
         });
-        return context
-          .initialize(true)
-          .then(() => {
-            return context.saveAs();
-          })
-          .then(() => {
-            expect(context.path).to.be(newPath);
-          });
+
+        return initialize.then(() => context.saveAs()).then(() => {
+          expect(context.path).to.be(newPath);
+        });
       });
 
       it('should bring up a conflict dialog', () => {

@@ -423,8 +423,8 @@ const state: JupyterLabPlugin<IStateDB> = {
           workspaces
             .fetch(source)
             .then(saved => {
-              // If this command is called after a reset, the state database will
-              // already be resolved.
+              // If this command is called after a reset, the state database
+              // will already be resolved.
               if (!resolved) {
                 resolved = true;
                 transform.resolve({ type: 'overwrite', contents: saved.data });
@@ -433,8 +433,8 @@ const state: JupyterLabPlugin<IStateDB> = {
             .catch(reason => {
               console.warn(`Fetching workspace (${workspace}) failed:`, reason);
 
-              // If the workspace does not exist, cancel the data transformation and
-              // save a workspace with the current user state data.
+              // If the workspace does not exist, cancel the data transformation
+              // and save a workspace with the current user state data.
               if (!resolved) {
                 resolved = true;
                 transform.resolve({ type: 'cancel', contents: null });
