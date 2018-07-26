@@ -1,24 +1,24 @@
 import { ShortcutItem } from './ShortcutItem';
 
+import { ShortcutObject, TakenByObject } from '..';
+
 import * as React from 'react';
 
-import { 
-  ShortcutListStyle, 
-  ShortcutListContainerStyle 
+import {
+  ShortcutListStyle,
+  ShortcutListContainerStyle
 } from '../componentStyle/ShortcutListStyle';
-
-import { ShortcutObject, TakenByObject } from '..';
 
 const TOPNAV_HEIGHT: number = 174
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
-  shortcuts:  ShortcutObject[];
+  shortcuts: ShortcutObject[];
   handleUpdate: Function;
   resetShortcut: Function;
   deleteShortcut: Function;
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string] : TakenByObject };
+  keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   height: number;
@@ -29,13 +29,12 @@ export interface IShortcutListProps {
 export class ShortcutList extends React.Component<IShortcutListProps, {}> {
   render() {
     return (
-      <div 
-        className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)} 
+      <div
+        className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)}
         id='shortcutListContainer'
       >
         <div className={ShortcutListStyle}>
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
-            //const shortcut: ShortcutObject = this.props.shortcuts[key];
             return (
               <ShortcutItem
                 key={shortcut.commandName + '_' + shortcut.selector}

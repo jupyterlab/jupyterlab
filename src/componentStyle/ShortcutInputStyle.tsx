@@ -45,7 +45,11 @@ export const InputStyle = style({
 });
 
 export const InputUnavailableStyle = style({
-  borderColor: 'var(--jp-error-color2)'
+  $nest: {
+    '&:focus': {
+      borderColor: 'var(--jp-error-color2)'
+    }
+  }
 });
 
 export const InputTextStyle = style({
@@ -71,6 +75,7 @@ export const InputWaitingStyle = style({
 export const SubmitStyle = style({
   background: 'var(--jp-brand-color1)',
   borderRadius: '0px',
+  border: 'none',
   color: 'var(--jp-layout-color0)',
   fontFamily: 'var(--jp-ui-font-family)',
   display: 'block',

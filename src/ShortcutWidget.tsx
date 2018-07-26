@@ -1,7 +1,5 @@
 import { VDomRenderer } from '@jupyterlab/apputils';
 
-import { Message } from '@phosphor/messaging'
-
 import * as React from 'react'
 
 import { ShortcutUI } from './components/ShortcutUI';
@@ -43,7 +41,7 @@ export default class ShortcutWidget extends VDomRenderer<any> {
     this.shortcutPlugin = shortcutPlugin
   }
 
-  protected onUpdateRequest(msg: Message): void {
+  protected onUpdateRequest(): void {
     this.reactComponent = 
       <ShortcutUI
         commandList={this.commandList}
@@ -58,14 +56,6 @@ export default class ShortcutWidget extends VDomRenderer<any> {
       document.getElementById('jupyterlab-shortcutui')
     )
     this.render();
-  }
-
-  protected onAfterAttach(msg: Message) {
-    super.update()
-  }
-
-  protected onAfterShow(msg: Message) {
-    super.update()
   }
 
   protected onResize(msg: Widget.ResizeMessage): void {

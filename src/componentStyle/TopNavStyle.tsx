@@ -50,7 +50,6 @@ export const SearchStyle = style({
   borderWidth: 'var(--jp-border-width)',
   borderStyle: 'solid',
   borderColor: 'var(--jp-layout-color3)',
-  /* border-radius: var(--jp-border-radius);   this is 2px */
   borderRadius: '3px',
   height: '20px',
   width: '65%',
@@ -77,7 +76,7 @@ export const SearchStyle = style({
   }
 });
 
-export const AdvancedOptionsContainerStyle = style (
+export const AdvancedOptionsContainerStyle = style(
   {
     display: 'contents'
   }
@@ -88,7 +87,7 @@ export const AdvancedOptionsStyle = style({
   width: '15%'
 });
 
-export const AdvancedOptionsSmallStyle = style ({
+export const AdvancedOptionsSmallStyle = style({
   width: '30%'
 })
 
@@ -122,7 +121,7 @@ export const HeaderRowContainerStyle = style({
 })
 
 export const HeaderRowStyle = style({
-  fontWeight: 'bold', //'var(--jp-content-heading-font-weight)',
+  fontWeight: 'bold',
   fontSize: 'var(--jp-ui-font-size2)',
   backgroundColor: 'var(--jp-layout-color0)',
   width: '100%',
