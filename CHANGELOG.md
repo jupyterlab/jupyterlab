@@ -6,6 +6,8 @@
 
 We added new workspace support, which enables you to have multiple saved layouts, including in different browser windows. See the [workspace documentation](https://jupyterlab.readthedocs.io/en/stable/user/urls.html) for more details. ([#4502](https://github.com/jupyterlab/jupyterlab/issues/4502), [#4708](https://github.com/jupyterlab/jupyterlab/pull/4708), [#4088](https://github.com/jupyterlab/jupyterlab/issues/4088), [#4041](https://github.com/jupyterlab/jupyterlab/pull/4041) [#3673](https://github.com/jupyterlab/jupyterlab/issues/3673), [#4780](https://github.com/jupyterlab/jupyterlab/pull/4780))
 
+We also removed the "Beta" label to better signal that JupyterLab is ready for users to use on a daily basis. The extension developer API is still being stabilized. See the release blog post for details. ([#4898](https://github.com/jupyterlab/jupyterlab/issues/4898), [#4920](https://github.com/jupyterlab/jupyterlab/pull/4920))
+
 We also added new menu items, keyboard shortcuts, commands, and settings:
 
 * "Activate Previously Used Tab" added to the Tab menu (`Ctrl/Cmd Shift '`) to toggle between the previously active tabs in the main area. ([#4296](https://github.com/jupyterlab/jupyterlab/pull/4296)).
@@ -19,6 +21,10 @@ We also added new menu items, keyboard shortcuts, commands, and settings:
 * "Notebook" added to the command palette to open a new notebook ([#4812](https://github.com/jupyterlab/jupyterlab/pull/4812)).
 * `notebook:run-in-console` added to the command palette to run the selected text or current line from a notebook in a console. A default shortcut for this command is not yet provided, but can be added by users. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
 * "fontFamily", "fontSize", and "lineHeight" settings added to the text editor advanced settings ([#4673](https://github.com/jupyterlab/jupyterlab/pull/4673)).
+* "Show Left Area" has been renamed to "Show Left Sidebar" for consistency (same for right sidebar) ([#3818](https://github.com/jupyterlab/jupyterlab/pull/3818))
+* "notebook:change-to-cell-heading-X" keyboard shortcuts (and commands) renamed to "notebook:change-cell-to-heading-X" for X=1...6. This fixes the notebook command-mode keyboard shortcuts for changing headings. ([#4430](https://github.com/jupyterlab/jupyterlab/pull/4430))
+* Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity in a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
+
 
 Other changes for users include:
 
@@ -33,20 +39,48 @@ Other changes for users include:
 * The console execute shortcut can now be set to either `Enter` or `Shift Enter` as a Console setting. ([#4054](https://github.com/jupyterlab/jupyterlab/pull/4054)).
 * Initial kernel selection for a notebook or console can no longer be canceled: the user must select a kernel. ([#4596](https://github.com/jupyterlab/jupyterlab/pull/4596)).
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510)).
+* Installing extensions in JupyterLab requires JupyterLab works with nodejs 9 or earlier (not with node 10). There is a serious bug in yarn that prevents us from upgrading to a version compatible with nodejs 10 ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
+* JupyterLab now recognizes the `.tsv` file extension as tab-separated files. ([#4684](https://github.com/jupyterlab/jupyterlab/pull/4684))
 
-Changes for developers include:
+Changes for extension developers include:
 
-* The JupyterLab codebase is now compiled to ES6 rather than ES5. Extension authors may have some minor compatibility updates to make. If you are writing an extension in Typescript, we recommend changing it to ES6 as well. ([#4462](https://github.com/jupyterlab/jupyterlab/pull/4462)).
-* The JupyterLab codebase is now formatted using [Prettier](https://github.com/prettier/prettier). By default the development environment installs a pre-commit hook that auto-formats your staged changes. ([#4090](https://github.com/jupyterlab/jupyterlab/pull/4090)).
 * A new signal for observing application dirty status state changes ([#4840](https://github.com/jupyterlab/jupyterlab/issues/4840))
 * A new signal for observing notebook cell execution ([#4740](https://github.com/jupyterlab/jupyterlab/issues/4740), [#4744](https://github.com/jupyterlab/jupyterlab/pull/4744)).
+* A new `anyMessage` signal for observing any message a kernel sends or receives. ([#4437](https://github.com/jupyterlab/jupyterlab/pull/4437))
 * A new API for removing groups from a JupyterLab menu. `addGroup` now returns an `IDisposable` which can be used to remove the group. `removeGroup` has been removed. ([#4890](https://github.com/jupyterlab/jupyterlab/pull/4890))
 * The `Launcher` now uses commands from the application `CommandRegistry` to launch new activities. Extension authors that add items to the launcher will need to update them to use commands. ([#4757](https://github.com/jupyterlab/jupyterlab/pull/4757)).
 * There is now a top-level `addToBottomArea` function in the application, allowing extension authors to add bottom panel items like status bars. ([#4752](https://github.com/jupyterlab/jupyterlab/pull/4752)).
 * Rendermime extensions can now indicate that they are the default rendered widget factory for a file-type. For instance, the default widget for a markdown file is a text editor, but the default rendered widget is the markdown viewer. ([#4692](https://github.com/jupyterlab/jupyterlab/pull/4692)).
 * Add new workspace REST endpoints to `jupyterlab_launcher` and make them available in `@jupyterlab/services` ([#4841](https://github.com/jupyterlab/jupyterlab/pull/4841)).
 * Documents created with a mimerenderer extension can now be accessed using an `IInstanceTracker` which tracks them. Include the token `IMimeDocumentTracker` in your plugin to access this. The `IInstanceTracker` interface has also gained convenience functions `find` and `filter` to simplify iterating over instances. ([#4762](https://github.com/jupyterlab/jupyterlab/pull/4762)).
+* RenderMime render errors are now displayed to the user. ([#4465](https://github.com/jupyterlab/jupyterlab/pull/4465))
 * `getNotebookVersion` is added to the `PageConfig` object ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224)).
+* The session `kernelChanged` signal now contains both the old kernel and the new kernel to make it easy to unregister things from the old kernel. ([#4834](https://github.com/jupyterlab/jupyterlab/pull/4834))
+* The `connectTo` functions for connecting to kernels and sessions are now synchronous (returning a connection immediately rather than a promise). The DefaultSession `clone` and `update` methods are also synchronous now. ([#4725](https://github.com/jupyterlab/jupyterlab/pull/4725))
+* Kernel message processing is now asynchronous, which guarantees the order of processing even if a handler is asynchronous. If a kernel message handler returns a promise, kernel message processing is paused until the promise resolves. The kernel's `anyMessage` signal is emitted synchronously when a message is received before asynchronous message handling, and the `iopubMessage` and `unhandledMessage` signals are emitted during asynchronous message handling. These changes mean that the comm `onMsg` and `onClose` handlers and the kernel future `onReply`, `onIOPub`, and `onStdin` handlers, as well as the comm target and message hook handlers, may be asynchronous and return promises. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
+
+* Kernel comm targets and message hooks now are unregistered with `removeCommTarget` and `removeMessageHook`, instead of using disposables. The corresponding `registerCommTarget` and `registerMessageHook` functions now return nothing.
+* The kernel `connectToComm` function is synchronous, and now returns the comm rather than a promise to the comm. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
+* The `KernelFutureHandler` class `expectShell` constructor argument is renamed to `expectReply`. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
+* The kernel future `done` returned promise now resolves to undefined if there is no reply message. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
+* The `IDisplayDataMsg` is updated to have the optional `transient` key, and a new `IUpdateDisplayDataMsg` type was added for update display messages. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
+* The  `uuid` function from `@jupyterlab/coreutils` is removed. Instead import `UUID` from `@phosphor/coreutils` and use `UUID.uuid4()` . ([#4604](https://github.com/jupyterlab/jupyterlab/pull/4604))
+* Main area widgets like the notebook, editor, console, and launcher now inherit from a common `MainAreaWidget` class. The `MainAreaWidget` class provides a consistent interface with a content area (`.content`) and a toolbar (`.toolbar`), and consistent focus handling and activation. Extension authors may consider inheriting from the `MainAreaWidget` for consistency. Several changes this caused include:
+  - The notebook panel `.notebook` attribute is renamed to `.content`.
+  - The text editor widget's editor is `.content.editor` rather than just `.editor`.
+  - Document widgets implement `IDocumentWidget<ContentType>`, instead of using `DocumentRegistry.IReadyWidget`. An `DocumentWidget` has the `.toolbar` and `.content` attributes from `MainAreaWidget` and adds a context attribute.
+  - Mime documents use a `MimeContent` widget embedded inside of a `DocumentWidget` now.
+  
+  ([#3499](https://github.com/jupyterlab/jupyterlab/pull/3499), [4453](https://github.com/jupyterlab/jupyterlab/pull/4453))
+* The notebook panel `.notebook` attribute has been renamed to `.content` for consistency with other main area widgets. 
+
+Changes in the JupyterLab code infrastructure include:
+
+* The JupyterLab TypeScript codebase is now compiled to ES2015 (ES6) using TypeScript 2.9. We also turned on the TypeScript `esModuleInterop` flag to enable more natural imports from non-es2015 JavaScript modules. With the update to ES2015 output, code generated from async/await syntax became much more manageable, so we have started to use async/await liberally throughout the codebase, especially in tests. Because we use Typedoc for API documentation, we still use syntax compatible with TypeScript 2.7 where Typedoc is used. Extension authors may have some minor compatibility updates to make. If you are writing an extension in TypeScript, we recommend updating to TypeScript 2.9 and targeting ES2015 output as well. ([#4462](https://github.com/jupyterlab/jupyterlab/pull/4462), [#4675](https://github.com/jupyterlab/jupyterlab/pull/4675), [#4714](https://github.com/jupyterlab/jupyterlab/pull/4714), [#4797](https://github.com/jupyterlab/jupyterlab/pull/4797)).
+* The JupyterLab codebase is now formatted using [Prettier](https://github.com/prettier/prettier). By default the development environment installs a pre-commit hook that formats your staged changes. ([#4090](https://github.com/jupyterlab/jupyterlab/pull/4090)).
+* Updated build infrastructure using webpack 4 and better typing. ([#4702](https://github.com/jupyterlab/jupyterlab/pull/4702), [#4698](https://github.com/jupyterlab/jupyterlab/pull/4698))
+* Upgraded yarn to version 1.6. Please note that you must use NodeJS version 9 or earlier with JupyterLab (i.e., not NodeJS version 10). We will upgrade yarn, with NodeJS version 10 support, when a [bug in yarn](https://github.com/yarnpkg/yarn/issues/5935) is fixed. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
+* Various process utilities were moved to `jupyterlab_launcher`. ([#4696](https://github.com/jupyterlab/jupyterlab/pull/4696))
 
 Other fixes include:
 
@@ -55,6 +89,7 @@ Other fixes include:
 * Fixed a bug where the cursor would not show up in the dark theme. ([#4699](https://github.com/jupyterlab/jupyterlab/pull/4699)).
 * Fixed a bug preventing relative links from working correctly in alternate `IDrive`s. ([#4613](https://github.com/jupyterlab/jupyterlab/pull/4613)).
 * Fixed a bug breaking the image viewer upon saving the image. ([#4602](https://github.com/jupyterlab/jupyterlab/pull/4602)).
+* Fixed the font size for code blocks in notebook Markdown headers. ([#4617](https://github.com/jupyterlab/jupyterlab/pull/4617))
 * Prevented a memory leak when repeatedly rendering a Vega chart. ([#4904](https://github.com/jupyterlab/jupyterlab/pull/4904)).
 * Support dropped terminal connection re-connecting ([#4763](https://github.com/jupyterlab/jupyterlab/issues/4763), [#4802](https://github.com/jupyterlab/jupyterlab/pull/4802)).
 * Use `require.ensure` in `vega4-extension` to lazily load `vega-embed` and its dependencies on first render ([#4706](https://github.com/jupyterlab/jupyterlab/pull/4706)).
@@ -62,6 +97,8 @@ Other fixes include:
 * Fix default settings JSON in setting editor ([#4591](https://github.com/jupyterlab/jupyterlab/issues/4591), [#4595](https://github.com/jupyterlab/jupyterlab/pull/4595)).
 * Fix setting editor pane layout's stretch factor ([#2971](https://github.com/jupyterlab/jupyterlab/issues/2971), [#4772](https://github.com/jupyterlab/jupyterlab/pull/4772)).
 * Programmatically set settings are now output with nicer formatting. ([#4870](https://github.com/jupyterlab/jupyterlab/pull/4870))
+* Fixed a bug in displaying one-line CSV files. ([#4795](https://github.com/jupyterlab/jupyterlab/issues/4795), [#4796](https://github.com/jupyterlab/jupyterlab/pull/4796))
+* Fixed a bug where JSON arrays in rich outputs were collapsed into strings. ([#4480](https://github.com/jupyterlab/jupyterlab/pull/4480))
 
 ## [Beta 2 (v0.32.0)](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.32.0)
 
