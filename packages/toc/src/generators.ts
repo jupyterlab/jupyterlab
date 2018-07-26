@@ -33,7 +33,7 @@ let currentLevel = 1;
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  widget: TableOfContents | null = null,
+  widget: TableOfContents,
   needNumbering = true
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
@@ -51,10 +51,17 @@ export function createNotebookGenerator(
           )[0].innerHTML;
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
-          let text = (model as CodeCellModel).value.text;
-          const onClickFactory2 = (line: number) => {
-            return () => {
-              cell.node.scrollIntoView();
+          let showCode = true;
+          if (widget) {
+            console.log('widget:' + widget.showCode);
+            showCode = widget.showCode;
+          }
+          if (showCode) {
+            let text = (model as CodeCellModel).value.text;
+            const onClickFactory2 = (line: number) => {
+              return () => {
+                cell.node.scrollIntoView();
+              };
             };
           };
           headings = headings.concat(
