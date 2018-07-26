@@ -8,18 +8,18 @@ See the [JupyterLab 0.33.0](https://github.com/jupyterlab/jupyterlab/milestone/1
 
 #### Key Features:
 
-- [No longer in beta](#no-longer-in-beta)
-- [Workspaces](#workspaces)
-- [Menu items](#menu-items)
-- [Keyboard shortcuts](#keyboard-shorcuts)
-- [Command palette items](#command-palette-items)
-- [Settings](#settings)
-- [Larger file uploads](#larger-size-uploads)
-- [Extension management and installation](#extension-manager)
-- [Interface changes](#interface-changes)
-- [Renderers](#renderers)
-- [Changes for developers](#changes-for-developers)
-- [Other fixes](#other-fixes)
+* [No longer in beta](#no-longer-in-beta)
+* [Workspaces](#workspaces)
+* [Menu items](#menu-items)
+* [Keyboard shortcuts](#keyboard-shorcuts)
+* [Command palette items](#command-palette-items)
+* [Settings](#settings)
+* [Larger file uploads](#larger-size-uploads)
+* [Extension management and installation](#extension-manager)
+* [Interface changes](#interface-changes)
+* [Renderers](#renderers)
+* [Changes for developers](#changes-for-developers)
+* [Other fixes](#other-fixes)
 
 #### No longer in beta
 
@@ -33,13 +33,12 @@ We added new workspace support, which enables you to have multiple saved layouts
 
 * "Activate Previously Used Tab" added to the Tab menu (`Ctrl/Cmd Shift '`) to toggle between the previously active tabs in the main area. ([#4296](https://github.com/jupyterlab/jupyterlab/pull/4296))
 * "Reload From Disk" added to the File menu to reload an open file from the state saved on disk. ([#4615](https://github.com/jupyterlab/jupyterlab/pull/4615))
-* "Save Notebook with View State" added to the File menu to persist the notebook collapsed and scrolled cell state.  We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981))
+* "Save Notebook with View State" added to the File menu to persist the notebook collapsed and scrolled cell state. We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981))
 * "Increase/Decrease Font Size" added to the text editor settings menu. ([#4811](https://github.com/jupyterlab/jupyterlab/pull/4811))
 * "Show in File Browser" added to a document tab's context menu. ([#4500](https://github.com/jupyterlab/jupyterlab/pull/4500))
 * "Open in New Browser Tab" added to the file browser context menu. ([#4315](https://github.com/jupyterlab/jupyterlab/pull/4315))
 * "Copy Path" added to file browser context menu to copy the document's path to the clipboard. ([#4582](https://github.com/jupyterlab/jupyterlab/pull/4582))
 * "Show Left Area" has been renamed to "Show Left Sidebar" for consistency (same for right sidebar). ([#3818](https://github.com/jupyterlab/jupyterlab/pull/3818))
-
 
 #### Keyboard shortcuts
 
@@ -64,6 +63,7 @@ We added new workspace support, which enables you to have multiple saved layouts
 * Support for larger file uploads (>15MB) when using Jupyter notebook server version >= 5.1. ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224))
 
 #### Extension management and installation
+
 * New extension manager for installing JupyterLab extensions from npm within the JupyterLab UI. You can enable this from the Advanced Settings interface. ([#4682](https://github.com/jupyterlab/jupyterlab/pull/4682), [#4925](https://github.com/jupyterlab/jupyterlab/pull/4925))
 * Please note that to install extensions in JupyterLab, you must use NodeJS version 9 or earlier (i.e., not NodeJS version 10). We will upgrade yarn, with NodeJS version 10 support, when a [bug in yarn](https://github.com/yarnpkg/yarn/issues/5935) is fixed. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 
