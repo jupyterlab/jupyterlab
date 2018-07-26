@@ -1,0 +1,6 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0V22H22V0H0Z" transform="translate(1 1)" stroke="#757575" stroke-width="2"/>
+<path d="M0 0H14.6667V0.833334C14.6667 1.38562 14.219 1.83333 13.6667 1.83333H0V0Z" transform="translate(2.83325 15.668)" fill="white"/>
+<rect width="14" height="14" transform="translate(5 5)" fill="#757575"/>
+<path d="M0 0H13V1C13 1.55228 12.5523 2 12 2H0V0Z" transform="translate(4 14)" fill="white"/>
+</svg>
