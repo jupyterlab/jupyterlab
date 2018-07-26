@@ -46,6 +46,9 @@ export function createNotebookGenerator(
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
+          let executionCount = cell.node.getElementsByClassName(
+            'jp-InputArea-prompt'
+          )[0].innerHTML;
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
           let showCode = true;
@@ -60,15 +63,16 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            headings = headings.concat(
-              Private.getCodeCells(
-                text,
-                onClickFactory2,
-                numberingDict,
-                currentLevel
-              )
-            );
-          }
+          };
+          headings = headings.concat(
+            Private.getCodeCells(
+              text,
+              onClickFactory2,
+              numberingDict,
+              executionCount,
+              currentLevel
+            )
+          );
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
@@ -365,6 +369,7 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
+    executionCount: string,
     lastLevel: number
   ): IHeading[] {
     let headings: IHeading[] = [];
@@ -373,7 +378,7 @@ namespace Private {
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       headings.push({
-        text: lines[0],
+        text: executionCount + ' ' + lines[0],
         level,
         onClick,
         type: 'code'
