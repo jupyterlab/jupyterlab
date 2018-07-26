@@ -2,7 +2,6 @@ import { Widget, PanelLayout } from '@phosphor/widgets';
 import { HoverBox } from '@jupyterlab/apputils';
 
 import { Message } from '@phosphor/messaging';
-import { ElementExt } from '@phosphor/domutils';
 import { hoverItem } from '../style/lineForm';
 import { clickedItem, interactiveItem } from '../style/statusBar';
 
@@ -26,8 +25,8 @@ export class Popup extends Widget {
         this.setGeometry();
         Widget.attach(this, document.body);
         this.update();
-        this._anchor.toggleClass(clickedItem);
-        this._anchor.toggleClass(interactiveItem);
+        this._anchor.addClass(clickedItem);
+        this._anchor.removeClass(interactiveItem);
     }
 
     setGeometry() {
@@ -54,26 +53,56 @@ export class Popup extends Widget {
     }
 
     protected onAfterAttach(msg: Message): void {
-        document.addEventListener('click', this, true);
+        document.addEventListener('click', this, false);
+        document.addEventListener('keypress', this, false);
     }
 
     protected onAfterDetach(msg: Message): void {
-        document.removeEventListener('click', this, true);
+        document.removeEventListener('click', this, false);
+        document.removeEventListener('keypress', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
         if (
-            !ElementExt.hitTest(this._body.node, event.clientX, event.clientY)
+            !!event.target &&
+            !this._body.node.contains(event.target as HTMLElement)
         ) {
             super.dispose();
             this.dispose();
-            this._anchor.toggleClass(clickedItem);
-            this._anchor.toggleClass(interactiveItem);
+        }
+    }
+
+    dispose() {
+        super.dispose();
+        this._anchor.removeClass(clickedItem);
+        this._anchor.addClass(interactiveItem);
+    }
+
+    protected _evtKeydown(event: KeyboardEvent): void {
+        // Check for escape key
+        switch (event.keyCode) {
+            case 27: // Escape.
+                console.log(`Pressed escape`);
+                event.stopPropagation();
+                event.preventDefault();
+                this.dispose();
+                break;
+            default:
+                break;
         }
     }
 
     handleEvent(event: Event): void {
-        this._evtClick(event as MouseEvent);
+        switch (event.type) {
+            case 'keydown':
+                this._evtKeydown(event as KeyboardEvent);
+                break;
+            case 'click':
+                this._evtClick(event as MouseEvent);
+                break;
+            default:
+                break;
+        }
     }
 
     private _body: Widget;
