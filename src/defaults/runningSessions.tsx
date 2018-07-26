@@ -29,17 +29,16 @@ const RunningSessionsComponent = (
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
         <GroupItem
-            spacing="5px"
+            spacing={vars.textIconHalfSpacing}
             onClick={props.handleClick}
-            title={'Number of active sessions'}
         >
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.terminals} />
-                <IconItem source={'terminal-item'} />
+                <IconItem source={'terminal-item'} offset={{ x: 1, y: 3 }} />
             </GroupItem>
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.kernels} />
-                <IconItem source={'kernel-item'} />
+                <IconItem source={'kernel-item'} offset={{ x: 0, y: 3 }} />
             </GroupItem>
         </GroupItem>
     );
@@ -68,7 +67,7 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-
+        this.node.title = 'Open running sessions tab';
         this.addClass(interactiveItem);
     }
 

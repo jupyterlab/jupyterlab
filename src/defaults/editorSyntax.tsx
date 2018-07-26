@@ -31,11 +31,10 @@ const EditorSyntaxComponent = (
 ): React.ReactElement<EditorSyntaxComponent.IProps> => {
     return (
         <TextItem
-            title="Set programming language"
             source={props.mode}
             onClick={props.handleClick}
         />
-    );
+     );
 };
 
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
@@ -53,6 +52,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         );
 
         this.addClass(interactiveItem);
+        this.node.title = 'Set programming language';
     }
 
     render() {

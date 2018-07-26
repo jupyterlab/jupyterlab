@@ -1,11 +1,3 @@
-.edit-item {
-    background-image: url('./images/edit-icon.svg');
-}
-
-.command-item {
-    background-image: url('./images/command-icon.svg');
-}
-
 .kernel-item {
     background-image: url('./images/kernel-icon.svg');
 }
@@ -24,4 +16,8 @@
 
 .lineForm-enter-icon {
     background-image: url('./images/line-form.svg');
+}
+
+.status-bar-icon {
+    background-image: url('./images/status-bar-icon.svg');
 }
