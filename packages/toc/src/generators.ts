@@ -244,9 +244,18 @@ namespace Private {
     const lines = text.split('\n');
     let headings: IHeading[] = [];
 
+    let inCodeBlock = false;
     // Iterate over the lines to get the header level and
     // the text for the line.
     lines.forEach((line, idx) => {
+      // Don't check for markdown headings if we
+      // are in a code block (demarkated by backticks.
+      if (line.indexOf('```') === 0) {
+        inCodeBlock = !inCodeBlock;
+      }
+      if (inCodeBlock) {
+        return;
+      }
       // Make an onClick handler for this line.
       const onClick = onClickFactory(idx);
 
