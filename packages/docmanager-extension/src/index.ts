@@ -407,10 +407,20 @@ function addCommands(
     caption: 'Reload contents from disk',
     isEnabled,
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
-        return context.revert();
+      if (!isEnabled()) {
+        return;
       }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return showDialog({
+        title: 'Reload Notebook from Disk',
+        body: `Are you sure you want to reload
+          the notebook from the disk?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
+      }).then(result => {
+        if (result.button.accept && !context.isDisposed) {
+          return context.revert();
+        }
+      });
     }
   });
 
