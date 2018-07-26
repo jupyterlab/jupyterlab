@@ -113,5 +113,6 @@ export namespace Popup {
     export interface IOptions {
         body: Widget;
         anchor: Widget;
+        // align: 'right' | 'left';
     }
 }

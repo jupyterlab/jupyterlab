@@ -23,7 +23,7 @@ namespace EditorSyntaxComponent {
 const EditorSyntaxComponent = (
     props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> => {
-    return <TextItem title="Set programming language" source={props.mode} />;
+    return <TextItem source={props.mode} />;
 };
 
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
@@ -38,6 +38,8 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
             this._tracker.currentWidget &&
                 this._tracker.currentWidget.content.editor
         );
+
+        this.node.title = 'Set programming language';
     }
 
     render() {

@@ -31,7 +31,6 @@ const RunningSessionsComponent = (
         <GroupItem
             spacing={vars.textIconHalfSpacing}
             onClick={props.handleClick}
-            title={'Number of active sessions'}
         >
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.terminals} />
@@ -68,7 +67,7 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-
+        this.node.title = 'Open running sessions tab';
         this.addClass(interactiveItem);
     }
 
