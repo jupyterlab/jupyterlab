@@ -1,4 +1,4 @@
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import * as React from 'react'
 
@@ -12,7 +12,7 @@ import { Widget, Title } from '@phosphor/widgets';
 
 import * as ReactDOM from 'react-dom';
 
-export default class ShortcutWidget extends VDomRenderer<any> {
+export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   height: number;
   width: number;
   commandList: string[];
@@ -32,13 +32,13 @@ export default class ShortcutWidget extends VDomRenderer<any> {
     commandRegistry: CommandRegistry,
     shortcutPlugin: string,
   ) {
-    super()
-    this.height = height
-    this.width = width
-    this.commandList = commandList
-    this.settingRegistry = settingRegistry
-    this.commandRegistry = commandRegistry
-    this.shortcutPlugin = shortcutPlugin
+    super();
+    this.height = height;
+    this.width = width;
+    this.commandList = commandList;
+    this.settingRegistry = settingRegistry;
+    this.commandRegistry = commandRegistry;
+    this.shortcutPlugin = shortcutPlugin;
   }
 
   protected onUpdateRequest(): void {

@@ -12,7 +12,7 @@
     "url": "https://github.com/jupyterlab/jupyterlab-shortcutui/tree/initial-development/issues"
   },
   "license": "BSD-3-Clause",
-  "author": "Noah Stapp",
+  "author": "Jenna Landy and Noah Stapp",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
