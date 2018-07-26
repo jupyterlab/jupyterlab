@@ -36,7 +36,7 @@
     "@jupyterlab/docregistry": "^0.17.1",
     "@jupyterlab/rendermime": "^0.17.1",
     "@jupyterlab/rendermime-interfaces": "^1.1.1",
-    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/services": "^3.0.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/application": "^1.6.0",
     "@phosphor/commands": "^1.5.0",

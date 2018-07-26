@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.17.1",
-    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/services": "^3.0.2",
     "@phosphor/messaging": "^1.2.2",
     "react": "~16.4.0",
     "react-paginate": "^5.2.3",

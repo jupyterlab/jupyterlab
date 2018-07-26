@@ -50,4 +50,4 @@ utils.run('npm run build:update');
 utils.run('npm run integrity');
 utils.run('git commit -a -m "Integrity update"');
 
-console.log('\n\nFinished, make sure to push the commit and the tag.');
+console.log('\n\nFinished, make sure to push the commit(s) and tag(s).');

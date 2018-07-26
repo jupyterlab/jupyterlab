@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.17.1",
-    "@jupyterlab/application-extension": "^0.17.1",
+    "@jupyterlab/application-extension": "^0.17.2",
     "@jupyterlab/apputils-extension": "^0.17.1",
     "@jupyterlab/buildutils": "^0.8.1",
     "@jupyterlab/codemirror-extension": "^0.17.1",

@@ -20,7 +20,7 @@
     "@jupyterlab/coreutils": "^2.0.1",
     "@jupyterlab/mathjax2-extension": "^0.5.1",
     "@jupyterlab/rendermime": "^0.17.1",
-    "@jupyterlab/services": "^3.0.1",
+    "@jupyterlab/services": "^3.0.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.6.0",
