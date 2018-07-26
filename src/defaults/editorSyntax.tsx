@@ -13,9 +13,10 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { CommandRegistry } from '@phosphor/commands';
-// import { JSONObject } from '@phosphor/coreutils';
-// import { Menu } from '@phosphor/widgets';
-// import { showPopup } from '../component/hover';
+import { JSONObject } from '@phosphor/coreutils';
+import { Menu } from '@phosphor/widgets';
+import { showPopup } from '../component/hover';
+import { interactiveItem } from '../style/statusBar';
 
 namespace EditorSyntaxComponent {
     export interface IProps {
@@ -43,13 +44,15 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         super();
 
         this._tracker = opts.tracker;
-        // this._commands = opts.commands;
+        this._commands = opts.commands;
 
         this._tracker.currentChanged.connect(this._onEditorChange);
         this.model = new EditorSyntax.Model(
             this._tracker.currentWidget &&
                 this._tracker.currentWidget.content.editor
         );
+
+        this.addClass(interactiveItem);
     }
 
     render() {
@@ -72,7 +75,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     }
 
     private _handleClick = () => {
-        /*const modeMenu = new Menu({ commands: this._commands });
+        const modeMenu = new Menu({ commands: this._commands });
         let command = 'codemirror:change-mode';
         Mode.getModeInfo()
             .sort((a, b) => {
@@ -81,22 +84,17 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
                 return aName.localeCompare(bName);
             })
             .forEach(spec => {
-                // Avoid mode name with a curse word.
-                if (spec.mode.indexOf('brainf') === 0) {
-                    return;
-                }
-
                 let args: JSONObject = {
                     insertSpaces: true,
-                    name: `spec.name`
+                    name: spec.name!
                 };
 
                 modeMenu.addItem({
                     command,
                     args
                 });
-            });*/
-        // showPopup({ body: modeMenu, anchor: this });
+            });
+        showPopup({ body: modeMenu, anchor: this, align: 'left' });
     };
 
     private _onEditorChange = (
@@ -107,7 +105,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     };
 
     private _tracker: IEditorTracker;
-    // private _commands: CommandRegistry;
+    private _commands: CommandRegistry;
 }
 
 namespace EditorSyntax {
