@@ -17,31 +17,41 @@ import { Token } from '@phosphor/coreutils';
 import { IconItem } from '../component/icon';
 import { IStatusContext } from '../contexts';
 
+export const cellStatus = (
+    prop: NotebookTrustComponent.IProps | NotebookTrust.Model
+) => {
+    if (prop.trustedCells === prop.totalCells) {
+        return [
+            `Notebook trusted: ${prop.trustedCells} of ${
+                prop.totalCells
+            } cells trusted.`,
+            'trusted-item'
+        ];
+    } else if (prop.activeCellTrusted) {
+        return [
+            `Active cell trusted: ${prop.trustedCells} of ${
+                prop.totalCells
+            } cells trusted. `,
+            'trusted-item'
+        ];
+    } else {
+        return [
+            `Notebook not trusted: ${prop.trustedCells} of ${
+                prop.totalCells
+            } cells trusted.`,
+            'not-trusted-item'
+        ];
+    }
+};
 // tslint:disable-next-line:variable-name
 const NotebookTrustComponent = (
     props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> => {
-    let title: string;
     let source: string;
 
-    if (props.allCellsTrusted) {
-        title = `Notebook trusted: ${props.trustedCells} of ${
-            props.totalCells
-        } cells trusted`;
-        source = 'trusted-item';
-    } else if (props.activeCellTrusted) {
-        title = `Active cell trusted: ${props.trustedCells} of ${
-            props.totalCells
-        } cells trusted`;
-        source = 'trusted-item';
-    } else {
-        title = `Notebook not trusted: ${props.trustedCells} of ${
-            props.totalCells
-        } cells trusted`;
-        source = 'not-trusted-item';
-    }
+    source = cellStatus(props)[1];
 
-    return <IconItem title={title} source={source} />;
+    return <IconItem source={source} />;
 };
 
 namespace NotebookTrustComponent {
@@ -57,13 +67,14 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
     implements INotebookTrust {
     constructor(opts: NotebookTrust.IOptions) {
         super();
-
         this._tracker = opts.tracker;
 
         this._tracker.currentChanged.connect(this._onNotebookChange);
         this.model = new NotebookTrust.Model(
             this._tracker.currentWidget && this._tracker.currentWidget.content
         );
+
+        this.node.title = cellStatus(this.model)[0];
     }
 
     private _onNotebookChange = (
@@ -81,6 +92,7 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model>
         if (this.model === null) {
             return null;
         } else {
+            this.node.title = cellStatus(this.model)[0];
             return (
                 <div>
                     <NotebookTrustComponent

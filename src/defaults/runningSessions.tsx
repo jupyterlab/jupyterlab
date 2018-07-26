@@ -28,11 +28,7 @@ const RunningSessionsComponent = (
     props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
     return (
-        <GroupItem
-            spacing="5px"
-            onClick={props.handleClick}
-            title={'Number of active sessions'}
-        >
+        <GroupItem spacing="5px" onClick={props.handleClick}>
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.terminals} />
                 <IconItem source={'terminal-item'} />
@@ -68,7 +64,7 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-
+        this.node.title = 'Number of active sessions';
         this.addClass(interactiveItem);
     }
 

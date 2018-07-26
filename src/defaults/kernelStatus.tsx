@@ -31,7 +31,6 @@ const KernelStatusComponent = (
     return (
         <TextItem
             onClick={props.handleClick}
-            title="Current active kernel"
             source={`${TextExt.titleCase(props.name)} | ${TextExt.titleCase(
                 props.status
             )}`}
@@ -60,6 +59,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._consoleTracker.currentChanged.connect(this._onConsoleChange);
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
+        this.node.title = 'Current active kernel';
 
         this.model = new KernelStatus.Model(
             this._getFocusedSession(this._shell.currentWidget)

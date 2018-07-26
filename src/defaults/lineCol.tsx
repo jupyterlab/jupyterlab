@@ -136,7 +136,6 @@ const LineColComponent = (
 ): React.ReactElement<LineColComponent.IProps> => {
     return (
         <TextItem
-            title="Go to line number"
             onClick={props.handleClick}
             source={`Ln ${props.line}, Col ${props.column}`}
         />
@@ -163,6 +162,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
             this._getFocusedEditor(this._shell.currentWidget)
         );
 
+        this.node.title = 'Go to line number';
         this.addClass(interactiveItem);
     }
 
