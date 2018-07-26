@@ -60,10 +60,12 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
         this.setState({ value: event.currentTarget.value });
     };
 
-    private _handleSubmit = <T extends HTMLElement>(
-        event: React.FormEvent<T>
-    ) => {
+    private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        console.log(`Submitting ${event.currentTarget.name}`);
+
+        return false;
     };
 
     private _handleFocus = () => {
@@ -80,8 +82,8 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
     render() {
         return (
-            <div className={lineFormSearch} onSubmit={this._handleSubmit}>
-                <form>
+            <div className={lineFormSearch}>
+                <form name="lineColForm" onSubmit={this._handleSubmit}>
                     <div
                         className={classes(
                             lineFormWrapper,
@@ -94,7 +96,6 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
                         <input
                             type="text"
                             className={lineFormInput}
-                            spellCheck={false}
                             onChange={this._handleChange}
                             onFocus={this._handleFocus}
                             onBlur={this._handleBlur}
@@ -106,11 +107,11 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
 
                         <input
                             type="submit"
-                            value=""
                             className={classes(
                                 lineFormButton,
                                 'lineForm-enter-icon'
                             )}
+                            value=""
                         />
                     </div>
                     <label className={lineFormCaption}>Go to line number</label>

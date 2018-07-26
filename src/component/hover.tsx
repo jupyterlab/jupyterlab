@@ -62,10 +62,9 @@ export class Popup extends Widget {
     }
 
     protected _evtClick(event: MouseEvent): void {
-        if (ElementExt.hitTest(this._body.node, event.clientX, event.clientY)) {
-            event.preventDefault();
-            event.stopPropagation();
-        } else {
+        if (
+            !ElementExt.hitTest(this._body.node, event.clientX, event.clientY)
+        ) {
             super.dispose();
             this.dispose();
             this._anchor.toggleClass(clickedItem);
