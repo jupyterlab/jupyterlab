@@ -4,15 +4,15 @@ import { IDisposable } from '@phosphor/disposable';
 export namespace SignalExt {
     export class CombinedSignal<T, U> extends Signal<T, U>
         implements IDisposable {
-        constructor(sender: T, ...children: Array<ISignal<any, U>>) {
+        constructor(sender: T, ...parents: Array<ISignal<any, U>>) {
             super(sender);
 
-            this._children = children;
+            this._parents = parents;
 
             this._forwardFunc = (_aSender: any, value: U) => {
                 this.emit(value);
             };
-            this._children.forEach(child => child.connect(this._forwardFunc));
+            this._parents.forEach(child => child.connect(this._forwardFunc));
         }
 
         get isDisposed() {
@@ -24,14 +24,12 @@ export namespace SignalExt {
                 return;
             }
 
-            this._children.forEach(child =>
-                child.disconnect(this._forwardFunc)
-            );
+            this._parents.forEach(child => child.disconnect(this._forwardFunc));
             this._isDisposed = true;
         }
 
         private _forwardFunc: Slot<any, U>;
         private _isDisposed = false;
-        private _children: Array<ISignal<any, U>>;
+        private _parents: Array<ISignal<any, U>>;
     }
 }
