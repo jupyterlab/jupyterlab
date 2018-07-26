@@ -91,9 +91,9 @@ export class TableOfContents extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Don't bother if the TOC is not visible
-    if (!this.isVisible) {
+    /* if (!this.isVisible) {
       return;
-    }
+    } */
 
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
