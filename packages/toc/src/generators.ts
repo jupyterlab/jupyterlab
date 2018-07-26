@@ -260,7 +260,7 @@ export function createLatexGenerator(
               column: 0
             });
           };
-          headings.push({ text, level, onClick });
+          headings.push({ text, level, onClick, type: 'heading' });
         }
       });
       return headings;
@@ -325,7 +325,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'heading' });
+        headings.push({ text, level, numbering, onClick, type: 'header' });
         return;
       }
 
@@ -336,7 +336,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'heading' });
+        headings.push({ text, level, numbering, onClick, type: 'header' });
         return;
       }
 
@@ -348,7 +348,7 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'heading' });
+        headings.push({ text, level, numbering, onClick, type: 'header' });
       }
     });
     return headings;
@@ -365,11 +365,9 @@ namespace Private {
       const lines = text.split('\n');
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
-      let numbering = Private.generateNumbering(numberingDict, level);
       headings.push({
         text: lines[0],
         level,
-        numbering,
         onClick,
         type: 'code'
       });
@@ -410,7 +408,7 @@ namespace Private {
         numbering +
         '</span>';
       heading.innerHTML = numberingElement + html;
-      headings.push({ level, text, numbering, html, onClick });
+      headings.push({ level, text, numbering, html, onClick, type: 'header' });
     }
     return headings;
   }
