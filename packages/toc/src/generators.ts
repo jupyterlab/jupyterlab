@@ -63,16 +63,16 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-          };
-          headings = headings.concat(
-            Private.getCodeCells(
-              text,
-              onClickFactory2,
-              numberingDict,
-              executionCount,
-              currentLevel
-            )
-          );
+            headings = headings.concat(
+              Private.getCodeCells(
+                text,
+                onClickFactory2,
+                numberingDict,
+                executionCount,
+                currentLevel
+              )
+            );
+          }
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
