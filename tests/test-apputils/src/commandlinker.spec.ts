@@ -5,8 +5,6 @@ import expect = require('expect.js');
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { h, VirtualNode, VirtualDOM } from '@phosphor/virtualdom';
-
 import { simulate } from 'simulate-event';
 
 import { CommandLinker } from '@jupyterlab/apputils';
@@ -98,34 +96,6 @@ describe('@jupyterlab/apputils', () => {
         expect(linker.isDisposed).to.be(false);
         linker.dispose();
         expect(linker.isDisposed).to.be(true);
-      });
-    });
-
-    describe('#populateVNodeDataset()', () => {
-      it('should connect a node to a command', () => {
-        let called = false;
-        let command = 'commandlinker:connect-node';
-        let commands = new CommandRegistry();
-        let linker = new CommandLinker({ commands });
-        let node: HTMLElement;
-        let vnode: VirtualNode;
-        let disposable = commands.addCommand(command, {
-          execute: () => {
-            called = true;
-          }
-        });
-
-        vnode = h.div({ dataset: linker.populateVNodeDataset(command, null) });
-        node = VirtualDOM.realize(vnode);
-        document.body.appendChild(node);
-
-        expect(called).to.be(false);
-        simulate(node, 'click');
-        expect(called).to.be(true);
-
-        document.body.removeChild(node);
-        linker.dispose();
-        disposable.dispose();
       });
     });
   });
