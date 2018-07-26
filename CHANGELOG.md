@@ -4,9 +4,11 @@
 
 #### Jul 24, 2018
 
-We added new workspace support, which enables you to have multiple saved layouts, including in different browser windows. See the [workspace documentation](https://jupyterlab.readthedocs.io/en/stable/user/urls.html) for more details. ([#4502](https://github.com/jupyterlab/jupyterlab/issues/4502), [#4708](https://github.com/jupyterlab/jupyterlab/pull/4708), [#4088](https://github.com/jupyterlab/jupyterlab/issues/4088), [#4041](https://github.com/jupyterlab/jupyterlab/pull/4041) [#3673](https://github.com/jupyterlab/jupyterlab/issues/3673), [#4780](https://github.com/jupyterlab/jupyterlab/pull/4780))
+To see the full list of pull requests and issues closed, see the [JupyterLab 0.33](https://github.com/jupyterlab/jupyterlab/milestone/12?closed=1) milestone on GitHub.
 
-We also removed the "Beta" label to better signal that JupyterLab is ready for users to use on a daily basis. The extension developer API is still being stabilized. See the release blog post for details. ([#4898](https://github.com/jupyterlab/jupyterlab/issues/4898), [#4920](https://github.com/jupyterlab/jupyterlab/pull/4920))
+In JupyterLab 0.33, we removed the "Beta" label to better signal that JupyterLab is ready for users to use on a daily basis. The extension developer API is still being stabilized. See the release blog post for details. ([#4898](https://github.com/jupyterlab/jupyterlab/issues/4898), [#4920](https://github.com/jupyterlab/jupyterlab/pull/4920))
+
+We added new workspace support, which enables you to have multiple saved layouts, including in different browser windows. See the [workspace documentation](https://jupyterlab.readthedocs.io/en/stable/user/urls.html) for more details. ([#4502](https://github.com/jupyterlab/jupyterlab/issues/4502), [#4708](https://github.com/jupyterlab/jupyterlab/pull/4708), [#4088](https://github.com/jupyterlab/jupyterlab/issues/4088), [#4041](https://github.com/jupyterlab/jupyterlab/pull/4041) [#3673](https://github.com/jupyterlab/jupyterlab/issues/3673), [#4780](https://github.com/jupyterlab/jupyterlab/pull/4780))
 
 We also added new menu items, keyboard shortcuts, commands, and settings:
 
@@ -19,11 +21,11 @@ We also added new menu items, keyboard shortcuts, commands, and settings:
 * "Save As..." given the keyboard shortcut `Ctrl/Cmd Shift S` ([#4560](https://github.com/jupyterlab/jupyterlab/pull/4560))
 * "Run All Cells" given the keyboard shortcut `Ctrl/Cmd Shift Enter` ([#4558](https://github.com/jupyterlab/jupyterlab/pull/4558)).
 * "Notebook" added to the command palette to open a new notebook ([#4812](https://github.com/jupyterlab/jupyterlab/pull/4812)).
-* `notebook:run-in-console` added to the command palette to run the selected text or current line from a notebook in a console. A default shortcut for this command is not yet provided, but can be added by users. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
+* "Run Selected Text or Current Line in Console" added to the command palette to run the selected text or current line from a notebook in a console. A default keyboard shortcut for this command is not yet provided, but can be added by users with the `notebook:run-in-console` command. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
 * "fontFamily", "fontSize", and "lineHeight" settings added to the text editor advanced settings ([#4673](https://github.com/jupyterlab/jupyterlab/pull/4673)).
 * "Show Left Area" has been renamed to "Show Left Sidebar" for consistency (same for right sidebar) ([#3818](https://github.com/jupyterlab/jupyterlab/pull/3818))
 * "notebook:change-to-cell-heading-X" keyboard shortcuts (and commands) renamed to "notebook:change-cell-to-heading-X" for X=1...6. This fixes the notebook command-mode keyboard shortcuts for changing headings. ([#4430](https://github.com/jupyterlab/jupyterlab/pull/4430))
-* Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity in a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
+* Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity from a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
 
 Other changes for users include:
 
@@ -57,23 +59,17 @@ Changes for extension developers include:
 * The session `kernelChanged` signal now contains both the old kernel and the new kernel to make it easy to unregister things from the old kernel. ([#4834](https://github.com/jupyterlab/jupyterlab/pull/4834))
 * The `connectTo` functions for connecting to kernels and sessions are now synchronous (returning a connection immediately rather than a promise). The DefaultSession `clone` and `update` methods are also synchronous now. ([#4725](https://github.com/jupyterlab/jupyterlab/pull/4725))
 * Kernel message processing is now asynchronous, which guarantees the order of processing even if a handler is asynchronous. If a kernel message handler returns a promise, kernel message processing is paused until the promise resolves. The kernel's `anyMessage` signal is emitted synchronously when a message is received before asynchronous message handling, and the `iopubMessage` and `unhandledMessage` signals are emitted during asynchronous message handling. These changes mean that the comm `onMsg` and `onClose` handlers and the kernel future `onReply`, `onIOPub`, and `onStdin` handlers, as well as the comm target and message hook handlers, may be asynchronous and return promises. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
-
 * Kernel comm targets and message hooks now are unregistered with `removeCommTarget` and `removeMessageHook`, instead of using disposables. The corresponding `registerCommTarget` and `registerMessageHook` functions now return nothing.
 * The kernel `connectToComm` function is synchronous, and now returns the comm rather than a promise to the comm. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The `KernelFutureHandler` class `expectShell` constructor argument is renamed to `expectReply`. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The kernel future `done` returned promise now resolves to undefined if there is no reply message. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The `IDisplayDataMsg` is updated to have the optional `transient` key, and a new `IUpdateDisplayDataMsg` type was added for update display messages. ([#4697](https://github.com/jupyterlab/jupyterlab/pull/4697))
 * The `uuid` function from `@jupyterlab/coreutils` is removed. Instead import `UUID` from `@phosphor/coreutils` and use `UUID.uuid4()` . ([#4604](https://github.com/jupyterlab/jupyterlab/pull/4604))
-* Main area widgets like the notebook, editor, console, and launcher now inherit from a common `MainAreaWidget` class. The `MainAreaWidget` class provides a consistent interface with a content area (`.content`) and a toolbar (`.toolbar`), and consistent focus handling and activation. Extension authors may consider inheriting from the `MainAreaWidget` for consistency. Several changes this caused include:
-
+* Main area widgets like the launcher and console inherit from a common `MainAreaWidget` class which provides a content area (`.content`) and a toolbar (`.toolbar`), consistent focus handling and activation behavior, and a spinner displayed until the given `reveal` promise is resolved. Document widgets, like the notebook and text editor and other documents opened from the document manager, implement the `IDocumentWidget` interface (instead of `DocumentRegistry.IReadyWidget`), which builds on `MainAreaWidget` and adds a `.context` attribute for the document context and makes dirty handling consistent. Extension authors may consider inheriting from the `MainAreaWidget` or `DocumentWidget` class for consistency. Several effects from these changes are noted below. ([#3499](https://github.com/jupyterlab/jupyterlab/pull/3499), [4453](https://github.com/jupyterlab/jupyterlab/pull/4453))
   * The notebook panel `.notebook` attribute is renamed to `.content`.
-  * The text editor widget's editor is `.content.editor` rather than just `.editor`.
-  * Document widgets implement `IDocumentWidget<ContentType>`, instead of using `DocumentRegistry.IReadyWidget`. A `DocumentWidget` has the `.toolbar` and `.content` attributes from `MainAreaWidget` and adds a context attribute.
+  * The text editor is now the `.content` of a `DocumentWidget`, so the top-level editor widget has a toolbar and the editor itself is `widget.content.editor` rather than just `widget.editor`.
   * Mime documents use a `MimeContent` widget embedded inside of a `DocumentWidget` now.
-
-  ([#3499](https://github.com/jupyterlab/jupyterlab/pull/3499), [4453](https://github.com/jupyterlab/jupyterlab/pull/4453))
-
-* The notebook panel `.notebook` attribute has been renamed to `.content` for consistency with other main area widgets.
+  * Main area widgets and document widgets now have a `revealed` promise which resolves when the widget has been revealed (i.e., the spinner has been removed). This should be used instead of the `ready` promise.
 
 Changes in the JupyterLab code infrastructure include:
 
