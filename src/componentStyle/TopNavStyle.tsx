@@ -16,18 +16,27 @@ export const TopNavStyle = style({
 });
 
 export const SymbolsStyle = style({
-  width: '20%'
+  width: '15%',
+  display: 'table',
+  paddingLeft: '5%',
+  lineHeight: '24px'
 });
 
+export const SymbolsSmallStyle = style({
+  lineHeight: '14px'
+})
+
 export const SymbolsRowStyle = style({
-  display: 'flex',
+  display: 'table-row',
   justifyContent: 'center',
   paddingLeft: '20%',
 
   $nest: {
     '& div': {
       margin: '0px 10px',
-      fontSize: 'var(--jp-ui-font-size1)'
+      fontSize: 'var(--jp-ui-font-size1)',
+      display: 'table-cell',
+      width: '60%'
     }
   }
 });
@@ -95,7 +104,7 @@ export const AdvancedOptionsLinkStyle = style({
 
   $nest: {
     '&:hover': {
-      textDecoration: 'underline'
+      color: 'var(--jp-brand-color1)'
     },
     '&:active': {
       color: 'var(--jp-brand-color0)'

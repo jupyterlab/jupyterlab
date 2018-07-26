@@ -35,6 +35,7 @@
     "@jupyterlab/coreutils": "^2.0.0-1",
     "@jupyterlab/mainmenu": "^0.6.0-1",
     "@phosphor/widgets": "^1.6.0",
+    "@phosphor/keyboard": "^1.1.2",
     "@types/react-dom": "16.0.4",
     "react": "^16.4.1",
     "typestyle": "^2.0.1"

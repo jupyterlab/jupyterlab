@@ -1,14 +1,19 @@
-import { ShortcutObject } from '../index';
+import { ShortcutObject, TakenByObject } from '../index';
 
 import * as React from 'react';
 
 import { classes } from 'typestyle';
+
+import { EN_US } from '@phosphor/keyboard'
 
 import {
   InputStyle,
   InputUnavailableStyle,
   InputBoxHiddenStyle,
   InputBoxStyle,
+  InputTextStyle,
+  InputWaitingStyle,
+  InputSelectedTextStyle,
   SubmitNonFunctionalStyle,
   SubmitConflictStyle,
   SubmitStyle
@@ -16,13 +21,17 @@ import {
 
 export interface IShortcutInputProps {
   handleUpdate: Function;
+  deleteShortcut:Function;
   toggleInput: Function;
   shortcut: ShortcutObject;
+  shortcutId: string;
   toSymbols: Function;
-  keyBindingsUsed: { [index: string] : ShortcutObject };
+  keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   displayInput: boolean;
+  newOrReplace: string;
+  placeholder: string;
 }
 
 export interface IShortcutInputState {
@@ -30,9 +39,10 @@ export interface IShortcutInputState {
   userInput: string;
   isAvailable: boolean;
   isFunctional: boolean;
-  takenBy: ShortcutObject;
+  takenByObject: TakenByObject;
   keys: Array<string>;
   currentChain: string;
+  selected: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -44,13 +54,14 @@ export class ShortcutInput extends React.Component<
   }
 
   state = {
-    value: '',
+    value: this.props.placeholder,
     userInput: '',
     isAvailable: true,
-    isFunctional: false,
-    takenBy: new ShortcutObject(),
+    isFunctional: this.props.newOrReplace === 'replace',
+    takenByObject: new TakenByObject(),
     keys: new Array<string>(),
-    currentChain: ''
+    currentChain: '',
+    selected: true,
   };
 
   handleUpdate = () => {
@@ -65,10 +76,24 @@ export class ShortcutInput extends React.Component<
     );
   }
 
-  onKeyPress = (
-    event: any
-  ): void => {
-    event.preventDefault()
+  handleOverwrite = async () => {
+    this.props.deleteShortcut(
+      this.state.takenByObject.takenBy, 
+      this.state.takenByObject.takenByKey
+    ).then(this.handleUpdate())
+  }
+
+  handleReplace = async() => {
+    let keys = this.state.keys
+    keys.push(this.state.currentChain)
+    const shortcut = this.props.shortcut
+    this.props.toggleInput();
+    console.log('deleting  ', this.props.shortcutId)
+    await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
+    this.props.handleUpdate(
+      shortcut,
+      keys
+    );
   }
 
   /** Parse user input for chained shortcuts */
@@ -80,21 +105,17 @@ export class ShortcutInput extends React.Component<
     currentChain: string
   ): Array<any> => {
     event.preventDefault();
-    const wordKeys = [
-      'Tab',
-      'Shift',
-      'Ctrl',
-      'Control',
-      'Alt',
-      'Accel',
-      'Meta',
-      'Enter',
-      'ArrowUp',
-      'ArrowDown',
-      'ArrowRight',
-      'ArrowLeft',
-      'Escape'
-    ];
+    let key = EN_US.keyForKeydownEvent(event)
+
+    const modKeys = [
+      "Shift",
+      "Control",
+      "Alt",
+      "Meta",
+      "Ctrl",
+      "Accel"
+    ]
+
     if (event.key === 'Backspace') {
       userInput = '';
       value = '';
@@ -110,10 +131,14 @@ export class ShortcutInput extends React.Component<
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
         .trim();
-      if (wordKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
+
+      /** if last key was not a modefier key then there is a chain */
+      if (modKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = userInput + ',';
         keys.push(currentChain);
         currentChain = '';
+
+        /** check if a modefier key was held down through chain */
         if (event.ctrlKey && event.key != 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -130,22 +155,36 @@ export class ShortcutInput extends React.Component<
           userInput = (userInput + ' Shift').trim();
           currentChain = (currentChain + ' Shift').trim();
         }
-        if (wordKeys.lastIndexOf(event.key) === -1) {
-          userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
-          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
+
+        /** if key is not a modefier key, add its name to user input and current chain */
+        if (modKeys.lastIndexOf(event.key) === -1) {
+          userInput = (userInput + ' ' + key).trim();
+          currentChain = (currentChain + ' ' + key).trim();
+
+        /** if key is a modefier key, add its translated name to user input and current chain */
         } else {
           if (event.key === 'Meta') {
             userInput = (userInput + ' Accel').trim();
             currentChain = (currentChain + ' Accel').trim();
-          } else if (event.key === ' Control') {
+          } else if (event.key === 'Control') {
             userInput = (userInput + ' Ctrl').trim();
             currentChain = (currentChain + ' Ctrl').trim();
-          } else {
+          } else if (event.key === 'Shift') {
+            userInput = (userInput + ' Shift').trim();
+            currentChain = (currentChain + ' Shift').trim();
+          } else if (event.key === 'Alt') {
+            userInput = (userInput + ' Alt').trim();
+            currentChain = (currentChain + ' Alt').trim();
+          } else{
             userInput = (userInput + ' ' + event.key).trim();
             currentChain = (currentChain + ' ' + event.key).trim();
           }
         }
+
+      /** if there is not a chain, add the key to user input and current chain */
       } else {
+
+        /** if modefier key, rename */
         if (event.key === 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -158,15 +197,16 @@ export class ShortcutInput extends React.Component<
         } else if (event.key === 'Alt') {
           userInput = (userInput + ' Alt').trim();
           currentChain = (currentChain + ' Alt').trim();
-        } else if (wordKeys.lastIndexOf(event.key) === -1) {
-          userInput = (userInput + ' ' + event.key.toUpperCase()).trim();
-          currentChain = (currentChain + ' ' + event.key.toUpperCase()).trim();
-        } else {
-          userInput = (userInput + ' ' + event.key).trim();
-          currentChain = (currentChain + ' ' + event.key).trim();
+
+        /** if not a modefier key, add it regularly */
+        } else  {
+          userInput = (userInput + ' ' + key).trim();
+          currentChain = (currentChain + ' ' + key).trim();
         }
       }
     }
+
+    /** update state of keys and currentChain */
     this.setState({
       keys: keys,
       currentChain: currentChain
@@ -183,9 +223,9 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = shortcut.split(', ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1 || shortcut === '')
+      isFunctional: !(dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/)
     });
-    return dontEnd.indexOf(last) !== -1 || shortcut === '';
+    return dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/;
   };
 
   /** Check if shortcut being typed is already taken */
@@ -193,13 +233,17 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: string[],
     currentChain: string
-  ): ShortcutObject => {
+  ): TakenByObject => {
+
+    /** First, check whole shortcut */
     let isAvailable =
       (Object.keys(this.props.keyBindingsUsed).indexOf(
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ) === -1) || userInput === '';
-    let takenBy: ShortcutObject = new ShortcutObject();
+    let takenByObject: TakenByObject = new TakenByObject();
     if (isAvailable) {
+
+      /** Next, check each piece of a chain */
       for (let binding of keys) {
         if (
           Object.keys(this.props.keyBindingsUsed).indexOf(
@@ -208,34 +252,49 @@ export class ShortcutInput extends React.Component<
           binding !== ''
         ) {
           isAvailable = false;
-          takenBy = this.props.keyBindingsUsed[
+          takenByObject = this.props.keyBindingsUsed[
             binding + '_' + this.props.shortcut.selector
           ];
+          break;
         }
       }
+
+      /** Check current chain */
       if (
+        isAvailable &&
         Object.keys(this.props.keyBindingsUsed).indexOf(
           currentChain + '_' + this.props.shortcut.selector
         ) !== -1 &&
         currentChain !== ''
       ) {
         isAvailable = false;
-        takenBy = this.props.keyBindingsUsed[
+        takenByObject = this.props.keyBindingsUsed[
           currentChain + '_' + this.props.shortcut.selector
         ];
       }
+
+    /** If unavailable set takenByObject */
     } else {
-      takenBy = this.props.keyBindingsUsed[
+      takenByObject = this.props.keyBindingsUsed[
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
+
+    /** allow to set shortcut to what it initially was if replacing */
+    if (!isAvailable) {
+      if (takenByObject.takenBy.id === this.props.shortcut.id && this.props.newOrReplace === 'replace') {
+        isAvailable = true;
+        takenByObject = new TakenByObject();
+      }
+    }
+
     this.setState({ isAvailable: isAvailable });
-    return takenBy;
+    return takenByObject;
   };
 
-  checkConflict(takenBy: ShortcutObject): void {
-    if (takenBy.id !== '' && takenBy.id !== this.props.shortcut.id) {
-      this.props.sortConflict(this.props.shortcut, takenBy);
+  checkConflict(takenByObject: TakenByObject, keys: string): void {
+    if (takenByObject.id !== '' && takenByObject.takenBy.id !== this.props.shortcut.id) {
+      this.props.sortConflict(this.props.shortcut, takenByObject, takenByObject.takenByLabel, '');
     } else {
       this.props.clearConflicts();
     }
@@ -243,6 +302,7 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: any): void => {
+    this.setState({selected: false})
     const parsed = this.parseChaining(
       event,
       this.state.value,
@@ -255,14 +315,14 @@ export class ShortcutInput extends React.Component<
     const currentChain = parsed[2]
 
     const value = this.props.toSymbols(userInput);
-    let takenBy = this.checkShortcutAvailability(userInput, keys, currentChain);
-    this.checkConflict(takenBy);
+    let takenByObject = this.checkShortcutAvailability(userInput, keys, currentChain);
+    this.checkConflict(takenByObject, keys);
 
     this.setState(
       {
         value: value,
         userInput: userInput,
-        takenBy: takenBy,
+        takenByObject: takenByObject,
         keys: keys,
         currentChain: currentChain
       },
@@ -271,7 +331,7 @@ export class ShortcutInput extends React.Component<
   };
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur') {
+    if (event.relatedTarget === null || (event.relatedTarget as HTMLElement).id !== 'no-blur' && (event.relatedTarget as HTMLElement).id !== 'overwrite') {
       this.props.toggleInput();
       this.setState({
         value: '',
@@ -282,6 +342,8 @@ export class ShortcutInput extends React.Component<
   };
 
   render() {
+    console.log(this.props.shortcutId)
+
     let inputClassName = InputStyle;
     if (!this.state.isAvailable) {
       inputClassName = classes(inputClassName, InputUnavailableStyle);
@@ -293,13 +355,20 @@ export class ShortcutInput extends React.Component<
         }
         onBlur={(event) => this.handleBlur(event)}
       >
-        <input
+        <div tabIndex={0}
+          id='no-blur'
           className={inputClassName}
-          value={this.state.value}
           onKeyDown={this.handleInput}
           ref={input => input && input.focus()}
-          placeholder="press keys"
-        />
+        >
+          <p className={
+            (this.state.selected && this.props.newOrReplace==='replace') 
+            ? classes(InputTextStyle, InputSelectedTextStyle) 
+            : (this.state.value === '' ? classes(InputTextStyle, InputWaitingStyle) : InputTextStyle)
+          }>
+            {this.state.value === '' ? 'press keys' : this.state.value}
+          </p>
+        </div>
         <button
           className={
             !this.state.isFunctional
@@ -308,18 +377,43 @@ export class ShortcutInput extends React.Component<
                 ? classes(SubmitStyle, SubmitConflictStyle)
                 : SubmitStyle
           }
-          id={this.state.value !== '' ? 'no-blur' : 'blur'}
+          id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
-            this.handleUpdate();
-            this.setState({
-              value: '',
-              keys: [],
-              currentChain: ''
-            });
-            this.props.toggleInput();
+            if (this.props.newOrReplace === 'new') {
+              this.handleUpdate();
+              this.setState({
+                value: '',
+                keys: [],
+                currentChain: ''
+              });
+              this.props.toggleInput();
+            } else {
+              /** don't replace if field has not been edited */
+              if (this.state.selected) {
+                this.props.toggleInput();
+                this.setState({
+                  value: '',
+                  userInput: ''
+                });
+                this.props.clearConflicts();
+              } else {
+                this.handleReplace();
+              }
+            }
           }}
         />
+        {!this.state.isAvailable &&
+          <button
+            hidden
+            id='overwrite'
+            onClick={()=>{
+              this.handleOverwrite();
+              this.props.clearConflicts();
+              this.props.toggleInput();
+            }}
+          >Overwrite</button>
+        }
       </div>
     );
   }

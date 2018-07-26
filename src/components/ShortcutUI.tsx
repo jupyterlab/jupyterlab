@@ -8,7 +8,7 @@ import { ShortcutList } from './ShortcutList';
 
 import { TopNav } from './TopNav';
 
-import { ShortcutObject } from '../index';
+import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
 import { TopWhitespaceStyle, ShortcutUIStyle } from '../componentStyle/ShortcutUIStyle';
 
@@ -39,7 +39,7 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentSort: string;
-  keyBindingsUsed:  { [index: string] : ShortcutObject };
+  keyBindingsUsed:  { [index: string] : TakenByObject };
 }
 
 /** Normalize the query text for a fuzzy search. */
@@ -185,44 +185,50 @@ function getShortcutObjects(
   const shortcuts: any = shortcutsObj['composite'];
   let shortcutObjects: {[index: string]: ShortcutObject} = {};
   Object.keys(shortcuts).forEach(shortcutKey => {
-    let key =
-      shortcuts[shortcutKey]['command'] +
-      '_' +
-      shortcuts[shortcutKey]['selector'];
-    if (Object.keys(shortcutObjects).indexOf(key)!==-1) {
-      shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-      shortcutObjects[key].numberOfShortcuts = 2;
-    } else {
-      let shortcutObject = new ShortcutObject();
-      shortcutObject.commandName = shortcuts[shortcutKey]['command'];
-      shortcutObject.label = shortcuts[shortcutKey]['title'];
-      shortcutObject.category = shortcuts[shortcutKey]['category'];
-      shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
-      shortcutObject.selector = shortcuts[shortcutKey]['selector'];
-      shortcutObject.source = 'Default';
-      shortcutObject.id = shortcutKey;
-      shortcutObject.numberOfShortcuts = 1;
-      shortcutObjects[key] = shortcutObject;
-    }
+      let key =
+        shortcuts[shortcutKey]['command'] +
+        '_' +
+        shortcuts[shortcutKey]['selector'];
+      if (Object.keys(shortcutObjects).indexOf(key)!==-1) {
+        shortcutObjects[key].keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+        shortcutObjects[key].numberOfShortcuts = 2;
+      } else {
+        let shortcutObject = new ShortcutObject();
+        shortcutObject.commandName = shortcuts[shortcutKey]['command'];
+        shortcutObject.label = shortcuts[shortcutKey]['title'];
+        shortcutObject.category = shortcuts[shortcutKey]['category'];
+        shortcutObject.keys[shortcutKey] = shortcuts[shortcutKey]['keys'];
+        shortcutObject.selector = shortcuts[shortcutKey]['selector'];
+        shortcutObject.source = 'Default';
+        shortcutObject.id = shortcutKey;
+        shortcutObject.numberOfShortcuts = 1;
+        shortcutObjects[key] = shortcutObject;
+      }
   });
   return shortcutObjects;
 }
 
-/** Get list of all shortcut keybindings currently in use */
-/** An object where keys are unique keyBinding_selector and values are shortcut objects */
+/** Get list of all shortcut keybindings currently in use
+* An object where keys are unique keyBinding_selector and values are shortcut objects **/
 function getKeyBindingsUsed(
   shortcutObjects: {[index: string]: ShortcutObject}
-):  { [index: string] : ShortcutObject } {
-  let keyBindingsUsed:  { [index: string] : ShortcutObject } = {};
+):  { [index: string] : TakenByObject } {
+  let keyBindingsUsed:  { [index: string] : TakenByObject } = {};
   Object.keys(shortcutObjects).forEach((shortcut: string) => {
-    for (let key of Object.keys(shortcutObjects[shortcut].keys)) {
+    Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
+      const takenBy = new TakenByObject()
+      takenBy.takenByKey = key;
+      takenBy.takenByLabel = shortcutObjects[shortcut].category + ': ' + shortcutObjects[shortcut].label
+      takenBy.takenBy = shortcutObjects[shortcut];
+      takenBy.id = shortcutObjects[shortcut].selector + '_' + shortcutObjects[shortcut].commandName
+
       keyBindingsUsed[
-        shortcutObjects[shortcut].keys[key].join(' ') +
-          '_' +
-          shortcutObjects[shortcut].selector
+        shortcutObjects[shortcut].keys[key].join(" ") +
+        '_' +
+        shortcutObjects[shortcut].selector
       ] =
-      shortcutObjects[shortcut];
-    }
+      takenBy;
+    })
   });
   return keyBindingsUsed;
 }
@@ -320,38 +326,74 @@ export class ShortcutUI extends React.Component<
     const settings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    Object.keys(settings.user).forEach(async key => {
+    for(const key of Object.keys(settings.user)) {
       await this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
-    });
+    };
     this._getShortcutList();
   };
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    if (keys[0] !== '') {
-      let commandId: string = shortcutObject.id;
-      if (shortcutObject.numberOfShortcuts === 1) {
-        commandId = commandId + '-2';
-      } else {
-        Object.keys(shortcutObject.keys).forEach(key => {
-          if (shortcutObject.keys[key][0] === '') {
-            commandId = key;
-          }
-        });
-      }
-      await this.props.settingRegistry.set(
-        this.props.shortcutPlugin,
-        commandId,
-        {
-          command: shortcutObject.commandName,
-          keys: keys,
-          selector: shortcutObject.selector,
-          title: shortcutObject.label,
-          category: shortcutObject.category
+    await this._getShortcutList()
+    console.log(shortcutObject)
+    
+    let shortcut: ShortcutObject = this.state.filteredShortcutList.filter((s:ShortcutObject) => (
+      s.commandName === shortcutObject.commandName &&
+      s.selector === shortcutObject.selector
+    ))[0]
+
+    shortcutObject = shortcut;
+
+    console.log(shortcutObject)
+
+    let nonEmptyKeys: string[] = Object.keys(shortcutObject.keys)
+    nonEmptyKeys = nonEmptyKeys.filter((key: string) => {
+      console.log(shortcutObject.keys[key])
+      console.log(shortcutObject.keys[key][0] !== "")
+      return shortcutObject.keys[key][0] !== ""
+    })
+    let nonEmptyKey:string = nonEmptyKeys[0]
+    console.log('not empty', nonEmptyKeys, nonEmptyKey)
+    console.log('this things id', shortcutObject.id)
+    console.log(shortcutObject.keys)
+
+    let commandId: string = shortcutObject.id;
+    if (commandId === nonEmptyKey) {
+      console.log(nonEmptyKey.split('-')[nonEmptyKey.split('-').length -1])
+      if (nonEmptyKey.split('-')[nonEmptyKey.split('-').length -1] !== '2'){
+        /** either command-name or command-name-1 is taken */
+        if (commandId.split('-').indexOf('1') !== -1) {
+          commandId = shortcutObject.id.replace('-1','-2')
+        } else if (commandId.split('-').indexOf('2') === -1) {
+          commandId = shortcutObject.id + '-2';
         }
-      );
-      this._getShortcutList();
+      } else if (shortcutObject.numberOfShortcuts == 2) {
+        /** there are 2 by default, -1 is not taken */
+        if (commandId.split('-').indexOf('2') !== -1) {
+          commandId = shortcutObject.id.replace('-2','-1')
+        } else if (commandId.split('-').indexOf('1') === -1) {
+          commandId = shortcutObject.id + '-1';
+        }
+      } else {
+        /** there is 1 by default, it is not taken */
+        commandId = shortcutObject.id
+      }
     }
+
+    console.log('adding to ', commandId)
+
+    await this.props.settingRegistry.set(
+      this.props.shortcutPlugin,
+      commandId,
+      {
+        command: shortcutObject.commandName,
+        keys: keys,
+        selector: shortcutObject.selector,
+        title: shortcutObject.label,
+        category: shortcutObject.category
+      }
+    );
+    this._getShortcutList();
   };
 
   /** Delete shortcut for command, refresh state */
@@ -374,7 +416,7 @@ export class ShortcutUI extends React.Component<
         category: shortcutObject.category
       }
     );
-    this._getShortcutList();
+    this._getShortcutList().then(() => console.log('done'));
   };
 
   /** Reset a specific shortcut to its default settings */
@@ -433,29 +475,37 @@ export class ShortcutUI extends React.Component<
   /** Sort shortcut list so that the conflicting shortcut is right below the one currently being set */
   sortConflict = (
     newShortcut: ShortcutObject,
-    oldShortcut: ShortcutObject
+    takenBy: TakenByObject
   ): void => {
-    /*** */
-    console.log('sorting conflict')
-    const shortcutList = this.state.filteredShortcutList
-      .filter((shortcut: ShortcutObject) => shortcut.id !== oldShortcut.id)
+    
+    const shortcutList = this.state.filteredShortcutList 
+
+    if (shortcutList.filter(shortcut => shortcut.id === 'error_row').length === 0) {
+      const errorRow = new ErrorObject()
+      errorRow.takenBy = takenBy
+      errorRow.id = 'error_row'
+
+      shortcutList.splice(
+          shortcutList.indexOf(newShortcut) + 1,
+          0,
+          errorRow
+        );
       
-    shortcutList.splice(
-        shortcutList.indexOf(newShortcut) + 1,
-        0,
-        oldShortcut
-      );
-    console.log(shortcutList)
-    oldShortcut.hasConflict = true;
-    this.setState({ filteredShortcutList: shortcutList });
+      errorRow.hasConflict = true;
+      this.setState({ filteredShortcutList: shortcutList });
+      }
   };
 
   /** Remove conflict flag from all shortcuts */
   clearConflicts = (): void => {
-    const shortcutList = this.state.filteredShortcutList;
+    /** Remove error row */
+    const shortcutList = this.state.filteredShortcutList
+      .filter(shortcut => shortcut.id !== 'error_row')
+
     shortcutList.forEach((shortcut: ShortcutObject) => {
       shortcut.hasConflict = false;
     });
+
     this.setState({ filteredShortcutList: shortcutList });
   };
 
@@ -486,6 +536,7 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
+          errorSize={this.props.width < 775 ? 'small' : 'regular'}
         />
       </div>
     );

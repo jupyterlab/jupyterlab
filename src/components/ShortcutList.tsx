@@ -7,7 +7,7 @@ import {
   ShortcutListContainerStyle 
 } from '../componentStyle/ShortcutListStyle';
 
-import { ShortcutObject } from '..';
+import { ShortcutObject, TakenByObject } from '..';
 
 const TOPNAV_HEIGHT: number = 174
 
@@ -18,10 +18,11 @@ export interface IShortcutListProps {
   resetShortcut: Function;
   deleteShortcut: Function;
   showSelectors: boolean;
-  keyBindingsUsed: { [index: string] : ShortcutObject };
+  keyBindingsUsed: { [index: string] : TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
   height: number;
+  errorSize: string;
 }
 
 /** React component for list of shortcuts */
@@ -46,6 +47,7 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
                 keyBindingsUsed={this.props.keyBindingsUsed}
                 sortConflict={this.props.sortConflict}
                 clearConflicts={this.props.clearConflicts}
+                errorSize={this.props.errorSize}
               />
             );
           })}
