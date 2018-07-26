@@ -14,7 +14,7 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
+import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
@@ -159,6 +159,16 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
  * Export the plugin as default.
  */
 export default plugin;
+
+/* Widget to display the revert to checkpoint confirmation. */
+class RevertConfirmWidget extends Widget {
+  /**
+   * Construct a new revert confirmation widget.
+   */
+  constructor(checkpoint: Contents.ICheckpointModel) {
+    super({ node: Private.createRevertConfirmNode(checkpoint) });
+  }
+}
 
 /**
  * Add the file operations commands to the application's command registry.
@@ -409,13 +419,37 @@ function addCommands(
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
-        if (context.model.readOnly) {
-          return context.revert();
-        }
-        return context.restoreCheckpoint().then(() => context.revert());
+      if (!isEnabled()) {
+        return;
       }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return context.listCheckpoints().then(checkpoints => {
+        if (checkpoints.length < 1) {
+          return;
+        }
+        const lastCheckpoint = checkpoints[checkpoints.length - 1];
+        if (!lastCheckpoint) {
+          return;
+        }
+        return showDialog({
+          title: 'Revert notebook to checkpoint',
+          body: new RevertConfirmWidget(lastCheckpoint),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: 'Revert' })
+          ]
+        }).then(result => {
+          if (context.isDisposed) {
+            return;
+          }
+          if (result.button.accept) {
+            if (context.model.readOnly) {
+              return context.revert();
+            }
+            return context.restoreCheckpoint().then(() => context.revert());
+          }
+        });
+      });
     }
   });
 
@@ -646,4 +680,38 @@ namespace Private {
    * A counter for unique IDs.
    */
   export let id = 0;
+
+  export function createRevertConfirmNode(
+    checkpoint: Contents.ICheckpointModel
+  ): HTMLElement {
+    let body = document.createElement('div');
+    let confirmMessage = document.createElement('p');
+    let confirmText = document.createTextNode(`Are you sure you want to revert
+      the notebook to the latest checkpoint? `);
+    let cannotUndoText = document.createElement('strong');
+    cannotUndoText.textContent = 'This cannot be undone.';
+
+    confirmMessage.appendChild(confirmText);
+    confirmMessage.appendChild(cannotUndoText);
+
+    let lastCheckpointMessage = document.createElement('p');
+    let lastCheckpointText = document.createTextNode(
+      'The checkpoint was last updated at: '
+    );
+    let lastCheckpointDate = document.createElement('p');
+    let date = new Date(checkpoint.last_modified);
+    lastCheckpointDate.style.textAlign = 'center';
+    lastCheckpointDate.textContent =
+      Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +
+      ' (' +
+      Time.formatHuman(date) +
+      ')';
+
+    lastCheckpointMessage.appendChild(lastCheckpointText);
+    lastCheckpointMessage.appendChild(lastCheckpointDate);
+
+    body.appendChild(confirmMessage);
+    body.appendChild(lastCheckpointMessage);
+    return body;
+  }
 }
