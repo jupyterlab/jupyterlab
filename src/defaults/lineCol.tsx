@@ -37,11 +37,13 @@ import {
     lineFormButton
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
+import { Message } from '@phosphor/messaging';
 
 namespace LineForm {
     export interface IProps {
         handleSubmit: (value: number) => void;
         currentLine: number;
+        maxLine: number;
     }
 
     export interface IState {
@@ -63,7 +65,15 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        console.log(`Submitting ${event.currentTarget.name}`);
+        const value = parseInt(this._textInput!.value, 10);
+        if (
+            !isNaN(value) &&
+            isFinite(value) &&
+            1 <= value &&
+            value <= this.props.maxLine
+        ) {
+            this.props.handleSubmit(value);
+        }
 
         return false;
     };
@@ -83,7 +93,11 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     render() {
         return (
             <div className={lineFormSearch}>
-                <form name="lineColForm" onSubmit={this._handleSubmit}>
+                <form
+                    name="lineColumnForm"
+                    onSubmit={this._handleSubmit}
+                    noValidate
+                >
                     <div
                         className={classes(
                             lineFormWrapper,
@@ -114,7 +128,9 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
                             value=""
                         />
                     </div>
-                    <label className={lineFormCaption}>Go to line number</label>
+                    <label className={lineFormCaption}>
+                        Go to line number between 1 and {this.props.maxLine}
+                    </label>
                 </form>
             </div>
         );
@@ -195,15 +211,23 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
+    protected onUpdateRequest(msg: Message) {
+        this.model!.editor = this._getFocusedEditor(this._shell.currentWidget);
+
+        super.onUpdateRequest(msg);
+    }
+
     private _handleClick = () => {
         const body = new ReactElementWidget(
             (
                 <LineForm
                     handleSubmit={this._handleSubmit}
                     currentLine={this.model!.line}
+                    maxLine={this.model!.editor!.lineCount}
                 />
             )
         );
+
         this._popup = showPopup({
             body: body,
             anchor: this
@@ -215,6 +239,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this._popup!.dispose();
         this.model!.editor!.focus();
     };
+
     private _onNotebookChange = (tracker: INotebookTracker) => {
         this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
     };
