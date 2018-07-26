@@ -51,6 +51,7 @@
         "@jupyterlab/mainmenu": "^0.6.1",
         "@jupyterlab/notebook": "^0.17.1",
         "@jupyterlab/observables": "^2.0.1",
+        "@jupyterlab/docmanager": "^0.17.1",
         "@jupyterlab/services": "^3.0.1",
         "@jupyterlab/tooltip": "^0.17.1",
         "@phosphor/algorithm": "^1.1.2",

@@ -7,13 +7,14 @@ import {
 } from '@jupyterlab/application';
 import { IDefaultsManager } from './manager';
 import { TextItem } from '../component/text';
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { Widget, Title } from '@phosphor/widgets';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 namespace FilePathComponent {
     export interface IProps {
@@ -34,10 +35,14 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
         super();
 
         this._shell = opts.shell;
+        this._docManager = opts.docManager;
 
         this._shell.currentChanged.connect(this._onShellCurrentChanged);
 
-        this.model = new FilePath.Model(this._shell.currentWidget);
+        this.model = new FilePath.Model(
+            this._shell.currentWidget,
+            this._docManager
+        );
 
         this.node.title = this.model.path;
     }
@@ -70,14 +75,16 @@ class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
     };
 
     private _shell: ApplicationShell;
+    private _docManager: IDocumentManager;
 }
 
 namespace FilePath {
     export class Model extends VDomModel implements IFilePath.IModel {
-        constructor(widget: Widget | null) {
+        constructor(widget: Widget | null, docManager: IDocumentManager) {
             super();
 
             this.widget = widget;
+            this._docManager = docManager;
         }
 
         get path() {
@@ -95,10 +102,9 @@ namespace FilePath {
         set widget(widget: Widget | null) {
             const oldWidget = this._widget;
             if (oldWidget !== null) {
-                if (oldWidget instanceof DocumentWidget) {
-                    oldWidget.context.pathChanged.disconnect(
-                        this._onPathChange
-                    );
+                const oldContext = this._docManager.contextForWidget(oldWidget);
+                if (oldContext) {
+                    oldContext.pathChanged.disconnect(this._onPathChange);
                 } else {
                     oldWidget.title.changed.disconnect(this._onTitleChange);
                 }
@@ -109,16 +115,21 @@ namespace FilePath {
             if (this._widget === null) {
                 this._path = '';
                 this._name = '';
-            } else if (this._widget instanceof DocumentWidget) {
-                this._path = this._widget.context.path;
-                this._name = PathExt.basename(this._widget.context.path);
-
-                this._widget.context.pathChanged.connect(this._onPathChange);
             } else {
-                this._path = '';
-                this._name = this._widget.title.label;
+                const widgetContext = this._docManager.contextForWidget(
+                    this._widget
+                );
+                if (widgetContext) {
+                    this._path = widgetContext.path;
+                    this._name = PathExt.basename(widgetContext.path);
 
-                this._widget.title.changed.connect(this._onTitleChange);
+                    widgetContext.pathChanged.connect(this._onPathChange);
+                } else {
+                    this._path = '';
+                    this._name = this._widget.title.label;
+
+                    this._widget.title.changed.connect(this._onTitleChange);
+                }
             }
 
             this.stateChanged.emit(void 0);
@@ -143,10 +154,12 @@ namespace FilePath {
         private _path: string = '';
         private _name: string = '';
         private _widget: Widget | null = null;
+        private _docManager: IDocumentManager;
     }
 
     export interface IOptions {
         shell: ApplicationShell;
+        docManager: IDocumentManager;
     }
 }
 
@@ -171,9 +184,13 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
     id: 'jupyterlab-statusbar/default-items:file-path-item',
     autoStart: true,
     provides: IFilePath,
-    requires: [IDefaultsManager],
-    activate: (app: JupyterLab, manager: IDefaultsManager) => {
-        let item = new FilePath({ shell: app.shell });
+    requires: [IDefaultsManager, IDocumentManager],
+    activate: (
+        app: JupyterLab,
+        manager: IDefaultsManager,
+        docManager: IDocumentManager
+    ) => {
+        let item = new FilePath({ shell: app.shell, docManager });
 
         manager.addDefaultStatus('file-path-item', item, {
             align: 'right',

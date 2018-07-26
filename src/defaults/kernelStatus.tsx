@@ -148,9 +148,9 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         if (val === null) {
             return null;
         } else {
-            if (val instanceof NotebookPanel) {
+            if (this._notebookTracker.has(val)) {
                 return (val as NotebookPanel).session;
-            } else if (val instanceof ConsolePanel) {
+            } else if (this._consoleTracker.has(val)) {
                 return (val as ConsolePanel).session;
             } else {
                 return null;

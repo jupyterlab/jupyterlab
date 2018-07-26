@@ -13,11 +13,7 @@ import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
 import { IObservableMap } from '@jupyterlab/observables';
-import {
-    DocumentRegistry,
-    IDocumentWidget,
-    DocumentWidget
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
@@ -143,20 +139,17 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         if (val === null) {
             return null;
         } else {
-            if (val instanceof NotebookPanel) {
+            if (this._notebookTracker.has(val)) {
                 const activeCell = (val as NotebookPanel).content.activeCell;
                 if (activeCell === undefined) {
                     return null;
                 } else {
                     return activeCell.editor;
                 }
-            } else if (
-                val instanceof DocumentWidget &&
-                val.content instanceof FileEditor
-            ) {
-                return (val as DocumentWidget<FileEditor>).content.editor;
-            } else if (val instanceof ConsolePanel) {
-                const prompt = val.console.promptCell;
+            } else if (this._editorTracker.has(val)) {
+                return (val as IDocumentWidget<FileEditor>).content.editor;
+            } else if (this._consoleTracker.has(val)) {
+                const prompt = (val as ConsolePanel).console.promptCell;
                 if (prompt !== null) {
                     return prompt.editor;
                 } else {
