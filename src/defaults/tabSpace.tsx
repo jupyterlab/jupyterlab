@@ -97,7 +97,8 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
         showPopup({
             body: tabMenu,
-            anchor: this
+            anchor: this,
+            align: 'right'
         });
     };
 

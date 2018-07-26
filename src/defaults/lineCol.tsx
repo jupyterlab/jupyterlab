@@ -230,7 +230,8 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
         this._popup = showPopup({
             body: body,
-            anchor: this
+            anchor: this,
+            align: 'right'
         });
     };
 
