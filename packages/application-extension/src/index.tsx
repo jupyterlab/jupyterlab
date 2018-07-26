@@ -294,6 +294,10 @@ const busy: JupyterLabPlugin<void> = {
       if (favicon !== newFavicon) {
         favicon.rel = '';
         newFavicon.rel = 'icon';
+
+        // Firefox doesn't seem to recognize just changing rel, so we also
+        // reinsert the link into the DOM.
+        newFavicon.parentNode.replaceChild(newFavicon, newFavicon);
       }
     });
   },
