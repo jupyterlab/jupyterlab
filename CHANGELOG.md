@@ -42,6 +42,7 @@ Other changes for users include:
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510))
 * Installing extensions in JupyterLab requires JupyterLab works with nodejs 9 or earlier (not with node 10). There is a serious bug in yarn that prevents us from upgrading to a version compatible with nodejs 10. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 * JupyterLab now recognizes the `.tsv` file extension as tab-separated files. ([#4684](https://github.com/jupyterlab/jupyterlab/pull/4684))
+* The favicon now shows the busy status of the kernels in JupyterLab. ([#4361](https://github.com/jupyterlab/jupyterlab/pull/4361), [#3957](https://github.com/jupyterlab/jupyterlab/issues/3957), [#4966](https://github.com/jupyterlab/jupyterlab/pull/4966))
 
 Changes for extension developers include:
 
