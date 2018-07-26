@@ -325,7 +325,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick });
+        headings.push({ text, level, numbering, onClick, type: 'heading' });
         return;
       }
 
@@ -336,7 +336,7 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick });
+        headings.push({ text, level, numbering, onClick, type: 'heading' });
         return;
       }
 
@@ -348,7 +348,7 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick });
+        headings.push({ text, level, numbering, onClick, type: 'heading' });
       }
     });
     return headings;
@@ -362,10 +362,17 @@ namespace Private {
   ): IHeading[] {
     let headings: IHeading[] = [];
     if (text) {
+      const lines = text.split('\n');
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       let numbering = Private.generateNumbering(numberingDict, level);
-      headings.push({ text, level, numbering, onClick });
+      headings.push({
+        text: lines[0],
+        level,
+        numbering,
+        onClick,
+        type: 'code'
+      });
     }
     return headings;
   }
