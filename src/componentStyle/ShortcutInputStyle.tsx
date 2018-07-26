@@ -9,7 +9,7 @@ export const InputBoxHiddenStyle = style({
   display: 'hidden'
 });
 
-export const slideAnimation = keyframes({
+const slideAnimation = keyframes({
   from: {
     width: '0',
     left: '0'
@@ -32,15 +32,14 @@ export const InputStyle = style({
   paddingLeft: '10px',
   width: '120px',
   height: '25px',
+  lineHeight: '25px',
   display: 'block',
 
   $nest: {
     '&:focus': {
       outline: 'none',
-      color: 'var(--jp-content-font-color1)'
-    },
-    '&::placeholder': {
-      color: 'var(--jp-content-font-color3)'
+      color: 'var(--jp-content-font-color1)',
+      borderColor: 'var(--jp-brand-color2)'
     }
   }
 });
@@ -49,13 +48,33 @@ export const InputUnavailableStyle = style({
   borderColor: 'var(--jp-error-color2)'
 });
 
+export const InputTextStyle = style({
+  overflowX: 'hidden',
+  overflowY: 'hidden',
+  margin: '0',
+  marginTop: '4px',
+  padding: '0 5px',
+  height: '17px',
+  lineHeight: '17px',
+  width: 'fit-content'
+})
+
+export const InputSelectedTextStyle = style({
+  backgroundColor: 'var(--jp-brand-color3)',
+  overflow: 'hidden'
+})
+
+export const InputWaitingStyle = style({
+  color: 'var(--jp-content-font-color3)'
+})
+
 export const SubmitStyle = style({
   background: 'var(--jp-brand-color1)',
   borderRadius: '0px',
   color: 'var(--jp-layout-color0)',
   fontFamily: 'var(--jp-ui-font-family)',
   display: 'block',
-  height: '29px',
+  height: '27px',
   backgroundImage: 'var( --jp-icon-checkmark-white )',
   backgroundRepeat: 'no-repeat',
   width: '26px',

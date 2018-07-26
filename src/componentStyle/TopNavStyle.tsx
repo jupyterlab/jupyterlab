@@ -104,7 +104,7 @@ export const AdvancedOptionsLinkStyle = style({
 
   $nest: {
     '&:hover': {
-      textDecoration: 'underline'
+      color: 'var(--jp-brand-color1)'
     },
     '&:active': {
       color: 'var(--jp-brand-color0)'

@@ -11,6 +11,9 @@ import {
   InputUnavailableStyle,
   InputBoxHiddenStyle,
   InputBoxStyle,
+  InputTextStyle,
+  InputWaitingStyle,
+  InputSelectedTextStyle,
   SubmitNonFunctionalStyle,
   SubmitConflictStyle,
   SubmitStyle
@@ -39,6 +42,7 @@ export interface IShortcutInputState {
   takenByObject: TakenByObject;
   keys: Array<string>;
   currentChain: string;
+  selected: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -53,10 +57,11 @@ export class ShortcutInput extends React.Component<
     value: this.props.placeholder,
     userInput: '',
     isAvailable: true,
-    isFunctional: false,
+    isFunctional: this.props.newOrReplace === 'replace',
     takenByObject: new TakenByObject(),
     keys: new Array<string>(),
-    currentChain: ''
+    currentChain: '',
+    selected: true,
   };
 
   handleUpdate = () => {
@@ -89,12 +94,6 @@ export class ShortcutInput extends React.Component<
       shortcut,
       keys
     );
-  }
-
-  onKeyPress = (
-    event: any
-  ): void => {
-    event.preventDefault()
   }
 
   /** Parse user input for chained shortcuts */
@@ -272,6 +271,15 @@ export class ShortcutInput extends React.Component<
         keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
       ];
     }
+
+    /** allow to set shortcut to what it initially was if replacing */
+    if (!isAvailable) {
+      if (takenByObject.takenBy.id === this.props.shortcut.id && this.props.newOrReplace === 'replace') {
+        isAvailable = true;
+        takenByObject = new TakenByObject();
+      }
+    }
+
     this.setState({ isAvailable: isAvailable });
     return takenByObject;
   };
@@ -286,6 +294,7 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: any): void => {
+    this.setState({selected: false})
     const parsed = this.parseChaining(
       event,
       this.state.value,
@@ -338,14 +347,20 @@ export class ShortcutInput extends React.Component<
         }
         onBlur={(event) => this.handleBlur(event)}
       >
-        <input
+        <div tabIndex={0}
+          id='no-blur'
           className={inputClassName}
-          value={this.state.value}
           onKeyDown={this.handleInput}
-          onKeyPress={this.onKeyPress}
           ref={input => input && input.focus()}
-          placeholder="press keys"
-        />
+        >
+          <p className={
+            (this.state.selected && this.props.newOrReplace==='replace') 
+            ? classes(InputTextStyle, InputSelectedTextStyle) 
+            : (this.state.value === '' ? classes(InputTextStyle, InputWaitingStyle) : InputTextStyle)
+          }>
+            {this.state.value === '' ? 'press keys' : this.state.value}
+          </p>
+        </div>
         <button
           className={
             !this.state.isFunctional
@@ -366,7 +381,17 @@ export class ShortcutInput extends React.Component<
               });
               this.props.toggleInput();
             } else {
-              this.handleReplace();
+              /** don't replace if field has not been edited */
+              if (this.state.selected) {
+                this.props.toggleInput();
+                this.setState({
+                  value: '',
+                  userInput: ''
+                });
+                this.props.clearConflicts();
+              } else {
+                this.handleReplace();
+              }
             }
           }}
         />

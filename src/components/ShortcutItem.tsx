@@ -189,6 +189,7 @@ export class ShortcutItem extends React.Component<
                   onClick={() => {
                     this.toggleInputNew(), this.props.clearConflicts();
                   }}
+                  id='add-link'
                 >
                   Add Another
                 </a>
@@ -199,6 +200,7 @@ export class ShortcutItem extends React.Component<
                 onClick={() => {
                   this.toggleInputNew(), this.props.clearConflicts();
                 }}
+                id='add-link'
               >
                 Add New
               </a>

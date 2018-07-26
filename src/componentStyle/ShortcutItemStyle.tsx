@@ -27,6 +27,9 @@ export const RowStyle = style({
     '&:hover #shortcut-keys': {
       borderColor: 'var(--jp-border-color1)',
       background: 'var(--jp-layout-color2)',
+    },
+    '&:hover #add-link': {
+      color: 'var(--jp-brand-color1)'
     }
   }
 });
@@ -168,7 +171,7 @@ export const PlusStyle = style({
 
   $nest: {
     '&:hover': {
-      textDecoration: 'underline'
+      color: 'var(--jp-brand-color0)'
     },
     '&:active': {
       color: 'var(--jp-brand-color0)'
@@ -182,7 +185,7 @@ export const ResetStyle = style({
 
   $nest: {
     '&:hover': {
-      textDecoration: 'underline'
+      color: 'var(--jp-brand-color1)'
     }
   }
 });
