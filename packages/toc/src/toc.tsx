@@ -227,6 +227,8 @@ export interface IHeading {
    * already-renderd-to-html markdown headings.
    */
   html?: string | null;
+
+  type?: string | null;
 }
 
 /**
@@ -307,7 +309,13 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
       // let collapse = this.props.children ? (
       //   <img src={require('../static/rightarrow.svg')} />
       // ) : "";
-      content = <span style={{ paddingLeft }}>{numbering + heading.text}</span>;
+      if (heading.type === 'code') {
+        content = <span style={{ paddingLeft }}>{heading.text}</span>;
+      } else {
+        content = (
+          <span style={{ paddingLeft }}>{numbering + heading.text}</span>
+        );
+      }
     }
 
     return <li onClick={handleClick}>{content}</li>;
