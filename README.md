@@ -43,7 +43,7 @@ Instructions on how to install the project from the git sources are available in
 
 #### conda
 
-If you use `conda`, you can install as:
+If you use [`conda`](https://anaconda.org/conda-forge/jupyterlab), you can install as:
 
 ```bash
 conda install -c conda-forge jupyterlab
@@ -51,7 +51,7 @@ conda install -c conda-forge jupyterlab
 
 #### pip
 
-If you use `pip`, you can install it as:
+If you use [`pip`](https://pypi.org/project/jupyterlab/), you can install it as:
 
 ```bash
 pip install jupyterlab
