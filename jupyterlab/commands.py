@@ -1769,7 +1769,7 @@ def _fetch_package_metadata(registry, name, logger):
         logger.debug('Fetching URL: %s' % (req.get_full_url()))
     try:
         with contextlib.closing(urlopen(req)) as response:
-            return json.load(response)
+            return json.loads(response.decode('utf-8'))
     except URLError as exc:
         logger.warning(
             'Failed to fetch package metadata for %r: %r',
