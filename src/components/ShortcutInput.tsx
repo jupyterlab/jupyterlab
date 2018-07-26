@@ -221,12 +221,13 @@ export class ShortcutInput extends React.Component<
    * */
   checkNonFunctional = (shortcut: string): boolean => {
     const dontEnd = ['Ctrl', 'Alt', 'Accel', 'Shift'];
-    const shortcutKeys = shortcut.split(', ');
+    const shortcutKeys = this.state.currentChain.split(' ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/)
+      isFunctional: !(dontEnd.indexOf(last) !== -1)
     });
-    return dontEnd.indexOf(last) !== -1 /*|| shortcut === ''*/;
+
+    return dontEnd.indexOf(last) !== -1;
   };
 
   /** Check if shortcut being typed is already taken */
