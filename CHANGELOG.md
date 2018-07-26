@@ -40,9 +40,9 @@ Other changes for users include:
 * The console execute shortcut can now be set to either `Enter` or `Shift Enter` as a Console setting. ([#4054](https://github.com/jupyterlab/jupyterlab/pull/4054))
 * Initial kernel selection for a notebook or console can no longer be canceled: the user must select a kernel. ([#4596](https://github.com/jupyterlab/jupyterlab/pull/4596))
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510))
-* Installing extensions in JupyterLab requires JupyterLab works with nodejs 9 or earlier (not with node 10). There is a serious bug in yarn that prevents us from upgrading to a version compatible with nodejs 10. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 * JupyterLab now recognizes the `.tsv` file extension as tab-separated files. ([#4684](https://github.com/jupyterlab/jupyterlab/pull/4684))
 * The favicon now shows the busy status of the kernels in JupyterLab. ([#4361](https://github.com/jupyterlab/jupyterlab/pull/4361), [#3957](https://github.com/jupyterlab/jupyterlab/issues/3957), [#4966](https://github.com/jupyterlab/jupyterlab/pull/4966))
+* Please note that to install extensions in JupyterLab, you must use NodeJS version 9 or earlier (i.e., not NodeJS version 10). We will upgrade yarn, with NodeJS version 10 support, when a [bug in yarn](https://github.com/yarnpkg/yarn/issues/5935) is fixed. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 
 Changes for extension developers include:
 
