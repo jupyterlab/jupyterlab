@@ -233,7 +233,7 @@ const tree: JupyterLabPlugin<void> = {
         router.navigate(url, { silent: true });
 
         return commands
-          .execute('filebrowser:navigate-main', { path })
+          .execute('filebrowser:navigate', { path })
           .then(() => commands.execute('apputils:save-statedb', { immediate }))
           .catch(reason => {
             console.warn(`Tree routing failed:`, reason);
