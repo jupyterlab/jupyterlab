@@ -59,7 +59,7 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
-    config.app_name = 'JupyterLab Beta'
+    config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
     config.page_url = '/lab'
     config.cache_files = True
