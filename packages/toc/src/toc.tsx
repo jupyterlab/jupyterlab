@@ -37,7 +37,6 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._notebook = options.notebookTracker;
-    console.log(this._notebook);
   }
 
   /**
@@ -343,7 +342,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
       if (el.type === 'code' && !this.state.showCode) {
-        return <div />;
+        return <div key={`emptycode-${i++}`} />;
       } else {
         return (
           <TOCItem
@@ -354,7 +353,6 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         );
       }
     });
-
     const handleClick = (event: React.SyntheticEvent<HTMLButtonElement>) => {
       this.props.widget.needNumbering = !this.props.widget.needNumbering;
       this.setState({ needNumbering: this.props.widget.needNumbering });
@@ -364,7 +362,6 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       this.props.widget.showCode = event.target.checked;
       this.setState({ showCode: this.props.widget.showCode });
     };
-
     // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
@@ -376,7 +373,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
           type="checkbox"
           onChange={event => toggleCode(event)}
           checked={this.state.showCode}
-        />{' '}
+        />
         Show code cells
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>

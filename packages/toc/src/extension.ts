@@ -60,7 +60,6 @@ function activateTOC(
   rendermime: IRenderMimeRegistry
 ): ITableOfContentsRegistry {
   // Create the ToC widget.
-  console.log(notebookTracker + 'in extension');
   const toc = new TableOfContents({ docmanager, rendermime, notebookTracker });
 
   // Create the ToC registry.
@@ -117,5 +116,4 @@ function activateTOC(
 
   return registry;
 }
-
 export default extension;
