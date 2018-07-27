@@ -1,19 +1,35 @@
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal, Slot } from '@phosphor/signaling';
+import { IDisposable } from '@phosphor/disposable';
 
 export namespace SignalExt {
-    export function combine<S, T>(
-        sender: S,
-        a: ISignal<any, T>,
-        b: ISignal<any, T>
-    ): Signal<S, T> {
-        const combinedSignal: Signal<S, T> = new Signal(sender);
-        const forwardValue = (_aSender: any, value: T) => {
-            combinedSignal.emit(value);
-        };
+    export class CombinedSignal<T, U> extends Signal<T, U>
+        implements IDisposable {
+        constructor(sender: T, ...parents: Array<ISignal<any, U>>) {
+            super(sender);
 
-        a.connect(forwardValue);
-        b.connect(forwardValue);
+            this._parents = parents;
 
-        return combinedSignal;
+            this._forwardFunc = (_aSender: any, value: U) => {
+                this.emit(value);
+            };
+            this._parents.forEach(child => child.connect(this._forwardFunc));
+        }
+
+        get isDisposed() {
+            return this._isDisposed;
+        }
+
+        dispose() {
+            if (this.isDisposed) {
+                return;
+            }
+
+            this._parents.forEach(child => child.disconnect(this._forwardFunc));
+            this._isDisposed = true;
+        }
+
+        private _forwardFunc: Slot<any, U>;
+        private _isDisposed = false;
+        private _parents: Array<ISignal<any, U>>;
     }
 }
