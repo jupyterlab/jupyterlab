@@ -4,6 +4,7 @@ import { HoverBox } from '@jupyterlab/apputils';
 import { Message } from '@phosphor/messaging';
 import { hoverItem } from '../style/lineForm';
 import { clickedItem, interactiveItem } from '../style/statusBar';
+// import { Menu } from '@phosphor/widgets';
 
 export function showPopup(options: Popup.IOptions) {
     let dialog = new Popup(options);
@@ -20,6 +21,9 @@ export class Popup extends Widget {
         this._align = options.align;
         let layout = (this.layout = new PanelLayout());
         layout.addWidget(options.body);
+        this._body.node.addEventListener('resize', () => {
+            this.update();
+        });
     }
 
     launch() {
@@ -37,6 +41,7 @@ export class Popup extends Widget {
         if (this._align === 'right') {
             aligned = -(bodyRect.width - anchorRect.width);
         }
+        console.log(bodyRect.width);
         const style = window.getComputedStyle(this._body.node);
         HoverBox.setGeometry({
             anchor: anchorRect,
@@ -54,17 +59,20 @@ export class Popup extends Widget {
 
     protected onUpdateRequest(msg: Message): void {
         this.setGeometry();
+        this.setGeometry();
         super.onUpdateRequest(msg);
     }
 
     protected onAfterAttach(msg: Message): void {
         document.addEventListener('click', this, false);
         document.addEventListener('keypress', this, false);
+        window.addEventListener('resize', this, false);
     }
 
     protected onAfterDetach(msg: Message): void {
         document.removeEventListener('click', this, false);
         document.removeEventListener('keypress', this, false);
+        document.removeEventListener('resize', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
@@ -75,6 +83,10 @@ export class Popup extends Widget {
             super.dispose();
             this.dispose();
         }
+    }
+
+    protected _evtResize(): void {
+        this.update();
     }
 
     dispose() {
@@ -104,6 +116,9 @@ export class Popup extends Widget {
                 break;
             case 'click':
                 this._evtClick(event as MouseEvent);
+                break;
+            case 'resize':
+                this._evtResize();
                 break;
             default:
                 break;

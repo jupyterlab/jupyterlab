@@ -67,11 +67,14 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-        this.node.title = 'Open running sessions tab';
+        // this.node.title = 'Open running sessions tab';
         this.addClass(interactiveItem);
     }
 
     render() {
+        this.node.title = `${this.model!.terminals} Terminals, ${
+            this.model!.kernels
+        } Kernels`;
         return (
             <RunningSessionsComponent
                 kernels={this.model!.kernels}
