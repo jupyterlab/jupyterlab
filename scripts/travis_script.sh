@@ -66,7 +66,7 @@ if [[ $GROUP == integrity ]]; then
     jlpm run integrity
 
     # Lint our files.
-    jlpm run lint:check
+    jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 
     # Build the packages individually.
     jlpm run build:src
