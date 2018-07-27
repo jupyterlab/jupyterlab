@@ -37,6 +37,7 @@ export class TableOfContents extends Widget {
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
     this._notebook = options.notebookTracker;
+    console.log(this._notebook);
   }
 
   /**
