@@ -1,7 +1,7 @@
 import { ISignal, Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
-import { JSONObject, JSONArray } from '@phosphor/coreutils';
+import { JSONObject, JSONArray, JSONValue } from '@phosphor/coreutils';
 
 export type SettingValue =
     | string
@@ -43,6 +43,12 @@ export class SettingsConnector<I extends SettingValue> implements IDisposable {
 
     get currentValue() {
         return this._value;
+    }
+
+    set currentValue(value: I | null) {
+        if (this._settings) {
+            this._settings.set(this._settingKey, value as JSONValue);
+        }
     }
 
     get isDisposed() {
