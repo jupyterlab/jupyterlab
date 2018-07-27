@@ -40,7 +40,8 @@ export const item = style(
     {
         maxHeight: vars.height,
         marginLeft: vars.itemMargin,
-        marginRight: vars.itemMargin
+        marginRight: vars.itemMargin,
+        height: vars.height
     },
     itemPadding
 );
