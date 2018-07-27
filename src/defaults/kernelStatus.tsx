@@ -206,8 +206,8 @@ namespace KernelStatus {
                 oldSession.kernelChanged.disconnect(this._onKernelChanged);
             }
 
+            const oldState = this._getAllState();
             this._session = session;
-
             if (this._session === null) {
                 this._kernelStatus = 'unknown';
                 this._kernelName = 'unknown';
@@ -221,7 +221,7 @@ namespace KernelStatus {
                 this._session.kernelChanged.connect(this._onKernelChanged);
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onKernelStatusChanged = (
@@ -236,6 +236,7 @@ namespace KernelStatus {
             _session: IClientSession,
             change: Session.IKernelChangedArgs
         ) => {
+            const oldState = this._getAllState();
             const { newValue } = change;
             if (newValue !== null) {
                 this._kernelStatus = newValue.status;
@@ -245,8 +246,21 @@ namespace KernelStatus {
                 this._kernelName = 'unknown';
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): [string, string] {
+            return [this._kernelName, this._kernelStatus];
+        }
+
+        private _triggerChange(
+            oldState: [string, string],
+            newState: [string, string]
+        ) {
+            if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _kernelName: string = 'unknown';
         private _kernelStatus: Kernel.Status = 'unknown';

@@ -15,7 +15,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
-import { IObservableMap } from '@jupyterlab/observables';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
@@ -309,8 +308,8 @@ namespace LineCol {
                 );
             }
 
+            const oldState = this._getAllState();
             this._editor = editor;
-
             if (this._editor === null) {
                 this._column = 1;
                 this._line = 1;
@@ -324,7 +323,7 @@ namespace LineCol {
                 this._line = pos.line + 1;
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         get line(): number {
@@ -335,16 +334,27 @@ namespace LineCol {
             return this._column;
         }
 
-        private _onSelectionChanged = (
-            selections: IObservableMap<CodeEditor.ITextSelection[]>,
-            change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
-        ) => {
-            let pos = this.editor!.getCursorPosition();
+        private _onSelectionChanged = () => {
+            const oldState = this._getAllState();
+            const pos = this.editor!.getCursorPosition();
             this._line = pos.line + 1;
             this._column = pos.column + 1;
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): [number, number] {
+            return [this._line, this._column];
+        }
+
+        private _triggerChange(
+            oldState: [number, number],
+            newState: [number, number]
+        ) {
+            if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _line: number = 1;
         private _column: number = 1;

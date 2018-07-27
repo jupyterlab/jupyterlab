@@ -110,8 +110,8 @@ namespace FilePath {
                 }
             }
 
+            const oldState = this._getAllState();
             this._widget = widget;
-
             if (this._widget === null) {
                 this._path = '';
                 this._name = '';
@@ -132,24 +132,39 @@ namespace FilePath {
                 }
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onTitleChange = (title: Title<Widget>) => {
+            const oldState = this._getAllState();
             this._name = title.label;
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
 
         private _onPathChange = (
             _documentModel: DocumentRegistry.IContext<DocumentRegistry.IModel>,
             newPath: string
         ) => {
+            const oldState = this._getAllState();
             this._path = newPath;
             this._name = PathExt.basename(newPath);
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): [string, string] {
+            return [this._path, this._name];
+        }
+
+        private _triggerChange(
+            oldState: [string, string],
+            newState: [string, string]
+        ) {
+            if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _path: string = '';
         private _name: string = '';
