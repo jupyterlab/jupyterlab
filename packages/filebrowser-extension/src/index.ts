@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ApplicationShell,
   ILayoutRestorer,
   JupyterLab,
   JupyterLabPlugin
@@ -226,11 +227,14 @@ function addCommands(
     const driveName = app.serviceManager.contents.driveName(path);
 
     if (driveName) {
-      let browserForPath = tracker.find((fb: FileBrowser) => fb.id.toLowerCase().startsWith(driveName.toLowerCase()));
+      let browserForPath = tracker.find(fb => fb.model.driveName === driveName);
 
       if (!browserForPath) {
         // warn that no filebrowser could be found for this driveName
-        console.warn(`${CommandIDs.navigate} failed to find filebrowser for path: ${path}`); return;
+        console.warn(
+          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+        );
+        return;
       }
 
       return browserForPath;
@@ -316,9 +320,7 @@ function addCommands(
       const path = (args.path as string) || '';
       const browserForPath = getBrowserForPath(path);
       const services = app.serviceManager;
-      // const driveName = services.contents.driveName(path);
       const localPath = services.contents.localPath(path);
-      // const open = 'docmanager:open';
       const failure = (reason: any) => {
         console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
       };
@@ -326,8 +328,8 @@ function addCommands(
       return services.ready
         .then(() => services.contents.get(path))
         .then(value => {
-          const {model} = browserForPath;
-          const {restored} = model;
+          const { model } = browserForPath;
+          const { restored } = model;
 
           if (value.type === 'directory') {
             return restored.then(() => model.cd(`/${localPath}`));
@@ -335,7 +337,7 @@ function addCommands(
 
           return restored
             .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
-            .then(() => commands.execute('docmanager:open', {path: path}));
+            .then(() => commands.execute('docmanager:open', { path: path }));
         })
         .catch(failure);
     }
@@ -443,14 +445,30 @@ function addCommands(
 
   commands.addCommand(CommandIDs.showBrowser, {
     execute: args => {
-      const path = args.path as string || '';
+      const path = (args.path as string) || '';
       const browserForPath = getBrowserForPath(path);
 
-      if (Object.is(browser, browserForPath)) {
-        app.shell.activateById(browserForPath.id);
+      // Check for browser not found
+      if (!browserForPath) {
+        return;
       }
-      else {
-        app.shell.activateById(browserForPath.parent.id);
+      // Shortcut if we are using the main file browser
+      if (browser === browserForPath) {
+        app.shell.activateById(browser.id);
+        return;
+      } else {
+        const areas: ApplicationShell.Area[] = ['left', 'right'];
+        for (let area of areas) {
+          const it = app.shell.widgets(area);
+          let widget = it.next();
+          while (widget) {
+            if (widget.contains(browserForPath)) {
+              app.shell.activateById(widget.id);
+              return;
+            }
+            widget = it.next();
+          }
+        }
       }
     }
   });
