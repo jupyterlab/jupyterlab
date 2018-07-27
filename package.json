@@ -1,18 +1,18 @@
 {
-  "name": "@jupyterlab/jupyterlab-shortcutui",
-  "version": "1.0.0",
+  "name": "@jupyterlab/shortcutui",
+  "version": "0.1.0",
   "description": "A JupyterLab extension for managing keyboard shortcuts",
+  "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/jupyterlab/jupyterlab-shortcutui/tree/initial-development",
+  "homepage": "https://github.com/jupyterlab/jupyterlab-shortcutui/",
   "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui/tree/initial-development/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui/issues"
   },
   "license": "BSD-3-Clause",
-  "author": "Jenna Landy and Noah Stapp",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
@@ -21,7 +21,7 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui/tree/initial-development.git"
+    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui.git"
   },
   "scripts": {
     "build": "tsc",
