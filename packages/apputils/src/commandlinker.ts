@@ -3,23 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ElementDataset } from '@phosphor/virtualdom';
-
-/**
- * The command data attribute added to nodes that are connected.
- */
-const COMMAND_ATTR = 'commandlinker-command';
-
-/**
- * The args data attribute added to nodes that are connected.
- */
-const ARGS_ATTR = 'commandlinker-args';
+import { AttachedProperty } from '@phosphor/properties';
 
 /**
  * A static class that provides helper methods to generate clickable nodes that
@@ -70,16 +60,8 @@ export class CommandLinker implements IDisposable {
    * 1. If a node is connected, the default click action will be prevented.
    * 2. The `HTMLElement` passed in should be clickable.
    */
-  connectNode(
-    node: HTMLElement,
-    command: string,
-    args?: JSONObject
-  ): HTMLElement {
-    node.setAttribute(`data-${COMMAND_ATTR}`, command);
-    if (args !== void 0) {
-      node.setAttribute(`data-${ARGS_ATTR}`, JSON.stringify(args));
-    }
-    return node;
+  connectNode(node: HTMLElement, command: string, args?: JSONObject): void {
+    Private.linkedCommandProperty.set(node, { command, args: args || {} });
   }
 
   /**
@@ -97,10 +79,8 @@ export class CommandLinker implements IDisposable {
    * using the `populateVNodeDataset` method in order to disconnect them from
    * executing their command/argument pair.
    */
-  disconnectNode(node: HTMLElement): HTMLElement {
-    node.removeAttribute(`data-${COMMAND_ATTR}`);
-    node.removeAttribute(`data-${ARGS_ATTR}`);
-    return node;
+  disconnectNode(node: HTMLElement): void {
+    AttachedProperty.clearData(node);
   }
 
   /**
@@ -124,65 +104,16 @@ export class CommandLinker implements IDisposable {
   }
 
   /**
-   * Populate the `dataset` attribute within the collection of attributes used
-   * to instantiate a virtual DOM node with the values necessary for its
-   * rendered DOM node to respond to clicks by executing a command/argument
-   * pair.
-   *
-   * @param command - The command ID to execute upon click.
-   *
-   * @param args - The arguments with which to invoke the command.
-   *
-   * @returns A `dataset` collection for use within virtual node attributes.
-   *
-   * #### Notes
-   * The return value can be used on its own as the value for the `dataset`
-   * attribute of a virtual element, or it can be added to an existing `dataset`
-   * as in the example below.
-   *
-   * #### Example
-   * ```typescript
-   * let command = 'some:command-id';
-   * let args = { alpha: 'beta' };
-   * let anchor = h.a({
-   *   className: 'some-class',
-   *   dataset: {
-   *     foo: '1',
-   *     bar: '2',
-   *     ../...linker.populateVNodeDataset(command, args)
-   *   }
-   * }, 'some text');
-   * ```
-   */
-  populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
-    let dataset: ElementDataset;
-    if (args !== void 0) {
-      dataset = { [ARGS_ATTR]: JSON.stringify(args), [COMMAND_ATTR]: command };
-    } else {
-      dataset = { [COMMAND_ATTR]: command };
-    }
-    return dataset;
-  }
-
-  /**
    * The global click handler that deploys commands/argument pairs that are
    * attached to the node being clicked.
    */
   private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
-      if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
+      let prop = Private.linkedCommandProperty.get(target);
+      if (prop) {
         event.preventDefault();
-        let command = target.getAttribute(`data-${COMMAND_ATTR}`);
-        if (!command) {
-          return;
-        }
-        let argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
-        let args = JSONExt.emptyObject;
-        if (argsValue) {
-          args = JSON.parse(argsValue);
-        }
-        this._commands.execute(command, args);
+        this._commands.execute(prop.command, prop.args);
         return;
       }
       target = target.parentElement;
@@ -206,4 +137,35 @@ export namespace CommandLinker {
      */
     commands: CommandRegistry;
   }
+}
+
+/**
+ * A namespace for private functionality.
+ */
+namespace Private {
+  /**
+   * A command to attach to a node.
+   */
+  interface ILinkedCommand {
+    /**
+     * The command id.
+     */
+    command: string;
+
+    /**
+     * The args for the command.
+     */
+    args: JSONObject;
+  }
+
+  /**
+   * An attached property for keeping track of commands to link.
+   */
+  export const linkedCommandProperty = new AttachedProperty<
+    HTMLElement,
+    ILinkedCommand
+  >({
+    name: 'linkedCommandName',
+    create: () => undefined
+  });
 }
