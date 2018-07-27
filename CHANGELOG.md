@@ -1,54 +1,92 @@
 # JupyterLab Changelog
 
-## [0.33](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.33.0)
+## [v0.33.0](https://github.com/jupyterlab/jupyterlab/releases/tag/v0.33.0)
 
 #### July 26, 2018
 
-To see the full list of pull requests and issues closed, see the [JupyterLab 0.33](https://github.com/jupyterlab/jupyterlab/milestone/12?closed=1) milestone on GitHub.
+See the [JupyterLab 0.33.0](https://github.com/jupyterlab/jupyterlab/milestone/12?closed=1) milestone on GitHub for the full list of pull requests and issues closed.
+
+#### Key Features:
+
+* [No longer in beta](#no-longer-in-beta)
+* [Workspaces](#workspaces)
+* [Menu items](#menu-items)
+* [Keyboard shortcuts](#keyboard-shorcuts)
+* [Command palette items](#command-palette-items)
+* [Settings](#settings)
+* [Larger file uploads](#larger-size-uploads)
+* [Extension management and installation](#extension-manager)
+* [Interface changes](#interface-changes)
+* [Renderers](#renderers)
+* [Changes for developers](#changes-for-developers)
+* [Other fixes](#other-fixes)
+
+#### No longer in beta
 
 In JupyterLab 0.33, we removed the "Beta" label to better signal that JupyterLab is ready for users to use on a daily basis. The extension developer API is still being stabilized. See the release blog post for details. ([#4898](https://github.com/jupyterlab/jupyterlab/issues/4898), [#4920](https://github.com/jupyterlab/jupyterlab/pull/4920))
 
+#### Workspaces
+
 We added new workspace support, which enables you to have multiple saved layouts, including in different browser windows. See the [workspace documentation](https://jupyterlab.readthedocs.io/en/stable/user/urls.html) for more details. ([#4502](https://github.com/jupyterlab/jupyterlab/issues/4502), [#4708](https://github.com/jupyterlab/jupyterlab/pull/4708), [#4088](https://github.com/jupyterlab/jupyterlab/issues/4088), [#4041](https://github.com/jupyterlab/jupyterlab/pull/4041) [#3673](https://github.com/jupyterlab/jupyterlab/issues/3673), [#4780](https://github.com/jupyterlab/jupyterlab/pull/4780))
 
-We also added new menu items, keyboard shortcuts, commands, and settings:
+#### Menu items
 
 * "Activate Previously Used Tab" added to the Tab menu (`Ctrl/Cmd Shift '`) to toggle between the previously active tabs in the main area. ([#4296](https://github.com/jupyterlab/jupyterlab/pull/4296))
-* "Reload From Disk" added to File menu to reload an open file from the state saved on disk. ([#4615](https://github.com/jupyterlab/jupyterlab/pull/4615))
+* "Reload From Disk" added to the File menu to reload an open file from the state saved on disk. ([#4615](https://github.com/jupyterlab/jupyterlab/pull/4615))
+* "Save Notebook with View State" added to the File menu to persist the notebook collapsed and scrolled cell state. We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981))
 * "Increase/Decrease Font Size" added to the text editor settings menu. ([#4811](https://github.com/jupyterlab/jupyterlab/pull/4811))
 * "Show in File Browser" added to a document tab's context menu. ([#4500](https://github.com/jupyterlab/jupyterlab/pull/4500))
 * "Open in New Browser Tab" added to the file browser context menu. ([#4315](https://github.com/jupyterlab/jupyterlab/pull/4315))
 * "Copy Path" added to file browser context menu to copy the document's path to the clipboard. ([#4582](https://github.com/jupyterlab/jupyterlab/pull/4582))
+* "Show Left Area" has been renamed to "Show Left Sidebar" for consistency (same for right sidebar). ([#3818](https://github.com/jupyterlab/jupyterlab/pull/3818))
+
+#### Keyboard shortcuts
+
 * "Save As..." given the keyboard shortcut `Ctrl/Cmd Shift S`. ([#4560](https://github.com/jupyterlab/jupyterlab/pull/4560))
 * "Run All Cells" given the keyboard shortcut `Ctrl/Cmd Shift Enter`. ([#4558](https://github.com/jupyterlab/jupyterlab/pull/4558))
+* "notebook:change-to-cell-heading-X" keyboard shortcuts (and commands) renamed to "notebook:change-cell-to-heading-X" for X=1...6. This fixes the notebook command-mode keyboard shortcuts for changing headings. ([#4430](https://github.com/jupyterlab/jupyterlab/pull/4430))
+* The console execute shortcut can now be set to either `Enter` or `Shift Enter` as a Console setting. ([#4054](https://github.com/jupyterlab/jupyterlab/pull/4054))
+
+#### Command palette items
+
 * "Notebook" added to the command palette to open a new notebook. ([#4812](https://github.com/jupyterlab/jupyterlab/pull/4812))
 * "Run Selected Text or Current Line in Console" added to the command palette to run the selected text or current line from a notebook in a console. A default keyboard shortcut for this command is not yet provided, but can be added by users with the `notebook:run-in-console` command. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
-* "fontFamily", "fontSize", and "lineHeight" settings added to the text editor advanced settings. ([#4673](https://github.com/jupyterlab/jupyterlab/pull/4673))
-* "Show Left Area" has been renamed to "Show Left Sidebar" for consistency (same for right sidebar). ([#3818](https://github.com/jupyterlab/jupyterlab/pull/3818))
-* "notebook:change-to-cell-heading-X" keyboard shortcuts (and commands) renamed to "notebook:change-cell-to-heading-X" for X=1...6. This fixes the notebook command-mode keyboard shortcuts for changing headings. ([#4430](https://github.com/jupyterlab/jupyterlab/pull/4430))
-* Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity from a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
-
-Other changes for users include:
-
-* A command for persisting collapsed and scrolling state of notebook cells with a default keybinding of `Ctrl Shift S`. We also added a generic way for different widgets to register a "Save with extras" command that appears in the File menu under save. We now read the `collapsed`, `scrolled`, `jupyter.source_hidden` and `jupyter.outputs_hidden` notebook cell metadata when opening. `collapsed` and `jupyter.outputs_hidden` are redundant and the initial collapsed state is the union of both of them. When the state is persisted, if an output is collapsed, both will be written with the value `true`, and if it is not, both will not be written. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981))
-* Support for larger file uploads (>15MB) when using Jupyter notebook server version >= 5.1. ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224))
-* Solarized dark and light text editor themes from CodeMirror. ([#4445](https://github.com/jupyterlab/jupyterlab/pull/4445))
-* New extension manager for installing extensions from within the JupyterLab UI. ([#4682](https://github.com/jupyterlab/jupyterlab/pull/4682), [#4925](https://github.com/jupyterlab/jupyterlab/pull/4925))
-* JupyterLab now ships with a Vega4 renderer by default (upgraded from Vega3). ([#4806](https://github.com/jupyterlab/jupyterlab/pull/4806))
-* Wider tabs in the main working area to show longer filenames. ([#4801](https://github.com/jupyterlab/jupyterlab/pull/4801))
-* The HTML sanitizer now allows some extra tags in rendered HTML, including `kbd`, `sup`, and `sub`. ([#4618](https://github.com/jupyterlab/jupyterlab/pull/4618))
-* Javascript execution in notebook cells has been re-enabled. ([#4515](https://github.com/jupyterlab/jupyterlab/pull/4682))
-* The console execute shortcut can now be set to either `Enter` or `Shift Enter` as a Console setting. ([#4054](https://github.com/jupyterlab/jupyterlab/pull/4054))
-* Initial kernel selection for a notebook or console can no longer be canceled: the user must select a kernel. ([#4596](https://github.com/jupyterlab/jupyterlab/pull/4596))
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510))
-* JupyterLab now recognizes the `.tsv` file extension as tab-separated files. ([#4684](https://github.com/jupyterlab/jupyterlab/pull/4684))
-* The favicon now shows the busy status of the kernels in JupyterLab. ([#4361](https://github.com/jupyterlab/jupyterlab/pull/4361), [#3957](https://github.com/jupyterlab/jupyterlab/issues/3957), [#4966](https://github.com/jupyterlab/jupyterlab/pull/4966))
+
+#### Settings
+
+* "fontFamily", "fontSize", and "lineHeight" settings added to the text editor advanced settings. ([#4673](https://github.com/jupyterlab/jupyterlab/pull/4673))
+* Solarized dark and light text editor themes from CodeMirror. ([#4445](https://github.com/jupyterlab/jupyterlab/pull/4445))
+
+#### Larger file uploads
+
+* Support for larger file uploads (>15MB) when using Jupyter notebook server version >= 5.1. ([#4224](https://github.com/jupyterlab/jupyterlab/pull/4224))
+
+#### Extension management and installation
+
+* New extension manager for installing JupyterLab extensions from npm within the JupyterLab UI. You can enable this from the Advanced Settings interface. ([#4682](https://github.com/jupyterlab/jupyterlab/pull/4682), [#4925](https://github.com/jupyterlab/jupyterlab/pull/4925))
 * Please note that to install extensions in JupyterLab, you must use NodeJS version 9 or earlier (i.e., not NodeJS version 10). We will upgrade yarn, with NodeJS version 10 support, when a [bug in yarn](https://github.com/yarnpkg/yarn/issues/5935) is fixed. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 
-Changes for extension developers include:
+#### Interface changes
+
+* Wider tabs in the main working area to show longer filenames. ([#4801](https://github.com/jupyterlab/jupyterlab/pull/4801))
+* Initial kernel selection for a notebook or console can no longer be canceled: the user must select a kernel. ([#4596](https://github.com/jupyterlab/jupyterlab/pull/4596))
+* Consoles now do not display output from other clients by default. A new "Show All Kernel Activity" console context menu item has been added to show all activity from a kernel in the console. ([#4503](https://github.com/jupyterlab/jupyterlab/pull/4503))
+* The favicon now shows the busy status of the kernels in JupyterLab. ([#4361](https://github.com/jupyterlab/jupyterlab/pull/4361), [#3957](https://github.com/jupyterlab/jupyterlab/issues/3957), [#4966](https://github.com/jupyterlab/jupyterlab/pull/4966))
+
+#### Renderers
+
+* JupyterLab now ships with a Vega4 renderer by default (upgraded from Vega3). ([#4806](https://github.com/jupyterlab/jupyterlab/pull/4806))
+* The HTML sanitizer now allows some extra tags in rendered HTML, including `kbd`, `sup`, and `sub`. ([#4618](https://github.com/jupyterlab/jupyterlab/pull/4618))
+* JupyterLab now recognizes the `.tsv` file extension as tab-separated files. ([#4684](https://github.com/jupyterlab/jupyterlab/pull/4684))
+* Javascript execution in notebook cells has been re-enabled. ([#4515](https://github.com/jupyterlab/jupyterlab/pull/4682))
+
+#### Changes for developers
 
 * A new signal for observing application dirty status state changes. ([#4840](https://github.com/jupyterlab/jupyterlab/issues/4840))
 * A new signal for observing notebook cell execution. ([#4740](https://github.com/jupyterlab/jupyterlab/issues/4740), [#4744](https://github.com/jupyterlab/jupyterlab/pull/4744))
 * A new `anyMessage` signal for observing any message a kernel sends or receives. ([#4437](https://github.com/jupyterlab/jupyterlab/pull/4437))
+* A generic way for different widgets to register a "Save with extras" command that appears in the File menu under save. ([#3981](https://github.com/jupyterlab/jupyterlab/pull/3981))
 * A new API for removing groups from a JupyterLab menu. `addGroup` now returns an `IDisposable` which can be used to remove the group. `removeGroup` has been removed. ([#4890](https://github.com/jupyterlab/jupyterlab/pull/4890))
 * The `Launcher` now uses commands from the application `CommandRegistry` to launch new activities. Extension authors that add items to the launcher will need to update them to use commands. ([#4757](https://github.com/jupyterlab/jupyterlab/pull/4757))
 * There is now a top-level `addToBottomArea` function in the application, allowing extension authors to add bottom panel items like status bars. ([#4752](https://github.com/jupyterlab/jupyterlab/pull/4752))
@@ -80,7 +118,7 @@ Changes in the JupyterLab code infrastructure include:
 * Upgraded yarn to version 1.6. Please note that you must use NodeJS version 9 or earlier with JupyterLab (i.e., not NodeJS version 10). We will upgrade yarn, with NodeJS version 10 support, when a [bug in yarn](https://github.com/yarnpkg/yarn/issues/5935) is fixed. ([#4804](https://github.com/jupyterlab/jupyterlab/pull/4804))
 * Various process utilities were moved to `jupyterlab_launcher`. ([#4696](https://github.com/jupyterlab/jupyterlab/pull/4696))
 
-Other fixes include:
+#### Other fixes
 
 * Fixed a rendering bug with the Launcher in single-document mode. ([#4805](https://github.com/jupyterlab/jupyterlab/pull/4805))
 * Fixed a bug where the native context menu could not be triggered in a notebook cell in Chrome. ([#4720](https://github.com/jupyterlab/jupyterlab/pull/4720))
