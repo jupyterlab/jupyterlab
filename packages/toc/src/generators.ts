@@ -36,7 +36,6 @@ export function createNotebookGenerator(
   widget: TableOfContents,
   needNumbering = true
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
-  console.log(widget);
   return {
     tracker,
     usesLatex: true,
