@@ -4,7 +4,6 @@ import { HoverBox } from '@jupyterlab/apputils';
 import { Message } from '@phosphor/messaging';
 import { hoverItem } from '../style/lineForm';
 import { clickedItem, interactiveItem } from '../style/statusBar';
-// import { Menu } from '@phosphor/widgets';
 
 export function showPopup(options: Popup.IOptions) {
     let dialog = new Popup(options);
@@ -41,7 +40,6 @@ export class Popup extends Widget {
         if (this._align === 'right') {
             aligned = -(bodyRect.width - anchorRect.width);
         }
-        console.log(bodyRect.width);
         const style = window.getComputedStyle(this._body.node);
         HoverBox.setGeometry({
             anchor: anchorRect,
@@ -72,7 +70,7 @@ export class Popup extends Widget {
     protected onAfterDetach(msg: Message): void {
         document.removeEventListener('click', this, false);
         document.removeEventListener('keypress', this, false);
-        document.removeEventListener('resize', this, false);
+        window.removeEventListener('resize', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
