@@ -29,12 +29,7 @@ namespace EditorSyntaxComponent {
 const EditorSyntaxComponent = (
     props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> => {
-    return (
-        <TextItem
-            source={props.mode}
-            onClick={props.handleClick}
-        />
-     );
+    return <TextItem source={props.mode} onClick={props.handleClick} />;
 };
 
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
@@ -132,8 +127,8 @@ namespace EditorSyntax {
                 );
             }
 
+            const oldState = this._getAllState();
             this._editor = editor;
-
             if (this._editor === null) {
                 this._mode = '';
             } else {
@@ -145,18 +140,29 @@ namespace EditorSyntax {
                 );
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onMIMETypeChange = (
             mode: CodeEditor.IModel,
             change: IChangedArgs<string>
         ) => {
+            const oldState = this._getAllState();
             const spec = Mode.findByMIME(change.newValue);
             this._mode = spec.name || spec.mode;
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): string {
+            return this._mode;
+        }
+
+        private _triggerChange(oldState: string, newState: string) {
+            if (oldState !== newState) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _mode: string = '';
         private _editor: CodeEditor.IEditor | null = null;

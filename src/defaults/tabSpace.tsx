@@ -8,12 +8,9 @@ import {
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
-import { IObservableMap } from '@jupyterlab/observables';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
@@ -27,6 +24,8 @@ import { showPopup } from '../component/hover';
 import { interactiveItem } from '../style/statusBar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { Message } from '@phosphor/messaging';
+import { SettingsConnector } from '../util/settings';
 
 namespace TabSpaceComponent {
     export interface IProps {
@@ -57,20 +56,38 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this._shell = opts.shell;
         this._commands = opts.commands;
 
-        this._notebookTracker.currentChanged.connect(this._onNotebookChange);
+        this._settingsConnectors = {
+            notebook: {
+                code: new SettingsConnector({
+                    registry: opts.settings,
+                    pluginId: '@jupyterlab/notebook-extension:tracker',
+                    settingKey: 'codeCellConfig'
+                }),
+                markdown: new SettingsConnector({
+                    registry: opts.settings,
+                    pluginId: '@jupyterlab/notebook-extension:tracker',
+                    settingKey: 'markdownCellConfig'
+                }),
+                raw: new SettingsConnector({
+                    registry: opts.settings,
+                    pluginId: '@jupyterlab/notebook-extension:tracker',
+                    settingKey: 'rawCellConfig'
+                })
+            },
+            editor: new SettingsConnector({
+                registry: opts.settings,
+                pluginId: '@jupyterlab/fileeditor-extension:plugin',
+                settingKey: 'editorConfig'
+            })
+        };
+
         this._notebookTracker.activeCellChanged.connect(
             this._onActiveCellChange
         );
-        this._notebookTracker.selectionChanged.connect(this._onNotebookChange);
-
-        this._editorTracker.currentChanged.connect(this._onEditorChange);
-
-        this._consoleTracker.currentChanged.connect(this._onConsoleChange);
-
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new TabSpace.Model(
-            this._getFocusedEditor(this._shell.currentWidget)
+            this._getFocusedSettingsConnector(this._shell.currentWidget)
         );
 
         this.node.title = 'Change tab spacing';
@@ -98,7 +115,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         });
     };
 
-    protected render(): React.ReactElement<TabSpaceComponent.IProps> | null {
+    render(): React.ReactElement<TabSpaceComponent.IProps> | null {
         if (this.model === null) {
             return null;
         } else {
@@ -111,31 +128,46 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         }
     }
 
-    private _onNotebookChange = (tracker: INotebookTracker) => {
-        this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
-    };
+    dispose() {
+        super.dispose();
+
+        this._notebookTracker.activeCellChanged.disconnect(
+            this._onActiveCellChange
+        );
+        this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
+    }
+
+    protected onUpdateRequest(msg: Message) {
+        this.model!.settingConnector = this._getFocusedSettingsConnector(
+            this._shell.currentWidget
+        );
+
+        super.onUpdateRequest(msg);
+    }
 
     private _onActiveCellChange = (
         _tracker: INotebookTracker,
         cell: Cell | null
     ) => {
-        this.model!.editor = cell && cell.editor;
+        let settingsConnector: SettingsConnector<{ tabSize: number }> | null;
+        if (cell !== null) {
+            if (cell.model.type === 'code') {
+                settingsConnector = this._settingsConnectors.notebook.code;
+            } else if (cell.model.type === 'raw') {
+                settingsConnector = this._settingsConnectors.notebook.raw;
+            } else {
+                settingsConnector = this._settingsConnectors.notebook.markdown;
+            }
+        } else {
+            settingsConnector = null;
+        }
+
+        this.model!.settingConnector = settingsConnector;
     };
 
-    private _onEditorChange = (
-        _tracker: IEditorTracker,
-        document: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
-    ) => {
-        this.model!.editor = document && document.content.editor;
-    };
-
-    private _onConsoleChange = (tracker: IConsoleTracker) => {
-        const prompt =
-            tracker.currentWidget && tracker.currentWidget.console.promptCell;
-        this.model!.editor = prompt && prompt.editor;
-    };
-
-    private _getFocusedEditor(val: Widget | null): CodeEditor.IEditor | null {
+    private _getFocusedSettingsConnector(
+        val: Widget | null
+    ): SettingsConnector<{ tabSize: number }> | null {
         if (val === null) {
             return null;
         } else {
@@ -144,14 +176,20 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                 if (activeCell === undefined) {
                     return null;
                 } else {
-                    return activeCell.editor;
+                    if (activeCell.model.type === 'code') {
+                        return this._settingsConnectors.notebook.code;
+                    } else if (activeCell.model.type === 'raw') {
+                        return this._settingsConnectors.notebook.raw;
+                    } else {
+                        return this._settingsConnectors.notebook.markdown;
+                    }
                 }
             } else if (this._editorTracker.has(val)) {
-                return (val as IDocumentWidget<FileEditor>).content.editor;
+                return this._settingsConnectors.editor;
             } else if (this._consoleTracker.has(val)) {
                 const prompt = (val as ConsolePanel).console.promptCell;
                 if (prompt !== null) {
-                    return prompt.editor;
+                    return this._settingsConnectors.notebook.code;
                 } else {
                     return null;
                 }
@@ -166,8 +204,8 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         change: ApplicationShell.IChangedArgs
     ) => {
         const { newValue } = change;
-        const editor = this._getFocusedEditor(newValue);
-        this.model!.editor = editor;
+        const settingConnector = this._getFocusedSettingsConnector(newValue);
+        this.model!.settingConnector = settingConnector;
     };
 
     private _notebookTracker: INotebookTracker;
@@ -175,57 +213,76 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
     private _commands: CommandRegistry;
+    private _settingsConnectors: Private.ISettingConnectorContainer;
+}
+
+namespace Private {
+    export interface ISettingConnectorContainer {
+        notebook: {
+            markdown: SettingsConnector<{ tabSize: number }>;
+            code: SettingsConnector<{ tabSize: number }>;
+            raw: SettingsConnector<{ tabSize: number }>;
+        };
+        editor: SettingsConnector<{ tabSize: number }>;
+    }
 }
 
 namespace TabSpace {
     export class Model extends VDomModel implements ITabSpace.IModel {
-        constructor(editor: CodeEditor.IEditor | null) {
+        constructor(
+            settingConnector: SettingsConnector<{ tabSize: number }> | null
+        ) {
             super();
 
-            this.editor = editor;
+            this.settingConnector = settingConnector;
         }
 
-        get editor(): CodeEditor.IEditor | null {
-            return this._editor;
+        get settingConnector(): SettingsConnector<{ tabSize: number }> | null {
+            return this._settingConnector;
         }
 
-        set editor(editor: CodeEditor.IEditor | null) {
-            this._editor = editor;
+        set settingConnector(
+            settingConnector: SettingsConnector<{ tabSize: number }> | null
+        ) {
+            const oldTabSpace = this._tabSpace;
+            const oldSettingConnector = this._settingConnector;
+            if (oldSettingConnector !== null) {
+                oldSettingConnector.changed.disconnect(this._onTabSizeChanged);
+            }
+            this._settingConnector = settingConnector;
 
-            if (this._editor === null) {
+            if (this._settingConnector === null) {
                 this._tabSpace = 4;
             } else {
-                this._editor.model.selections.changed.connect(
-                    this._onSelectionChanged
-                );
+                this._settingConnector.changed.connect(this._onTabSizeChanged);
 
-                this._editor.model.value.changed.connect(this._onValueChanged);
-
-                this._tabSpace = this.editor!.getOption('tabSize');
+                this._tabSpace = this._settingConnector.currentValue!.tabSize;
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldTabSpace, this._tabSpace);
         }
 
         get tabSpace() {
             return this._tabSpace;
         }
 
-        private _onSelectionChanged = (
-            selections: IObservableMap<CodeEditor.ITextSelection[]>,
-            change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
-        ) => {
-            this._tabSpace = this.editor!.getOption('tabSize');
-            this.stateChanged.emit(void 0);
+        private _onTabSizeChanged = () => {
+            const oldTabSpace = this._tabSpace;
+            this._tabSpace = this.settingConnector!.currentValue!.tabSize;
+
+            this._triggerChange(oldTabSpace, this._tabSpace);
         };
 
-        private _onValueChanged = () => {
-            this._tabSpace = this.editor!.getOption('tabSize');
-            this.stateChanged.emit(void 0);
-        };
+        private _triggerChange(oldValue: number, newValue: number): void {
+            if (oldValue !== newValue) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _tabSpace: number = 4;
-        private _editor: CodeEditor.IEditor | null = null;
+        private _settingConnector: SettingsConnector<{
+            tabSize: number;
+        }> | null = null;
     }
 
     export interface IOptions {
@@ -234,6 +291,7 @@ namespace TabSpace {
         consoleTracker: IConsoleTracker;
         shell: ApplicationShell;
         commands: CommandRegistry;
+        settings: ISettingRegistry;
     }
 }
 
@@ -245,7 +303,9 @@ export interface ITabSpace extends IDisposable {
 export namespace ITabSpace {
     export interface IModel {
         readonly tabSpace: number;
-        readonly editor: CodeEditor.IEditor | null;
+        readonly settingConnector: SettingsConnector<{
+            tabSize: number;
+        }> | null;
     }
 }
 
@@ -276,7 +336,8 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
             notebookTracker,
             editorTracker,
             consoleTracker,
-            commands: app.commands
+            commands: app.commands,
+            settings
         });
 
         defaultsManager.addDefaultStatus('tab-space-item', item, {

@@ -97,7 +97,6 @@ export class Popup extends Widget {
         // Check for escape key
         switch (event.keyCode) {
             case 27: // Escape.
-                console.log(`Pressed escape`);
                 event.stopPropagation();
                 event.preventDefault();
                 this.dispose();

@@ -124,9 +124,12 @@ namespace RunningSessions {
         }
 
         set kernels(kernels: number) {
+            const oldKernels = this._kernels;
             this._kernels = kernels;
 
-            this.stateChanged.emit(void 0);
+            if (oldKernels !== this._kernels) {
+                this.stateChanged.emit(void 0);
+            }
         }
 
         get terminals() {
@@ -134,9 +137,12 @@ namespace RunningSessions {
         }
 
         set terminals(terminals: number) {
+            const oldTerminals = this._terminals;
             this._terminals = terminals;
 
-            this.stateChanged.emit(void 0);
+            if (oldTerminals !== this._terminals) {
+                this.stateChanged.emit(void 0);
+            }
         }
 
         private _terminals: number = 0;

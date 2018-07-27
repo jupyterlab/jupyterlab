@@ -58,8 +58,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         this._shell = opts.shell;
         this._filePath = opts.filePath;
 
-        this._notebookTracker.currentChanged.connect(this._onNotebookChange);
-        this._consoleTracker.currentChanged.connect(this._onConsoleChange);
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
         this._filePath.model!.stateChanged.connect(this._onFilePathChange);
 
@@ -91,8 +89,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     dispose() {
         super.dispose();
 
-        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
-        this._consoleTracker.currentChanged.disconnect(this._onConsoleChange);
         this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
@@ -128,22 +124,6 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         }
     };
 
-    private _onNotebookChange = (
-        _tracker: INotebookTracker,
-        panel: NotebookPanel | null
-    ) => {
-        this.model!.session = panel && panel.session;
-        this.addClass(interactiveItem);
-    };
-
-    private _onConsoleChange = (
-        _tracker: IConsoleTracker,
-        panel: ConsolePanel | null
-    ) => {
-        this.model!.session = panel && panel.session;
-        this.removeClass(interactiveItem);
-    };
-
     private _getFocusedSession(val: Widget | null): IClientSession | null {
         if (val === null) {
             return null;
@@ -165,6 +145,11 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
         const { newValue } = change;
         const editor = this._getFocusedSession(newValue);
         this.model!.session = editor;
+        if (this.model!.type === 'notebook') {
+            this.addClass(interactiveItem);
+        } else {
+            this.removeClass(interactiveItem);
+        }
     };
 
     private _notebookTracker: INotebookTracker;
@@ -206,8 +191,8 @@ namespace KernelStatus {
                 oldSession.kernelChanged.disconnect(this._onKernelChanged);
             }
 
+            const oldState = this._getAllState();
             this._session = session;
-
             if (this._session === null) {
                 this._kernelStatus = 'unknown';
                 this._kernelName = 'unknown';
@@ -221,7 +206,7 @@ namespace KernelStatus {
                 this._session.kernelChanged.connect(this._onKernelChanged);
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onKernelStatusChanged = (
@@ -236,6 +221,7 @@ namespace KernelStatus {
             _session: IClientSession,
             change: Session.IKernelChangedArgs
         ) => {
+            const oldState = this._getAllState();
             const { newValue } = change;
             if (newValue !== null) {
                 this._kernelStatus = newValue.status;
@@ -245,8 +231,21 @@ namespace KernelStatus {
                 this._kernelName = 'unknown';
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): [string, string] {
+            return [this._kernelName, this._kernelStatus];
+        }
+
+        private _triggerChange(
+            oldState: [string, string],
+            newState: [string, string]
+        ) {
+            if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _kernelName: string = 'unknown';
         private _kernelStatus: Kernel.Status = 'unknown';

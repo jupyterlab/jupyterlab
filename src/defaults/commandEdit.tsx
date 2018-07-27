@@ -105,8 +105,8 @@ namespace CommandEdit {
                 oldNotebook.modelContentChanged.disconnect(this._onChanged);
             }
 
+            const oldState = this._getAllState();
             this._notebook = notebook;
-
             if (this._notebook === null) {
                 this._notebookMode = 'command';
             } else {
@@ -116,17 +116,28 @@ namespace CommandEdit {
                 this._notebook.modelContentChanged.connect(this._onChanged);
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onChanged = (_notebook: Notebook) => {
+            const oldState = this._getAllState();
             if (_notebook !== null && _notebook !== undefined) {
                 this._notebookMode = _notebook.mode;
             } else {
                 this._notebookMode = 'command';
             }
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): NotebookMode {
+            return this._notebookMode;
+        }
+
+        private _triggerChange(oldState: NotebookMode, newState: NotebookMode) {
+            if (oldState !== newState) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _notebookMode: NotebookMode = 'command';
         private _notebook: Notebook | null = null;
