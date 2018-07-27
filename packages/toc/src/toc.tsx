@@ -341,13 +341,17 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      return (
-        <TOCItem
-          needNumbering={this.state.needNumbering}
-          heading={el}
-          key={`${el.text}-${el.level}-${i++}`}
-        />
-      );
+      if (el.type === 'code' && !this.state.showCode) {
+        return <div />;
+      } else {
+        return (
+          <TOCItem
+            needNumbering={this.state.needNumbering}
+            heading={el}
+            key={`${el.text}-${el.level}-${i++}`}
+          />
+        );
+      }
     });
 
     const handleClick = (event: React.SyntheticEvent<HTMLButtonElement>) => {
@@ -357,6 +361,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
 
     const toggleCode = (event: React.ChangeEvent<HTMLInputElement>) => {
       this.props.widget.showCode = event.target.checked;
+      this.setState({ showCode: this.props.widget.showCode });
     };
 
     // Return the JSX component.
@@ -366,8 +371,12 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         <button onClick={event => handleClick(event)}>
           Show/Hide Numbering
         </button>
-        <input type="checkbox" onChange={event => toggleCode(event)} /> Show
-        code cells
+        <input
+          type="checkbox"
+          onChange={event => toggleCode(event)}
+          checked={this.state.showCode}
+        />{' '}
+        Show code cells
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );

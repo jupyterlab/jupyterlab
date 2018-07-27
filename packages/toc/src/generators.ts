@@ -53,7 +53,6 @@ export function createNotebookGenerator(
           // are rendered markdown or HTML.
           let showCode = true;
           if (widget) {
-            console.log('widget:' + widget.showCode);
             showCode = widget.showCode;
           }
           if (showCode) {
