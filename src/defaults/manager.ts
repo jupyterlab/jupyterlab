@@ -8,6 +8,7 @@ import { Widget } from '@phosphor/widgets';
 import { Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { SignalExt } from '../util/signal';
+import { SettingsConnector } from '../util/settings';
 
 export interface IDefaultsManager {
     addDefaultStatus(
@@ -32,19 +33,14 @@ export const IDefaultsManager = new Token<IDefaultsManager>(
 
 class DefaultsManager implements IDefaultsManager, IDisposable {
     constructor(opts: DefaultsManager.IOptions) {
-        this._settings = opts.settings;
         this._statusBar = opts.statusBar;
+        this._settingsConnector = new SettingsConnector({
+            pluginId: STATUSBAR_PLUGIN_ID,
+            registry: opts.settings,
+            settingKey: 'enabledDefaultItems'
+        });
 
-        this._settings
-            .load(STATUSBAR_PLUGIN_ID)
-            .then(settings => {
-                settings.changed.connect(this._onSettingsUpdated);
-
-                this._onSettingsUpdated(settings);
-            })
-            .catch((reason: Error) => {
-                console.error(reason.message);
-            });
+        this._settingsConnector.changed.connect(this._onSettingsUpdated);
     }
 
     addDefaultStatus(
@@ -97,19 +93,15 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
         }
 
         Signal.clearData(this);
+        this._settingsConnector.dispose();
         this._isDisposed = true;
     }
 
-    private _onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
-        let rawEnabledItems = settings.get('enabledDefaultItems').composite as
-            | string[]
-            | null;
-
-        if (rawEnabledItems === null) {
-            rawEnabledItems = settings.default(
-                'enabledDefaultItems'
-            ) as string[];
-        }
+    private _onSettingsUpdated = (
+        connector: SettingsConnector<string[]>,
+        change: SettingsConnector.IChangedArgs<string[]>
+    ) => {
+        let rawEnabledItems = change.newValue !== null ? change.newValue : [];
 
         let newEnabledItems = new Set(rawEnabledItems);
 
@@ -140,8 +132,7 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
     > = new Map();
     private _enabledStatusIds: Set<string> = new Set();
     private _isDisposed: boolean = false;
-
-    private _settings: ISettingRegistry;
+    private _settingsConnector: SettingsConnector<string[]>;
     private _statusBar: IStatusBar;
 }
 
