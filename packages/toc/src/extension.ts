@@ -60,7 +60,7 @@ function activateTOC(
   rendermime: IRenderMimeRegistry
 ): ITableOfContentsRegistry {
   // Create the ToC widget.
-  const toc = new TableOfContents({docmanager, rendermime, notebookTracker});
+  const toc = new TableOfContents({ docmanager, rendermime, notebookTracker });
 
   // Create the ToC registry.
   const registry = new TableOfContentsRegistry();
