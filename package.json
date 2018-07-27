@@ -1,5 +1,5 @@
 {
-    "name": "jupyterlab-statusbar",
+    "name": "@jupyterlab/statusbar",
     "version": "0.1.0",
     "description": "A status bar for JupyterLab",
     "keywords": [
@@ -12,7 +12,7 @@
         "url": "https://github.com/jupyterlab/jupyterlab-statusbar/issues"
     },
     "license": "BSD-3-Clause",
-    "author": "Richa Gadgil",
+    "author": "Richa Gadgil, Takahiro Shimokobe, Declan Kelly",
     "files": [
         "lib/**/*.d.ts",
         "lib/**/*.js.map",
@@ -71,6 +71,7 @@
     "devDependencies": {
         "@types/react": "~16.0.9",
         "@types/react-dom": "~16.0.2",
+        "prettier": "^1.13.7",
         "rimraf": "^2.6.1",
         "tslint": "^5.11.0",
         "typescript": "^2.9.2"
