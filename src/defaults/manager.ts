@@ -66,9 +66,9 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
 
         // Combine stateChanged of settings with provided stateChanged
         const stateChanged: SignalExt.CombinedSignal<
-            Widget,
+            this,
             void
-        > = new SignalExt.CombinedSignal(item);
+        > = new SignalExt.CombinedSignal(this);
         if (opts.stateChanged === undefined) {
             opts.stateChanged = stateChanged;
         } else {
