@@ -103,39 +103,35 @@ export class JupyterLab extends Application<ApplicationShell> {
       return;
     }
 
-    this._contextEvent = event;
+    this._contextMenuEvent = event;
     if (this.contextMenu.open(event)) {
       event.preventDefault();
       event.stopPropagation();
     }
   }
 
-  get contextMenuEvent(): Event {
-    return this._contextEvent;
-  }
-
-  get contextMenuTargetPath(): string {
-    if (!this.contextMenuEvent) {
-      return;
+  /**
+   * Gets the hierarchy of html nodes that was under the cursor
+   * when the most recent contextmenu event was issued
+   */
+  get contextMenuNodes(): HTMLElement[] {
+    if (!this._contextMenuEvent) {
+      return [];
     }
 
-    let target = this.contextMenuEvent.target as HTMLSelectElement;
-    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+    // this one-liner doesn't work, but should at some point
+    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+    // return this._contextMenuEvent.composedPath() as HTMLElement[];
 
-    let pathMatch = target.title.match(pathRe);
-
-    if (pathMatch == null) {
-      // if path could not be found in .title, search for it in .parentElement
-      pathMatch = target.parentElement.title.match(pathRe);
+    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    while (
+      'parentNode' in nodes[nodes.length - 1] &&
+      nodes[nodes.length - 1].parentNode &&
+      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
+    ) {
+      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
     }
-
-    if (pathMatch == null) {
-      // (for now) no other place to search, just return
-      return;
-    }
-
-    // return the found path
-    return pathMatch[1];
+    return nodes;
   }
 
   /**
@@ -181,6 +177,46 @@ export class JupyterLab extends Application<ApplicationShell> {
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
+  }
+
+  /**
+   * Gets all of the valid, non-empty values of a given property
+   * across all of the nodes in the hierarchy returned by contextMenuNodes
+   */
+  contextMenuValues(prop: string): any[] {
+    let vals: any[] = [];
+    for (let node of this.contextMenuNodes as any[]) {
+      if (prop in node && node[prop]) {
+        vals.push(node[prop]);
+      }
+    }
+    return vals;
+  }
+
+  /**
+   * Gets the first valid, non-empty value of a property
+   * in the node hierarchy returned by contextMenuNodes.
+   * Optionally, gets the first value that matches a passed-in RegExp
+   */
+  contextMenuFirst(prop: string, regexp: RegExp | null = null): any | null {
+    if (regexp) {
+      for (let node of this.contextMenuNodes as any[]) {
+        if (prop in node && node[prop]) {
+          let match = node[prop].match(regexp);
+          if (match) {
+            return match;
+          }
+        }
+      }
+    } else {
+      for (let node of this.contextMenuNodes as any[]) {
+        if (prop in node && node[prop]) {
+          return node[prop];
+        }
+      }
+    }
+
+    return;
   }
 
   /**
@@ -257,7 +293,7 @@ export class JupyterLab extends Application<ApplicationShell> {
     });
   }
 
-  private _contextEvent: Event;
+  private _contextMenuEvent: MouseEvent;
   private _info: JupyterLab.IInfo;
   private _dirtyCount = 0;
   private _busyCount = 0;

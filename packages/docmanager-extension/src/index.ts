@@ -179,13 +179,15 @@ function addCommands(
 
   // fetches the doc widget associated with the most recent contextmenu event
   const contextMenuWidget = (): Widget => {
-    let path = app.contextMenuTargetPath;
-    if (!path) {
+    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+    let pathMatch = app.contextMenuFirst('title', pathRe);
+
+    if (!pathMatch) {
       // fall back to active doc widget if path cannot be obtained from event
       return app.shell.currentWidget;
     }
 
-    return docManager.findWidget(path);
+    return docManager.findWidget(pathMatch[1]);
   };
 
   // operates on active widget by default
@@ -282,7 +284,7 @@ function addCommands(
       return !!iterator.next() && !!iterator.next();
     },
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
@@ -297,9 +299,9 @@ function addCommands(
   commands.addCommand(CommandIDs.closeRightTabs, {
     label: () => `Close Tabs to Right`,
     isEnabled: () =>
-      shell.currentWidget && widgetsRightOf(shell.currentWidget).length > 0,
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
