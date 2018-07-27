@@ -20,6 +20,9 @@ export class Popup extends Widget {
         this._align = options.align;
         let layout = (this.layout = new PanelLayout());
         layout.addWidget(options.body);
+        this._body.node.addEventListener('resize', () => {
+            this.update();
+        });
     }
 
     launch() {
@@ -54,17 +57,20 @@ export class Popup extends Widget {
 
     protected onUpdateRequest(msg: Message): void {
         this.setGeometry();
+        this.setGeometry();
         super.onUpdateRequest(msg);
     }
 
     protected onAfterAttach(msg: Message): void {
         document.addEventListener('click', this, false);
         document.addEventListener('keypress', this, false);
+        window.addEventListener('resize', this, false);
     }
 
     protected onAfterDetach(msg: Message): void {
         document.removeEventListener('click', this, false);
         document.removeEventListener('keypress', this, false);
+        window.removeEventListener('resize', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
@@ -77,6 +83,10 @@ export class Popup extends Widget {
         }
     }
 
+    protected _evtResize(): void {
+        this.update();
+    }
+
     dispose() {
         super.dispose();
         this._anchor.removeClass(clickedItem);
@@ -87,7 +97,6 @@ export class Popup extends Widget {
         // Check for escape key
         switch (event.keyCode) {
             case 27: // Escape.
-                console.log(`Pressed escape`);
                 event.stopPropagation();
                 event.preventDefault();
                 this.dispose();
@@ -104,6 +113,9 @@ export class Popup extends Widget {
                 break;
             case 'click':
                 this._evtClick(event as MouseEvent);
+                break;
+            case 'resize':
+                this._evtResize();
                 break;
             default:
                 break;

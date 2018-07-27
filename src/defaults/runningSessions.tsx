@@ -67,11 +67,13 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model>
         );
 
         this.model = new RunningSessions.Model();
-        this.node.title = 'Open running sessions tab';
         this.addClass(interactiveItem);
     }
 
     render() {
+        this.node.title = `${this.model!.terminals} Terminals, ${
+            this.model!.kernels
+        } Kernels`;
         return (
             <RunningSessionsComponent
                 kernels={this.model!.kernels}
@@ -122,9 +124,12 @@ namespace RunningSessions {
         }
 
         set kernels(kernels: number) {
+            const oldKernels = this._kernels;
             this._kernels = kernels;
 
-            this.stateChanged.emit(void 0);
+            if (oldKernels !== this._kernels) {
+                this.stateChanged.emit(void 0);
+            }
         }
 
         get terminals() {
@@ -132,9 +137,12 @@ namespace RunningSessions {
         }
 
         set terminals(terminals: number) {
+            const oldTerminals = this._terminals;
             this._terminals = terminals;
 
-            this.stateChanged.emit(void 0);
+            if (oldTerminals !== this._terminals) {
+                this.stateChanged.emit(void 0);
+            }
         }
 
         private _terminals: number = 0;

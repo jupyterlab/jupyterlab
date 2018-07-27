@@ -153,9 +153,8 @@ namespace NotebookTrust {
                 );
             }
 
+            const oldState = this._getAllState();
             this._notebook = model;
-            this.stateChanged.emit(void 0);
-
             if (this._notebook === null) {
                 this._trustedCells = 0;
                 this._totalCells = 0;
@@ -185,27 +184,29 @@ namespace NotebookTrust {
                 this._trustedCells = trusted;
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         private _onModelChanged = (notebook: Notebook) => {
+            const oldState = this._getAllState();
             const { total, trusted } = this._deriveCellTrustState(
                 notebook.model
             );
 
             this._totalCells = total;
             this._trustedCells = trusted;
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
 
         private _onActiveCellChanged = (model: Notebook, cell: Cell | null) => {
+            const oldState = this._getAllState();
             if (cell !== null && cell !== undefined) {
                 this._activeCellTrusted = cell.model.trusted;
             } else {
                 this._activeCellTrusted = false;
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
 
         private _deriveCellTrustState(
@@ -227,6 +228,27 @@ namespace NotebookTrust {
                 total,
                 trusted
             };
+        }
+
+        private _getAllState(): [number, number, boolean] {
+            return [
+                this._trustedCells,
+                this._totalCells,
+                this.activeCellTrusted
+            ];
+        }
+
+        private _triggerChange(
+            oldState: [number, number, boolean],
+            newState: [number, number, boolean]
+        ) {
+            if (
+                oldState[0] !== newState[0] ||
+                oldState[1] !== newState[1] ||
+                oldState[2] !== newState[2]
+            ) {
+                this.stateChanged.emit(void 0);
+            }
         }
 
         private _trustedCells: number = 0;

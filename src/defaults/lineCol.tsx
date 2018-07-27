@@ -15,8 +15,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
-import { IObservableMap } from '@jupyterlab/observables';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
@@ -34,6 +33,7 @@ import {
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
 import { Message } from '@phosphor/messaging';
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
 namespace LineForm {
     export interface IProps {
@@ -161,14 +161,12 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
         this._notebookTracker = opts.notebookTracker;
         this._editorTracker = opts.editorTracker;
+        this._consoleTracker = opts.consoleTracker;
         this._shell = opts.shell;
 
-        this._notebookTracker.currentChanged.connect(this._onNotebookChange);
         this._notebookTracker.activeCellChanged.connect(
             this._onActiveCellChange
         );
-        this._notebookTracker.selectionChanged.connect(this._onNotebookChange);
-        this._editorTracker.currentChanged.connect(this._onEditorChange);
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
         this.model = new LineCol.Model(
@@ -196,14 +194,9 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     dispose() {
         super.dispose();
 
-        this._notebookTracker.currentChanged.disconnect(this._onNotebookChange);
         this._notebookTracker.activeCellChanged.disconnect(
             this._onActiveCellChange
         );
-        this._notebookTracker.selectionChanged.disconnect(
-            this._onNotebookChange
-        );
-        this._editorTracker.currentChanged.disconnect(this._onEditorChange);
         this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
     }
 
@@ -237,22 +230,11 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this.model!.editor!.focus();
     };
 
-    private _onNotebookChange = (tracker: INotebookTracker) => {
-        this.model!.editor = tracker.activeCell && tracker.activeCell.editor;
-    };
-
     private _onActiveCellChange = (
         _tracker: INotebookTracker,
         cell: Cell | null
     ) => {
         this.model!.editor = cell && cell.editor;
-    };
-
-    private _onEditorChange = (
-        _tracker: IEditorTracker,
-        document: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
-    ) => {
-        this.model!.editor = document && document.content.editor;
     };
 
     private _getFocusedEditor(val: Widget | null): CodeEditor.IEditor | null {
@@ -268,6 +250,9 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
                 }
             } else if (this._editorTracker.has(val)) {
                 return (val as IDocumentWidget<FileEditor>).content.editor;
+            } else if (this._consoleTracker.has(val)) {
+                const promptCell = (val as ConsolePanel).console.promptCell;
+                return promptCell && promptCell.editor;
             } else {
                 return null;
             }
@@ -285,6 +270,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
 
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
+    private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
     private _popup: Popup | undefined;
 }
@@ -309,8 +295,8 @@ namespace LineCol {
                 );
             }
 
+            const oldState = this._getAllState();
             this._editor = editor;
-
             if (this._editor === null) {
                 this._column = 1;
                 this._line = 1;
@@ -324,7 +310,7 @@ namespace LineCol {
                 this._line = pos.line + 1;
             }
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         }
 
         get line(): number {
@@ -335,16 +321,27 @@ namespace LineCol {
             return this._column;
         }
 
-        private _onSelectionChanged = (
-            selections: IObservableMap<CodeEditor.ITextSelection[]>,
-            change: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
-        ) => {
-            let pos = this.editor!.getCursorPosition();
+        private _onSelectionChanged = () => {
+            const oldState = this._getAllState();
+            const pos = this.editor!.getCursorPosition();
             this._line = pos.line + 1;
             this._column = pos.column + 1;
 
-            this.stateChanged.emit(void 0);
+            this._triggerChange(oldState, this._getAllState());
         };
+
+        private _getAllState(): [number, number] {
+            return [this._line, this._column];
+        }
+
+        private _triggerChange(
+            oldState: [number, number],
+            newState: [number, number]
+        ) {
+            if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+                this.stateChanged.emit(void 0);
+            }
+        }
 
         private _line: number = 1;
         private _column: number = 1;
@@ -354,6 +351,7 @@ namespace LineCol {
     export interface IOptions {
         notebookTracker: INotebookTracker;
         editorTracker: IEditorTracker;
+        consoleTracker: IConsoleTracker;
         shell: ApplicationShell;
     }
 }
@@ -378,17 +376,24 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
     id: 'jupyterlab-statusbar/default-items:line-col',
     autoStart: true,
     provides: ILineCol,
-    requires: [IDefaultsManager, INotebookTracker, IEditorTracker],
+    requires: [
+        IDefaultsManager,
+        INotebookTracker,
+        IEditorTracker,
+        IConsoleTracker
+    ],
     activate: (
         app: JupyterLab,
         defaultsManager: IDefaultsManager,
         notebookTracker: INotebookTracker,
-        editorTracker: IEditorTracker
+        editorTracker: IEditorTracker,
+        consoleTracker: IConsoleTracker
     ) => {
         let item = new LineCol({
             shell: app.shell,
             notebookTracker,
-            editorTracker
+            editorTracker,
+            consoleTracker
         });
 
         defaultsManager.addDefaultStatus('line-col-item', item, {
@@ -396,7 +401,8 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
             priority: 2,
             isActive: IStatusContext.delegateActive(app.shell, [
                 { tracker: notebookTracker },
-                { tracker: editorTracker }
+                { tracker: editorTracker },
+                { tracker: consoleTracker }
             ])
         });
 
