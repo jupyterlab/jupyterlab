@@ -19,7 +19,7 @@ A JupyterLab extension for managing keyboard shortcuts
 ## Install
 
 ```bash
-jupyter labextension install jupyterlab-shortcutui
+jupyter labextension install @jupyterlab/shortcutui
 ```
 
 ## Development
