@@ -586,9 +586,9 @@ function addCommands(
         return;
       }
 
-      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
-      commands.execute('filebrowser:activate-main');
-      commands.execute('filebrowser:navigate-main', { path: context.path });
+      // 'activate' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate', { path: context.path });
+      commands.execute('filebrowser:navigate', { path: context.path });
     }
   });
 

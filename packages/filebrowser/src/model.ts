@@ -117,6 +117,13 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * The drive name that gets prepended to the path.
+   */
+  get driveName(): string {
+    return this._driveName;
+  }
+
+  /**
    * A promise that resolves when the model is first restored.
    */
   get restored(): Promise<void> {
