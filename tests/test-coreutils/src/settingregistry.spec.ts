@@ -151,62 +151,45 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#plugins', () => {
-      it('should return a list of registered plugins in registry', done => {
+      it('should return a list of registered plugins in registry', async () => {
         const one = 'foo';
         const two = 'bar';
 
         expect(registry.plugins.length).to.equal(0);
         connector.schemas[one] = { type: 'object' };
         connector.schemas[two] = { type: 'object' };
-        registry
-          .load(one)
-          .then(() => {
-            expect(registry.plugins).to.have.length(1);
-          })
-          .then(() => registry.load(two))
-          .then(() => {
-            expect(registry.plugins).to.have.length(2);
-          })
-          .then(done)
-          .catch(done);
+        await registry.load(one);
+        expect(registry.plugins).to.have.length(1);
+        await registry.load(two);
+        expect(registry.plugins).to.have.length(2);
       });
     });
 
     describe('#get()', () => {
-      it('should get a setting item from a loaded plugin', done => {
+      it('should get a setting item from a loaded plugin', async () => {
         const id = 'foo';
         const key = 'bar';
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.load(id))
-          .then(() => registry.get(id, key))
-          .then(saved => {
-            expect(saved.user).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        (await registry.load(id)) as Settings;
+        const saved = await registry.get(id, key);
+        expect(saved.user).to.equal(value);
       });
 
-      it('should get a setting item from a plugin that is not loaded', done => {
+      it('should get a setting item from a plugin that is not loaded', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
 
         connector.schemas[id] = { type: 'object' };
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.get(id, key))
-          .then(saved => {
-            expect(saved.composite).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        const saved = await registry.get(id, key);
+        expect(saved.composite).to.equal(value);
       });
 
-      it('should use schema default if user data not available', done => {
+      it('should use schema default if user data not available', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -217,17 +200,12 @@ describe('@jupyterlab/coreutils', () => {
           }
         });
 
-        registry
-          .get(id, key)
-          .then(saved => {
-            expect(saved.composite).to.equal(schema.properties[key].default);
-            expect(saved.composite).to.not.equal(saved.user);
-          })
-          .then(done)
-          .catch(done);
+        const saved = await registry.get(id, key);
+        expect(saved.composite).to.equal(schema.properties[key].default);
+        expect(saved.composite).to.not.equal(saved.user);
       });
 
-      it('should let user value override schema default', done => {
+      it('should let user value override schema default', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -238,123 +216,90 @@ describe('@jupyterlab/coreutils', () => {
           }
         });
 
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.get(id, key))
-          .then(saved => {
-            expect(saved.composite).to.equal(value);
-            expect(saved.user).to.equal(value);
-            expect(saved.composite).to.not.equal(
-              schema.properties[key].default
-            );
-            expect(saved.user).to.not.equal(schema.properties[key].default);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        const saved = await registry.get(id, key);
+        expect(saved.composite).to.equal(value);
+        expect(saved.user).to.equal(value);
+        expect(saved.composite).to.not.equal(schema.properties[key].default);
+        expect(saved.user).to.not.equal(schema.properties[key].default);
       });
 
-      it('should reject if a plugin does not exist', done => {
-        registry
-          .get('foo', 'bar')
-          .then(saved => {
-            done('should not resolve');
-          })
-          .catch(reason => {
-            done();
-          });
+      it('should reject if a plugin does not exist', async () => {
+        let failed = false;
+        try {
+          await registry.get('foo', 'bar');
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
       });
 
-      it('should resolve `undefined` if a key does not exist', done => {
+      it('should resolve `undefined` if a key does not exist', async () => {
         const id = 'foo';
         const key = 'bar';
 
         connector.schemas[id] = { type: 'object' };
 
-        registry
-          .get(id, key)
-          .then(saved => {
-            expect(saved.composite).to.equal(void 0);
-            expect(saved.user).to.equal(void 0);
-          })
-          .then(done)
-          .catch(done);
+        const saved = await registry.get(id, key);
+        expect(saved.composite).to.equal(void 0);
+        expect(saved.user).to.equal(void 0);
       });
     });
 
     describe('#load()', () => {
-      it(`should resolve a registered plugin's settings`, done => {
+      it(`should resolve a registered plugin's settings`, async () => {
         const id = 'foo';
 
         expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object' };
-        registry
-          .load(id)
-          .then(settings => {
-            expect(settings.plugin).to.equal(id);
-          })
-          .then(done)
-          .catch(done);
+        const settings = (await registry.load(id)) as Settings;
+        expect(settings.plugin).to.equal(id);
       });
 
-      it('should reject if a plugin does not exist', done => {
-        registry
-          .load('foo')
-          .then(settings => {
-            done('should not resolve');
-          })
-          .catch(reason => {
-            done();
-          });
+      it('should reject if a plugin does not exist', async () => {
+        let failed = false;
+        try {
+          await registry.load('foo');
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
       });
     });
 
     describe('#reload()', () => {
-      it(`should load a registered plugin's settings`, done => {
+      it(`should load a registered plugin's settings`, async () => {
         const id = 'foo';
 
         expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object' };
-        registry
-          .reload(id)
-          .then(settings => {
-            expect(settings.plugin).to.equal(id);
-          })
-          .then(done)
-          .catch(done);
+        const settings = await registry.reload(id);
+        expect(settings.plugin).to.equal(id);
       });
 
-      it(`should replace a registered plugin's settings`, done => {
+      it(`should replace a registered plugin's settings`, async () => {
         const id = 'foo';
         const first = 'Foo';
         const second = 'Bar';
 
         expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object', title: first };
-        registry
-          .reload(id)
-          .then(settings => {
-            expect(settings.schema.title).to.equal(first);
-          })
-          .then(() => {
-            connector.schemas[id].title = second;
-          })
-          .then(() => registry.reload(id))
-          .then(settings => {
-            expect(settings.schema.title).to.equal(second);
-          })
-          .then(done)
-          .catch(done);
+        let settings = await registry.reload(id);
+        expect(settings.schema.title).to.equal(first);
+        await Promise.resolve(void 0);
+        connector.schemas[id].title = second;
+        settings = await registry.reload(id);
+        expect(settings.schema.title).to.equal(second);
       });
 
-      it('should reject if a plugin does not exist', done => {
-        registry
-          .reload('foo')
-          .then(settings => {
-            done('should not resolve');
-          })
-          .catch(reason => {
-            done();
-          });
+      it('should reject if a plugin does not exist', async () => {
+        let failed = false;
+        try {
+          await registry.reload('foo');
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
       });
     });
   });
@@ -412,7 +357,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#composite', () => {
-      it('should contain the merged user and default data', done => {
+      it('should contain the merged user and default data', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -424,19 +369,11 @@ describe('@jupyterlab/coreutils', () => {
         });
 
         connector.schemas[id] = schema;
-        registry
-          .load(id)
-          .then(s => {
-            settings = s as Settings;
-          })
-          .then(() => {
-            expect(settings.composite[key]).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.composite[key]).to.equal(value);
       });
 
-      it('should privilege user data', done => {
+      it('should privilege user data', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -448,17 +385,9 @@ describe('@jupyterlab/coreutils', () => {
         });
 
         connector.schemas[id] = schema;
-        registry
-          .load(id)
-          .then(s => {
-            settings = s as Settings;
-          })
-          .then(() => settings.set(key, value))
-          .then(() => {
-            expect(settings.composite[key]).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        await settings.set(key, value);
+        expect(settings.composite[key]).to.equal(value);
       });
     });
 
@@ -491,7 +420,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#user', () => {
-      it('should privilege user data', done => {
+      it('should privilege user data', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -503,17 +432,9 @@ describe('@jupyterlab/coreutils', () => {
         });
 
         connector.schemas[id] = schema;
-        registry
-          .load(id)
-          .then(s => {
-            settings = s as Settings;
-          })
-          .then(() => settings.set(key, value))
-          .then(() => {
-            expect(settings.user[key]).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        await settings.set(key, value);
+        expect(settings.user[key]).to.equal(value);
       });
     });
 
@@ -559,7 +480,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#default()', () => {
-      it('should return a fully extrapolated schema default', done => {
+      it('should return a fully extrapolated schema default', async () => {
         const id = 'omicron';
         const defaults = {
           foo: 'one',
@@ -605,40 +526,29 @@ describe('@jupyterlab/coreutils', () => {
             'nonexistent-default': { type: 'string' }
           }
         };
-        registry
-          .load(id)
-          .then(settings => {
-            expect(settings.default('nonexistent-key')).to.equal(undefined);
-            expect(settings.default('foo')).to.equal(defaults.foo);
-            expect(settings.default('bar')).to.equal(defaults.bar);
-            expect(settings.default('baz')).to.deep.equal(defaults.baz);
-            expect(settings.default('nonexistent-default')).to.equal(undefined);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('nonexistent-key')).to.equal(undefined);
+        expect(settings.default('foo')).to.equal(defaults.foo);
+        expect(settings.default('bar')).to.equal(defaults.bar);
+        expect(settings.default('baz')).to.deep.equal(defaults.baz);
+        expect(settings.default('nonexistent-default')).to.equal(undefined);
       });
     });
 
     describe('#get()', () => {
-      it('should get a setting item', done => {
+      it('should get a setting item', async () => {
         const id = 'foo';
         const key = 'bar';
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.load(id))
-          .then(s => {
-            const saved = (settings = s as Settings).get(key);
-
-            expect(saved.user).to.equal(value);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        settings = (await registry.load(id)) as Settings;
+        const saved = settings.get(key);
+        expect(saved.user).to.equal(value);
       });
 
-      it('should use schema default if user data not available', done => {
+      it('should use schema default if user data not available', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -649,19 +559,14 @@ describe('@jupyterlab/coreutils', () => {
           }
         });
 
-        registry
-          .load(id)
-          .then(s => {
-            const saved = (settings = s as Settings).get(key);
+        settings = (await registry.load(id)) as Settings;
+        const saved = settings.get(key);
 
-            expect(saved.composite).to.equal(schema.properties[key].default);
-            expect(saved.composite).to.not.equal(saved.user);
-          })
-          .then(done)
-          .catch(done);
+        expect(saved.composite).to.equal(schema.properties[key].default);
+        expect(saved.composite).to.not.equal(saved.user);
       });
 
-      it('should let user value override schema default', done => {
+      it('should let user value override schema default', async () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
@@ -672,118 +577,77 @@ describe('@jupyterlab/coreutils', () => {
           }
         });
 
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.load(id))
-          .then(s => {
-            const saved = (settings = s as Settings).get(key);
-
-            expect(saved.composite).to.equal(value);
-            expect(saved.user).to.equal(value);
-            expect(saved.composite).to.not.equal(
-              schema.properties[key].default
-            );
-            expect(saved.user).to.not.equal(schema.properties[key].default);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        settings = (await registry.load(id)) as Settings;
+        const saved = settings.get(key);
+        expect(saved.composite).to.equal(value);
+        expect(saved.user).to.equal(value);
+        expect(saved.composite).to.not.equal(schema.properties[key].default);
+        expect(saved.user).to.not.equal(schema.properties[key].default);
       });
 
-      it('should be `undefined` if a key does not exist', done => {
+      it('should be `undefined` if a key does not exist', async () => {
         const id = 'foo';
         const key = 'bar';
 
         connector.schemas[id] = { type: 'object' };
 
-        registry
-          .load(id)
-          .then(s => {
-            const saved = (settings = s as Settings).get(key);
-
-            expect(saved.composite).to.equal(void 0);
-            expect(saved.user).to.equal(void 0);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        const saved = settings.get(key);
+        expect(saved.composite).to.equal(void 0);
+        expect(saved.user).to.equal(void 0);
       });
     });
 
     describe('#remove()', () => {
-      it('should remove a setting item', done => {
+      it('should remove a setting item', async () => {
         const id = 'foo';
         const key = 'bar';
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
-        connector
-          .save(id, JSON.stringify({ [key]: value }))
-          .then(() => registry.load(id))
-          .then(s => {
-            const saved = (settings = s as Settings).get(key);
-
-            expect(saved.user).to.equal(value);
-            return settings.remove(key);
-          })
-          .then(() => {
-            const saved = settings.get(key);
-
-            expect(saved.composite).to.equal(void 0);
-            expect(saved.user).to.equal(void 0);
-          })
-          .then(done)
-          .catch(done);
+        await connector.save(id, JSON.stringify({ [key]: value }));
+        settings = (await registry.load(id)) as Settings;
+        let saved = settings.get(key);
+        expect(saved.user).to.equal(value);
+        await settings.remove(key);
+        saved = settings.get(key);
+        expect(saved.composite).to.equal(void 0);
+        expect(saved.user).to.equal(void 0);
       });
     });
 
     describe('#save()', () => {
-      it('should save user setting data', done => {
+      it('should save user setting data', async () => {
         const id = 'foo';
         const one = 'one';
         const two = 'two';
 
         connector.schemas[id] = { type: 'object' };
-        registry
-          .load(id)
-          .then(s => {
-            return (settings = s as Settings).save(
-              JSON.stringify({ one, two })
-            );
-          })
-          .then(() => {
-            let saved = settings.get('one');
+        settings = (await registry.load(id)) as Settings;
+        await settings.save(JSON.stringify({ one, two }));
+        let saved = settings.get('one');
+        expect(saved.composite).to.equal(one);
+        expect(saved.user).to.equal(one);
 
-            expect(saved.composite).to.equal(one);
-            expect(saved.user).to.equal(one);
+        saved = settings.get('two');
 
-            saved = settings.get('two');
-
-            expect(saved.composite).to.equal(two);
-            expect(saved.user).to.equal(two);
-          })
-          .then(done)
-          .catch(done);
+        expect(saved.composite).to.equal(two);
+        expect(saved.user).to.equal(two);
       });
     });
 
     describe('#set()', () => {
-      it('should set a user setting item', done => {
+      it('should set a user setting item', async () => {
         const id = 'foo';
         const one = 'one';
 
         connector.schemas[id] = { type: 'object' };
-        registry
-          .load(id)
-          .then(s => {
-            return (settings = s as Settings).set('one', one);
-          })
-          .then(() => {
-            let saved = settings.get('one');
-
-            expect(saved.composite).to.equal(one);
-            expect(saved.user).to.equal(one);
-          })
-          .then(done)
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        await settings.set('one', one);
+        const saved = settings.get('one');
+        expect(saved.composite).to.equal(one);
+        expect(saved.user).to.equal(one);
       });
     });
   });

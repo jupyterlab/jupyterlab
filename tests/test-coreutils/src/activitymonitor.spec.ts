@@ -25,12 +25,12 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#constructor()', () => {
       it('should accept a signal', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         expect(monitor).to.be.an.instanceof(ActivityMonitor);
       });
 
       it('should accept a timeout', () => {
-        let monitor = new ActivityMonitor<TestObject, string[]>({
+        const monitor = new ActivityMonitor<TestObject, string[]>({
           signal: testObj.two,
           timeout: 100
         });
@@ -41,7 +41,7 @@ describe('@jupyterlab/coreutils', () => {
     describe('#activityStopped', () => {
       it('should be emitted after the signal has fired and a timeout', done => {
         let called = false;
-        let monitor = new ActivityMonitor({ signal, timeout: 100 });
+        const monitor = new ActivityMonitor({ signal, timeout: 100 });
         monitor.activityStopped.connect((sender, args) => {
           expect(sender).to.equal(monitor);
           expect(args.sender).to.equal(testObj);
@@ -59,12 +59,12 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#timeout', () => {
       it('should default to `1000`', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         expect(monitor.timeout).to.equal(1000);
       });
 
       it('should be set-able', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.timeout = 200;
         expect(monitor.timeout).to.equal(200);
       });
@@ -72,7 +72,7 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the monitor is disposed', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         expect(monitor.isDisposed).to.equal(false);
         monitor.dispose();
         expect(monitor.isDisposed).to.equal(true);
@@ -81,13 +81,13 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the monitor', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.dispose();
         expect(monitor.isDisposed).to.equal(true);
       });
 
       it('should be a no-op if called more than once', () => {
-        let monitor = new ActivityMonitor<TestObject, number>({ signal });
+        const monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.dispose();
         monitor.dispose();
         expect(monitor.isDisposed).to.equal(true);
