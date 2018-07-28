@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager-extension",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "description": "JupyterLab - Document Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
