@@ -9,7 +9,7 @@ describe('@jupyterlab/coreutils', () => {
   describe('URLExt', () => {
     describe('.parse()', () => {
       it('should parse a url into a URLExt object', () => {
-        let obj = URLExt.parse('http://www.example.com');
+        const obj = URLExt.parse('http://www.example.com');
         expect(obj.href).to.equal('http://www.example.com/');
         expect(obj.protocol).to.equal('http:');
         expect(obj.host).to.equal('www.example.com');
@@ -18,8 +18,8 @@ describe('@jupyterlab/coreutils', () => {
       });
 
       it('should handle query and hash', () => {
-        let url = "http://example.com/path?that's#all, folks";
-        let obj = URLExt.parse(url);
+        const url = "http://example.com/path?that's#all, folks";
+        const obj = URLExt.parse(url);
         try {
           expect(obj.href).to.equal(
             'http://example.com/path?that%27s#all,%20folks'
@@ -58,7 +58,7 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('objectToQueryString()', () => {
       it('should return a serialized object string suitable for a query', () => {
-        let obj = {
+        const obj = {
           name: 'foo',
           id: 'baz'
         };

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Router } from '@jupyterlab/application';
 
@@ -23,19 +23,19 @@ describe('apputils', () => {
 
     describe('#constructor()', () => {
       it('should construct a new router', () => {
-        expect(router).to.be.a(Router);
+        expect(router).to.be.an.instanceof(Router);
       });
     });
 
     describe('#base', () => {
       it('should be the base URL of the application', () => {
-        expect(router.base).to.be(base);
+        expect(router.base).to.equal(base);
       });
     });
 
     describe('#commands', () => {
       it('should be the command registry used by the router', () => {
-        expect(router.commands).to.be(commands);
+        expect(router.commands).to.equal(commands);
       });
     });
 
@@ -48,7 +48,7 @@ describe('apputils', () => {
         const search = '';
         const hash = '';
 
-        expect(router.current).to.eql({ hash, path, request, search });
+        expect(router.current).to.deep.equal({ hash, path, request, search });
       });
     });
 
@@ -64,7 +64,7 @@ describe('apputils', () => {
         router.register({ command: 'a', pattern: /.*/, rank: 10 });
 
         router.routed.connect(() => {
-          expect(routed).to.be(true);
+          expect(routed).to.equal(true);
           done();
         });
         router.route();
@@ -73,12 +73,12 @@ describe('apputils', () => {
 
     describe('#stop', () => {
       it('should be a unique token', () => {
-        expect(router.stop).to.be.a(Token);
+        expect(router.stop).to.be.an.instanceof(Token);
       });
 
       it('should stop routing if returned by a routed command', done => {
         const wanted = ['a', 'b'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
@@ -103,7 +103,7 @@ describe('apputils', () => {
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
         router.routed.connect(() => {
-          expect(recorded).to.eql(wanted);
+          expect(recorded).to.deep.equal(wanted);
           done();
         });
         router.route();
@@ -120,7 +120,7 @@ describe('apputils', () => {
     describe('#register()', () => {
       it('should register a command with a route pattern', done => {
         const wanted = ['a'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
@@ -130,7 +130,7 @@ describe('apputils', () => {
         router.register({ command: 'a', pattern: /.*/ });
 
         router.routed.connect(() => {
-          expect(recorded).to.eql(wanted);
+          expect(recorded).to.deep.equal(wanted);
           done();
         });
         router.route();
@@ -140,7 +140,7 @@ describe('apputils', () => {
     describe('#route()', () => {
       it('should route the location to a command', done => {
         const wanted = ['a'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
@@ -148,13 +148,13 @@ describe('apputils', () => {
           }
         });
         router.register({ command: 'a', pattern: /#a/, rank: 10 });
-        expect(recorded).to.be.empty();
+        expect(recorded.length).to.equal(0);
 
         // Change the hash because changing location is a security error.
         window.location.hash = 'a';
 
         router.routed.connect(() => {
-          expect(recorded).to.eql(wanted);
+          expect(recorded).to.deep.equal(wanted);
           window.location.hash = '';
           done();
         });

@@ -12,26 +12,26 @@ describe('@jupyterlab/coreutils', () => {
   describe('MarkdownCodeBlocks', () => {
     describe('.isMarkdown()', () => {
       it('should return true for a valid markdown extension', () => {
-        let isMarkdown = MarkdownCodeBlocks.isMarkdown('.md');
+        const isMarkdown = MarkdownCodeBlocks.isMarkdown('.md');
         expect(isMarkdown).to.equal(true);
       });
     });
 
     describe('.findMarkdownCodeBlocks()', () => {
       it('should find a simple block', () => {
-        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
         expect(codeblocks.length).to.equal(1);
         expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
 
       it('should find a single line block', () => {
-        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK2);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK2);
         expect(codeblocks.length).to.equal(1);
         expect(codeblocks[0].code).to.equal('a = 10');
       });
 
       it('should find a block with a language', () => {
-        let codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
+        const codeblocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(BLOCK1);
         expect(codeblocks.length).to.equal(1);
         expect(codeblocks[0].code).to.equal('a = 10\nb = 20\n');
       });
