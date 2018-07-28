@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {

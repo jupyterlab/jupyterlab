@@ -32,7 +32,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^2.0.2",
     "@jupyterlab/observables": "^2.0.2",
-    "@jupyterlab/rendermime": "^0.17.2",
+    "@jupyterlab/rendermime": "^0.17.3",
     "@jupyterlab/rendermime-interfaces": "^1.1.2",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/signaling": "^1.2.2"
