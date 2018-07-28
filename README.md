@@ -60,7 +60,7 @@ JupyterLab uses Python, and as of July 2018 JupyterLab can use either Python2 or
 
 1.  If you are using Windows with Python version 3.3 or higher, use the [Python Launcher for Windows](https://docs.python.org/3/using/windows.html?highlight=shebang#python-launcher-for-windows) to use `pip` with Python version 3:
     ```bash
-    py -3 pip install jupyterlab
+    py -3 -m pip install jupyterlab
     ```
 2.  If your system has a `python3` command (standard on Unix-like systems), install with:
     ```bash
