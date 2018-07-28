@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@jupyterlab/application-extension@^0.17.3":
-  version "0.17.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.17.3.tgz#7bcd75496d2dc5de7ac119d21f99fa5516c878de"
+"@jupyterlab/application-extension@^0.17.4":
+  version "0.17.4"
+  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.17.4.tgz#649e6b343672000119128aaf66936559c2fe0051"
   dependencies:
     "@jupyterlab/application" "^0.17.2"
     "@jupyterlab/apputils" "^0.17.2"
@@ -251,9 +251,9 @@
     "@phosphor/signaling" "^1.2.2"
     "@phosphor/widgets" "^1.6.0"
 
-"@jupyterlab/docmanager-extension@^0.17.3":
-  version "0.17.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/docmanager-extension/-/docmanager-extension-0.17.3.tgz#faa310b668f5e214d11a43c87888d836e6e91f38"
+"@jupyterlab/docmanager-extension@^0.17.4":
+  version "0.17.4"
+  resolved "https://registry.npmjs.org/@jupyterlab/docmanager-extension/-/docmanager-extension-0.17.4.tgz#bb1e34e2c1422be2dd06e7fc4437a45be62b98b6"
   dependencies:
     "@jupyterlab/application" "^0.17.2"
     "@jupyterlab/apputils" "^0.17.2"
@@ -330,9 +330,9 @@
     "@jupyterlab/rendermime" "^0.17.2"
     "@phosphor/coreutils" "^1.3.0"
 
-"@jupyterlab/filebrowser-extension@^0.17.3":
-  version "0.17.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.17.3.tgz#a898efb7a141ee7b1cd015c2388ecbd030071181"
+"@jupyterlab/filebrowser-extension@^0.17.4":
+  version "0.17.4"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.17.4.tgz#143c743acc24eb7e8d93ea3c98621d8c42f3996f"
   dependencies:
     "@jupyterlab/application" "^0.17.2"
     "@jupyterlab/apputils" "^0.17.2"
@@ -346,9 +346,9 @@
     "@phosphor/commands" "^1.5.0"
     "@phosphor/widgets" "^1.6.0"
 
-"@jupyterlab/filebrowser@^0.17.2":
-  version "0.17.2"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.17.2.tgz#cc4e0be7461526e8a116342cceeb5bda2e128fbc"
+"@jupyterlab/filebrowser@^0.17.2", "@jupyterlab/filebrowser@^0.17.3":
+  version "0.17.3"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.17.3.tgz#1ec7b055f153fe3a1a81eef7fa104d512ad27e18"
   dependencies:
     "@jupyterlab/apputils" "^0.17.2"
     "@jupyterlab/coreutils" "^2.0.2"

@@ -12,7 +12,7 @@
     "@jupyterlab/codemirror": "^0.17.3",
     "@jupyterlab/docmanager": "^0.17.2",
     "@jupyterlab/docregistry": "^0.17.2",
-    "@jupyterlab/filebrowser": "^0.17.2",
+    "@jupyterlab/filebrowser": "^0.17.3",
     "@jupyterlab/fileeditor": "^0.17.2",
     "@jupyterlab/services": "^3.0.3",
     "@jupyterlab/theme-light-extension": "^0.17.3",
