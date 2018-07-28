@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { ApplicationShell, LayoutRestorer } from '@jupyterlab/application';
 
@@ -26,7 +26,7 @@ describe('apputils', () => {
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        expect(restorer).to.be.a(LayoutRestorer);
+        expect(restorer).to.be.an.instanceof(LayoutRestorer);
       });
     });
 
@@ -37,7 +37,7 @@ describe('apputils', () => {
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        expect(restorer.restored).to.be.a(Promise);
+        expect(restorer.restored).to.be.an.instanceof(Promise);
       });
 
       it('should resolve when restorer is done', done => {
@@ -77,8 +77,8 @@ describe('apputils', () => {
           .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
-            expect(layout.mainArea.currentWidget).to.be(currentWidget);
-            expect(layout.mainArea.mode).to.be(mode);
+            expect(layout.mainArea.currentWidget).to.equal(currentWidget);
+            expect(layout.mainArea.mode).to.equal(mode);
             done();
           })
           .catch(done);
@@ -95,7 +95,7 @@ describe('apputils', () => {
         restorer
           .fetch()
           .then(layout => {
-            expect(layout).to.be.ok();
+            expect(layout).to.be.not.be(null);
             done();
           })
           .catch(done);
@@ -126,7 +126,7 @@ describe('apputils', () => {
           .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
-            expect(layout).to.eql(dehydrated);
+            expect(layout).to.deep.equal(dehydrated);
             done();
           })
           .catch(done);
@@ -165,7 +165,7 @@ describe('apputils', () => {
           .catch(done);
         restorer.restored
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           })
           .then(() => state.remove(key))
           .then(() => {
@@ -224,7 +224,7 @@ describe('apputils', () => {
           .then(() => restorer.save(dehydrated))
           .then(() => restorer.fetch())
           .then(layout => {
-            expect(layout).to.eql(dehydrated);
+            expect(layout).to.deep.equal(dehydrated);
             done();
           })
           .catch(done);
