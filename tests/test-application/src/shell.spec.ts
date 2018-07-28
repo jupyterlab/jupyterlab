@@ -33,7 +33,7 @@ describe('ApplicationShell', () => {
 
   describe('#constructor()', () => {
     it('should create an ApplicationShell instance', () => {
-      expect(shell).to.be.an(ApplicationShell);
+      expect(shell).to.be.an.instanceof(ApplicationShell);
     });
   });
 

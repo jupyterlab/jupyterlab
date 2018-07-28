@@ -31,5 +31,7 @@ glob.sync(path.join(target, 'src', '*.ts*')).forEach(function(filePath) {
   src = src.split('to.be(').join('to.equal(');
   src = src.split('to.eql(').join('to.deep.equal(');
   src = src.split('to.be.a(').join('to.be.an.instanceof(');
+  src = src.split('to.be.an(').join('to.be.an.instanceof(');
+  src = src.split(').to.be.empty()').join('.length).to.be(0)');
   fs.writeFileSync(filePath, src, 'utf8');
 });

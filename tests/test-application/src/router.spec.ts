@@ -148,7 +148,7 @@ describe('apputils', () => {
           }
         });
         router.register({ command: 'a', pattern: /#a/, rank: 10 });
-        expect(recorded).to.be.empty();
+        expect(recorded.length).to.be(0);
 
         // Change the hash because changing location is a security error.
         window.location.hash = 'a';
