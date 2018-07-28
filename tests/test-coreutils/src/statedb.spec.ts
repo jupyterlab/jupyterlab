@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { StateDB } from '@jupyterlab/coreutils';
 
@@ -15,7 +15,7 @@ describe('StateDB', () => {
   describe('#constructor()', () => {
     it('should create a state database', () => {
       let db = new StateDB({ namespace: 'test' });
-      expect(db).to.be.a(StateDB);
+      expect(db).to.be.an.instanceof(StateDB);
     });
 
     it('should allow an overwrite data transformation', done => {
@@ -35,14 +35,14 @@ describe('StateDB', () => {
         .save(key, incorrect)
         .then(() => prepopulate.fetch(key))
         .then(value => {
-          expect(value).to.be(incorrect);
+          expect(value).to.equal(incorrect);
         })
         .then(() => {
           transform.resolve(transformation);
         })
         .then(() => db.fetch(key))
         .then(value => {
-          expect(value).to.be(correct);
+          expect(value).to.equal(correct);
         })
         .then(() => db.clear())
         .then(done)
@@ -61,11 +61,11 @@ describe('StateDB', () => {
         .save('foo', 'bar')
         .then(() => db.fetch('foo'))
         .then(saved => {
-          expect(saved).to.be('bar');
+          expect(saved).to.equal('bar');
         })
         .then(() => db.fetch(key))
         .then(saved => {
-          expect(saved).to.be(value);
+          expect(saved).to.equal(value);
         })
         .then(() => db.clear())
         .then(done)
@@ -96,7 +96,7 @@ describe('StateDB', () => {
         .then(() => db.save('bar', 1))
         .then(() => db.remove('bar'))
         .then(() => {
-          expect(recorded).to.eql(changes);
+          expect(recorded).to.deep.equal(changes);
         })
         .then(() => db.clear())
         .then(done)
@@ -124,7 +124,7 @@ describe('StateDB', () => {
     it('should be the read-only internal namespace', () => {
       let namespace = 'test-namespace';
       let db = new StateDB({ namespace });
-      expect(db.namespace).to.be(namespace);
+      expect(db.namespace).to.equal(namespace);
     });
   });
 
@@ -136,7 +136,7 @@ describe('StateDB', () => {
       let key = 'foo:bar';
       let value = { qux: 'quux' };
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db
         .save(key, value)
         .then(() => {
@@ -144,7 +144,7 @@ describe('StateDB', () => {
         })
         .then(() => db.clear())
         .then(() => {
-          expect(localStorage).to.be.empty();
+          expect(localStorage.length).to.equal(0);
         })
         .then(done)
         .catch(done);
@@ -156,7 +156,7 @@ describe('StateDB', () => {
       let db1 = new StateDB({ namespace: 'test-namespace-1' });
       let db2 = new StateDB({ namespace: 'test-namespace-2' });
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db1
         .save('foo', { bar: null })
         .then(() => {
@@ -172,7 +172,7 @@ describe('StateDB', () => {
         })
         .then(() => db2.clear())
         .then(() => {
-          expect(localStorage).to.be.empty();
+          expect(localStorage.length).to.equal(0);
         })
         .then(done)
         .catch(done);
@@ -187,7 +187,7 @@ describe('StateDB', () => {
       let key = 'foo:bar';
       let value = { baz: 'qux' };
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db
         .save(key, value)
         .then(() => {
@@ -195,7 +195,7 @@ describe('StateDB', () => {
         })
         .then(() => db.fetch(key))
         .then(fetched => {
-          expect(fetched).to.eql(value);
+          expect(fetched).to.deep.equal(value);
         })
         .then(() => db.clear())
         .then(done)
@@ -208,11 +208,11 @@ describe('StateDB', () => {
       let db = new StateDB({ namespace: 'test-namespace' });
       let key = 'foo:bar';
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db
         .fetch(key)
         .then(fetched => {
-          expect(fetched).to.be(undefined);
+          expect(fetched).to.equal(undefined);
         })
         .then(done)
         .catch(done);
@@ -233,7 +233,7 @@ describe('StateDB', () => {
         'abc:jkl'
       ];
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       let promises = keys.map(key => db.save(key, { value: key }));
       Promise.all(promises)
         .then(() => {
@@ -241,23 +241,23 @@ describe('StateDB', () => {
         })
         .then(() => db.fetchNamespace('foo'))
         .then(fetched => {
-          expect(fetched.length).to.be(3);
+          expect(fetched.length).to.equal(3);
 
           let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
 
-          expect(sorted[0].id).to.be(keys[0]);
-          expect(sorted[1].id).to.be(keys[1]);
-          expect(sorted[2].id).to.be(keys[2]);
+          expect(sorted[0].id).to.equal(keys[0]);
+          expect(sorted[1].id).to.equal(keys[1]);
+          expect(sorted[2].id).to.equal(keys[2]);
         })
         .then(() => db.fetchNamespace('abc'))
         .then(fetched => {
-          expect(fetched.length).to.be(3);
+          expect(fetched.length).to.equal(3);
 
           let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
 
-          expect(sorted[0].id).to.be(keys[3]);
-          expect(sorted[1].id).to.be(keys[4]);
-          expect(sorted[2].id).to.be(keys[5]);
+          expect(sorted[0].id).to.equal(keys[3]);
+          expect(sorted[1].id).to.equal(keys[4]);
+          expect(sorted[2].id).to.equal(keys[5]);
         })
         .then(() => db.clear())
         .then(done)
@@ -273,7 +273,7 @@ describe('StateDB', () => {
       let key = 'foo:bar';
       let value = { baz: 'qux' };
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db
         .save(key, value)
         .then(() => {
@@ -281,7 +281,7 @@ describe('StateDB', () => {
         })
         .then(() => db.remove(key))
         .then(() => {
-          expect(localStorage).to.be.empty();
+          expect(localStorage.length).to.equal(0);
         })
         .then(done)
         .catch(done);
@@ -296,16 +296,16 @@ describe('StateDB', () => {
       let key = 'foo:bar';
       let value = { baz: 'qux' };
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       db
         .save(key, value)
         .then(() => db.fetch(key))
         .then(fetched => {
-          expect(fetched).to.eql(value);
+          expect(fetched).to.deep.equal(value);
         })
         .then(() => db.remove(key))
         .then(() => {
-          expect(localStorage).to.be.empty();
+          expect(localStorage.length).to.equal(0);
         })
         .then(done)
         .catch(done);
@@ -326,11 +326,11 @@ describe('StateDB', () => {
         }
       };
 
-      expect(localStorage.length).to.be(0);
+      expect(localStorage.length).to.equal(0);
       Promise.all(Object.keys(contents).map(key => db.save(key, contents[key])))
         .then(() => db.toJSON())
         .then(serialized => {
-          expect(serialized).to.eql(contents);
+          expect(serialized).to.deep.equal(contents);
         })
         .then(() => db.clear())
         .then(done)

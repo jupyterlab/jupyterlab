@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import {
   DefaultSchemaValidator,
@@ -45,7 +45,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should create a new schema validator', () => {
         const validator = new DefaultSchemaValidator();
 
-        expect(validator).to.be.a(DefaultSchemaValidator);
+        expect(validator).to.be.an.instanceof(DefaultSchemaValidator);
       });
     });
 
@@ -66,7 +66,7 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data: { composite, user }, raw, schema };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.be(null);
+        expect(errors).to.equal(null);
       });
 
       it('should return errors if the data fails to validate', () => {
@@ -85,7 +85,7 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data: { composite, user }, raw, schema };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.not.be(null);
+        expect(errors).to.not.equal(null);
       });
 
       it('should populate the composite data', () => {
@@ -104,9 +104,11 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data: { composite, user }, raw, schema };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.be(null);
-        expect(plugin.data.user.bar).to.be(undefined);
-        expect(plugin.data.composite.bar).to.be(schema.properties.bar.default);
+        expect(errors).to.equal(null);
+        expect(plugin.data.user.bar).to.equal(undefined);
+        expect(plugin.data.composite.bar).to.equal(
+          schema.properties.bar.default
+        );
       });
     });
   });
@@ -126,7 +128,7 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#constructor()', () => {
       it('should create a new setting registry', () => {
-        expect(registry).to.be.a(SettingRegistry);
+        expect(registry).to.be.an.instanceof(SettingRegistry);
       });
     });
 
@@ -138,7 +140,7 @@ describe('@jupyterlab/coreutils', () => {
 
         connector.schemas[id] = { type: 'object' };
         registry.pluginChanged.connect((sender: any, plugin: string) => {
-          expect(id).to.be(plugin);
+          expect(id).to.equal(plugin);
           done();
         });
         registry
@@ -153,7 +155,7 @@ describe('@jupyterlab/coreutils', () => {
         const one = 'foo';
         const two = 'bar';
 
-        expect(registry.plugins).to.be.empty();
+        expect(registry.plugins.length).to.equal(0);
         connector.schemas[one] = { type: 'object' };
         connector.schemas[two] = { type: 'object' };
         registry
@@ -182,7 +184,7 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => registry.load(id))
           .then(() => registry.get(id, key))
           .then(saved => {
-            expect(saved.user).to.be(value);
+            expect(saved.user).to.equal(value);
           })
           .then(done)
           .catch(done);
@@ -198,7 +200,7 @@ describe('@jupyterlab/coreutils', () => {
           .save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => {
-            expect(saved.composite).to.be(value);
+            expect(saved.composite).to.equal(value);
           })
           .then(done)
           .catch(done);
@@ -218,8 +220,8 @@ describe('@jupyterlab/coreutils', () => {
         registry
           .get(id, key)
           .then(saved => {
-            expect(saved.composite).to.be(schema.properties[key].default);
-            expect(saved.composite).to.not.be(saved.user);
+            expect(saved.composite).to.equal(schema.properties[key].default);
+            expect(saved.composite).to.not.equal(saved.user);
           })
           .then(done)
           .catch(done);
@@ -240,10 +242,12 @@ describe('@jupyterlab/coreutils', () => {
           .save(id, JSON.stringify({ [key]: value }))
           .then(() => registry.get(id, key))
           .then(saved => {
-            expect(saved.composite).to.be(value);
-            expect(saved.user).to.be(value);
-            expect(saved.composite).to.not.be(schema.properties[key].default);
-            expect(saved.user).to.not.be(schema.properties[key].default);
+            expect(saved.composite).to.equal(value);
+            expect(saved.user).to.equal(value);
+            expect(saved.composite).to.not.equal(
+              schema.properties[key].default
+            );
+            expect(saved.user).to.not.equal(schema.properties[key].default);
           })
           .then(done)
           .catch(done);
@@ -269,8 +273,8 @@ describe('@jupyterlab/coreutils', () => {
         registry
           .get(id, key)
           .then(saved => {
-            expect(saved.composite).to.be(void 0);
-            expect(saved.user).to.be(void 0);
+            expect(saved.composite).to.equal(void 0);
+            expect(saved.user).to.equal(void 0);
           })
           .then(done)
           .catch(done);
@@ -281,12 +285,12 @@ describe('@jupyterlab/coreutils', () => {
       it(`should resolve a registered plugin's settings`, done => {
         const id = 'foo';
 
-        expect(registry.plugins).to.be.empty();
+        expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object' };
         registry
           .load(id)
           .then(settings => {
-            expect(settings.plugin).to.be(id);
+            expect(settings.plugin).to.equal(id);
           })
           .then(done)
           .catch(done);
@@ -308,12 +312,12 @@ describe('@jupyterlab/coreutils', () => {
       it(`should load a registered plugin's settings`, done => {
         const id = 'foo';
 
-        expect(registry.plugins).to.be.empty();
+        expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object' };
         registry
           .reload(id)
           .then(settings => {
-            expect(settings.plugin).to.be(id);
+            expect(settings.plugin).to.equal(id);
           })
           .then(done)
           .catch(done);
@@ -324,19 +328,19 @@ describe('@jupyterlab/coreutils', () => {
         const first = 'Foo';
         const second = 'Bar';
 
-        expect(registry.plugins).to.be.empty();
+        expect(registry.plugins.length).to.equal(0);
         connector.schemas[id] = { type: 'object', title: first };
         registry
           .reload(id)
           .then(settings => {
-            expect(settings.schema.title).to.be(first);
+            expect(settings.schema.title).to.equal(first);
           })
           .then(() => {
             connector.schemas[id].title = second;
           })
           .then(() => registry.reload(id))
           .then(settings => {
-            expect(settings.schema.title).to.be(second);
+            expect(settings.schema.title).to.equal(second);
           })
           .then(done)
           .catch(done);
@@ -382,7 +386,7 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
-        expect(settings).to.be.a(Settings);
+        expect(settings).to.be.an.instanceof(Settings);
       });
     });
 
@@ -467,9 +471,9 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.isDisposed).to.be(false);
+        expect(settings.isDisposed).to.equal(false);
         settings.dispose();
-        expect(settings.isDisposed).to.be(true);
+        expect(settings.isDisposed).to.equal(true);
       });
     });
 
@@ -482,7 +486,7 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.schema).to.eql(schema);
+        expect(settings.schema).to.deep.equal(schema);
       });
     });
 
@@ -535,7 +539,7 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.registry).to.be(registry);
+        expect(settings.registry).to.equal(registry);
       });
     });
 
@@ -548,9 +552,9 @@ describe('@jupyterlab/coreutils', () => {
         const plugin = { id, data, raw, schema };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.isDisposed).to.be(false);
+        expect(settings.isDisposed).to.equal(false);
         settings.dispose();
-        expect(settings.isDisposed).to.be(true);
+        expect(settings.isDisposed).to.equal(true);
       });
     });
 
@@ -604,11 +608,11 @@ describe('@jupyterlab/coreutils', () => {
         registry
           .load(id)
           .then(settings => {
-            expect(settings.default('nonexistent-key')).to.be(undefined);
-            expect(settings.default('foo')).to.be(defaults.foo);
-            expect(settings.default('bar')).to.be(defaults.bar);
-            expect(settings.default('baz')).to.eql(defaults.baz);
-            expect(settings.default('nonexistent-default')).to.be(undefined);
+            expect(settings.default('nonexistent-key')).to.equal(undefined);
+            expect(settings.default('foo')).to.equal(defaults.foo);
+            expect(settings.default('bar')).to.equal(defaults.bar);
+            expect(settings.default('baz')).to.deep.equal(defaults.baz);
+            expect(settings.default('nonexistent-default')).to.equal(undefined);
           })
           .then(done)
           .catch(done);
@@ -628,7 +632,7 @@ describe('@jupyterlab/coreutils', () => {
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
-            expect(saved.user).to.be(value);
+            expect(saved.user).to.equal(value);
           })
           .then(done)
           .catch(done);
@@ -650,8 +654,8 @@ describe('@jupyterlab/coreutils', () => {
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
-            expect(saved.composite).to.be(schema.properties[key].default);
-            expect(saved.composite).to.not.be(saved.user);
+            expect(saved.composite).to.equal(schema.properties[key].default);
+            expect(saved.composite).to.not.equal(saved.user);
           })
           .then(done)
           .catch(done);
@@ -674,10 +678,12 @@ describe('@jupyterlab/coreutils', () => {
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
-            expect(saved.composite).to.be(value);
-            expect(saved.user).to.be(value);
-            expect(saved.composite).to.not.be(schema.properties[key].default);
-            expect(saved.user).to.not.be(schema.properties[key].default);
+            expect(saved.composite).to.equal(value);
+            expect(saved.user).to.equal(value);
+            expect(saved.composite).to.not.equal(
+              schema.properties[key].default
+            );
+            expect(saved.user).to.not.equal(schema.properties[key].default);
           })
           .then(done)
           .catch(done);
@@ -694,8 +700,8 @@ describe('@jupyterlab/coreutils', () => {
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
-            expect(saved.composite).to.be(void 0);
-            expect(saved.user).to.be(void 0);
+            expect(saved.composite).to.equal(void 0);
+            expect(saved.user).to.equal(void 0);
           })
           .then(done)
           .catch(done);
@@ -715,14 +721,14 @@ describe('@jupyterlab/coreutils', () => {
           .then(s => {
             const saved = (settings = s as Settings).get(key);
 
-            expect(saved.user).to.be(value);
+            expect(saved.user).to.equal(value);
             return settings.remove(key);
           })
           .then(() => {
             const saved = settings.get(key);
 
-            expect(saved.composite).to.be(void 0);
-            expect(saved.user).to.be(void 0);
+            expect(saved.composite).to.equal(void 0);
+            expect(saved.user).to.equal(void 0);
           })
           .then(done)
           .catch(done);
@@ -746,13 +752,13 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => {
             let saved = settings.get('one');
 
-            expect(saved.composite).to.be(one);
-            expect(saved.user).to.be(one);
+            expect(saved.composite).to.equal(one);
+            expect(saved.user).to.equal(one);
 
             saved = settings.get('two');
 
-            expect(saved.composite).to.be(two);
-            expect(saved.user).to.be(two);
+            expect(saved.composite).to.equal(two);
+            expect(saved.user).to.equal(two);
           })
           .then(done)
           .catch(done);
@@ -773,8 +779,8 @@ describe('@jupyterlab/coreutils', () => {
           .then(() => {
             let saved = settings.get('one');
 
-            expect(saved.composite).to.be(one);
-            expect(saved.user).to.be(one);
+            expect(saved.composite).to.equal(one);
+            expect(saved.user).to.equal(one);
           })
           .then(done)
           .catch(done);

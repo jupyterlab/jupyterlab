@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Signal } from '@phosphor/signaling';
 
@@ -26,7 +26,7 @@ describe('@jupyterlab/coreutils', () => {
     describe('#constructor()', () => {
       it('should accept a signal', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
-        expect(monitor).to.be.an(ActivityMonitor);
+        expect(monitor).to.be.an.instanceof(ActivityMonitor);
       });
 
       it('should accept a timeout', () => {
@@ -34,7 +34,7 @@ describe('@jupyterlab/coreutils', () => {
           signal: testObj.two,
           timeout: 100
         });
-        expect(monitor).to.be.an(ActivityMonitor);
+        expect(monitor).to.be.an.instanceof(ActivityMonitor);
       });
     });
 
@@ -43,15 +43,15 @@ describe('@jupyterlab/coreutils', () => {
         let called = false;
         let monitor = new ActivityMonitor({ signal, timeout: 100 });
         monitor.activityStopped.connect((sender, args) => {
-          expect(sender).to.be(monitor);
-          expect(args.sender).to.be(testObj);
-          expect(args.args).to.be(10);
+          expect(sender).to.equal(monitor);
+          expect(args.sender).to.equal(testObj);
+          expect(args.args).to.equal(10);
           called = true;
         });
         signal.emit(10);
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
         setTimeout(() => {
-          expect(called).to.be(true);
+          expect(called).to.equal(true);
           done();
         }, 100);
       });
@@ -60,22 +60,22 @@ describe('@jupyterlab/coreutils', () => {
     describe('#timeout', () => {
       it('should default to `1000`', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
-        expect(monitor.timeout).to.be(1000);
+        expect(monitor.timeout).to.equal(1000);
       });
 
       it('should be set-able', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.timeout = 200;
-        expect(monitor.timeout).to.be(200);
+        expect(monitor.timeout).to.equal(200);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the monitor is disposed', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
-        expect(monitor.isDisposed).to.be(false);
+        expect(monitor.isDisposed).to.equal(false);
         monitor.dispose();
-        expect(monitor.isDisposed).to.be(true);
+        expect(monitor.isDisposed).to.equal(true);
       });
     });
 
@@ -83,14 +83,14 @@ describe('@jupyterlab/coreutils', () => {
       it('should dispose of the resources used by the monitor', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.dispose();
-        expect(monitor.isDisposed).to.be(true);
+        expect(monitor.isDisposed).to.equal(true);
       });
 
       it('should be a no-op if called more than once', () => {
         let monitor = new ActivityMonitor<TestObject, number>({ signal });
         monitor.dispose();
         monitor.dispose();
-        expect(monitor.isDisposed).to.be(true);
+        expect(monitor.isDisposed).to.equal(true);
       });
     });
   });
