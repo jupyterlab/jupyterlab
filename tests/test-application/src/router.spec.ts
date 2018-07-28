@@ -78,7 +78,7 @@ describe('apputils', () => {
 
       it('should stop routing if returned by a routed command', done => {
         const wanted = ['a', 'b'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
@@ -120,7 +120,7 @@ describe('apputils', () => {
     describe('#register()', () => {
       it('should register a command with a route pattern', done => {
         const wanted = ['a'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
@@ -140,7 +140,7 @@ describe('apputils', () => {
     describe('#route()', () => {
       it('should route the location to a command', done => {
         const wanted = ['a'];
-        let recorded: string[] = [];
+        const recorded: string[] = [];
 
         commands.addCommand('a', {
           execute: () => {
