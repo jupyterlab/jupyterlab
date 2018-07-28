@@ -89,7 +89,7 @@ describe('apputils', () => {
           state: new StateDB({ namespace: NAMESPACE })
         });
         const layout = await restorer.fetch();
-        expect(layout).to.be.not.be(null);
+        expect(layout).to.not.equal(null);
       });
 
       it('should fetch saved data', async () => {
@@ -155,10 +155,9 @@ describe('apputils', () => {
 
     describe('#save()', () => {
       it('should not run before `first` promise', async () => {
-        let called = false;
         const restorer = new LayoutRestorer({
           first: new Promise(() => {
-            called = true;
+            // no op
           }),
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
@@ -168,8 +167,11 @@ describe('apputils', () => {
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
-        await restorer.save(dehydrated);
-        expect(called).to.equal(true);
+        try {
+          await restorer.save(dehydrated);
+        } catch (e) {
+          expect(e).to.equal('save() was called prematurely.');
+        }
       });
 
       it('should save data', async () => {
