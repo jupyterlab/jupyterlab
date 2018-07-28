@@ -28,8 +28,13 @@ glob.sync(path.join(target, 'src', '*.ts*')).forEach(function(filePath) {
   src = src
     .split("import expect = require('expect.js')")
     .join("import { expect } from 'chai'");
+  src = src.split('to.be(undefined)').join('to.be.undefined');
+  src = src.split('to.be(void 0)').join('to.be.undefined');
+  src = src.split('to.be(null').join('to.be.null');
   src = src.split('to.be(').join('to.equal(');
   src = src.split('to.not.be(').join('to.not.equal(');
+  src = src.split('to.be.ok()').join('to.be.ok');
+  src = src.split('to.be.empty(').join('to.be.empty');
   src = src.split('to.eql(').join('to.deep.equal(');
   src = src.split('to.be.a(').join('to.be.an.instanceof(');
   src = src.split('to.be.an(').join('to.be.an.instanceof(');
