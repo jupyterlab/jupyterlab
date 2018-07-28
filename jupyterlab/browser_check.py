@@ -5,6 +5,7 @@ from __future__ import print_function, absolute_import
 from concurrent.futures import ThreadPoolExecutor
 import json
 import os
+import shutil
 import sys
 import subprocess
 
@@ -12,7 +13,7 @@ from tornado.ioloop import IOLoop
 from notebook.notebookapp import flags, aliases
 from traitlets import Bool, Unicode
 
-from .labapp import LabApp
+from .labapp import LabApp, get_app_dir
 
 
 here = os.path.dirname(__file__)
@@ -61,7 +62,14 @@ class BrowserApp(LabApp):
 def run_browser(url):
     """Run the browser test and return an exit code.
     """
-    return subprocess.run(["node", "chrome-test.js", url], cwd=here).returncode
+    target = os.path.join(get_app_dir(), 'browser_test')
+    if not os.path.exists(os.path.join(target, 'node_modules')):
+        os.makedirs(target)
+        subprocess.run(["jlpm"], cwd=target)
+        subprocess.run(["jlpm", "add", "puppeteer"], cwd=target)
+    src = os.path.join(here, "chrome-test.js")
+    return subprocess.run(["node", src, url], cwd=target).returncode
+
 
 if __name__ == '__main__':
     BrowserApp.launch_instance()
