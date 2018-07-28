@@ -277,11 +277,11 @@ export namespace IKernelStatus {
 
 // tslint:disable-next-line:variable-name
 export const IKernelStatus = new Token<IKernelStatus>(
-    'jupyterlab-statusbar/IKernelStatus'
+    '@jupyterlab/statusbar:IKernelStatus'
 );
 
 export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
-    id: 'jupyterlab-statusbar/default-items:kernel-status',
+    id: '@jupyterlab/statusbar:kernel-status-item',
     autoStart: true,
     requires: [IDefaultsManager, INotebookTracker, IConsoleTracker, IFilePath],
     activate: (

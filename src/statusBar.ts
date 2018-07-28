@@ -14,7 +14,7 @@ import { Message } from '@phosphor/messaging';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
-    'jupyterlab-statusbar/IStatusBar'
+    '@jupyterlab/statusbar:IStatusBar'
 );
 
 export interface IStatusBar {

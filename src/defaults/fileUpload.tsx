@@ -173,7 +173,7 @@ export interface IFileUpload extends IDisposable {
 
 // tslint:disable-next-line:variable-name
 export const IFileUpload = new Token<IFileUpload>(
-    'jupyterlab-statusbar/IFileUpload'
+    '@jupyterlab/statusbar:IFileUpload'
 );
 
 export namespace IFileUpload {
@@ -190,7 +190,7 @@ export namespace IFileUpload {
 }
 
 export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
-    id: 'jupyterlab-statusbar/default-items:file-upload',
+    id: '@jupyterlab/statusbar:file-upload-item',
     autoStart: true,
     provides: IFileUpload,
     requires: [IDefaultsManager, IFileBrowserFactory],

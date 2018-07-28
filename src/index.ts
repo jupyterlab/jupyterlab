@@ -20,7 +20,7 @@ import {
     editorSyntax
 } from './defaults';
 
-export const STATUSBAR_PLUGIN_ID = 'jupyterlab-statusbar:plugin';
+export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar:plugin';
 
 /**
  * Initialization data for the statusbar extension.

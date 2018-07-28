@@ -169,14 +169,14 @@ export namespace IRunningSessions {
 
 // tslint:disable-next-line:variable-name
 export const IRunningSessions = new Token<IRunningSessions>(
-    'jupyterlab-statusbar/IRunningSessions'
+    '@jupyterlab/statusbar:IRunningSessions'
 );
 
 /*
  * Initialization data for the statusbar extension.
  */
 export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
-    id: 'jupyterlab-statusbar/default-items:running-sessions',
+    id: '@jupyterlab/statusbar:running-sessions-item',
     autoStart: true,
     provides: IRunningSessions,
     requires: [IDefaultsManager],

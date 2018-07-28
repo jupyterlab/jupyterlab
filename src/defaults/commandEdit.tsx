@@ -162,11 +162,11 @@ export namespace ICommandEdit {
 
 // tslint:disable-next-line:variable-name
 export const ICommandEdit = new Token<ICommandEdit>(
-    'jupyterlab-statusbar/ICommandEdit'
+    '@jupyterlab/statusbar:ICommandEdit'
 );
 
 export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
-    id: 'jupyterlab-statusbar/default-items:command-edit',
+    id: '@jupyterlab/statusbar:command-edit-item',
     autoStart: true,
     provides: ICommandEdit,
     requires: [IDefaultsManager, INotebookTracker],

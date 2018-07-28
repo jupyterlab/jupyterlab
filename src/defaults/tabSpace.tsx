@@ -310,10 +310,12 @@ export namespace ITabSpace {
 }
 
 // tslint:disable-next-line:variable-name
-export const ITabSpace = new Token<ITabSpace>('jupyterlab-statusbar/ITabSpace');
+export const ITabSpace = new Token<ITabSpace>(
+    '@jupyterlab/statusbar:ITabSpace'
+);
 
 export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
-    id: 'jupyterlab-statusbar/default-items:tab-space',
+    id: '@jupyterlab/statusbar:tab-space-item',
     autoStart: true,
     provides: ITabSpace,
     requires: [

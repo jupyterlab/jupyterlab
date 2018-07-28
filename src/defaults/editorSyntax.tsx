@@ -188,11 +188,11 @@ export namespace IEditorSyntax {
 
 // tslint:disable-next-line:variable-name
 export const IEditorSyntax = new Token<IEditorSyntax>(
-    'jupyterlab-statusbar/IEditorSyntax'
+    '@jupyterlab/statusbar:IEditorSyntax'
 );
 
 export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
-    id: 'jupyterlab-statusbar/default-items:editor-syntax-item',
+    id: '@jupyterlab/statusbar:editor-syntax-item',
     autoStart: true,
     provides: IEditorSyntax,
     requires: [IDefaultsManager, IEditorTracker],

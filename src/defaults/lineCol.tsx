@@ -370,10 +370,10 @@ export namespace ILineCol {
 }
 
 // tslint:disable-next-line:variable-name
-export const ILineCol = new Token<ILineCol>('jupyterlab-statusbar/ILineCol');
+export const ILineCol = new Token<ILineCol>('@jupyterlab/statusbar:ILineCol');
 
 export const lineColItem: JupyterLabPlugin<ILineCol> = {
-    id: 'jupyterlab-statusbar/default-items:line-col',
+    id: '@jupyterlab/statusbar:line-col-item',
     autoStart: true,
     provides: ILineCol,
     requires: [
