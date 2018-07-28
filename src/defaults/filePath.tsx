@@ -193,10 +193,12 @@ export namespace IFilePath {
 }
 
 // tslint:disable-next-line:variable-name
-export const IFilePath = new Token<IFilePath>('jupyterlab-statusbar/IFilePath');
+export const IFilePath = new Token<IFilePath>(
+    '@jupyterlab/statusbar:IFilePath'
+);
 
 export const filePathItem: JupyterLabPlugin<IFilePath> = {
-    id: 'jupyterlab-statusbar/default-items:file-path-item',
+    id: '@jupyterlab/statusbar:file-path-item',
     autoStart: true,
     provides: IFilePath,
     requires: [IDefaultsManager, IDocumentManager],

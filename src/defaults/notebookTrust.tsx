@@ -279,11 +279,11 @@ export namespace INotebookTrust {
 
 // tslint:disable-next-line:variable-name
 export const INotebookTrust = new Token<INotebookTrust>(
-    'jupyterlab-statusbar/INotebookTrust'
+    '@jupyterlab/statusbar:INotebookTrust'
 );
 
 export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
-    id: 'jupyterlab-statusbar/default-items:trusted-notebook',
+    id: '@jupyterlab/statusbar:trusted-notebook-item',
     autoStart: true,
     provides: INotebookTrust,
     requires: [IDefaultsManager, INotebookTracker],

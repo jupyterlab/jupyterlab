@@ -28,7 +28,7 @@ export namespace IDefaultsManager {
 
 // tslint:disable-next-line:variable-name
 export const IDefaultsManager = new Token<IDefaultsManager>(
-    'jupyterlab-statusbar/IDefaultStatusesManager'
+    '@jupyterlab/statusbar:IDefaultStatusesManager'
 );
 
 class DefaultsManager implements IDefaultsManager, IDisposable {
@@ -157,7 +157,7 @@ namespace DefaultsManager {
  * Initialization data for the statusbar extension.
  */
 export const defaultsManager: JupyterLabPlugin<IDefaultsManager> = {
-    id: 'jupyterlab-statusbar/defaults-manager',
+    id: '@jupyterlab/statusbar:defaults-manager',
     provides: IDefaultsManager,
     autoStart: true,
     requires: [ISettingRegistry, IStatusBar],
