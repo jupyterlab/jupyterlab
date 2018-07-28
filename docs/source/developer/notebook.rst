@@ -96,7 +96,7 @@ Higher level actions using NotebookActions
 ''''''''''''''''''''''''''''''''''''''''''
 
 Higher-level actions are contained in the
-`NotebookActions <http://jupyterlab.github.io/jupyterlab/modules/_notebook_src_actions_.notebookactions.html>`__
+`NotebookActions <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_actions_.notebookactions.html>`__
 namespace, which has functions, when given a notebook widget, to run a
 cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.

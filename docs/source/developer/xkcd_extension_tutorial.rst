@@ -214,7 +214,7 @@ You should see a message that says
 ``JupyterLab extension jupyterlab_xkcd is activated!`` in the console.
 If you do, congrats, you're ready to start modifying the the extension!
 If not, go back, make sure you didn't miss a step, and `reach
-out <README.html#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 Note: Leave the terminal running the ``jupyter lab --watch`` command
 open.
