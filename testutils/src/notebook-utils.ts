@@ -23,7 +23,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 
-import { defaultRenderMime } from './rendermime';
+import { defaultRenderMime as localRendermime } from './rendermime';
 
 /**
  * Stub for the require() function.
@@ -89,7 +89,7 @@ export namespace NBTestUtils {
    * Get a copy of the default rendermime instance.
    */
   export function defaultRenderMime(): RenderMimeRegistry {
-    return defaultRenderMime();
+    return localRendermime();
   }
 
   export const clipboard = Clipboard.getInstance();

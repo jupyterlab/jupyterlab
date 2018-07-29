@@ -9,6 +9,8 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Token } from '@phosphor/coreutils';
 
+import { testEmission } from '@jupyterlab/testutils';
+
 const base = '/';
 
 describe('apputils', () => {
@@ -69,7 +71,7 @@ describe('apputils', () => {
           called = true;
         });
         await router.route();
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
 
@@ -104,13 +106,13 @@ describe('apputils', () => {
         router.register({ command: 'c', pattern: /.*/, rank: 30 });
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
-        let called = false;
-        router.routed.connect(() => {
-          expect(recorded).to.deep.equal(wanted);
-          called = true;
+        let promise = testEmission(router.routed, {
+          test: () => {
+            expect(recorded).to.deep.equal(wanted);
+          }
         });
         await router.route();
-        expect(called).to.be(true);
+        await promise;
       });
     });
 
@@ -139,7 +141,7 @@ describe('apputils', () => {
           called = true;
         });
         await router.route();
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
 
@@ -166,7 +168,7 @@ describe('apputils', () => {
           called = true;
         });
         await router.route();
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
   });
