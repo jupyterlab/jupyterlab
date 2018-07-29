@@ -20,7 +20,7 @@ import {
 import {
   createClientSession,
   defaultRenderMime,
-  DEFAULT_OUTPUTS
+  NBTestUtils
 } from '@jupyterlab/testutils';
 
 /**
@@ -52,7 +52,10 @@ describe('outputarea/widget', () => {
   let model: OutputAreaModel;
 
   beforeEach(() => {
-    model = new OutputAreaModel({ values: DEFAULT_OUTPUTS, trusted: true });
+    model = new OutputAreaModel({
+      values: NBTestUtils.DEFAULT_OUTPUTS,
+      trusted: true
+    });
     widget = new LogOutputArea({ rendermime, model });
   });
 
@@ -99,7 +102,9 @@ describe('outputarea/widget', () => {
       });
 
       it('should get the number of child widgets', () => {
-        expect(widget.widgets.length).to.be(DEFAULT_OUTPUTS.length - 1);
+        expect(widget.widgets.length).to.be(
+          NBTestUtils.DEFAULT_OUTPUTS.length - 1
+        );
         widget.model.clear();
         expect(widget.widgets.length).to.be(0);
       });
@@ -136,7 +141,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should clear existing outputs', () => {
-        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         return session.kernel.ready
           .then(() => {
             let future = session.kernel.requestExecute({ code: CODE });
@@ -154,13 +159,13 @@ describe('outputarea/widget', () => {
       it('should handle an added output', () => {
         widget.model.clear();
         widget.methods = [];
-        widget.model.add(DEFAULT_OUTPUTS[0]);
+        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         expect(widget.methods).to.contain('onModelChanged');
         expect(widget.widgets.length).to.be(1);
       });
 
       it('should handle a clear', () => {
-        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         widget.methods = [];
         widget.model.clear();
         expect(widget.methods).to.contain('onModelChanged');
@@ -169,9 +174,9 @@ describe('outputarea/widget', () => {
 
       it('should handle a set', () => {
         widget.model.clear();
-        widget.model.add(DEFAULT_OUTPUTS[0]);
+        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         widget.methods = [];
-        widget.model.add(DEFAULT_OUTPUTS[0]);
+        widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         expect(widget.methods).to.contain('onModelChanged');
         expect(widget.widgets.length).to.be(1);
       });
@@ -204,7 +209,7 @@ describe('outputarea/widget', () => {
       });
 
       it('should clear existing outputs', () => {
-        widget.model.fromJSON(DEFAULT_OUTPUTS);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         return OutputArea.execute(CODE, widget, session).then(reply => {
           expect(reply.content.execution_count).to.be.ok();
           expect(model.length).to.be(1);

@@ -20,6 +20,8 @@ import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
 export { NBTestUtils } from './notebook-utils';
 
+export { defaultRenderMime } from './rendermime';
+
 /**
  * Test a single emission from a signal.
  *

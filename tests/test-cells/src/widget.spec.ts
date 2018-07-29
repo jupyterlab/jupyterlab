@@ -277,10 +277,10 @@ describe('cells/widget', () => {
         });
       });
 
-      describe('#NBTestUtils.editorFactory', () => {
+      describe('#editorFactory', () => {
         it('should be the editor factory used by the content factory', () => {
-          let factory = new Cell.ContentFactory({});
-          expect(factory.editorFactory).to.be(editorFactory);
+          let factory = new Cell.ContentFactory({ editorFactory });
+          expect(factory.editorFactory).to.equal(editorFactory);
         });
       });
 

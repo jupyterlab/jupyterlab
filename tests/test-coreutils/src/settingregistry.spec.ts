@@ -148,7 +148,7 @@ describe('@jupyterlab/coreutils', () => {
         });
         await registry.load(id);
         await registry.set(id, key, value);
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
 

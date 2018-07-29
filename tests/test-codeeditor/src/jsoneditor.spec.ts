@@ -369,7 +369,7 @@ describe('apputils', () => {
     });
 
     describe('#onAfterShow()', () => {
-      it('should update the editor', done => {
+      it('should update the editor', async () => {
         editor.hide();
         Widget.attach(editor, document.body);
         editor.show();
