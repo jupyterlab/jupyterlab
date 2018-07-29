@@ -169,6 +169,13 @@ statement on a line and open the browser debugger to debug specific tests.
 
 Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
 
+We use `karma` to run our tests in a browser, `mocha` as the test framework, and `chai` for test assertions.  We use [async/await](https://mochajs.org/#using-async--await) for asynchronous tests.  We have
+a helper function in `@jupyterlab/testutils` called `testEmission` to help with
+writing tests that use `Phosphor` signals, as well as a `framePromise` function
+to get a `Promise` for a `requestAnimationFrame`.  We sometimes have to set
+a sentinel value inside a `Promise` and then check that the sentinel was set if
+we need a promise to run without blocking.
+
 To create a new test for a package in `packages/`, use the following
 command, where `<package-directory-name>` is the name of the folder in
 `packages/`:

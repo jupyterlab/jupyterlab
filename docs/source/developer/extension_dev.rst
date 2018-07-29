@@ -202,6 +202,10 @@ path on the user's machine or a provided tarball. Any valid
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
 
+There are a number of helper functions in `testutils` in this repo (which is a public npm package called `@jupyterlab/testutils`) that can be used when writing
+tests for an extension.
+
+
 Mime Renderer Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
