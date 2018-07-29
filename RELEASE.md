@@ -72,6 +72,7 @@ twine upload dist/*
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
 * [ ] Update the other repos listed below
+* [ ] Add a tag to `extension-cookiecutter-ts` with the new JupyterLab version
 * [ ] Update the extension examples listed below
 * [ ] Update the xkcd tutorial
 * [ ] Update `jupyterlab/_version.py` with a final version
