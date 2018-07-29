@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
-import { dismissDialog } from '../../utils';
+import { dismissDialog } from '@jupyterlab/testutils';
 
 import {
   createConsolePanelFactory,

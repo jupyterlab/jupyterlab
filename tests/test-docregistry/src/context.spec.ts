@@ -22,7 +22,7 @@ import {
   acceptDialog,
   dismissDialog,
   createNotebookContext
-} from '../../utils';
+} from '@jupyterlab/testutils';
 
 import { DEFAULT_CONTENT } from '../../notebook-utils';
 

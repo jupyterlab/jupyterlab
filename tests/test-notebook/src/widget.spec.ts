@@ -32,7 +32,7 @@ import {
   defaultEditorConfig
 } from '../../notebook-utils';
 
-import { sleep } from '../../utils';
+import { sleep } from '@jupyterlab/testutils';
 
 const contentFactory = createNotebookFactory();
 const options: Notebook.IOptions = {

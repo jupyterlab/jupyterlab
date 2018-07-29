@@ -17,7 +17,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 class LogToolbarButton extends ToolbarButton {
   events: string[] = [];

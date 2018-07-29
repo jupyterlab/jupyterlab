@@ -19,6 +19,7 @@
     "@jupyterlab/csvviewer": "^0.17.2",
     "@jupyterlab/docregistry": "^0.17.2",
     "@jupyterlab/services": "^3.0.3",
+    "@jupyterlab/testutils": "^0.1.0",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.6.0",
     "csv-spectrum": "~1.0.0",

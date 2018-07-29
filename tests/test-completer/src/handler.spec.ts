@@ -16,7 +16,7 @@ import {
   KernelConnector
 } from '@jupyterlab/completer';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
   let model = new CodeEditor.Model();

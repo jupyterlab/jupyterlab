@@ -22,7 +22,7 @@ import {
 
 import { createNotebookPanel, populateNotebook } from '../../notebook-utils';
 
-import { createNotebookContext, sleep } from '../../utils';
+import { createNotebookContext, sleep } from '@jupyterlab/testutils';
 
 class LogTool extends CellTools.Tool {
   methods: string[] = [];

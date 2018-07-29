@@ -20,7 +20,7 @@ import {
   createClientSession,
   dismissDialog,
   sleep
-} from '../../utils';
+} from '@jupyterlab/testutils';
 
 import {
   DEFAULT_CONTENT,

@@ -5,9 +5,7 @@ import { expect } from 'chai';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
-
-import { ISignal, Signal } from '@phosphor/signaling';
+import { testEmission } from '@jupyterlab/testutils';
 
 import { each } from '@phosphor/algorithm';
 

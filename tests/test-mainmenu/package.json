@@ -18,6 +18,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",
+    "@jupyterlab/testutils": "^0.1.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/widgets": "^1.6.0",

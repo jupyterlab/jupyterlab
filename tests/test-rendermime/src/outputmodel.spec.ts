@@ -7,7 +7,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { OutputModel } from '@jupyterlab/rendermime';
 
-import { DEFAULT_OUTPUTS } from '../../utils';
+import { DEFAULT_OUTPUTS } from '@jupyterlab/testutils';
 
 const DEFAULT_EXECUTE: nbformat.IOutput = {
   output_type: 'execute_result',

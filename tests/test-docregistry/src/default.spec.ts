@@ -20,7 +20,7 @@ import {
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { createFileContext, sleep } from '../../utils';
+import { createFileContext, sleep } from '@jupyterlab/testutils';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

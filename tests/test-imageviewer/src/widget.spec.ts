@@ -20,7 +20,7 @@ import {
 
 import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
 
-import { createFileContext } from '../../utils';
+import { createFileContext } from '@jupyterlab/testutils';
 
 class LogImage extends ImageViewer {
   methods: string[] = [];

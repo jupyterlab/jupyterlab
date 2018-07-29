@@ -17,7 +17,7 @@ import {
 
 import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
 
-import { createFileContext, defaultRenderMime } from '../../utils';
+import { createFileContext, defaultRenderMime } from '@jupyterlab/testutils';
 
 const RENDERMIME = defaultRenderMime();
 

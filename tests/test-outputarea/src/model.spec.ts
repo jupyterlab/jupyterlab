@@ -7,7 +7,7 @@ import { OutputModel } from '@jupyterlab/rendermime';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import { DEFAULT_OUTPUTS } from '../../utils';
+import { DEFAULT_OUTPUTS } from '@jupyterlab/testutils';
 
 describe('outputarea/model', () => {
   let model: OutputAreaModel;

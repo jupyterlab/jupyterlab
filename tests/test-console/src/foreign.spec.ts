@@ -19,7 +19,7 @@ import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
 import { createCodeCellFactory } from '../../notebook-utils';
 
-import { createClientSession, defaultRenderMime } from '../../utils';
+import { createClientSession, defaultRenderMime } from '@jupyterlab/testutils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell): void {

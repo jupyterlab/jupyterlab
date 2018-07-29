@@ -21,7 +21,7 @@ import {
   createClientSession,
   defaultRenderMime,
   DEFAULT_OUTPUTS
-} from '../../utils';
+} from '@jupyterlab/testutils';
 
 /**
  * The default rendermime instance to use for testing.

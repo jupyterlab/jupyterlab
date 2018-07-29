@@ -18,7 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 import { createCodeCellFactory } from '../../notebook-utils';
 

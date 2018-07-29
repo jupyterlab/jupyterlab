@@ -35,7 +35,7 @@ import {
   editorFactory
 } from '../../notebook-utils';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 

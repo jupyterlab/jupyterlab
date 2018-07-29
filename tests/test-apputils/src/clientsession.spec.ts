@@ -9,7 +9,7 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { acceptDialog, dismissDialog } from '../../utils';
+import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
   describe('ClientSession', () => {

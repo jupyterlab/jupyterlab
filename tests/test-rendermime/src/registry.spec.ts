@@ -22,7 +22,7 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { defaultRenderMime, createFileContext } from '../../utils';
+import { defaultRenderMime, createFileContext } from '@jupyterlab/testutils';
 
 const RESOLVER: IRenderMime.IResolver = createFileContext().urlResolver;
 

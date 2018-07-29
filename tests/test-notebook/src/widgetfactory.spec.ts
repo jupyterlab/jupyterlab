@@ -13,7 +13,7 @@ import { NotebookWidgetFactory } from '@jupyterlab/notebook';
 
 import { Context } from '@jupyterlab/docregistry';
 
-import { createNotebookContext } from '../../utils';
+import { createNotebookContext } from '@jupyterlab/testutils';
 
 import {
   createNotebookPanelFactory,

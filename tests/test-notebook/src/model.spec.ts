@@ -15,7 +15,7 @@ import { ModelDB } from '@jupyterlab/observables';
 
 import { DEFAULT_CONTENT } from '../../notebook-utils';
 
-import { sleep } from '../../utils';
+import { sleep } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {

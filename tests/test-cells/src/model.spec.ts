@@ -16,7 +16,7 @@ import {
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import { DEFAULT_OUTPUTS } from '../../utils';
+import { DEFAULT_OUTPUTS } from '@jupyterlab/testutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {

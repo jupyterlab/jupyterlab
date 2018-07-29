@@ -13,7 +13,7 @@ import {
   NotebookTracker
 } from '@jupyterlab/notebook';
 
-import { createNotebookContext } from '../../utils';
+import { createNotebookContext } from '@jupyterlab/testutils';
 
 import { DEFAULT_CONTENT, createNotebookPanel } from '../../notebook-utils';
 

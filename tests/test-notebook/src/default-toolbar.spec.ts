@@ -21,7 +21,7 @@ import { INotebookModel } from '@jupyterlab/notebook';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { createNotebookContext, sleep } from '../../utils';
+import { createNotebookContext, sleep } from '@jupyterlab/testutils';
 
 import {
   DEFAULT_CONTENT,

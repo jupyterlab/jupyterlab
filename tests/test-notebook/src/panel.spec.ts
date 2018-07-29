@@ -9,7 +9,7 @@ import { INotebookModel, NotebookPanel, Notebook } from '@jupyterlab/notebook';
 
 import { Toolbar } from '@jupyterlab/apputils';
 
-import { createNotebookContext } from '../../utils';
+import { createNotebookContext } from '@jupyterlab/testutils';
 
 import {
   createNotebookPanelFactory,
