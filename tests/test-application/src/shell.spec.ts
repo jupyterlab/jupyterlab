@@ -3,6 +3,8 @@
 
 import { expect } from 'chai';
 
+import { framePromise } from '@jupyterlab/testutils';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -232,25 +234,21 @@ describe('ApplicationShell', () => {
       expect(widget.isVisible).to.equal(false);
     });
 
-    it('should activate a widget in the main area', done => {
+    it('should activate a widget in the main area', async () => {
       const widget = new ContentWidget();
       widget.id = 'foo';
       shell.addToMainArea(widget);
       shell.activateById('foo');
-      requestAnimationFrame(() => {
-        expect(widget.activated).to.equal(true);
-        done();
-      });
+      await framePromise();
+      expect(widget.activated).to.equal(true);
     });
 
-    it('should be a no-op if the widget is not in the main area', done => {
+    it('should be a no-op if the widget is not in the main area', async () => {
       const widget = new ContentWidget();
       widget.id = 'foo';
       shell.activateById('foo');
-      requestAnimationFrame(() => {
-        expect(widget.activated).to.equal(false);
-        done();
-      });
+      await framePromise();
+      expect(widget.activated).to.equal(false);
     });
   });
 

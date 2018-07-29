@@ -7,6 +7,8 @@ import { Signal } from '@phosphor/signaling';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
+import { sleep } from '@jupyterlab/testutils';
+
 class TestObject {
   one = new Signal<TestObject, number>(this);
 
@@ -39,7 +41,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#activityStopped', () => {
-      it('should be emitted after the signal has fired and a timeout', done => {
+      it('should be emitted after the signal has fired and a timeout', async () => {
         let called = false;
         const monitor = new ActivityMonitor({ signal, timeout: 100 });
         monitor.activityStopped.connect((sender, args) => {
@@ -50,10 +52,8 @@ describe('@jupyterlab/coreutils', () => {
         });
         signal.emit(10);
         expect(called).to.equal(false);
-        setTimeout(() => {
-          expect(called).to.equal(true);
-          done();
-        }, 100);
+        await sleep(100);
+        expect(called).to.equal(true);
       });
     });
 

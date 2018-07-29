@@ -53,7 +53,7 @@ describe('apputils', () => {
     });
 
     describe('#routed', () => {
-      it('should emit a signal when a path is routed', done => {
+      it('should emit a signal when a path is routed', async () => {
         let routed = false;
 
         commands.addCommand('a', {
@@ -63,11 +63,13 @@ describe('apputils', () => {
         });
         router.register({ command: 'a', pattern: /.*/, rank: 10 });
 
+        let called = false;
         router.routed.connect(() => {
           expect(routed).to.equal(true);
-          done();
+          called = true;
         });
-        router.route();
+        await router.route();
+        expect(called).to.be(true);
       });
     });
 
@@ -76,7 +78,7 @@ describe('apputils', () => {
         expect(router.stop).to.be.an.instanceof(Token);
       });
 
-      it('should stop routing if returned by a routed command', done => {
+      it('should stop routing if returned by a routed command', async () => {
         const wanted = ['a', 'b'];
         const recorded: string[] = [];
 
@@ -102,11 +104,13 @@ describe('apputils', () => {
         router.register({ command: 'c', pattern: /.*/, rank: 30 });
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
+        let called = false;
         router.routed.connect(() => {
           expect(recorded).to.deep.equal(wanted);
-          done();
+          called = true;
         });
-        router.route();
+        await router.route();
+        expect(called).to.be(true);
       });
     });
 
@@ -118,7 +122,7 @@ describe('apputils', () => {
     });
 
     describe('#register()', () => {
-      it('should register a command with a route pattern', done => {
+      it('should register a command with a route pattern', async () => {
         const wanted = ['a'];
         const recorded: string[] = [];
 
@@ -129,16 +133,18 @@ describe('apputils', () => {
         });
         router.register({ command: 'a', pattern: /.*/ });
 
+        let called = false;
         router.routed.connect(() => {
           expect(recorded).to.deep.equal(wanted);
-          done();
+          called = true;
         });
-        router.route();
+        await router.route();
+        expect(called).to.be(true);
       });
     });
 
     describe('#route()', () => {
-      it('should route the location to a command', done => {
+      it('should route the location to a command', async () => {
         const wanted = ['a'];
         const recorded: string[] = [];
 
@@ -153,12 +159,14 @@ describe('apputils', () => {
         // Change the hash because changing location is a security error.
         window.location.hash = 'a';
 
+        let called = false;
         router.routed.connect(() => {
           expect(recorded).to.deep.equal(wanted);
           window.location.hash = '';
-          done();
+          called = true;
         });
-        router.route();
+        await router.route();
+        expect(called).to.be(true);
       });
     });
   });

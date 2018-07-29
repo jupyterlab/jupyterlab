@@ -40,19 +40,16 @@ describe('apputils', () => {
         expect(restorer.restored).to.be.an.instanceof(Promise);
       });
 
-      it('should resolve when restorer is done', done => {
+      it('should resolve when restorer is done', async () => {
         const ready = new PromiseDelegate<void>();
         const restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        restorer.restored
-          .then(() => {
-            done();
-          })
-          .catch(done);
+        let promise = restorer.restored;
         ready.resolve(void 0);
+        await promise;
       });
     });
 
