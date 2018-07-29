@@ -17,9 +17,11 @@ import { ForeignHandler } from '@jupyterlab/console';
 
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
-import { createCodeCellFactory } from '../../notebook-utils';
-
-import { createClientSession, defaultRenderMime } from '@jupyterlab/testutils';
+import {
+  createClientSession,
+  defaultRenderMime,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell): void {
@@ -63,7 +65,7 @@ class TestHandler extends ForeignHandler {
 const rendermime = defaultRenderMime();
 
 function cellFactory(): CodeCell {
-  let contentFactory = createCodeCellFactory();
+  let contentFactory = NBTestUtils.createCodeCellFactory();
   let model = new CodeCellModel({});
   let cell = new CodeCell({ model, rendermime, contentFactory });
   return cell;

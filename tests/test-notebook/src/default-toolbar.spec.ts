@@ -21,13 +21,11 @@ import { INotebookModel } from '@jupyterlab/notebook';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { createNotebookContext, sleep } from '@jupyterlab/testutils';
-
 import {
-  DEFAULT_CONTENT,
-  clipboard,
-  createNotebookPanel
-} from '../../notebook-utils';
+  createNotebookContext,
+  sleep,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
@@ -39,8 +37,8 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(async () => {
       context = await createNotebookContext();
       await context.initialize(true);
-      panel = createNotebookPanel(context);
-      context.model.fromJSON(DEFAULT_CONTENT);
+      panel = NBTestUtils.createNotebookPanel(context);
+      context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
     });
 
     afterEach(async () => {
@@ -89,7 +87,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         button.node.click();
         expect(panel.content.widgets.length).to.be(count - 1);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
 
@@ -106,7 +104,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         button.node.click();
         expect(panel.content.widgets.length).to.be(count);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
         button.dispose();
       });
 

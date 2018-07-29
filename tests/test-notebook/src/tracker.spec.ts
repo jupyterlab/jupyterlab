@@ -13,9 +13,7 @@ import {
   NotebookTracker
 } from '@jupyterlab/notebook';
 
-import { createNotebookContext } from '@jupyterlab/testutils';
-
-import { DEFAULT_CONTENT, createNotebookPanel } from '../../notebook-utils';
+import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 const namespace = 'notebook-tracker-test';
 
@@ -56,7 +54,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be `null` if a tracked notebook has no active cell', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         panel.content.model.cells.clear();
         tracker.add(panel);
         expect(tracker.activeCell).to.be(null);
@@ -64,9 +62,9 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the active cell if a tracked notebook has one', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         tracker.add(panel);
-        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be.a(Cell);
         panel.dispose();
       });
@@ -75,12 +73,12 @@ describe('@jupyterlab/notebook', () => {
     describe('#activeCellChanged', () => {
       it('should emit a signal when the active cell changes', () => {
         let tracker = new NotebookTracker({ namespace });
-        let panel = createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         let count = 0;
         tracker.activeCellChanged.connect(() => {
           count++;
         });
-        panel.content.model.fromJSON(DEFAULT_CONTENT);
+        panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         tracker.add(panel);
         expect(count).to.be(1);
         panel.content.activeCellIndex = 1;
@@ -92,7 +90,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#onCurrentChanged()', () => {
       it('should be called when the active cell changes', () => {
         let tracker = new TestTracker({ namespace });
-        let panel = createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         tracker.add(panel);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });

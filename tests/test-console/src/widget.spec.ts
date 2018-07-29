@@ -18,9 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import { createClientSession } from '@jupyterlab/testutils';
-
-import { createCodeCellFactory } from '../../notebook-utils';
+import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
 
 import {
   createConsoleFactory,
@@ -165,7 +163,7 @@ describe('console/widget', () => {
 
     describe('#addCell()', () => {
       it('should add a code cell to the content widget', () => {
-        let contentFactory = createCodeCellFactory();
+        let contentFactory = NBTestUtils.createCodeCellFactory();
         let model = new CodeCellModel({});
         let cell = new CodeCell({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);

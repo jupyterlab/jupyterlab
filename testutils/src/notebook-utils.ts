@@ -19,6 +19,8 @@ import {
   StaticNotebook
 } from '@jupyterlab/notebook';
 
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 
 import { defaultRenderMime } from './rendermime';
@@ -83,7 +85,12 @@ export namespace NBTestUtils {
 
   export const mimeTypeService = editorServices.mimeTypeService;
 
-  export const rendermime = defaultRenderMime();
+  /**
+   * Get a copy of the default rendermime instance.
+   */
+  export function defaultRenderMime(): RenderMimeRegistry {
+    return defaultRenderMime();
+  }
 
   export const clipboard = Clipboard.getInstance();
 

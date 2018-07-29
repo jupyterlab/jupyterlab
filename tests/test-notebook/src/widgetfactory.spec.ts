@@ -13,16 +13,10 @@ import { NotebookWidgetFactory } from '@jupyterlab/notebook';
 
 import { Context } from '@jupyterlab/docregistry';
 
-import { createNotebookContext } from '@jupyterlab/testutils';
+import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
-import {
-  createNotebookPanelFactory,
-  defaultEditorConfig,
-  rendermime,
-  mimeTypeService
-} from '../../notebook-utils';
-
-const contentFactory = createNotebookPanelFactory();
+const contentFactory = NBTestUtils.createNotebookPanelFactory();
+const rendermime = NBTestUtils.defaultRendermime();
 
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
@@ -30,8 +24,8 @@ function createFactory(): NotebookWidgetFactory {
     fileTypes: ['notebook'],
     rendermime,
     contentFactory,
-    mimeTypeService,
-    editorConfig: defaultEditorConfig
+    mimeTypeService: NBTestUtils.mimeTypeService,
+    editorConfig: NBTestUtils.defaultEditorConfig
   });
 }
 
@@ -82,12 +76,12 @@ describe('@jupyterlab/notebook', () => {
     describe('#editorConfig', () => {
       it('should be the editor config passed into the constructor', () => {
         let factory = createFactory();
-        expect(factory.editorConfig).to.be(defaultEditorConfig);
+        expect(factory.editorConfig).to.be(NBTestUtils.defaultEditorConfig);
       });
 
       it('should be settable', () => {
         let factory = createFactory();
-        let newConfig = { ...defaultEditorConfig };
+        let newConfig = { ...NBTestUtils.defaultEditorConfig };
         factory.editorConfig = newConfig;
         expect(factory.editorConfig).to.be(newConfig);
       });
@@ -109,7 +103,9 @@ describe('@jupyterlab/notebook', () => {
       it('should pass the editor config to the notebook', () => {
         let factory = createFactory();
         let panel = factory.createNew(context);
-        expect(panel.content.editorConfig).to.be(defaultEditorConfig);
+        expect(panel.content.editorConfig).to.be(
+          NBTestUtils.defaultEditorConfig
+        );
       });
 
       it('should populate the default toolbar items', () => {

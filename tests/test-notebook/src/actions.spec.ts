@@ -19,22 +19,17 @@ import {
   acceptDialog,
   createClientSession,
   dismissDialog,
-  sleep
+  sleep,
+  NBTestUtils
 } from '@jupyterlab/testutils';
-
-import {
-  DEFAULT_CONTENT,
-  createNotebookFactory,
-  rendermime,
-  clipboard,
-  mimeTypeService
-} from '../../notebook-utils';
 
 const ERROR_INPUT = 'a = foo';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 describe('@jupyterlab/notebook', () => {
+  const rendermime = NBTestUtils.defaultRendermime();
+
   describe('NotebookActions', () => {
     let widget: Notebook;
     let session: ClientSession;
@@ -55,11 +50,11 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(() => {
       widget = new Notebook({
         rendermime,
-        contentFactory: createNotebookFactory(),
-        mimeTypeService
+        contentFactory: NBTestUtils.createNotebookFactory(),
+        mimeTypeService: NBTestUtils.mimeTypeService
       });
       let model = new NotebookModel();
-      model.fromJSON(DEFAULT_CONTENT);
+      model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
       widget.model = model;
 
       widget.activeCellIndex = 0;
@@ -67,7 +62,7 @@ describe('@jupyterlab/notebook', () => {
 
     afterEach(() => {
       widget.dispose();
-      clipboard.clear();
+      NBTestUtils.clipboard.clear();
     });
 
     after(() => {
@@ -1037,19 +1032,19 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#copy()', () => {
-      it('should copy the selected cells to a clipboard', () => {
+      it('should copy the selected cells to a NBTestUtils.clipboard', () => {
         let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.copy(widget);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
-        let data = clipboard.getData(JUPYTER_CELL_MIME);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        let data = NBTestUtils.clipboard.getData(JUPYTER_CELL_MIME);
         expect(data.length).to.be(2);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.copy(widget);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
       });
 
       it('should change to command mode', () => {
@@ -1060,7 +1055,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#cut()', () => {
-      it('should cut the selected cells to a clipboard', () => {
+      it('should cut the selected cells to a NBTestUtils.clipboard', () => {
         let next = widget.widgets[1];
         widget.select(next);
         let count = widget.widgets.length;
@@ -1071,7 +1066,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.cut(widget);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.be(false);
       });
 
       it('should change to command mode', () => {
@@ -1099,7 +1094,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#paste()', () => {
-      it('should paste cells from a clipboard', () => {
+      it('should paste cells from a NBTestUtils.clipboard', () => {
         let source = widget.activeCell.model.value.text;
         let next = widget.widgets[1];
         widget.select(next);
@@ -1119,7 +1114,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.be(-1);
       });
 
-      it('should be a no-op if there is no cell data on the clipboard', () => {
+      it('should be a no-op if there is no cell data on the NBTestUtils.clipboard', () => {
         let count = widget.widgets.length;
         NotebookActions.paste(widget);
         expect(widget.widgets.length).to.be(count);
@@ -1419,7 +1414,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', done => {
         let model = widget.model;
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let cell = model.cells.get(0);
         expect(cell.trusted).to.not.be(true);
         NotebookActions.trust(widget).then(() => {
@@ -1431,7 +1426,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should not trust the notebook cells if the user aborts', done => {
         let model = widget.model;
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let cell = model.cells.get(0);
         expect(cell.trusted).to.not.be(true);
         NotebookActions.trust(widget).then(() => {
@@ -1450,8 +1445,8 @@ describe('@jupyterlab/notebook', () => {
 
       it('should show a dialog if all cells are trusted', done => {
         let model = widget.model;
-        widget.model.fromJSON(DEFAULT_CONTENT);
-        model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         for (let i = 0; i < model.cells.length; i++) {
           let cell = model.cells.get(i);
           cell.trusted = true;

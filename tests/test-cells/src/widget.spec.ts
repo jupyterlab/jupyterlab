@@ -28,14 +28,7 @@ import {
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 
-import {
-  createBaseCellFactory,
-  createCodeCellFactory,
-  rendermime,
-  editorFactory
-} from '../../notebook-utils';
-
-import { createClientSession } from '@jupyterlab/testutils';
+import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
 
@@ -45,7 +38,7 @@ class LogBaseCell extends Cell {
   constructor() {
     super({
       model: new CellModel({}),
-      contentFactory: createBaseCellFactory()
+      contentFactory: NBTestUtils.createBaseCellFactory()
     });
   }
 
@@ -71,8 +64,8 @@ class LogCodeCell extends CodeCell {
   constructor() {
     super({
       model: new CodeCellModel({}),
-      contentFactory: createCodeCellFactory(),
-      rendermime
+      contentFactory: NBTestUtils.createCodeCellFactory(),
+      rendermime: NBTestUtils.defaultRendermime()
     });
   }
 
@@ -97,8 +90,11 @@ class LogMarkdownCell extends MarkdownCell {
 }
 
 describe('cells/widget', () => {
+  const rendermime = NBTestUtils.defaultRendermime();
+  const editorFactory = NBTestUtils.editorFactory;
+
   describe('Cell', () => {
-    let contentFactory = createBaseCellFactory();
+    let contentFactory = NBTestUtils.createBaseCellFactory();
     let model = new CellModel({});
 
     describe('#constructor()', () => {
@@ -108,7 +104,7 @@ describe('cells/widget', () => {
       });
 
       it('should accept a custom contentFactory', () => {
-        contentFactory = createBaseCellFactory();
+        contentFactory = NBTestUtils.createBaseCellFactory();
         let widget = new Cell({ model, contentFactory });
         expect(widget).to.be.a(Cell);
       });
@@ -281,9 +277,9 @@ describe('cells/widget', () => {
         });
       });
 
-      describe('#editorFactory', () => {
+      describe('#NBTestUtils.editorFactory', () => {
         it('should be the editor factory used by the content factory', () => {
-          let factory = new Cell.ContentFactory({ editorFactory });
+          let factory = new Cell.ContentFactory({});
           expect(factory.editorFactory).to.be(editorFactory);
         });
       });
@@ -319,7 +315,7 @@ describe('cells/widget', () => {
   });
 
   describe('CodeCell', () => {
-    let contentFactory = createCodeCellFactory();
+    let contentFactory = NBTestUtils.createCodeCellFactory();
     let model = new CodeCellModel({});
 
     describe('#constructor()', () => {
@@ -329,7 +325,7 @@ describe('cells/widget', () => {
       });
 
       it('should accept a custom contentFactory', () => {
-        contentFactory = createCodeCellFactory();
+        contentFactory = NBTestUtils.createCodeCellFactory();
         let widget = new CodeCell({ model, contentFactory, rendermime });
         expect(widget).to.be.a(CodeCell);
       });
@@ -458,7 +454,7 @@ describe('cells/widget', () => {
   });
 
   describe('MarkdownCell', () => {
-    let contentFactory = createBaseCellFactory();
+    let contentFactory = NBTestUtils.createBaseCellFactory();
     let model = new MarkdownCellModel({});
 
     describe('#constructor()', () => {
@@ -543,7 +539,7 @@ describe('cells/widget', () => {
   });
 
   describe('RawCell', () => {
-    let contentFactory = createBaseCellFactory();
+    let contentFactory = NBTestUtils.createBaseCellFactory();
 
     describe('#constructor()', () => {
       it('should create a raw cell widget', () => {
