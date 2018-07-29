@@ -14,7 +14,7 @@
     "@jupyterlab/csvviewer": "^0.17.2",
     "@jupyterlab/docmanager": "^0.17.2",
     "@jupyterlab/docregistry": "^0.17.2",
-    "@jupyterlab/filebrowser": "^0.17.2",
+    "@jupyterlab/filebrowser": "^0.17.3",
     "@jupyterlab/fileeditor": "^0.17.2",
     "@jupyterlab/imageviewer": "^0.17.2",
     "@jupyterlab/inspector": "^0.17.2",
