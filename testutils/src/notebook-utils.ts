@@ -34,7 +34,45 @@ declare var require: any;
 // tslint:disable-next-line
 
 export namespace NBTestUtils {
-  export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../examples/notebook/test.ipynb') as nbformat.INotebookContent;
+  /**
+   * The default outputs used for testing.
+   */
+  export const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
+    {
+      name: 'stdout',
+      output_type: 'stream',
+      text: ['hello world\n', '0\n', '1\n', '2\n']
+    },
+    {
+      name: 'stderr',
+      output_type: 'stream',
+      text: ['output to stderr\n']
+    },
+    {
+      name: 'stderr',
+      output_type: 'stream',
+      text: ['output to stderr2\n']
+    },
+    {
+      output_type: 'execute_result',
+      execution_count: 1,
+      data: { 'text/plain': 'foo' },
+      metadata: {}
+    },
+    {
+      output_type: 'display_data',
+      data: { 'text/plain': 'hello, world' },
+      metadata: {}
+    },
+    {
+      output_type: 'error',
+      ename: 'foo',
+      evalue: 'bar',
+      traceback: ['fizz', 'buzz']
+    }
+  ];
+
+  export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../default.ipynb') as nbformat.INotebookContent;
   DEFAULT_CONTENT.metadata = { orig_nbformat: 1 };
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };

@@ -7,8 +7,6 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { ClientSession } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
-
 import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -236,44 +234,6 @@ export async function dismissDialog(
     simulate(node as HTMLElement, 'keydown', { keyCode: 27 });
   }
 }
-
-/**
- * The default outputs used for testing.
- */
-export const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
-  {
-    name: 'stdout',
-    output_type: 'stream',
-    text: ['hello world\n', '0\n', '1\n', '2\n']
-  },
-  {
-    name: 'stderr',
-    output_type: 'stream',
-    text: ['output to stderr\n']
-  },
-  {
-    name: 'stderr',
-    output_type: 'stream',
-    text: ['output to stderr2\n']
-  },
-  {
-    output_type: 'execute_result',
-    execution_count: 1,
-    data: { 'text/plain': 'foo' },
-    metadata: {}
-  },
-  {
-    output_type: 'display_data',
-    data: { 'text/plain': 'hello, world' },
-    metadata: {}
-  },
-  {
-    output_type: 'error',
-    ename: 'foo',
-    evalue: 'bar',
-    traceback: ['fizz', 'buzz']
-  }
-];
 
 /**
  * A namespace for private data.
