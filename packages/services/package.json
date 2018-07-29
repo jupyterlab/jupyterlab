@@ -54,6 +54,7 @@
     "ws": "~1.1.4"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^0.1.0",
     "@types/expect.js": "~0.3.29",
     "@types/mocha": "~2.2.44",
     "@types/node-fetch": "~1.6.7",

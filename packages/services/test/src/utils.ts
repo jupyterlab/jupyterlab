@@ -27,6 +27,8 @@ import { deserialize, serialize } from '../../lib/kernel/serialize';
 
 import { Session } from '../../lib/session';
 
+export { testEmission, isFulfilled } from '@jupyterlab/testutils';
+
 // stub for node global
 declare var global: any;
 
@@ -208,13 +210,6 @@ export async function expectFailure(
   );
 
   return done ? result.then(done, done) : result;
-}
-
-/**
- * Do something in the future ensuring total ordering wrt to Promises.
- */
-export function doLater(cb: () => void): void {
-  Promise.resolve().then(cb);
 }
 
 /**
