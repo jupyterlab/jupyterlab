@@ -5,6 +5,10 @@ import { expect } from 'chai';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
 import { each } from '@phosphor/algorithm';
 
 import { Panel, Widget } from '@phosphor/widgets';
@@ -40,35 +44,34 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#currentChanged', () => {
-      it('should emit when the current widget has been updated', () => {
+      it('should emit when the current widget has been updated', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         widget.node.tabIndex = -1;
-        let called = false;
-        tracker.currentChanged.connect(() => {
-          called = true;
-        });
+        let promise = testEmission(tracker.currentChanged, {});
         Widget.attach(widget, document.body);
         widget.node.focus();
         simulate(widget.node, 'focus');
         tracker.add(widget);
-        expect(called).to.equal(true);
+        await promise;
         Widget.detach(widget);
       });
     });
 
     describe('#widgetAdded', () => {
-      it('should emit when a widget has been added', done => {
+      it('should emit when a widget has been added', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
-        tracker.widgetAdded.connect((sender, added) => {
-          expect(added).to.equal(widget);
-          done();
+        let promise = testEmission(tracker.widgetAdded, {
+          test: (sender, added) => {
+            expect(added).to.equal(widget);
+          }
         });
         tracker.add(widget);
+        await promise;
       });
 
-      it('should not emit when a widget has been injected', done => {
+      it('should not emit when a widget has been injected', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const one = new Widget();
         const two = new Widget();
@@ -77,9 +80,10 @@ describe('@jupyterlab/apputils', () => {
         tracker.widgetAdded.connect(() => {
           total++;
         });
-        tracker.currentChanged.connect(() => {
-          expect(total).to.equal(1);
-          done();
+        let promise = testEmission(tracker.currentChanged, {
+          find: () => {
+            return total === 1;
+          }
         });
         tracker.add(one);
         tracker.inject(two);
@@ -87,6 +91,7 @@ describe('@jupyterlab/apputils', () => {
         two.node.focus();
         simulate(two.node, 'focus');
         Widget.detach(two);
+        await promise;
       });
     });
 

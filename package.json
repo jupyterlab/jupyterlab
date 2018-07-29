@@ -85,6 +85,7 @@
     "buildutils/template",
     "buildutils/test-template",
     "tests",
-    "tests/test-*"
+    "tests/test-*",
+    "testutils"
   ]
 }
