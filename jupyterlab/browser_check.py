@@ -68,7 +68,7 @@ def run_browser(url):
         subprocess.call(["jlpm"], cwd=target)
         subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
-    return subprocess.check_output(["node", "chrome-test.js", url], cwd=target)
+    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
 
 
 if __name__ == '__main__':
