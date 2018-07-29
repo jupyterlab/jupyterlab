@@ -28,7 +28,7 @@ const ERROR_INPUT = 'a = foo';
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 describe('@jupyterlab/notebook', () => {
-  const rendermime = NBTestUtils.defaultRendermime();
+  const rendermime = NBTestUtils.defaultRenderMime();
 
   describe('NotebookActions', () => {
     let widget: Notebook;

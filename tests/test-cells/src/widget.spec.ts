@@ -31,6 +31,7 @@ import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
+const rendermime = NBTestUtils.defaultRenderMime();
 
 class LogBaseCell extends Cell {
   methods: string[] = [];
@@ -65,7 +66,7 @@ class LogCodeCell extends CodeCell {
     super({
       model: new CodeCellModel({}),
       contentFactory: NBTestUtils.createCodeCellFactory(),
-      rendermime: NBTestUtils.defaultRendermime()
+      rendermime
     });
   }
 
@@ -90,7 +91,6 @@ class LogMarkdownCell extends MarkdownCell {
 }
 
 describe('cells/widget', () => {
-  const rendermime = NBTestUtils.defaultRendermime();
   const editorFactory = NBTestUtils.editorFactory;
 
   describe('Cell', () => {

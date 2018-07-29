@@ -16,7 +16,7 @@ import { Context } from '@jupyterlab/docregistry';
 import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
-const rendermime = NBTestUtils.defaultRendermime();
+const rendermime = NBTestUtils.defaultRenderMime();
 
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({

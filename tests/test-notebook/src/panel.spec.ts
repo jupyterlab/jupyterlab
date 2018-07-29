@@ -14,7 +14,7 @@ import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 /**
  * Default data.
  */
-const contentFactory = NBTestUtils.NBTestUtils.NBTestUtils.createNotebookPanelFactory();
+const contentFactory = NBTestUtils.createNotebookPanelFactory();
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookPanel', () => {
@@ -37,7 +37,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should change notebook to edit mode if we have a single empty code cell', async () => {
-        const panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        const panel = NBTestUtils.createNotebookPanel(context);
         const model = panel.content.model;
         expect(model).to.be(context.model);
         await context.initialize(true);
@@ -48,34 +48,34 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#toolbar', () => {
       it('should be the toolbar used by the widget', () => {
-        let panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         expect(panel.toolbar).to.be.a(Toolbar);
       });
     });
 
     describe('#content', () => {
       it('should be the notebook content widget', () => {
-        let panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         expect(panel.content).to.be.a(Notebook);
       });
     });
 
     describe('#context', () => {
       it('should get the document context for the widget', () => {
-        let panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         expect(panel.context).to.be(context);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
-        let panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
       });
 
       it('should be safe to call more than once', () => {
-        let panel = NBTestUtils.NBTestUtils.createNotebookPanel(context);
+        let panel = NBTestUtils.createNotebookPanel(context);
         panel.dispose();
         panel.dispose();
         expect(panel.isDisposed).to.be(true);
@@ -96,12 +96,10 @@ describe('@jupyterlab/notebook', () => {
         it('should create a notebook widget', () => {
           let options = {
             contentFactory: contentFactory,
-            rendermime: NBTestUtils.defaultRendermime(),
+            rendermime: NBTestUtils.defaultRenderMime(),
             mimeTypeService: NBTestUtils.mimeTypeService
           };
-          expect(contentFactory.NBTestUtils.createNotebook(options)).to.be.a(
-            Notebook
-          );
+          expect(contentFactory.createNotebook(options)).to.be.a(Notebook);
         });
       });
     });

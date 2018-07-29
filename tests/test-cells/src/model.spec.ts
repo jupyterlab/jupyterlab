@@ -16,7 +16,7 @@ import {
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import { DEFAULT_OUTPUTS } from '@jupyterlab/testutils';
+import { NBTestUtils } from '@jupyterlab/testutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -107,7 +107,7 @@ describe('cells/model', () => {
 
       it('should update the trusted state of the output models', () => {
         let model = new CodeCellModel({});
-        model.outputs.add(DEFAULT_OUTPUTS[0]);
+        model.outputs.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         expect(model.outputs.get(0).trusted).to.be(false);
         model.trusted = true;
         expect(model.outputs.get(0).trusted).to.be(true);

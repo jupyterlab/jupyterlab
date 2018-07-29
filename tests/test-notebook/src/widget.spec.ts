@@ -26,11 +26,14 @@ import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 import { sleep, NBTestUtils } from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookFactory();
+const editorConfig = NBTestUtils.defaultEditorConfig;
+const rendermime = NBTestUtils.defaultRenderMime();
+
 const options: Notebook.IOptions = {
-  rendermime: NBTestUtils.defaultRendermime(),
+  rendermime,
   contentFactory,
   mimeTypeService: NBTestUtils.mimeTypeService,
-  editorConfig: NBTestUtils.defaultEditorConfig
+  editorConfig
 };
 
 function createWidget(): LogStaticNotebook {
@@ -142,7 +145,6 @@ function selected(nb: Notebook): number[] {
 }
 
 describe('@jupyter/notebook', () => {
-  const rendermime = NBTestUtils.defaultRendermime();
   describe('StaticNotebook', () => {
     describe('#constructor()', () => {
       it('should create a notebook widget', () => {
@@ -162,7 +164,7 @@ describe('@jupyter/notebook', () => {
 
       it('should accept an optional editor config', () => {
         let widget = new StaticNotebook(options);
-        expect(widget.editorConfig).to.be(defaultEditorConfig);
+        expect(widget.editorConfig).to.be(editorConfig);
       });
     });
 
@@ -337,10 +339,10 @@ describe('@jupyter/notebook', () => {
           true
         );
         let newConfig = {
-          raw: defaultEditorConfig.raw,
-          markdown: defaultEditorConfig.markdown,
+          raw: editorConfig.raw,
+          markdown: editorConfig.markdown,
           code: {
-            ...defaultEditorConfig.code,
+            ...editorConfig.code,
             autoClosingBrackets: false
           }
         };
@@ -472,6 +474,7 @@ describe('@jupyter/notebook', () => {
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a new ContentFactory', () => {
+          const editorFactory = NBTestUtils.editorFactory;
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           expect(factory).to.be.a(StaticNotebook.ContentFactory);
         });
