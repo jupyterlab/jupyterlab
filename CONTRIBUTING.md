@@ -167,8 +167,7 @@ of your choice after it says `No captured browser`. You can put a `debugger`
 statement on a line and open the browser debugger to debug specific tests.
 `jlpm watch` also accepts the `--pattern` argument.
 
-Note that there are some helper functions in `tests/utils.ts` and
-`tests/notebook-utils.ts` that are used by many of the tests.
+Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
 
 To create a new test for a package in `packages/`, use the following
 command, where `<package-directory-name>` is the name of the folder in

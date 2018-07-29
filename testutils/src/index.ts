@@ -1,11 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// tslint:disable-next-line
-/// <reference path="./json-to-html.d.ts"/>
-
-import json2html = require('json-to-html');
-
 import { simulate } from 'simulate-event';
 
 import { ServiceManager } from '@jupyterlab/services';
@@ -25,12 +20,7 @@ import {
 
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
-import {
-  IRenderMime,
-  RenderMimeRegistry,
-  RenderedHTML,
-  standardRendererFactories
-} from '@jupyterlab/rendermime';
+export { NBTestUtils } from './notebook-utils';
 
 /**
  * Test a single emission from a signal.
@@ -119,19 +109,12 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 }
 
 /**
- * Get a copy of the default rendermime instance.
- */
-export function defaultRenderMime(): RenderMimeRegistry {
-  return Private.rendermime.clone();
-}
-
-/**
  * Create a client session object.
  */
 export async function createClientSession(
   options: Partial<ClientSession.IOptions> = {}
 ): Promise<ClientSession> {
-  const manager = options.manager || Private.manager.sessions;
+  const manager = options.manager || Private.getManager().sessions;
 
   await manager.ready;
   return new ClientSession({
@@ -156,7 +139,7 @@ export function createFileContext(
 ): Context<DocumentRegistry.IModel> {
   const factory = Private.textFactory;
 
-  manager = manager || Private.manager;
+  manager = manager || Private.getManager();
   path = path || UUID.uuid4() + '.txt';
 
   return new Context({ manager, factory, path });
@@ -171,7 +154,7 @@ export async function createNotebookContext(
 ): Promise<Context<INotebookModel>> {
   const factory = Private.notebookFactory;
 
-  manager = manager || Private.manager;
+  manager = manager || Private.getManager();
   path = path || UUID.uuid4() + '.ipynb';
   await manager.ready;
 
@@ -296,34 +279,19 @@ export const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
  * A namespace for private data.
  */
 namespace Private {
-  export const manager = new ServiceManager();
+  let manager: ServiceManager;
 
   export const textFactory = new TextModelFactory();
 
   export const notebookFactory = new NotebookModelFactory({});
 
-  class JSONRenderer extends RenderedHTML {
-    mimeType = 'text/html';
-
-    renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      let source = model.data['application/json'];
-      model.setData({ data: { 'text/html': json2html(source) } });
-      return super.renderModel(model);
+  /**
+   * Get or create the service manager singleton.
+   */
+  export function getManager(): ServiceManager {
+    if (!manager) {
+      manager = new ServiceManager();
     }
+    return manager;
   }
-
-  const jsonRendererFactory = {
-    mimeTypes: ['application/json'],
-    safe: true,
-    createRenderer(
-      options: IRenderMime.IRendererOptions
-    ): IRenderMime.IRenderer {
-      return new JSONRenderer(options);
-    }
-  };
-
-  export const rendermime = new RenderMimeRegistry({
-    initialFactories: standardRendererFactories
-  });
-  rendermime.addFactory(jsonRendererFactory, 10);
 }

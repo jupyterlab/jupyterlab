@@ -30,6 +30,9 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.17.2",
+    "@jupyterlab/cells": "^0.17.2",
+    "@jupyterlab/codeeditor": "^0.17.2",
+    "@jupyterlab/codemirror": "^0.17.3",
     "@jupyterlab/coreutils": "^2.0.2",
     "@jupyterlab/docregistry": "^0.17.2",
     "@jupyterlab/notebook": "^0.17.2",
