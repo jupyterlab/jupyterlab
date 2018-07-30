@@ -57,23 +57,21 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this._commands = opts.commands;
 
         this._settingsConnectors = {
-            notebook: {
-                code: new SettingsConnector({
-                    registry: opts.settings,
-                    pluginId: '@jupyterlab/notebook-extension:tracker',
-                    settingKey: 'codeCellConfig'
-                }),
-                markdown: new SettingsConnector({
-                    registry: opts.settings,
-                    pluginId: '@jupyterlab/notebook-extension:tracker',
-                    settingKey: 'markdownCellConfig'
-                }),
-                raw: new SettingsConnector({
-                    registry: opts.settings,
-                    pluginId: '@jupyterlab/notebook-extension:tracker',
-                    settingKey: 'rawCellConfig'
-                })
-            },
+            notebookCode: new SettingsConnector({
+                registry: opts.settings,
+                pluginId: '@jupyterlab/notebook-extension:tracker',
+                settingKey: 'codeCellConfig'
+            }),
+            notebookMarkdown: new SettingsConnector({
+                registry: opts.settings,
+                pluginId: '@jupyterlab/notebook-extension:tracker',
+                settingKey: 'markdownCellConfig'
+            }),
+            notebookRaw: new SettingsConnector({
+                registry: opts.settings,
+                pluginId: '@jupyterlab/notebook-extension:tracker',
+                settingKey: 'rawCellConfig'
+            }),
             editor: new SettingsConnector({
                 registry: opts.settings,
                 pluginId: '@jupyterlab/fileeditor-extension:plugin',
@@ -152,11 +150,11 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
         if (cell !== null) {
             if (cell.model.type === 'code') {
-                settingsConnector = this._settingsConnectors.notebook.code;
+                settingsConnector = this._settingsConnectors.notebookCode;
             } else if (cell.model.type === 'raw') {
-                settingsConnector = this._settingsConnectors.notebook.raw;
+                settingsConnector = this._settingsConnectors.notebookRaw;
             } else {
-                settingsConnector = this._settingsConnectors.notebook.markdown;
+                settingsConnector = this._settingsConnectors.notebookMarkdown;
             }
         } else {
             settingsConnector = null;
@@ -177,11 +175,11 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                     return null;
                 } else {
                     if (activeCell.model.type === 'code') {
-                        return this._settingsConnectors.notebook.code;
+                        return this._settingsConnectors.notebookCode;
                     } else if (activeCell.model.type === 'raw') {
-                        return this._settingsConnectors.notebook.raw;
+                        return this._settingsConnectors.notebookRaw;
                     } else {
-                        return this._settingsConnectors.notebook.markdown;
+                        return this._settingsConnectors.notebookMarkdown;
                     }
                 }
             } else if (this._editorTracker.has(val)) {
@@ -189,7 +187,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             } else if (this._consoleTracker.has(val)) {
                 const prompt = (val as ConsolePanel).console.promptCell;
                 if (prompt !== null) {
-                    return this._settingsConnectors.notebook.code;
+                    return this._settingsConnectors.notebookCode;
                 } else {
                     return null;
                 }
@@ -218,11 +216,9 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
 namespace Private {
     export interface ISettingConnectorContainer {
-        notebook: {
-            markdown: SettingsConnector<TabSpace.SettingData>;
-            code: SettingsConnector<TabSpace.SettingData>;
-            raw: SettingsConnector<TabSpace.SettingData>;
-        };
+        notebookMarkdown: SettingsConnector<TabSpace.SettingData>;
+        notebookCode: SettingsConnector<TabSpace.SettingData>;
+        notebookRaw: SettingsConnector<TabSpace.SettingData>;
         editor: SettingsConnector<TabSpace.SettingData>;
     }
 }
