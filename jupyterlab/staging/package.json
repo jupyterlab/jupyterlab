@@ -98,7 +98,7 @@
     "react": "~16.4.0",
     "react-dom": "~16.4.0",
     "react-paginate": "^5.2.3",
-    "sanitize-html": "~1.14.3",
+    "sanitize-html": "~1.18.2",
     "semver": "^5.5.0",
     "url-parse": "~1.4.3",
     "xterm": "~3.3.0"
