@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Message } from '@phosphor/messaging';
 
@@ -78,14 +78,14 @@ describe('console/widget', () => {
     describe('#constructor()', () => {
       it('should create a new console content widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget).to.be.a(CodeConsole);
-        expect(widget.node.classList).to.contain('jp-CodeConsole');
+        expect(widget).to.be.an.instanceof(CodeConsole);
+        expect(Array.from(widget.node.classList)).to.contain('jp-CodeConsole');
       });
     });
 
     describe('#cells', () => {
       it('should exist upon instantiation', () => {
-        expect(widget.cells).to.be.ok();
+        expect(widget.cells).to.be.ok;
       });
 
       it('should reflect the contents of the widget', () => {
@@ -98,9 +98,9 @@ describe('console/widget', () => {
             return widget.execute(force);
           })
           .then(() => {
-            expect(widget.cells.length).to.be(1);
+            expect(widget.cells.length).to.equal(1);
             widget.clear();
-            expect(widget.cells.length).to.be(0);
+            expect(widget.cells.length).to.equal(0);
           });
       });
     });
@@ -119,7 +119,7 @@ describe('console/widget', () => {
             return widget.execute(force);
           })
           .then(() => {
-            expect(called).to.be.a(Date);
+            expect(called).to.be.an.instanceof(Date);
           });
       });
     });
@@ -127,7 +127,7 @@ describe('console/widget', () => {
     describe('#promptCell', () => {
       it('should be a code cell widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget.promptCell).to.be.a(CodeCell);
+        expect(widget.promptCell).to.be.an.instanceof(CodeCell);
       });
 
       it('should be replaced after execution', () => {
@@ -135,7 +135,7 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
 
         let old = widget.promptCell;
-        expect(old).to.be.a(CodeCell);
+        expect(old).to.be.an.instanceof(CodeCell);
 
         return (widget.session as ClientSession)
           .initialize()
@@ -143,21 +143,23 @@ describe('console/widget', () => {
             return widget.execute(force);
           })
           .then(() => {
-            expect(widget.promptCell).to.be.a(CodeCell);
-            expect(widget.promptCell).to.not.be(old);
+            expect(widget.promptCell).to.be.an.instanceof(CodeCell);
+            expect(widget.promptCell).to.not.equal(old);
           });
       });
     });
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(widget.session.path).to.ok();
+        expect(widget.session.path).to.be.ok;
       });
     });
 
     describe('#contentFactory', () => {
       it('should be the content factory used by the widget', () => {
-        expect(widget.contentFactory).to.be.a(CodeConsole.ContentFactory);
+        expect(widget.contentFactory).to.be.an.instanceof(
+          CodeConsole.ContentFactory
+        );
       });
     });
 
@@ -167,9 +169,9 @@ describe('console/widget', () => {
         let model = new CodeCellModel({});
         let cell = new CodeCell({ model, contentFactory, rendermime });
         Widget.attach(widget, document.body);
-        expect(widget.cells.length).to.be(0);
+        expect(widget.cells.length).to.equal(0);
         widget.addCell(cell);
-        expect(widget.cells.length).to.be(1);
+        expect(widget.cells.length).to.equal(1);
       });
     });
 
@@ -185,8 +187,8 @@ describe('console/widget', () => {
           .then(() => {
             expect(widget.cells.length).to.be.greaterThan(0);
             widget.clear();
-            expect(widget.cells.length).to.be(0);
-            expect(widget.promptCell.model.value.text).to.be('');
+            expect(widget.cells.length).to.equal(0);
+            expect(widget.promptCell.model.value.text).to.equal('');
           });
       });
     });
@@ -194,17 +196,17 @@ describe('console/widget', () => {
     describe('#dispose()', () => {
       it('should dispose the content widget', () => {
         Widget.attach(widget, document.body);
-        expect(widget.isDisposed).to.be(false);
+        expect(widget.isDisposed).to.equal(false);
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to dispose multiple times', () => {
         Widget.attach(widget, document.body);
-        expect(widget.isDisposed).to.be(false);
+        expect(widget.isDisposed).to.equal(false);
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
@@ -212,7 +214,7 @@ describe('console/widget', () => {
       it('should execute contents of the prompt if forced', () => {
         let force = true;
         Widget.attach(widget, document.body);
-        expect(widget.cells.length).to.be(0);
+        expect(widget.cells.length).to.equal(0);
         return (widget.session as ClientSession)
           .initialize()
           .then(() => {
@@ -228,7 +230,7 @@ describe('console/widget', () => {
         let timeout = 9000;
         Widget.attach(widget, document.body);
         widget.promptCell.model.value.text = 'for x in range(5):';
-        expect(widget.cells.length).to.be(0);
+        expect(widget.cells.length).to.equal(0);
         let session = widget.session as ClientSession;
         session.kernelPreference = { name: 'ipython' };
         return session
@@ -237,7 +239,7 @@ describe('console/widget', () => {
             return widget.execute(force, timeout);
           })
           .then(() => {
-            expect(widget.cells.length).to.be(0);
+            expect(widget.cells.length).to.equal(0);
           });
       });
     });
@@ -246,7 +248,7 @@ describe('console/widget', () => {
       it('should add a code cell and execute it', done => {
         let code = 'print("#inject()")';
         Widget.attach(widget, document.body);
-        expect(widget.cells.length).to.be(0);
+        expect(widget.cells.length).to.equal(0);
         widget
           .inject(code)
           .then(() => {
@@ -262,9 +264,9 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
 
         let model = widget.promptCell.model;
-        expect(model.value.text).to.be.empty();
+        expect(model.value.text).to.be.empty;
         widget.insertLinebreak();
-        expect(model.value.text).to.be('\n');
+        expect(model.value.text).to.equal('\n');
       });
     });
 
@@ -275,28 +277,28 @@ describe('console/widget', () => {
 
         let serialized = widget.serialize();
         expect(serialized).to.have.length(1);
-        expect(serialized[0].source).to.be('foo');
+        expect(serialized[0].source).to.equal('foo');
       });
     });
 
     describe('#newPromptCell()', () => {
       it('should be called after attach, creating a prompt', () => {
-        expect(widget.promptCell).to.not.be.ok();
+        expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('newPromptCell');
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('newPromptCell');
-        expect(widget.promptCell).to.be.ok();
+        expect(widget.promptCell).to.be.ok;
       });
 
       it('should be called after execution, creating a prompt', () => {
-        expect(widget.promptCell).to.not.be.ok();
+        expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('newPromptCell');
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('newPromptCell');
 
         let old = widget.promptCell;
         let force = true;
-        expect(old).to.be.a(CodeCell);
+        expect(old).to.be.an.instanceof(CodeCell);
         widget.methods = [];
 
         return (widget.session as ClientSession)
@@ -305,8 +307,8 @@ describe('console/widget', () => {
             return widget.execute(force);
           })
           .then(() => {
-            expect(widget.promptCell).to.be.a(CodeCell);
-            expect(widget.promptCell).to.not.be(old);
+            expect(widget.promptCell).to.be.an.instanceof(CodeCell);
+            expect(widget.promptCell).to.not.equal(old);
             expect(widget.methods).to.contain('newPromptCell');
           });
       });
@@ -314,14 +316,14 @@ describe('console/widget', () => {
 
     describe('#onActivateRequest()', () => {
       it('should focus the prompt editor', done => {
-        expect(widget.promptCell).to.not.be.ok();
+        expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('onActivateRequest');
         Widget.attach(widget, document.body);
         requestAnimationFrame(() => {
           widget.activate();
           requestAnimationFrame(() => {
             expect(widget.methods).to.contain('onActivateRequest');
-            expect(widget.promptCell.editor.hasFocus()).to.be(true);
+            expect(widget.promptCell.editor.hasFocus()).to.equal(true);
             done();
           });
         });
@@ -330,11 +332,11 @@ describe('console/widget', () => {
 
     describe('#onAfterAttach()', () => {
       it('should be called after attach, creating a prompt', () => {
-        expect(widget.promptCell).to.not.be.ok();
+        expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('onAfterAttach');
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
-        expect(widget.promptCell).to.be.ok();
+        expect(widget.promptCell).to.be.ok;
       });
     });
 
@@ -342,7 +344,7 @@ describe('console/widget', () => {
       describe('#constructor', () => {
         it('should create a new ContentFactory', () => {
           let factory = new CodeConsole.ContentFactory({ editorFactory });
-          expect(factory).to.be.a(CodeConsole.ContentFactory);
+          expect(factory).to.be.an.instanceof(CodeConsole.ContentFactory);
         });
       });
 
@@ -354,7 +356,7 @@ describe('console/widget', () => {
             model,
             contentFactory
           });
-          expect(prompt).to.be.a(CodeCell);
+          expect(prompt).to.be.an.instanceof(CodeCell);
         });
       });
 
@@ -365,7 +367,7 @@ describe('console/widget', () => {
             model,
             contentFactory
           });
-          expect(prompt).to.be.a(RawCell);
+          expect(prompt).to.be.an.instanceof(RawCell);
         });
       });
     });
@@ -374,7 +376,7 @@ describe('console/widget', () => {
       describe('#constructor()', () => {
         it('should create a new model factory', () => {
           let factory = new CodeConsole.ModelFactory({});
-          expect(factory).to.be.a(CodeConsole.ModelFactory);
+          expect(factory).to.be.an.instanceof(CodeConsole.ModelFactory);
         });
 
         it('should accept a codeCellContentFactory', () => {
@@ -382,14 +384,16 @@ describe('console/widget', () => {
           let factory = new CodeConsole.ModelFactory({
             codeCellContentFactory
           });
-          expect(factory.codeCellContentFactory).to.be(codeCellContentFactory);
+          expect(factory.codeCellContentFactory).to.equal(
+            codeCellContentFactory
+          );
         });
       });
 
       describe('#codeCellContentFactory', () => {
         it('should be the code cell content factory used by the factory', () => {
           let factory = new CodeConsole.ModelFactory({});
-          expect(factory.codeCellContentFactory).to.be(
+          expect(factory.codeCellContentFactory).to.equal(
             CodeCellModel.defaultContentFactory
           );
         });
@@ -398,21 +402,21 @@ describe('console/widget', () => {
       describe('#createCodeCell()', () => {
         it('should create a code cell', () => {
           let factory = new CodeConsole.ModelFactory({});
-          expect(factory.createCodeCell({})).to.be.a(CodeCellModel);
+          expect(factory.createCodeCell({})).to.be.an.instanceof(CodeCellModel);
         });
       });
 
       describe('#createRawCell()', () => {
         it('should create a raw cell model', () => {
           let factory = new CodeConsole.ModelFactory({});
-          expect(factory.createRawCell({})).to.be.a(RawCellModel);
+          expect(factory.createRawCell({})).to.be.an.instanceof(RawCellModel);
         });
       });
     });
 
     describe('.defaultModelFactory', () => {
       it('should be a ModelFactory', () => {
-        expect(CodeConsole.defaultModelFactory).to.be.a(
+        expect(CodeConsole.defaultModelFactory).to.be.an.instanceof(
           CodeConsole.ModelFactory
         );
       });
