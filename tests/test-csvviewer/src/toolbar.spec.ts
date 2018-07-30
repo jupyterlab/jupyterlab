@@ -17,7 +17,7 @@ describe('csvviewer/toolbar', () => {
       it('should instantiate a `CSVDelimiter` toolbar widget', () => {
         const widget = new CSVDelimiter({ selected: ',' });
         expect(widget).to.be.an.instanceof(CSVDelimiter);
-        expect(widget.node.classList).to.contain('jp-CSVDelimiter');
+        expect(Array.from(widget.node.classList)).to.contain('jp-CSVDelimiter');
         widget.dispose();
       });
 
