@@ -18,7 +18,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig } from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 
@@ -193,8 +193,9 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = PageConfig.getOption('pageUrl');
-    const router = new Router({ base, commands });
+    const base = PageConfig.getOption('baseUrl');
+    const page = PageConfig.getOption('pageUrl');
+    const router = new Router({ base: URLExt.join(base, page), commands });
 
     app.started.then(() => {
       // Route the very first request on load.

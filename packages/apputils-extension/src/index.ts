@@ -682,7 +682,7 @@ namespace Private {
   /**
    * Allows the user to clear state if splash screen takes too long.
    */
-  export function redirect(router: IRouter, warn = false): Promise<void> {
+  export async function redirect(router: IRouter, warn = false): Promise<void> {
     const form = createRedirectForm(warn);
     const dialog = new Dialog({
       title: 'Please use a different workspace.',
@@ -691,24 +691,23 @@ namespace Private {
       buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
     });
 
-    return dialog.launch().then(result => {
-      dialog.dispose();
+    const result = await dialog.launch();
 
-      if (result.value) {
-        const workspaces = PageConfig.getOption('workspacesUrl');
-        const url = URLExt.join(workspaces, result.value);
-
-        // Navigate to a new workspace URL and abandon this session altogether.
-        router.navigate(url, { hard: true, silent: true });
-
-        // This promise will never resolve because the application navigates
-        // away to a new location. It only exists to satisfy the return type
-        // of the `redirect` function.
-        return new Promise<void>(() => undefined);
-      }
-
+    dialog.dispose();
+    if (!result.value) {
       return redirect(router, true);
-    });
+    }
+
+    // Navigate to a new workspace URL and abandon this session altogether.
+    const workspaces = PageConfig.getOption('workspacesUrl');
+    const url = URLExt.join(workspaces, result.value);
+
+    router.navigate(url, { hard: true, silent: true });
+
+    // This promise will never resolve because the application navigates
+    // away to a new location. It only exists to satisfy the return type
+    // of the `redirect` function.
+    return new Promise<void>(() => undefined);
   }
 
   /**
