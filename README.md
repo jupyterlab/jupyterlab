@@ -9,15 +9,14 @@ Changing Contexts
 Component Interactions
 ![Component Previews](http://g.recordit.co/jT0NA6D9c9.gif)
 
-
 ## Prerequisites
 
-* JupyterLab
+-   JupyterLab
 
 ## Installation
 
 ```bash
-jupyter labextension install statusbar
+jupyter labextension install @jupyterlab/statusbar
 ```
 
 ## Development
