@@ -18,7 +18,6 @@
   "dependencies": {
     "@jupyterlab/services": "^3.0.3",
     "@jupyterlab/terminal": "^0.17.2",
-    "@jupyterlab/testutils": "^0.1.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "expect.js": "~0.3.1"
