@@ -212,9 +212,11 @@ export class Router implements IRouter {
    * @param options - The navigation options.
    */
   navigate(path: string, options: IRouter.INavOptions = {}): void {
-    const url = path ? URLExt.join(this.base, path) : this.base;
+    const { base } = this;
     const { history } = window;
     const { hard, silent } = options;
+    const url =
+      path && path.indexOf(base) === 0 ? path : URLExt.join(base, path);
 
     if (silent) {
       history.replaceState({}, '', url);

@@ -695,7 +695,8 @@ namespace Private {
       dialog.dispose();
 
       if (result.value) {
-        const url = `workspaces/${result.value}`;
+        const workspaces = PageConfig.getOption('workspacesUrl');
+        const url = URLExt.join(workspaces, result.value);
 
         // Navigate to a new workspace URL and abandon this session altogether.
         router.navigate(url, { hard: true, silent: true });
@@ -703,9 +704,7 @@ namespace Private {
         // This promise will never resolve because the application navigates
         // away to a new location. It only exists to satisfy the return type
         // of the `redirect` function.
-        return new Promise<void>(() => {
-          /* no-op */
-        });
+        return new Promise<void>(() => undefined);
       }
 
       return redirect(router, true);
