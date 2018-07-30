@@ -5,7 +5,7 @@ import { Message } from '@phosphor/messaging';
 import { hoverItem } from '../style/lineForm';
 import { clickedItem, interactiveItem } from '../style/statusBar';
 
-export function showPopup(options: Popup.IOptions) {
+export function showPopup(options: Popup.IOptions): Popup | null {
     let dialog = new Popup(options);
     dialog.launch();
     return dialog;
@@ -63,27 +63,27 @@ export class Popup extends Widget {
 
     protected onAfterAttach(msg: Message): void {
         document.addEventListener('click', this, false);
-        document.addEventListener('keypress', this, false);
-        window.addEventListener('resize', this, false);
+        this.node.addEventListener('keypress', this, false);
     }
 
     protected onAfterDetach(msg: Message): void {
         document.removeEventListener('click', this, false);
-        document.removeEventListener('keypress', this, false);
-        window.removeEventListener('resize', this, false);
+        this.node.removeEventListener('keypress', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
         if (
             !!event.target &&
-            !this._body.node.contains(event.target as HTMLElement)
+            !(
+                this._body.node.contains(event.target as HTMLElement) ||
+                this._anchor.node.contains(event.target as HTMLElement)
+            )
         ) {
-            super.dispose();
             this.dispose();
         }
     }
 
-    protected _evtResize(): void {
+    protected onResize(): void {
         this.update();
     }
 
@@ -113,9 +113,6 @@ export class Popup extends Widget {
                 break;
             case 'click':
                 this._evtClick(event as MouseEvent);
-                break;
-            case 'resize':
-                this._evtResize();
                 break;
             default:
                 break;

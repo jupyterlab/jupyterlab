@@ -1,16 +1,9 @@
 import { ISignal, Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
-import { JSONObject, JSONArray, JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@phosphor/coreutils';
 
-export type SettingValue =
-    | string
-    | number
-    | boolean
-    | JSONObject
-    | JSONArray
-    | undefined;
-export class SettingsConnector<I extends SettingValue> implements IDisposable {
+export class SettingsConnector<I extends JSONValue> implements IDisposable {
     constructor(opts: SettingsConnector.IOptions) {
         this._registry = opts.registry;
         this._pluginId = opts.pluginId;

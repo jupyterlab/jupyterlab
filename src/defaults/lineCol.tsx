@@ -272,7 +272,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     private _editorTracker: IEditorTracker;
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
-    private _popup: Popup | undefined;
+    private _popup: Popup | null = null;
 }
 
 namespace LineCol {
