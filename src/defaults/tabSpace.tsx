@@ -30,6 +30,7 @@ import { SettingsConnector } from '../util/settings';
 namespace TabSpaceComponent {
     export interface IProps {
         tabSpace: number;
+        isSpaces: boolean;
         handleClick: () => void;
     }
 }
@@ -38,10 +39,11 @@ namespace TabSpaceComponent {
 const TabSpaceComponent = (
     props: TabSpaceComponent.IProps
 ): React.ReactElement<TabSpaceComponent.IProps> => {
+    const description = props.isSpaces ? 'Spaces' : 'Tab Size';
     return (
         <TextItem
             onClick={props.handleClick}
-            source={`Spaces: ${props.tabSpace}`}
+            source={`${description}: ${props.tabSpace}`}
         />
     );
 };
@@ -93,8 +95,20 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         if (this.model === null) {
             return null;
         } else {
+            const provider = this._getFocusedSettingProvider(
+                this._shell.currentWidget
+            );
+            const currentValue =
+                provider &&
+                this._settingsProviderData[provider].connector.currentValue;
+
+            if (!currentValue) {
+                return null;
+            }
+
             return (
                 <TabSpaceComponent
+                    isSpaces={currentValue.insertSpaces}
                     tabSpace={this.model.tabSpace}
                     handleClick={this._handleClick}
                 />
