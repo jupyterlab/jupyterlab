@@ -149,7 +149,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         _tracker: INotebookTracker,
         cell: Cell | null
     ) => {
-        let settingsConnector: SettingsConnector<{ tabSize: number }> | null;
+        let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
         if (cell !== null) {
             if (cell.model.type === 'code') {
                 settingsConnector = this._settingsConnectors.notebook.code;
@@ -167,7 +167,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
     private _getFocusedSettingsConnector(
         val: Widget | null
-    ): SettingsConnector<{ tabSize: number }> | null {
+    ): SettingsConnector<TabSpace.SettingData> | null {
         if (val === null) {
             return null;
         } else {
@@ -219,30 +219,28 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 namespace Private {
     export interface ISettingConnectorContainer {
         notebook: {
-            markdown: SettingsConnector<{ tabSize: number }>;
-            code: SettingsConnector<{ tabSize: number }>;
-            raw: SettingsConnector<{ tabSize: number }>;
+            markdown: SettingsConnector<TabSpace.SettingData>;
+            code: SettingsConnector<TabSpace.SettingData>;
+            raw: SettingsConnector<TabSpace.SettingData>;
         };
-        editor: SettingsConnector<{ tabSize: number }>;
+        editor: SettingsConnector<TabSpace.SettingData>;
     }
 }
 
 namespace TabSpace {
     export class Model extends VDomModel implements ITabSpace.IModel {
-        constructor(
-            settingConnector: SettingsConnector<{ tabSize: number }> | null
-        ) {
+        constructor(settingConnector: SettingsConnector<SettingData> | null) {
             super();
 
             this.settingConnector = settingConnector;
         }
 
-        get settingConnector(): SettingsConnector<{ tabSize: number }> | null {
+        get settingConnector(): SettingsConnector<SettingData> | null {
             return this._settingConnector;
         }
 
         set settingConnector(
-            settingConnector: SettingsConnector<{ tabSize: number }> | null
+            settingConnector: SettingsConnector<SettingData> | null
         ) {
             const oldTabSpace = this._tabSpace;
             const oldSettingConnector = this._settingConnector;
@@ -280,9 +278,9 @@ namespace TabSpace {
         }
 
         private _tabSpace: number = 4;
-        private _settingConnector: SettingsConnector<{
-            tabSize: number;
-        }> | null = null;
+        private _settingConnector: SettingsConnector<
+            TabSpace.SettingData
+        > | null = null;
     }
 
     export interface IOptions {
@@ -293,6 +291,8 @@ namespace TabSpace {
         commands: CommandRegistry;
         settings: ISettingRegistry;
     }
+
+    export type SettingData = { tabSize: number; insertSpaces: boolean };
 }
 
 export interface ITabSpace extends IDisposable {
