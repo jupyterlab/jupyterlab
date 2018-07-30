@@ -12,6 +12,8 @@ import {
   StateDB
 } from '@jupyterlab/coreutils';
 
+import { testEmission } from '@jupyterlab/testutils';
+
 import { JSONObject } from '@phosphor/coreutils';
 
 export class TestConnector extends StateDB
@@ -133,20 +135,20 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#pluginChanged', () => {
-      it('should emit when a plugin changes', done => {
+      it('should emit when a plugin changes', async () => {
         const id = 'foo';
         const key = 'bar';
         const value = 'baz';
 
         connector.schemas[id] = { type: 'object' };
+        let called = false;
         registry.pluginChanged.connect((sender: any, plugin: string) => {
           expect(id).to.equal(plugin);
-          done();
+          called = true;
         });
-        registry
-          .load(id)
-          .then(() => registry.set(id, key, value))
-          .catch(done);
+        await registry.load(id);
+        await registry.set(id, key, value);
+        expect(called).to.equal(true);
       });
     });
 
@@ -336,23 +338,15 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#changed', () => {
-      it('should emit when a plugin changes', done => {
+      it('should emit when a plugin changes', async () => {
         const id = 'alpha';
         const schema = { type: 'object' };
 
         connector.schemas[id] = schema;
-        registry
-          .load(id)
-          .then(s => {
-            settings = s as Settings;
-          })
-          .then(() => {
-            settings.changed.connect(() => {
-              done();
-            });
-            return settings.set('foo', 'bar');
-          })
-          .catch(done);
+        settings = (await registry.load(id)) as Settings;
+        let promise = testEmission(settings.changed, {});
+        await settings.set('foo', 'bar');
+        await promise;
       });
     });
 

@@ -5,6 +5,8 @@ import { expect } from 'chai';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
+import { framePromise } from '@jupyterlab/testutils';
+
 import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
@@ -38,17 +40,17 @@ describe('@jupyterlab/apputils', () => {
   describe('VDomModel', () => {
     describe('#constructor()', () => {
       it('should create a VDomModel', () => {
-        let model = new VDomModel();
+        const model = new VDomModel();
         expect(model).to.be.an.instanceof(VDomModel);
       });
 
       it('should create a TestModel', () => {
-        let model = new TestModel();
+        const model = new TestModel();
         expect(model).to.be.an.instanceof(TestModel);
       });
 
       it('should be properly disposed', () => {
-        let model = new TestModel();
+        const model = new TestModel();
         model.dispose();
         expect(model.isDisposed).to.be.equal(true);
       });
@@ -56,7 +58,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#stateChanged()', () => {
       it('should fire the stateChanged signal on a change', () => {
-        let model = new TestModel();
+        const model = new TestModel();
         let changed = false;
         model.stateChanged.connect(() => {
           changed = true;
@@ -70,12 +72,12 @@ describe('@jupyterlab/apputils', () => {
   describe('VDomRenderer', () => {
     describe('#constructor()', () => {
       it('should create a TestWidget', () => {
-        let widget = new TestWidget();
+        const widget = new TestWidget();
         expect(widget).to.be.an.instanceof(TestWidget);
       });
 
       it('should be properly disposed', () => {
-        let widget = new TestWidget();
+        const widget = new TestWidget();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
@@ -83,8 +85,8 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#modelChanged()', () => {
       it('should fire the stateChanged signal on a change', () => {
-        let widget = new TestWidget();
-        let model = new TestModel();
+        const widget = new TestWidget();
+        const model = new TestModel();
         let changed = false;
         widget.modelChanged.connect(() => {
           changed = true;
@@ -95,28 +97,24 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#render()', () => {
-      it('should render the contents after a model change', done => {
-        let widget = new TestWidget();
-        let model = new TestModel();
+      it('should render the contents after a model change', async () => {
+        const widget = new TestWidget();
+        const model = new TestModel();
         widget.model = model;
         model.value = 'foo';
-        requestAnimationFrame(() => {
-          let span = widget.node.firstChild as HTMLElement;
-          expect(span.textContent).to.equal('foo');
-          done();
-        });
+        await framePromise();
+        let span = widget.node.firstChild as HTMLElement;
+        expect(span.textContent).to.equal('foo');
       });
     });
 
     describe('#noModel()', () => {
-      it('should work with a null model', done => {
-        let widget = new TestWidgetNoModel();
+      it('should work with a null model', async () => {
+        const widget = new TestWidgetNoModel();
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          let span = widget.node.firstChild as HTMLElement;
-          expect(span.textContent).to.equal('No model!');
-          done();
-        });
+        await framePromise();
+        const span = widget.node.firstChild as HTMLElement;
+        expect(span.textContent).to.equal('No model!');
       });
     });
   });

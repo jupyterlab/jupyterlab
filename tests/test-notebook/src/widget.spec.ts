@@ -23,23 +23,17 @@ import { INotebookModel, NotebookModel } from '@jupyterlab/notebook';
 
 import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 
-import {
-  DEFAULT_CONTENT,
-  createNotebookFactory,
-  rendermime,
-  mimeTypeService,
-  editorFactory,
-  defaultEditorConfig
-} from '../../notebook-utils';
+import { sleep, NBTestUtils } from '@jupyterlab/testutils';
 
-import { sleep } from '../../utils';
+const contentFactory = NBTestUtils.createNotebookFactory();
+const editorConfig = NBTestUtils.defaultEditorConfig;
+const rendermime = NBTestUtils.defaultRenderMime();
 
-const contentFactory = createNotebookFactory();
 const options: Notebook.IOptions = {
   rendermime,
   contentFactory,
-  mimeTypeService,
-  editorConfig: defaultEditorConfig
+  mimeTypeService: NBTestUtils.mimeTypeService,
+  editorConfig
 };
 
 function createWidget(): LogStaticNotebook {
@@ -170,7 +164,7 @@ describe('@jupyter/notebook', () => {
 
       it('should accept an optional editor config', () => {
         let widget = new StaticNotebook(options);
-        expect(widget.editorConfig).to.be(defaultEditorConfig);
+        expect(widget.editorConfig).to.be(editorConfig);
       });
     });
 
@@ -254,7 +248,7 @@ describe('@jupyter/notebook', () => {
       it('should add the model cells to the layout', () => {
         let widget = new LogStaticNotebook(options);
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.model = model;
         expect(widget.widgets.length).to.be(6);
       });
@@ -274,7 +268,7 @@ describe('@jupyter/notebook', () => {
 
         beforeEach(() => {
           widget = createWidget();
-          widget.model.fromJSON(DEFAULT_CONTENT);
+          widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         });
 
         afterEach(() => {
@@ -345,10 +339,10 @@ describe('@jupyter/notebook', () => {
           true
         );
         let newConfig = {
-          raw: defaultEditorConfig.raw,
-          markdown: defaultEditorConfig.markdown,
+          raw: editorConfig.raw,
+          markdown: editorConfig.markdown,
           code: {
-            ...defaultEditorConfig.code,
+            ...editorConfig.code,
             autoClosingBrackets: false
           }
         };
@@ -391,7 +385,7 @@ describe('@jupyter/notebook', () => {
       it('should get the number of child widgets', () => {
         let widget = createWidget();
         expect(widget.widgets.length).to.be(1);
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(widget.widgets.length).to.be(6);
       });
     });
@@ -454,7 +448,7 @@ describe('@jupyter/notebook', () => {
     describe('#onCellInserted()', () => {
       it('should be called when a cell is inserted', () => {
         let widget = createWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(widget.methods).to.contain('onCellInserted');
       });
     });
@@ -462,7 +456,7 @@ describe('@jupyter/notebook', () => {
     describe('#onCellMoved()', () => {
       it('should be called when a cell is moved', () => {
         let widget = createWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.model.cells.move(0, 1);
         expect(widget.methods).to.contain('onCellMoved');
       });
@@ -480,6 +474,7 @@ describe('@jupyter/notebook', () => {
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a new ContentFactory', () => {
+          const editorFactory = NBTestUtils.editorFactory;
           let factory = new StaticNotebook.ContentFactory({ editorFactory });
           expect(factory).to.be.a(StaticNotebook.ContentFactory);
         });
@@ -540,7 +535,7 @@ describe('@jupyter/notebook', () => {
     describe('#activeCellChanged', () => {
       it('should be emitted when the active cell changes', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let called = false;
         widget.activeCellChanged.connect((sender, args) => {
           expect(sender).to.be(widget);
@@ -553,7 +548,7 @@ describe('@jupyter/notebook', () => {
 
       it('should not be emitted when the active cell does not change', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let called = false;
         widget.activeCellChanged.connect(() => {
           called = true;
@@ -566,7 +561,7 @@ describe('@jupyter/notebook', () => {
     describe('#selectionChanged', () => {
       it('should be emitted when the selection changes', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let called = false;
         widget.selectionChanged.connect((sender, args) => {
           expect(sender).to.be(widget);
@@ -579,7 +574,7 @@ describe('@jupyter/notebook', () => {
 
       it('should not be emitted when the selection does not change', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let called = false;
         widget.select(widget.widgets[1]);
         widget.selectionChanged.connect(() => {
@@ -635,7 +630,7 @@ describe('@jupyter/notebook', () => {
 
       it('should deselect all cells if switching to edit mode', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await sleep();
         widget.extendContiguousSelectionTo(widget.widgets.length - 1);
@@ -668,14 +663,14 @@ describe('@jupyter/notebook', () => {
 
       it('should set the active cell index of the notebook', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         expect(widget.activeCellIndex).to.be(1);
       });
 
       it('should clamp the index to the bounds of the notebook cells', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.activeCellIndex = -2;
         expect(widget.activeCellIndex).to.be(0);
         widget.activeCellIndex = 100;
@@ -685,7 +680,7 @@ describe('@jupyter/notebook', () => {
       it('should emit the `stateChanged` signal', () => {
         let widget = createActiveWidget();
         let called = false;
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.stateChanged.connect((sender, args) => {
           expect(sender).to.be(widget);
           expect(args.name).to.be('activeCellIndex');
@@ -700,7 +695,7 @@ describe('@jupyter/notebook', () => {
       it('should be a no-op if the value does not change', () => {
         let widget = createActiveWidget();
         let called = false;
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.stateChanged.connect(() => {
           called = true;
         });
@@ -710,7 +705,7 @@ describe('@jupyter/notebook', () => {
 
       it('should post an update request', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         await sleep();
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.activeCellIndex = 1;
@@ -718,7 +713,7 @@ describe('@jupyter/notebook', () => {
 
       it('should update the active cell if necessary', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         expect(widget.activeCell).to.be(widget.widgets[1]);
       });
@@ -734,7 +729,7 @@ describe('@jupyter/notebook', () => {
     describe('#select()', () => {
       it('should select a cell widget', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let cell = widget.widgets[0];
         widget.select(cell);
         expect(widget.isSelected(cell)).to.be(true);
@@ -742,7 +737,7 @@ describe('@jupyter/notebook', () => {
 
       it('should allow multiple widgets to be selected', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.widgets.forEach(cell => {
           widget.select(cell);
         });
@@ -754,7 +749,7 @@ describe('@jupyter/notebook', () => {
     describe('#deselect()', () => {
       it('should deselect a cell', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         for (let i = 0; i < widget.widgets.length; i++) {
           let cell = widget.widgets[i];
           widget.select(cell);
@@ -766,7 +761,7 @@ describe('@jupyter/notebook', () => {
 
       it('should let the active cell be deselected', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let cell = widget.activeCell;
         widget.select(cell);
         expect(widget.isSelected(cell)).to.be(true);
@@ -778,7 +773,7 @@ describe('@jupyter/notebook', () => {
     describe('#isSelected()', () => {
       it('should get whether the cell is selected', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.select(widget.widgets[0]);
         widget.select(widget.widgets[2]);
         expect(selected(widget)).to.eql([0, 2]);
@@ -786,7 +781,7 @@ describe('@jupyter/notebook', () => {
 
       it('reports selection whether or not cell is active', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(selected(widget)).to.eql([]);
         widget.select(widget.activeCell);
         expect(selected(widget)).to.eql([widget.activeCellIndex]);
@@ -796,7 +791,7 @@ describe('@jupyter/notebook', () => {
     describe('#deselectAll()', () => {
       it('should deselect all cells', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.select(widget.widgets[0]);
         widget.select(widget.widgets[2]);
         widget.select(widget.widgets[3]);
@@ -911,7 +906,7 @@ describe('@jupyter/notebook', () => {
 
       it('should work in each permutation of anchor, head, and index', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           checkSelection(widget, p[0], p[1], p[2]);
@@ -920,7 +915,7 @@ describe('@jupyter/notebook', () => {
 
       it('should work when we only have an active cell, with no existing selection', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           if (p[0] === p[1]) {
@@ -931,7 +926,7 @@ describe('@jupyter/notebook', () => {
 
       it('should clip when the index is greater than the last index', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           checkSelection(widget, p[0], p[1], Number.MAX_SAFE_INTEGER);
@@ -940,7 +935,7 @@ describe('@jupyter/notebook', () => {
 
       it('should clip when the index is greater than the last index with no existing selection', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           if (p[0] === p[1]) {
@@ -951,7 +946,7 @@ describe('@jupyter/notebook', () => {
 
       it('should clip when the index is less than 0', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           checkSelection(widget, p[0], p[1], -10);
@@ -960,7 +955,7 @@ describe('@jupyter/notebook', () => {
 
       it('should clip when the index is less than 0 with no existing selection', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         permutations.forEach(p => {
           if (p[0] === p[1]) {
@@ -990,7 +985,7 @@ describe('@jupyter/notebook', () => {
     describe('#getContiguousSelection()', () => {
       it('throws an error when the selection is not contiguous', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[3]);
@@ -1003,7 +998,7 @@ describe('@jupyter/notebook', () => {
 
       it('throws an error if the active cell is not at an endpoint', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1024,7 +1019,7 @@ describe('@jupyter/notebook', () => {
 
       it('returns null values if there is no selection', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         let selection = widget.getContiguousSelection();
         expect(selection).to.eql({ head: null, anchor: null });
@@ -1041,7 +1036,7 @@ describe('@jupyter/notebook', () => {
 
       it('works if head is before the anchor', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1054,7 +1049,7 @@ describe('@jupyter/notebook', () => {
 
       it('works if head is after the anchor', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[1]);
         widget.select(widget.widgets[2]);
@@ -1067,7 +1062,7 @@ describe('@jupyter/notebook', () => {
 
       it('works if head and anchor are the same', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
 
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
@@ -1082,7 +1077,7 @@ describe('@jupyter/notebook', () => {
 
       beforeEach(async () => {
         widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await sleep();
       });
@@ -1259,7 +1254,7 @@ describe('@jupyter/notebook', () => {
     describe('#onAfterAttach()', () => {
       it('should add event listeners', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         let child = widget.widgets[0];
         await sleep();
@@ -1275,7 +1270,7 @@ describe('@jupyter/notebook', () => {
 
       it('should post an update request', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await sleep();
         expect(widget.methods).to.contain('onAfterAttach');
@@ -1288,7 +1283,7 @@ describe('@jupyter/notebook', () => {
     describe('#onBeforeDetach()', () => {
       it('should remove event listeners', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         let child = widget.widgets[0];
         await sleep();
@@ -1331,7 +1326,7 @@ describe('@jupyter/notebook', () => {
 
       beforeEach(async () => {
         widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await sleep();
       });
@@ -1376,7 +1371,7 @@ describe('@jupyter/notebook', () => {
     describe('#onCellInserted()', () => {
       it('should post an `update-request', async () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(widget.methods).to.contain('onCellInserted');
         await sleep();
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -1384,13 +1379,13 @@ describe('@jupyter/notebook', () => {
 
       it('should update the active cell if necessary', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
 
       it('should keep the currently active cell active', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.activeCellIndex = 1;
         let cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.insert(1, cell);
@@ -1400,7 +1395,7 @@ describe('@jupyter/notebook', () => {
       context('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', () => {
           let widget = createActiveWidget();
-          widget.model.fromJSON(DEFAULT_CONTENT);
+          widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
           widget.activeCellIndex = 1;
           let child = widget.widgets[widget.activeCellIndex];
           (child.editor.edgeRequested as any).emit('top');
@@ -1409,7 +1404,7 @@ describe('@jupyter/notebook', () => {
 
         it('should activate the next cell if bottom is requested', () => {
           let widget = createActiveWidget();
-          widget.model.fromJSON(DEFAULT_CONTENT);
+          widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
           let child = widget.widgets[widget.activeCellIndex];
           (child.editor.edgeRequested as any).emit('bottom');
           expect(widget.activeCellIndex).to.be(1);
@@ -1436,7 +1431,7 @@ describe('@jupyter/notebook', () => {
 
         moves.forEach(m => {
           let [fromIndex, toIndex, activeIndex] = m;
-          widget.model.fromJSON(DEFAULT_CONTENT);
+          widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
           let cell = widget.widgets[3];
           widget.activeCellIndex = 3;
           widget.model.cells.move(fromIndex, toIndex);
@@ -1458,14 +1453,14 @@ describe('@jupyter/notebook', () => {
 
       it('should update the active cell if necessary', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.model.cells.remove(0);
         expect(widget.activeCell).to.be(widget.widgets[0]);
       });
 
       it('should keep the currently active cell active', () => {
         let widget = createActiveWidget();
-        widget.model.fromJSON(DEFAULT_CONTENT);
+        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         widget.activeCellIndex = 2;
         widget.model.cells.remove(1);
         expect(widget.activeCell).to.be(widget.widgets[1]);

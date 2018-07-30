@@ -22,7 +22,7 @@ import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { acceptDialog, dismissDialog } from '../../utils';
+import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

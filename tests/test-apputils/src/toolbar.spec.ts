@@ -17,7 +17,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { createClientSession } from '../../utils';
+import { createClientSession, framePromise } from '@jupyterlab/testutils';
 
 class LogToolbarButton extends ToolbarButton {
   events: string[] = [];
@@ -357,7 +357,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#handleEvent()', () => {
       context('click', () => {
-        it('should activate the callback', done => {
+        it('should activate the callback', async () => {
           let called = false;
           const button = new ToolbarButton({
             onClick: () => {
@@ -365,12 +365,10 @@ describe('@jupyterlab/apputils', () => {
             }
           });
           Widget.attach(button, document.body);
-          requestAnimationFrame(() => {
-            simulate(button.node, 'click');
-            expect(called).to.equal(true);
-            button.dispose();
-            done();
-          });
+          await framePromise();
+          simulate(button.node, 'click');
+          expect(called).to.equal(true);
+          button.dispose();
         });
       });
     });
@@ -387,17 +385,15 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#onBeforeDetach()', () => {
-      it('should remove event listeners from the node', done => {
+      it('should remove event listeners from the node', async () => {
         const button = new LogToolbarButton();
         Widget.attach(button, document.body);
-        requestAnimationFrame(() => {
-          Widget.detach(button);
-          expect(button.methods).to.contain('onBeforeDetach');
-          simulate(button.node, 'click');
-          expect(button.events).to.not.contain('click');
-          button.dispose();
-          done();
-        });
+        await framePromise();
+        Widget.detach(button);
+        expect(button.methods).to.contain('onBeforeDetach');
+        simulate(button.node, 'click');
+        expect(button.events).to.not.contain('click');
+        button.dispose();
       });
     });
   });

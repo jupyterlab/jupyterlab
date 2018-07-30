@@ -21,10 +21,9 @@ import {
   waitForDialog,
   acceptDialog,
   dismissDialog,
-  createNotebookContext
-} from '../../utils';
-
-import { DEFAULT_CONTENT } from '../../notebook-utils';
+  createNotebookContext,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
@@ -121,7 +120,7 @@ describe('docregistry/context', () => {
 
       it('should initialize the model when the file is saved for the first time', async () => {
         const context = await createNotebookContext();
-        context.model.fromJSON(DEFAULT_CONTENT);
+        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(context.model.cells.canUndo).to.be(true);
         await context.initialize(true);
         await context.ready;
@@ -134,9 +133,9 @@ describe('docregistry/context', () => {
         await manager.contents.save(context.path, {
           type: 'notebook',
           format: 'json',
-          content: DEFAULT_CONTENT
+          content: NBTestUtils.DEFAULT_CONTENT
         });
-        context.model.fromJSON(DEFAULT_CONTENT);
+        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(context.model.cells.canUndo).to.be(true);
         await context.initialize(false);
         await context.ready;

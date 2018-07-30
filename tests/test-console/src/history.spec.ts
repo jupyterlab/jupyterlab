@@ -13,7 +13,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsoleHistory } from '@jupyterlab/console';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
   header: null,

@@ -15,7 +15,7 @@ import { SaveHandler } from '@jupyterlab/docmanager';
 
 import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
-import { acceptDialog, waitForDialog } from '../../utils';
+import { acceptDialog, waitForDialog } from '@jupyterlab/testutils';
 
 describe('docregistry/savehandler', () => {
   let manager: ServiceManager.IManager;

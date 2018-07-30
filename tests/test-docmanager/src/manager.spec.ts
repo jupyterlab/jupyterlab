@@ -17,7 +17,7 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { dismissDialog } from '../../utils';
+import { dismissDialog } from '@jupyterlab/testutils';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

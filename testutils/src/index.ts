@@ -1,21 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// tslint:disable-next-line
-/// <reference path="./typings/json-to-html/json-to-html.d.ts"/>
-
-import json2html = require('json-to-html');
-
 import { simulate } from 'simulate-event';
 
 import { ServiceManager } from '@jupyterlab/services';
 
 import { ClientSession } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 import {
   TextModelFactory,
   DocumentRegistry,
@@ -24,12 +18,84 @@ import {
 
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
-import {
-  IRenderMime,
-  RenderMimeRegistry,
-  RenderedHTML,
-  standardRendererFactories
-} from '@jupyterlab/rendermime';
+export { NBTestUtils } from './notebook-utils';
+
+export { defaultRenderMime } from './rendermime';
+
+/**
+ * Test a single emission from a signal.
+ *
+ * @param signal - The signal we are listening to.
+ * @param find - An optional function to determine which emission to test,
+ * defaulting to the first emission.
+ * @param test - An optional function which contains the tests for the emission.
+ * @param value - An optional value that the promise resolves to if it is
+ * successful.
+ *
+ * @returns a promise that rejects if the function throws an error (e.g., if an
+ * expect test doesn't pass), and resolves otherwise.
+ *
+ * #### Notes
+ * The first emission for which the find function returns true will be tested in
+ * the test function. If the find function is not given, the first signal
+ * emission will be tested.
+ *
+ * You can test to see if any signal comes which matches a criteria by just
+ * giving a find function. You can test the very first signal by just giving a
+ * test function. And you can test the first signal matching the find criteria
+ * by giving both.
+ *
+ * The reason this function is asynchronous is so that the thing causing the
+ * signal emission (such as a websocket message) can be asynchronous.
+ */
+export function testEmission<T, U, V>(
+  signal: ISignal<T, U>,
+  options: {
+    find?: (a: T, b: U) => boolean;
+    test?: (a: T, b: U) => void;
+    value?: V;
+  }
+): Promise<V> {
+  const done = new PromiseDelegate<V>();
+  const object = {};
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
+        }
+      } catch (e) {
+        done.reject(e);
+      }
+      done.resolve(options.value || undefined);
+    }
+  }, object);
+  return done.promise;
+}
+
+/**
+ * Test to see if a promise is fulfilled.
+ *
+ * @returns true if the promise is fulfilled (either resolved or rejected), and
+ * false if the promise is still pending.
+ */
+export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+  let x = Object.create(null);
+  let result = await Promise.race([p, x]).catch(() => false);
+  return result !== x;
+}
+
+/**
+ * Convert a requestAnimationFrame into a Promise.
+ */
+export function framePromise(): Promise<void> {
+  const done = new PromiseDelegate<void>();
+  requestAnimationFrame(() => {
+    done.resolve(void 0);
+  });
+  return done.promise;
+}
 
 /**
  * Return a promise that resolves in the given milliseconds with the given value.
@@ -43,19 +109,12 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 }
 
 /**
- * Get a copy of the default rendermime instance.
- */
-export function defaultRenderMime(): RenderMimeRegistry {
-  return Private.rendermime.clone();
-}
-
-/**
  * Create a client session object.
  */
 export async function createClientSession(
   options: Partial<ClientSession.IOptions> = {}
 ): Promise<ClientSession> {
-  const manager = options.manager || Private.manager.sessions;
+  const manager = options.manager || Private.getManager().sessions;
 
   await manager.ready;
   return new ClientSession({
@@ -80,7 +139,7 @@ export function createFileContext(
 ): Context<DocumentRegistry.IModel> {
   const factory = Private.textFactory;
 
-  manager = manager || Private.manager;
+  manager = manager || Private.getManager();
   path = path || UUID.uuid4() + '.txt';
 
   return new Context({ manager, factory, path });
@@ -95,7 +154,7 @@ export async function createNotebookContext(
 ): Promise<Context<INotebookModel>> {
   const factory = Private.notebookFactory;
 
-  manager = manager || Private.manager;
+  manager = manager || Private.getManager();
   path = path || UUID.uuid4() + '.ipynb';
   await manager.ready;
 
@@ -182,72 +241,19 @@ export async function dismissDialog(
  * A namespace for private data.
  */
 namespace Private {
-  export const manager = new ServiceManager();
+  let manager: ServiceManager;
 
   export const textFactory = new TextModelFactory();
 
   export const notebookFactory = new NotebookModelFactory({});
 
-  class JSONRenderer extends RenderedHTML {
-    mimeType = 'text/html';
-
-    renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      let source = model.data['application/json'];
-      model.setData({ data: { 'text/html': json2html(source) } });
-      return super.renderModel(model);
+  /**
+   * Get or create the service manager singleton.
+   */
+  export function getManager(): ServiceManager {
+    if (!manager) {
+      manager = new ServiceManager();
     }
+    return manager;
   }
-
-  const jsonRendererFactory = {
-    mimeTypes: ['application/json'],
-    safe: true,
-    createRenderer(
-      options: IRenderMime.IRendererOptions
-    ): IRenderMime.IRenderer {
-      return new JSONRenderer(options);
-    }
-  };
-
-  export const rendermime = new RenderMimeRegistry({
-    initialFactories: standardRendererFactories
-  });
-  rendermime.addFactory(jsonRendererFactory, 10);
 }
-
-/**
- * The default outputs used for testing.
- */
-export const DEFAULT_OUTPUTS: nbformat.IOutput[] = [
-  {
-    name: 'stdout',
-    output_type: 'stream',
-    text: ['hello world\n', '0\n', '1\n', '2\n']
-  },
-  {
-    name: 'stderr',
-    output_type: 'stream',
-    text: ['output to stderr\n']
-  },
-  {
-    name: 'stderr',
-    output_type: 'stream',
-    text: ['output to stderr2\n']
-  },
-  {
-    output_type: 'execute_result',
-    execution_count: 1,
-    data: { 'text/plain': 'foo' },
-    metadata: {}
-  },
-  {
-    output_type: 'display_data',
-    data: { 'text/plain': 'hello, world' },
-    metadata: {}
-  },
-  {
-    output_type: 'error',
-    ename: 'foo',
-    evalue: 'bar',
-    traceback: ['fizz', 'buzz']
-  }
-];

@@ -7,7 +7,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { OutputModel } from '@jupyterlab/rendermime';
 
-import { DEFAULT_OUTPUTS } from '../../utils';
+import { NBTestUtils } from '@jupyterlab/testutils';
 
 const DEFAULT_EXECUTE: nbformat.IOutput = {
   output_type: 'execute_result',
@@ -67,8 +67,8 @@ describe('rendermime/outputmodel', () => {
 
     describe('.getData()', () => {
       it('should handle all bundle types', () => {
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
+        for (let i = 0; i < NBTestUtils.DEFAULT_OUTPUTS.length; i++) {
+          let output = NBTestUtils.DEFAULT_OUTPUTS[i];
           let bundle = OutputModel.getData(output);
           expect(Object.keys(bundle).length).to.not.be(0);
         }

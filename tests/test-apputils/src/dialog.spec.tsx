@@ -15,7 +15,11 @@ import { generate, simulate } from 'simulate-event';
 
 import * as React from 'react';
 
-import { acceptDialog, dismissDialog, waitForDialog } from '../../utils';
+import {
+  acceptDialog,
+  dismissDialog,
+  waitForDialog
+} from '@jupyterlab/testutils';
 
 class TestDialog extends Dialog<any> {
   methods: string[] = [];
