@@ -54,38 +54,18 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this._editorTracker = opts.editorTracker;
         this._consoleTracker = opts.consoleTracker;
         this._shell = opts.shell;
-        this._commands = opts.commands;
-
-        this._settingsConnectors = {
-            notebookCode: new SettingsConnector({
-                registry: opts.settings,
-                pluginId: '@jupyterlab/notebook-extension:tracker',
-                settingKey: 'codeCellConfig'
-            }),
-            notebookMarkdown: new SettingsConnector({
-                registry: opts.settings,
-                pluginId: '@jupyterlab/notebook-extension:tracker',
-                settingKey: 'markdownCellConfig'
-            }),
-            notebookRaw: new SettingsConnector({
-                registry: opts.settings,
-                pluginId: '@jupyterlab/notebook-extension:tracker',
-                settingKey: 'rawCellConfig'
-            }),
-            editor: new SettingsConnector({
-                registry: opts.settings,
-                pluginId: '@jupyterlab/fileeditor-extension:plugin',
-                settingKey: 'editorConfig'
-            })
-        };
+        this._settingsProviderData = opts.settingsProviderData;
 
         this._notebookTracker.activeCellChanged.connect(
             this._onActiveCellChange
         );
         this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
 
+        const provider = this._getFocusedSettingProvider(
+            this._shell.currentWidget
+        );
         this.model = new TabSpace.Model(
-            this._getFocusedSettingsConnector(this._shell.currentWidget)
+            provider && this._settingsProviderData[provider].connector
         );
 
         this.node.title = 'Change tab spacing';
@@ -94,20 +74,16 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     }
 
     private _handleClick = () => {
-        const tabMenu = new Menu({ commands: this._commands });
-        let command = 'fileeditor:change-tabs';
-
-        for (let size of [1, 2, 4, 8]) {
-            let args: JSONObject = {
-                insertSpaces: true,
-                size,
-                name: `Spaces: ${size}`
-            };
-            tabMenu.addItem({ command, args });
+        const provider = this._getFocusedSettingProvider(
+            this._shell.currentWidget
+        );
+        if (!provider) {
+            return;
         }
+        const { menu } = this._settingsProviderData[provider];
 
         showPopup({
-            body: tabMenu,
+            body: menu,
             anchor: this,
             align: 'right'
         });
@@ -136,9 +112,11 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     }
 
     protected onUpdateRequest(msg: Message) {
-        this.model!.settingConnector = this._getFocusedSettingsConnector(
+        const provider = this._getFocusedSettingProvider(
             this._shell.currentWidget
         );
+        this.model!.settingConnector =
+            provider && this._settingsProviderData[provider].connector;
 
         super.onUpdateRequest(msg);
     }
@@ -150,11 +128,15 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
         if (cell !== null) {
             if (cell.model.type === 'code') {
-                settingsConnector = this._settingsConnectors.notebookCode;
+                settingsConnector = this._settingsProviderData['notebookCode']
+                    .connector;
             } else if (cell.model.type === 'raw') {
-                settingsConnector = this._settingsConnectors.notebookRaw;
+                settingsConnector = this._settingsProviderData['notebookRaw']
+                    .connector;
             } else {
-                settingsConnector = this._settingsConnectors.notebookMarkdown;
+                settingsConnector = this._settingsProviderData[
+                    'notebookMarkdown'
+                ].connector;
             }
         } else {
             settingsConnector = null;
@@ -163,9 +145,9 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         this.model!.settingConnector = settingsConnector;
     };
 
-    private _getFocusedSettingsConnector(
+    private _getFocusedSettingProvider(
         val: Widget | null
-    ): SettingsConnector<TabSpace.SettingData> | null {
+    ): TabSpace.SettingProvider | null {
         if (val === null) {
             return null;
         } else {
@@ -175,19 +157,19 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                     return null;
                 } else {
                     if (activeCell.model.type === 'code') {
-                        return this._settingsConnectors.notebookCode;
+                        return 'notebookCode';
                     } else if (activeCell.model.type === 'raw') {
-                        return this._settingsConnectors.notebookRaw;
+                        return 'notebookRaw';
                     } else {
-                        return this._settingsConnectors.notebookMarkdown;
+                        return 'notebookMarkdown';
                     }
                 }
             } else if (this._editorTracker.has(val)) {
-                return this._settingsConnectors.editor;
+                return 'editor';
             } else if (this._consoleTracker.has(val)) {
                 const prompt = (val as ConsolePanel).console.promptCell;
                 if (prompt !== null) {
-                    return this._settingsConnectors.notebookCode;
+                    return 'notebookCode';
                 } else {
                     return null;
                 }
@@ -202,24 +184,73 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         change: ApplicationShell.IChangedArgs
     ) => {
         const { newValue } = change;
-        const settingConnector = this._getFocusedSettingsConnector(newValue);
-        this.model!.settingConnector = settingConnector;
+        const provider = this._getFocusedSettingProvider(newValue);
+        this.model!.settingConnector =
+            provider && this._settingsProviderData[provider].connector;
     };
 
     private _notebookTracker: INotebookTracker;
     private _editorTracker: IEditorTracker;
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
-    private _commands: CommandRegistry;
-    private _settingsConnectors: Private.ISettingConnectorContainer;
+    private _settingsProviderData: TabSpace.ISettingProviderData;
 }
 
 namespace Private {
-    export interface ISettingConnectorContainer {
-        notebookMarkdown: SettingsConnector<TabSpace.SettingData>;
-        notebookCode: SettingsConnector<TabSpace.SettingData>;
-        notebookRaw: SettingsConnector<TabSpace.SettingData>;
-        editor: SettingsConnector<TabSpace.SettingData>;
+    export function initNotebookConnectorAndMenu(
+        app: JupyterLab,
+        settings: ISettingRegistry,
+        pluginId: string,
+        settingKey: string,
+        commandId: string,
+        tracker: INotebookTracker
+    ): [SettingsConnector<TabSpace.SettingData>, Menu] {
+        const connector = new SettingsConnector<TabSpace.SettingData>({
+            registry: settings,
+            pluginId,
+            settingKey
+        });
+
+        app.commands.addCommand(commandId, {
+            label: args => args['name'] as string,
+            execute: args => {
+                connector.currentValue = {
+                    tabSize: (args['size'] as number) || 4,
+                    insertSpaces: !!args['insertSpaces']
+                };
+            },
+            isEnabled: IStatusContext.delegateActive(app.shell, [{ tracker }]),
+            isToggled: args => {
+                const insertSpaces = !!args['insertSpaces'];
+                const size = (args['size'] as number) || 4;
+                const { currentValue } = connector;
+                return (
+                    !!currentValue &&
+                    currentValue.insertSpaces === insertSpaces &&
+                    currentValue.tabSize === size
+                );
+            }
+        });
+
+        const menu = new Menu({ commands: app.commands });
+
+        const args: JSONObject = {
+            insertSpaces: false,
+            size: 4,
+            name: 'Indent with Tab'
+        };
+        menu.addItem({ command: commandId, args });
+
+        for (let size of [1, 2, 4, 8]) {
+            let args: JSONObject = {
+                insertSpaces: true,
+                size,
+                name: `Spaces: ${size}`
+            };
+            menu.addItem({ command: commandId, args });
+        }
+
+        return [connector, menu];
     }
 }
 
@@ -279,6 +310,19 @@ namespace TabSpace {
         > | null = null;
     }
 
+    export type SettingProvider =
+        | 'notebookMarkdown'
+        | 'notebookCode'
+        | 'notebookRaw'
+        | 'editor';
+
+    export type ISettingProviderData = {
+        [P in SettingProvider]: {
+            connector: SettingsConnector<TabSpace.SettingData>;
+            menu: Menu;
+        }
+    };
+
     export interface IOptions {
         notebookTracker: INotebookTracker;
         editorTracker: IEditorTracker;
@@ -286,6 +330,7 @@ namespace TabSpace {
         shell: ApplicationShell;
         commands: CommandRegistry;
         settings: ISettingRegistry;
+        settingsProviderData: ISettingProviderData;
     }
 
     export type SettingData = { tabSize: number; insertSpaces: boolean };
@@ -327,13 +372,93 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
         consoleTracker: IConsoleTracker,
         settings: ISettingRegistry
     ) => {
-        let item = new TabSpace({
+        const [
+            notebookMarkdownConnector,
+            markdownMenu
+        ] = Private.initNotebookConnectorAndMenu(
+            app,
+            settings,
+            '@jupyterlab/notebook-extension:tracker',
+            'markdownCellConfig',
+            CommandIDs.changeTabsNotebookMarkdown,
+            notebookTracker
+        );
+
+        const [
+            notebookCodeConnector,
+            codeMenu
+        ] = Private.initNotebookConnectorAndMenu(
+            app,
+            settings,
+            '@jupyterlab/notebook-extension:tracker',
+            'codeCellConfig',
+            CommandIDs.changeTabsNotebookCode,
+            notebookTracker
+        );
+
+        const [
+            notebookRawConnector,
+            rawMenu
+        ] = Private.initNotebookConnectorAndMenu(
+            app,
+            settings,
+            '@jupyterlab/notebook-extension:tracker',
+            'rawCellConfig',
+            CommandIDs.changeTabsNotebookRaw,
+            notebookTracker
+        );
+
+        const editorConnector = new SettingsConnector<TabSpace.SettingData>({
+            registry: settings,
+            pluginId: '@jupyterlab/fileeditor-extension:plugin',
+            settingKey: 'editorConfig'
+        });
+
+        const editorMenu = new Menu({ commands: app.commands });
+
+        const args: JSONObject = {
+            insertSpaces: false,
+            size: 4,
+            name: 'Indent with Tab'
+        };
+        editorMenu.addItem({ command: CommandIDs.changeTabsEditor, args });
+
+        for (let size of [1, 2, 4, 8]) {
+            let args: JSONObject = {
+                insertSpaces: true,
+                size,
+                name: `Spaces: ${size}`
+            };
+            editorMenu.addItem({ command: CommandIDs.changeTabsEditor, args });
+        }
+
+        const settingsProviderData: TabSpace.ISettingProviderData = {
+            notebookCode: {
+                connector: notebookCodeConnector,
+                menu: codeMenu
+            },
+            notebookMarkdown: {
+                connector: notebookMarkdownConnector,
+                menu: markdownMenu
+            },
+            notebookRaw: {
+                connector: notebookRawConnector,
+                menu: rawMenu
+            },
+            editor: {
+                connector: editorConnector,
+                menu: editorMenu
+            }
+        };
+
+        const item = new TabSpace({
             shell: app.shell,
             notebookTracker,
             editorTracker,
             consoleTracker,
             commands: app.commands,
-            settings
+            settings,
+            settingsProviderData
         });
 
         defaultsManager.addDefaultStatus('tab-space-item', item, {
@@ -349,3 +474,10 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
         return item;
     }
 };
+
+namespace CommandIDs {
+    export const changeTabsNotebookMarkdown = 'notebook:markdown-change-tabs';
+    export const changeTabsNotebookCode = 'notebook:code-change-tabs';
+    export const changeTabsNotebookRaw = 'notebook:raw-change-tabs';
+    export const changeTabsEditor = 'fileeditor:change-tabs';
+}
