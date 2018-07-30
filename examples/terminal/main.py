@@ -13,13 +13,19 @@ run ``python main.py``.
 """
 import os
 from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.notebookapp import NotebookApp
+
+try:
+    from notebook.base.handlers import IPythonHandler as JupyterHandler, FileFindHandler
+    from notebook.notebookapp import NotebookApp as ServerApp
+except ImportError:
+    from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
+    from jupyter_server.serverapp import ServerApp
+
 from traitlets import Unicode
 
 
-class ExampleHandler(IPythonHandler):
-    """Handle requests between the main app page and notebook server."""
+class ExampleHandler(JupyterHandler):
+    """Handle requests between the main app page and Jupyter server."""
 
     def get(self):
         """Get the main page for the application's interface."""
@@ -33,7 +39,7 @@ class ExampleHandler(IPythonHandler):
         return loader.load(self.settings['jinja2_env'], name)
 
 
-class ExampleApp(NotebookApp):
+class ExampleApp(ServerApp):
 
     default_url = Unicode('/example')
 

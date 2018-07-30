@@ -5,7 +5,11 @@ from ipython_genutils.tempdir import TemporaryDirectory
 from ipython_genutils import py3compat
 from jupyterlab.labapp import LabApp
 from jupyterlab_launcher.tests.utils import APITester, LabTestBase
-from notebook.tests.launchnotebook import assert_http_error
+
+try:
+    from notebook.tests.launchnotebook import assert_http_error
+except ImportError:
+    from jupyter_server.tests.launchserver import assert_http_error
 
 
 class BuildAPITester(APITester):

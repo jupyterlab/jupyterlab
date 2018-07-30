@@ -4,7 +4,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from notebook.notebookapp import NotebookApp, aliases, flags
+try:
+    from notebook.notebookapp import NotebookApp as ServerApp, aliases, flags
+except:
+    from jupyter_server.serverapp import ServerApp, aliases, flags
+
 from jupyter_core.application import JupyterApp, base_aliases
 
 from traitlets import Bool, Unicode
@@ -123,7 +127,7 @@ lab_flags['watch'] = (
 )
 
 
-class LabApp(NotebookApp):
+class LabApp(ServerApp):
     version = version
 
     description = """
@@ -208,9 +212,14 @@ class LabApp(NotebookApp):
         """
         super(LabApp, self).init_server_extensions()
         msg = 'JupyterLab server extension not enabled, manually loading...'
-        if not self.nbserver_extensions.get('jupyterlab', False):
-            self.log.warn(msg)
-            load_jupyter_server_extension(self)
+        if hasattr(self, 'nbserver_extensions'):
+            if not self.nbserver_extensions.get('jupyterlab', False):
+                self.log.warn(msg)
+                load_jupyter_server_extension(self)
+        else:
+            if not self.jpserver_extensions.get('jupyterlab', False):
+                self.log.warn(msg)
+                load_jupyter_server_extension(self)
 
 
 #-----------------------------------------------------------------------------

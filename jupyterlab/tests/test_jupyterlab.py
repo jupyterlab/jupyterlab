@@ -19,7 +19,12 @@ except ImportError:
 
 from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
-from notebook.notebookapp import NotebookApp
+
+try:
+    from notebook.notebookapp import NotebookApp as ServerApp
+except ImportError:
+    from jupyter_server.serverapp import ServerApp
+
 from jupyter_core import paths
 
 from jupyterlab import commands
@@ -372,7 +377,7 @@ class TestExtension(TestCase):
         assert data['jupyterlab']['publicUrl'] == 'bar'
 
     def test_load_extension(self):
-        app = NotebookApp()
+        app = ServerApp()
         stderr = sys.stderr
         sys.stderr = self.devnull
         app.initialize(argv=[])

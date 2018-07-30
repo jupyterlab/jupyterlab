@@ -5,17 +5,24 @@ Distributed under the terms of the Modified BSD License.
 
 import os
 from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.utils import url_path_join as ujoin
-from notebook.notebookapp import NotebookApp
+
+try:
+    from notebook.base.handlers import IPythonHandler as JupyterHandler, FileFindHandler
+    from notebook.utils import url_path_join as ujoin
+    from notebook.notebookapp import NotebookApp as ServerApp
+except ImportError:
+    from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
+    from jupyter_server.utils import url_path_join as ujoin
+    from jupyter_server.serverapp import ServerApp
+
 from traitlets import Unicode
 from jupyterlab_launcher.handlers import SettingsHandler, ThemesHandler
 
 HERE = os.path.dirname(__file__)
 
 
-class ExampleHandler(IPythonHandler):
-    """Handle requests between the main app page and notebook server."""
+class ExampleHandler(JupyterHandler):
+    """Handle requests between the main app page and Jupyter server."""
 
     def get(self):
         """Get the main page for the application's interface."""
@@ -29,7 +36,7 @@ class ExampleHandler(IPythonHandler):
         return loader.load(self.settings['jinja2_env'], name)
 
 
-class ExampleApp(NotebookApp):
+class ExampleApp(ServerApp):
 
     default_url = Unicode('/example')
 

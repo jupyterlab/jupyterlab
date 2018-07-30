@@ -6,7 +6,11 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 from threading import Event
 
-from notebook.base.handlers import APIHandler
+try:
+    from notebook.base.handlers import APIHandler
+except ImportError:
+    from jupyter_server.base.handlers import APIHandler
+
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 

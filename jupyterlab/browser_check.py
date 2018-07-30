@@ -10,7 +10,12 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from notebook.notebookapp import flags, aliases
+
+try:
+    from notebook.notebookapp import flags, aliases
+except ImportError:
+    from jupyter_server.serverapp import flags, aliases
+
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
