@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -22,7 +22,7 @@ describe('@jupyterlab/mainmenu', () => {
     let commands: CommandRegistry;
     let menu: EditMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    const wodget = new Wodget();
 
     before(() => {
       commands = new CommandRegistry();
@@ -42,8 +42,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new edit menu', () => {
-        expect(menu).to.be.an(EditMenu);
-        expect(menu.menu.title.label).to.be('Edit');
+        expect(menu).to.be.an.instanceof(EditMenu);
+        expect(menu.menu.title.label).to.equal('Edit');
       });
     });
 
@@ -62,9 +62,9 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.undoers.add(undoer);
         delegateExecute(wodget, menu.undoers, 'undo');
-        expect(wodget.state).to.be('undo');
+        expect(wodget.state).to.equal('undo');
         delegateExecute(wodget, menu.undoers, 'redo');
-        expect(wodget.state).to.be('redo');
+        expect(wodget.state).to.equal('redo');
       });
     });
 
@@ -84,9 +84,9 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.clearers.add(clearer);
         delegateExecute(wodget, menu.clearers, 'clearCurrent');
-        expect(wodget.state).to.be('clearCurrent');
+        expect(wodget.state).to.equal('clearCurrent');
         delegateExecute(wodget, menu.clearers, 'clearAll');
-        expect(wodget.state).to.be('clearAll');
+        expect(wodget.state).to.equal('clearAll');
       });
     });
 
@@ -105,9 +105,9 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.findReplacers.add(finder);
         delegateExecute(wodget, menu.findReplacers, 'find');
-        expect(wodget.state).to.be('find');
+        expect(wodget.state).to.equal('find');
         delegateExecute(wodget, menu.findReplacers, 'findAndReplace');
-        expect(wodget.state).to.be('findAndReplace');
+        expect(wodget.state).to.equal('findAndReplace');
       });
     });
   });
