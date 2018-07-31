@@ -55,6 +55,7 @@ class CssPropertyRegex {
   ];
 
   public static readonly FLOAT = /^(left|right)$/;
+  public static readonly CLEAR = /^(none|left|right|both|initial|inherit)$/;
   public static readonly DISPLAY = /^(inline|block|inline\-block)$/;
 
   public static readonly LENGTH = /^0$|^[+-]?([0-9]*[.])?[0-9]+(px|em|ex|%|in|cm|mm|pt|pc)$/;
@@ -149,12 +150,14 @@ class Sanitizer implements ISanitizer {
       img: {
         display: [CssPropertyRegex.DISPLAY],
         float: [CssPropertyRegex.FLOAT],
+        clear: [CssPropertyRegex.CLEAR],
         height: [CssPropertyRegex.LENGTH],
         width: [CssPropertyRegex.LENGTH]
       },
       div: {
         display: [CssPropertyRegex.DISPLAY],
         float: [CssPropertyRegex.FLOAT],
+        clear: [CssPropertyRegex.CLEAR],
         'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
         'font-weight': [CssPropertyRegex.FONT_WEIGHT],
         height: [CssPropertyRegex.LENGTH],
@@ -163,6 +166,7 @@ class Sanitizer implements ISanitizer {
       span: {
         display: [CssPropertyRegex.DISPLAY],
         float: [CssPropertyRegex.FLOAT],
+        clear: [CssPropertyRegex.CLEAR],
         'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
         'font-weight': [CssPropertyRegex.FONT_WEIGHT],
         height: [CssPropertyRegex.LENGTH],
@@ -171,6 +175,7 @@ class Sanitizer implements ISanitizer {
       p: {
         display: [CssPropertyRegex.DISPLAY],
         float: [CssPropertyRegex.FLOAT],
+        clear: [CssPropertyRegex.CLEAR],
         'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
         'font-weight': [CssPropertyRegex.FONT_WEIGHT],
         height: [CssPropertyRegex.LENGTH],
