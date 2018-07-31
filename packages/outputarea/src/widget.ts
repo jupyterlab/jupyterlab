@@ -540,12 +540,14 @@ export namespace OutputArea {
   export function execute(
     code: string,
     output: OutputArea,
-    session: IClientSession
+    session: IClientSession,
+    cellId: string
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
-      stop_on_error: true
+      stop_on_error: true,
+      cellId: cellId
     };
 
     if (!session.kernel) {

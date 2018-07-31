@@ -527,6 +527,7 @@ export class DefaultKernel implements Kernel.IKernel {
       username: this._username,
       session: this._clientId
     };
+    const { cellId, ...rest } = content;
     let defaults: JSONObject = {
       silent: false,
       store_history: true,
@@ -534,8 +535,10 @@ export class DefaultKernel implements Kernel.IKernel {
       allow_stdin: true,
       stop_on_error: false
     };
-    content = { ...defaults, ...content };
-    let msg = KernelMessage.createShellMessage(options, content);
+    const restContent = { ...defaults, ...rest };
+    let msg = KernelMessage.createShellMessage(options, restContent, {
+      cellId: content.cellId
+    });
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 
