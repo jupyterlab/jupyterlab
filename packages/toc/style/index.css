@@ -36,7 +36,7 @@
   flex-direction: column;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size0);
+  /* font-size: var(--jp-ui-font-size0); */
   height: 100%;
 }
 
@@ -49,4 +49,14 @@
   margin: 0px;
   padding: 12px 0 4px 12px;
   text-transform: uppercase;
+}
+
+.jp-TableOfContents-codeContainer {
+  overflow: hidden;
+}
+
+.jp-TableOfContents-code {
+  font-size: 8px;
+  max-height: 70px;
+  overflow-y: auto;
 }

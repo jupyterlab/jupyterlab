@@ -39,6 +39,10 @@ export class TableOfContents extends Widget {
     this._notebook = options.notebookTracker;
   }
 
+  // filterByTag(name: string) {
+
+  // }
+
   /**
    * The current widget-generator tuple for the ToC.
    */
@@ -280,7 +284,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
    */
   render() {
     const { heading } = this.props;
-
+    console.log('place 1 ' + heading);
     let level = Math.round(heading.level);
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
@@ -316,6 +320,65 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
   }
 }
 
+export class TOCCodeCell extends React.Component<
+  ITOCItemProps,
+  ITOCItemStates
+> {
+  constructor(props: ITOCItemProps) {
+    super(props);
+    this.state = { needNumbering: this.props.needNumbering };
+  }
+
+  componentWillReceiveProps(nextProps: ITOCItemProps) {
+    this.setState({ needNumbering: nextProps.needNumbering });
+  }
+
+  /**
+   * Render the item.
+   */
+  render() {
+    const { heading } = this.props;
+    console.log('place 2 ' + heading);
+    let level = Math.round(heading.level);
+    // Clamp the header level between 1 and six.
+    level = Math.max(Math.min(level, 6), 1);
+
+    const paddingLeft = (level - 1) * 12;
+
+    // Create an onClick handler for the TOC item
+    // that scrolls the anchor into view.
+    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      heading.onClick();
+    };
+
+    let content;
+    let numbering =
+      heading.numbering && this.state.needNumbering ? heading.numbering : '';
+    if (heading.html) {
+      console.log("you're not covering this case idiot");
+      content = (
+        <span
+          className={'jp-TableOfContents-code'}
+          dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
+          style={{ paddingLeft }}
+        />
+      );
+    } else {
+      content = (
+        <span style={{ paddingLeft }}>
+          <pre className={'jp-TableOfContents-code'}>
+            {numbering + heading.text}
+          </pre>
+        </span>
+      );
+    }
+
+    return <li onClick={handleClick}>{content}</li>;
+  }
+}
+
 export interface ITOCTreeStates {
   needNumbering: boolean;
   showCode: boolean;
@@ -344,13 +407,23 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       if (el.type === 'code' && !this.state.showCode) {
         return <div key={`emptycode-${i++}`} />;
       } else {
-        return (
-          <TOCItem
-            needNumbering={this.state.needNumbering}
-            heading={el}
-            key={`${el.text}-${el.level}-${i++}`}
-          />
-        );
+        if (el.type === 'code') {
+          return (
+            <TOCCodeCell
+              needNumbering={this.state.needNumbering}
+              heading={el}
+              key={`${el.text}-${el.level}-${i++}`}
+            />
+          );
+        } else {
+          return (
+            <TOCItem
+              needNumbering={this.state.needNumbering}
+              heading={el}
+              key={`${el.text}-${el.level}-${i++}`}
+            />
+          );
+        }
       }
     });
     const handleClick = (event: React.SyntheticEvent<HTMLButtonElement>) => {
@@ -362,6 +435,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       this.props.widget.showCode = event.target.checked;
       this.setState({ showCode: this.props.widget.showCode });
     };
+
+    // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
+    //   this.props.widget.filterByTag("test");
+    // }
     // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
@@ -375,6 +452,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
           checked={this.state.showCode}
         />
         Show code cells
+        {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );

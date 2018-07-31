@@ -374,10 +374,16 @@ namespace Private {
     let headings: IHeading[] = [];
     if (text) {
       const lines = text.split('\n');
+      let headingText = '';
+      let numLines = Math.min(lines.length, 10);
+      for (let i = 0; i < numLines - 1; i++) {
+        headingText = headingText + lines[i] + '\n';
+      }
+      headingText = headingText + lines[numLines - 1];
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       headings.push({
-        text: executionCount + ' ' + lines[0],
+        text: executionCount + ' ' + headingText,
         level,
         onClick,
         type: 'code'
