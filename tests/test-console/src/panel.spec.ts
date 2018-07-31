@@ -38,7 +38,7 @@ const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
   let panel: TestPanel;
-  let manager = new ServiceManager();
+  const manager = new ServiceManager();
 
   before(() => {
     return manager.ready;
@@ -119,14 +119,14 @@ describe('console/panel', () => {
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a new code console factory', () => {
-          let factory = new ConsolePanel.ContentFactory({ editorFactory });
+          const factory = new ConsolePanel.ContentFactory({ editorFactory });
           expect(factory).to.be.an.instanceof(ConsolePanel.ContentFactory);
         });
       });
 
       describe('#createConsole()', () => {
         it('should create a console widget', () => {
-          let options = {
+          const options = {
             contentFactory: contentFactory,
             rendermime,
             mimeTypeService,

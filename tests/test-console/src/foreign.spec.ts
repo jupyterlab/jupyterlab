@@ -11,7 +11,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Panel } from '@phosphor/widgets';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { ForeignHandler } from '@jupyterlab/console';
 
@@ -89,21 +89,12 @@ describe('@jupyterlab/console', () => {
     let handler: TestHandler;
     let session: IClientSession;
 
-    before(() => {
+    before(async () => {
       const path = UUID.uuid4();
       const sessions = [Session.startNew({ path }), Session.startNew({ path })];
-      return Promise.all(sessions)
-        .then(([one, two]) => {
-          local = one;
-          foreign = two;
-        })
-        .then(() => {
-          return createClientSession({ path: local.path });
-        })
-        .then(s => {
-          session = s;
-          return s.initialize();
-        });
+      [local, foreign] = await Promise.all(sessions);
+      session = await createClientSession({ path: local.path });
+      await (session as ClientSession).initialize();
     });
 
     beforeEach(() => {
@@ -115,12 +106,11 @@ describe('@jupyterlab/console', () => {
       handler.dispose();
     });
 
-    after(() => {
+    after(async () => {
       local.dispose();
       foreign.dispose();
-      return session.shutdown().then(() => {
-        session.dispose();
-      });
+      await session.shutdown();
+      session.dispose();
     });
 
     describe('#constructor()', () => {

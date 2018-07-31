@@ -423,15 +423,10 @@ describe('cells/widget', () => {
     describe('.execute()', () => {
       let session: IClientSession;
 
-      beforeEach(() => {
-        return createClientSession()
-          .then(s => {
-            session = s;
-            return s.initialize();
-          })
-          .then(() => {
-            return session.kernel.ready;
-          });
+      beforeEach(async () => {
+        session = await createClientSession();
+        await s.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(() => {
@@ -443,15 +438,14 @@ describe('cells/widget', () => {
         return CodeCell.execute(widget, session);
       });
 
-      it('should fulfill a promise if there is code to execute', () => {
+      it('should fulfill a promise if there is code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         let originalCount: number;
         widget.model.value.text = 'foo';
         originalCount = widget.model.executionCount;
-        return CodeCell.execute(widget, session).then(() => {
-          const executionCount = widget.model.executionCount;
-          expect(executionCount).to.not.equal(originalCount);
-        });
+        await CodeCell.execute(widget, session);
+        const executionCount = widget.model.executionCount;
+        expect(executionCount).to.not.equal(originalCount);
       });
     });
   });
