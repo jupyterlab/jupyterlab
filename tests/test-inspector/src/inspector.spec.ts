@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Signal } from '@phosphor/signaling';
 
@@ -35,92 +35,92 @@ describe('inspector/index', () => {
   describe('Inspector', () => {
     describe('#constructor()', () => {
       it('should construct a new inspector widget', () => {
-        let widget = new InspectorPanel();
-        expect(widget).to.be.an(InspectorPanel);
+        const widget = new InspectorPanel();
+        expect(widget).to.be.an.instanceof(InspectorPanel);
       });
 
       it('should add the `jp-Inspector` class', () => {
-        let widget = new InspectorPanel();
-        expect(widget.hasClass('jp-Inspector')).to.be(true);
+        const widget = new InspectorPanel();
+        expect(widget.hasClass('jp-Inspector')).to.equal(true);
       });
 
       it('should hide its tab bar if there are less than two items', () => {
-        let widget = new InspectorPanel();
+        const widget = new InspectorPanel();
         widget.add({ name: 'Foo', rank: 20, type: 'foo' });
-        expect(widget).to.be.an(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.be(true);
+        expect(widget).to.be.an.instanceof(InspectorPanel);
+        expect(widget.tabBar.isHidden).to.equal(true);
       });
 
       it('should show its tab bar if there is more than one item', () => {
-        let widget = new InspectorPanel();
+        const widget = new InspectorPanel();
         widget.add({ name: 'Foo', rank: 20, type: 'foo' });
         widget.add({ name: 'Boo', rank: 30, type: 'bar' });
-        expect(widget).to.be.an(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.be(false);
+        expect(widget).to.be.an.instanceof(InspectorPanel);
+        expect(widget.tabBar.isHidden).to.equal(false);
       });
     });
 
     describe('#source', () => {
       it('should default to `null`', () => {
-        let widget = new InspectorPanel();
-        expect(widget.source).to.be(null);
+        const widget = new InspectorPanel();
+        expect(widget.source).to.be.null;
       });
 
       it('should be settable multiple times', () => {
-        let widget = new InspectorPanel();
-        let source = new TestInspectable();
-        expect(widget.source).to.be(null);
+        const widget = new InspectorPanel();
+        const source = new TestInspectable();
+        expect(widget.source).to.be.null;
         widget.source = source;
-        expect(widget.source).to.be(source);
+        expect(widget.source).to.equal(source);
         widget.source = null;
-        expect(widget.source).to.be(null);
+        expect(widget.source).to.be.null;
         widget.source = new TestInspectable();
-        expect(widget.source).to.be.a(TestInspectable);
+        expect(widget.source).to.be.an.instanceof(TestInspectable);
       });
     });
 
     describe('#add()', () => {
       it('should add inspector child items', () => {
-        let panel = new InspectorPanel();
-        let original = panel.widgets.length;
+        const panel = new InspectorPanel();
+        const original = panel.widgets.length;
 
         panel.add({ name: 'Foo', rank: 20, type: 'foo' });
         panel.add({ name: 'Boo', rank: 30, type: 'bar' });
 
-        expect(panel.widgets.length).to.be(original + 2);
+        expect(panel.widgets.length).to.equal(original + 2);
       });
 
       it('should return disposables to remove child items', () => {
-        let panel = new InspectorPanel();
-        let original = panel.widgets.length;
-        let disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
+        const panel = new InspectorPanel();
+        const original = panel.widgets.length;
+        const disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
 
-        expect(panel.widgets.length).to.be(original + 1);
+        expect(panel.widgets.length).to.equal(original + 1);
         disposable.dispose();
-        expect(panel.widgets.length).to.be(original);
+        expect(panel.widgets.length).to.equal(original);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the inspector', () => {
-        let widget = new InspectorPanel();
-        expect(widget.isDisposed).to.be(false);
+        const widget = new InspectorPanel();
+        expect(widget.isDisposed).to.equal(false);
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be a no-op if called more than once', () => {
-        let widget = new InspectorPanel();
-        expect(widget.isDisposed).to.be(false);
+        const widget = new InspectorPanel();
+        expect(widget.isDisposed).to.equal(false);
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('#onInspectorUpdate()', () => {
       it('should fire when a source updates', () => {
-        let widget = new TestInspectorPanel();
+        const widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
         expect(widget.methods).to.not.contain('onInspectorUpdate');
         (widget.source.inspected as any).emit({
