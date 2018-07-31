@@ -75,6 +75,53 @@ export function testEmission<T, U, V>(
 }
 
 /**
+ * Convert a signal into an array of promises.
+ *
+ * @param signal - The signal we are listening to.
+ * @param numberValues - The number of values to store.
+ *
+ * @returns a Promise that resolves with an array of `(sender, args)` pairs.
+ */
+export function signalToPromises<T, U>(
+  signal: ISignal<T, U>,
+  numberValues: number
+): Promise<[T, U]>[] {
+  const values: Promise<[T, U]>[] = new Array(numberValues);
+  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+
+  for (let i = 0; i < numberValues; i++) {
+    values[i] = new Promise<[T, U]>(resolve => {
+      resolvers[i] = resolve;
+    });
+  }
+
+  let current = 0;
+  function slot(sender: T, args: U) {
+    resolvers[current++]([sender, args]);
+    if (current === numberValues) {
+      cleanup();
+    }
+  }
+  signal.connect(slot);
+
+  function cleanup() {
+    signal.disconnect(slot);
+  }
+  return values;
+}
+
+/**
+ * Convert a signal into a promise for the first emitted value.
+ *
+ * @param signal - The signal we are listening to.
+ *
+ * @returns a Promise that resolves with a `(sender, args)` pair.
+ */
+export function signalToPromise<T, U>(signal: ISignal<T, U>): Promise<[T, U]> {
+  return signalToPromises(signal, 1)[0];
+}
+
+/**
  * Test to see if a promise is fulfilled.
  *
  * @returns true if the promise is fulfilled (either resolved or rejected), and
