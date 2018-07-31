@@ -50,7 +50,14 @@ We added new workspace support, which enables you to have multiple saved layouts
 #### Command palette items
 
 * "Notebook" added to the command palette to open a new notebook. ([#4812](https://github.com/jupyterlab/jupyterlab/pull/4812))
-* "Run Selected Text or Current Line in Console" added to the command palette to run the selected text or current line from a notebook in a console. A default keyboard shortcut for this command is not yet provided, but can be added by users with the `notebook:run-in-console` command. ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
+* "Run Selected Text or Current Line in Console" added to the command palette to run the selected text or current line from a notebook in a console. A default keyboard shortcut for this command is not yet provided, but can be added by users with the `notebook:run-in-console` command. To add a keyboard shortcut `Ctrl G` for this command, use the "Settings" | "Advanced Settings Editor" menu item to open the "Keyboard Shortcuts" advanced settings, and add the following JSON in the shortcut JSON object in the User Overrides pane (adjust the actual keyboard shortcut if you wish). ([#3453](https://github.com/jupyterlab/jupyterlab/issues/3453), [#4206](https://github.com/jupyterlab/jupyterlab/issues/4206), [#4330](https://github.com/jupyterlab/jupyterlab/pull/4330))
+  ```json
+  "notebook:run-in-console": {
+    "command": "notebook:run-in-console",
+    "keys": ["Ctrl G"],
+    "selector": ".jp-Notebook.jp-mod-editMode"
+  }
+  ```
 * The command palette now renders labels, toggled state, and keyboard shortcuts in a more consistent and correct way. ([#4533](https://github.com/jupyterlab/jupyterlab/pull/4533), [#4510](https://github.com/jupyterlab/jupyterlab/pull/4510))
 
 #### Settings
