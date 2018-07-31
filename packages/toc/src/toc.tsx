@@ -79,10 +79,7 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(
-      this.update,
-      this
-    );
+    this._monitor.activityStopped.connect(this.update, this);
     this.update();
   }
 
@@ -94,7 +91,6 @@ export class TableOfContents extends Widget {
     /* if (!this.isVisible) {
       return;
     } */
-
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -145,6 +141,11 @@ export class TableOfContents extends Widget {
    */
   protected onAfterShow(msg: Message): void {
     this.update();
+    if (this._notebook.currentWidget != null) {
+      this._notebook.currentWidget.content.activeCellChanged.connect(() => {
+        this.update();
+      });
+    }
   }
 
   get needNumbering() {
