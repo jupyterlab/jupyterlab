@@ -13,7 +13,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsoleHistory } from '@jupyterlab/console';
 
-import { createClientSession, testEmission } from '@jupyterlab/testutils';
+import { createClientSession, signalToPromise } from '@jupyterlab/testutils';
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
   header: null,
@@ -167,14 +167,11 @@ describe('console/history', () => {
         const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         history.push('foo');
-        const promise = testEmission(editor.model.value.changed, {
-          test: () => {
-            return editor.model.value.text === 'foo';
-          }
-        });
+        const promise = signalToPromise(editor.model.value.changed);
         editor.edgeRequested.emit('top');
         expect(history.methods).to.contain('onEdgeRequest');
         await promise;
+        expect(editor.model.value.text).to.equal('foo');
       });
     });
   });

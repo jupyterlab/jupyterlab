@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { testEmission } from '@jupyterlab/testutils';
+import { signalToPromise, testEmission } from '@jupyterlab/testutils';
 
 import { each } from '@phosphor/algorithm';
 
@@ -46,7 +46,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         widget.node.tabIndex = -1;
-        let promise = testEmission(tracker.currentChanged, {});
+        let promise = signalToPromise(tracker.currentChanged);
         Widget.attach(widget, document.body);
         widget.node.focus();
         simulate(widget.node, 'focus');
@@ -60,13 +60,10 @@ describe('@jupyterlab/apputils', () => {
       it('should emit when a widget has been added', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
-        let promise = testEmission(tracker.widgetAdded, {
-          test: (sender, added) => {
-            expect(added).to.equal(widget);
-          }
-        });
+        let promise = signalToPromise(tracker.widgetAdded);
         tracker.add(widget);
-        await promise;
+        const { sender, args } = await promise;
+        expect(args).to.equal(widget);
       });
 
       it('should not emit when a widget has been injected', async () => {
