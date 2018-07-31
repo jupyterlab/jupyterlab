@@ -32,7 +32,34 @@ export namespace ISanitizer {
      * The allowed attributes for a given tag.
      */
     allowedAttributes?: { [key: string]: string[] };
+
+    /**
+     * The allowed style values for a given tag.
+     */
+    allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
   }
+}
+
+/**
+ * Wrapper class for various allowed CSS property values
+ */
+class CssPropertyRegex {
+  // Legal css color values
+  public static readonly COLOR_HEX = /^\#(0x)?[0-9a-f]+$/i;
+  public static readonly COLOR_RGB = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i;
+  public static readonly COLOR_NAME = /^(AliceBlue|AntiqueWhite|Aqua|Aquamarine|Azure|Beige|Bisque|Black|BlanchedAlmond|Blue|BlueViolet|Brown|BurlyWood|CadetBlue|Chartreuse|Chocolate|Coral|CornflowerBlue|Cornsilk|Crimson|Cyan|DarkBlue|DarkCyan|DarkGoldenRod|DarkGray|DarkGrey|DarkGreen|DarkKhaki|DarkMagenta|DarkOliveGreen|Darkorange|DarkOrchid|DarkRed|DarkSalmon|DarkSeaGreen|DarkSlateBlue|DarkSlateGray|DarkSlateGrey|DarkTurquoise|DarkViolet|DeepPink|DeepSkyBlue|DimGray|DimGrey|DodgerBlue|FireBrick|FloralWhite|ForestGreen|Fuchsia|Gainsboro|GhostWhite|Gold|GoldenRod|Gray|Grey|Green|GreenYellow|HoneyDew|HotPink|IndianRed|Indigo|Ivory|Khaki|Lavender|LavenderBlush|LawnGreen|LemonChiffon|LightBlue|LightCoral|LightCyan|LightGoldenRodYellow|LightGray|LightGrey|LightGreen|LightPink|LightSalmon|LightSeaGreen|LightSkyBlue|LightSlateGray|LightSlateGrey|LightSteelBlue|LightYellow|Lime|LimeGreen|Linen|Magenta|Maroon|MediumAquaMarine|MediumBlue|MediumOrchid|MediumPurple|MediumSeaGreen|MediumSlateBlue|MediumSpringGreen|MediumTurquoise|MediumVioletRed|MidnightBlue|MintCream|MistyRose|Moccasin|NavajoWhite|Navy|OldLace|Olive|OliveDrab|Orange|OrangeRed|Orchid|PaleGoldenRod|PaleGreen|PaleTurquoise|PaleVioletRed|PapayaWhip|PeachPuff|Peru|Pink|Plum|PowderBlue|Purple|Red|RosyBrown|RoyalBlue|SaddleBrown|Salmon|SandyBrown|SeaGreen|SeaShell|Sienna|Silver|SkyBlue|SlateBlue|SlateGray|SlateGrey|Snow|SpringGreen|SteelBlue|Tan|Teal|Thistle|Tomato|Turquoise|Violet|Wheat|White|WhiteSmoke|Yellow|YellowGreen)$/i;
+  public static readonly COLOR = [
+    CssPropertyRegex.COLOR_HEX,
+    CssPropertyRegex.COLOR_RGB,
+    CssPropertyRegex.COLOR_NAME
+  ];
+
+  public static readonly FLOAT = /^(left|right)$/;
+  public static readonly DISPLAY = /^(inline|block|inline\-block)$/;
+
+  public static readonly LENGTH = /^0$|^[+-]?([0-9]*[.])?[0-9]+(px|em|ex|%|in|cm|mm|pt|pc)$/;
+  public static readonly FONT_SIZE = /^(medium|xx-small|x-small|small|large|x-large|xx-large|smaller|larger)$/;
+  public static readonly FONT_WEIGHT = /^(normal|bold|bolder|lighter|100|200|300|400|500|600|700|800|900|initial|inherit)$/;
 }
 
 /**
@@ -53,42 +80,102 @@ class Sanitizer implements ISanitizer {
   }
 
   private _options: sanitize.IOptions = {
-    allowedTags: sanitize.defaults.allowedTags.concat(
+    // HTML tags that are allowed to be used
+    // (This array no longer relies on sanitizer-html's default value for 'allowedTags' because
+    // they seem to change across versions)
+    allowedTags: [
+      'a',
+      'audio',
+      'b',
+      'blockquote',
+      'br',
+      'caption',
+      'code',
+      'colspan',
+      'del',
+      'div',
+      'em',
       'h1',
       'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'hr',
+      'i',
       'img',
-      'span',
-      'audio',
-      'video',
-      'del',
+      'input',
       'kbd',
-      'sup',
-      'sub',
-      'colspan',
+      'li',
+      'ol',
+      'p',
+      'pre',
       'rowspan',
-      'input'
-    ),
+      'span',
+      'strike',
+      'strong',
+      'sub',
+      'sup',
+      'table',
+      'tbody',
+      'td',
+      'th',
+      'thead',
+      'tr',
+      'ul',
+      'video'
+    ],
+    // Attributes that HTML tags are allowed to have
     allowedAttributes: {
-      // Allow the "rel" attribute for <a> tags.
-      a: sanitize.defaults.allowedAttributes['a'].concat('rel'),
-      // Allow the "src" attribute for <img> tags.
-      img: ['src', 'height', 'width', 'alt'],
-      // Allow "type", "disabled", and "checked" attributes for <input> tags.
-      input: ['type', 'disabled', 'checked'],
-      // Allow "class" attribute for <code> tags.
+      a: ['href', 'name', 'rel', 'style', 'target'],
+      img: ['alt', 'height', 'src', 'style', 'width'],
+      input: ['checked', 'disabled', 'type'],
       code: ['class'],
-      // Allow "class" attribute for <span> tags.
-      span: ['class'],
-      // Allow "class" attribute for <div> tags.
-      div: ['class'],
-      // Allow "class" attribute for <p> tags.
-      p: ['class'],
-      // Allow "class" attribute for <pre> tags.
-      pre: ['class'],
-      // Allow the "src" attribute for <audio> tags.
-      audio: ['src', 'autoplay', 'loop', 'muted', 'controls'],
-      // Allow the "src" attribute for <video> tags.
-      video: ['src', 'height', 'width', 'autoplay', 'loop', 'muted', 'controls']
+      span: ['class', 'style'],
+      div: ['class', 'style'],
+      p: ['class', 'style'],
+      pre: ['class', 'style'],
+      audio: ['autoplay', 'controls', 'loop', 'muted', 'src'],
+      video: ['autoplay', 'controls', 'height', 'loop', 'muted', 'src', 'width']
+    },
+    // Inline CSS styles that HTML tags may have (and their allowed values)
+    allowedStyles: {
+      // Allow any element, that allows the 'style' attribute, to have custom colors
+      '*': {
+        background: CssPropertyRegex.COLOR,
+        'background-color': CssPropertyRegex.COLOR,
+        color: CssPropertyRegex.COLOR
+      },
+      img: {
+        display: [CssPropertyRegex.DISPLAY],
+        float: [CssPropertyRegex.FLOAT],
+        height: [CssPropertyRegex.LENGTH],
+        width: [CssPropertyRegex.LENGTH]
+      },
+      div: {
+        display: [CssPropertyRegex.DISPLAY],
+        float: [CssPropertyRegex.FLOAT],
+        'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
+        'font-weight': [CssPropertyRegex.FONT_WEIGHT],
+        height: [CssPropertyRegex.LENGTH],
+        width: [CssPropertyRegex.LENGTH]
+      },
+      span: {
+        display: [CssPropertyRegex.DISPLAY],
+        float: [CssPropertyRegex.FLOAT],
+        'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
+        'font-weight': [CssPropertyRegex.FONT_WEIGHT],
+        height: [CssPropertyRegex.LENGTH],
+        width: [CssPropertyRegex.LENGTH]
+      },
+      p: {
+        display: [CssPropertyRegex.DISPLAY],
+        float: [CssPropertyRegex.FLOAT],
+        'font-size': [CssPropertyRegex.FONT_SIZE, CssPropertyRegex.LENGTH],
+        'font-weight': [CssPropertyRegex.FONT_WEIGHT],
+        height: [CssPropertyRegex.LENGTH],
+        width: [CssPropertyRegex.LENGTH]
+      }
     },
     transformTags: {
       // Set the "rel" attribute for <a> tags to "nofollow".
