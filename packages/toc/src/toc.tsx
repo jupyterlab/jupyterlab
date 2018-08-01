@@ -83,7 +83,10 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
+    this._monitor.activityStopped.connect(
+      this.update,
+      this
+    );
     this.update();
   }
 
@@ -163,6 +166,8 @@ export class TableOfContents extends Widget {
 
   private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
   public showCode = true;
+  public showRaw = false;
+  public showMarkdown = false;
   private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
@@ -285,7 +290,6 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
    */
   render() {
     const { heading } = this.props;
-    console.log('place 1 ' + heading);
     let level = Math.round(heading.level);
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
@@ -339,7 +343,6 @@ export class TOCCodeCell extends React.Component<
    */
   render() {
     const { heading } = this.props;
-    console.log('place 2 ' + heading);
     let level = Math.round(heading.level);
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
@@ -353,29 +356,15 @@ export class TOCCodeCell extends React.Component<
       event.stopPropagation();
       heading.onClick();
     };
-
-    let content;
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
-    if (heading.html) {
-      console.log("you're not covering this case idiot");
-      content = (
-        <span
-          className={'jp-TableOfContents-code'}
-          dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
-          style={{ paddingLeft }}
-        />
-      );
-    } else {
-      content = (
-        <span style={{ paddingLeft }}>
-          <pre className={'jp-TableOfContents-code'}>
-            {numbering + heading.text}
-          </pre>
-        </span>
-      );
-    }
-
+    let content = (
+      <span style={{ paddingLeft }}>
+        <pre className={'jp-TableOfContents-code'}>
+          {numbering + heading.text}
+        </pre>
+      </span>
+    );
     return <li onClick={handleClick}>{content}</li>;
   }
 }
@@ -383,6 +372,8 @@ export class TOCCodeCell extends React.Component<
 export interface ITOCTreeStates {
   needNumbering: boolean;
   showCode: boolean;
+  showRaw: boolean;
+  showMarkdown: boolean;
 }
 
 /**
@@ -397,7 +388,9 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     super(props);
     this.state = {
       needNumbering: this.props.widget.needNumbering,
-      showCode: this.props.widget.showCode
+      showCode: this.props.widget.showCode,
+      showRaw: this.props.widget.showRaw,
+      showMarkdown: this.props.widget.showMarkdown
     };
   }
 
@@ -407,8 +400,12 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     let listing: JSX.Element[] = this.props.toc.map(el => {
       if (el.type === 'code' && !this.state.showCode) {
         return <div key={`emptycode-${i++}`} />;
+      } else if (el.type === 'raw' && !this.state.showRaw) {
+        return <div key={`emptyraw-${i++}`} />;
+      } else if (el.type === 'mardkwon' && !this.state.showMarkdown) {
+        return <div key={`emptymd-${i++}`} />;
       } else {
-        if (el.type === 'code') {
+        if (el.type === 'code' || el.type === 'raw') {
           return (
             <TOCCodeCell
               needNumbering={this.state.needNumbering}
@@ -437,6 +434,16 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       this.setState({ showCode: this.props.widget.showCode });
     };
 
+    const toggleRaw = (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.props.widget.showRaw = event.target.checked;
+      this.setState({ showRaw: this.props.widget.showRaw });
+    };
+
+    const toggleMarkdown = (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.props.widget.showMarkdown = event.target.checked;
+      this.setState({ showMarkdown: this.props.widget.showMarkdown });
+    };
+
     // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
     //   this.props.widget.filterByTag("test");
     // }
@@ -453,6 +460,18 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
           checked={this.state.showCode}
         />
         Show code cells
+        <input
+          type="checkbox"
+          onChange={event => toggleRaw(event)}
+          checked={this.state.showRaw}
+        />
+        Show raw cells
+        <input
+          type="checkbox"
+          onChange={event => toggleMarkdown(event)}
+          checked={this.state.showMarkdown}
+        />
+        Show markdown cells
         {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
