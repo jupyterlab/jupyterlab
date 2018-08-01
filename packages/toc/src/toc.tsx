@@ -15,6 +15,8 @@ import { Widget } from '@phosphor/widgets';
 
 import { TableOfContentsRegistry } from './registry';
 
+import { CodeComponent } from './codemirror';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { INotebookTracker } from '@jupyterlab/notebook';
@@ -83,7 +85,10 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
+    this._monitor.activityStopped.connect(
+      this.update,
+      this
+    );
     this.update();
   }
 
@@ -358,20 +363,30 @@ export class TOCCodeCell extends React.Component<
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
     if (heading.html) {
-      console.log("you're not covering this case idiot");
+      /* console.log("you're not covering this case idiot");
       content = (
         <span
           className={'jp-TableOfContents-code'}
           dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
           style={{ paddingLeft }}
         />
+      ); */
+      content = (
+        <span className={'toc-code-span'} style={{ paddingLeft }}>
+          <CodeComponent code={numbering + heading.html} />
+        </span>
       );
     } else {
-      content = (
+      /* content = (
         <span style={{ paddingLeft }}>
           <pre className={'jp-TableOfContents-code'}>
             {numbering + heading.text}
           </pre>
+        </span>
+      ); */
+      content = (
+        <span className={'toc-code-span'} style={{ paddingLeft }}>
+          <CodeComponent code={numbering + heading.text} />
         </span>
       );
     }
