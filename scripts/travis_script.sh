@@ -17,7 +17,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm test
+    jlpm test --loglevel success > /dev/null
     jlpm run clean
 fi
 
