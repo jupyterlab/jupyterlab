@@ -12,7 +12,7 @@ import {
   StateDB
 } from '@jupyterlab/coreutils';
 
-import { testEmission } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -344,7 +344,7 @@ describe('@jupyterlab/coreutils', () => {
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
-        let promise = testEmission(settings.changed, {});
+        let promise = signalToPromise(settings.changed);
         await settings.set('foo', 'bar');
         await promise;
       });

@@ -58,13 +58,10 @@ describe('@jupyterlab/completer', () => {
   let connector: KernelConnector;
   let session: IClientSession;
 
-  before(() => {
-    return createClientSession().then(s => {
-      return s.initialize().then(() => {
-        session = s;
-        connector = new KernelConnector({ session });
-      });
-    });
+  before(async () => {
+    session = await createClientSession();
+    await session.initialize();
+    connector = new KernelConnector({ session });
   });
 
   after(() => session.shutdown());

@@ -44,18 +44,15 @@ describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
   let session: ClientSession;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     widget = new Toolbar();
-    return createClientSession().then(s => {
-      session = s;
-    });
+    session = await createClientSession();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     widget.dispose();
-    return session.shutdown().then(() => {
-      session.dispose();
-    });
+    await session.shutdown();
+    session.dispose();
   });
 
   describe('Toolbar', () => {
@@ -253,11 +250,10 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('.createKernelNameItem()', () => {
-      it("should display the `'display_name'` of the kernel", () => {
+      it("should display the `'display_name'` of the kernel", async () => {
         const item = Toolbar.createKernelNameItem(session);
-        return session.initialize().then(() => {
-          expect(item.node.textContent).to.equal(session.kernelDisplayName);
-        });
+        await session.initialize();
+        expect(item.node.textContent).to.equal(session.kernelDisplayName);
       });
 
       it("should display `'No Kernel!'` if there is no kernel", () => {
@@ -267,13 +263,12 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('.createKernelStatusItem()', () => {
-      beforeEach(() => {
-        return session.initialize().then(() => {
-          return session.kernel.ready;
-        });
+      beforeEach(async () => {
+        await session.initialize();
+        await session.kernel.ready;
       });
 
-      it('should display a busy status if the kernel status is not idle', () => {
+      it('should display a busy status if the kernel status is not idle', async () => {
         const item = Toolbar.createKernelStatusItem(session);
         let called = false;
         const future = session.kernel.requestExecute({ code: 'a = 1' });
@@ -283,12 +278,11 @@ describe('@jupyterlab/apputils', () => {
             called = true;
           }
         };
-        return future.done.then(() => {
-          expect(called).to.equal(true);
-        });
+        await future.done;
+        expect(called).to.equal(true);
       });
 
-      it('should show the current status in the node title', () => {
+      it('should show the current status in the node title', async () => {
         const item = Toolbar.createKernelStatusItem(session);
         const status = session.status;
         expect(item.node.title.toLowerCase()).to.contain(status);
@@ -300,22 +294,16 @@ describe('@jupyterlab/apputils', () => {
             called = true;
           }
         };
-        return future.done.then(() => {
-          expect(called).to.equal(true);
-        });
+        await future.done;
+        expect(called).to.equal(true);
       });
 
-      it('should handle a starting session', () => {
-        return session
-          .shutdown()
-          .then(() => {
-            return createClientSession();
-          })
-          .then(session => {
-            const item = Toolbar.createKernelStatusItem(session);
-            expect(item.node.title).to.equal('Kernel Starting');
-            expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-          });
+      it('should handle a starting session', async () => {
+        await session.shutdown();
+        session = await createClientSession();
+        const item = Toolbar.createKernelStatusItem(session);
+        expect(item.node.title).to.equal('Kernel Starting');
+        expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
       });
     });
   });
