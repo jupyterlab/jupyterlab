@@ -48,7 +48,7 @@ function createFactory(modelName?: string) {
 
 describe('docregistry/registry', () => {
   describe('DocumentRegistry', () => {
-    const registry: DocumentRegistry;
+    let registry: DocumentRegistry;
 
     beforeEach(() => {
       registry = new DocumentRegistry();
@@ -312,7 +312,7 @@ describe('docregistry/registry', () => {
           fileTypes: ['json']
         });
         registry.addWidgetFactory(jFactory);
-        const factories = registry.preferredWidgetFactories('foo.table.json');
+        let factories = registry.preferredWidgetFactories('foo.table.json');
         expect(toArray(factories)).to.deep.equal([tFactory, jFactory]);
         factories = registry.preferredWidgetFactories('foo.json');
         expect(toArray(factories)).to.deep.equal([jFactory]);
@@ -324,7 +324,7 @@ describe('docregistry/registry', () => {
           fileTypes: ['tablejson']
         });
         registry.addWidgetFactory(factory);
-        const factories = registry.preferredWidgetFactories('foo.table.json');
+        let factories = registry.preferredWidgetFactories('foo.table.json');
         expect(toArray(factories)).to.deep.equal([factory]);
         factories = registry.preferredWidgetFactories('foo.json');
         expect(toArray(factories)).to.deep.equal([]);
@@ -429,7 +429,7 @@ describe('docregistry/registry', () => {
             defaultFor: ['*']
           })
         );
-        const pref = registry.getKernelPreference('.c', 'global');
+        let pref = registry.getKernelPreference('.c', 'global');
         expect(pref.language).to.equal('clike');
         expect(pref.shouldStart).to.equal(false);
         expect(pref.canStart).to.equal(false);
