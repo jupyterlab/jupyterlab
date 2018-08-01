@@ -21,8 +21,6 @@ const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
 
-let currentLevel = 1;
-
 /**
  * Create a TOC generator for notebooks.
  *
@@ -67,8 +65,7 @@ export function createNotebookGenerator(
                 text,
                 onClickFactory2,
                 numberingDict,
-                executionCount,
-                currentLevel
+                executionCount
               )
             );
           }
@@ -126,7 +123,6 @@ export function createNotebookGenerator(
                 numbering
               )
             );
-            currentLevel = headings[headings.length - 1]['level'];
           } else {
             const onClickFactory = (line: number) => {
               return () => {
@@ -142,6 +138,22 @@ export function createNotebookGenerator(
                 onClickFactory,
                 numberingDict
               )
+            );
+          }
+        } else if (model.type === 'raw') {
+          let showRaw = false;
+          if (widget) {
+            showRaw = widget.showRaw;
+          }
+          if (showRaw) {
+            let text = (model as CodeCellModel).value.text;
+            const onClickFactory2 = (line: number) => {
+              return () => {
+                cell.node.scrollIntoView();
+              };
+            };
+            headings = headings.concat(
+              Private.getRawCells(text, onClickFactory2, numberingDict)
             );
           }
         }
@@ -281,7 +293,9 @@ export function createLatexGenerator(
 /**
  * A private namespace for miscellaneous things.
  */
+let currentLevel = 1;
 namespace Private {
+  //let currentLevel = 1;
   export function incrementNumberingDict(dict: any, level: number) {
     if (dict[level + 1] != undefined) {
       dict[level + 1] = undefined;
@@ -332,6 +346,7 @@ namespace Private {
       let match = line.match(/^([#]{1,6}) (.*)/);
       if (match) {
         const level = match[1].length;
+        currentLevel = level;
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
@@ -343,6 +358,7 @@ namespace Private {
       match = line.match(/^([=]{2,}|[-]{2,})/);
       if (match && idx > 0) {
         const level = match[1][0] === '=' ? 1 : 2;
+        currentLevel = level;
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
@@ -356,10 +372,18 @@ namespace Private {
       match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
         const level = parseInt(match[1], 10);
+        currentLevel = level;
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
         headings.push({ text, level, numbering, onClick, type: 'header' });
+        return;
       }
+      headings.push({
+        text: line,
+        level: currentLevel + 1,
+        onClick,
+        type: 'markdown'
+      });
     });
     return headings;
   }
@@ -368,8 +392,7 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    executionCount: string,
-    lastLevel: number
+    executionCount: string
   ): IHeading[] {
     let headings: IHeading[] = [];
     if (text) {
@@ -381,12 +404,38 @@ namespace Private {
       }
       headingText = headingText + lines[numLines - 1];
       const onClick = onClickFactory(0);
-      const level = lastLevel + 1;
+      const level = currentLevel + 1;
       headings.push({
         text: executionCount + ' ' + headingText,
         level,
         onClick,
         type: 'code'
+      });
+    }
+    return headings;
+  }
+
+  export function getRawCells(
+    text: string,
+    onClickFactory: (line: number) => (() => void),
+    numberingDict: any
+  ): IHeading[] {
+    let headings: IHeading[] = [];
+    if (text) {
+      const lines = text.split('\n');
+      let headingText = '';
+      let numLines = Math.min(lines.length, 10);
+      for (let i = 0; i < numLines - 1; i++) {
+        headingText = headingText + lines[i] + '\n';
+      }
+      headingText = headingText + lines[numLines - 1];
+      const onClick = onClickFactory(0);
+      const level = currentLevel + 1;
+      headings.push({
+        text: headingText,
+        level,
+        onClick,
+        type: 'raw'
       });
     }
     return headings;
@@ -403,29 +452,73 @@ namespace Private {
     needNumbering = true
   ): IHeading[] {
     let headings: IHeading[] = [];
-    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    let headingNodes = node.querySelectorAll('span');
     for (let i = 0; i < headingNodes.length; i++) {
-      const heading = headingNodes[i];
-      const level = parseInt(heading.tagName[1]);
-      const text = heading.textContent;
-      let shallHide = !needNumbering;
-      if (heading.getElementsByClassName('numbering-entry').length > 0) {
-        heading.removeChild(
-          heading.getElementsByClassName('numbering-entry')[0]
-        );
+      let markdownCell = headingNodes[i];
+      if (
+        markdownCell.getAttribute('role') === 'presentation' &&
+        markdownCell.children.length === 0
+      ) {
+        if (markdownCell.textContent) {
+          headings.push({
+            level: currentLevel + 1,
+            text: markdownCell.textContent,
+            onClick: onClickFactory(markdownCell),
+            type: 'markdown'
+          });
+        }
+      } else {
+        const heading = headingNodes[i];
+        let classes = heading.className.split(' ');
+        if (classes.indexOf('cm-header') > -1) {
+          const level = parseInt(classes[1].slice(-1));
+          currentLevel = level;
+          let text = heading.textContent;
+          if (text) {
+            console.log('beginning text: ' + text);
+            if (heading.getElementsByClassName('numbering-entry').length > 0) {
+              heading.removeChild(
+                heading.getElementsByClassName('numbering-entry')[0]
+              );
+            }
+            /* TODO: detect whether the document has numbering on T/F */
+            let numberingOn = needNumbering;
+            if (numberingOn) {
+              let numIndex = text.indexOf(' ');
+              text = text.substring(numIndex + 1);
+            }
+            console.log('split text: ' + text);
+            let match = text.match(/^([#]{1,6}) (.*)/);
+            if (match) {
+              text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
+            } else {
+              let match = text.match(/^([=]{2,}|[-]{2,})/);
+              if (match) {
+                text = text.replace(/\[(.+)\]\(.+\)/g, '$1');
+              }
+            }
+            let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+            html = html.replace('¶', '');
+            const onClick = onClickFactory(heading);
+            let numbering = Private.generateNumbering(numberingDict, level);
+            let shallHide = !needNumbering;
+            console.log('shallHide: ' + shallHide);
+            let numberingElement =
+              '<span class="numbering-entry" ' +
+              (shallHide ? ' hidden="true"' : '') +
+              '>' +
+              numbering +
+              '</span>';
+            console.log('final html: ' + html);
+            console.log('final text: ' + text);
+            /* TODO: fix innerHTML */
+            console.log('numberingElement: ' + numberingElement);
+            heading.innerHTML = numberingElement + text;
+            console.log('innerHTML: ' + numberingElement + html);
+            headings.push({ level, text, numbering, onClick, type: 'header' });
+          }
+        }
       }
-      let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
-      html = html.replace('¶', ''); // Remove the anchor symbol.
-      const onClick = onClickFactory(heading);
-      let numbering = Private.generateNumbering(numberingDict, level);
-      let numberingElement =
-        '<span class="numbering-entry" ' +
-        (shallHide ? ' hidden="true"' : '') +
-        '>' +
-        numbering +
-        '</span>';
-      heading.innerHTML = numberingElement + html;
-      headings.push({ level, text, numbering, html, onClick, type: 'header' });
     }
     return headings;
   }
