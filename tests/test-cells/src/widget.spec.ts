@@ -425,7 +425,7 @@ describe('cells/widget', () => {
 
       beforeEach(async () => {
         session = await createClientSession();
-        await s.initialize();
+        await session.initialize();
         await session.kernel.ready;
       });
 
