@@ -13,6 +13,8 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
+import { framePromise } from '@jupyterlab/testutils';
+
 class LogEditor extends CodeMirrorEditor {
   methods: string[] = [];
   events: string[] = [];
@@ -149,28 +151,24 @@ describe('CodeEditorWrapper', () => {
   });
 
   describe('#onAfterAttach()', () => {
-    it('should refresh the editor', done => {
+    it('should refresh the editor', async () => {
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
   });
 
   describe('#onAfterShow()', () => {
-    it('should refresh the editor', done => {
+    it('should refresh the editor', async () => {
       widget.hide();
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
       expect(editor.methods).to.not.contain('refresh');
       widget.show();
       expect(widget.methods).to.contain('onAfterShow');
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
   });
 

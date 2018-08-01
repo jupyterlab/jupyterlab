@@ -233,7 +233,7 @@ const tree: JupyterLabPlugin<void> = {
         router.navigate(url, { silent: true });
 
         return commands
-          .execute('filebrowser:navigate-main', { path })
+          .execute('filebrowser:navigate', { path })
           .then(() => commands.execute('apputils:save-statedb', { immediate }))
           .catch(reason => {
             console.warn(`Tree routing failed:`, reason);
@@ -278,11 +278,27 @@ const busy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
   activate: async (app: JupyterLab) => {
     app.busySignal.connect((_, isBusy) => {
-      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
       const favicon = document.querySelector(
-        'link[rel="shortcut icon"]'
+        `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
-      favicon.href = `/static/base/images/${filename}`;
+      if (!favicon) {
+        return;
+      }
+      const newFavicon = document.querySelector(
+        `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
+      ) as HTMLLinkElement;
+      if (!newFavicon) {
+        return;
+      }
+      // If we have the two icons with the special classes, then toggle them.
+      if (favicon !== newFavicon) {
+        favicon.rel = '';
+        newFavicon.rel = 'icon';
+
+        // Firefox doesn't seem to recognize just changing rel, so we also
+        // reinsert the link into the DOM.
+        newFavicon.parentNode.replaceChild(newFavicon, newFavicon);
+      }
     });
   },
   requires: [],

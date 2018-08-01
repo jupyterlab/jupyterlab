@@ -34,7 +34,7 @@ import { Contents } from '@jupyterlab/services';
 const DOCUMENT_CLASS = 'jp-Document';
 
 /**
- * A class that maintains the lifecyle of file-backed widgets.
+ * A class that maintains the lifecycle of file-backed widgets.
  */
 export class DocumentWidgetManager implements IDisposable {
   /**

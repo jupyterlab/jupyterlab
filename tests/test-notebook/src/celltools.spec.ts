@@ -20,9 +20,11 @@ import {
   NotebookActions
 } from '@jupyterlab/notebook';
 
-import { createNotebookPanel, populateNotebook } from '../../notebook-utils';
-
-import { createNotebookContext, moment } from '../../utils';
+import {
+  createNotebookContext,
+  sleep,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 class LogTool extends CellTools.Tool {
   methods: string[] = [];
@@ -89,13 +91,13 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(async () => {
       const context0 = await createNotebookContext();
       await context0.initialize(true);
-      panel0 = createNotebookPanel(context0);
-      populateNotebook(panel0.content);
+      panel0 = NBTestUtils.createNotebookPanel(context0);
+      NBTestUtils.populateNotebook(panel0.content);
 
       const context1 = await createNotebookContext();
       await context1.initialize(true);
-      panel1 = createNotebookPanel(context1);
-      populateNotebook(panel1.content);
+      panel1 = NBTestUtils.createNotebookPanel(context1);
+      NBTestUtils.populateNotebook(panel1.content);
 
       tracker = new NotebookTracker({ namespace: 'notebook' });
       tracker.add(panel0);
@@ -108,7 +110,7 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
       // Give the posted messages a chance to be handled.
-      await moment();
+      await sleep();
     });
 
     afterEach(() => {

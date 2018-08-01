@@ -20,7 +20,7 @@ import {
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { createFileContext, sleep } from '../../utils';
+import { createFileContext, sleep } from '@jupyterlab/testutils';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(
@@ -375,7 +375,7 @@ describe('docregistry/default', () => {
     });
 
     describe('defaultKernelLanguage', () => {
-      it('should get the default kernel langauge of the document', () => {
+      it('should get the default kernel language of the document', () => {
         let model = new DocumentModel();
         expect(model.defaultKernelLanguage).to.be('');
       });

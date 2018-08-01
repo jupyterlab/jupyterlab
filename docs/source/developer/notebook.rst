@@ -60,13 +60,14 @@ individual cell input content is supported by the CodeMirror editor's
 undo feature. (Note: CodeMirror editor's undo does not cover cell
 metadata changes.)
 
-Cursors and metadata
+Metadata
 ''''''''''''''''''''
 
 The notebook model and the cell model (i.e. notebook cells) support
-getting and setting metadata through cursors. You may request a cursor
-to write to a specific metadata key from a notebook model or a cell
-model.
+getting and setting metadata through an
+`IObservableJSON <http://jupyterlab.github.io/jupyterlab/modules/_observables_src_observablejson_.iobservablejson.html>`__
+object. You can use this to get and set notebook/cell metadata,
+as well as subscribe to changes to it.
 
 Notebook widget
 ^^^^^^^^^^^^^^^
@@ -95,7 +96,7 @@ Higher level actions using NotebookActions
 ''''''''''''''''''''''''''''''''''''''''''
 
 Higher-level actions are contained in the
-`NotebookActions <http://jupyterlab.github.io/jupyterlab/modules/_notebook_src_actions_.notebookactions.html>`__
+`NotebookActions <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_actions_.notebookactions.html>`__
 namespace, which has functions, when given a notebook widget, to run a
 cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.
@@ -209,7 +210,7 @@ Copy the following to ``src/index.ts``:
        */
       createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
         let callback = () => {
-          NotebookActions.runAll(panel.notebook, context.session);
+          NotebookActions.runAll(panel.content, context.session);
         };
         let button = new ToolbarButton({
           className: 'myButton',

@@ -164,7 +164,7 @@ describe('kernel', () => {
   });
 
   describe('Kernel.connectTo()', () => {
-    it('should connect to an exisiting kernel', () => {
+    it('should connect to an existing kernel', () => {
       let id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.be(id);

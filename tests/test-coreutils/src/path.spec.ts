@@ -11,12 +11,12 @@ describe('@jupyterlab/coreutils', () => {
   describe('PathExt', () => {
     describe('.join()', () => {
       it('should join the arguments and normalize the path', () => {
-        let path = PathExt.join('foo', '../../../bar');
+        const path = PathExt.join('foo', '../../../bar');
         expect(path).to.equal('../../bar');
       });
 
       it('should not return "." for an empty path', () => {
-        let path = PathExt.join('', '');
+        const path = PathExt.join('', '');
         expect(path).to.equal('');
       });
     });
@@ -33,12 +33,12 @@ describe('@jupyterlab/coreutils', () => {
       });
 
       it('should not return "." for an empty path', () => {
-        let path = PathExt.dirname('');
+        const path = PathExt.dirname('');
         expect(path).to.equal('');
       });
 
       it('should not return "." for a path in the root directory', () => {
-        let path = PathExt.dirname('foo.txt');
+        const path = PathExt.dirname('foo.txt');
         expect(path).to.equal('');
       });
     });
@@ -48,33 +48,33 @@ describe('@jupyterlab/coreutils', () => {
         expect(PathExt.extname(TESTPATH)).to.equal('.js');
       });
 
-      it('should only take the last occurance of a dot', () => {
+      it('should only take the last occurrence of a dot', () => {
         expect(PathExt.extname('foo.tar.gz')).to.equal('.gz');
       });
     });
 
     describe('.normalize()', () => {
       it('should normalize a string path', () => {
-        let path = PathExt.normalize('./fixtures///b/../b/c.js');
+        const path = PathExt.normalize('./fixtures///b/../b/c.js');
         expect(path).to.equal('fixtures/b/c.js');
       });
 
       it('should not return "." for an empty path', () => {
-        let path = PathExt.normalize('');
+        const path = PathExt.normalize('');
         expect(path).to.equal('');
       });
     });
 
     describe('.resolve()', () => {
       it('should resolve a sequence of paths to an absolute path on the server', () => {
-        let path = PathExt.resolve('var/lib', '../', 'file/');
+        const path = PathExt.resolve('var/lib', '../', 'file/');
         expect(path).to.equal('var/file');
       });
     });
 
     describe('.relative()', () => {
       it('should solve the relative path', () => {
-        let path = PathExt.relative('var/lib', 'var/apache');
+        const path = PathExt.relative('var/lib', 'var/apache');
         expect(path).to.equal('../apache');
       });
     });

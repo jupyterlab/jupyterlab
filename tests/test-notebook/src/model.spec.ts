@@ -13,9 +13,7 @@ import { NotebookModel } from '@jupyterlab/notebook';
 
 import { ModelDB } from '@jupyterlab/observables';
 
-import { DEFAULT_CONTENT } from '../../notebook-utils';
-
-import { moment } from '../../utils';
+import { sleep, NBTestUtils } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
@@ -86,7 +84,7 @@ describe('@jupyterlab/notebook', () => {
         let model = new NotebookModel();
         let cell = model.contentFactory.createCodeCell({});
         model.cells.push(cell);
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).to.be(-1);
         expect(model.cells.length).to.be(6);
       });
@@ -96,7 +94,7 @@ describe('@jupyterlab/notebook', () => {
         let cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         model.cells.push(cell);
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.cells.undo();
         expect(model.cells.length).to.be(2);
         expect(model.cells.get(1).value.text).to.be('foo');
@@ -151,7 +149,7 @@ describe('@jupyterlab/notebook', () => {
         it('should add a new code cell when cells are cleared', async () => {
           let model = new NotebookModel();
           model.cells.clear();
-          await moment();
+          await sleep();
           expect(model.cells.length).to.be(1);
           expect(model.cells.get(0)).to.be.a(CodeCellModel);
         });
@@ -200,15 +198,15 @@ describe('@jupyterlab/notebook', () => {
     describe('#nbformat', () => {
       it('should get the major version number of the nbformat', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
-        expect(model.nbformat).to.be(DEFAULT_CONTENT.nbformat);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        expect(model.nbformat).to.be(NBTestUtils.DEFAULT_CONTENT.nbformat);
       });
     });
 
     describe('#nbformatMinor', () => {
       it('should get the minor version number of the nbformat', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(model.nbformatMinor).to.be(nbformat.MINOR_VERSION);
       });
     });
@@ -247,7 +245,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.dispose();
         expect(model.cells).to.be(null);
         expect(model.isDisposed).to.be(true);
@@ -264,7 +262,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#toString()', () => {
       it('should serialize the model to a string', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let text = model.toString();
         let data = JSON.parse(text);
         expect(data.cells.length).to.be(6);
@@ -274,14 +272,14 @@ describe('@jupyterlab/notebook', () => {
     describe('#fromString()', () => {
       it('should deserialize the model from a string', () => {
         let model = new NotebookModel();
-        model.fromString(JSON.stringify(DEFAULT_CONTENT));
+        model.fromString(JSON.stringify(NBTestUtils.DEFAULT_CONTENT));
         expect(model.cells.length).to.be(6);
       });
 
       it('should set the dirty flag', () => {
         let model = new NotebookModel();
         model.dirty = false;
-        model.fromString(JSON.stringify(DEFAULT_CONTENT));
+        model.fromString(JSON.stringify(NBTestUtils.DEFAULT_CONTENT));
         expect(model.dirty).to.be(true);
       });
     });
@@ -289,7 +287,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#toJSON()', () => {
       it('should serialize the model to JSON', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         let data = model.toJSON();
         expect(data.cells.length).to.be(6);
       });
@@ -298,16 +296,16 @@ describe('@jupyterlab/notebook', () => {
     describe('#fromJSON()', () => {
       it('should serialize the model from JSON', () => {
         let model = new NotebookModel();
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(model.cells.length).to.be(6);
-        expect(model.nbformat).to.be(DEFAULT_CONTENT.nbformat);
+        expect(model.nbformat).to.be(NBTestUtils.DEFAULT_CONTENT.nbformat);
         expect(model.nbformatMinor).to.be(nbformat.MINOR_VERSION);
       });
 
       it('should set the dirty flag', () => {
         let model = new NotebookModel();
         model.dirty = false;
-        model.fromJSON(DEFAULT_CONTENT);
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(model.dirty).to.be(true);
       });
     });

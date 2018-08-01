@@ -19,7 +19,7 @@ import {
   CHUNK_SIZE
 } from '@jupyterlab/filebrowser';
 
-import { acceptDialog, dismissDialog } from '../../utils';
+import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
 import { ISignal } from '@phosphor/signaling';
 import { IIterator } from '@phosphor/algorithm';
 

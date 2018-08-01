@@ -264,7 +264,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Don't bother setting the option if it is already the same.
     if (this._config[option] !== value) {
       this._config[option] = value;
-      Private.setOption(this.editor, option, value);
+      Private.setOption(this.editor, option, value, this._config);
     }
   }
 
@@ -286,7 +286,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Find a position fot the given offset.
+   * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
     const { ch, line } = this.doc.posFromIndex(offset);
@@ -823,6 +823,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this.refresh();
     }
     this.host.classList.add('jp-mod-focused');
+
+    // Update the selections on editor gaining focus because
+    // the onCursorActivity function filters usual cursor events
+    // based on the editor's focus.
+    this._onCursorActivity();
   }
 
   /**
@@ -1127,6 +1132,7 @@ namespace Private {
       insertSpaces,
       lineHeight,
       lineWrap,
+      wordWrapColumn,
       tabSize,
       readOnly,
       ...otherOptions
@@ -1135,7 +1141,7 @@ namespace Private {
       autoCloseBrackets: autoClosingBrackets,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
-      lineWrapping: lineWrap,
+      lineWrapping: lineWrap === 'off' ? false : true,
       readOnly,
       ...otherOptions
     };
@@ -1151,6 +1157,14 @@ namespace Private {
       }
       if (readOnly) {
         el.classList.add(READ_ONLY_CLASS);
+      }
+      if (lineWrap === 'wordWrapColumn') {
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        lines.style.width = `${wordWrapColumn}ch`;
+      }
+      if (lineWrap === 'bounded') {
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        lines.style.maxWidth = `${wordWrapColumn}ch`;
       }
       host.appendChild(el);
     }, bareConfig);
@@ -1174,7 +1188,11 @@ namespace Private {
     if (/^\s*$/.test(before)) {
       CodeMirror.commands['indentMore'](cm);
     } else {
-      CodeMirror.commands['insertSoftTab'](cm);
+      if (cm.getOption('indentWithTabs')) {
+        CodeMirror.commands['insertTab'](cm);
+      } else {
+        CodeMirror.commands['insertSoftTab'](cm);
+      }
     }
   }
 
@@ -1227,12 +1245,29 @@ namespace Private {
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
     editor: CodeMirror.Editor,
     option: K,
-    value: CodeMirrorEditor.IConfig[K]
+    value: CodeMirrorEditor.IConfig[K],
+    config: CodeMirrorEditor.IConfig
   ): void {
     let el = editor.getWrapperElement();
     switch (option) {
       case 'lineWrap':
-        editor.setOption('lineWrapping', value);
+        const lineWrapping = value === 'off' ? false : true;
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        const maxWidth =
+          value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
+        const width =
+          value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
+        lines.style.maxWidth = maxWidth;
+        lines.style.width = width;
+        editor.setOption('lineWrapping', lineWrapping);
+        break;
+      case 'wordWrapColumn':
+        const { lineWrap } = config;
+        if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
+          const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+          const prop = lineWrap === 'wordWrapColumn' ? 'width' : 'maxWidth';
+          lines.style[prop] = `${value}ch`;
+        }
         break;
       case 'tabSize':
         editor.setOption('indentUnit', value);

@@ -5,8 +5,8 @@ Let's Make an xkcd JupyterLab Extension
 
 .. warning::
 
-   The extension developer API is not stable and will evolve in JupyterLab beta
-   releases. The extension developer API will be stable in JupyterLab 1.0.
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -214,7 +214,7 @@ You should see a message that says
 ``JupyterLab extension jupyterlab_xkcd is activated!`` in the console.
 If you do, congrats, you're ready to start modifying the the extension!
 If not, go back, make sure you didn't miss a step, and `reach
-out <README.html#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 Note: Leave the terminal running the ``jupyter lab --watch`` command
 open.
@@ -388,7 +388,7 @@ single *xkcd.com* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -439,7 +439,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with the
 `02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-02-show-a-comic>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-02-show-a-comic>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -523,7 +523,7 @@ of the comic.
 
 If anything is misbehaving, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -675,7 +675,7 @@ comic.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-04-refactor-and-refresh>`__
 to debug. Once it's working properly, commit it.
 
 .. code:: bash
@@ -802,7 +802,7 @@ the panel and refresh the browser tab. You should not see an xkcd tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-05-restore-panel-state>`__
 if your extension is misbehaving. Make a commit when the state of your
 extension persists properly.
 
@@ -862,7 +862,7 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-06-prepare-to-publish>`__
 for further debugging.
 
 |Extension page on npmjs.com|

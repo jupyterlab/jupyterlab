@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
@@ -13,7 +13,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsoleHistory } from '@jupyterlab/console';
 
-import { createClientSession } from '../../utils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
   header: null,
@@ -65,40 +65,40 @@ describe('console/history', () => {
     describe('#constructor()', () => {
       it('should create a console history object', () => {
         let history = new ConsoleHistory({ session });
-        expect(history).to.be.a(ConsoleHistory);
+        expect(history).to.be.an.instanceof(ConsoleHistory);
       });
     });
 
     describe('#isDisposed', () => {
       it('should get whether the object is disposed', () => {
         let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
     });
 
     describe('#session', () => {
       it('should be the client session object', () => {
         let history = new ConsoleHistory({ session });
-        expect(history.session).to.be(session);
+        expect(history.session).to.equal(session);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose the history object', () => {
         let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
 
       it('should be safe to dispose multiple times', () => {
         let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
     });
 
@@ -106,7 +106,7 @@ describe('console/history', () => {
       it('should return an empty string if no history exists', () => {
         let history = new ConsoleHistory({ session });
         return history.back('').then(result => {
-          expect(result).to.be('');
+          expect(result).to.equal('');
         });
       });
 
@@ -116,17 +116,17 @@ describe('console/history', () => {
         history.back('').then(result => {
           let index = mockHistory.content.history.length - 1;
           let last = (mockHistory.content.history[index] as any)[2];
-          expect(result).to.be(last);
+          expect(result).to.equal(last);
           done();
         });
       });
     });
 
     describe('#forward()', () => {
-      it('should return an emptry string if no history exists', () => {
+      it('should return an empty string if no history exists', () => {
         let history = new ConsoleHistory({ session });
         return history.forward('').then(result => {
-          expect(result).to.be('');
+          expect(result).to.equal('');
         });
       });
 
@@ -137,7 +137,7 @@ describe('console/history', () => {
           history.forward('').then(result => {
             let index = mockHistory.content.history.length - 1;
             let last = (mockHistory.content.history[index] as any)[2];
-            expect(result).to.be(last);
+            expect(result).to.equal(last);
             done();
           });
         });
@@ -150,7 +150,7 @@ describe('console/history', () => {
         let item = 'foo';
         history.push(item);
         history.back('').then(result => {
-          expect(result).to.be(item);
+          expect(result).to.equal(item);
           done();
         });
       });
@@ -179,7 +179,7 @@ describe('console/history', () => {
         history.editor = editor;
         history.push('foo');
         editor.model.value.changed.connect(() => {
-          expect(editor.model.value.text).to.be('foo');
+          expect(editor.model.value.text).to.equal('foo');
           done();
         });
         editor.edgeRequested.emit('top');

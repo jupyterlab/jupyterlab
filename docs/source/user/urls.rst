@@ -48,12 +48,17 @@ multiple users (or browsers) as long as they have access to the same server:
 
   http(s)://<server:port>/<lab-location>/lab/workspaces/foo
 
+A workspace should only be open in a single browser tab at a time. If JupyterLab
+detects that a workspace is being opened multiple times simultaneously, it will
+prompt for a new workspace name. Opening a document in two different browser
+tabs simultaneously is also not supported.
+
 .. _url-clone:
 
 Cloning Workspaces
 ~~~~~~~~~~~~~~~~~~
 
-Workspaces can the ability ``clone`` their contents into a new workspace.
+You can copy the contents of a workspace into another workspace with the ``clone`` url parameter.
 
 To copy the contents of the workspace ``foo`` into the workspace ``bar``:
 
@@ -78,7 +83,7 @@ To copy the contents of the workspace ``foo`` into the default workspace:
 Resetting a Workspace
 ~~~~~~~~~~~~~~~~~~~~~
 
-To clear a workspace of its contents, it can be ``reset``.
+Use the ``reset`` url parameter to clear a workspace of its contents.
 
 To reset the contents of the workspace ``foo``:
 
@@ -98,9 +103,9 @@ Combining URL Functions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 
-These URL functions can be used separately as above, or in combination, e.g.:
+These URL functions can be used separately, as above, or in combination.
 
-To reset the workspace ``foo`` and to load a specific notebook afterward:
+To reset the workspace ``foo`` and load a specific notebook afterward:
 
 .. code-block:: none
 
@@ -113,7 +118,7 @@ load a notebook afterward:
 
   http(s)://<server:port>/<lab-location>/lab/workspaces/foo/tree/path/to/notebook.ipynb?clone=bar
 
-To reset the contents of the default workspace and to load a notebook:
+To reset the contents of the default workspace and load a notebook:
 
 .. code-block:: none
 

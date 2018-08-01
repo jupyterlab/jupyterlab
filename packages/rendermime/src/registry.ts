@@ -294,7 +294,7 @@ export namespace RenderMimeRegistry {
    */
   export interface IOptions {
     /**
-     * Intial factories to add to the rendermime instance.
+     * Initial factories to add to the rendermime instance.
      */
     initialFactories?: ReadonlyArray<IRenderMime.IRendererFactory>;
 

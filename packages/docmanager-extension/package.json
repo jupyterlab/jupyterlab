@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager-extension",
-  "version": "0.17.0-1",
+  "version": "0.17.4",
   "description": "JupyterLab - Document Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,13 +30,13 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.17.0-1",
-    "@jupyterlab/apputils": "^0.17.0-1",
-    "@jupyterlab/coreutils": "^2.0.0-1",
-    "@jupyterlab/docmanager": "^0.17.0-1",
-    "@jupyterlab/docregistry": "^0.17.0-1",
-    "@jupyterlab/mainmenu": "^0.6.0-1",
-    "@jupyterlab/services": "^3.0.0-1",
+    "@jupyterlab/application": "^0.17.2",
+    "@jupyterlab/apputils": "^0.17.2",
+    "@jupyterlab/coreutils": "^2.0.2",
+    "@jupyterlab/docmanager": "^0.17.2",
+    "@jupyterlab/docregistry": "^0.17.2",
+    "@jupyterlab/mainmenu": "^0.6.2",
+    "@jupyterlab/services": "^3.0.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/widgets": "^1.6.0"

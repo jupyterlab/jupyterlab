@@ -137,7 +137,7 @@ describe('rendermime/factories', () => {
     });
 
     describe('#createRenderer()', () => {
-      it('should create an img element with the svg inline', () => {
+      it('should create an img element with the uri encoded svg inline', () => {
         const source = '<svg></svg>';
         let f = svgRendererFactory;
         let mimeType = 'image/svg+xml';
@@ -146,7 +146,7 @@ describe('rendermime/factories', () => {
         return w.renderModel(model).then(() => {
           let imgEl = w.node.getElementsByTagName('img')[0];
           expect(imgEl).to.be.ok();
-          expect(imgEl.src).to.contain(source);
+          expect(imgEl.src).to.contain(encodeURIComponent(source));
         });
       });
     });

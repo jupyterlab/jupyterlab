@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -15,29 +15,29 @@ describe('@jupyterlab/apputils', () => {
   describe('CommandLinker', () => {
     describe('#constructor()', () => {
       it('should create a command linker', () => {
-        let linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker).to.be.a(CommandLinker);
+        const linker = new CommandLinker({ commands: new CommandRegistry() });
+        expect(linker).to.be.an.instanceof(CommandLinker);
         linker.dispose();
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether a command linker has been disposed', () => {
-        let linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker.isDisposed).to.be(false);
+        const linker = new CommandLinker({ commands: new CommandRegistry() });
+        expect(linker.isDisposed).to.equal(false);
         linker.dispose();
-        expect(linker.isDisposed).to.be(true);
+        expect(linker.isDisposed).to.equal(true);
       });
     });
 
     describe('#connectNode()', () => {
       it('should connect a node to a command', () => {
         let called = false;
-        let command = 'commandlinker:connect-node';
-        let commands = new CommandRegistry();
-        let linker = new CommandLinker({ commands });
-        let node = document.createElement('div');
-        let disposable = commands.addCommand(command, {
+        const command = 'commandlinker:connect-node';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const node = document.createElement('div');
+        const disposable = commands.addCommand(command, {
           execute: () => {
             called = true;
           }
@@ -46,9 +46,9 @@ describe('@jupyterlab/apputils', () => {
         document.body.appendChild(node);
         linker.connectNode(node, command, null);
 
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
         simulate(node, 'click');
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
 
         document.body.removeChild(node);
         linker.dispose();
@@ -59,11 +59,11 @@ describe('@jupyterlab/apputils', () => {
     describe('#disconnectNode()', () => {
       it('should disconnect a node from a command', () => {
         let called = false;
-        let command = 'commandlinker:disconnect-node';
-        let commands = new CommandRegistry();
-        let linker = new CommandLinker({ commands });
-        let node = document.createElement('div');
-        let disposable = commands.addCommand(command, {
+        const command = 'commandlinker:disconnect-node';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
+        const node = document.createElement('div');
+        const disposable = commands.addCommand(command, {
           execute: () => {
             called = true;
           }
@@ -73,18 +73,18 @@ describe('@jupyterlab/apputils', () => {
         linker.connectNode(node, command, null);
 
         // Make sure connection is working.
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
         simulate(node, 'click');
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
 
         // Reset flag.
         called = false;
 
         // Make sure disconnection is working.
         linker.disconnectNode(node);
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
         simulate(node, 'click');
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
 
         document.body.removeChild(node);
         linker.dispose();
@@ -94,22 +94,22 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#dispose()', () => {
       it('should dispose the resources held by the linker', () => {
-        let linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker.isDisposed).to.be(false);
+        const linker = new CommandLinker({ commands: new CommandRegistry() });
+        expect(linker.isDisposed).to.equal(false);
         linker.dispose();
-        expect(linker.isDisposed).to.be(true);
+        expect(linker.isDisposed).to.equal(true);
       });
     });
 
     describe('#populateVNodeDataset()', () => {
       it('should connect a node to a command', () => {
         let called = false;
-        let command = 'commandlinker:connect-node';
-        let commands = new CommandRegistry();
-        let linker = new CommandLinker({ commands });
+        const command = 'commandlinker:connect-node';
+        const commands = new CommandRegistry();
+        const linker = new CommandLinker({ commands });
         let node: HTMLElement;
         let vnode: VirtualNode;
-        let disposable = commands.addCommand(command, {
+        const disposable = commands.addCommand(command, {
           execute: () => {
             called = true;
           }
@@ -119,9 +119,9 @@ describe('@jupyterlab/apputils', () => {
         node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 
-        expect(called).to.be(false);
+        expect(called).to.equal(false);
         simulate(node, 'click');
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
 
         document.body.removeChild(node);
         linker.dispose();

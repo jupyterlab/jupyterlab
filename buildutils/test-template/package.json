@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template-for-tests",
-  "version": "0.3.0-1",
+  "version": "0.3.2",
   "private": true,
   "scripts": {
     "build": "tsc",
