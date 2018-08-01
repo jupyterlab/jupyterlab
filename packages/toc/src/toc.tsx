@@ -51,6 +51,15 @@ export class TableOfContents extends Widget {
   }
   set current(value: TableOfContents.ICurrentWidget | null) {
     // If they are the same as previously, do nothing.
+    if (this._notebook.currentWidget) {
+      this._notebook.currentWidget.context.ready.then(() => {
+        if (this._notebook.currentWidget) {
+          this.needNumbering = this._notebook.currentWidget.model.metadata.get(
+            'autoNumberingEnabled'
+          ) as boolean;
+        }
+      });
+    }
     if (
       value &&
       this._current &&
@@ -83,7 +92,10 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
+    this._monitor.activityStopped.connect(
+      this.update,
+      this
+    );
     this.update();
   }
 
@@ -158,6 +170,12 @@ export class TableOfContents extends Widget {
 
   set needNumbering(value: boolean) {
     this._needNumbering = value;
+    if (this._notebook.currentWidget != null) {
+      this._notebook.currentWidget.model.metadata.set(
+        'autoNumberingEnabled',
+        value
+      );
+    }
     this.changeNumberingStateForAllCells(value);
   }
 
@@ -399,6 +417,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       needNumbering: this.props.widget.needNumbering,
       showCode: this.props.widget.showCode
     };
+  }
+
+  componentWillReceiveProps(nextProps: ITOCTreeProps) {
+    this.setState({ needNumbering: this.props.widget.needNumbering });
   }
 
   render() {
