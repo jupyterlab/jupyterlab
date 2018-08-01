@@ -452,14 +452,15 @@ namespace Private {
     needNumbering = true
   ): IHeading[] {
     let headings: IHeading[] = [];
-    let headingNodes = node.querySelectorAll('span');
+    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     for (let i = 0; i < headingNodes.length; i++) {
       let markdownCell = headingNodes[i];
       if (
-        markdownCell.getAttribute('role') === 'presentation' &&
+        markdownCell.nodeName.toLowerCase() === 'p' &&
         markdownCell.children.length === 0
       ) {
         if (markdownCell.textContent) {
+          console.log();
           headings.push({
             level: currentLevel + 1,
             text: markdownCell.textContent,
@@ -469,55 +470,34 @@ namespace Private {
         }
       } else {
         const heading = headingNodes[i];
-        let classes = heading.className.split(' ');
-        if (classes.indexOf('cm-header') > -1) {
-          const level = parseInt(classes[1].slice(-1));
-          currentLevel = level;
-          let text = heading.textContent;
-          if (text) {
-            console.log('beginning text: ' + text);
-            if (heading.getElementsByClassName('numbering-entry').length > 0) {
-              heading.removeChild(
-                heading.getElementsByClassName('numbering-entry')[0]
-              );
-            }
-            /* TODO: detect whether the document has numbering on T/F */
-            let numberingOn = needNumbering;
-            if (numberingOn) {
-              let numIndex = text.indexOf(' ');
-              text = text.substring(numIndex + 1);
-            }
-            console.log('split text: ' + text);
-            let match = text.match(/^([#]{1,6}) (.*)/);
-            if (match) {
-              text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-            } else {
-              let match = text.match(/^([=]{2,}|[-]{2,})/);
-              if (match) {
-                text = text.replace(/\[(.+)\]\(.+\)/g, '$1');
-              }
-            }
-            let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
-            html = html.replace('¶', '');
-            const onClick = onClickFactory(heading);
-            let numbering = Private.generateNumbering(numberingDict, level);
-            let shallHide = !needNumbering;
-            console.log('shallHide: ' + shallHide);
-            let numberingElement =
-              '<span class="numbering-entry" ' +
-              (shallHide ? ' hidden="true"' : '') +
-              '>' +
-              numbering +
-              '</span>';
-            console.log('final html: ' + html);
-            console.log('final text: ' + text);
-            /* TODO: fix innerHTML */
-            console.log('numberingElement: ' + numberingElement);
-            heading.innerHTML = numberingElement + text;
-            console.log('innerHTML: ' + numberingElement + html);
-            headings.push({ level, text, numbering, onClick, type: 'header' });
-          }
+        const level = parseInt(heading.tagName[1]);
+        const text = heading.textContent;
+        let shallHide = !needNumbering;
+        currentLevel = level;
+        if (heading.getElementsByClassName('numbering-entry').length > 0) {
+          heading.removeChild(
+            heading.getElementsByClassName('numbering-entry')[0]
+          );
         }
+        let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+        html = html.replace('¶', ''); // Remove the anchor symbol.
+        const onClick = onClickFactory(heading);
+        let numbering = Private.generateNumbering(numberingDict, level);
+        let numberingElement =
+          '<span class="numbering-entry" ' +
+          (shallHide ? ' hidden="true"' : '') +
+          '>' +
+          numbering +
+          '</span>';
+        heading.innerHTML = numberingElement + html;
+        headings.push({
+          level,
+          text,
+          numbering,
+          html,
+          onClick,
+          type: 'header'
+        });
       }
     }
     return headings;
