@@ -137,7 +137,17 @@ class Sanitizer implements ISanitizer {
       p: ['class', 'style'],
       pre: ['class', 'style'],
       audio: ['autoplay', 'controls', 'loop', 'muted', 'src'],
-      video: ['autoplay', 'controls', 'height', 'loop', 'muted', 'src', 'width']
+      video: [
+        'autoplay',
+        'controls',
+        'height',
+        'loop',
+        'muted',
+        'src',
+        'width'
+      ],
+      th: ['rowspan', 'colspan'],
+      td: ['rowspan', 'colspan']
     },
     // Inline CSS styles that HTML tags may have (and their allowed values)
     allowedStyles: {
