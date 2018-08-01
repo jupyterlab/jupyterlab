@@ -22,8 +22,8 @@ import {
 } from '../utils';
 
 describe('Kernel.IKernel', () => {
-  const defaultKernel: Kernel.IKernel;
-  const specs: Kernel.ISpecModels;
+  let defaultKernel: Kernel.IKernel;
+  let specs: Kernel.ISpecModels;
 
   before(async () => {
     specs = await Kernel.getSpecs();
@@ -103,7 +103,7 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#unhandledMessage', () => {
-    const tester: KernelTester;
+    let tester: KernelTester;
     beforeEach(() => {
       tester = new KernelTester();
     });
@@ -198,7 +198,7 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#anyMessage', () => {
-    const tester: KernelTester;
+    let tester: KernelTester;
     beforeEach(() => {
       tester = new KernelTester();
     });
@@ -550,7 +550,7 @@ describe('Kernel.IKernel', () => {
       const msg = KernelMessage.createShellMessage(options);
       const future = kernel.sendShellMessage(msg, true);
 
-      const newMsg: KernelMessage.IMessage;
+      let newMsg: KernelMessage.IMessage;
       tester.onMessage(msg => {
         // trigger onDone
         options.msgType = 'status';
@@ -589,13 +589,13 @@ describe('Kernel.IKernel', () => {
         name: defaultKernel.name
       });
       const interrupt = defaultKernel.interrupt();
-      await expectFailure(interrupt, null, 'Invalid response: 200 OK');
+      await expectFailure(interrupt, 'Invalid response: 200 OK');
     });
 
     it('should throw an error for an error response', async () => {
       handleRequest(defaultKernel, 500, {});
       const interrupt = defaultKernel.interrupt();
-      await expectFailure(interrupt, null, '');
+      await expectFailure(interrupt, '');
     });
 
     it('should fail if the kernel is dead', async () => {
@@ -608,7 +608,7 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
-      await expectFailure(kernel.interrupt(), null, 'Kernel is dead');
+      await expectFailure(kernel.interrupt(), 'Kernel is dead');
       tester.dispose();
     });
   });
@@ -624,7 +624,7 @@ describe('Kernel.IKernel', () => {
     it('should fail if the kernel does not restart', async () => {
       handleRequest(defaultKernel, 500, {});
       const restart = defaultKernel.restart();
-      await expectFailure(restart, null, '');
+      await expectFailure(restart, '');
     });
 
     it('should throw an error for an invalid response', async () => {
@@ -632,7 +632,6 @@ describe('Kernel.IKernel', () => {
       handleRequest(kernel, 205, { id: kernel.id, name: kernel.name });
       await expectFailure(
         kernel.restart(),
-        null,
         'Invalid response: 205 Reset Content'
       );
     });
@@ -668,7 +667,7 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should emit `"reconnecting"`, then `"connected"` status', async () => {
-      const connectedEmission: Promise<void>;
+      let connectedEmission: Promise<void>;
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'reconnecting',
         test: () => {
@@ -696,7 +695,7 @@ describe('Kernel.IKernel', () => {
         name: 'foo'
       });
       const shutdown = defaultKernel.shutdown();
-      await expectFailure(shutdown, null, 'Invalid response: 200 OK');
+      await expectFailure(shutdown, 'Invalid response: 200 OK');
     });
 
     it('should handle a 404 error', async () => {
@@ -708,7 +707,7 @@ describe('Kernel.IKernel', () => {
     it('should throw an error for an error response', async () => {
       handleRequest(defaultKernel, 500, {});
       const shutdown = defaultKernel.shutdown();
-      await expectFailure(shutdown, null, '');
+      await expectFailure(shutdown, '');
     });
 
     it('should fail if the kernel is dead', async () => {
@@ -721,7 +720,7 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
-      await expectFailure(kernel.shutdown(), null, 'Kernel is dead');
+      await expectFailure(kernel.shutdown(), 'Kernel is dead');
       tester.dispose();
     });
 
@@ -767,7 +766,7 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
-      expectFailure(kernel.requestComplete(options), null, 'Kernel is dead');
+      await expectFailure(kernel.requestComplete(options), 'Kernel is dead');
       tester.dispose();
     });
   });
@@ -843,7 +842,7 @@ describe('Kernel.IKernel', () => {
 
   context('#requestExecute()', () => {
     it('should send and handle incoming messages', async () => {
-      const newMsg: KernelMessage.IMessage;
+      let newMsg: KernelMessage.IMessage;
       const content: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
@@ -860,7 +859,7 @@ describe('Kernel.IKernel', () => {
         session: defaultKernel.clientId
       };
 
-      const future: Kernel.IFuture;
+      let future: Kernel.IFuture;
       const tester = new KernelTester();
 
       tester.onMessage(msg => {
@@ -939,9 +938,9 @@ describe('Kernel.IKernel', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      const future: Kernel.IFuture;
+      let future: Kernel.IFuture;
 
-      const kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernel;
 
       const tester = new KernelTester();
       tester.onMessage(message => {
@@ -1009,8 +1008,8 @@ describe('Kernel.IKernel', () => {
       const calls: string[] = [];
 
       const tester = new KernelTester();
-      const future: Kernel.IFuture;
-      const kernel: Kernel.IKernel;
+      let future: Kernel.IFuture;
+      let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
@@ -1067,8 +1066,8 @@ describe('Kernel.IKernel', () => {
       };
       const calls: string[] = [];
       const tester = new KernelTester();
-      const future: Kernel.IFuture;
-      const kernel: Kernel.IKernel;
+      let future: Kernel.IFuture;
+      let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
@@ -1123,8 +1122,8 @@ describe('Kernel.IKernel', () => {
       };
       const calls: string[] = [];
       const tester = new KernelTester();
-      const future: Kernel.IFuture;
-      const kernel: Kernel.IKernel;
+      let future: Kernel.IFuture;
+      let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply

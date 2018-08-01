@@ -476,12 +476,12 @@ describe('session', () => {
 
       it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setName(UUID.uuid4()), '');
+        await expectFailure(defaultSession.setName(UUID.uuid4()), '');
       });
 
       it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setName(UUID.uuid4()));
+        await expectFailure(defaultSession.setName(UUID.uuid4()));
       });
 
       it('should fail if the session is disposed', async () => {
@@ -552,7 +552,7 @@ describe('session', () => {
 
       it('should fail for an incorrect response status', async () => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.shutdown());
+        await expectFailure(defaultSession.shutdown());
       });
 
       it('should handle a 404 status', async () => {
@@ -575,7 +575,7 @@ describe('session', () => {
 
       it('should fail for an error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.shutdown(), '');
+        await expectFailure(defaultSession.shutdown(), '');
       });
 
       it('should fail if the session is disposed', async () => {

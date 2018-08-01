@@ -17,7 +17,7 @@ import { WorkspaceManager } from '../../lib/workspace';
 
 describe('manager', () => {
   describe('ServiceManager', () => {
-    const manager: ServiceManager.IManager;
+    let manager: ServiceManager.IManager;
 
     beforeEach(() => {
       manager = new ServiceManager();
@@ -65,13 +65,12 @@ describe('manager', () => {
     });
 
     describe('#isReady', () => {
-      it('should test whether the manager is ready', () => {
+      it('should test whether the manager is ready', async () => {
         manager.dispose();
         manager = new ServiceManager();
         expect(manager.isReady).to.equal(false);
-        return manager.ready.then(() => {
-          expect(manager.isReady).to.equal(true);
-        });
+        await manager.ready;
+        expect(manager.isReady).to.equal(true);
       });
     });
   });

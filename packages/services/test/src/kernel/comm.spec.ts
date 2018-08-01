@@ -44,7 +44,7 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 describe('jupyter.services - Comm', () => {
-  const kernel: Kernel.IKernel;
+  let kernel: Kernel.IKernel;
 
   before(() => {
     return Kernel.startNew({ name: 'ipython' }).then(k => {
@@ -176,7 +176,7 @@ describe('jupyter.services - Comm', () => {
   });
 
   describe('IComm', () => {
-    const comm: Kernel.IComm;
+    let comm: Kernel.IComm;
 
     beforeEach(() => {
       comm = kernel.connectToComm('test');
@@ -197,27 +197,32 @@ describe('jupyter.services - Comm', () => {
     context('#onClose', () => {
       it('should be readable and writable function', async () => {
         expect(comm.onClose).to.be.undefined;
+        let called = false;
         comm.onClose = msg => {
-          done();
+          called = true;
         };
-        comm.close();
+        await comm.close().done;
+        expect(called).to.equal(true);
       });
 
       it('should be called when the server side closes', async () => {
+        let called = false;
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onClose = data => {
-            done();
+            called = true;
           };
           comm.send('quit');
         });
-        kernel.requestExecute({ code: SEND }, true).done.catch(done);
+        await kernel.requestExecute({ code: SEND }, true).done;
+        expect(called).to.equal(true);
       });
     });
 
     context('#onMsg', () => {
       it('should be readable and writable function', async () => {
+        let called = false;
         comm.onMsg = msg => {
-          done();
+          called = true;
         };
         expect(typeof comm.onMsg).to.equal('function');
         const options: KernelMessage.IOptions = {
@@ -228,85 +233,77 @@ describe('jupyter.services - Comm', () => {
         };
         const msg = KernelMessage.createMessage(options);
         comm.onMsg(msg as KernelMessage.ICommMsgMsg);
+        expect(called).to.equal(true);
       });
 
       it('should be called when the server side sends a message', async () => {
+        let called = false;
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onMsg = msg => {
             expect(msg.content.data).to.equal('hello');
-            done();
+            called = true;
           };
         });
-        kernel.requestExecute({ code: BLIP }, true).done.catch(done);
+        await kernel.requestExecute({ code: BLIP }, true).done;
+        expect(called).to.equal(true);
       });
     });
 
     context('#open()', () => {
-      it('should send a message to the server', () => {
-        const future = kernel.requestExecute({ code: TARGET });
-        future.done.then(() => {
-          const encoder = new TextEncoder();
-          const data = encoder.encode('hello');
-          future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
-            data,
-            data.buffer
-          ]);
-          return future.done;
-        });
+      it('should send a message to the server', async () => {
+        let future = kernel.requestExecute({ code: TARGET });
+        await future.done;
+        const encoder = new TextEncoder();
+        const data = encoder.encode('hello');
+        future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
+          data,
+          data.buffer
+        ]);
+        await future.done;
       });
     });
 
     context('#send()', () => {
-      it('should send a message to the server', () => {
-        return comm.open().done.then(() => {
-          const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
-          return future.done;
-        });
+      it('should send a message to the server', async () => {
+        await comm.open().done;
+        const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
+        await future.done;
       });
 
-      it('should pass through a buffers field', () => {
-        return comm.open().done.then(() => {
-          const future = comm.send({ buffers: 'bar' });
-          return future.done;
-        });
+      it('should pass through a buffers field', async () => {
+        await comm.open().done;
+        const future = comm.send({ buffers: 'bar' });
+        await future.done;
       });
     });
 
     context('#close()', () => {
-      it('should send a message to the server', () => {
-        return comm.open().done.then(() => {
-          const encoder = new TextEncoder();
-          const data = encoder.encode('hello');
-          const future = comm.close({ foo: 'bar' }, {}, [data, data.buffer]);
-          return future.done;
-        });
+      it('should send a message to the server', async () => {
+        await comm.open().done;
+        const encoder = new TextEncoder();
+        const data = encoder.encode('hello');
+        const future = comm.close({ foo: 'bar' }, {}, [data, data.buffer]);
+        await future.done;
       });
 
       it('should trigger an onClose', async () => {
-        comm
-          .open()
-          .done.then(() => {
-            comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
-              expect(msg.content.data).to.deep.equal({ foo: 'bar' });
-              done();
-            };
-            const future = comm.close({ foo: 'bar' });
-            return future.done;
-          })
-          .catch(done);
+        await comm.open().done;
+        let called = false;
+        comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
+          expect(msg.content.data).to.deep.equal({ foo: 'bar' });
+          called = true;
+        };
+        const future = comm.close({ foo: 'bar' });
+        await future.done;
+        expect(called).to.equal(true);
       });
 
-      it('should not send subsequent messages', () => {
-        return comm
-          .open()
-          .done.then(() => {
-            return comm.close({ foo: 'bar' }).done;
-          })
-          .then(() => {
-            expect(() => {
-              comm.send('test');
-            }).to.throw();
-          });
+      it('should not send subsequent messages', async () => {
+        await comm.open().done;
+        await comm.close({ foo: 'bar' }).done;
+        expect(() => {
+          comm.send('test');
+        }).to.throw();
       });
     });
   });

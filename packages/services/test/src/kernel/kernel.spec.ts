@@ -23,21 +23,15 @@ PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel', () => {
-  const defaultKernel: Kernel.IKernel;
-  const specs: Kernel.ISpecModels;
-  const tester: KernelTester;
+  let defaultKernel: Kernel.IKernel;
+  let specs: Kernel.ISpecModels;
+  let tester: KernelTester;
 
-  before(() => {
-    return Kernel.getSpecs()
-      .then(s => {
-        specs = s;
-        return Kernel.startNew();
-      })
-      .then(k => {
-        defaultKernel = k;
-        // Start another kernel.
-        return Kernel.startNew();
-      });
+  before(async () => {
+    specs = await Kernel.getSpecs();
+    defaultKernel = await Kernel.startNew();
+    // Start another kernel.
+    await Kernel.startNew();
   });
 
   afterEach(() => {
@@ -47,57 +41,53 @@ describe('kernel', () => {
   });
 
   after(() => {
-    Kernel.shutdownAll();
+    return Kernel.shutdownAll();
   });
 
   describe('Kernel.listRunning()', () => {
-    it('should yield a list of valid kernel ids', () => {
-      return Kernel.listRunning().then(response => {
-        expect(toArray(response).length).to.be.greaterThan(0);
-      });
+    it('should yield a list of valid kernel ids', async () => {
+      const response = await Kernel.listRunning();
+      expect(toArray(response).length).to.be.greaterThan(0);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const serverSettings = makeSettings();
-      return Kernel.listRunning(serverSettings).then(response => {
-        expect(toArray(response).length).to.be.greaterThan(0);
-      });
+      const response = await Kernel.listRunning(serverSettings);
+      expect(toArray(response).length).to.be.greaterThan(0);
     });
 
     it('should throw an error for an invalid model', async () => {
       const data = { id: UUID.uuid4(), name: 'test' };
       const settings = getRequestHandler(200, data);
       const promise = Kernel.listRunning(settings);
-      expectFailure(promise, done, 'Invalid kernel list');
+      await expectFailure(promise, 'Invalid kernel list');
     });
 
     it('should throw an error for an invalid response', async () => {
       const settings = getRequestHandler(201, {});
       const promise = Kernel.listRunning(settings);
-      expectFailure(promise, done, 'Invalid response: 201 Created');
+      await expectFailure(promise, 'Invalid response: 201 Created');
     });
 
     it('should throw an error for an error response', async () => {
       const settings = getRequestHandler(500, {});
       const promise = Kernel.listRunning(settings);
-      expectFailure(promise, done, '');
+      await expectFailure(promise, '');
     });
   });
 
   describe('Kernel.startNew()', () => {
-    it('should create an Kernel.IKernel object', () => {
-      return Kernel.startNew({}).then(kernel => {
-        expect(kernel.status).to.equal('unknown');
-        return kernel.shutdown();
-      });
+    it('should create an Kernel.IKernel object', async () => {
+      const kernel = await Kernel.startNew({});
+      expect(kernel.status).to.equal('unknown');
+      await kernel.shutdown();
     });
 
-    it('should accept ajax options', () => {
+    it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
-      return Kernel.startNew({ serverSettings }).then(kernel => {
-        expect(kernel.status).to.equal('unknown');
-        return kernel.shutdown();
-      });
+      const kernel = await Kernel.startNew({ serverSettings });
+      expect(kernel.status).to.equal('unknown');
+      await kernel.shutdown();
     });
 
     // TODO: fix this test. The idea here is that if a kernel immediately
@@ -109,23 +99,19 @@ describe('kernel', () => {
     it.skip('should still start if the kernel dies', async () => {
       tester = new KernelTester();
       tester.initialStatus = 'dead';
-      tester
-        .start()
-        .then(kernel => {
-          kernel.statusChanged.connect((sender, state) => {
-            if (state === 'dead') {
-              tester.dispose();
-              done();
-            }
-          });
-        })
-        .catch(done);
+      const kernel = await tester.start();
+      await testEmission(kernel.statusChanged, {
+        test: (sender, state) => {
+          return state === 'dead';
+        }
+      });
+      tester.dispose();
     });
 
     it('should throw an error for an invalid kernel id', async () => {
       const serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
       const kernelPromise = Kernel.startNew({ serverSettings });
-      expectFailure(kernelPromise, done);
+      await expectFailure(kernelPromise);
     });
 
     it('should throw an error for another invalid kernel id', async () => {
@@ -134,20 +120,20 @@ describe('kernel', () => {
         name: 1
       });
       const kernelPromise = Kernel.startNew({ serverSettings });
-      expectFailure(kernelPromise, done);
+      await expectFailure(kernelPromise);
     });
 
     it('should throw an error for an invalid response', async () => {
       const data = { id: UUID.uuid4(), name: 'foo' };
       const serverSettings = getRequestHandler(200, data);
       const kernelPromise = Kernel.startNew({ serverSettings });
-      expectFailure(kernelPromise, done, 'Invalid response: 200 OK');
+      await expectFailure(kernelPromise, 'Invalid response: 200 OK');
     });
 
     it('should throw an error for an error response', async () => {
       const serverSettings = getRequestHandler(500, {});
       const kernelPromise = Kernel.startNew({ serverSettings });
-      expectFailure(kernelPromise, done, '');
+      await expectFailure(kernelPromise, '');
     });
 
     it('should auto-reconnect on websocket error', async () => {
@@ -181,10 +167,9 @@ describe('kernel', () => {
   });
 
   describe('Kernel.shutdown()', () => {
-    it('should shut down a kernel by id', () => {
-      return Kernel.startNew().then(k => {
-        return Kernel.shutdown(k.id);
-      });
+    it('should shut down a kernel by id', async () => {
+      const k = await Kernel.startNew();
+      await Kernel.shutdown(k.id);
     });
 
     it('should handle a 404 error', () => {
@@ -193,26 +178,23 @@ describe('kernel', () => {
   });
 
   describe('Kernel.getSpecs()', () => {
-    it('should load the kernelspecs', () => {
-      return Kernel.getSpecs().then(specs => {
-        expect(specs.default).to.be.ok;
-      });
+    it('should load the kernelspecs', async () => {
+      const specs = await Kernel.getSpecs();
+      expect(specs.default).to.be.ok;
     });
 
-    it('should accept ajax options', () => {
+    it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
-      return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.be.ok;
-      });
+      const specs = await Kernel.getSpecs(serverSettings);
+      expect(specs.default).to.be.ok;
     });
 
-    it('should handle a missing default parameter', () => {
+    it('should handle a missing default parameter', async () => {
       const serverSettings = getRequestHandler(200, {
         kernelspecs: { python: PYTHON_SPEC }
       });
-      return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.be.ok;
-      });
+      const specs = await Kernel.getSpecs(serverSettings);
+      expect(specs.default).to.be.ok;
     });
 
     it('should throw for a missing kernelspecs parameter', async () => {
@@ -220,10 +202,10 @@ describe('kernel', () => {
         default: PYTHON_SPEC.name
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No kernelspecs found');
+      await expectFailure(promise, 'No kernelspecs found');
     });
 
-    it('should omit an invalid kernelspec', () => {
+    it('should omit an invalid kernelspec', async () => {
       const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.name = 1;
       const serverSettings = getRequestHandler(200, {
@@ -233,10 +215,9 @@ describe('kernel', () => {
           python: PYTHON_SPEC
         }
       });
-      return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.equal('python');
-        expect(specs.kernelspecs['R']).to.be.undefined;
-      });
+      const specs = await Kernel.getSpecs(serverSettings);
+      expect(specs.default).to.equal('python');
+      expect(specs.kernelspecs['R']).to.be.undefined;
     });
 
     it('should handle an improper name', async () => {
@@ -247,7 +228,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No valid kernelspecs found');
+      await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should handle an improper language', async () => {
@@ -258,7 +239,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No valid kernelspecs found');
+      await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should handle an improper argv', async () => {
@@ -269,7 +250,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No valid kernelspecs found');
+      await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should handle an improper display_name', async () => {
@@ -280,7 +261,7 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No valid kernelspecs found');
+      await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should handle missing resources', async () => {
@@ -291,13 +272,13 @@ describe('kernel', () => {
         kernelspecs: { R: R_SPEC }
       });
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'No valid kernelspecs found');
+      await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should throw an error for an invalid response', async () => {
       const serverSettings = getRequestHandler(201, {});
       const promise = Kernel.getSpecs(serverSettings);
-      expectFailure(promise, done, 'Invalid response: 201 Created');
+      await expectFailure(promise, 'Invalid response: 201 Created');
     });
   });
 });

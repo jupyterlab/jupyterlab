@@ -8,7 +8,7 @@ import { Kernel, KernelMessage } from '../../../lib/kernel';
 import { KernelTester, createMsg } from '../utils';
 
 describe('Kernel.IFuture', () => {
-  const tester: KernelTester;
+  let tester: KernelTester;
 
   afterEach(() => {
     if (tester) {
@@ -39,8 +39,8 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      const future: Kernel.IFuture;
-      const kernel: Kernel.IKernel;
+      let future: Kernel.IFuture;
+      let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
@@ -103,7 +103,7 @@ describe('Kernel.IFuture', () => {
       ]);
     });
 
-    it('should abort processing if a hook returns false, but the done logic should still work', () => {
+    it('should abort processing if a hook returns false, but the done logic should still work', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
@@ -114,8 +114,8 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      const future: Kernel.IFuture;
-      const kernel: Kernel.IKernel;
+      let future: Kernel.IFuture;
+      let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
@@ -152,20 +152,14 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester
-        .start()
-        .then(k => {
-          kernel = k;
-          future = kernel.requestExecute(options, false);
-          return future.done;
-        })
-        .then(() => {
-          // the last hook was called for the stream and the status message.
-          expect(calls).to.deep.equal(['first', 'first']);
-        });
+      kernel = await tester.start();
+      future = kernel.requestExecute(options, false);
+      await future.done;
+      // the last hook was called for the stream and the status message.
+      expect(calls).to.deep.equal(['first', 'first']);
     });
 
-    it('should process additions on the next run', () => {
+    it('should process additions on the next run', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
@@ -176,7 +170,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      const future: Kernel.IFuture;
+      let future: Kernel.IFuture;
 
       tester.onMessage(message => {
         // send a reply
@@ -212,24 +206,13 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester
-        .start()
-        .then(kernel => {
-          future = kernel.requestExecute(options, false);
-          return future.done;
-        })
-        .then(() => {
-          expect(calls).to.deep.equal([
-            'last',
-            'iopub',
-            'first',
-            'last',
-            'iopub'
-          ]);
-        });
+      const kernel = await tester.start();
+      future = kernel.requestExecute(options, false);
+      await future.done;
+      expect(calls).to.deep.equal(['last', 'iopub', 'first', 'last', 'iopub']);
     });
 
-    it('should deactivate message hooks immediately on removal', () => {
+    it('should deactivate message hooks immediately on removal', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
@@ -240,7 +223,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      const future: Kernel.IFuture;
+      let future: Kernel.IFuture;
 
       const toDelete = (msg: KernelMessage.IIOPubMessage) => {
         calls.push('delete');
@@ -283,23 +266,19 @@ describe('Kernel.IFuture', () => {
         };
       });
 
-      return tester
-        .start()
-        .then(kernel => {
-          future = kernel.requestExecute(options, false);
-          return future.done;
-        })
-        .then(() => {
-          expect(calls).to.deep.equal([
-            'first',
-            'delete',
-            'iopub',
-            'first',
-            'iopub'
-          ]);
-          future.dispose();
-          future.removeMessageHook(first);
-        });
+      const kernel = await tester.start();
+      future = kernel.requestExecute(options, false);
+      await future.done;
+
+      expect(calls).to.deep.equal([
+        'first',
+        'delete',
+        'iopub',
+        'first',
+        'iopub'
+      ]);
+      future.dispose();
+      future.removeMessageHook(first);
     });
   });
 });
