@@ -234,9 +234,9 @@ const tree: JupyterLabPlugin<void> = {
         const workspaceMatch = args.path.match(Patterns.workspace);
         const match = treeMatch || workspaceMatch;
         const path = decodeURIComponent(match[1]);
-        const workspaces = PageConfig.getOption('workspacesUrl');
+        const workspaces = app.info.urls.workspaces;
         const workspace = PageConfig.getOption('workspace');
-        const page = PageConfig.getOption('pageUrl');
+        const page = app.info.urls.page;
         const url =
           (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
           args.search +

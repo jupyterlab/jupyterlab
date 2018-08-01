@@ -263,10 +263,13 @@ export namespace JupyterLab {
      * The urls used by the application.
      */
     readonly urls: {
+      readonly base: string;
       readonly page: string;
       readonly public: string;
       readonly settings: string;
       readonly themes: string;
+      readonly tree: string;
+      readonly workspaces: string;
     };
 
     /**
@@ -280,6 +283,7 @@ export namespace JupyterLab {
       readonly themes: string;
       readonly userSettings: string;
       readonly serverRoot: string;
+      readonly workspaces: string;
     };
 
     /**
@@ -300,10 +304,13 @@ export namespace JupyterLab {
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
     urls: {
+      base: PageConfig.getOption('baseUrl'),
       page: PageConfig.getOption('pageUrl'),
       public: PageConfig.getOption('publicUrl'),
       settings: PageConfig.getOption('settingsUrl'),
-      themes: PageConfig.getOption('themesUrl')
+      themes: PageConfig.getOption('themesUrl'),
+      tree: PageConfig.getOption('treeUrl'),
+      workspaces: PageConfig.getOption('workspacesUrl')
     },
     directories: {
       appSettings: PageConfig.getOption('appSettingsDir'),
@@ -312,7 +319,8 @@ export namespace JupyterLab {
       templates: PageConfig.getOption('templatesDir'),
       themes: PageConfig.getOption('themesDir'),
       userSettings: PageConfig.getOption('userSettingsDir'),
-      serverRoot: PageConfig.getOption('serverRoot')
+      serverRoot: PageConfig.getOption('serverRoot'),
+      workspaces: PageConfig.getOption('workspacesDir')
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
   };

@@ -83,7 +83,9 @@ namespace CommandIDs {
 namespace Patterns {
   export const cloneState = /[?&]clone([=&]|$)/;
 
-  export const loadState = /^\/workspaces\/([^?\/]+)/;
+  export const loadState = new RegExp(
+    `^${PageConfig.getOption('workspacesUrl')}([^?\/]+)`
+  );
 
   export const resetOnLoad = /(\?reset|\&reset)($|&)/;
 }
@@ -181,7 +183,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   ): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
-    const url = app.info.urls.themes;
+    const url = URLExt.join(app.info.urls.base, app.info.urls.themes);
     const key = themes.id;
     const manager = new ThemeManager({ key, host, settings, splash, url });
 
@@ -465,6 +467,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
               // After the state has been cloned, navigate to the URL.
               cloned.then(() => {
+                console.log(`THIS URL: ${url}`);
                 router.navigate(url, { silent: true });
               });
 
