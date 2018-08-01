@@ -17,7 +17,7 @@ import { WorkspaceManager } from '../../lib/workspace';
 
 describe('manager', () => {
   describe('ServiceManager', () => {
-    let manager: ServiceManager.IManager;
+    const manager: ServiceManager.IManager;
 
     beforeEach(() => {
       manager = new ServiceManager();

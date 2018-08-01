@@ -8,7 +8,7 @@ import { Kernel, KernelMessage } from '../../../lib/kernel';
 import { KernelTester, createMsg } from '../utils';
 
 describe('Kernel.IFuture', () => {
-  let tester: KernelTester;
+  const tester: KernelTester;
 
   afterEach(() => {
     if (tester) {
@@ -29,7 +29,7 @@ describe('Kernel.IFuture', () => {
 
   describe('Message hooks', () => {
     it('should have the most recently registered hook run first', async () => {
-      let options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -37,25 +37,25 @@ describe('Kernel.IFuture', () => {
         allow_stdin: false,
         stop_on_error: false
       };
-      let calls: string[] = [];
+      const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
-      let kernel: Kernel.IKernel;
+      const future: Kernel.IFuture;
+      const kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
-        let parentHeader = message.header;
-        let msg = createMsg('shell', parentHeader);
+        const parentHeader = message.header;
+        const msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parentHeader);
+          const msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parentHeader);
+          const msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state =
             'idle';
@@ -104,7 +104,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should abort processing if a hook returns false, but the done logic should still work', () => {
-      let options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -112,25 +112,25 @@ describe('Kernel.IFuture', () => {
         allow_stdin: false,
         stop_on_error: false
       };
-      let calls: string[] = [];
+      const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
-      let kernel: Kernel.IKernel;
+      const future: Kernel.IFuture;
+      const kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
         // send a reply
-        let parentHeader = message.header;
-        let msg = createMsg('shell', parentHeader);
+        const parentHeader = message.header;
+        const msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parentHeader);
+          const msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parentHeader);
+          const msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state =
             'idle';
@@ -166,7 +166,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should process additions on the next run', () => {
-      let options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -174,24 +174,24 @@ describe('Kernel.IFuture', () => {
         allow_stdin: false,
         stop_on_error: false
       };
-      let calls: string[] = [];
+      const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      const future: Kernel.IFuture;
 
       tester.onMessage(message => {
         // send a reply
-        let parentHeader = message.header;
-        let msg = createMsg('shell', parentHeader);
+        const parentHeader = message.header;
+        const msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parentHeader);
+          const msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parentHeader);
+          const msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state =
             'idle';
@@ -230,7 +230,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should deactivate message hooks immediately on removal', () => {
-      let options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -238,15 +238,15 @@ describe('Kernel.IFuture', () => {
         allow_stdin: false,
         stop_on_error: false
       };
-      let calls: string[] = [];
+      const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      const future: Kernel.IFuture;
 
-      let toDelete = (msg: KernelMessage.IIOPubMessage) => {
+      const toDelete = (msg: KernelMessage.IIOPubMessage) => {
         calls.push('delete');
         return true;
       };
-      let first = (msg: KernelMessage.IIOPubMessage) => {
+      const first = (msg: KernelMessage.IIOPubMessage) => {
         if (calls.length > 0) {
           // delete the hook the second time around
           future.removeMessageHook(toDelete);
@@ -257,18 +257,18 @@ describe('Kernel.IFuture', () => {
 
       tester.onMessage(message => {
         // send a reply
-        let parentHeader = message.header;
-        let msg = createMsg('shell', parentHeader);
+        const parentHeader = message.header;
+        const msg = createMsg('shell', parentHeader);
         tester.send(msg);
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          let msgStream = createMsg('iopub', parentHeader);
+          const msgStream = createMsg('iopub', parentHeader);
           msgStream.header.msg_type = 'stream';
           msgStream.content = { name: 'stdout', text: 'foo' };
           tester.send(msgStream);
           // trigger onDone
-          let msgDone = createMsg('iopub', parentHeader);
+          const msgDone = createMsg('iopub', parentHeader);
           msgDone.header.msg_type = 'status';
           (msgDone as KernelMessage.IStatusMsg).content.execution_state =
             'idle';

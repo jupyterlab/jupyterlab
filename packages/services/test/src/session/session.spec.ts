@@ -73,101 +73,95 @@ describe('session', () => {
   });
 
   describe('Session.listRunning()', () => {
-    it('should yield a list of valid session models', () => {
-      return Session.listRunning().then(response => {
-        let running = toArray(response);
-        expect(running.length).to.greaterThan(0);
-      });
+    it('should yield a list of valid session models', async () => {
+      const response = await Session.listRunning();
+      const running = toArray(response);
+      expect(running.length).to.greaterThan(0);
     });
 
-    it('should throw an error for an invalid model', done => {
-      let data = { id: '1234', path: 'test' };
-      let serverSettings = getRequestHandler(200, data);
-      let list = Session.listRunning(serverSettings);
-      expectFailure(list, done);
+    it('should throw an error for an invalid model', async () => {
+      const data = { id: '1234', path: 'test' };
+      const serverSettings = getRequestHandler(200, data);
+      const list = Session.listRunning(serverSettings);
+      await expectFailure(list);
     });
 
-    it('should throw an error for another invalid model', done => {
-      let data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
-      let serverSettings = getRequestHandler(200, data);
-      let list = Session.listRunning(serverSettings);
-      expectFailure(list, done);
+    it('should throw an error for another invalid model', async () => {
+      const data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
+      const serverSettings = getRequestHandler(200, data);
+      const list = Session.listRunning(serverSettings);
+      await expectFailure(list);
     });
 
-    it('should fail for wrong response status', done => {
-      let serverSettings = getRequestHandler(201, [createSessionModel()]);
-      let list = Session.listRunning(serverSettings);
-      expectFailure(list, done);
+    it('should fail for wrong response status', async () => {
+      const serverSettings = getRequestHandler(201, [createSessionModel()]);
+      const list = Session.listRunning(serverSettings);
+      await expectFailure(list);
     });
 
-    it('should fail for error response status', done => {
-      let serverSettings = getRequestHandler(500, {});
-      let list = Session.listRunning(serverSettings);
-      expectFailure(list, done, '');
+    it('should fail for error response status', async () => {
+      const serverSettings = getRequestHandler(500, {});
+      const list = Session.listRunning(serverSettings);
+      await expectFailure(list, '');
     });
   });
 
   describe('Session.startNew', () => {
     it('should start a session', async () => {
-      return startNew().then(s => {
-        session = s;
-        expect(session.id).to.be.ok;
-      });
+      session = await startNew();
+      expect(session.id).to.be.ok;
     });
 
-    it('should accept ajax options', done => {
-      let serverSettings = makeSettings();
-      let options: Session.IOptions = { path: UUID.uuid4(), serverSettings };
-      Session.startNew(options).then(s => {
-        session = s;
-        expect(session.id).to.be.ok;
-        done();
-      });
+    it('should accept ajax options', async () => {
+      const serverSettings = makeSettings();
+      const options: Session.IOptions = { path: UUID.uuid4(), serverSettings };
+      session = await Session.startNew(options);
+      expect(session.id).to.be.ok;
     });
 
     it('should start even if the websocket fails', () => {
-      let tester = new SessionTester();
+      const tester = new SessionTester();
       tester.initialStatus = 'dead';
       return tester.startSession().then(() => {
         tester.dispose();
       });
     });
 
-    it('should fail for wrong response status', done => {
-      let sessionModel = createSessionModel();
-      let serverSettings = getRequestHandler(200, sessionModel);
-      let options = createSessionOptions(sessionModel, serverSettings);
-      let sessionPromise = Session.startNew(options);
-      expectFailure(sessionPromise, done);
+    it('should fail for wrong response status', async () => {
+      const sessionModel = createSessionModel();
+      const serverSettings = getRequestHandler(200, sessionModel);
+      const options = createSessionOptions(sessionModel, serverSettings);
+      const sessionPromise = Session.startNew(options);
+      await expectFailure(sessionPromise);
     });
 
-    it('should fail for error response status', done => {
-      let serverSettings = getRequestHandler(500, {});
-      let sessionModel = createSessionModel();
-      let options = createSessionOptions(sessionModel, serverSettings);
-      let sessionPromise = Session.startNew(options);
-      expectFailure(sessionPromise, done, '');
+    it('should fail for error response status', async () => {
+      const serverSettings = getRequestHandler(500, {});
+      const sessionModel = createSessionModel();
+      const options = createSessionOptions(sessionModel, serverSettings);
+      const sessionPromise = Session.startNew(options);
+      await expectFailure(sessionPromise, '');
     });
 
-    it('should fail for wrong response model', done => {
-      let sessionModel = createSessionModel();
+    it('should fail for wrong response model', async () => {
+      const sessionModel = createSessionModel();
       (sessionModel as any).path = 1;
-      let serverSettings = getRequestHandler(201, sessionModel);
-      let options = createSessionOptions(sessionModel, serverSettings);
-      let sessionPromise = Session.startNew(options);
-      let msg = `Property 'path' is not of type 'string'`;
-      expectFailure(sessionPromise, done, msg);
+      const serverSettings = getRequestHandler(201, sessionModel);
+      const options = createSessionOptions(sessionModel, serverSettings);
+      const sessionPromise = Session.startNew(options);
+      const msg = `Property 'path' is not of type 'string'`;
+      await expectFailure(sessionPromise, msg);
     });
 
     it('should handle a deprecated response model', () => {
-      let sessionModel = createSessionModel();
-      let data = {
+      const sessionModel = createSessionModel();
+      const data = {
         id: sessionModel.id,
         kernel: sessionModel.kernel,
         notebook: { path: sessionModel.path }
       };
-      let serverSettings = getRequestHandler(201, data);
-      let options = createSessionOptions(sessionModel, serverSettings);
+      const serverSettings = getRequestHandler(201, data);
+      const options = createSessionOptions(sessionModel, serverSettings);
       return Session.startNew(options);
     });
   });
@@ -186,7 +180,7 @@ describe('session', () => {
 
   describe('Session.connectTo()', () => {
     it('should connect to a running session', () => {
-      let newSession = Session.connectTo(defaultSession.model);
+      const newSession = Session.connectTo(defaultSession.model);
       expect(newSession.id).to.equal(defaultSession.id);
       expect(newSession.kernel.id).to.equal(defaultSession.kernel.id);
       expect(newSession).to.not.equal(defaultSession);
@@ -194,7 +188,7 @@ describe('session', () => {
     });
 
     it('should accept server settings', () => {
-      let serverSettings = makeSettings();
+      const serverSettings = makeSettings();
       const session = Session.connectTo(defaultSession.model, serverSettings);
       expect(session.id).to.be.ok;
     });
@@ -230,12 +224,12 @@ describe('session', () => {
     context('#kernelChanged', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.IKernelChangedArgs | null = null;
-        let object = {};
+        const object = {};
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;
           Signal.disconnectReceiver(object);
         }, object);
-        let previous = defaultSession.kernel;
+        const previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
         await defaultSession.kernel.ready;
         expect(previous).to.not.equal(defaultSession.kernel);
@@ -262,18 +256,15 @@ describe('session', () => {
     });
 
     context('#iopubMessage', () => {
-      it('should be emitted for an iopub message', () => {
+      it('should be emitted for an iopub message', async () => {
         let called = false;
         defaultSession.iopubMessage.connect((s, msg) => {
           if (msg.header.msg_type === 'status') {
             called = true;
           }
         });
-        return defaultSession.kernel
-          .requestExecute({ code: 'a=1' }, true)
-          .done.then(() => {
-            expect(called).to.equal(true);
-          });
+        await defaultSession.kernel.requestExecute({ code: 'a=1' }, true).done;
+        expect(called).to.equal(true);
       });
     });
 
@@ -286,7 +277,7 @@ describe('session', () => {
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
         });
-        let msg = KernelMessage.createShellMessage({
+        const msg = KernelMessage.createShellMessage({
           msgType: 'foo',
           channel: 'shell',
           session: tester.serverSessionId,
@@ -301,19 +292,18 @@ describe('session', () => {
     });
 
     context('#propertyChanged', () => {
-      it('should be emitted when the session path changes', () => {
-        let newPath = UUID.uuid4();
+      it('should be emitted when the session path changes', async () => {
+        const newPath = UUID.uuid4();
         let called = false;
-        let object = {};
+        const object = {};
         defaultSession.propertyChanged.connect((s, type) => {
           expect(defaultSession.path).to.equal(newPath);
           expect(type).to.equal('path');
           called = true;
           Signal.disconnectReceiver(object);
         }, object);
-        return defaultSession.setPath(newPath).then(() => {
-          expect(called).to.equal(true);
-        });
+        await defaultSession.setPath(newPath);
+        expect(called).to.equal(true);
       });
     });
 
@@ -343,7 +333,7 @@ describe('session', () => {
 
     context('#model', () => {
       it('should be an IModel', () => {
-        let model = defaultSession.model;
+        const model = defaultSession.model;
         expect(typeof model.id).to.equal('string');
         expect(typeof model.path).to.equal('string');
         expect(typeof model.kernel.name).to.equal('string');
@@ -413,102 +403,99 @@ describe('session', () => {
     });
 
     context('#setPath()', () => {
-      it('should set the path of the session', () => {
-        let newPath = UUID.uuid4();
-        return defaultSession.setPath(newPath).then(() => {
-          expect(defaultSession.path).to.equal(newPath);
-        });
+      it('should set the path of the session', async () => {
+        const newPath = UUID.uuid4();
+        await defaultSession.setPath(newPath);
+        expect(defaultSession.path).to.equal(newPath);
       });
 
-      it('should fail for improper response status', done => {
+      it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setPath(UUID.uuid4()), done);
+        await expectFailure(defaultSession.setPath(UUID.uuid4()));
       });
 
-      it('should fail for error response status', done => {
+      it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setPath(UUID.uuid4()), done, '');
+        await expectFailure(defaultSession.setPath(UUID.uuid4()), '');
       });
 
-      it('should fail for improper model', done => {
+      it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setPath(UUID.uuid4()), done);
+        await expectFailure(defaultSession.setPath(UUID.uuid4()));
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, null, 'Session is disposed');
+        const promise = session.setPath(UUID.uuid4());
+        await expectFailure(promise, 'Session is disposed');
       });
     });
 
     context('#setType()', () => {
-      it('should set the type of the session', () => {
-        let type = UUID.uuid4();
-        return defaultSession.setType(type).then(() => {
-          expect(defaultSession.type).to.equal(type);
-        });
+      it('should set the type of the session', async () => {
+        const type = UUID.uuid4();
+        await defaultSession.setType(type);
+        expect(defaultSession.type).to.equal(type);
       });
 
-      it('should fail for improper response status', done => {
+      it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setType(UUID.uuid4()), done);
+        await expectFailure(defaultSession.setType(UUID.uuid4()));
       });
 
-      it('should fail for error response status', done => {
+      it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setType(UUID.uuid4()), done, '');
+        await expectFailure(defaultSession.setType(UUID.uuid4()), '');
       });
 
-      it('should fail for improper model', done => {
+      it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setType(UUID.uuid4()), done);
+        await expectFailure(defaultSession.setType(UUID.uuid4()));
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, null, 'Session is disposed');
+        const promise = session.setPath(UUID.uuid4());
+        await expectFailure(promise, 'Session is disposed');
       });
     });
 
     context('#setName()', () => {
-      it('should set the name of the session', () => {
-        let name = UUID.uuid4();
-        return defaultSession.setName(name).then(() => {
-          expect(defaultSession.name).to.equal(name);
-        });
+      it('should set the name of the session', async () => {
+        const name = UUID.uuid4();
+        await defaultSession.setName(name);
+        expect(defaultSession.name).to.equal(name);
       });
 
-      it('should fail for improper response status', done => {
+      it('should fail for improper response status', async () => {
         handleRequest(defaultSession, 201, {});
-        expectFailure(defaultSession.setName(UUID.uuid4()), done);
+        await expectFailure(defaultSession.setName(UUID.uuid4()));
       });
 
-      it('should fail for error response status', done => {
+      it('should fail for error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.setName(UUID.uuid4()), done, '');
+        expectFailure(defaultSession.setName(UUID.uuid4()), '');
       });
 
-      it('should fail for improper model', done => {
+      it('should fail for improper model', async () => {
         handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.setName(UUID.uuid4()), done);
+        expectFailure(defaultSession.setName(UUID.uuid4()));
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        let promise = session.setPath(UUID.uuid4());
-        await expectFailure(promise, null, 'Session is disposed');
+        const promise = session.setPath(UUID.uuid4());
+        await expectFailure(promise, 'Session is disposed');
       });
     });
 
     context('#changeKernel()', () => {
       it('should create a new kernel with the new name', async () => {
         session = await startNew();
-        let previous = session.kernel;
+        const previous = session.kernel;
         await previous.ready;
         await session.changeKernel({ name: previous.name });
         await session.kernel.ready;
@@ -520,9 +507,9 @@ describe('session', () => {
 
       it('should accept the id of the new kernel', async () => {
         session = await startNew();
-        let previous = session.kernel;
+        const previous = session.kernel;
         await previous.ready;
-        let kernel = await Kernel.startNew();
+        const kernel = await Kernel.startNew();
         await kernel.ready;
         await session.changeKernel({ id: kernel.id });
         await session.kernel.ready;
@@ -535,9 +522,9 @@ describe('session', () => {
 
       it('should update the session path if it has changed', async () => {
         session = await startNew();
-        let previous = session.kernel;
+        const previous = session.kernel;
         await previous.ready;
-        let model = { ...session.model, path: 'foo.ipynb' };
+        const model = { ...session.model, path: 'foo.ipynb' };
         handleRequest(session, 200, model);
         await session.changeKernel({ name: previous.name });
         await session.kernel.ready;
@@ -548,63 +535,58 @@ describe('session', () => {
     });
 
     context('#shutdown()', () => {
-      it('should shut down properly', () => {
-        return startNew().then(session => {
-          return session.shutdown();
-        });
+      it('should shut down properly', async () => {
+        session = await startNew();
+        await session.shutdown();
       });
 
-      it('should emit a terminated signal', () => {
+      it('should emit a terminated signal', async () => {
         let called = false;
-        return startNew()
-          .then(session => {
-            session.terminated.connect(() => {
-              called = true;
-            });
-            return session.shutdown();
-          })
-          .then(() => {
-            expect(called).to.equal(true);
-          });
-      });
-
-      it('should fail for an incorrect response status', done => {
-        handleRequest(defaultSession, 200, {});
-        expectFailure(defaultSession.shutdown(), done);
-      });
-
-      it('should handle a 404 status', () => {
-        return startNew().then(session => {
-          handleRequest(session, 404, {});
-          return session.shutdown();
+        session = await startNew();
+        session.terminated.connect(() => {
+          called = true;
         });
+        await session.shutdown();
+        expect(called).to.equal(true);
       });
 
-      it('should handle a specific error status', done => {
+      it('should fail for an incorrect response status', async () => {
+        handleRequest(defaultSession, 200, {});
+        expectFailure(defaultSession.shutdown());
+      });
+
+      it('should handle a 404 status', async () => {
+        session = await startNew();
+        handleRequest(session, 404, {});
+        await session.shutdown();
+      });
+
+      it('should handle a specific error status', async () => {
         handleRequest(defaultSession, 410, {});
-        defaultSession
-          .shutdown()
-          .catch(err => {
-            let text = 'The kernel was deleted but the session was not';
-            expect(err.message).to.contain(text);
-          })
-          .then(done, done);
+        let promise = defaultSession.shutdown();
+        try {
+          await promise;
+          throw Error('should not get here');
+        } catch (err) {
+          const text = 'The kernel was deleted but the session was not';
+          expect(err.message).to.contain(text);
+        }
       });
 
-      it('should fail for an error response status', done => {
+      it('should fail for an error response status', async () => {
         handleRequest(defaultSession, 500, {});
-        expectFailure(defaultSession.shutdown(), done, '');
+        expectFailure(defaultSession.shutdown(), '');
       });
 
       it('should fail if the session is disposed', async () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        await expectFailure(session.shutdown(), null, 'Session is disposed');
+        await expectFailure(session.shutdown(), 'Session is disposed');
       });
 
       it('should dispose of all session instances', async () => {
-        let session0 = await startNew();
-        let session1 = Session.connectTo(session0.model);
+        const session0 = await startNew();
+        const session1 = Session.connectTo(session0.model);
         await session0.shutdown();
         expect(session1.isDisposed).to.equal(true);
       });

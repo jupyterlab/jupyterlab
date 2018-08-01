@@ -59,18 +59,17 @@ describe('session/manager', () => {
     describe('#serverSettings', () => {
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = ServerConnection.makeSettings();
-        let token = serverSettings.token;
+        const serverSettings = ServerConnection.makeSettings();
+        const token = serverSettings.token;
         manager = new SessionManager({ serverSettings });
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
     describe('#specs', () => {
-      it('should be the kernel specs', () => {
-        return manager.ready.then(() => {
-          expect(manager.specs.default).to.be.ok;
-        });
+      it('should be the kernel specs', async () => {
+        await manager.ready;
+        expect(manager.specs.default).to.be.ok;
       });
     });
 
@@ -94,15 +93,15 @@ describe('session/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', () => {
         return manager.refreshRunning().then(() => {
-          let running = toArray(manager.running());
+          const running = toArray(manager.running());
           expect(running.length).to.be.greaterThan(0);
         });
       });
     });
 
     describe('#specsChanged', () => {
-      it('should be emitted when the specs change', done => {
-        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+      it('should be emitted when the specs change', async () => {
+        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
@@ -116,8 +115,8 @@ describe('session/manager', () => {
     });
 
     describe('#runningChanged', () => {
-      it('should be emitted when the running sessions changed', done => {
-        let object = {};
+      it('should be emitted when the running sessions changed', async () => {
+        const object = {};
         manager.runningChanged.connect((sender, args) => {
           expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
@@ -180,7 +179,7 @@ describe('session/manager', () => {
       // future is prematurely disposed.
       it('should refresh the list of session ids', () => {
         return manager.refreshRunning().then(() => {
-          let running = toArray(manager.running());
+          const running = toArray(manager.running());
           expect(running.length).to.be.greaterThan(0);
         });
       });
@@ -188,7 +187,7 @@ describe('session/manager', () => {
 
     describe('#refreshSpecs()', () => {
       it('should refresh the specs', () => {
-        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         return manager.refreshSpecs().then(() => {
@@ -199,7 +198,7 @@ describe('session/manager', () => {
 
     describe('#startNew()', () => {
       it('should start a session', async () => {
-        let session = await manager.startNew({ path: UUID.uuid4() });
+        const session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
         expect(session.id).to.be.ok;
         return session.shutdown();
@@ -210,7 +209,7 @@ describe('session/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        let session = await manager.startNew({ path: UUID.uuid4() });
+        const session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
         expect(called).to.equal(true);
       });
@@ -218,7 +217,7 @@ describe('session/manager', () => {
 
     describe('#findByPath()', () => {
       it('should find an existing session by path', async () => {
-        let newModel = await manager.findByPath(session.path);
+        const newModel = await manager.findByPath(session.path);
         expect(newModel.id).to.equal(session.id);
       });
     });
@@ -243,7 +242,7 @@ describe('session/manager', () => {
 
     describe('shutdown()', () => {
       it('should shut down a session by id', async () => {
-        let temp = await startNew(manager);
+        const temp = await startNew(manager);
         await temp.kernel.ready;
         await manager.shutdown(temp.id);
         expect(temp.isDisposed).to.equal(true);
@@ -251,7 +250,7 @@ describe('session/manager', () => {
 
       it('should emit a runningChanged signal', async () => {
         let called = false;
-        let session = await startNew(manager);
+        const session = await startNew(manager);
         await session.kernel.ready;
         manager.runningChanged.connect((sender, sessions) => {
           // Make sure the sessions list does not have our shutdown session in it.

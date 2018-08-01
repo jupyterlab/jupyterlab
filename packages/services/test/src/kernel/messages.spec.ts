@@ -8,7 +8,7 @@ import { KernelMessage } from '../../../lib/kernel';
 describe('kernel/messages', () => {
   describe('KernelMessage.isStreamMsg()', () => {
     it('should check for a stream message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'stream',
         channel: 'iopub',
         session: 'baz'
@@ -25,7 +25,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isDisplayDataMsg()', () => {
     it('should check for a display data message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'display_data',
         channel: 'iopub',
         session: 'baz'
@@ -42,7 +42,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isExecuteInputMsg()', () => {
     it('should check for a execute input message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'execute_input',
         channel: 'iopub',
         session: 'baz'
@@ -59,7 +59,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isExecuteResultMsg()', () => {
     it('should check for an execute result message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'execute_result',
         channel: 'iopub',
         session: 'baz'
@@ -76,7 +76,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isStatusMsg()', () => {
     it('should check for a status message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'status',
         channel: 'iopub',
         session: 'baz'
@@ -93,7 +93,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isClearOutputMsg()', () => {
     it('should check for a clear output message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'clear_output',
         channel: 'iopub',
         session: 'baz'
@@ -110,7 +110,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isCommOpenMsg()', () => {
     it('should check for a comm open message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'comm_open',
         channel: 'iopub',
         session: 'baz'
@@ -127,7 +127,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isErrorMsg()', () => {
     it('should check for an message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'error',
         channel: 'iopub',
         session: 'baz'
@@ -144,7 +144,7 @@ describe('kernel/messages', () => {
 
   describe('KernelMessage.isInputRequestMsg()', () => {
     it('should check for an input_request message type', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'input_request',
         channel: 'stdin',
         session: 'baz'

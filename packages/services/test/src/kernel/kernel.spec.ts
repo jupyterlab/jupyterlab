@@ -18,14 +18,14 @@ import {
   testEmission
 } from '../utils';
 
-let PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel', () => {
-  let defaultKernel: Kernel.IKernel;
-  let specs: Kernel.ISpecModels;
-  let tester: KernelTester;
+  const defaultKernel: Kernel.IKernel;
+  const specs: Kernel.ISpecModels;
+  const tester: KernelTester;
 
   before(() => {
     return Kernel.getSpecs()
@@ -58,28 +58,28 @@ describe('kernel', () => {
     });
 
     it('should accept server settings', () => {
-      let serverSettings = makeSettings();
+      const serverSettings = makeSettings();
       return Kernel.listRunning(serverSettings).then(response => {
         expect(toArray(response).length).to.be.greaterThan(0);
       });
     });
 
-    it('should throw an error for an invalid model', done => {
-      let data = { id: UUID.uuid4(), name: 'test' };
-      let settings = getRequestHandler(200, data);
-      let promise = Kernel.listRunning(settings);
+    it('should throw an error for an invalid model', async () => {
+      const data = { id: UUID.uuid4(), name: 'test' };
+      const settings = getRequestHandler(200, data);
+      const promise = Kernel.listRunning(settings);
       expectFailure(promise, done, 'Invalid kernel list');
     });
 
-    it('should throw an error for an invalid response', done => {
-      let settings = getRequestHandler(201, {});
-      let promise = Kernel.listRunning(settings);
+    it('should throw an error for an invalid response', async () => {
+      const settings = getRequestHandler(201, {});
+      const promise = Kernel.listRunning(settings);
       expectFailure(promise, done, 'Invalid response: 201 Created');
     });
 
-    it('should throw an error for an error response', done => {
-      let settings = getRequestHandler(500, {});
-      let promise = Kernel.listRunning(settings);
+    it('should throw an error for an error response', async () => {
+      const settings = getRequestHandler(500, {});
+      const promise = Kernel.listRunning(settings);
       expectFailure(promise, done, '');
     });
   });
@@ -93,7 +93,7 @@ describe('kernel', () => {
     });
 
     it('should accept ajax options', () => {
-      let serverSettings = makeSettings();
+      const serverSettings = makeSettings();
       return Kernel.startNew({ serverSettings }).then(kernel => {
         expect(kernel.status).to.equal('unknown');
         return kernel.shutdown();
@@ -106,7 +106,7 @@ describe('kernel', () => {
     // kernel typically doesn't immediately send its status, does it? I suppose
     // it should - if we are connecting to an existing kernel, it would be nice
     // to know right off if it's busy/dead/etc.
-    it.skip('should still start if the kernel dies', done => {
+    it.skip('should still start if the kernel dies', async () => {
       tester = new KernelTester();
       tester.initialStatus = 'dead';
       tester
@@ -122,31 +122,31 @@ describe('kernel', () => {
         .catch(done);
     });
 
-    it('should throw an error for an invalid kernel id', done => {
-      let serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
-      let kernelPromise = Kernel.startNew({ serverSettings });
+    it('should throw an error for an invalid kernel id', async () => {
+      const serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
+      const kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });
 
-    it('should throw an error for another invalid kernel id', done => {
-      let serverSettings = getRequestHandler(201, {
+    it('should throw an error for another invalid kernel id', async () => {
+      const serverSettings = getRequestHandler(201, {
         id: UUID.uuid4(),
         name: 1
       });
-      let kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done);
     });
 
-    it('should throw an error for an invalid response', done => {
-      let data = { id: UUID.uuid4(), name: 'foo' };
-      let serverSettings = getRequestHandler(200, data);
-      let kernelPromise = Kernel.startNew({ serverSettings });
+    it('should throw an error for an invalid response', async () => {
+      const data = { id: UUID.uuid4(), name: 'foo' };
+      const serverSettings = getRequestHandler(200, data);
+      const kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done, 'Invalid response: 200 OK');
     });
 
-    it('should throw an error for an error response', done => {
-      let serverSettings = getRequestHandler(500, {});
-      let kernelPromise = Kernel.startNew({ serverSettings });
+    it('should throw an error for an error response', async () => {
+      const serverSettings = getRequestHandler(500, {});
+      const kernelPromise = Kernel.startNew({ serverSettings });
       expectFailure(kernelPromise, done, '');
     });
 
@@ -165,15 +165,15 @@ describe('kernel', () => {
 
   describe('Kernel.connectTo()', () => {
     it('should connect to an existing kernel', () => {
-      let id = defaultKernel.id;
+      const id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.equal(id);
       kernel.dispose();
     });
 
     it('should accept server settings', () => {
-      let id = defaultKernel.id;
-      let serverSettings = makeSettings();
+      const id = defaultKernel.id;
+      const serverSettings = makeSettings();
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
       expect(kernel.id).to.equal(id);
       kernel.dispose();
@@ -200,14 +200,14 @@ describe('kernel', () => {
     });
 
     it('should accept ajax options', () => {
-      let serverSettings = makeSettings();
+      const serverSettings = makeSettings();
       return Kernel.getSpecs(serverSettings).then(specs => {
         expect(specs.default).to.be.ok;
       });
     });
 
     it('should handle a missing default parameter', () => {
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         kernelspecs: { python: PYTHON_SPEC }
       });
       return Kernel.getSpecs(serverSettings).then(specs => {
@@ -215,18 +215,18 @@ describe('kernel', () => {
       });
     });
 
-    it('should throw for a missing kernelspecs parameter', done => {
-      let serverSettings = getRequestHandler(200, {
+    it('should throw for a missing kernelspecs parameter', async () => {
+      const serverSettings = getRequestHandler(200, {
         default: PYTHON_SPEC.name
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No kernelspecs found');
     });
 
     it('should omit an invalid kernelspec', () => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.name = 1;
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'python',
         kernelspecs: {
           R: R_SPEC,
@@ -239,64 +239,64 @@ describe('kernel', () => {
       });
     });
 
-    it('should handle an improper name', done => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+    it('should handle an improper name', async () => {
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.name = 1;
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No valid kernelspecs found');
     });
 
-    it('should handle an improper language', done => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+    it('should handle an improper language', async () => {
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.spec.language = 1;
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No valid kernelspecs found');
     });
 
-    it('should handle an improper argv', done => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+    it('should handle an improper argv', async () => {
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.spec.argv = 'hello';
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No valid kernelspecs found');
     });
 
-    it('should handle an improper display_name', done => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+    it('should handle an improper display_name', async () => {
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       R_SPEC.spec.display_name = ['hello'];
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No valid kernelspecs found');
     });
 
-    it('should handle missing resources', done => {
-      let R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+    it('should handle missing resources', async () => {
+      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
       delete R_SPEC.resources;
-      let serverSettings = getRequestHandler(200, {
+      const serverSettings = getRequestHandler(200, {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      let promise = Kernel.getSpecs(serverSettings);
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'No valid kernelspecs found');
     });
 
-    it('should throw an error for an invalid response', done => {
-      let serverSettings = getRequestHandler(201, {});
-      let promise = Kernel.getSpecs(serverSettings);
+    it('should throw an error for an invalid response', async () => {
+      const serverSettings = getRequestHandler(201, {});
+      const promise = Kernel.getSpecs(serverSettings);
       expectFailure(promise, done, 'Invalid response: 201 Created');
     });
   });

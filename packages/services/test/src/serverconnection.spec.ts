@@ -13,7 +13,7 @@ describe('@jupyterlab/services', () => {
   describe('ServerConnection', () => {
     describe('.makeRequest()', () => {
       it('should make a request to the server', () => {
-        let settings = getRequestHandler(200, 'hello');
+        const settings = getRequestHandler(200, 'hello');
         return ServerConnection.makeRequest(settings.baseUrl, {}, settings)
           .then(response => {
             expect(response.statusText).to.equal('OK');
@@ -27,23 +27,23 @@ describe('@jupyterlab/services', () => {
 
     describe('.makeSettings()', () => {
       it('should use default settings', () => {
-        let settings = ServerConnection.makeSettings();
+        const settings = ServerConnection.makeSettings();
         expect(settings.baseUrl).to.equal(PageConfig.getBaseUrl());
         expect(settings.wsUrl).to.equal(PageConfig.getWsUrl());
         expect(settings.token).to.equal(PageConfig.getOption('token'));
       });
 
       it('should use baseUrl for wsUrl', () => {
-        let conf: Partial<ServerConnection.ISettings> = {
+        const conf: Partial<ServerConnection.ISettings> = {
           baseUrl: 'https://host/path'
         };
-        let settings = ServerConnection.makeSettings(conf);
+        const settings = ServerConnection.makeSettings(conf);
         expect(settings.baseUrl).to.equal(conf.baseUrl);
         expect(settings.wsUrl).to.equal('wss://host/path');
       });
 
       it('should handle overrides', () => {
-        let defaults: Partial<ServerConnection.ISettings> = {
+        const defaults: Partial<ServerConnection.ISettings> = {
           baseUrl: 'foo',
           wsUrl: 'bar',
           init: {
@@ -51,7 +51,7 @@ describe('@jupyterlab/services', () => {
           },
           token: 'baz'
         };
-        let settings = ServerConnection.makeSettings(defaults);
+        const settings = ServerConnection.makeSettings(defaults);
         expect(settings.baseUrl).to.equal(defaults.baseUrl);
         expect(settings.wsUrl).to.equal(defaults.wsUrl);
         expect(settings.token).to.equal(defaults.token);
@@ -61,14 +61,14 @@ describe('@jupyterlab/services', () => {
 
     describe('.makeError()', () => {
       it('should create a server error from a server response', () => {
-        let settings = getRequestHandler(200, 'hi');
-        let init = { body: 'hi' };
+        const settings = getRequestHandler(200, 'hi');
+        const init = { body: 'hi' };
         return ServerConnection.makeRequest(
           settings.baseUrl,
           init,
           settings
         ).then(response => {
-          let err = new ServerConnection.ResponseError(response);
+          const err = new ServerConnection.ResponseError(response);
           expect(err.message).to.equal('Invalid response: 200 OK');
         });
       });

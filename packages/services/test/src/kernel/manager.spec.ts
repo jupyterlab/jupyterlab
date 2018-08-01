@@ -17,14 +17,14 @@ import {
   testEmission
 } from '../utils';
 
-let PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
+const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel/manager', () => {
-  let manager: KernelManager;
-  let specs: Kernel.ISpecModels;
-  let kernel: Kernel.IKernel;
+  const manager: KernelManager;
+  const specs: Kernel.ISpecModels;
+  const kernel: Kernel.IKernel;
 
   before(() => {
     return Kernel.getSpecs()
@@ -63,8 +63,8 @@ describe('kernel/manager', () => {
     describe('#serverSettings', () => {
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = makeSettings();
-        let token = serverSettings.token;
+        const serverSettings = makeSettings();
+        const token = serverSettings.token;
         manager = new KernelManager({ serverSettings });
         expect(manager.serverSettings.token).to.equal(token);
       });
@@ -87,8 +87,8 @@ describe('kernel/manager', () => {
     });
 
     describe('#specsChanged', () => {
-      it('should be emitted when the specs change', done => {
-        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+      it('should be emitted when the specs change', async () => {
+        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
@@ -101,7 +101,7 @@ describe('kernel/manager', () => {
     });
 
     describe('#runningChanged', () => {
-      it('should be emitted in refreshRunning when the running kernels changed', done => {
+      it('should be emitted in refreshRunning when the running kernels changed', async () => {
         manager.runningChanged.connect((sender, args) => {
           expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
@@ -114,7 +114,7 @@ describe('kernel/manager', () => {
           .catch(done);
       });
 
-      it('should be emitted when a kernel is shut down', done => {
+      it('should be emitted when a kernel is shut down', async () => {
         manager
           .startNew()
           .then(kernel => {
@@ -147,7 +147,7 @@ describe('kernel/manager', () => {
 
     describe('#refreshSpecs()', () => {
       it('should update list of kernel specs', () => {
-        let specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         return manager.refreshSpecs().then(() => {
@@ -169,7 +169,7 @@ describe('kernel/manager', () => {
         return manager.startNew();
       });
 
-      it('should emit a runningChanged signal', done => {
+      it('should emit a runningChanged signal', async () => {
         manager.runningChanged.connect(() => {
           done();
         });
@@ -179,7 +179,7 @@ describe('kernel/manager', () => {
 
     describe('#findById()', () => {
       it('should find an existing kernel by id', () => {
-        let id = kernel.id;
+        const id = kernel.id;
         return manager.findById(id).then(model => {
           expect(model.id).to.equal(id);
         });
@@ -188,12 +188,12 @@ describe('kernel/manager', () => {
 
     describe('#connectTo()', () => {
       it('should connect to an existing kernel', () => {
-        let id = kernel.id;
-        let newConnection = manager.connectTo(kernel.model);
+        const id = kernel.id;
+        const newConnection = manager.connectTo(kernel.model);
         expect(newConnection.model.id).to.equal(id);
       });
 
-      it('should emit a runningChanged signal', done => {
+      it('should emit a runningChanged signal', async () => {
         manager.runningChanged.connect(() => {
           done();
         });
@@ -207,14 +207,14 @@ describe('kernel/manager', () => {
 
     describe('shutdown()', () => {
       it('should shut down a kernel by id', async () => {
-        let kernel = await manager.startNew();
+        const kernel = await manager.startNew();
         await kernel.ready;
         await manager.shutdown(kernel.id);
         expect(kernel.isDisposed).to.equal(true);
       });
 
       it('should emit a runningChanged signal', async () => {
-        let kernel = await manager.startNew();
+        const kernel = await manager.startNew();
         const emission = testEmission(manager.runningChanged, {
           test: () => {
             expect(kernel.isDisposed).to.equal(false);

@@ -12,14 +12,14 @@ import { init } from '../utils';
 // Initialize fetch override.
 init();
 
-let BLIP = `
+const BLIP = `
 from ipykernel.comm import Comm
 comm = Comm(target_name="test", data="hello")
 comm.send(data="hello")
 comm.close("goodbye")
 `;
 
-let RECEIVE = `
+const RECEIVE = `
 def _recv(msg):
     data = msg["content"]["data"]
     if data == "quit":
@@ -28,7 +28,7 @@ def _recv(msg):
          comm.send(data)
 `;
 
-let SEND = `
+const SEND = `
 ${RECEIVE}
 from ipykernel.comm import Comm
 comm = Comm(target_name="test", data="hello")
@@ -36,7 +36,7 @@ comm.send(data="hello")
 comm.on_msg(_recv)
 `;
 
-let TARGET = `
+const TARGET = `
 ${RECEIVE}
 def target_func(comm, msg):
     comm.on_msg(_recv)
@@ -44,7 +44,7 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 describe('jupyter.services - Comm', () => {
-  let kernel: Kernel.IKernel;
+  const kernel: Kernel.IKernel;
 
   before(() => {
     return Kernel.startNew({ name: 'ipython' }).then(k => {
@@ -66,30 +66,30 @@ describe('jupyter.services - Comm', () => {
   describe('Kernel', () => {
     context('#connectToComm()', () => {
       it('should create an instance of IComm', () => {
-        let comm = kernel.connectToComm('test');
+        const comm = kernel.connectToComm('test');
         expect(comm.targetName).to.equal('test');
         expect(typeof comm.commId).to.equal('string');
       });
 
       it('should use the given id', () => {
-        let comm = kernel.connectToComm('test', '1234');
+        const comm = kernel.connectToComm('test', '1234');
         expect(comm.targetName).to.equal('test');
         expect(comm.commId).to.equal('1234');
       });
 
       it('should reuse an existing comm', () => {
-        let comm = kernel.connectToComm('test', '1234');
-        let comm2 = kernel.connectToComm('test', '1234');
+        const comm = kernel.connectToComm('test', '1234');
+        const comm2 = kernel.connectToComm('test', '1234');
         expect(comm).to.equal(comm2);
       });
     });
 
     context('#registerCommTarget()', () => {
       it('should call the provided callback', async () => {
-        let promise = new PromiseDelegate<
+        const promise = new PromiseDelegate<
           [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
-        let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
         };
         kernel.registerCommTarget('test', hook);
@@ -98,7 +98,7 @@ describe('jupyter.services - Comm', () => {
         await kernel.requestExecute({ code: SEND }, true).done;
 
         // Get the comm.
-        let [comm, msg] = await promise.promise;
+        const [comm, msg] = await promise.promise;
         expect(msg.content.data).to.equal('hello');
 
         // Clean up
@@ -109,8 +109,8 @@ describe('jupyter.services - Comm', () => {
 
     context('#commInfo()', () => {
       it('should get the comm info', async () => {
-        let commPromise = new PromiseDelegate<Kernel.IComm>();
-        let hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+        const commPromise = new PromiseDelegate<Kernel.IComm>();
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           commPromise.resolve(comm);
         };
         kernel.registerCommTarget('test', hook);
@@ -119,13 +119,13 @@ describe('jupyter.services - Comm', () => {
         await kernel.requestExecute({ code: SEND }, true).done;
 
         // Get the comm.
-        let comm = await commPromise.promise;
+        const comm = await commPromise.promise;
 
         // Ask the kernel for the list of current comms.
-        let msg = await kernel.requestCommInfo({});
+        const msg = await kernel.requestCommInfo({});
 
         // Test to make sure the comm we just created is listed.
-        let comms = msg.content.comms;
+        const comms = msg.content.comms;
         expect(comms[comm.commId].target_name).to.equal('test');
 
         // Clean up
@@ -140,8 +140,8 @@ describe('jupyter.services - Comm', () => {
             return kernel.requestCommInfo({ target: 'test' });
           })
           .then(msg => {
-            let comms = msg.content.comms;
-            for (let id in comms) {
+            const comms = msg.content.comms;
+            for (const id in comms) {
               expect(comms[id].target_name).to.equal('test');
             }
           });
@@ -150,14 +150,14 @@ describe('jupyter.services - Comm', () => {
 
     context('#isDisposed', () => {
       it('should be true after we dispose of the comm', () => {
-        let comm = kernel.connectToComm('test');
+        const comm = kernel.connectToComm('test');
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let comm = kernel.connectToComm('test');
+        const comm = kernel.connectToComm('test');
         expect(comm.isDisposed).to.equal(false);
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
@@ -168,7 +168,7 @@ describe('jupyter.services - Comm', () => {
 
     context('#dispose()', () => {
       it('should dispose of the resources held by the comm', () => {
-        let comm = kernel.connectToComm('foo');
+        const comm = kernel.connectToComm('foo');
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
@@ -176,7 +176,7 @@ describe('jupyter.services - Comm', () => {
   });
 
   describe('IComm', () => {
-    let comm: Kernel.IComm;
+    const comm: Kernel.IComm;
 
     beforeEach(() => {
       comm = kernel.connectToComm('test');
@@ -195,7 +195,7 @@ describe('jupyter.services - Comm', () => {
     });
 
     context('#onClose', () => {
-      it('should be readable and writable function', done => {
+      it('should be readable and writable function', async () => {
         expect(comm.onClose).to.be.undefined;
         comm.onClose = msg => {
           done();
@@ -203,7 +203,7 @@ describe('jupyter.services - Comm', () => {
         comm.close();
       });
 
-      it('should be called when the server side closes', done => {
+      it('should be called when the server side closes', async () => {
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onClose = data => {
             done();
@@ -215,22 +215,22 @@ describe('jupyter.services - Comm', () => {
     });
 
     context('#onMsg', () => {
-      it('should be readable and writable function', done => {
+      it('should be readable and writable function', async () => {
         comm.onMsg = msg => {
           done();
         };
         expect(typeof comm.onMsg).to.equal('function');
-        let options: KernelMessage.IOptions = {
+        const options: KernelMessage.IOptions = {
           msgType: 'comm_msg',
           channel: 'iopub',
           username: kernel.username,
           session: kernel.clientId
         };
-        let msg = KernelMessage.createMessage(options);
+        const msg = KernelMessage.createMessage(options);
         comm.onMsg(msg as KernelMessage.ICommMsgMsg);
       });
 
-      it('should be called when the server side sends a message', done => {
+      it('should be called when the server side sends a message', async () => {
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onMsg = msg => {
             expect(msg.content.data).to.equal('hello');
@@ -243,10 +243,10 @@ describe('jupyter.services - Comm', () => {
 
     context('#open()', () => {
       it('should send a message to the server', () => {
-        let future = kernel.requestExecute({ code: TARGET });
+        const future = kernel.requestExecute({ code: TARGET });
         future.done.then(() => {
-          let encoder = new TextEncoder();
-          let data = encoder.encode('hello');
+          const encoder = new TextEncoder();
+          const data = encoder.encode('hello');
           future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
             data,
             data.buffer
@@ -259,14 +259,14 @@ describe('jupyter.services - Comm', () => {
     context('#send()', () => {
       it('should send a message to the server', () => {
         return comm.open().done.then(() => {
-          let future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
+          const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
           return future.done;
         });
       });
 
       it('should pass through a buffers field', () => {
         return comm.open().done.then(() => {
-          let future = comm.send({ buffers: 'bar' });
+          const future = comm.send({ buffers: 'bar' });
           return future.done;
         });
       });
@@ -275,14 +275,14 @@ describe('jupyter.services - Comm', () => {
     context('#close()', () => {
       it('should send a message to the server', () => {
         return comm.open().done.then(() => {
-          let encoder = new TextEncoder();
-          let data = encoder.encode('hello');
-          let future = comm.close({ foo: 'bar' }, {}, [data, data.buffer]);
+          const encoder = new TextEncoder();
+          const data = encoder.encode('hello');
+          const future = comm.close({ foo: 'bar' }, {}, [data, data.buffer]);
           return future.done;
         });
       });
 
-      it('should trigger an onClose', done => {
+      it('should trigger an onClose', async () => {
         comm
           .open()
           .done.then(() => {
@@ -290,7 +290,7 @@ describe('jupyter.services - Comm', () => {
               expect(msg.content.data).to.deep.equal({ foo: 'bar' });
               done();
             };
-            let future = comm.close({ foo: 'bar' });
+            const future = comm.close({ foo: 'bar' });
             return future.done;
           })
           .catch(done);
