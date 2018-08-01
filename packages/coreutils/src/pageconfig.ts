@@ -129,17 +129,14 @@ export namespace PageConfig {
    * @param options - The tree URL construction options.
    */
   export function getTreeUrl(options: ITreeOptions = {}): string {
-    const base = getOption('baseUrl');
-    const page = getOption('pageUrl');
+    const base = getBaseUrl();
+    const tree = getOption('treeUrl');
     const workspaces = getOption('workspacesUrl');
     const workspace = getOption('workspace');
-    const includeWorkspace = !!options.workspace;
-    const url =
-      includeWorkspace && workspace
-        ? URLExt.join(workspaces, workspace, 'tree')
-        : URLExt.join(base, page, 'tree');
 
-    return URLExt.parse(url).toString();
+    return !!options.workspace && workspace
+      ? URLExt.join(base, workspaces, workspace, 'tree')
+      : URLExt.join(base, tree);
   }
 
   /**

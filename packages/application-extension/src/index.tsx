@@ -51,7 +51,13 @@ namespace CommandIDs {
  * The routing regular expressions used by the application plugin.
  */
 namespace Patterns {
-  export const tree = /[^?]*(\/tree\/([^?]+))/;
+  export const tree = new RegExp(
+    `^${PageConfig.getOption('treeUrl')}([^?\/]+)`
+  );
+
+  export const workspace = new RegExp(
+    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?\/]+)`
+  );
 }
 
 /**
@@ -194,8 +200,7 @@ const router: JupyterLabPlugin<IRouter> = {
   activate: (app: JupyterLab) => {
     const { commands } = app;
     const base = PageConfig.getOption('baseUrl');
-    const page = PageConfig.getOption('pageUrl');
-    const router = new Router({ base: URLExt.join(base, page), commands });
+    const router = new Router({ base, commands });
 
     app.started.then(() => {
       // Route the very first request on load.
@@ -225,9 +230,17 @@ const tree: JupyterLabPlugin<void> = {
 
     commands.addCommand(CommandIDs.tree, {
       execute: (args: IRouter.ILocation) => {
-        const { request } = args;
-        const path = decodeURIComponent(args.path.match(Patterns.tree)[2]);
-        const url = request.replace(request.match(Patterns.tree)[1], '');
+        const treeMatch = args.path.match(Patterns.tree);
+        const workspaceMatch = args.path.match(Patterns.workspace);
+        const match = treeMatch || workspaceMatch;
+        const path = decodeURIComponent(match[1]);
+        const workspaces = PageConfig.getOption('workspacesUrl');
+        const workspace = PageConfig.getOption('workspace');
+        const page = PageConfig.getOption('pageUrl');
+        const url =
+          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
+          args.search +
+          args.hash;
         const immediate = true;
 
         // Silently remove the tree portion of the URL leaving the rest intact.
@@ -243,6 +256,7 @@ const tree: JupyterLabPlugin<void> = {
     });
 
     router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
   }
 };
 

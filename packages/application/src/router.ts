@@ -185,7 +185,7 @@ export class Router implements IRouter {
     const { base } = this;
     const parsed = URLExt.parse(window.location.href);
     const { search, hash } = parsed;
-    const path = parsed.pathname.replace(base, '');
+    const path = parsed.pathname.replace(base, '/');
     const request = path + search + hash;
 
     return { hash, path, request, search };
