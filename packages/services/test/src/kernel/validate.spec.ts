@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -37,7 +37,7 @@ describe('kernel/validate', () => {
         session: 'baz'
       });
       delete msg.channel;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if a field is invalid', () => {
@@ -47,7 +47,7 @@ describe('kernel/validate', () => {
         session: 'baz'
       });
       (msg as any).header.username = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if the parent header is given an invalid', () => {
@@ -58,7 +58,7 @@ describe('kernel/validate', () => {
       });
       msg.parent_header = msg.header;
       (msg as any).parent_header.username = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if the channel is not a string', () => {
@@ -68,7 +68,7 @@ describe('kernel/validate', () => {
         session: 'baz'
       });
       (msg as any).channel = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should validate an iopub message', () => {
@@ -104,7 +104,7 @@ describe('kernel/validate', () => {
         },
         {}
       );
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw on invalid iopub message content', () => {
@@ -116,7 +116,7 @@ describe('kernel/validate', () => {
         },
         { wait: 1 }
       );
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should handle no buffers field', () => {
@@ -148,13 +148,13 @@ describe('kernel/validate', () => {
     it('should fail on missing data', () => {
       let spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       delete spec['name'];
-      expect(() => validateSpecModel(spec)).to.throwError();
+      expect(() => validateSpecModel(spec)).to.throw();
     });
 
     it('should fail on incorrect data', () => {
       let spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       spec.spec.language = 1;
-      expect(() => validateSpecModel(spec)).to.throwError();
+      expect(() => validateSpecModel(spec)).to.throw();
     });
   });
 
@@ -173,7 +173,7 @@ describe('kernel/validate', () => {
       const model: any = {
         default: 'python'
       };
-      expect(() => validateSpecModels(model)).to.throwError();
+      expect(() => validateSpecModels(model)).to.throw();
     });
   });
 });

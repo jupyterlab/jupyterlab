@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -16,11 +16,11 @@ describe('@jupyterlab/services', () => {
         let settings = getRequestHandler(200, 'hello');
         return ServerConnection.makeRequest(settings.baseUrl, {}, settings)
           .then(response => {
-            expect(response.statusText).to.be('OK');
+            expect(response.statusText).to.equal('OK');
             return response.json();
           })
           .then(data => {
-            expect(data).to.be('hello');
+            expect(data).to.equal('hello');
           });
       });
     });
@@ -28,9 +28,9 @@ describe('@jupyterlab/services', () => {
     describe('.makeSettings()', () => {
       it('should use default settings', () => {
         let settings = ServerConnection.makeSettings();
-        expect(settings.baseUrl).to.be(PageConfig.getBaseUrl());
-        expect(settings.wsUrl).to.be(PageConfig.getWsUrl());
-        expect(settings.token).to.be(PageConfig.getOption('token'));
+        expect(settings.baseUrl).to.equal(PageConfig.getBaseUrl());
+        expect(settings.wsUrl).to.equal(PageConfig.getWsUrl());
+        expect(settings.token).to.equal(PageConfig.getOption('token'));
       });
 
       it('should use baseUrl for wsUrl', () => {
@@ -38,8 +38,8 @@ describe('@jupyterlab/services', () => {
           baseUrl: 'https://host/path'
         };
         let settings = ServerConnection.makeSettings(conf);
-        expect(settings.baseUrl).to.be(conf.baseUrl);
-        expect(settings.wsUrl).to.be('wss://host/path');
+        expect(settings.baseUrl).to.equal(conf.baseUrl);
+        expect(settings.wsUrl).to.equal('wss://host/path');
       });
 
       it('should handle overrides', () => {
@@ -52,10 +52,10 @@ describe('@jupyterlab/services', () => {
           token: 'baz'
         };
         let settings = ServerConnection.makeSettings(defaults);
-        expect(settings.baseUrl).to.be(defaults.baseUrl);
-        expect(settings.wsUrl).to.be(defaults.wsUrl);
-        expect(settings.token).to.be(defaults.token);
-        expect(settings.init.credentials).to.be(defaults.init.credentials);
+        expect(settings.baseUrl).to.equal(defaults.baseUrl);
+        expect(settings.wsUrl).to.equal(defaults.wsUrl);
+        expect(settings.token).to.equal(defaults.token);
+        expect(settings.init.credentials).to.equal(defaults.init.credentials);
       });
     });
 
@@ -69,7 +69,7 @@ describe('@jupyterlab/services', () => {
           settings
         ).then(response => {
           let err = new ServerConnection.ResponseError(response);
-          expect(err.message).to.be('Invalid response: 200 OK');
+          expect(err.message).to.equal('Invalid response: 200 OK');
         });
       });
     });

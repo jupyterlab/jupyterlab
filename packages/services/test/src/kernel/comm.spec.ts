@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
@@ -67,20 +67,20 @@ describe('jupyter.services - Comm', () => {
     context('#connectToComm()', () => {
       it('should create an instance of IComm', () => {
         let comm = kernel.connectToComm('test');
-        expect(comm.targetName).to.be('test');
-        expect(typeof comm.commId).to.be('string');
+        expect(comm.targetName).to.equal('test');
+        expect(typeof comm.commId).to.equal('string');
       });
 
       it('should use the given id', () => {
         let comm = kernel.connectToComm('test', '1234');
-        expect(comm.targetName).to.be('test');
-        expect(comm.commId).to.be('1234');
+        expect(comm.targetName).to.equal('test');
+        expect(comm.commId).to.equal('1234');
       });
 
       it('should reuse an existing comm', () => {
         let comm = kernel.connectToComm('test', '1234');
         let comm2 = kernel.connectToComm('test', '1234');
-        expect(comm).to.be(comm2);
+        expect(comm).to.equal(comm2);
       });
     });
 
@@ -99,7 +99,7 @@ describe('jupyter.services - Comm', () => {
 
         // Get the comm.
         let [comm, msg] = await promise.promise;
-        expect(msg.content.data).to.be('hello');
+        expect(msg.content.data).to.equal('hello');
 
         // Clean up
         kernel.removeCommTarget('test', hook);
@@ -126,7 +126,7 @@ describe('jupyter.services - Comm', () => {
 
         // Test to make sure the comm we just created is listed.
         let comms = msg.content.comms;
-        expect(comms[comm.commId].target_name).to.be('test');
+        expect(comms[comm.commId].target_name).to.equal('test');
 
         // Clean up
         kernel.removeCommTarget('test', hook);
@@ -142,7 +142,7 @@ describe('jupyter.services - Comm', () => {
           .then(msg => {
             let comms = msg.content.comms;
             for (let id in comms) {
-              expect(comms[id].target_name).to.be('test');
+              expect(comms[id].target_name).to.equal('test');
             }
           });
       });
@@ -151,18 +151,18 @@ describe('jupyter.services - Comm', () => {
     context('#isDisposed', () => {
       it('should be true after we dispose of the comm', () => {
         let comm = kernel.connectToComm('test');
-        expect(comm.isDisposed).to.be(false);
+        expect(comm.isDisposed).to.equal(false);
         comm.dispose();
-        expect(comm.isDisposed).to.be(true);
+        expect(comm.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
         let comm = kernel.connectToComm('test');
-        expect(comm.isDisposed).to.be(false);
-        expect(comm.isDisposed).to.be(false);
+        expect(comm.isDisposed).to.equal(false);
+        expect(comm.isDisposed).to.equal(false);
         comm.dispose();
-        expect(comm.isDisposed).to.be(true);
-        expect(comm.isDisposed).to.be(true);
+        expect(comm.isDisposed).to.equal(true);
+        expect(comm.isDisposed).to.equal(true);
       });
     });
 
@@ -170,7 +170,7 @@ describe('jupyter.services - Comm', () => {
       it('should dispose of the resources held by the comm', () => {
         let comm = kernel.connectToComm('foo');
         comm.dispose();
-        expect(comm.isDisposed).to.be(true);
+        expect(comm.isDisposed).to.equal(true);
       });
     });
   });
@@ -184,19 +184,19 @@ describe('jupyter.services - Comm', () => {
 
     context('#id', () => {
       it('should be a string', () => {
-        expect(typeof comm.commId).to.be('string');
+        expect(typeof comm.commId).to.equal('string');
       });
     });
 
     context('#name', () => {
       it('should be a string', () => {
-        expect(comm.targetName).to.be('test');
+        expect(comm.targetName).to.equal('test');
       });
     });
 
     context('#onClose', () => {
       it('should be readable and writable function', done => {
-        expect(comm.onClose).to.be(undefined);
+        expect(comm.onClose).to.be.undefined;
         comm.onClose = msg => {
           done();
         };
@@ -219,7 +219,7 @@ describe('jupyter.services - Comm', () => {
         comm.onMsg = msg => {
           done();
         };
-        expect(typeof comm.onMsg).to.be('function');
+        expect(typeof comm.onMsg).to.equal('function');
         let options: KernelMessage.IOptions = {
           msgType: 'comm_msg',
           channel: 'iopub',
@@ -233,7 +233,7 @@ describe('jupyter.services - Comm', () => {
       it('should be called when the server side sends a message', done => {
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onMsg = msg => {
-            expect(msg.content.data).to.be('hello');
+            expect(msg.content.data).to.equal('hello');
             done();
           };
         });
@@ -287,7 +287,7 @@ describe('jupyter.services - Comm', () => {
           .open()
           .done.then(() => {
             comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
-              expect(msg.content.data).to.eql({ foo: 'bar' });
+              expect(msg.content.data).to.deep.equal({ foo: 'bar' });
               done();
             };
             let future = comm.close({ foo: 'bar' });
@@ -305,7 +305,7 @@ describe('jupyter.services - Comm', () => {
           .then(() => {
             expect(() => {
               comm.send('test');
-            }).to.throwError();
+            }).to.throw();
           });
       });
     });

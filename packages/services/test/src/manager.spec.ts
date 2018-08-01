@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { ContentsManager } from '../../lib/contents';
 
@@ -30,37 +30,37 @@ describe('manager', () => {
 
     describe('#constructor()', () => {
       it('should create a new service manager', () => {
-        expect(manager).to.be.a(ServiceManager);
+        expect(manager).to.be.an.instanceof(ServiceManager);
       });
     });
 
     describe('#sessions', () => {
       it('should be the sessions manager instance', () => {
-        expect(manager.sessions).to.be.a(SessionManager);
+        expect(manager.sessions).to.be.an.instanceof(SessionManager);
       });
     });
 
     describe('#settings', () => {
       it('should be the setting manager instance', () => {
-        expect(manager.settings).to.be.a(SettingManager);
+        expect(manager.settings).to.be.an.instanceof(SettingManager);
       });
     });
 
     describe('#contents', () => {
       it('should be the content manager instance', () => {
-        expect(manager.contents).to.be.a(ContentsManager);
+        expect(manager.contents).to.be.an.instanceof(ContentsManager);
       });
     });
 
     describe('#terminals', () => {
       it('should be the terminal manager instance', () => {
-        expect(manager.terminals).to.be.a(TerminalManager);
+        expect(manager.terminals).to.be.an.instanceof(TerminalManager);
       });
     });
 
     describe('#workspaces', () => {
       it('should be the workspace manager instance', () => {
-        expect(manager.workspaces).to.be.a(WorkspaceManager);
+        expect(manager.workspaces).to.be.an.instanceof(WorkspaceManager);
       });
     });
 
@@ -68,9 +68,9 @@ describe('manager', () => {
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new ServiceManager();
-        expect(manager.isReady).to.be(false);
+        expect(manager.isReady).to.equal(false);
         return manager.ready.then(() => {
-          expect(manager.isReady).to.be(true);
+          expect(manager.isReady).to.equal(true);
         });
       });
     });

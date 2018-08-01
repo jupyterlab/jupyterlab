@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Kernel, KernelMessage } from '../../../lib/kernel';
 
@@ -23,7 +23,7 @@ describe('Kernel.IFuture', () => {
   it('should have a msg attribute', async () => {
     const kernel = await Kernel.startNew();
     const future = kernel.requestExecute({ code: 'print("hello")' });
-    expect(typeof future.msg.header.msg_id).to.be('string');
+    expect(typeof future.msg.header.msg_id).to.equal('string');
     await future.done;
   });
 
@@ -71,11 +71,13 @@ describe('Kernel.IFuture', () => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
-            expect((msg as KernelMessage.IStreamMsg).content.text).to.be('foo');
+            expect((msg as KernelMessage.IStreamMsg).content.text).to.equal(
+              'foo'
+            );
           } else {
             expect(
               (msg as KernelMessage.IStatusMsg).content.execution_state
-            ).to.be('idle');
+            ).to.equal('idle');
           }
           // not returning should also continue handling
           return void 0;
@@ -91,7 +93,7 @@ describe('Kernel.IFuture', () => {
       await future.done;
 
       // the last hook was called for the stream and the status message.
-      expect(calls).to.eql([
+      expect(calls).to.deep.equal([
         'first',
         'last',
         'iopub',
@@ -159,7 +161,7 @@ describe('Kernel.IFuture', () => {
         })
         .then(() => {
           // the last hook was called for the stream and the status message.
-          expect(calls).to.eql(['first', 'first']);
+          expect(calls).to.deep.equal(['first', 'first']);
         });
     });
 
@@ -217,7 +219,13 @@ describe('Kernel.IFuture', () => {
           return future.done;
         })
         .then(() => {
-          expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
+          expect(calls).to.deep.equal([
+            'last',
+            'iopub',
+            'first',
+            'last',
+            'iopub'
+          ]);
         });
     });
 
@@ -282,7 +290,13 @@ describe('Kernel.IFuture', () => {
           return future.done;
         })
         .then(() => {
-          expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
+          expect(calls).to.deep.equal([
+            'first',
+            'delete',
+            'iopub',
+            'first',
+            'iopub'
+          ]);
           future.dispose();
           future.removeMessageHook(first);
         });

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -49,12 +49,12 @@ describe('Kernel.IKernel', () => {
     it('should be emitted when the kernel is shut down', async () => {
       let called = false;
       defaultKernel.terminated.connect((sender, args) => {
-        expect(sender).to.be(defaultKernel);
-        expect(args).to.be(void 0);
+        expect(sender).to.equal(defaultKernel);
+        expect(args).to.be.undefined;
         called = true;
       });
       await defaultKernel.shutdown();
-      expect(called).to.be(true);
+      expect(called).to.equal(true);
     });
   });
 
@@ -67,7 +67,7 @@ describe('Kernel.IKernel', () => {
         }
       });
       await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
-      expect(called).to.be(true);
+      expect(called).to.equal(true);
     });
   });
 
@@ -78,7 +78,7 @@ describe('Kernel.IKernel', () => {
         called = true;
       });
       await defaultKernel.requestExecute({ code: 'a=1' }, true).done;
-      expect(called).to.be(true);
+      expect(called).to.equal(true);
     });
 
     it('should be emitted regardless of the sender', async () => {
@@ -137,7 +137,7 @@ describe('Kernel.IKernel', () => {
       const msgId = UUID.uuid4();
       const emission = testEmission(kernel.unhandledMessage, {
         test: (k, msg) => {
-          expect(msg.header.msg_id).to.be(msgId);
+          expect(msg.header.msg_id).to.equal(msgId);
         }
       });
 
@@ -166,10 +166,10 @@ describe('Kernel.IKernel', () => {
       const msgId = 'message from right session';
       const emission = testEmission(kernel.unhandledMessage, {
         test: (k, msg) => {
-          expect((msg.parent_header as KernelMessage.IHeader).session).to.be(
+          expect((msg.parent_header as KernelMessage.IHeader).session).to.equal(
             kernel.clientId
           );
-          expect(msg.header.msg_id).to.be(msgId);
+          expect(msg.header.msg_id).to.equal(msgId);
         }
       });
 
@@ -213,9 +213,9 @@ describe('Kernel.IKernel', () => {
 
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
-          expect(args.msg.header.msg_id).to.be(msgId);
-          expect(args.msg.header.msg_type).to.be('foo');
-          expect(args.direction).to.be('recv');
+          expect(args.msg.header.msg_id).to.equal(msgId);
+          expect(args.msg.header.msg_type).to.equal('foo');
+          expect(args.direction).to.equal('recv');
         }
       });
 
@@ -236,8 +236,8 @@ describe('Kernel.IKernel', () => {
 
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
-          expect((args.msg.header as any).msg_id).to.be(msgId);
-          expect(args.direction).to.be('recv');
+          expect((args.msg.header as any).msg_id).to.equal(msgId);
+          expect(args.direction).to.equal('recv');
         }
       });
       tester.sendStatus(msgId, 'idle');
@@ -248,8 +248,8 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
-          expect(args.msg.content.value).to.be('foo');
-          expect(args.direction).to.be('send');
+          expect(args.msg.content.value).to.equal('foo');
+          expect(args.direction).to.equal('send');
         }
       });
       kernel.sendInputReply({ value: 'foo' });
@@ -259,33 +259,33 @@ describe('Kernel.IKernel', () => {
 
   context('#id', () => {
     it('should be a string', () => {
-      expect(typeof defaultKernel.id).to.be('string');
+      expect(typeof defaultKernel.id).to.equal('string');
     });
   });
 
   context('#name', () => {
     it('should be a string', () => {
-      expect(typeof defaultKernel.name).to.be('string');
+      expect(typeof defaultKernel.name).to.equal('string');
     });
   });
 
   context('#model', () => {
     it('should be an IModel', () => {
       let model = defaultKernel.model;
-      expect(typeof model.name).to.be('string');
-      expect(typeof model.id).to.be('string');
+      expect(typeof model.name).to.equal('string');
+      expect(typeof model.id).to.equal('string');
     });
   });
 
   context('#username', () => {
     it('should be a string', () => {
-      expect(typeof defaultKernel.username).to.be('string');
+      expect(typeof defaultKernel.username).to.equal('string');
     });
   });
 
   context('#serverSettings', () => {
     it('should be the server settings', () => {
-      expect(defaultKernel.serverSettings.baseUrl).to.be(
+      expect(defaultKernel.serverSettings.baseUrl).to.equal(
         PageConfig.getBaseUrl()
       );
     });
@@ -293,7 +293,7 @@ describe('Kernel.IKernel', () => {
 
   context('#clientId', () => {
     it('should be a string', () => {
-      expect(typeof defaultKernel.clientId).to.be('string');
+      expect(typeof defaultKernel.clientId).to.equal('string');
     });
   });
 
@@ -355,8 +355,8 @@ describe('Kernel.IKernel', () => {
       await kernel.ready;
       const emission = testEmission(kernel.statusChanged, {
         test: (k, status) => {
-          expect(status).to.be('busy');
-          expect(kernel.status).to.be('busy');
+          expect(status).to.equal('busy');
+          expect(kernel.status).to.equal('busy');
         }
       });
 
@@ -375,23 +375,23 @@ describe('Kernel.IKernel', () => {
     it('should get the kernel info', () => {
       let name = defaultKernel.info.language_info.name;
       let defaultSpecs = specs.kernelspecs[specs.default];
-      expect(name).to.be(defaultSpecs.language);
+      expect(name).to.equal(defaultSpecs.language);
     });
   });
 
   context('#getSpec()', () => {
     it('should resolve with the spec', async () => {
       let spec = await defaultKernel.getSpec();
-      expect(spec.name).to.be(specs.default);
+      expect(spec.name).to.equal(specs.default);
     });
   });
 
   context('#isReady', () => {
     it('should test whether the kernel is ready', async () => {
       let kernel = await Kernel.startNew();
-      expect(kernel.isReady).to.be(false);
+      expect(kernel.isReady).to.equal(false);
       await kernel.ready;
-      expect(kernel.isReady).to.be(true);
+      expect(kernel.isReady).to.equal(true);
       await kernel.shutdown();
     });
   });
@@ -405,18 +405,18 @@ describe('Kernel.IKernel', () => {
   context('#isDisposed', () => {
     it('should be true after we dispose of the kernel', () => {
       let kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.isDisposed).to.be(false);
+      expect(kernel.isDisposed).to.equal(false);
       kernel.dispose();
-      expect(kernel.isDisposed).to.be(true);
+      expect(kernel.isDisposed).to.equal(true);
     });
 
     it('should be safe to call multiple times', () => {
       let kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.isDisposed).to.be(false);
-      expect(kernel.isDisposed).to.be(false);
+      expect(kernel.isDisposed).to.equal(false);
+      expect(kernel.isDisposed).to.equal(false);
       kernel.dispose();
-      expect(kernel.isDisposed).to.be(true);
-      expect(kernel.isDisposed).to.be(true);
+      expect(kernel.isDisposed).to.equal(true);
+      expect(kernel.isDisposed).to.equal(true);
     });
   });
 
@@ -424,21 +424,21 @@ describe('Kernel.IKernel', () => {
     it('should dispose of the resources held by the kernel', () => {
       let kernel = Kernel.connectTo(defaultKernel.model);
       let future = kernel.requestExecute({ code: 'foo' });
-      expect(future.isDisposed).to.be(false);
+      expect(future.isDisposed).to.equal(false);
       kernel.dispose();
-      expect(future.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
     });
 
     it('should be safe to call twice', () => {
       const kernel = Kernel.connectTo(defaultKernel.model);
       let future = kernel.requestExecute({ code: 'foo' });
-      expect(future.isDisposed).to.be(false);
+      expect(future.isDisposed).to.equal(false);
       kernel.dispose();
-      expect(future.isDisposed).to.be(true);
-      expect(kernel.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
+      expect(kernel.isDisposed).to.equal(true);
       kernel.dispose();
-      expect(future.isDisposed).to.be(true);
-      expect(kernel.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
+      expect(kernel.isDisposed).to.equal(true);
     });
   });
 
@@ -451,7 +451,7 @@ describe('Kernel.IKernel', () => {
 
       tester.onMessage(msg => {
         try {
-          expect(msg.header.msg_id).to.be(msgId);
+          expect(msg.header.msg_id).to.equal(msgId);
         } catch (e) {
           done.reject(e);
           throw e;
@@ -483,7 +483,7 @@ describe('Kernel.IKernel', () => {
         try {
           let decoder = new TextDecoder('utf8');
           let item = msg.buffers[0] as DataView;
-          expect(decoder.decode(item)).to.be('hello');
+          expect(decoder.decode(item)).to.equal('hello');
         } catch (e) {
           done.reject(e);
           throw e;
@@ -530,7 +530,7 @@ describe('Kernel.IKernel', () => {
       let msg = KernelMessage.createShellMessage(options);
       expect(() => {
         kernel.sendShellMessage(msg, true);
-      }).to.throwException(/Kernel is dead/);
+      }).to.throw(/Kernel is dead/);
       await tester.shutdown();
       tester.dispose();
     });
@@ -657,8 +657,8 @@ describe('Kernel.IKernel', () => {
       let future = kernel.requestExecute({ code: 'foo' });
       kernel.restart();
       await kernel.ready;
-      expect(future.isDisposed).to.be(true);
-      expect(comm.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
+      expect(comm.isDisposed).to.equal(true);
     });
   });
 
@@ -731,8 +731,8 @@ describe('Kernel.IKernel', () => {
       await kernel0.ready;
       await kernel1.ready;
       await kernel0.shutdown();
-      expect(kernel0.isDisposed).to.be(true);
-      expect(kernel1.isDisposed).to.be(true);
+      expect(kernel0.isDisposed).to.equal(true);
+      expect(kernel1.isDisposed).to.equal(true);
     });
   });
 
@@ -740,7 +740,7 @@ describe('Kernel.IKernel', () => {
     it('should resolve the promise', async () => {
       const msg = await defaultKernel.requestKernelInfo();
       let name = msg.content.language_info.name;
-      expect(name).to.be.ok();
+      expect(name).to.be.ok;
     });
   });
 
@@ -815,7 +815,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       const done = new PromiseDelegate<void>();
       tester.onMessage(msg => {
-        expect(msg.header.msg_type).to.be('input_reply');
+        expect(msg.header.msg_type).to.equal('input_reply');
         done.resolve(null);
       });
       kernel.sendInputReply({ value: 'test' });
@@ -836,7 +836,7 @@ describe('Kernel.IKernel', () => {
       await dead;
       expect(() => {
         kernel.sendInputReply({ value: 'test' });
-      }).to.throwException(/Kernel is dead/);
+      }).to.throw(/Kernel is dead/);
       tester.dispose();
     });
   });
@@ -864,7 +864,7 @@ describe('Kernel.IKernel', () => {
       const tester = new KernelTester();
 
       tester.onMessage(msg => {
-        expect(msg.channel).to.be('shell');
+        expect(msg.channel).to.equal('shell');
 
         // send a reply
         options.channel = 'shell';
@@ -906,7 +906,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
       future = kernel.requestExecute(content);
       await future.done;
-      expect(future.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
       await tester.shutdown();
       tester.dispose();
     });
@@ -922,9 +922,9 @@ describe('Kernel.IKernel', () => {
       };
       let future = defaultKernel.requestExecute(options, false);
       await future.done;
-      expect(future.isDisposed).to.be(false);
+      expect(future.isDisposed).to.equal(false);
       future.dispose();
-      expect(future.isDisposed).to.be(true);
+      expect(future.isDisposed).to.equal(true);
     });
   });
 
@@ -985,7 +985,7 @@ describe('Kernel.IKernel', () => {
       future = kernel.requestExecute(options, false);
       await future.done;
       // the last hook was called for the stream and the status message.
-      expect(calls).to.eql([
+      expect(calls).to.deep.equal([
         'first',
         'last',
         'iopub',
@@ -1051,7 +1051,7 @@ describe('Kernel.IKernel', () => {
       future = kernel.requestExecute(options, false);
       await future.done;
       // the last hook was called for the stream and the status message.
-      expect(calls).to.eql(['first', 'first']);
+      expect(calls).to.deep.equal(['first', 'first']);
       await tester.shutdown();
       tester.dispose();
     });
@@ -1107,7 +1107,7 @@ describe('Kernel.IKernel', () => {
       kernel = await tester.start();
       future = kernel.requestExecute(options, false);
       await future.done;
-      expect(calls).to.eql(['last', 'iopub', 'first', 'last', 'iopub']);
+      expect(calls).to.deep.equal(['last', 'iopub', 'first', 'last', 'iopub']);
       await tester.shutdown();
       tester.dispose();
     });
@@ -1168,7 +1168,13 @@ describe('Kernel.IKernel', () => {
       kernel = await tester.start();
       future = kernel.requestExecute(options, false);
       await future.done;
-      expect(calls).to.eql(['first', 'delete', 'iopub', 'first', 'iopub']);
+      expect(calls).to.deep.equal([
+        'first',
+        'delete',
+        'iopub',
+        'first',
+        'iopub'
+      ]);
       await tester.shutdown();
       tester.dispose();
     });
@@ -1354,13 +1360,13 @@ describe('Kernel.IKernel', () => {
       // At this point, the synchronous anyMessage signal should have been
       // emitted for every message, but no actual message handling should have
       // happened.
-      expect(msgSignal).to.eql(msgSignalExpected);
-      expect(calls).to.eql([]);
+      expect(msgSignal).to.deep.equal(msgSignalExpected);
+      expect(calls).to.deep.equal([]);
 
       // Release the lock on message processing.
       handlingBlock.resolve(undefined);
       await future.done;
-      expect(calls).to.eql(callsExpected);
+      expect(calls).to.deep.equal(callsExpected);
 
       await tester.shutdown();
       tester.dispose();

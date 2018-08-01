@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -87,7 +87,7 @@ describe('kernel', () => {
   describe('Kernel.startNew()', () => {
     it('should create an Kernel.IKernel object', () => {
       return Kernel.startNew({}).then(kernel => {
-        expect(kernel.status).to.be('unknown');
+        expect(kernel.status).to.equal('unknown');
         return kernel.shutdown();
       });
     });
@@ -95,7 +95,7 @@ describe('kernel', () => {
     it('should accept ajax options', () => {
       let serverSettings = makeSettings();
       return Kernel.startNew({ serverSettings }).then(kernel => {
-        expect(kernel.status).to.be('unknown');
+        expect(kernel.status).to.equal('unknown');
         return kernel.shutdown();
       });
     });
@@ -167,7 +167,7 @@ describe('kernel', () => {
     it('should connect to an existing kernel', () => {
       let id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.id).to.be(id);
+      expect(kernel.id).to.equal(id);
       kernel.dispose();
     });
 
@@ -175,7 +175,7 @@ describe('kernel', () => {
       let id = defaultKernel.id;
       let serverSettings = makeSettings();
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
-      expect(kernel.id).to.be(id);
+      expect(kernel.id).to.equal(id);
       kernel.dispose();
     });
   });
@@ -195,14 +195,14 @@ describe('kernel', () => {
   describe('Kernel.getSpecs()', () => {
     it('should load the kernelspecs', () => {
       return Kernel.getSpecs().then(specs => {
-        expect(specs.default).to.be.ok();
+        expect(specs.default).to.be.ok;
       });
     });
 
     it('should accept ajax options', () => {
       let serverSettings = makeSettings();
       return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.be.ok();
+        expect(specs.default).to.be.ok;
       });
     });
 
@@ -211,7 +211,7 @@ describe('kernel', () => {
         kernelspecs: { python: PYTHON_SPEC }
       });
       return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.be.ok();
+        expect(specs.default).to.be.ok;
       });
     });
 
@@ -234,8 +234,8 @@ describe('kernel', () => {
         }
       });
       return Kernel.getSpecs(serverSettings).then(specs => {
-        expect(specs.default).to.be('python');
-        expect(specs.kernelspecs['R']).to.be(void 0);
+        expect(specs.default).to.equal('python');
+        expect(specs.kernelspecs['R']).to.be.undefined;
       });
     });
 

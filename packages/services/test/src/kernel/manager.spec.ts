@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -39,7 +39,7 @@ describe('kernel/manager', () => {
 
   beforeEach(() => {
     manager = new KernelManager();
-    expect(manager.specs).to.be(null);
+    expect(manager.specs).to.be.null;
     return manager.ready;
   });
 
@@ -56,7 +56,7 @@ describe('kernel/manager', () => {
       it('should take the options as an argument', () => {
         manager.dispose();
         manager = new KernelManager({ serverSettings: makeSettings() });
-        expect(manager instanceof KernelManager).to.be(true);
+        expect(manager instanceof KernelManager).to.equal(true);
       });
     });
 
@@ -66,14 +66,14 @@ describe('kernel/manager', () => {
         let serverSettings = makeSettings();
         let token = serverSettings.token;
         manager = new KernelManager({ serverSettings });
-        expect(manager.serverSettings.token).to.be(token);
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
     describe('#specs', () => {
       it('should get the kernel specs', () => {
         return manager.ready.then(() => {
-          expect(manager.specs.default).to.be.ok();
+          expect(manager.specs.default).to.be.ok;
         });
       });
     });
@@ -92,8 +92,8 @@ describe('kernel/manager', () => {
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
-          expect(args.default).to.be(specs.default);
+          expect(sender).to.equal(manager);
+          expect(args.default).to.equal(specs.default);
           done();
         });
         manager.refreshSpecs();
@@ -103,7 +103,7 @@ describe('kernel/manager', () => {
     describe('#runningChanged', () => {
       it('should be emitted in refreshRunning when the running kernels changed', done => {
         manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
+          expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
           done();
         });
@@ -132,9 +132,9 @@ describe('kernel/manager', () => {
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new KernelManager();
-        expect(manager.isReady).to.be(false);
+        expect(manager.isReady).to.equal(false);
         return manager.ready.then(() => {
-          expect(manager.isReady).to.be(true);
+          expect(manager.isReady).to.equal(true);
         });
       });
     });
@@ -151,7 +151,7 @@ describe('kernel/manager', () => {
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         return manager.refreshSpecs().then(() => {
-          expect(manager.specs.default).to.be(specs.default);
+          expect(manager.specs.default).to.equal(specs.default);
         });
       });
     });
@@ -181,7 +181,7 @@ describe('kernel/manager', () => {
       it('should find an existing kernel by id', () => {
         let id = kernel.id;
         return manager.findById(id).then(model => {
-          expect(model.id).to.be(id);
+          expect(model.id).to.equal(id);
         });
       });
     });
@@ -190,7 +190,7 @@ describe('kernel/manager', () => {
       it('should connect to an existing kernel', () => {
         let id = kernel.id;
         let newConnection = manager.connectTo(kernel.model);
-        expect(newConnection.model.id).to.be(id);
+        expect(newConnection.model.id).to.equal(id);
       });
 
       it('should emit a runningChanged signal', done => {
@@ -210,14 +210,14 @@ describe('kernel/manager', () => {
         let kernel = await manager.startNew();
         await kernel.ready;
         await manager.shutdown(kernel.id);
-        expect(kernel.isDisposed).to.be(true);
+        expect(kernel.isDisposed).to.equal(true);
       });
 
       it('should emit a runningChanged signal', async () => {
         let kernel = await manager.startNew();
         const emission = testEmission(manager.runningChanged, {
           test: () => {
-            expect(kernel.isDisposed).to.be(false);
+            expect(kernel.isDisposed).to.equal(false);
           }
         });
         await manager.shutdown(kernel.id);

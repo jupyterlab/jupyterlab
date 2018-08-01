@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import {
   Contents,
@@ -41,14 +41,14 @@ describe('contents', () => {
   describe('#constructor()', () => {
     it('should accept no options', () => {
       let contents = new ContentsManager();
-      expect(contents).to.be.a(ContentsManager);
+      expect(contents).to.be.an.instanceof(ContentsManager);
     });
 
     it('should accept options', () => {
       let contents = new ContentsManager({
         defaultDrive: new Drive()
       });
-      expect(contents).to.be.a(ContentsManager);
+      expect(contents).to.be.an.instanceof(ContentsManager);
     });
   });
 
@@ -57,10 +57,10 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(sender).to.be(contents);
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(sender).to.equal(contents);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       contents.newUntitled().catch(done);
@@ -72,7 +72,7 @@ describe('contents', () => {
       contents.addDrive(drive);
       handleRequest(drive, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(args.newValue.path).to.be('other:' + DEFAULT_FILE.path);
+        expect(args.newValue.path).to.equal('other:' + DEFAULT_FILE.path);
         done();
       });
       contents.newUntitled({ path: 'other:' }).catch(done);
@@ -82,20 +82,20 @@ describe('contents', () => {
   describe('#isDisposed', () => {
     it('should test whether the manager is disposed', () => {
       let contents = new ContentsManager();
-      expect(contents.isDisposed).to.be(false);
+      expect(contents.isDisposed).to.equal(false);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the manager', () => {
       let contents = new ContentsManager();
-      expect(contents.isDisposed).to.be(false);
+      expect(contents.isDisposed).to.equal(false);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
     });
   });
 
@@ -114,11 +114,11 @@ describe('contents', () => {
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.localPath('other:foo/bar/example.txt')).to.be(
+      expect(contents.localPath('other:foo/bar/example.txt')).to.equal(
         'foo/bar/example.txt'
       );
 
-      expect(contents.localPath('alternative:/foo/bar/example.txt')).to.be(
+      expect(contents.localPath('alternative:/foo/bar/example.txt')).to.equal(
         'foo/bar/example.txt'
       );
     });
@@ -129,7 +129,7 @@ describe('contents', () => {
 
       expect(
         contents.localPath('other:foo/odd:directory/example:file.txt')
-      ).to.be('foo/odd:directory/example:file.txt');
+      ).to.equal('foo/odd:directory/example:file.txt');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
@@ -138,7 +138,7 @@ describe('contents', () => {
 
       expect(
         contents.localPath('which:foo/odd:directory/example:file.txt')
-      ).to.be('which:foo/odd:directory/example:file.txt');
+      ).to.equal('which:foo/odd:directory/example:file.txt');
     });
   });
 
@@ -148,9 +148,9 @@ describe('contents', () => {
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.driveName('other:foo/bar/example.txt')).to.be('other');
+      expect(contents.driveName('other:foo/bar/example.txt')).to.equal('other');
 
-      expect(contents.driveName('alternative:/foo/bar/example.txt')).to.be(
+      expect(contents.driveName('alternative:/foo/bar/example.txt')).to.equal(
         'alternative'
       );
     });
@@ -161,7 +161,7 @@ describe('contents', () => {
 
       expect(
         contents.driveName('other:foo/odd:directory/example:file.txt')
-      ).to.be('other');
+      ).to.equal('other');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
@@ -170,7 +170,7 @@ describe('contents', () => {
 
       expect(
         contents.driveName('which:foo/odd:directory/example:file.txt')
-      ).to.be('');
+      ).to.equal('');
     });
   });
 
@@ -180,7 +180,7 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       let options: Contents.IFetchOptions = { type: 'file' };
       return contents.get('/foo', options).then(model => {
-        expect(model.path).to.be('foo');
+        expect(model.path).to.equal('foo');
       });
     });
 
@@ -189,7 +189,7 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_DIR);
       let options: Contents.IFetchOptions = { type: 'directory' };
       return contents.get('/foo', options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -200,7 +200,7 @@ describe('contents', () => {
       handleRequest(drive, 200, DEFAULT_FILE);
       let options: Contents.IFetchOptions = { type: 'file' };
       return contents.get('other:/foo', options).then(model => {
-        expect(model.path).to.be('other:foo');
+        expect(model.path).to.equal('other:foo');
       });
     });
 
@@ -211,7 +211,7 @@ describe('contents', () => {
       handleRequest(drive, 200, DEFAULT_DIR);
       let options: Contents.IFetchOptions = { type: 'directory' };
       return contents.get('other:/foo', options).then(model => {
-        expect(model.content[0].path).to.be('other:foo/bar/buzz.txt');
+        expect(model.content[0].path).to.equal('other:foo/bar/buzz.txt');
       });
     });
 
@@ -235,9 +235,9 @@ describe('contents', () => {
       let test2 = contents.getDownloadUrl('fizz/buzz/bar.txt');
       let test3 = contents.getDownloadUrl('/bar.txt');
       return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
+        expect(urls[0]).to.equal('http://foo/files/bar.txt');
+        expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+        expect(urls[2]).to.equal('http://foo/files/bar.txt');
       });
     });
 
@@ -245,7 +245,7 @@ describe('contents', () => {
       let drive = new Drive({ serverSettings: settings });
       let contents = new ContentsManager({ defaultDrive: drive });
       return contents.getDownloadUrl('b ar?3.txt').then(url => {
-        expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
+        expect(url).to.equal('http://foo/files/b%20ar%3F3.txt');
       });
     });
 
@@ -253,7 +253,7 @@ describe('contents', () => {
       let drive = new Drive({ serverSettings: settings });
       let contents = new ContentsManager({ defaultDrive: drive });
       return contents.getDownloadUrl('fizz/../bar.txt').then(url => {
-        expect(url).to.be('http://foo/files/fizz/../bar.txt');
+        expect(url).to.equal('http://foo/files/fizz/../bar.txt');
       });
     });
 
@@ -265,9 +265,9 @@ describe('contents', () => {
       let test2 = contents.getDownloadUrl('other:fizz/buzz/bar.txt');
       let test3 = contents.getDownloadUrl('other:/bar.txt');
       return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
+        expect(urls[0]).to.equal('http://foo/files/bar.txt');
+        expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+        expect(urls[2]).to.equal('http://foo/files/bar.txt');
       });
     });
   });
@@ -277,7 +277,7 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       return contents.newUntitled({ path: '/foo' }).then(model => {
-        expect(model.path).to.be('foo/test');
+        expect(model.path).to.equal('foo/test');
       });
     });
 
@@ -289,7 +289,7 @@ describe('contents', () => {
         type: 'directory'
       };
       return contents.newUntitled(options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -299,7 +299,7 @@ describe('contents', () => {
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_FILE);
       return contents.newUntitled({ path: 'other:/foo' }).then(model => {
-        expect(model.path).to.be('other:foo/test');
+        expect(model.path).to.equal('other:foo/test');
       });
     });
 
@@ -313,7 +313,7 @@ describe('contents', () => {
         type: 'directory'
       };
       return contents.newUntitled(options).then(model => {
-        expect(model.path).to.be('other:' + DEFAULT_DIR.path);
+        expect(model.path).to.equal('other:' + DEFAULT_DIR.path);
       });
     });
 
@@ -321,9 +321,9 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       contents.newUntitled({ type: 'file', ext: 'test' }).catch(done);
@@ -371,8 +371,8 @@ describe('contents', () => {
       let path = '/foo/bar.txt';
       handleRequest(contents, 204, { path });
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be('foo/bar.txt');
+        expect(args.type).to.equal('delete');
+        expect(args.oldValue.path).to.equal('foo/bar.txt');
         done();
       });
       contents.delete(path).catch(done);
@@ -406,7 +406,7 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       let rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
       return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -417,7 +417,7 @@ describe('contents', () => {
       handleRequest(other, 200, DEFAULT_FILE);
       let rename = contents.rename('other:/foo/bar.txt', 'other:/foo/baz.txt');
       return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -425,9 +425,9 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('rename');
-        expect(args.oldValue.path).to.be('foo/bar.txt');
-        expect(args.newValue.path).to.be('foo/test');
+        expect(args.type).to.equal('rename');
+        expect(args.oldValue.path).to.equal('foo/bar.txt');
+        expect(args.newValue.path).to.equal('foo/test');
         done();
       });
       contents.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
@@ -456,7 +456,7 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       let save = contents.save('/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -467,7 +467,7 @@ describe('contents', () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       let save = contents.save('other:/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.path).to.be('other:foo');
+        expect(model.path).to.equal('other:foo');
       });
     });
 
@@ -476,7 +476,7 @@ describe('contents', () => {
       handleRequest(contents, 201, DEFAULT_FILE);
       let save = contents.save('/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -484,9 +484,9 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('save');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('save');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       contents.save('/foo', { type: 'file', name: 'test' }).catch(done);
@@ -514,7 +514,7 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       return contents.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -524,7 +524,7 @@ describe('contents', () => {
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_FILE);
       return contents.copy('other:/foo/test', 'other:/baz').then(model => {
-        expect(model.path).to.be('other:foo/test');
+        expect(model.path).to.equal('other:foo/test');
       });
     });
 
@@ -532,9 +532,9 @@ describe('contents', () => {
       let contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       contents.copy('/foo/bar.txt', '/baz').catch(done);
@@ -563,7 +563,7 @@ describe('contents', () => {
       handleRequest(contents, 201, DEFAULT_CP);
       let checkpoint = contents.createCheckpoint('/foo/bar.txt');
       return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -574,7 +574,7 @@ describe('contents', () => {
       handleRequest(other, 201, DEFAULT_CP);
       let checkpoint = contents.createCheckpoint('other:/foo/bar.txt');
       return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -601,7 +601,7 @@ describe('contents', () => {
       handleRequest(contents, 200, [DEFAULT_CP, DEFAULT_CP]);
       let checkpoints = contents.listCheckpoints('/foo/bar.txt');
       return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -612,7 +612,7 @@ describe('contents', () => {
       handleRequest(other, 200, [DEFAULT_CP, DEFAULT_CP]);
       let checkpoints = contents.listCheckpoints('other:/foo/bar.txt');
       return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -703,14 +703,14 @@ describe('drive', () => {
   describe('#constructor()', () => {
     it('should accept no options', () => {
       let drive = new Drive();
-      expect(drive).to.be.a(Drive);
+      expect(drive).to.be.an.instanceof(Drive);
     });
 
     it('should accept options', () => {
       let drive = new Drive({
         name: 'name'
       });
-      expect(drive).to.be.a(Drive);
+      expect(drive).to.be.an.instanceof(Drive);
     });
   });
 
@@ -719,7 +719,7 @@ describe('drive', () => {
       let drive = new Drive({
         name: 'name'
       });
-      expect(drive.name).to.be('name');
+      expect(drive.name).to.equal('name');
     });
   });
 
@@ -728,10 +728,10 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
-        expect(sender).to.be(drive);
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(sender).to.equal(drive);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       drive.newUntitled().catch(done);
@@ -741,20 +741,20 @@ describe('drive', () => {
   describe('#isDisposed', () => {
     it('should test whether the drive is disposed', () => {
       let drive = new Drive();
-      expect(drive.isDisposed).to.be(false);
+      expect(drive.isDisposed).to.equal(false);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the drive', () => {
       let drive = new Drive();
-      expect(drive.isDisposed).to.be(false);
+      expect(drive.isDisposed).to.equal(false);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
     });
   });
 
@@ -765,7 +765,7 @@ describe('drive', () => {
       let options: Contents.IFetchOptions = { type: 'file' };
       let get = drive.get('/foo', options);
       return get.then(model => {
-        expect(model.path).to.be(DEFAULT_FILE.path);
+        expect(model.path).to.equal(DEFAULT_FILE.path);
       });
     });
 
@@ -775,7 +775,7 @@ describe('drive', () => {
       let options: Contents.IFetchOptions = { type: 'directory' };
       let get = drive.get('/foo', options);
       return get.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -785,7 +785,7 @@ describe('drive', () => {
       let options: Contents.IFetchOptions = { type: 'directory' };
       let get = drive.get('/foo', options);
       return get.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -808,23 +808,23 @@ describe('drive', () => {
       let test2 = drive.getDownloadUrl('fizz/buzz/bar.txt');
       let test3 = drive.getDownloadUrl('/bar.txt');
       return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
+        expect(urls[0]).to.equal('http://foo/files/bar.txt');
+        expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+        expect(urls[2]).to.equal('http://foo/files/bar.txt');
       });
     });
 
     it('should encode characters', () => {
       let drive = new Drive({ serverSettings: settings });
       return drive.getDownloadUrl('b ar?3.txt').then(url => {
-        expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
+        expect(url).to.equal('http://foo/files/b%20ar%3F3.txt');
       });
     });
 
     it('should not handle relative paths', () => {
       let drive = new Drive({ serverSettings: settings });
       return drive.getDownloadUrl('fizz/../bar.txt').then(url => {
-        expect(url).to.be('http://foo/files/fizz/../bar.txt');
+        expect(url).to.equal('http://foo/files/fizz/../bar.txt');
       });
     });
   });
@@ -834,7 +834,7 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       return drive.newUntitled({ path: '/foo' }).then(model => {
-        expect(model.path).to.be(DEFAULT_FILE.path);
+        expect(model.path).to.equal(DEFAULT_FILE.path);
       });
     });
 
@@ -847,7 +847,7 @@ describe('drive', () => {
       };
       let newDir = drive.newUntitled(options);
       return newDir.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -855,9 +855,9 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       drive.newUntitled({ type: 'file', ext: 'test' }).catch(done);
@@ -872,7 +872,7 @@ describe('drive', () => {
         ext: 'txt'
       };
       return drive.newUntitled(options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
+        expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
       });
     });
 
@@ -910,8 +910,8 @@ describe('drive', () => {
       let path = '/foo/bar.txt';
       handleRequest(drive, 204, { path });
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be('/foo/bar.txt');
+        expect(args.type).to.equal('delete');
+        expect(args.oldValue.path).to.equal('/foo/bar.txt');
         done();
       });
       drive.delete(path).catch(done);
@@ -951,7 +951,7 @@ describe('drive', () => {
       handleRequest(drive, 200, DEFAULT_FILE);
       let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
       return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -959,9 +959,9 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('rename');
-        expect(args.oldValue.path).to.be('/foo/bar.txt');
-        expect(args.newValue.path).to.be('foo/test');
+        expect(args.type).to.equal('rename');
+        expect(args.oldValue.path).to.equal('/foo/bar.txt');
+        expect(args.newValue.path).to.equal('foo/test');
         done();
       });
       drive.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
@@ -972,7 +972,7 @@ describe('drive', () => {
       handleRequest(drive, 200, DEFAULT_FILE);
       let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
       return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -999,7 +999,7 @@ describe('drive', () => {
       handleRequest(drive, 200, DEFAULT_FILE);
       let save = drive.save('/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -1008,7 +1008,7 @@ describe('drive', () => {
       handleRequest(drive, 201, DEFAULT_FILE);
       let save = drive.save('/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -1016,9 +1016,9 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('save');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('save');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       drive.save('/foo', { type: 'file', name: 'test' }).catch(done);
@@ -1029,7 +1029,7 @@ describe('drive', () => {
       handleRequest(drive, 200, DEFAULT_FILE);
       let save = drive.save('/foo', { type: 'file', name: 'test' });
       return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -1055,7 +1055,7 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       return drive.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -1063,9 +1063,9 @@ describe('drive', () => {
       let drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
         done();
       });
       drive.copy('/foo/bar.txt', '/baz').catch(done);
@@ -1075,7 +1075,7 @@ describe('drive', () => {
       let drive = new Drive({ serverSettings });
       handleRequest(drive, 201, DEFAULT_FILE);
       return drive.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
+        expect(model.created).to.equal(DEFAULT_FILE.created);
       });
     });
 
@@ -1102,7 +1102,7 @@ describe('drive', () => {
       handleRequest(drive, 201, DEFAULT_CP);
       let checkpoint = drive.createCheckpoint('/foo/bar.txt');
       return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -1111,7 +1111,7 @@ describe('drive', () => {
       handleRequest(drive, 201, DEFAULT_CP);
       let checkpoint = drive.createCheckpoint('/foo/bar.txt');
       return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -1138,7 +1138,7 @@ describe('drive', () => {
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
       let checkpoints = drive.listCheckpoints('/foo/bar.txt');
       return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -1147,7 +1147,7 @@ describe('drive', () => {
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
       let checkpoints = drive.listCheckpoints('/foo/bar.txt');
       return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
+        expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
       });
     });
 
@@ -1235,7 +1235,7 @@ describe('drive', () => {
           }
         })
         .then(msg => {
-          expect(msg.path).to.be(path);
+          expect(msg.path).to.equal(path);
         });
     });
 
@@ -1248,7 +1248,7 @@ describe('drive', () => {
           return contents.rename(model0.path, 'foo.ipynb');
         })
         .then(model1 => {
-          expect(model1.path).to.be('foo.ipynb');
+          expect(model1.path).to.equal('foo.ipynb');
           return contents.delete('foo.ipynb');
         });
     });
@@ -1276,7 +1276,7 @@ describe('drive', () => {
       return contents
         .save('baz.txt', options)
         .then(model0 => {
-          expect(model0.name).to.be('baz.txt');
+          expect(model0.name).to.equal('baz.txt');
           return contents.createCheckpoint('baz.txt');
         })
         .then(value => {
@@ -1284,7 +1284,7 @@ describe('drive', () => {
           return contents.listCheckpoints('baz.txt');
         })
         .then(checkpoints => {
-          expect(checkpoints[0]).to.eql(checkpoint);
+          expect(checkpoints[0]).to.deep.equal(checkpoint);
           return contents.restoreCheckpoint('baz.txt', checkpoint.id);
         })
         .then(() => {

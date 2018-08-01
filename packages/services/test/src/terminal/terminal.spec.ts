@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -32,7 +32,7 @@ describe('terminal', () => {
   describe('TerminalSession', () => {
     describe('.isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
-        expect(TerminalSession.isAvailable()).to.be(true);
+        expect(TerminalSession.isAvailable()).to.equal(true);
       });
     });
 
@@ -40,7 +40,7 @@ describe('terminal', () => {
       it('should startNew a terminal session', () => {
         return TerminalSession.startNew().then(s => {
           session = s;
-          expect(session.name).to.be.ok();
+          expect(session.name).to.be.ok;
         });
       });
     });
@@ -49,8 +49,8 @@ describe('terminal', () => {
       it('should give back an existing session', () => {
         return TerminalSession.connectTo(defaultSession.name).then(
           newSession => {
-            expect(newSession.name).to.be(defaultSession.name);
-            expect(newSession).to.not.be(defaultSession);
+            expect(newSession.name).to.equal(defaultSession.name);
+            expect(newSession).to.not.equal(defaultSession);
           }
         );
       });
@@ -91,8 +91,8 @@ describe('terminal', () => {
           .then(s => {
             session = s;
             session.terminated.connect((sender, args) => {
-              expect(sender).to.be(session);
-              expect(args).to.be(void 0);
+              expect(sender).to.equal(session);
+              expect(args).to.be.undefined;
               done();
             });
             return session.shutdown();
@@ -108,7 +108,7 @@ describe('terminal', () => {
           .then(s => {
             session = s;
             session.messageReceived.connect((sender, msg) => {
-              expect(sender).to.be(session);
+              expect(sender).to.equal(session);
               if (msg.type === 'stdout') {
                 Signal.disconnectReceiver(object);
                 done();
@@ -121,13 +121,13 @@ describe('terminal', () => {
 
     describe('#name', () => {
       it('should be the name of the session', () => {
-        expect(defaultSession.name).to.be.ok();
+        expect(defaultSession.name).to.be.ok;
       });
     });
 
     context('#serverSettings', () => {
       it('should be the server settings of the server', () => {
-        expect(defaultSession.serverSettings.baseUrl).to.be(
+        expect(defaultSession.serverSettings.baseUrl).to.equal(
           PageConfig.getBaseUrl()
         );
       });
@@ -137,9 +137,9 @@ describe('terminal', () => {
       it('should test whether the object is disposed', () => {
         return TerminalSession.startNew().then(session => {
           let name = session.name;
-          expect(session.isDisposed).to.be(false);
+          expect(session.isDisposed).to.equal(false);
           session.dispose();
-          expect(session.isDisposed).to.be(true);
+          expect(session.isDisposed).to.equal(true);
           return TerminalSession.shutdown(name);
         });
       });
@@ -150,7 +150,7 @@ describe('terminal', () => {
         TerminalSession.startNew().then(session => {
           let name = session.name;
           session.dispose();
-          expect(session.isDisposed).to.be(true);
+          expect(session.isDisposed).to.equal(true);
           return TerminalSession.shutdown(name);
         });
       });
@@ -160,7 +160,7 @@ describe('terminal', () => {
           let name = session.name;
           session.dispose();
           session.dispose();
-          expect(session.isDisposed).to.be(true);
+          expect(session.isDisposed).to.equal(true);
           return TerminalSession.shutdown(name);
         });
       });
@@ -171,11 +171,11 @@ describe('terminal', () => {
         return TerminalSession.startNew()
           .then(s => {
             session = s;
-            expect(session.isReady).to.be(false);
+            expect(session.isReady).to.equal(false);
             return session.ready;
           })
           .then(() => {
-            expect(session.isReady).to.be(true);
+            expect(session.isReady).to.equal(true);
           });
       });
     });
@@ -201,11 +201,11 @@ describe('terminal', () => {
           .then(s => {
             session = s;
             let promise = session.reconnect();
-            expect(session.isReady).to.be(false);
+            expect(session.isReady).to.equal(false);
             return promise;
           })
           .then(() => {
-            expect(session.isReady).to.be(true);
+            expect(session.isReady).to.equal(true);
           });
       });
     });

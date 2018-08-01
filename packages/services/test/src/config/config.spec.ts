@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -36,13 +36,13 @@ describe('config', () => {
   describe('ConfigSection.create()', () => {
     it('should load a config', () => {
       return ConfigSection.create({ name: randomName() }).then(config => {
-        expect(Object.keys(config.data).length).to.be(0);
+        expect(Object.keys(config.data).length).to.equal(0);
       });
     });
 
     it('should load a config', () => {
       return ConfigSection.create({ name: randomName() }).then(config => {
-        expect(Object.keys(config.data).length).to.be(0);
+        expect(Object.keys(config.data).length).to.equal(0);
       });
     });
 
@@ -52,7 +52,7 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       }).then(config => {
-        expect(Object.keys(config.data).length).to.be(0);
+        expect(Object.keys(config.data).length).to.equal(0);
       });
     });
 
@@ -75,10 +75,10 @@ describe('config', () => {
           return config.update({ foo: 'baz', spam: 'eggs' });
         })
         .then((data: any) => {
-          expect(data.foo).to.be('baz');
-          expect(config.data['foo']).to.be('baz');
-          expect(data['spam']).to.be('eggs');
-          expect(config.data['spam']).to.be('eggs');
+          expect(data.foo).to.equal('baz');
+          expect(config.data['foo']).to.equal('baz');
+          expect(data['spam']).to.equal('eggs');
+          expect(config.data['spam']).to.equal('eggs');
         });
     });
 
@@ -91,10 +91,10 @@ describe('config', () => {
           return config.update({ foo: 'baz', spam: 'eggs' });
         })
         .then((data: any) => {
-          expect(data.foo).to.be('baz');
-          expect(config.data['foo']).to.be('baz');
-          expect(data['spam']).to.be('eggs');
-          expect(config.data['spam']).to.be('eggs');
+          expect(data.foo).to.equal('baz');
+          expect(config.data['foo']).to.equal('baz');
+          expect(data['spam']).to.equal('eggs');
+          expect(config.data['spam']).to.equal('eggs');
         });
     });
 
@@ -123,7 +123,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           defaults,
           className
         });
-        expect(config).to.be.a(ConfigWithDefaults);
+        expect(config).to.be.an.instanceof(ConfigWithDefaults);
       });
     });
   });
@@ -141,7 +141,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           className
         });
         let data = config.get('foo');
-        expect(data).to.be('bar');
+        expect(data).to.equal('bar');
       });
     });
 
@@ -157,7 +157,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           className
         });
         let data = config.get('spam');
-        expect(data).to.be('eggs');
+        expect(data).to.equal('eggs');
       });
     });
 
@@ -173,7 +173,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           className
         });
         let data = config.get('spam');
-        expect(data).to.be('eggs');
+        expect(data).to.equal('eggs');
       });
     });
 
@@ -191,7 +191,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           className
         });
         let data = config.get('foo');
-        expect(data).to.not.be.ok();
+        expect(data).to.not.be.ok;
       });
     });
   });
@@ -208,7 +208,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
         })
         .then(() => {
           let data = section.data['testclass'] as JSONObject;
-          expect(data['foo']).to.be('bar');
+          expect(data['foo']).to.equal('bar');
         });
     });
 
@@ -219,11 +219,11 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           section = s;
           let config = new ConfigWithDefaults({ section });
           let set = config.set('foo', 'bar');
-          expect(section.data['foo']).to.be('bar');
+          expect(section.data['foo']).to.equal('bar');
           return set;
         })
         .then(data => {
-          expect(section.data['foo']).to.be('bar');
+          expect(section.data['foo']).to.equal('bar');
         });
     });
 
@@ -234,7 +234,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
           handleRequest(section, 201, { foo: 'bar' });
           let config = new ConfigWithDefaults({ section });
           let set = config.set('foo', 'bar');
-          expect(section.data['foo']).to.be('bar');
+          expect(section.data['foo']).to.equal('bar');
           expectFailure(set, done, 'Invalid response: 201 Created');
         })
         .catch(done);

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Session } from '../../../lib/session';
 
@@ -38,7 +38,7 @@ describe('session/validate', () => {
         path: 'bar',
         name: ''
       };
-      expect(() => validateModel(model)).to.throwError();
+      expect(() => validateModel(model)).to.throw();
     });
   });
 });

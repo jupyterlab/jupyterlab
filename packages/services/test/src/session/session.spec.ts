@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -111,7 +111,7 @@ describe('session', () => {
     it('should start a session', async () => {
       return startNew().then(s => {
         session = s;
-        expect(session.id).to.be.ok();
+        expect(session.id).to.be.ok;
       });
     });
 
@@ -120,7 +120,7 @@ describe('session', () => {
       let options: Session.IOptions = { path: UUID.uuid4(), serverSettings };
       Session.startNew(options).then(s => {
         session = s;
-        expect(session.id).to.ok();
+        expect(session.id).to.be.ok;
         done();
       });
     });
@@ -187,16 +187,16 @@ describe('session', () => {
   describe('Session.connectTo()', () => {
     it('should connect to a running session', () => {
       let newSession = Session.connectTo(defaultSession.model);
-      expect(newSession.id).to.be(defaultSession.id);
-      expect(newSession.kernel.id).to.be(defaultSession.kernel.id);
-      expect(newSession).to.not.be(defaultSession);
-      expect(newSession.kernel).to.not.be(defaultSession.kernel);
+      expect(newSession.id).to.equal(defaultSession.id);
+      expect(newSession.kernel.id).to.equal(defaultSession.kernel.id);
+      expect(newSession).to.not.equal(defaultSession);
+      expect(newSession.kernel).to.not.equal(defaultSession.kernel);
     });
 
     it('should accept server settings', () => {
       let serverSettings = makeSettings();
       const session = Session.connectTo(defaultSession.model, serverSettings);
-      expect(session.id).to.be.ok();
+      expect(session.id).to.be.ok;
     });
   });
 
@@ -223,7 +223,7 @@ describe('session', () => {
         });
         await session.shutdown();
         session.dispose();
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
 
@@ -238,8 +238,8 @@ describe('session', () => {
         let previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
         await defaultSession.kernel.ready;
-        expect(previous).to.not.be(defaultSession.kernel);
-        expect(called).to.eql({
+        expect(previous).to.not.equal(defaultSession.kernel);
+        expect(called).to.deep.equal({
           oldValue: previous,
           newValue: defaultSession.kernel
         });
@@ -256,7 +256,7 @@ describe('session', () => {
           }
         });
         return defaultSession.kernel.requestKernelInfo().then(() => {
-          expect(called).to.be(true);
+          expect(called).to.equal(true);
         });
       });
     });
@@ -272,7 +272,7 @@ describe('session', () => {
         return defaultSession.kernel
           .requestExecute({ code: 'a=1' }, true)
           .done.then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
     });
@@ -306,66 +306,66 @@ describe('session', () => {
         let called = false;
         let object = {};
         defaultSession.propertyChanged.connect((s, type) => {
-          expect(defaultSession.path).to.be(newPath);
-          expect(type).to.be('path');
+          expect(defaultSession.path).to.equal(newPath);
+          expect(type).to.equal('path');
           called = true;
           Signal.disconnectReceiver(object);
         }, object);
         return defaultSession.setPath(newPath).then(() => {
-          expect(called).to.be(true);
+          expect(called).to.equal(true);
         });
       });
     });
 
     context('#id', () => {
       it('should be a string', () => {
-        expect(typeof defaultSession.id).to.be('string');
+        expect(typeof defaultSession.id).to.equal('string');
       });
     });
 
     context('#path', () => {
       it('should be a string', () => {
-        expect(typeof defaultSession.path).to.be('string');
+        expect(typeof defaultSession.path).to.equal('string');
       });
     });
 
     context('#name', () => {
       it('should be a string', () => {
-        expect(typeof defaultSession.name).to.be('string');
+        expect(typeof defaultSession.name).to.equal('string');
       });
     });
 
     context('#type', () => {
       it('should be a string', () => {
-        expect(typeof defaultSession.name).to.be('string');
+        expect(typeof defaultSession.name).to.equal('string');
       });
     });
 
     context('#model', () => {
       it('should be an IModel', () => {
         let model = defaultSession.model;
-        expect(typeof model.id).to.be('string');
-        expect(typeof model.path).to.be('string');
-        expect(typeof model.kernel.name).to.be('string');
-        expect(typeof model.kernel.id).to.be('string');
+        expect(typeof model.id).to.equal('string');
+        expect(typeof model.path).to.equal('string');
+        expect(typeof model.kernel.name).to.equal('string');
+        expect(typeof model.kernel.id).to.equal('string');
       });
     });
 
     context('#kernel', () => {
       it('should be an IKernel object', () => {
-        expect(typeof defaultSession.kernel.id).to.be('string');
+        expect(typeof defaultSession.kernel.id).to.equal('string');
       });
     });
 
     context('#kernel', () => {
       it('should be a delegate to the kernel status', () => {
-        expect(defaultSession.status).to.be(defaultSession.kernel.status);
+        expect(defaultSession.status).to.equal(defaultSession.kernel.status);
       });
     });
 
     context('#serverSettings', () => {
       it('should be the serverSettings', () => {
-        expect(defaultSession.serverSettings.baseUrl).to.be(
+        expect(defaultSession.serverSettings.baseUrl).to.equal(
           PageConfig.getBaseUrl()
         );
       });
@@ -374,18 +374,18 @@ describe('session', () => {
     context('#isDisposed', () => {
       it('should be true after we dispose of the session', () => {
         const session = Session.connectTo(defaultSession.model);
-        expect(session.isDisposed).to.be(false);
+        expect(session.isDisposed).to.equal(false);
         session.dispose();
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
         const session = Session.connectTo(defaultSession.model);
-        expect(session.isDisposed).to.be(false);
-        expect(session.isDisposed).to.be(false);
+        expect(session.isDisposed).to.equal(false);
+        expect(session.isDisposed).to.equal(false);
         session.dispose();
-        expect(session.isDisposed).to.be(true);
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
+        expect(session.isDisposed).to.equal(true);
       });
     });
 
@@ -393,22 +393,22 @@ describe('session', () => {
       it('should dispose of the resources held by the session', () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
       });
 
       it('should be safe to call twice', () => {
         const session = Session.connectTo(defaultSession.model);
         session.dispose();
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
         session.dispose();
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
       });
 
       it('should be safe to call if the kernel is disposed', () => {
         const session = Session.connectTo(defaultSession.model);
         session.kernel.dispose();
         session.dispose();
-        expect(session.isDisposed).to.be(true);
+        expect(session.isDisposed).to.equal(true);
       });
     });
 
@@ -416,7 +416,7 @@ describe('session', () => {
       it('should set the path of the session', () => {
         let newPath = UUID.uuid4();
         return defaultSession.setPath(newPath).then(() => {
-          expect(defaultSession.path).to.be(newPath);
+          expect(defaultSession.path).to.equal(newPath);
         });
       });
 
@@ -447,7 +447,7 @@ describe('session', () => {
       it('should set the type of the session', () => {
         let type = UUID.uuid4();
         return defaultSession.setType(type).then(() => {
-          expect(defaultSession.type).to.be(type);
+          expect(defaultSession.type).to.equal(type);
         });
       });
 
@@ -478,7 +478,7 @@ describe('session', () => {
       it('should set the name of the session', () => {
         let name = UUID.uuid4();
         return defaultSession.setName(name).then(() => {
-          expect(defaultSession.name).to.be(name);
+          expect(defaultSession.name).to.equal(name);
         });
       });
 
@@ -512,9 +512,9 @@ describe('session', () => {
         await previous.ready;
         await session.changeKernel({ name: previous.name });
         await session.kernel.ready;
-        expect(session.kernel.name).to.be(previous.name);
-        expect(session.kernel.id).to.not.be(previous.id);
-        expect(session.kernel).to.not.be(previous);
+        expect(session.kernel.name).to.equal(previous.name);
+        expect(session.kernel.id).to.not.equal(previous.id);
+        expect(session.kernel).to.not.equal(previous);
         previous.dispose();
       });
 
@@ -526,9 +526,9 @@ describe('session', () => {
         await kernel.ready;
         await session.changeKernel({ id: kernel.id });
         await session.kernel.ready;
-        expect(session.kernel.id).to.be(kernel.id);
-        expect(session.kernel).to.not.be(previous);
-        expect(session.kernel).to.not.be(kernel);
+        expect(session.kernel.id).to.equal(kernel.id);
+        expect(session.kernel).to.not.equal(previous);
+        expect(session.kernel).to.not.equal(kernel);
         await previous.dispose();
         await kernel.dispose();
       });
@@ -541,8 +541,8 @@ describe('session', () => {
         handleRequest(session, 200, model);
         await session.changeKernel({ name: previous.name });
         await session.kernel.ready;
-        expect(session.kernel.name).to.be(previous.name);
-        expect(session.path).to.be(model.path);
+        expect(session.kernel.name).to.equal(previous.name);
+        expect(session.path).to.equal(model.path);
         previous.dispose();
       });
     });
@@ -564,7 +564,7 @@ describe('session', () => {
             return session.shutdown();
           })
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
 
@@ -606,7 +606,7 @@ describe('session', () => {
         let session0 = await startNew();
         let session1 = Session.connectTo(session0.model);
         await session0.shutdown();
-        expect(session1.isDisposed).to.be(true);
+        expect(session1.isDisposed).to.equal(true);
       });
     });
   });

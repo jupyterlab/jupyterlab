@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -38,7 +38,7 @@ describe('session/manager', () => {
 
   beforeEach(() => {
     manager = new SessionManager();
-    expect(manager.specs).to.be(null);
+    expect(manager.specs).to.be.null;
   });
 
   afterEach(() => {
@@ -52,7 +52,7 @@ describe('session/manager', () => {
   describe('SessionManager', () => {
     describe('#constructor()', () => {
       it('should create a new session manager', () => {
-        expect(manager instanceof SessionManager).to.be(true);
+        expect(manager instanceof SessionManager).to.equal(true);
       });
     });
 
@@ -62,14 +62,14 @@ describe('session/manager', () => {
         let serverSettings = ServerConnection.makeSettings();
         let token = serverSettings.token;
         manager = new SessionManager({ serverSettings });
-        expect(manager.serverSettings.token).to.be(token);
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
     describe('#specs', () => {
       it('should be the kernel specs', () => {
         return manager.ready.then(() => {
-          expect(manager.specs.default).to.be.ok();
+          expect(manager.specs.default).to.be.ok;
         });
       });
     });
@@ -78,9 +78,9 @@ describe('session/manager', () => {
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new SessionManager();
-        expect(manager.isReady).to.be(false);
+        expect(manager.isReady).to.equal(false);
         return manager.ready.then(() => {
-          expect(manager.isReady).to.be(true);
+          expect(manager.isReady).to.equal(true);
         });
       });
     });
@@ -106,7 +106,7 @@ describe('session/manager', () => {
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         manager.specsChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
+          expect(sender).to.equal(manager);
           if (args.default === specs.default) {
             done();
           }
@@ -119,7 +119,7 @@ describe('session/manager', () => {
       it('should be emitted when the running sessions changed', done => {
         let object = {};
         manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
+          expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
           Signal.disconnectReceiver(object);
           done();
@@ -138,7 +138,7 @@ describe('session/manager', () => {
             return s.shutdown();
           })
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
 
@@ -154,7 +154,7 @@ describe('session/manager', () => {
             return manager.refreshRunning();
           })
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
 
@@ -170,7 +170,7 @@ describe('session/manager', () => {
             return manager.refreshRunning();
           })
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
     });
@@ -192,7 +192,7 @@ describe('session/manager', () => {
         specs.default = 'shell';
         handleRequest(manager, 200, specs);
         return manager.refreshSpecs().then(() => {
-          expect(manager.specs.default).to.be(specs.default);
+          expect(manager.specs.default).to.equal(specs.default);
         });
       });
     });
@@ -201,7 +201,7 @@ describe('session/manager', () => {
       it('should start a session', async () => {
         let session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
-        expect(session.id).to.be.ok();
+        expect(session.id).to.be.ok;
         return session.shutdown();
       });
 
@@ -212,21 +212,21 @@ describe('session/manager', () => {
         });
         let session = await manager.startNew({ path: UUID.uuid4() });
         await session.kernel.ready;
-        expect(called).to.be(true);
+        expect(called).to.equal(true);
       });
     });
 
     describe('#findByPath()', () => {
       it('should find an existing session by path', async () => {
         let newModel = await manager.findByPath(session.path);
-        expect(newModel.id).to.be(session.id);
+        expect(newModel.id).to.equal(session.id);
       });
     });
 
     describe('#findById()', () => {
       it('should find an existing session by id', () => {
         return manager.findById(session.id).then(newModel => {
-          expect(newModel.id).to.be(session.id);
+          expect(newModel.id).to.equal(session.id);
         });
       });
     });
@@ -234,10 +234,10 @@ describe('session/manager', () => {
     describe('#connectTo()', () => {
       it('should connect to a running session', () => {
         const newSession = manager.connectTo(session.model);
-        expect(newSession.id).to.be(session.id);
-        expect(newSession.kernel.id).to.be(session.kernel.id);
-        expect(newSession).to.not.be(session);
-        expect(newSession.kernel).to.not.be(session.kernel);
+        expect(newSession.id).to.equal(session.id);
+        expect(newSession.kernel.id).to.equal(session.kernel.id);
+        expect(newSession).to.not.equal(session);
+        expect(newSession.kernel).to.not.equal(session.kernel);
       });
     });
 
@@ -246,7 +246,7 @@ describe('session/manager', () => {
         let temp = await startNew(manager);
         await temp.kernel.ready;
         await manager.shutdown(temp.id);
-        expect(temp.isDisposed).to.be(true);
+        expect(temp.isDisposed).to.equal(true);
       });
 
       it('should emit a runningChanged signal', async () => {
@@ -261,8 +261,8 @@ describe('session/manager', () => {
         });
 
         await manager.shutdown(session.id);
-        expect(called).to.be(true);
-        expect(session.isDisposed).to.be(true);
+        expect(called).to.equal(true);
+        expect(session.isDisposed).to.equal(true);
       });
     });
   });

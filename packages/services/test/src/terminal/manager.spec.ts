@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -41,7 +41,7 @@ describe('terminal', () => {
       it('should accept no options', () => {
         manager.dispose();
         manager = new TerminalManager();
-        expect(manager).to.be.a(TerminalManager);
+        expect(manager).to.be.an.instanceof(TerminalManager);
       });
 
       it('should accept options', () => {
@@ -49,7 +49,7 @@ describe('terminal', () => {
         manager = new TerminalManager({
           serverSettings: ServerConnection.makeSettings()
         });
-        expect(manager).to.be.a(TerminalManager);
+        expect(manager).to.be.an.instanceof(TerminalManager);
       });
     });
 
@@ -59,7 +59,7 @@ describe('terminal', () => {
         let serverSettings = ServerConnection.makeSettings();
         let token = serverSettings.token;
         manager = new TerminalManager({ serverSettings });
-        expect(manager.serverSettings.token).to.be(token);
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
@@ -67,9 +67,9 @@ describe('terminal', () => {
       it('should test whether the manager is ready', () => {
         manager.dispose();
         manager = new TerminalManager();
-        expect(manager.isReady).to.be(false);
+        expect(manager.isReady).to.equal(false);
         return manager.ready.then(() => {
-          expect(manager.isReady).to.be(true);
+          expect(manager.isReady).to.equal(true);
         });
       });
     });
@@ -82,7 +82,7 @@ describe('terminal', () => {
 
     describe('#isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
-        expect(TerminalSession.isAvailable()).to.be(true);
+        expect(TerminalSession.isAvailable()).to.equal(true);
       });
     });
 
@@ -98,7 +98,7 @@ describe('terminal', () => {
     describe('#startNew()', () => {
       it('should startNew a new terminal session', () => {
         return manager.startNew().then(session => {
-          expect(session.name).to.be.ok();
+          expect(session.name).to.be.ok;
         });
       });
 
@@ -114,7 +114,7 @@ describe('terminal', () => {
       it('should connect to an existing session', () => {
         let name = session.name;
         return manager.connectTo(name).then(session => {
-          expect(session.name).to.be(name);
+          expect(session.name).to.equal(name);
         });
       });
     });
@@ -129,7 +129,7 @@ describe('terminal', () => {
             return manager.shutdown(s.name);
           })
           .then(() => {
-            expect(temp.isDisposed).to.be(true);
+            expect(temp.isDisposed).to.equal(true);
           });
       });
 
@@ -139,13 +139,13 @@ describe('terminal', () => {
           .startNew()
           .then(s => {
             manager.runningChanged.connect((sender, args) => {
-              expect(s.isDisposed).to.be(false);
+              expect(s.isDisposed).to.equal(false);
               called = true;
             });
             return manager.shutdown(s.name);
           })
           .then(() => {
-            expect(called).to.be(true);
+            expect(called).to.equal(true);
           });
       });
     });
@@ -153,7 +153,7 @@ describe('terminal', () => {
     describe('#runningChanged', () => {
       it('should be emitted when the running terminals changed', done => {
         manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
+          expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
           done();
         });
@@ -172,14 +172,14 @@ describe('terminal', () => {
           })
           .then(() => {
             let running = toArray(manager.running());
-            expect(running.length).to.be(before + 1);
+            expect(running.length).to.equal(before + 1);
             let found = false;
             running.map(m => {
               if (m.name === model.name) {
                 found = true;
               }
             });
-            expect(found).to.be(true);
+            expect(found).to.equal(true);
           });
       });
     });
