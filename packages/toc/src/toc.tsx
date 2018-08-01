@@ -358,6 +358,7 @@ export class TOCCodeCell extends React.Component<
       event.stopPropagation();
       heading.onClick();
     };
+    let content = null;
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
     if (heading.html) {
