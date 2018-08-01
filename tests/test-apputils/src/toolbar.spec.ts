@@ -249,8 +249,8 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('.createKernelNameItem()', async () => {
-      it("should display the `'display_name'` of the kernel", () => {
+    describe('.createKernelNameItem()', () => {
+      it("should display the `'display_name'` of the kernel", async () => {
         const item = Toolbar.createKernelNameItem(session);
         await session.initialize();
         expect(item.node.textContent).to.equal(session.kernelDisplayName);
@@ -300,7 +300,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should handle a starting session', async () => {
         await session.shutdown();
-        const session = await createClientSession();
+        session = await createClientSession();
         const item = Toolbar.createKernelStatusItem(session);
         expect(item.node.title).to.equal('Kernel Starting');
         expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);

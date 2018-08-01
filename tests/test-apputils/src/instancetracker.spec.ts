@@ -62,7 +62,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = new Widget();
         let promise = signalToPromise(tracker.widgetAdded);
         tracker.add(widget);
-        const { sender, args } = await promise;
+        const [sender, args] = await promise;
         expect(args).to.equal(widget);
       });
 
