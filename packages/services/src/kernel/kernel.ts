@@ -266,7 +266,7 @@ export namespace Kernel {
      */
     requestExecute(
       content: KernelMessage.IExecuteRequest,
-      metadata: JSONObject,
+      metadata?: JSONObject,
       disposeOnDone?: boolean
     ): Kernel.IFuture;
 
