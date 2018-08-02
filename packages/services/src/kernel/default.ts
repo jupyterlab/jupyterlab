@@ -519,7 +519,7 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   requestExecute(
     content: KernelMessage.IExecuteRequest,
-    metadata: JSONObject = {},
+    metadata?: JSONObject,
     disposeOnDone: boolean = true
   ): Kernel.IFuture {
     let options: KernelMessage.IOptions = {
