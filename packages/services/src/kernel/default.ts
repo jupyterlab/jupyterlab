@@ -528,7 +528,6 @@ export class DefaultKernel implements Kernel.IKernel {
       username: this._username,
       session: this._clientId
     };
-    const { cellId, ...rest } = content;
     let defaults: JSONObject = {
       silent: false,
       store_history: true,
