@@ -60,12 +60,14 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getCodeCells(
                 text,
                 onClickFactory2,
                 numberingDict,
-                executionCount
+                executionCount,
+                lastLevel
               )
             );
           }
@@ -87,12 +89,19 @@ export function createNotebookGenerator(
                 el.scrollIntoView();
               };
             };
+            let lastLevel = Private.getLastLevel(headings);
+            let numbering = true;
+            if (widget != null) {
+              numbering = widget.needNumbering;
+            }
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 outputWidget.node,
                 onClickFactory,
                 sanitizer,
-                numberingDict
+                numberingDict,
+                lastLevel,
+                numbering
               )
             );
           }
@@ -101,26 +110,28 @@ export function createNotebookGenerator(
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if ((cell as MarkdownCell).rendered) {
-            const onClickFactory = (el: Element) => {
+            const onClickFactory = (line: number) => {
               return () => {
                 if (!(cell as MarkdownCell).rendered) {
                   cell.node.scrollIntoView();
                 } else {
-                  el.scrollIntoView();
+                  cell.node.scrollIntoView();
                 }
               };
             };
-            let numbering = true;
-            if (widget != null) {
-              numbering = widget.needNumbering;
-            }
+            // let numbering = true;
+            // if (widget != null) {
+            //   numbering = widget.needNumbering;
+            // }
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
-              Private.getRenderedHTMLHeadings(
-                cell.node,
+              Private.getMarkdownHeadings(
+                model.value.text,
                 onClickFactory,
-                sanitizer,
+                //sanitizer,
                 numberingDict,
-                numbering
+                //numbering,
+                lastLevel
               )
             );
           } else {
@@ -132,11 +143,13 @@ export function createNotebookGenerator(
                 }
               };
             };
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getMarkdownHeadings(
                 model.value.text,
                 onClickFactory,
-                numberingDict
+                numberingDict,
+                lastLevel
               )
             );
           }
@@ -152,8 +165,14 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
-              Private.getRawCells(text, onClickFactory2, numberingDict)
+              Private.getRawCells(
+                text,
+                onClickFactory2,
+                numberingDict,
+                lastLevel
+              )
             );
           }
         }
@@ -193,7 +212,7 @@ export function createMarkdownGenerator(
           editor.content.editor.setCursorPosition({ line, column: 0 });
         };
       };
-      return Private.getMarkdownHeadings(
+      return Private.getMarkdownDocHeadings(
         model.value.text,
         onClickFactory,
         null
@@ -231,7 +250,8 @@ export function createRenderedMarkdownGenerator(
         widget.content.node,
         onClickFactory,
         sanitizer,
-        null
+        null,
+        0
       );
     }
   };
@@ -293,9 +313,20 @@ export function createLatexGenerator(
 /**
  * A private namespace for miscellaneous things.
  */
-let currentLevel = 1;
 namespace Private {
-  //let currentLevel = 1;
+  export function getLastLevel(headings: IHeading[]) {
+    if (headings.length > 0) {
+      let location = headings.length - 1;
+      while (location >= 0) {
+        if (headings[location].type === 'header') {
+          return headings[location].level;
+        }
+        location = location - 1;
+      }
+    }
+    return 0;
+  }
+
   export function incrementNumberingDict(dict: any, level: number) {
     if (dict[level + 1] != undefined) {
       dict[level + 1] = undefined;
@@ -323,11 +354,7 @@ namespace Private {
     return numbering;
   }
 
-  /**
-   * Given a string of markdown, get the markdown headings
-   * in that string.
-   */
-  export function getMarkdownHeadings(
+  export function getMarkdownDocHeadings(
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any
@@ -346,7 +373,6 @@ namespace Private {
       let match = line.match(/^([#]{1,6}) (.*)/);
       if (match) {
         const level = match[1].length;
-        currentLevel = level;
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
@@ -358,7 +384,6 @@ namespace Private {
       match = line.match(/^([=]{2,}|[-]{2,})/);
       if (match && idx > 0) {
         const level = match[1][0] === '=' ? 1 : 2;
-        currentLevel = level;
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
@@ -372,19 +397,74 @@ namespace Private {
       match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
       if (match) {
         const level = parseInt(match[1], 10);
-        currentLevel = level;
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
         headings.push({ text, level, numbering, onClick, type: 'header' });
         return;
       }
+    });
+    return headings;
+  }
+
+  /**
+   * Given a string of markdown, get the markdown headings
+   * in that string.
+   */
+  export function getMarkdownHeadings(
+    text: string,
+    onClickFactory: (line: number) => (() => void),
+    numberingDict: any,
+    lastLevel: number
+  ): IHeading[] {
+    // Split the text into lines.
+    const lines = text.split('\n');
+    let headings: IHeading[] = [];
+    console.log('Entered getMarkdownHeadings');
+    // Iterate over the lines to get the header level and
+    // the text for the line.
+    let line = lines[0];
+    let idx = 0;
+    // Make an onClick handler for this line.
+    const onClick = onClickFactory(idx);
+    console.log('first line: ' + line);
+
+    // First test for '#'-style headers.
+    let match = line.match(/^([#]{1,6}) (.*)/);
+    let match2 = line.match(/^([=]{2,}|[-]{2,})/);
+    let match3 = line.match(/<h([1-6])>(.*)<\/h\1>/i);
+    if (match) {
+      const level = match[1].length;
+      // Take special care to parse markdown links into raw text.
+      const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
+      let numbering = Private.generateNumbering(numberingDict, level);
+      headings.push({ text, level, numbering, onClick, type: 'header' });
+    }
+
+    // Next test for '==='-style headers.
+    else if (match2 && idx > 0) {
+      const level = match2[1][0] === '=' ? 1 : 2;
+      // Take special care to parse markdown links into raw text.
+      const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
+      let numbering = Private.generateNumbering(numberingDict, level);
+      headings.push({ text, level, numbering, onClick, type: 'header' });
+    }
+
+    // Finally test for HTML headers. This will not catch multiline
+    // headers, nor will it catch multiple headers on the same line.
+    // It should do a decent job of catching many, though.
+    else if (match3) {
+      const level = parseInt(match3[1], 10);
+      const text = match3[2];
+      let numbering = Private.generateNumbering(numberingDict, level);
+      headings.push({ text, level, numbering, onClick, type: 'header' });
+    } else {
       headings.push({
         text: line,
-        level: currentLevel + 1,
+        level: lastLevel + 1,
         onClick,
         type: 'markdown'
       });
-    });
+    }
     return headings;
   }
 
@@ -392,7 +472,8 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    executionCount: string
+    executionCount: string,
+    lastLevel: number
   ): IHeading[] {
     let headings: IHeading[] = [];
     if (text) {
@@ -404,7 +485,7 @@ namespace Private {
       }
       headingText = headingText + lines[numLines - 1];
       const onClick = onClickFactory(0);
-      const level = currentLevel + 1;
+      const level = lastLevel + 1;
       headings.push({
         text: executionCount + ' ' + headingText,
         level,
@@ -418,7 +499,8 @@ namespace Private {
   export function getRawCells(
     text: string,
     onClickFactory: (line: number) => (() => void),
-    numberingDict: any
+    numberingDict: any,
+    lastLevel: number
   ): IHeading[] {
     let headings: IHeading[] = [];
     if (text) {
@@ -430,7 +512,7 @@ namespace Private {
       }
       headingText = headingText + lines[numLines - 1];
       const onClick = onClickFactory(0);
-      const level = currentLevel + 1;
+      const level = lastLevel + 1;
       headings.push({
         text: headingText,
         level,
@@ -449,11 +531,12 @@ namespace Private {
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
     numberingDict: any,
+    lastLevel: number,
     needNumbering = true
   ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-    for (let i = 0; i < headingNodes.length; i++) {
+    for (let i = 0; i < 2; i++) {
       let markdownCell = headingNodes[i];
       if (
         markdownCell.nodeName.toLowerCase() === 'p' &&
@@ -462,7 +545,7 @@ namespace Private {
         if (markdownCell.textContent) {
           console.log();
           headings.push({
-            level: currentLevel + 1,
+            level: lastLevel + 1,
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
             type: 'markdown'
@@ -473,7 +556,6 @@ namespace Private {
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent;
         let shallHide = !needNumbering;
-        currentLevel = level;
         if (heading.getElementsByClassName('numbering-entry').length > 0) {
           heading.removeChild(
             heading.getElementsByClassName('numbering-entry')[0]
