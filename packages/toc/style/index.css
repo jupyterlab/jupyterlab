@@ -83,3 +83,12 @@
 .CodeMirror-scroll::-webkit-scrollbar-track {
   background-color: transparent;
 }
+
+.dropdown-menu-button {
+}
+
+.dropdown-menu-list {
+  position: absolute;
+  margin-top: 0px;
+  background-color: white;
+}
