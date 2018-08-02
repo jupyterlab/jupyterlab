@@ -85,6 +85,7 @@ function activateEditorCommands(
   settingRegistry: ISettingRegistry
 ): void {
   const { commands, restored } = app;
+  console.log('ha ha ha ha ha ha ha ha!');
   let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
 
   /**

@@ -29,12 +29,12 @@
   },
   "scripts": {
     "build": "run-p build:**",
-    "build:typescript": "tsc",
+    "build:src": "tsc -b src",
     "build:webpack": "webpack",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf static",
     "prepublishOnly": "npm run build",
     "watch": "run-p watch:**",
-    "watch:typescript": "tsc -w --listEmittedFiles",
+    "watch:src": "tsc -b src --watch",
     "watch:webpack": "webpack --watch"
   },
   "dependencies": {
@@ -50,7 +50,9 @@
     "svg-url-loader": "~2.3.1",
     "svgo": "~1.0.4",
     "svgo-loader": "~2.1.0",
-    "typescript": "~2.9.2",
+    "ts-loader": "~5.0.0",
+    "typedoc": "~0.12.0",
+    "typescript": "~3.0.3",
     "url-loader": "~1.0.1",
     "webpack": "~4.12.0",
     "webpack-cli": "^3.0.3"

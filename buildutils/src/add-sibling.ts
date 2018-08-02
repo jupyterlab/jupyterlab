@@ -50,28 +50,5 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
   fs.removeSync(path.join(packagePath, 'node_modules'));
 }
 
-// Get the package.json of the extension.
-let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
-
-// Add the extension path to packages/metapackage/tsconfig.json
-let tsconfigPath = path.join(
-  basePath,
-  'packages',
-  'metapackage',
-  'tsconfig.json'
-);
-let tsconfig = utils.readJSONFile(tsconfigPath);
-tsconfig.compilerOptions.paths[data.name] = [
-  path.join('..', packageDirName, 'src')
-];
-fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-
 // Update the core jupyterlab build dependencies.
-try {
-  utils.run('jlpm run integrity');
-} catch (e) {
-  if (!process.env.TRAVIS_BRANCH) {
-    console.error(e);
-    process.exit(1);
-  }
-}
+utils.run('jlpm run integrity');

@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../apputils/src"
+    },
+    {
+      "path": "../../codeeditor/src"
+    },
+    {
+      "path": "../../coreutils/src"
+    },
+    {
+      "path": "../../services/src"
+    }
+  ]
+}

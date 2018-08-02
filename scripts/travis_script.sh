@@ -52,8 +52,9 @@ if [[ $GROUP == docs ]]; then
     # Run the link check - allow for a link to fail once
     py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
-    # Build the api docs
-    jlpm run docs
+    # Build the docs
+    jlpm build:packages
+    jlpm docs
 
     # Verify tutorial docs build
     pushd docs
@@ -65,7 +66,7 @@ fi
 
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
-    jlpm run integrity
+    jlpm run integrity --force
 
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
@@ -152,7 +153,7 @@ if [[ $GROUP == cli ]]; then
     jlpm run build
     jlpm run remove:package extension
     jlpm run build
-    jlpm run integrity
+    jlpm run integrity --force  # Should have a clean tree now
 
     # Test cli tools
     jlpm run get:dependency mocha
@@ -167,10 +168,10 @@ if [[ $GROUP == cli ]]; then
     pip install -q pexpect
     python scripts/create_theme.py
     mv foo packages
-    jlpm run integrity || exit 0
+    jlpm run integrity
     jlpm run build:packages
     jlpm run build:dev
     python -m jupyterlab.browser_check --dev-mode
     rm -rf packages/foo
-    jlpm run integrity || exit 0
+    jlpm run integrity
 fi

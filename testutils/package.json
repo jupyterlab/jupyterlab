@@ -24,10 +24,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b src",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b src --watch"
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.18.4",
@@ -47,6 +47,6 @@
   },
   "devDependencies": {
     "@types/node-fetch": "^2.1.2",
-    "typescript": "~2.9.2"
+    "typescript": "~3.0.3"
   }
 }

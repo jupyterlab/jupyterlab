@@ -1,0 +1,27 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../apputils/src"
+    },
+    {
+      "path": "../../coreutils/src"
+    },
+    {
+      "path": "../../docregistry/src"
+    },
+    {
+      "path": "../../rendermime/src"
+    },
+    {
+      "path": "../../rendermime-interfaces/src"
+    },
+    {
+      "path": "../../services/src"
+    }
+  ]
+}

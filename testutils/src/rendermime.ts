@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// tslint:disable-next-line
-/// <reference path="./json-to-html.d.ts"/>
-
 import json2html = require('json-to-html');
 
 import {

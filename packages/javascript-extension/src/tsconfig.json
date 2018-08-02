@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../rendermime/src"
+    },
+    {
+      "path": "../../rendermime-interfaces/src"
+    }
+  ]
+}

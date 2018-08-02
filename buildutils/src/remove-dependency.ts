@@ -45,3 +45,6 @@ function handlePackage(packagePath: string): void {
   // Write the file back to disk.
   utils.writePackageData(packagePath, data);
 }
+
+// Update the core jupyterlab build dependencies.
+utils.run('jlpm run integrity');

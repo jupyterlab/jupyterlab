@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../build",
+    "types": ["mocha"],
+    "composite": false
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../../packages/apputils/src"
+    },
+    {
+      "path": "../../../packages/mainmenu/src"
+    }
+  ]
+}
