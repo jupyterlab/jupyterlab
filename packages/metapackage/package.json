@@ -83,7 +83,7 @@
     "@jupyterlab/services": "^3.0.3",
     "@jupyterlab/settingeditor": "^0.6.2",
     "@jupyterlab/settingeditor-extension": "^0.12.2",
-    "@jupyterlab/shortcuts-extension": "^0.17.2",
+    "@jupyterlab/shortcuts-extension": "^0.17.3",
     "@jupyterlab/tabmanager-extension": "^0.17.2",
     "@jupyterlab/terminal": "^0.17.2",
     "@jupyterlab/terminal-extension": "^0.17.2",
