@@ -1146,9 +1146,7 @@ export class DefaultKernel implements Kernel.IKernel {
       return;
     }
     // Clear the websocket event handlers and the socket itself.
-    this._ws.onclose = this._noOp;
-    this._ws.onerror = this._noOp;
-    this._ws = null;
+    this._clearSocket();
 
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateStatus('reconnecting');
