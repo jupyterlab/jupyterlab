@@ -92,3 +92,8 @@
   margin-top: 0px;
   background-color: white;
 }
+
+.numberingIcon {
+  float: right;
+  margin: 8px;
+}

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Widget } from '../node_modules/@phosphor/widgets';
 
 export interface DropdownItem {
   props: any;
