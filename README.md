@@ -3,12 +3,12 @@
 A JupyterLab extension for rendering math with [MathJax 3 alpha](https://github.com/mathjax/mathjax-v3).
 
 The default LaTeX renderer in JupyterLab uses [MathJax](https://www.mathjax.org/).
-This extension substitutes the MathJax renderer with the MathJax 3 (alpha) renderer.
+This extension substitutes the MathJax renderer with the MathJax 3 (beta) renderer.
 
 ## Prerequisites
 
-* JupyterLab ^0.29.0
-* Node.js >= 5
+* JupyterLab ^0.34
+* Node.js >= 8
 
 ## Install
 
