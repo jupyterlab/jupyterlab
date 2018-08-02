@@ -281,7 +281,7 @@ export class InspectorPanel extends TabPanel implements IInspector {
     if (args.content) {
       for (let type in items) {
         let inspector = this._items[type];
-        if (inspector.rank < widget.rank && inspector.content) {
+        if (inspector.rank > widget.rank && inspector.content) {
           return;
         }
       }
