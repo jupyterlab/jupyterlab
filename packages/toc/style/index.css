@@ -71,13 +71,13 @@
 .toc-code-span {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .cm-toc .CodeMirror-scroll {
   overflow-x: hidden;
-  overflow-y: scroll;
-  max-height: 60px;
+  overflow-y: hidden;
+  max-height: 81px;
 }
 
 .CodeMirror-scroll::-webkit-scrollbar-track {

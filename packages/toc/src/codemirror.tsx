@@ -1,5 +1,6 @@
-import { UnControlled as CodeMirror } from 'react-codemirror2';
 import * as React from 'react';
+
+const CodeMirror = require('react-codemirror');
 
 export interface CodeComponentProps {
   code: string;
@@ -28,7 +29,8 @@ export class CodeComponent extends React.Component<
       showCursorWhenSelecting: false,
       readOnly: 'true',
       cursorBlinkRate: -1,
-      lineWrapping: true
+      lineWrapping: true,
+      scrollbarStyle: 'null'
     };
     return (
       <CodeMirror
