@@ -44,24 +44,30 @@ export class JupyterLab extends Application<ApplicationShell> {
     super({ shell: new ApplicationShell() });
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
+
+    // Populate application info.
     this._info = { ...JupyterLab.defaultInfo, ...options };
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
 
+    // Make workspace accessible from application info.
+    Object.defineProperty(this._info, 'workspace', {
+      get: () => PageConfig.getOption('workspace') || ''
+    });
+
+    // Instantiate public resources.
     this.serviceManager = new ServiceManager();
+    this.commandLinker = new CommandLinker({ commands: this.commands });
+    this.docRegistry = new DocumentRegistry();
 
-    let linker = new CommandLinker({ commands: this.commands });
-    this.commandLinker = linker;
-
-    let registry = (this.docRegistry = new DocumentRegistry());
-    registry.addModelFactory(new Base64ModelFactory());
+    // Add initial model factory.
+    this.docRegistry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
-      let plugins = createRendermimePlugins(options.mimeExtensions);
-      plugins.forEach(plugin => {
+      for (let plugin of createRendermimePlugins(options.mimeExtensions)) {
         this.registerPlugin(plugin);
-      });
+      }
     }
   }
 
@@ -290,6 +296,14 @@ export namespace JupyterLab {
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
+
+    /**
+     * The name of the current workspace.
+     *
+     * #### Notes
+     * The default /lab workspace name is empty.
+     */
+    readonly workspace: string;
   }
 
   /**
@@ -322,7 +336,8 @@ export namespace JupyterLab {
       serverRoot: PageConfig.getOption('serverRoot'),
       workspaces: PageConfig.getOption('workspacesDir')
     },
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
+    workspace: ''
   };
 
   /**
