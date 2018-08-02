@@ -541,7 +541,7 @@ export namespace OutputArea {
     code: string,
     output: OutputArea,
     session: IClientSession,
-    metadata: JSONObject = {}
+    metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
