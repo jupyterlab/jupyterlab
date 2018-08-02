@@ -43,9 +43,9 @@ describe('apputils', () => {
 
     describe('#current', () => {
       it('should return the current window location as an object', () => {
-        // The karma test window location is a file called `context.html`
+        // The karma test window location is the path `/context.html`
         // without any query string parameters or hash.
-        const path = 'context.html';
+        const path = '/context.html';
         const request = path;
         const search = '';
         const hash = '';
