@@ -20,7 +20,6 @@ import {
   InspectionHandler,
   InspectorPanel,
   KernelConnector,
-  InfoHandler,
   KernelInfoHandler
 } from '@jupyterlab/inspector';
 
