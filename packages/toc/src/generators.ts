@@ -110,28 +110,28 @@ export function createNotebookGenerator(
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if ((cell as MarkdownCell).rendered) {
-            const onClickFactory = (line: number) => {
+            const onClickFactory = (el: Element) => {
               return () => {
                 if (!(cell as MarkdownCell).rendered) {
                   cell.node.scrollIntoView();
                 } else {
-                  cell.node.scrollIntoView();
+                  el.scrollIntoView();
                 }
               };
             };
-            // let numbering = true;
-            // if (widget != null) {
-            //   numbering = widget.needNumbering;
-            // }
+            let numbering = true;
+            if (widget != null) {
+              numbering = widget.needNumbering;
+            }
             let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
-              Private.getMarkdownHeadings(
-                model.value.text,
+              Private.getRenderedHTMLHeadings(
+                cell.node,
                 onClickFactory,
-                //sanitizer,
+                sanitizer,
                 numberingDict,
-                //numbering,
-                lastLevel
+                lastLevel,
+                numbering
               )
             );
           } else {
@@ -419,14 +419,12 @@ namespace Private {
     // Split the text into lines.
     const lines = text.split('\n');
     let headings: IHeading[] = [];
-    console.log('Entered getMarkdownHeadings');
     // Iterate over the lines to get the header level and
     // the text for the line.
     let line = lines[0];
     let idx = 0;
     // Make an onClick handler for this line.
     const onClick = onClickFactory(idx);
-    console.log('first line: ' + line);
 
     // First test for '#'-style headers.
     let match = line.match(/^([#]{1,6}) (.*)/);
@@ -536,8 +534,8 @@ namespace Private {
   ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-    for (let i = 0; i < 2; i++) {
-      let markdownCell = headingNodes[i];
+    if (headingNodes.length > 0) {
+      let markdownCell = headingNodes[0];
       if (
         markdownCell.nodeName.toLowerCase() === 'p' &&
         markdownCell.children.length === 0
@@ -552,7 +550,7 @@ namespace Private {
           });
         }
       } else {
-        const heading = headingNodes[i];
+        const heading = headingNodes[0];
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent;
         let shallHide = !needNumbering;
@@ -572,6 +570,7 @@ namespace Private {
           numbering +
           '</span>';
         heading.innerHTML = numberingElement + html;
+        console.log(heading.innerHTML);
         headings.push({
           level,
           text,
