@@ -119,12 +119,11 @@ describe('session', () => {
       expect(session.id).to.be.ok;
     });
 
-    it('should start even if the websocket fails', () => {
+    it('should start even if the websocket fails', async () => {
       const tester = new SessionTester();
       tester.initialStatus = 'dead';
-      return tester.startSession().then(() => {
-        tester.dispose();
-      });
+      await tester.startSession();
+      tester.dispose();
     });
 
     it('should fail for wrong response status', async () => {
@@ -242,16 +241,15 @@ describe('session', () => {
     });
 
     context('#statusChanged', () => {
-      it('should emit when the kernel status changes', () => {
+      it('should emit when the kernel status changes', async () => {
         let called = false;
         defaultSession.statusChanged.connect((s, status) => {
           if (status === 'busy') {
             called = true;
           }
         });
-        return defaultSession.kernel.requestKernelInfo().then(() => {
-          expect(called).to.equal(true);
-        });
+        await defaultSession.kernel.requestKernelInfo();
+        expect(called).to.equal(true);
       });
     });
 

@@ -207,10 +207,9 @@ describe('session/manager', () => {
     });
 
     describe('#findById()', () => {
-      it('should find an existing session by id', () => {
-        return manager.findById(session.id).then(newModel => {
-          expect(newModel.id).to.equal(session.id);
-        });
+      it('should find an existing session by id', async () => {
+        const newModel = await manager.findById(session.id);
+        expect(newModel.id).to.equal(session.id);
       });
     });
 

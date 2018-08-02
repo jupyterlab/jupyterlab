@@ -194,26 +194,24 @@ export function handleRequest(item: IService, status: number, body: any) {
 export async function expectFailure(
   promise: Promise<any>,
   message?: string
-): Promise<any> {
-  const result = promise.then(
-    (msg: any) => {
-      throw Error('Expected failure did not occur');
-    },
-    (error: Error) => {
-      if (message && error.message.indexOf(message) === -1) {
-        throw Error(`Error "${message}" not in: "${error.message}"`);
-      }
+): Promise<void> {
+  let called = false;
+  try {
+    await promise;
+    called = true;
+  } catch (err) {
+    if (message && err.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${err.message}"`);
     }
-  );
-
-  return result;
+  }
 }
 
 /**
  * Do something in the future ensuring total ordering wrt to Promises.
  */
-export function doLater(cb: () => void): void {
-  Promise.resolve().then(cb);
+export async function doLater(cb: () => void): Promise<void> {
+  await Promise.resolve(void 0);
+  cb();
 }
 
 /**

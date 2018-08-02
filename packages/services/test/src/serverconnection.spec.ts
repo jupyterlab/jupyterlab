@@ -12,16 +12,16 @@ import { getRequestHandler } from './utils';
 describe('@jupyterlab/services', () => {
   describe('ServerConnection', () => {
     describe('.makeRequest()', () => {
-      it('should make a request to the server', () => {
+      it('should make a request to the server', async () => {
         const settings = getRequestHandler(200, 'hello');
-        return ServerConnection.makeRequest(settings.baseUrl, {}, settings)
-          .then(response => {
-            expect(response.statusText).to.equal('OK');
-            return response.json();
-          })
-          .then(data => {
-            expect(data).to.equal('hello');
-          });
+        const response = await ServerConnection.makeRequest(
+          settings.baseUrl,
+          {},
+          settings
+        );
+        expect(response.statusText).to.equal('OK');
+        const data = await response.json();
+        expect(data).to.equal('hello');
       });
     });
 
@@ -60,17 +60,16 @@ describe('@jupyterlab/services', () => {
     });
 
     describe('.makeError()', () => {
-      it('should create a server error from a server response', () => {
+      it('should create a server error from a server response', async () => {
         const settings = getRequestHandler(200, 'hi');
         const init = { body: 'hi' };
-        return ServerConnection.makeRequest(
+        const response = await ServerConnection.makeRequest(
           settings.baseUrl,
           init,
           settings
-        ).then(response => {
-          const err = new ServerConnection.ResponseError(response);
-          expect(err.message).to.equal('Invalid response: 200 OK');
-        });
+        );
+        const err = new ServerConnection.ResponseError(response);
+        expect(err.message).to.equal('Invalid response: 200 OK');
       });
     });
   });

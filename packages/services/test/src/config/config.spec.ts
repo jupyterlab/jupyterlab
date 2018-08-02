@@ -34,26 +34,23 @@ function randomName() {
 
 describe('config', () => {
   describe('ConfigSection.create()', () => {
-    it('should load a config', () => {
-      return ConfigSection.create({ name: randomName() }).then(config => {
-        expect(Object.keys(config.data).length).to.equal(0);
-      });
+    it('should load a config', async () => {
+      const config = await ConfigSection.create({ name: randomName() });
+      expect(Object.keys(config.data).length).to.equal(0);
     });
 
-    it('should load a config', () => {
-      return ConfigSection.create({ name: randomName() }).then(config => {
-        expect(Object.keys(config.data).length).to.equal(0);
-      });
+    it('should load a config', async () => {
+      const config = await ConfigSection.create({ name: randomName() });
+      expect(Object.keys(config.data).length).to.equal(0);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const serverSettings = makeSettings();
-      return ConfigSection.create({
+      const config = await ConfigSection.create({
         name: randomName(),
         serverSettings
-      }).then(config => {
-        expect(Object.keys(config.data).length).to.equal(0);
       });
+      expect(Object.keys(config.data).length).to.equal(0);
     });
 
     it('should fail for an incorrect response', async () => {
@@ -62,182 +59,153 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       });
-      expectFailure(configPromise, done, 'Invalid response: 201 Created');
+      await expectFailure(configPromise, 'Invalid response: 201 Created');
     });
   });
 
   describe('#update()', () => {
-    it('should update a config', () => {
-      const config: IConfigSection;
-      return ConfigSection.create({ name: randomName() })
-        .then(c => {
-          config = c;
-          return config.update({ foo: 'baz', spam: 'eggs' });
-        })
-        .then((data: any) => {
-          expect(data.foo).to.equal('baz');
-          expect(config.data['foo']).to.equal('baz');
-          expect(data['spam']).to.equal('eggs');
-          expect(config.data['spam']).to.equal('eggs');
-        });
+    it('should update a config', async () => {
+      const config = await ConfigSection.create({ name: randomName() });
+      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
+      expect(data.foo).to.equal('baz');
+      expect(config.data['foo']).to.equal('baz');
+      expect(data['spam']).to.equal('eggs');
+      expect(config.data['spam']).to.equal('eggs');
     });
 
-    it('should accept server settings', () => {
-      const config: IConfigSection;
+    it('should accept server settings', async () => {
       const serverSettings = makeSettings();
-      return ConfigSection.create({ name: randomName(), serverSettings })
-        .then(c => {
-          config = c;
-          return config.update({ foo: 'baz', spam: 'eggs' });
-        })
-        .then((data: any) => {
-          expect(data.foo).to.equal('baz');
-          expect(config.data['foo']).to.equal('baz');
-          expect(data['spam']).to.equal('eggs');
-          expect(config.data['spam']).to.equal('eggs');
-        });
+      const config = await ConfigSection.create({
+        name: randomName(),
+        serverSettings
+      });
+      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
+      expect(data.foo).to.equal('baz');
+      expect(config.data['foo']).to.equal('baz');
+      expect(data['spam']).to.equal('eggs');
+      expect(config.data['spam']).to.equal('eggs');
     });
 
     it('should fail for an incorrect response', async () => {
-      ConfigSection.create({ name: randomName() })
-        .then(config => {
-          handleRequest(config, 201, {});
-          const update = config.update({ foo: 'baz' });
-          expectFailure(update, done, 'Invalid response: 201 Created');
-        })
-        .catch(done);
+      const config = await ConfigSection.create({ name: randomName() });
+      handleRequest(config, 201, {});
+      const update = config.update({ foo: 'baz' });
+      await expectFailure(update, 'Invalid response: 201 Created');
     });
   });
 });
 
 describe('jupyter.services - ConfigWithDefaults', () => {
   describe('#constructor()', () => {
-    it('should complete properly', () => {
+    it('should complete properly', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      return ConfigSection.create({
+      const section = await ConfigSection.create({
         name: randomName()
-      }).then(section => {
-        const config = new ConfigWithDefaults({
-          section,
-          defaults,
-          className
-        });
-        expect(config).to.be.an.instanceof(ConfigWithDefaults);
       });
+      const config = new ConfigWithDefaults({
+        section,
+        defaults,
+        className
+      });
+      expect(config).to.be.an.instanceof(ConfigWithDefaults);
     });
   });
 
   describe('#get()', () => {
-    it('should get a new config value', () => {
+    it('should get a new config value', async () => {
       const defaults: JSONObject = { foo: 'bar' };
       const className = 'testclass';
-      return ConfigSection.create({
+      const section = await ConfigSection.create({
         name: randomName()
-      }).then(section => {
-        const config = new ConfigWithDefaults({
-          section,
-          defaults,
-          className
-        });
-        const data = config.get('foo');
-        expect(data).to.equal('bar');
       });
+      const config = new ConfigWithDefaults({
+        section,
+        defaults,
+        className
+      });
+      const data = config.get('foo');
+      expect(data).to.equal('bar');
     });
 
-    it('should get a default config value', () => {
+    it('should get a default config value', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      return ConfigSection.create({
+      const section = await ConfigSection.create({
         name: randomName()
-      }).then(section => {
-        const config = new ConfigWithDefaults({
-          section,
-          defaults,
-          className
-        });
-        const data = config.get('spam');
-        expect(data).to.equal('eggs');
       });
+      const config = new ConfigWithDefaults({
+        section,
+        defaults,
+        className
+      });
+      const data = config.get('spam');
+      expect(data).to.equal('eggs');
     });
 
-    it('should get a default config value with no class', () => {
+    it('should get a default config value with no class', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      return ConfigSection.create({
+      const section = await ConfigSection.create({
         name: randomName()
-      }).then(section => {
-        const config = new ConfigWithDefaults({
-          section,
-          defaults,
-          className
-        });
-        const data = config.get('spam');
-        expect(data).to.equal('eggs');
       });
+      const config = new ConfigWithDefaults({
+        section,
+        defaults,
+        className
+      });
+      const data = config.get('spam');
+      expect(data).to.equal('eggs');
     });
 
-    it('should get a falsey value', () => {
+    it('should get a falsey value', async () => {
       const defaults: JSONObject = { foo: true };
       const className = 'testclass';
       const serverSettings = getRequestHandler(200, { foo: false });
-      return ConfigSection.create({
+      const section = await ConfigSection.create({
         name: randomName(),
         serverSettings
-      }).then(section => {
-        const config = new ConfigWithDefaults({
-          section,
-          defaults,
-          className
-        });
-        const data = config.get('foo');
-        expect(data).to.not.be.ok;
       });
+      const config = new ConfigWithDefaults({
+        section,
+        defaults,
+        className
+      });
+      const data = config.get('foo');
+      expect(data).to.not.be.ok;
     });
   });
 
   describe('#set()', () => {
-    it('should set a value in a class immediately', () => {
+    it('should set a value in a class immediately', async () => {
       const className = 'testclass';
-      const section: IConfigSection;
-      return ConfigSection.create({ name: randomName() })
-        .then(s => {
-          section = s;
-          const config = new ConfigWithDefaults({ section, className });
-          return config.set('foo', 'bar');
-        })
-        .then(() => {
-          const data = section.data['testclass'] as JSONObject;
-          expect(data['foo']).to.equal('bar');
-        });
+      const section = await ConfigSection.create({ name: randomName() });
+      const config = new ConfigWithDefaults({ section, className });
+      let data: any = await config.set('foo', 'bar');
+      data = section.data['testclass'] as JSONObject;
+      expect(data['foo']).to.equal('bar');
     });
 
-    it('should set a top level value', () => {
-      const section: IConfigSection;
-      return ConfigSection.create({ name: randomName() })
-        .then(s => {
-          section = s;
-          const config = new ConfigWithDefaults({ section });
-          const set = config.set('foo', 'bar');
-          expect(section.data['foo']).to.equal('bar');
-          return set;
-        })
-        .then(data => {
-          expect(section.data['foo']).to.equal('bar');
-        });
+    it('should set a top level value', async () => {
+      const section = await ConfigSection.create({ name: randomName() });
+      const config = new ConfigWithDefaults({ section });
+      const set = config.set('foo', 'bar');
+      expect(section.data['foo']).to.equal('bar');
+      const data: any = await set;
+      expect(section.data['foo']).to.equal('bar');
     });
 
     it('should fail for an invalid response', async () => {
       const serverSettings = getRequestHandler(200, {});
-      ConfigSection.create({ name: randomName(), serverSettings })
-        .then(section => {
-          handleRequest(section, 201, { foo: 'bar' });
-          const config = new ConfigWithDefaults({ section });
-          const set = config.set('foo', 'bar');
-          expect(section.data['foo']).to.equal('bar');
-          expectFailure(set, done, 'Invalid response: 201 Created');
-        })
-        .catch(done);
+      const section = await ConfigSection.create({
+        name: randomName(),
+        serverSettings
+      });
+      handleRequest(section, 201, { foo: 'bar' });
+      const config = new ConfigWithDefaults({ section });
+      const set = config.set('foo', 'bar');
+      expect(section.data['foo']).to.equal('bar');
+      await expectFailure(set, 'Invalid response: 201 Created');
     });
   });
 });

@@ -187,7 +187,7 @@ describe('contents', () => {
       expect(model.path).to.equal('foo');
     });
 
-    it('should get a directory', () => {
+    it('should get a directory', async () => {
       const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_DIR);
       const options: Contents.IFetchOptions = { type: 'directory' };
@@ -195,7 +195,7 @@ describe('contents', () => {
       expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should get a file from an additional drive', () => {
+    it('should get a file from an additional drive', async () => {
       const contents = new ContentsManager();
       const drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
@@ -205,7 +205,7 @@ describe('contents', () => {
       expect(model.path).to.equal('other:foo');
     });
 
-    it('should get a directory from an additional drive', () => {
+    it('should get a directory from an additional drive', async () => {
       const contents = new ContentsManager();
       const drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
@@ -296,7 +296,7 @@ describe('contents', () => {
       expect(model.path).to.equal('other:foo/test');
     });
 
-    it('should create a directory on an additional drive', () => {
+    it('should create a directory on an additional drive', async () => {
       const contents = new ContentsManager();
       const other = new Drive({ name: 'other' });
       contents.addDrive(other);
@@ -458,7 +458,7 @@ describe('contents', () => {
       expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should save a file on an additional drive', () => {
+    it('should save a file on an additional drive', async () => {
       const contents = new ContentsManager();
       const other = new Drive({ name: 'other' });
       contents.addDrive(other);
@@ -468,7 +468,7 @@ describe('contents', () => {
       expect(model.path).to.equal('other:foo');
     });
 
-    it('should create a new file', () => {
+    it('should create a new file', async () => {
       const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       const save = contents.save('/foo', { type: 'file', name: 'test' });
@@ -508,7 +508,7 @@ describe('contents', () => {
   });
 
   describe('#copy()', () => {
-    it('should copy a file', () => {
+    it('should copy a file', async () => {
       const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
       const model = await contents.copy('/foo/bar.txt', '/baz');
@@ -592,7 +592,7 @@ describe('contents', () => {
   });
 
   describe('#listCheckpoints()', () => {
-    it('should list the checkpoints', () => {
+    it('should list the checkpoints', async () => {
       const contents = new ContentsManager();
       handleRequest(contents, 200, [DEFAULT_CP, DEFAULT_CP]);
       const checkpoints = contents.listCheckpoints('/foo/bar.txt');
@@ -600,7 +600,7 @@ describe('contents', () => {
       expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should list the checkpoints on an additional drive', () => {
+    it('should list the checkpoints on an additional drive', async () => {
       const contents = new ContentsManager();
       const other = new Drive({ name: 'other' });
       contents.addDrive(other);
@@ -819,7 +819,7 @@ describe('drive', () => {
     });
   });
 
-  describe('#newUntitled()', () => {
+  describe('#newUntitled()', async () => {
     it('should create a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
@@ -827,7 +827,7 @@ describe('drive', () => {
       expect(model.path).to.equal(DEFAULT_FILE.path);
     });
 
-    it('should create a directory', () => {
+    it('should create a directory', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
       const options: Contents.ICreateOptions = {
@@ -888,10 +888,10 @@ describe('drive', () => {
   });
 
   describe('#delete()', () => {
-    it('should delete a file', () => {
+    it('should delete a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 204, {});
-      return drive.delete('/foo/bar.txt');
+      await drive.delete('/foo/bar.txt');
     });
 
     it('should emit the fileChanged signal', async () => {
@@ -907,10 +907,10 @@ describe('drive', () => {
       await drive.delete(path);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
-      drive.delete('/foo/bar.txt');
+      await drive.delete('/foo/bar.txt');
     });
 
     it('should fail for an incorrect response', async () => {
@@ -984,7 +984,7 @@ describe('drive', () => {
   });
 
   describe('#save()', () => {
-    it('should save a file', () => {
+    it('should save a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
@@ -992,7 +992,7 @@ describe('drive', () => {
       expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should create a new file', () => {
+    it('should create a new file', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
@@ -1014,7 +1014,7 @@ describe('drive', () => {
       expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, DEFAULT_FILE);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
@@ -1040,7 +1040,7 @@ describe('drive', () => {
   });
 
   describe('#copy()', () => {
-    it('should copy a file', () => {
+    it('should copy a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       const model = await drive.copy('/foo/bar.txt', '/baz');
@@ -1061,7 +1061,7 @@ describe('drive', () => {
       expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 201, DEFAULT_FILE);
       const model = await drive.copy('/foo/bar.txt', '/baz');
@@ -1120,7 +1120,7 @@ describe('drive', () => {
   });
 
   describe('#listCheckpoints()', () => {
-    it('should list the checkpoints', () => {
+    it('should list the checkpoints', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
       const checkpoints = drive.listCheckpoints('/foo/bar.txt');
@@ -1128,7 +1128,7 @@ describe('drive', () => {
       expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
       const checkpoints = drive.listCheckpoints('/foo/bar.txt');
@@ -1207,13 +1207,16 @@ describe('drive', () => {
       let path = '';
       const listing = await contents.get('src');
       content = listing.content as Contents.IModel[];
+      let called = false;
       for (let i = 0; i < content.length; i++) {
         if (content[i].type === 'file') {
           path = content[i].path;
-          await contents.get(path, { type: 'file' });
+          const msg = await contents.get(path, { type: 'file' });
+          expect(msg.path).to.equal(path);
+          called = true;
         }
       }
-      expect(msg.path).to.equal(path);
+      expect(called).to.equal(true);
     });
 
     it('should create a new file, rename it, and delete it', async () => {

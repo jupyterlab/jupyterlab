@@ -46,10 +46,8 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 describe('jupyter.services - Comm', () => {
   let kernel: Kernel.IKernel;
 
-  before(() => {
-    return Kernel.startNew({ name: 'ipython' }).then(k => {
-      kernel = k;
-    });
+  before(async () => {
+    kernel = await Kernel.startNew({ name: 'ipython' });
   });
 
   afterEach(() => {
@@ -133,18 +131,13 @@ describe('jupyter.services - Comm', () => {
         comm.dispose();
       });
 
-      it('should allow an optional target', () => {
-        return kernel
-          .requestExecute({ code: SEND }, true)
-          .done.then(() => {
-            return kernel.requestCommInfo({ target: 'test' });
-          })
-          .then(msg => {
-            const comms = msg.content.comms;
-            for (const id in comms) {
-              expect(comms[id].target_name).to.equal('test');
-            }
-          });
+      it('should allow an optional target', async () => {
+        await kernel.requestExecute({ code: SEND }, true).done;
+        const msg = await kernel.requestCommInfo({ target: 'test' });
+        const comms = msg.content.comms;
+        for (const id in comms) {
+          expect(comms[id].target_name).to.equal('test');
+        }
       });
     });
 
