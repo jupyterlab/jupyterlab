@@ -7,7 +7,7 @@ IF "%NAME%"=="python" (
     if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run build:core
     if !errorlevel! neq 0 exit /b !errorlevel!
-    jlpm run integrity
+    jlpm run integrity --force
     if !errorlevel! neq 0 exit /b !errorlevel!
     python -m jupyterlab.browser_check --core-mode
     if !errorlevel! neq 0 exit /b !errorlevel!

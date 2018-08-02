@@ -73,11 +73,4 @@ tsconfig.compilerOptions.paths[data.name] = [
 utils.writeJSONFile(tsconfigPath, tsconfig);
 
 // Update the core jupyterlab build dependencies.
-try {
-  utils.run('jlpm run integrity');
-} catch (e) {
-  if (!process.env.TRAVIS_BRANCH) {
-    console.error(e);
-    process.exit(1);
-  }
-}
+utils.run('jlpm run integrity');

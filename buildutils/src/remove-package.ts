@@ -31,28 +31,9 @@ let packagePath = path.join(basePath, 'packages', target, 'package.json');
 if (!fs.existsSync(packagePath)) {
   packagePath = require.resolve(path.join(target, 'package.json'));
 }
-let data = utils.readJSONFile(packagePath);
-
-// Remove the extension path from packages/metapackage/tsconfig.json
-let tsconfigPath = path.join(
-  basePath,
-  'packages',
-  'metapackage',
-  'tsconfig.json'
-);
-let tsconfig = utils.readJSONFile(tsconfigPath);
-tsconfig.compilerOptions.paths[data.name] = undefined;
-fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
 
 // Remove the package from the local tree.
 fs.removeSync(path.dirname(packagePath));
 
 // Update the core jupyterlab build dependencies.
-try {
-  utils.run('npm run integrity');
-} catch (e) {
-  if (!process.env.TRAVIS_BRANCH) {
-    console.error(e);
-    process.exit(1);
-  }
-}
+utils.run('npm run integrity');

@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../build",
+    "types": ["mocha", "node"],
+    "composite": false
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../../packages/csvviewer/src"
+    },
+    {
+      "path": "../../../packages/docregistry/src"
+    },
+    {
+      "path": "../../../packages/services/src"
+    }
+  ]
+}

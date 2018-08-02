@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../build",
+    "types": ["mocha"],
+    "composite": false
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../../packages/observables/src"
+    }
+  ]
+}

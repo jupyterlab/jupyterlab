@@ -220,6 +220,7 @@ export class ClientSession implements IClientSession {
     this._name = options.name || '';
     this._setBusy = options.setBusy;
     this._kernelPreference = options.kernelPreference || {};
+    console.log('hi there again');
   }
 
   /**

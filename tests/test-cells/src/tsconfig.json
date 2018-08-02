@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../build",
+    "types": ["mocha"],
+    "composite": false
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../../packages/apputils/src"
+    },
+    {
+      "path": "../../../packages/cells/src"
+    },
+    {
+      "path": "../../../packages/codeeditor/src"
+    },
+    {
+      "path": "../../../packages/coreutils/src"
+    },
+    {
+      "path": "../../../packages/outputarea/src"
+    },
+    {
+      "path": "../../../testutils/src"
+    }
+  ]
+}

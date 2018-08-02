@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../application/src"
+    },
+    {
+      "path": "../../apputils/src"
+    },
+    {
+      "path": "../../coreutils/src"
+    },
+    {
+      "path": "../../extensionmanager/src"
+    }
+  ]
+}

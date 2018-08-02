@@ -23,12 +23,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc && node build.js",
+    "build": "tsc -b src",
     "clean": "rimraf lib",
-    "docs": "typedoc --mode modules --module commonjs --excludeNotExported --target es2015 --moduleResolution node --name JupyterLab --out ../../docs/api --skipLibCheck .",
+    "docs": "node build-doc-index.js",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles",
-    "watch:files": "node watch-files.js"
+    "watch": "tsc -b src --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.18.4",
@@ -99,6 +98,6 @@
     "fs-extra": "~4.0.2",
     "rimraf": "~2.6.2",
     "typedoc": "~0.12.0",
-    "typescript": "~2.9.2"
+    "typescript": "~3.0.3"
   }
 }

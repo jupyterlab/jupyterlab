@@ -158,12 +158,7 @@ def watch_packages(logger=None):
     ts_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
                           cwd=ts_dir, logger=logger, startup_regex=ts_regex)
 
-    # Run the metapackage file watcher.
-    tsf_regex = 'Watching the metapackage files...'
-    tsf_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch:files'],
-        cwd=ts_dir, logger=logger, startup_regex=tsf_regex)
-
-    return [ts_proc, tsf_proc]
+    return [ts_proc]
 
 
 def watch_dev(logger=None):

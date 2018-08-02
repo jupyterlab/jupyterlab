@@ -9,6 +9,8 @@ import { Kernel } from './kernel';
 
 import { KernelMessage } from './messages';
 
+declare var setImmediate: any;
+
 /**
  * Implementation of a kernel future.
  *
