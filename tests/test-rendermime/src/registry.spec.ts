@@ -99,14 +99,13 @@ describe('rendermime/registry', () => {
         }).to.throw();
       });
 
-      it('should render json data', () => {
+      it('should render json data', async () => {
         const model = createModel({
           'application/json': { foo: 1 }
         });
         const w = r.createRenderer('application/json');
-        return w.renderModel(model).then(() => {
-          expect(w.node.textContent).to.equal('{\n  "foo": 1\n}');
-        });
+        await w.renderModel(model);
+        expect(w.node.textContent).to.equal('{\n  "foo": 1\n}');
       });
 
       it('should send a url resolver', async () => {

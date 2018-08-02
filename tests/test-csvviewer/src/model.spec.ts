@@ -324,7 +324,7 @@ describe('csvviewer/model', () => {
       ]);
     });
 
-    it('handles delayed parsing of rows past the initial rows', () => {
+    it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({
         data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`,
         delimiter: ',',
@@ -348,30 +348,31 @@ describe('csvviewer/model', () => {
       ]);
 
       // Check everything is in order after all the data has been parsed asynchronously.
-      return d.ready.then(() => {
-        expect(d.rowCount('column-header')).to.equal(1);
-        expect(d.rowCount('body')).to.equal(3);
-        expect(d.columnCount('row-header')).to.equal(1);
-        expect(d.columnCount('body')).to.equal(3);
-        expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.deep.equal(
-          ['a', 'b', 'c']
-        );
-        expect([0, 1, 2].map(i => d.data('body', 0, i))).to.deep.equal([
-          'c',
-          'd',
-          'e'
-        ]);
-        expect([0, 1, 2].map(i => d.data('body', 1, i))).to.deep.equal([
-          'f',
-          'g',
-          'h'
-        ]);
-        expect([0, 1, 2].map(i => d.data('body', 2, i))).to.deep.equal([
-          'i',
-          'j',
-          'k'
-        ]);
-      });
+      await d.ready;
+      expect(d.rowCount('column-header')).to.equal(1);
+      expect(d.rowCount('body')).to.equal(3);
+      expect(d.columnCount('row-header')).to.equal(1);
+      expect(d.columnCount('body')).to.equal(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.deep.equal([
+        'a',
+        'b',
+        'c'
+      ]);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).to.deep.equal([
+        'c',
+        'd',
+        'e'
+      ]);
+      expect([0, 1, 2].map(i => d.data('body', 1, i))).to.deep.equal([
+        'f',
+        'g',
+        'h'
+      ]);
+      expect([0, 1, 2].map(i => d.data('body', 2, i))).to.deep.equal([
+        'i',
+        'j',
+        'k'
+      ]);
     });
   });
 });
