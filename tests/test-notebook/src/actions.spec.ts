@@ -604,7 +604,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(widget, ipySession);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         await ipySession.kernel.restart();
@@ -615,7 +615,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(widget, ipySession);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -1381,8 +1381,9 @@ describe('@jupyterlab/notebook', () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
-        await NotebookActions.trust(widget);
+        let promise = NotebookActions.trust(widget);
         await acceptDialog();
+        await promise;
         expect(cell.trusted).to.equal(true);
       });
 
@@ -1397,7 +1398,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).to.not.equal(true);
       });
 
-      it('should bail if the model is `null`', async () => {
+      it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
         await NotebookActions.trust(widget);
       });
@@ -1410,7 +1411,7 @@ describe('@jupyterlab/notebook', () => {
           const cell = model.cells.get(i);
           cell.trusted = true;
         }
-        const promise = await NotebookActions.trust(widget);
+        const promise = NotebookActions.trust(widget);
         await acceptDialog();
         await promise;
       });
