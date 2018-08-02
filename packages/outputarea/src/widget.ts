@@ -552,7 +552,7 @@ export namespace OutputArea {
     if (!session.kernel) {
       return Promise.reject('Session has no kernel.');
     }
-    let future = session.kernel.requestExecute(content, metadata, false);
+    let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
