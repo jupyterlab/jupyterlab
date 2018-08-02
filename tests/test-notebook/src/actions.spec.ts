@@ -35,16 +35,12 @@ describe('@jupyterlab/notebook', () => {
     let session: ClientSession;
     let ipySession: ClientSession;
 
-    before(() => {
-      return createClientSession()
-        .then(s => {
-          session = s;
-          return createClientSession({ kernelPreference: { name: 'ipython' } });
-        })
-        .then(s => {
-          ipySession = s;
-          return Promise.all([s.initialize(), session.initialize()]);
-        });
+    before(async () => {
+      session = await createClientSession();
+      ipySession = await createClientSession({
+        kernelPreference: { name: 'ipython' }
+      });
+      await Promise.all([ipySession.initialize(), session.initialize()]);
     });
 
     beforeEach(() => {
@@ -70,7 +66,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#executed', () => {
-      it('should emit when Markdown and code cells are run', () => {
+      it('should emit when Markdown and code cells are run', async () => {
         const cell = widget.activeCell as CodeCell;
         const next = widget.widgets[1] as MarkdownCell;
         let emitted = 0;
@@ -82,10 +78,9 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
 
-        return NotebookActions.run(widget, session).then(result => {
-          expect(emitted).to.equal(2);
-          expect(next.rendered).to.equal(true);
-        });
+        await NotebookActions.run(widget, session);
+        expect(emitted).to.equal(2);
+        expect(next.rendered).to.equal(true);
       });
     });
 
@@ -465,62 +460,56 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#run()', () => {
-      it('should run the selected cells', () => {
+      it('should run the selected cells', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(cell.model.outputs.length).to.be.above(0);
-          expect(next.rendered).to.equal(true);
-        });
+        const result = await NotebookActions.run(widget, session);
+        expect(result).to.equal(true);
+        expect(cell.model.outputs.length).to.be.above(0);
+        expect(next.rendered).to.equal(true);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.equal(false);
-        });
+        const result = await NotebookActions.run(widget, session);
+        expect(result).to.equal(false);
       });
 
-      it('should activate the last selected cell', () => {
+      it('should activate the last selected cell', async () => {
         const other = widget.widgets[2];
         widget.select(other);
         other.model.value.text = 'a = 1';
-        return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.activeCell).to.equal(other);
-        });
+        const result = await NotebookActions.run(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.activeCell).to.equal(other);
       });
 
-      it('should clear the selection', () => {
+      it('should clear the selection', async () => {
         const next = widget.widgets[1];
         widget.select(next);
-        return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        });
+        const result = await NotebookActions.run(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.mode).to.equal('command');
-        });
+        const result = await NotebookActions.run(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.mode).to.equal('command');
       });
 
-      it('should handle no session', () => {
-        return NotebookActions.run(widget, null).then(result => {
-          expect(result).to.equal(true);
-          const cell = widget.activeCell as CodeCell;
-          expect(cell.model.executionCount).to.be.null;
-        });
+      it('should handle no session', async () => {
+        const result = await NotebookActions.run(widget, null);
+        expect(result).to.equal(true);
+        const cell = widget.activeCell as CodeCell;
+        expect(cell.model.executionCount).to.be.null;
       });
 
-      it('should stop executing code cells on an error', () => {
+      it('should stop executing code cells on an error', async () => {
         let cell = widget.model.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
         widget.model.cells.insert(2, cell);
@@ -528,207 +517,183 @@ describe('@jupyterlab/notebook', () => {
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.run(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(cell.executionCount).to.be.null;
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.run(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.executionCount).to.be.null;
+        await ipySession.kernel.restart();
       });
 
-      it('should render all markdown cells on an error', () => {
+      it('should render all markdown cells on an error', async () => {
         const cell = widget.model.contentFactory.createMarkdownCell({});
         widget.model.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
-        return NotebookActions.run(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(child.rendered).to.equal(true);
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.run(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(child.rendered).to.equal(true);
+        await ipySession.kernel.restart();
       });
     });
 
     describe('#runAndAdvance()', () => {
-      it('should run the selected cells ', () => {
+      it('should run the selected cells ', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(cell.model.outputs.length).to.be.above(0);
-          expect(next.rendered).to.equal(true);
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(true);
+        expect(cell.model.outputs.length).to.be.above(0);
+        expect(next.rendered).to.equal(true);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(false);
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(false);
       });
 
-      it('should clear the existing selection', () => {
+      it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(
-          result => {
-            expect(result).to.equal(false);
-            expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-            return ipySession.kernel.restart();
-          }
-        );
+        const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
+        await ipySession.kernel.restart();
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.mode).to.equal('command');
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.mode).to.equal('command');
       });
 
-      it('should activate the cell after the last selected cell', () => {
+      it('should activate the cell after the last selected cell', async () => {
         const next = widget.widgets[3] as MarkdownCell;
         widget.select(next);
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.activeCellIndex).to.equal(4);
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.activeCellIndex).to.equal(4);
       });
 
-      it('should create a new code cell in edit mode if necessary', () => {
+      it('should create a new code cell in edit mode if necessary', async () => {
         const count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.widgets.length).to.equal(count + 1);
-          expect(widget.activeCell).to.be.an.instanceof(CodeCell);
-          expect(widget.mode).to.equal('edit');
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.widgets.length).to.equal(count + 1);
+        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.mode).to.equal('edit');
       });
 
-      it('should allow an undo of the new cell', () => {
+      it('should allow an undo of the new cell', async () => {
         const count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        return NotebookActions.runAndAdvance(widget, session).then(result => {
-          expect(result).to.equal(true);
-          NotebookActions.undo(widget);
-          expect(widget.widgets.length).to.equal(count);
-        });
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(true);
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).to.equal(count);
       });
 
-      it('should stop executing code cells on an error', () => {
+      it('should stop executing code cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(
-          result => {
-            expect(result).to.equal(false);
-            expect(cell.executionCount).to.be.null;
-            return ipySession.kernel.restart();
-          }
-        );
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(false);
+        expect(cell.executionCount).to.be.null;
+        await ipySession.kernel.restart();
       });
 
-      it('should render all markdown cells on an error', () => {
+      it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        return NotebookActions.runAndAdvance(widget, ipySession).then(
-          result => {
-            expect(result).to.equal(false);
-            expect(cell.rendered).to.equal(true);
-            expect(widget.activeCellIndex).to.equal(2);
-            return ipySession.kernel.restart();
-          }
-        );
+        const result = await NotebookActions.runAndAdvance(widget, session);
+        expect(result).to.equal(false);
+        expect(cell.rendered).to.equal(true);
+        expect(widget.activeCellIndex).to.equal(2);
+        await ipySession.kernel.restart();
       });
     });
 
     describe('#runAndInsert()', () => {
-      it('should run the selected cells ', () => {
+      it('should run the selected cells ', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         widget.select(next);
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        return NotebookActions.runAndInsert(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(cell.model.outputs.length).to.be.above(0);
-          expect(next.rendered).to.equal(true);
-        });
+        const result = await NotebookActions.runAndInsert(widget, session);
+        expect(result).to.equal(true);
+        expect(cell.model.outputs.length).to.be.above(0);
+        expect(next.rendered).to.equal(true);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        return NotebookActions.runAndInsert(widget, session).then(result => {
-          expect(result).to.equal(false);
-        });
+        const result = await NotebookActions.runAndInsert(widget, session);
+        expect(result).to.equal(false);
       });
 
-      it('should clear the existing selection', () => {
+      it('should clear the existing selection', async () => {
         const next = widget.widgets[1];
         widget.select(next);
-        return NotebookActions.runAndInsert(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        });
+        const result = await NotebookActions.runAndInsert(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
       });
 
-      it('should insert a new code cell in edit mode after the last selected cell', () => {
+      it('should insert a new code cell in edit mode after the last selected cell', async () => {
         const next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         const count = widget.widgets.length;
-        return NotebookActions.runAndInsert(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.activeCell).to.be.an.instanceof(CodeCell);
-          expect(widget.mode).to.equal('edit');
-          expect(widget.widgets.length).to.equal(count + 1);
-        });
+        const result = await NotebookActions.runAndInsert(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.mode).to.equal('edit');
+        expect(widget.widgets.length).to.equal(count + 1);
       });
 
-      it('should allow an undo of the cell insert', () => {
+      it('should allow an undo of the cell insert', async () => {
         const next = widget.widgets[2];
         widget.select(next);
         next.model.value.text = 'a = 1';
         const count = widget.widgets.length;
-        return NotebookActions.runAndInsert(widget, session).then(result => {
-          expect(result).to.equal(true);
-          NotebookActions.undo(widget);
-          expect(widget.widgets.length).to.equal(count);
-        });
+        const result = await NotebookActions.runAndInsert(widget, session);
+        expect(result).to.equal(true);
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).to.equal(count);
       });
 
-      it('should stop executing code cells on an error', () => {
+      it('should stop executing code cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        return NotebookActions.runAndInsert(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(cell.executionCount).to.be.null;
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.runAndInsert(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.executionCount).to.be.null;
+        await ipySession.kernel.restart();
       });
 
-      it('should render all markdown cells on an error', () => {
+      it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        return NotebookActions.runAndInsert(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(cell.rendered).to.equal(true);
-          expect(widget.activeCellIndex).to.equal(2);
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.runAndInsert(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.rendered).to.equal(true);
+        expect(widget.activeCellIndex).to.equal(2);
+        await ipySession.kernel.restart();
       });
     });
 
@@ -738,69 +703,62 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].model.value.text = 'a = 1';
       });
 
-      it('should run all of the cells in the notebok', () => {
+      it('should run all of the cells in the notebok', async () => {
         const next = widget.widgets[1] as MarkdownCell;
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        return NotebookActions.runAll(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(cell.model.outputs.length).to.be.above(0);
-          expect(next.rendered).to.equal(true);
-        });
+        const result = await NotebookActions.runAll(widget, session);
+        expect(result).to.equal(true);
+        expect(cell.model.outputs.length).to.be.above(0);
+        expect(next.rendered).to.equal(true);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        return NotebookActions.runAll(widget, session).then(result => {
-          expect(result).to.equal(false);
-        });
+        const result = await NotebookActions.runAll(widget, session);
+        expect(result).to.equal(false);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        return NotebookActions.runAll(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.mode).to.equal('command');
-        });
+        const result = await NotebookActions.runAll(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.mode).to.equal('command');
       });
 
-      it('should clear the existing selection', () => {
+      it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        return NotebookActions.runAll(widget, session).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.isSelected(widget.widgets[2])).to.equal(false);
-        });
+        const result = await NotebookActions.runAll(widget, session);
+        expect(result).to.equal(true);
+        expect(widget.isSelected(widget.widgets[2])).to.equal(false);
       });
 
-      it('should activate the last cell', () => {
-        return NotebookActions.runAll(widget, session).then(result => {
-          expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-        });
+      it('should activate the last cell', async () => {
+        await NotebookActions.runAll(widget, session);
+        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
       });
 
-      it('should stop executing code cells on an error', () => {
+      it('should stop executing code cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
-        return NotebookActions.runAll(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(cell.executionCount).to.be.null;
-          expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.runAll(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.executionCount).to.be.null;
+        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        await ipySession.kernel.restart();
       });
 
-      it('should render all markdown cells on an error', () => {
+      it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
-        return NotebookActions.runAll(widget, ipySession).then(result => {
-          expect(result).to.equal(false);
-          expect(cell.rendered).to.equal(true);
-          return ipySession.kernel.restart();
-        });
+        const result = await NotebookActions.runAll(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.rendered).to.equal(true);
+        await ipySession.kernel.restart();
       });
     });
 
@@ -1418,38 +1376,33 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#trust()', () => {
-      it('should trust the notebook cells if the user accepts', done => {
+      it('should trust the notebook cells if the user accepts', async () => {
         const model = widget.model;
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
-        NotebookActions.trust(widget).then(() => {
-          expect(cell.trusted).to.equal(true);
-          done();
-        });
-        acceptDialog();
+        await NotebookActions.trust(widget);
+        await acceptDialog();
+        expect(cell.trusted).to.equal(true);
       });
 
-      it('should not trust the notebook cells if the user aborts', done => {
+      it('should not trust the notebook cells if the user aborts', async () => {
         const model = widget.model;
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
-        NotebookActions.trust(widget).then(() => {
-          expect(cell.trusted).to.not.equal(true);
-          done();
-        });
-        dismissDialog();
+        let promise = NotebookActions.trust(widget);
+        await dismissDialog();
+        await promise;
+        expect(cell.trusted).to.not.equal(true);
       });
 
-      it('should bail if the model is `null`', done => {
+      it('should bail if the model is `null`', async () => {
         widget.model = null;
-        NotebookActions.trust(widget).then(() => {
-          done();
-        });
+        await NotebookActions.trust(widget);
       });
 
-      it('should show a dialog if all cells are trusted', done => {
+      it('should show a dialog if all cells are trusted', async () => {
         const model = widget.model;
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
@@ -1457,10 +1410,9 @@ describe('@jupyterlab/notebook', () => {
           const cell = model.cells.get(i);
           cell.trusted = true;
         }
-        NotebookActions.trust(widget).then(() => {
-          done();
-        });
-        acceptDialog();
+        const promise = await NotebookActions.trust(widget);
+        await acceptDialog();
+        await promise;
       });
     });
   });

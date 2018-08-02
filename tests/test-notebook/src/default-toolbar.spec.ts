@@ -23,6 +23,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import {
   createNotebookContext,
+  signalToPromise,
   sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
@@ -48,14 +49,13 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#createSaveButton()', () => {
-      it('should save when clicked', done => {
+      it('should save when clicked', async () => {
         const button = ToolbarItems.createSaveButton(panel);
         Widget.attach(button, document.body);
-        context.fileChanged.connect(() => {
-          button.dispose();
-          done();
-        });
+        let promise = signalToPromise(context.fileChanged);
         button.node.click();
+        await promise;
+        button.dispose();
       });
 
       it("should have the `'jp-SaveIcon'` class", () => {
