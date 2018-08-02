@@ -56,7 +56,7 @@ jlpm run build:update
 * Create the Python release artifacts:
 
 ```bash
-rm -rf dist
+rm -rf dist build
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
