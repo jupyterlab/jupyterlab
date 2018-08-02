@@ -199,15 +199,15 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should be called when the server side closes', async () => {
-        let called = false;
+        let promise = new PromiseDelegate<void>();
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onClose = data => {
-            called = true;
+            promise.resolve(void 0);
           };
           comm.send('quit');
         });
         await kernel.requestExecute({ code: SEND }, true).done;
-        expect(called).to.equal(true);
+        await promise.promise;
       });
     });
 

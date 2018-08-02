@@ -108,7 +108,7 @@ describe('kernel/manager', () => {
       });
 
       it('should be emitted when a kernel is shut down', async () => {
-        kernel = await manager.startNew();
+        const kernel = await manager.startNew();
         let called = false;
         manager.runningChanged.connect(() => {
           manager.dispose();
