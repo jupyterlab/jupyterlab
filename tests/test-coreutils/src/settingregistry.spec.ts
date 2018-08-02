@@ -24,20 +24,17 @@ export class TestConnector extends StateDB
     super({ namespace: 'setting-registry-tests' });
   }
 
-  fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    return super.fetch(id).then((data: string) => {
-      if (!data && !this.schemas[id]) {
-        return null;
-      }
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
+    const data = await super.fetch(id);
+    if (!data && !this.schemas[id]) {
+      return null;
+    }
 
-      const schema = this.schemas[id] || { type: 'object' };
-      const composite = {};
-      const user = {};
-      const raw = data || '{ }';
-      const result = { id, data: { composite, user }, raw, schema };
-
-      return result;
-    });
+    const schema = this.schemas[id] || { type: 'object' };
+    const composite = {};
+    const user = {};
+    const raw = (data as string) || '{ }';
+    return { id, data: { composite, user }, raw, schema };
   }
 }
 

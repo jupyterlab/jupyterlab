@@ -138,13 +138,12 @@ describe('ImageViewer', () => {
   });
 
   describe('#onUpdateRequest()', () => {
-    it('should render the image', () => {
+    it('should render the image', async () => {
       const img: HTMLImageElement = widget.node.querySelector('img');
-      return widget.ready.then(() => {
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.methods).to.contain('onUpdateRequest');
-        expect(img.src).to.contain(IMAGE.content);
-      });
+      await widget.ready;
+      MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+      expect(widget.methods).to.contain('onUpdateRequest');
+      expect(img.src).to.contain(IMAGE.content);
     });
   });
 

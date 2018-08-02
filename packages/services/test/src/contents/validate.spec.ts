@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import {
   validateContentsModel,
@@ -17,15 +17,15 @@ describe('validate', () => {
     });
 
     it('should fail on missing data', () => {
-      let model = JSON.parse(JSON.stringify(DEFAULT_FILE));
+      const model = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete model['path'];
-      expect(() => validateContentsModel(model)).to.throwError();
+      expect(() => validateContentsModel(model)).to.throw();
     });
 
     it('should fail on incorrect data', () => {
-      let model = JSON.parse(JSON.stringify(DEFAULT_FILE));
+      const model = JSON.parse(JSON.stringify(DEFAULT_FILE));
       model.type = 1;
-      expect(() => validateContentsModel(model)).to.throwError();
+      expect(() => validateContentsModel(model)).to.throw();
     });
   });
 
@@ -35,13 +35,13 @@ describe('validate', () => {
     });
 
     it('should fail on missing data', () => {
-      let model = { id: 'foo' };
-      expect(() => validateCheckpointModel(model as any)).to.throwError();
+      const model = { id: 'foo' };
+      expect(() => validateCheckpointModel(model as any)).to.throw();
     });
 
     it('should fail on incorrect data', () => {
-      let model = { id: 1, last_modified: '1' };
-      expect(() => validateCheckpointModel(model as any)).to.throwError();
+      const model = { id: 1, last_modified: '1' };
+      expect(() => validateCheckpointModel(model as any)).to.throw();
     });
   });
 });

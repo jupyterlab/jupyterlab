@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -19,7 +19,7 @@ import { PYTHON_SPEC } from '../utils';
 describe('kernel/validate', () => {
   describe('validateMessage', () => {
     it('should pass a valid message', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'comm_msg',
           channel: 'iopub',
@@ -31,48 +31,48 @@ describe('kernel/validate', () => {
     });
 
     it('should throw if missing a field', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'comm_msg',
         channel: 'iopub',
         session: 'baz'
       });
       delete msg.channel;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if a field is invalid', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'comm_msg',
         channel: 'iopub',
         session: 'baz'
       });
       (msg as any).header.username = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if the parent header is given an invalid', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'comm_msg',
         channel: 'iopub',
         session: 'baz'
       });
       msg.parent_header = msg.header;
       (msg as any).parent_header.username = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw if the channel is not a string', () => {
-      let msg = KernelMessage.createMessage({
+      const msg = KernelMessage.createMessage({
         msgType: 'comm_msg',
         channel: 'iopub',
         session: 'baz'
       });
       (msg as any).channel = 1;
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should validate an iopub message', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'comm_close',
           channel: 'iopub',
@@ -84,7 +84,7 @@ describe('kernel/validate', () => {
     });
 
     it('should ignore on an unknown iopub message type', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'foo',
           channel: 'iopub',
@@ -96,7 +96,7 @@ describe('kernel/validate', () => {
     });
 
     it('should throw on missing iopub message content', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'error',
           channel: 'iopub',
@@ -104,11 +104,11 @@ describe('kernel/validate', () => {
         },
         {}
       );
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should throw on invalid iopub message content', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'clear_output',
           channel: 'iopub',
@@ -116,11 +116,11 @@ describe('kernel/validate', () => {
         },
         { wait: 1 }
       );
-      expect(() => validateMessage(msg)).to.throwError();
+      expect(() => validateMessage(msg)).to.throw();
     });
 
     it('should handle no buffers field', () => {
-      let msg = KernelMessage.createMessage(
+      const msg = KernelMessage.createMessage(
         {
           msgType: 'comm_msg',
           channel: 'iopub',
@@ -135,7 +135,7 @@ describe('kernel/validate', () => {
 
   describe('#validateModel()', () => {
     it('should pass a valid id', () => {
-      let id: Kernel.IModel = { name: 'foo', id: 'baz' };
+      const id: Kernel.IModel = { name: 'foo', id: 'baz' };
       validateModel(id);
     });
   });
@@ -146,15 +146,15 @@ describe('kernel/validate', () => {
     });
 
     it('should fail on missing data', () => {
-      let spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       delete spec['name'];
-      expect(() => validateSpecModel(spec)).to.throwError();
+      expect(() => validateSpecModel(spec)).to.throw();
     });
 
     it('should fail on incorrect data', () => {
-      let spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       spec.spec.language = 1;
-      expect(() => validateSpecModel(spec)).to.throwError();
+      expect(() => validateSpecModel(spec)).to.throw();
     });
   });
 
@@ -173,7 +173,7 @@ describe('kernel/validate', () => {
       const model: any = {
         default: 'python'
       };
-      expect(() => validateSpecModels(model)).to.throwError();
+      expect(() => validateSpecModels(model)).to.throw();
     });
   });
 });
