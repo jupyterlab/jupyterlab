@@ -269,69 +269,6 @@ const infopanels: JupyterLabPlugin<void> = {
 };
 
 /**
- * An extension that can be uncommented test the infopanels extension.
- * It adds a command to send content of a cell as content of a transient_display_data
- * messages to the inspector.
- */
-/*
-namespace CommandIDs {
-  export const display = 'inspector:test_transient_message';
-}
-
-const testpanels: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/inspector-extension:testpanels',
-  requires: [ICommandPalette, IInspector, INotebookTracker],
-  autoStart: true,
-  activate: (
-    app: JupyterLab,
-    palette: ICommandPalette,
-    inspector: IInspector,
-    notebooks: INotebookTracker
-  ): void => {
-    const { commands } = app;
-
-    const handler = new InfoHandler({ inspector });
-
-    const category = 'Inspector';
-    const command = CommandIDs.display;
-    const label = 'Send as transient_display_data';
-
-    commands.addCommand(command, {
-      label,
-      execute: () => {
-        // get the current notebook and cell
-        let widget = notebooks.currentWidget;
-        if (!widget) {
-          return;
-        }
-        let cell = widget.content.activeCell;
-        if (!cell) {
-          return;
-        }
-        let content = cell.model.value.text;
-        let transientMsg = KernelMessage.createMessage(
-          {
-            msgType: 'transient_display_data',
-            channel: 'iopub',
-            session: 'whatever'
-          },
-          eval('(' + content + ')')
-        );
-        handler.displayTransientMessage(
-          transientMsg as KernelMessage.ITransientDisplayDataMsg
-        );
-      }
-    });
-    palette.addItem({ command, category });
-    app.contextMenu.addItem({
-      command: CommandIDs.display,
-      selector: '.jp-Notebook .jp-Cell'
-    });
-  }
-};
-*/
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
@@ -339,7 +276,6 @@ const plugins: JupyterLabPlugin<any>[] = [
   consoles,
   notebooks,
   infopanels
-  // testpanels
 ];
 export default plugins;
 
