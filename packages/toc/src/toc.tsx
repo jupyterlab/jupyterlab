@@ -109,6 +109,10 @@ export class TableOfContents extends Widget {
     /* if (!this.isVisible) {
       return;
     } */
+    this.updateTOC();
+  }
+
+  updateTOC() {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -445,7 +449,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         return <div key={`emptycode-${i++}`} />;
       } else if (el.type === 'raw' && !this.state.showRaw) {
         return <div key={`emptyraw-${i++}`} />;
-      } else if (el.type === 'mardkwon' && !this.state.showMarkdown) {
+      } else if (el.type === 'markdown' && !this.state.showMarkdown) {
         return <div key={`emptymd-${i++}`} />;
       } else {
         if (el.type === 'code' || el.type === 'raw') {
@@ -480,6 +484,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     const toggleRaw = (event: React.ChangeEvent<HTMLInputElement>) => {
       this.props.widget.showRaw = event.target.checked;
       this.setState({ showRaw: this.props.widget.showRaw });
+      this.props.widget.updateTOC();
     };
 
     const toggleMarkdown = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -515,6 +520,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
           checked={this.state.showMarkdown}
         />
         Show markdown cells
+        <button>Cell Types</button>
         {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
