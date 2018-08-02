@@ -25,7 +25,7 @@ export class TestConnector extends StateDB
   }
 
   async fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    const data: string = await super.fetch(id);
+    const data = await super.fetch(id);
     if (!data && !this.schemas[id]) {
       return null;
     }
@@ -33,10 +33,8 @@ export class TestConnector extends StateDB
     const schema = this.schemas[id] || { type: 'object' };
     const composite = {};
     const user = {};
-    const raw = data || '{ }';
-    const result = { id, data: { composite, user }, raw, schema };
-
-    return result;
+    const raw = (data as string) || '{ }';
+    return { id, data: { composite, user }, raw, schema };
   }
 }
 

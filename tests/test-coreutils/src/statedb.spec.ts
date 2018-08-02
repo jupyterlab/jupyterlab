@@ -52,9 +52,9 @@ describe('StateDB', () => {
 
       // By sharing a namespace, the two databases will share data.
       await prepopulate.save('foo', 'bar');
+      transform.resolve({ type: 'merge', contents: { [key]: value } });
       let saved = await db.fetch('foo');
       expect(saved).to.equal('bar');
-      transform.resolve({ type: 'merge', contents: { [key]: value } });
       saved = await db.fetch(key);
       expect(saved).to.equal(value);
       await db.clear();
