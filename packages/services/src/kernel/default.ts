@@ -519,6 +519,7 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   requestExecute(
     content: KernelMessage.IExecuteRequest,
+    metadata: JSONObject = {},
     disposeOnDone: boolean = true
   ): Kernel.IFuture {
     let options: KernelMessage.IOptions = {
@@ -536,9 +537,7 @@ export class DefaultKernel implements Kernel.IKernel {
       stop_on_error: false
     };
     const restContent = { ...defaults, ...rest };
-    let msg = KernelMessage.createShellMessage(options, restContent, {
-      cellId: content.cellId
-    });
+    let msg = KernelMessage.createShellMessage(options, restContent, metadata);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 

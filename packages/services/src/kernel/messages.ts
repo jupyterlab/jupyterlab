@@ -505,7 +505,6 @@ export namespace KernelMessage {
    */
   export interface IExecuteRequest extends IExecuteOptions {
     code: string;
-    cellId: string;
   }
 
   /**

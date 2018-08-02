@@ -541,19 +541,18 @@ export namespace OutputArea {
     code: string,
     output: OutputArea,
     session: IClientSession,
-    cellId: string
+    metadata: JSONObject = {}
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
-      stop_on_error: true,
-      cellId: cellId
+      stop_on_error: true
     };
 
     if (!session.kernel) {
       return Promise.reject('Session has no kernel.');
     }
-    let future = session.kernel.requestExecute(content, false);
+    let future = session.kernel.requestExecute(content, metadata, false);
     output.future = future;
     return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
