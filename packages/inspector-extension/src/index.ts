@@ -28,8 +28,6 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { InspectorManager } from './manager';
 
-import { KernelMessage } from '@jupyterlab/services';
-
 /**
  * The command IDs used by the inspector plugin.
  */
