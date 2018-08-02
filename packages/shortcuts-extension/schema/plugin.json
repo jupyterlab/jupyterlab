@@ -26,6 +26,17 @@
       },
       "type": "object"
     },
+    "tabmenu:activate-previously-used-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previously Used Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": {},
       "properties": {
