@@ -1314,15 +1314,6 @@ describe('@jupyter/notebook', () => {
         expect(document.activeElement).to.equal(widget.node);
         widget.dispose();
       });
-
-      it('should post an `update-request', async () => {
-        const widget = createActiveWidget();
-        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        expect(widget.methods).to.contain('onActivateRequest');
-        await sleep();
-        expect(widget.methods).to.contain('onUpdateRequest');
-        widget.dispose();
-      });
     });
 
     describe('#onUpdateRequest()', () => {
