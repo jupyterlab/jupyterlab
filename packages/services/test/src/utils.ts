@@ -5,7 +5,7 @@ import encoding from 'text-encoding';
 
 import WebSocket from 'ws';
 
-import expect from 'expect.js';
+import { expect } from 'chai';
 
 import { UUID } from '@phosphor/coreutils';
 
