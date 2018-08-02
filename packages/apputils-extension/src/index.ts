@@ -261,8 +261,14 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   provides: IWindowResolver,
   requires: [IRouter],
   activate: (app: JupyterLab, router: IRouter) => {
-    const candidate = Private.getWorkspace(router) || '';
     const resolver = new WindowResolver();
+    const base = PageConfig.getOption('baseUrl');
+    const page = PageConfig.getOption('pageUrl');
+    const workspaces = PageConfig.getOption('workspacesUrl');
+    const workspace = Private.getWorkspace(router) || '';
+    const candidate = workspace
+      ? URLExt.join(base, workspaces, workspace)
+      : URLExt.join(base, page);
 
     return resolver
       .resolve(candidate)
