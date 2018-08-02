@@ -536,8 +536,8 @@ export class DefaultKernel implements Kernel.IKernel {
       allow_stdin: true,
       stop_on_error: false
     };
-    const restContent = { ...defaults, ...rest };
-    let msg = KernelMessage.createShellMessage(options, restContent, metadata);
+    content = { ...defaults, ...content };
+    let msg = KernelMessage.createShellMessage(options, content, metadata);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 
