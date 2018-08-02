@@ -54,11 +54,11 @@
     "ws": "~1.1.4"
   },
   "devDependencies": {
-    "@types/expect.js": "~0.3.29",
+    "@types/chai": "~4.0.10",
     "@types/mocha": "~2.2.44",
     "@types/node-fetch": "~1.6.7",
     "@types/ws": "~0.0.39",
-    "expect.js": "~0.3.1",
+    "chai": "~4.1.2",
     "istanbul": "~0.3.22",
     "mocha": "~3.5.3",
     "npm-run-all": "~4.1.1",

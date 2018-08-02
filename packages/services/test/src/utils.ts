@@ -5,7 +5,7 @@ import encoding from 'text-encoding';
 
 import WebSocket from 'ws';
 
-import expect from 'expect.js';
+import { expect } from 'chai';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -144,12 +144,12 @@ export function getRequestHandler(
   status: number,
   body: any
 ): ServerConnection.ISettings {
-  let fetch = (info: RequestInfo, init: RequestInit) => {
+  const fetch = (info: RequestInfo, init: RequestInit) => {
     // Normalize the body.
     body = JSON.stringify(body);
 
     // Create the response and return it as a promise.
-    let response = new Response(body, { status });
+    const response = new Response(body, { status });
     return Promise.resolve(response as any);
   };
   return ServerConnection.makeSettings({ fetch });
@@ -167,10 +167,10 @@ export interface IService {
  */
 export function handleRequest(item: IService, status: number, body: any) {
   // Store the existing fetch function.
-  let oldFetch = item.serverSettings.fetch;
+  const oldFetch = item.serverSettings.fetch;
 
   // A single use callback.
-  let temp = (info: RequestInfo, init: RequestInit) => {
+  const temp = (info: RequestInfo, init: RequestInit) => {
     // Restore fetch.
     (item.serverSettings as any).fetch = oldFetch;
 
@@ -180,7 +180,7 @@ export function handleRequest(item: IService, status: number, body: any) {
     }
 
     // Create the response and return it as a promise.
-    let response = new Response(body, { status });
+    const response = new Response(body, { status });
     return Promise.resolve(response as any);
   };
 
@@ -193,28 +193,25 @@ export function handleRequest(item: IService, status: number, body: any) {
  */
 export async function expectFailure(
   promise: Promise<any>,
-  done?: () => void,
   message?: string
-): Promise<any> {
-  let result = promise.then(
-    (msg: any) => {
-      throw Error('Expected failure did not occur');
-    },
-    (error: Error) => {
-      if (message && error.message.indexOf(message) === -1) {
-        throw Error(`Error "${message}" not in: "${error.message}"`);
-      }
+): Promise<void> {
+  let called = false;
+  try {
+    await promise;
+    called = true;
+  } catch (err) {
+    if (message && err.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${err.message}"`);
     }
-  );
-
-  return done ? result.then(done, done) : result;
+  }
 }
 
 /**
  * Do something in the future ensuring total ordering wrt to Promises.
  */
-export function doLater(cb: () => void): void {
-  Promise.resolve().then(cb);
+export async function doLater(cb: () => void): Promise<void> {
+  await Promise.resolve(void 0);
+  cb();
 }
 
 /**
@@ -236,7 +233,7 @@ class SocketTester implements IService {
       this._ws = ws;
       this.onSocket(ws);
       this._ready.resolve(undefined);
-      let connect = this._onConnect;
+      const connect = this._onConnect;
       if (connect) {
         connect(ws);
       }
@@ -449,7 +446,7 @@ export class KernelTester extends SocketTester {
     content: any
   ) {
     options.session = this.serverSessionId;
-    let msg = KernelMessage.createMessage(
+    const msg = KernelMessage.createMessage(
       options as KernelMessage.IOptions,
       content
     );
@@ -473,7 +470,7 @@ export class KernelTester extends SocketTester {
     handleRequest(this, 201, { name: 'test', id: UUID.uuid4() });
 
     // Construct a new kernel.
-    let serverSettings = this.serverSettings;
+    const serverSettings = this.serverSettings;
     this._kernel = await Kernel.startNew({ serverSettings });
     await this.ready;
     await this._kernel.ready;
@@ -520,7 +517,7 @@ export class KernelTester extends SocketTester {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
-      let data = deserialize(msg);
+      const data = deserialize(msg);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.parentHeader = data.header;
@@ -533,7 +530,7 @@ export class KernelTester extends SocketTester {
         this.sendStatus(UUID.uuid4(), 'idle');
         this.parentHeader = undefined;
       } else {
-        let onMessage = this._onMessage;
+        const onMessage = this._onMessage;
         if (onMessage) {
           onMessage(data);
         }
@@ -577,7 +574,7 @@ export class SessionTester extends SocketTester {
    */
   async startSession(): Promise<Session.ISession> {
     handleRequest(this, 201, createSessionModel());
-    let serverSettings = this.serverSettings;
+    const serverSettings = this.serverSettings;
     this._session = await Session.startNew({
       path: UUID.uuid4(),
       serverSettings
@@ -610,12 +607,14 @@ export class SessionTester extends SocketTester {
    * Send the status from the server to the client.
    */
   sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
-    let options: KernelMessage.IOptions = {
+    const options: KernelMessage.IOptions = {
       msgType: 'status',
       channel: 'iopub',
       session: this.serverSessionId
     };
-    let msg = KernelMessage.createMessage(options, { execution_state: status });
+    const msg = KernelMessage.createMessage(options, {
+      execution_state: status
+    });
     if (parentHeader) {
       msg.parent_header = parentHeader;
     }
@@ -645,25 +644,25 @@ export class SessionTester extends SocketTester {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
-      let data = deserialize(msg);
+      const data = deserialize(msg);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.sendStatus('busy', data.header);
 
         // Then send the kernel_info_reply message.
-        let options: KernelMessage.IOptions = {
+        const options: KernelMessage.IOptions = {
           msgType: 'kernel_info_reply',
           channel: 'shell',
           session: this.serverSessionId
         };
-        let msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO);
+        const msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO);
         msg.parent_header = data.header;
         this.send(msg);
 
         // Then send status idle message.
         this.sendStatus('idle', data.header);
       } else {
-        let onMessage = this._onMessage;
+        const onMessage = this._onMessage;
         if (onMessage) {
           onMessage(data);
         }
@@ -691,10 +690,10 @@ export class TerminalTester extends SocketTester {
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
     sock.on('message', (msg: any) => {
-      let onMessage = this._onMessage;
+      const onMessage = this._onMessage;
       if (onMessage) {
-        let data = JSON.parse(msg) as JSONPrimitive[];
-        let termMsg: TerminalSession.IMessage = {
+        const data = JSON.parse(msg) as JSONPrimitive[];
+        const termMsg: TerminalSession.IMessage = {
           type: data[0] as TerminalSession.MessageType,
           content: data.slice(1)
         };
@@ -765,8 +764,8 @@ export async function testEmission<T, U, V>(
  * false if the promise is still pending.
  */
 export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
-  let x = Object.create(null);
-  let result = await Promise.race([p, x]).catch(() => false);
+  const x = Object.create(null);
+  const result = await Promise.race([p, x]).catch(() => false);
   return result !== x;
 }
 
@@ -778,7 +777,7 @@ export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
  *
  * interface A {a: number, b: string}
  * type B = MakeOptional<A, 'a'>
- * let x: B = {b: 'test'}
+ * const x: B = {b: 'test'}
  */
 type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> &
   { [P in Extract<keyof T, K>]?: T[P] };

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -17,10 +17,8 @@ describe('terminal', () => {
   let manager: TerminalSession.IManager;
   let session: TerminalSession.ISession;
 
-  before(() => {
-    return TerminalSession.startNew().then(s => {
-      session = s;
-    });
+  before(async () => {
+    session = await TerminalSession.startNew();
   });
 
   beforeEach(() => {
@@ -41,7 +39,7 @@ describe('terminal', () => {
       it('should accept no options', () => {
         manager.dispose();
         manager = new TerminalManager();
-        expect(manager).to.be.a(TerminalManager);
+        expect(manager).to.be.an.instanceof(TerminalManager);
       });
 
       it('should accept options', () => {
@@ -49,28 +47,27 @@ describe('terminal', () => {
         manager = new TerminalManager({
           serverSettings: ServerConnection.makeSettings()
         });
-        expect(manager).to.be.a(TerminalManager);
+        expect(manager).to.be.an.instanceof(TerminalManager);
       });
     });
 
     describe('#serverSettings', () => {
       it('should get the server settings', () => {
         manager.dispose();
-        let serverSettings = ServerConnection.makeSettings();
-        let token = serverSettings.token;
+        const serverSettings = ServerConnection.makeSettings();
+        const token = serverSettings.token;
         manager = new TerminalManager({ serverSettings });
-        expect(manager.serverSettings.token).to.be(token);
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
     describe('#isReady', () => {
-      it('should test whether the manager is ready', () => {
+      it('should test whether the manager is ready', async () => {
         manager.dispose();
         manager = new TerminalManager();
-        expect(manager.isReady).to.be(false);
-        return manager.ready.then(() => {
-          expect(manager.isReady).to.be(true);
-        });
+        expect(manager.isReady).to.equal(false);
+        await manager.ready;
+        expect(manager.isReady).to.equal(true);
       });
     });
 
@@ -82,105 +79,90 @@ describe('terminal', () => {
 
     describe('#isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
-        expect(TerminalSession.isAvailable()).to.be(true);
+        expect(TerminalSession.isAvailable()).to.equal(true);
       });
     });
 
     describe('#running()', () => {
-      it('should give an iterator over the list of running models', () => {
-        return manager.refreshRunning().then(() => {
-          let running = toArray(manager.running());
-          expect(running.length).to.be.greaterThan(0);
-        });
+      it('should give an iterator over the list of running models', async () => {
+        await manager.refreshRunning();
+        const running = toArray(manager.running());
+        expect(running.length).to.be.greaterThan(0);
       });
     });
 
     describe('#startNew()', () => {
-      it('should startNew a new terminal session', () => {
-        return manager.startNew().then(session => {
-          expect(session.name).to.be.ok();
-        });
+      it('should startNew a new terminal session', async () => {
+        session = await manager.startNew();
+        expect(session.name).to.be.ok;
       });
 
-      it('should emit a runningChanged signal', done => {
+      it('should emit a runningChanged signal', async () => {
+        let called = false;
         manager.runningChanged.connect(() => {
-          done();
+          called = true;
         });
-        manager.startNew();
+        await manager.startNew();
+        expect(called).to.equal(true);
       });
     });
 
     describe('#connectTo()', () => {
-      it('should connect to an existing session', () => {
-        let name = session.name;
-        return manager.connectTo(name).then(session => {
-          expect(session.name).to.be(name);
-        });
+      it('should connect to an existing session', async () => {
+        const name = session.name;
+        session = await manager.connectTo(name);
+        expect(session.name).to.equal(name);
       });
     });
 
     describe('#shutdown()', () => {
-      it('should shut down a session by id', () => {
-        let temp: TerminalSession.ISession;
-        return manager
-          .startNew()
-          .then(s => {
-            temp = s;
-            return manager.shutdown(s.name);
-          })
-          .then(() => {
-            expect(temp.isDisposed).to.be(true);
-          });
+      it('should shut down a session by id', async () => {
+        const temp = await manager.startNew();
+        await manager.shutdown(temp.name);
+        expect(temp.isDisposed).to.equal(true);
       });
 
-      it('should emit a runningChanged signal', () => {
+      it('should emit a runningChanged signal', async () => {
         let called = false;
-        return manager
-          .startNew()
-          .then(s => {
-            manager.runningChanged.connect((sender, args) => {
-              expect(s.isDisposed).to.be(false);
-              called = true;
-            });
-            return manager.shutdown(s.name);
-          })
-          .then(() => {
-            expect(called).to.be(true);
-          });
+        session = await manager.startNew();
+        manager.runningChanged.connect((sender, args) => {
+          expect(session.isDisposed).to.equal(false);
+          called = true;
+        });
+        await manager.shutdown(session.name);
+        expect(called).to.equal(true);
       });
     });
 
     describe('#runningChanged', () => {
-      it('should be emitted when the running terminals changed', done => {
+      it('should be emitted when the running terminals changed', async () => {
+        let called = false;
         manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.be(manager);
+          expect(sender).to.equal(manager);
           expect(toArray(args).length).to.be.greaterThan(0);
-          done();
+          called = true;
         });
-        manager.startNew().catch(done);
+        await manager.startNew();
+        expect(called).to.equal(true);
       });
     });
 
     describe('#refreshRunning()', () => {
-      it('should update the running session models', () => {
+      it('should update the running session models', async () => {
         let model: TerminalSession.IModel;
-        let before = toArray(manager.running()).length;
-        return TerminalSession.startNew()
-          .then(s => {
-            model = s.model;
-            return manager.refreshRunning();
-          })
-          .then(() => {
-            let running = toArray(manager.running());
-            expect(running.length).to.be(before + 1);
-            let found = false;
-            running.map(m => {
-              if (m.name === model.name) {
-                found = true;
-              }
-            });
-            expect(found).to.be(true);
-          });
+        const before = toArray(manager.running()).length;
+        session = await TerminalSession.startNew();
+        model = session.model;
+        await manager.refreshRunning();
+        const running = toArray(manager.running());
+        expect(running.length).to.equal(before + 1);
+        let found = false;
+        running.map(m => {
+          if (m.name === model.name) {
+            found = true;
+          }
+        });
+        expect(found).to.equal(true);
       });
     });
   });

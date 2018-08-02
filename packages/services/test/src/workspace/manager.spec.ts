@@ -56,7 +56,7 @@ describe('workspace', () => {
         ids.forEach(async id => {
           await manager.save(id, { data: {}, metadata: { id } });
         });
-        expect((await manager.list()).sort()).to.eql(ids.sort());
+        expect((await manager.list()).sort()).to.deep.equal(ids.sort());
       });
     });
 

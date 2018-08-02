@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -22,7 +22,7 @@ describe('@jupyterlab/mainmenu', () => {
     let commands: CommandRegistry;
     let menu: FileMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    const wodget = new Wodget();
 
     before(() => {
       commands = new CommandRegistry();
@@ -42,14 +42,14 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new file menu', () => {
-        expect(menu).to.be.an(FileMenu);
-        expect(menu.menu.title.label).to.be('File');
+        expect(menu).to.be.an.instanceof(FileMenu);
+        expect(menu.menu.title.label).to.equal('File');
       });
     });
 
     describe('#newMenu', () => {
       it('should be a submenu for `New...` commands', () => {
-        expect(menu.newMenu.menu.title.label).to.be('New');
+        expect(menu.newMenu.menu.title.label).to.equal('New');
       });
     });
 
@@ -66,7 +66,7 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.closeAndCleaners.add(cleaner);
         delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
-        expect(wodget.state).to.be('clean');
+        expect(wodget.state).to.equal('clean');
       });
     });
 
@@ -83,7 +83,7 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.persistAndSavers.add(persistAndSaver);
         delegateExecute(wodget, menu.persistAndSavers, 'persistAndSave');
-        expect(wodget.state).to.be('saved');
+        expect(wodget.state).to.equal('saved');
       });
     });
 
@@ -99,7 +99,7 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.consoleCreators.add(creator);
         delegateExecute(wodget, menu.consoleCreators, 'createConsole');
-        expect(wodget.state).to.be('create');
+        expect(wodget.state).to.equal('create');
       });
     });
   });

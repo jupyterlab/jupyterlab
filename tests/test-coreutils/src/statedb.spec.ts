@@ -51,18 +51,12 @@ describe('StateDB', () => {
       let value = 'qux';
 
       // By sharing a namespace, the two databases will share data.
-      let promise = prepopulate
-        .save('foo', 'bar')
-        .then(() => db.fetch('foo'))
-        .then(saved => {
-          expect(saved).to.equal('bar');
-        })
-        .then(() => db.fetch(key))
-        .then(saved => {
-          expect(saved).to.equal(value);
-        });
+      await prepopulate.save('foo', 'bar');
       transform.resolve({ type: 'merge', contents: { [key]: value } });
-      await promise;
+      let saved = await db.fetch('foo');
+      expect(saved).to.equal('bar');
+      saved = await db.fetch(key);
+      expect(saved).to.equal(value);
       await db.clear();
     });
   });

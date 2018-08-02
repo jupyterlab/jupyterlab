@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { ServerConnection, SettingManager } from '../../../lib';
 
@@ -15,14 +15,14 @@ describe('setting', () => {
     describe('#constructor()', () => {
       it('should accept no options', () => {
         const manager = new SettingManager();
-        expect(manager).to.be.a(SettingManager);
+        expect(manager).to.be.an.instanceof(SettingManager);
       });
 
       it('should accept options', () => {
         const manager = new SettingManager({
           serverSettings: ServerConnection.makeSettings()
         });
-        expect(manager).to.be.a(SettingManager);
+        expect(manager).to.be.an.instanceof(SettingManager);
       });
     });
 
@@ -31,7 +31,7 @@ describe('setting', () => {
         const baseUrl = 'foo';
         const serverSettings = ServerConnection.makeSettings({ baseUrl });
         const manager = new SettingManager({ serverSettings });
-        expect(manager.serverSettings.baseUrl).to.be(baseUrl);
+        expect(manager.serverSettings.baseUrl).to.equal(baseUrl);
       });
     });
   });

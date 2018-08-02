@@ -17,6 +17,7 @@ import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
 import {
   acceptDialog,
+  signalToPromise,
   testEmission,
   waitForDialog
 } from '@jupyterlab/testutils';
@@ -103,7 +104,7 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should trigger a save', () => {
-        let promise = testEmission(context.fileChanged, {});
+        let promise = signalToPromise(context.fileChanged);
         context.model.fromString('bar');
         expect(handler.isActive).to.equal(false);
         handler.saveInterval = 1;

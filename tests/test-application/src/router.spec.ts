@@ -9,7 +9,7 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Token } from '@phosphor/coreutils';
 
-import { testEmission } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testutils';
 
 const base = '/';
 
@@ -106,13 +106,10 @@ describe('apputils', () => {
         router.register({ command: 'c', pattern: /.*/, rank: 30 });
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
-        let promise = testEmission(router.routed, {
-          test: () => {
-            expect(recorded).to.deep.equal(wanted);
-          }
-        });
+        let promise = signalToPromise(router.routed);
         await router.route();
         await promise;
+        expect(recorded).to.deep.equal(wanted);
       });
     });
 

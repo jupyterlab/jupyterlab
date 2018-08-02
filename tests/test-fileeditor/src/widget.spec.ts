@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { MessageLoop, Message } from '@phosphor/messaging';
 
@@ -31,6 +31,8 @@ import {
   FileEditorFactory
 } from '@jupyterlab/fileeditor';
 
+import { framePromise } from '@jupyterlab/testutils';
+
 class LogFileEditor extends FileEditor {
   events: string[] = [];
 
@@ -58,22 +60,22 @@ class LogFileEditor extends FileEditor {
 }
 
 describe('fileeditorcodewrapper', () => {
-  let factoryService = new CodeMirrorEditorFactory();
-  let modelFactory = new TextModelFactory();
-  let mimeTypeService = new CodeMirrorMimeTypeService();
+  const factoryService = new CodeMirrorEditorFactory();
+  const modelFactory = new TextModelFactory();
+  const mimeTypeService = new CodeMirrorMimeTypeService();
   let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 
-  before(done => {
+  before(() => {
     manager = new ServiceManager();
-    manager.ready.then(done, done);
+    return manager.ready;
   });
 
   describe('FileEditorCodeWrapper', () => {
     let widget: FileEditorCodeWrapper;
 
     beforeEach(() => {
-      let path = UUID.uuid4() + '.py';
+      const path = UUID.uuid4() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new FileEditorCodeWrapper({
         factory: options => factoryService.newDocumentEditor(options),
@@ -88,23 +90,20 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an editor wrapper widget', () => {
-        expect(widget).to.be.an(FileEditorCodeWrapper);
+        expect(widget).to.be.an.instanceof(FileEditorCodeWrapper);
       });
 
-      it('should update the editor text when the model changes', done => {
-        context.initialize(true).catch(done);
-        context.ready
-          .then(() => {
-            widget.context.model.fromString('foo');
-            expect(widget.editor.model.value.text).to.be('foo');
-          })
-          .then(done, done);
+      it('should update the editor text when the model changes', async () => {
+        await context.initialize(true);
+        await context.ready;
+        widget.context.model.fromString('foo');
+        expect(widget.editor.model.value.text).to.equal('foo');
       });
     });
 
     describe('#context', () => {
       it('should be the context used by the widget', () => {
-        expect(widget.context).to.be(context);
+        expect(widget.context).to.equal(context);
       });
     });
   });
@@ -113,7 +112,7 @@ describe('fileeditorcodewrapper', () => {
     let widget: LogFileEditor;
 
     beforeEach(() => {
-      let path = UUID.uuid4() + '.py';
+      const path = UUID.uuid4() + '.py';
       context = new Context({ manager, factory: modelFactory, path });
       widget = new LogFileEditor({
         factory: options => factoryService.newDocumentEditor(options),
@@ -128,49 +127,42 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an editor widget', () => {
-        expect(widget).to.be.an(FileEditor);
+        expect(widget).to.be.an.instanceof(FileEditor);
       });
 
-      it('should update the editor text when the model changes', done => {
-        context.initialize(true).catch(done);
-        context.ready
-          .then(() => {
-            widget.context.model.fromString('foo');
-            expect(widget.editor.model.value.text).to.be('foo');
-          })
-          .then(done, done);
+      it('should update the editor text when the model changes', async () => {
+        await context.initialize(true);
+        await context.ready;
+        widget.context.model.fromString('foo');
+        expect(widget.editor.model.value.text).to.equal('foo');
       });
 
       it('should set the mime type for the path', () => {
-        expect(widget.editor.model.mimeType).to.be('text/x-python');
+        expect(widget.editor.model.mimeType).to.equal('text/x-python');
       });
 
-      it('should update the mime type when the path changes', done => {
+      it('should update the mime type when the path changes', async () => {
+        let called = false;
         context.pathChanged.connect((sender, args) => {
-          expect(widget.editor.model.mimeType).to.be('text/x-julia');
-          done();
+          expect(widget.editor.model.mimeType).to.equal('text/x-julia');
+          called = true;
         });
-        context
-          .initialize(true)
-          .then(() => {
-            return manager.contents.rename(context.path, UUID.uuid4() + '.jl');
-          })
-          .catch(done);
+        await context.initialize(true);
+        await manager.contents.rename(context.path, UUID.uuid4() + '.jl');
+        expect(called).to.equal(true);
       });
     });
 
     describe('#context', () => {
       it('should be the context used by the widget', () => {
-        expect(widget.context).to.be(context);
+        expect(widget.context).to.equal(context);
       });
     });
 
     describe('#handleEvent()', () => {
-      beforeEach(done => {
+      beforeEach(() => {
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          done();
-        });
+        return framePromise();
       });
 
       afterEach(() => {
@@ -181,52 +173,46 @@ describe('fileeditorcodewrapper', () => {
         it('should focus the editor', () => {
           simulate(widget.node, 'mousedown');
           expect(widget.events).to.contain('mousedown');
-          expect(widget.editor.hasFocus()).to.be(true);
+          expect(widget.editor.hasFocus()).to.equal(true);
         });
       });
     });
 
     describe('#onAfterAttach()', () => {
-      it('should add event listeners', done => {
+      it('should add event listeners', async () => {
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onAfterAttach');
-          simulate(widget.node, 'mousedown');
-          expect(widget.events).to.contain('mousedown');
-          done();
-        });
+        await framePromise();
+        expect(widget.methods).to.contain('onAfterAttach');
+        simulate(widget.node, 'mousedown');
+        expect(widget.events).to.contain('mousedown');
       });
     });
 
     describe('#onBeforeDetach()', () => {
-      it('should remove event listeners', done => {
+      it('should remove event listeners', async () => {
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          Widget.detach(widget);
-          expect(widget.methods).to.contain('onBeforeDetach');
-          widget.events = [];
-          simulate(widget.node, 'mousedown');
-          expect(widget.events).to.not.contain('mousedown');
-          done();
-        });
+        await framePromise();
+        Widget.detach(widget);
+        expect(widget.methods).to.contain('onBeforeDetach');
+        widget.events = [];
+        simulate(widget.node, 'mousedown');
+        expect(widget.events).to.not.contain('mousedown');
       });
     });
 
     describe('#onActivateRequest()', () => {
-      it('should focus the node after an update', done => {
+      it('should focus the node after an update', async () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        requestAnimationFrame(() => {
-          expect(widget.editor.hasFocus()).to.be(true);
-          done();
-        });
+        await framePromise();
+        expect(widget.editor.hasFocus()).to.equal(true);
       });
     });
   });
 
   describe('FileEditorFactory', () => {
-    let widgetFactory = new FileEditorFactory({
+    const widgetFactory = new FileEditorFactory({
       editorServices: {
         factoryService,
         mimeTypeService
@@ -240,15 +226,15 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an FileEditorFactory', () => {
-        expect(widgetFactory).to.be.an(FileEditorFactory);
+        expect(widgetFactory).to.be.an.instanceof(FileEditorFactory);
       });
     });
 
     describe('#createNewWidget()', () => {
       it('should create a document widget', () => {
         const d = widgetFactory.createNew(context);
-        expect(d).to.be.a(DocumentWidget);
-        expect(d.content).to.be.a(FileEditor);
+        expect(d).to.be.an.instanceof(DocumentWidget);
+        expect(d.content).to.be.an.instanceof(FileEditor);
       });
     });
   });
