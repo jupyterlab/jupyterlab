@@ -266,6 +266,7 @@ export interface IHeading {
    */
   html?: string | null;
   type: string;
+  prompt?: string;
 }
 
 /**
@@ -415,7 +416,12 @@ export class TOCCodeCell extends React.Component<
         </span>
       );
     }
-    return <li onClick={handleClick}>{content}</li>;
+    return (
+      <li onClick={handleClick}>
+        <div className="toc-code-cell-prompt">{heading.prompt}</div>
+        {content}
+      </li>
+    );
   }
 }
 

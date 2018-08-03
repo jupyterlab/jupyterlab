@@ -485,9 +485,10 @@ namespace Private {
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       headings.push({
-        text: executionCount + ' ' + headingText,
+        text: headingText,
         level,
         onClick,
+        prompt: executionCount.substring(3),
         type: 'code'
       });
     }

@@ -124,3 +124,23 @@
   width: fit-content;
   float: right;
 }
+
+.toc-code-cell-prompt {
+  flex: 0 0 27px;
+  color: var(--jp-cell-prompt-not-active-font-color);
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  font-family: var(--jp-cell-prompt-font-family);
+  padding: var(--jp-code-padding);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: 9px;
+  border: var(--jp-border-width) solid transparent;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
