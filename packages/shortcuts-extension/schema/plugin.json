@@ -162,6 +162,17 @@
       },
       "type": "object"
     },
+    "docmanager:save-as": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save As" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
     "editmenu:undo": {
       "default": {},
       "properties": {
