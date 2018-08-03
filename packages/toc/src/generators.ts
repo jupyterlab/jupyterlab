@@ -537,9 +537,10 @@ namespace Private {
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
       if (markdownCell.nodeName.toLowerCase() === 'p') {
-        if (markdownCell.textContent) {
+        if (markdownCell.innerHTML) {
           headings.push({
             level: lastLevel + 1,
+            html: sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions),
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
             type: 'markdown'

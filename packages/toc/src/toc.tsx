@@ -456,6 +456,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.props.widget.showCode = !this.props.widget.showCode;
     this.setState({ showCode: this.props.widget.showCode });
     component.setState({ selected: this.props.widget.showCode });
+    this.props.widget.updateTOC();
   };
 
   toggleRaw = (component: React.Component) => {
