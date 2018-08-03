@@ -481,6 +481,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
 
   private dropDownMenuItems: DropdownItem[] = [
     {
+      id: 0,
       props: {
         title: 'Show code cells',
         selectedByDefault: this.props.widget.showCode,
@@ -489,6 +490,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       type: TagTypeDropdownItem
     },
     {
+      id: 1,
       props: {
         title: 'Show raw cells',
         selectedByDefault: this.props.widget.showRaw,
@@ -497,6 +499,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       type: TagTypeDropdownItem
     },
     {
+      id: 2,
       props: {
         title: 'Show markdown cells',
         selectedByDefault: this.props.widget.showMarkdown,
