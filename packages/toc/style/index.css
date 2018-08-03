@@ -62,6 +62,7 @@
 
 .cm-toc .CodeMirror {
   font-size: 9px;
+  z-index: 0;
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
@@ -103,6 +104,11 @@
   display: inline-block;
   width: 18px;
   height: 18px;
+  padding-left: 5px;
+}
+
+.dropdown-menu-li {
+  padding-right: 5px;
 }
 
 .dropdown-menu-li:hover {
