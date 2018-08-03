@@ -454,10 +454,6 @@ describe('cells/widget', () => {
           expect(executionCount).to.not.equal(originalCount);
         });
       });
-      it('should fulfill a promise with code with metadata', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
-        return CodeCell.execute(widget, session, { cellId: widget.model.id });
-      });
     });
   });
 
