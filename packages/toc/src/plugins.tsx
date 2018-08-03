@@ -52,19 +52,17 @@ export function createDropdownMenu(items: DropdownItem[]) {
           <div className={'dropdown-menu-button'} onClick={() => openMenu()}>
             {buttonTitle}
           </div>
-          {menuOpen && (
-            <ul className={'dropdown-menu-list'}>
-              {items.map(item => {
-                const ItemType = item.type;
-                const itemProps = item.props;
-                return (
-                  <li>
-                    <ItemType {...itemProps} />
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <ul className={'dropdown-menu-list'} hidden={!menuOpen}>
+            {items.map(item => {
+              const ItemType = item.type;
+              const itemProps = item.props;
+              return (
+                <li>
+                  <ItemType {...itemProps} />
+                </li>
+              );
+            })}
+          </ul>
         </div>
       );
     }
