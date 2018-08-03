@@ -6,6 +6,7 @@ export interface DropdownItem {
 }
 
 interface DropdownMenuProps {
+  className: string | null;
   buttonTitle: JSX.Element;
 }
 
@@ -22,9 +23,8 @@ export function createDropdownMenu(items: DropdownItem[]) {
 
     render() {
       const { menuOpen } = this.state;
-      const { buttonTitle } = this.props;
+      const { buttonTitle, className } = this.props;
       const handleClick = () => {
-        console.log('handle click');
         if (!menuOpen) {
           document.addEventListener('click', handleOutsideClick, false);
         } else {
@@ -47,8 +47,12 @@ export function createDropdownMenu(items: DropdownItem[]) {
         document.removeEventListener('click', handleOutsideClick, false);
         this.setState({ menuOpen: false });
       };
+      const classNameForComponent = className === null ? '' : className + ' ';
       return (
-        <div className={'dropdown-menu'} ref={node => (this.node = node)}>
+        <div
+          className={classNameForComponent + 'dropdown-menu'}
+          ref={node => (this.node = node)}
+        >
           <div className={'dropdown-menu-button'} onClick={() => openMenu()}>
             {buttonTitle}
           </div>
