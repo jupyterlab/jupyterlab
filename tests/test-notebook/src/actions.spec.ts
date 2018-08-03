@@ -259,6 +259,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).to.be(count - 2);
       });
 
+      it('should increment deletedCells model when cells deleted', () => {
+        let next = widget.widgets[1];
+        widget.select(next);
+        let count = widget.model.deletedCells.length;
+        NotebookActions.deleteCells(widget);
+        expect(widget.model.deletedCells.length).to.be(count + 2);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.deleteCells(widget);
@@ -480,6 +488,15 @@ describe('@jupyterlab/notebook', () => {
           expect(result).to.be(true);
           expect(cell.model.outputs.length).to.be.above(0);
           expect(next.rendered).to.be(true);
+        });
+      });
+
+      it('should delete deletedCells metadata when cell run', () => {
+        let cell = widget.activeCell as CodeCell;
+        cell.model.outputs.clear();
+        return NotebookActions.run(widget, session).then(result => {
+          expect(result).to.be(true);
+          expect(widget.model.deletedCells.length).to.be(0);
         });
       });
 
