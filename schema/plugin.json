@@ -17,7 +17,8 @@
                 "line-col-item",
                 "notebook-trust-item",
                 "running-sessions-item",
-                "tab-space-item"
+                "tab-space-item",
+                "memory-usage-item"
             ]
         }
     },
