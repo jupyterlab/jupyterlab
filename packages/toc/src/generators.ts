@@ -541,7 +541,6 @@ namespace Private {
         markdownCell.children.length === 0
       ) {
         if (markdownCell.textContent) {
-          console.log();
           headings.push({
             level: lastLevel + 1,
             text: markdownCell.textContent,
@@ -570,7 +569,6 @@ namespace Private {
           numbering +
           '</span>';
         heading.innerHTML = numberingElement + html;
-        console.log(heading.innerHTML);
         headings.push({
           level,
           text,

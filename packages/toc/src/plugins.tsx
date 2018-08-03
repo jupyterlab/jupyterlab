@@ -24,6 +24,7 @@ export function createDropdownMenu(items: DropdownItem[]) {
       const { menuOpen } = this.state;
       const { buttonTitle } = this.props;
       const handleClick = () => {
+        console.log('handle click');
         if (!menuOpen) {
           document.addEventListener('click', handleOutsideClick, false);
         } else {
@@ -32,6 +33,7 @@ export function createDropdownMenu(items: DropdownItem[]) {
       };
       const openMenu = () => {
         handleClick();
+        console.log(menuOpen);
         if (menuOpen) {
           this.setState({ menuOpen: false });
         } else {
@@ -39,11 +41,10 @@ export function createDropdownMenu(items: DropdownItem[]) {
         }
       };
       const handleOutsideClick = (event: any) => {
-        if (event.target && this.node) {
-          if (this.node.contains(event.target)) {
-            return;
-          }
+        if (event.target.className === 'dropdown-menu-inner-clickable') {
+          return;
         }
+        document.removeEventListener('click', handleOutsideClick, false);
         this.setState({ menuOpen: false });
       };
       return (
@@ -51,19 +52,17 @@ export function createDropdownMenu(items: DropdownItem[]) {
           <div className={'dropdown-menu-button'} onClick={() => openMenu()}>
             {buttonTitle}
           </div>
-          {menuOpen && (
-            <ul className={'dropdown-menu-list'}>
-              {items.map(item => {
-                const ItemType = item.type;
-                const itemProps = item.props;
-                return (
-                  <li className={'dropdown-menu-li'}>
-                    <ItemType {...itemProps} />
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <ul className={'dropdown-menu-list'} hidden={!menuOpen}>
+            {items.map(item => {
+              const ItemType = item.type;
+              const itemProps = item.props;
+              return (
+                <li className={'dropdown-menu-li'}>
+                  <ItemType {...itemProps} />
+                </li>
+              );
+            })}
+          </ul>
         </div>
       );
     }
@@ -102,6 +101,7 @@ export class TagTypeDropdownItem extends React.Component<
     );
     return (
       <div
+        className={'dropdown-menu-inner-clickable'}
         onClick={() => {
           onClickHandler(this);
         }}
