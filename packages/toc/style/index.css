@@ -144,3 +144,7 @@
   -ms-user-select: none;
   user-select: none;
 }
+
+.toc-toolbar {
+  user-select: none;
+}
