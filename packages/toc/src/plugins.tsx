@@ -98,7 +98,7 @@ export class TagTypeDropdownItem extends React.Component<
     const { title, onClickHandler } = this.props;
     let checked = this.state.selected ? (
       <span className={'menu-check-div'}>
-        <img src={require('../static/check.svg')} />
+        <img className={'check-image'} src={require('../static/check.svg')} />
       </span>
     ) : (
       <span className={'menu-check-div'}> </span>

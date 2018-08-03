@@ -322,6 +322,20 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     level = Math.max(Math.min(level, 6), 1);
 
     const paddingLeft = 4; //(level - 1) * 12;
+    let fontSize;
+    let levelsSizes: { [level: number]: string } = {
+      1: '18.74',
+      2: '16.02',
+      3: '13.69',
+      4: '12',
+      5: '11',
+      6: '10'
+    };
+    if (heading.type === 'header') {
+      fontSize = levelsSizes[level] + 'px';
+    } else {
+      fontSize = '9px';
+    }
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
@@ -334,18 +348,24 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     let content;
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
+    let cellClass = heading.type === 'header' ? 'header-cell' : 'markdown-cell';
     if (heading.html) {
       content = (
         <span
           dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
-          style={{ paddingLeft }}
+          style={{ paddingLeft, fontSize }}
+          className={cellClass}
         />
       );
     } else {
       // let collapse = this.props.children ? (
       //   <img src={require('../static/rightarrow.svg')} />
       // ) : "";
-      content = <span style={{ paddingLeft }}>{numbering + heading.text}</span>;
+      content = (
+        <span className={cellClass} style={{ paddingLeft, fontSize }}>
+          {numbering + heading.text}
+        </span>
+      );
     }
 
     return <li onClick={handleClick}>{content}</li>;
