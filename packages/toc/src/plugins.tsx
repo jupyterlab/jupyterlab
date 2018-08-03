@@ -6,7 +6,7 @@ export interface DropdownItem {
 }
 
 interface DropdownMenuProps {
-  buttonTitle: string;
+  buttonTitle: JSX.Element;
 }
 
 interface DropdownMenuState {
@@ -57,7 +57,7 @@ export function createDropdownMenu(items: DropdownItem[]) {
                 const ItemType = item.type;
                 const itemProps = item.props;
                 return (
-                  <li>
+                  <li className={'dropdown-menu-li'}>
                     <ItemType {...itemProps} />
                   </li>
                 );
@@ -93,13 +93,20 @@ export class TagTypeDropdownItem extends React.Component<
 
   render() {
     const { title, onClickHandler } = this.props;
+    let checked = this.state.selected ? (
+      <span className={'menu-check-div'}>
+        <img src={require('../static/check.svg')} />
+      </span>
+    ) : (
+      <span className={'menu-check-div'}> </span>
+    );
     return (
       <div
         onClick={() => {
           onClickHandler(this);
         }}
       >
-        {title} {this.state.selected && ' --SELECTED'}
+        {checked} {title}
       </div>
     );
   }

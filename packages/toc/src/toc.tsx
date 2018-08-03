@@ -544,7 +544,16 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
             className={'numberingIcon'}
           />
         </div>
-        <DropdownMenu buttonTitle="Tag Type" />
+        <DropdownMenu
+          buttonTitle={
+            <span>
+              Show Cell Type<img
+                className={'dropdown-arrow'}
+                src={require('../static/menu_arrow.svg')}
+              />
+            </span>
+          }
+        />
         {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
