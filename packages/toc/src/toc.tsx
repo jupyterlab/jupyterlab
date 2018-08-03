@@ -321,7 +321,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
 
-    const paddingLeft = (level - 1) * 12;
+    const paddingLeft = 4; //(level - 1) * 12;
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
@@ -374,7 +374,7 @@ export class TOCCodeCell extends React.Component<
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
 
-    const paddingLeft = (level - 1) * 12;
+    const paddingLeft = 4; //(level - 1) * 12;
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
