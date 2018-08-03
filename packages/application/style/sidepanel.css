@@ -67,8 +67,12 @@
 }
 
 .jp-SideBar .p-TabBar-tab.p-mod-current {
-  min-height: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
-  max-height: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
+  min-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  max-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
   transform: translateY(var(--jp-border-width));
 }
 
