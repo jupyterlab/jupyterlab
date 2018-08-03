@@ -4,6 +4,7 @@ const CodeMirror = require('react-codemirror');
 
 export interface CodeComponentProps {
   code: string;
+  theme: string;
 }
 
 export interface CodeComponentState {
@@ -25,7 +26,7 @@ export class CodeComponent extends React.Component<
 
   render() {
     const options = {
-      theme: 'jupyter',
+      theme: this.props.theme,
       showCursorWhenSelecting: false,
       readOnly: 'true',
       cursorBlinkRate: -1,

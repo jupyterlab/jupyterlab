@@ -386,6 +386,7 @@ export class TOCCodeCell extends React.Component<
     let content = null;
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
+    let theme = heading.type === 'raw' ? 'none' : 'jupyter';
     if (heading.html) {
       /* console.log("you're not covering this case idiot");
       content = (
@@ -397,7 +398,7 @@ export class TOCCodeCell extends React.Component<
       ); */
       content = (
         <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.html} />
+          <CodeComponent code={numbering + heading.html} theme={theme} />
         </span>
       );
     } else {
@@ -410,7 +411,7 @@ export class TOCCodeCell extends React.Component<
       ); */
       content = (
         <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.text} />
+          <CodeComponent code={numbering + heading.text} theme={theme} />
         </span>
       );
     }
