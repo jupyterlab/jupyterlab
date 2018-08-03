@@ -203,19 +203,6 @@ describe('outputarea/widget', () => {
         });
       });
 
-      it('should accept metadata from a kernel and send outputs to the model', () => {
-        let metadata = { cellId: 'test' };
-        return session.kernel.ready.then(() => {
-          return OutputArea.execute(CODE, widget, session, metadata).then(
-            reply => {
-              expect(reply.content.execution_count).to.be.ok();
-              expect(reply.content.status).to.be('ok');
-              expect(model.length).to.be(1);
-            }
-          );
-        });
-      });
-
       it('should clear existing outputs', () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
         return OutputArea.execute(CODE, widget, session).then(reply => {

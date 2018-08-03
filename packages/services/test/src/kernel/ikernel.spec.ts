@@ -931,7 +931,7 @@ describe('Kernel.IKernel', () => {
   });
 
   context('#checkExecuteMetadata()', () => {
-    it('should send and handle incoming messages', async () => {
+    it('should accept cell metadata as part of request', async () => {
       let options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
