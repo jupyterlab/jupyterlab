@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconItem } from '../component/icon';
 import { TextItem } from '../component/text';
-
 import {
     JupyterLabPlugin,
     JupyterLab,
@@ -187,7 +186,8 @@ export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
         });
 
         manager.addDefaultStatus('running-sessions-item', item, {
-            align: 'left'
+            align: 'left',
+            priority: 0
         });
 
         return item;
