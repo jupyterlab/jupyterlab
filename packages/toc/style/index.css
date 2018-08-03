@@ -91,12 +91,13 @@
 }
 
 .dropdown-menu-list {
-  position: absolute;
+  z-index: 2;
+  position: fixed;
   list-style-type: none;
   margin: 0px;
   padding: 0px;
   background-color: white;
-  border: 1px solid gray;
+  border: 1px solid var(--jp-layout-color2);
 }
 
 .numberingIcon {
@@ -111,7 +112,7 @@
 }
 
 .dropdown-menu-li:hover {
-  background-color: var(--jp-layout-color4);
+  background-color: var(--jp-layout-color2);
 }
 
 .dropdown-arrow {
