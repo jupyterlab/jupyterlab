@@ -87,13 +87,33 @@
 .dropdown-menu-button {
 }
 
+.dropdown-menu {
+}
+
 .dropdown-menu-list {
   position: absolute;
-  margin-top: 0px;
+  list-style-type: none;
+  margin: 0px;
+  padding: 0px;
   background-color: white;
+  border: 1px solid gray;
 }
 
 .numberingIcon {
   float: right;
   margin: 8px;
+}
+
+.menu-check-div {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.dropdown-menu-li:hover {
+  background-color: var(--jp-layout-color4);
+}
+
+.dropdown-arrow {
+  padding-left: 5px;
 }
