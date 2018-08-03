@@ -84,12 +84,6 @@
   background-color: transparent;
 }
 
-.dropdown-menu-button {
-}
-
-.dropdown-menu {
-}
-
 .dropdown-menu-list {
   position: absolute;
   list-style-type: none;
@@ -116,4 +110,16 @@
 
 .dropdown-arrow {
   padding-left: 5px;
+}
+
+.celltypes-dropdown.dropdown-menu {
+  width: fit-content;
+  padding-left: 12px;
+  padding-top: 12px;
+  display: inline-block;
+}
+
+.auto-numbering-button {
+  width: fit-content;
+  float: right;
 }

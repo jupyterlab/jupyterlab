@@ -539,24 +539,31 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
-        <div onClick={event => this.handleClick()}>
-          <img
-            alt="Toggle Auto-Numbering"
-            title="Toggle Auto-Numbering"
-            src={require('../static/numbering.svg')}
-            className={'numberingIcon'}
+        <div className="toc-toolbar">
+          <DropdownMenu
+            className="celltypes-dropdown"
+            buttonTitle={
+              <span>
+                Cell Type
+                <img
+                  className="dropdown-arrow"
+                  src={require('../static/menu_arrow.svg')}
+                />
+              </span>
+            }
           />
+          <div
+            className="auto-numbering-button"
+            onClick={event => this.handleClick()}
+          >
+            <img
+              alt="Toggle Auto-Numbering"
+              title="Toggle Auto-Numbering"
+              src={require('../static/numbering.svg')}
+              className="numberingIcon"
+            />
+          </div>
         </div>
-        <DropdownMenu
-          buttonTitle={
-            <span>
-              Show Cell Type<img
-                className={'dropdown-arrow'}
-                src={require('../static/menu_arrow.svg')}
-              />
-            </span>
-          }
-        />
         {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
