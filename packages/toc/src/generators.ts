@@ -485,9 +485,10 @@ namespace Private {
       const onClick = onClickFactory(0);
       const level = lastLevel + 1;
       headings.push({
-        text: executionCount + ' ' + headingText,
+        text: headingText,
         level,
         onClick,
+        prompt: executionCount.substring(3),
         type: 'code'
       });
     }
@@ -536,13 +537,11 @@ namespace Private {
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
-      if (
-        markdownCell.nodeName.toLowerCase() === 'p' &&
-        markdownCell.children.length === 0
-      ) {
-        if (markdownCell.textContent) {
+      if (markdownCell.nodeName.toLowerCase() === 'p') {
+        if (markdownCell.innerHTML) {
           headings.push({
             level: lastLevel + 1,
+            html: sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions),
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
             type: 'markdown'

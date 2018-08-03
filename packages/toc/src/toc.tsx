@@ -266,6 +266,7 @@ export interface IHeading {
    */
   html?: string | null;
   type: string;
+  prompt?: string;
 }
 
 /**
@@ -406,6 +407,7 @@ export class TOCCodeCell extends React.Component<
     let content = null;
     let numbering =
       heading.numbering && this.state.needNumbering ? heading.numbering : '';
+    let theme = heading.type === 'raw' ? 'none' : 'jupyter';
     if (heading.html) {
       /* console.log("you're not covering this case idiot");
       content = (
@@ -417,7 +419,7 @@ export class TOCCodeCell extends React.Component<
       ); */
       content = (
         <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.html} />
+          <CodeComponent code={numbering + heading.html} theme={theme} />
         </span>
       );
     } else {
@@ -430,11 +432,16 @@ export class TOCCodeCell extends React.Component<
       ); */
       content = (
         <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.text} />
+          <CodeComponent code={numbering + heading.text} theme={theme} />
         </span>
       );
     }
-    return <li onClick={handleClick}>{content}</li>;
+    return (
+      <li onClick={handleClick}>
+        <div className="toc-code-cell-prompt">{heading.prompt}</div>
+        {content}
+      </li>
+    );
   }
 }
 
@@ -476,6 +483,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.props.widget.showCode = !this.props.widget.showCode;
     this.setState({ showCode: this.props.widget.showCode });
     component.setState({ selected: this.props.widget.showCode });
+    this.props.widget.updateTOC();
   };
 
   toggleRaw = (component: React.Component) => {
@@ -493,6 +501,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
 
   private dropDownMenuItems: DropdownItem[] = [
     {
+      id: 0,
       props: {
         title: 'Code',
         selectedByDefault: this.props.widget.showCode,
@@ -501,6 +510,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       type: TagTypeDropdownItem
     },
     {
+      id: 1,
       props: {
         title: 'Raw',
         selectedByDefault: this.props.widget.showRaw,
@@ -509,6 +519,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       type: TagTypeDropdownItem
     },
     {
+      id: 2,
       props: {
         title: 'Markdown text',
         selectedByDefault: this.props.widget.showMarkdown,

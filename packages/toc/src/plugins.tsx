@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 export interface DropdownItem {
+  id: number;
   props: any;
   type: any;
 }
@@ -60,8 +61,9 @@ export function createDropdownMenu(items: DropdownItem[]) {
             {items.map(item => {
               const ItemType = item.type;
               const itemProps = item.props;
+              const id = item.id;
               return (
-                <li className={'dropdown-menu-li'}>
+                <li className={'dropdown-menu-li'} key={'dropdown-item-' + id}>
                   <ItemType {...itemProps} />
                 </li>
               );

@@ -67,6 +67,7 @@
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
   max-width: 100%;
+  max-height: 81px;
 }
 
 .toc-code-span {
@@ -78,7 +79,6 @@
 .cm-toc .CodeMirror-scroll {
   overflow-x: hidden;
   overflow-y: hidden;
-  max-height: 81px;
 }
 
 .markdown-cell {
@@ -92,7 +92,7 @@
 }
 
 .dropdown-menu-list {
-  z-index: 2;
+  z-index: 3;
   position: fixed;
   list-style-type: none;
   margin: 0px;
@@ -159,6 +159,31 @@
   width: fit-content;
   float: right;
 }
+
+.toc-code-cell-prompt {
+  flex: 0 0 27px;
+  color: var(--jp-cell-prompt-not-active-font-color);
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  font-family: var(--jp-cell-prompt-font-family);
+  padding: var(--jp-code-padding);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: 9px;
+  border: var(--jp-border-width) solid transparent;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.toc-toolbar {
+  user-select: none;
+}
+
 /* 
 .dropdown-menu-inner-clickable {
   padding: 0px;
