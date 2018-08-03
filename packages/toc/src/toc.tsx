@@ -194,6 +194,7 @@ export class TableOfContents extends Widget {
   public showCode = true;
   public showRaw = false;
   public showMarkdown = false;
+  public menuOpen = false;
   private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
@@ -446,9 +447,63 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.setState({ needNumbering: this.props.widget.needNumbering });
   }
 
+  handleClick = () => {
+    this.props.widget.needNumbering = !this.props.widget.needNumbering;
+    this.setState({ needNumbering: this.props.widget.needNumbering });
+  };
+
+  toggleCode = (component: React.Component) => {
+    this.props.widget.showCode = !this.props.widget.showCode;
+    this.setState({ showCode: this.props.widget.showCode });
+    component.setState({ selected: this.props.widget.showCode });
+  };
+
+  toggleRaw = (component: React.Component) => {
+    this.props.widget.showRaw = !this.props.widget.showRaw;
+    this.setState({ showRaw: this.props.widget.showRaw });
+    component.setState({ selected: this.props.widget.showRaw });
+    this.props.widget.updateTOC();
+  };
+
+  toggleMarkdown = (component: React.Component) => {
+    this.props.widget.showMarkdown = !this.props.widget.showMarkdown;
+    this.setState({ showMarkdown: this.props.widget.showMarkdown });
+    component.setState({ selected: this.props.widget.showMarkdown });
+  };
+
+  private dropDownMenuItems: DropdownItem[] = [
+    {
+      props: {
+        title: 'Show code cells',
+        selectedByDefault: this.props.widget.showCode,
+        onClickHandler: this.toggleCode.bind(this)
+      },
+      type: TagTypeDropdownItem
+    },
+    {
+      props: {
+        title: 'Show raw cells',
+        selectedByDefault: this.props.widget.showRaw,
+        onClickHandler: this.toggleRaw.bind(this)
+      },
+      type: TagTypeDropdownItem
+    },
+    {
+      props: {
+        title: 'Show markdown cells',
+        selectedByDefault: this.props.widget.showMarkdown,
+        onClickHandler: this.toggleMarkdown.bind(this)
+      },
+      type: TagTypeDropdownItem
+    }
+  ];
+
+  private renderedDropdownMenu = createDropdownMenu(this.dropDownMenuItems);
+
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
+    const DropdownMenu = this.renderedDropdownMenu;
     let listing: JSX.Element[] = this.props.toc.map(el => {
       if (el.type === 'code' && !this.state.showCode) {
         return <div key={`emptycode-${i++}`} />;
@@ -476,58 +531,6 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         }
       }
     });
-    const handleClick = () => {
-      this.props.widget.needNumbering = !this.props.widget.needNumbering;
-      this.setState({ needNumbering: this.props.widget.needNumbering });
-    };
-
-    const toggleCode = (component: React.Component) => {
-      this.props.widget.showCode = !this.props.widget.showCode;
-      this.setState({ showCode: this.props.widget.showCode });
-      component.setState({ selected: this.props.widget.showCode });
-    };
-
-    const toggleRaw = (component: React.Component) => {
-      this.props.widget.showRaw = !this.props.widget.showRaw;
-      this.setState({ showRaw: this.props.widget.showRaw });
-      component.setState({ selected: this.props.widget.showRaw });
-      this.props.widget.updateTOC();
-    };
-
-    const toggleMarkdown = (component: React.Component) => {
-      this.props.widget.showMarkdown = !this.props.widget.showMarkdown;
-      this.setState({ showMarkdown: this.props.widget.showMarkdown });
-      component.setState({ selected: this.props.widget.showMarkdown });
-    };
-
-    const dropDownMenuItems: DropdownItem[] = [
-      {
-        props: {
-          title: 'Show code cells',
-          selectedByDefault: this.props.widget.showCode,
-          onClickHandler: toggleCode
-        },
-        type: TagTypeDropdownItem
-      },
-      {
-        props: {
-          title: 'Show raw cells',
-          selectedByDefault: this.props.widget.showRaw,
-          onClickHandler: toggleRaw
-        },
-        type: TagTypeDropdownItem
-      },
-      {
-        props: {
-          title: 'Show markdown cells',
-          selectedByDefault: this.props.widget.showMarkdown,
-          onClickHandler: toggleMarkdown
-        },
-        type: TagTypeDropdownItem
-      }
-    ];
-
-    const DropdownMenu = createDropdownMenu(dropDownMenuItems);
 
     // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
     //   this.props.widget.filterByTag("test");
@@ -536,7 +539,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
-        <div onClick={event => handleClick()}>
+        <div onClick={event => this.handleClick()}>
           <img
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
