@@ -23,7 +23,7 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
     render() {
         if (this.model === null) {
             return null;
-        } else if (this.model.metricsAvailable) {
+        } else {
             let text: string;
             if (this.model.memoryLimit === null) {
                 text = `${this.model.currentMemory.toFixed(
@@ -37,8 +37,6 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
                 )} ${this.model.units}`;
             }
             return <TextItem title="Current memory usage" source={text} />;
-        } else {
-            return null;
         }
     }
 }
@@ -100,6 +98,9 @@ namespace MemoryUsage {
                 .catch(err => {
                     const oldMetricsAvailable = this._metricsAvailable;
                     this._metricsAvailable = false;
+                    this._currentMemory = 0;
+                    this._memoryLimit = null;
+                    this._units = 'B';
                     if (oldMetricsAvailable) {
                         clearInterval(this._intervalId);
 
@@ -123,6 +124,9 @@ namespace MemoryUsage {
 
             if (value === null) {
                 this._metricsAvailable = false;
+                this._currentMemory = 0;
+                this._memoryLimit = null;
+                this._units = 'B';
                 if (oldMetricsAvailable) {
                     clearInterval(this._intervalId);
 
@@ -280,7 +284,8 @@ export const memoryUsageItem: JupyterLabPlugin<IMemoryUsage> = {
         defaultsManager.addDefaultStatus('memory-usage-item', item, {
             align: 'left',
             priority: 2,
-            isActive: () => true
+            isActive: () => item.model!.metricsAvailable,
+            stateChanged: item.model!.stateChanged
         });
 
         return item;
