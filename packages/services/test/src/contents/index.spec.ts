@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import {
   Contents,
@@ -17,7 +17,7 @@ import {
   handleRequest
 } from '../utils';
 
-let DEFAULT_DIR: Contents.IModel = {
+const DEFAULT_DIR: Contents.IModel = {
   name: 'bar',
   path: 'foo/bar',
   type: 'directory',
@@ -32,7 +32,7 @@ let DEFAULT_DIR: Contents.IModel = {
   format: 'json'
 };
 
-let DEFAULT_CP: Contents.ICheckpointModel = {
+const DEFAULT_CP: Contents.ICheckpointModel = {
   id: '1234',
   last_modified: 'yesterday'
 };
@@ -40,68 +40,72 @@ let DEFAULT_CP: Contents.ICheckpointModel = {
 describe('contents', () => {
   describe('#constructor()', () => {
     it('should accept no options', () => {
-      let contents = new ContentsManager();
-      expect(contents).to.be.a(ContentsManager);
+      const contents = new ContentsManager();
+      expect(contents).to.be.an.instanceof(ContentsManager);
     });
 
     it('should accept options', () => {
-      let contents = new ContentsManager({
+      const contents = new ContentsManager({
         defaultDrive: new Drive()
       });
-      expect(contents).to.be.a(ContentsManager);
+      expect(contents).to.be.an.instanceof(ContentsManager);
     });
   });
 
   describe('#fileChanged', () => {
-    it('should be emitted when a file changes', done => {
-      let contents = new ContentsManager();
+    it('should be emitted when a file changes', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(sender).to.be(contents);
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(sender).to.equal(contents);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      contents.newUntitled().catch(done);
+      await contents.newUntitled();
+      expect(called).to.equal(true);
     });
 
-    it('should include the full path for additional drives', done => {
-      let contents = new ContentsManager();
-      let drive = new Drive({ name: 'other' });
+    it('should include the full path for additional drives', async () => {
+      const contents = new ContentsManager();
+      const drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
       handleRequest(drive, 201, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.newValue.path).to.be('other:' + DEFAULT_FILE.path);
-        done();
+        expect(args.newValue.path).to.equal('other:' + DEFAULT_FILE.path);
+        called = true;
       });
-      contents.newUntitled({ path: 'other:' }).catch(done);
+      await contents.newUntitled({ path: 'other:' });
+      expect(called).to.equal(true);
     });
   });
 
   describe('#isDisposed', () => {
     it('should test whether the manager is disposed', () => {
-      let contents = new ContentsManager();
-      expect(contents.isDisposed).to.be(false);
+      const contents = new ContentsManager();
+      expect(contents.isDisposed).to.equal(false);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the manager', () => {
-      let contents = new ContentsManager();
-      expect(contents.isDisposed).to.be(false);
+      const contents = new ContentsManager();
+      expect(contents.isDisposed).to.equal(false);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
       contents.dispose();
-      expect(contents.isDisposed).to.be(true);
+      expect(contents.isDisposed).to.equal(true);
     });
   });
 
   describe('#addDrive()', () => {
     it('should add a new drive to the manager', () => {
-      let contents = new ContentsManager();
+      const contents = new ContentsManager();
       contents.addDrive(new Drive({ name: 'other' }));
       handleRequest(contents, 200, DEFAULT_FILE);
       return contents.get('other:');
@@ -114,11 +118,11 @@ describe('contents', () => {
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.localPath('other:foo/bar/example.txt')).to.be(
+      expect(contents.localPath('other:foo/bar/example.txt')).to.equal(
         'foo/bar/example.txt'
       );
 
-      expect(contents.localPath('alternative:/foo/bar/example.txt')).to.be(
+      expect(contents.localPath('alternative:/foo/bar/example.txt')).to.equal(
         'foo/bar/example.txt'
       );
     });
@@ -129,7 +133,7 @@ describe('contents', () => {
 
       expect(
         contents.localPath('other:foo/odd:directory/example:file.txt')
-      ).to.be('foo/odd:directory/example:file.txt');
+      ).to.equal('foo/odd:directory/example:file.txt');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
@@ -138,7 +142,7 @@ describe('contents', () => {
 
       expect(
         contents.localPath('which:foo/odd:directory/example:file.txt')
-      ).to.be('which:foo/odd:directory/example:file.txt');
+      ).to.equal('which:foo/odd:directory/example:file.txt');
     });
   });
 
@@ -148,9 +152,9 @@ describe('contents', () => {
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));
 
-      expect(contents.driveName('other:foo/bar/example.txt')).to.be('other');
+      expect(contents.driveName('other:foo/bar/example.txt')).to.equal('other');
 
-      expect(contents.driveName('alternative:/foo/bar/example.txt')).to.be(
+      expect(contents.driveName('alternative:/foo/bar/example.txt')).to.equal(
         'alternative'
       );
     });
@@ -161,7 +165,7 @@ describe('contents', () => {
 
       expect(
         contents.driveName('other:foo/odd:directory/example:file.txt')
-      ).to.be('other');
+      ).to.equal('other');
     });
 
     it('should leave alone names with ":" that are not drive names', () => {
@@ -170,480 +174,467 @@ describe('contents', () => {
 
       expect(
         contents.driveName('which:foo/odd:directory/example:file.txt')
-      ).to.be('');
+      ).to.equal('');
     });
   });
 
   describe('#get()', () => {
-    it('should get a file', () => {
-      let contents = new ContentsManager();
+    it('should get a file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
-      let options: Contents.IFetchOptions = { type: 'file' };
-      return contents.get('/foo', options).then(model => {
-        expect(model.path).to.be('foo');
-      });
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const model = await contents.get('/foo', options);
+      expect(model.path).to.equal('foo');
     });
 
-    it('should get a directory', () => {
-      let contents = new ContentsManager();
+    it('should get a directory', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_DIR);
-      let options: Contents.IFetchOptions = { type: 'directory' };
-      return contents.get('/foo', options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const model = await contents.get('/foo', options);
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should get a file from an additional drive', () => {
-      let contents = new ContentsManager();
-      let drive = new Drive({ name: 'other' });
+    it('should get a file from an additional drive', async () => {
+      const contents = new ContentsManager();
+      const drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
       handleRequest(drive, 200, DEFAULT_FILE);
-      let options: Contents.IFetchOptions = { type: 'file' };
-      return contents.get('other:/foo', options).then(model => {
-        expect(model.path).to.be('other:foo');
-      });
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.path).to.equal('other:foo');
     });
 
-    it('should get a directory from an additional drive', () => {
-      let contents = new ContentsManager();
-      let drive = new Drive({ name: 'other' });
+    it('should get a directory from an additional drive', async () => {
+      const contents = new ContentsManager();
+      const drive = new Drive({ name: 'other' });
       contents.addDrive(drive);
       handleRequest(drive, 200, DEFAULT_DIR);
-      let options: Contents.IFetchOptions = { type: 'directory' };
-      return contents.get('other:/foo', options).then(model => {
-        expect(model.content[0].path).to.be('other:foo/bar/buzz.txt');
-      });
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.content[0].path).to.equal('other:foo/bar/buzz.txt');
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_DIR);
-      let get = contents.get('/foo');
-      expectFailure(get, done, 'Invalid response: 201 Created');
+      const get = contents.get('/foo');
+      await expectFailure(get, 'Invalid response: 201 Created');
     });
   });
 
   describe('#getDownloadUrl()', () => {
-    let settings = ServerConnection.makeSettings({
+    const settings = ServerConnection.makeSettings({
       baseUrl: 'http://foo'
     });
 
-    it('should get the url of a file', () => {
-      let drive = new Drive({ serverSettings: settings });
-      let contents = new ContentsManager({ defaultDrive: drive });
-      let test1 = contents.getDownloadUrl('bar.txt');
-      let test2 = contents.getDownloadUrl('fizz/buzz/bar.txt');
-      let test3 = contents.getDownloadUrl('/bar.txt');
-      return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
-      });
+    it('should get the url of a file', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const contents = new ContentsManager({ defaultDrive: drive });
+      const test1 = contents.getDownloadUrl('bar.txt');
+      const test2 = contents.getDownloadUrl('fizz/buzz/bar.txt');
+      const test3 = contents.getDownloadUrl('/bar.txt');
+      const urls = await Promise.all([test1, test2, test3]);
+      expect(urls[0]).to.equal('http://foo/files/bar.txt');
+      expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+      expect(urls[2]).to.equal('http://foo/files/bar.txt');
     });
 
-    it('should encode characters', () => {
-      let drive = new Drive({ serverSettings: settings });
-      let contents = new ContentsManager({ defaultDrive: drive });
-      return contents.getDownloadUrl('b ar?3.txt').then(url => {
-        expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
-      });
+    it('should encode characters', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const contents = new ContentsManager({ defaultDrive: drive });
+      const url = await contents.getDownloadUrl('b ar?3.txt');
+      expect(url).to.equal('http://foo/files/b%20ar%3F3.txt');
     });
 
-    it('should not handle relative paths', () => {
-      let drive = new Drive({ serverSettings: settings });
-      let contents = new ContentsManager({ defaultDrive: drive });
-      return contents.getDownloadUrl('fizz/../bar.txt').then(url => {
-        expect(url).to.be('http://foo/files/fizz/../bar.txt');
-      });
+    it('should not handle relative paths', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const contents = new ContentsManager({ defaultDrive: drive });
+      const url = await contents.getDownloadUrl('fizz/../bar.txt');
+      expect(url).to.equal('http://foo/files/fizz/../bar.txt');
     });
 
-    it('should get the url of a file from an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other', serverSettings: settings });
+    it('should get the url of a file from an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other', serverSettings: settings });
       contents.addDrive(other);
-      let test1 = contents.getDownloadUrl('other:bar.txt');
-      let test2 = contents.getDownloadUrl('other:fizz/buzz/bar.txt');
-      let test3 = contents.getDownloadUrl('other:/bar.txt');
-      return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
-      });
+      const test1 = contents.getDownloadUrl('other:bar.txt');
+      const test2 = contents.getDownloadUrl('other:fizz/buzz/bar.txt');
+      const test3 = contents.getDownloadUrl('other:/bar.txt');
+      const urls = await Promise.all([test1, test2, test3]);
+      expect(urls[0]).to.equal('http://foo/files/bar.txt');
+      expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+      expect(urls[2]).to.equal('http://foo/files/bar.txt');
     });
   });
 
   describe('#newUntitled()', () => {
-    it('should create a file', () => {
-      let contents = new ContentsManager();
+    it('should create a file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
-      return contents.newUntitled({ path: '/foo' }).then(model => {
-        expect(model.path).to.be('foo/test');
-      });
+      const model = await contents.newUntitled({ path: '/foo' });
+      expect(model.path).to.equal('foo/test');
     });
 
-    it('should create a directory', () => {
-      let contents = new ContentsManager();
+    it('should create a directory', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_DIR);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: '/foo',
         type: 'directory'
       };
-      return contents.newUntitled(options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const model = await contents.newUntitled(options);
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should create a file on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should create a file on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_FILE);
-      return contents.newUntitled({ path: 'other:/foo' }).then(model => {
-        expect(model.path).to.be('other:foo/test');
-      });
+      const model = await contents.newUntitled({ path: 'other:/foo' });
+      expect(model.path).to.equal('other:foo/test');
     });
 
-    it('should create a directory on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should create a directory on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_DIR);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: 'other:/foo',
         type: 'directory'
       };
-      return contents.newUntitled(options).then(model => {
-        expect(model.path).to.be('other:' + DEFAULT_DIR.path);
-      });
+      const model = await contents.newUntitled(options);
+      expect(model.path).to.equal('other:' + DEFAULT_DIR.path);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let contents = new ContentsManager();
+    it('should emit the fileChanged signal', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      contents.newUntitled({ type: 'file', ext: 'test' }).catch(done);
+      await contents.newUntitled({ type: 'file', ext: 'test' });
+      expect(called).to.equal(true);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
       dir.name = 1;
       handleRequest(contents, 201, dir);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: '/foo',
         type: 'file',
         ext: 'py'
       };
-      let newFile = contents.newUntitled(options);
-      expectFailure(newFile, done);
+      const newFile = contents.newUntitled(options);
+      await expectFailure(newFile);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_DIR);
-      let newDir = contents.newUntitled();
-      expectFailure(newDir, done, 'Invalid response: 200 OK');
+      const newDir = contents.newUntitled();
+      await expectFailure(newDir, 'Invalid response: 200 OK');
     });
   });
 
   describe('#delete()', () => {
     it('should delete a file', () => {
-      let contents = new ContentsManager();
+      const contents = new ContentsManager();
       handleRequest(contents, 204, {});
       return contents.delete('/foo/bar.txt');
     });
 
     it('should delete a file on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 204, {});
       return contents.delete('other:/foo/bar.txt');
     });
 
-    it('should emit the fileChanged signal', done => {
-      let contents = new ContentsManager();
-      let path = '/foo/bar.txt';
+    it('should emit the fileChanged signal', async () => {
+      const contents = new ContentsManager();
+      const path = '/foo/bar.txt';
       handleRequest(contents, 204, { path });
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be('foo/bar.txt');
-        done();
+        expect(args.type).to.equal('delete');
+        expect(args.oldValue.path).to.equal('foo/bar.txt');
+        called = true;
       });
-      contents.delete(path).catch(done);
+      await contents.delete(path);
+      expect(called).to.equal(true);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, {});
-      let del = contents.delete('/foo/bar.txt');
-      expectFailure(del, done, 'Invalid response: 200 OK');
+      const del = contents.delete('/foo/bar.txt');
+      await expectFailure(del, 'Invalid response: 200 OK');
     });
 
-    it('should throw a specific error', done => {
-      let contents = new ContentsManager();
+    it('should throw a specific error', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 400, {});
-      let del = contents.delete('/foo/');
-      expectFailure(del, done, '');
+      const del = contents.delete('/foo/');
+      await expectFailure(del, '');
     });
 
-    it('should throw a general error', done => {
-      let contents = new ContentsManager();
+    it('should throw a general error', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 500, {});
-      let del = contents.delete('/foo/');
-      expectFailure(del, done, '');
+      const del = contents.delete('/foo/');
+      await expectFailure(del, '');
     });
   });
 
   describe('#rename()', () => {
-    it('should rename a file', () => {
-      let contents = new ContentsManager();
+    it('should rename a file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
-      let rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
+      const model = await rename;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should rename a file on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should rename a file on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 200, DEFAULT_FILE);
-      let rename = contents.rename('other:/foo/bar.txt', 'other:/foo/baz.txt');
-      return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const rename = contents.rename(
+        'other:/foo/bar.txt',
+        'other:/foo/baz.txt'
+      );
+      const model = await rename;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let contents = new ContentsManager();
+    it('should emit the fileChanged signal', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('rename');
-        expect(args.oldValue.path).to.be('foo/bar.txt');
-        expect(args.newValue.path).to.be('foo/test');
-        done();
+        expect(args.type).to.equal('rename');
+        expect(args.oldValue.path).to.equal('foo/bar.txt');
+        expect(args.newValue.path).to.equal('foo/test');
+        called = true;
       });
-      contents.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
+      await contents.rename('/foo/bar.txt', '/foo/baz.txt');
+      expect(called).to.equal(true);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete dir.path;
       handleRequest(contents, 200, dir);
-      let rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      expectFailure(rename, done);
+      const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
+      await expectFailure(rename);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
-      let rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      expectFailure(rename, done, 'Invalid response: 201 Created');
+      const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
+      await expectFailure(rename, 'Invalid response: 201 Created');
     });
   });
 
   describe('#save()', () => {
-    it('should save a file', () => {
-      let contents = new ContentsManager();
+    it('should save a file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
-      let save = contents.save('/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const save = contents.save('/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should save a file on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should save a file on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(contents, 200, DEFAULT_FILE);
-      let save = contents.save('other:/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.path).to.be('other:foo');
-      });
+      const save = contents.save('other:/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.path).to.equal('other:foo');
     });
 
-    it('should create a new file', () => {
-      let contents = new ContentsManager();
+    it('should create a new file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
-      let save = contents.save('/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const save = contents.save('/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let contents = new ContentsManager();
+    it('should emit the fileChanged signal', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('save');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('save');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      contents.save('/foo', { type: 'file', name: 'test' }).catch(done);
+      await contents.save('/foo', { type: 'file', name: 'test' });
+      expect(called).to.equal(true);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.format;
       handleRequest(contents, 200, file);
-      let save = contents.save('/foo', { type: 'file', name: 'test' });
-      expectFailure(save, done);
+      const save = contents.save('/foo', { type: 'file', name: 'test' });
+      await expectFailure(save);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 204, DEFAULT_FILE);
-      let save = contents.save('/foo', { type: 'file', name: 'test' });
-      expectFailure(save, done, 'Invalid response: 204 No Content');
+      const save = contents.save('/foo', { type: 'file', name: 'test' });
+      await expectFailure(save, 'Invalid response: 204 No Content');
     });
   });
 
   describe('#copy()', () => {
-    it('should copy a file', () => {
-      let contents = new ContentsManager();
+    it('should copy a file', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
-      return contents.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const model = await contents.copy('/foo/bar.txt', '/baz');
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should copy a file on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should copy a file on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_FILE);
-      return contents.copy('other:/foo/test', 'other:/baz').then(model => {
-        expect(model.path).to.be('other:foo/test');
-      });
+      const model = await contents.copy('other:/foo/test', 'other:/baz');
+      expect(model.path).to.equal('other:foo/test');
     });
 
-    it('should emit the fileChanged signal', done => {
-      let contents = new ContentsManager();
+    it('should emit the fileChanged signal', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_FILE);
+      let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      contents.copy('/foo/bar.txt', '/baz').catch(done);
+      await contents.copy('/foo/bar.txt', '/baz');
+      expect(called).to.equal(true);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.type;
       handleRequest(contents, 201, file);
-      let copy = contents.copy('/foo/bar.txt', '/baz');
-      expectFailure(copy, done);
+      const copy = contents.copy('/foo/bar.txt', '/baz');
+      await expectFailure(copy);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_FILE);
-      let copy = contents.copy('/foo/bar.txt', '/baz');
-      expectFailure(copy, done, 'Invalid response: 200 OK');
+      const copy = contents.copy('/foo/bar.txt', '/baz');
+      await expectFailure(copy, 'Invalid response: 200 OK');
     });
   });
 
   describe('#createCheckpoint()', () => {
-    it('should create a checkpoint', () => {
-      let contents = new ContentsManager();
+    it('should create a checkpoint', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, DEFAULT_CP);
-      let checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoint = contents.createCheckpoint('/foo/bar.txt');
+      const model = await checkpoint;
+      expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should create a checkpoint on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should create a checkpoint on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 201, DEFAULT_CP);
-      let checkpoint = contents.createCheckpoint('other:/foo/bar.txt');
-      return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoint = contents.createCheckpoint('other:/foo/bar.txt');
+      const model = await checkpoint;
+      expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.last_modified;
       handleRequest(contents, 201, cp);
-      let checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      expectFailure(checkpoint, done);
+      const checkpoint = contents.createCheckpoint('/foo/bar.txt');
+      await expectFailure(checkpoint);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, DEFAULT_CP);
-      let checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      const checkpoint = contents.createCheckpoint('/foo/bar.txt');
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 
   describe('#listCheckpoints()', () => {
-    it('should list the checkpoints', () => {
-      let contents = new ContentsManager();
+    it('should list the checkpoints', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, [DEFAULT_CP, DEFAULT_CP]);
-      let checkpoints = contents.listCheckpoints('/foo/bar.txt');
-      return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoints = contents.listCheckpoints('/foo/bar.txt');
+      const models = await checkpoints;
+      expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should list the checkpoints on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+    it('should list the checkpoints on an additional drive', async () => {
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 200, [DEFAULT_CP, DEFAULT_CP]);
-      let checkpoints = contents.listCheckpoints('other:/foo/bar.txt');
-      return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoints = contents.listCheckpoints('other:/foo/bar.txt');
+      const models = await checkpoints;
+      expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should fail for an incorrect model', done => {
-      let contents = new ContentsManager();
-      let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
+    it('should fail for an incorrect model', async () => {
+      const contents = new ContentsManager();
+      const cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.id;
       handleRequest(contents, 200, [cp, DEFAULT_CP]);
-      let checkpoints = contents.listCheckpoints('/foo/bar.txt');
-      let second = () => {
-        handleRequest(contents, 200, DEFAULT_CP);
-        let newCheckpoints = contents.listCheckpoints('/foo/bar.txt');
-        expectFailure(newCheckpoints, done, 'Invalid Checkpoint list');
-      };
-
-      expectFailure(checkpoints, second);
+      const checkpoints = contents.listCheckpoints('/foo/bar.txt');
+      await expectFailure(checkpoints);
+      handleRequest(contents, 200, DEFAULT_CP);
+      const newCheckpoints = contents.listCheckpoints('/foo/bar.txt');
+      await expectFailure(newCheckpoints, 'Invalid Checkpoint list');
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 201, {});
-      let checkpoints = contents.listCheckpoints('/foo/bar.txt');
-      expectFailure(checkpoints, done, 'Invalid response: 201 Created');
+      const checkpoints = contents.listCheckpoints('/foo/bar.txt');
+      await expectFailure(checkpoints, 'Invalid response: 201 Created');
     });
   });
 
   describe('#restoreCheckpoint()', () => {
     it('should restore a checkpoint', () => {
-      let contents = new ContentsManager();
+      const contents = new ContentsManager();
       handleRequest(contents, 204, {});
-      let checkpoint = contents.restoreCheckpoint(
+      const checkpoint = contents.restoreCheckpoint(
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
@@ -651,648 +642,620 @@ describe('contents', () => {
     });
 
     it('should restore a checkpoint on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 204, {});
-      let checkpoint = contents.restoreCheckpoint(
+      const checkpoint = contents.restoreCheckpoint(
         'other:/foo/bar.txt',
         DEFAULT_CP.id
       );
       return checkpoint;
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, {});
-      let checkpoint = contents.restoreCheckpoint(
+      const checkpoint = contents.restoreCheckpoint(
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 
   describe('#deleteCheckpoint()', () => {
     it('should delete a checkpoint', () => {
-      let contents = new ContentsManager();
+      const contents = new ContentsManager();
       handleRequest(contents, 204, {});
       return contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
     it('should delete a checkpoint on an additional drive', () => {
-      let contents = new ContentsManager();
-      let other = new Drive({ name: 'other' });
+      const contents = new ContentsManager();
+      const other = new Drive({ name: 'other' });
       contents.addDrive(other);
       handleRequest(other, 204, {});
       return contents.deleteCheckpoint('other:/foo/bar.txt', DEFAULT_CP.id);
     });
 
-    it('should fail for an incorrect response', done => {
-      let contents = new ContentsManager();
+    it('should fail for an incorrect response', async () => {
+      const contents = new ContentsManager();
       handleRequest(contents, 200, {});
-      let checkpoint = contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      const checkpoint = contents.deleteCheckpoint(
+        '/foo/bar.txt',
+        DEFAULT_CP.id
+      );
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 });
 
 describe('drive', () => {
-  let serverSettings = makeSettings();
+  const serverSettings = makeSettings();
 
   describe('#constructor()', () => {
     it('should accept no options', () => {
-      let drive = new Drive();
-      expect(drive).to.be.a(Drive);
+      const drive = new Drive();
+      expect(drive).to.be.an.instanceof(Drive);
     });
 
     it('should accept options', () => {
-      let drive = new Drive({
+      const drive = new Drive({
         name: 'name'
       });
-      expect(drive).to.be.a(Drive);
+      expect(drive).to.be.an.instanceof(Drive);
     });
   });
 
   describe('#name', () => {
     it('should return the name of the drive', () => {
-      let drive = new Drive({
+      const drive = new Drive({
         name: 'name'
       });
-      expect(drive.name).to.be('name');
+      expect(drive.name).to.equal('name');
     });
   });
 
   describe('#fileChanged', () => {
-    it('should be emitted when a file changes', done => {
-      let drive = new Drive();
+    it('should be emitted when a file changes', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(sender).to.be(drive);
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(sender).to.equal(drive);
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      drive.newUntitled().catch(done);
+      await drive.newUntitled();
+      expect(called).to.equal(true);
     });
   });
 
   describe('#isDisposed', () => {
     it('should test whether the drive is disposed', () => {
-      let drive = new Drive();
-      expect(drive.isDisposed).to.be(false);
+      const drive = new Drive();
+      expect(drive.isDisposed).to.equal(false);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the drive', () => {
-      let drive = new Drive();
-      expect(drive.isDisposed).to.be(false);
+      const drive = new Drive();
+      expect(drive.isDisposed).to.equal(false);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
       drive.dispose();
-      expect(drive.isDisposed).to.be(true);
+      expect(drive.isDisposed).to.equal(true);
     });
   });
 
   describe('#get()', () => {
-    it('should get a file', () => {
-      let drive = new Drive();
+    it('should get a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
-      let options: Contents.IFetchOptions = { type: 'file' };
-      let get = drive.get('/foo', options);
-      return get.then(model => {
-        expect(model.path).to.be(DEFAULT_FILE.path);
-      });
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const get = drive.get('/foo', options);
+      const model = await get;
+      expect(model.path).to.equal(DEFAULT_FILE.path);
     });
 
-    it('should get a directory', () => {
-      let drive = new Drive();
+    it('should get a directory', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_DIR);
-      let options: Contents.IFetchOptions = { type: 'directory' };
-      let get = drive.get('/foo', options);
-      return get.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const get = drive.get('/foo', options);
+      const model = await get;
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, DEFAULT_DIR);
-      let options: Contents.IFetchOptions = { type: 'directory' };
-      let get = drive.get('/foo', options);
-      return get.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const get = drive.get('/foo', options);
+      const model = await get;
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
-      let get = drive.get('/foo');
-      expectFailure(get, done, 'Invalid response: 201 Created');
+      const get = drive.get('/foo');
+      await expectFailure(get, 'Invalid response: 201 Created');
     });
   });
 
   describe('#getDownloadUrl()', () => {
-    let settings = ServerConnection.makeSettings({
+    const settings = ServerConnection.makeSettings({
       baseUrl: 'http://foo'
     });
 
-    it('should get the url of a file', () => {
-      let drive = new Drive({ serverSettings: settings });
-      let test1 = drive.getDownloadUrl('bar.txt');
-      let test2 = drive.getDownloadUrl('fizz/buzz/bar.txt');
-      let test3 = drive.getDownloadUrl('/bar.txt');
-      return Promise.all([test1, test2, test3]).then(urls => {
-        expect(urls[0]).to.be('http://foo/files/bar.txt');
-        expect(urls[1]).to.be('http://foo/files/fizz/buzz/bar.txt');
-        expect(urls[2]).to.be('http://foo/files/bar.txt');
-      });
+    it('should get the url of a file', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const test1 = drive.getDownloadUrl('bar.txt');
+      const test2 = drive.getDownloadUrl('fizz/buzz/bar.txt');
+      const test3 = drive.getDownloadUrl('/bar.txt');
+      const urls = await Promise.all([test1, test2, test3]);
+      expect(urls[0]).to.equal('http://foo/files/bar.txt');
+      expect(urls[1]).to.equal('http://foo/files/fizz/buzz/bar.txt');
+      expect(urls[2]).to.equal('http://foo/files/bar.txt');
     });
 
-    it('should encode characters', () => {
-      let drive = new Drive({ serverSettings: settings });
-      return drive.getDownloadUrl('b ar?3.txt').then(url => {
-        expect(url).to.be('http://foo/files/b%20ar%3F3.txt');
-      });
+    it('should encode characters', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const url = await drive.getDownloadUrl('b ar?3.txt');
+      expect(url).to.equal('http://foo/files/b%20ar%3F3.txt');
     });
 
-    it('should not handle relative paths', () => {
-      let drive = new Drive({ serverSettings: settings });
-      return drive.getDownloadUrl('fizz/../bar.txt').then(url => {
-        expect(url).to.be('http://foo/files/fizz/../bar.txt');
-      });
+    it('should not handle relative paths', async () => {
+      const drive = new Drive({ serverSettings: settings });
+      const url = await drive.getDownloadUrl('fizz/../bar.txt');
+      expect(url).to.equal('http://foo/files/fizz/../bar.txt');
     });
   });
 
-  describe('#newUntitled()', () => {
-    it('should create a file', () => {
-      let drive = new Drive();
+  describe('#newUntitled()', async () => {
+    it('should create a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
-      return drive.newUntitled({ path: '/foo' }).then(model => {
-        expect(model.path).to.be(DEFAULT_FILE.path);
-      });
+      const model = await drive.newUntitled({ path: '/foo' });
+      expect(model.path).to.equal(DEFAULT_FILE.path);
     });
 
-    it('should create a directory', () => {
-      let drive = new Drive();
+    it('should create a directory', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: '/foo',
         type: 'directory'
       };
-      let newDir = drive.newUntitled(options);
-      return newDir.then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const newDir = drive.newUntitled(options);
+      const model = await newDir;
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let drive = new Drive();
+    it('should emit the fileChanged signal', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      drive.newUntitled({ type: 'file', ext: 'test' }).catch(done);
+      await drive.newUntitled({ type: 'file', ext: 'test' });
+      expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 201, DEFAULT_DIR);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: '/foo',
         type: 'file',
         ext: 'txt'
       };
-      return drive.newUntitled(options).then(model => {
-        expect(model.content[0].path).to.be(DEFAULT_DIR.content[0].path);
-      });
+      const model = await drive.newUntitled(options);
+      expect(model.content[0].path).to.equal(DEFAULT_DIR.content[0].path);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const dir = JSON.parse(JSON.stringify(DEFAULT_DIR));
       dir.name = 1;
       handleRequest(drive, 201, dir);
-      let options: Contents.ICreateOptions = {
+      const options: Contents.ICreateOptions = {
         path: '/foo',
         type: 'file',
         ext: 'py'
       };
-      let newFile = drive.newUntitled(options);
-      expectFailure(newFile, done);
+      const newFile = drive.newUntitled(options);
+      await expectFailure(newFile);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_DIR);
-      let newDir = drive.newUntitled();
-      expectFailure(newDir, done, 'Invalid response: 200 OK');
+      const newDir = drive.newUntitled();
+      await expectFailure(newDir, 'Invalid response: 200 OK');
     });
   });
 
   describe('#delete()', () => {
-    it('should delete a file', () => {
-      let drive = new Drive();
+    it('should delete a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 204, {});
-      return drive.delete('/foo/bar.txt');
+      await drive.delete('/foo/bar.txt');
     });
 
-    it('should emit the fileChanged signal', done => {
-      let drive = new Drive();
-      let path = '/foo/bar.txt';
+    it('should emit the fileChanged signal', async () => {
+      const drive = new Drive();
+      const path = '/foo/bar.txt';
       handleRequest(drive, 204, { path });
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('delete');
-        expect(args.oldValue.path).to.be('/foo/bar.txt');
-        done();
+        expect(args.type).to.equal('delete');
+        expect(args.oldValue.path).to.equal('/foo/bar.txt');
+        called = true;
       });
-      drive.delete(path).catch(done);
+      await drive.delete(path);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
-      drive.delete('/foo/bar.txt');
+      await drive.delete('/foo/bar.txt');
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, {});
-      let del = drive.delete('/foo/bar.txt');
-      expectFailure(del, done, 'Invalid response: 200 OK');
+      const del = drive.delete('/foo/bar.txt');
+      await expectFailure(del, 'Invalid response: 200 OK');
     });
 
-    it('should throw a specific error', done => {
-      let drive = new Drive();
+    it('should throw a specific error', async () => {
+      const drive = new Drive();
       handleRequest(drive, 400, {});
-      let del = drive.delete('/foo/');
-      expectFailure(del, done, '');
+      const del = drive.delete('/foo/');
+      await expectFailure(del, '');
     });
 
-    it('should throw a general error', done => {
-      let drive = new Drive();
+    it('should throw a general error', async () => {
+      const drive = new Drive();
       handleRequest(drive, 500, {});
-      let del = drive.delete('/foo/');
-      expectFailure(del, done, '');
+      const del = drive.delete('/foo/');
+      await expectFailure(del, '');
     });
   });
 
   describe('#rename()', () => {
-    it('should rename a file', () => {
-      let drive = new Drive();
+    it('should rename a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
-      let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
+      const model = await rename;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let drive = new Drive();
+    it('should emit the fileChanged signal', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('rename');
-        expect(args.oldValue.path).to.be('/foo/bar.txt');
-        expect(args.newValue.path).to.be('foo/test');
-        done();
+        expect(args.type).to.equal('rename');
+        expect(args.oldValue.path).to.equal('/foo/bar.txt');
+        expect(args.newValue.path).to.equal('foo/test');
+        called = true;
       });
-      drive.rename('/foo/bar.txt', '/foo/baz.txt').catch(done);
+      await drive.rename('/foo/bar.txt', '/foo/baz.txt');
+      expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, DEFAULT_FILE);
-      let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      return rename.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
+      const model = await rename;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const dir = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete dir.path;
       handleRequest(drive, 200, dir);
-      let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      expectFailure(rename, done);
+      const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
+      await expectFailure(rename);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
-      let rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      expectFailure(rename, done, 'Invalid response: 201 Created');
+      const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
+      await expectFailure(rename, 'Invalid response: 201 Created');
     });
   });
 
   describe('#save()', () => {
-    it('should save a file', () => {
-      let drive = new Drive();
+    it('should save a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
-      let save = drive.save('/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const save = drive.save('/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should create a new file', () => {
-      let drive = new Drive();
+    it('should create a new file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
-      let save = drive.save('/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const save = drive.save('/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let drive = new Drive();
+    it('should emit the fileChanged signal', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('save');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('save');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      drive.save('/foo', { type: 'file', name: 'test' }).catch(done);
+      await drive.save('/foo', { type: 'file', name: 'test' });
+      expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, DEFAULT_FILE);
-      let save = drive.save('/foo', { type: 'file', name: 'test' });
-      return save.then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const save = drive.save('/foo', { type: 'file', name: 'test' });
+      const model = await save;
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.format;
       handleRequest(drive, 200, file);
-      let save = drive.save('/foo', { type: 'file', name: 'test' });
-      expectFailure(save, done);
+      const save = drive.save('/foo', { type: 'file', name: 'test' });
+      await expectFailure(save);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 204, DEFAULT_FILE);
-      let save = drive.save('/foo', { type: 'file', name: 'test' });
-      expectFailure(save, done, 'Invalid response: 204 No Content');
+      const save = drive.save('/foo', { type: 'file', name: 'test' });
+      await expectFailure(save, 'Invalid response: 204 No Content');
     });
   });
 
   describe('#copy()', () => {
-    it('should copy a file', () => {
-      let drive = new Drive();
+    it('should copy a file', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
-      return drive.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const model = await drive.copy('/foo/bar.txt', '/baz');
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should emit the fileChanged signal', done => {
-      let drive = new Drive();
+    it('should emit the fileChanged signal', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
+      let called = false;
       drive.fileChanged.connect((sender, args) => {
-        expect(args.type).to.be('new');
-        expect(args.oldValue).to.be(null);
-        expect(args.newValue.path).to.be(DEFAULT_FILE.path);
-        done();
+        expect(args.type).to.equal('new');
+        expect(args.oldValue).to.be.null;
+        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        called = true;
       });
-      drive.copy('/foo/bar.txt', '/baz').catch(done);
+      await drive.copy('/foo/bar.txt', '/baz');
+      expect(called).to.equal(true);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 201, DEFAULT_FILE);
-      return drive.copy('/foo/bar.txt', '/baz').then(model => {
-        expect(model.created).to.be(DEFAULT_FILE.created);
-      });
+      const model = await drive.copy('/foo/bar.txt', '/baz');
+      expect(model.created).to.equal(DEFAULT_FILE.created);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let file = JSON.parse(JSON.stringify(DEFAULT_FILE));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const file = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete file.type;
       handleRequest(drive, 201, file);
-      let copy = drive.copy('/foo/bar.txt', '/baz');
-      expectFailure(copy, done);
+      const copy = drive.copy('/foo/bar.txt', '/baz');
+      await expectFailure(copy);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
-      let copy = drive.copy('/foo/bar.txt', '/baz');
-      expectFailure(copy, done, 'Invalid response: 200 OK');
+      const copy = drive.copy('/foo/bar.txt', '/baz');
+      await expectFailure(copy, 'Invalid response: 200 OK');
     });
   });
 
   describe('#createCheckpoint()', () => {
-    it('should create a checkpoint', () => {
-      let drive = new Drive();
+    it('should create a checkpoint', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_CP);
-      let checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoint = drive.createCheckpoint('/foo/bar.txt');
+      const model = await checkpoint;
+      expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 201, DEFAULT_CP);
-      let checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      return checkpoint.then(model => {
-        expect(model.last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoint = drive.createCheckpoint('/foo/bar.txt');
+      const model = await checkpoint;
+      expect(model.last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.last_modified;
       handleRequest(drive, 201, cp);
-      let checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      expectFailure(checkpoint, done);
+      const checkpoint = drive.createCheckpoint('/foo/bar.txt');
+      await expectFailure(checkpoint);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_CP);
-      let checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      const checkpoint = drive.createCheckpoint('/foo/bar.txt');
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 
   describe('#listCheckpoints()', () => {
-    it('should list the checkpoints', () => {
-      let drive = new Drive();
+    it('should list the checkpoints', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
-      let checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoints = drive.listCheckpoints('/foo/bar.txt');
+      const models = await checkpoints;
+      expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+    it('should accept server settings', async () => {
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 200, [DEFAULT_CP, DEFAULT_CP]);
-      let checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      return checkpoints.then(models => {
-        expect(models[0].last_modified).to.be(DEFAULT_CP.last_modified);
-      });
+      const checkpoints = drive.listCheckpoints('/foo/bar.txt');
+      const models = await checkpoints;
+      expect(models[0].last_modified).to.equal(DEFAULT_CP.last_modified);
     });
 
-    it('should fail for an incorrect model', done => {
-      let drive = new Drive();
-      let cp = JSON.parse(JSON.stringify(DEFAULT_CP));
+    it('should fail for an incorrect model', async () => {
+      const drive = new Drive();
+      const cp = JSON.parse(JSON.stringify(DEFAULT_CP));
       delete cp.id;
       handleRequest(drive, 200, [cp, DEFAULT_CP]);
-      let checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      let second = () => {
-        handleRequest(drive, 200, DEFAULT_CP);
-        let newCheckpoints = drive.listCheckpoints('/foo/bar.txt');
-        expectFailure(newCheckpoints, done, 'Invalid Checkpoint list');
-      };
-
-      expectFailure(checkpoints, second);
+      const checkpoints = drive.listCheckpoints('/foo/bar.txt');
+      await expectFailure(checkpoints);
+      handleRequest(drive, 200, DEFAULT_CP);
+      const newCheckpoints = drive.listCheckpoints('/foo/bar.txt');
+      await expectFailure(newCheckpoints, 'Invalid Checkpoint list');
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 201, {});
-      let checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      expectFailure(checkpoints, done, 'Invalid response: 201 Created');
+      const checkpoints = drive.listCheckpoints('/foo/bar.txt');
+      await expectFailure(checkpoints, 'Invalid response: 201 Created');
     });
   });
 
   describe('#restoreCheckpoint()', () => {
     it('should restore a checkpoint', () => {
-      let drive = new Drive();
+      const drive = new Drive();
       handleRequest(drive, 204, {});
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       return checkpoint;
     });
 
     it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
       return checkpoint;
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, {});
-      let checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 
   describe('#deleteCheckpoint()', () => {
     it('should delete a checkpoint', () => {
-      let drive = new Drive();
+      const drive = new Drive();
       handleRequest(drive, 204, {});
       return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
     it('should accept server settings', () => {
-      let drive = new Drive({ serverSettings });
+      const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
       return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
     });
 
-    it('should fail for an incorrect response', done => {
-      let drive = new Drive();
+    it('should fail for an incorrect response', async () => {
+      const drive = new Drive();
       handleRequest(drive, 200, {});
-      let checkpoint = drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      expectFailure(checkpoint, done, 'Invalid response: 200 OK');
+      const checkpoint = drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      await expectFailure(checkpoint, 'Invalid response: 200 OK');
     });
   });
 
   describe('integration tests', () => {
-    it('should list a directory and get the file contents', () => {
-      let contents = new ContentsManager();
+    it('should list a directory and get the file contents', async () => {
+      const contents = new ContentsManager();
       let content: Contents.IModel[];
       let path = '';
-      return contents
-        .get('src')
-        .then(listing => {
-          content = listing.content as Contents.IModel[];
-          for (let i = 0; i < content.length; i++) {
-            if (content[i].type === 'file') {
-              path = content[i].path;
-              return contents.get(path, { type: 'file' });
-            }
-          }
-        })
-        .then(msg => {
-          expect(msg.path).to.be(path);
-        });
+      const listing = await contents.get('src');
+      content = listing.content as Contents.IModel[];
+      let called = false;
+      for (let i = 0; i < content.length; i++) {
+        if (content[i].type === 'file') {
+          path = content[i].path;
+          const msg = await contents.get(path, { type: 'file' });
+          expect(msg.path).to.equal(path);
+          called = true;
+        }
+      }
+      expect(called).to.equal(true);
     });
 
-    it('should create a new file, rename it, and delete it', () => {
-      let contents = new ContentsManager();
-      let options: Contents.ICreateOptions = { type: 'file', ext: '.ipynb' };
-      return contents
-        .newUntitled(options)
-        .then(model0 => {
-          return contents.rename(model0.path, 'foo.ipynb');
-        })
-        .then(model1 => {
-          expect(model1.path).to.be('foo.ipynb');
-          return contents.delete('foo.ipynb');
-        });
+    it('should create a new file, rename it, and delete it', async () => {
+      const contents = new ContentsManager();
+      const options: Contents.ICreateOptions = { type: 'file', ext: '.ipynb' };
+      const model0 = await contents.newUntitled(options);
+      const model1 = await contents.rename(model0.path, 'foo.ipynb');
+      expect(model1.path).to.equal('foo.ipynb');
+      return contents.delete('foo.ipynb');
     });
 
-    it('should create a file by name and delete it', () => {
-      let contents = new ContentsManager();
-      let options: Partial<Contents.IModel> = {
+    it('should create a file by name and delete it', async () => {
+      const contents = new ContentsManager();
+      const options: Partial<Contents.IModel> = {
         type: 'file',
         content: '',
         format: 'text'
       };
-      return contents.save('baz.txt', options).then(model0 => {
-        return contents.delete('baz.txt');
-      });
+      const model0 = await contents.save('baz.txt', options);
+      await contents.delete('baz.txt');
     });
 
-    it('should exercise the checkpoint API', () => {
-      let contents = new ContentsManager();
-      let options: Partial<Contents.IModel> = {
+    it('should exercise the checkpoint API', async () => {
+      const contents = new ContentsManager();
+      const options: Partial<Contents.IModel> = {
         type: 'file',
         format: 'text',
         content: 'foo'
       };
       let checkpoint: Contents.ICheckpointModel;
-      return contents
-        .save('baz.txt', options)
-        .then(model0 => {
-          expect(model0.name).to.be('baz.txt');
-          return contents.createCheckpoint('baz.txt');
-        })
-        .then(value => {
-          checkpoint = value;
-          return contents.listCheckpoints('baz.txt');
-        })
-        .then(checkpoints => {
-          expect(checkpoints[0]).to.eql(checkpoint);
-          return contents.restoreCheckpoint('baz.txt', checkpoint.id);
-        })
-        .then(() => {
-          return contents.deleteCheckpoint('baz.txt', checkpoint.id);
-        })
-        .then(() => {
-          return contents.delete('baz.txt');
-        });
+      const model0 = await contents.save('baz.txt', options);
+      expect(model0.name).to.equal('baz.txt');
+      const value = await contents.createCheckpoint('baz.txt');
+      checkpoint = value;
+      const checkpoints = await contents.listCheckpoints('baz.txt');
+      expect(checkpoints[0]).to.deep.equal(checkpoint);
+      await contents.restoreCheckpoint('baz.txt', checkpoint.id);
+      await contents.deleteCheckpoint('baz.txt', checkpoint.id);
+      await contents.delete('baz.txt');
     });
   });
 });

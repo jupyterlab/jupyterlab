@@ -41,7 +41,7 @@ const LAUNCHER_CLASS = 'jp-Launcher';
 const KNOWN_CATEGORIES = ['Notebook', 'Console', 'Other'];
 
 /**
- * These laucher item categories are known to have kernels, so the kernel icons
+ * These launcher item categories are known to have kernels, so the kernel icons
  * are used.
  */
 const KERNEL_CATEGORIES = ['Notebook', 'Console'];

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -21,13 +21,12 @@ import { INotebookModel } from '@jupyterlab/notebook';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { createNotebookContext, moment } from '../../utils';
-
 import {
-  DEFAULT_CONTENT,
-  clipboard,
-  createNotebookPanel
-} from '../../notebook-utils';
+  createNotebookContext,
+  signalToPromise,
+  sleep,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
@@ -39,8 +38,8 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(async () => {
       context = await createNotebookContext();
       await context.initialize(true);
-      panel = createNotebookPanel(context);
-      context.model.fromJSON(DEFAULT_CONTENT);
+      panel = NBTestUtils.createNotebookPanel(context);
+      context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
     });
 
     afterEach(async () => {
@@ -50,94 +49,93 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#createSaveButton()', () => {
-      it('should save when clicked', done => {
-        let button = ToolbarItems.createSaveButton(panel);
+      it('should save when clicked', async () => {
+        const button = ToolbarItems.createSaveButton(panel);
         Widget.attach(button, document.body);
-        context.fileChanged.connect(() => {
-          button.dispose();
-          done();
-        });
+        let promise = signalToPromise(context.fileChanged);
         button.node.click();
+        await promise;
+        button.dispose();
       });
 
       it("should have the `'jp-SaveIcon'` class", () => {
-        let button = ToolbarItems.createSaveButton(panel);
-        expect(button.hasClass('jp-SaveIcon')).to.be(true);
+        const button = ToolbarItems.createSaveButton(panel);
+        expect(button.hasClass('jp-SaveIcon')).to.equal(true);
       });
     });
 
     describe('#createInsertButton()', () => {
       it('should insert below when clicked', () => {
-        let button = ToolbarItems.createInsertButton(panel);
+        const button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.activeCellIndex).to.be(1);
-        expect(panel.content.activeCell).to.be.a(CodeCell);
+        expect(panel.content.activeCellIndex).to.equal(1);
+        expect(panel.content.activeCell).to.be.an.instanceof(CodeCell);
         button.dispose();
       });
 
       it("should have the `'jp-AddIcon'` class", () => {
-        let button = ToolbarItems.createInsertButton(panel);
-        expect(button.hasClass('jp-AddIcon')).to.be(true);
+        const button = ToolbarItems.createInsertButton(panel);
+        expect(button.hasClass('jp-AddIcon')).to.equal(true);
       });
     });
 
     describe('#createCutButton()', () => {
       it('should cut when clicked', () => {
-        let button = ToolbarItems.createCutButton(panel);
-        let count = panel.content.widgets.length;
+        const button = ToolbarItems.createCutButton(panel);
+        const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.widgets.length).to.be(count - 1);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        expect(panel.content.widgets.length).to.equal(count - 1);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
       });
 
       it("should have the `'jp-CutIcon'` class", () => {
-        let button = ToolbarItems.createCutButton(panel);
-        expect(button.hasClass('jp-CutIcon')).to.be(true);
+        const button = ToolbarItems.createCutButton(panel);
+        expect(button.hasClass('jp-CutIcon')).to.equal(true);
       });
     });
 
     describe('#createCopyButton()', () => {
       it('should copy when clicked', () => {
-        let button = ToolbarItems.createCopyButton(panel);
-        let count = panel.content.widgets.length;
+        const button = ToolbarItems.createCopyButton(panel);
+        const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         button.node.click();
-        expect(panel.content.widgets.length).to.be(count);
-        expect(clipboard.hasData(JUPYTER_CELL_MIME)).to.be(true);
+        expect(panel.content.widgets.length).to.equal(count);
+        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
       });
 
       it("should have the `'jp-CopyIcon'` class", () => {
-        let button = ToolbarItems.createCopyButton(panel);
-        expect(button.hasClass('jp-CopyIcon')).to.be(true);
+        const button = ToolbarItems.createCopyButton(panel);
+        expect(button.hasClass('jp-CopyIcon')).to.equal(true);
       });
     });
 
     describe('#createPasteButton()', () => {
       it('should paste when clicked', async () => {
-        let button = ToolbarItems.createPasteButton(panel);
-        let count = panel.content.widgets.length;
+        const button = ToolbarItems.createPasteButton(panel);
+        const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         NotebookActions.copy(panel.content);
         button.node.click();
-        await moment();
-        expect(panel.content.widgets.length).to.be(count + 1);
+        await sleep();
+        expect(panel.content.widgets.length).to.equal(count + 1);
         button.dispose();
       });
 
       it("should have the `'jp-PasteIcon'` class", () => {
-        let button = ToolbarItems.createPasteButton(panel);
-        expect(button.hasClass('jp-PasteIcon')).to.be(true);
+        const button = ToolbarItems.createPasteButton(panel);
+        expect(button.hasClass('jp-PasteIcon')).to.equal(true);
       });
     });
 
     describe('#createRunButton()', () => {
       it('should run and advance when clicked', async () => {
-        let button = ToolbarItems.createRunButton(panel);
-        let widget = panel.content;
+        const button = ToolbarItems.createRunButton(panel);
+        const widget = panel.content;
 
         // Clear and select the first two cells.
         const codeCell = widget.widgets[0] as CodeCell;
@@ -155,7 +153,7 @@ describe('@jupyterlab/notebook', () => {
         context.session.statusChanged.connect((sender, status) => {
           // Find the right status idle message
           if (status === 'idle' && codeCell.model.outputs.length > 0) {
-            expect(mdCell.rendered).to.be(true);
+            expect(mdCell.rendered).to.equal(true);
             expect(widget.activeCellIndex).to.equal(2);
             button.dispose();
             p.resolve(0);
@@ -166,49 +164,49 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it("should have the `'jp-RunIcon'` class", () => {
-        let button = ToolbarItems.createRunButton(panel);
-        expect(button.hasClass('jp-RunIcon')).to.be(true);
+        const button = ToolbarItems.createRunButton(panel);
+        expect(button.hasClass('jp-RunIcon')).to.equal(true);
       });
     });
 
     describe('#createCellTypeItem()', () => {
       it('should track the cell type of the current cell', () => {
-        let item = ToolbarItems.createCellTypeItem(panel);
-        let node = item.node.getElementsByTagName(
+        const item = ToolbarItems.createCellTypeItem(panel);
+        const node = item.node.getElementsByTagName(
           'select'
         )[0] as HTMLSelectElement;
-        expect(node.value).to.be('code');
+        expect(node.value).to.equal('code');
         panel.content.activeCellIndex++;
-        expect(node.value).to.be('markdown');
+        expect(node.value).to.equal('markdown');
       });
 
       it("should display `'-'` if multiple cell types are selected", () => {
-        let item = ToolbarItems.createCellTypeItem(panel);
-        let node = item.node.getElementsByTagName(
+        const item = ToolbarItems.createCellTypeItem(panel);
+        const node = item.node.getElementsByTagName(
           'select'
         )[0] as HTMLSelectElement;
-        expect(node.value).to.be('code');
+        expect(node.value).to.equal('code');
         panel.content.select(panel.content.widgets[1]);
-        expect(node.value).to.be('-');
+        expect(node.value).to.equal('-');
       });
 
       it('should display the active cell type if multiple cells of the same type are selected', () => {
-        let item = ToolbarItems.createCellTypeItem(panel);
-        let node = item.node.getElementsByTagName(
+        const item = ToolbarItems.createCellTypeItem(panel);
+        const node = item.node.getElementsByTagName(
           'select'
         )[0] as HTMLSelectElement;
-        expect(node.value).to.be('code');
-        let cell = panel.model.contentFactory.createCodeCell({});
+        expect(node.value).to.equal('code');
+        const cell = panel.model.contentFactory.createCodeCell({});
         panel.model.cells.insert(1, cell);
         panel.content.select(panel.content.widgets[1]);
-        expect(node.value).to.be('code');
+        expect(node.value).to.equal('code');
       });
     });
 
     describe('#populateDefaults()', () => {
       it('should add the default items to the panel toolbar', () => {
         ToolbarItems.populateDefaults(panel);
-        expect(toArray(panel.toolbar.names())).to.eql([
+        expect(toArray(panel.toolbar.names())).to.deep.equal([
           'save',
           'insert',
           'cut',

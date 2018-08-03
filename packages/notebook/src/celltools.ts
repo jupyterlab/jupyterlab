@@ -264,7 +264,7 @@ export namespace CellTools {
      * Handle a change to the active cell.
      *
      * #### Notes
-     * The default implemenatation is a no-op.
+     * The default implementation is a no-op.
      */
     protected onActiveCellChanged(msg: Message): void {
       /* no-op */

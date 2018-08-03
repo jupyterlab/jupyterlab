@@ -3,7 +3,7 @@
 
 import { IDisposable } from '@phosphor/disposable';
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -20,7 +20,7 @@ export abstract class VDomRenderer<
   T extends VDomRenderer.IModel | null
 > extends Widget {
   /**
-   * A signal emited when the model changes.
+   * A signal emitted when the model changes.
    */
   get modelChanged(): ISignal<this, void> {
     return this._modelChanged;
@@ -80,7 +80,7 @@ export abstract class VDomRenderer<
    * Make sure the widget is rendered, even if the model has not changed.
    */
   protected onAfterAttach(msg: Message): void {
-    this.update();
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
   }
 
   /**
@@ -133,7 +133,7 @@ export namespace VDomRenderer {
    */
   export interface IModel extends IDisposable {
     /**
-     * A signal emited when any model state changes.
+     * A signal emitted when any model state changes.
      */
     readonly stateChanged: ISignal<this, void>;
   }

@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { OutputModel } from '@jupyterlab/rendermime';
 
-import { DEFAULT_OUTPUTS } from '../../utils';
+import { NBTestUtils } from '@jupyterlab/testutils';
 
 const DEFAULT_EXECUTE: nbformat.IOutput = {
   output_type: 'execute_result',
@@ -29,62 +29,62 @@ describe('rendermime/outputmodel', () => {
   describe('OutputModel', () => {
     describe('#constructor()', () => {
       it('should create a new output model', () => {
-        let value = DEFAULT_EXECUTE;
+        const value = DEFAULT_EXECUTE;
         let model = new OutputModel({ value });
-        expect(model).to.be.an(OutputModel);
+        expect(model).to.be.an.instanceof(OutputModel);
         model = new OutputModel({ value, trusted: true });
-        expect(model).to.be.an(OutputModel);
+        expect(model).to.be.an.instanceof(OutputModel);
       });
     });
 
     describe('#type', () => {
       it('should be the output type', () => {
         let model = new OutputModel({ value: DEFAULT_EXECUTE });
-        expect(model.type).to.be(DEFAULT_EXECUTE.output_type);
+        expect(model.type).to.equal(DEFAULT_EXECUTE.output_type);
         model = new OutputModel({ value: DEFAULT_STREAM });
-        expect(model.type).to.be(DEFAULT_STREAM.output_type);
+        expect(model.type).to.equal(DEFAULT_STREAM.output_type);
       });
     });
 
     describe('#executionCount', () => {
       it('should be the execution count of an execution result', () => {
-        let model = new OutputModel({ value: DEFAULT_EXECUTE });
-        expect(model.executionCount).to.be(1);
+        const model = new OutputModel({ value: DEFAULT_EXECUTE });
+        expect(model.executionCount).to.equal(1);
       });
 
       it('should be null for non-execution results', () => {
-        let model = new OutputModel({ value: DEFAULT_STREAM });
-        expect(model.executionCount).to.be(null);
+        const model = new OutputModel({ value: DEFAULT_STREAM });
+        expect(model.executionCount).to.be.null;
       });
     });
 
     describe('#toJSON()', () => {
       it('should yield the raw value', () => {
-        let model = new OutputModel({ value: DEFAULT_EXECUTE });
-        expect(model.toJSON()).to.eql(DEFAULT_EXECUTE);
+        const model = new OutputModel({ value: DEFAULT_EXECUTE });
+        expect(model.toJSON()).to.deep.equal(DEFAULT_EXECUTE);
       });
     });
 
     describe('.getData()', () => {
       it('should handle all bundle types', () => {
-        for (let i = 0; i < DEFAULT_OUTPUTS.length; i++) {
-          let output = DEFAULT_OUTPUTS[i];
-          let bundle = OutputModel.getData(output);
-          expect(Object.keys(bundle).length).to.not.be(0);
+        for (let i = 0; i < NBTestUtils.DEFAULT_OUTPUTS.length; i++) {
+          const output = NBTestUtils.DEFAULT_OUTPUTS[i];
+          const bundle = OutputModel.getData(output);
+          expect(Object.keys(bundle).length).to.not.equal(0);
         }
       });
     });
 
     describe('.getMetadata()', () => {
       it('should get the metadata from the bundle', () => {
-        let metadata = OutputModel.getMetadata(DEFAULT_EXECUTE);
-        expect(metadata['foo']).to.be(1);
-        expect(metadata['bar']).to.be('baz');
+        const metadata = OutputModel.getMetadata(DEFAULT_EXECUTE);
+        expect(metadata['foo']).to.equal(1);
+        expect(metadata['bar']).to.equal('baz');
       });
 
       it('should handle output with no metadata field', () => {
-        let metadata = OutputModel.getMetadata(DEFAULT_STREAM);
-        expect(Object.keys(metadata).length).to.be(0);
+        const metadata = OutputModel.getMetadata(DEFAULT_STREAM);
+        expect(Object.keys(metadata).length).to.equal(0);
       });
     });
   });

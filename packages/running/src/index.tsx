@@ -289,8 +289,9 @@ export class RunningSessions extends Widget {
     this.options = options;
 
     // this can't be in the react element, because then it would be too nested
-    this.node.className = RUNNING_CLASS;
+    this.addClass(RUNNING_CLASS);
   }
+
   protected onUpdateRequest(msg: Message): void {
     ReactDOM.render(
       <RunningSessionsComponent

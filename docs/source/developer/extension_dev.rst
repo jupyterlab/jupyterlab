@@ -5,8 +5,8 @@ Extension Developer Guide
 
 .. warning::
 
-   The extension developer API is not stable and will evolve in JupyterLab beta
-   releases. The extension developer API will be stable in JupyterLab 1.0.
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
 
 JupyterLab can be extended in four ways via:
 
@@ -176,7 +176,7 @@ subsequently reversed by running
 
     jlpm run remove:package <extension-dir-name>
 
-This will remove the package metadata from the source tree, but wil
+This will remove the package metadata from the source tree, but will
 **not** remove any files added by the ``addsibling`` script, which
 should be removed manually.
 
@@ -201,6 +201,12 @@ path on the user's machine or a provided tarball. Any valid
 ``npm install`` specifier can be used in
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
+
+There are a number of helper functions in `testutils` in this repo (which is a public npm package called `@jupyterlab/testutils`) that can be used when writing
+tests for an extension.  See `tests/test-application` for an example of the infrastructure needed to run tests.  There is a `karma` config file that points
+to the parent directory's `karma` config, and a test runner, `run-test.py` that
+starts a Jupyter server.
+
 
 Mime Renderer Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -646,19 +646,19 @@ export namespace StaticNotebook {
   export const defaultEditorConfig: IEditorConfig = {
     code: {
       ...CodeEditor.defaultConfig,
-      lineWrap: false,
+      lineWrap: 'off',
       matchBrackets: true,
       autoClosingBrackets: true
     },
     markdown: {
       ...CodeEditor.defaultConfig,
-      lineWrap: true,
+      lineWrap: 'on',
       matchBrackets: false,
       autoClosingBrackets: false
     },
     raw: {
       ...CodeEditor.defaultConfig,
-      lineWrap: true,
+      lineWrap: 'on',
       matchBrackets: false,
       autoClosingBrackets: false
     }

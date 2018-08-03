@@ -185,7 +185,7 @@ The reason is that these selectors are dependent on the implementation
 of the toolbar having the ``jp-Toolbar`` CSS class. When ``MyWidget``
 adds the ``jp-MyWidget-toolbar`` class, it can style the child
 independent of its implementation. The other reason to add the
-``jp-MyWidget-toolbar`` class is if the DOM stucture is highly
+``jp-MyWidget-toolbar`` class is if the DOM structure is highly
 recursive, the usual descendant selectors may not be specific to target
 only the desired children.
 

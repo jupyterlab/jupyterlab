@@ -54,7 +54,7 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
 /**
  * A widget which hosts a file browser.
  *
- * The widget uses the Jupyter Contents API to retreive contents,
+ * The widget uses the Jupyter Contents API to retrieve contents,
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */

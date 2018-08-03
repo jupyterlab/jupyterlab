@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { KernelMessage } from '../../../lib/kernel';
 
@@ -13,13 +13,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isStreamMsg(msg)).to.be(true);
+      expect(KernelMessage.isStreamMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isStreamMsg(msg)).to.be(false);
+      expect(KernelMessage.isStreamMsg(msg)).to.equal(false);
     });
   });
 
@@ -30,13 +30,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isDisplayDataMsg(msg)).to.be(true);
+      expect(KernelMessage.isDisplayDataMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isDisplayDataMsg(msg)).to.be(false);
+      expect(KernelMessage.isDisplayDataMsg(msg)).to.equal(false);
     });
   });
 
@@ -47,13 +47,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isExecuteInputMsg(msg)).to.be(true);
+      expect(KernelMessage.isExecuteInputMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isExecuteInputMsg(msg)).to.be(false);
+      expect(KernelMessage.isExecuteInputMsg(msg)).to.equal(false);
     });
   });
 
@@ -64,13 +64,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isExecuteResultMsg(msg)).to.be(true);
+      expect(KernelMessage.isExecuteResultMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isExecuteResultMsg(msg)).to.be(false);
+      expect(KernelMessage.isExecuteResultMsg(msg)).to.equal(false);
     });
   });
 
@@ -81,13 +81,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isStatusMsg(msg)).to.be(true);
+      expect(KernelMessage.isStatusMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isStatusMsg(msg)).to.be(false);
+      expect(KernelMessage.isStatusMsg(msg)).to.equal(false);
     });
   });
 
@@ -98,13 +98,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isClearOutputMsg(msg)).to.be(true);
+      expect(KernelMessage.isClearOutputMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isClearOutputMsg(msg)).to.be(false);
+      expect(KernelMessage.isClearOutputMsg(msg)).to.equal(false);
     });
   });
 
@@ -115,13 +115,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isCommOpenMsg(msg)).to.be(true);
+      expect(KernelMessage.isCommOpenMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isCommOpenMsg(msg)).to.be(false);
+      expect(KernelMessage.isCommOpenMsg(msg)).to.equal(false);
     });
   });
 
@@ -132,13 +132,13 @@ describe('kernel/messages', () => {
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isErrorMsg(msg)).to.be(true);
+      expect(KernelMessage.isErrorMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'iopub',
         session: 'baz'
       });
-      expect(KernelMessage.isErrorMsg(msg)).to.be(false);
+      expect(KernelMessage.isErrorMsg(msg)).to.equal(false);
     });
   });
 
@@ -149,13 +149,13 @@ describe('kernel/messages', () => {
         channel: 'stdin',
         session: 'baz'
       });
-      expect(KernelMessage.isInputRequestMsg(msg)).to.be(true);
+      expect(KernelMessage.isInputRequestMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
         msgType: 'foo',
         channel: 'stdin',
         session: 'baz'
       });
-      expect(KernelMessage.isStatusMsg(msg)).to.be(false);
+      expect(KernelMessage.isStatusMsg(msg)).to.equal(false);
     });
   });
 });

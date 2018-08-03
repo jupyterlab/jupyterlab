@@ -26,6 +26,17 @@
       },
       "type": "object"
     },
+    "tabmenu:activate-previously-used-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previously Used Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": {},
       "properties": {
@@ -89,7 +100,7 @@
         "selector": {
           "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Console Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -102,7 +113,7 @@
         "selector": {
           "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Notebook Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -147,6 +158,17 @@
         "keys": { "default": ["Accel S"] },
         "selector": { "default": "body" },
         "title": { "default": "Save" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "docmanager:save-as": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save As" },
         "category": { "default": "File Operations" }
       },
       "type": "object"

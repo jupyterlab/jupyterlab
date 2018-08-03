@@ -1,14 +1,14 @@
 {
   "name": "@jupyterlab/test-mainmenu",
-  "version": "0.3.0-1",
+  "version": "0.3.2",
   "private": true,
   "scripts": {
     "build": "tsc",
     "clean": "rimraf build && rimraf coverage",
-    "coverage": "python run-test.py --browsers ChromeHeadless karma-cov.conf.js",
+    "coverage": "python run-test.py --browsers=ChromeHeadless karma-cov.conf.js",
     "test": "jlpm run test:firefox",
     "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
-    "test:chrome-headless": "python run-test.py --browsers ChromeHeadless karma.conf.js",
+    "test:chrome-headless": "python run-test.py --browsers=ChromeHeadless karma.conf.js",
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true --browserNoActivityTimeout=10000000 karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
@@ -16,14 +16,15 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.17.0-1",
-    "@jupyterlab/mainmenu": "^0.6.0-1",
+    "@jupyterlab/apputils": "^0.17.2",
+    "@jupyterlab/mainmenu": "^0.6.2",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/widgets": "^1.6.0",
-    "expect.js": "~0.3.1"
+    "chai": "~4.1.2"
   },
   "devDependencies": {
+    "@types/chai": "~4.0.10",
     "karma": "~2.0.4",
     "karma-chrome-launcher": "~2.2.0",
     "puppeteer": "^1.5.0",

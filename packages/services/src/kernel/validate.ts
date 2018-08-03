@@ -11,7 +11,7 @@ import { KernelMessage } from './messages';
 const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
 
 /**
- * Requred fields and types for contents of various types of `kernel.IMessage`
+ * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
 const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {

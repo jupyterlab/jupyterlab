@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mainmenu",
-  "version": "0.6.0-1",
+  "version": "0.6.2",
   "description": "JupyterLab - Main Menu",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,8 +28,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.17.0-1",
-    "@jupyterlab/services": "^3.0.0-1",
+    "@jupyterlab/apputils": "^0.17.2",
+    "@jupyterlab/services": "^3.0.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.5.0",
     "@phosphor/coreutils": "^1.3.0",

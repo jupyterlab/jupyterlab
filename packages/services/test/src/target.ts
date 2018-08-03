@@ -5,7 +5,7 @@ declare var define: any;
 
 if (typeof define !== 'function') {
   // tslint:disable-next-line
-  let define = require('amdefine')(module);
+  const define = require('amdefine')(module);
 }
 
 module.exports = {

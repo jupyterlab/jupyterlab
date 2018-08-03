@@ -22,9 +22,9 @@ from setuptools.command.develop import develop
 NAME = 'jupyterlab'
 DESCRIPTION = 'The JupyterLab notebook server extension.'
 LONG_DESCRIPTION = """
-This is a beta release of JupyterLab.
+An extensible, comprehensive Jupyter web application.
 Development happens on https://github.com/jupyter/jupyterlab, with chat on
-https://gitter.im/jupyter/jupyterlab.
+https://gitter.im/jupyterlab/jupyterlab.
 """
 
 ensure_python(['2.7', '>=3.3'])
@@ -40,7 +40,7 @@ data_files_spec = [
 package_data_spec = dict()
 package_data_spec[NAME] = [
     'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**', 'node-version-check.js'
+    'themes/**', 'schemas/**', '*.js'
 ]
 
 staging = pjoin(HERE, NAME, 'staging')
@@ -131,7 +131,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.11.0,<0.12.0',
+    'jupyterlab_launcher>=0.11.2,<0.12.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
     'subprocess32;python_version<"3.0"'
@@ -139,7 +139,7 @@ setup_args['install_requires'] = [
 
 setup_args['extras_require'] = {
     'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest', 'requests', 'pytest-check-links', 'selenium'],
+    'test': ['pytest', 'requests', 'pytest-check-links'],
     'docs': [
         'sphinx',
         'recommonmark',

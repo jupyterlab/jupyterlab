@@ -21,6 +21,7 @@ except ImportError:
     from mock import patch  # py2
 
 from traitlets import Unicode
+from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
@@ -38,6 +39,13 @@ def _create_notebook_dir():
     os.mkdir(osp.join(root_dir, 'src'))
     with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
         fid.write('hello')
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
+def _create_workspaces_dir():
+    """Create a temporary directory for workspaces."""
+    root_dir = tempfile.mkdtemp(prefix='mock_workspaces')
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
 
@@ -103,8 +111,9 @@ class _test_env(object):
 class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
-    notebook_dir = Unicode(_create_notebook_dir())
     allow_origin = Unicode('*')
+    notebook_dir = Unicode(_create_notebook_dir())
+    workspaces_dir = Unicode(_create_workspaces_dir())
 
     def __init__(self):
         self.env_patch = _test_env()
@@ -118,6 +127,7 @@ class ProcessTestApp(ProcessApp):
     def start(self):
         _install_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
+        self.lab_config.workspaces_dir = self.workspaces_dir
         ProcessApp.start(self)
 
     def _process_finished(self, future):
@@ -134,7 +144,7 @@ class ProcessTestApp(ProcessApp):
 class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
-    karma_pattern = Unicode('src/*.spec.ts')
+    karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
 
     def get_command(self):
@@ -168,12 +178,11 @@ class KarmaTestApp(ProcessTestApp):
         parser = argparse.ArgumentParser()
         parser.add_argument('--pattern', action='store')
         args, argv = parser.parse_known_args()
-        pattern = args.pattern or 'src/*.spec.ts'
+        pattern = args.pattern or self.karma_pattern
         files = glob.glob(pjoin(cwd, pattern))
         if not files:
             msg = 'No files matching "%s" found in "%s"'
-            raise ValueError(msg % (pattern, msg))
-
+            raise ValueError(msg % (pattern, cwd))
         # Find and validate the coverage folder
         with open(pjoin(cwd, 'package.json')) as fid:
             data = json.load(fid)
@@ -190,7 +199,7 @@ class KarmaTestApp(ProcessTestApp):
             folder = folder.encode('utf-8')
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
-        env.setdefault('KARMA_FILE_PATTERN', pattern)
+        env.setdefault('KARMA_FILE_PATTERN', py3compat.unicode_to_str(pattern))
         env.setdefault('KARMA_COVER_FOLDER', folder)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
@@ -200,7 +209,7 @@ class KarmaTestApp(ProcessTestApp):
 def run_karma(base_dir):
     """Run a karma test in the given base directory.
     """
-    logging.disable(logging.ERROR)
+    logging.disable(logging.WARNING)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
     app.initialize([])

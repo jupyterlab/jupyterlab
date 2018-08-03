@@ -46,7 +46,6 @@
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
-    "no-unused-expression": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,
@@ -60,7 +59,10 @@
       "check-whitespace"
     ],
     "one-variable-per-declaration": [true, "ignore-for-loop"],
-    "quotemark": [true, "single", "avoid-escape"],
+    "quotemark": {
+      "options": [true, "single", "avoid-escape"],
+      "severity": "off"
+    },
     "radix": true,
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
@@ -105,5 +107,8 @@
       "check-separator",
       "check-type"
     ]
+  },
+  "linterOptions": {
+    "exclude": ["node_modules/**/*.ts", "**/*.d.ts", "jupyterlab/**/*.ts"]
   }
 }

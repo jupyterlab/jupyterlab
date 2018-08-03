@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { ArrayExt } from '@phosphor/algorithm';
 
@@ -44,7 +44,7 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new main menu', () => {
-        expect(menu).to.be.a(JupyterLabMenu);
+        expect(menu).to.be.an.instanceof(JupyterLabMenu);
       });
 
       it('should accept useSeparators as an option', () => {
@@ -53,8 +53,8 @@ describe('@jupyterlab/mainmenu', () => {
         menu1.addGroup([{ command: 'run1' }, { command: 'run2' }]);
         menu2.addGroup([{ command: 'run1' }, { command: 'run2' }]);
 
-        expect(menu1.menu.items.length).to.be(2);
-        expect(menu2.menu.items.length).to.be(4);
+        expect(menu1.menu.items.length).to.equal(2);
+        expect(menu2.menu.items.length).to.equal(4);
       });
     });
 
@@ -62,75 +62,73 @@ describe('@jupyterlab/mainmenu', () => {
       it('should add a new group to the menu', () => {
         menu.addGroup([{ command: 'run1' }, { command: 'run2' }]);
 
-        let idx1 = ArrayExt.findFirstIndex(
+        const idx1 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run1'
         );
-        let idx2 = ArrayExt.findFirstIndex(
+        const idx2 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run2'
         );
 
-        expect(idx1 === -1).to.be(false);
-        expect(idx2 === -1).to.be(false);
-        expect(idx1 > idx2).to.be(false);
+        expect(idx1 === -1).to.equal(false);
+        expect(idx2 === -1).to.equal(false);
+        expect(idx1 > idx2).to.equal(false);
       });
 
       it('should take a rank as an option', () => {
         menu.addGroup([{ command: 'run1' }, { command: 'run2' }], 2);
         menu.addGroup([{ command: 'run3' }, { command: 'run4' }], 1);
 
-        let idx1 = ArrayExt.findFirstIndex(
+        const idx1 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run1'
         );
-        let idx2 = ArrayExt.findFirstIndex(
+        const idx2 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run2'
         );
-        let idx3 = ArrayExt.findFirstIndex(
+        const idx3 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run3'
         );
-        let idx4 = ArrayExt.findFirstIndex(
+        const idx4 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run4'
         );
-        expect(idx3 < idx4).to.be(true);
-        expect(idx4 < idx1).to.be(true);
-        expect(idx1 < idx2).to.be(true);
+        expect(idx3 < idx4).to.equal(true);
+        expect(idx4 < idx1).to.equal(true);
+        expect(idx1 < idx2).to.equal(true);
       });
-    });
 
-    describe('#removeGroup()', () => {
-      it('should remove a group from the menu', () => {
+      it('should return a disposable that can be used to remove the group', () => {
         const group1 = [{ command: 'run1' }, { command: 'run2' }];
         const group2 = [{ command: 'run3' }, { command: 'run4' }];
-        menu.addGroup(group1);
+        const disposable = menu.addGroup(group1);
         menu.addGroup(group2);
-        menu.removeGroup(group1);
+        disposable.dispose();
 
-        let idx1 = ArrayExt.findFirstIndex(
+        const idx1 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run1'
         );
-        let idx2 = ArrayExt.findFirstIndex(
+        const idx2 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run2'
         );
-        let idx3 = ArrayExt.findFirstIndex(
+        const idx3 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run3'
         );
-        let idx4 = ArrayExt.findFirstIndex(
+        const idx4 = ArrayExt.findFirstIndex(
           menu.menu.items,
           m => m.command === 'run4'
         );
 
-        expect(idx1).to.be(-1);
-        expect(idx2).to.be(-1);
-        expect(idx3 === -1).to.be(false);
-        expect(idx4 === -1).to.be(false);
+        expect(idx1).to.equal(-1);
+        expect(idx2).to.equal(-1);
+        expect(idx3 === -1).to.equal(false);
+        expect(idx4 === -1).to.equal(false);
       });
     });
   });

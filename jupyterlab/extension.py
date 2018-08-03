@@ -56,10 +56,10 @@ def load_jupyter_server_extension(nbapp):
     )
 
     # Print messages.
-    logger.info('JupyterLab beta preview extension loaded from %s' % HERE)
+    logger.info('JupyterLab extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
-    config.app_name = 'JupyterLab Beta'
+    config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
     config.page_url = '/lab'
     config.cache_files = True
@@ -92,7 +92,7 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
-    # Export the version info tuple to a JSON array. This get's printed
+    # Export the version info tuple to a JSON array. This gets printed
     # inside double quote marks, so we render it to a JSON string of the
     # JSON data (so that we can call JSON.parse on the frontend on it).
     # We also have to wrap it in `Markup` so that it isn't escaped

@@ -596,12 +596,12 @@ export class SettingRegistry {
       return Promise.resolve(undefined);
     }
 
-    const raw = json.parse(plugins[plugin].raw);
+    const raw = json.parse(plugins[plugin].raw, null, true);
 
     // Delete both the value and any associated comment.
     delete raw[key];
     delete raw[`// ${key}`];
-    plugins[plugin].raw = json.stringify(raw);
+    plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], raw);
 
     return this._save(plugin);
   }
@@ -625,9 +625,12 @@ export class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    const raw = json.parse(plugins[plugin].raw);
+    const raw = json.parse(plugins[plugin].raw, null, true);
 
-    plugins[plugin].raw = json.stringify({ ...raw, [key]: value });
+    plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {
+      ...raw,
+      [key]: value
+    });
 
     return this._save(plugin);
   }
@@ -1007,16 +1010,51 @@ export namespace Private {
       prefix(description || nondescript),
       prefix(line(length)),
       '',
-      keys.map(key => docstring(schema, key)).join(',\n\n'),
+      keys.map(key => defaultDocumentedValue(schema, key)).join(',\n\n'),
       '}'
     ].join('\n');
   }
 
   /**
-   * Returns a documentation string for a specific schema property.
+   * Returns an annotated (JSON with comments) version of a plugin's
+   * setting data.
    */
-  function docstring(schema: ISettingRegistry.ISchema, key: string): string {
-    const { description, title } = schema.properties[key];
+  export function annotatedPlugin(
+    plugin: ISettingRegistry.IPlugin,
+    data: JSONObject
+  ): string {
+    const { description, title } = plugin.schema;
+    const keys = Object.keys(data).sort((a, b) => a.localeCompare(b));
+    const length = Math.max(
+      (description || nondescript).length,
+      plugin.id.length
+    );
+
+    return [
+      '{',
+      prefix(`${title || untitled}`),
+      prefix(plugin.id),
+      prefix(description || nondescript),
+      prefix(line(length)),
+      '',
+      keys
+        .map(key => documentedValue(plugin.schema, key, data[key]))
+        .join(',\n\n'),
+      '}'
+    ].join('\n');
+  }
+
+  /**
+   * Returns the default value-with-documentation-string for a
+   * specific schema property.
+   */
+  function defaultDocumentedValue(
+    schema: ISettingRegistry.ISchema,
+    key: string
+  ): string {
+    const props = schema.properties && schema.properties[key];
+    const description = (props && props['description']) || nondescript;
+    const title = (props && props['title']) || untitled;
     const reified = reifyDefault(schema, key);
     const defaults =
       reified === undefined
@@ -1030,6 +1068,24 @@ export namespace Private {
     ].join('\n');
   }
 
+  /**
+   * Returns a value-with-documentation-string for a specific schema property.
+   */
+  function documentedValue(
+    schema: ISettingRegistry.ISchema,
+    key: string,
+    value: JSONValue
+  ): string {
+    const props = schema.properties && schema.properties[key];
+    const description = (props && props['description']) || nondescript;
+    const title = (props && props['title']) || untitled;
+    const attribute = prefix(
+      `"${key}": ${JSON.stringify(value, null, 2)}`,
+      indent
+    );
+
+    return [prefix(title), prefix(description), attribute].join('\n');
+  }
   /**
    * Returns a line of a specified length.
    */

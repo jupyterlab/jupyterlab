@@ -141,8 +141,8 @@ export namespace CodeEditor {
    *
    * #### Write access
    * - if a user code is a selection owner then:
-   *   - it can change selections beloging to it
-   *   - but it must not change selections beloging to other selection owners
+   *   - it can change selections belonging to it
+   *   - but it must not change selections belonging to other selection owners
    * - otherwise it must not change any selection
    */
 
@@ -255,7 +255,7 @@ export namespace CodeEditor {
     }
 
     /**
-     * Dipose of the resources used by the model.
+     * Dispose of the resources used by the model.
      */
     dispose(): void {
       if (this._isDisposed) {
@@ -567,9 +567,13 @@ export namespace CodeEditor {
     lineNumbers: boolean;
 
     /**
-     * Set to false for horizontal scrolling.
+     * Control the line wrapping of the editor. Possible values are:
+     * - "off", lines will never wrap.
+     * - "on", lines will wrap at the viewport border.
+     * - "wordWrapColumn", lines will wrap at `wordWrapColumn`.
+     * - "bounded", lines will wrap at minimum between viewport width and wordWrapColumn.
      */
-    lineWrap: boolean;
+    lineWrap: 'off' | 'on' | 'wordWrapColumn' | 'bounded';
 
     /**
      * Whether the editor is read-only.
@@ -595,6 +599,11 @@ export namespace CodeEditor {
      * Whether to automatically close brackets after opening them.
      */
     autoClosingBrackets: boolean;
+
+    /**
+     * The column where to break text line.
+     */
+    wordWrapColumn: number;
   }
 
   /**
@@ -605,7 +614,8 @@ export namespace CodeEditor {
     fontSize: null,
     lineHeight: null,
     lineNumbers: false,
-    lineWrap: true,
+    lineWrap: 'on',
+    wordWrapColumn: 80,
     readOnly: false,
     tabSize: 4,
     insertSpaces: true,
