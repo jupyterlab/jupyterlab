@@ -536,10 +536,7 @@ namespace Private {
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
-      if (
-        markdownCell.nodeName.toLowerCase() === 'p' &&
-        markdownCell.children.length === 0
-      ) {
+      if (markdownCell.nodeName.toLowerCase() === 'p') {
         if (markdownCell.textContent) {
           headings.push({
             level: lastLevel + 1,

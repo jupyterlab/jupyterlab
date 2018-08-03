@@ -85,7 +85,7 @@
 }
 
 .dropdown-menu-list {
-  z-index: 2;
+  z-index: 3;
   position: fixed;
   list-style-type: none;
   margin: 0px;
