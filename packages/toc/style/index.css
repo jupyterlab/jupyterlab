@@ -62,6 +62,7 @@
 
 .cm-toc .CodeMirror {
   font-size: 9px;
+  z-index: 0;
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
@@ -80,6 +81,12 @@
   overflow-y: hidden;
 }
 
+.markdown-cell {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  max-height: 22px;
+}
+
 .CodeMirror-scroll::-webkit-scrollbar-track {
   background-color: transparent;
 }
@@ -92,6 +99,7 @@
   padding: 0px;
   background-color: white;
   border: 1px solid var(--jp-layout-color2);
+  box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
 }
 
 .numberingIcon {
@@ -101,8 +109,25 @@
 
 .menu-check-div {
   display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 10px;
+  height: 10px;
+  padding-left: 5px;
+  padding-top: 5px;
+}
+
+.check-image {
+  width: 10px;
+  height: 10px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.dropdown-menu-li {
+  margin: 0px;
+  padding-top: 3px;
+  padding-bottom: 6px;
+  padding-right: 20px;
+  padding-left: 3px;
 }
 
 .dropdown-menu-li:hover {
@@ -110,14 +135,24 @@
 }
 
 .dropdown-arrow {
+  padding-top: 3px;
   padding-left: 5px;
+  height: 11px;
+  width: 11px;
 }
 
+.dropdown-menu-button {
+  padding-left: 10px;
+  padding-top: 8px;
+}
 .celltypes-dropdown.dropdown-menu {
-  width: fit-content;
+  /* width: fit-content;
   padding-left: 12px;
-  padding-top: 12px;
+  padding-top: 12px; */
+  padding: 0px;
+  margin: 0px;
   display: inline-block;
+  font-size: 12px;
 }
 
 .auto-numbering-button {
@@ -148,3 +183,11 @@
 .toc-toolbar {
   user-select: none;
 }
+
+/* 
+.dropdown-menu-inner-clickable {
+  padding: 0px;
+  margin-top: -8px;
+  margin-bottom: 3px;
+  margin-right: 20px;
+} */
