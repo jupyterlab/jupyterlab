@@ -124,10 +124,11 @@
 
 .dropdown-menu-li {
   margin: 0px;
-  padding-top: 3px;
+  padding-top: 5px;
   padding-bottom: 6px;
   padding-right: 20px;
   padding-left: 3px;
+  min-height: 20px;
 }
 
 .dropdown-menu-li:hover {
