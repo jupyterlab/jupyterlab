@@ -259,6 +259,23 @@ const files: JupyterLabPlugin<void> = {
         });
       }
     });
+    // Likewise, when an editor is created, check if there
+    // is already a console associated with that path.
+    // If so, make a completer for it.
+    editorTracker.widgetAdded.connect((sender, widget) => {
+      const console = consoleTracker.find(
+        c => c.session.path === widget.context.path
+      );
+      if (console) {
+        const session = console.session;
+        const connector = new KernelConnector({ session });
+        manager.register({
+          connector,
+          editor: widget.content.editor,
+          parent: widget
+        });
+      }
+    });
 
     // Add console completer invoke command.
     app.commands.addCommand(CommandIDs.invokeFile, {
