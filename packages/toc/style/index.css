@@ -118,6 +118,7 @@
   width: 10px;
   height: 24px;
   padding-left: 5px;
+  vertical-align: middle;
 }
 
 .check-image {
@@ -183,14 +184,14 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .toc-code-cell-prompt {
-  flex: 0 0 27px;
+  flex: 0 27px;
   color: var(--jp-cell-prompt-not-active-font-color);
   opacity: var(--jp-cell-prompt-not-active-opacity);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
   letter-spacing: var(--jp-cell-prompt-letter-spacing);
   line-height: var(--jp-code-line-height);
-  font-size: 9px;
+  font-size: 8px;
   border: var(--jp-border-width) solid transparent;
   text-align: right;
   white-space: nowrap;
@@ -212,8 +213,14 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 .dropdown-menu-inner-clickable {
   font-size: 12px;
   height: 24px;
+  vertical-align: middle;
+  padding-right: 12px;
   /*padding: 0px;
   margin-top: -8px;
   margin-bottom: 3px;
   margin-right: 20px;*/
+}
+
+.option-title {
+  vertical-align: middle;
 }
