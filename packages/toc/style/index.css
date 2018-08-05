@@ -110,7 +110,7 @@
   float: right;
   padding: 0px;
   margin: 8px;
-  margin-top: 5px;
+  margin-right: 11px;
 }
 
 .menu-check-div {
@@ -154,8 +154,8 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 .dropdown-menu-button {
   padding: 0px;
   margin: 0px;
-  padding-left: 10px;
-  padding-top: 8px;
+  padding-left: 20px;
+  padding-top: 12px;
 }
 
 .celltypes-dropdown {
@@ -175,7 +175,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   padding: 0px;
   margin: 0px;
   display: inline-block;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .auto-numbering-button {
@@ -204,7 +204,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .toc-toolbar {
-  height: 28px;
+  height: 45px;
   padding: 0px;
   margin: 0px;
   user-select: none;
