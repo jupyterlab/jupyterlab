@@ -35,8 +35,7 @@ export class CodeComponent extends React.Component<
         showCursorWhenSelecting: false,
         readOnly: 'true',
         cursorBlinkRate: -1,
-        lineWrapping: true,
-        scrollbarStyle: 'null'
+        lineWrapping: true
       }
     );
     if (this.codeMirror) {
