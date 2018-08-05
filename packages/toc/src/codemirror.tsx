@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const CodeMirror = require('codemirror');
+import * as CodeMirror from 'codemirror';
 
 export interface CodeComponentProps {
   code: string;
@@ -22,20 +22,25 @@ export class CodeComponent extends React.Component<
 
   componentWillReceiveProps(nextProps: CodeComponentProps) {
     this.setState({ code: nextProps.code });
+    if (this.codeMirror) {
+      this.codeMirror.refresh();
+    }
   }
 
   componentDidMount() {
-    this.codeMirror = CodeMirror.fromTextArea(this.refs.editor, {
-      theme: this.props.theme,
-      showCursorWhenSelecting: false,
-      readOnly: 'true',
-      cursorBlinkRate: -1,
-      lineWrapping: true,
-      scrollbarStyle: 'null'
-    });
+    this.codeMirror = CodeMirror.fromTextArea(
+      this.refs.editor as HTMLTextAreaElement,
+      {
+        theme: this.props.theme,
+        showCursorWhenSelecting: false,
+        readOnly: 'true',
+        cursorBlinkRate: -1,
+        lineWrapping: true,
+        scrollbarStyle: 'null'
+      }
+    );
     if (this.codeMirror) {
     }
-    console.log('hello world');
   }
 
   render() {
@@ -50,7 +55,7 @@ export class CodeComponent extends React.Component<
     );
   }
 
-  private codeMirror: any = null;
+  private codeMirror: CodeMirror.EditorFromTextArea | null = null;
 
   /* render() {
     const options = {
