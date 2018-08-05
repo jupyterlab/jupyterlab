@@ -130,8 +130,6 @@
 TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .dropdown-menu-li {
-  height: 12px;
-  margin: 0px;
   padding: 0px; /*
   padding-top: 5px;
   padding-bottom: 6px;
@@ -217,10 +215,3 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   margin-bottom: 3px;
   margin-right: 20px;*/
 }
-
-/*
-.option-title {
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-*/

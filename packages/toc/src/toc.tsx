@@ -60,9 +60,19 @@ export class TableOfContents extends Widget {
     // If they are the same as previously, do nothing.
     if (this._notebook.currentWidget) {
       this._notebook.currentWidget.context.ready.then(() => {
+        this._defaultsLoaded = true;
         if (this._notebook.currentWidget) {
           this.needNumbering = this._notebook.currentWidget.model.metadata.get(
             'autoNumberingEnabled'
+          ) as boolean;
+          this.showCode = this._notebook.currentWidget.model.metadata.get(
+            'toc-showcode'
+          ) as boolean;
+          this.showRaw = this._notebook.currentWidget.model.metadata.get(
+            'toc-showraw'
+          ) as boolean;
+          this.showMarkdown = this._notebook.currentWidget.model.metadata.get(
+            'toc-showmarkdowntxt'
           ) as boolean;
         }
       });
@@ -128,7 +138,12 @@ export class TableOfContents extends Widget {
       }
     }
     ReactDOM.render(
-      <TOCTree widget={this} title={title} toc={toc} />,
+      <TOCTree
+        widget={this}
+        title={title}
+        toc={toc}
+        defaultsLoaded={this._defaultsLoaded}
+      />,
       this.node,
       () => {
         if (
@@ -190,7 +205,14 @@ export class TableOfContents extends Widget {
     this.changeNumberingStateForAllCells(value);
   }
 
+  set notebookMetadata(value: [string, any]) {
+    if (this._notebook.currentWidget != null) {
+      this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
+    }
+  }
+
   private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
+  private _defaultsLoaded = false;
   public showCode = true;
   public showRaw = false;
   public showMarkdown = false;
@@ -283,6 +305,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    */
   toc: IHeading[];
   widget: TableOfContents;
+  defaultsLoaded: boolean;
 }
 
 /**
@@ -450,6 +473,7 @@ export interface ITOCTreeStates {
   showCode: boolean;
   showRaw: boolean;
   showMarkdown: boolean;
+  defaultsLoaded: boolean;
 }
 
 /**
@@ -466,12 +490,24 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       needNumbering: this.props.widget.needNumbering,
       showCode: this.props.widget.showCode,
       showRaw: this.props.widget.showRaw,
-      showMarkdown: this.props.widget.showMarkdown
+      showMarkdown: this.props.widget.showMarkdown,
+      defaultsLoaded: false
     };
   }
 
   componentWillReceiveProps(nextProps: ITOCTreeProps) {
     this.setState({ needNumbering: this.props.widget.needNumbering });
+    if (
+      nextProps.defaultsLoaded == true &&
+      this.state.defaultsLoaded == false
+    ) {
+      this.setState({
+        showCode: this.props.widget.showCode,
+        showRaw: this.props.widget.showRaw,
+        showMarkdown: this.props.widget.showMarkdown,
+        defaultsLoaded: true
+      });
+    }
   }
 
   handleClick = () => {
@@ -483,6 +519,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.props.widget.showCode = !this.props.widget.showCode;
     this.setState({ showCode: this.props.widget.showCode });
     component.setState({ selected: this.props.widget.showCode });
+    this.props.widget.notebookMetadata = [
+      'toc-showcode',
+      this.props.widget.showCode
+    ];
     this.props.widget.updateTOC();
   };
 
@@ -490,6 +530,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.props.widget.showRaw = !this.props.widget.showRaw;
     this.setState({ showRaw: this.props.widget.showRaw });
     component.setState({ selected: this.props.widget.showRaw });
+    this.props.widget.notebookMetadata = [
+      'toc-showraw',
+      this.props.widget.showRaw
+    ];
     this.props.widget.updateTOC();
   };
 
@@ -497,44 +541,47 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     this.props.widget.showMarkdown = !this.props.widget.showMarkdown;
     this.setState({ showMarkdown: this.props.widget.showMarkdown });
     component.setState({ selected: this.props.widget.showMarkdown });
+    this.props.widget.notebookMetadata = [
+      'toc-showmarkdowntxt',
+      this.props.widget.showMarkdown
+    ];
   };
 
-  private dropDownMenuItems: DropdownItem[] = [
-    {
-      id: 0,
-      props: {
-        title: 'Code',
-        selectedByDefault: this.props.widget.showCode,
-        onClickHandler: this.toggleCode.bind(this)
-      },
-      type: TagTypeDropdownItem
-    },
-    {
-      id: 1,
-      props: {
-        title: 'Raw',
-        selectedByDefault: this.props.widget.showRaw,
-        onClickHandler: this.toggleRaw.bind(this)
-      },
-      type: TagTypeDropdownItem
-    },
-    {
-      id: 2,
-      props: {
-        title: 'Markdown text',
-        selectedByDefault: this.props.widget.showMarkdown,
-        onClickHandler: this.toggleMarkdown.bind(this)
-      },
-      type: TagTypeDropdownItem
-    }
-  ];
-
-  private renderedDropdownMenu = createDropdownMenu(this.dropDownMenuItems);
+  private renderedDropdownMenu = createDropdownMenu();
 
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     const DropdownMenu = this.renderedDropdownMenu;
+    const dropDownMenuItems: DropdownItem[] = [
+      {
+        id: 0,
+        props: {
+          title: 'Code',
+          selectedByDefault: this.props.widget.showCode,
+          onClickHandler: this.toggleCode.bind(this)
+        },
+        type: TagTypeDropdownItem
+      },
+      {
+        id: 1,
+        props: {
+          title: 'Raw',
+          selectedByDefault: this.props.widget.showRaw,
+          onClickHandler: this.toggleRaw.bind(this)
+        },
+        type: TagTypeDropdownItem
+      },
+      {
+        id: 2,
+        props: {
+          title: 'Markdown text',
+          selectedByDefault: this.props.widget.showMarkdown,
+          onClickHandler: this.toggleMarkdown.bind(this)
+        },
+        type: TagTypeDropdownItem
+      }
+    ];
     let listing: JSX.Element[] = this.props.toc.map(el => {
       if (el.type === 'code' && !this.state.showCode) {
         return <div key={`emptycode-${i++}`} />;
@@ -573,6 +620,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         <div className="toc-toolbar">
           <DropdownMenu
             className="celltypes-dropdown"
+            items={this.state.defaultsLoaded ? dropDownMenuItems : []}
             buttonTitle={
               <span>
                 Cell Type
