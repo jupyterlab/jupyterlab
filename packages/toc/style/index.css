@@ -184,7 +184,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .toc-code-cell-prompt {
-  flex: 0 27px;
+  flex: 0 0 27px;
   color: var(--jp-cell-prompt-not-active-font-color);
   opacity: var(--jp-cell-prompt-not-active-opacity);
   font-family: var(--jp-cell-prompt-font-family);

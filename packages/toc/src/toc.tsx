@@ -345,7 +345,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     // Clamp the header level between 1 and six.
     level = Math.max(Math.min(level, 6), 1);
 
-    const paddingLeft = 20; //(level - 1) * 12;
+    const paddingLeft = 22; //(level - 1) * 12;
     let fontSize;
     let levelsSizes: { [level: number]: string } = {
       1: '18.74',
