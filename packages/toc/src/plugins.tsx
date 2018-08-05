@@ -9,7 +9,10 @@ export interface DropdownItem {
 interface DropdownMenuProps {
   className: string | null;
   buttonTitle: JSX.Element;
-  items: DropdownItem[];
+  items: {
+    stateIndicator: any;
+    items: DropdownItem[];
+  };
 }
 
 interface DropdownMenuState {
@@ -35,7 +38,6 @@ export function createDropdownMenu() {
       };
       const openMenu = () => {
         handleClick();
-        console.log(menuOpen);
         if (menuOpen) {
           this.setState({ menuOpen: false });
         } else {
@@ -59,7 +61,7 @@ export function createDropdownMenu() {
             {buttonTitle}
           </div>
           <ul className={'dropdown-menu-list'} hidden={!menuOpen}>
-            {this.props.items.map(item => {
+            {this.props.items.items.map(item => {
               const ItemType = item.type;
               const itemProps = item.props;
               const id = item.id;
@@ -94,8 +96,11 @@ export class TagTypeDropdownItem extends React.Component<
 > {
   constructor(props: TagTypeDropdownItemProps) {
     super(props);
-    console.log(props.selectedByDefault);
     this.state = { selected: props.selectedByDefault };
+  }
+
+  componentWillReceiveProps(nextProps: TagTypeDropdownItemProps) {
+    this.setState({ selected: nextProps.selectedByDefault });
   }
 
   render() {
@@ -117,7 +122,7 @@ export class TagTypeDropdownItem extends React.Component<
           onClickHandler(this);
         }}
       >
-        {checked}{" "}
+        {checked}{' '}
         <span className={'option-title dropdown-clickable'}>{title}</span>
       </div>
     );
