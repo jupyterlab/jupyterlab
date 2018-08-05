@@ -117,10 +117,8 @@ export class TagTypeDropdownItem extends React.Component<
           onClickHandler(this);
         }}
       >
-        {checked}{' '}
-        <span className={'celltype-dropdown-title dropdown-clickable'}>
-          {title}
-        </span>
+        {checked}{" "}
+        <span className={'option-title dropdown-clickable'}>{title}</span>
       </div>
     );
   }
