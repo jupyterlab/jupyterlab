@@ -15,6 +15,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { ITooltipManager, Tooltip } from '@jupyterlab/tooltip';
@@ -28,6 +30,8 @@ namespace CommandIDs {
   export const launchConsole = 'tooltip:launch-console';
 
   export const launchNotebook = 'tooltip:launch-notebook';
+
+  export const launchFile = 'tooltip:launch-file';
 }
 
 /**
@@ -144,9 +148,50 @@ const notebooks: JupyterLabPlugin<void> = {
 };
 
 /**
+ * The file editor tooltip plugin.
+ */
+const files: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/tooltip-extension:files',
+  autoStart: true,
+  requires: [ITooltipManager, IConsoleTracker, IEditorTracker],
+  activate: (
+    app: JupyterLab,
+    manager: ITooltipManager,
+    consoleTracker: IConsoleTracker,
+    editorTracker: IEditorTracker
+  ): void => {
+    // Add tooltip launch command.
+    app.commands.addCommand(CommandIDs.launchFile, {
+      execute: () => {
+        const parent = editorTracker.currentWidget;
+        if (!parent) {
+          return;
+        }
+        const console = consoleTracker.find(
+          c => parent.context.path === c.session.path
+        );
+        if (!console) {
+          return;
+        }
+
+        const anchor = parent.content;
+        const editor = anchor.editor;
+        const kernel = console.session.kernel;
+        const rendermime = console.console.rendermime;
+
+        // If all components necessary for rendering exist, create a tooltip.
+        if (!!editor && !!kernel && !!rendermime) {
+          return manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks, files];
 export default plugins;
 
 /**

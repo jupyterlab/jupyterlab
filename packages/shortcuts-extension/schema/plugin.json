@@ -1007,6 +1007,19 @@
         "category": { "default": "Tooltips" }
       },
       "type": "object"
+    },
+    "tooltip:launch-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-file" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
     }
   },
   "oneOf": [{ "$ref": "#/definitions/shortcut" }],
