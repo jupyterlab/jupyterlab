@@ -32,7 +32,7 @@ export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
   widget: TableOfContents,
-  needNumbering = true
+  needNumbering = false
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   return {
     tracker,
@@ -531,7 +531,7 @@ namespace Private {
     sanitizer: ISanitizer,
     numberingDict: any,
     lastLevel: number,
-    needNumbering = true
+    needNumbering = false
   ): IHeading[] {
     let headings: IHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');

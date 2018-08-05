@@ -30,7 +30,7 @@ import {
  * Timeout for throttling TOC rendering.
  */
 const RENDER_TIMEOUT = 1000;
-const NEED_NUMBERING_BY_DEFAULT = true;
+const NEED_NUMBERING_BY_DEFAULT = false;
 
 /**
  * A widget for hosting a notebook table-of-contents.
