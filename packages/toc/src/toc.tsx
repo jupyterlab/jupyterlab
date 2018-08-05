@@ -60,7 +60,7 @@ export class TableOfContents extends Widget {
     // If they are the same as previously, do nothing.
     if (this._notebook.currentWidget) {
       this._notebook.currentWidget.context.ready.then(() => {
-        this._defaultsLoaded = true;
+        this._defaultsLoaded = new Date().toLocaleTimeString();
         if (this._notebook.currentWidget) {
           this.needNumbering = this._notebook.currentWidget.model.metadata.get(
             'autoNumberingEnabled'
@@ -212,7 +212,7 @@ export class TableOfContents extends Widget {
   }
 
   private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
-  private _defaultsLoaded = false;
+  private _defaultsLoaded: any = null;
   public showCode = true;
   public showRaw = false;
   public showMarkdown = false;
@@ -305,7 +305,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    */
   toc: IHeading[];
   widget: TableOfContents;
-  defaultsLoaded: boolean;
+  defaultsLoaded: any;
 }
 
 /**
@@ -473,7 +473,7 @@ export interface ITOCTreeStates {
   showCode: boolean;
   showRaw: boolean;
   showMarkdown: boolean;
-  defaultsLoaded: boolean;
+  defaultsLoaded: any;
 }
 
 /**
@@ -491,21 +491,21 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       showCode: this.props.widget.showCode,
       showRaw: this.props.widget.showRaw,
       showMarkdown: this.props.widget.showMarkdown,
-      defaultsLoaded: false
+      defaultsLoaded: null
     };
   }
 
   componentWillReceiveProps(nextProps: ITOCTreeProps) {
     this.setState({ needNumbering: this.props.widget.needNumbering });
     if (
-      nextProps.defaultsLoaded == true &&
-      this.state.defaultsLoaded == false
+      nextProps.defaultsLoaded != null &&
+      this.state.defaultsLoaded != nextProps.defaultsLoaded
     ) {
       this.setState({
         showCode: this.props.widget.showCode,
         showRaw: this.props.widget.showRaw,
         showMarkdown: this.props.widget.showMarkdown,
-        defaultsLoaded: true
+        defaultsLoaded: nextProps.defaultsLoaded
       });
     }
   }
@@ -609,7 +609,6 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         }
       }
     });
-
     // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
     //   this.props.widget.filterByTag("test");
     // }
@@ -620,7 +619,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         <div className="toc-toolbar">
           <DropdownMenu
             className="celltypes-dropdown"
-            items={this.state.defaultsLoaded ? dropDownMenuItems : []}
+            items={{
+              stateIndicator: this.state.defaultsLoaded,
+              items: dropDownMenuItems
+            }}
             buttonTitle={
               <span>
                 Cell Type
