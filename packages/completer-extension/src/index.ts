@@ -288,7 +288,7 @@ const files: JupyterLabPlugin<void> = {
     app.commands.addKeyBinding({
       command: CommandIDs.selectFile,
       keys: ['Enter'],
-      selector: `.jp-FileEditor`
+      selector: `.jp-FileEditor .jp-mod-completer-active`
     });
   }
 };

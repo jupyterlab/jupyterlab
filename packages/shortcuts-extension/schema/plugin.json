@@ -124,9 +124,9 @@
         "command": { "default": "completer:invoke-file" },
         "keys": { "default": ["Tab"] },
         "selector": {
-          "default": ".jp-FileEditor"
+          "default": ".jp-FileEditor .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Notebook Completion" },
+        "title": { "default": "Invoke File Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
