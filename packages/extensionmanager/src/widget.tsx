@@ -162,7 +162,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       title={title}
     >
       <div className="jp-extensionmanager-entry-title">
-        <div className="jp-extensionmanager-entry-name">{entry.name}</div>
+        <div className="jp-extensionmanager-entry-name">
+          <a href={entry.link} target="_blank">
+            {entry.name}
+          </a>
+        </div>
         <div className="jp-extensionmanager-entry-jupyter-org" />
       </div>
       <div className="jp-extensionmanager-entry-content">
@@ -328,7 +332,12 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
     let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [<SearchBar key="searchbar" placeholder="SEARCH" />];
+    let elements = [
+      <SearchBar
+        key="searchbar"
+        placeholder="SEARCH (enter space to list all)"
+      />
+    ];
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt

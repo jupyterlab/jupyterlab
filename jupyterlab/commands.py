@@ -1071,6 +1071,8 @@ class _AppHandler(object):
             path = osp.realpath(target)
             extensions[name] = dict(path=path,
                                     filename=osp.basename(path),
+                                    link=data.get('homepage',
+                                        data.get('repository')['url']),
                                     version=data['version'],
                                     jupyterlab=jlab,
                                     dependencies=deps,
