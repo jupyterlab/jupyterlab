@@ -87,6 +87,10 @@
   max-height: 22px;
 }
 
+.markdown-cell code {
+  font-size: 9px;
+}
+
 .CodeMirror-scroll::-webkit-scrollbar-track {
   background-color: transparent;
 }
@@ -110,25 +114,29 @@
 .menu-check-div {
   display: inline-block;
   width: 10px;
-  height: 10px;
+  height: 24px;
   padding-left: 5px;
-  padding-top: 5px;
 }
 
 .check-image {
   width: 10px;
   height: 10px;
-  padding: 0px;
+  padding-top: 7px;
+  padding-bottom: 7px;
   margin: 0px;
 }
 
+/* NOTE: DO NOT CHANGE SIZE OF ANY PART OF CELL TYPE MENU WITHOUT ENSURING THAT
+TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
+
 .dropdown-menu-li {
+  height: 12px;
   margin: 0px;
+  padding: 0px; /*
   padding-top: 5px;
   padding-bottom: 6px;
   padding-right: 20px;
-  padding-left: 3px;
-  min-height: 20px;
+  padding-left: 3px; */
 }
 
 .dropdown-menu-li:hover {
@@ -143,10 +151,23 @@
 }
 
 .dropdown-menu-button {
+  padding: 0px;
+  margin: 0px;
   padding-left: 10px;
   padding-top: 8px;
 }
-.celltypes-dropdown.dropdown-menu {
+
+.celltypes-dropdown {
+  /* width: fit-content;
+  padding-left: 12px;
+  padding-top: 12px; */
+  padding: 0px;
+  margin: 0px;
+  display: inline-block;
+  font-size: 12px;
+}
+
+.dropdown-menu {
   /* width: fit-content;
   padding-left: 12px;
   padding-top: 12px; */
@@ -182,13 +203,24 @@
 }
 
 .toc-toolbar {
+  height: 26px;
+  padding: 0px;
+  margin: 0px;
   user-select: none;
 }
 
-/* 
 .dropdown-menu-inner-clickable {
-  padding: 0px;
+  font-size: 12px;
+  height: 24px;
+  /*padding: 0px;
   margin-top: -8px;
   margin-bottom: 3px;
-  margin-right: 20px;
-} */
+  margin-right: 20px;*/
+}
+
+/*
+.option-title {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+*/
