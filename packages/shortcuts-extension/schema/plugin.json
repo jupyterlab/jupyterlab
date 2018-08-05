@@ -118,6 +118,19 @@
       },
       "type": "object"
     },
+    "completer:invoke-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-file" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor"
+        },
+        "title": { "default": "Invoke Notebook Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
     "console:linebreak": {
       "default": {},
       "properties": {

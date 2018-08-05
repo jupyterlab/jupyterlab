@@ -13,6 +13,8 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Widget } from '@phosphor/widgets';
@@ -27,11 +29,15 @@ namespace CommandIDs {
 
   export const invokeNotebook = 'completer:invoke-notebook';
 
+  export const invokeFile = 'completer:invoke-file';
+
   export const select = 'completer:select';
 
   export const selectConsole = 'completer:select-console';
 
   export const selectNotebook = 'completer:select-notebook';
+
+  export const selectFile = 'completer:select-file';
 }
 
 /**
@@ -225,7 +231,70 @@ const notebooks: JupyterLabPlugin<void> = {
 };
 
 /**
+ * An extension that registers file editors for completion.
+ */
+const files: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:files',
+  requires: [ICompletionManager, IConsoleTracker, IEditorTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    consoleTracker: IConsoleTracker,
+    editorTracker: IEditorTracker
+  ): void => {
+    // When a console is created, check if it is associated with
+    // a text editor. If so, make a completer for it.
+    consoleTracker.widgetAdded.connect((sender, widget) => {
+      const editor = editorTracker.find(
+        e => e.context.path === widget.session.path
+      );
+      if (editor) {
+        const session = widget.session;
+        const connector = new KernelConnector({ session });
+        manager.register({
+          connector,
+          editor: editor.content.editor,
+          parent: editor
+        });
+      }
+    });
+
+    // Add console completer invoke command.
+    app.commands.addCommand(CommandIDs.invokeFile, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.invoke, { id });
+        }
+      }
+    });
+
+    // Add console completer select command.
+    app.commands.addCommand(CommandIDs.selectFile, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
+        }
+      }
+    });
+
+    // Set enter key for console completer select command.
+    app.commands.addKeyBinding({
+      command: CommandIDs.selectFile,
+      keys: ['Enter'],
+      selector: `.jp-FileEditor`
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks, files];
 export default plugins;
