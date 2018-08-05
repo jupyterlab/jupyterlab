@@ -164,3 +164,16 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 .jp-Stdin-input:focus {
   box-shadow: none;
 }
+
+/*-----------------------------------------------------------------------------
+| Output Area View
+|----------------------------------------------------------------------------*/
+
+.jp-LinkedOutputView .jp-OutputArea {
+  height: calc(100%);
+  display: block;
+}
+
+.jp-LinkedOutputView .jp-OutputArea-child:only-child {
+  height: calc(100%);
+}
