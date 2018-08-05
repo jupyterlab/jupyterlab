@@ -9,13 +9,14 @@ export interface DropdownItem {
 interface DropdownMenuProps {
   className: string | null;
   buttonTitle: JSX.Element;
+  items: DropdownItem[];
 }
 
 interface DropdownMenuState {
   menuOpen: boolean;
 }
 
-export function createDropdownMenu(items: DropdownItem[]) {
+export function createDropdownMenu() {
   return class extends React.Component<DropdownMenuProps, DropdownMenuState> {
     constructor(props: DropdownMenuProps) {
       super(props);
@@ -42,7 +43,7 @@ export function createDropdownMenu(items: DropdownItem[]) {
         }
       };
       const handleOutsideClick = (event: any) => {
-        if (event.target.className === 'dropdown-menu-inner-clickable') {
+        if (event.target.className.indexOf('dropdown-clickable') > 0) {
           return;
         }
         document.removeEventListener('click', handleOutsideClick, false);
@@ -58,7 +59,7 @@ export function createDropdownMenu(items: DropdownItem[]) {
             {buttonTitle}
           </div>
           <ul className={'dropdown-menu-list'} hidden={!menuOpen}>
-            {items.map(item => {
+            {this.props.items.map(item => {
               const ItemType = item.type;
               const itemProps = item.props;
               const id = item.id;
@@ -93,26 +94,33 @@ export class TagTypeDropdownItem extends React.Component<
 > {
   constructor(props: TagTypeDropdownItemProps) {
     super(props);
+    console.log(props.selectedByDefault);
     this.state = { selected: props.selectedByDefault };
   }
 
   render() {
     const { title, onClickHandler } = this.props;
     let checked = this.state.selected ? (
-      <span className={'menu-check-div'}>
-        <img className={'check-image'} src={require('../static/check.svg')} />
+      <span className={'menu-check-div dropdown-clickable'}>
+        <img
+          className={'check-image dropdown-clickable'}
+          src={require('../static/check.svg')}
+        />
       </span>
     ) : (
-      <span className={'menu-check-div'}> </span>
+      <span className={'menu-check-div dropdown-clickable'}> </span>
     );
     return (
       <div
-        className={'dropdown-menu-inner-clickable'}
+        className={'dropdown-menu-inner-clickable dropdown-clickable'}
         onClick={() => {
           onClickHandler(this);
         }}
       >
-        {checked} {title}
+        {checked}{' '}
+        <span className={'celltype-dropdown-title dropdown-clickable'}>
+          {title}
+        </span>
       </div>
     );
   }

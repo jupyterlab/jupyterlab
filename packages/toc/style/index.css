@@ -124,10 +124,6 @@
 
 .dropdown-menu-li {
   margin: 0px;
-  padding-top: 3px;
-  padding-bottom: 6px;
-  padding-right: 20px;
-  padding-left: 3px;
 }
 
 .dropdown-menu-li:hover {
@@ -184,10 +180,12 @@
   user-select: none;
 }
 
-/* 
 .dropdown-menu-inner-clickable {
-  padding: 0px;
-  margin-top: -8px;
-  margin-bottom: 3px;
-  margin-right: 20px;
-} */
+  padding-top: 3px;
+  padding-bottom: 6px;
+  padding-right: 20px;
+  padding-left: 3px;
+}
+
+.celltype-dropdown-title {
+}
