@@ -163,7 +163,8 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Translate search results from an npm repository query into entries.
+   * Translate search results from an npm repository query into entries
+   * and remove entries with 'deprecated' in the keyword list
    *
    * @param res Promise to an npm query result.
    */
@@ -173,6 +174,9 @@ export class ListModel extends VDomModel {
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
+      if (pkg.keywords.indexOf('deprecated') < 0) {
+        continue;
+      }
       entries[pkg.name] = {
         name: pkg.name,
         description: pkg.description,
