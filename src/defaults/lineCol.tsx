@@ -207,6 +207,9 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
     }
 
     private _handleClick = () => {
+        if (this._popup) {
+            this._popup.dispose();
+        }
         const body = new ReactElementWidget(
             (
                 <LineForm
