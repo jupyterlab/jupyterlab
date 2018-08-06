@@ -15,7 +15,7 @@ Component Interactions
 
 ## Optional Dependencies 
 
--   nbresuse https://github.com/yuvipanda/nbresuse
+-   [nbresuse](https://github.com/yuvipanda/nbresuse) <br />
     Upon installation, NB resource usage extension will appear in the status bar.
 
 ## Installation
