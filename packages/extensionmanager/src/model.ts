@@ -174,7 +174,7 @@ export class ListModel extends VDomModel {
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
-      if (pkg.keywords.indexOf('deprecated') < 0) {
+      if (pkg.keywords.indexOf('deprecated') >= 0) {
         continue;
       }
       entries[pkg.name] = {
