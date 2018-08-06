@@ -36,7 +36,7 @@ export interface IEntry {
   /**
    * A representative link of the package.
    */
-  link: string;
+  url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -81,7 +81,7 @@ export interface IInstalledEntry {
   /**
    * A representative link of the package.
    */
-  link: string;
+  url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -186,7 +186,7 @@ export class ListModel extends VDomModel {
       entries[pkg.name] = {
         name: pkg.name,
         description: pkg.description,
-        link:
+        url:
           'homepage' in pkg.links
             ? pkg.links.homepage
             : 'repository' in pkg.links ? pkg.links.repository : pkg.links.npm,
@@ -216,7 +216,7 @@ export class ListModel extends VDomModel {
           entries[pkg.name] = {
             name: pkg.name,
             description: pkg.description,
-            link: pkg.link,
+            url: pkg.url,
             installed: pkg.installed !== false,
             enabled: pkg.enabled,
             status: pkg.status,

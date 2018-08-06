@@ -20,13 +20,13 @@ from .commands import (
 )
 
 
-def _make_extension_entry(name, description, link, enabled, core, latest_version,
+def _make_extension_entry(name, description, url, enabled, core, latest_version,
                           installed_version, status, installed=None):
     """Create an extension entry that can be sent to the client"""
     ret = dict(
         name=name,
         description=description,
-        link=link,
+        url=url,
         enabled=enabled,
         core=core,
         latest_version=latest_version,
@@ -94,7 +94,7 @@ class ExtensionManager(object):
             extensions.append(_make_extension_entry(
                 name=name,
                 description=pkg_info['description'],
-                link=pkg_info['homepage'],
+                url=data['url'],
                 enabled=(name not in info['disabled']),
                 core=False,
                 # Use wanted version to ensure we limit ourselves
@@ -109,7 +109,7 @@ class ExtensionManager(object):
                 extensions.append(_make_extension_entry(
                     name=name,
                     description=data['description'],
-                    link=data['link'],
+                    url=data['url'],
                     installed=False,
                     enabled=False,
                     core=False,

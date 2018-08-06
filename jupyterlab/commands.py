@@ -1069,10 +1069,16 @@ class _AppHandler(object):
             name = data['name']
             jlab = data.get('jupyterlab', dict())
             path = osp.realpath(target)
+            # homepage, repository  are optional
+            if 'homepage' in data:
+                url = data['homepage']
+            elif 'repository' in data:
+                url = data['repository'].get('url', '')
+            else:
+                url = ''
             extensions[name] = dict(path=path,
                                     filename=osp.basename(path),
-                                    link=data.get('homepage',
-                                        data.get('repository')['url']),
+                                    url=url,
                                     version=data['version'],
                                     jupyterlab=jlab,
                                     dependencies=deps,

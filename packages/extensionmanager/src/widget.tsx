@@ -163,7 +163,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     >
       <div className="jp-extensionmanager-entry-title">
         <div className="jp-extensionmanager-entry-name">
-          <a href={entry.link} target="_blank">
+          <a href={entry.url} target="_blank">
             {entry.name}
           </a>
         </div>
