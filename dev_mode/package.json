@@ -54,7 +54,7 @@
     "@jupyterlab/notebook": "^0.17.2",
     "@jupyterlab/notebook-extension": "^0.17.2",
     "@jupyterlab/observables": "^2.0.2",
-    "@jupyterlab/outputarea": "^0.17.2",
+    "@jupyterlab/outputarea": "^0.17.3",
     "@jupyterlab/pdf-extension": "^0.8.2",
     "@jupyterlab/rendermime": "^0.17.3",
     "@jupyterlab/rendermime-extension": "^0.11.2",
@@ -215,7 +215,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.33.6",
+    "version": "0.33.7",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
