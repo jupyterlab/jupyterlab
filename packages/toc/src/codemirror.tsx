@@ -55,23 +55,4 @@ export class CodeComponent extends React.Component<
   }
 
   private codeMirror: CodeMirror.EditorFromTextArea | null = null;
-
-  /* render() {
-    const options = {
-      theme: this.props.theme,
-      showCursorWhenSelecting: false,
-      readOnly: 'true',
-      cursorBlinkRate: -1,
-      lineWrapping: true,
-      scrollbarStyle: 'null'
-    };
-    return (
-      <CodeMirror
-        className={'cm-toc'}
-        value={this.state.code}
-        options={options}
-      />
-    );
-    const codeMirror = new CodeMirror.fromTe
-  } */
 }

@@ -55,7 +55,7 @@ export function createNotebookGenerator(
           }
           if (showCode) {
             let text = (model as CodeCellModel).value.text;
-            const onClickFactory2 = (line: number) => {
+            const onClickFactory = (line: number) => {
               return () => {
                 cell.node.scrollIntoView();
               };
@@ -64,7 +64,7 @@ export function createNotebookGenerator(
             headings = headings.concat(
               Private.getCodeCells(
                 text,
-                onClickFactory2,
+                onClickFactory,
                 numberingDict,
                 executionCount,
                 lastLevel
