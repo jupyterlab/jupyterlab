@@ -4,7 +4,7 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { CommandLinker } from '@jupyterlab/apputils';
 
@@ -299,11 +299,13 @@ export namespace JupyterLab {
 
     /**
      * The name of the current workspace.
-     *
-     * #### Notes
-     * The default /lab workspace name is empty.
      */
     readonly workspace: string;
+
+    /**
+     * The name of the default workspace.
+     */
+    readonly defaultWorkspace: string;
   }
 
   /**
@@ -337,7 +339,11 @@ export namespace JupyterLab {
       workspaces: PageConfig.getOption('workspacesDir')
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
-    workspace: ''
+    workspace: '',
+    defaultWorkspace: URLExt.join(
+      PageConfig.getOption('baseUrl'),
+      PageConfig.getOption('pageUrl')
+    )
   };
 
   /**
