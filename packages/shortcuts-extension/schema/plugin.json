@@ -974,7 +974,7 @@
         "keys": { "default": ["Shift Tab"] },
         "selector": {
           "default":
-            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
@@ -988,7 +988,7 @@
         "keys": { "default": ["Shift Tab"] },
         "selector": {
           "default":
-            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
