@@ -176,7 +176,7 @@
 
 #jp-left-stack > .p-Widget,
 #jp-right-stack > .p-Widget {
-  min-width: 300px;
+  min-width: var(--jp-sidebar-min-width);
 }
 
 #jp-right-stack {
