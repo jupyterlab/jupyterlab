@@ -109,7 +109,7 @@ class ExtensionManager(object):
                 extensions.append(_make_extension_entry(
                     name=name,
                     description=data['description'],
-                    url=data['url'],
+                    url=data.get('homepage', ''),
                     installed=False,
                     enabled=False,
                     core=False,
