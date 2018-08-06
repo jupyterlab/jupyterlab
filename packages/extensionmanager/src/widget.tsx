@@ -332,12 +332,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
     let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [
-      <SearchBar
-        key="searchbar"
-        placeholder="SEARCH (enter space to list all)"
-      />
-    ];
+    let elements = [<SearchBar key="searchbar" placeholder="SEARCH" />];
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt
