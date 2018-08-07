@@ -22,6 +22,10 @@ import {
   sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import {
+  JSONObject,
+  JSONArray
+} from '../../../node_modules/@phosphor/coreutils';
 
 const ERROR_INPUT = 'a = foo';
 
@@ -1011,6 +1015,20 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         NotebookActions.copy(widget);
         expect(widget.mode).to.equal('command');
+      });
+
+      it('should delete metadata.deletable', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.metadata.set('deletable', false);
+        NotebookActions.copy(widget);
+        const data = NBTestUtils.clipboard.getData(
+          JUPYTER_CELL_MIME
+        ) as JSONArray;
+        data.map(cell => {
+          expect(((cell as JSONObject).metadata as JSONObject).deletable).to.be
+            .undefined;
+        });
       });
     });
 
