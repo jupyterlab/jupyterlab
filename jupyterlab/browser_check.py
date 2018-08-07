@@ -3,19 +3,20 @@
 from __future__ import print_function, absolute_import
 
 from concurrent.futures import ThreadPoolExecutor
-import json
+from os import path as osp
 import os
+import shutil
 import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
 from notebook.notebookapp import flags, aliases
-from traitlets import Bool, Unicode
+from traitlets import Bool
 
-from .labapp import LabApp
+from .labapp import LabApp, get_app_dir
 
 
-here = os.path.dirname(__file__)
+here = osp.abspath(osp.dirname(__file__))
 test_flags = dict(flags)
 test_flags['core-mode'] = (
     {'BrowserApp': {'core_mode': True}},
@@ -61,7 +62,14 @@ class BrowserApp(LabApp):
 def run_browser(url):
     """Run the browser test and return an exit code.
     """
-    return subprocess.run(["node", "chrome-test.js", url], cwd=here).returncode
+    target = osp.join(get_app_dir(), 'browser_test')
+    if not osp.exists(osp.join(target, 'node_modules')):
+        os.makedirs(target)
+        subprocess.call(["jlpm"], cwd=target)
+        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
+    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
+    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
+
 
 if __name__ == '__main__':
     BrowserApp.launch_instance()

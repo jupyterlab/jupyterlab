@@ -121,7 +121,7 @@ import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-  Kernel.connectTo(kernelModels[0]).then(kernel => {
+    const kernel = Kernel.connectTo(kernelModels[0]);
     console.log(kernel.name);
   });
 });
@@ -183,9 +183,8 @@ import { Session } from '@jupyterlab/services';
 
 // Get a list of available sessions and connect to one.
 Session.listRunning().then(sessionModels => {
-  Session.connectTo(sessionModels[0]).then(session => {
-    console.log(session.kernel.name);
-  });
+  const session = Session.connectTo(sessionModels[0]);
+  console.log(session.kernel.name);
 });
 
 // Start a new session.

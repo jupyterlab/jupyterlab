@@ -9,7 +9,8 @@
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
-    "build:test": "lerna run build:test",
+    "build:test": "jlpm run build:testutils && lerna run build:test",
+    "build:testutils": "cd testutils && jlpm run build",
     "build:themes": "lerna run build:webpack --scope \"@jupyterlab/theme-*-extension\"",
     "build:update": "node buildutils/lib/update-core-mode.js",
     "build:utils": "cd buildutils && jlpm run build",
@@ -33,7 +34,7 @@
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
     "integrity": "node buildutils/lib/ensure-repo.js",
-    "lint": "jlpm run prettier && jlpm run eslint && jlpm run tslint",
+    "lint": "jlpm && jlpm run prettier && jlpm run eslint && jlpm run tslint",
     "lint:check": "jlpm run prettier:check && jlpm run eslint:check && jlpm run tslint:check",
     "patch:release": "node buildutils/lib/patch-release.js",
     "publish": "jlpm run clean:slate && jlpm run build:packages && jlpm integrity && lerna publish --force-publish=* -m \"Publish\"",
@@ -85,6 +86,7 @@
     "buildutils/template",
     "buildutils/test-template",
     "tests",
-    "tests/test-*"
+    "tests/test-*",
+    "testutils"
   ]
 }

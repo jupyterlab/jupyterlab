@@ -56,7 +56,7 @@ jlpm run build:update
 * Create the Python release artifacts:
 
 ```bash
-rm -rf dist
+rm -rf dist build
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
@@ -72,6 +72,7 @@ twine upload dist/*
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
 * [ ] Update the other repos listed below
+* [ ] Add a tag to `extension-cookiecutter-ts` with the new JupyterLab version
 * [ ] Update the extension examples listed below
 * [ ] Update the xkcd tutorial
 * [ ] Update `jupyterlab/_version.py` with a final version
@@ -168,11 +169,11 @@ shasum -a 256 dist/*.tar.gz
 * Create a PR with the version bump
 * Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
 
-## Making a patch release of a JavaScript package
+## Making a patch release JavaScript package(s)
 
 * Backport the change to the previous release branch
 * Make a new PR against the previous branch
-* Run the following script, where the package is in `/packages/package-folder-name`:
+* Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given):
 
 ```bash
 jlpm run patch:release package-folder-name

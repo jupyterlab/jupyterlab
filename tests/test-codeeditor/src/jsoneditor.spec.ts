@@ -9,6 +9,8 @@ import { ObservableJSON } from '@jupyterlab/observables';
 
 import { JSONEditor } from '@jupyterlab/codeeditor';
 
+import { framePromise } from '@jupyterlab/testutils';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -367,14 +369,12 @@ describe('apputils', () => {
     });
 
     describe('#onAfterShow()', () => {
-      it('should update the editor', done => {
+      it('should update the editor', async () => {
         editor.hide();
         Widget.attach(editor, document.body);
         editor.show();
-        requestAnimationFrame(() => {
-          expect(editor.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await framePromise();
+        expect(editor.methods).to.contain('onUpdateRequest');
       });
     });
 

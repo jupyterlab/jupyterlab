@@ -273,10 +273,6 @@ export class DefaultKernel implements Kernel.IKernel {
     if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
-      let msgType = msg.header.msg_type;
-      if (msgType === 'status') {
-        msgType += ' ' + (msg.content as any).execution_state;
-      }
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({ msg, direction: 'send' });
@@ -519,7 +515,8 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   requestExecute(
     content: KernelMessage.IExecuteRequest,
-    disposeOnDone: boolean = true
+    disposeOnDone: boolean = true,
+    metadata?: JSONObject
   ): Kernel.IFuture {
     let options: KernelMessage.IOptions = {
       msgType: 'execute_request',
@@ -535,7 +532,7 @@ export class DefaultKernel implements Kernel.IKernel {
       stop_on_error: false
     };
     content = { ...defaults, ...content };
-    let msg = KernelMessage.createShellMessage(options, content);
+    let msg = KernelMessage.createShellMessage(options, content, metadata);
     return this.sendShellMessage(msg, true, disposeOnDone);
   }
 
@@ -1150,9 +1147,7 @@ export class DefaultKernel implements Kernel.IKernel {
       return;
     }
     // Clear the websocket event handlers and the socket itself.
-    this._ws.onclose = this._noOp;
-    this._ws.onerror = this._noOp;
-    this._ws = null;
+    this._clearSocket();
 
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateStatus('reconnecting');

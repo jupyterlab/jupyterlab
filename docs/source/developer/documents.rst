@@ -22,7 +22,7 @@ A 'document' in JupyterLab is represented by a model instance implementing the `
 
 A single file path can have multiple different models (and hence different contexts) representing the file. For example, a notebook can be opened with a notebook model and with a text model. Different models for the same file path do not directly communicate with each other.
 
-`Document widgets <http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.ireadywidget.html>`__ represent a view of a document model. There can be multiple document widgets associated with a single document model, and they naturally stay in sync with each other since they are views on the same underlying data model.
+`Document widgets <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html>`__ represent a view of a document model. There can be multiple document widgets associated with a single document model, and they naturally stay in sync with each other since they are views on the same underlying data model.
 
 
 The `Document

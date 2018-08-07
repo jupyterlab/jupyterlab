@@ -34,6 +34,11 @@ export interface IEntry {
   description: string;
 
   /**
+   * A representative link of the package.
+   */
+  url: string;
+
+  /**
    * Whether the extension is currently installed.
    */
   installed: boolean;
@@ -72,6 +77,11 @@ export interface IInstalledEntry {
    * A short description of the extension.
    */
   description: string;
+
+  /**
+   * A representative link of the package.
+   */
+  url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -163,7 +173,8 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Translate search results from an npm repository query into entries.
+   * Translate search results from an npm repository query into entries
+   * and remove entries with 'deprecated' in the keyword list
    *
    * @param res Promise to an npm query result.
    */
@@ -173,9 +184,16 @@ export class ListModel extends VDomModel {
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
+      if (pkg.keywords.indexOf('deprecated') >= 0) {
+        continue;
+      }
       entries[pkg.name] = {
         name: pkg.name,
         description: pkg.description,
+        url:
+          'homepage' in pkg.links
+            ? pkg.links.homepage
+            : 'repository' in pkg.links ? pkg.links.repository : pkg.links.npm,
         installed: false,
         enabled: false,
         status: null,
@@ -202,6 +220,7 @@ export class ListModel extends VDomModel {
           entries[pkg.name] = {
             name: pkg.name,
             description: pkg.description,
+            url: pkg.url,
             installed: pkg.installed !== false,
             enabled: pkg.enabled,
             status: pkg.status,

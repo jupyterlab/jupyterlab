@@ -458,7 +458,7 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
 
   // Render in img so that user can save it easily
   const img = new Image();
-  img.src = `data:image/svg+xml,${source}`;
+  img.src = `data:image/svg+xml,${encodeURIComponent(source)}`;
   host.appendChild(img);
 
   if (unconfined === true) {

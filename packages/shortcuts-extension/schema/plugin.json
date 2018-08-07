@@ -26,6 +26,17 @@
       },
       "type": "object"
     },
+    "tabmenu:activate-previously-used-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previously Used Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": {},
       "properties": {
@@ -147,6 +158,17 @@
         "keys": { "default": ["Accel S"] },
         "selector": { "default": "body" },
         "title": { "default": "Save" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "docmanager:save-as": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save As" },
         "category": { "default": "File Operations" }
       },
       "type": "object"
@@ -952,7 +974,7 @@
         "keys": { "default": ["Shift Tab"] },
         "selector": {
           "default":
-            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
@@ -966,7 +988,7 @@
         "keys": { "default": ["Shift Tab"] },
         "selector": {
           "default":
-            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }

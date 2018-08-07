@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -17,74 +17,74 @@ describe('@jupyterlab/cells', () => {
   describe('InputArea', () => {
     describe('#constructor()', () => {
       it('should create an input area widget', () => {
-        let widget = new InputArea({ model });
-        expect(widget).to.be.an(InputArea);
+        const widget = new InputArea({ model });
+        expect(widget).to.be.an.instanceof(InputArea);
       });
     });
 
     describe('#model', () => {
       it('should be the model used by the input area', () => {
-        let widget = new InputArea({ model });
-        expect(widget.model).to.be(model);
+        const widget = new InputArea({ model });
+        expect(widget.model).to.equal(model);
       });
     });
 
     describe('#contentFactory', () => {
       it('should be the content factory used by the input area', () => {
-        let widget = new InputArea({ model });
-        expect(widget.contentFactory).to.be(InputArea.defaultContentFactory);
+        const widget = new InputArea({ model });
+        expect(widget.contentFactory).to.equal(InputArea.defaultContentFactory);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be the editor widget used by the input area', () => {
-        let widget = new InputArea({ model });
-        expect(widget.editorWidget).to.be.a(CodeEditorWrapper);
+        const widget = new InputArea({ model });
+        expect(widget.editorWidget).to.be.an.instanceof(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be the code editor used by the cell', () => {
-        let widget = new InputArea({ model });
-        expect(widget.editor.host).to.be(widget.editorWidget.node);
+        const widget = new InputArea({ model });
+        expect(widget.editor.host).to.equal(widget.editorWidget.node);
       });
     });
 
     describe('#promptNode', () => {
       it('should be the prompt node used by the cell', () => {
-        let widget = new InputArea({ model });
+        const widget = new InputArea({ model });
         expect(widget.promptNode.className).to.contain('jp-InputPrompt');
       });
     });
 
     describe('#renderInput()', () => {
       it('should render the widget', () => {
-        let widget = new InputArea({ model });
-        let rendered = new Widget();
+        const widget = new InputArea({ model });
+        const rendered = new Widget();
         Widget.attach(widget, document.body);
         widget.renderInput(rendered);
-        expect(rendered.isAttached).to.be(true);
+        expect(rendered.isAttached).to.equal(true);
         widget.dispose();
       });
     });
 
     describe('#showEditor()', () => {
       it('should be called to show the editor', () => {
-        let widget = new InputArea({ model });
-        let rendered = new Widget();
+        const widget = new InputArea({ model });
+        const rendered = new Widget();
         Widget.attach(widget, document.body);
         widget.renderInput(rendered);
         widget.showEditor();
-        expect(rendered.isAttached).to.be(false);
+        expect(rendered.isAttached).to.equal(false);
         widget.dispose();
       });
     });
 
     describe('#setPrompt()', () => {
       it('should change the value of the input prompt', () => {
-        let widget = new InputArea({ model });
-        let prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
-        expect(prompt.textContent).to.be.empty();
+        const widget = new InputArea({ model });
+        const prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
+        expect(prompt.textContent).to.be.empty;
         widget.setPrompt('foo');
         expect(prompt.textContent).to.contain('foo');
       });
@@ -92,40 +92,42 @@ describe('@jupyterlab/cells', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
-        let widget = new InputArea({ model });
+        const widget = new InputArea({ model });
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('.ContentFactory', () => {
       describe('#constructor()', () => {
         it('should create a new content factory', () => {
-          let factory = new InputArea.ContentFactory();
-          expect(factory).to.be.an(InputArea.ContentFactory);
+          const factory = new InputArea.ContentFactory();
+          expect(factory).to.be.an.instanceof(InputArea.ContentFactory);
         });
       });
 
       describe('#editorFactory', () => {
         it('should be the code editor factory being used', () => {
-          let factory = new InputArea.ContentFactory();
-          expect(factory.editorFactory).to.be(InputArea.defaultEditorFactory);
+          const factory = new InputArea.ContentFactory();
+          expect(factory.editorFactory).to.equal(
+            InputArea.defaultEditorFactory
+          );
         });
       });
 
       describe('#createInputPrompt()', () => {
         it('should create an input prompt', () => {
-          let factory = new InputArea.ContentFactory();
-          expect(factory.createInputPrompt()).to.be.an(InputPrompt);
+          const factory = new InputArea.ContentFactory();
+          expect(factory.createInputPrompt()).to.be.an.instanceof(InputPrompt);
         });
       });
     });
 
     describe('.defaultContentFactory', () => {
       it('should be an instance of the content factory', () => {
-        expect(InputArea.defaultContentFactory).to.be.an(
+        expect(InputArea.defaultContentFactory).to.be.an.instanceof(
           InputArea.ContentFactory
         );
       });
@@ -133,9 +135,9 @@ describe('@jupyterlab/cells', () => {
 
     describe('.defaultEditorFactory', () => {
       it('should be an editor factory', () => {
-        let factory = InputArea.defaultEditorFactory;
-        let host = document.createElement('div');
-        expect(factory({ host, model }).host).to.be(host);
+        const factory = InputArea.defaultEditorFactory;
+        const host = document.createElement('div');
+        expect(factory({ host, model }).host).to.equal(host);
       });
     });
   });
@@ -143,17 +145,17 @@ describe('@jupyterlab/cells', () => {
   describe('InputPrompt', () => {
     describe('#constructor()', () => {
       it('should create an input prompt', () => {
-        let widget = new InputPrompt();
-        expect(widget).to.be.an(InputPrompt);
+        const widget = new InputPrompt();
+        expect(widget).to.be.an.instanceof(InputPrompt);
       });
     });
 
     describe('#executionCount', () => {
       it('should be the execution count for the prompt', () => {
-        let widget = new InputPrompt();
-        expect(widget.executionCount).to.be(null);
+        const widget = new InputPrompt();
+        expect(widget.executionCount).to.be.null;
         widget.executionCount = '1';
-        expect(widget.executionCount).to.be('1');
+        expect(widget.executionCount).to.equal('1');
       });
     });
   });

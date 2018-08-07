@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -29,15 +29,13 @@ import {
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 
 import {
-  createBaseCellFactory,
-  createCodeCellFactory,
-  rendermime,
-  editorFactory
-} from '../../notebook-utils';
-
-import { createClientSession } from '../../utils';
+  createClientSession,
+  framePromise,
+  NBTestUtils
+} from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
+const rendermime = NBTestUtils.defaultRenderMime();
 
 class LogBaseCell extends Cell {
   methods: string[] = [];
@@ -45,7 +43,7 @@ class LogBaseCell extends Cell {
   constructor() {
     super({
       model: new CellModel({}),
-      contentFactory: createBaseCellFactory()
+      contentFactory: NBTestUtils.createBaseCellFactory()
     });
   }
 
@@ -71,7 +69,7 @@ class LogCodeCell extends CodeCell {
   constructor() {
     super({
       model: new CodeCellModel({}),
-      contentFactory: createCodeCellFactory(),
+      contentFactory: NBTestUtils.createCodeCellFactory(),
       rendermime
     });
   }
@@ -97,31 +95,33 @@ class LogMarkdownCell extends MarkdownCell {
 }
 
 describe('cells/widget', () => {
+  const editorFactory = NBTestUtils.editorFactory;
+
   describe('Cell', () => {
-    let contentFactory = createBaseCellFactory();
-    let model = new CellModel({});
+    const contentFactory = NBTestUtils.createBaseCellFactory();
+    const model = new CellModel({});
 
     describe('#constructor()', () => {
       it('should create a base cell widget', () => {
-        let widget = new Cell({ model, contentFactory });
-        expect(widget).to.be.a(Cell);
+        const widget = new Cell({ model, contentFactory });
+        expect(widget).to.be.an.instanceof(Cell);
       });
 
       it('should accept a custom contentFactory', () => {
-        contentFactory = createBaseCellFactory();
-        let widget = new Cell({ model, contentFactory });
-        expect(widget).to.be.a(Cell);
+        const contentFactory = NBTestUtils.createBaseCellFactory();
+        const widget = new Cell({ model, contentFactory });
+        expect(widget).to.be.an.instanceof(Cell);
       });
 
       it('shoule accept a custom editorConfig', () => {
-        let editorConfig: Partial<CodeEditor.IConfig> = {
+        const editorConfig: Partial<CodeEditor.IConfig> = {
           insertSpaces: false,
           matchBrackets: false
         };
-        let widget = new Cell({ editorConfig, model, contentFactory });
-        expect(widget.editor.getOption('insertSpaces')).to.be(false);
-        expect(widget.editor.getOption('matchBrackets')).to.be(false);
-        expect(widget.editor.getOption('lineNumbers')).to.be(
+        const widget = new Cell({ editorConfig, model, contentFactory });
+        expect(widget.editor.getOption('insertSpaces')).to.equal(false);
+        expect(widget.editor.getOption('matchBrackets')).to.equal(false);
+        expect(widget.editor.getOption('lineNumbers')).to.equal(
           CodeEditor.defaultConfig.lineNumbers
         );
       });
@@ -129,128 +129,123 @@ describe('cells/widget', () => {
 
     describe('#model', () => {
       it('should be the model used by the widget', () => {
-        let model = new CellModel({});
-        let widget = new Cell({ model, contentFactory });
-        expect(widget.model).to.be(model);
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory });
+        expect(widget.model).to.equal(model);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be a code editor widget', () => {
-        let widget = new Cell({ model, contentFactory });
-        expect(widget.editorWidget).to.be.a(CodeEditorWrapper);
+        const widget = new Cell({ model, contentFactory });
+        expect(widget.editorWidget).to.be.an.instanceof(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be a cell editor', () => {
-        let widget = new Cell({ model, contentFactory });
-        expect(widget.editor.uuid).to.be.ok();
+        const widget = new Cell({ model, contentFactory });
+        expect(widget.editor.uuid).to.be.ok;
       });
     });
 
     describe('#inputArea', () => {
       it('should be the input area for the cell', () => {
-        let widget = new Cell({ model });
-        expect(widget.inputArea).to.be.an(InputArea);
+        const widget = new Cell({ model });
+        expect(widget.inputArea).to.be.an.instanceof(InputArea);
       });
     });
 
     describe('#readOnly', () => {
       it('should be a boolean', () => {
-        let widget = new Cell({ model, contentFactory });
-        expect(typeof widget.readOnly).to.be('boolean');
+        const widget = new Cell({ model, contentFactory });
+        expect(typeof widget.readOnly).to.equal('boolean');
       });
 
       it('should default to false', () => {
-        let widget = new Cell({ model, contentFactory });
-        expect(widget.readOnly).to.be(false);
+        const widget = new Cell({ model, contentFactory });
+        expect(widget.readOnly).to.equal(false);
       });
 
       it('should be settable', () => {
-        let widget = new Cell({
+        const widget = new Cell({
           model,
           contentFactory
         });
         widget.readOnly = true;
-        expect(widget.readOnly).to.be(true);
+        expect(widget.readOnly).to.equal(true);
       });
 
-      it('should ignore being set to the same value', done => {
-        let widget = new LogBaseCell();
+      it('should ignore being set to the same value', async () => {
+        const widget = new LogBaseCell();
         widget.readOnly = true;
         widget.readOnly = true;
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.eql(['onUpdateRequest']);
-          done();
-        });
+        await framePromise();
+        expect(widget.methods).to.deep.equal(['onUpdateRequest']);
       });
     });
 
     describe('#inputCollapsed', () => {
       it('should be the view state of the input being collapsed', () => {
-        let widget = new LogBaseCell();
-        expect(widget.inputHidden).to.be(false);
+        const widget = new LogBaseCell();
+        expect(widget.inputHidden).to.equal(false);
         widget.inputHidden = true;
-        expect(widget.inputHidden).to.be(true);
+        expect(widget.inputHidden).to.equal(true);
       });
     });
 
     describe('#onActivateRequest()', () => {
-      it('should focus the cell editor', done => {
-        let widget = new LogBaseCell();
+      it('should focus the cell editor', async () => {
+        const widget = new LogBaseCell();
         Widget.attach(widget, document.body);
         widget.activate();
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onActivateRequest');
-          requestAnimationFrame(() => {
-            expect(widget.editor.hasFocus()).to.be(true);
-            widget.dispose();
-            done();
-          });
-        });
+        await framePromise();
+        expect(widget.methods).to.contain('onActivateRequest');
+        await framePromise();
+        expect(widget.editor.hasFocus()).to.equal(true);
+        widget.dispose();
       });
     });
 
     describe('#setPrompt()', () => {
       it('should not throw an error (full test in input area)', () => {
-        let widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory });
         expect(() => {
           widget.setPrompt(void 0);
-        }).to.not.throwError();
+        }).to.not.throw;
         expect(() => {
           widget.setPrompt(null);
-        }).to.not.throwError();
+        }).to.not.throw();
         expect(() => {
           widget.setPrompt('');
-        }).to.not.throwError();
+        }).to.not.throw();
         expect(() => {
           widget.setPrompt('null');
-        }).to.not.throwError();
+        }).to.not.throw();
         expect(() => {
           widget.setPrompt('test');
-        }).to.not.throwError();
+        }).to.not.throw();
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
-        let widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory });
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory });
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('#onAfterAttach()', () => {
       it('should run when widget is attached', () => {
-        let widget = new LogBaseCell();
+        const widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onAfterAttach');
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
@@ -260,7 +255,7 @@ describe('cells/widget', () => {
 
     describe('#onUpdateRequest()', () => {
       it('should update the widget', () => {
-        let widget = new LogBaseCell();
+        const widget = new LogBaseCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -269,76 +264,80 @@ describe('cells/widget', () => {
 
     describe('#.defaultContentFactory', () => {
       it('should be a contentFactory', () => {
-        expect(Cell.defaultContentFactory).to.be.a(Cell.ContentFactory);
+        expect(Cell.defaultContentFactory).to.be.an.instanceof(
+          Cell.ContentFactory
+        );
       });
     });
 
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a ContentFactory', () => {
-          let factory = new Cell.ContentFactory({ editorFactory });
-          expect(factory).to.be.a(Cell.ContentFactory);
+          const factory = new Cell.ContentFactory({ editorFactory });
+          expect(factory).to.be.an.instanceof(Cell.ContentFactory);
         });
       });
 
       describe('#editorFactory', () => {
         it('should be the editor factory used by the content factory', () => {
-          let factory = new Cell.ContentFactory({ editorFactory });
-          expect(factory.editorFactory).to.be(editorFactory);
+          const factory = new Cell.ContentFactory({ editorFactory });
+          expect(factory.editorFactory).to.equal(editorFactory);
         });
       });
 
       describe('#createCellHeader()', () => {
         it('should create a new cell header', () => {
-          let factory = new Cell.ContentFactory();
-          expect(factory.createCellHeader()).to.be.a(CellHeader);
+          const factory = new Cell.ContentFactory();
+          expect(factory.createCellHeader()).to.be.an.instanceof(CellHeader);
         });
       });
 
       describe('#createCellFooter()', () => {
         it('should create a new cell footer', () => {
-          let factory = new Cell.ContentFactory();
-          expect(factory.createCellFooter()).to.be.a(CellFooter);
+          const factory = new Cell.ContentFactory();
+          expect(factory.createCellFooter()).to.be.an.instanceof(CellFooter);
         });
       });
 
       describe('#createOutputPrompt()', () => {
         it('should create a new output prompt', () => {
-          let factory = new Cell.ContentFactory();
-          expect(factory.createOutputPrompt()).to.be.an(OutputPrompt);
+          const factory = new Cell.ContentFactory();
+          expect(factory.createOutputPrompt()).to.be.an.instanceof(
+            OutputPrompt
+          );
         });
       });
 
       describe('#createInputPrompt()', () => {
         it('should create a new input prompt', () => {
-          let factory = new Cell.ContentFactory();
-          expect(factory.createInputPrompt()).to.be.an(InputPrompt);
+          const factory = new Cell.ContentFactory();
+          expect(factory.createInputPrompt()).to.be.an.instanceof(InputPrompt);
         });
       });
     });
   });
 
   describe('CodeCell', () => {
-    let contentFactory = createCodeCellFactory();
-    let model = new CodeCellModel({});
+    const contentFactory = NBTestUtils.createCodeCellFactory();
+    const model = new CodeCellModel({});
 
     describe('#constructor()', () => {
       it('should create a code cell widget', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(CodeCell);
+        const widget = new CodeCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.an.instanceof(CodeCell);
       });
 
       it('should accept a custom contentFactory', () => {
-        contentFactory = createCodeCellFactory();
-        let widget = new CodeCell({ model, contentFactory, rendermime });
-        expect(widget).to.be.a(CodeCell);
+        const contentFactory = NBTestUtils.createCodeCellFactory();
+        const widget = new CodeCell({ model, contentFactory, rendermime });
+        expect(widget).to.be.an.instanceof(CodeCell);
       });
     });
 
     describe('#outputArea', () => {
       it('should be the output area used by the cell', () => {
-        let widget = new CodeCell({ model, rendermime });
-        expect(widget.outputArea).to.be.an(OutputArea);
+        const widget = new CodeCell({ model, rendermime });
+        expect(widget.outputArea).to.be.an.instanceof(OutputArea);
       });
     });
 
@@ -346,24 +345,24 @@ describe('cells/widget', () => {
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
         let widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputHidden).to.be(false);
+        expect(widget.outputHidden).to.equal(false);
 
         collapsedModel.metadata.set('collapsed', true);
         collapsedModel.metadata.set('jupyter', { outputs_hidden: false });
         widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputHidden).to.be(true);
+        expect(widget.outputHidden).to.equal(true);
 
         collapsedModel.metadata.set('collapsed', false);
         collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
         widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputHidden).to.be(true);
+        expect(widget.outputHidden).to.equal(true);
       });
 
       it('should be the view state of the output being collapsed', () => {
-        let widget = new CodeCell({ model, rendermime });
-        expect(widget.outputHidden).to.be(false);
+        const widget = new CodeCell({ model, rendermime });
+        expect(widget.outputHidden).to.equal(false);
         widget.outputHidden = true;
-        expect(widget.outputHidden).to.be(true);
+        expect(widget.outputHidden).to.equal(true);
       });
     });
 
@@ -371,40 +370,40 @@ describe('cells/widget', () => {
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
         let widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputsScrolled).to.be(false);
+        expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', false);
         widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputsScrolled).to.be(false);
+        expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', 'auto');
         widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputsScrolled).to.be(false);
+        expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', true);
         widget = new CodeCell({ model: collapsedModel, rendermime });
-        expect(widget.outputsScrolled).to.be(true);
+        expect(widget.outputsScrolled).to.equal(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
+        const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
+        const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('#onUpdateRequest()', () => {
       it('should update the widget', () => {
-        let widget = new LogCodeCell();
+        const widget = new LogCodeCell();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -413,8 +412,8 @@ describe('cells/widget', () => {
 
     describe('#onMetadataChanged()', () => {
       it('should fire when model metadata changes', () => {
-        let method = 'onMetadataChanged';
-        let widget = new LogCodeCell();
+        const method = 'onMetadataChanged';
+        const widget = new LogCodeCell();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
@@ -424,15 +423,10 @@ describe('cells/widget', () => {
     describe('.execute()', () => {
       let session: IClientSession;
 
-      beforeEach(() => {
-        return createClientSession()
-          .then(s => {
-            session = s;
-            return s.initialize();
-          })
-          .then(() => {
-            return session.kernel.ready;
-          });
+      beforeEach(async () => {
+        session = await createClientSession();
+        await session.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(() => {
@@ -440,101 +434,101 @@ describe('cells/widget', () => {
       });
 
       it('should fulfill a promise if there is no code to execute', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
+        const widget = new CodeCell({ model, rendermime, contentFactory });
         return CodeCell.execute(widget, session);
       });
 
-      it('should fulfill a promise if there is code to execute', () => {
-        let widget = new CodeCell({ model, rendermime, contentFactory });
+      it('should fulfill a promise if there is code to execute', async () => {
+        const widget = new CodeCell({ model, rendermime, contentFactory });
         let originalCount: number;
         widget.model.value.text = 'foo';
         originalCount = widget.model.executionCount;
-        return CodeCell.execute(widget, session).then(() => {
-          let executionCount = widget.model.executionCount;
-          expect(executionCount).to.not.equal(originalCount);
-        });
+        await CodeCell.execute(widget, session);
+        const executionCount = widget.model.executionCount;
+        expect(executionCount).to.not.equal(originalCount);
       });
     });
   });
 
   describe('MarkdownCell', () => {
-    let contentFactory = createBaseCellFactory();
-    let model = new MarkdownCellModel({});
+    const contentFactory = NBTestUtils.createBaseCellFactory();
+    const model = new MarkdownCellModel({});
 
     describe('#constructor()', () => {
       it('should create a markdown cell widget', () => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(MarkdownCell);
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.an.instanceof(MarkdownCell);
       });
 
       it('should accept a custom contentFactory', () => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
-        expect(widget).to.be.a(MarkdownCell);
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        expect(widget).to.be.an.instanceof(MarkdownCell);
       });
 
       it('should set the default mimetype to text/x-ipythongfm', () => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
-        expect(widget.model.mimeType).to.be('text/x-ipythongfm');
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        expect(widget.model.mimeType).to.equal('text/x-ipythongfm');
       });
     });
 
     describe('#rendered', () => {
-      it('should default to true', done => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+      it('should default to true', async () => {
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
         Widget.attach(widget, document.body);
-        expect(widget.rendered).to.be(true);
-        requestAnimationFrame(() => {
-          expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(true);
-          widget.dispose();
-          done();
-        });
+        expect(widget.rendered).to.equal(true);
+        await framePromise();
+        expect(widget.node.classList.contains(RENDERED_CLASS)).to.equal(true);
       });
 
-      it('should unrender the widget', done => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+      it('should unrender the widget', async () => {
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
         Widget.attach(widget, document.body);
         widget.rendered = false;
-        requestAnimationFrame(() => {
-          expect(widget.node.classList.contains(RENDERED_CLASS)).to.be(false);
-          widget.dispose();
-          done();
-        });
+        await framePromise();
+        expect(widget.node.classList.contains(RENDERED_CLASS)).to.equal(false);
+        widget.dispose();
       });
 
-      it('should ignore being set to the same value', done => {
-        let widget = new LogMarkdownCell({ model, rendermime, contentFactory });
+      it('should ignore being set to the same value', async () => {
+        const widget = new LogMarkdownCell({
+          model,
+          rendermime,
+          contentFactory
+        });
         Widget.attach(widget, document.body);
         widget.rendered = false;
         widget.rendered = false;
-        requestAnimationFrame(() => {
-          let updates = widget.methods.filter(method => {
-            return method === 'onUpdateRequest';
-          });
-          expect(updates).to.have.length(1);
-          widget.dispose();
-          done();
+        await framePromise();
+        const updates = widget.methods.filter(method => {
+          return method === 'onUpdateRequest';
         });
+        expect(updates).to.have.length(1);
+        widget.dispose();
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let widget = new MarkdownCell({ model, rendermime, contentFactory });
+        const widget = new MarkdownCell({ model, rendermime, contentFactory });
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('#onUpdateRequest()', () => {
       it('should update the widget', () => {
-        let widget = new LogMarkdownCell({ model, rendermime, contentFactory });
+        const widget = new LogMarkdownCell({
+          model,
+          rendermime,
+          contentFactory
+        });
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -543,13 +537,13 @@ describe('cells/widget', () => {
   });
 
   describe('RawCell', () => {
-    let contentFactory = createBaseCellFactory();
+    const contentFactory = NBTestUtils.createBaseCellFactory();
 
     describe('#constructor()', () => {
       it('should create a raw cell widget', () => {
-        let model = new RawCellModel({});
-        let widget = new RawCell({ model, contentFactory });
-        expect(widget).to.be.a(RawCell);
+        const model = new RawCellModel({});
+        const widget = new RawCell({ model, contentFactory });
+        expect(widget).to.be.an.instanceof(RawCell);
       });
     });
   });
@@ -557,7 +551,7 @@ describe('cells/widget', () => {
   describe('CellHeader', () => {
     describe('#constructor()', () => {
       it('should create a new cell header', () => {
-        expect(new CellHeader()).to.be.a(CellHeader);
+        expect(new CellHeader()).to.be.an.instanceof(CellHeader);
       });
     });
   });
@@ -565,7 +559,7 @@ describe('cells/widget', () => {
   describe('CellFooter', () => {
     describe('#constructor()', () => {
       it('should create a new cell footer', () => {
-        expect(new CellFooter()).to.be.a(CellFooter);
+        expect(new CellFooter()).to.be.an.instanceof(CellFooter);
       });
     });
   });

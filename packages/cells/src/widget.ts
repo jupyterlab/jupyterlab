@@ -797,7 +797,9 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session)
+    return OutputArea.execute(code, cell.outputArea, session, {
+      cellId: model.id
+    })
       .then(msg => {
         model.executionCount = msg.content.execution_count;
         return msg;
