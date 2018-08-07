@@ -22,6 +22,8 @@ import {
 
 import { ArrayExt, each, toArray } from '@phosphor/algorithm';
 
+import { JSONObject } from '@phosphor/coreutils';
+
 import { ElementExt } from '@phosphor/domutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -31,7 +33,6 @@ import * as React from 'react';
 import { INotebookModel } from './model';
 
 import { Notebook } from './widget';
-import { JSONObject } from '../../../node_modules/@phosphor/coreutils';
 
 // The message to display to the user when prompting to trust the notebook.
 const TRUST_MESSAGE = (
