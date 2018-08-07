@@ -16,10 +16,87 @@ import { each } from '@phosphor/algorithm';
 import { TableOfContentsRegistry } from './registry';
 
 import { IHeading, TableOfContents } from './toc';
+import { CodeComponent } from './codemirror';
+
+import * as React from 'react';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
+
+interface INotebookHeading extends IHeading {
+  numbering?: string | null;
+  type: string;
+  prompt?: string;
+}
+
+interface NotebookItemRendererOptions {
+  needNumbering: boolean;
+  sanitizer: ISanitizer;
+}
+
+function notebookItemRenderer(
+  options: NotebookItemRendererOptions,
+  item: INotebookHeading
+) {
+  const levelsSizes: { [level: number]: string } = {
+    1: '18.74',
+    2: '16.02',
+    3: '13.69',
+    4: '12',
+    5: '11',
+    6: '10'
+  };
+  let jsx;
+  if (item.type === 'markdown' || item.type === 'header') {
+    const paddingLeft = 22;
+    let fontSize = '9px';
+    let numbering =
+      item.numbering && options.needNumbering ? item.numbering : '';
+    if (item.type === 'header') {
+      fontSize = levelsSizes[item.level] + 'px';
+    }
+    if (item.html) {
+      jsx = (
+        <span
+          dangerouslySetInnerHTML={{
+            __html:
+              numbering +
+              options.sanitizer.sanitize(item.html, Private.sanitizerOptions)
+          }}
+          className="markdown-cell"
+          style={{ fontSize, paddingLeft }}
+        />
+      );
+    } else {
+      jsx = (
+        <span className="markdown-cell" style={{ fontSize, paddingLeft }}>
+          {numbering + item.text}
+        </span>
+      );
+    }
+  } else if (item.type === 'code') {
+    jsx = (
+      <div className="toc-code-cell-div">
+        <div className="toc-code-cell-prompt">{item.prompt}</div>
+        <span className={'toc-code-span'}>
+          <CodeComponent code={item.text!} theme="jupyter" />
+        </span>
+      </div>
+    );
+  } else if (item.type === 'raw') {
+    jsx = (
+      <div className="toc-code-cell-div">
+        <span className={'toc-code-span'}>
+          <CodeComponent code={item.text!} theme="none" />
+        </span>
+      </div>
+    );
+  } else {
+    jsx = <div />;
+  }
+  return jsx;
+}
 
 /**
  * Create a TOC generator for notebooks.
@@ -37,8 +114,17 @@ export function createNotebookGenerator(
   return {
     tracker,
     usesLatex: true,
+    itemRenderer: (item: INotebookHeading) => {
+      return notebookItemRenderer(
+        {
+          needNumbering: needNumbering,
+          sanitizer: sanitizer
+        },
+        item
+      );
+    },
     generate: panel => {
-      let headings: IHeading[] = [];
+      let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
       each(panel.content.widgets, cell => {
         let model = cell.model;
@@ -60,7 +146,8 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            // let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = -1;
             headings = headings.concat(
               Private.getCodeCells(
                 text,
@@ -89,7 +176,8 @@ export function createNotebookGenerator(
                 el.scrollIntoView();
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            // let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = -1;
             let numbering = true;
             if (widget != null) {
               numbering = widget.needNumbering;
@@ -123,7 +211,8 @@ export function createNotebookGenerator(
             if (widget != null) {
               numbering = widget.needNumbering;
             }
-            let lastLevel = Private.getLastLevel(headings);
+            // let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = -1;
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 cell.node,
@@ -143,7 +232,8 @@ export function createNotebookGenerator(
                 }
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            // let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = -1;
             headings = headings.concat(
               Private.getMarkdownHeadings(
                 model.value.text,
@@ -165,7 +255,8 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            // let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = -1;
             headings = headings.concat(
               Private.getRawCells(
                 text,
@@ -302,7 +393,9 @@ export function createLatexGenerator(
               column: 0
             });
           };
-          headings.push({ text, level, onClick, type: 'heading' });
+          // TODO: HEADER!!!
+          // headings.push({ text, level, onClick, type: 'heading' });
+          headings.push({ text, level, onClick });
         }
       });
       return headings;
@@ -314,7 +407,7 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
-  export function getLastLevel(headings: IHeading[]) {
+  /* export function getLastLevel(headings: IHeading[]) {
     if (headings.length > 0) {
       let location = headings.length - 1;
       while (location >= 0) {
@@ -325,7 +418,7 @@ namespace Private {
       }
     }
     return 0;
-  }
+  } */
 
   export function incrementNumberingDict(dict: any, level: number) {
     if (dict[level + 1] != undefined) {
@@ -358,10 +451,10 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any
-  ): IHeading[] {
+  ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: IHeading[] = [];
+    let headings: INotebookHeading[] = [];
 
     // Iterate over the lines to get the header level and
     // the text for the line.
@@ -376,7 +469,8 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
 
@@ -387,7 +481,8 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
 
@@ -399,7 +494,8 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
     });
@@ -415,10 +511,10 @@ namespace Private {
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
     lastLevel: number
-  ): IHeading[] {
+  ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: IHeading[] = [];
+    let headings: INotebookHeading[] = [];
     // Iterate over the lines to get the header level and
     // the text for the line.
     let line = lines[0];
@@ -435,6 +531,7 @@ namespace Private {
       // Take special care to parse markdown links into raw text.
       const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
+      // TODO: HEADER!!!
       headings.push({ text, level, numbering, onClick, type: 'header' });
     }
 
@@ -444,6 +541,7 @@ namespace Private {
       // Take special care to parse markdown links into raw text.
       const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
+      // TODO: HEADER!!!
       headings.push({ text, level, numbering, onClick, type: 'header' });
     }
 
@@ -454,6 +552,7 @@ namespace Private {
       const level = parseInt(match3[1], 10);
       const text = match3[2];
       let numbering = Private.generateNumbering(numberingDict, level);
+      // TODO: HEADER!!!
       headings.push({ text, level, numbering, onClick, type: 'header' });
     } else {
       headings.push({
@@ -472,8 +571,8 @@ namespace Private {
     numberingDict: any,
     executionCount: string,
     lastLevel: number
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
@@ -488,8 +587,8 @@ namespace Private {
         text: headingText,
         level,
         onClick,
-        prompt: executionCount.substring(3),
-        type: 'code'
+        type: 'code',
+        prompt: executionCount.substring(3)
       });
     }
     return headings;
@@ -500,8 +599,8 @@ namespace Private {
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
     lastLevel: number
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
@@ -532,8 +631,8 @@ namespace Private {
     numberingDict: any,
     lastLevel: number,
     needNumbering = false
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
@@ -541,7 +640,7 @@ namespace Private {
         if (markdownCell.innerHTML) {
           headings.push({
             level: lastLevel + 1,
-            html: sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions),
+            html: markdownCell.innerHTML,
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
             type: 'markdown'
@@ -568,6 +667,7 @@ namespace Private {
           numbering +
           '</span>';
         heading.innerHTML = numberingElement + html;
+        // TODO: HEADER!!! (type: header)
         headings.push({
           level,
           text,
@@ -620,7 +720,7 @@ namespace Private {
    * sanitize HTML headings, if they are given. We specifically
    * disallow anchor tags, since we are adding our own.
    */
-  const sanitizerOptions = {
+  export const sanitizerOptions = {
     allowedTags: [
       'p',
       'blockquote',

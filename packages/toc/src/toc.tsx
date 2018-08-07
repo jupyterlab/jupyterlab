@@ -15,8 +15,6 @@ import { Widget } from '@phosphor/widgets';
 
 import { TableOfContentsRegistry } from './registry';
 
-import { CodeComponent } from './codemirror';
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { INotebookTracker } from '@jupyterlab/notebook';
@@ -137,11 +135,18 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
+    let itemRenderer = (item: IHeading) => {
+      return <span>{item.text}</span>;
+    };
+    if (this._current && this._current!.generator.itemRenderer) {
+      itemRenderer = this._current!.generator.itemRenderer!;
+    }
     ReactDOM.render(
       <TOCTree
         widget={this}
         title={title}
         toc={toc}
+        itemRenderer={itemRenderer}
         defaultsLoaded={this._defaultsLoaded}
       />,
       this.node,
@@ -269,8 +274,6 @@ export interface IHeading {
    */
   level: number;
 
-  numbering?: string | null;
-
   /**
    * A function to execute when clicking the ToC
    * item. Typically this will be used to scroll
@@ -287,8 +290,6 @@ export interface IHeading {
    * already-renderd-to-html markdown headings.
    */
   html?: string | null;
-  type: string;
-  prompt?: string;
 }
 
 /**
@@ -306,6 +307,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
   toc: IHeading[];
   widget: TableOfContents;
   defaultsLoaded: any;
+  itemRenderer: (item: IHeading) => JSX.Element;
 }
 
 /**
@@ -317,6 +319,7 @@ export interface ITOCItemProps extends React.Props<TOCItem> {
    */
   heading: IHeading;
   needNumbering: boolean;
+  itemRenderer: (item: IHeading) => JSX.Element;
 }
 
 export interface ITOCItemStates {
@@ -341,25 +344,6 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
    */
   render() {
     const { heading } = this.props;
-    let level = Math.round(heading.level);
-    // Clamp the header level between 1 and six.
-    level = Math.max(Math.min(level, 6), 1);
-
-    const paddingLeft = 22; //(level - 1) * 12;
-    let fontSize;
-    let levelsSizes: { [level: number]: string } = {
-      1: '18.74',
-      2: '16.02',
-      3: '13.69',
-      4: '12',
-      5: '11',
-      6: '10'
-    };
-    if (heading.type === 'header') {
-      fontSize = levelsSizes[level] + 'px';
-    } else {
-      fontSize = '9px';
-    }
 
     // Create an onClick handler for the TOC item
     // that scrolls the anchor into view.
@@ -369,102 +353,8 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
       heading.onClick();
     };
 
-    let content;
-    let numbering =
-      heading.numbering && this.state.needNumbering ? heading.numbering : '';
-    let cellClass = heading.type === 'header' ? 'header-cell' : 'markdown-cell';
-    if (heading.html) {
-      content = (
-        <span
-          dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
-          style={{ paddingLeft, fontSize }}
-          className={cellClass}
-        />
-      );
-    } else {
-      // let collapse = this.props.children ? (
-      //   <img src={require('../static/rightarrow.svg')} />
-      // ) : "";
-      content = (
-        <span className={cellClass} style={{ paddingLeft, fontSize }}>
-          {numbering + heading.text}
-        </span>
-      );
-    }
-
+    let content = this.props.itemRenderer(heading);
     return <li onClick={handleClick}>{content}</li>;
-  }
-}
-
-export class TOCCodeCell extends React.Component<
-  ITOCItemProps,
-  ITOCItemStates
-> {
-  constructor(props: ITOCItemProps) {
-    super(props);
-    this.state = { needNumbering: this.props.needNumbering };
-  }
-
-  componentWillReceiveProps(nextProps: ITOCItemProps) {
-    this.setState({ needNumbering: nextProps.needNumbering });
-  }
-
-  /**
-   * Render the item.
-   */
-  render() {
-    const { heading } = this.props;
-    let level = Math.round(heading.level);
-    // Clamp the header level between 1 and six.
-    level = Math.max(Math.min(level, 6), 1);
-
-    const paddingLeft = 0; //(level - 1) * 12;
-
-    // Create an onClick handler for the TOC item
-    // that scrolls the anchor into view.
-    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      heading.onClick();
-    };
-    let content = null;
-    let numbering =
-      heading.numbering && this.state.needNumbering ? heading.numbering : '';
-    let theme = heading.type === 'raw' ? 'none' : 'jupyter';
-    if (heading.html) {
-      /* console.log("you're not covering this case idiot");
-      content = (
-        <span
-          className={'jp-TableOfContents-code'}
-          dangerouslySetInnerHTML={{ __html: numbering + heading.html }}
-          style={{ paddingLeft }}
-        />
-      ); */
-      content = (
-        <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.html} theme={theme} />
-        </span>
-      );
-    } else {
-      /* content = (
-        <span style={{ paddingLeft }}>
-          <pre className={'jp-TableOfContents-code'}>
-            {numbering + heading.text}
-          </pre>
-        </span>
-      ); */
-      content = (
-        <span className={'toc-code-span'} style={{ paddingLeft }}>
-          <CodeComponent code={numbering + heading.text} theme={theme} />
-        </span>
-      );
-    }
-    return (
-      <li onClick={handleClick} style={{ paddingLeft }}>
-        <div className="toc-code-cell-prompt">{heading.prompt}</div>
-        {content}
-      </li>
-    );
   }
 }
 
@@ -583,31 +473,14 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       }
     ];
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      if (el.type === 'code' && !this.state.showCode) {
-        return <div key={`emptycode-${i++}`} />;
-      } else if (el.type === 'raw' && !this.state.showRaw) {
-        return <div key={`emptyraw-${i++}`} />;
-      } else if (el.type === 'markdown' && !this.state.showMarkdown) {
-        return <div key={`emptymd-${i++}`} />;
-      } else {
-        if (el.type === 'code' || el.type === 'raw') {
-          return (
-            <TOCCodeCell
-              needNumbering={this.state.needNumbering}
-              heading={el}
-              key={`${el.text}-${el.level}-${i++}`}
-            />
-          );
-        } else {
-          return (
-            <TOCItem
-              needNumbering={this.state.needNumbering}
-              heading={el}
-              key={`${el.text}-${el.level}-${i++}`}
-            />
-          );
-        }
-      }
+      return (
+        <TOCItem
+          needNumbering={this.state.needNumbering}
+          heading={el}
+          itemRenderer={this.props.itemRenderer}
+          key={`${el.text}-${el.level}-${i++}`}
+        />
+      );
     });
     // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
     //   this.props.widget.filterByTag("test");
