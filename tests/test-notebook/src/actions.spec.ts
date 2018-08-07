@@ -254,7 +254,7 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         let count = widget.model.deletedCells.length;
         NotebookActions.deleteCells(widget);
-        expect(widget.model.deletedCells.length).to.be(count + 2);
+        expect(widget.model.deletedCells.length).to.equal(count + 2);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -484,11 +484,11 @@ describe('@jupyterlab/notebook', () => {
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         return NotebookActions.run(widget, session).then(result => {
-          expect(result).to.be(true);
-          expect(widget.model.deletedCells.length).to.be(0);
+          expect(result).to.equal(true);
+          expect(widget.model.deletedCells.length).to.equal(0);
         });
       });
-      
+
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
         const result = await NotebookActions.run(widget, session);
