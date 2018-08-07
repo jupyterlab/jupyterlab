@@ -130,11 +130,12 @@ type SessionProps<M> = {
 function Item<M>(props: SessionProps<M> & { model: M }) {
   const { model } = props;
   return (
-    <li className={ITEM_CLASS} onClick={() => props.openRequested.emit(model)}>
+    <li className={ITEM_CLASS}>
       <span className={`${ITEM_ICON_CLASS} ${props.iconClass(model)}`} />
       <span
         className={ITEM_LABEL_CLASS}
         title={props.labelTitle ? props.labelTitle(model) : ''}
+        onClick={() => props.openRequested.emit(model)}
       >
         {props.label(model)}
       </span>
