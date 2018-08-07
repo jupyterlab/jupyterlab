@@ -9,8 +9,6 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Message } from '@phosphor/messaging';
 
-import { each } from '@phosphor/algorithm';
-
 import { Widget } from '@phosphor/widgets';
 
 import { TableOfContentsRegistry } from './registry';
@@ -162,25 +160,11 @@ export class TableOfContents extends Widget {
     );
   }
 
-  private changeNumberingStateForAllCells(showNumbering: boolean) {
-    if (this._notebook.currentWidget) {
-      each(this._notebook.currentWidget.content.widgets, cell => {
-        let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        each(headingNodes, heading => {
-          if (heading.getElementsByClassName('numbering-entry').length > 0) {
-            if (!showNumbering) {
-              heading
-                .getElementsByClassName('numbering-entry')[0]
-                .setAttribute('hidden', 'true');
-            } else {
-              heading
-                .getElementsByClassName('numbering-entry')[0]
-                .removeAttribute('hidden');
-            }
-          }
-        });
-      });
+  get generator() {
+    if (this._current) {
+      return this._current.generator;
     }
+    return null;
   }
 
   /**
@@ -207,7 +191,6 @@ export class TableOfContents extends Widget {
         value
       );
     }
-    this.changeNumberingStateForAllCells(value);
   }
 
   set notebookMetadata(value: [string, any]) {
@@ -443,6 +426,11 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
     const DropdownMenu = this.renderedDropdownMenu;
+    const generator = this.props.widget.generator;
+    let Toolbar = null;
+    if (generator && generator.toolbarGenerator) {
+      Toolbar = generator.toolbarGenerator();
+    }
     const dropDownMenuItems: DropdownItem[] = [
       {
         id: 0,
@@ -489,6 +477,7 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
+        {Toolbar && <Toolbar />}
         <div className="toc-toolbar">
           <DropdownMenu
             className="celltypes-dropdown"

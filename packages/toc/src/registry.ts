@@ -67,6 +67,8 @@ export namespace TableOfContentsRegistry {
    * for a type of widget.
    */
 
+  export abstract class IGeneratorOptionsManager {}
+
   export interface IGenerator<W extends Widget = Widget> {
     /**
      * An instance tracker for the widget.
@@ -91,7 +93,11 @@ export namespace TableOfContentsRegistry {
      */
     usesLatex?: boolean;
 
+    options?: IGeneratorOptionsManager;
+
     itemRenderer?(item: IHeading): JSX.Element;
+
+    toolbarGenerator?: () => any;
 
     /**
      * A function that takes the widget, and produces

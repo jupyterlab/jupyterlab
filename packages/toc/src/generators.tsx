@@ -30,13 +30,58 @@ interface INotebookHeading extends IHeading {
   prompt?: string;
 }
 
-interface NotebookItemRendererOptions {
-  needNumbering: boolean;
+class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
+  constructor(
+    widget: TableOfContents,
+    notebook: INotebookTracker,
+    options: { needNumbering: boolean; sanitizer: ISanitizer }
+  ) {
+    super();
+    this._numbering = options.needNumbering;
+    this._widget = widget;
+    this._notebook = notebook;
+    this.sanitizer = options.sanitizer;
+  }
+
+  private changeNumberingStateForAllCells(showNumbering: boolean) {
+    if (this._notebook.currentWidget) {
+      each(this._notebook.currentWidget.content.widgets, cell => {
+        let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        each(headingNodes, heading => {
+          if (heading.getElementsByClassName('numbering-entry').length > 0) {
+            if (!showNumbering) {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .setAttribute('hidden', 'true');
+            } else {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .removeAttribute('hidden');
+            }
+          }
+        });
+      });
+    }
+  }
+
+  set numbering(value: boolean) {
+    this._widget.update();
+    this._numbering = value;
+    this.changeNumberingStateForAllCells(this._numbering);
+  }
+
+  get numbering() {
+    return this._numbering;
+  }
+
   sanitizer: ISanitizer;
+  private _numbering: boolean;
+  private _notebook: INotebookTracker;
+  private _widget: TableOfContents;
 }
 
 function notebookItemRenderer(
-  options: NotebookItemRendererOptions,
+  options: NotebookGeneratorOptionsManager,
   item: INotebookHeading
 ) {
   const levelsSizes: { [level: number]: string } = {
@@ -51,8 +96,7 @@ function notebookItemRenderer(
   if (item.type === 'markdown' || item.type === 'header') {
     const paddingLeft = 22;
     let fontSize = '9px';
-    let numbering =
-      item.numbering && options.needNumbering ? item.numbering : '';
+    let numbering = item.numbering && options.numbering ? item.numbering : '';
     if (item.type === 'header') {
       fontSize = levelsSizes[item.level] + 'px';
     }
@@ -98,6 +142,33 @@ function notebookItemRenderer(
   return jsx;
 }
 
+interface NotebookGeneratorToolbarProps {
+  defaultNumbering: boolean;
+}
+
+interface NotebookGeneratorToolbarState {}
+
+export function notebookGeneratorToolbar(
+  options: NotebookGeneratorOptionsManager,
+  tracker: INotebookTracker
+) {
+  return class extends React.Component<
+    NotebookGeneratorToolbarProps,
+    NotebookGeneratorToolbarState
+  > {
+    render() {
+      const handleOnClick = () => {
+        options.numbering = !options.numbering;
+      };
+      return (
+        <div>
+          <button onClick={handleOnClick}>Auto Numbering</button>
+        </div>
+      );
+    }
+  };
+}
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -108,20 +179,21 @@ function notebookItemRenderer(
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  widget: TableOfContents,
-  needNumbering = false
+  widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
+  const options = new NotebookGeneratorOptionsManager(widget, tracker, {
+    needNumbering: false,
+    sanitizer: sanitizer
+  });
   return {
     tracker,
     usesLatex: true,
+    options: options,
+    toolbarGenerator: () => {
+      return notebookGeneratorToolbar(options, tracker);
+    },
     itemRenderer: (item: INotebookHeading) => {
-      return notebookItemRenderer(
-        {
-          needNumbering: needNumbering,
-          sanitizer: sanitizer
-        },
-        item
-      );
+      return notebookItemRenderer(options, item);
     },
     generate: panel => {
       let headings: INotebookHeading[] = [];
@@ -178,10 +250,7 @@ export function createNotebookGenerator(
             };
             // let lastLevel = Private.getLastLevel(headings);
             let lastLevel = -1;
-            let numbering = true;
-            if (widget != null) {
-              numbering = widget.needNumbering;
-            }
+            let numbering = options.numbering;
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 outputWidget.node,
@@ -207,10 +276,7 @@ export function createNotebookGenerator(
                 }
               };
             };
-            let numbering = true;
-            if (widget != null) {
-              numbering = widget.needNumbering;
-            }
+            let numbering = options.numbering;
             // let lastLevel = Private.getLastLevel(headings);
             let lastLevel = -1;
             headings = headings.concat(
