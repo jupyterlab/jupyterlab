@@ -6,13 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 from threading import Event
 
-try:
-    from notebook.base.handlers import APIHandler
-except ImportError:
-    from jupyter_server.base.handlers import APIHandler
-
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
+
+from jupyterlab_launcher.server import APIHandler
 
 from .commands import build, clean, build_check
 

@@ -20,10 +20,7 @@ except ImportError:
 from ipython_genutils import py3compat
 from ipython_genutils.tempdir import TemporaryDirectory
 
-try:
-    from notebook.notebookapp import NotebookApp as ServerApp
-except ImportError:
-    from jupyter_server.serverapp import ServerApp
+from jupyterlab_launcher.server import ServerApp
 
 from jupyter_core import paths
 

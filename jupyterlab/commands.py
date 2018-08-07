@@ -24,11 +24,7 @@ from threading import Event
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
 from jupyterlab_launcher.process import which, Process, WatchHelper
-
-try:
-    from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
-except ImportError:
-    from jupyter_server.extensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
+from jupyterlab_launcher.server import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE

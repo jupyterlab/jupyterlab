@@ -9,13 +9,10 @@ import re
 
 from concurrent.futures import ThreadPoolExecutor
 
-try:
-    from notebook.base.handlers import APIHandler
-except ImportError:
-    from jupyter_server.base.handlers import APIHandler
-
 from tornado import gen, web
 from tornado.ioloop import IOLoop
+
+from jupyterlab_launcher.server import APIHandler
 
 from .commands import (
     get_app_info, install_extension, uninstall_extension,

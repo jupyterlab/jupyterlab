@@ -14,14 +14,9 @@ run ``python main.py``.
 import os
 from jinja2 import FileSystemLoader
 
-try:
-    from notebook.base.handlers import IPythonHandler as JupyterHandler, FileFindHandler
-    from notebook.notebookapp import NotebookApp as ServerApp
-except ImportError:
-    from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
-    from jupyter_server.serverapp import ServerApp
-
 from traitlets import Unicode
+
+from jupyterlab_launcher.server import ServerApp, JupyterHandler, FileFindHandler
 
 
 class ExampleHandler(JupyterHandler):

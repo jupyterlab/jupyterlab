@@ -5,15 +5,9 @@ Distributed under the terms of the Modified BSD License.
 import os
 from jinja2 import FileSystemLoader
 
-try:
-    from notebook.notebookapp import NotebookApp as ServerApp
-    from notebook.base.handlers import IPythonHandler as JupyterHandler, FileFindHandler
-except ImportError:
-    from jupyter_server.serverapp import ServerApp
-    from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
-
 from traitlets import Unicode
 
+from jupyterlab_launcher.server import ServerApp, JupyterHandler, FileFindHandler
 
 HERE = os.path.dirname(__file__)
 LOADER = FileSystemLoader(HERE)

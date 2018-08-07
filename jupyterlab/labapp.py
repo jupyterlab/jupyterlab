@@ -4,11 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-try:
-    from notebook.notebookapp import NotebookApp as ServerApp, aliases, flags
-except:
-    from jupyter_server.serverapp import ServerApp, aliases, flags
-
+from jupyterlab_launcher.server import ServerApp, aliases, flags
 from jupyter_core.application import JupyterApp, base_aliases
 
 from traitlets import Bool, Unicode

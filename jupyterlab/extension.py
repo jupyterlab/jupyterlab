@@ -31,13 +31,7 @@ def load_jupyter_server_extension(nbapp):
     # Delay imports to speed up jlpmapp
     from json import dumps
     from jupyterlab_launcher import add_handlers, LabConfig
-
-    try:
-        from notebook.utils import url_path_join as ujoin, url_escape
-        from notebook._version import version_info
-    except ImportError:
-        from jupyter_server.utils import url_path_join as ujoin, url_escape
-        from jupyter_server._version import version_info
+    from jupyterlab_launcher.server import url_path_join as ujoin, url_escape
 
     from tornado.ioloop import IOLoop
     from markupsafe import Markup
@@ -98,13 +92,15 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
+
+    # TODO: what to do here
     # Export the version info tuple to a JSON array. This gets printed
     # inside double quote marks, so we render it to a JSON string of the
     # JSON data (so that we can call JSON.parse on the frontend on it).
     # We also have to wrap it in `Markup` so that it isn't escaped
     # by Jinja. Otherwise, if the version has string parts these will be
     # escaped and then will have to be unescaped on the frontend.
-    page_config['notebookVersion'] = Markup(dumps(dumps(version_info))[1:-1])
+    #page_config['notebookVersion'] = Markup(dumps(dumps(version_info))[1:-1])
 
     if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)

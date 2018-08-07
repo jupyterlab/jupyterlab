@@ -6,16 +6,9 @@ Distributed under the terms of the Modified BSD License.
 import os
 from jinja2 import FileSystemLoader
 
-try:
-    from notebook.base.handlers import IPythonHandler as JupyterHandler, FileFindHandler
-    from notebook.utils import url_path_join as ujoin
-    from notebook.notebookapp import NotebookApp as ServerApp
-except ImportError:
-    from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
-    from jupyter_server.utils import url_path_join as ujoin
-    from jupyter_server.serverapp import ServerApp
-
 from traitlets import Unicode
+
+from jupyterlab_launcher.server import ServerApp, JupyterHandler, FileHandler, url_path as ujoin
 from jupyterlab_launcher.handlers import SettingsHandler, ThemesHandler
 
 HERE = os.path.dirname(__file__)
