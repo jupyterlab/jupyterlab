@@ -13,6 +13,8 @@ import { Signal } from '@phosphor/signaling';
 
 import { Kernel, KernelMessage } from '../../../lib/kernel';
 
+import { Cell } from '@jupyterlab/cells';
+
 import {
   expectFailure,
   KernelTester,
@@ -924,6 +926,23 @@ describe('Kernel.IKernel', () => {
       expect(future.isDisposed).to.equal(false);
       future.dispose();
       expect(future.isDisposed).to.equal(true);
+    });
+  });
+
+  context('#checkExecuteMetadata()', () => {
+    it('should accept cell metadata as part of request', async () => {
+      let options: KernelMessage.IExecuteRequest = {
+        code: 'test',
+        silent: false,
+        store_history: true,
+        user_expressions: {},
+        allow_stdin: false,
+        stop_on_error: false
+      };
+      let metadata = { cellId: 'test' };
+      let future = defaultKernel.requestExecute(options, false, metadata);
+      await future.done;
+      expect((future.msg.metadata = metadata));
     });
   });
 
