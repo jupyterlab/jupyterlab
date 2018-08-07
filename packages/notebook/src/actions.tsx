@@ -31,6 +31,7 @@ import * as React from 'react';
 import { INotebookModel } from './model';
 
 import { Notebook } from './widget';
+import { JSONObject } from '../../../node_modules/@phosphor/coreutils';
 
 // The message to display to the user when prompting to trust the notebook.
 const TRUST_MESSAGE = (
@@ -1542,9 +1543,15 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = notebook.widgets
+    let data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => cell.model.toJSON());
+      .map(cell => cell.model.toJSON())
+      .map(cellJSON => {
+        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+          delete (cellJSON.metadata as JSONObject).deletable;
+        }
+        return cellJSON;
+      });
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
