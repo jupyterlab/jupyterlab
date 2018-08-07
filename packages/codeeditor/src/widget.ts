@@ -13,6 +13,17 @@ import { CodeEditor } from './';
 const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
 
 /**
+ * The class name added to an editor widget that has a cursor/selection
+ * within the whitespace at the beginning of a line
+ */
+const HAS_IN_LEADING_WHITESPACE_CLASS = 'jp-mod-in-leading-whitespace';
+
+/**
+ * RegExp to test for leading whitespace
+ */
+const leadingWhitespaceRe = /^\s+$/;
+
+/**
  * A widget which hosts a code editor.
  */
 export class CodeEditorWrapper extends Widget {
@@ -103,9 +114,23 @@ export class CodeEditorWrapper extends Widget {
     const { start, end } = this.editor.getSelection();
 
     if (start.column !== end.column || start.line !== end.line) {
+      // a selection was made
       this.addClass(HAS_SELECTION_CLASS);
+      this.removeClass(HAS_IN_LEADING_WHITESPACE_CLASS);
     } else {
+      // the cursor was placed
       this.removeClass(HAS_SELECTION_CLASS);
+
+      if (
+        this.editor
+          .getLine(end.line)
+          .slice(0, end.column)
+          .match(leadingWhitespaceRe)
+      ) {
+        this.addClass(HAS_IN_LEADING_WHITESPACE_CLASS);
+      } else {
+        this.removeClass(HAS_IN_LEADING_WHITESPACE_CLASS);
+      }
     }
   }
 }
