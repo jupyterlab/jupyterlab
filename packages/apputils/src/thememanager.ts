@@ -142,6 +142,13 @@ export class ThemeManager {
   }
 
   /**
+   * Test whether a given theme is light.
+   */
+  isLight(name: string): boolean {
+    return this._themes[name].isLight;
+  }
+
+  /**
    * Handle the current settings.
    */
   private _loadSettings(): void {
@@ -313,6 +320,13 @@ export namespace ThemeManager {
      * The display name of the theme.
      */
     name: string;
+
+    /**
+     * Whether the theme is light or dark. Downstream authors
+     * of extensions can use this information to customize their
+     * UI depending upon the current theme.
+     */
+    isLight: boolean;
 
     /**
      * Load the theme.

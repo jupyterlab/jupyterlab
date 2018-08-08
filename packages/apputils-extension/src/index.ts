@@ -190,6 +190,14 @@ const themes: JupyterLabPlugin<IThemeManager> = {
     // can lead to an incorrect toggle on the currently used theme.
     let currentTheme: string;
 
+    // Set data attributes on the application shell for the current theme.
+    manager.themeChanged.connect((sender, args) => {
+      currentTheme = args.newValue;
+      app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
+      app.shell.dataset.themeName = currentTheme;
+      commands.notifyCommandChanged(CommandIDs.changeTheme);
+    });
+
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
         const theme = args['theme'] as string;
@@ -201,9 +209,7 @@ const themes: JupyterLabPlugin<IThemeManager> = {
         if (theme === manager.theme) {
           return;
         }
-        currentTheme = theme;
         manager.setTheme(theme);
-        commands.notifyCommandChanged(CommandIDs.changeTheme);
       }
     });
 
