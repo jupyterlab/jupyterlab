@@ -18,6 +18,12 @@ import { TableOfContentsRegistry } from './registry';
 import { IHeading, TableOfContents } from './toc';
 import { CodeComponent } from './codemirror';
 
+import {
+  createDropdownMenu,
+  DropdownItem,
+  TagTypeDropdownItem
+} from './plugins';
+
 import * as React from 'react';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
@@ -65,8 +71,9 @@ class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGenerator
   }
 
   set numbering(value: boolean) {
-    this._widget.update();
     this._numbering = value;
+    this._widget.update();
+    this._widget.notebookMetadata = ['toc-autonumbering', this._numbering];
     this.changeNumberingStateForAllCells(this._numbering);
   }
 
@@ -74,8 +81,55 @@ class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGenerator
     return this._numbering;
   }
 
+  set showCode(value: boolean) {
+    this._showCode = value;
+    this._widget.notebookMetadata = ['toc-showcode', this._showCode];
+    this._widget.update();
+  }
+
+  get showCode() {
+    return this._showCode;
+  }
+
+  set showRaw(value: boolean) {
+    this._showRaw = value;
+    this._widget.notebookMetadata = ['toc-showraw', this._showRaw];
+    this._widget.update();
+  }
+
+  get showRaw() {
+    return this._showRaw;
+  }
+
+  set showMarkdown(value: boolean) {
+    this._showMarkdown = value;
+    this._widget.notebookMetadata = ['toc-showmarkdowntxt', this._showMarkdown];
+    this._widget.update();
+  }
+
+  get showMarkdown() {
+    return this._showMarkdown;
+  }
+
+  // initialize options, will NOT change notebook metadata
+  initializeOptions(
+    numbering: boolean,
+    showCode: boolean,
+    showRaw: boolean,
+    showMarkdown: boolean
+  ) {
+    this._numbering = numbering;
+    this._showCode = showCode;
+    this._showRaw = showRaw;
+    this._showMarkdown = showMarkdown;
+    this._widget.update();
+  }
+
   sanitizer: ISanitizer;
   private _numbering: boolean;
+  private _showCode = false;
+  private _showRaw = false;
+  private _showMarkdown = false;
   private _notebook: INotebookTracker;
   private _widget: TableOfContents;
 }
@@ -100,7 +154,7 @@ function notebookItemRenderer(
     if (item.type === 'header') {
       fontSize = levelsSizes[item.level] + 'px';
     }
-    if (item.html) {
+    if (item.html && (item.type === 'header' || options.showMarkdown)) {
       jsx = (
         <span
           dangerouslySetInnerHTML={{
@@ -112,14 +166,16 @@ function notebookItemRenderer(
           style={{ fontSize, paddingLeft }}
         />
       );
-    } else {
+    } else if (item.type === 'header' || options.showMarkdown) {
       jsx = (
         <span className="markdown-cell" style={{ fontSize, paddingLeft }}>
           {numbering + item.text}
         </span>
       );
+    } else {
+      jsx = <div />;
     }
-  } else if (item.type === 'code') {
+  } else if (item.type === 'code' && options.showCode) {
     jsx = (
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>
@@ -128,7 +184,7 @@ function notebookItemRenderer(
         </span>
       </div>
     );
-  } else if (item.type === 'raw') {
+  } else if (item.type === 'raw' && options.showRaw) {
     jsx = (
       <div className="toc-code-cell-div">
         <span className={'toc-code-span'}>
@@ -142,11 +198,13 @@ function notebookItemRenderer(
   return jsx;
 }
 
-interface NotebookGeneratorToolbarProps {
-  defaultNumbering: boolean;
-}
+interface NotebookGeneratorToolbarProps {}
 
-interface NotebookGeneratorToolbarState {}
+interface NotebookGeneratorToolbarState {
+  showCode: boolean;
+  showRaw: boolean;
+  showMarkdown: boolean;
+}
 
 export function notebookGeneratorToolbar(
   options: NotebookGeneratorOptionsManager,
@@ -156,13 +214,128 @@ export function notebookGeneratorToolbar(
     NotebookGeneratorToolbarProps,
     NotebookGeneratorToolbarState
   > {
+    constructor(props: NotebookGeneratorToolbarProps) {
+      super(props);
+      this.state = { showCode: true, showRaw: false, showMarkdown: false };
+      if (tracker.currentWidget) {
+        tracker.currentWidget.context.ready.then(() => {
+          if (tracker.currentWidget) {
+            let _numbering = tracker.currentWidget.model.metadata.get(
+              'toc-autonumbering'
+            ) as boolean;
+            let numbering =
+              _numbering != undefined ? _numbering : options.numbering;
+            let _showCode = tracker.currentWidget.model.metadata.get(
+              'toc-showcode'
+            ) as boolean;
+            let showCode =
+              _showCode != undefined ? _showCode : options.showCode;
+            let _showRaw = tracker.currentWidget.model.metadata.get(
+              'toc-showraw'
+            ) as boolean;
+            let showRaw = _showRaw != undefined ? _showRaw : options.showRaw;
+            let _showMarkdown = tracker.currentWidget.model.metadata.get(
+              'toc-showmarkdowntxt'
+            ) as boolean;
+            let showMarkdown =
+              _showMarkdown != undefined ? _showMarkdown : options.showMarkdown;
+            options.initializeOptions(
+              numbering,
+              showCode,
+              showRaw,
+              showMarkdown
+            );
+            this.setState({
+              showCode: options.showCode,
+              showRaw: options.showRaw,
+              showMarkdown: options.showMarkdown
+            });
+          }
+        });
+      }
+    }
+    toggleCode = (component: React.Component) => {
+      options.showCode = !options.showCode;
+      this.setState({ showCode: options.showCode });
+    };
+
+    toggleRaw = (component: React.Component) => {
+      options.showRaw = !options.showRaw;
+      this.setState({ showRaw: options.showRaw });
+    };
+
+    toggleMarkdown = (component: React.Component) => {
+      options.showMarkdown = !options.showMarkdown;
+      this.setState({ showMarkdown: options.showMarkdown });
+    };
+
+    toggleAutoNumbering = () => {
+      options.numbering = !options.numbering;
+    };
+
+    renderedDropdownMenu: any = createDropdownMenu();
+
     render() {
-      const handleOnClick = () => {
-        options.numbering = !options.numbering;
-      };
+      const DropdownMenu = this.renderedDropdownMenu;
+      const dropDownMenuItems: DropdownItem[] = [
+        {
+          id: 0,
+          props: {
+            title: 'Code',
+            selectedByDefault: this.state.showCode,
+            onClickHandler: this.toggleCode.bind(this)
+          },
+          type: TagTypeDropdownItem
+        },
+        {
+          id: 1,
+          props: {
+            title: 'Raw',
+            selectedByDefault: this.state.showRaw,
+            onClickHandler: this.toggleRaw.bind(this)
+          },
+          type: TagTypeDropdownItem
+        },
+        {
+          id: 2,
+          props: {
+            title: 'Markdown text',
+            selectedByDefault: this.state.showMarkdown,
+            onClickHandler: this.toggleMarkdown.bind(this)
+          },
+          type: TagTypeDropdownItem
+        }
+      ];
+
       return (
-        <div>
-          <button onClick={handleOnClick}>Auto Numbering</button>
+        <div className="toc-toolbar">
+          <DropdownMenu
+            className="celltypes-dropdown"
+            items={{
+              stateIndicator: '',
+              items: dropDownMenuItems
+            }}
+            buttonTitle={
+              <span>
+                Cell Type
+                <img
+                  className="dropdown-arrow"
+                  src={require('../static/menu_arrow.svg')}
+                />
+              </span>
+            }
+          />
+          <div
+            className="auto-numbering-button"
+            onClick={event => this.toggleAutoNumbering()}
+          >
+            <img
+              alt="Toggle Auto-Numbering"
+              title="Toggle Auto-Numbering"
+              src={require('../static/numbering.svg')}
+              className="numberingIcon"
+            />
+          </div>
         </div>
       );
     }
@@ -209,7 +382,7 @@ export function createNotebookGenerator(
           // are rendered markdown or HTML.
           let showCode = true;
           if (widget) {
-            showCode = widget.showCode;
+            showCode = options.showCode;
           }
           if (showCode) {
             let text = (model as CodeCellModel).value.text;
@@ -218,8 +391,7 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            // let lastLevel = Private.getLastLevel(headings);
-            let lastLevel = -1;
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getCodeCells(
                 text,
@@ -248,8 +420,7 @@ export function createNotebookGenerator(
                 el.scrollIntoView();
               };
             };
-            // let lastLevel = Private.getLastLevel(headings);
-            let lastLevel = -1;
+            let lastLevel = Private.getLastLevel(headings);
             let numbering = options.numbering;
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
@@ -277,8 +448,7 @@ export function createNotebookGenerator(
               };
             };
             let numbering = options.numbering;
-            // let lastLevel = Private.getLastLevel(headings);
-            let lastLevel = -1;
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 cell.node,
@@ -298,8 +468,7 @@ export function createNotebookGenerator(
                 }
               };
             };
-            // let lastLevel = Private.getLastLevel(headings);
-            let lastLevel = -1;
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getMarkdownHeadings(
                 model.value.text,
@@ -312,7 +481,7 @@ export function createNotebookGenerator(
         } else if (model.type === 'raw') {
           let showRaw = false;
           if (widget) {
-            showRaw = widget.showRaw;
+            showRaw = options.showRaw;
           }
           if (showRaw) {
             let text = (model as CodeCellModel).value.text;
@@ -321,8 +490,7 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            // let lastLevel = Private.getLastLevel(headings);
-            let lastLevel = -1;
+            let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getRawCells(
                 text,
@@ -473,7 +641,7 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
-  /* export function getLastLevel(headings: IHeading[]) {
+  export function getLastLevel(headings: INotebookHeading[]) {
     if (headings.length > 0) {
       let location = headings.length - 1;
       while (location >= 0) {
@@ -484,7 +652,7 @@ namespace Private {
       }
     }
     return 0;
-  } */
+  }
 
   export function incrementNumberingDict(dict: any, level: number) {
     if (dict[level + 1] != undefined) {

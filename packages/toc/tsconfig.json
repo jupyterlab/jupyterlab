@@ -5,7 +5,7 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "noEmitOnError": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "lib": ["DOM", "ES6"],
     "module": "commonjs",
     "moduleResolution": "node",

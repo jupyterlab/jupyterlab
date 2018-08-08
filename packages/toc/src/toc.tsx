@@ -16,17 +16,11 @@ import { TableOfContentsRegistry } from './registry';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import {
-  createDropdownMenu,
-  DropdownItem,
-  TagTypeDropdownItem
-} from './plugins';
 
 /**
  * Timeout for throttling TOC rendering.
  */
 const RENDER_TIMEOUT = 1000;
-const NEED_NUMBERING_BY_DEFAULT = false;
 
 /**
  * A widget for hosting a notebook table-of-contents.
@@ -54,25 +48,6 @@ export class TableOfContents extends Widget {
   }
   set current(value: TableOfContents.ICurrentWidget | null) {
     // If they are the same as previously, do nothing.
-    if (this._notebook.currentWidget) {
-      this._notebook.currentWidget.context.ready.then(() => {
-        this._defaultsLoaded = new Date().toLocaleTimeString();
-        if (this._notebook.currentWidget) {
-          this.needNumbering = this._notebook.currentWidget.model.metadata.get(
-            'autoNumberingEnabled'
-          ) as boolean;
-          this.showCode = this._notebook.currentWidget.model.metadata.get(
-            'toc-showcode'
-          ) as boolean;
-          this.showRaw = this._notebook.currentWidget.model.metadata.get(
-            'toc-showraw'
-          ) as boolean;
-          this.showMarkdown = this._notebook.currentWidget.model.metadata.get(
-            'toc-showmarkdowntxt'
-          ) as boolean;
-        }
-      });
-    }
     if (
       value &&
       this._current &&
@@ -90,7 +65,7 @@ export class TableOfContents extends Widget {
     }
     // If we are wiping the ToC, update and return.
     if (!this._current) {
-      this.update();
+      this.updateTOC(true);
       return;
     }
 
@@ -109,7 +84,7 @@ export class TableOfContents extends Widget {
       this.update,
       this
     );
-    this.update();
+    this.updateTOC(true);
   }
 
   /**
@@ -120,10 +95,10 @@ export class TableOfContents extends Widget {
     /* if (!this.isVisible) {
       return;
     } */
-    this.updateTOC();
+    this.updateTOC(false);
   }
 
-  updateTOC() {
+  updateTOC(contextChanged: boolean) {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -144,8 +119,8 @@ export class TableOfContents extends Widget {
         widget={this}
         title={title}
         toc={toc}
+        contextChanged={contextChanged}
         itemRenderer={itemRenderer}
-        defaultsLoaded={this._defaultsLoaded}
       />,
       this.node,
       () => {
@@ -179,32 +154,12 @@ export class TableOfContents extends Widget {
     }
   }
 
-  get needNumbering() {
-    return this._needNumbering;
-  }
-
-  set needNumbering(value: boolean) {
-    this._needNumbering = value;
-    if (this._notebook.currentWidget != null) {
-      this._notebook.currentWidget.model.metadata.set(
-        'autoNumberingEnabled',
-        value
-      );
-    }
-  }
-
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
       this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
     }
   }
 
-  private _needNumbering = NEED_NUMBERING_BY_DEFAULT;
-  private _defaultsLoaded: any = null;
-  public showCode = true;
-  public showRaw = false;
-  public showMarkdown = false;
-  public menuOpen = false;
   private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
@@ -289,7 +244,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    */
   toc: IHeading[];
   widget: TableOfContents;
-  defaultsLoaded: any;
+  contextChanged: boolean;
   itemRenderer: (item: IHeading) => JSX.Element;
 }
 
@@ -301,13 +256,10 @@ export interface ITOCItemProps extends React.Props<TOCItem> {
    * An IHeading to render.
    */
   heading: IHeading;
-  needNumbering: boolean;
   itemRenderer: (item: IHeading) => JSX.Element;
 }
 
-export interface ITOCItemStates {
-  needNumbering: boolean;
-}
+export interface ITOCItemStates {}
 
 /**
  * A React component for a table of contents entry.
@@ -315,11 +267,6 @@ export interface ITOCItemStates {
 export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
   constructor(props: ITOCItemProps) {
     super(props);
-    this.state = { needNumbering: this.props.needNumbering };
-  }
-
-  componentWillReceiveProps(nextProps: ITOCItemProps) {
-    this.setState({ needNumbering: nextProps.needNumbering });
   }
 
   /**
@@ -341,13 +288,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
   }
 }
 
-export interface ITOCTreeStates {
-  needNumbering: boolean;
-  showCode: boolean;
-  showRaw: boolean;
-  showMarkdown: boolean;
-  defaultsLoaded: any;
-}
+export interface ITOCTreeStates {}
 
 /**
  * A React component for a table of contents.
@@ -359,111 +300,25 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
 
   constructor(props: ITOCTreeProps) {
     super(props);
-    this.state = {
-      needNumbering: this.props.widget.needNumbering,
-      showCode: this.props.widget.showCode,
-      showRaw: this.props.widget.showRaw,
-      showMarkdown: this.props.widget.showMarkdown,
-      defaultsLoaded: null
-    };
   }
 
-  componentWillReceiveProps(nextProps: ITOCTreeProps) {
-    this.setState({ needNumbering: this.props.widget.needNumbering });
+  componentWillReceiveProps(newProps: ITOCTreeProps) {
     if (
-      nextProps.defaultsLoaded != null &&
-      this.state.defaultsLoaded != nextProps.defaultsLoaded
+      newProps.contextChanged &&
+      this.props.widget.generator &&
+      this.props.widget.generator.toolbarGenerator
     ) {
-      this.setState({
-        showCode: this.props.widget.showCode,
-        showRaw: this.props.widget.showRaw,
-        showMarkdown: this.props.widget.showMarkdown,
-        defaultsLoaded: nextProps.defaultsLoaded
-      });
+      this.renderedToolbar = this.props.widget.generator.toolbarGenerator();
     }
   }
-
-  handleClick = () => {
-    this.props.widget.needNumbering = !this.props.widget.needNumbering;
-    this.setState({ needNumbering: this.props.widget.needNumbering });
-  };
-
-  toggleCode = (component: React.Component) => {
-    this.props.widget.showCode = !this.props.widget.showCode;
-    this.setState({ showCode: this.props.widget.showCode });
-    component.setState({ selected: this.props.widget.showCode });
-    this.props.widget.notebookMetadata = [
-      'toc-showcode',
-      this.props.widget.showCode
-    ];
-    this.props.widget.updateTOC();
-  };
-
-  toggleRaw = (component: React.Component) => {
-    this.props.widget.showRaw = !this.props.widget.showRaw;
-    this.setState({ showRaw: this.props.widget.showRaw });
-    component.setState({ selected: this.props.widget.showRaw });
-    this.props.widget.notebookMetadata = [
-      'toc-showraw',
-      this.props.widget.showRaw
-    ];
-    this.props.widget.updateTOC();
-  };
-
-  toggleMarkdown = (component: React.Component) => {
-    this.props.widget.showMarkdown = !this.props.widget.showMarkdown;
-    this.setState({ showMarkdown: this.props.widget.showMarkdown });
-    component.setState({ selected: this.props.widget.showMarkdown });
-    this.props.widget.notebookMetadata = [
-      'toc-showmarkdowntxt',
-      this.props.widget.showMarkdown
-    ];
-  };
-
-  private renderedDropdownMenu = createDropdownMenu();
 
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
-    const DropdownMenu = this.renderedDropdownMenu;
-    const generator = this.props.widget.generator;
-    let Toolbar = null;
-    if (generator && generator.toolbarGenerator) {
-      Toolbar = generator.toolbarGenerator();
-    }
-    const dropDownMenuItems: DropdownItem[] = [
-      {
-        id: 0,
-        props: {
-          title: 'Code',
-          selectedByDefault: this.props.widget.showCode,
-          onClickHandler: this.toggleCode.bind(this)
-        },
-        type: TagTypeDropdownItem
-      },
-      {
-        id: 1,
-        props: {
-          title: 'Raw',
-          selectedByDefault: this.props.widget.showRaw,
-          onClickHandler: this.toggleRaw.bind(this)
-        },
-        type: TagTypeDropdownItem
-      },
-      {
-        id: 2,
-        props: {
-          title: 'Markdown text',
-          selectedByDefault: this.props.widget.showMarkdown,
-          onClickHandler: this.toggleMarkdown.bind(this)
-        },
-        type: TagTypeDropdownItem
-      }
-    ];
+    const Toolbar = this.renderedToolbar;
     let listing: JSX.Element[] = this.props.toc.map(el => {
       return (
         <TOCItem
-          needNumbering={this.state.needNumbering}
           heading={el}
           itemRenderer={this.props.itemRenderer}
           key={`${el.text}-${el.level}-${i++}`}
@@ -478,38 +333,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
         {Toolbar && <Toolbar />}
-        <div className="toc-toolbar">
-          <DropdownMenu
-            className="celltypes-dropdown"
-            items={{
-              stateIndicator: this.state.defaultsLoaded,
-              items: dropDownMenuItems
-            }}
-            buttonTitle={
-              <span>
-                Cell Type
-                <img
-                  className="dropdown-arrow"
-                  src={require('../static/menu_arrow.svg')}
-                />
-              </span>
-            }
-          />
-          <div
-            className="auto-numbering-button"
-            onClick={event => this.handleClick()}
-          >
-            <img
-              alt="Toggle Auto-Numbering"
-              title="Toggle Auto-Numbering"
-              src={require('../static/numbering.svg')}
-              className="numberingIcon"
-            />
-          </div>
-        </div>
-        {/* <button name="test" onClick={event => filterByTag(event)} >Only show tag "test" </button> */}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );
   }
+
+  private renderedToolbar = this.props.widget.generator!.toolbarGenerator!();
 }
