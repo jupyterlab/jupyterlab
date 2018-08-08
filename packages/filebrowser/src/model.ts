@@ -17,7 +17,8 @@ import {
   each,
   find,
   IIterator,
-  IterableOrArrayLike
+  IterableOrArrayLike,
+  ArrayExt
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -173,15 +174,9 @@ export class FileBrowserModel implements IDisposable {
   }
 
   uploadFailed(file: File) {
-    console.log(this._uploads);
-    let index = 0;
-    this._uploads.forEach(upload => {
-      if (upload.path !== file.name) {
-        index = index + 1;
-      }
+    ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+      return file.name === uploadIndex.path;
     });
-    this._uploads.splice(index, 1);
-    console.log(this._uploads);
   }
   /**
    * Create an iterator over the status of all in progress uploads.
@@ -480,7 +475,6 @@ export class FileBrowserModel implements IDisposable {
       const newUpload = { path, progress: start / file.size };
       this._uploads.splice(this._uploads.indexOf(upload));
       this._uploads.push(newUpload);
-      console.log(this._uploads);
       this._uploadChanged.emit({
         name: 'update',
         newValue: newUpload,
