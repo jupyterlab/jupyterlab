@@ -44,13 +44,18 @@ const plugin: JupyterLabPlugin<void> = {
     let enabled = settings.composite['enabled'] === true;
 
     const { shell, serviceManager } = app;
-    const view = new ExtensionView(serviceManager);
+    let view: ExtensionView | undefined;
 
-    view.id = 'extensionmanager.main-view';
-    view.title.label = 'Extensions';
-    restorer.add(view, view.id);
+    const createView = () => {
+      const v = new ExtensionView(serviceManager);
+      v.id = 'extensionmanager.main-view';
+      v.title.label = 'Extensions';
+      restorer.add(v, v.id);
+      return v;
+    };
 
     if (enabled) {
+      view = createView();
       shell.addToLeftArea(view);
     }
 
@@ -59,14 +64,15 @@ const plugin: JupyterLabPlugin<void> = {
     app.restored.then(() => {
       settings.changed.connect(async () => {
         enabled = settings.composite['enabled'] === true;
-        if (enabled && !view.isAttached) {
+        if (enabled && (!view || (view && !view.isAttached))) {
           const accepted = await Private.showWarning();
           if (!accepted) {
             settings.set('enabled', false);
             return;
           }
+          view = view || createView();
           shell.addToLeftArea(view);
-        } else if (!enabled && view.isAttached) {
+        } else if (!enabled && view && view.isAttached) {
           view.close();
         }
       });
