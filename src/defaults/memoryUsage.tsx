@@ -15,8 +15,7 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
         super();
 
         this.model = new MemoryUsage.Model({
-            refreshRate: 5000,
-            checkEndpointRate: 60000
+            refreshRate: 5000
         });
     }
 
@@ -43,16 +42,9 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
 
 namespace MemoryUsage {
     export class Model extends VDomModel implements IMemoryUsage.IModel {
-        constructor({
-            refreshRate,
-            checkEndpointRate
-        }: {
-            refreshRate: number;
-            checkEndpointRate: number;
-        }) {
+        constructor({ refreshRate }: { refreshRate: number }) {
             super();
 
-            this._checkEndpointRate = checkEndpointRate;
             this._refreshRate = refreshRate;
 
             this._intervalId = setInterval(
@@ -89,7 +81,11 @@ namespace MemoryUsage {
             requestResult
                 .then(response => {
                     if (response.ok) {
-                        return response.json();
+                        try {
+                            return response.json();
+                        } catch (err) {
+                            return null;
+                        }
                     } else {
                         return null;
                     }
@@ -101,14 +97,9 @@ namespace MemoryUsage {
                     this._currentMemory = 0;
                     this._memoryLimit = null;
                     this._units = 'B';
+                    clearInterval(this._intervalId);
+
                     if (oldMetricsAvailable) {
-                        clearInterval(this._intervalId);
-
-                        this._intervalId = setInterval(
-                            this._makeMetricRequest,
-                            this._checkEndpointRate
-                        );
-
                         this.stateChanged.emit(void 0);
                     }
                 });
@@ -127,14 +118,8 @@ namespace MemoryUsage {
                 this._currentMemory = 0;
                 this._memoryLimit = null;
                 this._units = 'B';
-                if (oldMetricsAvailable) {
-                    clearInterval(this._intervalId);
 
-                    this._intervalId = setInterval(
-                        this._makeMetricRequest,
-                        this._checkEndpointRate
-                    );
-                }
+                clearInterval(this._intervalId);
             } else {
                 const numBytes = value.rss;
                 const memoryLimit = value.limits.memory
@@ -152,8 +137,6 @@ namespace MemoryUsage {
                     : null;
 
                 if (!oldMetricsAvailable) {
-                    clearInterval(this._intervalId);
-
                     this._intervalId = setInterval(
                         this._makeMetricRequest,
                         this._refreshRate
@@ -177,7 +160,6 @@ namespace MemoryUsage {
         private _units: MemoryUnit = 'B';
         private _intervalId: number;
         private _refreshRate: number;
-        private _checkEndpointRate: number;
     }
 
     export type MemoryUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB';
