@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
@@ -10,6 +10,8 @@ import { Token } from '@phosphor/coreutils';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Dialog, showDialog } from './dialog';
 
@@ -73,6 +75,13 @@ export class ThemeManager {
    */
   get themes(): ReadonlyArray<string> {
     return Object.keys(this._themes);
+  }
+
+  /**
+   * A signal fired when the application theme changes.
+   */
+  get themeChanged(): ISignal<this, IChangedArgs<string>> {
+    return this._themeChanged;
   }
 
   /**
@@ -226,6 +235,11 @@ export class ThemeManager {
         this._current = theme;
         Private.fitAll(this._host);
         splash.dispose();
+        this._themeChanged.emit({
+          name: 'theme',
+          oldValue: current,
+          newValue: theme
+        });
       })
       .catch(reason => {
         this._onError(reason);
@@ -254,6 +268,7 @@ export class ThemeManager {
   private _settings: ISettingRegistry.ISettings;
   private _splash: ISplashScreen;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
+  private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
 }
 
 /**
