@@ -11,7 +11,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 from notebook.base.handlers import APIHandler
 from tornado import gen, web
-from tornado.ioloop import IOLoop
 
 from .commands import (
     get_app_info, install_extension, uninstall_extension,
