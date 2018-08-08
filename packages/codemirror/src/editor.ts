@@ -118,7 +118,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
-    CodeMirror.on(editor, 'keydown', (editor, event) => {
+    CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -485,6 +485,38 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.doc.setSelections(cmSelections, 0);
   }
 
+  /**
+   * Get a list of tokens for the current editor text content.
+   */
+  getTokens(): CodeEditor.IToken[] {
+    let tokens: CodeEditor.IToken[] = [];
+    for (let i = 0; i < this.lineCount; ++i) {
+      const lineTokens = this.editor.getLineTokens(i).map(t => ({
+        offset: this.getOffsetAt({ column: t.start, line: i }),
+        value: t.string,
+        type: t.type || ''
+      }));
+      tokens = tokens.concat(lineTokens);
+    }
+    return tokens;
+  }
+
+  /**
+   * Get the token at a given editor position.
+   */
+  getTokenForPosition(position: CodeEditor.IPosition): CodeEditor.IToken {
+    const cursor = this._toCodeMirrorPosition(position);
+    const token = this.editor.getTokenAt(cursor);
+    return {
+      offset: this.getOffsetAt({ column: token.start, line: cursor.line }),
+      value: token.string,
+      type: token.type
+    };
+  }
+
+  /**
+   * Insert a new indented line at the current cursor position.
+   */
   newIndentedLine(): void {
     this.execCommand('newlineAndIndent');
   }
