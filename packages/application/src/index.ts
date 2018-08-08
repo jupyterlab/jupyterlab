@@ -340,9 +340,12 @@ export namespace JupyterLab {
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
     workspace: '',
-    defaultWorkspace: URLExt.join(
-      PageConfig.getOption('baseUrl'),
-      PageConfig.getOption('pageUrl')
+    defaultWorkspace: PageConfig.setOption(
+      'defaultWorkspace',
+      URLExt.join(
+        PageConfig.getOption('baseUrl'),
+        PageConfig.getOption('pageUrl')
+      )
     )
   };
 

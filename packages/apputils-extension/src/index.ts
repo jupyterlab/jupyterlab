@@ -427,10 +427,9 @@ const state: JupyterLabPlugin<IStateDB> = {
                 )
             : null;
         const source = clone || workspace;
-        const fetch = workspaces.fetch(source);
 
         try {
-          const saved = await fetch;
+          const saved = await workspaces.fetch(source);
 
           // If this command is called after a reset, the state database
           // will already be resolved.

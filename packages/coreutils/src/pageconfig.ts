@@ -131,11 +131,14 @@ export namespace PageConfig {
   export function getTreeUrl(options: ITreeOptions = {}): string {
     const base = getBaseUrl();
     const tree = getOption('treeUrl');
+    const defaultWorkspace = getOption('defaultWorkspace');
     const workspaces = getOption('workspacesUrl');
     const workspace = getOption('workspace');
+    const prefix = URLExt.join(PageConfig.getOption('baseUrl'), workspaces);
+    const token = workspace.substring(prefix.length);
 
-    return !!options.workspace && workspace
-      ? URLExt.join(base, workspaces, workspace, 'tree')
+    return !!options.workspace && workspace && workspace !== defaultWorkspace
+      ? URLExt.join(base, workspaces, token, 'tree')
       : URLExt.join(base, tree);
   }
 
