@@ -36,7 +36,7 @@
   flex-direction: column;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  /* font-size: var(--jp-ui-font-size0); */
+  /* font-size: var(--jp-ui-font-size0);  */
   height: 100%;
 }
 
@@ -101,7 +101,7 @@
   list-style-type: none;
   margin: 0px;
   padding: 0px;
-  background-color: white;
+  background-color: var(--jp-layout-color1);
   border: 1px solid var(--jp-layout-color2);
   box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
 }
@@ -133,11 +133,7 @@
 TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .dropdown-menu-li {
-  padding: 0px; /*
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-right: 20px;
-  padding-left: 3px; */
+  padding: 0px;
 }
 
 .dropdown-menu-li:hover {
@@ -159,9 +155,6 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .celltypes-dropdown {
-  /* width: fit-content;
-  padding-left: 12px;
-  padding-top: 12px; */
   padding: 0px;
   margin: 0px;
   display: inline-block;
@@ -169,9 +162,6 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .dropdown-menu {
-  /* width: fit-content;
-  padding-left: 12px;
-  padding-top: 12px; */
   padding: 0px;
   margin: 0px;
   display: inline-block;
@@ -215,10 +205,6 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   height: 24px;
   vertical-align: middle;
   padding-right: 12px;
-  /*padding: 0px;
-  margin-top: -8px;
-  margin-bottom: 3px;
-  margin-right: 20px;*/
 }
 
 .option-title {
