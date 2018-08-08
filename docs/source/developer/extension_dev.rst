@@ -476,3 +476,135 @@ This would look something like the following in a ``Widget`` subclass:
       event.stopPropagation();
 
 .. |dependencies| image:: dependency-graph.svg
+
+Packaging your Extension
+^^^^^^^^^^^^^
+
+One way to make your extension more easily accessible to end-users is to distribute it as a package for the `conda package management system <https://conda.io/docs/>`__. Benefits of conda for any use case include the fact that it is platform agnostic (unlike e.g. homebrew or apt-get), language agnostic (unlike e.g. CRAN, PyPI, or NPM), and is integrated with a well-designed virtual environment manager. However, conda is also especially suitable to the distribution of JupyterLab extensions in particular. This is because a general JupyterLab extension will often consist of both TypeScript code (to extend the user interface) as well as Python code (to extend the underlying Jupyter notebook server). Since conda is language agnostic, both types of code can be combined into one single package, simplifying the installation process for end-users and thereby decreasing the barriers to adoption of your extension.
+
+In contrast, splitting your extension into two separate packages, with the Python code packaged via PyPI and the TypeScript code packaged via NPM, would present several problems (which are avoided when using conda to distribute your extension). First, the PyPI package would only be able to track Python code dependencies your extension might have, while the NPM package would only be able to track Javascript/TypeScript code dependencies your extension might have. This could lead to unnecessary complications for the end user if your extension has both types of dependencies. This is especially likely to be the case if your JupyterLab extension has another JupyterLab extension as a dependency. Even if your extension has only one type of code dependency, it might be used as a dependency for developers of another JupyterLab extension. It will be easier for others to use your extension as a dependency for their own JupyterLab extensions for the reasons already given above. (Of course, there are reasons why you might not want others to use your JupyterLab extension as a dependency for their own extension, but presumably you would enjoy the increased popularity of and traffic to your extension resulting from others using it as a dependency.)
+
+In order to create a conda package, you need at the very least a YAML file containing metadata for your package (called ``meta.yaml``) and a shell script including (among other things) the installation commands for your package (called ``build.sh``). Putting these together in a directory, it is then possible to use `conda build <https://conda.io/docs/user-guide/tasks/build-packages/recipe.html>`__ to create a conda package, which can then be used to distribute your JupyterLab extension.
+
+Below are templates which you might be able to use to create these files for your extension:
+
+``meta.yaml``
+
+.. code:: yaml
+
+    package:
+      name: 
+      version: 
+    
+    source:
+      git_url: 
+    
+    requirements:
+      build:
+        - nodejs
+        - jupyterlab
+      run:
+        - nodejs
+        - jupyterlab
+    
+    about:
+      home: 
+      license: 
+      license_file: 
+      creator: 
+..
+
+``build.sh``
+
+.. code:: shell
+
+    # Fill in the name of the git directory from which the extension is to be installed here:
+    export PKG_NAME=
+    
+    # If Jupyter data and config directories have already been set by the user,
+    # the contents of those directories are copied into the newly created data and config directories.
+    # This ensures that the user does not lose any Jupyter settings which they were used to having
+    # in the particular conda environment. At the same time, it still also ensures that the values of
+    # the Jupyter data and config directories are specific to the given conda environment ONLY, and
+    # thus that any changes in settings occurring as a result of installing this package are localized
+    # to the given conda environment (into which the package is being installed) ONLY.
+    
+    /bin/mkdir -p $CONDA_PREFIX/etc $CONDA_PREFIX/etc/$PKG_NAME
+    
+    # make sure repository contents actually at desired location
+    /bin/cp -a ./. $CONDA_PREFIX/etc/$PKG_NAME
+    cd $CONDA_PREFIX/etc
+    
+    /bin/mkdir -p ./jupyter/nbdata ./jupyter/nbconfig ./conda/activate.d ./conda/deactivate.d
+    touch ./conda/activate.d/env_vars.sh ./conda/deactivate.d/env_vars.sh
+    
+    ##### Create activation script
+    
+    # create a shell script to run upon activation of the conda environment
+    echo "#\!/bin/bash" >> ./conda/activate.d/env_vars.sh
+    # if a Jupyter data directory already exists, copy its contents to the new Jupyter data directory
+    if [ ! -z "$JUPYTER_DATA_DIR" ]
+    then
+        /bin/cp -a $JUPYTER_DATA_DIR/. $CONDA_PREFIX/etc/jupyter/nbdata
+        echo ""
+        echo "WARNING: Your Jupyter data directory for this conda environment has been changed."
+        echo "Your Jupyter data directory has been changed ONLY for this conda environment."
+        echo "Your Jupyter data directory has been changed from $JUPYTER_DATA_DIR to $CONDA_PREFIX/etc/jupyter/nbdata"
+        echo ""
+    fi
+    # ensure that a value for the Jupyter data directory is set for the current conda environment
+    # and that this choice is reflected in the shell environment variables upon activation of the environment
+    echo "export JUPYTER_DATA_DIR=\$CONDA_PREFIX/etc/jupyter/nbdata" >> ./conda/activate.d/env_vars.sh
+    
+    # if a Jupyter config directory already exists, copy its contents to the new Jupyter config directory
+    if [ ! -z "$JUPYTER_CONFIG_DIR" ]
+    then
+        /bin/cp -a $JUPYTER_CONFIG_DIR/. $CONDA_PREFIX/etc/jupyter/nbconfig
+        echo ""
+        echo "WARNING: Your Jupyter config directory for this conda environment has been changed."
+        echo "Your Jupyter config directory has been changed ONLY for this conda environment."
+        echo "Your Jupyter config directory has been changed from $JUPYTER_CONFIG_DIR to $CONDA_PREFIX/etc/jupyter/nbconfig"
+        echo ""
+    fi
+    # ensure that a Jupyter config directory is set for the current conda environment
+    # and that this choice is reflected in the shell environment variables upon activation of the environment
+    echo "export JUPYTER_CONFIG_DIR=\$CONDA_PREFIX/etc/jupyter/nbconfig" >> ./conda/activate.d/env_vars.sh
+        
+    ##### Create deactivation script
+    
+    echo "#\!/bin/bash" >> ./conda/deactivate.d/env_vars.sh
+    echo "unset JUPYTER_DATA_DIR" >> ./conda/deactivate.d/env_vars.sh
+    echo "unset JUPYTER_CONFIG_DIR" >> ./conda/deactivate.d/env_vars.sh
+    
+    ##### Deactivate then reactivate conda environment so that changes take effect
+    
+    export ENVIRONMENT_DIRECTORY=$CONDA_PREFIX
+    conda deactivate
+    source activate $ENVIRONMENT_DIRECTORY
+    
+    ##### Actually install the JupyterLab extension
+    cd $PKG_NAME
+    
+    ##### COPY AND PASTE DEVELOPER INSTALL INSTRUCTIONS HERE
+    
+    # In case you get an error about NPM running out of memory:
+    # export NODE_OPTIONS=--max-old-space-size=4096
+    
+    # If developer install instructions aren't provided, first try the pattern found in the docs:
+    # http://jupyterlab.readthedocs.io/en/stable/developer/extension_dev.html#extension-authoring
+    
+    # npm install
+    # npm run build
+    # jupyter labextension install .
+    
+    cd ..
+    /bin/rm -rf ./$PKG_NAME
+    
+    # The idea was to re-build JupyterLab so that extension is loaded upon startup
+    # but it doesn't seem to actually do anything in practice
+    # Lab still needs to be rebuilt for the installation to complete
+    # jupyter lab build
+    # Likewise Lab still needs to be rebuilt for any uninstall to be complete
+
+..
+      
