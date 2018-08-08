@@ -3,7 +3,7 @@
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
-import { CodeCell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -34,6 +34,7 @@ interface INotebookHeading extends IHeading {
   numbering?: string | null;
   type: string;
   prompt?: string;
+  cellRef?: Cell;
 }
 
 class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
@@ -149,6 +150,9 @@ function notebookItemRenderer(
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
     const paddingLeft = 22;
+    const collapseOnClick = (cellRef?: Cell) => {
+      console.log(cellRef!.model.value.text);
+    };
     let fontSize = '9px';
     let numbering = item.numbering && options.numbering ? item.numbering : '';
     if (item.type === 'header') {
@@ -166,12 +170,35 @@ function notebookItemRenderer(
           style={{ fontSize, paddingLeft }}
         />
       );
+      if (item.type === 'header') {
+        jsx = (
+          <div>
+            <button
+              onClick={event => {
+                event.stopPropagation();
+                collapseOnClick(item.cellRef);
+              }}
+            >
+              CL
+            </button>
+            {jsx}
+          </div>
+        );
+      }
     } else if (item.type === 'header' || options.showMarkdown) {
       jsx = (
         <span className="markdown-cell" style={{ fontSize, paddingLeft }}>
           {numbering + item.text}
         </span>
       );
+      if (item.type === 'header') {
+        jsx = (
+          <div>
+            <button>CL</button>
+            {jsx}
+          </div>
+        );
+      }
     } else {
       jsx = <div />;
     }
@@ -398,7 +425,8 @@ export function createNotebookGenerator(
                 onClickFactory2,
                 numberingDict,
                 executionCount,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
@@ -429,7 +457,8 @@ export function createNotebookGenerator(
                 sanitizer,
                 numberingDict,
                 lastLevel,
-                numbering
+                numbering,
+                cell
               )
             );
           }
@@ -456,7 +485,8 @@ export function createNotebookGenerator(
                 sanitizer,
                 numberingDict,
                 lastLevel,
-                numbering
+                numbering,
+                cell
               )
             );
           } else {
@@ -474,7 +504,8 @@ export function createNotebookGenerator(
                 model.value.text,
                 onClickFactory,
                 numberingDict,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
@@ -496,7 +527,8 @@ export function createNotebookGenerator(
                 text,
                 onClickFactory2,
                 numberingDict,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
@@ -744,7 +776,8 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    lastLevel: number
+    lastLevel: number,
+    cellRef: Cell
   ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
@@ -766,7 +799,14 @@ namespace Private {
       const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
       // TODO: HEADER!!!
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     }
 
     // Next test for '==='-style headers.
@@ -776,7 +816,14 @@ namespace Private {
       const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
       // TODO: HEADER!!!
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     }
 
     // Finally test for HTML headers. This will not catch multiline
@@ -787,13 +834,21 @@ namespace Private {
       const text = match3[2];
       let numbering = Private.generateNumbering(numberingDict, level);
       // TODO: HEADER!!!
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     } else {
       headings.push({
         text: line,
         level: lastLevel + 1,
         onClick,
-        type: 'markdown'
+        type: 'markdown',
+        cellRef: cellRef
       });
     }
     return headings;
@@ -804,7 +859,8 @@ namespace Private {
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
     executionCount: string,
-    lastLevel: number
+    lastLevel: number,
+    cellRef: Cell
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
     if (text) {
@@ -822,7 +878,8 @@ namespace Private {
         level,
         onClick,
         type: 'code',
-        prompt: executionCount.substring(3)
+        prompt: executionCount.substring(3),
+        cellRef: cellRef
       });
     }
     return headings;
@@ -832,7 +889,8 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    lastLevel: number
+    lastLevel: number,
+    cellRef: Cell
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
     if (text) {
@@ -849,7 +907,8 @@ namespace Private {
         text: headingText,
         level,
         onClick,
-        type: 'raw'
+        type: 'raw',
+        cellRef: cellRef
       });
     }
     return headings;
@@ -864,7 +923,8 @@ namespace Private {
     sanitizer: ISanitizer,
     numberingDict: any,
     lastLevel: number,
-    needNumbering = false
+    needNumbering = false,
+    cellRef?: Cell
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
@@ -877,7 +937,8 @@ namespace Private {
             html: markdownCell.innerHTML,
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
-            type: 'markdown'
+            type: 'markdown',
+            cellRef: cellRef
           });
         }
       } else {
@@ -908,7 +969,8 @@ namespace Private {
           numbering,
           html,
           onClick,
-          type: 'header'
+          type: 'header',
+          cellRef: cellRef
         });
       }
     }
