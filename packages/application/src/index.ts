@@ -45,13 +45,27 @@ export class JupyterLab extends Application<ApplicationShell> {
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
 
+    // Construct the default workspace name.
+    const defaultWorkspace = URLExt.join(
+      PageConfig.getOption('baseUrl'),
+      PageConfig.getOption('pageUrl')
+    );
+
+    // Set default workspace in page config.
+    PageConfig.setOption('defaultWorkspace', defaultWorkspace);
+
     // Populate application info.
-    this._info = { ...JupyterLab.defaultInfo, ...options };
+    this._info = {
+      ...JupyterLab.defaultInfo,
+      ...options,
+      ...{ defaultWorkspace }
+    };
+
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
 
-    // Make workspace accessible from application info.
+    // Make workspace accessible via a getter because it is set at runtime.
     Object.defineProperty(this._info, 'workspace', {
       get: () => PageConfig.getOption('workspace') || ''
     });
@@ -340,16 +354,7 @@ export namespace JupyterLab {
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
     workspace: '',
-    defaultWorkspace: (() => {
-      const defaultWorkspace = URLExt.join(
-        PageConfig.getOption('baseUrl'),
-        PageConfig.getOption('pageUrl')
-      );
-
-      PageConfig.setOption('defaultWorkspace', defaultWorkspace);
-
-      return defaultWorkspace;
-    })()
+    defaultWorkspace: ''
   };
 
   /**
