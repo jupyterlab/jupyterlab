@@ -75,7 +75,7 @@ const main: JupyterLabPlugin<void> = {
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
-    const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
+    const workspace = resolver.name;
 
     console.log(`Starting application in workspace: ${workspace}`);
 

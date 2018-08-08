@@ -477,6 +477,7 @@ const state: JupyterLabPlugin<IStateDB> = {
         return commands.execute(CommandIDs.saveState, { immediate });
       }
     });
+
     router.register({
       command: CommandIDs.loadState,
       pattern: /.?/,
@@ -545,23 +546,19 @@ const state: JupyterLabPlugin<IStateDB> = {
         return cleared;
       }
     });
+
     router.register({
       command: CommandIDs.resetOnLoad,
       pattern: Patterns.resetOnLoad,
       rank: 10 // Set reset rank at a higher priority than the default 100.
     });
 
-    const fallthrough = () => {
-      // If the state database is still unresolved after the first URL has been
-      // routed, leave it intact.
-      if (!resolved) {
-        resolved = true;
-        transform.resolve({ type: 'cancel', contents: null });
-      }
-      router.routed.disconnect(fallthrough, state);
-    };
+    // Clean up state database when the window unloads.
+    window.addEventListener('beforeunload', () => {
+      const silent = true;
 
-    router.routed.connect(fallthrough, state);
+      state.clear(silent);
+    });
 
     return state;
   }
