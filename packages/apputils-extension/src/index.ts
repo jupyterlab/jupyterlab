@@ -81,13 +81,11 @@ namespace CommandIDs {
  * The routing regular expressions used by the apputils plugin.
  */
 namespace Patterns {
-  export const cloneState = /[?&]clone([=&]|$)/;
+  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
 
-  export const loadState = new RegExp(
+  export const workspace = new RegExp(
     `^${PageConfig.getOption('workspacesUrl')}([^?\/]+)`
   );
-
-  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
 }
 
 /**
@@ -260,28 +258,32 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   autoStart: true,
   provides: IWindowResolver,
   requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  activate: async (app: JupyterLab, router: IRouter) => {
     const resolver = new WindowResolver();
-    const base = PageConfig.getOption('baseUrl');
-    const page = PageConfig.getOption('pageUrl');
-    const workspaces = PageConfig.getOption('workspacesUrl');
-    const workspace = Private.getWorkspace(router) || '';
+    const match = router.current.path.match(Patterns.workspace);
+    const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = workspace
-      ? URLExt.join(base, workspaces, workspace)
-      : URLExt.join(base, page);
+      ? URLExt.join(
+          PageConfig.getOption('baseUrl'),
+          PageConfig.getOption('workspacesUrl'),
+          workspace
+        )
+      : app.info.defaultWorkspace;
 
-    return resolver
-      .resolve(candidate)
-      .catch(reason => {
-        console.warn('Window resolution failed:', reason);
+    try {
+      await resolver.resolve(candidate);
+    } catch (error) {
+      console.warn('Window resolution failed:', error);
 
-        return Private.redirect(router);
-      })
-      .then(() => {
-        PageConfig.setOption('workspace', resolver.name);
-
-        return resolver;
+      // Return a promise that never resolves.
+      return new Promise<IWindowResolver>(() => {
+        Private.redirect(router);
       });
+    }
+
+    PageConfig.setOption('workspace', resolver.name);
+
+    return resolver;
   }
 };
 
@@ -330,15 +332,30 @@ const state: JupyterLabPlugin<IStateDB> = {
     });
 
     commands.addCommand(CommandIDs.recoverState, {
-      execute: () => {
+      execute: async ({ global }) => {
         const immediate = true;
         const silent = true;
 
         // Clear the state silently so that the state changed signal listener
         // will not be triggered as it causes a save state.
-        return state
-          .clear(silent)
-          .then(() => commands.execute(CommandIDs.saveState, { immediate }));
+        await state.clear(silent);
+
+        // If the user explictly chooses to recover state, all of local storage
+        // should be cleared.
+        if (global) {
+          try {
+            window.localStorage.clear();
+            console.log('Cleared local storage');
+          } catch (error) {
+            console.warn('Clearing local storage failed.', error);
+
+            // To give the user time to see the console warning before redirect,
+            // do not set the `immediate` flag.
+            return commands.execute(CommandIDs.saveState);
+          }
+        }
+
+        return commands.execute(CommandIDs.saveState, { immediate });
       }
     });
 
@@ -347,16 +364,10 @@ const state: JupyterLabPlugin<IStateDB> = {
     let conflated: PromiseDelegate<void> | null = null;
 
     commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${Private.getWorkspace(router)})`,
-      isEnabled: () => !!Private.getWorkspace(router),
-      execute: args => {
-        const workspace = Private.getWorkspace(router);
-
-        if (!workspace) {
-          return;
-        }
-
-        const timeout = args.immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
+      label: () => `Save Workspace (${app.info.workspace})`,
+      execute: ({ immediate }) => {
+        const { workspace } = app.info;
+        const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
 
@@ -369,23 +380,21 @@ const state: JupyterLabPlugin<IStateDB> = {
           window.clearTimeout(debouncer);
         }
 
-        debouncer = window.setTimeout(() => {
+        debouncer = window.setTimeout(async () => {
           // Prevent a race condition between the timeout and saving.
           if (!conflated) {
             return;
           }
 
-          state
-            .toJSON()
-            .then(data => workspaces.save(id, { data, metadata }))
-            .then(() => {
-              conflated.resolve(undefined);
-              conflated = null;
-            })
-            .catch(reason => {
-              conflated.reject(reason);
-              conflated = null;
-            });
+          const data = await state.toJSON();
+
+          try {
+            await workspaces.save(id, { data, metadata });
+            conflated.resolve(undefined);
+          } catch (error) {
+            conflated.reject(error);
+          }
+          conflated = null;
         }, timeout);
 
         return conflated.promise;
@@ -397,7 +406,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     };
 
     commands.addCommand(CommandIDs.loadState, {
-      execute: (args: IRouter.ILocation) => {
+      execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
         if (resolved) {
@@ -405,111 +414,87 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const workspace = Private.getWorkspace(router);
+        const { defaultWorkspace, workspace } = app.info;
         const query = URLExt.queryStringToObject(search || '');
-        const clone = query['clone'];
-        const source = typeof clone === 'string' ? clone : workspace;
+        const clone =
+          typeof query['clone'] === 'string'
+            ? query['clone'] === ''
+              ? defaultWorkspace
+              : URLExt.join(
+                  PageConfig.getOption('baseUrl'),
+                  PageConfig.getOption('workspacesUrl'),
+                  query['clone']
+                )
+            : null;
+        const source = clone || workspace;
+        const fetch = workspaces.fetch(source);
 
-        let promise: Promise<any>;
+        try {
+          const saved = await fetch;
 
-        // If the default /lab workspace is being cloned, copy it out of local
-        // storage instead of making a round trip to the server because it
-        // does not exist on the server.
-        if (source === clone && source === '') {
-          const prefix = `${source}:${info.namespace}:`;
-          const mask = (key: string) => key.replace(prefix, '');
-          const contents = StateDB.toJSON(prefix, mask);
+          // If this command is called after a reset, the state database
+          // will already be resolved.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'overwrite', contents: saved.data });
+          }
+        } catch (error) {
+          console.warn(`Fetching workspace (${workspace}) failed:`, error);
 
-          resolved = true;
-          transform.resolve({ type: 'overwrite', contents });
-          promise = Promise.resolve();
+          // If the workspace does not exist, cancel the data transformation
+          // and save a workspace with the current user state data.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'cancel', contents: null });
+          }
         }
 
-        // If there is no promise, fetch the source and overwrite the database.
-        promise =
-          promise ||
-          workspaces
-            .fetch(source)
-            .then(saved => {
-              // If this command is called after a reset, the state database
-              // will already be resolved.
-              if (!resolved) {
-                resolved = true;
-                transform.resolve({ type: 'overwrite', contents: saved.data });
-              }
-            })
-            .catch(reason => {
-              console.warn(`Fetching workspace (${workspace}) failed:`, reason);
+        // Any time the local state database changes, save the workspace.
+        if (workspace) {
+          state.changed.connect(listener, state);
+        }
 
-              // If the workspace does not exist, cancel the data transformation
-              // and save a workspace with the current user state data.
-              if (!resolved) {
-                resolved = true;
-                transform.resolve({ type: 'cancel', contents: null });
-              }
-            })
-            .then(() => {
-              // Any time the local state database changes, save the workspace.
-              if (workspace) {
-                state.changed.connect(listener, state);
-              }
-            });
+        const immediate = true;
 
-        return promise
-          .catch(reason => {
-            console.warn(`${CommandIDs.loadState} failed:`, reason);
-          })
-          .then(() => {
-            const immediate = true;
+        if (source === clone) {
+          // Maintain the query string parameters but remove `clone`.
+          delete query['clone'];
 
-            if (source === clone) {
-              // Maintain the query string parameters but remove `clone`.
-              delete query['clone'];
+          const url = path + URLExt.objectToQueryString(query) + hash;
+          const cloned = commands
+            .execute(CommandIDs.saveState, { immediate })
+            .then(() => router.stop);
 
-              const url = path + URLExt.objectToQueryString(query) + hash;
-              const cloned = commands
-                .execute(CommandIDs.saveState, { immediate })
-                .then(() => router.stop);
-
-              // After the state has been cloned, navigate to the URL.
-              cloned.then(() => {
-                console.log(`THIS URL: ${url}`);
-                router.navigate(url, { silent: true });
-              });
-
-              return cloned;
-            }
-
-            // After the state database has finished loading, save it.
-            return commands.execute(CommandIDs.saveState, { immediate });
+          // After the state has been cloned, navigate to the URL.
+          cloned.then(() => {
+            console.log(`HERE: ${url}`);
+            router.navigate(url, { silent: true });
           });
+
+          return cloned;
+        }
+
+        // After the state database has finished loading, save it.
+        return commands.execute(CommandIDs.saveState, { immediate });
       }
     });
-    // Both the load state and clone state patterns should trigger the load
-    // state command if the URL matches one of them, but cloning a workspace
-    // outranks loading it because it is an explicit user action.
     router.register({
       command: CommandIDs.loadState,
-      pattern: Patterns.cloneState,
-      rank: 20 // Set loading rank at a higher priority than the default 100.
-    });
-    router.register({
-      command: CommandIDs.loadState,
-      pattern: Patterns.loadState,
-      rank: 30 // Set loading rank at a higher priority than the default 100.
+      pattern: /.?/,
+      rank: 20 // Very high priority: 20/100.
     });
 
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
-      execute: () => {
-        commands
-          .execute(CommandIDs.recoverState)
-          .then(() => {
-            router.reload();
-          })
-          .catch(() => {
-            router.reload();
-          });
+      execute: async () => {
+        const global = true;
+
+        try {
+          await commands.execute(CommandIDs.recoverState, { global });
+        } catch (error) {
+          /* Ignore failures and redirect. */
+        }
+        router.reload();
       }
     });
 
@@ -601,15 +586,6 @@ export default plugins;
  * The namespace for module private data.
  */
 namespace Private {
-  /**
-   * Returns the workspace name from the URL, if it exists.
-   */
-  export function getWorkspace(router: IRouter): string {
-    const match = router.current.path.match(Patterns.loadState);
-
-    return (match && decodeURIComponent(match[1])) || '';
-  }
-
   /**
    * Create a splash element.
    */
