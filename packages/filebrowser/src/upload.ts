@@ -70,6 +70,7 @@ export class Uploader extends ToolbarButton {
     let pending = files.map(file => this.model.upload(file));
     Promise.all(pending).catch(error => {
       showErrorMessage('Upload Error', error);
+      files.forEach(file => this.model.uploadFailed(file));
     });
   };
 

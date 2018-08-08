@@ -172,6 +172,17 @@ export class FileBrowserModel implements IDisposable {
     return this._uploadChanged;
   }
 
+  uploadFailed(file: File) {
+    console.log(this._uploads);
+    let index = 0;
+    this._uploads.forEach(upload => {
+      if (upload.path !== file.name) {
+        index = index + 1;
+      }
+    });
+    this._uploads.splice(index, 1);
+    console.log(this._uploads);
+  }
   /**
    * Create an iterator over the status of all in progress uploads.
    */
@@ -437,6 +448,7 @@ export class FileBrowserModel implements IDisposable {
           reject(`Failed to upload "${file.name}":` + event);
       });
       await this._uploadCheckDisposed();
+
       let model: Partial<Contents.IModel> = {
         type,
         format,
@@ -468,6 +480,7 @@ export class FileBrowserModel implements IDisposable {
       const newUpload = { path, progress: start / file.size };
       this._uploads.splice(this._uploads.indexOf(upload));
       this._uploads.push(newUpload);
+      console.log(this._uploads);
       this._uploadChanged.emit({
         name: 'update',
         newValue: newUpload,
