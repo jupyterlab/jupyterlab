@@ -6,7 +6,7 @@ export interface DropdownItem {
   type: any;
 }
 
-interface DropdownMenuProps {
+export interface DropdownMenuProps {
   className: string | null;
   buttonTitle: JSX.Element;
   items: {

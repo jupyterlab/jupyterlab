@@ -66,6 +66,9 @@ export namespace TableOfContentsRegistry {
    * An interface for an object that knows how to generate a table-of-contents
    * for a type of widget.
    */
+
+  export abstract class IGeneratorOptionsManager {}
+
   export interface IGenerator<W extends Widget = Widget> {
     /**
      * An instance tracker for the widget.
@@ -89,6 +92,12 @@ export namespace TableOfContentsRegistry {
      * Defaults to `false`.
      */
     usesLatex?: boolean;
+
+    options?: IGeneratorOptionsManager;
+
+    itemRenderer?(item: IHeading): JSX.Element;
+
+    toolbarGenerator?: () => any;
 
     /**
      * A function that takes the widget, and produces

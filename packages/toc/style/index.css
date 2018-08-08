@@ -210,3 +210,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 .option-title {
   vertical-align: middle;
 }
+.toc-code-cell-div {
+  display: inline-flex;
+  width: 100%;
+}

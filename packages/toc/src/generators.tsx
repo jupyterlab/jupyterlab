@@ -3,7 +3,7 @@
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
-import { CodeCell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -16,10 +16,358 @@ import { each } from '@phosphor/algorithm';
 import { TableOfContentsRegistry } from './registry';
 
 import { IHeading, TableOfContents } from './toc';
+import { CodeComponent } from './codemirror';
+
+import {
+  createDropdownMenu,
+  DropdownItem,
+  TagTypeDropdownItem
+} from './plugins';
+
+import * as React from 'react';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
+
+interface INotebookHeading extends IHeading {
+  numbering?: string | null;
+  type: string;
+  prompt?: string;
+  cellRef?: Cell;
+}
+
+class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
+  constructor(
+    widget: TableOfContents,
+    notebook: INotebookTracker,
+    options: { needNumbering: boolean; sanitizer: ISanitizer }
+  ) {
+    super();
+    this._numbering = options.needNumbering;
+    this._widget = widget;
+    this._notebook = notebook;
+    this.sanitizer = options.sanitizer;
+  }
+
+  private changeNumberingStateForAllCells(showNumbering: boolean) {
+    if (this._notebook.currentWidget) {
+      each(this._notebook.currentWidget.content.widgets, cell => {
+        let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        each(headingNodes, heading => {
+          if (heading.getElementsByClassName('numbering-entry').length > 0) {
+            if (!showNumbering) {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .setAttribute('hidden', 'true');
+            } else {
+              heading
+                .getElementsByClassName('numbering-entry')[0]
+                .removeAttribute('hidden');
+            }
+          }
+        });
+      });
+    }
+  }
+
+  set numbering(value: boolean) {
+    this._numbering = value;
+    this._widget.update();
+    this._widget.notebookMetadata = ['toc-autonumbering', this._numbering];
+    this.changeNumberingStateForAllCells(this._numbering);
+  }
+
+  get numbering() {
+    return this._numbering;
+  }
+
+  set showCode(value: boolean) {
+    this._showCode = value;
+    this._widget.notebookMetadata = ['toc-showcode', this._showCode];
+    this._widget.update();
+  }
+
+  get showCode() {
+    return this._showCode;
+  }
+
+  set showRaw(value: boolean) {
+    this._showRaw = value;
+    this._widget.notebookMetadata = ['toc-showraw', this._showRaw];
+    this._widget.update();
+  }
+
+  get showRaw() {
+    return this._showRaw;
+  }
+
+  set showMarkdown(value: boolean) {
+    this._showMarkdown = value;
+    this._widget.notebookMetadata = ['toc-showmarkdowntxt', this._showMarkdown];
+    this._widget.update();
+  }
+
+  get showMarkdown() {
+    return this._showMarkdown;
+  }
+
+  // initialize options, will NOT change notebook metadata
+  initializeOptions(
+    numbering: boolean,
+    showCode: boolean,
+    showRaw: boolean,
+    showMarkdown: boolean
+  ) {
+    this._numbering = numbering;
+    this._showCode = showCode;
+    this._showRaw = showRaw;
+    this._showMarkdown = showMarkdown;
+    this._widget.update();
+  }
+
+  sanitizer: ISanitizer;
+  private _numbering: boolean;
+  private _showCode = false;
+  private _showRaw = false;
+  private _showMarkdown = false;
+  private _notebook: INotebookTracker;
+  private _widget: TableOfContents;
+}
+
+function notebookItemRenderer(
+  options: NotebookGeneratorOptionsManager,
+  item: INotebookHeading
+) {
+  const levelsSizes: { [level: number]: string } = {
+    1: '18.74',
+    2: '16.02',
+    3: '13.69',
+    4: '12',
+    5: '11',
+    6: '10'
+  };
+  let jsx;
+  if (item.type === 'markdown' || item.type === 'header') {
+    const paddingLeft = 22;
+    const collapseOnClick = (cellRef?: Cell) => {
+      console.log(cellRef!.model.value.text);
+    };
+    let fontSize = '9px';
+    let numbering = item.numbering && options.numbering ? item.numbering : '';
+    if (item.type === 'header') {
+      fontSize = levelsSizes[item.level] + 'px';
+    }
+    if (item.html && (item.type === 'header' || options.showMarkdown)) {
+      jsx = (
+        <span
+          dangerouslySetInnerHTML={{
+            __html:
+              numbering +
+              options.sanitizer.sanitize(item.html, Private.sanitizerOptions)
+          }}
+          className="markdown-cell"
+          style={{ fontSize, paddingLeft }}
+        />
+      );
+      if (item.type === 'header') {
+        jsx = (
+          <div>
+            <button
+              onClick={event => {
+                event.stopPropagation();
+                collapseOnClick(item.cellRef);
+              }}
+            >
+              CL
+            </button>
+            {jsx}
+          </div>
+        );
+      }
+    } else if (item.type === 'header' || options.showMarkdown) {
+      jsx = (
+        <span className="markdown-cell" style={{ fontSize, paddingLeft }}>
+          {numbering + item.text}
+        </span>
+      );
+      if (item.type === 'header') {
+        jsx = (
+          <div>
+            <button>CL</button>
+            {jsx}
+          </div>
+        );
+      }
+    } else {
+      jsx = <div />;
+    }
+  } else if (item.type === 'code' && options.showCode) {
+    jsx = (
+      <div className="toc-code-cell-div">
+        <div className="toc-code-cell-prompt">{item.prompt}</div>
+        <span className={'toc-code-span'}>
+          <CodeComponent code={item.text!} theme="jupyter" />
+        </span>
+      </div>
+    );
+  } else if (item.type === 'raw' && options.showRaw) {
+    jsx = (
+      <div className="toc-code-cell-div">
+        <span className={'toc-code-span'}>
+          <CodeComponent code={item.text!} theme="none" />
+        </span>
+      </div>
+    );
+  } else {
+    jsx = <div />;
+  }
+  return jsx;
+}
+
+interface NotebookGeneratorToolbarProps {}
+
+interface NotebookGeneratorToolbarState {
+  showCode: boolean;
+  showRaw: boolean;
+  showMarkdown: boolean;
+}
+
+export function notebookGeneratorToolbar(
+  options: NotebookGeneratorOptionsManager,
+  tracker: INotebookTracker
+) {
+  return class extends React.Component<
+    NotebookGeneratorToolbarProps,
+    NotebookGeneratorToolbarState
+  > {
+    constructor(props: NotebookGeneratorToolbarProps) {
+      super(props);
+      this.state = { showCode: true, showRaw: false, showMarkdown: false };
+      if (tracker.currentWidget) {
+        tracker.currentWidget.context.ready.then(() => {
+          if (tracker.currentWidget) {
+            let _numbering = tracker.currentWidget.model.metadata.get(
+              'toc-autonumbering'
+            ) as boolean;
+            let numbering =
+              _numbering != undefined ? _numbering : options.numbering;
+            let _showCode = tracker.currentWidget.model.metadata.get(
+              'toc-showcode'
+            ) as boolean;
+            let showCode =
+              _showCode != undefined ? _showCode : options.showCode;
+            let _showRaw = tracker.currentWidget.model.metadata.get(
+              'toc-showraw'
+            ) as boolean;
+            let showRaw = _showRaw != undefined ? _showRaw : options.showRaw;
+            let _showMarkdown = tracker.currentWidget.model.metadata.get(
+              'toc-showmarkdowntxt'
+            ) as boolean;
+            let showMarkdown =
+              _showMarkdown != undefined ? _showMarkdown : options.showMarkdown;
+            options.initializeOptions(
+              numbering,
+              showCode,
+              showRaw,
+              showMarkdown
+            );
+            this.setState({
+              showCode: options.showCode,
+              showRaw: options.showRaw,
+              showMarkdown: options.showMarkdown
+            });
+          }
+        });
+      }
+    }
+    toggleCode = (component: React.Component) => {
+      options.showCode = !options.showCode;
+      this.setState({ showCode: options.showCode });
+    };
+
+    toggleRaw = (component: React.Component) => {
+      options.showRaw = !options.showRaw;
+      this.setState({ showRaw: options.showRaw });
+    };
+
+    toggleMarkdown = (component: React.Component) => {
+      options.showMarkdown = !options.showMarkdown;
+      this.setState({ showMarkdown: options.showMarkdown });
+    };
+
+    toggleAutoNumbering = () => {
+      options.numbering = !options.numbering;
+    };
+
+    renderedDropdownMenu: any = createDropdownMenu();
+
+    render() {
+      const DropdownMenu = this.renderedDropdownMenu;
+      const dropDownMenuItems: DropdownItem[] = [
+        {
+          id: 0,
+          props: {
+            title: 'Code',
+            selectedByDefault: this.state.showCode,
+            onClickHandler: this.toggleCode.bind(this)
+          },
+          type: TagTypeDropdownItem
+        },
+        {
+          id: 1,
+          props: {
+            title: 'Raw',
+            selectedByDefault: this.state.showRaw,
+            onClickHandler: this.toggleRaw.bind(this)
+          },
+          type: TagTypeDropdownItem
+        },
+        {
+          id: 2,
+          props: {
+            title: 'Markdown text',
+            selectedByDefault: this.state.showMarkdown,
+            onClickHandler: this.toggleMarkdown.bind(this)
+          },
+          type: TagTypeDropdownItem
+        }
+      ];
+
+      return (
+        <div className="toc-toolbar">
+          <DropdownMenu
+            className="celltypes-dropdown"
+            items={{
+              stateIndicator: '',
+              items: dropDownMenuItems
+            }}
+            buttonTitle={
+              <span>
+                Cell Type
+                <img
+                  className="dropdown-arrow"
+                  src={require('../static/menu_arrow.svg')}
+                />
+              </span>
+            }
+          />
+          <div
+            className="auto-numbering-button"
+            onClick={event => this.toggleAutoNumbering()}
+          >
+            <img
+              alt="Toggle Auto-Numbering"
+              title="Toggle Auto-Numbering"
+              src={require('../static/numbering.svg')}
+              className="numberingIcon"
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+}
 
 /**
  * Create a TOC generator for notebooks.
@@ -31,14 +379,24 @@ const HTML_MIME_TYPE = 'text/html';
 export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
-  widget: TableOfContents,
-  needNumbering = false
+  widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
+  const options = new NotebookGeneratorOptionsManager(widget, tracker, {
+    needNumbering: false,
+    sanitizer: sanitizer
+  });
   return {
     tracker,
     usesLatex: true,
+    options: options,
+    toolbarGenerator: () => {
+      return notebookGeneratorToolbar(options, tracker);
+    },
+    itemRenderer: (item: INotebookHeading) => {
+      return notebookItemRenderer(options, item);
+    },
     generate: panel => {
-      let headings: IHeading[] = [];
+      let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
       each(panel.content.widgets, cell => {
         let model = cell.model;
@@ -51,7 +409,7 @@ export function createNotebookGenerator(
           // are rendered markdown or HTML.
           let showCode = true;
           if (widget) {
-            showCode = widget.showCode;
+            showCode = options.showCode;
           }
           if (showCode) {
             let text = (model as CodeCellModel).value.text;
@@ -67,7 +425,8 @@ export function createNotebookGenerator(
                 onClickFactory,
                 numberingDict,
                 executionCount,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
@@ -90,10 +449,7 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let numbering = true;
-            if (widget != null) {
-              numbering = widget.needNumbering;
-            }
+            let numbering = options.numbering;
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
                 outputWidget.node,
@@ -101,7 +457,8 @@ export function createNotebookGenerator(
                 sanitizer,
                 numberingDict,
                 lastLevel,
-                numbering
+                numbering,
+                cell
               )
             );
           }
@@ -119,10 +476,7 @@ export function createNotebookGenerator(
                 }
               };
             };
-            let numbering = true;
-            if (widget != null) {
-              numbering = widget.needNumbering;
-            }
+            let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
             headings = headings.concat(
               Private.getRenderedHTMLHeadings(
@@ -131,7 +485,8 @@ export function createNotebookGenerator(
                 sanitizer,
                 numberingDict,
                 lastLevel,
-                numbering
+                numbering,
+                cell
               )
             );
           } else {
@@ -149,14 +504,15 @@ export function createNotebookGenerator(
                 model.value.text,
                 onClickFactory,
                 numberingDict,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
         } else if (model.type === 'raw') {
           let showRaw = false;
           if (widget) {
-            showRaw = widget.showRaw;
+            showRaw = options.showRaw;
           }
           if (showRaw) {
             let text = (model as CodeCellModel).value.text;
@@ -171,7 +527,8 @@ export function createNotebookGenerator(
                 text,
                 onClickFactory2,
                 numberingDict,
-                lastLevel
+                lastLevel,
+                cell
               )
             );
           }
@@ -302,7 +659,9 @@ export function createLatexGenerator(
               column: 0
             });
           };
-          headings.push({ text, level, onClick, type: 'heading' });
+          // TODO: HEADER!!!
+          // headings.push({ text, level, onClick, type: 'heading' });
+          headings.push({ text, level, onClick });
         }
       });
       return headings;
@@ -314,7 +673,7 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
-  export function getLastLevel(headings: IHeading[]) {
+  export function getLastLevel(headings: INotebookHeading[]) {
     if (headings.length > 0) {
       let location = headings.length - 1;
       while (location >= 0) {
@@ -358,10 +717,10 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any
-  ): IHeading[] {
+  ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: IHeading[] = [];
+    let headings: INotebookHeading[] = [];
 
     // Iterate over the lines to get the header level and
     // the text for the line.
@@ -376,7 +735,8 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
 
@@ -387,7 +747,8 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
 
@@ -399,7 +760,8 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = Private.generateNumbering(numberingDict, level);
-        headings.push({ text, level, numbering, onClick, type: 'header' });
+        // TODO: HEADER!!!
+        headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
     });
@@ -414,11 +776,12 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    lastLevel: number
-  ): IHeading[] {
+    lastLevel: number,
+    cellRef: Cell
+  ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: IHeading[] = [];
+    let headings: INotebookHeading[] = [];
     // Iterate over the lines to get the header level and
     // the text for the line.
     let line = lines[0];
@@ -435,7 +798,15 @@ namespace Private {
       // Take special care to parse markdown links into raw text.
       const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      // TODO: HEADER!!!
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     }
 
     // Next test for '==='-style headers.
@@ -444,7 +815,15 @@ namespace Private {
       // Take special care to parse markdown links into raw text.
       const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = Private.generateNumbering(numberingDict, level);
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      // TODO: HEADER!!!
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     }
 
     // Finally test for HTML headers. This will not catch multiline
@@ -454,13 +833,22 @@ namespace Private {
       const level = parseInt(match3[1], 10);
       const text = match3[2];
       let numbering = Private.generateNumbering(numberingDict, level);
-      headings.push({ text, level, numbering, onClick, type: 'header' });
+      // TODO: HEADER!!!
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef
+      });
     } else {
       headings.push({
         text: line,
         level: lastLevel + 1,
         onClick,
-        type: 'markdown'
+        type: 'markdown',
+        cellRef: cellRef
       });
     }
     return headings;
@@ -471,9 +859,10 @@ namespace Private {
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
     executionCount: string,
-    lastLevel: number
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+    lastLevel: number,
+    cellRef: Cell
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
@@ -488,8 +877,9 @@ namespace Private {
         text: headingText,
         level,
         onClick,
+        type: 'code',
         prompt: executionCount.substring(3),
-        type: 'code'
+        cellRef: cellRef
       });
     }
     return headings;
@@ -499,9 +889,10 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
-    lastLevel: number
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+    lastLevel: number,
+    cellRef: Cell
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
@@ -516,7 +907,8 @@ namespace Private {
         text: headingText,
         level,
         onClick,
-        type: 'raw'
+        type: 'raw',
+        cellRef: cellRef
       });
     }
     return headings;
@@ -531,9 +923,10 @@ namespace Private {
     sanitizer: ISanitizer,
     numberingDict: any,
     lastLevel: number,
-    needNumbering = false
-  ): IHeading[] {
-    let headings: IHeading[] = [];
+    needNumbering = false,
+    cellRef?: Cell
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
@@ -541,10 +934,11 @@ namespace Private {
         if (markdownCell.innerHTML) {
           headings.push({
             level: lastLevel + 1,
-            html: sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions),
+            html: markdownCell.innerHTML,
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
-            type: 'markdown'
+            type: 'markdown',
+            cellRef: cellRef
           });
         }
       } else {
@@ -568,13 +962,15 @@ namespace Private {
           numbering +
           '</span>';
         heading.innerHTML = numberingElement + html;
+        // TODO: HEADER!!! (type: header)
         headings.push({
           level,
           text,
           numbering,
           html,
           onClick,
-          type: 'header'
+          type: 'header',
+          cellRef: cellRef
         });
       }
     }
@@ -620,7 +1016,7 @@ namespace Private {
    * sanitize HTML headings, if they are given. We specifically
    * disallow anchor tags, since we are adding our own.
    */
-  const sanitizerOptions = {
+  export const sanitizerOptions = {
     allowedTags: [
       'p',
       'blockquote',
