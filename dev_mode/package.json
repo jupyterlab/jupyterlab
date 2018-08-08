@@ -59,7 +59,7 @@
     "@jupyterlab/rendermime": "^0.17.3",
     "@jupyterlab/rendermime-extension": "^0.11.2",
     "@jupyterlab/rendermime-interfaces": "^1.1.2",
-    "@jupyterlab/running": "^0.17.2",
+    "@jupyterlab/running": "^0.17.3",
     "@jupyterlab/running-extension": "^0.17.2",
     "@jupyterlab/services": "^3.0.3",
     "@jupyterlab/settingeditor": "^0.6.2",
@@ -215,7 +215,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.33.7",
+    "version": "0.33.8",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
