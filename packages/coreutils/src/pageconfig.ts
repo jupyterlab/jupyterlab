@@ -5,6 +5,8 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import minimist from 'minimist';
 
+import { PathExt } from './path';
+
 import { URLExt } from './url';
 
 /**
@@ -134,11 +136,9 @@ export namespace PageConfig {
     const defaultWorkspace = getOption('defaultWorkspace');
     const workspaces = getOption('workspacesUrl');
     const workspace = getOption('workspace');
-    const prefix = URLExt.join(PageConfig.getOption('baseUrl'), workspaces);
-    const token = workspace.substring(prefix.length);
 
     return !!options.workspace && workspace && workspace !== defaultWorkspace
-      ? URLExt.join(base, workspaces, token, 'tree')
+      ? URLExt.join(base, workspaces, PathExt.basename(workspace), 'tree')
       : URLExt.join(base, tree);
   }
 

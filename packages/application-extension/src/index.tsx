@@ -18,7 +18,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 
@@ -235,7 +235,7 @@ const tree: JupyterLabPlugin<void> = {
         const match = treeMatch || workspaceMatch;
         const path = decodeURIComponent(match[1]);
         const { page, workspaces } = app.info.urls;
-        const workspace = app.info.workspace;
+        const workspace = PathExt.basename(app.info.workspace);
         const url =
           (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
           args.search +
