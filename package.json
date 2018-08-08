@@ -18,7 +18,7 @@
         "lib/**/*.js.map",
         "lib/**/*.js",
         "style/*.css",
-        "style/images/*",
+        "style/images/*.svg",
         "schema/*.json"
     ],
     "main": "lib/index.js",
