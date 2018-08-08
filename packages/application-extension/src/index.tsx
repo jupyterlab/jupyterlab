@@ -229,7 +229,7 @@ const tree: JupyterLabPlugin<void> = {
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ILocation) => {
+      execute: async (args: IRouter.ILocation) => {
         const treeMatch = args.path.match(Patterns.tree);
         const workspaceMatch = args.path.match(Patterns.workspace);
         const match = treeMatch || workspaceMatch;
@@ -241,16 +241,17 @@ const tree: JupyterLabPlugin<void> = {
           args.search +
           args.hash;
         const immediate = true;
+        const silent = true;
 
         // Silently remove the tree portion of the URL leaving the rest intact.
-        router.navigate(url, { silent: true });
+        router.navigate(url, { silent });
 
-        return commands
-          .execute('filebrowser:navigate', { path })
-          .then(() => commands.execute('apputils:save-statedb', { immediate }))
-          .catch(reason => {
-            console.warn(`Tree routing failed:`, reason);
-          });
+        try {
+          await commands.execute('filebrowser:navigate', { path });
+          await commands.execute('apputils:save-statedb', { immediate });
+        } catch (error) {
+          console.warn('Tree routing failed.', error);
+        }
       }
     });
 
