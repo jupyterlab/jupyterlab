@@ -340,13 +340,16 @@ export namespace JupyterLab {
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
     workspace: '',
-    defaultWorkspace: PageConfig.setOption(
-      'defaultWorkspace',
-      URLExt.join(
+    defaultWorkspace: (() => {
+      const defaultWorkspace = URLExt.join(
         PageConfig.getOption('baseUrl'),
         PageConfig.getOption('pageUrl')
-      )
-    )
+      );
+
+      PageConfig.setOption('defaultWorkspace', defaultWorkspace);
+
+      return defaultWorkspace;
+    })()
   };
 
   /**
