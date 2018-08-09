@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+
+import { find } from '@phosphor/algorithm';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -18,6 +20,8 @@ import { IConsoleTracker } from '@jupyterlab/console';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ITooltipManager, Tooltip } from '@jupyterlab/tooltip';
 
@@ -153,31 +157,82 @@ const notebooks: JupyterLabPlugin<void> = {
 const files: JupyterLabPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:files',
   autoStart: true,
-  requires: [ITooltipManager, IConsoleTracker, IEditorTracker],
+  requires: [ITooltipManager, IEditorTracker, IRenderMimeRegistry],
   activate: (
     app: JupyterLab,
     manager: ITooltipManager,
-    consoleTracker: IConsoleTracker,
-    editorTracker: IEditorTracker
+    editorTracker: IEditorTracker,
+    rendermime: IRenderMimeRegistry
   ): void => {
+    // Keep a list of active ISessions so that we can
+    // clean them up when they are no longer needed.
+    const activeSessions: {
+      [id: string]: Session.ISession;
+    } = {};
+
+    const sessions = app.serviceManager.sessions;
+    // When the list of running sessions changes,
+    // check to see if there are any kernels with a
+    // matching path for the file editors.
+    const onRunningChanged = (
+      sender: Session.IManager,
+      models: Session.IModel[]
+    ) => {
+      editorTracker.forEach(file => {
+        const model = find(models, m => file.context.path === m.path);
+        if (model) {
+          const oldSession = activeSessions[file.id];
+          // If there is a matching path, but it is the same
+          // session as we previously had, do nothing.
+          if (oldSession && oldSession.id === model.id) {
+            return;
+          }
+          // Otherwise, dispose of the old session and reset to
+          // a new CompletionConnector.
+          if (oldSession) {
+            delete activeSessions[file.id];
+            oldSession.dispose();
+          }
+          const session = sessions.connectTo(model);
+          activeSessions[file.id] = session;
+        } else {
+          const session = activeSessions[file.id];
+          if (session) {
+            session.dispose();
+            delete activeSessions[file.id];
+          }
+        }
+      });
+    };
+    Session.listRunning().then(models => {
+      onRunningChanged(sessions, models);
+    });
+    sessions.runningChanged.connect(onRunningChanged);
+
+    // Clean up after a widget when it is disposed
+    editorTracker.widgetAdded.connect((sender, widget) => {
+      widget.disposed.connect(w => {
+        const session = activeSessions[w.id];
+        if (session) {
+          session.dispose();
+          delete activeSessions[w.id];
+        }
+      });
+    });
+
     // Add tooltip launch command.
     app.commands.addCommand(CommandIDs.launchFile, {
-      execute: () => {
+      execute: async () => {
         const parent = editorTracker.currentWidget;
-        if (!parent) {
+        const kernel =
+          parent &&
+          activeSessions[parent.id] &&
+          activeSessions[parent.id].kernel;
+        if (!kernel) {
           return;
         }
-        const console = consoleTracker.find(
-          c => parent.context.path === c.session.path
-        );
-        if (!console) {
-          return;
-        }
-
         const anchor = parent.content;
         const editor = anchor.editor;
-        const kernel = console.session.kernel;
-        const rendermime = console.console.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {
