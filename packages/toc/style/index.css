@@ -242,3 +242,9 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   margin: auto;
   position: absolute;
 }
+
+.toc-twist-placeholder {
+  max-width: 10px;
+  opacity: 0;
+  overflow: hidden;
+}

@@ -193,6 +193,7 @@ function notebookItemRenderer(
               collapseOnClick(item.cellRef);
             }}
           >
+            <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
               src={require('../static/downarrow.svg')}
@@ -208,6 +209,7 @@ function notebookItemRenderer(
                 collapseOnClick(item.cellRef);
               }}
             >
+              <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
                 src={require('../static/rightarrow.svg')}
@@ -241,6 +243,7 @@ function notebookItemRenderer(
               collapseOnClick(item.cellRef);
             }}
           >
+            <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
               src={require('../static/downarrow.svg')}
@@ -256,6 +259,7 @@ function notebookItemRenderer(
                 collapseOnClick(item.cellRef);
               }}
             >
+              <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
                 src={require('../static/rightarrow.svg')}
