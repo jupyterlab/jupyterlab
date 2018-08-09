@@ -17,7 +17,8 @@ import {
   each,
   find,
   IIterator,
-  IterableOrArrayLike
+  IterableOrArrayLike,
+  ArrayExt
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -446,6 +447,7 @@ export class FileBrowserModel implements IDisposable {
           reject(`Failed to upload "${file.name}":` + event);
       });
       await this._uploadCheckDisposed();
+
       let model: Partial<Contents.IModel> = {
         type,
         format,
@@ -457,7 +459,14 @@ export class FileBrowserModel implements IDisposable {
     };
 
     if (!chunked) {
-      return await uploadInner(file);
+      try {
+        return await uploadInner(file);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+        throw err;
+      }
     }
 
     let finalModel: Contents.IModel;
@@ -484,7 +493,16 @@ export class FileBrowserModel implements IDisposable {
       });
       upload = newUpload;
 
-      const currentModel = await uploadInner(file.slice(start, end), chunk);
+      let currentModel: Contents.IModel;
+      try {
+        currentModel = await uploadInner(file.slice(start, end), chunk);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+
+        throw err;
+      }
 
       if (lastChunk) {
         finalModel = currentModel;
