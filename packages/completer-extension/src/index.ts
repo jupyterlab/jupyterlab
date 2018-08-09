@@ -14,11 +14,13 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
-
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
+
+import { Session } from '@jupyterlab/services';
+
+import { find } from '@phosphor/algorithm';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -242,77 +244,84 @@ const notebooks: JupyterLabPlugin<void> = {
  */
 const files: JupyterLabPlugin<void> = {
   id: '@jupyterlab/completer-extension:files',
-  requires: [ICompletionManager, IConsoleTracker, IEditorTracker],
+  requires: [ICompletionManager, IEditorTracker],
   autoStart: true,
   activate: (
     app: JupyterLab,
     manager: ICompletionManager,
-    consoleTracker: IConsoleTracker,
     editorTracker: IEditorTracker
   ): void => {
-    // Keep a list of active file completion handlers.
-    const handlers: {
-      [id: string]: ICompletionManager.ICompletableAttributes;
+    // Keep a list of active ISessions so that we can
+    // clean them up when they are no longer needed.
+    const activeSessions: {
+      [id: string]: Session.ISession;
     } = {};
 
-    // When an editor is created, check if there
-    // is already a console associated with that path.
-    // If so, make a CompletionConnector for it.
-    // Otherwise, make the more limited ContextConnector
+    // When a new file editor is created, make the completer for it.
     editorTracker.widgetAdded.connect((sender, widget) => {
-      const console = consoleTracker.find(
-        c => c.session.path === widget.context.path
-      );
+      const sessions = app.serviceManager.sessions;
       const editor = widget.content.editor;
-      let handler: ICompletionManager.ICompletableAttributes;
-      let connector: IDataConnector<
-        CompletionHandler.IReply,
-        void,
-        CompletionHandler.IRequest
-      >;
-      if (console) {
-        const session = console.session;
-        connector = new CompletionConnector({ session, editor });
-        session.terminated.connect(() => {
-          if (!widget.isDisposed) {
-            handler.connector = new ContextConnector({ editor });
+      const contextConnector = new ContextConnector({ editor });
+
+      // When the list of running sessions changes,
+      // check to see if there are any kernels with a
+      // matching path for this file editor.
+      const onRunningChanged = (
+        sender: Session.IManager,
+        models: Session.IModel[]
+      ) => {
+        const oldSession = activeSessions[widget.id];
+        // Search for a matching path.
+        const model = find(models, m => m.path === widget.context.path);
+        if (model) {
+          // If there is a matching path, but it is the same
+          // session as we previously had, do nothing.
+          if (oldSession && oldSession.id === model.id) {
+            return;
           }
-        });
-      } else {
-        connector = new ContextConnector({ editor });
-      }
-      handler = manager.register({
-        connector,
+          // Otherwise, dispose of the old session and reset to
+          // a new CompletionConnector.
+          if (oldSession) {
+            delete activeSessions[widget.id];
+            oldSession.dispose();
+          }
+          const session = sessions.connectTo(model);
+          handler.connector = new CompletionConnector({ session, editor });
+          activeSessions[widget.id] = session;
+        } else {
+          // If we didn't find a match, make sure
+          // the connector is the contextConnector and
+          // dispose of any previous connection.
+          handler.connector = contextConnector;
+          if (oldSession) {
+            delete activeSessions[widget.id];
+            oldSession.dispose();
+          }
+        }
+      };
+      Session.listRunning().then(models => {
+        onRunningChanged(sessions, models);
+      });
+      sessions.runningChanged.connect(onRunningChanged);
+
+      // Initially create the handler with the contextConnector.
+      // If a kernel session is found matching this file editor,
+      // it will be replaced in onRunningChanged().
+      const handler = manager.register({
+        connector: contextConnector,
         editor,
         parent: widget
       });
-      handlers[widget.id] = handler;
-      widget.disposed.connect(() => {
-        delete handlers[widget.id];
-      });
-    });
 
-    // When a console is created, check if it is associated with
-    // a text editor. If so, make a completer for it.
-    consoleTracker.widgetAdded.connect((sender, widget) => {
-      const fileWidget = editorTracker.find(
-        e => e.context.path === widget.session.path
-      );
-      if (fileWidget) {
-        const handler = handlers[fileWidget.id];
-        if (!handler) {
-          return;
+      // When the widget is disposed, do some cleanup.
+      widget.disposed.connect(() => {
+        sessions.runningChanged.disconnect(onRunningChanged);
+        const session = activeSessions[widget.id];
+        if (session) {
+          delete activeSessions[widget.id];
+          session.dispose();
         }
-        const session = widget.session;
-        const editor = fileWidget.content.editor;
-        const connector = new CompletionConnector({ session, editor });
-        session.terminated.connect(() => {
-          if (!fileWidget.isDisposed) {
-            handler.connector = new ContextConnector({ editor });
-          }
-        });
-        handler.connector = connector;
-      }
+      });
     });
 
     // Add console completer invoke command.
