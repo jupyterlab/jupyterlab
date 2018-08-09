@@ -154,7 +154,7 @@ function notebookItemRenderer(
   };
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
-    const paddingLeft = 22;
+    const paddingLeft = 24;
     const collapseOnClick = (cellRef?: Cell) => {
       let collapsed = cellRef!.model.metadata.get(
         'toc-hr-collapsed'

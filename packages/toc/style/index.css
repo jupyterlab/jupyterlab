@@ -179,11 +179,13 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   opacity: var(--jp-cell-prompt-not-active-opacity);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
+  padding-right: 0px;
+  padding-left: 0px;
   letter-spacing: var(--jp-cell-prompt-letter-spacing);
   line-height: var(--jp-code-line-height);
   font-size: 8px;
   border: var(--jp-border-width) solid transparent;
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -218,4 +220,11 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .toc-entry-holder {
   display: inline-flex;
+}
+
+.toc-collapse-button {
+  padding-left: 3px;
+  position: absolute;
+  cursor: default;
+  min-width: 11px;
 }
