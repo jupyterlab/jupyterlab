@@ -641,7 +641,7 @@ Jun 02, 2017
    https://github.com/jupyterlab/jupyterlab/pull/2266
 -  Various bug fixes and style improvements.
 
-`0.22.0 (v0.22.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.22.0>`__
+`v0.22.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.22.0>`__
 ------------------------------------------------------------------------------------
 
 May 18, 2017
@@ -670,7 +670,7 @@ May 18, 2017
    https://github.com/jupyterlab/jupyterlab/pull/2185
 -  Cleanup, bug fixes, and style updates.
 
-`0.20.0 (v0.20.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.20.0>`__
+`v0.20.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.20.0>`__
 ------------------------------------------------------------------------------------
 
 Apr 21, 2017
@@ -691,7 +691,7 @@ Release Notes:
 
 Numerous bug fixes and improvements.
 
-`Release 0.19 (v0.19.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.19.0>`__
+`v0.19.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.19.0>`__
 ------------------------------------------------------------------------------------------
 
 Apr 04, 2017
@@ -707,7 +707,7 @@ big split.
 https://github.com/jupyterlab/jupyterlab/pull/1984
 https://github.com/jupyterlab/jupyterlab/pull/1927
 
-`Version 0.18 (v0.18.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.18.0>`__
+`v0.18.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.18.0>`__
 ------------------------------------------------------------------------------------------
 
 Mar 21, 2017
@@ -720,7 +720,7 @@ Mar 21, 2017
    https://github.com/jupyterlab/jupyterlab/pull/1880
 -  Numerous bug fixes and style updates.
 
-`0.17.0 (v0.17.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.17.0>`__
+`v0.17.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.17.0>`__
 ------------------------------------------------------------------------------------
 
 Mar 01, 2017
@@ -739,7 +739,7 @@ Mar 01, 2017
    https://github.com/jupyterlab/jupyterlab/pull/1764
 -  Numerous style updates and bug fixes.
 
-`Version 16 (v0.16.0) <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.16.0>`__
+`v0.16.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.16.0>`__
 ----------------------------------------------------------------------------------------
 
 Feb 09, 2017
