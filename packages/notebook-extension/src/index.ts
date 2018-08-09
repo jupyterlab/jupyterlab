@@ -487,10 +487,14 @@ function activateNotebookHandler(
       if (args['isLauncher'] && args['kernelName']) {
         return services.specs.kernelspecs[kernelName].display_name;
       }
+      if (args['isPalette']) {
+        return 'New Notebook';
+      }
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: args => (args['isLauncher'] ? '' : 'jp-NotebookIcon'),
+    iconClass: args =>
+      args['isLauncher'] || args['isPalette'] ? '' : 'jp-NotebookIcon',
     execute: args => {
       const cwd =
         args['cwd'] || browserFactory
@@ -1564,7 +1568,6 @@ function addCommands(
 function populatePalette(palette: ICommandPalette): void {
   let category = 'Notebook Operations';
   [
-    CommandIDs.createNew,
     CommandIDs.interrupt,
     CommandIDs.restart,
     CommandIDs.restartClear,
@@ -1586,6 +1589,12 @@ function populatePalette(palette: ICommandPalette): void {
     CommandIDs.saveWithView
   ].forEach(command => {
     palette.addItem({ command, category });
+  });
+
+  palette.addItem({
+    command: CommandIDs.createNew,
+    category,
+    args: { isPalette: true }
   });
 
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
