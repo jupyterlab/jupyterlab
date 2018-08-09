@@ -43,6 +43,8 @@ import { Menu } from '@phosphor/widgets';
 namespace CommandIDs {
   export const copy = 'filebrowser:copy';
 
+  export const copyDownloadLink = 'filebrowser:copy-download-link';
+
   // For main browser only.
   export const createLauncher = 'filebrowser:create-main-launcher';
 
@@ -391,6 +393,24 @@ function addCommands(
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.copyDownloadLink, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return browser.model.manager.services.contents
+        .getDownloadUrl(browser.selectedItems().next().path)
+        .then(url => {
+          Clipboard.copyToSystem(url);
+        });
+    },
+    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    label: 'Copy Download Link',
+    mnemonic: 0
+  });
+
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -557,6 +577,7 @@ function createContextMenu(
 
   menu.addItem({ command: CommandIDs.share });
   menu.addItem({ command: CommandIDs.copyPath });
+  menu.addItem({ command: CommandIDs.copyDownloadLink });
 
   return menu;
 }
