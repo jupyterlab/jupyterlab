@@ -108,7 +108,9 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    let itemRenderer = (item: IHeading) => {
+    let itemRenderer: (item: IHeading) => JSX.Element | null = (
+      item: IHeading
+    ) => {
       return <span>{item.text}</span>;
     };
     if (this._current && this._current!.generator.itemRenderer) {
@@ -245,7 +247,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
   toc: IHeading[];
   widget: TableOfContents;
   contextChanged: boolean;
-  itemRenderer: (item: IHeading) => JSX.Element;
+  itemRenderer: (item: IHeading) => JSX.Element | null;
 }
 
 /**
@@ -256,7 +258,7 @@ export interface ITOCItemProps extends React.Props<TOCItem> {
    * An IHeading to render.
    */
   heading: IHeading;
-  itemRenderer: (item: IHeading) => JSX.Element;
+  itemRenderer: (item: IHeading) => JSX.Element | null;
 }
 
 export interface ITOCItemStates {}
@@ -284,7 +286,7 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
     };
 
     let content = this.props.itemRenderer(heading);
-    return <li onClick={handleClick}>{content}</li>;
+    return content && <li onClick={handleClick}>{content}</li>;
   }
 }
 

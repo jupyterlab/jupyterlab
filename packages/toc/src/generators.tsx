@@ -35,6 +35,7 @@ interface INotebookHeading extends IHeading {
   type: string;
   prompt?: string;
   cellRef?: Cell;
+  hasChild?: boolean;
 }
 
 class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
@@ -112,6 +113,10 @@ class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGenerator
     return this._showMarkdown;
   }
 
+  updateWidget() {
+    this._widget.update();
+  }
+
   // initialize options, will NOT change notebook metadata
   initializeOptions(
     numbering: boolean,
@@ -151,7 +156,12 @@ function notebookItemRenderer(
   if (item.type === 'markdown' || item.type === 'header') {
     const paddingLeft = 22;
     const collapseOnClick = (cellRef?: Cell) => {
-      console.log(cellRef!.model.value.text);
+      let collapsed = cellRef!.model.metadata.get(
+        'toc-hr-collapsed'
+      ) as boolean;
+      collapsed = collapsed != undefined ? collapsed : false;
+      cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
+      options.updateWidget();
     };
     let fontSize = '9px';
     let numbering = item.numbering && options.numbering ? item.numbering : '';
@@ -171,16 +181,37 @@ function notebookItemRenderer(
         />
       );
       if (item.type === 'header') {
-        jsx = (
-          <div>
-            <button
+        let collapsed = item.cellRef!.model.metadata.get(
+          'toc-hr-collapsed'
+        ) as boolean;
+        collapsed = collapsed != undefined ? collapsed : false;
+        let twistButton = (
+          <div
+            className="toc-collapse-button"
+            onClick={event => {
+              event.stopPropagation();
+              collapseOnClick(item.cellRef);
+            }}
+          >
+            <img src={require('../static/downarrow.svg')} />
+          </div>
+        );
+        if (collapsed) {
+          twistButton = (
+            <div
+              className="toc-collapse-button"
               onClick={event => {
                 event.stopPropagation();
                 collapseOnClick(item.cellRef);
               }}
             >
-              CL
-            </button>
+              <img src={require('../static/rightarrow.svg')} />
+            </div>
+          );
+        }
+        jsx = (
+          <div className="toc-entry-holder">
+            {item.hasChild && twistButton}
             {jsx}
           </div>
         );
@@ -192,15 +223,43 @@ function notebookItemRenderer(
         </span>
       );
       if (item.type === 'header') {
+        let collapsed = item.cellRef!.model.metadata.get(
+          'toc-hr-collapsed'
+        ) as boolean;
+        collapsed = collapsed != undefined ? collapsed : false;
+        let twistButton = (
+          <div
+            className="toc-collapse-button"
+            onClick={event => {
+              event.stopPropagation();
+              collapseOnClick(item.cellRef);
+            }}
+          >
+            <img src={require('../static/downarrow.svg')} />
+          </div>
+        );
+        if (collapsed) {
+          twistButton = (
+            <div
+              className="toc-collapse-button"
+              onClick={event => {
+                event.stopPropagation();
+                collapseOnClick(item.cellRef);
+              }}
+            >
+              <img src={require('../static/rightarrow.svg')} />
+            </div>
+          );
+        }
         jsx = (
-          <div>
-            <button>CL</button>
+          <div className="toc-entry-holder">
+            {item.hasChild && twistButton}
             {jsx}
           </div>
         );
       }
     } else {
-      jsx = <div />;
+      jsx = null;
     }
   } else if (item.type === 'code' && options.showCode) {
     jsx = (
@@ -220,7 +279,7 @@ function notebookItemRenderer(
       </div>
     );
   } else {
-    jsx = <div />;
+    jsx = null;
   }
   return jsx;
 }
@@ -398,7 +457,11 @@ export function createNotebookGenerator(
     generate: panel => {
       let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
+      let currentCollapseLevel = -1;
+      let prevHeading: INotebookHeading | null = null;
       each(panel.content.widgets, cell => {
+        let collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
+        collapsed = collapsed != undefined ? collapsed : false;
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
@@ -419,16 +482,18 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            headings = headings.concat(
-              Private.getCodeCells(
-                text,
-                onClickFactory,
-                numberingDict,
-                executionCount,
-                lastLevel,
-                cell
-              )
+            let renderedHeadings = Private.getCodeCells(
+              text,
+              onClickFactory,
+              numberingDict,
+              executionCount,
+              lastLevel,
+              cell
             );
+            if (currentCollapseLevel < 0) {
+              headings = headings.concat(renderedHeadings);
+            }
+            prevHeading = renderedHeadings[0];
           }
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
@@ -450,17 +515,37 @@ export function createNotebookGenerator(
             };
             let lastLevel = Private.getLastLevel(headings);
             let numbering = options.numbering;
-            headings = headings.concat(
-              Private.getRenderedHTMLHeadings(
-                outputWidget.node,
-                onClickFactory,
-                sanitizer,
-                numberingDict,
-                lastLevel,
-                numbering,
-                cell
-              )
+            let renderedHeadings = Private.getRenderedHTMLHeadings(
+              outputWidget.node,
+              onClickFactory,
+              sanitizer,
+              numberingDict,
+              lastLevel,
+              numbering,
+              cell
             );
+            let renderedHeading = renderedHeadings[0];
+            if (renderedHeading.type === 'markdown') {
+              if (currentCollapseLevel < 0) {
+                headings = headings.concat(renderedHeadings);
+              }
+            } else if (renderedHeading.type === 'header') {
+              if (prevHeading && prevHeading.type === 'header') {
+                prevHeading.hasChild = false;
+              }
+              if (
+                currentCollapseLevel >= renderedHeading.level ||
+                currentCollapseLevel < 0
+              ) {
+                headings = headings.concat(renderedHeadings);
+                if (collapsed) {
+                  currentCollapseLevel = renderedHeading.level;
+                } else {
+                  currentCollapseLevel = -1;
+                }
+              }
+            }
+            prevHeading = renderedHeading;
           }
         } else if (model.type === 'markdown') {
           // If the cell is rendered, generate the ToC items from
@@ -478,17 +563,37 @@ export function createNotebookGenerator(
             };
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
-            headings = headings.concat(
-              Private.getRenderedHTMLHeadings(
-                cell.node,
-                onClickFactory,
-                sanitizer,
-                numberingDict,
-                lastLevel,
-                numbering,
-                cell
-              )
+            let renderedHeadings = Private.getRenderedHTMLHeadings(
+              cell.node,
+              onClickFactory,
+              sanitizer,
+              numberingDict,
+              lastLevel,
+              numbering,
+              cell
             );
+            let renderedHeading = renderedHeadings[0];
+            if (renderedHeading.type === 'markdown') {
+              if (currentCollapseLevel < 0) {
+                headings = headings.concat(renderedHeadings);
+              }
+            } else if (renderedHeading.type === 'header') {
+              if (prevHeading && prevHeading.type === 'header') {
+                prevHeading.hasChild = false;
+              }
+              if (
+                currentCollapseLevel >= renderedHeading.level ||
+                currentCollapseLevel < 0
+              ) {
+                headings = headings.concat(renderedHeadings);
+                if (collapsed) {
+                  currentCollapseLevel = renderedHeading.level;
+                } else {
+                  currentCollapseLevel = -1;
+                }
+              }
+            }
+            prevHeading = renderedHeading;
           } else {
             const onClickFactory = (line: number) => {
               return () => {
@@ -499,15 +604,34 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            headings = headings.concat(
-              Private.getMarkdownHeadings(
-                model.value.text,
-                onClickFactory,
-                numberingDict,
-                lastLevel,
-                cell
-              )
+            let renderedHeadings = Private.getMarkdownHeadings(
+              model.value.text,
+              onClickFactory,
+              numberingDict,
+              lastLevel,
+              cell
             );
+            let renderedHeading = renderedHeadings[0];
+            if (renderedHeading.type === 'markdown') {
+              if (currentCollapseLevel < 0) {
+                headings = headings.concat(renderedHeadings);
+              }
+            } else if (renderedHeading.type === 'header') {
+              if (prevHeading && prevHeading.type === 'header') {
+                prevHeading.hasChild = false;
+              }
+              if (
+                currentCollapseLevel >= renderedHeading.level ||
+                currentCollapseLevel < 0
+              ) {
+                headings = headings.concat(renderedHeadings);
+                if (collapsed) {
+                  currentCollapseLevel = renderedHeading.level;
+                } else {
+                  currentCollapseLevel = -1;
+                }
+              }
+            }
           }
         } else if (model.type === 'raw') {
           let showRaw = false;
@@ -522,15 +646,17 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            headings = headings.concat(
-              Private.getRawCells(
-                text,
-                onClickFactory2,
-                numberingDict,
-                lastLevel,
-                cell
-              )
+            let renderedHeadings = Private.getRawCells(
+              text,
+              onClickFactory2,
+              numberingDict,
+              lastLevel,
+              cell
             );
+            if (currentCollapseLevel < 0) {
+              headings = headings.concat(renderedHeadings);
+            }
+            prevHeading = renderedHeadings[0];
           }
         }
       });
@@ -805,7 +931,8 @@ namespace Private {
         numbering,
         onClick,
         type: 'header',
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: true
       });
     }
 
@@ -822,7 +949,8 @@ namespace Private {
         numbering,
         onClick,
         type: 'header',
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: true
       });
     }
 
@@ -840,7 +968,8 @@ namespace Private {
         numbering,
         onClick,
         type: 'header',
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: true
       });
     } else {
       headings.push({
@@ -848,7 +977,8 @@ namespace Private {
         level: lastLevel + 1,
         onClick,
         type: 'markdown',
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: false
       });
     }
     return headings;
@@ -879,7 +1009,8 @@ namespace Private {
         onClick,
         type: 'code',
         prompt: executionCount.substring(3),
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: false
       });
     }
     return headings;
@@ -908,7 +1039,8 @@ namespace Private {
         level,
         onClick,
         type: 'raw',
-        cellRef: cellRef
+        cellRef: cellRef,
+        hasChild: false
       });
     }
     return headings;
@@ -938,7 +1070,8 @@ namespace Private {
             text: markdownCell.textContent,
             onClick: onClickFactory(markdownCell),
             type: 'markdown',
-            cellRef: cellRef
+            cellRef: cellRef,
+            hasChild: true
           });
         }
       } else {
@@ -970,7 +1103,8 @@ namespace Private {
           html,
           onClick,
           type: 'header',
-          cellRef: cellRef
+          cellRef: cellRef,
+          hasChild: true
         });
       }
     }

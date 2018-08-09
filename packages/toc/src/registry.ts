@@ -95,7 +95,7 @@ export namespace TableOfContentsRegistry {
 
     options?: IGeneratorOptionsManager;
 
-    itemRenderer?(item: IHeading): JSX.Element;
+    itemRenderer?: (item: IHeading) => JSX.Element | null;
 
     toolbarGenerator?: () => any;
 
