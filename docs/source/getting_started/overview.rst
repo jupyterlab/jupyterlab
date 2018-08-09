@@ -52,7 +52,8 @@ classic Jupyter Notebook.
 JupyterLab Releases
 ~~~~~~~~~~~~~~~~~~~
 
-The current release of JupyterLab is suitable for general daily use.
+The current release of JupyterLab is suitable for general daily use. Please
+review the :ref:`changelog` for detailed descriptions of each release.
 
 The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
 We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
