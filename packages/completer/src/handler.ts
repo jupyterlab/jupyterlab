@@ -13,8 +13,6 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Signal } from '@phosphor/signaling';
 
-import { contextHint } from './contexthint';
-
 import { Completer } from './widget';
 
 /**
@@ -346,17 +344,9 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
-    // Make a completion request to the kernel.
-    const kernelPromise = this._connector.fetch(request);
-    // Also make a context hint request to get tokens which
-    // may not be known to the kernel. Push it onto the async
-    // stack in case tokenization is expensive.
-    const contextPromise = new Promise<CompletionHandler.IReply>(resolve => {
-      resolve(contextHint(editor));
-    });
-
-    return Promise.all([kernelPromise, contextPromise])
-      .then(([kernelReply, contextReply]) => {
+    return this._connector
+      .fetch(request)
+      .then(reply => {
         if (this.isDisposed) {
           throw new Error('Handler is disposed');
         }
@@ -366,11 +356,9 @@ export class CompletionHandler implements IDisposable {
           throw new Error('A newer completion request is pending');
         }
 
-        // Merge the replies
-        const reply = Private.mergeReplies(kernelReply, contextReply);
         this._onReply(state, reply);
       })
-      .catch((err: any) => {
+      .catch(reason => {
         // Completion request failures or negative results fail silently.
         const model = this.completer.model;
 
@@ -530,35 +518,5 @@ export namespace CompletionHandler {
      */
     export const InvokeRequest = new Message('invoke-request');
     /* tslint:enable */
-  }
-}
-
-/**
- * A namespace for private functionality.
- */
-namespace Private {
-  /**
-   * Merge results from kernel and context completions.
-   */
-  export function mergeReplies(
-    kernel: CompletionHandler.IReply,
-    context: CompletionHandler.IReply
-  ): CompletionHandler.IReply {
-    // If one is empty, return the other.
-    if (kernel.matches.length === 0) {
-      return context;
-    } else if (context.matches.length === 0) {
-      return kernel;
-    }
-
-    // They both have matches, so merge them, with a preference for the
-    // kernel result.
-    let matches = [...kernel.matches];
-    context.matches.forEach(match => {
-      if (matches.indexOf(match) === -1) {
-        matches.push(match);
-      }
-    });
-    return { ...kernel, matches };
   }
 }

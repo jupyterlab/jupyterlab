@@ -6,12 +6,15 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
   CompleterModel,
   Completer,
+  CompletionConnector,
   CompletionHandler,
-  ICompletionManager,
-  KernelConnector
+  ContextConnector,
+  ICompletionManager
 } from '@jupyterlab/completer';
 
 import { IConsoleTracker } from '@jupyterlab/console';
+
+import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
@@ -133,12 +136,14 @@ const consoles: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const session = anchor.session;
       const parent = panel;
-      const connector = new KernelConnector({ session });
+      const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
 
       // Listen for prompt creation.
       anchor.promptCellCreated.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+        const editor = cell && cell.editor;
+        handler.editor = editor;
+        handler.connector = new CompletionConnector({ session, editor });
       });
     });
 
@@ -191,12 +196,14 @@ const notebooks: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const session = panel.session;
       const parent = panel;
-      const connector = new KernelConnector({ session });
+      const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
 
       // Listen for active cell changes.
       panel.content.activeCellChanged.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+        const editor = cell && cell.editor;
+        handler.editor = editor;
+        handler.connector = new CompletionConnector({ session, editor });
       });
     });
 
@@ -243,37 +250,68 @@ const files: JupyterLabPlugin<void> = {
     consoleTracker: IConsoleTracker,
     editorTracker: IEditorTracker
   ): void => {
-    // When a console is created, check if it is associated with
-    // a text editor. If so, make a completer for it.
-    consoleTracker.widgetAdded.connect((sender, widget) => {
-      const editor = editorTracker.find(
-        e => e.context.path === widget.session.path
-      );
-      if (editor) {
-        const session = widget.session;
-        const connector = new KernelConnector({ session });
-        manager.register({
-          connector,
-          editor: editor.content.editor,
-          parent: editor
-        });
-      }
-    });
-    // Likewise, when an editor is created, check if there
+    // Keep a list of active file completion handlers.
+    const handlers: {
+      [id: string]: ICompletionManager.ICompletableAttributes;
+    } = {};
+
+    // When an editor is created, check if there
     // is already a console associated with that path.
-    // If so, make a completer for it.
+    // If so, make a CompletionConnector for it.
+    // Otherwise, make the more limited ContextConnector
     editorTracker.widgetAdded.connect((sender, widget) => {
       const console = consoleTracker.find(
         c => c.session.path === widget.context.path
       );
+      const editor = widget.content.editor;
+      let handler: ICompletionManager.ICompletableAttributes;
+      let connector: IDataConnector<
+        CompletionHandler.IReply,
+        void,
+        CompletionHandler.IRequest
+      >;
       if (console) {
         const session = console.session;
-        const connector = new KernelConnector({ session });
-        manager.register({
-          connector,
-          editor: widget.content.editor,
-          parent: widget
+        connector = new CompletionConnector({ session, editor });
+        session.terminated.connect(() => {
+          if (!widget.isDisposed) {
+            handler.connector = new ContextConnector({ editor });
+          }
         });
+      } else {
+        connector = new ContextConnector({ editor });
+      }
+      handler = manager.register({
+        connector,
+        editor,
+        parent: widget
+      });
+      handlers[widget.id] = handler;
+      widget.disposed.connect(() => {
+        delete handlers[widget.id];
+      });
+    });
+
+    // When a console is created, check if it is associated with
+    // a text editor. If so, make a completer for it.
+    consoleTracker.widgetAdded.connect((sender, widget) => {
+      const fileWidget = editorTracker.find(
+        e => e.context.path === widget.session.path
+      );
+      if (fileWidget) {
+        const handler = handlers[fileWidget.id];
+        if (!handler) {
+          return;
+        }
+        const session = widget.session;
+        const editor = fileWidget.content.editor;
+        const connector = new CompletionConnector({ session, editor });
+        session.terminated.connect(() => {
+          if (!fileWidget.isDisposed) {
+            handler.connector = new ContextConnector({ editor });
+          }
+        });
+        handler.connector = connector;
       }
     });
 
