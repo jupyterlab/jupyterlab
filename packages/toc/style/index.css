@@ -222,6 +222,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   display: inline-flex;
   position: relative;
   align-items: center;
+  width: 100%;
 }
 
 .toc-collapse-button {
@@ -232,6 +233,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 }
 
 .header-cell {
+  width: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
 }
@@ -247,4 +249,11 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   max-width: 10px;
   opacity: 0;
   overflow: hidden;
+}
+
+.eyeball-icon {
+  float: right;
+  padding: 0px;
+  margin: 0px;
+  padding-left: 7px;
 }

@@ -153,6 +153,11 @@ function notebookItemRenderer(
     6: '10'
   };
   let jsx;
+  const hideOnClick = (cell?: Cell) => {
+    if (cell) {
+      cell.inputHidden = !cell.inputHidden;
+    }
+  };
   if (item.type === 'markdown' || item.type === 'header') {
     const paddingLeft = 24;
     const collapseOnClick = (cellRef?: Cell) => {
@@ -221,6 +226,14 @@ function notebookItemRenderer(
           <div className="toc-entry-holder">
             {item.hasChild && twistButton}
             {jsx}
+            <div className={'eyeball-icon'}>
+              <img
+                src={require('../static/eyeball_view.svg')}
+                onClick={event => {
+                  hideOnClick(item.cellRef);
+                }}
+              />
+            </div>
           </div>
         );
       }
@@ -271,6 +284,14 @@ function notebookItemRenderer(
           <div className="toc-entry-holder">
             {item.hasChild && twistButton}
             {jsx}
+            <div className={'eyeball-icon'}>
+              <img
+                src={require('../static/eyeball_view.svg')}
+                onClick={event => {
+                  hideOnClick(item.cellRef);
+                }}
+              />
+            </div>
           </div>
         );
       }
@@ -284,6 +305,14 @@ function notebookItemRenderer(
         <span className={'toc-code-span'}>
           <CodeComponent code={item.text!} theme="jupyter" />
         </span>
+        <div className={'eyeball-icon'}>
+          <img
+            src={require('../static/eyeball_view.svg')}
+            onClick={event => {
+              hideOnClick(item.cellRef);
+            }}
+          />
+        </div>
       </div>
     );
   } else if (item.type === 'raw' && options.showRaw) {
@@ -292,6 +321,14 @@ function notebookItemRenderer(
         <span className={'toc-code-span'}>
           <CodeComponent code={item.text!} theme="none" />
         </span>
+        <div className={'eyeball-icon'}>
+          <img
+            src={require('../static/eyeball_view.svg')}
+            onClick={event => {
+              hideOnClick(item.cellRef);
+            }}
+          />
+        </div>
       </div>
     );
   } else {
