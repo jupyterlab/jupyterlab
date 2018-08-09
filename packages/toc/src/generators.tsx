@@ -193,7 +193,10 @@ function notebookItemRenderer(
               collapseOnClick(item.cellRef);
             }}
           >
-            <img src={require('../static/downarrow.svg')} />
+            <img
+              className="toc-arrow-img"
+              src={require('../static/downarrow.svg')}
+            />
           </div>
         );
         if (collapsed) {
@@ -205,7 +208,10 @@ function notebookItemRenderer(
                 collapseOnClick(item.cellRef);
               }}
             >
-              <img src={require('../static/rightarrow.svg')} />
+              <img
+                className="toc-arrow-img"
+                src={require('../static/rightarrow.svg')}
+              />
             </div>
           );
         }
@@ -235,7 +241,10 @@ function notebookItemRenderer(
               collapseOnClick(item.cellRef);
             }}
           >
-            <img src={require('../static/downarrow.svg')} />
+            <img
+              className="toc-arrow-img"
+              src={require('../static/downarrow.svg')}
+            />
           </div>
         );
         if (collapsed) {
@@ -247,7 +256,10 @@ function notebookItemRenderer(
                 collapseOnClick(item.cellRef);
               }}
             >
-              <img src={require('../static/rightarrow.svg')} />
+              <img
+                className="toc-arrow-img"
+                src={require('../static/rightarrow.svg')}
+              />
             </div>
           );
         }

@@ -220,16 +220,25 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .toc-entry-holder {
   display: inline-flex;
+  position: relative;
+  align-items: center;
 }
 
 .toc-collapse-button {
   padding-left: 3px;
-  position: absolute;
   cursor: default;
   min-width: 11px;
+  position: absolute;
 }
 
 .header-cell {
   overflow-x: hidden;
   overflow-y: hidden;
+}
+
+.toc-arrow-img {
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  position: absolute;
 }
