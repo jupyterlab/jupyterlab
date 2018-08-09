@@ -50,8 +50,8 @@ describe('workspace', () => {
     });
 
     describe('#list()', async () => {
-      it('should fetch a list of workspaces', async () => {
-        const ids = ['foo', 'bar', 'baz'];
+      it('should fetch a workspace list supporting arbitrary IDs', async () => {
+        const ids = ['foo', 'bar', 'baz', 'f/o/o', 'b/a/r', 'b/a/z'];
 
         ids.forEach(async id => {
           await manager.save(id, { data: {}, metadata: { id } });
