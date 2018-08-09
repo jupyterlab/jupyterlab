@@ -574,7 +574,10 @@ export function createNotebookGenerator(
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
-          if ((cell as MarkdownCell).rendered) {
+          if (
+            (cell as MarkdownCell).rendered &&
+            !(cell as MarkdownCell).inputHidden
+          ) {
             const onClickFactory = (el: Element) => {
               return () => {
                 if (!(cell as MarkdownCell).rendered) {
