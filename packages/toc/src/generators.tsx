@@ -549,7 +549,11 @@ export function createNotebookGenerator(
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
-              if (prevHeading && prevHeading.type === 'header') {
+              if (
+                prevHeading &&
+                prevHeading.type === 'header' &&
+                prevHeading.level >= renderedHeading.level
+              ) {
                 prevHeading.hasChild = false;
               }
               if (
@@ -597,7 +601,11 @@ export function createNotebookGenerator(
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
-              if (prevHeading && prevHeading.type === 'header') {
+              if (
+                prevHeading &&
+                prevHeading.type === 'header' &&
+                prevHeading.level >= renderedHeading.level
+              ) {
                 prevHeading.hasChild = false;
               }
               if (
@@ -636,7 +644,11 @@ export function createNotebookGenerator(
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
-              if (prevHeading && prevHeading.type === 'header') {
+              if (
+                prevHeading &&
+                prevHeading.type === 'header' &&
+                prevHeading.level >= renderedHeading.level
+              ) {
                 prevHeading.hasChild = false;
               }
               if (
