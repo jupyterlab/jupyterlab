@@ -149,11 +149,6 @@ export class TableOfContents extends Widget {
    */
   protected onAfterShow(msg: Message): void {
     this.update();
-    if (this._notebook.currentWidget != null) {
-      this._notebook.currentWidget.content.activeCellChanged.connect(() => {
-        this.update();
-      });
-    }
   }
 
   set notebookMetadata(value: [string, any]) {

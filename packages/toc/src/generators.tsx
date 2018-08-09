@@ -306,6 +306,9 @@ export function notebookGeneratorToolbar(
       if (tracker.currentWidget) {
         tracker.currentWidget.context.ready.then(() => {
           if (tracker.currentWidget) {
+            tracker.currentWidget.content.activeCellChanged.connect(() => {
+              options.updateWidget();
+            });
             let _numbering = tracker.currentWidget.model.metadata.get(
               'toc-autonumbering'
             ) as boolean;
