@@ -1463,10 +1463,9 @@ class _AppHandler(object):
 def _node_check():
     """Check for the existence of nodejs with the correct version.
     """
-    try:
-        proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
-        proc.wait()
-    except Exception:
+    proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
+    return_code = proc.wait()
+    if return_code == 1:
         msg = 'Please install nodejs 5+ and npm before continuing. nodejs may be installed using conda or directly from the nodejs website.'
         raise ValueError(msg)
 
