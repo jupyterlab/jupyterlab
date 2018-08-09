@@ -484,9 +484,12 @@ export function createNotebookGenerator(
         let model = cell.model;
         // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
-          let executionCount = cell.node.getElementsByClassName(
-            'jp-InputArea-prompt'
-          )[0].innerHTML;
+          let executionCountNumber = (cell as CodeCell).model
+            .executionCount as number;
+          let executionCount =
+            executionCountNumber != null
+              ? '[' + executionCountNumber + ']: '
+              : '[ ]: ';
           // Iterate over the outputs, and parse them if they
           // are rendered markdown or HTML.
           let showCode = true;
@@ -1042,7 +1045,7 @@ namespace Private {
         level,
         onClick,
         type: 'code',
-        prompt: executionCount.substring(3),
+        prompt: executionCount,
         cellRef: cellRef,
         hasChild: false
       });
