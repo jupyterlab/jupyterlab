@@ -176,7 +176,7 @@ function notebookItemRenderer(
               numbering +
               options.sanitizer.sanitize(item.html, Private.sanitizerOptions)
           }}
-          className="markdown-cell"
+          className={item.type + '-cell'}
           style={{ fontSize, paddingLeft }}
         />
       );
@@ -218,7 +218,7 @@ function notebookItemRenderer(
       }
     } else if (item.type === 'header' || options.showMarkdown) {
       jsx = (
-        <span className="markdown-cell" style={{ fontSize, paddingLeft }}>
+        <span className={item.type + '-cell'} style={{ fontSize, paddingLeft }}>
           {numbering + item.text}
         </span>
       );

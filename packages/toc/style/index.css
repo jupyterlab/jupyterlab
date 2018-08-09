@@ -228,3 +228,8 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   cursor: default;
   min-width: 11px;
 }
+
+.header-cell {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
