@@ -90,6 +90,45 @@ describe('docregistry/context', () => {
       });
     });
 
+    describe('#saving', () => {
+      it("should emit 'starting' when the file starts saving", async () => {
+        let called = false;
+        let checked = false;
+        context.saving.connect((sender, args) => {
+          if (!called) {
+            expect(sender).to.equal(context);
+            expect(args).to.equal('starting');
+
+            checked = true;
+          }
+
+          called = true;
+        });
+
+        await context.initialize(true);
+        expect(called).to.be.true;
+        expect(checked).to.be.true;
+      });
+
+      it("should emit 'ending' when the file ends saving", async () => {
+        let called = 0;
+        let checked = false;
+        context.saving.connect((sender, args) => {
+          if (called > 0) {
+            expect(sender).to.equal(context);
+            expect(args).to.equal('ending');
+            checked = true;
+          }
+
+          called += 1;
+        });
+
+        await context.initialize(true);
+        expect(called).to.equal(2);
+        expect(checked).to.be.true;
+      });
+    });
+
     describe('#isReady', () => {
       it('should indicate whether the context is ready', async () => {
         expect(context.isReady).to.equal(false);
