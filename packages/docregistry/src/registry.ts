@@ -866,7 +866,7 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
-  export type SaveState = 'starting' | 'ending';
+  export type SaveState = 'starting' | 'completed' | 'failed';
 
   /**
    * A type alias for a context.

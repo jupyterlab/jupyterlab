@@ -485,7 +485,6 @@ export class Context<T extends DocumentRegistry.IModel>
           return;
         }
 
-        this._fileSaving.emit('ending');
         model.dirty = false;
         this._updateContentsModel(value);
 
@@ -506,6 +505,16 @@ export class Context<T extends DocumentRegistry.IModel>
         const name = PathExt.basename(localPath);
         this._handleError(err, `File Save Error for ${name}`);
         throw err;
+      })
+      .catch(err => {
+        // Capture all error paths and confirm failure
+        this._fileSaving.emit('failed');
+        throw err;
+      })
+      .then(value => {
+        // Capture all sucess paths and emit completion
+        this._fileSaving.emit('completed');
+        return value;
       });
   }
 

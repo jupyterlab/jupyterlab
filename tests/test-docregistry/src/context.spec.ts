@@ -110,13 +110,13 @@ describe('docregistry/context', () => {
         expect(checked).to.be.true;
       });
 
-      it("should emit 'ending' when the file ends saving", async () => {
+      it("should emit 'completed' when the file ends saving", async () => {
         let called = 0;
         let checked = false;
         context.saving.connect((sender, args) => {
           if (called > 0) {
             expect(sender).to.equal(context);
-            expect(args).to.equal('ending');
+            expect(args).to.equal('completed');
             checked = true;
           }
 
