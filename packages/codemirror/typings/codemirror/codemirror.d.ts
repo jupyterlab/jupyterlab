@@ -453,20 +453,15 @@ declare namespace CodeMirror {
     refresh(): void;
 
     /** Retrieves information about the token the current mode found before the given position (a {line, ch} object). */
-    getTokenAt(
-      pos: CodeMirror.Position
-    ): {
-      /** The character(on the given line) at which the token starts. */
-      start: number;
-      /** The character at which the token ends. */
-      end: number;
-      /** The token's string. */
-      string: string;
-      /** The token type the mode assigned to the token, such as "keyword" or "comment" (may also be null). */
-      type: string;
-      /** The mode's state at the end of this token. */
-      state: any;
-    };
+    getTokenAt(pos: CodeMirror.Position): Token;
+
+    /** This is a (much) cheaper version of getTokenAt useful for when you just need the type of the token at a given position,
+    and no other information. Will return null for unstyled tokens, and a string, potentially containing multiple
+    space-separated style names, otherwise. */
+    getTokenTypeAt(pos: CodeMirror.Position): string;
+
+    /** This is similar to getTokenAt, but collects all tokens for a given line into an array. */
+    getLineTokens(line: number, precise?: boolean): Token[];
 
     /** Returns the mode's parser state, if any, at the end of the given line number.
         If no line number is given, the state at the end of the document is returned.
@@ -1001,6 +996,33 @@ declare namespace CodeMirror {
      * the side of the selection that moves
      */
     head: Position;
+  }
+
+  interface Token {
+    /**
+     * The character(on the given line) at which the token starts.
+     */
+    start: number;
+
+    /**
+     * The character at which the token ends.
+     */
+    end: number;
+
+    /**
+     * The token's string.
+     */
+    string: string;
+    /**
+     * The token type the mode assigned to the token,
+     * such as "keyword" or "comment" (may also be null).
+     */
+    type: string | null;
+
+    /**
+     * The mode's state at the end of this token.
+     */
+    state: any;
   }
 
   interface EditorConfiguration {

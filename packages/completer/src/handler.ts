@@ -485,7 +485,7 @@ export namespace CompletionHandler {
     /**
      * A list of matching completion strings.
      */
-    matches: string[];
+    matches: ReadonlyArray<string>;
 
     /**
      * Any metadata that accompanies the completion reply.

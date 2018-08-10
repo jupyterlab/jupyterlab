@@ -118,6 +118,19 @@
       },
       "type": "object"
     },
+    "completer:invoke-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-file" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor .jp-mod-completer-enabled"
+        },
+        "title": { "default": "Invoke File Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
     "console:linebreak": {
       "default": {},
       "properties": {
@@ -989,6 +1002,19 @@
         "selector": {
           "default":
             ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:launch-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-file" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
