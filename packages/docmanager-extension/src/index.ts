@@ -186,12 +186,26 @@ function addCommands(
     const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
-  const fileType = () => {
-    const { currentWidget } = shell;
-    if (!currentWidget) {
+
+  // fetches the doc widget associated with the most recent contextmenu event
+  const contextMenuWidget = (): Widget => {
+    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+    let pathMatch = app.contextMenuFirst('title', pathRe);
+
+    if (!pathMatch) {
+      // fall back to active doc widget if path cannot be obtained from event
+      return app.shell.currentWidget;
+    }
+
+    return docManager.findWidget(pathMatch[1]);
+  };
+
+  // operates on active widget by default
+  const fileType = (widget: Widget = shell.currentWidget) => {
+    if (!widget) {
       return 'File';
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     if (!context) {
       return '';
     }
@@ -280,7 +294,7 @@ function addCommands(
       return !!iterator.next() && !!iterator.next();
     },
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
@@ -295,9 +309,9 @@ function addCommands(
   commands.addCommand(CommandIDs.closeRightTabs, {
     label: () => `Close Tabs to Right`,
     isEnabled: () =>
-      shell.currentWidget && widgetsRightOf(shell.currentWidget).length > 0,
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
@@ -535,21 +549,21 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileType()}…`,
+    label: () => `Rename ${fileType(contextMenuWidget())}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(contextMenuWidget());
         return renameDialog(docManager, context!.path);
       }
     }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View for ${fileType()}`,
+    label: () => `New View for ${fileType(contextMenuWidget())}`,
     isEnabled,
     execute: args => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       if (!widget) {
@@ -581,7 +595,7 @@ function addCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
-      let context = docManager.contextForWidget(shell.currentWidget);
+      let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
