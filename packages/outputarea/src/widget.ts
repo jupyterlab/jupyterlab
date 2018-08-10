@@ -628,7 +628,7 @@ export class OutputPrompt extends Widget implements IOutputPrompt {
     if (value === null) {
       this.node.textContent = '';
     } else {
-      this.node.textContent = `Out[${value}]:`;
+      this.node.textContent = `[${value}]:`;
     }
   }
 

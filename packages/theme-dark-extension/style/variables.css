@@ -28,7 +28,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Elevation
    *
    * We style box-shadows using Material Design's idea of elevation. These particular numbers are taken from here:
-   * 
+   *
    * https://github.com/material-components/material-components-web
    * https://material-components-web.appspot.com/elevation.html
    */
@@ -173,9 +173,9 @@ all of MD as it is not optimized for dense, information rich UIs.
     Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol';
 
-  /* 
+  /*
    * Code Fonts
-   * 
+   *
    * Code font variables are used for typography of code and other monospaces content.
    */
 
@@ -247,7 +247,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-active-background: var(--jp-layout-color0);
   --jp-cell-editor-active-border-color: var(--jp-brand-color1);
 
-  --jp-cell-prompt-width: 90px;
+  --jp-cell-prompt-width: 64px;
   --jp-cell-prompt-font-family: 'Source Code Pro', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1;
