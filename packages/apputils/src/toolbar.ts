@@ -63,6 +63,18 @@ const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
 const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
 /**
+ * The class name added to a button content node.
+ */
+const CONTENT_CLASS = 'jp-FileButtons-buttonContent';
+
+/**
+ * The class name added to a button icon node.
+ */
+const ICON_CLASS = 'jp-FileButtons-buttonIcon';
+
+const MATERIAL_CLASS = 'jp-MaterialIcon';
+
+/**
  * A layout for toolbars.
  *
  * #### Notes
@@ -455,11 +467,12 @@ export class ToolbarButton extends Widget {
           .split(/\s/)
       : null;
 
-    if (classes) {
-      classes.forEach(name => {
-        this.addClass(name);
-      });
-    }
+    let buttonContent = document.createElement('span');
+    let buttonIcon = document.createElement('span');
+    buttonContent.className = CONTENT_CLASS;
+    buttonIcon.className = [ICON_CLASS, MATERIAL_CLASS, classes].join(' ');
+    buttonContent.appendChild(buttonIcon);
+    this.node.appendChild(buttonContent);
 
     this.node.title = options.tooltip || '';
   }
