@@ -23,7 +23,7 @@
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",
-    "precommit": "lint-staged",
+    "precommit": "lint-staged && jlpm run integrity",
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",

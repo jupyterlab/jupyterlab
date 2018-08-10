@@ -1436,8 +1436,14 @@ namespace Private {
         break;
       case 'code':
         if (session) {
-          return CodeCell.execute(cell as CodeCell, session)
+          return CodeCell.execute(cell as CodeCell, session, {
+            deletedCells: notebook.model.deletedCells
+          })
             .then(reply => {
+              notebook.model.deletedCells.splice(
+                0,
+                notebook.model.deletedCells.length
+              );
               if (cell.isDisposed) {
                 return false;
               }
@@ -1636,6 +1642,7 @@ namespace Private {
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
+        notebook.model.deletedCells.push(child.model.id);
       }
     });
 

@@ -55,6 +55,10 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+  /**
+   * The array of deleted cells since the notebook was last run.
+   */
+  readonly deletedCells: string[];
 }
 
 /**
@@ -83,6 +87,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     }
     this._ensureMetadata();
     metadata.changed.connect(this.triggerContentChange, this);
+    this._deletedCells = [];
   }
 
   /**
@@ -125,7 +130,12 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
-
+  /**
+   * The default kernel name of the document.
+   */
+  get deletedCells(): string[] {
+    return this._deletedCells;
+  }
   /**
    * The default kernel language of the document.
    */
@@ -308,6 +318,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   private _cells: CellList;
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
+  private _deletedCells: string[];
 }
 
 /**
