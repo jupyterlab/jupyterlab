@@ -557,7 +557,9 @@ const state: JupyterLabPlugin<IStateDB> = {
     window.addEventListener('beforeunload', () => {
       const silent = true;
 
-      state.clear(silent);
+      state.clear(silent).catch(() => {
+        /* no-op */
+      });
     });
 
     return state;
