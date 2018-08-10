@@ -233,8 +233,6 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   save(): Promise<void> {
     return this.ready.then(() => {
-      this._fileSaving.emit('starting');
-
       return this._save();
     });
   }
@@ -460,6 +458,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Save the document contents to disk.
    */
   private _save(): Promise<void> {
+    this._fileSaving.emit('starting');
     let model = this._model;
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
