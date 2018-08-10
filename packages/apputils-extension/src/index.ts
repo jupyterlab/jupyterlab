@@ -195,6 +195,13 @@ const themes: JupyterLabPlugin<IThemeManager> = {
       currentTheme = args.newValue;
       app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
       app.shell.dataset.themeName = currentTheme;
+      if (currentTheme === 'JupyterLab Light') {
+        app.shell.toggleClass('jp-mod-light', true);
+        app.shell.toggleClass('jp-mod-dark', false);
+      } else {
+        app.shell.toggleClass('jp-mod-dark', true);
+        app.shell.toggleClass('jp-mod-light', false);
+      }
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 
