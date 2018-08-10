@@ -745,6 +745,11 @@ export namespace DocumentRegistry {
     fileChanged: ISignal<this, Contents.IModel>;
 
     /**
+     * A signal emitted on the start and end of a saving operation
+     */
+    saving: ISignal<this, SaveState>;
+
+    /**
      * A signal emitted when the context is disposed.
      */
     disposed: ISignal<this, void>;
@@ -860,6 +865,8 @@ export namespace DocumentRegistry {
      */
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
+
+  export type SaveState = 'starting' | 'ending';
 
   /**
    * A type alias for a context.

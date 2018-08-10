@@ -96,6 +96,13 @@ export class Context<T extends DocumentRegistry.IModel>
   }
 
   /**
+   * A signal emitted on the start and end of a saving operation
+   */
+  get saving(): ISignal<this, DocumentRegistry.SaveState> {
+    return this._fileSaving;
+  }
+
+  /**
    * A signal emitted when the context is disposed.
    */
   get disposed(): ISignal<this, void> {
@@ -226,6 +233,8 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   save(): Promise<void> {
     return this.ready.then(() => {
+      this._fileSaving.emit('starting');
+
       return this._save();
     });
   }
@@ -476,6 +485,8 @@ export class Context<T extends DocumentRegistry.IModel>
         if (this.isDisposed) {
           return;
         }
+
+        this._fileSaving.emit('ending');
         model.dirty = false;
         this._updateContentsModel(value);
 
@@ -746,6 +757,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _fileSaving = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
 }
 
