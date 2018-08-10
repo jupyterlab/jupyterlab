@@ -251,10 +251,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-prompt-font-family: 'Source Code Pro', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1;
-  --jp-cell-prompt-not-active-opacity: 0.5;
+  --jp-cell-prompt-not-active-opacity: 1;
   --jp-cell-prompt-not-active-font-color: var(--md-grey-300);
-  --jp-cell-inprompt-font-color: var(--md-grey-50);
-  --jp-cell-outprompt-font-color: var(--md-grey-50);
+  /* --jp-cell-inprompt-font-color: var(--md-grey-50);
+  --jp-cell-outprompt-font-color: var(--md-grey-50); */
+
+
+  /* A custom blend of MD grey and blue 600
+   * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
+  --jp-cell-inprompt-font-color: #307fc1;
+  /* A custom blend of MD grey and orange 600
+   * https://meyerweb.com/eric/tools/color-blend/#546E7A:F4511E:5:hex */
+  --jp-cell-outprompt-font-color: #bf5b3d;
+
 
   /* Notebook specific styles */
 
