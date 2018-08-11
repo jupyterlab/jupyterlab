@@ -464,6 +464,28 @@ export class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+  moveLeftActiveToRightArea() {
+    if (this._leftHandler.current) {
+      let id = this._leftHandler.current.id;
+      if (this._leftHandler.has(id)) {
+        let rank = this._leftHandler.retrieveItemBy(id).rank;
+        this._rightHandler.addWidget(this._leftHandler.current, rank);
+        this._rightHandler.activate(id);
+      }
+    }
+  }
+
+  moveRightActiveToLeftArea() {
+    if (this._rightHandler.current) {
+      let id = this._rightHandler.current.id;
+      if (this._rightHandler.has(id)) {
+        let rank = this._rightHandler.retrieveItemBy(id).rank;
+        this._leftHandler.addWidget(this._rightHandler.current, rank);
+        this._leftHandler.activate(id);
+      }
+    }
+  }
+
   /**
    * Add a widget to the top content area.
    *
@@ -979,6 +1001,10 @@ namespace Private {
       this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
     }
 
+    get current() {
+      return this._current;
+    }
+
     /**
      * Get the tab bar managed by the handler.
      */
@@ -1033,6 +1059,11 @@ namespace Private {
      */
     collapse(): void {
       this._sideBar.currentTitle = null;
+    }
+
+    retrieveItemBy(id: string) {
+      let item = find(this._items, value => value.widget.id === id);
+      return item ? item : null;
     }
 
     /**
@@ -1130,6 +1161,7 @@ namespace Private {
         newWidget.show();
       }
       this._lastCurrent = newWidget || oldWidget;
+      this._current = newWidget;
       if (newWidget) {
         const id = newWidget.id;
         document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
@@ -1166,5 +1198,6 @@ namespace Private {
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+    private _current: Widget | null;
   }
 }

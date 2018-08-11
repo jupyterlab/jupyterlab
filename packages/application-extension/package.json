@@ -32,6 +32,8 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/apputils": "^0.17.2",
     "@jupyterlab/coreutils": "^2.0.3",
+    "@jupyterlab/apputils-extension": "^0.17.2",
+    "@jupyterlab/coreutils": "^2.0.2",
     "react": "~16.4.0"
   },
   "devDependencies": {
