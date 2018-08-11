@@ -27,7 +27,7 @@ Development happens on https://github.com/jupyter/jupyterlab, with chat on
 https://gitter.im/jupyterlab/jupyterlab.
 """
 
-ensure_python(['2.7', '>=3.3'])
+ensure_python(['>=3.5'])
 
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
@@ -131,14 +131,10 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=5.0',
-    'jupyterlab_launcher>=0.13.0,<0.14.0',
-    'ipython_genutils',
-    'futures;python_version<"3.0"',
-    'subprocess32;python_version<"3.0"'
+    'jupyterlab_launcher>=0.13.0,<0.14.0'
 ]
 
 setup_args['extras_require'] = {
-    'test:python_version == "2.7"': ['mock'],
     'test': ['pytest', 'requests', 'pytest-check-links'],
     'docs': [
         'sphinx',
@@ -148,6 +144,7 @@ setup_args['extras_require'] = {
 }
 
 
+setup_args['python_requires'] = '>=3.5'
 setup_args['include_package_data'] = True
 
 # Force entrypoints with setuptools (needed for Windows, unconditional

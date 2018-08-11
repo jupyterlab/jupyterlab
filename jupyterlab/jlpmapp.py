@@ -34,6 +34,7 @@ def execvp(cmd, argv):
     else:
         os.execvp(cmd, argv)
 
+
 def main(argv=None):
     """Run node and return the result.
     """

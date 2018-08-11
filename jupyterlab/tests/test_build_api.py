@@ -1,8 +1,7 @@
 """Test the kernels service API."""
+from tempfile import TemporaryDirectory
 import threading
 
-from ipython_genutils.tempdir import TemporaryDirectory
-from ipython_genutils import py3compat
 from jupyterlab.labapp import LabApp
 from jupyterlab_launcher.tests.utils import APITester, LabTestBase
 from jupyterlab_launcher.servertest import assert_http_error
@@ -29,7 +28,7 @@ class BuildAPITest(LabTestBase):
     def tempdir(self):
         td = TemporaryDirectory()
         self.tempdirs.append(td)
-        return py3compat.cast_unicode(td.name)
+        return td.name
 
     def setUp(self):
         # Any TemporaryDirectory objects appended to this list will be cleaned

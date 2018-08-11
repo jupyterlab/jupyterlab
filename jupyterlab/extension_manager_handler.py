@@ -9,8 +9,7 @@ import re
 
 from concurrent.futures import ThreadPoolExecutor
 
-from tornado import gen, web
-from tornado.ioloop import IOLoop
+from tornado import web
 
 from jupyterlab_launcher.server import APIHandler
 
@@ -51,6 +50,7 @@ _message_map = {
     'update': re.compile(r'(?P<name>.*) changed from (?P<oldver>.*) to (?P<newver>.*)'),
 }
 
+
 def _build_check_info(app_dir, logger):
     """Get info about packages scheduled for (un)install/update"""
     handler = _AppHandler(app_dir, logger)
@@ -75,8 +75,7 @@ class ExtensionManager(object):
         # To start fetching data on outdated extensions immediately, uncomment:
         # IOLoop.current().spawn_callback(self._get_outdated)
 
-    @gen.coroutine
-    def list_extensions(self):
+    async def list_extensions(self):
         """Handle a request for all installed extensions"""
         info = get_app_info(app_dir=self.app_dir, logger=self.log)
         build_check_info = _build_check_info(self.app_dir, self.log)
@@ -85,7 +84,7 @@ class ExtensionManager(object):
         # TODO: Ensure loops can run in parallel
         for name, data in info['extensions'].items():
             status = 'ok'
-            pkg_info = yield self._get_pkg_info(name, data)
+            pkg_info = await self._get_pkg_info(name, data)
             if info['compat_errors'].get(name, None):
                 status = 'error'
             else:
@@ -105,7 +104,7 @@ class ExtensionManager(object):
                 status=status,
             ))
         for name in build_check_info['uninstall']:
-            data = yield self._get_scheduled_uninstall_info(name)
+            data = self._get_scheduled_uninstall_info(name)
             if data is not None:
                 extensions.append(_make_extension_entry(
                     name=name,
@@ -118,51 +117,46 @@ class ExtensionManager(object):
                     installed_version=data['version'],
                     status='warning',
                 ))
-        raise gen.Return(extensions)
+        return extensions
 
-    @gen.coroutine
     def install(self, extension):
         """Handle an install/update request"""
         try:
             install_extension(extension, app_dir=self.app_dir, logger=self.log)
         except ValueError as e:
-            raise gen.Return(dict(status='error', message=str(e)))
-        raise gen.Return(dict(status='ok',))
+            return dict(status='error', message=str(e))
+        return dict(status='ok',)
 
-    @gen.coroutine
     def uninstall(self, extension):
         """Handle an uninstall request"""
         did_uninstall = uninstall_extension(extension, app_dir=self.app_dir, logger=self.log)
-        raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
+        return dict(status='ok' if did_uninstall else 'error',)
 
-    @gen.coroutine
     def enable(self, extension):
         """Handle an enable request"""
         enable_extension(extension, app_dir=self.app_dir, logger=self.log)
-        raise gen.Return(dict(status='ok',))
+        return dict(status='ok',)
 
-    @gen.coroutine
     def disable(self, extension):
         """Handle a disable request"""
         disable_extension(extension, app_dir=self.app_dir, logger=self.log)
-        raise gen.Return(dict(status='ok',))
+        return dict(status='ok',)
 
-    @gen.coroutine
     def _get_pkg_info(self, name, data):
         """Get information about a package"""
         info = read_package(data['path'])
 
         # Get latest version that is compatible with current lab:
-        outdated = yield self._get_outdated()
+        outdated = self._get_outdated()
         if outdated and name in outdated:
             info['latest_version'] = outdated[name]
         else:
             # Fallback to indicating that current is latest
             info['latest_version'] = info['version']
 
-        raise gen.Return(info)
+        return info
 
-    def _get_outdated(self):
+    async def _get_outdated(self):
         """Get a Future to information from `npm/yarn outdated`.
 
         This will cache the results. To refresh the cache, set
@@ -171,37 +165,33 @@ class ExtensionManager(object):
         """
         # Ensure self._outdated is a Future for data on outdated extensions
         if self._outdated is None:
-            self._outdated = self._load_outdated()
+            self._outdated = await self._load_outdated()
         # Return the Future
         return self._outdated
 
-    def refresh_outdated(self):
-        self._outdated = self._load_outdated()
+    async def refresh_outdated(self):
+        self._outdated = await self._load_outdated()
         return self._outdated
 
-    @gen.coroutine
-    def _load_outdated(self):
+    async def _load_outdated(self):
         """Get the latest compatible version"""
         info = get_app_info(app_dir=self.app_dir, logger=self.log)
         names = tuple(info['extensions'].keys())
-        data = yield self.executor.submit(
+        data = await self.executor.submit(
             get_latest_compatible_package_versions,
             names,
             app_dir=self.app_dir,
             logger=self.log,
         )
-        raise gen.Return(data)
+        return data
 
-    @gen.coroutine
     def _get_scheduled_uninstall_info(self, name):
         """Get information about a package that is scheduled for uninstallation"""
         target = os.path.join(
             self.app_dir, 'staging', 'node_modules', name, 'package.json')
         if os.path.exists(target):
             with open(target) as fid:
-                raise gen.Return(json.load(fid))
-        else:
-            raise gen.Return(None)
+                return json.load(fid)
 
 
 class ExtensionHandler(APIHandler):
@@ -210,17 +200,15 @@ class ExtensionHandler(APIHandler):
         self.manager = manager
 
     @web.authenticated
-    @gen.coroutine
-    def get(self):
+    async def get(self):
         """GET query returns info on all installed extensions"""
         if self.get_argument('refresh', False) == '1':
-            yield self.manager.refresh_outdated()
-        extensions = yield self.manager.list_extensions()
+            await self.manager.refresh_outdated()
+        extensions = await self.manager.list_extensions()
         self.finish(json.dumps(extensions))
 
     @web.authenticated
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         """POST query performs an action on a specific extension"""
         data = self.get_json_body()
         cmd = data['cmd']
@@ -237,15 +225,13 @@ class ExtensionHandler(APIHandler):
         ret_value = None
         try:
             if cmd == 'install':
-                ret_value = yield self.manager.install(name)
+                ret_value = self.manager.install(name)
             elif cmd == 'uninstall':
-                ret_value = yield self.manager.uninstall(name)
+                ret_value = self.manager.uninstall(name)
             elif cmd == 'enable':
-                ret_value = yield self.manager.enable(name)
+                ret_value = self.manager.enable(name)
             elif cmd == 'disable':
-                ret_value = yield self.manager.disable(name)
-        except gen.Return as e:
-            ret_value = e.value
+                ret_value = self.manager.disable(name)
         except Exception as e:
             raise web.HTTPError(500, str(e))
 
