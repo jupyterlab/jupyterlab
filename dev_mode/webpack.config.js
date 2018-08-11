@@ -9,16 +9,53 @@ var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
-
 var Build = require('@jupyterlab/buildutils').Build;
+
 var package_data = require('./package.json');
 
 // Handle the extensions.
 var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
+
+// Find the loaders specified by the extensions
+var custom_loaders = [];
+var allExtensions = Object.keys(extensions).concat(Object.keys(mimeExtensions));
+allExtensions.forEach(function(extension) {
+  var extData = require(path.join(extension, 'package.json'));
+  var loaders = extData.jupyterlab.loaders;
+  if (loaders === void 0) {
+    return;
+  }
+  var use = loader;
+  for (var loader in loaders) {
+    switch (loader) {
+      case 'raw':
+        use = 'raw-loader';
+        break;
+      case 'url':
+        use = 'url-loader?limit=10000';
+        break;
+      case 'file':
+        use = 'file-loader';
+        break;
+      case 'css':
+        use = ['style-loader', 'css-loader'];
+        break;
+      default:
+        break;
+    }
+    for (var file_path of loaders[loader]) {
+      file_path = extData.name + '/' + file_path;
+      var rule = { test: extData.name + '/' + file_path, use: use };
+      custom_loaders.push(rule);
+    }
+  }
+});
+
+// Ensure that we have the addtional assets for the extensions.
 Build.ensureAssets({
-  packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
+  packageNames: allExtensions,
   output: jlab.outputDir
 });
 
@@ -115,44 +152,43 @@ module.exports = {
     }
   },
   module: {
-    rules: [
-      { test: /^JUPYTERLAB_RAW_LOADER_/, use: 'raw-loader' },
-      { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
-      { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.md$/, use: 'raw-loader' },
-      { test: /\.txt$/, use: 'raw-loader' },
-      {
-        test: /\.js$/,
-        use: ['source-map-loader'],
-        enforce: 'pre',
-        // eslint-disable-next-line no-undef
-        exclude: /node_modules/
-      },
-      { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-      { test: /\.js.map$/, use: 'file-loader' },
-      {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-      },
-      {
-        test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-      },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-      {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=image/svg+xml'
-      }
-    ]
+    rules:
+      custom_loaders +
+      [
+        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+        { test: /\.md$/, use: 'raw-loader' },
+        { test: /\.txt$/, use: 'raw-loader' },
+        {
+          test: /\.js$/,
+          use: ['source-map-loader'],
+          enforce: 'pre',
+          // eslint-disable-next-line no-undef
+          exclude: /node_modules/
+        },
+        { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
+        { test: /\.js.map$/, use: 'file-loader' },
+        {
+          test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+        },
+        {
+          test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+        },
+        {
+          test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+        },
+        {
+          test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+        },
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+        {
+          test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+        }
+      ]
   },
   watchOptions: {
     ignored: function(localPath) {

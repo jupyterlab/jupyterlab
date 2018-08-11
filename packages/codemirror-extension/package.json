@@ -46,6 +46,9 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "loaders": {
+      "file": ["lib/foo"]
+    }
   }
 }
