@@ -39,11 +39,6 @@ allExtensions.forEach(function(extension) {
       case 'file':
         use = 'file-loader';
         break;
-      case 'css':
-        use = ['style-loader', 'css-loader'];
-        break;
-      default:
-        break;
     }
     for (var file_path of loaders[loader]) {
       file_path = extData.name + '/' + file_path;

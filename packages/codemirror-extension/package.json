@@ -48,7 +48,9 @@
     "extension": true,
     "schemaDir": "schema",
     "loaders": {
-      "file": ["lib/foo"]
+      "file": [
+        "lib/foo"
+      ]
     }
   }
 }
