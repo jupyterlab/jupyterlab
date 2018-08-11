@@ -69,12 +69,11 @@ namespace Patterns {
  */
 const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, ISettingRegistry, IWindowResolver],
+  requires: [ICommandPalette, IRouter, IWindowResolver],
   activate: (
     app: JupyterLab,
     palette: ICommandPalette,
     router: IRouter,
-    settings: ISettingRegistry,
     resolver: IWindowResolver
   ) => {
     // Requiring the window resolver guarantees that the application extension
@@ -93,7 +92,7 @@ const main: JupyterLabPlugin<void> = {
       showErrorMessage('Error Registering Plugins', { message: body });
     }
 
-    addCommands(app, palette, settings);
+    addCommands(app, palette);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.

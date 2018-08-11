@@ -355,7 +355,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     if (!area) {
       return null;
     }
-    let dehydrated: Private.ISideArea = { collapsed: area.collapsed };
+    let dehydrated: Private.ISideArea = {
+      collapsed: area.collapsed,
+      userMovedWidgets: area.userMovedWidgets
+    };
     if (area.currentWidget) {
       let current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -381,7 +384,12 @@ export class LayoutRestorer implements ILayoutRestorer {
     area?: Private.ISideArea | null
   ): ApplicationShell.ISideArea {
     if (!area) {
-      return { collapsed: true, currentWidget: null, widgets: null };
+      return {
+        collapsed: true,
+        currentWidget: null,
+        widgets: null,
+        userMovedWidgets: null
+      };
     }
     let internal = this._widgets;
     const collapsed = area.hasOwnProperty('collapsed')
@@ -401,7 +409,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     return {
       collapsed,
       currentWidget: currentWidget!,
-      widgets: widgets as Widget[] | null
+      widgets: widgets as Widget[] | null,
+      userMovedWidgets: area.userMovedWidgets
     };
   }
 
@@ -520,6 +529,8 @@ namespace Private {
      * The collection of widgets held by the sidebar.
      */
     widgets?: Array<string> | null;
+
+    userMovedWidgets: string[];
   }
 
   /**

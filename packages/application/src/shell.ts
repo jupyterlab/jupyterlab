@@ -464,25 +464,41 @@ export class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+  moveWidgetToRightArea(id: string) {
+    if (this._leftHandler.has(id)) {
+      let item = this._leftHandler.retrieveItemBy(id);
+      this._rightHandler.addWidget(item.widget, item.rank);
+      let index = this._rightHandler.userMovedWidgets.indexOf(id);
+      if (index > -1) {
+        this._rightHandler.userMovedWidgets.splice(index, 1);
+      }
+      this._leftHandler.addMovedWidgets(id);
+      this._rightHandler.activate(id);
+    }
+  }
+
+  moveWidgetToLeftArea(id: string) {
+    if (this._rightHandler.has(id)) {
+      let item = this._rightHandler.retrieveItemBy(id);
+      this._leftHandler.addWidget(item.widget, item.rank);
+      let index = this._leftHandler.userMovedWidgets.indexOf(id);
+      if (index > -1) {
+        this._leftHandler.userMovedWidgets.splice(index, 1);
+      }
+      this._rightHandler.addMovedWidgets(id);
+      this._leftHandler.activate(id);
+    }
+  }
+
   moveLeftActiveToRightArea() {
     if (this._leftHandler.current) {
-      let id = this._leftHandler.current.id;
-      if (this._leftHandler.has(id)) {
-        let rank = this._leftHandler.retrieveItemBy(id).rank;
-        this._rightHandler.addWidget(this._leftHandler.current, rank);
-        this._rightHandler.activate(id);
-      }
+      this.moveWidgetToRightArea(this._leftHandler.current.id);
     }
   }
 
   moveRightActiveToLeftArea() {
     if (this._rightHandler.current) {
-      let id = this._rightHandler.current.id;
-      if (this._rightHandler.has(id)) {
-        let rank = this._rightHandler.retrieveItemBy(id).rank;
-        this._leftHandler.addWidget(this._rightHandler.current, rank);
-        this._leftHandler.activate(id);
-      }
+      this.moveWidgetToLeftArea(this._rightHandler.current.id);
     }
   }
 
@@ -636,6 +652,18 @@ export class ApplicationShell extends Widget {
       // application state has been restored.
       MessageLoop.flush();
       this._restored.resolve(layout);
+      let widgetsToMove = this._leftHandler.userMovedWidgets;
+      if (widgetsToMove) {
+        for (let i = 0; i < widgetsToMove.length; i++) {
+          this.moveWidgetToRightArea(widgetsToMove[i]);
+        }
+      }
+      widgetsToMove = this._rightHandler.userMovedWidgets;
+      if (widgetsToMove) {
+        for (let i = 0; i < widgetsToMove.length; i++) {
+          this.moveWidgetToLeftArea(widgetsToMove[i]);
+        }
+      }
     }
   }
 
@@ -913,6 +941,8 @@ export namespace ApplicationShell {
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
+
+    readonly userMovedWidgets: string[];
   }
 
   /**
@@ -1019,6 +1049,20 @@ namespace Private {
       return this._stackedPanel;
     }
 
+    addMovedWidgets(id: string) {
+      if (this._userMovedWidgets) {
+        if (this._userMovedWidgets.indexOf(id) === -1) {
+          this._userMovedWidgets.push(id);
+        }
+      } else {
+        this._userMovedWidgets = [id];
+      }
+    }
+
+    get userMovedWidgets() {
+      return this._userMovedWidgets;
+    }
+
     /**
      * Expand the sidebar.
      *
@@ -1089,7 +1133,8 @@ namespace Private {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
-      return { collapsed, currentWidget, widgets };
+      let userMovedWidgets = this._userMovedWidgets;
+      return { collapsed, currentWidget, widgets, userMovedWidgets };
     }
 
     /**
@@ -1101,6 +1146,7 @@ namespace Private {
       } else if (data.collapsed) {
         this.collapse();
       }
+      this._userMovedWidgets = data.userMovedWidgets;
     }
 
     /**
@@ -1194,6 +1240,7 @@ namespace Private {
     }
 
     private _items = new Array<Private.IRankItem>();
+    private _userMovedWidgets: string[];
     private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
