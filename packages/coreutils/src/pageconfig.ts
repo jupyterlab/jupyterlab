@@ -110,7 +110,7 @@ export namespace PageConfig {
   }
 
   /**
-   * Get the base url for a Jupyter application.
+   * Get the base url for a Jupyter application, or an empty string.
    */
   export function getBaseUrl(): string {
     return URLExt.normalize(getOption('baseUrl'));
@@ -136,7 +136,7 @@ export namespace PageConfig {
   }
 
   /**
-   * Get the base websocket url for a Jupyter application.
+   * Get the base websocket url for a Jupyter application, or an empty string.
    */
   export function getWsUrl(baseUrl?: string): string {
     let wsUrl = getOption('wsUrl');
