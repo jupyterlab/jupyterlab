@@ -54,12 +54,9 @@ describe('@jupyterlab/coreutils', () => {
         expect(PageConfig.getWsUrl(url)).to.equal('ws://foo.com/');
       });
 
-      it('should fail with a bad base url', () => {
+      it('should be an empty string for a bad base url', () => {
         const url = 'blargh://foo.com';
-        const foo = () => {
-          PageConfig.getWsUrl(url);
-        };
-        expect(foo).to.throw();
+        expect(PageConfig.getWsUrl(url)).to.equal('');
       });
     });
   });

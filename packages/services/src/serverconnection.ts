@@ -200,11 +200,17 @@ namespace Private {
     options: Partial<ServerConnection.ISettings> = {}
   ): ServerConnection.ISettings {
     const wsUrl = options.wsUrl || PageConfig.getWsUrl(options.baseUrl);
-    return {
+    const settings = {
       ...ServerConnection.defaultSettings,
       ...options,
       ...{ wsUrl }
     };
+    if (!settings.baseUrl) {
+      throw Error('Could not determine baseUrl');
+    }
+    if (!settings.wsUrl) {
+      throw Error('Could not determine wsUrl');
+    }
   }
 
   /**

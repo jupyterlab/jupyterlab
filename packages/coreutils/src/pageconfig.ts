@@ -113,11 +113,7 @@ export namespace PageConfig {
    * Get the base url for a Jupyter application.
    */
   export function getBaseUrl(): string {
-    const baseUrl = URLExt.normalize(getOption('baseUrl'));
-    if (!baseUrl) {
-      throw new Error('Could not determine default baseUrl');
-    }
-    return baseUrl;
+    return URLExt.normalize(getOption('baseUrl'));
   }
 
   /**
@@ -147,7 +143,7 @@ export namespace PageConfig {
     if (!wsUrl) {
       baseUrl = baseUrl ? URLExt.normalize(baseUrl) : getBaseUrl();
       if (baseUrl.indexOf('http') !== 0) {
-        throw new Error('Could not determine wsUrl');
+        return '';
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
