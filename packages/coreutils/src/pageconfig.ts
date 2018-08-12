@@ -151,7 +151,7 @@ export namespace PageConfig {
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
-    return URLExt.parse(wsUrl).toString();
+    return URLExt.normalize(wsUrl);
   }
 
   /**
