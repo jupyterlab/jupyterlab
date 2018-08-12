@@ -211,6 +211,7 @@ namespace Private {
     if (!settings.wsUrl) {
       throw Error('Could not determine wsUrl');
     }
+    return settings;
   }
 
   /**
