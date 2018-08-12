@@ -115,7 +115,7 @@ export namespace PageConfig {
   export function getBaseUrl(): string {
     const baseUrl = Private.normalizeUrl(getOption('baseUrl'));
     if (!baseUrl) {
-      throw new Error('Could not determine base Url, please specify');
+      throw new Error('Could not determine baseUrl, please specify');
     }
     return baseUrl;
   }
