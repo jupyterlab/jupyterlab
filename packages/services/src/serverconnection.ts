@@ -211,7 +211,7 @@ namespace Private {
       wsUrl = defaultSettings.wsUrl;
     }
     // Otherwise convert the baseUrl to a wsUrl if possible.
-    if (!wsUrl && baseUrl.indexOf('http') !== 0) {
+    if (!wsUrl && baseUrl.indexOf('http') === 0) {
       wsUrl = 'ws' + baseUrl.slice(4);
     }
     // Otherwise fall back on the default wsUrl.
