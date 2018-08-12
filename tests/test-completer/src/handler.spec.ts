@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -60,7 +60,7 @@ describe('@jupyterlab/completer', () => {
 
   before(async () => {
     session = await createClientSession();
-    await session.initialize();
+    await (session as ClientSession).initialize();
     connector = new KernelConnector({ session });
   });
 
