@@ -48,7 +48,7 @@ class LogEditor extends JSONEditor {
   }
 }
 
-describe('apputils', () => {
+describe('codeeditor', () => {
   describe('JSONEditor', () => {
     let editor: LogEditor;
     let editorServices = new CodeMirrorEditorFactory();
@@ -98,19 +98,23 @@ describe('apputils', () => {
 
     describe('#headerNode', () => {
       it('should be the header node used by the editor', () => {
-        expect(editor.headerNode.classList).to.contain('jp-JSONEditor-header');
+        expect(Array.from(editor.headerNode.classList)).to.contain(
+          'jp-JSONEditor-header'
+        );
       });
     });
 
     describe('#titleNode', () => {
       it('should be the title node used by the editor', () => {
-        expect(editor.titleNode.classList).to.contain('jp-JSONEditor-title');
+        expect(Array.from(editor.titleNode.classList)).to.contain(
+          'jp-JSONEditor-title'
+        );
       });
     });
 
     describe('#collapserNode', () => {
       it('should be the collapser node used by the editor', () => {
-        expect(editor.collapserNode.classList).to.contain(
+        expect(Array.from(editor.collapserNode.classList)).to.contain(
           'jp-JSONEditor-collapser'
         );
       });
@@ -118,7 +122,7 @@ describe('apputils', () => {
 
     describe('#editorHostNode', () => {
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain(
+        expect(Array.from(editor.editorHostNode.classList)).to.contain(
           'jp-JSONEditor-host'
         );
       });
@@ -126,7 +130,7 @@ describe('apputils', () => {
 
     describe('#revertButtonNode', () => {
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain(
+        expect(Array.from(editor.revertButtonNode.classList)).to.contain(
           'jp-JSONEditor-revertButton'
         );
       });
@@ -134,7 +138,7 @@ describe('apputils', () => {
 
     describe('#commitButtonNode', () => {
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain(
+        expect(Array.from(editor.commitButtonNode.classList)).to.contain(
           'jp-JSONEditor-commitButton'
         );
       });
@@ -342,14 +346,14 @@ describe('apputils', () => {
           editor = new LogEditor({ editorFactory, collapsible: true });
           Widget.attach(editor, document.body);
           simulate(editor.titleNode, 'click');
-          expect(editor.editorHostNode.classList).to.contain(
+          expect(Array.from(editor.editorHostNode.classList)).to.contain(
             'jp-mod-collapsed'
           );
         });
 
         it('should have no effect if the editor is not collapsible', () => {
           simulate(editor.titleNode, 'click');
-          expect(editor.editorHostNode.classList).to.not.contain(
+          expect(Array.from(editor.editorHostNode.classList)).to.not.contain(
             'jp-mod-collapsed'
           );
         });
