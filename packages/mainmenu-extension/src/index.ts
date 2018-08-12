@@ -266,7 +266,8 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 
   const newViewGroup = [
     { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole }
+    { command: CommandIDs.createConsole },
+    { command: 'docmanager:open-direct' }
   ];
 
   // Add the close group
