@@ -202,13 +202,6 @@ namespace Private {
    * Normalize a url.
    */
   export function normalizeUrl(path: string): string {
-    if (typeof location !== undefined) {
-      if (path.indexOf('//') === 0) {
-        path = location.protocol + path;
-      } else if (path.indexOf('/') === 0) {
-        path = location.origin + path;
-      }
-    }
     return path && URLExt.parse(path).toString();
   }
 }
