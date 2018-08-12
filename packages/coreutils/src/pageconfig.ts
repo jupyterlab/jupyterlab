@@ -115,7 +115,7 @@ export namespace PageConfig {
   export function getBaseUrl(): string {
     const baseUrl = URLExt.normalize(getOption('baseUrl'));
     if (!baseUrl) {
-      throw new Error('Could not determine baseUrl, please specify');
+      throw new Error('Could not determine default baseUrl');
     }
     return baseUrl;
   }
@@ -147,7 +147,7 @@ export namespace PageConfig {
     if (!wsUrl) {
       baseUrl = baseUrl ? URLExt.normalize(baseUrl) : getBaseUrl();
       if (baseUrl.indexOf('http') !== 0) {
-        throw new Error('Could not determine wsUrl, please specify');
+        throw new Error('Could not determine default wsUrl, please specify');
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
