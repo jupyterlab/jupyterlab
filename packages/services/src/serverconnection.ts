@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * Handle the default `fetch` and `WebSocket` providers.
@@ -199,27 +199,11 @@ namespace Private {
   export function makeSettings(
     options: Partial<ServerConnection.ISettings> = {}
   ): ServerConnection.ISettings {
-    let extra: Partial<ServerConnection.ISettings> = {};
-    if (options.baseUrl && !options.wsUrl) {
-      // Setting baseUrl to https://host... sets wsUrl to wss://host...
-      let baseUrl = options.baseUrl;
-      if (baseUrl.indexOf('http') !== 0) {
-        if (typeof location !== 'undefined') {
-          baseUrl = URLExt.join(location.origin, baseUrl);
-        } else {
-          // TODO: Why are we hardcoding localhost and 8888? That doesn't seem
-          // good. See https://github.com/jupyterlab/jupyterlab/issues/4761
-          baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
-        }
-      }
-      extra = {
-        wsUrl: 'ws' + baseUrl.slice(4)
-      };
-    }
+    const wsUrl = options.wsUrl || PageConfig.getWsUrl(options.baseUrl);
     return {
       ...ServerConnection.defaultSettings,
       ...options,
-      ...extra
+      ...{ wsUrl }
     };
   }
 

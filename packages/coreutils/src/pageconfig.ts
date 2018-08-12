@@ -113,14 +113,11 @@ export namespace PageConfig {
    * Get the base url for a Jupyter application.
    */
   export function getBaseUrl(): string {
-    let baseUrl = getOption('baseUrl');
-    if (!baseUrl || baseUrl === '/') {
-      baseUrl =
-        typeof location === 'undefined'
-          ? 'http://localhost:8888/'
-          : location.origin + '/';
+    const baseUrl = Private.normalizeUrl(getOption('baseUrl'));
+    if (!baseUrl) {
+      throw new Error('Could not determine base Url, please specify');
     }
-    return URLExt.parse(baseUrl).toString();
+    return baseUrl;
   }
 
   /**
@@ -148,13 +145,9 @@ export namespace PageConfig {
   export function getWsUrl(baseUrl?: string): string {
     let wsUrl = getOption('wsUrl');
     if (!wsUrl) {
-      baseUrl = baseUrl || getBaseUrl();
+      baseUrl = baseUrl ? Private.normalizeUrl(baseUrl) : getBaseUrl();
       if (baseUrl.indexOf('http') !== 0) {
-        if (typeof location !== 'undefined') {
-          baseUrl = URLExt.join(location.origin, baseUrl);
-        } else {
-          baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
-        }
+        throw new Error('Could not determine wsUrl, please specify');
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
@@ -203,5 +196,19 @@ namespace Private {
       return '';
     }
     return decodeURIComponent(val);
+  }
+
+  /**
+   * Normalize a url.
+   */
+  export function normalizeUrl(path: string): string {
+    if (typeof location !== undefined) {
+      if (path.indexOf('//') === 0) {
+        path = location.protocol + path;
+      } else if (path.indexOf('/') === 0) {
+        path = location.origin + path;
+      }
+    }
+    return path && URLExt.parse(path).toString();
   }
 }
