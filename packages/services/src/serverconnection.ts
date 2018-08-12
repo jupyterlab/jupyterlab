@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 /**
  * Handle the default `fetch` and `WebSocket` providers.
@@ -199,6 +199,7 @@ namespace Private {
   export function makeSettings(
     options: Partial<ServerConnection.ISettings> = {}
   ): ServerConnection.ISettings {
+    const defaultSettings = ServerConnection.defaultSettings;
     const baseUrl =
       URLExt.normalize(options.baseUrl) || defaultSettings.baseUrl;
     if (!baseUrl) {
@@ -219,7 +220,7 @@ namespace Private {
       throw Error('Could not determine wsUrl');
     }
     return {
-      ...ServerConnection.defaultSettings,
+      ...defaultSettings,
       ...options,
       ...{ wsUrl }
     };
