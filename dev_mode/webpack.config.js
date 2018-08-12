@@ -18,11 +18,12 @@ var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
 
-// Find the loaders specified by the extensions
+// Find the custom loaders specified by the extensions.
 var custom_loaders = [];
 var allExtensions = Object.keys(extensions).concat(Object.keys(mimeExtensions));
 allExtensions.forEach(function(extension) {
   var extData = require(path.join(extension, 'package.json'));
+  var extDeps = extData.dependencies;
   var loaders = extData.jupyterlab.loaders;
   if (loaders === void 0) {
     return;
@@ -39,10 +40,33 @@ allExtensions.forEach(function(extension) {
       case 'file':
         use = 'file-loader';
         break;
+      default:
+        console.warn('Refusing to add custom loader', loader, 'in', extension);
+        break;
     }
-    for (var file_path of loaders[loader]) {
-      file_path = extData.name + '/' + file_path;
-      var rule = { test: extData.name + '/' + file_path, use: use };
+    for (var path_spec of loaders[loader]) {
+      // Make sure the path spec starts with the package name or a dep.
+      if (!(path_spec.indexOf(extension) === 0)) {
+        var found = false;
+        for (var dep_name of extDeps) {
+          if (found === true) {
+            continue;
+          }
+          if (path_spec.indexOf(dep_name) === 0) {
+            found = true;
+          }
+        }
+        if (found === false) {
+          console.warn(
+            'Refusing to add custom rule',
+            path_spec,
+            'in',
+            extension
+          );
+          continue;
+        }
+      }
+      var rule = { test: path_spec, use: use };
       custom_loaders.push(rule);
     }
   }
