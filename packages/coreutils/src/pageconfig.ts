@@ -113,7 +113,7 @@ export namespace PageConfig {
    * Get the base url for a Jupyter application.
    */
   export function getBaseUrl(): string {
-    const baseUrl = Private.normalizeUrl(getOption('baseUrl'));
+    const baseUrl = URLExt.normalize(getOption('baseUrl'));
     if (!baseUrl) {
       throw new Error('Could not determine baseUrl, please specify');
     }
@@ -145,7 +145,7 @@ export namespace PageConfig {
   export function getWsUrl(baseUrl?: string): string {
     let wsUrl = getOption('wsUrl');
     if (!wsUrl) {
-      baseUrl = baseUrl ? Private.normalizeUrl(baseUrl) : getBaseUrl();
+      baseUrl = baseUrl ? URLExt.normalize(baseUrl) : getBaseUrl();
       if (baseUrl.indexOf('http') !== 0) {
         throw new Error('Could not determine wsUrl, please specify');
       }
@@ -196,12 +196,5 @@ namespace Private {
       return '';
     }
     return decodeURIComponent(val);
-  }
-
-  /**
-   * Normalize a url.
-   */
-  export function normalizeUrl(path: string): string {
-    return path && URLExt.parse(path).toString();
   }
 }
