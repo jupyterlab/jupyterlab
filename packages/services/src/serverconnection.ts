@@ -199,19 +199,30 @@ namespace Private {
   export function makeSettings(
     options: Partial<ServerConnection.ISettings> = {}
   ): ServerConnection.ISettings {
-    const wsUrl = options.wsUrl || PageConfig.getWsUrl(options.baseUrl);
-    const settings = {
+    const baseUrl =
+      URLExt.normalize(options.baseUrl) || defaultSettings.baseUrl;
+    if (!baseUrl) {
+      throw Error('Could not determine baseUrl');
+    }
+    let wsUrl = options.wsUrl;
+    // Prefer the default wsUrl if we are using the default baseUrl.
+    if (!wsUrl && baseUrl === defaultSettings.baseUrl) {
+      wsUrl = defaultSettings.wsUrl;
+    }
+    // Otherwise convert the base url to a wsUrl if possible.
+    if (!wsUrl && baseUrl.indexOf('http') !== 0) {
+      wsUrl = 'ws' + baseUrl.slice(4);
+    }
+    // Otherwise fall back on the default wsUrl.
+    wsUrl = wsUrl || defaultSettings.wsUrl;
+    if (!wsUrl) {
+      throw Error('Could not determine wsUrl');
+    }
+    return {
       ...ServerConnection.defaultSettings,
       ...options,
       ...{ wsUrl }
     };
-    if (!settings.baseUrl) {
-      throw Error('Could not determine baseUrl');
-    }
-    if (!settings.wsUrl) {
-      throw Error('Could not determine wsUrl');
-    }
-    return settings;
   }
 
   /**
