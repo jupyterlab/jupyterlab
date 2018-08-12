@@ -43,6 +43,7 @@ install:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
   - 'python -m pip install -U pip'
+  - 'pip search jupyterlab-launcher'
   - 'pip install --upgrade -e ".[test]"'
   - 'jupyter kernelspec list'
   - 'jlpm versions'
