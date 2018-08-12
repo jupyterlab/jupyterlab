@@ -81,8 +81,8 @@
   background-image: var(--jp-icon-circle);
 }
 
-.jp-newFolderIcon {
-  background-image: var(--jp-icon-new-directory);
+.jp-FolderIcon {
+  background-image: var(--jp-icon-folder);
 }
 
 .jp-HomeIcon {
@@ -137,6 +137,10 @@
 
 .jp-MoreHorizIcon {
   background-image: var(--jp-icon-more);
+}
+
+.jp-NewFolderIcon {
+  background-image: var(--jp-icon-new-directory);
 }
 
 .jp-NotebookIcon {
@@ -195,8 +199,8 @@
   background-image: var(--jp-icon-undo);
 }
 
-.jp-UploadIcon {
-  background-image: var(--jp-icon-upload);
+.jp-FileUploadIcon {
+  background-image: var(--jp-icon-file-upload);
 }
 
 .jp-YamlIcon {
