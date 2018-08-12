@@ -39,7 +39,8 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 16px;
-  border: 1px solid var(--jp-layout-color1);
+  margin-bottom: 4px;
+  /* border: 1px solid var(--jp-layout-color1); */
 }
 
 .jp-Toolbar-item.jp-Toolbar-button:focus {
