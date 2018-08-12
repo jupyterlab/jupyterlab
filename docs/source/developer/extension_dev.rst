@@ -152,9 +152,9 @@ When using local extensions and linked packages, you can run the command
 This will cause the application to incrementally rebuild when one of the
 linked packages changes. Note that only compiled JavaScript files (and
 the CSS files) are watched by the WebPack process. This means that if 
-your extension is in typescript you'll have to run a `jlpm run build`
+your extension is in TypeScript you'll have to run a `jlpm run build`
 before the changes will be reflected in JupyterLab. To avoid this step
-you can also watch the typescript sources in your extension which is
+you can also watch the TypeScript sources in your extension which is
 usually assigned to the `tsc -w` shortcut.
 
 Note that the application is built against **released** versions of the
