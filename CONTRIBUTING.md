@@ -327,6 +327,27 @@ a package by importing from it in the TypeScript file, and then running:
 We also have scripts for creating and removing packages in `packages/`,
 `jlpm run create:package` and `jlpm run remove:package`.
 
+## Testing Changes to External Packages
+
+If you want to make changes to one of JupyterLab's external packages (for example, [phosphor](https://github.com/phosphorjs/phosphor)) and test them out against your copy of JupyterLab, you can easily do so using the `link` command: 
+
+1. Make your changes and then build the external package
+2. Register a link to the modified external package
+    - navigate to the external package dir and run `jlpm link`
+3. Link JupyterLab to modded package
+    - navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
+
+You can then (re)build JupyterLab (eg `jlpm run build`) and your changes should be picked up by the build.
+
+To restore JupyterLab to its original state, you use the `unlink` command:
+
+1. Unlink JupyterLab and modded package
+    - navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
+2. Reinstall original version of the external package in JupyterLab
+    - run `jlpm install --check-files`
+
+You can then (re)build JupyterLab and everything should be back to default.
+
 ## Notes
 
 * By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
