@@ -64,6 +64,11 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(script)).to.equal('');
     });
 
+    it('should strip iframe tags', () => {
+      const script = '<iframe src=""></iframe>';
+      expect(defaultSanitizer.sanitize(script)).to.equal('');
+    });
+
     it('should strip link tags', () => {
       const link = '<link rel="stylesheet" type="text/css" href="theme.css">';
       expect(defaultSanitizer.sanitize(link)).to.equal('');
@@ -98,6 +103,40 @@ describe('defaultSanitizer', () => {
       input = div.querySelector('input');
 
       expect(input.disabled).to.equal(true);
+    });
+
+    // Test unwanted inline CSS style stripping
+
+    it('should allow harmless inline CSS', () => {
+      const div = '<div style="color:green;"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal(div);
+    });
+
+    it("should strip 'content' properties from inline CSS", () => {
+      const div = '<div style="color: green; content: attr(title)"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal(
+        '<div style="color:green;"></div>'
+      );
+    });
+
+    it("should strip 'counter-increment' properties from inline CSS", () => {
+      const div = '<div style="counter-increment: example-counter;"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal('<div></div>');
+    });
+
+    it("should strip 'counter-reset' properties from inline CSS", () => {
+      const div = '<div style="counter-reset: chapter-count 0;"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal('<div></div>');
+    });
+
+    it("should strip 'widows' properties from inline CSS", () => {
+      const div = '<div style="widows: 2;"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal('<div></div>');
+    });
+
+    it("should strip 'orphans' properties from inline CSS", () => {
+      const div = '<div style="orphans: 3;"></div>';
+      expect(defaultSanitizer.sanitize(div)).to.equal('<div></div>');
     });
   });
 });

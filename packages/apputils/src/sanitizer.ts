@@ -272,7 +272,6 @@ class CssProp {
     volume: `${CssProp.N.number_pos}|${
       CssProp.B.percentage_pos
     }|silent|x-soft|soft|medium|loud|x-loud`,
-    widows: CssProp.N.integer_pos,
     word_wrap: CssProp.AP.overflow_wrap,
     zoom: `normal|${CssProp.N.number_pos}|${CssProp.B.percentage_pos}`,
     backface_visibility: CssProp.AP.visibility,
@@ -301,7 +300,6 @@ class CssProp {
     }`,
     margin_left: CssProp.C.margin_width,
     max_width: `${CssProp.B.length_pos}|${CssProp.B.percentage_pos}|none|auto`,
-    orphans: CssProp.N.integer_pos,
     outline_style: CssProp.A.border_style,
     padding_bottom: CssProp.C.padding_width,
     padding_right: CssProp.C.padding_width,
@@ -455,7 +453,6 @@ class CssProp {
   static TEXT_INDENT = CssProp.reg(CssProp.CP.text_indent);
   static TEXT_SHADOW = CssProp.reg(CssProp.CP.text_shadow);
   static VOLUME = CssProp.reg(CssProp.CP.volume);
-  static WIDOWS = CssProp.reg(CssProp.CP.widows);
   static WORD_WRAP = CssProp.reg(CssProp.CP.word_wrap);
   static ZOOM = CssProp.reg(CssProp.CP.zoom);
   static BACKFACE_VISIBILITY = CssProp.reg(CssProp.CP.backface_visibility);
@@ -478,7 +475,6 @@ class CssProp {
   static LINE_HEIGHT = CssProp.reg(CssProp.CP.line_height);
   static MARGIN_LEFT = CssProp.reg(CssProp.CP.margin_left);
   static MAX_WIDTH = CssProp.reg(CssProp.CP.max_width);
-  static ORPHANS = CssProp.reg(CssProp.CP.orphans);
   static OUTLINE_STYLE = CssProp.reg(CssProp.CP.outline_style);
   static PADDING_BOTTOM = CssProp.reg(CssProp.CP.padding_bottom);
   static PADDING_RIGHT = CssProp.reg(CssProp.CP.padding_right);
@@ -976,7 +972,6 @@ class Sanitizer implements ISanitizer {
         'min-height': [CssProp.MIN_HEIGHT],
         'min-width': [CssProp.MIN_WIDTH],
         opacity: [CssProp.OPACITY],
-        orphans: [CssProp.ORPHANS],
         outline: [CssProp.OUTLINE],
         'outline-color': [CssProp.OUTLINE_COLOR],
         'outline-style': [CssProp.OUTLINE_STYLE],
@@ -1022,7 +1017,6 @@ class Sanitizer implements ISanitizer {
         visibility: [CssProp.VISIBILITY],
         volume: [CssProp.VOLUME],
         'white-space': [CssProp.WHITE_SPACE],
-        widows: [CssProp.WIDOWS],
         width: [CssProp.WIDTH],
         'word-break': [CssProp.WORD_BREAK],
         'word-spacing': [CssProp.WORD_SPACING],
