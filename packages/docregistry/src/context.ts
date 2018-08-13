@@ -458,7 +458,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Save the document contents to disk.
    */
   private _save(): Promise<void> {
-    this._fileSaving.emit('starting');
+    this._fileSaving.emit('started');
     let model = this._model;
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
@@ -506,16 +506,19 @@ export class Context<T extends DocumentRegistry.IModel>
         this._handleError(err, `File Save Error for ${name}`);
         throw err;
       })
-      .catch(err => {
-        // Capture all error paths and confirm failure
-        this._fileSaving.emit('failed');
-        throw err;
-      })
-      .then(value => {
-        // Capture all sucess paths and emit completion
-        this._fileSaving.emit('completed');
-        return value;
-      });
+      .then(
+        value => {
+          // Capture all sucess paths and emit completion
+          this._fileSaving.emit('completed');
+          return value;
+        },
+        err => {
+          // Capture all error paths and emit failure
+          this._fileSaving.emit('failed');
+          throw err;
+        }
+      )
+      .catch();
   }
 
   /**

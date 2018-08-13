@@ -97,7 +97,7 @@ describe('docregistry/context', () => {
         context.saving.connect((sender, args) => {
           if (!called) {
             expect(sender).to.equal(context);
-            expect(args).to.equal('starting');
+            expect(args).to.equal('started');
 
             checked = true;
           }
@@ -126,6 +126,36 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         expect(called).to.equal(2);
         expect(checked).to.be.true;
+      });
+
+      it("should emit 'failed' when the save operation fails out", async () => {
+        context = new Context({
+          manager,
+          factory,
+          path: 'src/readonly-temp.txt'
+        });
+
+        let called = 0;
+        let checked;
+        context.saving.connect((sender, args) => {
+          if (called > 0) {
+            expect(sender).to.equal(context);
+            checked = args;
+          }
+
+          called += 1;
+        });
+
+        try {
+          await context.initialize(true);
+        } catch (err) {
+          expect(err.message).to.contain('Invalid response: 403 Forbidden');
+        }
+
+        expect(called).to.equal(2);
+        expect(checked).to.equal('failed');
+
+        await acceptDialog();
       });
     });
 
