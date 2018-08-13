@@ -101,7 +101,7 @@
 }
 
 .jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab.p-mod-current:last-child {
-  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
 /* Transforms */
