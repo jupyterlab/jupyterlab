@@ -37,6 +37,15 @@
       },
       "type": "object"
     },
+    "application:toggle-presentation-mode": {
+      "default": { },
+      "properties": {
+        "command": { "default": "application:toggle-presentation-mode" },
+        "keys": { "default": ["Accel Shift P"] },
+        "selector": { "default": "body" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": {},
       "properties": {
