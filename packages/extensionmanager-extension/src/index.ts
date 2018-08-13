@@ -49,8 +49,7 @@ const plugin: JupyterLabPlugin<void> = {
     const createView = () => {
       const v = new ExtensionView(serviceManager);
       v.id = 'extensionmanager.main-view';
-      v.title.label = 'Extension';
-      // v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
+      v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
       v.title.caption = 'Extension Manager';
       restorer.add(v, v.id);
       return v;
