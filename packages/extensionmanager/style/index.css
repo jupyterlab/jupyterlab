@@ -59,7 +59,7 @@
 
 .jp-extensionmanager-search-bar {
   padding: 8px;
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-layout-color1);
   border-bottom: 1px solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
