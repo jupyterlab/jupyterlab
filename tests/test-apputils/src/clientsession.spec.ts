@@ -372,12 +372,12 @@ describe('@jupyterlab/apputils', () => {
       it('should restart if the user accepts the dialog', async () => {
         let called = false;
 
-        await session.initialize();
         session.statusChanged.connect((sender, args) => {
           if (args === 'restarting') {
             called = true;
           }
         });
+        await session.initialize();
 
         const restart = ClientSession.restartKernel(session.kernel);
 

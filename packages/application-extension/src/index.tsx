@@ -18,7 +18,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig } from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 
@@ -51,7 +51,13 @@ namespace CommandIDs {
  * The routing regular expressions used by the application plugin.
  */
 namespace Patterns {
-  export const tree = /[^?]*(\/tree\/([^?]+))/;
+  export const tree = new RegExp(
+    `^${PageConfig.getOption('treeUrl')}([^?\/]+)`
+  );
+
+  export const workspace = new RegExp(
+    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?\/]+)`
+  );
 }
 
 /**
@@ -69,7 +75,7 @@ const main: JupyterLabPlugin<void> = {
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
-    const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
+    const workspace = resolver.name;
 
     console.log(`Starting application in workspace: ${workspace}`);
 
@@ -193,7 +199,7 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = PageConfig.getOption('pageUrl');
+    const base = PageConfig.getOption('baseUrl');
     const router = new Router({ base, commands });
 
     app.started.then(() => {
@@ -223,25 +229,34 @@ const tree: JupyterLabPlugin<void> = {
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ILocation) => {
-        const { request } = args;
-        const path = decodeURIComponent(args.path.match(Patterns.tree)[2]);
-        const url = request.replace(request.match(Patterns.tree)[1], '');
+      execute: async (args: IRouter.ILocation) => {
+        const treeMatch = args.path.match(Patterns.tree);
+        const workspaceMatch = args.path.match(Patterns.workspace);
+        const match = treeMatch || workspaceMatch;
+        const path = decodeURIComponent(match[1]);
+        const { page, workspaces } = app.info.urls;
+        const workspace = PathExt.basename(app.info.workspace);
+        const url =
+          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
+          args.search +
+          args.hash;
         const immediate = true;
+        const silent = true;
 
         // Silently remove the tree portion of the URL leaving the rest intact.
-        router.navigate(url, { silent: true });
+        router.navigate(url, { silent });
 
-        return commands
-          .execute('filebrowser:navigate', { path })
-          .then(() => commands.execute('apputils:save-statedb', { immediate }))
-          .catch(reason => {
-            console.warn(`Tree routing failed:`, reason);
-          });
+        try {
+          await commands.execute('filebrowser:navigate', { path });
+          await commands.execute('apputils:save-statedb', { immediate });
+        } catch (error) {
+          console.warn('Tree routing failed.', error);
+        }
       }
     });
 
     router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
   }
 };
 

@@ -458,7 +458,7 @@ function addCommands(
 
       Clipboard.copyToSystem(item.path);
     },
-    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    isVisible: () => browser.selectedItems().next !== undefined,
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     label: 'Copy Path'
   });

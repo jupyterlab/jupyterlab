@@ -7,7 +7,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -425,7 +425,7 @@ describe('cells/widget', () => {
 
       beforeEach(async () => {
         session = await createClientSession();
-        await session.initialize();
+        await (session as ClientSession).initialize();
         await session.kernel.ready;
       });
 
@@ -433,9 +433,14 @@ describe('cells/widget', () => {
         return session.shutdown();
       });
 
-      it('should fulfill a promise if there is no code to execute', () => {
+      it('should fulfill a promise if there is no code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
-        return CodeCell.execute(widget, session);
+        try {
+          await CodeCell.execute(widget, session);
+        } catch (error) {
+          console.log('IT BREAKS HERE');
+          throw error;
+        }
       });
 
       it('should fulfill a promise if there is code to execute', async () => {
