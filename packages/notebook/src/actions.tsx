@@ -22,6 +22,8 @@ import {
 
 import { ArrayExt, each, toArray } from '@phosphor/algorithm';
 
+import { JSONObject } from '@phosphor/coreutils';
+
 import { ElementExt } from '@phosphor/domutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -1548,9 +1550,15 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = notebook.widgets
+    let data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => cell.model.toJSON());
+      .map(cell => cell.model.toJSON())
+      .map(cellJSON => {
+        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+          delete (cellJSON.metadata as JSONObject).deletable;
+        }
+        return cellJSON;
+      });
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
