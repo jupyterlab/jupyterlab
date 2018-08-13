@@ -34,6 +34,7 @@
   --jp-icon-book-selected: url('icons/jupyter/book_selected.svg');
   --jp-icon-book: url('icons/jupyter/book.svg');
   --jp-icon-bug: url('icons/md/bug.svg');
+  --jp-icon-build: url('icons/md/ic_build_24px.svg');
   --jp-icon-caretdown: url('icons/md/caretdown.svg');
   --jp-icon-caretleft: url('icons/md/caretleft.svg');
   --jp-icon-caretright: url('icons/md/caretright.svg');
@@ -47,6 +48,7 @@
   --jp-icon-console: url('icons/jupyter/console.svg');
   --jp-icon-copy: url('icons/md/copy.svg');
   --jp-icon-cut: url('icons/md/cut.svg');
+  --jp-icon-directions-run: url('icons/md/ic_directions_run_24px.svg');
   --jp-icon-directory-selected: url('icons/jupyter/directory_selected.svg');
   --jp-icon-directory: url('icons/jupyter/directory.svg');
   --jp-icon-download: url('icons/md/download.svg');
@@ -54,6 +56,7 @@
   --jp-icon-ellipses: url('icons/md/ellipses.svg');
   --jp-icon-expand-less: url('icons/md/expand-less.svg');
   --jp-icon-expand-more: url('icons/md/expand-more.svg');
+  --jp-icon-extension: url('icons/md/ic_extension_24px.svg');
   --jp-icon-file-selected: url('icons/jupyter/file_selected.svg');
   --jp-icon-file-upload: url('icons/md/ic_file_upload_24px.svg');
   --jp-icon-file: url('icons/jupyter/file.svg');
@@ -74,6 +77,7 @@
   --jp-icon-markdown: url('icons/jupyter/markdown.svg');
   --jp-icon-more: url('icons/md/more-horiz.svg');
   --jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');
+  --jp-icon-palette: url('icons/md/ic_palette_24px.svg');
   --jp-icon-paste: url('icons/md/paste.svg');
   --jp-icon-python-selected: url('icons/jupyter/python_selected.svg');
   --jp-icon-python: url('icons/jupyter/python.svg');
@@ -89,6 +93,7 @@
   --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
   --jp-icon-spreadsheet: url('icons/jupyter/csv.svg');
   --jp-icon-stop: url('icons/md/stop.svg');
+  --jp-icon-tab: url('icons/md/ic_tab_24px.svg');
   --jp-icon-terminal: url('icons/jupyter/terminal.svg');
   --jp-icon-text-editor: url('icons/jupyter/texteditor.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
