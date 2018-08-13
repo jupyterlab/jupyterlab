@@ -42,16 +42,6 @@ const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 const LISTING_CLASS = 'jp-FileBrowser-listing';
 
 /**
- * The class name added to the refresh button.
- */
-const REFRESH_BUTTON = 'jp-RefreshIcon';
-
-/**
- * The class name added to a material icon button.
- */
-const MATERIAL_CLASS = 'jp-MaterialIcon';
-
-/**
  * A widget which hosts a file browser.
  *
  * The widget uses the Jupyter Contents API to retrieve contents,
@@ -79,7 +69,7 @@ export class FileBrowser extends Widget {
 
     let directoryPending = false;
     let newFolder = new ToolbarButton({
-      className: 'jp-NewFolderIcon',
+      className: 'jp-NewFolderIcon jp-Icon jp-Icon-16',
       onClick: () => {
         if (directoryPending === true) {
           return;
@@ -100,18 +90,16 @@ export class FileBrowser extends Widget {
       },
       tooltip: 'New Folder'
     });
-    newFolder.addClass(MATERIAL_CLASS);
 
     let uploader = new Uploader({ model });
 
     let refresher = new ToolbarButton({
-      className: REFRESH_BUTTON,
+      className: 'jp-RefreshIcon jp-Icon jp-Icon-16',
       onClick: () => {
         model.refresh();
       },
       tooltip: 'Refresh File List'
     });
-    refresher.addClass(MATERIAL_CLASS);
 
     this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);

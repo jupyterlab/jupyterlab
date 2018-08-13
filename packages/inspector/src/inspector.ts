@@ -430,7 +430,7 @@ class InspectorItem extends Widget {
     }
 
     let clear = new ToolbarButton({
-      className: CLEAR_CLASS,
+      className: CLEAR_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         this._clear();
       },
@@ -439,7 +439,7 @@ class InspectorItem extends Widget {
     toolbar.addItem('clear', clear);
 
     let back = new ToolbarButton({
-      className: BACK_CLASS,
+      className: BACK_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         this._back();
       },
@@ -448,7 +448,7 @@ class InspectorItem extends Widget {
     toolbar.addItem('back', back);
 
     let forward = new ToolbarButton({
-      className: FORWARD_CLASS,
+      className: FORWARD_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         this._forward();
       },

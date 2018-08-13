@@ -70,7 +70,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_SAVE_CLASS,
+      className: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
       onClick: () => {
         if (panel.context.model.readOnly) {
           return showDialog({
@@ -94,7 +94,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INSERT_CLASS,
+      className: TOOLBAR_INSERT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -107,7 +107,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_CUT_CLASS,
+      className: TOOLBAR_CUT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -120,7 +120,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_COPY_CLASS,
+      className: TOOLBAR_COPY_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -133,7 +133,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_PASTE_CLASS,
+      className: TOOLBAR_PASTE_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -146,7 +146,7 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RUN_CLASS,
+      className: TOOLBAR_RUN_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.runAndAdvance(panel.content, panel.session);
       },

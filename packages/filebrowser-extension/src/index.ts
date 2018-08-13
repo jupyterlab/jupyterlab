@@ -142,13 +142,12 @@ function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      className: 'jp-AddIcon',
+      className: 'jp-AddIcon jp-Icon jp-Icon-16',
       onClick: () => {
         return createLauncher(commands, widget);
       },
       tooltip: 'New Launcher'
     });
-    launcher.addClass('jp-MaterialIcon');
     widget.toolbar.insertItem(0, 'launch', launcher);
 
     // Add a context menu handler to the file browser's directory listing.

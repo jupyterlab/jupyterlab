@@ -31,16 +31,6 @@ const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
 const TOOLBAR_BUTTON_CLASS = 'jp-Toolbar-button';
 
 /**
- * The class name added to toolbar interrupt button.
- */
-const TOOLBAR_INTERRUPT_CLASS = 'jp-StopIcon';
-
-/**
- * The class name added to toolbar restart button.
- */
-const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
-
-/**
  * The class name added to toolbar kernel name text.
  */
 const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
@@ -324,7 +314,7 @@ export namespace Toolbar {
     let oldClasses = Private.commandClassName(commands, id).split(/\s/);
 
     (button.node as HTMLButtonElement).disabled = !commands.isEnabled(id);
-    Private.setNodeContentFromCommand(button.node, commands, id);
+    // Private.setNodeContentFromCommand(button.node, commands, id);
 
     // Ensure that we pick up relevant changes to the command:
     function onChange(
@@ -350,17 +340,17 @@ export namespace Toolbar {
 
       for (let cls of oldClasses) {
         if (cls && newClasses.indexOf(cls) === -1) {
-          button.removeClass(cls);
+          (button.node.firstChild as HTMLElement).classList.remove(cls);
         }
       }
       for (let cls of newClasses) {
         if (cls && oldClasses.indexOf(cls) === -1) {
-          button.addClass(cls);
+          (button.node.firstChild as HTMLElement).classList.add(cls);
         }
       }
       oldClasses = newClasses;
       button.node.title = Private.commandTooltip(sender, id);
-      Private.setNodeContentFromCommand(button.node, sender, id);
+      // Private.setNodeContentFromCommand(button.node, sender, id);
       (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
     }
     commands.commandChanged.connect(onChange, button);
@@ -375,7 +365,7 @@ export namespace Toolbar {
     session: IClientSession
   ): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INTERRUPT_CLASS,
+      className: 'jp-StopIcon jp-Icon jp-Icon-16',
       onClick: () => {
         if (session.kernel) {
           session.kernel.interrupt();
@@ -390,7 +380,7 @@ export namespace Toolbar {
    */
   export function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RESTART_CLASS,
+      className: 'jp-RefreshIcon jp-Icon jp-Icon-16',
       onClick: () => {
         session.restart();
       },
@@ -443,23 +433,23 @@ export class ToolbarButton extends Widget {
    * Construct a new toolbar button.
    */
   constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: document.createElement('button') });
+    super({ node: Private.createToolbarButtonContent(options.className) });
     Styling.styleNodeByTag(this.node, 'button');
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick || Private.noOp;
 
-    const classes = options.className
-      ? options.className
-          .trim()
-          .replace(/\s{2,}/g, ' ')
-          .split(/\s/)
-      : null;
+    // const classes = options.className
+    //   ? options.className
+    //       .trim()
+    //       .replace(/\s{2,}/g, ' ')
+    //       .split(/\s/)
+    //   : null;
 
-    if (classes) {
-      classes.forEach(name => {
-        this.addClass(name);
-      });
-    }
+    // if (classes) {
+    //   classes.forEach(name => {
+    //     this.addClass(name);
+    //   });
+    // }
 
     this.node.title = options.tooltip || '';
   }
@@ -533,6 +523,19 @@ export namespace ToolbarButton {
  */
 namespace Private {
   /**
+   * Create the DOM node for the ToolbarButton
+   */
+  export function createToolbarButtonContent(className?: string): HTMLElement {
+    let b = document.createElement('button');
+    let s = document.createElement('span');
+    if (className) {
+      s.className = className;
+    }
+    b.appendChild(s);
+    return b;
+  }
+
+  /**
    * An attached property for the name of a toolbar item.
    */
   export const nameProperty = new AttachedProperty<Widget, string>({
@@ -572,7 +575,7 @@ namespace Private {
     if (!commands.isVisible(id)) {
       name += ' p-mod-hidden';
     }
-    return name;
+    return (name += 'jp-Icon jp-Icon-16');
   }
 
   /**
@@ -587,9 +590,8 @@ namespace Private {
     const iconLabel = commands.iconLabel(id);
     const label = commands.label(id);
 
-    node.innerHTML = '';
     if (iconClass) {
-      node.className += ` ${iconClass}`;
+      (node.firstChild as HTMLElement).className += ` ${iconClass}`;
       node.setAttribute('title', iconLabel || label);
     } else {
       node.innerText = label;

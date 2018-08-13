@@ -13,6 +13,32 @@
   background-position: center;
 }
 
+.jp-Icon {
+  display: block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: auto;
+}
+
+.jp-Icon-16 {
+  min-width: 16px;
+  min-height: 16px;
+  background-size: 16px;
+}
+
+.jp-Icon-18 {
+  min-width: 18px;
+  min-height: 18px;
+  background-size: 18px;
+}
+
+.jp-Icon-20 {
+  min-width: 20px;
+  min-height: 20px;
+  background-size: 20px;
+}
+
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
 }
@@ -152,7 +178,7 @@
 }
 
 .jp-NewFolderIcon {
-  background-image: var(--jp-icon-new-directory);
+  background-image: var(--jp-icon-new-folder);
 }
 
 .jp-NotebookIcon {

@@ -21,6 +21,10 @@ button.jp-mod-styled {
   -moz-appearance: none;
 }
 
+button.jp-mod-styled:focus {
+  background: var(--jp-layout-color2);
+}
+
 input.jp-mod-styled {
   background: var(--jp-input-background);
   height: 28px;
@@ -39,11 +43,6 @@ input.jp-mod-styled {
 input.jp-mod-styled:focus {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
-}
-
-button.jp-mod-styled:focus {
-  box-shadow: inset 0 0 0 1px #ffffff;
-  border: rgba(0, 0, 0, 0) solid 1px;
 }
 
 .jp-select-wrapper {
