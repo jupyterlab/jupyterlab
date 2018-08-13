@@ -22,10 +22,7 @@ import {
   sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
-import {
-  JSONObject,
-  JSONArray
-} from '../../../node_modules/@phosphor/coreutils';
+import { JSONObject, JSONArray } from '@phosphor/coreutils';
 
 const ERROR_INPUT = 'a = foo';
 
