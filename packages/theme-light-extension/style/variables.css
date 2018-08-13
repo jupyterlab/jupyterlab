@@ -180,7 +180,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-font-size: 13px;
   --jp-code-line-height: 1.3077; /* 17px for 13px base */
   --jp-code-padding: 0.385em; /* 5px for 13px base */
-  --jp-code-font-family: 'Source Code Pro', monospace;
+  --jp-code-font-family: 'Consolas', 'Source Code Pro', monospace;
 
   /* This gives a magnification of about 125% in presentation mode over normal. */
   --jp-code-presentation-font-size: 16px;
@@ -246,7 +246,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-active-border-color: var(--jp-brand-color1);
 
   --jp-cell-prompt-width: 90px;
-  --jp-cell-prompt-font-family: 'Source Code Pro', monospace;
+  --jp-cell-prompt-font-family: 'Consolas', 'Source Code Pro', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1;
   --jp-cell-prompt-not-active-opacity: 0.5;
