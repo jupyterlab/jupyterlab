@@ -9,17 +9,14 @@ import os
 import shutil
 import sys
 from os.path import join as pjoin
+from tempfile import TemporaryDirectory
 from unittest import TestCase
+from unittest.mock import patch
+
 import pytest
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch  # py2
+from jupyterlab_launcher.server import ServerApp
 
-from ipython_genutils import py3compat
-from ipython_genutils.tempdir import TemporaryDirectory
-from notebook.notebookapp import NotebookApp
 from jupyter_core import paths
 
 from jupyterlab import commands
@@ -56,7 +53,7 @@ class TestExtension(TestCase):
     def tempdir(self):
         td = TemporaryDirectory()
         self.tempdirs.append(td)
-        return py3compat.cast_unicode(td.name)
+        return td.name
 
     def setUp(self):
         # Any TemporaryDirectory objects appended to this list will be cleaned
@@ -372,7 +369,7 @@ class TestExtension(TestCase):
         assert data['jupyterlab']['publicUrl'] == 'bar'
 
     def test_load_extension(self):
-        app = NotebookApp()
+        app = ServerApp()
         stderr = sys.stderr
         sys.stderr = self.devnull
         app.initialize(argv=[])

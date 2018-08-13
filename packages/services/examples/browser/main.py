@@ -2,18 +2,19 @@
 Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
 """
-from notebook.notebookapp import NotebookApp
+
 import os
 from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
+
 from traitlets import Unicode
 
+from jupyterlab_launcher.server import ServerApp, JupyterHandler, FileFindHandler
 
 HERE = os.path.dirname(__file__)
 LOADER = FileSystemLoader(HERE)
 
 
-class ExampleHander(IPythonHandler):
+class ExampleHander(JupyterHandler):
     """Handle requests between the main app page and notebook server."""
 
     def get(self):
@@ -26,7 +27,7 @@ class ExampleHander(IPythonHandler):
         return LOADER.load(self.settings['jinja2_env'], name)
 
 
-class ExampleApp(NotebookApp):
+class ExampleApp(ServerApp):
     """A notebook app that runs the example."""
 
     default_url = Unicode('/example')

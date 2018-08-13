@@ -13,13 +13,14 @@ run ``python main.py``.
 """
 import os
 from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.notebookapp import NotebookApp
+
 from traitlets import Unicode
 
+from jupyterlab_launcher.server import ServerApp, JupyterHandler, FileFindHandler
 
-class ExampleHandler(IPythonHandler):
-    """Handle requests between the main app page and notebook server."""
+
+class ExampleHandler(JupyterHandler):
+    """Handle requests between the main app page and Jupyter server."""
 
     def get(self):
         """Get the main page for the application's interface."""
@@ -33,7 +34,7 @@ class ExampleHandler(IPythonHandler):
         return loader.load(self.settings['jinja2_env'], name)
 
 
-class ExampleApp(NotebookApp):
+class ExampleApp(ServerApp):
 
     default_url = Unicode('/example')
 

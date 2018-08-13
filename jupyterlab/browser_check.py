@@ -1,7 +1,5 @@
 
 # -*- coding: utf-8 -*-
-from __future__ import print_function, absolute_import
-
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
 import os
@@ -10,8 +8,10 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from notebook.notebookapp import flags, aliases
+
 from traitlets import Bool
+
+from jupyterlab_launcher.server import flags, aliases
 
 from .labapp import LabApp, get_app_dir
 
