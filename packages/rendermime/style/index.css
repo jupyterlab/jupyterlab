@@ -140,6 +140,11 @@
   line-height: var(--jp-content-line-height);
 }
 
+/* Left-justify outputs.*/
+.jp-OutputArea-output.jp-RenderedLatex {
+  text-align: left;
+}
+
 /*-----------------------------------------------------------------------------
 | RenderedHTML
 |----------------------------------------------------------------------------*/
@@ -151,10 +156,6 @@
   line-height: var(--jp-content-line-height);
   /* Give a bit more R padding on Markdown text to keep line lengths reasonable */
   padding-right: 20px;
-}
-
-.jp-RenderedHTMLCommon .MathJax_Display {
-  margin: 0;
 }
 
 .jp-RenderedHTMLCommon em {
