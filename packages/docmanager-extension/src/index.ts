@@ -389,8 +389,8 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.openDirect, {
-    label: () => 'Open File...',
-    caption: 'Open file',
+    label: () => 'Open From Path...',
+    caption: 'Open from path',
     isEnabled: () => true,
     execute: () => {
       return getOpenPath(docManager.services.contents).then(path => {
