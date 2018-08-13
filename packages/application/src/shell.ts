@@ -468,9 +468,11 @@ export class ApplicationShell extends Widget {
     if (this._leftHandler.has(id)) {
       let item = this._leftHandler.retrieveItemBy(id);
       this._rightHandler.addWidget(item.widget, item.rank);
-      let index = this._rightHandler.userMovedWidgets.indexOf(id);
-      if (index > -1) {
-        this._rightHandler.userMovedWidgets.splice(index, 1);
+      if (this._rightHandler.userMovedWidgets) {
+        let index = this._rightHandler.userMovedWidgets.indexOf(id);
+        if (index > -1) {
+          this._rightHandler.userMovedWidgets.splice(index, 1);
+        }
       }
       this._leftHandler.addMovedWidgets(id);
       this._rightHandler.activate(id);
@@ -481,9 +483,11 @@ export class ApplicationShell extends Widget {
     if (this._rightHandler.has(id)) {
       let item = this._rightHandler.retrieveItemBy(id);
       this._leftHandler.addWidget(item.widget, item.rank);
-      let index = this._leftHandler.userMovedWidgets.indexOf(id);
-      if (index > -1) {
-        this._leftHandler.userMovedWidgets.splice(index, 1);
+      if (this._leftHandler.userMovedWidgets) {
+        let index = this._leftHandler.userMovedWidgets.indexOf(id);
+        if (index > -1) {
+          this._leftHandler.userMovedWidgets.splice(index, 1);
+        }
       }
       this._rightHandler.addMovedWidgets(id);
       this._leftHandler.activate(id);
