@@ -389,7 +389,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.openDirect, {
-    label: () => 'Open from Path',
+    label: () => 'Open From Path...',
     caption: 'Open from path',
     isEnabled: () => true,
     execute: () => {
