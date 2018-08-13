@@ -19,9 +19,8 @@ import sys
 import tarfile
 from tempfile import TemporaryDirectory
 from threading import Event
-from urllib2 import Request, urlopen, quote
-from urllib2 import URLError, HTTPError
-from urlparse import urljoin
+from urllib.request import Request, urlopen, urljoin, quote
+from urllib.error import URLError
 
 from jupyter_core.paths import jupyter_config_path
 from jupyterlab_launcher.process import which, Process, WatchHelper
