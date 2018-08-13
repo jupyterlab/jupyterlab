@@ -15,7 +15,6 @@ matrix:
   - env: GROUP=integrity
   - env: GROUP=python
   - env: GROUP=js_services
-  - env: GROUP=python
   - env: GROUP=js_cov
   - env: GROUP=cli
     python: 3.5
