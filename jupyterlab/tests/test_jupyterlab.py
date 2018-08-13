@@ -13,6 +13,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch
 
+import pytest
 from notebook.notebookapp import NotebookApp
 from jupyter_core import paths
 
