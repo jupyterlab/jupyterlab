@@ -1,8 +1,6 @@
 # coding: utf-8
 """A lab app that runs a sub process for a demo or a test."""
 
-from __future__ import print_function, absolute_import
-
 from os import path as osp
 from os.path import join as pjoin
 from stat import S_IRUSR, S_IRGRP, S_IROTH
@@ -16,15 +14,11 @@ import pkg_resources
 import shutil
 import sys
 import tempfile
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch  # py2
 
 from traitlets import Unicode
-from ipython_genutils import py3compat
-from ipython_genutils.tempdir import TemporaryDirectory
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 
@@ -33,7 +27,6 @@ import jupyterlab_launcher
 
 
 HERE = osp.realpath(osp.dirname(__file__))
-PY2 = sys.version_info[0] < 3
 
 
 def _create_notebook_dir():
@@ -47,7 +40,7 @@ def _create_notebook_dir():
     with open(readonly_filepath, 'w') as fid:
         fid.write('hello from a readonly file')
 
-    os.chmod(readonly_filepath, S_IRUSR|S_IRGRP|S_IROTH)
+    os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
 
@@ -231,12 +224,9 @@ class KarmaTestApp(ProcessTestApp):
                 '"@jupyterlab/test-<package_dir_name>"' % name
             )
 
-        if PY2:
-            karma_inject_file = karma_inject_file.encode('utf-8')
-            folder = folder.encode('utf-8')
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
-        env.setdefault('KARMA_FILE_PATTERN', py3compat.unicode_to_str(pattern))
+        env.setdefault('KARMA_FILE_PATTERN', pattern)
         env.setdefault('KARMA_COVER_FOLDER', folder)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
@@ -254,4 +244,4 @@ def run_karma(base_dir):
 
 
 if __name__ == '__main__':
-    TestApp.launch_instance()
+    KarmaTestApp.launch_instance()

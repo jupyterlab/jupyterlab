@@ -8,8 +8,8 @@ matrix:
 environment:
   nodejs_version: "lts"
   matrix:
-    - PYTHON: C:\Miniconda
-      PYTHON_VERSION: 2.7
+    - PYTHON: C:\Miniconda-35
+      PYTHON_VERSION: 3.5
       NAME: javascript
 
     - PYTHON: C:\Miniconda36-x64
