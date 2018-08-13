@@ -636,21 +636,19 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a set containing IMenuExtenders,
-   * check the tracker and return the extender, if any,
-   * that holds the widget.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(
-    widget: Widget,
-    s: Set<E>
-  ): E {
-    let extender: E;
-    s.forEach(value => {
-      if (value.tracker.has(widget)) {
-        extender = value;
+  function find<T>(
+    it: Iterable<T>,
+    predicate: (value: T) => boolean
+  ): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
@@ -662,7 +660,7 @@ namespace Private {
     label: keyof E
   ): string {
     let widget = app.shell.currentWidget;
-    const extender = findExtender(widget, s);
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
@@ -683,7 +681,7 @@ namespace Private {
   ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -706,7 +704,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       return (
         !!extender &&
         !!extender[executor] &&
@@ -726,7 +724,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       // Coerce extender[toggled] to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
