@@ -5,6 +5,8 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+import { IIterator, toArray } from '@phosphor/algorithm';
+
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -110,6 +112,8 @@ type SessionProps<M> = {
     shutdownAll(): void;
     // A signal that should emit a new list of items whenever they are changed
     runningChanged: ISignal<any, M[]>;
+    // list the running models.
+    running(): IIterator<M>;
   };
   // called when the shutdown button is pressed on a particular item
   shutdown: (model: M) => void;
@@ -152,7 +156,7 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
 class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
   constructor(props: SessionProps<M>) {
     super(props);
-    this.state = { models: [] };
+    this.state = { models: toArray(props.manager.running()) };
   }
   render() {
     return (
