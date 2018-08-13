@@ -92,8 +92,8 @@
 
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 12px 0 4px 12px;
+  margin: 4px;
+  padding: 8px 12px;
   font-weight: 600;
   text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);

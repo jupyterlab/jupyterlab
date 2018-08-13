@@ -28,17 +28,6 @@
   flex: 0 0 auto;
 }
 
-.jp-extensionmanager-view header {
-  flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 12px 0 4px 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size0);
-}
-
 .jp-extensionmanager-listview {
   list-style-type: none;
   margin: 0;
@@ -60,8 +49,6 @@
 .jp-extensionmanager-search-bar {
   padding: 8px;
   background-color: var(--jp-layout-color1);
-  border-bottom: 1px solid var(--jp-border-color1);
-  box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
   flex: 0 0 auto;
 }
@@ -132,6 +119,14 @@
 .jp-extensionmanager-view header {
   display: flex;
   justify-content: space-between;
+  flex: 0 0 auto;
+  margin: 0px;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-extensionmanager-view header button.jp-extensionmanager-refresh {
