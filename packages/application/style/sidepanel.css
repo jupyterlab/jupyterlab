@@ -111,13 +111,18 @@
   transform: rotate(-90deg) translateX(-100%);
 }
 
-.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab:not(.p-mod-current) .p-TabBar-tabIcon {
+.jp-SideBar.p-TabBar.jp-mod-left
+  .p-TabBar-tab:not(.p-mod-current)
+  .p-TabBar-tabIcon {
   transform: rotate(90deg);
 }
 
-
 .jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
-  transform: rotate(90deg) translate(calc(-0.5 * var(--jp-border-width)), calc(-0.5 * var(--jp-border-width)));
+  transform: rotate(90deg)
+    translate(
+      calc(-0.5 * var(--jp-border-width)),
+      calc(-0.5 * var(--jp-border-width))
+    );
 }
 
 /* Right */
@@ -132,11 +137,11 @@
 }
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
-  transform: rotate(-90deg) translateX(calc(1.0 * var(--jp-border-width)));
+  transform: rotate(-90deg) translateX(calc(1 * var(--jp-border-width)));
 }
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
-  transform: translateY(calc(1.0 * var(--jp-border-width)));
+  transform: translateY(calc(1 * var(--jp-border-width)));
 }
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab:not(.p-mod-current) .p-TabBar-tabIcon {
@@ -165,4 +170,3 @@
 #jp-left-stack {
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
-
