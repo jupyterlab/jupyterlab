@@ -94,7 +94,7 @@ describe('docregistry/context', () => {
       it("should emit 'starting' when the file starts saving", async () => {
         let called = false;
         let checked = false;
-        context.saving.connect((sender, args) => {
+        context.saveState.connect((sender, args) => {
           if (!called) {
             expect(sender).to.equal(context);
             expect(args).to.equal('started');
@@ -113,7 +113,7 @@ describe('docregistry/context', () => {
       it("should emit 'completed' when the file ends saving", async () => {
         let called = 0;
         let checked = false;
-        context.saving.connect((sender, args) => {
+        context.saveState.connect((sender, args) => {
           if (called > 0) {
             expect(sender).to.equal(context);
             expect(args).to.equal('completed');
@@ -137,7 +137,7 @@ describe('docregistry/context', () => {
 
         let called = 0;
         let checked;
-        context.saving.connect((sender, args) => {
+        context.saveState.connect((sender, args) => {
           if (called > 0) {
             expect(sender).to.equal(context);
             checked = args;
