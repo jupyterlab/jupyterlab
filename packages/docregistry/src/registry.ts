@@ -745,9 +745,9 @@ export namespace DocumentRegistry {
     fileChanged: ISignal<this, Contents.IModel>;
 
     /**
-     * A signal emitted on the start and end of a saving operation
+     * A signal emitted on the start and end of a saving operation.
      */
-    saving: ISignal<this, SaveState>;
+    saveState: ISignal<this, SaveState>;
 
     /**
      * A signal emitted when the context is disposed.

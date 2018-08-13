@@ -96,10 +96,10 @@ export class Context<T extends DocumentRegistry.IModel>
   }
 
   /**
-   * A signal emitted on the start and end of a saving operation
+   * A signal emitted on the start and end of a saving operation.
    */
-  get saving(): ISignal<this, DocumentRegistry.SaveState> {
-    return this._fileSaving;
+  get saveState(): ISignal<this, DocumentRegistry.SaveState> {
+    return this._saveState;
   }
 
   /**
@@ -458,7 +458,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Save the document contents to disk.
    */
   private _save(): Promise<void> {
-    this._fileSaving.emit('started');
+    this._saveState.emit('started');
     let model = this._model;
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
@@ -508,13 +508,13 @@ export class Context<T extends DocumentRegistry.IModel>
       })
       .then(
         value => {
-          // Capture all sucess paths and emit completion
-          this._fileSaving.emit('completed');
+          // Capture all success paths and emit completion.
+          this._saveState.emit('completed');
           return value;
         },
         err => {
-          // Capture all error paths and emit failure
-          this._fileSaving.emit('failed');
+          // Capture all error paths and emit failure.
+          this._saveState.emit('failed');
           throw err;
         }
       )
@@ -768,7 +768,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
-  private _fileSaving = new Signal<this, DocumentRegistry.SaveState>(this);
+  private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
 }
 

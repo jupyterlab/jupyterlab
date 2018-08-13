@@ -41,11 +41,11 @@ def _create_notebook_dir():
     with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
         fid.write('hello')
 
-    readonly_filpath = osp.join(root_dir, 'src', 'readonly-temp.txt')
-    with open(readonly_filpath, 'w') as fid:
+    readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
+    with open(readonly_filepath, 'w') as fid:
         fid.write('hello from a readonly file')
 
-    os.chmod(readonly_filpath, S_IRUSR|S_IRGRP|S_IROTH)
+    os.chmod(readonly_filepath, S_IRUSR|S_IRGRP|S_IROTH)
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
 
