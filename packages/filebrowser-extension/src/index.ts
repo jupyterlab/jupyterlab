@@ -191,7 +191,8 @@ function activateBrowser(
 
   addCommands(app, factory.tracker, browser);
 
-  browser.title.label = 'Files';
+  browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
+  browser.title.caption = 'File Browser';
   shell.addToLeftArea(browser, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.

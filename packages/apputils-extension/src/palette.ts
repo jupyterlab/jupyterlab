@@ -28,6 +28,9 @@ class Palette implements ICommandPalette {
    */
   constructor(palette: CommandPalette) {
     this._palette = palette;
+    this._palette.title.iconClass = 'jp-PaletteIcon jp-SideBar-tabIcon';
+    this._palette.title.label = '';
+    this._palette.title.caption = 'Command Palette';
   }
 
   /**
@@ -80,7 +83,7 @@ export function activatePalette(app: JupyterLab): ICommandPalette {
 
   palette.inputNode.placeholder = 'SEARCH';
 
-  shell.addToLeftArea(palette);
+  shell.addToLeftArea(palette, { rank: 300 });
 
   return new Palette(palette);
 }

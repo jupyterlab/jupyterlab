@@ -79,7 +79,7 @@ export class FileBrowser extends Widget {
 
     let directoryPending = false;
     let newFolder = new ToolbarButton({
-      className: 'jp-newFolderIcon',
+      className: 'jp-NewFolderIcon',
       onClick: () => {
         if (directoryPending === true) {
           return;

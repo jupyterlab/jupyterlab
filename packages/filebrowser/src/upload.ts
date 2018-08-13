@@ -18,7 +18,7 @@ const ICON_CLASS = 'jp-FileButtons-buttonIcon';
 /**
  * The class name added to the upload button.
  */
-const MATERIAL_UPLOAD = 'jp-UploadIcon';
+const MATERIAL_UPLOAD = 'jp-FileUploadIcon';
 
 /**
  * The class name added to a material icon button.

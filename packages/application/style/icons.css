@@ -50,7 +50,7 @@
 }
 
 .jp-DirectionsRunIcon {
-  background-image: var( --jp-icon-directions-run);
+  background-image: var(--jp-icon-directions-run);
 }
 
 .jp-DownCaretIcon {
@@ -204,7 +204,7 @@
 }
 
 .jp-TabIcon {
-  background-image: var(  --jp-icon-tab);
+  background-image: var(--jp-icon-tab);
 }
 
 .jp-TerminalIcon {
