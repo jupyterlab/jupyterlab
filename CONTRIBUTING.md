@@ -329,24 +329,32 @@ We also have scripts for creating and removing packages in `packages/`,
 
 ## Testing Changes to External Packages
 
-If you want to make changes to one of JupyterLab's external packages (for example, [phosphor](https://github.com/phosphorjs/phosphor)) and test them out against your copy of JupyterLab, you can easily do so using the `link` command: 
+### Linking/Unlinking Packages to JupyterLab
 
-1. Make your changes and then build the external package
-2. Register a link to the modified external package
-    - navigate to the external package dir and run `jlpm link`
-3. Link JupyterLab to modded package
-    - navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
+If you want to make changes to one of JupyterLab's external packages (for example, [phosphor](https://github.com/phosphorjs/phosphor)) and test them out against your copy of JupyterLab, you can easily do so using the `link` command:
+
+1.  Make your changes and then build the external package
+2.  Register a link to the modified external package
+    * navigate to the external package dir and run `jlpm link`
+3.  Link JupyterLab to modded package
+    * navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
 
 You can then (re)build JupyterLab (eg `jlpm run build`) and your changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the `unlink` command:
 
-1. Unlink JupyterLab and modded package
-    - navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
-2. Reinstall original version of the external package in JupyterLab
-    - run `jlpm install --check-files`
+1.  Unlink JupyterLab and modded package
+    * navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
+2.  Reinstall original version of the external package in JupyterLab
+    * run `jlpm install --check-files`
 
 You can then (re)build JupyterLab and everything should be back to default.
+
+### Possible Linking Pitfalls
+
+If you're working on an external project with more than one package, you'll probably have to link in your copies of every package in the project, including those you made no changes to. Failing to do so may cause issues relating to duplication of shared state.
+
+Specifically, when working with phosphor, you'll probably have to link your copy of the `"@phosphor/messaging"` package (in addition to whatever packages you actually made changes to). This is due to potential duplication of objects contained in the `MessageLoop` namespace provided by the `messaging` package.
 
 ## Notes
 
