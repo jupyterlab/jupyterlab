@@ -39,23 +39,26 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: 16px;
-  border: 1px solid var(--jp-layout-color1);
+  margin-bottom: 4px;
+  /* border: 1px solid var(--jp-layout-color1); */
 }
 
 .jp-Toolbar-item.jp-Toolbar-button:focus {
-  box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
+  /* box-shadow: var(--jp-toolbar-box-shadow); */
+  /* border: 1px solid var(--jp-toolbar-border-color); */
+  background: var(--jp-layout-color2);
 }
 
 .jp-Toolbar-button:enabled:hover {
-  border: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.24);
+  /* border: 1px solid var(--jp-toolbar-border-color); */
+  /* box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.24); */
+  background: var(--jp-layout-color2);
 }
 
 .jp-Toolbar-button:enabled:active {
-  border: 1px solid var(--jp-toolbar-border-color);
+  /* border: 1px solid var(--jp-toolbar-border-color); */
   background-color: var(--jp-toolbar-active-background);
-  box-shadow: var(--jp-toolbar-box-shadow);
+  /* box-shadow: var(--jp-toolbar-box-shadow); */
 }
 
 .jp-Toolbar-button:disabled {
