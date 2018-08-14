@@ -107,10 +107,9 @@
 }
 
 .numberingIcon {
-  float: right;
+  float: left;
   padding: 0px;
-  margin: 8px;
-  margin-right: 11px;
+  margin: 4px;
 }
 
 .menu-check-div {
@@ -128,9 +127,6 @@
   padding-bottom: 7px;
   margin: 0px;
 }
-
-/* NOTE: DO NOT CHANGE SIZE OF ANY PART OF CELL TYPE MENU WITHOUT ENSURING THAT
-TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .dropdown-menu-li {
   padding: 0px;
@@ -170,7 +166,7 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
 
 .auto-numbering-button {
   width: fit-content;
-  float: right;
+  float: left;
 }
 
 .toc-code-cell-prompt {

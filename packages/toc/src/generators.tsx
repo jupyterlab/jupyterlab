@@ -286,14 +286,14 @@ function notebookItemRenderer(
         </span>
       </div>
     );
-  } else if (item.type === 'raw' && options.showRaw) {
-    jsx = (
-      <div className="toc-code-cell-div">
-        <span className={'toc-code-span'}>
-          <CodeComponent code={item.text!} theme="none" />
-        </span>
-      </div>
-    );
+    // } else if (item.type === 'raw' && options.showRaw) {
+    //   jsx = (
+    //     <div className="toc-code-cell-div">
+    //       <span className={'toc-code-span'}>
+    //         <CodeComponent code={item.text!} theme="none" />
+    //       </span>
+    //     </div>
+    //   );
   } else {
     jsx = null;
   }
@@ -438,6 +438,17 @@ export function notebookGeneratorToolbar(
               alt="Toggle Code Cells"
               title="Toggle Code Cells"
               src={require('../static/code_selected.svg')}
+              className="numberingIcon"
+            />
+          </div>
+          <div
+            className="auto-numbering-button"
+            onClick={event => this.toggleMarkdown.bind(this)}
+          >
+            <img
+              alt="Toggle Code Cells"
+              title="Toggle Code Cells"
+              src={require('../static/markdown_unselected.svg')}
               className="numberingIcon"
             />
           </div>
