@@ -68,7 +68,7 @@
     "eslint": "^4.12.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",
-    "husky": "1.0.0-rc.13 ",
+    "husky": "1.0.0-rc.13",
     "lerna": "^2.4.0",
     "lint-staged": "^7.1.0",
     "npm-run-all": "~4.1.1",
