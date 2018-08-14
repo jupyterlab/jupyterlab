@@ -250,3 +250,29 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   opacity: 0;
   overflow: hidden;
 }
+
+.eyeball-icon {
+  float: right;
+  padding: 0px;
+  margin: 0px;
+  padding-left: 7px;
+}
+
+.cm-toc-plain {
+}
+
+.cm-toc-plain-textarea {
+  font-size: 9px;
+  z-index: 0;
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0px;
+  background: var(--jp-cell-editor-background);
+  width: calc(100% - 6px);
+  overflow: hidden;
+  max-height: 81px;
+  resize: none;
+  font-family: var(--jp-code-font-family);
+  outline: none;
+  user-select: none;
+  white-space: pre;
+}

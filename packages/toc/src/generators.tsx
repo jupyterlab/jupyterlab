@@ -16,7 +16,7 @@ import { each } from '@phosphor/algorithm';
 import { TableOfContentsRegistry } from './registry';
 
 import { IHeading, TableOfContents } from './toc';
-import { CodeComponent } from './codemirror';
+import { CodeComponent, ExperimentalCodeComponent } from './codemirror';
 
 import {
   createDropdownMenu
@@ -30,7 +30,7 @@ const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
 
-interface INotebookHeading extends IHeading {
+export interface INotebookHeading extends IHeading {
   numbering?: string | null;
   type: string;
   prompt?: string;
@@ -282,7 +282,7 @@ function notebookItemRenderer(
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>
         <span className={'toc-code-span'}>
-          <CodeComponent code={item.text!} theme="jupyter" />
+          <ExperimentalCodeComponent heading={item} />
         </span>
       </div>
     );
