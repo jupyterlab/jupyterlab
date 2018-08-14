@@ -13,6 +13,8 @@ import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
 
+import { isJupyterOrg } from './query';
+
 // TODO: Replace pagination with lazy loading of lower search results
 
 /**
@@ -149,9 +151,24 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
+  let title = entry.name;
+  if (isJupyterOrg(entry.name)) {
+    flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
+    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
   return (
-    <li className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}>
-      <div className="jp-extensionmanager-entry-name">{entry.name}</div>
+    <li
+      className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
+      title={title}
+    >
+      <div className="jp-extensionmanager-entry-title">
+        <div className="jp-extensionmanager-entry-name">
+          <a href={entry.url} target="_blank">
+            {entry.name}
+          </a>
+        </div>
+        <div className="jp-extensionmanager-entry-jupyter-org" />
+      </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">
           {entry.description}
@@ -359,7 +376,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </div>
       );
     } else if (!model.query && model.installed.length) {
-      content.push(
+      elements.push(
         <header key="installed-header">
           Installed<button
             className="jp-extensionmanager-refresh"
@@ -369,7 +386,9 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           >
             &#8635;
           </button>
-        </header>,
+        </header>
+      );
+      content.push(
         <ListView
           key="installed"
           entries={model.installed}
@@ -381,8 +400,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         />
       );
     } else if (model.searchError === null) {
+      elements.push(<header key="installable-header">Search results</header>);
       content.push(
-        <header key="installable-header">Search results</header>,
         <ListView
           key="installable"
           entries={model.searchResult}

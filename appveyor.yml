@@ -8,8 +8,8 @@ matrix:
 environment:
   nodejs_version: "lts"
   matrix:
-    - PYTHON: C:\Miniconda
-      PYTHON_VERSION: 2.7
+    - PYTHON: C:\Miniconda35
+      PYTHON_VERSION: 3.5
       NAME: javascript
 
     - PYTHON: C:\Miniconda36-x64
@@ -42,6 +42,7 @@ install:
   # Ensure python and python scripts are from right version:
   - 'SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"'
   # Install our package:
+  - 'python -m pip install -U pip'
   - 'pip install --upgrade -e ".[test]"'
   - 'jupyter kernelspec list'
   - 'jlpm versions'

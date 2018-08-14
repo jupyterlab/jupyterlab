@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -13,16 +13,10 @@ import { NotebookWidgetFactory } from '@jupyterlab/notebook';
 
 import { Context } from '@jupyterlab/docregistry';
 
-import { createNotebookContext } from '../../utils';
+import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
-import {
-  createNotebookPanelFactory,
-  defaultEditorConfig,
-  rendermime,
-  mimeTypeService
-} from '../../notebook-utils';
-
-const contentFactory = createNotebookPanelFactory();
+const contentFactory = NBTestUtils.createNotebookPanelFactory();
+const rendermime = NBTestUtils.defaultRenderMime();
 
 function createFactory(): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
@@ -30,8 +24,8 @@ function createFactory(): NotebookWidgetFactory {
     fileTypes: ['notebook'],
     rendermime,
     contentFactory,
-    mimeTypeService,
-    editorConfig: defaultEditorConfig
+    mimeTypeService: NBTestUtils.mimeTypeService,
+    editorConfig: NBTestUtils.defaultEditorConfig
   });
 }
 
@@ -50,72 +44,74 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#constructor()', () => {
       it('should create a notebook widget factory', () => {
-        let factory = createFactory();
-        expect(factory).to.be.a(NotebookWidgetFactory);
+        const factory = createFactory();
+        expect(factory).to.be.an.instanceof(NotebookWidgetFactory);
       });
     });
 
     describe('#isDisposed', () => {
       it('should get whether the factory has been disposed', () => {
-        let factory = createFactory();
-        expect(factory.isDisposed).to.be(false);
+        const factory = createFactory();
+        expect(factory.isDisposed).to.equal(false);
         factory.dispose();
-        expect(factory.isDisposed).to.be(true);
+        expect(factory.isDisposed).to.equal(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the factory', () => {
-        let factory = createFactory();
+        const factory = createFactory();
         factory.dispose();
-        expect(factory.isDisposed).to.be(true);
+        expect(factory.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        let factory = createFactory();
+        const factory = createFactory();
         factory.dispose();
         factory.dispose();
-        expect(factory.isDisposed).to.be(true);
+        expect(factory.isDisposed).to.equal(true);
       });
     });
 
     describe('#editorConfig', () => {
       it('should be the editor config passed into the constructor', () => {
-        let factory = createFactory();
-        expect(factory.editorConfig).to.be(defaultEditorConfig);
+        const factory = createFactory();
+        expect(factory.editorConfig).to.equal(NBTestUtils.defaultEditorConfig);
       });
 
       it('should be settable', () => {
-        let factory = createFactory();
-        let newConfig = { ...defaultEditorConfig };
+        const factory = createFactory();
+        const newConfig = { ...NBTestUtils.defaultEditorConfig };
         factory.editorConfig = newConfig;
-        expect(factory.editorConfig).to.be(newConfig);
+        expect(factory.editorConfig).to.equal(newConfig);
       });
     });
 
     describe('#createNew()', () => {
       it('should create a new `NotebookPanel` widget', () => {
-        let factory = createFactory();
-        let panel = factory.createNew(context);
-        expect(panel).to.be.a(NotebookPanel);
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        expect(panel).to.be.an.instanceof(NotebookPanel);
       });
 
       it('should create a clone of the rendermime', () => {
-        let factory = createFactory();
-        let panel = factory.createNew(context);
-        expect(panel.rendermime).to.not.be(rendermime);
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        expect(panel.rendermime).to.not.equal(rendermime);
       });
 
       it('should pass the editor config to the notebook', () => {
-        let factory = createFactory();
-        let panel = factory.createNew(context);
-        expect(panel.content.editorConfig).to.be(defaultEditorConfig);
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        expect(panel.content.editorConfig).to.equal(
+          NBTestUtils.defaultEditorConfig
+        );
       });
 
       it('should populate the default toolbar items', () => {
-        let factory = createFactory();
-        let panel = factory.createNew(context);
-        let items = toArray(panel.toolbar.names());
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        const items = toArray(panel.toolbar.names());
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');

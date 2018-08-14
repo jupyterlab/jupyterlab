@@ -14,7 +14,7 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ISettingRegistry } from '@jupyterlab/coreutils';
+import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
@@ -160,6 +160,16 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
  */
 export default plugin;
 
+/* Widget to display the revert to checkpoint confirmation. */
+class RevertConfirmWidget extends Widget {
+  /**
+   * Construct a new revert confirmation widget.
+   */
+  constructor(checkpoint: Contents.ICheckpointModel) {
+    super({ node: Private.createRevertConfirmNode(checkpoint) });
+  }
+}
+
 /**
  * Add the file operations commands to the application's command registry.
  */
@@ -176,12 +186,26 @@ function addCommands(
     const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
-  const fileType = () => {
-    const { currentWidget } = shell;
-    if (!currentWidget) {
+
+  // fetches the doc widget associated with the most recent contextmenu event
+  const contextMenuWidget = (): Widget => {
+    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+    let pathMatch = app.contextMenuFirst('title', pathRe);
+
+    if (!pathMatch) {
+      // fall back to active doc widget if path cannot be obtained from event
+      return app.shell.currentWidget;
+    }
+
+    return docManager.findWidget(pathMatch[1]);
+  };
+
+  // operates on active widget by default
+  const fileType = (widget: Widget = shell.currentWidget) => {
+    if (!widget) {
       return 'File';
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     if (!context) {
       return '';
     }
@@ -270,7 +294,7 @@ function addCommands(
       return !!iterator.next() && !!iterator.next();
     },
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
@@ -285,9 +309,9 @@ function addCommands(
   commands.addCommand(CommandIDs.closeRightTabs, {
     label: () => `Close Tabs to Right`,
     isEnabled: () =>
-      shell.currentWidget && widgetsRightOf(shell.currentWidget).length > 0,
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
     execute: () => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       if (!widget) {
         return;
       }
@@ -365,7 +389,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.openDirect, {
-    label: () => 'Open from Path',
+    label: () => 'Open From Path...',
     caption: 'Open from path',
     isEnabled: () => true,
     execute: () => {
@@ -397,10 +421,20 @@ function addCommands(
     caption: 'Reload contents from disk',
     isEnabled,
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
-        return context.revert();
+      if (!isEnabled()) {
+        return;
       }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return showDialog({
+        title: 'Reload Notebook from Disk',
+        body: `Are you sure you want to reload
+          the notebook from the disk?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
+      }).then(result => {
+        if (result.button.accept && !context.isDisposed) {
+          return context.revert();
+        }
+      });
     }
   });
 
@@ -409,13 +443,37 @@ function addCommands(
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
-        if (context.model.readOnly) {
-          return context.revert();
-        }
-        return context.restoreCheckpoint().then(() => context.revert());
+      if (!isEnabled()) {
+        return;
       }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return context.listCheckpoints().then(checkpoints => {
+        if (checkpoints.length < 1) {
+          return;
+        }
+        const lastCheckpoint = checkpoints[checkpoints.length - 1];
+        if (!lastCheckpoint) {
+          return;
+        }
+        return showDialog({
+          title: 'Revert notebook to checkpoint',
+          body: new RevertConfirmWidget(lastCheckpoint),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: 'Revert' })
+          ]
+        }).then(result => {
+          if (context.isDisposed) {
+            return;
+          }
+          if (result.button.accept) {
+            if (context.model.readOnly) {
+              return context.revert();
+            }
+            return context.restoreCheckpoint().then(() => context.revert());
+          }
+        });
+      });
     }
   });
 
@@ -491,21 +549,21 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileType()}…`,
+    label: () => `Rename ${fileType(contextMenuWidget())}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(contextMenuWidget());
         return renameDialog(docManager, context!.path);
       }
     }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View for ${fileType()}`,
+    label: () => `New View for ${fileType(contextMenuWidget())}`,
     isEnabled,
     execute: args => {
-      const widget = shell.currentWidget;
+      const widget = contextMenuWidget();
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       if (!widget) {
@@ -537,14 +595,14 @@ function addCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: () => {
-      let context = docManager.contextForWidget(shell.currentWidget);
+      let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
 
-      // 'activate-main' is needed if this command is selected in the "open tabs" sidebar
-      commands.execute('filebrowser:activate-main');
-      commands.execute('filebrowser:navigate-main', { path: context.path });
+      // 'activate' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate', { path: context.path });
+      commands.execute('filebrowser:navigate', { path: context.path });
     }
   });
 
@@ -646,4 +704,38 @@ namespace Private {
    * A counter for unique IDs.
    */
   export let id = 0;
+
+  export function createRevertConfirmNode(
+    checkpoint: Contents.ICheckpointModel
+  ): HTMLElement {
+    let body = document.createElement('div');
+    let confirmMessage = document.createElement('p');
+    let confirmText = document.createTextNode(`Are you sure you want to revert
+      the notebook to the latest checkpoint? `);
+    let cannotUndoText = document.createElement('strong');
+    cannotUndoText.textContent = 'This cannot be undone.';
+
+    confirmMessage.appendChild(confirmText);
+    confirmMessage.appendChild(cannotUndoText);
+
+    let lastCheckpointMessage = document.createElement('p');
+    let lastCheckpointText = document.createTextNode(
+      'The checkpoint was last updated at: '
+    );
+    let lastCheckpointDate = document.createElement('p');
+    let date = new Date(checkpoint.last_modified);
+    lastCheckpointDate.style.textAlign = 'center';
+    lastCheckpointDate.textContent =
+      Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +
+      ' (' +
+      Time.formatHuman(date) +
+      ')';
+
+    lastCheckpointMessage.appendChild(lastCheckpointText);
+    lastCheckpointMessage.appendChild(lastCheckpointDate);
+
+    body.appendChild(confirmMessage);
+    body.appendChild(lastCheckpointMessage);
+    return body;
+  }
 }

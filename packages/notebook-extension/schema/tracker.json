@@ -24,7 +24,8 @@
           "type": "boolean"
         },
         "lineWrap": {
-          "type": "boolean"
+          "type": "string",
+          "enum": ["off", "on", "wordWrapColumn", "bounded"]
         },
         "matchBrackets": {
           "type": "boolean"
@@ -37,6 +38,9 @@
         },
         "tabSize": {
           "type": "number"
+        },
+        "wordWrapColumn": {
+          "type": "integer"
         }
       },
       "additionalProperties": false,
@@ -54,11 +58,12 @@
         "fontSize": null,
         "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": false,
+        "lineWrap": "off",
         "matchBrackets": true,
         "readOnly": false,
         "insertSpaces": true,
-        "tabSize": 4
+        "tabSize": 4,
+        "wordWrapColumn": 80
       }
     },
     "markdownCellConfig": {
@@ -71,11 +76,12 @@
         "fontSize": null,
         "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": true,
+        "lineWrap": "on",
         "matchBrackets": false,
         "readOnly": false,
         "insertSpaces": true,
-        "tabSize": 4
+        "tabSize": 4,
+        "wordWrapColumn": 80
       }
     },
     "rawCellConfig": {
@@ -88,11 +94,12 @@
         "fontSize": null,
         "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": true,
+        "lineWrap": "on",
         "matchBrackets": false,
         "readOnly": false,
         "insertSpaces": true,
-        "tabSize": 4
+        "tabSize": 4,
+        "wordWrapColumn": 80
       }
     }
   },

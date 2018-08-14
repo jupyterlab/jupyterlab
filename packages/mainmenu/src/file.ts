@@ -103,7 +103,7 @@ export namespace IFileMenu {
   }
 
   /**
-   * Interface for an activity that has some persistance action
+   * Interface for an activity that has some persistence action
    * before saving.
    */
   export interface IPersistAndSave<T extends Widget> extends IMenuExtender<T> {
@@ -118,7 +118,7 @@ export namespace IFileMenu {
     action: string;
 
     /**
-     * A function to perform the persistance.
+     * A function to perform the persistence.
      */
     persistAndSave: (widget: T) => Promise<void>;
   }

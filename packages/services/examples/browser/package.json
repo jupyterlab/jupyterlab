@@ -1,6 +1,6 @@
 {
   "name": "browser-example",
-  "version": "0.13.0-1",
+  "version": "0.13.2",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,7 +8,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^3.0.0-1",
+    "@jupyterlab/services": "^3.0.3",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {

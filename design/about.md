@@ -58,7 +58,7 @@ Users should be able to:
 
 * Have an **overview** of tutorial contents on "Page 1" before scrolling
 
-* Read/Take action at the end (similiar to launcher)
+* Read/Take action at the end (similar to launcher)
 
   * _UI: Clicking Action_
 

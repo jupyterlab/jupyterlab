@@ -17,7 +17,8 @@ import {
   each,
   find,
   IIterator,
-  IterableOrArrayLike
+  IterableOrArrayLike,
+  ArrayExt
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -29,9 +30,9 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
- * The duration of auto-refresh in ms.
+ * The default duration of the auto-refresh in ms
  */
-const REFRESH_DURATION = 10000;
+const DEFAULT_REFRESH_INTERVAL = 10000;
 
 /**
  * The enforced time between refreshes in ms.
@@ -86,6 +87,8 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
+    this._baseRefreshDuration =
+      options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this._onFileChanged, this);
@@ -114,6 +117,13 @@ export class FileBrowserModel implements IDisposable {
    */
   get connectionFailure(): ISignal<this, Error> {
     return this._connectionFailure;
+  }
+
+  /**
+   * The drive name that gets prepended to the path.
+   */
+  get driveName(): string {
+    return this._driveName;
   }
 
   /**
@@ -255,7 +265,7 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._refreshDuration = REFRESH_DURATION;
+        this._refreshDuration = this._baseRefreshDuration;
         this._handleContents(contents);
         this._pendingPath = null;
         if (oldValue !== newValue) {
@@ -281,7 +291,7 @@ export class FileBrowserModel implements IDisposable {
           this._connectionFailure.emit(error);
           this.cd('/');
         } else {
-          this._refreshDuration = REFRESH_DURATION * 10;
+          this._refreshDuration = this._baseRefreshDuration * 10;
           this._connectionFailure.emit(error);
         }
       });
@@ -437,6 +447,7 @@ export class FileBrowserModel implements IDisposable {
           reject(`Failed to upload "${file.name}":` + event);
       });
       await this._uploadCheckDisposed();
+
       let model: Partial<Contents.IModel> = {
         type,
         format,
@@ -448,7 +459,14 @@ export class FileBrowserModel implements IDisposable {
     };
 
     if (!chunked) {
-      return await uploadInner(file);
+      try {
+        return await uploadInner(file);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+        throw err;
+      }
     }
 
     let finalModel: Contents.IModel;
@@ -475,7 +493,16 @@ export class FileBrowserModel implements IDisposable {
       });
       upload = newUpload;
 
-      const currentModel = await uploadInner(file.slice(start, end), chunk);
+      let currentModel: Contents.IModel;
+      try {
+        currentModel = await uploadInner(file.slice(start, end), chunk);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+
+        throw err;
+      }
 
       if (lastChunk) {
         finalModel = currentModel;
@@ -618,7 +645,8 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
-  private _refreshDuration = REFRESH_DURATION;
+  private _refreshDuration: number;
+  private _baseRefreshDuration: number;
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
@@ -652,6 +680,11 @@ export namespace FileBrowserModel {
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+
+    /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
   }
 }
 

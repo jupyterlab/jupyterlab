@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -22,7 +22,7 @@ describe('@jupyterlab/mainmenu', () => {
     let commands: CommandRegistry;
     let menu: RunMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    const wodget = new Wodget();
 
     before(() => {
       commands = new CommandRegistry();
@@ -42,8 +42,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new run menu', () => {
-        expect(menu).to.be.an(RunMenu);
-        expect(menu.menu.title.label).to.be('Run');
+        expect(menu).to.be.an.instanceof(RunMenu);
+        expect(menu.menu.title.label).to.equal('Run');
       });
     });
 
@@ -67,11 +67,11 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.codeRunners.add(runner);
         delegateExecute(wodget, menu.codeRunners, 'run');
-        expect(wodget.state).to.be('run');
+        expect(wodget.state).to.equal('run');
         delegateExecute(wodget, menu.codeRunners, 'runAll');
-        expect(wodget.state).to.be('runAll');
+        expect(wodget.state).to.equal('runAll');
         delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
-        expect(wodget.state).to.be('restartAndRunAll');
+        expect(wodget.state).to.equal('restartAndRunAll');
       });
     });
   });

@@ -4,7 +4,7 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { CommandLinker } from '@jupyterlab/apputils';
 
@@ -44,24 +44,44 @@ export class JupyterLab extends Application<ApplicationShell> {
     super({ shell: new ApplicationShell() });
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
-    this._info = { ...JupyterLab.defaultInfo, ...options };
+
+    // Construct the default workspace name.
+    const defaultWorkspace = URLExt.join(
+      PageConfig.getOption('baseUrl'),
+      PageConfig.getOption('pageUrl')
+    );
+
+    // Set default workspace in page config.
+    PageConfig.setOption('defaultWorkspace', defaultWorkspace);
+
+    // Populate application info.
+    this._info = {
+      ...JupyterLab.defaultInfo,
+      ...options,
+      ...{ defaultWorkspace }
+    };
+
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
 
+    // Make workspace accessible via a getter because it is set at runtime.
+    Object.defineProperty(this._info, 'workspace', {
+      get: () => PageConfig.getOption('workspace') || ''
+    });
+
+    // Instantiate public resources.
     this.serviceManager = new ServiceManager();
+    this.commandLinker = new CommandLinker({ commands: this.commands });
+    this.docRegistry = new DocumentRegistry();
 
-    let linker = new CommandLinker({ commands: this.commands });
-    this.commandLinker = linker;
-
-    let registry = (this.docRegistry = new DocumentRegistry());
-    registry.addModelFactory(new Base64ModelFactory());
+    // Add initial model factory.
+    this.docRegistry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
-      let plugins = createRendermimePlugins(options.mimeExtensions);
-      plugins.forEach(plugin => {
+      for (let plugin of createRendermimePlugins(options.mimeExtensions)) {
         this.registerPlugin(plugin);
-      });
+      }
     }
   }
 
@@ -84,6 +104,55 @@ export class JupyterLab extends Application<ApplicationShell> {
    * A list of all errors encountered when registering plugins.
    */
   readonly registerPluginErrors: Array<Error> = [];
+
+  /**
+   * A method invoked on a document `'contextmenu'` event.
+   *
+   * #### Notes
+   * The default implementation of this method opens the application
+   * `contextMenu` at the current mouse position.
+   *
+   * If the application context menu has no matching content *or* if
+   * the shift key is pressed, the default browser context menu will
+   * be opened instead.
+   *
+   * A subclass may reimplement this method as needed.
+   */
+  protected evtContextMenu(event: MouseEvent): void {
+    if (event.shiftKey) {
+      return;
+    }
+
+    this._contextMenuEvent = event;
+    if (this.contextMenu.open(event)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
+  /**
+   * Gets the hierarchy of html nodes that was under the cursor
+   * when the most recent contextmenu event was issued
+   */
+  get contextMenuNodes(): HTMLElement[] {
+    if (!this._contextMenuEvent) {
+      return [];
+    }
+
+    // this one-liner doesn't work, but should at some point
+    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+    // return this._contextMenuEvent.composedPath() as HTMLElement[];
+
+    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    while (
+      'parentNode' in nodes[nodes.length - 1] &&
+      nodes[nodes.length - 1].parentNode &&
+      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
+    ) {
+      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
+    }
+    return nodes;
+  }
 
   /**
    * Whether the application is dirty.
@@ -128,6 +197,46 @@ export class JupyterLab extends Application<ApplicationShell> {
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;
+  }
+
+  /**
+   * Gets all of the valid, non-empty values of a given property
+   * across all of the nodes in the hierarchy returned by contextMenuNodes
+   */
+  contextMenuValues(prop: string): any[] {
+    let vals: any[] = [];
+    for (let node of this.contextMenuNodes as any[]) {
+      if (prop in node && node[prop]) {
+        vals.push(node[prop]);
+      }
+    }
+    return vals;
+  }
+
+  /**
+   * Gets the first valid, non-empty value of a property
+   * in the node hierarchy returned by contextMenuNodes.
+   * Optionally, gets the first value that matches a passed-in RegExp
+   */
+  contextMenuFirst(prop: string, regexp: RegExp | null = null): any | null {
+    if (regexp) {
+      for (let node of this.contextMenuNodes as any[]) {
+        if (prop in node && node[prop]) {
+          let match = node[prop].match(regexp);
+          if (match) {
+            return match;
+          }
+        }
+      }
+    } else {
+      for (let node of this.contextMenuNodes as any[]) {
+        if (prop in node && node[prop]) {
+          return node[prop];
+        }
+      }
+    }
+
+    return;
   }
 
   /**
@@ -204,6 +313,7 @@ export class JupyterLab extends Application<ApplicationShell> {
     });
   }
 
+  private _contextMenuEvent: MouseEvent;
   private _info: JupyterLab.IInfo;
   private _dirtyCount = 0;
   private _busyCount = 0;
@@ -263,10 +373,13 @@ export namespace JupyterLab {
      * The urls used by the application.
      */
     readonly urls: {
+      readonly base: string;
       readonly page: string;
       readonly public: string;
       readonly settings: string;
       readonly themes: string;
+      readonly tree: string;
+      readonly workspaces: string;
     };
 
     /**
@@ -280,12 +393,23 @@ export namespace JupyterLab {
       readonly themes: string;
       readonly userSettings: string;
       readonly serverRoot: string;
+      readonly workspaces: string;
     };
 
     /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
+
+    /**
+     * The name of the current workspace.
+     */
+    readonly workspace: string;
+
+    /**
+     * The name of the default workspace.
+     */
+    readonly defaultWorkspace: string;
   }
 
   /**
@@ -300,10 +424,13 @@ export namespace JupyterLab {
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
     urls: {
+      base: PageConfig.getOption('baseUrl'),
       page: PageConfig.getOption('pageUrl'),
       public: PageConfig.getOption('publicUrl'),
       settings: PageConfig.getOption('settingsUrl'),
-      themes: PageConfig.getOption('themesUrl')
+      themes: PageConfig.getOption('themesUrl'),
+      tree: PageConfig.getOption('treeUrl'),
+      workspaces: PageConfig.getOption('workspacesUrl')
     },
     directories: {
       appSettings: PageConfig.getOption('appSettingsDir'),
@@ -312,9 +439,12 @@ export namespace JupyterLab {
       templates: PageConfig.getOption('templatesDir'),
       themes: PageConfig.getOption('themesDir'),
       userSettings: PageConfig.getOption('userSettingsDir'),
-      serverRoot: PageConfig.getOption('serverRoot')
+      serverRoot: PageConfig.getOption('serverRoot'),
+      workspaces: PageConfig.getOption('workspacesDir')
     },
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
+    workspace: '',
+    defaultWorkspace: ''
   };
 
   /**

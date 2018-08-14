@@ -9,15 +9,15 @@ IF "%NAME%"=="python" (
     if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run integrity
     if !errorlevel! neq 0 exit /b !errorlevel!
-    python -m jupyterlab.selenium_check --core-mode
+    python -m jupyterlab.browser_check --core-mode
     if !errorlevel! neq 0 exit /b !errorlevel!
-    python -m jupyterlab.selenium_check --dev-mode
+    python -m jupyterlab.browser_check --dev-mode
     if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run build
     if !errorlevel! neq 0 exit /b !errorlevel!
     jupyter lab build
     if !errorlevel! neq 0 exit /b !errorlevel!
-    python -m jupyterlab.selenium_check
+    python -m jupyterlab.browser_check
 
 ) ELSE (
     jlpm run build:packages

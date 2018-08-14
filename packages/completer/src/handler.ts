@@ -310,7 +310,7 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Handle a visiblity change signal from a completer widget.
+   * Handle a visibility change signal from a completer widget.
    */
   protected onVisibilityChanged(completer: Completer): void {
     // Completer is not active.
@@ -485,7 +485,7 @@ export namespace CompletionHandler {
     /**
      * A list of matching completion strings.
      */
-    matches: string[];
+    matches: ReadonlyArray<string>;
 
     /**
      * Any metadata that accompanies the completion reply.

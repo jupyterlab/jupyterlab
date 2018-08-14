@@ -26,6 +26,13 @@ export namespace URLExt {
   }
 
   /**
+   * Normalize a url.
+   */
+  export function normalize(url: string): string {
+    return url && parse(url).toString();
+  }
+
+  /**
    * Join a sequence of url components and normalizes as in node `path.join`.
    *
    * @param parts - The url components.
@@ -33,24 +40,36 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    // Adapted from url-join.
-    // Copyright (c) 2016 José F. Romaniello, MIT License.
-    // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
-    let str = [].slice.call(parts, 0).join('/');
+    parts = parts || [];
 
-    // make sure protocol is followed by two slashes
-    str = str.replace(/:\//g, '://');
+    // Isolate the top element.
+    const top = parts[0] || '';
 
-    // remove consecutive slashes
-    str = str.replace(/([^:\s])\/+/g, '$1/');
+    // Check whether protocol shorthand is being used.
+    const shorthand = top.indexOf('//') === 0;
 
-    // remove trailing slash before parameters or hash
-    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+    // Parse the top element into a header collection.
+    const header = top.match(/(\w+)(:)(\/\/)?/);
+    const protocol = header && header[1];
+    const colon = protocol && header[2];
+    const slashes = colon && header[3];
 
-    // replace ? in parameters with &
-    str = str.replace(/(\?.+)\?/g, '$1&');
+    // Construct the URL prefix.
+    const prefix = shorthand
+      ? '//'
+      : [protocol, colon, slashes].filter(str => str).join('');
 
-    return str;
+    // Construct the URL body omitting the prefix of the top value.
+    const body = [top.indexOf(prefix) === 0 ? top.replace(prefix, '') : top]
+      // Filter out top value if empty.
+      .filter(str => str)
+      // Remove leading slashes in all subsequent URL body elements.
+      .concat(parts.slice(1).map(str => str.replace(/^\//, '')))
+      .join('/')
+      // Replace multiple slashes with one.
+      .replace(/\/+/g, '/');
+
+    return prefix + body;
   }
 
   /**

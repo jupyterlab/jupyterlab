@@ -35,10 +35,12 @@ The command below ensures the latest dependencies and built files,
 then prompts you to select package versions. When one package has an
 effective major release, the packages that depend on it should also get a
 major release, to prevent consumers that are using the `^` semver
-requirement from getting a conflict.
+requirement from getting a conflict. Note that we publish the
+JavaScript packages using the `next` tag until we are ready for the
+final release.
 
 ```bash
-jlpm run publish
+jlpm run prerelease
 ```
 
 ### Publish the Python package
@@ -54,33 +56,37 @@ jlpm run build:update
 * Create the Python release artifacts:
 
 ```bash
-rm -rf dist
+rm -rf dist build
 python setup.py sdist
 python setup.py bdist_wheel --universal
 twine upload dist/*
 ```
 
-* Test the `rc` in a clean environment
-* Make sure the CI builds pass
+### Post prerelease checklist
+
+* [ ] Test the `rc` in a clean environment
+* [ ] Make sure the CI builds pass
   * The build will fail if we publish a new package because by default it is
     private. Use `npm access public @jupyterlab/<name>` to make it public.
   * The build will fail if we forget to include `style/` in the `files:`
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
-* Update the other repos listed below
-* Update the extension examples listed below
-* Update the xkcd tutorial
-* Update `jupyterlab/_version.py` with a final version
-* Make another Python release
-* Create a branch for the release and push to GitHub
-* Merge the PRs on the other repos and set the default branch of the
-  xckd repo
-* Publish to conda-forge (see below)
-* Update `jupyterlab/_version.py` with a `dev` version
-* Run `jlpm integrity` to update the `dev_mode` version
-* Commit and push the version update to master
-* Release the other repos as appropriate
-* Update version for binder (see below)
+* [ ] Update the other repos listed below
+* [ ] Add a tag to `extension-cookiecutter-ts` with the new JupyterLab version
+* [ ] Update the extension examples listed below
+* [ ] Update the xkcd tutorial
+* [ ] Update `jupyterlab/_version.py` with a final version
+* [ ] Make another Python release
+* [ ] Publish the final JavaScript packages using `jlpm run publish`
+* [ ] Create a branch for the release and push to GitHub
+* [ ] Merge the PRs on the other repos and set the default branch of the
+      xckd repo
+* [ ] Publish to conda-forge (see below)
+* [ ] Update `jupyterlab/_version.py` with a `dev` version
+* [ ] Run `jlpm integrity` to update the `dev_mode` version
+* [ ] Commit and push the version update to master
+* [ ] Release the other repos as appropriate
+* [ ] Update version for binder (see below)
 
 ### Other repos to update
 
@@ -163,11 +169,11 @@ shasum -a 256 dist/*.tar.gz
 * Create a PR with the version bump
 * Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
 
-## Making a patch release of a JavaScript package
+## Making a patch release JavaScript package(s)
 
 * Backport the change to the previous release branch
 * Make a new PR against the previous branch
-* Run the following script, where the package is in `/packages/package-folder-name`:
+* Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given):
 
 ```bash
 jlpm run patch:release package-folder-name

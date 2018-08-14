@@ -138,7 +138,8 @@ export function createRendermimePlugin(
           name: option.name,
           primaryFileType: registry.getFileType(option.primaryFileType),
           fileTypes: option.fileTypes,
-          defaultFor: option.defaultFor
+          defaultFor: option.defaultFor,
+          defaultRendered: option.defaultRendered
         });
         registry.addWidgetFactory(factory);
 

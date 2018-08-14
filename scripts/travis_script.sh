@@ -65,17 +65,14 @@ if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity
 
-    # Lint our JavaScript files.
-    ./node_modules/.bin/eslint .
+    # Lint our files.
+    jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 
     # Build the packages individually.
     jlpm run build:src
 
     # Make sure the examples build
     jlpm run build:examples
-
-    # Run a tslint check
-    ./node_modules/.bin/tslint -c tslint.json -e '**/*.d.ts' -e 'node_modules/**/*.ts' -e 'jupyterlab/**/*.ts' '**/*.ts'
 
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
@@ -84,21 +81,24 @@ if [[ $GROUP == integrity ]]; then
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
     # Make sure we can successfully load the dev app.
-    python -m jupyterlab.selenium_check --dev-mode
+    python -m jupyterlab.browser_check --dev-mode
 
     # Make sure core mode works
     jlpm run build:core
-    python -m jupyterlab.selenium_check --core-mode
+    python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
     jupyter labextension install ./jupyterlab/tests/mock_packages/extension
-    python -m jupyterlab.selenium_check
+    python -m jupyterlab.browser_check
     jupyter labextension list
+
+    # Make sure the deprecated `selenium_check` command still works
+    python -m jupyterlab.selenium_check
 
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
-    ./test_install/bin/python -m jupyterlab.selenium_check
+    ./test_install/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
     ./test_install/bin/jupyter lab build
 
@@ -161,14 +161,14 @@ if [[ $GROUP == cli ]]; then
     jlpm run get:dependency react-native
 
     # Test theme creation - make sure we can add it as a package, build,
-    # and run selenium
+    # and run browser
     pip install -q pexpect
     python scripts/create_theme.py
     mv foo packages
     jlpm run integrity || exit 0
     jlpm run build:packages
     jlpm run build:dev
-    python -m jupyterlab.selenium_check --dev-mode
+    python -m jupyterlab.browser_check --dev-mode
     rm -rf packages/foo
     jlpm run integrity || exit 0
 fi

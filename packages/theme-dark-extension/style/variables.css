@@ -28,7 +28,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Elevation
    *
    * We style box-shadows using Material Design's idea of elevation. These particular numbers are taken from here:
-   * 
+   *
    * https://github.com/material-components/material-components-web
    * https://material-components-web.appspot.com/elevation.html
    */
@@ -173,16 +173,17 @@ all of MD as it is not optimized for dense, information rich UIs.
     Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol';
 
-  /* 
+  /*
    * Code Fonts
-   * 
+   *
    * Code font variables are used for typography of code and other monospaces content.
    */
 
   --jp-code-font-size: 13px;
   --jp-code-line-height: 1.3077; /* 17px for 13px base */
   --jp-code-padding: 0.385em; /* 5px for 13px base */
-  --jp-code-font-family: 'Source Code Pro', monospace;
+  --jp-code-font-family-default: Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  --jp-code-font-family: var(--jp-code-font-family-default);
 
   /* This gives a magnification of about 125% in presentation mode over normal. */
   --jp-code-presentation-font-size: 16px;
@@ -247,14 +248,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-editor-active-background: var(--jp-layout-color0);
   --jp-cell-editor-active-border-color: var(--jp-brand-color1);
 
-  --jp-cell-prompt-width: 90px;
+  --jp-cell-prompt-width: 64px;
   --jp-cell-prompt-font-family: 'Source Code Pro', monospace;
   --jp-cell-prompt-letter-spacing: 0px;
   --jp-cell-prompt-opacity: 1;
-  --jp-cell-prompt-not-active-opacity: 0.5;
+  --jp-cell-prompt-not-active-opacity: 1;
   --jp-cell-prompt-not-active-font-color: var(--md-grey-300);
-  --jp-cell-inprompt-font-color: var(--md-grey-50);
-  --jp-cell-outprompt-font-color: var(--md-grey-50);
+
+  /* A custom blend of MD grey and blue 600
+   * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
+  --jp-cell-inprompt-font-color: #307fc1;
+  /* A custom blend of MD grey and orange 600
+   * https://meyerweb.com/eric/tools/color-blend/#546E7A:F4511E:5:hex */
+  --jp-cell-outprompt-font-color: #bf5b3d;
 
   /* Notebook specific styles */
 

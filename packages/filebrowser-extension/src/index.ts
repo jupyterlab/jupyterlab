@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ApplicationShell,
   ILayoutRestorer,
   JupyterLab,
   JupyterLabPlugin
@@ -42,6 +43,8 @@ import { Menu } from '@phosphor/widgets';
 namespace CommandIDs {
   export const copy = 'filebrowser:copy';
 
+  export const copyDownloadLink = 'filebrowser:copy-download-link';
+
   // For main browser only.
   export const createLauncher = 'filebrowser:create-main-launcher';
 
@@ -56,8 +59,7 @@ namespace CommandIDs {
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
-  // For main browser only.
-  export const navigate = 'filebrowser:navigate-main';
+  export const navigate = 'filebrowser:navigate';
 
   export const open = 'filebrowser:open';
 
@@ -73,8 +75,7 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  // For main browser only.
-  export const showBrowser = 'filebrowser:activate-main';
+  export const showBrowser = 'filebrowser:activate';
 
   export const shutdown = 'filebrowser:shutdown';
 
@@ -224,6 +225,26 @@ function addCommands(
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser
 ): void {
+  const getBrowserForPath = (path: string): FileBrowser => {
+    const driveName = app.serviceManager.contents.driveName(path);
+
+    if (driveName) {
+      let browserForPath = tracker.find(fb => fb.model.driveName === driveName);
+
+      if (!browserForPath) {
+        // warn that no filebrowser could be found for this driveName
+        console.warn(
+          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+        );
+        return;
+      }
+
+      return browserForPath;
+    }
+
+    // if driveName is empty, assume the main filebrowser
+    return browser;
+  };
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -299,8 +320,9 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
+      const browserForPath = getBrowserForPath(path);
       const services = app.serviceManager;
-      const open = 'docmanager:open';
+      const localPath = services.contents.localPath(path);
       const failure = (reason: any) => {
         console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
       };
@@ -308,16 +330,16 @@ function addCommands(
       return services.ready
         .then(() => services.contents.get(path))
         .then(value => {
-          const { model } = browser;
+          const { model } = browserForPath;
           const { restored } = model;
 
           if (value.type === 'directory') {
-            return restored.then(() => model.cd(`/${path}`));
+            return restored.then(() => model.cd(`/${localPath}`));
           }
 
           return restored
-            .then(() => model.cd(`/${PathExt.dirname(path)}`))
-            .then(() => commands.execute(open, { path }));
+            .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
+            .then(() => commands.execute('docmanager:open', { path: path }));
         })
         .catch(failure);
     }
@@ -335,7 +357,7 @@ function addCommands(
         toArray(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
-              return widget.model.cd(item.path);
+              return widget.model.cd(item.name);
             }
 
             return commands.execute('docmanager:open', { path: item.path });
@@ -368,6 +390,24 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-AddIcon',
     label: 'Open in New Browser Tab',
+    mnemonic: 0
+  });
+
+  commands.addCommand(CommandIDs.copyDownloadLink, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return browser.model.manager.services.contents
+        .getDownloadUrl(browser.selectedItems().next().path)
+        .then(url => {
+          Clipboard.copyToSystem(url);
+        });
+    },
+    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    label: 'Copy Download Link',
     mnemonic: 0
   });
 
@@ -418,14 +458,38 @@ function addCommands(
 
       Clipboard.copyToSystem(item.path);
     },
-    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    isVisible: () => browser.selectedItems().next !== undefined,
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     label: 'Copy Path'
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => {
-      app.shell.activateById(browser.id);
+    execute: args => {
+      const path = (args.path as string) || '';
+      const browserForPath = getBrowserForPath(path);
+
+      // Check for browser not found
+      if (!browserForPath) {
+        return;
+      }
+      // Shortcut if we are using the main file browser
+      if (browser === browserForPath) {
+        app.shell.activateById(browser.id);
+        return;
+      } else {
+        const areas: ApplicationShell.Area[] = ['left', 'right'];
+        for (let area of areas) {
+          const it = app.shell.widgets(area);
+          let widget = it.next();
+          while (widget) {
+            if (widget.contains(browserForPath)) {
+              app.shell.activateById(widget.id);
+              return;
+            }
+            widget = it.next();
+          }
+        }
+      }
     }
   });
 
@@ -513,6 +577,7 @@ function createContextMenu(
 
   menu.addItem({ command: CommandIDs.share });
   menu.addItem({ command: CommandIDs.copyPath });
+  menu.addItem({ command: CommandIDs.copyDownloadLink });
 
   return menu;
 }

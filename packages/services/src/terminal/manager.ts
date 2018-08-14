@@ -58,7 +58,7 @@ export class TerminalManager implements TerminalSession.IManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Test whether the manger is ready.
+   * Test whether the manager is ready.
    */
   get isReady(): boolean {
     return this._isReady;

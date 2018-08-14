@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { TerminalSession } from '@jupyterlab/services';
 
@@ -10,6 +10,8 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 
 import { Terminal } from '@jupyterlab/terminal';
+
+import { framePromise } from '@jupyterlab/testutils';
 
 class LogTerminal extends Terminal {
   methods: string[] = [];
@@ -50,20 +52,14 @@ describe('terminal/index', () => {
     let widget: LogTerminal;
     let session: TerminalSession.ISession;
 
-    before(done => {
-      TerminalSession.startNew()
-        .then(s => {
-          session = s;
-        })
-        .then(done, done);
+    before(async () => {
+      session = await TerminalSession.startNew();
     });
 
-    beforeEach(done => {
+    beforeEach(() => {
       widget = new LogTerminal();
       Widget.attach(widget, document.body);
-      requestAnimationFrame(() => {
-        done();
-      });
+      return framePromise();
     });
 
     afterEach(() => {
@@ -72,66 +68,61 @@ describe('terminal/index', () => {
 
     describe('#constructor()', () => {
       it('should create a terminal widget', () => {
-        expect(widget).to.be.a(Terminal);
+        expect(widget).to.be.an.instanceof(Terminal);
       });
     });
 
     describe('#session', () => {
       it('should be `null` by default', () => {
-        expect(widget.session).to.be(null);
+        expect(widget.session).to.be.null;
       });
 
-      it('should set the title when ready', function(done) {
+      it('should set the title when ready', async () => {
         widget.session = session;
-        expect(widget.session).to.be(session);
-        session.ready
-          .then(() => {
-            expect(widget.title.label).to.contain(session.name);
-          })
-          .then(done, done);
+        expect(widget.session).to.equal(session);
+        await session.ready;
+        expect(widget.title.label).to.contain(session.name);
       });
     });
 
     describe('#fontSize', () => {
       it('should be 13 by default', () => {
-        expect(widget.fontSize).to.be(13);
+        expect(widget.fontSize).to.equal(13);
       });
 
-      it('should trigger an update request', done => {
+      it('should trigger an update request', async () => {
         widget.fontSize = 14;
-        expect(widget.fontSize).to.be(14);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        expect(widget.fontSize).to.equal(14);
+        await framePromise();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
     });
 
     describe('#theme', () => {
       it('should be dark by default', () => {
-        expect(widget.theme).to.be('dark');
+        expect(widget.theme).to.equal('dark');
       });
 
       it('should be light if we change it', () => {
         widget.theme = 'light';
-        expect(widget.theme).to.be('light');
+        expect(widget.theme).to.equal('light');
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
-        expect(widget.isDisposed).to.be(false);
+        expect(widget.isDisposed).to.equal(false);
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
         widget.dispose();
-        expect(widget.isDisposed).to.be(true);
+        expect(widget.isDisposed).to.equal(true);
       });
     });
 
     describe('#refresh()', () => {
-      it('should refresh the widget', done => {
+      it('should refresh the widget', () => {
         widget.session = session;
-        widget.refresh().then(done, done);
+        return widget.refresh();
       });
     });
 
@@ -143,43 +134,36 @@ describe('terminal/index', () => {
     });
 
     describe('#onAfterAttach()', () => {
-      it('should post an update request', done => {
+      it('should post an update request', async () => {
         widget.session = session;
         Widget.detach(widget);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await framePromise();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
     });
 
     describe('#onAfterShow()', () => {
-      it('should post an update request', done => {
+      it('should post an update request', async () => {
         widget.session = session;
         widget.hide();
         Widget.detach(widget);
         Widget.attach(widget, document.body);
-        requestAnimationFrame(() => {
-          widget.methods = [];
-          widget.show();
-          requestAnimationFrame(() => {
-            expect(widget.methods).to.contain('onUpdateRequest');
-            done();
-          });
-        });
+        await framePromise();
+        widget.methods = [];
+        widget.show();
+        await framePromise();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
     });
 
     describe('#onResize()', () => {
-      it('should trigger an update request', done => {
-        let msg = Widget.ResizeMessage.UnknownSize;
+      it('should trigger an update request', async () => {
+        const msg = Widget.ResizeMessage.UnknownSize;
         MessageLoop.sendMessage(widget, msg);
         expect(widget.methods).to.contain('onResize');
-        requestAnimationFrame(() => {
-          expect(widget.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await framePromise();
+        expect(widget.methods).to.contain('onUpdateRequest');
       });
     });
 
@@ -189,8 +173,8 @@ describe('terminal/index', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
-        let style = window.getComputedStyle(widget.node);
-        expect(style.backgroundColor).to.be('rgb(0, 0, 0)');
+        const style = window.getComputedStyle(widget.node);
+        expect(style.backgroundColor).to.equal('rgb(0, 0, 0)');
       });
     });
 
@@ -205,10 +189,10 @@ describe('terminal/index', () => {
       it('should focus the terminal element', () => {
         Widget.detach(widget);
         Widget.attach(widget, document.body);
-        expect(widget.node.contains(document.activeElement)).to.be(false);
+        expect(widget.node.contains(document.activeElement)).to.equal(false);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        expect(widget.node.contains(document.activeElement)).to.be(true);
+        expect(widget.node.contains(document.activeElement)).to.equal(true);
       });
     });
   });

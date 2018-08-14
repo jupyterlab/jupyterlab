@@ -3,8 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-from __future__ import print_function
-
 import contextlib
 from distutils.version import LooseVersion
 import errno
@@ -19,23 +17,17 @@ import shutil
 import site
 import sys
 import tarfile
+from tempfile import TemporaryDirectory
 from threading import Event
+from urllib.request import Request, urlopen, urljoin, quote
+from urllib.error import URLError
 
-from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_core.paths import jupyter_config_path
 from jupyterlab_launcher.process import which, Process, WatchHelper
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE
-
-if sys.version_info.major < 3:
-    from urllib2 import Request, urlopen, quote
-    from urllib2 import URLError, HTTPError
-    from urlparse import urljoin
-else:
-    from urllib.request import Request, urlopen, urljoin, quote
-    from urllib.error import URLError, HTTPError
 
 
 # The regex for expecting the webpack output.
@@ -1069,8 +1061,16 @@ class _AppHandler(object):
             name = data['name']
             jlab = data.get('jupyterlab', dict())
             path = osp.realpath(target)
+            # homepage, repository  are optional
+            if 'homepage' in data:
+                url = data['homepage']
+            elif 'repository' in data:
+                url = data['repository'].get('url', '')
+            else:
+                url = ''
             extensions[name] = dict(path=path,
                                     filename=osp.basename(path),
+                                    url=url,
                                     version=data['version'],
                                     jupyterlab=jlab,
                                     dependencies=deps,
@@ -1726,7 +1726,7 @@ def _semver_prerelease_key(prerelease):
 
 
 def _semver_key(version, prerelease_first=False):
-    """A sort key-function for sorting semver verion string.
+    """A sort key-function for sorting semver version string.
 
     The default sorting order is ascending (0.x -> 1.x -> 2.x).
 
@@ -1769,7 +1769,7 @@ def _fetch_package_metadata(registry, name, logger):
         logger.debug('Fetching URL: %s' % (req.get_full_url()))
     try:
         with contextlib.closing(urlopen(req)) as response:
-            return json.load(response)
+            return json.loads(response.read().decode('utf-8'))
     except URLError as exc:
         logger.warning(
             'Failed to fetch package metadata for %r: %r',

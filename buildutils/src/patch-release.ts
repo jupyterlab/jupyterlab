@@ -14,33 +14,40 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-// Extract the desired package target.
-let target = process.argv[2];
-
-let packagePath = path.resolve(path.join('packages', target));
-
-if (!fs.existsSync(packagePath)) {
-  console.log('Invalid package path', packagePath);
-  process.exit(1);
-}
-
-// Perform the patch operations.
-console.log('Patching', target, '...');
 // Use npm here so this file can be used outside of JupyterLab.
 utils.run('npm run build:packages');
-utils.run('npm version patch', { cwd: packagePath });
-utils.run('npm publish', { cwd: packagePath });
+utils.run('npm run build:themes');
+
+// Extract the desired package target(s).
+process.argv.slice(2).forEach(target => {
+  let packagePath = path.resolve(path.join('packages', target));
+
+  if (!fs.existsSync(packagePath)) {
+    console.log('Invalid package path', packagePath);
+    process.exit(1);
+  }
+
+  // Perform the patch operations.
+  console.log('Patching', target, '...');
+
+  utils.run('npm version patch', { cwd: packagePath });
+  utils.run('npm publish', { cwd: packagePath });
+
+  // Extract the new package info.
+  let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
+  let name = data.name;
+  let version = data.version;
+
+  // Make the release commit
+  utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
+  utils.run('git tag ' + name + '@' + version);
+});
 
 // Update the static folder.
 utils.run('npm run build:update');
 
-// Extract the new package info.
-let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
-let name = data.name;
-let version = data.version;
-
+// Integrity update
 utils.run('npm run integrity');
-utils.run('git commit -a -m "Release ' + name + '@' + version + '"');
-utils.run('git tag ' + name + '@' + version);
+utils.run('git commit -a -m "Integrity update"');
 
-console.log('\n\nFinished, make sure to push the commit and the tag.');
+console.log('\n\nFinished, make sure to push the commit(s) and tag(s).');

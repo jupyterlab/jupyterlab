@@ -17,7 +17,7 @@ import {
 
 import { reportInstallError } from './dialog';
 
-import { Searcher, ISearchResult } from './query';
+import { Searcher, ISearchResult, isJupyterOrg } from './query';
 
 /**
  * Information about an extension.
@@ -32,6 +32,11 @@ export interface IEntry {
    * A short description of the extension.
    */
   description: string;
+
+  /**
+   * A representative link of the package.
+   */
+  url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -72,6 +77,11 @@ export interface IInstalledEntry {
    * A short description of the extension.
    */
   description: string;
+
+  /**
+   * A representative link of the package.
+   */
+  url: string;
 
   /**
    * Whether the extension is currently installed.
@@ -163,7 +173,8 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Translate search results from an npm repository query into entries.
+   * Translate search results from an npm repository query into entries
+   * and remove entries with 'deprecated' in the keyword list
    *
    * @param res Promise to an npm query result.
    */
@@ -173,9 +184,16 @@ export class ListModel extends VDomModel {
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
+      if (pkg.keywords.indexOf('deprecated') >= 0) {
+        continue;
+      }
       entries[pkg.name] = {
         name: pkg.name,
         description: pkg.description,
+        url:
+          'homepage' in pkg.links
+            ? pkg.links.homepage
+            : 'repository' in pkg.links ? pkg.links.repository : pkg.links.npm,
         installed: false,
         enabled: false,
         status: null,
@@ -202,6 +220,7 @@ export class ListModel extends VDomModel {
           entries[pkg.name] = {
             name: pkg.name,
             description: pkg.description,
+            url: pkg.url,
             installed: pkg.installed !== false,
             enabled: pkg.enabled,
             status: pkg.status,
@@ -320,7 +339,7 @@ export class ListModel extends VDomModel {
    *
    * This will query the NPM repository, and the notebook server.
    *
-   * Emits the `stateChanged` signal on succesfull completion.
+   * Emits the `stateChanged` signal on successful completion.
    */
   protected async update(refreshInstalled = false) {
     let search = this.searcher.searchExtensions(
@@ -344,7 +363,7 @@ export class ListModel extends VDomModel {
     for (let key of Object.keys(installedMap)) {
       installed.push(installedMap[key]);
     }
-    this._installed = installed;
+    this._installed = installed.sort(Private.comparator);
 
     let searchResult: IEntry[] = [];
     for (let key of Object.keys(searchMap)) {
@@ -354,7 +373,7 @@ export class ListModel extends VDomModel {
         searchResult.push(installedMap[key]);
       }
     }
-    this._searchResult = searchResult;
+    this._searchResult = searchResult.sort(Private.comparator);
     try {
       this._totalEntries = (await search).total;
     } catch (error) {
@@ -678,4 +697,29 @@ function handleError(response: Response): Response {
     throw new Error(`${response.status} (${response.statusText})`);
   }
   return response;
+}
+
+/**
+ * A namespace for private functionality.
+ */
+namespace Private {
+  /**
+   * A comparator function that sorts whitelisted orgs to the top.
+   */
+  export function comparator(a: IEntry, b: IEntry): number {
+    if (a.name === b.name) {
+      return 0;
+    }
+
+    let testA = isJupyterOrg(a.name);
+    let testB = isJupyterOrg(b.name);
+
+    if (testA === testB) {
+      return a.name.localeCompare(b.name);
+    } else if (testA && !testB) {
+      return -1;
+    } else {
+      return 1;
+    }
+  }
 }

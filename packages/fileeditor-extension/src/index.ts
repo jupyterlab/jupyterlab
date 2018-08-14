@@ -59,6 +59,8 @@ const FACTORY = 'Editor';
 namespace CommandIDs {
   export const createNew = 'fileeditor:create-new';
 
+  export const changeFontSize = 'fileeditor:change-font-size';
+
   export const lineNumbers = 'fileeditor:toggle-line-numbers';
 
   export const lineWrap = 'fileeditor:toggle-line-wrap';
@@ -117,7 +119,11 @@ function activate(
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
-    factoryOptions: { name: FACTORY, fileTypes: ['*'], defaultFor: ['*'] }
+    factoryOptions: {
+      name: FACTORY,
+      fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
+      defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
+    }
   });
   const { commands, restored } = app;
   const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
@@ -205,6 +211,33 @@ function activate(
     updateWidget(widget.content);
   });
 
+  // Add a command to change font size.
+  commands.addCommand(CommandIDs.changeFontSize, {
+    execute: args => {
+      const delta = Number(args['delta']);
+      if (Number.isNaN(delta)) {
+        console.error(
+          `${CommandIDs.changeFontSize}: delta arg must be a number`
+        );
+        return;
+      }
+      const style = window.getComputedStyle(document.documentElement);
+      const cssSize = parseInt(
+        style.getPropertyValue('--jp-code-font-size'),
+        10
+      );
+      const currentSize = config.fontSize || cssSize;
+      config.fontSize = currentSize + delta;
+      return settingRegistry
+        .set(id, 'editorConfig', config)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    isEnabled,
+    label: args => args['name'] as string
+  });
+
   commands.addCommand(CommandIDs.lineNumbers, {
     execute: () => {
       config.lineNumbers = !config.lineNumbers;
@@ -219,9 +252,12 @@ function activate(
     label: 'Line Numbers'
   });
 
+  type wrappingMode = 'on' | 'off' | 'wordWrapColumn' | 'bounded';
+
   commands.addCommand(CommandIDs.lineWrap, {
-    execute: () => {
-      config.lineWrap = !config.lineWrap;
+    execute: args => {
+      const lineWrap = (args['mode'] as wrappingMode) || 'off';
+      config.lineWrap = lineWrap;
       return settingRegistry
         .set(id, 'editorConfig', config)
         .catch((reason: Error) => {
@@ -229,7 +265,10 @@ function activate(
         });
     },
     isEnabled,
-    isToggled: () => config.lineWrap,
+    isToggled: args => {
+      const lineWrap = (args['mode'] as wrappingMode) || 'off';
+      return config.lineWrap === lineWrap;
+    },
     label: 'Word Wrap'
   });
 
@@ -432,6 +471,14 @@ function activate(
       };
       palette.addItem({ command, args, category: 'Text Editor' });
     }
+
+    args = { name: 'Increase Font Size', delta: 1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category: 'Text Editor' });
+
+    args = { name: 'Decrease Font Size', delta: -1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category: 'Text Editor' });
   }
 
   if (menu) {
@@ -454,8 +501,17 @@ function activate(
       };
       tabMenu.addItem({ command, args });
     }
+
     menu.settingsMenu.addGroup(
       [
+        {
+          command: CommandIDs.changeFontSize,
+          args: { name: 'Increase Text Editor Font Size', delta: +1 }
+        },
+        {
+          command: CommandIDs.changeFontSize,
+          args: { name: 'Decrease Text Editor Font Size', delta: -1 }
+        },
         { type: 'submenu', submenu: tabMenu },
         { command: CommandIDs.autoClosingBrackets }
       ],
@@ -484,8 +540,9 @@ function activate(
         widget.content.editor.setOption('lineNumbers', lineNumbers);
       },
       toggleWordWrap: widget => {
-        const wordWrap = !widget.content.editor.getOption('lineWrap');
-        widget.content.editor.setOption('lineWrap', wordWrap);
+        const oldValue = widget.content.editor.getOption('lineWrap');
+        const newValue = oldValue === 'off' ? 'on' : 'off';
+        widget.content.editor.setOption('lineWrap', newValue);
       },
       toggleMatchBrackets: widget => {
         const matchBrackets = !widget.content.editor.getOption('matchBrackets');
@@ -493,7 +550,8 @@ function activate(
       },
       lineNumbersToggled: widget =>
         widget.content.editor.getOption('lineNumbers'),
-      wordWrapToggled: widget => widget.content.editor.getOption('lineWrap'),
+      wordWrapToggled: widget =>
+        widget.content.editor.getOption('lineWrap') !== 'off',
       matchBracketsToggled: widget =>
         widget.content.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);

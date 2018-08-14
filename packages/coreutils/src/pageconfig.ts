@@ -5,6 +5,8 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import minimist from 'minimist';
 
+import { PathExt } from './path';
+
 import { URLExt } from './url';
 
 /**
@@ -110,17 +112,10 @@ export namespace PageConfig {
   }
 
   /**
-   * Get the base url for a Jupyter application.
+   * Get the base url for a Jupyter application, or the base url of the page.
    */
   export function getBaseUrl(): string {
-    let baseUrl = getOption('baseUrl');
-    if (!baseUrl || baseUrl === '/') {
-      baseUrl =
-        typeof location === 'undefined'
-          ? 'http://localhost:8888/'
-          : location.origin + '/';
-    }
-    return URLExt.parse(baseUrl).toString();
+    return URLExt.normalize(getOption('baseUrl') || '/');
   }
 
   /**
@@ -130,35 +125,29 @@ export namespace PageConfig {
    */
   export function getTreeUrl(options: ITreeOptions = {}): string {
     const base = getBaseUrl();
-    const page = getOption('pageUrl');
+    const tree = getOption('treeUrl');
+    const defaultWorkspace = getOption('defaultWorkspace');
     const workspaces = getOption('workspacesUrl');
     const workspace = getOption('workspace');
-    const includeWorkspace = !!options.workspace;
 
-    if (includeWorkspace && workspace) {
-      return URLExt.join(base, workspaces, workspace, 'tree');
-    } else {
-      return URLExt.join(base, page, 'tree');
-    }
+    return !!options.workspace && workspace && workspace !== defaultWorkspace
+      ? URLExt.join(base, workspaces, PathExt.basename(workspace), 'tree')
+      : URLExt.join(base, tree);
   }
 
   /**
-   * Get the base websocket url for a Jupyter application.
+   * Get the base websocket url for a Jupyter application, or an empty string.
    */
   export function getWsUrl(baseUrl?: string): string {
     let wsUrl = getOption('wsUrl');
     if (!wsUrl) {
-      baseUrl = baseUrl || getBaseUrl();
+      baseUrl = baseUrl ? URLExt.normalize(baseUrl) : getBaseUrl();
       if (baseUrl.indexOf('http') !== 0) {
-        if (typeof location !== 'undefined') {
-          baseUrl = URLExt.join(location.origin, baseUrl);
-        } else {
-          baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
-        }
+        return '';
       }
       wsUrl = 'ws' + baseUrl.slice(4);
     }
-    return URLExt.parse(wsUrl).toString();
+    return URLExt.normalize(wsUrl);
   }
 
   /**

@@ -11,7 +11,7 @@ async function main() {
 
   await page.goto(URL);
   console.info('Waiting for application to start...');
-  const res = await page.waitForSelector('#seleniumResult');
+  const res = await page.waitForSelector('#browserResult');
   const textContent = await res.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
   await browser.close();

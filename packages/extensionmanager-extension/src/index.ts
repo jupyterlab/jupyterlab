@@ -8,6 +8,8 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import { Dialog, showDialog } from '@jupyterlab/apputils';
+
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { ExtensionView } from '@jupyterlab/extensionmanager';
@@ -39,26 +41,43 @@ const plugin: JupyterLabPlugin<void> = {
     router: IRouter
   ) => {
     const settings = await registry.load(plugin.id);
-    const enabled = settings.composite['enabled'] === true;
+    let enabled = settings.composite['enabled'] === true;
 
-    // If the extension is enabled or disabled, refresh the page.
+    const { shell, serviceManager } = app;
+    let view: ExtensionView | undefined;
+
+    const createView = () => {
+      const v = new ExtensionView(serviceManager);
+      v.id = 'extensionmanager.main-view';
+      v.title.label = 'Extensions';
+      restorer.add(v, v.id);
+      return v;
+    };
+
+    if (enabled) {
+      view = createView();
+      shell.addToLeftArea(view);
+    }
+
+    // If the extension is enabled or disabled,
+    // add or remove it from the left area.
     app.restored.then(() => {
-      settings.changed.connect(() => {
-        router.reload();
+      settings.changed.connect(async () => {
+        enabled = settings.composite['enabled'] === true;
+        if (enabled && (!view || (view && !view.isAttached))) {
+          const accepted = await Private.showWarning();
+          if (!accepted) {
+            settings.set('enabled', false);
+            return;
+          }
+          view = view || createView();
+          shell.addToLeftArea(view);
+        } else if (!enabled && view && view.isAttached) {
+          view.close();
+        }
       });
     });
 
-    if (!enabled) {
-      return;
-    }
-
-    const { shell, serviceManager } = app;
-    const view = new ExtensionView(serviceManager);
-
-    view.id = 'extensionmanager.main-view';
-    view.title.label = 'Extensions';
-    restorer.add(view, view.id);
-    shell.addToLeftArea(view);
     addCommands(app, view);
   }
 };
@@ -101,3 +120,36 @@ function addCommands(app: JupyterLab, view: ExtensionView): void {
  * Export the plugin as the default.
  */
 export default plugin;
+
+/**
+ * A namespace for module-private functions.
+ */
+namespace Private {
+  /**
+   * Show a warning dialog about extension security.
+   *
+   * @returns whether the user accepted the dialog.
+   */
+  export async function showWarning(): Promise<boolean> {
+    return showDialog({
+      title: 'Enable Extension Manager?',
+      body:
+        "Thanks for trying out JupyterLab's extension manager. " +
+        'The JupyterLab development team is excited to have a robust ' +
+        'third-party extension community. ' +
+        'However, we cannot vouch for every extension, ' +
+        'and some may introduce security risks. ' +
+        'Do you want to continue?',
+      buttons: [
+        Dialog.cancelButton({ label: 'DISABLE' }),
+        Dialog.warnButton({ label: 'ENABLE' })
+      ]
+    }).then(result => {
+      if (result.button.accept) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+}

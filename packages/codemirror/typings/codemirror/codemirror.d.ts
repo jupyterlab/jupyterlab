@@ -78,7 +78,7 @@ declare namespace CodeMirror {
     updateFunc: Function
   ): void;
 
-  /** If your extention just needs to run some code whenever a CodeMirror instance is initialized, use CodeMirror.defineInitHook.
+  /** If your extension just needs to run some code whenever a CodeMirror instance is initialized, use CodeMirror.defineInitHook.
     Give it a function as its only argument, and from then on, that function will be called (with the instance as argument)
     whenever a new CodeMirror instance is initialized. */
   function defineInitHook(func: Function): void;
@@ -365,7 +365,7 @@ declare namespace CodeMirror {
       }
     ): CodeMirror.LineWidget;
 
-    /** Programatically set the size of the editor (overriding the applicable CSS rules).
+    /** Programmatically set the size of the editor (overriding the applicable CSS rules).
         width and height height can be either numbers(interpreted as pixels) or CSS units ("100%", for example).
         You can pass null for either of them to indicate that that dimension should not be changed. */
     setSize(width: any, height: any): void;
@@ -453,20 +453,15 @@ declare namespace CodeMirror {
     refresh(): void;
 
     /** Retrieves information about the token the current mode found before the given position (a {line, ch} object). */
-    getTokenAt(
-      pos: CodeMirror.Position
-    ): {
-      /** The character(on the given line) at which the token starts. */
-      start: number;
-      /** The character at which the token ends. */
-      end: number;
-      /** The token's string. */
-      string: string;
-      /** The token type the mode assigned to the token, such as "keyword" or "comment" (may also be null). */
-      type: string;
-      /** The mode's state at the end of this token. */
-      state: any;
-    };
+    getTokenAt(pos: CodeMirror.Position): Token;
+
+    /** This is a (much) cheaper version of getTokenAt useful for when you just need the type of the token at a given position,
+    and no other information. Will return null for unstyled tokens, and a string, potentially containing multiple
+    space-separated style names, otherwise. */
+    getTokenTypeAt(pos: CodeMirror.Position): string;
+
+    /** This is similar to getTokenAt, but collects all tokens for a given line into an array. */
+    getLineTokens(line: number, precise?: boolean): Token[];
 
     /** Returns the mode's parser state, if any, at the end of the given line number.
         If no line number is given, the state at the end of the document is returned.
@@ -717,7 +712,7 @@ declare namespace CodeMirror {
 
   interface Doc {
     /** Get the current editor content. You can pass it an optional argument to specify the string to be used to separate lines (defaults to "\n"). */
-    getValue(seperator?: string): string;
+    getValue(separator?: string): string;
 
     /** Set the editor content. */
     setValue(content: string): void;
@@ -727,7 +722,7 @@ declare namespace CodeMirror {
     getRange(
       from: Position,
       to: CodeMirror.Position,
-      seperator?: string
+      separator?: string
     ): string;
 
     /** Replace the part of the document between from and to with the given string.
@@ -962,7 +957,7 @@ declare namespace CodeMirror {
     text: string[];
     /**  Text that used to be between from and to, which is overwritten by this change. */
     removed: string[];
-    /**  String representing the origin of the change event and wether it can be merged with history */
+    /**  String representing the origin of the change event and whether it can be merged with history */
     origin: string;
   }
 
@@ -1001,6 +996,33 @@ declare namespace CodeMirror {
      * the side of the selection that moves
      */
     head: Position;
+  }
+
+  interface Token {
+    /**
+     * The character(on the given line) at which the token starts.
+     */
+    start: number;
+
+    /**
+     * The character at which the token ends.
+     */
+    end: number;
+
+    /**
+     * The token's string.
+     */
+    string: string;
+    /**
+     * The token type the mode assigned to the token,
+     * such as "keyword" or "comment" (may also be null).
+     */
+    type: string | null;
+
+    /**
+     * The mode's state at the end of this token.
+     */
+    state: any;
   }
 
   interface EditorConfiguration {
@@ -1471,7 +1493,7 @@ declare namespace CodeMirror {
 
   /**
    * An annotation contains a description of a lint error, detailing the location of the error within the code, the severity of the error,
-   * and an explaination as to why the error was thrown.
+   * and an explanation as to why the error was thrown.
    */
   interface Annotation {
     from: Position;

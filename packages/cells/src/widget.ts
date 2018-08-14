@@ -30,7 +30,7 @@ import {
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -782,7 +782,8 @@ export namespace CodeCell {
    */
   export function execute(
     cell: CodeCell,
-    session: IClientSession
+    session: IClientSession,
+    metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     let model = cell.model;
     let code = model.value.text;
@@ -792,12 +793,14 @@ export namespace CodeCell {
       return Promise.resolve(void 0);
     }
 
+    let cellId = { cellId: model.id };
+    metadata = { ...metadata, ...cellId };
     model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session)
+    return OutputArea.execute(code, cell.outputArea, session, metadata)
       .then(msg => {
         model.executionCount = msg.content.execution_count;
         return msg;

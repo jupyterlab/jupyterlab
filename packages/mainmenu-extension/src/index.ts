@@ -3,6 +3,8 @@
 
 import { each } from '@phosphor/algorithm';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { Menu, Widget } from '@phosphor/widgets';
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
@@ -264,7 +266,8 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 
   const newViewGroup = [
     { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole }
+    { command: CommandIDs.createConsole },
+    { command: 'docmanager:open-direct' }
   ];
 
   // Add the close group
@@ -557,7 +560,10 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     0
   );
 
-  let tabGroup: Menu.IItemOptions[] = [];
+  // A list of the active tabs in the main area.
+  const tabGroup: Menu.IItemOptions[] = [];
+  // A disposable for getting rid of the out-of-date tabs list.
+  let disposable: IDisposable;
 
   // Utility function to create a command to activate
   // a given tab, or get it if it already exists.
@@ -591,8 +597,12 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     // main area, and add them to the tab group
     // of the menu.
     const populateTabs = () => {
-      menu.removeGroup(tabGroup);
+      // remove the previous tab list
+      if (disposable && !disposable.isDisposed) {
+        disposable.dispose();
+      }
       tabGroup.length = 0;
+
       let isPreviouslyUsedTabAttached = false;
       each(app.shell.widgets('main'), widget => {
         if (widget.id === previousId) {
@@ -600,7 +610,7 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
         }
         tabGroup.push(createMenuItem(widget));
       });
-      menu.addGroup(tabGroup, 1);
+      disposable = menu.addGroup(tabGroup, 1);
       previousId = isPreviouslyUsedTabAttached ? previousId : '';
     };
     populateTabs();
@@ -626,21 +636,19 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a set containing IMenuExtenders,
-   * check the tracker and return the extender, if any,
-   * that holds the widget.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(
-    widget: Widget,
-    s: Set<E>
-  ): E {
-    let extender: E;
-    s.forEach(value => {
-      if (value.tracker.has(widget)) {
-        extender = value;
+  function find<T>(
+    it: Iterable<T>,
+    predicate: (value: T) => boolean
+  ): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
@@ -652,7 +660,7 @@ namespace Private {
     label: keyof E
   ): string {
     let widget = app.shell.currentWidget;
-    const extender = findExtender(widget, s);
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
@@ -673,7 +681,7 @@ namespace Private {
   ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -696,7 +704,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       return (
         !!extender &&
         !!extender[executor] &&
@@ -716,7 +724,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       // Coerce extender[toggled] to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.

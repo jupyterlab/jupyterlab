@@ -8,6 +8,7 @@
   background: var(--jp-layout-color1);
   display: flex;
   flex-direction: column;
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-extensionmanager-content {
@@ -28,7 +29,14 @@
 }
 
 .jp-extensionmanager-view header {
-  padding: 0 5px;
+  flex: 0 0 auto;
+  margin: 4px 0px;
+  padding: 12px 0 4px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-extensionmanager-listview {
@@ -51,7 +59,7 @@
 
 .jp-extensionmanager-search-bar {
   padding: 8px;
-  background-color: var(--jp-border-color3);
+  background-color: var(--jp-layout-color2);
   border-bottom: 1px solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
@@ -73,7 +81,7 @@
   overflow: overlay;
   padding: 0px 8px;
   border: 1px solid var(--jp-border-color0);
-  background-color: var(--jp-input-background-color-active);
+  background-color: var(--jp-input-active-background);
   height: 30px;
 }
 
@@ -178,6 +186,26 @@
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
+.jp-extensionmanager-entry-title {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-extensionmanager-entry-jupyter-org {
+  background-image: var(--jp-image-jupyter);
+  background-size: 1em;
+  background-repeat: no-repeat;
+  width: 1em;
+  display: none;
+  position: relative;
+  top: 3px;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
+  .jp-extensionmanager-entry-jupyter-org {
+  display: inline;
+}
+
 /* Precedence order update/error/warning matters! */
 .jp-extensionmanager-entry.jp-extensionmanager-entry-update {
   border-left: solid 8px var(--jp-brand-color2);
@@ -190,13 +218,12 @@
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
-  border-left: solid 8px var(--jp-warn-color2);
-  padding-left: 4px;
 }
 
 .jp-extensionmanager-entry-name {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
+  padding: 0 8px 0 0;
   margin-bottom: 3px;
 }
 .jp-extensionmanager-entry-description {

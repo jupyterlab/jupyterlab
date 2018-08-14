@@ -91,6 +91,13 @@ export namespace IRenderMime {
      * The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
+
+    /**
+     * The file types for which the factory should be the default for rendering,
+     * if that is different than the default factory (which may be for editing)
+     * If undefined, then it will fall back on the default file type.
+     */
+    readonly defaultRendered?: ReadonlyArray<string>;
   }
 
   /**
@@ -296,8 +303,14 @@ export namespace IRenderMime {
   export interface ILinkHandler {
     /**
      * Add the link handler to the node.
+     *
+     * @param node: the node for which to handle the link.
+     *
+     * @param path: the path to open when the link is clicked.
+     *
+     * @param id: an optional element id to scroll to when the path is opened.
      */
-    handleLink(node: HTMLElement, url: string): void;
+    handleLink(node: HTMLElement, path: string, id?: string): void;
   }
 
   /**

@@ -22,12 +22,12 @@ from setuptools.command.develop import develop
 NAME = 'jupyterlab'
 DESCRIPTION = 'The JupyterLab notebook server extension.'
 LONG_DESCRIPTION = """
-This is a beta release of JupyterLab.
+An extensible, comprehensive Jupyter web application.
 Development happens on https://github.com/jupyter/jupyterlab, with chat on
-https://gitter.im/jupyter/jupyterlab.
+https://gitter.im/jupyterlab/jupyterlab.
 """
 
-ensure_python(['2.7', '>=3.3'])
+ensure_python(['>=3.5'])
 
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
@@ -40,7 +40,7 @@ data_files_spec = [
 package_data_spec = dict()
 package_data_spec[NAME] = [
     'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**', 'node-version-check.js'
+    'themes/**', 'schemas/**', '*.js'
 ]
 
 staging = pjoin(HERE, NAME, 'staging')
@@ -120,9 +120,7 @@ setup_args = dict(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
@@ -131,15 +129,11 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
-    'jupyterlab_launcher>=0.11.0,<0.12.0',
-    'ipython_genutils',
-    'futures;python_version<"3.0"',
-    'subprocess32;python_version<"3.0"'
+    'jupyterlab_launcher>=0.13.1,<0.14.0'
 ]
 
 setup_args['extras_require'] = {
-    'test:python_version == "2.7"': ['mock'],
-    'test': ['pytest', 'requests', 'pytest-check-links', 'selenium'],
+    'test': ['pytest', 'requests', 'pytest-check-links'],
     'docs': [
         'sphinx',
         'recommonmark',
@@ -149,6 +143,7 @@ setup_args['extras_require'] = {
 
 
 setup_args['include_package_data'] = True
+setup_args['python_requires'] = '>=3.5'
 
 # Force entrypoints with setuptools (needed for Windows, unconditional
 # because of wheels)

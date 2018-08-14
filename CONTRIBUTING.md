@@ -17,7 +17,22 @@ questions about these issues.
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+All source code is written in
+[TypeScript](http://www.typescriptlang.org/Handbook). See the [Style
+Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+
+All source code is formatted using [prettier](https://prettier.io).
+When code is modified and committed, all staged files will be automtically
+formatted using pre-commit git hooks (with help from the
+[lint-staged](https://github.com/okonet/lint-staged) and
+[husky](https://github.com/typicode/husky) libraries). The benefit of using a
+code formatter like prettier is that it removes the topic of code style from the conversation
+when reviewing pull requests, thereby speeding up the review process.
+
+You may also use the prettier npm script (e.g. `npm run prettier` or `yarn prettier` or `jlpm prettier`) to format the entire code base. We recommend
+installing a prettier
+extension for your code editor and configuring it to format your code with
+a keyboard shortcut or automatically on save.
 
 ## Setting Up a Development Environment
 
@@ -29,7 +44,7 @@ Building JupyterLab from its GitHub source code requires Node.js version
 If you use `conda`, you can get it with:
 
 ```bash
-conda install -c conda-forge nodejs
+conda install -c conda-forge 'nodejs<10'
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
@@ -152,8 +167,14 @@ of your choice after it says `No captured browser`. You can put a `debugger`
 statement on a line and open the browser debugger to debug specific tests.
 `jlpm watch` also accepts the `--pattern` argument.
 
-Note that there are some helper functions in `tests/utils.ts` and
-`tests/notebook-utils.ts` that are used by many of the tests.
+Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
+
+We use `karma` to run our tests in a browser, `mocha` as the test framework, and `chai` for test assertions. We use [async/await](https://mochajs.org/#using-async--await) for asynchronous tests. We have
+a helper function in `@jupyterlab/testutils` called `testEmission` to help with
+writing tests that use `Phosphor` signals, as well as a `framePromise` function
+to get a `Promise` for a `requestAnimationFrame`. We sometimes have to set
+a sentinel value inside a `Promise` and then check that the sentinel was set if
+we need a promise to run without blocking.
 
 To create a new test for a package in `packages/`, use the following
 command, where `<package-directory-name>` is the name of the folder in

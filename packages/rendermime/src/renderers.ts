@@ -325,7 +325,7 @@ export function renderMarkdown(
 
       let originalContent = content;
 
-      // Santize the content it is not trusted.
+      // Sanitize the content it is not trusted.
       if (!trusted) {
         originalContent = `${content}`;
         content = sanitizer.sanitize(content);
@@ -458,7 +458,7 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
 
   // Render in img so that user can save it easily
   const img = new Image();
-  img.src = `data:image/svg+xml,${source}`;
+  img.src = `data:image/svg+xml,${encodeURIComponent(source)}`;
   host.appendChild(img);
 
   if (unconfined === true) {
@@ -613,7 +613,7 @@ namespace Private {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
-      let path = anchors[i].href;
+      let path = anchors[i].href || '';
       const isLocal =
         resolver && resolver.isLocal
           ? resolver.isLocal(path)
@@ -703,7 +703,7 @@ namespace Private {
     name: 'src' | 'href',
     resolver: IRenderMime.IResolver
   ): Promise<void> {
-    let source = node.getAttribute(name);
+    let source = node.getAttribute(name) || '';
     const isLocal = resolver.isLocal
       ? resolver.isLocal(source)
       : URLExt.isLocal(source);
@@ -742,7 +742,7 @@ namespace Private {
   ): Promise<void> {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
-    let href = anchor.getAttribute('href');
+    let href = anchor.getAttribute('href') || '';
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
@@ -767,7 +767,7 @@ namespace Private {
       .then(path => {
         // Handle the click override.
         if (linkHandler) {
-          linkHandler.handleLink(anchor, path);
+          linkHandler.handleLink(anchor, path, hash);
         }
         // Get the appropriate file download path.
         return resolver.getDownloadUrl(path);

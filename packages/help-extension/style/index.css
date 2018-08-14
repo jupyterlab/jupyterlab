@@ -54,7 +54,6 @@
   margin-right: 0px;
 }
 
-.jp-About-release,
 .jp-About-version {
   display: block;
 }
@@ -69,7 +68,6 @@
   justify-content: flex-start;
   align-items: flex-start;
   padding-top: 12px;
-  margin-bottom: -15px;
 }
 
 .jp-About-externalLinks .jp-Button-flat {
@@ -77,8 +75,7 @@
 }
 
 .jp-About-copyright {
-  position: relative;
-  bottom: -44px;
+  padding-top: 25px;
 }
 
 .jp-About-header {

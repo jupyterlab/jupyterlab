@@ -158,7 +158,7 @@ export namespace TerminalSession {
   }
 
   /**
-   * The options for intializing a terminal session object.
+   * The options for initializing a terminal session object.
    */
   export interface IOptions {
     /**

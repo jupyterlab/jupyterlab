@@ -16,7 +16,8 @@ module.exports = merge(common, {
           compress: false,
           ecma: 6,
           mangle: true
-        }
+        },
+        cache: process.platform !== 'win32'
       })
     ]
   }

@@ -31,6 +31,7 @@
   border-bottom: none;
   height: auto;
   margin: var(--jp-toolbar-header-margin);
+  box-shadow: none;
 }
 
 .jp-BreadCrumbs {
@@ -192,7 +193,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 108px;
+  flex: 0 0 125px;
   text-align: right;
 }
 
