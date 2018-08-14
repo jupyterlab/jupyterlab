@@ -946,7 +946,7 @@ export namespace ApplicationShell {
      */
     readonly widgets: Array<Widget> | null;
 
-    readonly userMovedWidgets: string[];
+    readonly userMovedWidgets?: string[];
   }
 
   /**

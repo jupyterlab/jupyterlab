@@ -530,7 +530,7 @@ namespace Private {
      */
     widgets?: Array<string> | null;
 
-    userMovedWidgets: string[];
+    userMovedWidgets?: string[];
   }
 
   /**
