@@ -412,6 +412,32 @@ export function notebookGeneratorToolbar(
       //   }
       // ];
 
+      let codeIcon = this.state.showCode ? (
+        <div
+          className="auto-numbering-button"
+          onClick={event => this.toggleCode.bind(this)}
+        >
+          <img
+            alt="Toggle Code Cells"
+            title="Toggle Code Cells"
+            src={require('../static/code_selected.svg')}
+            className="numberingIcon"
+          />
+        </div>
+      ) : (
+        <div
+          className="auto-numbering-button"
+          onClick={event => this.toggleCode.bind(this)}
+        >
+          <img
+            alt="Toggle Code Cells"
+            title="Toggle Code Cells"
+            src={require('../static/code_unselected.svg')}
+            className="numberingIcon"
+          />
+        </div>
+      );
+
       return (
         <div className="toc-toolbar">
           {/* <DropdownMenu
@@ -430,17 +456,7 @@ export function notebookGeneratorToolbar(
               </span>
             }
           /> */}
-          <div
-            className="auto-numbering-button"
-            onClick={event => this.toggleCode.bind(this)}
-          >
-            <img
-              alt="Toggle Code Cells"
-              title="Toggle Code Cells"
-              src={require('../static/code_selected.svg')}
-              className="numberingIcon"
-            />
-          </div>
+          {codeIcon}
           <div
             className="auto-numbering-button"
             onClick={event => this.toggleMarkdown.bind(this)}
