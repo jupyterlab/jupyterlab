@@ -119,7 +119,7 @@ export namespace PageConfig {
   export function getBaseUrl(): string {
     const baseUrl = URLExt.normalize(getOption('baseUrl'));
     if (!baseUrl && typeof location !== 'undefined') {
-      return location.origin;
+      return URLExt.normalize(location.origin);
     }
     return baseUrl;
   }
