@@ -23,6 +23,7 @@
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",
+    "precommit": "lint-staged && jlpm run integrity",
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
@@ -58,17 +59,12 @@
     "watch:packages": "python scripts/watch_packages.py",
     "watch:themes": "lerna run watch:webpack --scope '@jupyterlab/theme-*-extension'"
   },
-  "husky": {
-    "hooks": {
-        "precommit": "lint-staged && jlpm run integrity"
-    }
-  },
   "dependencies": {},
   "devDependencies": {
     "eslint": "^4.12.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",
-    "husky": "1.0.0-rc.13",
+    "husky": "^0.14.3",
     "lerna": "^2.4.0",
     "lint-staged": "^7.1.0",
     "npm-run-all": "~4.1.1",
