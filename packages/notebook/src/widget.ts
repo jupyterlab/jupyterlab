@@ -2052,7 +2052,7 @@ namespace Private {
               { className: DRAG_IMAGE_CLASS },
               h.span(
                 { className: CELL_DRAG_PROMPT_CLASS },
-                'In [' + promptNumber + ']:'
+                '[' + promptNumber + ']:'
               ),
               h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             ),
@@ -2079,7 +2079,7 @@ namespace Private {
               { className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}` },
               h.span(
                 { className: CELL_DRAG_PROMPT_CLASS },
-                'In [' + promptNumber + ']:'
+                '[' + promptNumber + ']:'
               ),
               h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             )
