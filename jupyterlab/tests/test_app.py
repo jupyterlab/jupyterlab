@@ -5,6 +5,7 @@ from __future__ import print_function, absolute_import
 
 from os import path as osp
 from os.path import join as pjoin
+from stat import S_IRUSR, S_IRGRP, S_IROTH
 import argparse
 import atexit
 import glob
@@ -41,6 +42,12 @@ def _create_notebook_dir():
     os.mkdir(osp.join(root_dir, 'src'))
     with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
         fid.write('hello')
+
+    readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
+    with open(readonly_filepath, 'w') as fid:
+        fid.write('hello from a readonly file')
+
+    os.chmod(readonly_filepath, S_IRUSR|S_IRGRP|S_IROTH)
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
 

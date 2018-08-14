@@ -90,6 +90,75 @@ describe('docregistry/context', () => {
       });
     });
 
+    describe('#saving', () => {
+      it("should emit 'starting' when the file starts saving", async () => {
+        let called = false;
+        let checked = false;
+        context.saveState.connect((sender, args) => {
+          if (!called) {
+            expect(sender).to.equal(context);
+            expect(args).to.equal('started');
+
+            checked = true;
+          }
+
+          called = true;
+        });
+
+        await context.initialize(true);
+        expect(called).to.be.true;
+        expect(checked).to.be.true;
+      });
+
+      it("should emit 'completed' when the file ends saving", async () => {
+        let called = 0;
+        let checked = false;
+        context.saveState.connect((sender, args) => {
+          if (called > 0) {
+            expect(sender).to.equal(context);
+            expect(args).to.equal('completed');
+            checked = true;
+          }
+
+          called += 1;
+        });
+
+        await context.initialize(true);
+        expect(called).to.equal(2);
+        expect(checked).to.be.true;
+      });
+
+      it("should emit 'failed' when the save operation fails out", async () => {
+        context = new Context({
+          manager,
+          factory,
+          path: 'src/readonly-temp.txt'
+        });
+
+        let called = 0;
+        let checked;
+        context.saveState.connect((sender, args) => {
+          if (called > 0) {
+            expect(sender).to.equal(context);
+            checked = args;
+          }
+
+          called += 1;
+        });
+
+        try {
+          await context.initialize(true);
+        } catch (err) {
+          expect(err.message).to.contain('Invalid response: 403 Forbidden');
+        }
+
+        expect(called).to.equal(2);
+        expect(checked).to.equal('failed');
+
+        await acceptDialog();
+      });
+    });
+
     describe('#isReady', () => {
       it('should indicate whether the context is ready', async () => {
         expect(context.isReady).to.equal(false);
