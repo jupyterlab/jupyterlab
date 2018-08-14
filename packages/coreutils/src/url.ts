@@ -26,6 +26,13 @@ export namespace URLExt {
   }
 
   /**
+   * Normalize a url.
+   */
+  export function normalize(url: string): string {
+    return url && parse(url).toString();
+  }
+
+  /**
    * Join a sequence of url components and normalizes as in node `path.join`.
    *
    * @param parts - The url components.

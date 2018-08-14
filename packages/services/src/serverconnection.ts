@@ -199,27 +199,24 @@ namespace Private {
   export function makeSettings(
     options: Partial<ServerConnection.ISettings> = {}
   ): ServerConnection.ISettings {
-    let extra: Partial<ServerConnection.ISettings> = {};
-    if (options.baseUrl && !options.wsUrl) {
-      // Setting baseUrl to https://host... sets wsUrl to wss://host...
-      let baseUrl = options.baseUrl;
-      if (baseUrl.indexOf('http') !== 0) {
-        if (typeof location !== 'undefined') {
-          baseUrl = URLExt.join(location.origin, baseUrl);
-        } else {
-          // TODO: Why are we hardcoding localhost and 8888? That doesn't seem
-          // good. See https://github.com/jupyterlab/jupyterlab/issues/4761
-          baseUrl = URLExt.join('http://localhost:8888/', baseUrl);
-        }
-      }
-      extra = {
-        wsUrl: 'ws' + baseUrl.slice(4)
-      };
+    const defaultSettings = ServerConnection.defaultSettings;
+    const baseUrl =
+      URLExt.normalize(options.baseUrl) || defaultSettings.baseUrl;
+    let wsUrl = options.wsUrl;
+    // Prefer the default wsUrl if we are using the default baseUrl.
+    if (!wsUrl && baseUrl === defaultSettings.baseUrl) {
+      wsUrl = defaultSettings.wsUrl;
     }
+    // Otherwise convert the baseUrl to a wsUrl if possible.
+    if (!wsUrl && baseUrl.indexOf('http') === 0) {
+      wsUrl = 'ws' + baseUrl.slice(4);
+    }
+    // Otherwise fall back on the default wsUrl.
+    wsUrl = wsUrl || defaultSettings.wsUrl;
     return {
-      ...ServerConnection.defaultSettings,
+      ...defaultSettings,
       ...options,
-      ...extra
+      ...{ wsUrl }
     };
   }
 

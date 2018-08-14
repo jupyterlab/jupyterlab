@@ -56,6 +56,26 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
+    describe('.normalize()', () => {
+      it('should handle leading slash', () => {
+        expect(URLExt.normalize('/')).to.equal(location.origin + '/');
+      });
+
+      it('should handle leading double slash', () => {
+        expect(URLExt.normalize('//foo')).to.equal(
+          location.protocol + '//foo/'
+        );
+      });
+
+      it('should handle http', () => {
+        expect(URLExt.normalize('http://foo')).to.equal('http://foo/');
+      });
+
+      it('should handle other', () => {
+        expect(URLExt.normalize('ftp://foo')).to.equal('ftp://foo/');
+      });
+    });
+
     describe('objectToQueryString()', () => {
       it('should return a serialized object string suitable for a query', () => {
         const obj = {
