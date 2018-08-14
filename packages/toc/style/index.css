@@ -256,7 +256,7 @@
 
 .cm-toc-plain-span {
   width: 100%;
-  white-space: pre-line;
+  white-space: pre-wrap;
   display: block;
 }
 
@@ -283,5 +283,5 @@
 }
 
 .cm-toc .CodeMirror-line {
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
