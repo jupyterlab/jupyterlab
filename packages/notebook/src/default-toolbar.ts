@@ -150,10 +150,7 @@ export namespace ToolbarItems {
       onClick: () => {
         NotebookActions.runAndAdvance(panel.content, panel.session);
       },
-      tooltip: 'Run the selected cells and advance',
-      label: 'Save',
-      iconLabel: 'Save Icon',
-      className: 'Save-Class'
+      tooltip: 'Run the selected cells and advance'
     });
   }
 
