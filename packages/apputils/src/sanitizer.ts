@@ -73,7 +73,7 @@ class CssProp {
   private static readonly B = {
     angle: `0|${CssProp.N.number}(deg|rad|grad|turn)`,
     frequency: `${CssProp.N.number}(Hz|kHz)`,
-    ident: String.raw`-?([_a-z]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*`,
+    ident: String.raw`-?([_a-z]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*`,
     len_or_perc: `0|${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc|%)`,
     length: `0|${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc)`,
     length_pos: `0|${CssProp.N.number_pos}(px|em|rem|ex|in|cm|mm|pt|pc)`,
