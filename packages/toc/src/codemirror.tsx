@@ -110,9 +110,9 @@ export class ExperimentalCodeComponent extends React.Component<
       );
     }
     return (
-      <div className="cm-toc-plain">
+      <div>
         <div className="cm-toc-plain-textarea">
-          <span>{this.state.heading.text!}</span>
+          <span className="cm-toc-plain-span">{this.state.heading.text!}</span>
         </div>
       </div>
     );
