@@ -113,13 +113,13 @@ export namespace PageConfig {
    * Get the base url for a Jupyter application, or an empty string.
    *
    * #### Notes
-   * If the baseUrl is not provided in `jupyter-config-data`, `location.origin`
-   * is used (if in a browser environment).
+   * If the baseUrl is not provided in `jupyter-config-data`, it will use the
+   * root url `/` (in the browser).
    */
   export function getBaseUrl(): string {
     const baseUrl = URLExt.normalize(getOption('baseUrl'));
-    if (!baseUrl && typeof location !== 'undefined') {
-      return URLExt.normalize(location.origin);
+    if (!baseUrl && typeof window !== 'undefined') {
+      return URLExt.normalize('/');
     }
     return baseUrl;
   }
