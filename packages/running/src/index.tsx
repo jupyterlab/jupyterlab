@@ -13,7 +13,11 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  showDialog,
+  ToolbarButtonComponent
+} from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -30,16 +34,6 @@ const RUNNING_CLASS = 'jp-RunningSessions';
  * The class name added to a running widget header.
  */
 const HEADER_CLASS = 'jp-RunningSessions-header';
-
-/**
- * The class name added to a running widget header refresh button.
- */
-const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
-
-/**
- * The class name added to shutdown all buttons.
- */
-const SHUTDOWN_CLASS = 'jp-RunningSessions-shutdownAll';
 
 /**
  * The class name added to the running terminal sessions section.
@@ -199,10 +193,11 @@ function Section<M>(props: SessionProps<M>) {
       {props.available && (
         <>
           <div className={SECTION_HEADER_CLASS}>
-            {props.name} Sessions
-            <button
-              title={`Shutdown All ${props.name} Sessions…`}
-              className={SHUTDOWN_CLASS}
+            <h2>{props.name} Sessions</h2>
+            <div className="jp-RunningSessions-sectionHeader-spacer" />
+            <ToolbarButtonComponent
+              tooltip={`Shutdown All ${props.name} Sessions…`}
+              iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
               onClick={onShutdown}
             />
           </div>
@@ -232,9 +227,9 @@ function RunningSessionsComponent({
   return (
     <>
       <div className={HEADER_CLASS}>
-        <button
-          title="Refresh List"
-          className={REFRESH_CLASS}
+        <ToolbarButtonComponent
+          tooltip="Refresh List"
+          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
           onClick={() => {
             if (terminalsAvailable) {
               manager.terminals.refreshRunning();
