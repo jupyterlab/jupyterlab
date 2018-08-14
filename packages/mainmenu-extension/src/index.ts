@@ -1,98 +1,81 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { each } from '@phosphor/algorithm';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { Menu, Widget } from '@phosphor/widgets';
+
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+
+import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
 import {
-  Menu, Widget
-} from '@phosphor/widgets';
-
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
-
-import {
-  ICommandPalette, showDialog, Dialog
-} from '@jupyterlab/apputils';
-
-import {
-  IMainMenu, IMenuExtender, EditMenu, FileMenu, KernelMenu,
-  MainMenu, RunMenu, SettingsMenu, ViewMenu, TabsMenu
+  IMainMenu,
+  IMenuExtender,
+  EditMenu,
+  FileMenu,
+  KernelMenu,
+  MainMenu,
+  RunMenu,
+  SettingsMenu,
+  ViewMenu,
+  TabsMenu
 } from '@jupyterlab/mainmenu';
-
 
 /**
  * A namespace for command IDs of semantic extension points.
  */
-export
-namespace CommandIDs {
-  export
-  const undo = 'editmenu:undo';
+export namespace CommandIDs {
+  export const activatePreviouslyUsedTab =
+    'tabmenu:activate-previously-used-tab';
 
-  export
-  const redo = 'editmenu:redo';
+  export const undo = 'editmenu:undo';
 
-  export
-  const clearCurrent = 'editmenu:clear-current';
+  export const redo = 'editmenu:redo';
 
-  export
-  const clearAll = 'editmenu:clear-all';
+  export const clearCurrent = 'editmenu:clear-current';
 
-  export
-  const find = 'editmenu:find';
+  export const clearAll = 'editmenu:clear-all';
 
-  export
-  const findAndReplace = 'editmenu:find-and-replace';
+  export const find = 'editmenu:find';
 
-  export
-  const closeAndCleanup = 'filemenu:close-and-cleanup';
+  export const findAndReplace = 'editmenu:find-and-replace';
 
-  export
-  const createConsole = 'filemenu:create-console';
+  export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export
-  const interruptKernel = 'kernelmenu:interrupt';
+  export const persistAndSave = 'filemenu:persist-and-save';
 
-  export
-  const restartKernel = 'kernelmenu:restart';
+  export const createConsole = 'filemenu:create-console';
 
-  export
-  const restartKernelAndClear = 'kernelmenu:restart-and-clear';
+  export const interruptKernel = 'kernelmenu:interrupt';
 
-  export
-  const changeKernel = 'kernelmenu:change';
+  export const restartKernel = 'kernelmenu:restart';
 
-  export
-  const shutdownKernel = 'kernelmenu:shutdown';
+  export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
 
-  export
-  const shutdownAllKernels = 'kernelmenu:shutdownAll';
+  export const changeKernel = 'kernelmenu:change';
 
-  export
-  const wordWrap = 'viewmenu:word-wrap';
+  export const shutdownKernel = 'kernelmenu:shutdown';
 
-  export
-  const lineNumbering = 'viewmenu:line-numbering';
+  export const shutdownAllKernels = 'kernelmenu:shutdownAll';
 
-  export
-  const matchBrackets = 'viewmenu:match-brackets';
+  export const wordWrap = 'viewmenu:word-wrap';
 
-  export
-  const run = 'runmenu:run';
+  export const lineNumbering = 'viewmenu:line-numbering';
 
-  export
-  const runAll = 'runmenu:run-all';
+  export const matchBrackets = 'viewmenu:match-brackets';
 
-  export
-  const restartAndRunAll = 'runmenu:restart-and-run-all';
+  export const run = 'runmenu:run';
 
-  export
-  const runAbove = 'runmenu:run-above';
+  export const runAll = 'runmenu:run-all';
 
-  export
-  const runBelow = 'runmenu:run-below';
+  export const restartAndRunAll = 'runmenu:restart-and-run-all';
+
+  export const runAbove = 'runmenu:run-above';
+
+  export const runBelow = 'runmenu:run-below';
 }
 
 /**
@@ -125,6 +108,11 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
       category: 'Kernel Operations'
     });
 
+    palette.addItem({
+      command: CommandIDs.activatePreviouslyUsedTab,
+      category: 'Main Area'
+    });
+
     app.shell.addToTopArea(logo);
     app.shell.addToTopArea(menu);
 
@@ -135,42 +123,38 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-function createEditMenu(app: JupyterLab, menu: EditMenu): void {
+export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
   // Add the undo/redo commands the the Edit menu.
   commands.addCommand(CommandIDs.undo, {
     label: 'Undo',
-    isEnabled:
-      Private.delegateEnabled(app, menu.undoers, 'undo'),
-    execute:
-      Private.delegateExecute(app, menu.undoers, 'undo')
+    isEnabled: Private.delegateEnabled(app, menu.undoers, 'undo'),
+    execute: Private.delegateExecute(app, menu.undoers, 'undo')
   });
   commands.addCommand(CommandIDs.redo, {
     label: 'Redo',
-    isEnabled:
-      Private.delegateEnabled(app, menu.undoers, 'redo'),
-    execute:
-      Private.delegateExecute(app, menu.undoers, 'redo')
+    isEnabled: Private.delegateEnabled(app, menu.undoers, 'redo'),
+    execute: Private.delegateExecute(app, menu.undoers, 'redo')
   });
-  menu.addGroup([
-    { command: CommandIDs.undo },
-    { command: CommandIDs.redo }
-  ], 0);
+  menu.addGroup(
+    [{ command: CommandIDs.undo }, { command: CommandIDs.redo }],
+    0
+  );
 
   // Add the clear commands to the Edit menu.
   commands.addCommand(CommandIDs.clearCurrent, {
     label: () => {
-      const noun =
-        Private.delegateLabel(app, menu.clearers, 'noun');
-      const enabled =
-        Private.delegateEnabled(app, menu.clearers, 'clearCurrent')();
+      const noun = Private.delegateLabel(app, menu.clearers, 'noun');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.clearers,
+        'clearCurrent'
+      )();
       return `Clear${enabled ? ` ${noun}` : ''}`;
     },
-    isEnabled:
-      Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
-    execute:
-      Private.delegateExecute(app, menu.clearers, 'clearCurrent')
+    isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
+    execute: Private.delegateExecute(app, menu.clearers, 'clearCurrent')
   });
   commands.addCommand(CommandIDs.clearAll, {
     label: () => {
@@ -178,78 +162,112 @@ function createEditMenu(app: JupyterLab, menu: EditMenu): void {
       const enabled = Private.delegateEnabled(app, menu.clearers, 'clearAll')();
       return `Clear All${enabled ? ` ${noun}` : ''}`;
     },
-    isEnabled:
-      Private.delegateEnabled(app, menu.clearers, 'clearAll'),
-    execute:
-      Private.delegateExecute(app, menu.clearers, 'clearAll')
+    isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearAll'),
+    execute: Private.delegateExecute(app, menu.clearers, 'clearAll')
   });
-  menu.addGroup([
-    { command: CommandIDs.clearCurrent },
-    { command: CommandIDs.clearAll },
-  ], 10);
+  menu.addGroup(
+    [{ command: CommandIDs.clearCurrent }, { command: CommandIDs.clearAll }],
+    10
+  );
 
   // Add the find/replace commands the the Edit menu.
   commands.addCommand(CommandIDs.find, {
     label: 'Find…',
-    isEnabled:
-      Private.delegateEnabled(app, menu.findReplacers, 'find'),
-    execute:
-      Private.delegateExecute(app, menu.findReplacers, 'find')
+    isEnabled: Private.delegateEnabled(app, menu.findReplacers, 'find'),
+    execute: Private.delegateExecute(app, menu.findReplacers, 'find')
   });
   commands.addCommand(CommandIDs.findAndReplace, {
     label: 'Find and Replace…',
-    isEnabled:
-      Private.delegateEnabled(app, menu.findReplacers, 'findAndReplace'),
-    execute:
-      Private.delegateExecute(app, menu.findReplacers, 'findAndReplace')
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.findReplacers,
+      'findAndReplace'
+    ),
+    execute: Private.delegateExecute(app, menu.findReplacers, 'findAndReplace')
   });
-  menu.addGroup([
-    { command: CommandIDs.find },
-    { command: CommandIDs.findAndReplace }
-  ], 200);
+  menu.addGroup(
+    [{ command: CommandIDs.find }, { command: CommandIDs.findAndReplace }],
+    200
+  );
 }
 
 /**
  * Create the basic `File` menu.
  */
-function createFileMenu(app: JupyterLab, menu: FileMenu): void {
+export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
   commands.addCommand(CommandIDs.closeAndCleanup, {
     label: () => {
-      const action =
-        Private.delegateLabel(app, menu.closeAndCleaners, 'action');
-      const name =
-        Private.delegateLabel(app, menu.closeAndCleaners, 'name');
+      const action = Private.delegateLabel(
+        app,
+        menu.closeAndCleaners,
+        'action'
+      );
+      const name = Private.delegateLabel(app, menu.closeAndCleaners, 'name');
       return `Close and ${action ? ` ${action} ${name}` : 'Shutdown'}`;
     },
-    isEnabled:
-      Private.delegateEnabled(app, menu.closeAndCleaners, 'closeAndCleanup'),
-    execute:
-      Private.delegateExecute(app, menu.closeAndCleaners, 'closeAndCleanup')
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.closeAndCleaners,
+      'closeAndCleanup'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.closeAndCleaners,
+      'closeAndCleanup'
+    )
+  });
+
+  // Add a delegator command for persisting data then saving.
+  commands.addCommand(CommandIDs.persistAndSave, {
+    label: () => {
+      const action = Private.delegateLabel(
+        app,
+        menu.persistAndSavers,
+        'action'
+      );
+      const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
+      return `Save ${name} ${action || 'with Extras'}`;
+    },
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.persistAndSavers,
+      'persistAndSave'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.persistAndSavers,
+      'persistAndSave'
+    )
   });
 
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
       const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
-      const label = `New Console for ${name ? name : 'Activity' }`;
+      const label = `New Console for ${name ? name : 'Activity'}`;
       return label;
     },
-    isEnabled: Private.delegateEnabled(app, menu.consoleCreators, 'createConsole'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.consoleCreators,
+      'createConsole'
+    ),
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
   // Add the new group
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
-    { command: 'filebrowser:create-main-launcher' },
+    { command: 'filebrowser:create-main-launcher' }
   ];
 
   const newViewGroup = [
     { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole }
+    { command: CommandIDs.createConsole },
+    { command: 'docmanager:open-direct' }
   ];
 
   // Add the close group
@@ -257,20 +275,28 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     'docmanager:close',
     'filemenu:close-and-cleanup',
     'docmanager:close-all-files'
-  ].map(command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
 
   // Add save group.
   const saveGroup = [
     'docmanager:save',
+    'filemenu:persist-and-save',
     'docmanager:save-as',
     'docmanager:save-all'
-  ].map(command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
 
   // Add the re group.
   const reGroup = [
+    'docmanager:reload',
     'docmanager:restore-checkpoint',
     'docmanager:rename'
-  ].map(command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
@@ -282,12 +308,16 @@ function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
-function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
+export function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
     label: 'Interrupt Kernel',
-    isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'interruptKernel'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.kernelUsers,
+      'interruptKernel'
+    ),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'interruptKernel')
   });
 
@@ -300,14 +330,23 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   commands.addCommand(CommandIDs.restartKernelAndClear, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.kernelUsers, 'noun');
-      const enabled =
-        Private.delegateEnabled(app, menu.kernelUsers, 'restartKernelAndClear')();
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.kernelUsers,
+        'restartKernelAndClear'
+      )();
       return `Restart Kernel and Clear${enabled ? ` ${noun}` : ''}…`;
     },
-    isEnabled:
-      Private.delegateEnabled(app, menu.kernelUsers, 'restartKernelAndClear'),
-    execute:
-      Private.delegateExecute(app, menu.kernelUsers, 'restartKernelAndClear')
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.kernelUsers,
+      'restartKernelAndClear'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.kernelUsers,
+      'restartKernelAndClear'
+    )
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
@@ -332,7 +371,8 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
         title: 'Shutdown All?',
         body: 'Shut down all kernels?',
         buttons: [
-          Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'SHUTDOWN' })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -345,70 +385,116 @@ function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
-    CommandIDs.restartAndRunAll,
-  ].map(command => { return { command }; });
+    CommandIDs.restartAndRunAll
+  ].map(command => {
+    return { command };
+  });
 
   menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
   menu.addGroup(restartGroup, 1);
-  menu.addGroup([{ command: CommandIDs.shutdownKernel },
-                 { command: CommandIDs.shutdownAllKernels }], 2);
+  menu.addGroup(
+    [
+      { command: CommandIDs.shutdownKernel },
+      { command: CommandIDs.shutdownAllKernels }
+    ],
+    2
+  );
   menu.addGroup([{ command: CommandIDs.changeKernel }], 3);
 }
 
 /**
  * Create the basic `View` menu.
  */
-function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
+export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
     label: 'Show Line Numbers',
-    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleLineNumbers'),
-    isToggled: Private.delegateToggled(app, menu.editorViewers, 'lineNumbersToggled'),
-    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleLineNumbers')
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.editorViewers,
+      'toggleLineNumbers'
+    ),
+    isToggled: Private.delegateToggled(
+      app,
+      menu.editorViewers,
+      'lineNumbersToggled'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.editorViewers,
+      'toggleLineNumbers'
+    )
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
     label: 'Match Brackets',
-    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleMatchBrackets'),
-    isToggled: Private.delegateToggled(app, menu.editorViewers, 'matchBracketsToggled'),
-    execute: Private.delegateExecute(app, menu.editorViewers, 'toggleMatchBrackets')
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.editorViewers,
+      'toggleMatchBrackets'
+    ),
+    isToggled: Private.delegateToggled(
+      app,
+      menu.editorViewers,
+      'matchBracketsToggled'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.editorViewers,
+      'toggleMatchBrackets'
+    )
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
     label: 'Wrap Words',
-    isEnabled: Private.delegateEnabled(app, menu.editorViewers, 'toggleWordWrap'),
-    isToggled: Private.delegateToggled(app, menu.editorViewers, 'wordWrapToggled'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.editorViewers,
+      'toggleWordWrap'
+    ),
+    isToggled: Private.delegateToggled(
+      app,
+      menu.editorViewers,
+      'wordWrapToggled'
+    ),
     execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
 
-  menu.addGroup([
-    { command: 'application:toggle-left-area' },
-    { command: 'application:toggle-right-area' }
-  ], 0);
+  menu.addGroup(
+    [
+      { command: 'application:toggle-left-area' },
+      { command: 'application:toggle-right-area' }
+    ],
+    0
+  );
 
   const editorViewerGroup = [
     CommandIDs.lineNumbering,
     CommandIDs.matchBrackets,
     CommandIDs.wordWrap
-  ].map( command => { return { command }; });
+  ].map(command => {
+    return { command };
+  });
   menu.addGroup(editorViewerGroup, 10);
 
   // Add the command for toggling single-document mode.
-  menu.addGroup([
-    { command: 'application:toggle-presentation-mode'},
-    { command: 'application:toggle-mode' }
-  ], 1000);
+  menu.addGroup(
+    [
+      { command: 'application:toggle-presentation-mode' },
+      { command: 'application:toggle-mode' }
+    ],
+    1000
+  );
 }
 
-function createRunMenu(app: JupyterLab, menu: RunMenu): void {
+export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.run, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      const enabled =
-        Private.delegateEnabled(app, menu.codeRunners, 'run')();
+      const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
       return `Run Selected${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
@@ -418,8 +504,11 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.runAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      const enabled =
-        Private.delegateEnabled(app, menu.codeRunners, 'runAll')();
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'runAll'
+      )();
       return `Run All${enabled ? ` ${noun}` : ''}`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
@@ -429,37 +518,52 @@ function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      const enabled =
-        Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll')();
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'restartAndRunAll'
+      )();
       return `Restart Kernel and Run All${enabled ? ` ${noun}` : ''}…`;
     },
-    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'restartAndRunAll'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.codeRunners,
+      'restartAndRunAll'
+    ),
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
   });
 
-  const runAllGroup = [
-    CommandIDs.runAll,
-    CommandIDs.restartAndRunAll
-  ].map( command => { return { command }; });
+  const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
+    command => {
+      return { command };
+    }
+  );
 
   menu.addGroup([{ command: CommandIDs.run }], 0);
   menu.addGroup(runAllGroup, 999);
 }
 
-function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
+export function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
-function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
+
+export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
   // Add commands for cycling the active tabs.
-  menu.addGroup([
-    { command: 'application:activate-next-tab' },
-    { command: 'application:activate-previous-tab' }
-  ], 0);
+  menu.addGroup(
+    [
+      { command: 'application:activate-next-tab' },
+      { command: 'application:activate-previous-tab' },
+      { command: CommandIDs.activatePreviouslyUsedTab }
+    ],
+    0
+  );
 
-
-  let tabGroup: Menu.IItemOptions[] = [];
+  // A list of the active tabs in the main area.
+  const tabGroup: Menu.IItemOptions[] = [];
+  // A disposable for getting rid of the out-of-date tabs list.
+  let disposable: IDisposable;
 
   // Utility function to create a command to activate
   // a given tab, or get it if it already exists.
@@ -477,20 +581,51 @@ function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     return { command: commandID };
   };
 
+  let previousId = '';
+
+  // Command to toggle between the current
+  // tab and the last modified tab.
+  commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
+    label: 'Activate Previously Used Tab',
+    isEnabled: () => !!previousId,
+    execute: () =>
+      previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
+  });
+
   app.restored.then(() => {
     // Iterate over the current widgets in the
     // main area, and add them to the tab group
     // of the menu.
     const populateTabs = () => {
-      menu.removeGroup(tabGroup);
+      // remove the previous tab list
+      if (disposable && !disposable.isDisposed) {
+        disposable.dispose();
+      }
       tabGroup.length = 0;
+
+      let isPreviouslyUsedTabAttached = false;
       each(app.shell.widgets('main'), widget => {
+        if (widget.id === previousId) {
+          isPreviouslyUsedTabAttached = true;
+        }
         tabGroup.push(createMenuItem(widget));
       });
-      menu.addGroup(tabGroup, 1);
+      disposable = menu.addGroup(tabGroup, 1);
+      previousId = isPreviouslyUsedTabAttached ? previousId : '';
     };
     populateTabs();
-    app.shell.layoutModified.connect(() => { populateTabs(); });
+    app.shell.layoutModified.connect(() => {
+      populateTabs();
+    });
+    // Update the id of the previous active tab if
+    // a new tab is selected.
+    app.shell.currentChanged.connect((sender, args) => {
+      let widget = args.oldValue;
+      if (!widget) {
+        return;
+      }
+      previousId = widget.id;
+    });
   });
 }
 
@@ -501,46 +636,60 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a set containing IMenuExtenders,
-   * check the tracker and return the extender, if any,
-   * that holds the widget.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(widget: Widget, s: Set<E>): E {
-    let extender: E;
-    s.forEach(value => {
-      if (value.tracker.has(widget)) {
-        extender = value;
+  function find<T>(
+    it: Iterable<T>,
+    predicate: (value: T) => boolean
+  ): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
    * A utility function that delegates a portion of a label to an IMenuExtender.
    */
-  export
-  function delegateLabel<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, label: keyof E): string {
+  export function delegateLabel<E extends IMenuExtender<Widget>>(
+    app: JupyterLab,
+    s: Set<E>,
+    label: keyof E
+  ): string {
     let widget = app.shell.currentWidget;
-    const extender = findExtender(widget, s);
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
-    return extender[label];
+    // Coerce the result to be a string. When Typedoc is updated to use
+    // Typescript 2.8, we can possibly use conditional types to get Typescript
+    // to recognize this is a string.
+    return (extender[label] as any) as string;
   }
 
   /**
    * A utility function that delegates command execution
    * to an IMenuExtender.
    */
-  export
-  function delegateExecute<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => Promise<any> {
+  export function delegateExecute<E extends IMenuExtender<Widget>>(
+    app: JupyterLab,
+    s: Set<E>,
+    executor: keyof E
+  ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
-      return extender[executor](widget);
+      // Coerce the result to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      let f = (extender[executor] as any) as (w: Widget) => Promise<any>;
+      return f(widget);
     };
   }
 
@@ -548,13 +697,19 @@ namespace Private {
    * A utility function that delegates whether a command is enabled
    * to an IMenuExtender.
    */
-  export
-  function delegateEnabled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, executor: keyof E): () => boolean {
+  export function delegateEnabled<E extends IMenuExtender<Widget>>(
+    app: JupyterLab,
+    s: Set<E>,
+    executor: keyof E
+  ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
-      return !!extender && !!extender[executor] &&
-        (extender.isEnabled ? extender.isEnabled(widget) : true);
+      const extender = find(s, value => value.tracker.has(widget));
+      return (
+        !!extender &&
+        !!extender[executor] &&
+        (extender.isEnabled ? extender.isEnabled(widget) : true)
+      );
     };
   }
 
@@ -562,12 +717,22 @@ namespace Private {
    * A utility function that delegates whether a command is toggled
    * for an IMenuExtender.
    */
-  export
-  function delegateToggled<E extends IMenuExtender<Widget>>(app: JupyterLab, s: Set<E>, toggled: keyof E): () => boolean {
+  export function delegateToggled<E extends IMenuExtender<Widget>>(
+    app: JupyterLab,
+    s: Set<E>,
+    toggled: keyof E
+  ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
-      return !!extender && !!extender[toggled] && !!extender[toggled](widget);
+      const extender = find(s, value => value.tracker.has(widget));
+      // Coerce extender[toggled] to be a function. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a function.
+      return (
+        !!extender &&
+        !!extender[toggled] &&
+        !!((extender[toggled] as any) as (w: Widget) => (() => boolean))(widget)
+      );
     };
   }
 }

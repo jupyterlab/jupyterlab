@@ -1,22 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IInstanceTracker
-} from '@jupyterlab/apputils';
+import { IInstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  Menu, Widget
-} from '@phosphor/widgets';
-
+import { Menu, Widget } from '@phosphor/widgets';
 
 /**
  * A common interface for extensible JupyterLab application menus.
@@ -26,13 +17,12 @@ import {
  * application menus that may be extended by plugins as well,
  * such as "Edit" and "View"
  */
-export
-interface IJupyterLabMenu extends IDisposable {
+export interface IJupyterLabMenu extends IDisposable {
   /**
    * Add a group of menu items specific to a particular
    * plugin.
    */
-  addGroup(items: Menu.IItemOptions[], rank?: number): void;
+  addGroup(items: Menu.IItemOptions[], rank?: number): IDisposable;
 }
 
 /**
@@ -42,8 +32,7 @@ interface IJupyterLabMenu extends IDisposable {
  * is deciding which IMenuExtender to delegate to upon
  * selection of the menu item.
  */
-export
-interface IMenuExtender<T extends Widget> {
+export interface IMenuExtender<T extends Widget> {
   /**
    * A widget tracker for identifying the appropriate extender.
    */
@@ -53,7 +42,7 @@ interface IMenuExtender<T extends Widget> {
    * An additional function that determines whether the extender
    * is enabled. By default it is considered enabled if the application
    * active widget is contained in the `tracker`. If this is also
-   * provided, the critereon is equivalent to
+   * provided, the criterion is equivalent to
    * `tracker.has(widget) && extender.isEnabled(widget)`
    */
   isEnabled?: (widget: T) => boolean;
@@ -62,8 +51,7 @@ interface IMenuExtender<T extends Widget> {
 /**
  * An extensible menu for JupyterLab application menus.
  */
-export
-class JupyterLabMenu implements IJupyterLabMenu {
+export class JupyterLabMenu implements IJupyterLabMenu {
   /**
    * Construct a new menu.
    *
@@ -85,80 +73,55 @@ class JupyterLabMenu implements IJupyterLabMenu {
    *
    * @param rank - the rank in the menu in which to insert the group.
    */
-  addGroup(items: Menu.IItemOptions[], rank?: number): void {
-    const rankGroup = { items, rank: rank === undefined ? 100 : rank };
+  addGroup(items: Menu.IItemOptions[], rank?: number): IDisposable {
+    const rankGroup = {
+      size: items.length,
+      rank: rank === undefined ? 100 : rank
+    };
 
     // Insert the plugin group into the list of groups.
-    const groupIndex = ArrayExt.upperBound(this._groups, rankGroup, Private.itemCmp);
+    const groupIndex = ArrayExt.upperBound(
+      this._groups,
+      rankGroup,
+      Private.itemCmp
+    );
 
     // Determine the index of the menu at which to insert the group.
     let insertIndex = 0;
     for (let i = 0; i < groupIndex; ++i) {
-      if (this._groups[i].items.length > 0) {
-        insertIndex += this._groups[i].items.length;
+      if (this._groups[i].size > 0) {
+        insertIndex += this._groups[i].size;
         // Increase the insert index by two extra in order
         // to include the leading and trailing separators.
         insertIndex += this._includeSeparators ? 2 : 0;
       }
     }
 
+    // Keep an array of the menu items that have been created.
+    const added: Menu.IItem[] = [];
+
     // Insert a separator before the group.
     // Phosphor takes care of superfluous leading,
     // trailing, and duplicate separators.
     if (this._includeSeparators) {
-      this.menu.insertItem(insertIndex++, { type: 'separator' });
+      added.push(this.menu.insertItem(insertIndex++, { type: 'separator' }));
     }
     // Insert the group.
     for (let item of items) {
-      this.menu.insertItem(insertIndex++, item);
+      added.push(this.menu.insertItem(insertIndex++, item));
     }
     // Insert a separator after the group.
     if (this._includeSeparators) {
-      this.menu.insertItem(insertIndex++, { type: 'separator' });
+      added.push(this.menu.insertItem(insertIndex++, { type: 'separator' }));
     }
 
     ArrayExt.insert(this._groups, groupIndex, rankGroup);
+
+    return new DisposableDelegate(() => {
+      added.forEach(i => this.menu.removeItem(i));
+      this._groups.splice(groupIndex, 1);
+    });
   }
-
-  /**
-   * Remove a group of menu items. These items should have been
-   * previously added.
-   *
-   * @param items - the previously added group to remove.
-   */
-  removeGroup(items: Menu.IItemOptions[]): void {
-    // Get the index within the current groups.
-    const index = ArrayExt.findFirstIndex(this._groups,
-      (rankGroup) => rankGroup.items === items);
-    if (index === -1) { return; }
-
-    // Determine the index within the menu for removal.
-    let removeIndex = 0;
-    for (let i = 0; i < index; ++i) {
-      if (this._groups[i].items.length > 0) {
-        removeIndex += this._groups[i].items.length;
-        // Increase the insert index by two extra in order
-        // to include the leading and trailing separators.
-        removeIndex += this._includeSeparators ? 2 : 0;
-      }
-    }
-
-    // Do the removal
-    if (this._includeSeparators) {
-      this.menu.removeItemAt(removeIndex); // Leading separator.
-    }
-    for (let i = 0; i < items.length; ++i) {
-      this.menu.removeItemAt(removeIndex);
-    }
-    if (this._includeSeparators) {
-      this.menu.removeItemAt(removeIndex); // Trailing separator.
-    }
-
-    // Insert a separator before the group.
-    this._groups.splice(index);
-  }
-
-
 
   /**
    * The underlying Phosphor menu.
@@ -186,7 +149,6 @@ class JupyterLabMenu implements IJupyterLabMenu {
   private _includeSeparators: boolean;
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -194,12 +156,11 @@ namespace Private {
   /**
    * An object which holds a menu and its sort rank.
    */
-  export
-  interface IRankGroup {
+  export interface IRankGroup {
     /**
-     * A menu grouping.
+     * The number of items in the menu grouping.
      */
-    items: Menu.IItemOptions[];
+    size: number;
 
     /**
      * The sort rank of the group.
@@ -210,8 +171,7 @@ namespace Private {
   /**
    * A comparator function for menu rank items.
    */
-  export
-  function itemCmp(first: IRankGroup, second: IRankGroup): number {
+  export function itemCmp(first: IRankGroup, second: IRankGroup): number {
     return first.rank - second.rank;
   }
 }

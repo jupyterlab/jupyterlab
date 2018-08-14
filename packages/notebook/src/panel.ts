@@ -1,59 +1,23 @@
-
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Kernel, KernelMessage
-} from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import {
-  each
-} from '@phosphor/algorithm';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  PromiseDelegate, Token
-} from '@phosphor/coreutils';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 
-import {
-  IClientSession, Toolbar
-} from '@jupyterlab/apputils';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  IEditorMimeTypeService
-} from '@jupyterlab/codeeditor';
+import { INotebookModel } from './model';
 
-import {
-  IChangedArgs, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-
-import {
-  INotebookModel
-} from './model';
-
-import {
-  Notebook, StaticNotebook
-} from './widget';
-
+import { Notebook } from './widget';
 
 /**
  * The class name added to notebook panels.
@@ -65,50 +29,37 @@ const NOTEBOOK_PANEL_TOOLBAR_CLASS = 'jp-NotebookPanel-toolbar';
 const NOTEBOOK_PANEL_NOTEBOOK_CLASS = 'jp-NotebookPanel-notebook';
 
 /**
- * The class name added to a dirty widget.
- */
-const DIRTY_CLASS = 'jp-mod-dirty';
-
-
-/**
  * A widget that hosts a notebook toolbar and content area.
  *
  * #### Notes
  * The widget keeps the document metadata in sync with the current
  * kernel on the context.
  */
-export
-class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
+export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Construct a new notebook panel.
    */
-  constructor(options: NotebookPanel.IOptions) {
-    super();
+  constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
+    super(options);
+
+    // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
-    this.rendermime = options.rendermime;
-    let contentFactory = this.contentFactory = (
-      options.contentFactory || NotebookPanel.defaultContentFactory
-    );
+    this.toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
+    this.content.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
-    let layout = this.layout = new PanelLayout();
+    // Set up things related to the context
+    this.content.model = this.context.model;
+    this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
-    // Toolbar
-    let toolbar = new Toolbar();
-    toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
-
-    // Notebook
-    let nbOptions: Notebook.IOptions = {
-      rendermime: this.rendermime,
-      languagePreference: options.languagePreference,
-      contentFactory: contentFactory,
-      mimeTypeService: options.mimeTypeService,
-      editorConfig: options.editorConfig,
-    };
-    let notebook = this.notebook = contentFactory.createNotebook(nbOptions);
-    notebook.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
-
-    layout.addWidget(toolbar);
-    layout.addWidget(this.notebook);
+    this.revealed.then(() => {
+      // Set the document edit mode on initial open if it looks like a new document.
+      if (this.content.widgets.length === 1) {
+        let cellModel = this.content.widgets[0].model;
+        if (cellModel.type === 'code' && cellModel.value.text === '') {
+          this.content.mode = 'edit';
+        }
+      }
+    });
   }
 
   /**
@@ -119,231 +70,79 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * A signal emitted when the panel context changes.
-   */
-  get contextChanged(): ISignal<this, void> {
-    return this._contextChanged;
-  }
-
-  /**
    * The client session used by the panel.
    */
   get session(): IClientSession {
-    return this._context ? this._context.session : null;
+    return this.context.session;
   }
 
   /**
-   * A promise that resolves when the notebook panel is ready.
+   * The content factory for the notebook.
+   *
+   * TODO: deprecate this in favor of the .content attribute
+   *
    */
-  get ready(): Promise<void> {
-    return this._ready.promise;
+  get contentFactory(): Notebook.IContentFactory {
+    return this.content.contentFactory;
   }
 
   /**
-   * The factory used by the widget.
+   * The rendermime instance for the notebook.
+   *
+   * TODO: deprecate this in favor of the .content attribute
+   *
    */
-  readonly contentFactory: NotebookPanel.IContentFactory;
-
-  /**
-   * The Rendermime instance used by the widget.
-   */
-  readonly rendermime: RenderMimeRegistry;
+  get rendermime(): RenderMimeRegistry {
+    return this.content.rendermime;
+  }
 
   /**
    * The notebook used by the widget.
    */
-  readonly notebook: Notebook;
-
-  /**
-   * Get the toolbar used by the widget.
-   */
-  get toolbar(): Toolbar<Widget> {
-    return (this.layout as PanelLayout).widgets[0] as Toolbar<Widget>;
-  }
+  readonly content: Notebook;
 
   /**
    * The model for the widget.
    */
   get model(): INotebookModel {
-    return this.notebook ? this.notebook.model : null;
-  }
-
-  /**
-   * The document context for the widget.
-   *
-   * #### Notes
-   * Changing the context also changes the model on the
-   * `content`.
-   */
-  get context(): DocumentRegistry.IContext<INotebookModel> {
-    return this._context;
-  }
-  set context(newValue: DocumentRegistry.IContext<INotebookModel>) {
-    newValue = newValue || null;
-    if (newValue === this._context) {
-      return;
-    }
-    let oldValue = this._context;
-    this._context = newValue;
-    // Trigger private, protected, and public changes.
-    this._onContextChanged(oldValue, newValue);
-    this.onContextChanged(oldValue, newValue);
-    this._contextChanged.emit(void 0);
-
-    if (!oldValue) {
-      newValue.ready.then(() => {
-        if (this.notebook.widgets.length === 1) {
-          let model = this.notebook.widgets[0].model;
-          if (model.type === 'code' && model.value.text === '') {
-            this.notebook.mode = 'edit';
-          }
-        }
-        this._ready.resolve(undefined);
-      });
-    }
+    return this.content ? this.content.model : null;
   }
 
   /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
-    this._context = null;
-    this.notebook.dispose();
+    this.content.dispose();
     super.dispose();
-  }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-    case 'mouseup':
-    case 'mouseout':
-      let target = event.target as HTMLElement;
-      if (this.toolbar.node.contains(document.activeElement) &&
-          target.localName !== 'select') {
-        this.notebook.node.focus();
-      }
-      break;
-    default:
-      break;
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.toolbar.node.addEventListener('mouseup', this);
-    this.toolbar.node.addEventListener('mouseout', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.toolbar.node.removeEventListener('mouseup', this);
-    this.toolbar.node.removeEventListener('mouseout', this);
   }
 
   /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.notebook.activate();
+    super.onActivateRequest(msg);
+
+    // TODO: do we still need to emit this signal? Who is using it?
     this._activated.emit(void 0);
-  }
-
-  /**
-   * Handle a change to the document context.
-   *
-   * #### Notes
-   * The default implementation is a no-op.
-   */
-  protected onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
-    // This is a no-op.
-  }
-
-
-  /**
-   * Handle a change in the model state.
-   */
-  protected onModelStateChanged(sender: INotebookModel, args: IChangedArgs<any>): void {
-    if (args.name === 'dirty') {
-      this._handleDirtyState();
-    }
-  }
-
-  /**
-   * Handle a change to the document path.
-   */
-  protected onPathChanged(sender: DocumentRegistry.IContext<INotebookModel>, path: string): void {
-    this.title.label = PathExt.basename(sender.localPath);
-  }
-
-  /**
-   * Handle a change in the context.
-   */
-  private _onContextChanged(oldValue: DocumentRegistry.IContext<INotebookModel>, newValue: DocumentRegistry.IContext<INotebookModel>): void {
-    if (oldValue) {
-      oldValue.pathChanged.disconnect(this.onPathChanged, this);
-      oldValue.session.kernelChanged.disconnect(this._onKernelChanged, this);
-      if (oldValue.model) {
-        oldValue.model.stateChanged.disconnect(this.onModelStateChanged, this);
-      }
-    }
-    if (!newValue) {
-      this._onKernelChanged(null, null);
-      return;
-    }
-    let context = newValue;
-    this.notebook.model = newValue.model;
-    this._handleDirtyState();
-    newValue.model.stateChanged.connect(this.onModelStateChanged, this);
-    context.session.kernelChanged.connect(this._onKernelChanged, this);
-
-    // Clear the cells when the context is initially populated.
-    if (!newValue.isReady) {
-      newValue.ready.then(() => {
-        if (this.isDisposed) {
-          return;
-        }
-        let model = newValue.model;
-        // Clear the undo state of the cells.
-        if (model) {
-          model.cells.clearUndo();
-          each(this.notebook.widgets, widget => {
-            widget.editor.clearHistory();
-          });
-        }
-      });
-    }
-
-    // Handle the document title.
-    this.onPathChanged(context, context.path);
-    context.pathChanged.connect(this.onPathChanged, this);
   }
 
   /**
    * Handle a change in the kernel by updating the document metadata.
    */
-  private _onKernelChanged(sender: any, kernel: Kernel.IKernelConnection): void {
-    if (!this.model || !kernel) {
+  private _onKernelChanged(
+    sender: any,
+    args: Session.IKernelChangedArgs
+  ): void {
+    if (!this.model || !args.newValue) {
       return;
     }
-    kernel.ready.then(() => {
+    let { newValue } = args;
+    newValue.ready.then(() => {
       if (this.model) {
-        this._updateLanguage(kernel.info.language_info);
+        this._updateLanguage(newValue.info.language_info);
       }
     });
-    this._updateSpec(kernel);
+    this._updateSpec(newValue);
   }
 
   /**
@@ -369,79 +168,28 @@ class NotebookPanel extends Widget implements DocumentRegistry.IReadyWidget {
     });
   }
 
-  /**
-   * Handle the dirty state of the model.
-   */
-  private _handleDirtyState(): void {
-    if (!this.model) {
-      return;
-    }
-    if (this.model.dirty) {
-      this.title.className += ` ${DIRTY_CLASS}`;
-    } else {
-      this.title.className = this.title.className.replace(DIRTY_CLASS, '');
-    }
-  }
-
-  private _context: DocumentRegistry.IContext<INotebookModel> = null;
   private _activated = new Signal<this, void>(this);
-  private _contextChanged = new Signal<this, void>(this);
-  private _ready = new PromiseDelegate<void>();
 }
-
 
 /**
  * A namespace for `NotebookPanel` statics.
  */
 export namespace NotebookPanel {
   /**
-   * An options interface for NotebookPanels.
-   */
-  export
-  interface IOptions {
-    /**
-     * The rendermime instance used by the panel.
-     */
-    rendermime: RenderMimeRegistry;
-
-    /**
-     * The language preference for the model.
-     */
-    languagePreference?: string;
-
-    /**
-     * The content factory for the panel.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
-     * The mimeType service.
-     */
-    mimeTypeService: IEditorMimeTypeService;
-
-    /**
-     * The notebook cell editor configuration.
-     */
-    editorConfig?: StaticNotebook.IEditorConfig;
-  }
-
-  /**
    * A content factory interface for NotebookPanel.
    */
-  export
-  interface IContentFactory extends Notebook.IContentFactory {
+  export interface IContentFactory extends Notebook.IContentFactory {
     /**
      * Create a new content area for the panel.
      */
     createNotebook(options: Notebook.IOptions): Notebook;
-
   }
 
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export
-  class ContentFactory extends Notebook.ContentFactory implements IContentFactory {
+  export class ContentFactory extends Notebook.ContentFactory
+    implements IContentFactory {
     /**
      * Create a new content area for the panel.
      */
@@ -453,14 +201,14 @@ export namespace NotebookPanel {
   /**
    * Default content factory for the notebook panel.
    */
-  export
-  const defaultContentFactory: ContentFactory = new ContentFactory();
+  export const defaultContentFactory: ContentFactory = new ContentFactory();
 
   /* tslint:disable */
   /**
    * The notebook renderer token.
    */
-  export
-  const IContentFactory = new Token<IContentFactory>('@jupyterlab/notebook:IContentFactory');
+  export const IContentFactory = new Token<IContentFactory>(
+    '@jupyterlab/notebook:IContentFactory'
+  );
   /* tslint:enable */
 }

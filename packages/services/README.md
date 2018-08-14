@@ -1,5 +1,4 @@
-JupyterLab Services
-===================
+# JupyterLab Services
 
 Javascript client for the Jupyter services REST APIs
 
@@ -7,33 +6,31 @@ Javascript client for the Jupyter services REST APIs
 
 [REST API Docs](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml)
 
-Note: All functions and classes using the REST API allow a `serverSettings` 
+Note: All functions and classes using the REST API allow a `serverSettings`
 parameter to configure requests.
 Requests are made using the `fetch` API, which is available in modern browsers
-or via `npm install fetch` for node users.  The `whatwg-fetch` npm package
+or via `npm install fetch` for node users. The `whatwg-fetch` npm package
 can be used to polyfill browsers that do not support the `fetch` API.
 
-
-Package Install
----------------
+## Package Install
 
 **Prerequisites**
-- [node](http://nodejs.org/)
-- [python](https://www.anaconda.com/download)
+
+* [node](http://nodejs.org/)
+* [python](https://www.anaconda.com/download)
 
 ```bash
 npm install --save @jupyterlab/services
 conda install notebook  # notebook 4.3+ required
 ```
 
-
-Source Build
-------------
+## Source Build
 
 **Prerequisites**
-- [git](http://git-scm.com/)
-- [node 0.12+](http://nodejs.org/)
-- [python](https://www.anaconda.com/download)
+
+* [git](http://git-scm.com/)
+* [node 0.12+](http://nodejs.org/)
+* [python](https://www.anaconda.com/download)
 
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
@@ -44,14 +41,13 @@ conda install notebook  # notebook 4.3+ required
 ```
 
 **Rebuild**
+
 ```bash
 npm run clean
 npm run build
 ```
 
-
-Run Tests
----------
+## Run Tests
 
 Follow the source build instructions first.
 
@@ -59,9 +55,7 @@ Follow the source build instructions first.
 npm test
 ```
 
-
-Build Docs
-----------
+## Build Docs
 
 Follow the source build instructions first.
 
@@ -71,27 +65,23 @@ npm run docs
 
 Navigate to `docs/index.html`.
 
+## Supported Runtimes
 
-Supported Runtimes
-------------------
-
-The runtime versions which are currently *known to work* are listed below.
+The runtime versions which are currently _known to work_ are listed below.
 Earlier versions may also work, but come with no guarantees.
 
-- Node 0.12.7+
-- IE 11+
-- Firefox 32+
-- Chrome 38+
+* Node 0.12.7+
+* IE 11+
+* Firefox 32+
+* Chrome 38+
 
 Note: "requirejs" may need be included in a global context for `Comm` targets
 using the a `target_module` (in the classic Notebook).
 This can be as a `<script>` tag in the browser or by using the `requirejs`
-package in node (`npm install requirejs` and setting 
+package in node (`npm install requirejs` and setting
 `global.requirejs = require('requirejs');`).
 
-
-Starting the Notebook Server
-----------------------------
+## Starting the Notebook Server
 
 Follow the package install instructions first.
 
@@ -101,50 +91,40 @@ The library requires a running Jupyter Notebook server, launched as:
 jupyter notebook
 ```
 
-
-Bundling for the Browser
-------------------------
+## Bundling for the Browser
 
 Follow the package install instructions first.
 
 See `examples/browser` for an example of using Webpack to bundle the library.
 
 Note: Some browsers (such as IE11), require a polyfill for Promises.
-The example demonstrates the use of the polyfill.  See also notes about
+The example demonstrates the use of the polyfill. See also notes about
 the `fetch` API polyfill above.
 
-
-Usage from Node.js
-------------------
+## Usage from Node.js
 
 Follow the package install instructions first.
 
 See `examples/node` for an example of using an ES5 node script.
 
-
-Usage Examples
---------------
+## Usage Examples
 
 **Note:** This module is fully compatible with Node/Babel/ES6/ES5. The
-examples below are written in TypeScript using ES6 syntax.  Simply
+examples below are written in TypeScript using ES6 syntax. Simply
 omit the type declarations when using a language other than TypeScript.
 A translator such as Babel can be used to convert from ES6 -> ES5.
 
 **Kernel**
 
 ```typescript
-import {
-  KernelMessage, Kernel
-} from '@jupyterlab/services';
-
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-  Kernel.connectTo(kernelModels[0].id).then((kernel) => {
+    const kernel = Kernel.connectTo(kernelModels[0]);
     console.log(kernel.name);
   });
 });
-
 
 // Get info about the available kernels and start a new one.
 Kernel.getSpecs().then(kernelSpecs => {
@@ -156,18 +136,20 @@ Kernel.getSpecs().then(kernelSpecs => {
   };
   Kernel.startNew(options).then(kernel => {
     // Execute and handle replies.
-    let future = kernel.requestExecute({ code: 'a = 1' } );
+    let future = kernel.requestExecute({ code: 'a = 1' });
     future.done.then(() => {
       console.log('Future is fulfilled');
     });
-    future.onIOPub = (msg) => {
-      console.log(msg.content);  // Print rich output data.
+    future.onIOPub = msg => {
+      console.log(msg.content); // Print rich output data.
     };
 
     // Restart the kernel and then send an inspect message.
     kernel.restart().then(() => {
       let request: KernelMessage.IInspectRequest = {
-        code: 'hello', cursor_pos: 4, detail_level: 0
+        code: 'hello',
+        cursor_pos: 4,
+        detail_level: 0
       };
       kernel.requestInspect(request).then(reply => {
         console.log(reply.content.data);
@@ -176,13 +158,13 @@ Kernel.getSpecs().then(kernelSpecs => {
 
     // Interrupt the kernel and then send a complete message.
     kernel.interrupt().then(() => {
-      kernel.requestComplete({ code: 'impor', cursor_pos: 4 } ).then((reply) => {
+      kernel.requestComplete({ code: 'impor', cursor_pos: 4 }).then(reply => {
         console.log(reply.content.matches);
       });
     });
 
     // Register a callback for when the kernel changes state.
-    kernel.statusChanged.connect((status) => {
+    kernel.statusChanged.connect(status => {
       console.log('status', status);
     });
 
@@ -192,22 +174,17 @@ Kernel.getSpecs().then(kernelSpecs => {
     });
   });
 });
-
 ```
 
 **Session**
 
 ```typescript
-import {
-  Session
-} from '@jupyterlab/services';
-
+import { Session } from '@jupyterlab/services';
 
 // Get a list of available sessions and connect to one.
 Session.listRunning().then(sessionModels => {
-  Session.connectTo(sessionModels[0].id).then((session) => {
-    console.log(session.kernel.name);
-  });
+  const session = Session.connectTo(sessionModels[0]);
+  console.log(session.kernel.name);
 });
 
 // Start a new session.
@@ -237,83 +214,77 @@ Session.startNew(options).then(session => {
   session.shutdown().then(() => {
     console.log('session closed');
   });
-
 });
-
 ```
 
 **Comm**
 
 ```typescript
-
-import {
-  Kernel
-} from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 
 // Create a comm from the server side.
 //
 // Get info about the available kernels and connect to one.
-Kernel.getSpecs().then(kernelSpecs => {
-  return Kernel.startNew({
-    name: kernelSpecs.default,
+Kernel.getSpecs()
+  .then(kernelSpecs => {
+    return Kernel.startNew({
+      name: kernelSpecs.default
+    });
+  })
+  .then(kernel => {
+    let comm = kernel.connectToComm('test').then(comm => {
+      comm.open('initial state');
+      comm.send('test');
+      comm.close('bye');
+    });
   });
-}).then(kernel => {
-  let comm = kernel.connectToComm('test');
-  comm.open('initial state');
-  comm.send('test');
-  comm.close('bye');
-});
 
 // Create a comm from the client side.
-Kernel.getSpecs().then(kernelSpecs => {
-  return Kernel.startNew({
-    name: kernelSpecs.default,
-  });
-}).then(kernel => {
-  kernel.registerCommTarget('test2', (comm, commMsg) => {
-    if (commMsg.content.target_name !== 'test2') {
-       return;
-    }
-    comm.onMsg = (msg) => {
-      console.log(msg);  // 'hello'
-    };
-    comm.onClose = (msg) => {
-      console.log(msg);  // 'bye'
-    };
-  });
+Kernel.getSpecs()
+  .then(kernelSpecs => {
+    return Kernel.startNew({
+      name: kernelSpecs.default
+    });
+  })
+  .then(kernel => {
+    kernel.registerCommTarget('test2', (comm, commMsg) => {
+      if (commMsg.content.target_name !== 'test2') {
+        return;
+      }
+      comm.onMsg = msg => {
+        console.log(msg); // 'hello'
+      };
+      comm.onClose = msg => {
+        console.log(msg); // 'bye'
+      };
+    });
 
-  let code = [
-    'from ipykernel.comm import Comm',
-    'comm = Comm(target_name="test2")',
-    'comm.send(data="hello")',
-    'comm.close(data="bye")'
-  ].join('\n');
-  kernel.requestExecute({ code: code });
-});
+    let code = [
+      'from ipykernel.comm import Comm',
+      'comm = Comm(target_name="test2")',
+      'comm.send(data="hello")',
+      'comm.close(data="bye")'
+    ].join('\n');
+    kernel.requestExecute({ code: code });
+  });
 ```
 
 **Contents**
 
 ```typescript
-import {
-  ContentsManager
-} from '@jupyterlab/services';
+import { ContentsManager } from '@jupyterlab/services';
 
 let contents = new ContentsManager();
 
 // Create a new python file.
-contents.newUntitled({ path: '/foo', type: 'file', ext: 'py' }).then(
-  (model) => {
-    console.log('new file:', model.path);
-  }
-);
+contents.newUntitled({ path: '/foo', type: 'file', ext: 'py' }).then(model => {
+  console.log('new file:', model.path);
+});
 
 // Get the contents of a directory.
-contents.get('/foo/bar').then(
-  (model) => {
-    console.log('files:', model.content);
-  }
-);
+contents.get('/foo/bar').then(model => {
+  console.log('files:', model.content);
+});
 
 // Rename a file.
 contents.rename('/foo/bar.txt', '/foo/baz.txt');
@@ -325,12 +296,12 @@ contents.save('/foo/test.ipynb');
 contents.delete('/foo/bar.txt');
 
 // Copy a file.
-contents.copy('/foo/bar.txt', '/baz').then((model) => {
-    console.log('new path', model.path);
+contents.copy('/foo/bar.txt', '/baz').then(model => {
+  console.log('new path', model.path);
 });
 
 // Create a checkpoint.
-contents.createCheckpoint('/foo/bar.ipynb').then((model) => {
+contents.createCheckpoint('/foo/bar.ipynb').then(model => {
   let checkpoint = model;
 
   // Restore a checkpoint.
@@ -341,17 +312,15 @@ contents.createCheckpoint('/foo/bar.ipynb').then((model) => {
 });
 
 // List checkpoints for a file.
-contents.listCheckpoints('/foo/bar.txt').then((models) => {
-    console.log(models[0].id);
+contents.listCheckpoints('/foo/bar.txt').then(models => {
+  console.log(models[0].id);
 });
 ```
 
 **Configuration**
 
 ```typescript
-import {
-  ConfigWithDefaults, ConfigSection
-} from '@jupyterlab/services';
+import { ConfigWithDefaults, ConfigSection } from '@jupyterlab/services';
 
 // The base url of the Jupyter server.
 
@@ -361,9 +330,9 @@ ConfigSection.create({ name: 'notebook' }).then(section => {
     defaults: { default_cell_type: 'code' },
     className: 'Notebook'
   });
-  console.log(config.get('default_cell_type'));   // 'code'
+  console.log(config.get('default_cell_type')); // 'code'
   config.set('foo', 'bar').then(data => {
-     console.log(data); // "{ 'foo': 'bar' }"
+    console.log(data); // "{ 'foo': 'bar' }"
   });
 });
 ```
@@ -371,10 +340,7 @@ ConfigSection.create({ name: 'notebook' }).then(section => {
 **Terminals**
 
 ```typescript
-import {
-  TerminalSession
-} from '@jupyterlab/services';
-
+import { TerminalSession } from '@jupyterlab/services';
 
 // Create a named terminal session and send some data.
 TerminalSession.startNew().then(session => {

@@ -7,28 +7,22 @@
 | Private CSS variables
 |----------------------------------------------------------------------------*/
 
-
 :root {
 }
-
 
 /*-----------------------------------------------------------------------------
 | Main OutputArea
 | OutputArea has a list of Outputs
 |----------------------------------------------------------------------------*/
 
-
 .jp-OutputArea {
   overflow-y: auto;
 }
-
 
 .jp-OutputArea-child {
   display: flex;
   flex-direction: row;
 }
-
-
 
 .jp-OutputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);
@@ -40,7 +34,7 @@
   font-size: var(--jp-code-font-size);
   border: var(--jp-border-width) solid transparent;
   opacity: var(--jp-cell-prompt-opacity);
-    /* Right align prompt text, don't wrap to handle large prompt numbers */
+  /* Right align prompt text, don't wrap to handle large prompt numbers */
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -52,10 +46,7 @@
   user-select: none;
 }
 
-
 .jp-OutputArea-output {
-  flex-grow: 1;
-  flex-shrink: 1;
   height: auto;
   overflow-x: auto;
   user-select: text;
@@ -64,20 +55,23 @@
   -ms-user-select: text;
 }
 
+.jp-OutputArea-child .jp-OutputArea-output {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
 
 /**
  * Isolated output.
  */
- .jp-OutputArea-output.jp-mod-isolated {
+.jp-OutputArea-output.jp-mod-isolated {
   width: 100%;
   display: block;
 }
 
-
 /*
 When drag events occur, `p-mod-override-cursor` is added to the body.
 Because iframes steal all cursor events, the following two rules are necessary
-to suppress pointer events while resize drags are occuring. There may be a
+to suppress pointer events while resize drags are occurring. There may be a
 better solution to this problem.
 */
 body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
@@ -94,7 +88,6 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   background: transparent;
 }
 
-
 /* pre */
 
 .jp-OutputArea-output pre {
@@ -108,14 +101,12 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   white-space: pre-wrap;
 }
 
-
 /* tables */
 
 .jp-OutputArea-output.jp-RenderedHTMLCommon table {
   margin-left: 0;
   margin-right: 0;
 }
-
 
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
@@ -130,23 +121,18 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 | returned by a cell
 |----------------------------------------------------------------------------*/
 
-
 .jp-OutputArea-output.jp-OutputArea-executeResult {
   margin-left: 0px;
   flex: 1 1 auto;
 }
 
-
 .jp-OutputArea-executeResult.jp-RenderedText {
   padding-top: var(--jp-code-padding);
 }
 
-
-
 /*-----------------------------------------------------------------------------
 | The Stdin output
 |----------------------------------------------------------------------------*/
-
 
 .jp-OutputArea-stdin {
   line-height: var(--jp-code-line-height);
@@ -154,18 +140,18 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   display: flex;
 }
 
-
 .jp-Stdin-prompt {
+  color: var(--jp-content-font-color0);
   padding-right: var(--jp-code-padding);
   vertical-align: baseline;
   flex: 0 0 auto;
 }
 
-
 .jp-Stdin-input {
   font-family: var(--jp-code-font-family);
   font-size: inherit;
   color: inherit;
+  background-color: inherit;
   width: auto;
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
@@ -175,7 +161,19 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   flex: 0 0 70%;
 }
 
-
 .jp-Stdin-input:focus {
-    box-shadow: none;
+  box-shadow: none;
+}
+
+/*-----------------------------------------------------------------------------
+| Output Area View
+|----------------------------------------------------------------------------*/
+
+.jp-LinkedOutputView .jp-OutputArea {
+  height: calc(100%);
+  display: block;
+}
+
+.jp-LinkedOutputView .jp-OutputArea-child:only-child {
+  height: calc(100%);
 }

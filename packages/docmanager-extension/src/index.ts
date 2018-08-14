@@ -1,81 +1,82 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { toArray, iter } from '@phosphor/algorithm';
+
+import { Widget, DockLayout } from '@phosphor/widgets';
+
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import {
-  showDialog, showErrorMessage, Spinner, Dialog, ICommandPalette
+  showDialog,
+  showErrorMessage,
+  Dialog,
+  ICommandPalette
 } from '@jupyterlab/apputils';
 
-import {
-  IChangedArgs, ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
 
 import {
-  renameDialog, DocumentManager, IDocumentManager
+  renameDialog,
+  getOpenPath,
+  DocumentManager,
+  IDocumentManager
 } from '@jupyterlab/docmanager';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {
-  IMainMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  Contents, Kernel
-} from '@jupyterlab/services';
+import { Contents, Kernel } from '@jupyterlab/services';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
+/**
+ * The name of the factory that creates markdown widgets.
+ */
+const MARKDOWN_FACTORY = 'Markdown Preview';
 
 /**
  * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
-  export
-  const clone = 'docmanager:clone';
+  export const clone = 'docmanager:clone';
 
-  export
-  const close = 'docmanager:close';
+  export const close = 'docmanager:close';
 
-  export
-  const closeAllFiles = 'docmanager:close-all-files';
+  export const closeAllFiles = 'docmanager:close-all-files';
 
-  export
-  const createFrom = 'docmanager:create-from';
+  export const closeOtherTabs = 'docmanager:close-other-tabs';
 
-  export
-  const deleteFile = 'docmanager:delete-file';
+  export const closeRightTabs = 'docmanager:close-right-tabs';
 
-  export
-  const newUntitled = 'docmanager:new-untitled';
+  export const deleteFile = 'docmanager:delete-file';
 
-  export
-  const open = 'docmanager:open';
+  export const newUntitled = 'docmanager:new-untitled';
 
-  export
-  const rename = 'docmanager:rename';
+  export const open = 'docmanager:open';
 
-  export
-  const restoreCheckpoint = 'docmanager:restore-checkpoint';
+  export const openBrowserTab = 'docmanager:open-browser-tab';
 
-  export
-  const save = 'docmanager:save';
+  export const openDirect = 'docmanager:open-direct';
 
-  export
-  const saveAll = 'docmanager:save-all';
+  export const reload = 'docmanager:reload';
 
-  export
-  const saveAs = 'docmanager:save-as';
+  export const rename = 'docmanager:rename';
 
-  export
-  const toggleAutosave = 'docmanager:toggle-autosave';
+  export const restoreCheckpoint = 'docmanager:restore-checkpoint';
+
+  export const save = 'docmanager:save';
+
+  export const saveAll = 'docmanager:save-all';
+
+  export const saveAs = 'docmanager:save-as';
+
+  export const toggleAutosave = 'docmanager:toggle-autosave';
+
+  export const showInFileBrowser = 'docmanager:show-in-file-browser';
+
+  export const markdownPreview = 'markdownviewer:open';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -87,7 +88,12 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
   requires: [ICommandPalette, IMainMenu, ISettingRegistry],
-  activate: (app: JupyterLab, palette: ICommandPalette, menu: IMainMenu, settingRegistry: ISettingRegistry): IDocumentManager => {
+  activate: (
+    app: JupyterLab,
+    palette: ICommandPalette,
+    menu: IMainMenu,
+    settingRegistry: ISettingRegistry
+  ): IDocumentManager => {
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
@@ -97,21 +103,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
           widget.id = `document-manager-${++Private.id}`;
         }
         widget.title.dataset = {
-          'type': 'document-title',
+          type: 'document-title',
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
           app.shell.addToMainArea(widget, options || {});
-
-          // Add a loading spinner, and remove it when the widget is ready.
-          if (widget.ready !== undefined) {
-            const spinner = new Spinner();
-            widget.node.appendChild(spinner.node);
-            widget.ready.then(() => {
-              widget.node.removeChild(spinner.node);
-              spinner.dispose();
-            });
-          }
         }
         shell.activateById(widget.id);
 
@@ -124,65 +120,149 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       }
     };
     const registry = app.docRegistry;
-    const docManager = new DocumentManager({ registry, manager, opener });
+    const when = app.restored.then(() => void 0);
+    const docManager = new DocumentManager({
+      registry,
+      manager,
+      opener,
+      when,
+      setBusy: app.setBusy.bind(app)
+    });
 
     // Register the file operations commands.
     addCommands(app, docManager, palette, opener, settingRegistry);
 
+    // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
       const autosave = settings.get('autosave').composite as boolean | null;
-      docManager.autosave = (autosave === true || autosave === false)
-                            ? autosave
-                            : true;
+      docManager.autosave =
+        autosave === true || autosave === false ? autosave : true;
+      app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
     };
 
     // Fetch the initial state of the settings.
     Promise.all([settingRegistry.load(pluginId), app.restored])
-    .then(([settings]) => {
-      settings.changed.connect(onSettingsUpdated);
-      onSettingsUpdated(settings);
-    }).catch((reason: Error) => {
-      console.error(reason.message);
-    });
+      .then(([settings]) => {
+        settings.changed.connect(onSettingsUpdated);
+        onSettingsUpdated(settings);
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
     menu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
 
     return docManager;
   }
 };
 
-
 /**
  * Export the plugin as default.
  */
 export default plugin;
 
+/* Widget to display the revert to checkpoint confirmation. */
+class RevertConfirmWidget extends Widget {
+  /**
+   * Construct a new revert confirmation widget.
+   */
+  constructor(checkpoint: Contents.ICheckpointModel) {
+    super({ node: Private.createRevertConfirmNode(checkpoint) });
+  }
+}
 
 /**
  * Add the file operations commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICommandPalette, opener: DocumentManager.IWidgetOpener, settingRegistry: ISettingRegistry): void {
-  const { commands, docRegistry } = app;
+function addCommands(
+  app: JupyterLab,
+  docManager: IDocumentManager,
+  palette: ICommandPalette,
+  opener: DocumentManager.IWidgetOpener,
+  settingRegistry: ISettingRegistry
+): void {
+  const { commands, docRegistry, shell } = app;
   const category = 'File Operations';
   const isEnabled = () => {
-    const { currentWidget } = app.shell;
+    const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
-  const fileType = () => {
-    const { currentWidget } = app.shell;
-    if (!currentWidget) {
+
+  // fetches the doc widget associated with the most recent contextmenu event
+  const contextMenuWidget = (): Widget => {
+    let pathRe = /[Pp]ath:\s?(.*)\n?/;
+    let pathMatch = app.contextMenuFirst('title', pathRe);
+
+    if (!pathMatch) {
+      // fall back to active doc widget if path cannot be obtained from event
+      return app.shell.currentWidget;
+    }
+
+    return docManager.findWidget(pathMatch[1]);
+  };
+
+  // operates on active widget by default
+  const fileType = (widget: Widget = shell.currentWidget) => {
+    if (!widget) {
       return 'File';
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     if (!context) {
       return '';
     }
     const fts = docRegistry.getFileTypesForPath(context.path);
-    return (fts.length && fts[0].displayName) ? fts[0].displayName : 'File';
+    return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
+  };
+  const closeWidgets = (widgets: Array<Widget>): void => {
+    widgets.forEach(widget => widget.close());
+  };
+  const findTab = (
+    area: DockLayout.AreaConfig,
+    widget: Widget
+  ): DockLayout.ITabAreaConfig | null => {
+    switch (area.type) {
+      case 'split-area':
+        const iterator = iter(area.children);
+        let tab: DockLayout.ITabAreaConfig | null = null;
+        let value: DockLayout.AreaConfig | null = null;
+        do {
+          value = iterator.next();
+          if (value) {
+            tab = findTab(value, widget);
+          }
+        } while (!tab && value);
+        return tab;
+      case 'tab-area':
+        const { id } = widget;
+        return area.widgets.some(widget => widget.id === id) ? area : null;
+      default:
+        return null;
+    }
+  };
+  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
+    const { mainArea } = shell.saveLayout();
+    if (mainArea.mode !== 'multiple-document') {
+      return null;
+    }
+    let area = mainArea.dock.main;
+    if (!area) {
+      return null;
+    }
+    return findTab(area, widget);
+  };
+  const widgetsRightOf = (widget: Widget): Array<Widget> => {
+    const { id } = widget;
+    const tabArea = tabAreaFor(widget);
+    const widgets = tabArea ? tabArea.widgets || [] : [];
+    const index = widgets.findIndex(widget => widget.id === id);
+    if (index < 0) {
+      return [];
+    }
+    return widgets.slice(index + 1);
   };
 
   commands.addCommand(CommandIDs.close, {
     label: () => {
-      const widget = app.shell.currentWidget;
+      const widget = shell.currentWidget;
       let name = 'File';
       if (widget) {
         const typeName = fileType();
@@ -190,25 +270,60 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       }
       return `Close ${name}`;
     },
-    isEnabled: () => !!app.shell.currentWidget &&
-                     !!app.shell.currentWidget.title.closable,
+    isEnabled: () =>
+      !!shell.currentWidget && !!shell.currentWidget.title.closable,
     execute: () => {
-      if (app.shell.currentWidget) {
-        app.shell.currentWidget.close();
+      if (shell.currentWidget) {
+        shell.currentWidget.close();
       }
     }
   });
 
   commands.addCommand(CommandIDs.closeAllFiles, {
     label: 'Close All',
-    execute: () => { app.shell.closeAll(); }
+    execute: () => {
+      shell.closeAll();
+    }
+  });
+
+  commands.addCommand(CommandIDs.closeOtherTabs, {
+    label: () => `Close Other Tabs`,
+    isEnabled: () => {
+      // Ensure there are at least two widgets.
+      const iterator = shell.widgets('main');
+      return !!iterator.next() && !!iterator.next();
+    },
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      const { id } = widget;
+      const otherWidgets = toArray(shell.widgets('main')).filter(
+        widget => widget.id !== id
+      );
+      closeWidgets(otherWidgets);
+    }
+  });
+
+  commands.addCommand(CommandIDs.closeRightTabs, {
+    label: () => `Close Tabs to Right`,
+    isEnabled: () =>
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      closeWidgets(widgetsRightOf(widget));
+    }
   });
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType()}`,
     execute: args => {
-      const path = typeof args['path'] === 'undefined' ? ''
-        : args['path'] as string;
+      const path =
+        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
 
       if (!path) {
         const command = CommandIDs.deleteFile;
@@ -220,54 +335,145 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
 
   commands.addCommand(CommandIDs.newUntitled, {
     execute: args => {
-      const errorTitle = args['error'] as string || 'Error';
-      const path = typeof args['path'] === 'undefined' ? ''
-        : args['path'] as string;
+      const errorTitle = (args['error'] as string) || 'Error';
+      const path =
+        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       let options: Partial<Contents.ICreateOptions> = {
         type: args['type'] as Contents.ContentType,
         path
       };
 
       if (args['type'] === 'file') {
-        options.ext = args['ext'] as string || '.txt';
+        options.ext = (args['ext'] as string) || '.txt';
       }
 
-      return docManager.services.contents.newUntitled(options)
+      return docManager.services.contents
+        .newUntitled(options)
         .catch(error => showErrorMessage(errorTitle, error));
     },
-    label: args => args['label'] as string || `New ${args['type'] as string}`
+    label: args => (args['label'] as string) || `New ${args['type'] as string}`
   });
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
-      const path = typeof args['path'] === 'undefined' ? ''
-        : args['path'] as string;
-      const factory = args['factory'] as string || void 0;
-      const kernel = args['kernel'] as Kernel.IModel || void 0;
-      const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
-      return docManager.services.contents.get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options))
-        .then(widget => {
-          return widget.ready.then(() => { return widget; });
-        });
+      const path =
+        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+      const factory = (args['factory'] as string) || void 0;
+      const kernel = (args['kernel'] as Kernel.IModel) || void 0;
+      const options =
+        (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
+      return docManager.services.contents
+        .get(path, { content: false })
+        .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
-    icon: args => args['icon'] as string || '',
+    icon: args => (args['icon'] as string) || '',
     label: args => (args['label'] || args['factory']) as string,
-    mnemonic: args => args['mnemonic'] as number || -1
+    mnemonic: args => (args['mnemonic'] as number) || -1
+  });
+
+  commands.addCommand(CommandIDs.openBrowserTab, {
+    execute: args => {
+      const path =
+        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+
+      if (!path) {
+        return;
+      }
+
+      return docManager.services.contents.getDownloadUrl(path).then(url => {
+        window.open(url, '_blank');
+      });
+    },
+    icon: args => (args['icon'] as string) || '',
+    label: () => 'Open in New Browser Tab'
+  });
+
+  commands.addCommand(CommandIDs.openDirect, {
+    label: () => 'Open From Path...',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: () => {
+      return getOpenPath(docManager.services.contents).then(path => {
+        if (!path) {
+          return;
+        }
+        docManager.services.contents.get(path, { content: false }).then(
+          args => {
+            // exists
+            return commands.execute(CommandIDs.open, { path: path });
+          },
+          () => {
+            // does not exist
+            return showDialog({
+              title: 'Cannot open',
+              body: 'File not found',
+              buttons: [Dialog.okButton()]
+            });
+          }
+        );
+        return;
+      });
+    }
+  });
+
+  commands.addCommand(CommandIDs.reload, {
+    label: () => `Reload ${fileType()} from Disk`,
+    caption: 'Reload contents from disk',
+    isEnabled,
+    execute: () => {
+      if (!isEnabled()) {
+        return;
+      }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return showDialog({
+        title: 'Reload Notebook from Disk',
+        body: `Are you sure you want to reload
+          the notebook from the disk?`,
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
+      }).then(result => {
+        if (result.button.accept && !context.isDisposed) {
+          return context.revert();
+        }
+      });
+    }
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileType()} to Saved`,
+    label: () => `Revert ${fileType()} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
-        if (context.model.readOnly) {
-          return context.revert();
-        }
-        return context.restoreCheckpoint().then(() => context.revert());
+      if (!isEnabled()) {
+        return;
       }
+      const context = docManager.contextForWidget(shell.currentWidget);
+      return context.listCheckpoints().then(checkpoints => {
+        if (checkpoints.length < 1) {
+          return;
+        }
+        const lastCheckpoint = checkpoints[checkpoints.length - 1];
+        if (!lastCheckpoint) {
+          return;
+        }
+        return showDialog({
+          title: 'Revert notebook to checkpoint',
+          body: new RevertConfirmWidget(lastCheckpoint),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: 'Revert' })
+          ]
+        }).then(result => {
+          if (context.isDisposed) {
+            return;
+          }
+          if (result.button.accept) {
+            if (context.model.readOnly) {
+              return context.revert();
+            }
+            return context.restoreCheckpoint().then(() => context.revert());
+          }
+        });
+      });
     }
   });
 
@@ -277,7 +483,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         if (context.model.readOnly) {
           return showDialog({
             title: 'Cannot Save',
@@ -285,7 +491,16 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
             buttons: [Dialog.okButton()]
           });
         }
-        return context.save().then(() => context.createCheckpoint());
+        return context
+          .save()
+          .then(() => context.createCheckpoint())
+          .catch(err => {
+            // If the save was canceled by user-action, do nothing.
+            if (err.message === 'Cancel') {
+              return;
+            }
+            throw err;
+          });
       }
     }
   });
@@ -294,7 +509,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     label: () => 'Save All',
     caption: 'Save all open documents',
     isEnabled: () => {
-      const iterator = app.shell.widgets('main');
+      const iterator = shell.widgets('main');
       let widget = iterator.next();
       while (widget) {
         if (docManager.contextForWidget(widget)) {
@@ -305,7 +520,7 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       return false;
     },
     execute: () => {
-      const iterator = app.shell.widgets('main');
+      const iterator = shell.widgets('main');
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
       let widget = iterator.next();
@@ -327,29 +542,30 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget);
         return context.saveAs();
       }
     }
   });
 
   commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileType()}…`,
+    label: () => `Rename ${fileType(contextMenuWidget())}…`,
     isEnabled,
     execute: () => {
       if (isEnabled()) {
-        let context = docManager.contextForWidget(app.shell.currentWidget);
+        let context = docManager.contextForWidget(contextMenuWidget());
         return renameDialog(docManager, context!.path);
       }
     }
   });
 
   commands.addCommand(CommandIDs.clone, {
-    label: () => `New View for ${fileType()}`,
+    label: () => `New View for ${fileType(contextMenuWidget())}`,
     isEnabled,
-    execute: (args) => {
-      const widget = app.shell.currentWidget;
-      const options = args['options'] as DocumentRegistry.IOpenOptions || void 0;
+    execute: args => {
+      const widget = contextMenuWidget();
+      const options =
+        (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       if (!widget) {
         return;
       }
@@ -358,19 +574,48 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
       if (child) {
         opener.open(child, options);
       }
-    },
+    }
   });
 
   commands.addCommand(CommandIDs.toggleAutosave, {
-    label: args =>
-      args['isPalette'] ? 'Toggle Document Autosave' : 'Autosave Documents',
+    label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
     execute: () => {
       const value = !docManager.autosave;
       const key = 'autosave';
-      return settingRegistry.set(pluginId, key, value)
-      .catch((reason: Error) => {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+      return settingRegistry
+        .set(pluginId, key, value)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        });
+    }
+  });
+
+  commands.addCommand(CommandIDs.showInFileBrowser, {
+    label: () => `Show in File Browser`,
+    isEnabled,
+    execute: () => {
+      let context = docManager.contextForWidget(contextMenuWidget());
+      if (!context) {
+        return;
+      }
+
+      // 'activate' is needed if this command is selected in the "open tabs" sidebar
+      commands.execute('filebrowser:activate', { path: context.path });
+      commands.execute('filebrowser:navigate', { path: context.path });
+    }
+  });
+
+  commands.addCommand(CommandIDs.markdownPreview, {
+    label: 'Markdown Preview',
+    execute: args => {
+      let path = args['path'];
+      if (typeof path !== 'string') {
+        return;
+      }
+      return commands.execute('docmanager:open', {
+        path,
+        factory: MARKDOWN_FACTORY
       });
     }
   });
@@ -385,27 +630,46 @@ function addCommands(app: JupyterLab, docManager: IDocumentManager, palette: ICo
     selector: '[data-type="document-title"]',
     rank: 2
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.closeOtherTabs,
+    selector: '[data-type="document-title"]',
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.closeRightTabs,
+    selector: '[data-type="document-title"]',
+    rank: 5
+  });
 
   [
+    CommandIDs.openDirect,
     CommandIDs.save,
+    CommandIDs.reload,
     CommandIDs.restoreCheckpoint,
     CommandIDs.saveAs,
     CommandIDs.clone,
     CommandIDs.close,
-    CommandIDs.closeAllFiles
-  ].forEach(command => { palette.addItem({ command, category }); });
-  palette.addItem({
-    command: CommandIDs.toggleAutosave,
-    category,
-    args: { isPalette: true }
+    CommandIDs.closeAllFiles,
+    CommandIDs.closeOtherTabs,
+    CommandIDs.closeRightTabs,
+    CommandIDs.toggleAutosave
+  ].forEach(command => {
+    palette.addItem({ command, category });
   });
 }
-
 
 /**
  * Handle dirty state for a context.
  */
-function handleContext(app: JupyterLab, context: DocumentRegistry.Context): void {
+function handleContext(
+  app: JupyterLab,
+  context: DocumentRegistry.Context
+): void {
   let disposable: IDisposable | null = null;
   let onStateChanged = (sender: any, args: IChangedArgs<any>) => {
     if (args.name === 'dirty') {
@@ -432,7 +696,6 @@ function handleContext(app: JupyterLab, context: DocumentRegistry.Context): void
   });
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -440,6 +703,39 @@ namespace Private {
   /**
    * A counter for unique IDs.
    */
-  export
-  let id = 0;
+  export let id = 0;
+
+  export function createRevertConfirmNode(
+    checkpoint: Contents.ICheckpointModel
+  ): HTMLElement {
+    let body = document.createElement('div');
+    let confirmMessage = document.createElement('p');
+    let confirmText = document.createTextNode(`Are you sure you want to revert
+      the notebook to the latest checkpoint? `);
+    let cannotUndoText = document.createElement('strong');
+    cannotUndoText.textContent = 'This cannot be undone.';
+
+    confirmMessage.appendChild(confirmText);
+    confirmMessage.appendChild(cannotUndoText);
+
+    let lastCheckpointMessage = document.createElement('p');
+    let lastCheckpointText = document.createTextNode(
+      'The checkpoint was last updated at: '
+    );
+    let lastCheckpointDate = document.createElement('p');
+    let date = new Date(checkpoint.last_modified);
+    lastCheckpointDate.style.textAlign = 'center';
+    lastCheckpointDate.textContent =
+      Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +
+      ' (' +
+      Time.formatHuman(date) +
+      ')';
+
+    lastCheckpointMessage.appendChild(lastCheckpointText);
+    lastCheckpointMessage.appendChild(lastCheckpointDate);
+
+    body.appendChild(confirmMessage);
+    body.appendChild(lastCheckpointMessage);
+    return body;
+  }
 }

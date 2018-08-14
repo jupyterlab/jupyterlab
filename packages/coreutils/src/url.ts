@@ -1,18 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONObject
-} from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
-import * as urlparse
- from 'url-parse';
+import urlparse from 'url-parse';
 
 /**
  * The namespace for URL-related functions.
  */
-export
-namespace URLExt {
+export namespace URLExt {
   /**
    * Parse a url into a URL object.
    *
@@ -20,8 +16,7 @@ namespace URLExt {
    *
    * @returns A URL object.
    */
-  export
-  function parse(url: string): IUrl {
+  export function parse(url: string): IUrl {
     if (typeof document !== 'undefined') {
       let a = document.createElement('a');
       a.href = url;
@@ -37,26 +32,37 @@ namespace URLExt {
    *
    * @returns the joined url.
    */
-  export
-  function join(...parts: string[]): string {
-    // Adapted from url-join.
-    // Copyright (c) 2016 José F. Romaniello, MIT License.
-    // https://github.com/jfromaniello/url-join/blob/v1.1.0/lib/url-join.js
-    let str = [].slice.call(parts, 0).join('/');
+  export function join(...parts: string[]): string {
+    parts = parts || [];
 
-    // make sure protocol is followed by two slashes
-    str = str.replace(/:\//g, '://');
+    // Isolate the top element.
+    const top = parts[0] || '';
 
-    // remove consecutive slashes
-    str = str.replace(/([^:\s])\/+/g, '$1/');
+    // Check whether protocol shorthand is being used.
+    const shorthand = top.indexOf('//') === 0;
 
-    // remove trailing slash before parameters or hash
-    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+    // Parse the top element into a header collection.
+    const header = top.match(/(\w+)(:)(\/\/)?/);
+    const protocol = header && header[1];
+    const colon = protocol && header[2];
+    const slashes = colon && header[3];
 
-    // replace ? in parameters with &
-    str = str.replace(/(\?.+)\?/g, '$1&');
+    // Construct the URL prefix.
+    const prefix = shorthand
+      ? '//'
+      : [protocol, colon, slashes].filter(str => str).join('');
 
-    return str;
+    // Construct the URL body omitting the prefix of the top value.
+    const body = [top.indexOf(prefix) === 0 ? top.replace(prefix, '') : top]
+      // Filter out top value if empty.
+      .filter(str => str)
+      // Remove leading slashes in all subsequent URL body elements.
+      .concat(parts.slice(1).map(str => str.replace(/^\//, '')))
+      .join('/')
+      // Replace multiple slashes with one.
+      .replace(/\/+/g, '/');
+
+    return prefix + body;
   }
 
   /**
@@ -70,8 +76,7 @@ namespace URLExt {
    * Preserves the `'/'` separators.
    * Should not include the base url, since all parts are escaped.
    */
-  export
-  function encodeParts(url: string): string {
+  export function encodeParts(url: string): string {
     return join(...url.split('/').map(encodeURIComponent));
   }
 
@@ -83,27 +88,59 @@ namespace URLExt {
    * @returns an encoded url query.
    *
    * #### Notes
-   * From [stackoverflow](http://stackoverflow.com/a/30707423).
+   * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export
-  function objectToQueryString(value: JSONObject): string {
-    return '?' + Object.keys(value).map(key =>
-      encodeURIComponent(key) + '=' + encodeURIComponent(String(value[key]))
-    ).join('&');
+  export function objectToQueryString(value: JSONObject): string {
+    const keys = Object.keys(value);
+
+    if (!keys.length) {
+      return '';
+    }
+
+    return (
+      '?' +
+      keys
+        .map(key => {
+          const content = encodeURIComponent(String(value[key]));
+
+          return key + (content ? '=' + content : '');
+        })
+        .join('&')
+    );
+  }
+
+  /**
+   * Return a parsed object that represents the values in a query string.
+   */
+  export function queryStringToObject(
+    value: string
+  ): { [key: string]: string } {
+    return value
+      .replace(/^\?/, '')
+      .split('&')
+      .reduce(
+        (acc, val) => {
+          const [key, value] = val.split('=');
+
+          acc[key] = decodeURIComponent(value || '');
+
+          return acc;
+        },
+        {} as { [key: string]: string }
+      );
   }
 
   /**
    * Test whether the url is a local url.
+   *
+   * #### Notes
+   * This function returns `false` for any fully qualified url, including
+   * `data:`, `file:`, and `//` protocol URLs.
    */
-  export
-  function isLocal(url: string): boolean {
-    switch (parse(url).host) {
-    case location.host:
-    case '':
-      return true;
-    default:
-      return false;
-    }
+  export function isLocal(url: string): boolean {
+    const { protocol } = parse(url);
+
+    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
   }
 
   /**
@@ -148,7 +185,6 @@ namespace URLExt {
      * `(#)` character
      */
     hash?: string;
-
 
     /**
      * The search element, including leading question mark (`'?'`), if any,

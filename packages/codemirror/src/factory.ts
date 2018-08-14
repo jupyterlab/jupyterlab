@@ -1,20 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor, IEditorFactoryService
-} from '@jupyterlab/codeeditor';
+import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
 
-import {
-  CodeMirrorEditor
-} from './editor';
-
+import { CodeMirrorEditor } from './editor';
 
 /**
  * CodeMirror editor factory.
  */
-export
-class CodeMirrorEditorFactory implements IEditorFactoryService {
+export class CodeMirrorEditorFactory implements IEditorFactoryService {
   /**
    * Construct an IEditorFactoryService for CodeMirrorEditors.
    */
@@ -23,21 +17,25 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
         'Cmd-Right': 'goLineRight',
-        'End': 'goLineRight',
+        End: 'goLineRight',
         'Cmd-Left': 'goLineLeft',
-        'Tab': 'indentMoreOrinsertTab',
+        Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
         'Cmd-/': 'toggleComment',
-        'Ctrl-/': 'toggleComment',
+        'Ctrl-/': 'toggleComment'
       },
       ...defaults
     };
     this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
-        'Tab': 'indentMoreOrinsertTab',
+        Tab: 'indentMoreOrinsertTab',
         'Shift-Tab': 'indentLess',
-        'Shift-Enter': () => { /* no-op */ }
+        'Cmd-/': 'toggleComment',
+        'Ctrl-/': 'toggleComment',
+        'Shift-Enter': () => {
+          /* no-op */
+        }
       },
       lineNumbers: true,
       scrollPastEnd: true,
@@ -52,9 +50,9 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
     options.host.dataset.type = 'inline';
     return new CodeMirrorEditor({
       ...options,
-      config: { ...this.inlineCodeMirrorConfig, ...options.config || {} }
+      config: { ...this.inlineCodeMirrorConfig, ...(options.config || {}) }
     });
-  }
+  };
 
   /**
    * Create a new editor for a full document.
@@ -63,11 +61,10 @@ class CodeMirrorEditorFactory implements IEditorFactoryService {
     options.host.dataset.type = 'document';
     return new CodeMirrorEditor({
       ...options,
-      config: { ...this.documentCodeMirrorConfig, ...options.config || {} }
+      config: { ...this.documentCodeMirrorConfig, ...(options.config || {}) }
     });
-  }
+  };
 
   protected inlineCodeMirrorConfig: Partial<CodeMirrorEditor.IConfig>;
   protected documentCodeMirrorConfig: Partial<CodeMirrorEditor.IConfig>;
-
 }

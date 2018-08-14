@@ -17,7 +17,6 @@ import * as fs from 'fs-extra';
 import * as utils from './utils';
 import { ensurePackage } from './ensure-package';
 
-
 // Data to ignore.
 let MISSING: { [key: string]: string[] } = {
   '@jupyterlab/buildutils': ['path']
@@ -29,14 +28,14 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/theme-dark-extension': ['font-awesome'],
   '@jupyterlab/theme-light-extension': ['font-awesome'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
-  '@jupyterlab/vega2-extension': ['d3', 'vega', 'vega-lite']
+  '@jupyterlab/test-csvviewer': ['csv-spectrum'],
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
 };
 
 let pkgData: { [key: string]: any } = {};
 let pkgPaths: { [key: string]: string } = {};
 let pkgNames: { [key: string]: string } = {};
 let depCache: { [key: string]: string } = {};
-
 
 /**
  * Ensure the metapackage package.
@@ -49,7 +48,10 @@ function ensureMetaPackage(): string[] {
   let metaPackageJson = path.join(metaPackagePath, 'package.json');
   let metaPackageData = utils.readJSONFile(metaPackageJson);
   let indexPath = path.join(metaPackagePath, 'src', 'index.ts');
-  let index = fs.readFileSync(indexPath, 'utf8').split('\r\n').join('\n');
+  let index = fs
+    .readFileSync(indexPath, 'utf8')
+    .split('\r\n')
+    .join('\n');
   let lines = index.split('\n').slice(0, 3);
   let messages: string[] = [];
   let seen: { [key: string]: boolean } = {};
@@ -76,7 +78,7 @@ function ensureMetaPackage(): string[] {
     if (index.indexOf(name) === -1) {
       valid = false;
     }
-    lines.push('import \'' + name + '\';');
+    lines.push("import '" + name + "';");
 
     if (!valid) {
       messages.push(`Updated: ${name}`);
@@ -104,7 +106,6 @@ function ensureMetaPackage(): string[] {
   return messages;
 }
 
-
 /**
  * Ensure the jupyterlab application package.
  */
@@ -130,11 +131,11 @@ function ensureJupyterlab(): string[] {
     let dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
-       data = utils.readJSONFile(dataPath);
+      data = utils.readJSONFile(dataPath);
     } catch (e) {
       return;
     }
-    if (data.private === true) {
+    if (data.private === true || data.name === '@jupyterlab/metapackage') {
       return;
     }
 
@@ -179,12 +180,10 @@ function ensureJupyterlab(): string[] {
   return [];
 }
 
-
 /**
  * Ensure the repo integrity.
  */
-export
-function ensureIntegrity(): boolean {
+export function ensureIntegrity(): boolean {
   let messages: { [key: string]: string[] } = {};
 
   // Pick up all the package versions.
@@ -235,7 +234,7 @@ function ensureIntegrity(): boolean {
   // Handle the metapackage metapackage.
   let pkgMessages = ensureMetaPackage();
   if (pkgMessages.length > 0) {
-    let pkgName ='@jupyterlab/metapackage';
+    let pkgName = '@jupyterlab/metapackage';
     if (!messages[pkgName]) {
       messages[pkgName] = [];
     }
@@ -256,7 +255,9 @@ function ensureIntegrity(): boolean {
   if (Object.keys(messages).length > 0) {
     console.log(JSON.stringify(messages, null, 2));
     if (process.env.TRAVIS_BRANCH || process.env.APPVEYOR) {
-      console.log('\n\nPlease run `jlpm run integrity` locally and commit the changes');
+      console.log(
+        '\n\nPlease run `jlpm run integrity` locally and commit the changes'
+      );
       process.exit(1);
     }
     utils.run('jlpm install');
@@ -268,7 +269,6 @@ function ensureIntegrity(): boolean {
   console.log('Repo integrity verified!');
   return true;
 }
-
 
 if (require.main === module) {
   ensureIntegrity();

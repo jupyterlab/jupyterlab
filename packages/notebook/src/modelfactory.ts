@@ -1,40 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeCellModel
-} from '@jupyterlab/cells';
+import { CodeCellModel } from '@jupyterlab/cells';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {
-  IModelDB
-} from '@jupyterlab/observables';
+import { IModelDB } from '@jupyterlab/observables';
 
-import {
-  Contents
-} from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 
-import {
-  INotebookModel, NotebookModel
-} from './model';
-
+import { INotebookModel, NotebookModel } from './model';
 
 /**
  * A model factory for notebooks.
  */
-export
-class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookModel> {
+export class NotebookModelFactory
+  implements DocumentRegistry.IModelFactory<INotebookModel> {
   /**
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions) {
     let codeCellContentFactory = options.codeCellContentFactory;
-    this.contentFactory = (options.contentFactory ||
-      new NotebookModel.ContentFactory({ codeCellContentFactory })
-    );
+    this.contentFactory =
+      options.contentFactory ||
+      new NotebookModel.ContentFactory({ codeCellContentFactory });
   }
 
   /**
@@ -99,17 +88,14 @@ class NotebookModelFactory implements DocumentRegistry.IModelFactory<INotebookMo
   private _disposed = false;
 }
 
-
 /**
  * The namespace for notebook model factory statics.
  */
-export
-namespace NotebookModelFactory {
+export namespace NotebookModelFactory {
   /**
    * The options used to initialize a NotebookModelFactory.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The factory for code cell content.
      */
@@ -117,7 +103,7 @@ namespace NotebookModelFactory {
 
     /**
      * The content factory used by the NotebookModelFactory.  If
-     * given, it will supercede the `codeCellContentFactory`.
+     * given, it will supersede the `codeCellContentFactory`.
      */
     contentFactory?: NotebookModel.IContentFactory;
   }

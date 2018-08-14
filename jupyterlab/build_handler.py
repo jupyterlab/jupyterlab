@@ -33,14 +33,20 @@ class Builder(object):
         if self.building:
             raise gen.Return(dict(status='building', message=''))
 
-        messages = yield self._run_build_check(self.app_dir, self.log)
-
-        status = 'needed' if messages else 'stable'
-        if messages:
-            self.log.warn('Build recommended')
-            [self.log.warn(m) for m in messages]
-        else:
-            self.log.info('Build is up to date')
+        try:
+            messages = yield self._run_build_check(self.app_dir, self.log)
+            status = 'needed' if messages else 'stable'
+            if messages:
+                self.log.warn('Build recommended')
+                [self.log.warn(m) for m in messages]
+            else:
+                self.log.info('Build is up to date')
+        except ValueError as e:
+            self.log.warn(
+                'Could not determine jupyterlab build status without nodejs'
+            )
+            status = 'stable'
+            messages = []
 
         raise gen.Return(dict(status=status, message='\n'.join(messages)))
 

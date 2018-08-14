@@ -10,7 +10,6 @@ import * as childProcess from 'child_process';
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
 
-
 /**
  * Get the appropriate dependency for a given package name.
  *
@@ -18,15 +17,14 @@ let allDevDeps: string[] = [];
  *
  * @returns The dependency version specifier.
  */
-export
-function getDependency(name: string): string {
+export function getDependency(name: string): string {
   let version = '';
   let versions: { [key: string]: number } = {};
   allDeps = [];
   allDevDeps = [];
 
   utils.getLernaPaths().forEach(pkgRoot => {
-  // Read in the package.json.
+    // Read in the package.json.
     let packagePath = path.join(pkgRoot, 'package.json');
     let data: any;
     try {
@@ -66,8 +64,9 @@ function getDependency(name: string): string {
 
   if (Object.keys(versions).length > 0) {
     // Get the most common version.
-    version = Object.keys(versions)
-      .reduce((a, b) => { return versions[a] > versions[b] ? a : b; });
+    version = Object.keys(versions).reduce((a, b) => {
+      return versions[a] > versions[b] ? a : b;
+    });
   } else {
     let cmd = `npm view ${name} version`;
     version = '~' + String(childProcess.execSync(cmd)).trim();
@@ -79,9 +78,9 @@ function getDependency(name: string): string {
 if (require.main === module) {
   // Make sure we have required command line arguments.
   if (process.argv.length < 3) {
-      let msg = '** Must supply a target library name\n';
-      process.stderr.write(msg);
-      process.exit(1);
+    let msg = '** Must supply a target library name\n';
+    process.stderr.write(msg);
+    process.exit(1);
   }
   let name = process.argv[2];
   let version = getDependency(name);

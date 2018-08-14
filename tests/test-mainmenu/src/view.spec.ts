@@ -1,27 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  ViewMenu, IViewMenu
-} from '@jupyterlab/mainmenu';
+import { ViewMenu, IViewMenu } from '@jupyterlab/mainmenu';
 
-import {
-  delegateExecute, delegateToggled
-} from './util';
+import { delegateExecute, delegateToggled } from './util';
 
 class Wodget extends Widget {
   wrapped: boolean = false;
@@ -30,9 +20,7 @@ class Wodget extends Widget {
 }
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('ViewMenu', () => {
-
     let commands: CommandRegistry;
     let menu: ViewMenu;
     let tracker: InstanceTracker<Wodget>;
@@ -56,16 +44,13 @@ describe('@jupyterlab/mainmenu', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new view menu', () => {
-        expect(menu).to.be.an(ViewMenu);
-        expect(menu.menu.title.label).to.be('View');
+        expect(menu).to.be.an.instanceof(ViewMenu);
+        expect(menu.menu.title.label).to.equal('View');
       });
-
     });
 
     describe('#editorViewers', () => {
-
       it('should allow setting of an IEditorViewer', () => {
         const viewer: IViewMenu.IEditorViewer<Wodget> = {
           tracker,
@@ -87,27 +72,30 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.editorViewers.add(viewer);
 
-        expect(delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled'))
-        .to.be(false);
-        expect(delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled'))
-        .to.be(false);
-        expect(delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled'))
-        .to.be(false);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')
+        ).to.equal(false);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled')
+        ).to.equal(false);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
+        ).to.equal(false);
 
         delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
         delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
         delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
 
-        expect(delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled'))
-        .to.be(true);
-        expect(delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled'))
-        .to.be(true);
-        expect(delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled'))
-        .to.be(true);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')
+        ).to.equal(true);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled')
+        ).to.equal(true);
+        expect(
+          delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
+        ).to.equal(true);
       });
-
     });
-
   });
-
 });

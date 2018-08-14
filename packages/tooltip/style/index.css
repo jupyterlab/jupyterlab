@@ -14,16 +14,15 @@
   display: flex;
 }
 
-
 .jp-Tooltip-content {
   overflow: auto;
 }
-
 
 .jp-Tooltip:focus {
   outline: 0;
 }
 
 .jp-Tooltip pre {
+  white-space: pre-wrap;
   margin: 0;
 }

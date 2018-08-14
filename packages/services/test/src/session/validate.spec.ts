@@ -1,25 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
-import {
-  Session
-} from '../../../lib/session';
+import { Session } from '../../../lib/session';
 
-import {
-  validateModel
-} from '../../../lib/session/validate';
-
+import { validateModel } from '../../../lib/session/validate';
 
 describe('session/validate', () => {
-
   describe('#validateModel()', () => {
-
     it('should pass a valid model', () => {
-      let model: Session.IModel = {
+      const model: Session.IModel = {
         id: 'foo',
-        kernel: { name: 'foo', id: '123'},
+        kernel: { name: 'foo', id: '123' },
         path: 'bar',
         name: '',
         type: ''
@@ -28,9 +21,9 @@ describe('session/validate', () => {
     });
 
     it('should pass a deprecated model', () => {
-      let model = {
+      const model = {
         id: 'foo',
-        kernel: { name: 'foo', id: '123'},
+        kernel: { name: 'foo', id: '123' },
         notebook: {
           path: 'bar'
         }
@@ -39,15 +32,13 @@ describe('session/validate', () => {
     });
 
     it('should fail on missing data', () => {
-      let model: any = {
+      const model: any = {
         id: 'foo',
-        kernel: { name: 'foo', id: '123'},
+        kernel: { name: 'foo', id: '123' },
         path: 'bar',
         name: ''
       };
-      expect(() => validateModel(model)).to.throwError();
+      expect(() => validateModel(model)).to.throw();
     });
-
   });
-
 });

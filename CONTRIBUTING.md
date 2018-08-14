@@ -1,7 +1,7 @@
 # Contributing to JupyterLab
 
 If you're reading this section, you're probably interested in contributing to
-JupyterLab.  Welcome and thanks for your interest in contributing!
+JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
 using Jupyter Notebook, and introduce yourself on the mailing list and share
@@ -12,26 +12,39 @@ that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
-
 ## General Guidelines
 
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+All source code is written in
+[TypeScript](http://www.typescriptlang.org/Handbook). See the [Style
+Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
+All source code is formatted using [prettier](https://prettier.io).
+When code is modified and committed, all staged files will be automtically
+formatted using pre-commit git hooks (with help from the
+[lint-staged](https://github.com/okonet/lint-staged) and
+[husky](https://github.com/typicode/husky) libraries). The benefit of using a
+code formatter like prettier is that it removes the topic of code style from the conversation
+when reviewing pull requests, thereby speeding up the review process.
+
+You may also use the prettier npm script (e.g. `npm run prettier` or `yarn prettier` or `jlpm prettier`) to format the entire code base. We recommend
+installing a prettier
+extension for your code editor and configuring it to format your code with
+a keyboard shortcut or automatically on save.
 
 ## Setting Up a Development Environment
 
 ### Installing Node.js and jlpm
 
 Building JupyterLab from its GitHub source code requires Node.js version
-4+.
+5+.
 
-If you use ``conda``, you can get it with:
+If you use `conda`, you can get it with:
 
 ```bash
-conda install -c conda-forge nodejs
+conda install -c conda-forge 'nodejs<10'
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
@@ -42,12 +55,11 @@ brew install node
 
 You can also use the installer from the [Node.js](https://nodejs.org) website.
 
-
 ## Installing JupyterLab
 
 JupyterLab requires Jupyter Notebook version 4.3 or later.
 
-If you use ``conda``, you can install notebook using:
+If you use `conda`, you can install notebook using:
 
 ```bash
 conda install -c conda-forge notebook
@@ -82,17 +94,20 @@ jupyter lab build  # Build the app dir assets (optional)
 
 Notes:
 
-* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager.  If you have `yarn` installed
-already, you can use the `yarn` command when developing, and it will use the
-local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
-a built application directory.
+* A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
 
-* At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`.  This will clean the repository, and re-install and
-rebuild.
+* There are versions of Node that are too modern. You should use a version of Node < 10.
+
+* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
+  already, you can use the `yarn` command when developing, and it will use the
+  local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
+  a built application directory.
+
+* At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`. This will clean the repository, and re-install and
+  rebuild.
 
 * If `pip` gives a `VersionConflict` error, it usually means that the installed
-version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade
-jupyterlab_launcher` to get the latest version.
+  version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade jupyterlab_launcher` to get the latest version.
 
 * To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
@@ -119,7 +134,7 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that are
-built in the dev-installed Python package.  When running in dev mode, a red
+built in the dev-installed Python package. When running in dev mode, a red
 stripe will appear at the top of the page; this is to indicate running
 an unreleased version.
 
@@ -146,14 +161,20 @@ jlpm test --pattern=src/*.spec.ts
 jlpm test --pattern=src/history.spec.ts
 ```
 
-You can run `jlpm watch` from a test folder, and it  will re-run the tests
-when the source file(s) change.  Note that you have to launch the browser
-of your choice after it says `No captured browser`.  You can put a `debugger`
+You can run `jlpm watch` from a test folder, and it will re-run the tests
+when the source file(s) change. Note that you have to launch the browser
+of your choice after it says `No captured browser`. You can put a `debugger`
 statement on a line and open the browser debugger to debug specific tests.
 `jlpm watch` also accepts the `--pattern` argument.
 
-Note that there are some helper functions in `tests/utils.ts` and
-`tests/notebook-utils.ts` that are used by many of the tests.
+Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
+
+We use `karma` to run our tests in a browser, `mocha` as the test framework, and `chai` for test assertions. We use [async/await](https://mochajs.org/#using-async--await) for asynchronous tests. We have
+a helper function in `@jupyterlab/testutils` called `testEmission` to help with
+writing tests that use `Phosphor` signals, as well as a `framePromise` function
+to get a `Promise` for a `requestAnimationFrame`. We sometimes have to set
+a sentinel value inside a `Promise` and then check that the sentinel was set if
+we need a promise to run without blocking.
 
 To create a new test for a package in `packages/`, use the following
 command, where `<package-directory-name>` is the name of the folder in
@@ -177,9 +198,10 @@ To run a specific example, change to the examples directory (i.e.
 ```bash
 python main.py
 ```
+
 ## Debugging
 
-All methods of building JupyterLab produce source maps.  The source maps
+All methods of building JupyterLab produce source maps. The source maps
 should be available in the source files view of your browser's development
 tools under the `webpack://` header.
 
@@ -192,26 +214,25 @@ debugging.
 
 When running a test, the packages will be available at the top level
 (e.g. `application/src`), and the current set of test files available under
-`/src`.  Note: it is recommended to use `jlpm run watch` in the test folder
-while debugging test options.  See [above](#build-and-run-the-tests) for more info.
+`/src`. Note: it is recommended to use `jlpm run watch` in the test folder
+while debugging test options. See [above](#build-and-run-the-tests) for more info.
 
-
-----
+---
 
 ## High level Architecture
 
 The JupyterLab application is made up of two major parts:
 
-- an npm package
-- a Jupyter server extension (Python package)
+* an npm package
+* a Jupyter server extension (Python package)
 
-Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html)
+Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
 
 ## The NPM Packages
 
 The repository consists of many npm packages that are managed using the lerna
-build tool.  The npm package source files are in the `packages/` subdirectory.
+build tool. The npm package source files are in the `packages/` subdirectory.
 
 ### Build the NPM Packages from Source
 
@@ -232,7 +253,7 @@ jlpm run build:packages
 
 ## [Writing Documentation](#writing-documenation)
 
-Documentation is written in Markdown and reStructuredText.  In particular, the documentation on our Read the Docs page is written in reStructuredText. To ensure that the Read the Docs page builds, you'll need to install the documentation dependencies with `conda`.  These dependencies are located in `docs/environment.yml`.  You can install the dependencies for building the documentation by creating a new conda environment:
+Documentation is written in Markdown and reStructuredText. In particular, the documentation on our Read the Docs page is written in reStructuredText. To ensure that the Read the Docs page builds, you'll need to install the documentation dependencies with `conda`. These dependencies are located in `docs/environment.yml`. You can install the dependencies for building the documentation by creating a new conda environment:
 
 ```bash
 conda env create -f docs/environment.yml
@@ -281,7 +302,6 @@ To have the system build after each source file change, run:
 jupyter lab --dev-mode --watch
 ```
 
-
 ## Build Utilities
 
 There is a range of build utilities for maintaining the repository.
@@ -292,10 +312,10 @@ To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 The key utility is `jlpm run integrity`, which ensures the integrity of
 the packages in the repo. It will:
 
-- Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
-- Ensure a consistent version of all packages.
-- Manage the meta package.
+* Ensure the core package version dependencies match everywhere.
+* Ensure imported packages match dependencies.
+* Ensure a consistent version of all packages.
+* Manage the meta package.
 
 The `packages/metapackage` package is used to build all of the TypeScript
 in the repository at once, instead of 50+ individual builds.
@@ -307,18 +327,17 @@ a package by importing from it in the TypeScript file, and then running:
 We also have scripts for creating and removing packages in `packages/`,
 `jlpm run create:package` and `jlpm run remove:package`.
 
-
 ## Notes
 
-- By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`.  If you wish to run
-the core application in `<git root>/jupyterlab/build`,
-run `jupyter lab --core-mode`.  This is the core application that will
-be shipped.
+* By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
+  the core application in `<git root>/jupyterlab/build`,
+  run `jupyter lab --core-mode`. This is the core application that will
+  be shipped.
 
-- If working with extensions, see the extension documentation on
-https://jupyterlab-tutorial.readthedocs.io/en/latest/index.html.
+* If working with extensions, see the extension documentation on
+  https://jupyterlab.readthedocs.io/en/latest/index.html.
 
-- The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
-omit the type declarations when using a language other than TypeScript.
+* The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
+  omit the type declarations when using a language other than TypeScript.
 
-- For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).
+* For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).

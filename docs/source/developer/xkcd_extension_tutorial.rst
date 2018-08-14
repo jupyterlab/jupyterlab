@@ -3,6 +3,11 @@
 Let's Make an xkcd JupyterLab Extension
 ---------------------------------------
 
+.. warning::
+
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
+
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
 that:
@@ -90,7 +95,7 @@ Create a repository
 ~~~~~~~~~~~~~~~~~~~
 
 Create a new repository for your extension. For example, on
-`Github <https://help.github.com/articles/create-a-repo/>`__. This is an
+`GitHub <https://help.github.com/articles/create-a-repo/>`__. This is an
 optional step but highly recommended if you want to share your
 extension.
 
@@ -191,7 +196,6 @@ should look something like the following:
      [449] ./~/@jupyterlab/theme-dark-extension/lib/index.js 800 bytes {1} [optional] [built]
      [450] ./~/@jupyterlab/theme-light-extension/lib/index.js 804 bytes {1} [optional] [built]
      [451] ./~/@jupyterlab/tooltip-extension/lib/index.js 5.61 kB {1} [optional] [built]
-     [452] ./~/@jupyterlab/vega2-extension/lib/index.js 6.19 kB {1} [optional] [built]
      [453] ./~/es6-promise/auto.js 179 bytes {1} [built]
      [454] /Users/foo/workspace/xkcd/lib/index.js 353 bytes {1} [optional] [built]
      [455] ./~/font-awesome/css/font-awesome.min.css 892 bytes {1} [built]
@@ -210,7 +214,7 @@ You should see a message that says
 ``JupyterLab extension jupyterlab_xkcd is activated!`` in the console.
 If you do, congrats, you're ready to start modifying the the extension!
 If not, go back, make sure you didn't miss a step, and `reach
-out <README.html#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 Note: Leave the terminal running the ``jupyter lab --watch`` command
 open.
@@ -254,6 +258,14 @@ to get a reference to the command palette interface.
     import {
       ICommandPalette
     } from '@jupyterlab/apputils';
+
+You will also need to install this dependency. Run the following command in the
+repository root folder install the dependency and save it to your
+`package.json`:
+
+.. code:: bash
+
+    npm install --save @jupyterlab/apputils
 
 Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
 definition so that it reads like so:
@@ -314,10 +326,17 @@ top of the file.
       Widget
     } from '@phosphor/widgets';
 
+Install this dependency as well:
+
+.. code:: bash
+
+    npm install --save @phosphor/widgets
+
+
 Then modify the ``activate`` function again so that it has the following
 code:
 
-.. code:: typescript
+.. code-block:: typescript
 
       activate: (app: JupyterLab, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
@@ -334,7 +353,7 @@ code:
           label: 'Random xkcd comic',
           execute: () => {
             if (!widget.isAttached) {
-              // Attach the widget to the main area if it's not there
+              // Attach the widget to the main work area if it's not there
               app.shell.addToMainArea(widget);
             }
             // Activate the widget
@@ -349,7 +368,7 @@ code:
 The first new block of code creates a ``Widget`` instance, assigns it a
 unique ID, gives it a label that will appear as its tab title, and makes
 the tab closable by the user. The second block of code add a new command
-labeled *Random xkcd comic* to JupyterLab. When the comm and executes,
+labeled *Random xkcd comic* to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
 the command to the command palette in a section called *Tutorial*.
@@ -369,14 +388,14 @@ single *xkcd.com* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
-.. code:: bash
+.. code-block:: bash
 
     git add .
-    git commit -m 'Show xkcd panel on command'
+    git commit -m 'Show xkcd command on panel'
 
 Show a comic in the panel
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -385,7 +404,7 @@ You've got an empty panel. It's time to add a comic to it. Go back to
 your code editor. Add the following code below the lines that create a
 ``Widget`` instance and above the lines that define the command.
 
-.. code:: typescript
+.. code-block:: typescript
 
         // Add an image element to the panel
         let img = document.createElement('img');
@@ -420,7 +439,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with the
 `02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-02-show-a-comic>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-02-show-a-comic>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -437,7 +456,7 @@ Center the comic and add attribution
 Open ``style/index.css`` in our extension project directory for editing.
 Add the following lines to it.
 
-.. code:: css
+.. code-block:: css
 
     .jp-xkcdWidget {
         display: flex;
@@ -463,7 +482,8 @@ the CSS file in the ``index.ts`` file. Modify the the ``activate``
 function to apply the CSS classes and add the attribution badge markup.
 The beginning of the function should read like the following:
 
-.. code:: typescript
+.. code-block:: typescript
+      :emphasize-lines: 9,13,16-22
 
       activate: (app: JupyterLab, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
@@ -503,7 +523,7 @@ of the comic.
 
 If anything is misbehaving, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -526,16 +546,23 @@ parts:
 Start by refactoring the widget code into the new ``XkcdWidget`` class.
 Add the following additional import to the top of the file.
 
-.. code:: typescript
+.. code-block:: typescript
 
     import {
       Message
     } from '@phosphor/messaging';
 
+Install this dependency:
+
+.. code:: bash
+
+    npm install --save @phosphor/messaging
+
+
 Then add the class just below the import statements in the ``index.ts``
 file.
 
-.. code:: typescript
+.. code-block:: typescript
 
     /**
      * An xckd comic viewer.
@@ -595,7 +622,7 @@ or to refresh the comic in the exist widget when the command runs again.
 The code for the ``activate`` function should read as follows after
 these changes:
 
-.. code:: typescript
+.. code-block:: typescript
 
     /**
      * Activate the xckd widget extension.
@@ -612,7 +639,7 @@ these changes:
         label: 'Random xkcd comic',
         execute: () => {
           if (!widget.isAttached) {
-            // Attach the widget to the main area if it's not there
+            // Attach the widget to the main work area if it's not there
             app.shell.addToMainArea(widget);
           }
           // Refresh the comic in the widget
@@ -630,7 +657,7 @@ Remove the ``activate`` function definition from the
 ``JupyterLabPlugin`` object and refer instead to the top-level function
 like so:
 
-.. code:: typescript
+.. code-block:: typescript
 
     const extension: JupyterLabPlugin<void> = {
       id: 'jupyterlab_xkcd',
@@ -648,7 +675,7 @@ comic.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-04-refactor-and-refresh>`__
 to debug. Once it's working properly, commit it.
 
 .. code:: bash
@@ -668,7 +695,8 @@ extension behave this way too.
 Update the imports at the top of your ``index.ts`` file so that the
 entire list of import statements looks like the following:
 
-.. code:: typescript
+.. code-block:: typescript
+    :emphasize-lines: 2,6,9-11
 
     import {
       JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
@@ -692,6 +720,13 @@ entire list of import statements looks like the following:
 
     import '../style/index.css';
 
+
+Install this dependency:
+
+.. code:: bash
+
+    npm install --save @phosphor/coreutils
+
 Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
 third parameter of the ``activate``.
@@ -713,7 +748,7 @@ Finally, rewrite the ``activate`` function so that it:
    to use it to save/restore panel state
 3. Creates, tracks, shows, and refreshes the widget panel appropriately
 
-.. code:: typescript
+.. code-block:: typescript
 
     function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
@@ -736,7 +771,7 @@ Finally, rewrite the ``activate`` function so that it:
             tracker.add(widget);
           }
           if (!widget.isAttached) {
-            // Attach the widget to the main area if it's not there
+            // Attach the widget to the main work area if it's not there
             app.shell.addToMainArea(widget);
           } else {
             // Refresh the comic in the widget
@@ -767,7 +802,7 @@ the panel and refresh the browser tab. You should not see an xkcd tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-05-restore-panel-state>`__
 if your extension is misbehaving. Make a commit when the state of your
 extension persists properly.
 
@@ -827,7 +862,7 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.31-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.33-06-prepare-to-publish>`__
 for further debugging.
 
 |Extension page on npmjs.com|
@@ -858,7 +893,7 @@ learning, here are some suggestions about what to try next:
 -  Push your extension git repository to GitHub.
 -  Give users the ability to pin comics in separate, permanent panels.
 -  Learn how to write `other kinds of
-   extensions <./extension_dev.md>`__.
+   extensions <./extension_dev.html>`__.
 
 .. |Completed xkcd extension screenshot| image:: xkcd_tutorial_complete.png
 .. |Empty xkcd extension panel| image:: xkcd_tutorial_empty.png

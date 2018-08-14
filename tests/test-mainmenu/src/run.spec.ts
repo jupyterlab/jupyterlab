@@ -1,40 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  RunMenu, IRunMenu
-} from '@jupyterlab/mainmenu';
+import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
 
 class Wodget extends Widget {
   state: string;
 }
 
-import {
-  delegateExecute
-} from './util';
+import { delegateExecute } from './util';
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('RunMenu', () => {
-
     let commands: CommandRegistry;
     let menu: RunMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    const wodget = new Wodget();
 
     before(() => {
       commands = new CommandRegistry();
@@ -53,16 +41,13 @@ describe('@jupyterlab/mainmenu', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new run menu', () => {
-        expect(menu).to.be.an(RunMenu);
-        expect(menu.menu.title.label).to.be('Run');
+        expect(menu).to.be.an.instanceof(RunMenu);
+        expect(menu.menu.title.label).to.equal('Run');
       });
-
     });
 
     describe('#codeRunners', () => {
-
       it('should allow setting of an ICodeRunner', () => {
         const runner: IRunMenu.ICodeRunner<Wodget> = {
           tracker,
@@ -82,15 +67,12 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.codeRunners.add(runner);
         delegateExecute(wodget, menu.codeRunners, 'run');
-        expect(wodget.state).to.be('run');
+        expect(wodget.state).to.equal('run');
         delegateExecute(wodget, menu.codeRunners, 'runAll');
-        expect(wodget.state).to.be('runAll');
+        expect(wodget.state).to.equal('runAll');
         delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
-        expect(wodget.state).to.be('restartAndRunAll');
+        expect(wodget.state).to.equal('restartAndRunAll');
       });
-
     });
-
   });
-
 });

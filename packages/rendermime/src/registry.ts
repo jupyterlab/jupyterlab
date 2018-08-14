@@ -2,55 +2,43 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  Contents, Session
-} from '@jupyterlab/services';
+import { Contents, Session } from '@jupyterlab/services';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
-
-import {
-  PathExt, URLExt
-} from '@jupyterlab/coreutils';
-
-import {
-  IClientSession, ISanitizer, defaultSanitizer
+  IClientSession,
+  ISanitizer,
+  defaultSanitizer
 } from '@jupyterlab/apputils';
 
-import {
-  ReadonlyJSONObject, Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
 
-import {
-  MimeModel
-} from './mimemodel';
-
+import { MimeModel } from './mimemodel';
 
 /* tslint:disable */
 /**
  * The rendermime token.
  */
-export
-const IRenderMimeRegistry = new Token<IRenderMimeRegistry>('@jupyterlab/rendermime:IRenderMimeRegistry');
+export const IRenderMimeRegistry = new Token<IRenderMimeRegistry>(
+  '@jupyterlab/rendermime:IRenderMimeRegistry'
+);
 
-export
-interface IRenderMimeRegistry extends RenderMimeRegistry {};
+export interface IRenderMimeRegistry extends RenderMimeRegistry {}
 /* tslint:enable */
-
 
 /* tslint:disable */
 /**
  * The latex typesetter token.
  */
-export
-const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>('@jupyterlab/rendermime:ILatexTypesetter');
+export const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>(
+  '@jupyterlab/rendermime:ILatexTypesetter'
+);
 
-export
-interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
+export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
 /* tslint:enable */
-
-
 
 /**
  * An object which manages mime renderer factories.
@@ -62,8 +50,7 @@ interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
  * #### Notes
  * This class is not intended to be subclassed.
  */
-export
-class RenderMimeRegistry {
+export class RenderMimeRegistry {
   /**
    * Construct a new rendermime.
    *
@@ -116,14 +103,20 @@ class RenderMimeRegistry {
    *
    * @param bundle - The bundle of mime data.
    *
-   * @param preferSafe - Whether to prefer a safe factory.
+   * @param safe - How to consider safe/unsafe factories. If 'ensure',
+   *   it will only consider safe factories. If 'any', any factory will be
+   *   considered. If 'prefer', unsafe factories will be considered, but
+   *   only after the safe options have been exhausted.
    *
    * @returns The preferred mime type from the available factories,
    *   or `undefined` if the mime type cannot be rendered.
    */
-  preferredMimeType(bundle: ReadonlyJSONObject, preferSafe: boolean): string | undefined {
+  preferredMimeType(
+    bundle: ReadonlyJSONObject,
+    safe: 'ensure' | 'prefer' | 'any' = 'ensure'
+  ): string | undefined {
     // Try to find a safe factory first, if preferred.
-    if (preferSafe) {
+    if (safe === 'ensure' || safe === 'prefer') {
       for (let mt of this.mimeTypes) {
         if (mt in bundle && this._factories[mt].safe) {
           return mt;
@@ -131,10 +124,12 @@ class RenderMimeRegistry {
       }
     }
 
-    // Otherwise, search for the best factory among all factories.
-    for (let mt of this.mimeTypes) {
-      if (mt in bundle) {
-        return mt;
+    if (safe !== 'ensure') {
+      // Otherwise, search for the best factory among all factories.
+      for (let mt of this.mimeTypes) {
+        if (mt in bundle) {
+          return mt;
+        }
       }
     }
 
@@ -290,19 +285,16 @@ class RenderMimeRegistry {
   private _factories: Private.FactoryMap = {};
 }
 
-
 /**
  * The namespace for `RenderMimeRegistry` class statics.
  */
-export
-namespace RenderMimeRegistry {
+export namespace RenderMimeRegistry {
   /**
    * The options used to initialize a rendermime instance.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
-     * Intial factories to add to the rendermime instance.
+     * Initial factories to add to the rendermime instance.
      */
     initialFactories?: ReadonlyArray<IRenderMime.IRendererFactory>;
 
@@ -334,8 +326,7 @@ namespace RenderMimeRegistry {
   /**
    * The options used to clone a rendermime instance.
    */
-  export
-  interface ICloneOptions {
+  export interface ICloneOptions {
     /**
      * The new sanitizer used to sanitize untrusted html inputs.
      */
@@ -360,8 +351,7 @@ namespace RenderMimeRegistry {
   /**
    * A default resolver that uses a session and a contents manager.
    */
-  export
-  class UrlResolver implements IRenderMime.IResolver {
+  export class UrlResolver implements IRenderMime.IResolver {
     /**
      * Create a new url resolver for a console.
      */
@@ -374,7 +364,7 @@ namespace RenderMimeRegistry {
      * Resolve a relative url to a correct server path.
      */
     resolveUrl(url: string): Promise<string> {
-      if (URLExt.isLocal(url)) {
+      if (this.isLocal(url)) {
         let cwd = PathExt.dirname(this._session.path);
         url = PathExt.resolve(cwd, url);
       }
@@ -385,10 +375,24 @@ namespace RenderMimeRegistry {
      * Get the download url of a given absolute server path.
      */
     getDownloadUrl(path: string): Promise<string> {
-      if (URLExt.isLocal(path)) {
+      if (this.isLocal(path)) {
         return this._contents.getDownloadUrl(path);
       }
       return Promise.resolve(path);
+    }
+
+    /**
+     * Whether the URL should be handled by the resolver
+     * or not.
+     *
+     * #### Notes
+     * This is similar to the `isLocal` check in `URLExt`,
+     * but it also checks whether the path points to any
+     * of the `IDrive`s that may be registered with the contents
+     * manager.
+     */
+    isLocal(url: string): boolean {
+      return URLExt.isLocal(url) || !!this._contents.driveName(url);
     }
 
     private _session: Session.ISession | IClientSession;
@@ -398,8 +402,7 @@ namespace RenderMimeRegistry {
   /**
    * The options used to create a UrlResolver.
    */
-  export
-  interface IUrlResolverOptions {
+  export interface IUrlResolverOptions {
     /**
      * The session used by the resolver.
      */
@@ -412,7 +415,6 @@ namespace RenderMimeRegistry {
   }
 }
 
-
 /**
  * The namespace for the module implementation details.
  */
@@ -420,26 +422,22 @@ namespace Private {
   /**
    * A type alias for a mime rank and tie-breaking id.
    */
-  export
-  type RankPair = { readonly id: number, readonly rank: number };
+  export type RankPair = { readonly id: number; readonly rank: number };
 
   /**
    * A type alias for a mapping of mime type -> rank pair.
    */
-  export
-  type RankMap = { [key: string]: RankPair };
+  export type RankMap = { [key: string]: RankPair };
 
   /**
    * A type alias for a mapping of mime type -> ordered factories.
    */
-  export
-  type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
+  export type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
 
   /**
    * Get the mime types in the map, ordered by rank.
    */
-  export
-  function sortedTypes(map: RankMap): string[] {
+  export function sortedTypes(map: RankMap): string[] {
     return Object.keys(map).sort((a, b) => {
       let p1 = map[a];
       let p2 = map[b];

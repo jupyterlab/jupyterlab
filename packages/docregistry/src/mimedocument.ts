@@ -1,100 +1,79 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  showErrorMessage
-} from '@jupyterlab/apputils';
+import { showErrorMessage } from '@jupyterlab/apputils';
+
+import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import {
-  ActivityMonitor, PathExt
-} from '@jupyterlab/coreutils';
-
-import {
-  IRenderMime, RenderMimeRegistry, MimeModel
+  IRenderMime,
+  RenderMimeRegistry,
+  MimeModel
 } from '@jupyterlab/rendermime';
 
-import {
-  JSONObject, PromiseDelegate
-} from '@phosphor/coreutils';
+import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  BoxLayout, Widget
-} from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@phosphor/widgets';
 
-import {
-  ABCWidgetFactory
-} from './default';
+import { ABCWidgetFactory, DocumentWidget } from './default';
 
-import {
-  DocumentRegistry
-} from './registry';
-
+import { DocumentRegistry } from './registry';
 
 /**
- * A widget for rendered mimetype document.
+ * A content widget for a rendered mimetype document.
  */
-export
-class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
+export class MimeContent extends Widget {
   /**
-   * Construct a new markdown widget.
+   * Construct a new widget.
    */
-  constructor(options: MimeDocument.IOptions) {
+  constructor(options: MimeContent.IOptions) {
     super();
     this.addClass('jp-MimeDocument');
-    this.node.tabIndex = -1;
-    let layout = this.layout = new BoxLayout();
-    let toolbar = new Widget();
-    toolbar.addClass('jp-Toolbar');
-    layout.addWidget(toolbar);
-    BoxLayout.setStretch(toolbar, 0);
-    let context = options.context;
-    this.rendermime = options.rendermime.clone({
-      resolver: context.urlResolver
-    });
-
-    this._context = context;
-    this._mimeType = options.mimeType;
+    this.mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
+    this._context = options.context;
+    this._renderer = options.renderer;
 
-    this._renderer = this.rendermime.createRenderer(this._mimeType);
+    const layout = (this.layout = new StackedLayout());
     layout.addWidget(this._renderer);
-    BoxLayout.setStretch(this._renderer, 1);
 
-    context.pathChanged.connect(this._onPathChanged, this);
-    this._onPathChanged();
+    this._context.ready
+      .then(() => {
+        return this._render();
+      })
+      .then(() => {
+        // After rendering for the first time, send an activation request if we
+        // are currently focused.
+        if (this.node === document.activeElement) {
+          // We want to synchronously send (not post) the activate message, while
+          // we know this node still has focus.
+          MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+        }
 
-    this._context.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      return this._render();
-    }).then(() => {
-      // Throttle the rendering rate of the widget.
-      this._monitor = new ActivityMonitor({
-        signal: context.model.contentChanged,
-        timeout: options.renderTimeout
+        // Throttle the rendering rate of the widget.
+        this._monitor = new ActivityMonitor({
+          signal: this._context.model.contentChanged,
+          timeout: options.renderTimeout
+        });
+        this._monitor.activityStopped.connect(this.update, this);
+
+        this._ready.resolve(undefined);
+      })
+      .catch(reason => {
+        // Dispose the document if rendering fails.
+        requestAnimationFrame(() => {
+          this.dispose();
+        });
+        showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
       });
-      this._monitor.activityStopped.connect(this.update, this);
-
-      this._ready.resolve(undefined);
-    });
   }
 
   /**
-   * The markdown widget's context.
+   * The mimetype for this rendered content.
    */
-  get context(): DocumentRegistry.Context {
-    return this._context;
-  }
-
-  /**
-   * The rendermime instance associated with the widget.
-   */
-  readonly rendermime: RenderMimeRegistry;
+  readonly mimeType: string;
 
   /**
    * A promise that resolves when the widget is ready.
@@ -118,20 +97,6 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   }
 
   /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    if (!this._hasRendered) {
-      this.node.focus();
-      return;
-    }
-    MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
-    if (!this.node.contains(document.activeElement)) {
-      this.node.focus();
-    }
-  }
-
-  /**
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -143,94 +108,92 @@ class MimeDocument extends Widget implements DocumentRegistry.IReadyWidget {
   /**
    * Render the mime content.
    */
-  private _render(): Promise<void> {
+  private async _render(): Promise<void> {
+    if (this.isDisposed) {
+      return;
+    }
+
+    // Since rendering is async, we note render requests that happen while we
+    // actually are rendering for a future rendering.
     if (this._isRendering) {
       this._renderRequested = true;
       return;
     }
+
+    // Set up for this rendering pass.
     this._renderRequested = false;
     let context = this._context;
     let model = context.model;
     let data: JSONObject = {};
     if (this._dataType === 'string') {
-      data[this._mimeType] = model.toString();
+      data[this.mimeType] = model.toString();
     } else {
-      data[this._mimeType] = model.toJSON();
+      data[this.mimeType] = model.toJSON();
     }
     let mimeModel = new MimeModel({ data, callback: this._changeCallback });
 
-    this._isRendering = true;
-    return this._renderer.renderModel(mimeModel).then(() => {
-      // Handle the first render after an activation.
-      if (!this._hasRendered && this.node === document.activeElement) {
-        MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
-      }
-      this._hasRendered = true;
+    try {
+      // Do the rendering asynchronously.
+      this._isRendering = true;
+      await this._renderer.renderModel(mimeModel);
       this._isRendering = false;
+
+      // If there is an outstanding request to render, go ahead and render
       if (this._renderRequested) {
         return this._render();
       }
-    }).catch(reason => {
+    } catch (reason) {
       // Dispose the document if rendering fails.
-      requestAnimationFrame(() => { this.dispose(); });
-
+      requestAnimationFrame(() => {
+        this.dispose();
+      });
       showErrorMessage(`Renderer Failure: ${context.path}`, reason);
-    });
-  }
-
-  /**
-   * Handle a path change.
-   */
-  private _onPathChanged(): void {
-    this.title.label = PathExt.basename(this._context.localPath);
+    }
   }
 
   /**
    * A bound change callback.
    */
-  private _changeCallback = (options: IRenderMime.IMimeModel.ISetDataOptions) => {
-    if (!options.data || !options.data[this._mimeType]) {
+  private _changeCallback = (
+    options: IRenderMime.IMimeModel.ISetDataOptions
+  ) => {
+    if (!options.data || !options.data[this.mimeType]) {
       return;
     }
-    let data = options.data[this._mimeType];
+    let data = options.data[this.mimeType];
     if (typeof data === 'string') {
       this._context.model.fromString(data);
     } else {
       this._context.model.fromJSON(data);
     }
-  }
+  };
 
-  private _context: DocumentRegistry.Context;
-  private _monitor: ActivityMonitor<any, any> | null;
+  private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _renderer: IRenderMime.IRenderer;
-  private _mimeType: string;
+  private _monitor: ActivityMonitor<any, any> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
-  private _hasRendered = false;
   private _isRendering = false;
   private _renderRequested = false;
 }
 
-
 /**
  * The namespace for MimeDocument class statics.
  */
-export
-namespace MimeDocument {
+export namespace MimeContent {
   /**
    * The options used to initialize a MimeDocument.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
-     * The document context.
+     * Context
      */
-    context: DocumentRegistry.Context;
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
 
     /**
-     * The rendermime instance.
+     * The renderer instance.
      */
-    rendermime: RenderMimeRegistry;
+    renderer: IRenderMime.IRenderer;
 
     /**
      * The mime type.
@@ -249,12 +212,15 @@ namespace MimeDocument {
   }
 }
 
+/**
+ * A document widget for mime content.
+ */
+export class MimeDocument extends DocumentWidget<MimeContent> {}
 
 /**
  * An implementation of a widget factory for a rendered mimetype document.
  */
-export
-class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistry.IModel> {
+export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   /**
    * Construct a new markdown widget factory.
    */
@@ -270,18 +236,27 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
    * Create a new widget given a context.
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
-    let ft = this._fileType;
-    let mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
-    let widget = new MimeDocument({
+    const ft = this._fileType;
+    const mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
+
+    const rendermime = this._rendermime.clone({
+      resolver: context.urlResolver
+    });
+    const renderer = rendermime.createRenderer(mimeType);
+
+    const content = new MimeContent({
       context,
+      renderer,
       mimeType,
-      rendermime: this._rendermime.clone(),
       renderTimeout: this._renderTimeout,
-      dataType: this._dataType,
+      dataType: this._dataType
     });
 
-    widget.title.iconClass = ft.iconClass;
-    widget.title.iconLabel = ft.iconLabel;
+    content.title.iconClass = ft.iconClass;
+    content.title.iconLabel = ft.iconLabel;
+
+    const widget = new MimeDocument({ content, context });
+
     return widget;
   }
 
@@ -291,17 +266,14 @@ class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument, DocumentRegistr
   private _fileType: DocumentRegistry.IFileType;
 }
 
-
 /**
  * The namespace for MimeDocumentFactory class statics.
  */
-export
-namespace MimeDocumentFactory {
+export namespace MimeDocumentFactory {
   /**
    * The options used to initialize a MimeDocumentFactory.
    */
-  export
-  interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
      * The primary file type associated with the document.
      */
@@ -324,7 +296,6 @@ namespace MimeDocumentFactory {
   }
 }
 
-
 /**
  * The namespace for the module implementation details.
  */
@@ -332,8 +303,12 @@ namespace Private {
   /**
    * Create the document registry options.
    */
-  export
-  function createRegistryOptions(options: MimeDocumentFactory.IOptions): DocumentRegistry.IWidgetFactoryOptions {
-    return { ...options, readOnly: true } as DocumentRegistry.IWidgetFactoryOptions;
+  export function createRegistryOptions(
+    options: MimeDocumentFactory.IOptions
+  ): DocumentRegistry.IWidgetFactoryOptions {
+    return {
+      ...options,
+      readOnly: true
+    } as DocumentRegistry.IWidgetFactoryOptions;
   }
 }

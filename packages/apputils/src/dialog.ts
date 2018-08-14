@@ -1,30 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt, each, map, toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
 
-import {
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  VirtualDOM, VirtualElement, h
-} from '@phosphor/virtualdom';
+import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
-import {
-  PanelLayout, Panel, Widget
-} from '@phosphor/widgets';
+import * as React from 'react';
 
-import {
-  Styling
-} from './styling';
+import { ReactElementWidget } from './vdom';
 
+import { Styling } from './styling';
 
 /**
  * Create and show a dialog.
@@ -33,8 +22,9 @@ import {
  *
  * @returns A promise that resolves with whether the dialog was accepted.
  */
-export
-function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.IResult<T>> {
+export function showDialog<T>(
+  options: Partial<Dialog.IOptions<T>> = {}
+): Promise<Dialog.IResult<T>> {
   let dialog = new Dialog(options);
   return dialog.launch();
 }
@@ -47,29 +37,28 @@ function showDialog<T>(options: Partial<Dialog.IOptions<T>>={}): Promise<Dialog.
  * @param error - the error to show in the dialog body (either a string
  *   or an object with a string `message` property).
  */
-export
-function showErrorMessage(title: string, error: any): Promise<void> {
-  console.error(error);
-  let options = {
+export function showErrorMessage(title: string, error: any): Promise<void> {
+  console.warn('Showing error:', error);
+
+  return showDialog({
     title: title,
     body: error.message || title,
-    buttons: [Dialog.okButton()],
-    okText: 'DISMISS'
-  };
-  return showDialog(options).then(() => { /* no-op */ });
+    buttons: [Dialog.okButton({ label: 'DISMISS' })]
+  }).then(() => {
+    /* no-op */
+  });
 }
 
 /**
  * A modal dialog widget.
  */
-export
-class Dialog<T> extends Widget {
+export class Dialog<T> extends Widget {
   /**
    * Create a dialog panel instance.
    *
    * @param options - The dialog setup options.
    */
-  constructor(options: Partial<Dialog.IOptions<T>> = { }) {
+  constructor(options: Partial<Dialog.IOptions<T>> = {}) {
     super();
     this.addClass('jp-Dialog');
     let normalized = Private.handleOptions(options);
@@ -78,11 +67,13 @@ class Dialog<T> extends Widget {
     this._host = normalized.host;
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
-    this._buttonNodes = toArray(map(this._buttons, button => {
-      return renderer.createButtonNode(button);
-    }));
+    this._buttonNodes = toArray(
+      map(this._buttons, button => {
+        return renderer.createButtonNode(button);
+      })
+    );
 
-    let layout = this.layout = new PanelLayout();
+    let layout = (this.layout = new PanelLayout());
     let content = new Panel();
     content.addClass('jp-Dialog-content');
     layout.addWidget(content);
@@ -97,13 +88,7 @@ class Dialog<T> extends Widget {
     content.addWidget(footer);
 
     this._primary = this._buttonNodes[this._defaultButton];
-
-    if (options.focusNodeSelector) {
-      let el = body.node.querySelector(options.focusNodeSelector);
-      if (el) {
-        this._primary = el as HTMLElement;
-      }
-    }
+    this._focusNodeSelector = options.focusNodeSelector;
   }
 
   /**
@@ -129,7 +114,7 @@ class Dialog<T> extends Widget {
     if (this._promise) {
       return this._promise.promise;
     }
-    const promise = this._promise = new PromiseDelegate<Dialog.IResult<T>>();
+    const promise = (this._promise = new PromiseDelegate<Dialog.IResult<T>>());
     let promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
     return promises.then(() => {
@@ -183,26 +168,26 @@ class Dialog<T> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    case 'contextmenu':
-      event.preventDefault();
-      event.stopPropagation();
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'focus':
+        this._evtFocus(event as FocusEvent);
+        break;
+      case 'contextmenu':
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+      default:
+        break;
     }
   }
 
   /**
-   *  A message handler invoked on a `'before-attach'` message.
+   *  A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
     let node = this.node;
@@ -212,11 +197,19 @@ class Dialog<T> extends Widget {
     document.addEventListener('focus', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
+    if (this._focusNodeSelector) {
+      let body = this.node.querySelector('.jp-Dialog-body');
+      let el = body.querySelector(this._focusNodeSelector);
+
+      if (el) {
+        this._primary = el as HTMLElement;
+      }
+    }
     this._primary.focus();
   }
 
   /**
-   *  A message handler invoked on a `'after-detach'` message.
+   *  A message handler invoked on an `'after-detach'` message.
    */
   protected onAfterDetach(msg: Message): void {
     let node = this.node;
@@ -243,7 +236,9 @@ class Dialog<T> extends Widget {
    * @param event - The DOM event sent to the widget
    */
   protected _evtClick(event: MouseEvent): void {
-    let content = this.node.getElementsByClassName('jp-Dialog-content')[0] as HTMLElement;
+    let content = this.node.getElementsByClassName(
+      'jp-Dialog-content'
+    )[0] as HTMLElement;
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
@@ -265,27 +260,27 @@ class Dialog<T> extends Widget {
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
     switch (event.keyCode) {
-    case 27:  // Escape.
-      event.stopPropagation();
-      event.preventDefault();
-      this.reject();
-      break;
-    case 9:  // Tab.
-      // Handle a tab on the last button.
-      let node = this._buttonNodes[this._buttons.length - 1];
-      if (document.activeElement === node && !event.shiftKey) {
+      case 27: // Escape.
         event.stopPropagation();
         event.preventDefault();
-        this._first.focus();
-      }
-      break;
-    case 13:  // Enter.
-      event.stopPropagation();
-      event.preventDefault();
-      this.resolve();
-      break;
-    default:
-      break;
+        this.reject();
+        break;
+      case 9: // Tab.
+        // Handle a tab on the last button.
+        let node = this._buttonNodes[this._buttons.length - 1];
+        if (document.activeElement === node && !event.shiftKey) {
+          event.stopPropagation();
+          event.preventDefault();
+          this._first.focus();
+        }
+        break;
+      case 13: // Enter.
+        event.stopPropagation();
+        event.preventDefault();
+        this.resolve();
+        break;
+      default:
+        break;
     }
   }
 
@@ -316,7 +311,11 @@ class Dialog<T> extends Widget {
     ArrayExt.removeFirstOf(Private.launchQueue, promise.promise);
     let body = this._body;
     let value: T | null = null;
-    if (button.accept && body instanceof Widget && typeof body.getValue === 'function') {
+    if (
+      button.accept &&
+      body instanceof Widget &&
+      typeof body.getValue === 'function'
+    ) {
       value = body.getValue();
     }
     this.dispose();
@@ -332,19 +331,17 @@ class Dialog<T> extends Widget {
   private _defaultButton: number;
   private _host: HTMLElement;
   private _body: Dialog.BodyType<T>;
+  private _focusNodeSelector = '';
 }
-
 
 /**
  * The namespace for Dialog class statics.
  */
-export
-namespace Dialog {
+export namespace Dialog {
   /**
    * The options used to create a dialog.
    */
-  export
-  interface IOptions<T> {
+  export interface IOptions<T> {
     /**
      * The top level text for the dialog.  Defaults to an empty string.
      */
@@ -396,8 +393,7 @@ namespace Dialog {
   /**
    * The options used to make a button item.
    */
-  export
-  interface IButton {
+  export interface IButton {
     /**
      * The label for the button.
      */
@@ -437,20 +433,17 @@ namespace Dialog {
   /**
    * The options used to create a button.
    */
-  export
-  type ButtonOptions = Partial<IButton>;
+  export type ButtonOptions = Partial<IButton>;
 
   /**
    * The header input types.
    */
-  export
-  type HeaderType = VirtualElement | string;
+  export type HeaderType = React.ReactElement<any> | string;
 
   /**
    * The result of a dialog.
    */
-  export
-  interface IResult<T> {
+  export interface IResult<T> {
     /**
      * The button that was pressed.
      */
@@ -465,8 +458,7 @@ namespace Dialog {
   /**
    * A widget used as a dialog body.
    */
-  export
-  interface IBodyWidget<T = string> extends Widget {
+  export interface IBodyWidget<T = string> extends Widget {
     /**
      * Get the serialized value of the widget.
      */
@@ -476,14 +468,12 @@ namespace Dialog {
   /**
    * The body input types.
    */
-  export
-  type BodyType<T> = IBodyWidget<T> | VirtualElement | string;
+  export type BodyType<T> = IBodyWidget<T> | React.ReactElement<any> | string;
 
   /**
    * Create an accept button.
    */
-  export
-  function okButton(options: ButtonOptions = {}): Readonly<IButton> {
+  export function okButton(options: ButtonOptions = {}): Readonly<IButton> {
     options.accept = true;
     return createButton(options);
   }
@@ -491,8 +481,7 @@ namespace Dialog {
   /**
    * Create a reject button.
    */
-  export
-  function cancelButton(options: ButtonOptions = {}): Readonly<IButton>  {
+  export function cancelButton(options: ButtonOptions = {}): Readonly<IButton> {
     options.accept = false;
     return createButton(options);
   }
@@ -500,8 +489,7 @@ namespace Dialog {
   /**
    * Create a warn button.
    */
-  export
-  function warnButton(options: ButtonOptions = {}): Readonly<IButton>  {
+  export function warnButton(options: ButtonOptions = {}): Readonly<IButton> {
     options.displayType = 'warn';
     return createButton(options);
   }
@@ -509,8 +497,7 @@ namespace Dialog {
   /**
    * Create a button item.
    */
-  export
-  function createButton(value: Dialog.ButtonOptions): Readonly<IButton>  {
+  export function createButton(value: Dialog.ButtonOptions): Readonly<IButton> {
     value.accept = value.accept !== false;
     let defaultLabel = value.accept ? 'OK' : 'CANCEL';
     return {
@@ -527,8 +514,7 @@ namespace Dialog {
   /**
    * A dialog renderer.
    */
-  export
-  interface IRenderer {
+  export interface IRenderer {
     /**
      * Create the header of the dialog.
      *
@@ -569,8 +555,7 @@ namespace Dialog {
   /**
    * The default implementation of a dialog renderer.
    */
-  export
-  class Renderer {
+  export class Renderer {
     /**
      * Create the header of the dialog.
      *
@@ -584,7 +569,7 @@ namespace Dialog {
         header = new Widget({ node: document.createElement('span') });
         header.node.textContent = title;
       } else {
-        header = new Widget({ node: VirtualDOM.realize(title) });
+        header = new ReactElementWidget(title);
       }
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
@@ -606,7 +591,10 @@ namespace Dialog {
       } else if (value instanceof Widget) {
         body = value;
       } else {
-        body = new Widget({ node: VirtualDOM.realize(value) });
+        body = new ReactElementWidget(value);
+        // Immediately update the body even though it has not yet attached in
+        // order to trigger a render of the DOM nodes from the React element.
+        MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
       }
       body.addClass('jp-Dialog-body');
       Styling.styleNode(body.node);
@@ -638,16 +626,11 @@ namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLElement {
-      let className = this.createItemClass(button);
-      // We use realize here instead of creating
-      // nodes with document.createElement as a
-      // shorthand, and only because this is not
-      // called often.
-      return VirtualDOM.realize(
-        h.button({ className },
-              this.renderIcon(button),
-              this.renderLabel(button))
-      );
+      const e = document.createElement('button');
+      e.className = this.createItemClass(button);
+      e.appendChild(this.renderIcon(button));
+      e.appendChild(this.renderLabel(button));
+      return e;
     }
 
     /**
@@ -686,11 +669,13 @@ namespace Dialog {
      *
      * @param data - The data to use for rendering the icon.
      *
-     * @returns A virtual element representing the icon.
+     * @returns An HTML element representing the icon.
      */
-    renderIcon(data: IButton): VirtualElement {
-      return h.div({ className: this.createIconClass(data) },
-                   data.iconLabel);
+    renderIcon(data: IButton): HTMLElement {
+      const e = document.createElement('div');
+      e.className = this.createIconClass(data);
+      e.appendChild(document.createTextNode(data.iconLabel));
+      return e;
     }
 
     /**
@@ -711,22 +696,22 @@ namespace Dialog {
      *
      * @param data - The data to use for rendering the label.
      *
-     * @returns A virtual element representing the item label.
+     * @returns An HTML element representing the item label.
      */
-    renderLabel(data: IButton): VirtualElement {
-      let className = 'jp-Dialog-buttonLabel';
-      let title = data.caption;
-      return h.div({ className, title }, data.label);
+    renderLabel(data: IButton): HTMLElement {
+      const e = document.createElement('div');
+      e.className = 'jp-Dialog-buttonLabel';
+      e.title = data.caption;
+      e.appendChild(document.createTextNode(data.label));
+      return e;
     }
   }
 
   /**
    * The default renderer instance.
    */
-  export
-  const defaultRenderer = new Renderer();
+  export const defaultRenderer = new Renderer();
 }
-
 
 /**
  * The namespace for module private data.
@@ -735,8 +720,7 @@ namespace Private {
   /**
    * The queue for launching dialogs.
    */
-  export
-  let launchQueue: Promise<Dialog.IResult<any>>[] = [];
+  export let launchQueue: Promise<Dialog.IResult<any>>[] = [];
 
   /**
    * Handle the input options for a dialog.
@@ -745,17 +729,20 @@ namespace Private {
    *
    * @returns A new options object with defaults applied.
    */
-  export
-  function handleOptions<T>(options: Partial<Dialog.IOptions<T>>={}): Dialog.IOptions<T> {
-    let buttons = (
-      options.buttons || [Dialog.cancelButton(), Dialog.okButton()]
-    );
+  export function handleOptions<T>(
+    options: Partial<Dialog.IOptions<T>> = {}
+  ): Dialog.IOptions<T> {
+    let buttons = options.buttons || [Dialog.cancelButton(), Dialog.okButton()];
+    let defaultButton = buttons.length - 1;
+    if (options.defaultButton !== undefined) {
+      defaultButton = options.defaultButton;
+    }
     return {
       title: options.title || '',
       body: options.body || '',
       host: options.host || document.body,
       buttons,
-      defaultButton: options.defaultButton || buttons.length - 1,
+      defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector || ''
     };
@@ -764,15 +751,14 @@ namespace Private {
   /**
    *  Find the first focusable item in the dialog.
    */
-  export
-  function findFirstFocusable(node: HTMLElement): HTMLElement {
+  export function findFirstFocusable(node: HTMLElement): HTMLElement {
     let candidateSelectors = [
       'input',
       'select',
       'a[href]',
       'textarea',
       'button',
-      '[tabindex]',
+      '[tabindex]'
     ].join(',');
     return node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
   }

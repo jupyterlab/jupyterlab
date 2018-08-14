@@ -1,71 +1,77 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect
-} from 'chai';
+import { expect } from 'chai';
 
-import {
-  MainAreaWidget
-} from '@jupyterlab/apputils';
+import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
-import {
-  MessageLoop
-} from '@phosphor/messaging';
+import { MessageLoop } from '@phosphor/messaging';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 describe('@jupyterlab/apputils', () => {
-
   describe('MainAreaWidget', () => {
-
     describe('#constructor()', () => {
-
       it('should create a new main area widget', () => {
-        const widget = new MainAreaWidget();
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
         expect(widget).to.be.an.instanceof(MainAreaWidget);
         expect(widget.hasClass('jp-MainAreaWidget')).to.equal(true);
-        expect(widget.node.tabIndex).to.equal(-1);
-        expect(widget.layout).to.be.an.instanceof(PanelLayout);
+        expect(widget.content.node.tabIndex).to.equal(-1);
+        expect(widget.title.closable).to.equal(true);
       });
 
-      it('should allow node and layout options', () => {
-        const layout = new PanelLayout();
-        const node = document.createElement('div');
-        const widget = new MainAreaWidget({node, layout});
+      it('should allow toolbar options', () => {
+        const content = new Widget();
+        const toolbar = new Toolbar();
+        const widget = new MainAreaWidget({ content, toolbar });
         expect(widget.hasClass('jp-MainAreaWidget')).to.equal(true);
-        expect(widget.node).to.equal(node);
-        expect(widget.node.tabIndex).to.equal(-1);
-        expect(widget.layout).to.equal(layout);
       });
-
     });
 
     describe('#onActivateRequest()', () => {
-
       it('should focus on activation', () => {
-        const widget = new MainAreaWidget();
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        expect(document.activeElement).to.equal(widget.node);
+        expect(document.activeElement).to.equal(widget.content.node);
       });
-
     });
 
     describe('#onCloseRequest()', () => {
-
       it('should dispose on close', () => {
-        const widget = new MainAreaWidget();
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.CloseRequest);
         expect(widget.isDisposed).to.equal(true);
       });
-
     });
 
-  });
+    context('title', () => {
+      it('should proxy from content to main', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        content.title.label = 'foo';
+        expect(widget.title.label).to.equal('foo');
+      });
 
+      it('should proxy from main to content', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        widget.title.label = 'foo';
+        expect(content.title.label).to.equal('foo');
+      });
+    });
+
+    context('dispose', () => {
+      it('should dispose of main', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        content.dispose();
+        expect(widget.isDisposed).to.equal(true);
+      });
+    });
+  });
 });

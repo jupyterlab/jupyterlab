@@ -7,7 +7,6 @@
 | Variables
 |----------------------------------------------------------------------------*/
 
-
 :root {
   --jp-private-sidebar-tab-width: 32px;
 }
@@ -15,7 +14,6 @@
 /*-----------------------------------------------------------------------------
 | SideBar
 |----------------------------------------------------------------------------*/
-
 
 .jp-SideBar {
   /* This is needed so that all font sizing of children done in ems is
@@ -33,16 +31,13 @@
   display: block;
 }
 
-
 .jp-SideBar.p-TabBar.jp-mod-left {
   border-right: var(--jp-border-width) solid var(--jp-border-color0);
 }
 
-
 .jp-SideBar.p-TabBar.jp-mod-right {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
-
 
 .jp-SideBar .p-TabBar-content,
 .jp-SideBar .p-TabBar-content {
@@ -55,18 +50,15 @@
   transform-origin: 0 0 0;
 }
 
-
 .jp-SideBar.jp-mod-left .p-TabBar-content {
   flex-direction: row-reverse;
   transform: rotate(-90deg) translateX(-100%);
 }
 
-
 .jp-SideBar.jp-mod-right .p-TabBar-content {
   flex-direction: row;
   transform: rotate(90deg) translateY(-100%);
 }
-
 
 .jp-SideBar .p-TabBar-tab {
   padding: 0 18px;
@@ -74,42 +66,44 @@
   overflow: visible;
 }
 
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  min-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  max-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  transform: translateY(var(--jp-border-width));
+}
 
 .jp-SideBar .p-TabBar-tab:not(.p-mod-current) {
   background: var(--jp-layout-color2);
 }
 
-
-
 .jp-SideBar .p-TabBar-tabLabel {
   line-height: var(--jp-private-sidebar-tab-width);
 }
-
 
 .jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
   background: var(--jp-layout-color1);
 }
 
-
 .jp-SideBar.jp-mod-left .p-TabBar-tab {
   border-left: var(--jp-border-width) solid var(--jp-border-color0);
 }
-
 
 .jp-SideBar.jp-mod-right .p-TabBar-tab {
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-
-#jp-left-stack > .p-Widget, #jp-right-stack > .p-Widget {
+#jp-left-stack > .p-Widget,
+#jp-right-stack > .p-Widget {
   min-width: 300px;
 }
-
 
 #jp-right-stack {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
 }
-
 
 #jp-left-stack {
   border-right: var(--jp-border-width) solid var(--jp-border-color1);

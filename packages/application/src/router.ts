@@ -3,41 +3,27 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  URLExt
-} from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  ReadonlyJSONObject, Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
 
-import {
-  DisposableDelegate, IDisposable
-} from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /* tslint:disable */
 /**
  * The URL Router token.
  */
-export
-const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
+export const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
 /* tslint:enable */
-
 
 /**
  * A static class that routes URLs within the application.
  */
-export
-interface IRouter {
+export interface IRouter {
   /**
    * The base URL for the router.
    */
@@ -49,18 +35,43 @@ interface IRouter {
   readonly commands: CommandRegistry;
 
   /**
-   * A signal emitted when the router routes a route.
+   * The parsed current URL of the application.
    */
-  readonly routed: ISignal<IRouter, IRouter.ICommandArgs>;
+  readonly current: IRouter.ILocation;
 
   /**
-   * Register to route a path pattern to a command.
+   * A signal emitted when the router routes a route.
+   */
+  readonly routed: ISignal<IRouter, IRouter.ILocation>;
+
+  /**
+   * If a matching rule's command resolves with the `stop` token during routing,
+   * no further matches will execute.
+   */
+  readonly stop: Token<void>;
+
+  /**
+   * Navigate to a new path within the application.
+   *
+   * @param path - The new path or empty string if redirecting to root.
+   *
+   * @param options - The navigation options.
+   */
+  navigate(path: string, options?: IRouter.INavOptions): void;
+
+  /**
+   * Register a rule that maps a path pattern to a command.
    *
    * @param options - The route registration options.
    *
-   * @returns A disposable that removes the registered rul from the router.
+   * @returns A disposable that removes the registered rule from the router.
    */
-  register(options: IRouter.IRegisterArgs): IDisposable;
+  register(options: IRouter.IRegisterOptions): IDisposable;
+
+  /**
+   * Cause a hard reload of the document.
+   */
+  reload(): void;
 
   /**
    * Route a specific path to an action.
@@ -69,26 +80,36 @@ interface IRouter {
    *
    * #### Notes
    * If a pattern is matched, its command will be invoked with arguments that
-   * match the `IRouter.ICommandArgs` interface.
+   * match the `IRouter.ILocation` interface.
    */
   route(url: string): void;
 }
 
-
 /**
  * A namespace for the `IRouter` specification.
  */
-export
-namespace IRouter {
+export namespace IRouter {
   /**
-   * The arguments passed into a command execution when a path is routed.
+   * The parsed location currently being routed.
    */
-  export
-  interface ICommandArgs extends ReadonlyJSONObject {
+  export interface ILocation extends ReadonlyJSONObject {
+    /**
+     * The location hash.
+     */
+    hash: string;
+
     /**
      * The path that matched a routing pattern.
      */
     path: string;
+
+    /**
+     * The request being routed with the router `base` omitted.
+     *
+     * #### Notes
+     * This field includes the query string and hash, if they exist.
+     */
+    request: string;
 
     /**
      * The search element, including leading question mark (`'?'`), if any,
@@ -98,10 +119,25 @@ namespace IRouter {
   }
 
   /**
+   * The options passed into a navigation request.
+   */
+  export interface INavOptions {
+    /**
+     * Whether the navigation should be hard URL change instead of an HTML
+     * history API change.
+     */
+    hard?: boolean;
+
+    /**
+     * Whether the navigation should be added to the browser's history.
+     */
+    silent?: boolean;
+  }
+
+  /**
    * The specification for registering a route with the router.
    */
-  export
-  interface IRegisterArgs {
+  export interface IRegisterOptions {
     /**
      * The command string that will be invoked upon matching.
      */
@@ -120,12 +156,10 @@ namespace IRouter {
   }
 }
 
-
 /**
  * A static class that routes URLs within the application.
  */
-export
-class Router implements IRouter {
+export class Router implements IRouter {
   /**
    * Create a URL router.
    */
@@ -145,10 +179,60 @@ class Router implements IRouter {
   readonly commands: CommandRegistry;
 
   /**
+   * Returns the parsed current URL of the application.
+   */
+  get current(): IRouter.ILocation {
+    const { base } = this;
+    const parsed = URLExt.parse(window.location.href);
+    const { search, hash } = parsed;
+    const path = parsed.pathname.replace(base, '/');
+    const request = path + search + hash;
+
+    return { hash, path, request, search };
+  }
+
+  /**
    * A signal emitted when the router routes a route.
    */
-  get routed(): ISignal<this, IRouter.ICommandArgs> {
+  get routed(): ISignal<this, IRouter.ILocation> {
     return this._routed;
+  }
+
+  /**
+   * If a matching rule's command resolves with the `stop` token during routing,
+   * no further matches will execute.
+   */
+  readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
+
+  /**
+   * Navigate to a new path within the application.
+   *
+   * @param path - The new path or empty string if redirecting to root.
+   *
+   * @param options - The navigation options.
+   */
+  navigate(path: string, options: IRouter.INavOptions = {}): void {
+    const { base } = this;
+    const { history } = window;
+    const { hard, silent } = options;
+    const url =
+      path && path.indexOf(base) === 0 ? path : URLExt.join(base, path);
+
+    if (silent) {
+      history.replaceState({}, '', url);
+    } else {
+      history.pushState({}, '', url);
+    }
+
+    if (hard) {
+      return this.reload();
+    }
+
+    // Because a `route()` call may still be in the stack after having received
+    // a `stop` token, wait for the next stack frame before calling `route()`.
+    requestAnimationFrame(() => {
+      this.route();
+    });
   }
 
   /**
@@ -156,65 +240,89 @@ class Router implements IRouter {
    *
    * @param options - The route registration options.
    *
-   * @returns A disposable that removes the registered rul from the router.
+   * @returns A disposable that removes the registered rule from the router.
    */
-  register(options: IRouter.IRegisterArgs): IDisposable {
+  register(options: IRouter.IRegisterOptions): IDisposable {
     const { command, pattern } = options;
     const rank = 'rank' in options ? options.rank : 100;
     const rules = this._rules;
 
     rules.set(pattern, { command, rank });
 
-    return new DisposableDelegate(() => { rules.delete(pattern); });
+    return new DisposableDelegate(() => {
+      rules.delete(pattern);
+    });
+  }
+
+  /**
+   * Cause a hard reload of the document.
+   */
+  reload(): void {
+    window.location.reload();
   }
 
   /**
    * Route a specific path to an action.
    *
-   * @param url - The URL string that will be routed.
-   *
    * #### Notes
    * If a pattern is matched, its command will be invoked with arguments that
-   * match the `IRouter.ICommandArgs` interface.
+   * match the `IRouter.ILocation` interface.
    */
-  route(url: string): void {
-    const parsed = URLExt.parse(url.replace(this.base, ''));
-    const args = { path: parsed.pathname, search: parsed.search };
+  route(): void {
+    const { commands, current, stop } = this;
+    const { request } = current;
+    const routed = this._routed;
+    const rules = this._rules;
     const matches: Private.Rule[] = [];
 
     // Collect all rules that match the URL.
-    this._rules.forEach((rule, pattern) => {
-      if (parsed.pathname.match(pattern)) {
+    rules.forEach((rule, pattern) => {
+      if (request.match(pattern)) {
         matches.push(rule);
       }
     });
 
-    // Order the matching rules by rank and execute them.
-    matches.sort((a, b) => a.rank - b.rank).forEach(rule => {
-      // Ignore the results of each executed promise.
-      this.commands.execute(rule.command, args).catch(reason => {
-        console.warn(`Routing ${url} using ${rule.command} failed:`, reason);
-      });
-    });
+    // Order the matching rules by rank and enqueue them.
+    const queue = matches.sort((a, b) => b.rank - a.rank);
 
-    this._routed.emit(args);
+    // Process each enqueued command sequentially and short-circuit if a promise
+    // resolves with the `stop` token.
+    (function next() {
+      if (!queue.length) {
+        routed.emit(current);
+        return;
+      }
+
+      const { command } = queue.pop();
+
+      commands
+        .execute(command, current)
+        .then(result => {
+          if (result === stop) {
+            queue.length = 0;
+            console.log(`Routing ${request} was short-circuited by ${command}`);
+          }
+          next();
+        })
+        .catch(reason => {
+          console.warn(`Routing ${request} to ${command} failed`, reason);
+          next();
+        });
+    })();
   }
 
-  private _routed = new Signal<this, IRouter.ICommandArgs>(this);
+  private _routed = new Signal<this, IRouter.ILocation>(this);
   private _rules = new Map<RegExp, Private.Rule>();
 }
-
 
 /**
  * A namespace for `Router` class statics.
  */
-export
-namespace Router {
+export namespace Router {
   /**
    * The options for instantiating a JupyterLab URL router.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The fully qualified base URL for the router.
      */
@@ -227,7 +335,6 @@ namespace Router {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -235,6 +342,5 @@ namespace Private {
   /**
    * The internal representation of a routing rule.
    */
-  export
-  type Rule = { command: string; rank: number };
+  export type Rule = { command: string; rank: number };
 }

@@ -1,34 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator, find, map
-} from '@phosphor/algorithm';
+import { IIterator, find, map, some } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  AttachedProperty
-} from '@phosphor/properties';
+import { AttachedProperty } from '@phosphor/properties';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import {
-  IClientSession
-} from './clientsession';
+import { IClientSession } from './clientsession';
 
-import {
-  Styling
-} from './styling';
-
+import { Styling } from './styling';
 
 /**
  * The class name added to toolbars.
@@ -44,11 +29,6 @@ const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
  * The class name added to toolbar buttons.
  */
 const TOOLBAR_BUTTON_CLASS = 'jp-Toolbar-button';
-
-/**
- * The class name added to a pressed button.
- */
-const TOOLBAR_PRESSED_CLASS = 'jp-mod-pressed';
 
 /**
  * The class name added to toolbar interrupt button.
@@ -80,23 +60,139 @@ const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
  */
 const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
 
-
 const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
+/**
+ * A layout for toolbars.
+ *
+ * #### Notes
+ * This layout automatically collapses its height if there are no visible
+ * toolbar widgets, and expands to the standard toolbar height if there are
+ * visible toolbar widgets.
+ */
+class ToolbarLayout extends PanelLayout {
+  /**
+   * A message handler invoked on a `'fit-request'` message.
+   *
+   * If any child widget is visible, expand the toolbar height to the normal
+   * toolbar height.
+   */
+  protected onFitRequest(msg: Message): void {
+    super.onFitRequest(msg);
+    if (this.parent!.isAttached) {
+      // If there are any widgets not explicitly hidden, expand the toolbar to
+      // accommodate them.
+      if (some(this.widgets, w => !w.isHidden)) {
+        this.parent!.node.style.minHeight = 'var(--jp-private-toolbar-height)';
+      } else {
+        this.parent!.node.style.minHeight = '';
+      }
+    }
 
+    // Set the dirty flag to ensure only a single update occurs.
+    this._dirty = true;
+
+    // Notify the ancestor that it should fit immediately. This may
+    // cause a resize of the parent, fulfilling the required update.
+    if (this.parent!.parent) {
+      MessageLoop.sendMessage(this.parent!.parent!, Widget.Msg.FitRequest);
+    }
+
+    // If the dirty flag is still set, the parent was not resized.
+    // Trigger the required update on the parent widget immediately.
+    if (this._dirty) {
+      MessageLoop.sendMessage(this.parent!, Widget.Msg.UpdateRequest);
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    if (this.parent!.isVisible) {
+      this._dirty = false;
+    }
+  }
+
+  /**
+   * A message handler invoked on a `'child-shown'` message.
+   */
+  protected onChildShown(msg: Widget.ChildMessage): void {
+    super.onChildShown(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * A message handler invoked on a `'child-hidden'` message.
+   */
+  protected onChildHidden(msg: Widget.ChildMessage): void {
+    super.onChildHidden(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * A message handler invoked on a `'before-attach'` message.
+   */
+  protected onBeforeAttach(msg: Message): void {
+    super.onBeforeAttach(msg);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * Attach a widget to the parent's DOM node.
+   *
+   * @param index - The current index of the widget in the layout.
+   *
+   * @param widget - The widget to attach to the parent.
+   *
+   * #### Notes
+   * This is a reimplementation of the superclass method.
+   */
+  protected attachWidget(index: number, widget: Widget): void {
+    super.attachWidget(index, widget);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  /**
+   * Detach a widget from the parent's DOM node.
+   *
+   * @param index - The previous index of the widget in the layout.
+   *
+   * @param widget - The widget to detach from the parent.
+   *
+   * #### Notes
+   * This is a reimplementation of the superclass method.
+   */
+  protected detachWidget(index: number, widget: Widget): void {
+    super.detachWidget(index, widget);
+
+    // Post a fit request for the parent widget.
+    this.parent!.fit();
+  }
+
+  private _dirty = false;
+}
 
 /**
  * A class which provides a toolbar widget.
  */
-export
-class Toolbar<T extends Widget> extends Widget {
+export class Toolbar<T extends Widget = Widget> extends Widget {
   /**
    * Construct a new toolbar widget.
    */
   constructor() {
     super();
     this.addClass(TOOLBAR_CLASS);
-    this.layout = new PanelLayout();
+    this.layout = new ToolbarLayout();
   }
 
   /**
@@ -105,7 +201,7 @@ class Toolbar<T extends Widget> extends Widget {
    * @returns An iterator over the toolbar item names.
    */
   names(): IIterator<string> {
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     return map(layout.widgets, widget => {
       return Private.nameProperty.get(widget);
     });
@@ -127,7 +223,7 @@ class Toolbar<T extends Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   addItem(name: string, widget: T): boolean {
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     return this.insertItem(layout.widgets.length, name, widget);
   }
 
@@ -153,7 +249,7 @@ class Toolbar<T extends Widget> extends Widget {
       return false;
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
-    let layout = this.layout as PanelLayout;
+    let layout = this.layout as ToolbarLayout;
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
     return true;
@@ -171,13 +267,13 @@ class Toolbar<T extends Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      if (!this.node.contains(document.activeElement) && this.parent) {
-        this.parent.activate();
-      }
-      break;
-    default:
-      break;
+      case 'click':
+        if (!this.node.contains(document.activeElement) && this.parent) {
+          this.parent.activate();
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -196,12 +292,10 @@ class Toolbar<T extends Widget> extends Widget {
   }
 }
 
-
 /**
  * The namespace for Toolbar class statics.
  */
-export
-namespace Toolbar {
+export namespace Toolbar {
   /**
    * Create a toolbar item for a command or `null` if the command does not exist
    * in the registry.
@@ -211,8 +305,10 @@ namespace Toolbar {
    * If there is no icon label, and no icon class, the main label will
    * be added.
    */
-  export
-  function createFromCommand(commands: CommandRegistry, id: string): ToolbarButton | null {
+  export function createFromCommand(
+    commands: CommandRegistry,
+    id: string
+  ): ToolbarButton | null {
     if (!commands.hasCommand(id)) {
       return null;
     }
@@ -231,9 +327,12 @@ namespace Toolbar {
     Private.setNodeContentFromCommand(button.node, commands, id);
 
     // Ensure that we pick up relevant changes to the command:
-    function onChange(sender: CommandRegistry, args: CommandRegistry.ICommandChangedArgs) {
+    function onChange(
+      sender: CommandRegistry,
+      args: CommandRegistry.ICommandChangedArgs
+    ) {
       if (args.id !== id) {
-        return;  // Not our command
+        return; // Not our command
       }
 
       if (args.type === 'removed') {
@@ -269,12 +368,12 @@ namespace Toolbar {
     return button;
   }
 
-
   /**
    * Create an interrupt toolbar item.
    */
-  export
-  function createInterruptButton(session: IClientSession): ToolbarButton {
+  export function createInterruptButton(
+    session: IClientSession
+  ): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_INTERRUPT_CLASS,
       onClick: () => {
@@ -286,12 +385,10 @@ namespace Toolbar {
     });
   }
 
-
   /**
    * Create a restart toolbar item.
    */
-  export
-  function createRestartButton(session: IClientSession): ToolbarButton {
+  export function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
       className: TOOLBAR_RESTART_CLASS,
       onClick: () => {
@@ -301,7 +398,6 @@ namespace Toolbar {
     });
   }
 
-
   /**
    * Create a toolbar spacer item.
    *
@@ -309,11 +405,9 @@ namespace Toolbar {
    * It is a flex spacer that separates the left toolbar items
    * from the right toolbar items.
    */
-  export
-  function createSpacerItem(): Widget {
+  export function createSpacerItem(): Widget {
     return new Private.Spacer();
   }
-
 
   /**
    * Create a kernel name indicator item.
@@ -323,11 +417,9 @@ namespace Toolbar {
    * or `'No Kernel!'` if there is no kernel.
    * It can handle a change in context or kernel.
    */
-  export
-  function createKernelNameItem(session: IClientSession): ToolbarButton {
+  export function createKernelNameItem(session: IClientSession): ToolbarButton {
     return new Private.KernelName(session);
   }
-
 
   /**
    * Create a kernel status indicator item.
@@ -338,18 +430,15 @@ namespace Toolbar {
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
-  export
-  function createKernelStatusItem(session: IClientSession): Widget {
+  export function createKernelStatusItem(session: IClientSession): Widget {
     return new Private.KernelStatus(session);
   }
 }
 
-
 /**
  * A widget which acts as a button in a toolbar.
  */
-export
-class ToolbarButton extends Widget {
+export class ToolbarButton extends Widget {
   /**
    * Construct a new toolbar button.
    */
@@ -359,11 +448,17 @@ class ToolbarButton extends Widget {
     this.addClass(TOOLBAR_BUTTON_CLASS);
     this._onClick = options.onClick || Private.noOp;
 
-    const classes = options.className ?
-      options.className.trim().replace(/\s{2,}/g, ' ').split(/\s/) : null;
+    const classes = options.className
+      ? options.className
+          .trim()
+          .replace(/\s{2,}/g, ' ')
+          .split(/\s/)
+      : null;
 
     if (classes) {
-      classes.forEach(name => { this.addClass(name); });
+      classes.forEach(name => {
+        this.addClass(name);
+      });
     }
 
     this.node.title = options.tooltip || '';
@@ -381,20 +476,13 @@ class ToolbarButton extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      if ((event as MouseEvent).button === 0) {
-        this._onClick();
-      }
-      break;
-    case 'mousedown':
-      this.addClass(TOOLBAR_PRESSED_CLASS);
-      break;
-    case 'mouseup':
-    case 'mouseout':
-      this.removeClass(TOOLBAR_PRESSED_CLASS);
-      break;
-    default:
-      break;
+      case 'click':
+        if ((event as MouseEvent).button === 0) {
+          this._onClick();
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -403,9 +491,6 @@ class ToolbarButton extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
-    this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('mouseup', this);
-    this.node.addEventListener('mouseout', this);
   }
 
   /**
@@ -413,25 +498,19 @@ class ToolbarButton extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
-    this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('mouseup', this);
-    this.node.removeEventListener('mouseout', this);
   }
 
   private _onClick: () => void;
 }
 
-
 /**
  * A namespace for `ToolbarButton` statics.
  */
-export
-namespace ToolbarButton {
+export namespace ToolbarButton {
   /**
    * The options used to construct a toolbar button.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The callback for a click event.
      */
@@ -449,7 +528,6 @@ namespace ToolbarButton {
   }
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -457,8 +535,7 @@ namespace Private {
   /**
    * An attached property for the name of a toolbar item.
    */
-  export
-  const nameProperty = new AttachedProperty<Widget, string>({
+  export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
     create: () => ''
   });
@@ -466,22 +543,27 @@ namespace Private {
   /**
    * ToolbarButton tooltip formatter for a command.
    */
-  export
-  function commandTooltip(commands: CommandRegistry, id: string): string {
+  export function commandTooltip(
+    commands: CommandRegistry,
+    id: string
+  ): string {
     return commands.caption(id);
   }
 
   /**
    * A no-op function.
    */
-  export
-  function noOp() { /* no-op */ }
+  export function noOp() {
+    /* no-op */
+  }
 
   /**
    * Get the class names for a command based ToolBarButton
    */
-  export
-  function commandClassName(commands: CommandRegistry, id: string): string {
+  export function commandClassName(
+    commands: CommandRegistry,
+    id: string
+  ): string {
     let name = commands.className(id);
     // Add the boolean state classes.
     if (commands.isToggled(id)) {
@@ -496,8 +578,11 @@ namespace Private {
   /**
    * Fill the node of a command based ToolBarButton.
    */
-  export
-  function setNodeContentFromCommand(node: HTMLElement, commands: CommandRegistry, id: string): void {
+  export function setNodeContentFromCommand(
+    node: HTMLElement,
+    commands: CommandRegistry,
+    id: string
+  ): void {
     const iconClass = commands.iconClass(id);
     const iconLabel = commands.iconLabel(id);
     const label = commands.label(id);
@@ -514,8 +599,7 @@ namespace Private {
   /**
    * A spacer widget.
    */
-  export
-  class Spacer extends Widget {
+  export class Spacer extends Widget {
     /**
      * Construct a new spacer widget.
      */
@@ -528,8 +612,7 @@ namespace Private {
   /**
    * A kernel name widget.
    */
-  export
-  class KernelName extends ToolbarButton {
+  export class KernelName extends ToolbarButton {
     /**
      * Construct a new kernel name widget.
      */
@@ -540,7 +623,7 @@ namespace Private {
           session.selectKernel();
         },
         tooltip: 'Switch kernel'
-        });
+      });
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);
     }
@@ -556,8 +639,7 @@ namespace Private {
   /**
    * A toolbar item that displays kernel status.
    */
-  export
-  class KernelStatus extends Widget {
+  export class KernelStatus extends Widget {
     /**
      * Construct a new kernel status widget.
      */

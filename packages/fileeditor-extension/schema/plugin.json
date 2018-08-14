@@ -9,11 +9,23 @@
         "autoClosingBrackets": {
           "type": "boolean"
         },
+        "fontFamily": {
+          "type": ["string", "null"]
+        },
+        "fontSize": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 100
+        },
+        "lineHeight": {
+          "type": ["number", "null"]
+        },
         "lineNumbers": {
           "type": "boolean"
         },
         "lineWrap": {
-          "type": "boolean"
+          "type": "string",
+          "enum": ["off", "on", "wordWrapColumn", "bounded"]
         },
         "matchBrackets": {
           "type": "boolean"
@@ -26,6 +38,9 @@
         },
         "tabSize": {
           "type": "number"
+        },
+        "wordWrapColumn": {
+          "type": "integer"
         }
       },
       "additionalProperties": false,
@@ -35,16 +50,21 @@
   "properties": {
     "editorConfig": {
       "title": "Editor Configuration",
-      "description": "The configuration for all text editors.",
+      "description":
+        "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`, values from\ncurrent theme are used.",
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
+        "fontFamily": null,
+        "fontSize": null,
+        "lineHeight": null,
         "lineNumbers": true,
-        "lineWrap": true,
+        "lineWrap": "on",
         "matchBrackets": true,
         "readOnly": false,
         "insertSpaces": true,
-        "tabSize": 4
+        "tabSize": 4,
+        "wordWrapColumn": 80
       }
     }
   },

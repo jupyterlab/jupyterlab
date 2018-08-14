@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
+var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -26,7 +27,7 @@ var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
   jupyterlab_extensions: extensions,
-  jupyterlab_mime_extensions: mimeExtensions,
+  jupyterlab_mime_extensions: mimeExtensions
 };
 var result = template(data);
 
@@ -44,11 +45,10 @@ fs.copySync('./templates/error.html', path.join(buildDir, 'error.html'));
 // Set up variables for watch mode.
 var localLinked = {};
 var ignoreCache = Object.create(null);
-Object.keys(jlab.linkedPackages).forEach(function (name) {
+Object.keys(jlab.linkedPackages).forEach(function(name) {
   var localPath = require.resolve(path.join(name, 'package.json'));
   localLinked[name] = path.dirname(localPath);
 });
-
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
@@ -62,7 +62,7 @@ function maybeSync(localPath, name, rest) {
   if (source === fs.realpathSync(localPath)) {
     return;
   }
-  fs.watchFile(source, { 'interval': 500 }, function(curr) {
+  fs.watchFile(source, { interval: 500 }, function(curr) {
     if (!curr || curr.nlink === 0) {
       return;
     }
@@ -74,42 +74,45 @@ function maybeSync(localPath, name, rest) {
   });
 }
 
-
 /**
  * A WebPack Plugin that copies the assets to the static directory.
  */
-function JupyterLabPlugin() { }
+function JupyterLabPlugin() {}
 
 JupyterLabPlugin.prototype.apply = function(compiler) {
-
-  compiler.plugin('after-emit', function(compilation, callback) {
-    var staticDir = jlab.staticDir;
-    if (!staticDir) {
-      callback();
-      return;
-    }
-    // Ensure a clean static directory on the first emit.
-    if (this._first && fs.existsSync(staticDir)) {
-      fs.removeSync(staticDir);
-    }
-    this._first = false;
-    fs.copySync(buildDir, staticDir);
-    callback();
-  }.bind(this));
+  compiler.hooks.afterEmit.tap(
+    'JupyterLabPlugin',
+    function() {
+      var staticDir = jlab.staticDir;
+      if (!staticDir) {
+        return;
+      }
+      // Ensure a clean static directory on the first emit.
+      if (this._first && fs.existsSync(staticDir)) {
+        fs.removeSync(staticDir);
+      }
+      this._first = false;
+      fs.copySync(buildDir, staticDir);
+    }.bind(this)
+  );
 };
 
 JupyterLabPlugin.prototype._first = true;
 
-
 module.exports = {
+  mode: 'development',
   entry: {
-    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')],
-    vendor: jlab.vendor
+    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
   },
   output: {
     path: path.resolve(buildDir),
     publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
     filename: '[name].[chunkhash].js'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
   },
   module: {
     rules: [
@@ -117,22 +120,39 @@ module.exports = {
       { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
       { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.json$/, use: 'json-loader' },
       { test: /\.md$/, use: 'raw-loader' },
       { test: /\.txt$/, use: 'raw-loader' },
-      { test: /\.js$/, use: ['source-map-loader'], enforce: 'pre',
+      {
+        test: /\.js$/,
+        use: ['source-map-loader'],
+        enforce: 'pre',
         // eslint-disable-next-line no-undef
-        exclude: path.join(process.cwd(), 'node_modules')
+        exclude: /node_modules/
       },
       { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
-      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/font-woff' },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-      { test: /\.otf(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/font-woff'
+      },
+      {
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/font-woff'
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+      },
+      {
+        test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+      },
       { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, use: 'url-loader?limit=10000&mimetype=image/svg+xml' }
-    ],
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+      }
+    ]
   },
   watchOptions: {
     ignored: function(localPath) {
@@ -142,7 +162,7 @@ module.exports = {
       }
       // Limit the watched files to those in our local linked package dirs.
       var ignore = true;
-      Object.keys(localLinked).some(function (name) {
+      Object.keys(localLinked).some(function(name) {
         // Bail if already found.
         var rootPath = localLinked[name];
         var contained = localPath.indexOf(rootPath + path.sep) !== -1;
@@ -166,17 +186,20 @@ module.exports = {
   bail: true,
   devtool: 'source-map',
   plugins: [
+    new DuplicatePackageCheckerPlugin({
+      verbose: true,
+      exclude(instance) {
+        // ignore known duplicates
+        return ['domelementtype', 'hash-base', 'inherits'].includes(
+          instance.name
+        );
+      }
+    }),
     new HtmlWebpackPlugin({
       template: path.join('templates', 'template.html'),
       title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest'
-    }),
     new JupyterLabPlugin({})
   ]
 };

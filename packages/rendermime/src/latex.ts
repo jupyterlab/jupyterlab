@@ -15,7 +15,6 @@ const inline = '$'; // the inline math delimiter
 // needed for searching for math in the text input.
 const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@@\d+@@|\\\\(?:\(|\)|\[|\]))/i;
 
-
 /**
  *  Break up the text into its component parts and search
  *    through them for math delimiters, braces, linebreaks, etc.
@@ -23,8 +22,7 @@ const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@
  *  Don't allow math to pass through a double linebreak
  *    (which will be a paragraph).
  */
-export
-function removeMath(text: string): { text: string, math: string[] } {
+export function removeMath(text: string): { text: string; math: string[] } {
   let math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
@@ -39,13 +37,21 @@ function removeMath(text: string): { text: string, math: string[] } {
   //     `$foo` and `$bar` are variables.  -->  <code>$foo ` and `$bar</code> are variables.
   let hasCodeSpans = /`/.test(text);
   if (hasCodeSpans) {
-    text = text.replace(/~/g, '~T').replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, (wholematch) => wholematch.replace(/\$/g, '~D'));
+    text = text
+      .replace(/~/g, '~T')
+      .replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, wholematch =>
+        wholematch.replace(/\$/g, '~D')
+      );
     deTilde = (text: string) => {
-      return text.replace(/~([TD])/g,
-        (wholematch, character) => (character === 'T') ? '~' : inline);
+      return text.replace(
+        /~([TD])/g,
+        (wholematch, character) => (character === 'T' ? '~' : inline)
+      );
     };
   } else {
-    deTilde = (text: string) => { return text; };
+    deTilde = (text: string) => {
+      return text;
+    };
   }
 
   let blocks = text.replace(/\r\n?/g, '\n').split(MATHSPLIT);
@@ -70,9 +76,9 @@ function removeMath(text: string): { text: string, math: string[] } {
           last = i;
         } else {
           blocks = processMath(start, i, deTilde, math, blocks);
-          start  = null;
-          end    = null;
-          last   = null;
+          start = null;
+          end = null;
+          last = null;
         }
       } else if (block.match(/\n.*\n/)) {
         if (last !== null) {
@@ -97,9 +103,9 @@ function removeMath(text: string): { text: string, math: string[] } {
         start = i;
         end = block;
         braces = 0;
-      } else if (block === '\\\\\(' || block === '\\\\\[') {
+      } else if (block === '\\\\(' || block === '\\\\[') {
         start = i;
-        end = block.slice(-1) === '(' ? '\\\\\)' : '\\\\\]';
+        end = block.slice(-1) === '(' ? '\\\\)' : '\\\\]';
         braces = 0;
       } else if (block.substr(1, 5) === 'begin') {
         start = i;
@@ -117,13 +123,11 @@ function removeMath(text: string): { text: string, math: string[] } {
   return { text: deTilde(blocks.join('')), math };
 }
 
-
 /**
  * Put back the math strings that were saved,
  * and clear the math array (no need to keep it around).
  */
-export
-function replaceMath(text: string, math: string[]): string {
+export function replaceMath(text: string, math: string[]): string {
   /**
    * Replace a math placeholder with its corresponding group.
    * The math delimiters "\\(", "\\[", "\\)" and "\\]" are replaced
@@ -131,12 +135,16 @@ function replaceMath(text: string, math: string[]): string {
    */
   let process = (match: string, n: number): string => {
     let group = math[n];
-    if (group.substr(0, 3) === '\\\\\(' &&
-        group.substr(group.length - 3) === '\\\\\)') {
-      group = '\\\(' + group.substring(3, group.length - 3) + '\\\)';
-    } else if (group.substr(0, 3) === '\\\\\[' &&
-               group.substr(group.length - 3) === '\\\\\]') {
-      group = '\\\[' + group.substring(3, group.length - 3) + '\\\]';
+    if (
+      group.substr(0, 3) === '\\\\(' &&
+      group.substr(group.length - 3) === '\\\\)'
+    ) {
+      group = '\\(' + group.substring(3, group.length - 3) + '\\)';
+    } else if (
+      group.substr(0, 3) === '\\\\[' &&
+      group.substr(group.length - 3) === '\\\\]'
+    ) {
+      group = '\\[' + group.substring(3, group.length - 3) + '\\]';
     }
     return group;
   };
@@ -156,11 +164,19 @@ function replaceMath(text: string, math: string[]): string {
  *   math, then push the math string onto the storage array.
  *  The preProcess function is called on all blocks if it has been passed in
  */
-function processMath(i: number, j: number, preProcess: (input: string) => string, math: string[], blocks: string[]): string[] {
-  let block = blocks.slice(i, j + 1).join('').replace(/&/g, '&amp;') // use HTML entity for &
-  .replace(/</g, '&lt;') // use HTML entity for <
-  .replace(/>/g, '&gt;') // use HTML entity for >
-  ;
+function processMath(
+  i: number,
+  j: number,
+  preProcess: (input: string) => string,
+  math: string[],
+  blocks: string[]
+): string[] {
+  let block = blocks
+    .slice(i, j + 1)
+    .join('')
+    .replace(/&/g, '&amp;') // use HTML entity for &
+    .replace(/</g, '&lt;') // use HTML entity for <
+    .replace(/>/g, '&gt;'); // use HTML entity for >
   if (navigator && navigator.appName === 'Microsoft Internet Explorer') {
     block = block.replace(/(%[^\n]*)\n/g, '$1<br/>\n');
   }

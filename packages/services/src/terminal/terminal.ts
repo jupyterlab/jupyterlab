@@ -1,41 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator
-} from '@phosphor/algorithm';
+import { IIterator } from '@phosphor/algorithm';
 
-import {
-  JSONPrimitive, JSONObject
-} from '@phosphor/coreutils';
+import { JSONPrimitive, JSONObject } from '@phosphor/coreutils';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal
-} from '@phosphor/signaling';
+import { ISignal } from '@phosphor/signaling';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  DefaultTerminalSession
-} from './default';
-
+import { DefaultTerminalSession } from './default';
 
 /**
  * The namespace for ISession statics.
  */
-export
-namespace TerminalSession {
+export namespace TerminalSession {
   /**
    * An interface for a terminal session.
    */
-  export
-  interface ISession extends IDisposable {
+  export interface ISession extends IDisposable {
     /**
      * A signal emitted when the session is shut down.
      */
@@ -92,8 +77,7 @@ namespace TerminalSession {
   /**
    * Test whether the terminal service is available.
    */
-  export
-  function isAvailable(): boolean {
+  export function isAvailable(): boolean {
     return DefaultTerminalSession.isAvailable();
   }
 
@@ -104,8 +88,7 @@ namespace TerminalSession {
    *
    * @returns A promise that resolves with the session instance.
    */
-  export
-  function startNew(options?: IOptions): Promise<ISession> {
+  export function startNew(options?: IOptions): Promise<ISession> {
     return DefaultTerminalSession.startNew(options);
   }
 
@@ -127,8 +110,10 @@ namespace TerminalSession {
    *
    * If the session does not exist on the server, the promise is rejected.
    */
-  export
-  function connectTo(name: string, options?: IOptions): Promise<ISession> {
+  export function connectTo(
+    name: string,
+    options?: IOptions
+  ): Promise<ISession> {
     return DefaultTerminalSession.connectTo(name, options);
   }
 
@@ -139,8 +124,9 @@ namespace TerminalSession {
    *
    * @returns A promise that resolves with the list of running session models.
    */
-  export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<IModel[]> {
+  export function listRunning(
+    settings?: ServerConnection.ISettings
+  ): Promise<IModel[]> {
     return DefaultTerminalSession.listRunning(settings);
   }
 
@@ -153,8 +139,10 @@ namespace TerminalSession {
    *
    * @returns A promise that resolves when the session is shut down.
    */
-  export
-  function shutdown(name: string, settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdown(
+    name: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return DefaultTerminalSession.shutdown(name, settings);
   }
 
@@ -163,27 +151,26 @@ namespace TerminalSession {
    *
    * @returns A promise that resolves when all of the sessions are shut down.
    */
-  export
-  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdownAll(
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     return DefaultTerminalSession.shutdownAll(settings);
   }
 
   /**
-   * The options for intializing a terminal session object.
+   * The options for initializing a terminal session object.
    */
-  export
-  interface IOptions {
-   /**
-    * The server settings for the session.
-    */
+  export interface IOptions {
+    /**
+     * The server settings for the session.
+     */
     serverSettings?: ServerConnection.ISettings;
   }
 
   /**
    * The server model for a terminal session.
    */
-  export
-  interface IModel extends JSONObject {
+  export interface IModel extends JSONObject {
     /**
      * The name of the terminal session.
      */
@@ -193,8 +180,7 @@ namespace TerminalSession {
   /**
    * A message from the terminal session.
    */
-  export
-  interface IMessage {
+  export interface IMessage {
     /**
      * The type of the message.
      */
@@ -209,8 +195,7 @@ namespace TerminalSession {
   /**
    * Valid message types for the terminal.
    */
-  export
-  type MessageType = 'stdout' | 'disconnect' | 'set_size' | 'stdin';
+  export type MessageType = 'stdout' | 'disconnect' | 'set_size' | 'stdin';
 
   /**
    * The interface for a terminal manager.
@@ -219,8 +204,7 @@ namespace TerminalSession {
    * The manager is responsible for maintaining the state of running
    * terminal sessions.
    */
-  export
-  interface IManager extends IDisposable {
+  export interface IManager extends IDisposable {
     /**
      * A signal emitted when the running terminals change.
      */

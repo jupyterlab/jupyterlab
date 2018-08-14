@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "0.4.2",
+  "version": "0.5.2",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -25,10 +25,10 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.6.2"
+    "typescript": "~2.9.2"
   }
 }

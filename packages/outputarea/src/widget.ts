@@ -2,49 +2,30 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject, ReadonlyJSONObject
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Signal
-} from '@phosphor/signaling';
+import { Signal } from '@phosphor/signaling';
 
-import {
-  Panel, PanelLayout
-} from '@phosphor/widgets';
+import { Panel, PanelLayout } from '@phosphor/widgets';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  nbformat
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import {
- IOutputModel, RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { IOutputModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  IRenderMime
-} from '@jupyterlab/rendermime-interfaces';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import {
-  Kernel, KernelMessage
-} from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import {
-  IOutputAreaModel
-} from './model';
-
+import { IOutputAreaModel } from './model';
 
 /**
  * The class name added to an output area widget.
@@ -96,16 +77,9 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
-/**
- * The class name added to stdin rendered text nodes.
- */
-const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
-
-
 /******************************************************************************
  * OutputArea
  ******************************************************************************/
-
 
 /**
  * An output area widget.
@@ -116,25 +90,24 @@ const STDIN_RENDERED_CLASS = 'jp-Stdin-rendered';
  * `null` model, and may want to listen to the `modelChanged`
  * signal.
  */
-export
-class OutputArea extends Widget {
+export class OutputArea extends Widget {
   /**
    * Construct an output area widget.
    */
   constructor(options: OutputArea.IOptions) {
     super();
-    let model = this.model = options.model;
+    let model = (this.model = options.model);
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
-    this.contentFactory = (
-      options.contentFactory || OutputArea.defaultContentFactory
-    );
+    this.contentFactory =
+      options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
     for (let i = 0; i < model.length; i++) {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
     model.changed.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -148,7 +121,7 @@ class OutputArea extends Widget {
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
-   * Te rendermime instance used by the widget.
+   * The rendermime instance used by the widget.
    */
   readonly rendermime: RenderMimeRegistry;
 
@@ -205,7 +178,7 @@ class OutputArea extends Widget {
     // Handle stdin.
     value.onStdin = msg => {
       if (KernelMessage.isInputRequestMsg(msg)) {
-        this._onInputRequest(msg, value);
+        this.onInputRequest(msg, value);
       }
     };
   }
@@ -225,29 +198,39 @@ class OutputArea extends Widget {
   /**
    * Follow changes on the model state.
    */
-  protected onModelChanged(sender: IOutputAreaModel, args: IOutputAreaModel.ChangedArgs): void {
-    let layoutIndex;
+  protected onModelChanged(
+    sender: IOutputAreaModel,
+    args: IOutputAreaModel.ChangedArgs
+  ): void {
     switch (args.type) {
-    case 'add':
-      layoutIndex = this._modelToLayoutIndex(args.newIndex);
-      this._insertOutput(layoutIndex, args.newValues[0]);
-      this.outputLengthChanged.emit(this.model.length);
-      break;
-    case 'remove':
-      // Only clear is supported by the model.
-      if (this.widgets.length) {
-        this._clear();
+      case 'add':
+        this._insertOutput(args.newIndex, args.newValues[0]);
         this.outputLengthChanged.emit(this.model.length);
-      }
-      break;
-    case 'set':
-      layoutIndex = this._modelToLayoutIndex(args.newIndex);
-      this._setOutput(layoutIndex, args.newValues[0]);
-      this.outputLengthChanged.emit(this.model.length);
-      break;
-    default:
-      break;
+        break;
+      case 'remove':
+        // Only clear is supported by the model.
+        if (this.widgets.length) {
+          this._clear();
+          this.outputLengthChanged.emit(this.model.length);
+        }
+        break;
+      case 'set':
+        this._setOutput(args.newIndex, args.newValues[0]);
+        this.outputLengthChanged.emit(this.model.length);
+        break;
+      default:
+        break;
     }
+  }
+
+  /**
+   * Follow changes on the output model state.
+   */
+  protected onStateChanged(sender: IOutputAreaModel): void {
+    for (let i = 0; i < this.model.length; i++) {
+      this._setOutput(i, this.model.get(i));
+    }
+    this.outputLengthChanged.emit(this.model.length);
   }
 
   /**
@@ -291,7 +274,10 @@ class OutputArea extends Widget {
   /**
    * Handle an input request from a kernel.
    */
-  private _onInputRequest(msg: KernelMessage.IInputRequestMsg, future: Kernel.IFuture): void {
+  protected onInputRequest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IFuture
+  ): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
     let stdinPrompt = msg.content.prompt;
@@ -311,6 +297,20 @@ class OutputArea extends Widget {
 
     let layout = this.layout as PanelLayout;
     layout.addWidget(panel);
+
+    /**
+     * Wait for the stdin to complete, add it to the model (so it persists)
+     * and remove the stdin widget.
+     */
+    input.value.then(value => {
+      // Use stdin as the stream so it does not get combined with stdout.
+      this.model.add({
+        output_type: 'stream',
+        name: 'stdin',
+        text: value + '\n'
+      });
+      panel.dispose();
+    });
   }
 
   /**
@@ -318,43 +318,32 @@ class OutputArea extends Widget {
    */
   private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
-    layout.widgets[index].dispose();
-    this._insertOutput(index, model);
+    let panel = layout.widgets[index] as Panel;
+    let renderer = (panel.widgets
+      ? panel.widgets[1]
+      : panel) as IRenderMime.IRenderer;
+    if (renderer.renderModel) {
+      renderer.renderModel(model);
+    } else {
+      layout.widgets[index].dispose();
+      this._insertOutput(index, model);
+    }
   }
 
   /**
    * Render and insert a single output into the layout.
    */
   private _insertOutput(index: number, model: IOutputModel): void {
-    let output = this._createOutputItem(model);
+    let output = this.createOutputItem(model);
     output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
   }
 
   /**
-   * Adjust the model index to the widgets index (skipping stdin widgets).
-   */
-  private _modelToLayoutIndex(index: number) {
-    let widgets = this.widgets;
-    let modelOutputs = -1;
-    let i;
-
-    for (i = 0; i < widgets.length; i++) {
-      if (!widgets[i].hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS)) {
-        modelOutputs++;
-        if (modelOutputs === index) {
-          break;
-        }
-      }
-    }
-    return i;
-  }
-
-  /**
    * Create an output item with a prompt and actual output
    */
-  private _createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget {
     let panel = new Panel();
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
@@ -363,8 +352,21 @@ class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
+    let output = this.createRenderedMimetype(model);
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+
+    return panel;
+  }
+
+  /**
+   * Render a mimetype
+   */
+  protected createRenderedMimetype(model: IOutputModel): Widget {
+    let widget: Widget;
     let mimeType = this.rendermime.preferredMimeType(
-      model.data, !model.trusted
+      model.data,
+      model.trusted ? 'any' : 'ensure'
     );
     if (mimeType) {
       let metadata = model.metadata;
@@ -382,12 +384,25 @@ class OutputArea extends Widget {
       if (isolated === true) {
         output = new Private.IsolatedRenderer(output);
       }
-      output.renderModel(model);
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-      panel.addWidget(output);
+      output.renderModel(model).catch(error => {
+        // Manually append error message to output
+        output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
+        // Remove mime-type-specific CSS classes
+        output.node.className = 'p-Widget jp-RenderedText';
+        output.node.setAttribute(
+          'data-mime-type',
+          'application/vnd.jupyter.stderr'
+        );
+      });
+      widget = output;
+    } else {
+      widget = new Widget();
+      widget.node.innerHTML =
+        `No ${model.trusted ? '' : '(safe) '}renderer could be ` +
+        'found for output. It has the following MIME types: ' +
+        Object.keys(model.data).join(', ');
     }
-
-    return panel;
+    return widget;
   }
 
   /**
@@ -402,44 +417,44 @@ class OutputArea extends Widget {
     let targets: number[];
 
     switch (msgType) {
-    case 'execute_result':
-    case 'display_data':
-    case 'stream':
-    case 'error':
-      output = msg.content as nbformat.IOutput;
-      output.output_type = msgType as nbformat.OutputType;
-      model.add(output);
-      break;
-    case 'clear_output':
-      let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-      model.clear(wait);
-      break;
-    case 'update_display_data':
-      output = msg.content as nbformat.IOutput;
-      output.output_type = 'display_data';
-      targets = this._displayIdMap.get(displayId);
-      if (targets) {
-        for (let index of targets) {
-          model.set(index, output);
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        output = msg.content as nbformat.IOutput;
+        output.output_type = msgType as nbformat.OutputType;
+        model.add(output);
+        break;
+      case 'clear_output':
+        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        model.clear(wait);
+        break;
+      case 'update_display_data':
+        output = msg.content as nbformat.IOutput;
+        output.output_type = 'display_data';
+        targets = this._displayIdMap.get(displayId);
+        if (targets) {
+          for (let index of targets) {
+            model.set(index, output);
+          }
         }
-      }
-      break;
-    default:
-      break;
+        break;
+      default:
+        break;
     }
     if (displayId && msgType === 'display_data') {
-       targets = this._displayIdMap.get(displayId) || [];
-       targets.push(model.length - 1);
-       this._displayIdMap.set(displayId, targets);
+      targets = this._displayIdMap.get(displayId) || [];
+      targets.push(model.length - 1);
+      this._displayIdMap.set(displayId, targets);
     }
-  }
+  };
 
   /**
    * Handle an execute reply message.
    */
   private _onExecuteReply = (msg: KernelMessage.IExecuteReplyMsg) => {
     // API responses that contain a pager are special cased and their type
-    // is overriden from 'execute_reply' to 'display_data' in order to
+    // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
     let model = this.model;
     let content = msg.content as KernelMessage.IExecuteOkReply;
@@ -458,24 +473,42 @@ class OutputArea extends Widget {
       metadata: {}
     };
     model.add(output);
-  }
+  };
 
   private _minHeightTimeout: number = null;
   private _future: Kernel.IFuture = null;
   private _displayIdMap = new Map<string, number[]>();
 }
 
+export class SimplifiedOutputArea extends OutputArea {
+  /**
+   * Handle an input request from a kernel by doing nothing.
+   */
+  protected onInputRequest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IFuture
+  ): void {
+    return;
+  }
+
+  /**
+   * Create an output item without a prompt, just the output widgets
+   */
+  protected createOutputItem(model: IOutputModel): Widget {
+    let output = this.createRenderedMimetype(model);
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    return output;
+  }
+}
 
 /**
  * A namespace for OutputArea statics.
  */
-export
-namespace OutputArea {
+export namespace OutputArea {
   /**
    * The options to create an `OutputArea`.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The model used by the widget.
      */
@@ -495,8 +528,12 @@ namespace OutputArea {
   /**
    * Execute code on an output area.
    */
-  export
-  function execute(code: string, output: OutputArea, session: IClientSession): Promise<KernelMessage.IExecuteReplyMsg> {
+  export function execute(
+    code: string,
+    output: OutputArea,
+    session: IClientSession,
+    metadata?: JSONObject
+  ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
       code,
@@ -506,7 +543,7 @@ namespace OutputArea {
     if (!session.kernel) {
       return Promise.reject('Session has no kernel.');
     }
-    let future = session.kernel.requestExecute(content, false);
+    let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
@@ -517,8 +554,7 @@ namespace OutputArea {
    * The content factory is used to create children in a way
    * that can be customized.
    */
-  export
-  interface IContentFactory {
+  export interface IContentFactory {
     /**
      * Create an output prompt.
      */
@@ -527,14 +563,13 @@ namespace OutputArea {
     /**
      * Create an stdin widget.
      */
-    createStdin(options: Stdin.IOptions): Widget;
+    createStdin(options: Stdin.IOptions): IStdin;
   }
 
   /**
    * The default implementation of `IContentFactory`.
    */
-  export
-  class ContentFactory implements IContentFactory {
+  export class ContentFactory implements IContentFactory {
     /**
      * Create the output prompt for the widget.
      */
@@ -553,21 +588,17 @@ namespace OutputArea {
   /**
    * The default `ContentFactory` instance.
    */
-  export
-  const defaultContentFactory = new ContentFactory();
+  export const defaultContentFactory = new ContentFactory();
 }
-
 
 /******************************************************************************
  * OutputPrompt
  ******************************************************************************/
 
-
 /**
  * The interface for an output prompt.
  */
-export
-interface IOutputPrompt extends Widget {
+export interface IOutputPrompt extends Widget {
   /**
    * The execution count for the prompt.
    */
@@ -577,8 +608,7 @@ interface IOutputPrompt extends Widget {
 /**
  * The default output prompt implementation
  */
-export
-class OutputPrompt extends Widget implements IOutputPrompt {
+export class OutputPrompt extends Widget implements IOutputPrompt {
   /*
     * Create an output prompt widget.
     */
@@ -598,39 +628,50 @@ class OutputPrompt extends Widget implements IOutputPrompt {
     if (value === null) {
       this.node.textContent = '';
     } else {
-        this.node.textContent = `Out[${value}]:`;
+      this.node.textContent = `[${value}]:`;
     }
   }
 
   private _executionCount: nbformat.ExecutionCount = null;
 }
 
-
 /******************************************************************************
  * Stdin
  ******************************************************************************/
 
-
 /**
  * The stdin interface
  */
-export
-interface IStdin extends Widget {}
+export interface IStdin extends Widget {
+  /**
+   * The stdin value.
+   */
+  readonly value: Promise<string>;
+}
 
 /**
  * The default stdin widget.
  */
-export
-class Stdin extends Widget implements IStdin {
+export class Stdin extends Widget implements IStdin {
   /**
    * Construct a new input widget.
    */
   constructor(options: Stdin.IOptions) {
-    super({ node: Private.createInputWidgetNode(options.prompt, options.password) });
+    super({
+      node: Private.createInputWidgetNode(options.prompt, options.password)
+    });
     this.addClass(STDIN_CLASS);
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
     this._future = options.future;
+    this._value = options.prompt + ' ';
+  }
+
+  /**
+   * The value of the widget.
+   */
+  get value() {
+    return this._promise.promise.then(() => this._value);
   }
 
   /**
@@ -646,18 +687,17 @@ class Stdin extends Widget implements IStdin {
   handleEvent(event: Event): void {
     let input = this._input;
     if (event.type === 'keydown') {
-      if ((event as KeyboardEvent).keyCode === 13) {  // Enter
+      if ((event as KeyboardEvent).keyCode === 13) {
+        // Enter
         this._future.sendInputReply({
           value: input.value
         });
-        let rendered = document.createElement('span');
-        rendered.className = STDIN_RENDERED_CLASS;
         if (input.type === 'password') {
-          rendered.textContent = Array(input.value.length + 1).join('·');
+          this._value += Array(input.value.length + 1).join('·');
         } else {
-          rendered.textContent = input.value;
+          this._value += input.value;
         }
-        input.parentElement.replaceChild(rendered, input);
+        this._promise.resolve(void 0);
       }
     }
   }
@@ -686,16 +726,15 @@ class Stdin extends Widget implements IStdin {
 
   private _future: Kernel.IFuture = null;
   private _input: HTMLInputElement = null;
+  private _value: string;
+  private _promise = new PromiseDelegate<void>();
 }
 
-
-export
-namespace Stdin {
+export namespace Stdin {
   /**
    * The options to create a stdin widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The prompt text.
      */
@@ -713,11 +752,9 @@ namespace Stdin {
   }
 }
 
-
 /******************************************************************************
  * Private namespace
  ******************************************************************************/
-
 
 /**
  * A namespace for private data.
@@ -726,8 +763,10 @@ namespace Private {
   /**
    * Create the node for an InputWidget.
    */
-  export
-  function createInputWidgetNode(prompt: string, password: boolean): HTMLElement {
+  export function createInputWidgetNode(
+    prompt: string,
+    password: boolean
+  ): HTMLElement {
     let node = document.createElement('div');
     let promptNode = document.createElement('pre');
     promptNode.className = STDIN_PROMPT_CLASS;
@@ -745,8 +784,8 @@ namespace Private {
   /**
    * A renderer for IFrame data.
    */
-  export
-  class IsolatedRenderer extends Widget implements IRenderMime.IRenderer {
+  export class IsolatedRenderer extends Widget
+    implements IRenderMime.IRenderer {
     /**
      * Create an isolated renderer.
      */

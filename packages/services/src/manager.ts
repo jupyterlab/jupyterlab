@@ -1,59 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Builder, BuildManager
-} from './builder';
+import { Builder, BuildManager } from './builder';
 
-import {
-  Contents, ContentsManager
-} from './contents';
+import { Contents, ContentsManager } from './contents';
 
-import {
-  Kernel
-} from './kernel';
+import { Kernel } from './kernel';
 
-import {
-  Session, SessionManager
-} from './session';
+import { Session, SessionManager } from './session';
 
-import {
-  Setting, SettingManager
-} from './setting';
+import { Setting, SettingManager } from './setting';
 
-import {
-  TerminalSession, TerminalManager
-} from './terminal';
+import { TerminalSession, TerminalManager } from './terminal';
 
-import {
-  ServerConnection
-} from './serverconnection';
+import { ServerConnection } from './serverconnection';
 
-import {
-  WorkspaceManager
-} from './workspace';
-
+import { Workspace, WorkspaceManager } from './workspace';
 
 /**
  * A Jupyter services manager.
  */
-export
-class ServiceManager implements ServiceManager.IManager {
+export class ServiceManager implements ServiceManager.IManager {
   /**
    * Construct a new services provider.
    */
   constructor(options: ServiceManager.IOptions = {}) {
-    this.serverSettings = (
-      options.serverSettings || ServerConnection.makeSettings()
-    );
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
 
     this.contents = new ContentsManager(options);
     this.sessions = new SessionManager(options);
@@ -70,7 +47,9 @@ class ServiceManager implements ServiceManager.IManager {
         return this.terminals.ready;
       }
     });
-    this._readyPromise.then(() => { this._isReady = true; });
+    this._readyPromise.then(() => {
+      this._isReady = true;
+    });
   }
 
   /**
@@ -165,26 +144,33 @@ class ServiceManager implements ServiceManager.IManager {
   private _isReady = false;
 }
 
-
 /**
  * The namespace for `ServiceManager` statics.
  */
-export
-namespace ServiceManager {
+export namespace ServiceManager {
   /**
    * A service manager interface.
    */
-  export
-  interface IManager extends IDisposable {
+  export interface IManager extends IDisposable {
     /**
-     * A signal emitted when the kernel specs change.
+     * The builder for the manager.
      */
-    specsChanged: ISignal<IManager, Kernel.ISpecModels>;
+    readonly builder: Builder.IManager;
 
     /**
-     * The kernel spec models.
+     * The contents manager for the manager.
      */
-    readonly specs: Kernel.ISpecModels | null;
+    readonly contents: Contents.IManager;
+
+    /**
+     * Test whether the manager is ready.
+     */
+    readonly isReady: boolean;
+
+    /**
+     * A promise that fulfills when the manager is initially ready.
+     */
+    readonly ready: Promise<void>;
 
     /**
      * The server settings of the manager.
@@ -202,14 +188,14 @@ namespace ServiceManager {
     readonly settings: Setting.IManager;
 
     /**
-     * The builder for the manager.
+     * The kernel spec models.
      */
-    readonly builder: Builder.IManager;
+    readonly specs: Kernel.ISpecModels | null;
 
     /**
-     * The contents manager for the manager.
+     * A signal emitted when the kernel specs change.
      */
-    readonly contents: Contents.IManager;
+    readonly specsChanged: ISignal<IManager, Kernel.ISpecModels>;
 
     /**
      * The terminals manager for the manager.
@@ -217,21 +203,15 @@ namespace ServiceManager {
     readonly terminals: TerminalSession.IManager;
 
     /**
-     * Test whether the manager is ready.
+     * The workspace manager for the manager.
      */
-    readonly isReady: boolean;
-
-    /**
-     * A promise that fulfills when the manager is initially ready.
-     */
-    readonly ready: Promise<void>;
+    readonly workspaces: Workspace.IManager;
   }
 
   /**
    * The options used to create a service manager.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The server settings of the manager.
      */

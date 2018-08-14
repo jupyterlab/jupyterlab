@@ -1,21 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  HelpMenu
-} from '@jupyterlab/mainmenu';
-
+import { HelpMenu } from '@jupyterlab/mainmenu';
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('HelpMenu', () => {
-
     let commands: CommandRegistry;
     let menu: HelpMenu;
 
@@ -33,12 +26,9 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new help menu', () => {
-        expect(menu).to.be.an(HelpMenu);
-        expect(menu.menu.title.label).to.be('Help');
+        expect(menu).to.be.an.instanceof(HelpMenu);
+        expect(menu.menu.title.label).to.equal('Help');
       });
-
     });
-
   });
-
 });

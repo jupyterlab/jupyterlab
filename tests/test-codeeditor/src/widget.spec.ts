@@ -3,29 +3,19 @@
 
 import expect = require('expect.js');
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  simulate
-} from 'simulate-event';
+import { simulate } from 'simulate-event';
 
-import {
-  CodeEditor, CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import {
-  CodeMirrorEditor
-} from '@jupyterlab/codemirror';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
+import { framePromise } from '@jupyterlab/testutils';
 
 class LogEditor extends CodeMirrorEditor {
-
   methods: string[] = [];
   events: string[] = [];
 
@@ -45,9 +35,7 @@ class LogEditor extends CodeMirrorEditor {
   }
 }
 
-
 class LogWidget extends CodeEditorWrapper {
-
   methods: string[] = [];
 
   protected onActivateRequest(msg: Message): void {
@@ -76,9 +64,7 @@ class LogWidget extends CodeEditorWrapper {
   }
 }
 
-
 describe('CodeEditorWrapper', () => {
-
   let widget: LogWidget;
   let editorFactory = (options: CodeEditor.IOptions) => {
     options.uuid = 'foo';
@@ -95,7 +81,6 @@ describe('CodeEditorWrapper', () => {
   });
 
   describe('#constructor()', () => {
-
     it('should be a CodeEditorWrapper', () => {
       expect(widget).to.be.a(CodeEditorWrapper);
     });
@@ -106,19 +91,15 @@ describe('CodeEditorWrapper', () => {
       let editor = widget.editor as LogEditor;
       expect(editor.events).to.contain('focus');
     });
-
   });
 
   describe('#editor', () => {
-
     it('should be a a code editor', () => {
       expect(widget.editor.getOption('lineNumbers')).to.be(false);
     });
-
   });
 
   describe('#dispose()', () => {
-
     it('should dispose of the resources used by the widget', () => {
       expect(widget.isDisposed).to.be(false);
       widget.dispose();
@@ -137,13 +118,10 @@ describe('CodeEditorWrapper', () => {
       simulate(widget.node, 'focus');
       expect(editor.events).to.not.contain('focus');
     });
-
   });
 
   describe('#handleEvent()', () => {
-
     context('focus', () => {
-
       it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
         let editor = widget.editor as LogEditor;
@@ -160,54 +138,41 @@ describe('CodeEditorWrapper', () => {
         simulate(editor.editor.getInputField(), 'focus');
         expect(editor.methods).to.eql(['refresh']);
       });
-
     });
-
   });
 
   describe('#onActivateRequest()', () => {
-
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
       MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
       expect(widget.editor.hasFocus()).to.be(true);
     });
-
   });
 
   describe('#onAfterAttach()', () => {
-
-    it('should refresh the editor', (done) => {
+    it('should refresh the editor', async () => {
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
-
   });
 
   describe('#onAfterShow()', () => {
-
-    it('should refresh the editor', (done) => {
+    it('should refresh the editor', async () => {
       widget.hide();
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
       expect(editor.methods).to.not.contain('refresh');
       widget.show();
       expect(widget.methods).to.contain('onAfterShow');
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
-
   });
 
   describe('#onResize()', () => {
-
     it('should set the size of the editor', () => {
       let msg = new Widget.ResizeMessage(10, 10);
       let editor = widget.editor as LogEditor;
@@ -233,7 +198,5 @@ describe('CodeEditorWrapper', () => {
       simulate(editor.editor.getInputField(), 'focus');
       expect(editor.methods).to.eql(['refresh']);
     });
-
   });
-
 });

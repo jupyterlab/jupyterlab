@@ -1,27 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
-import {
-  DataConnector
-} from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/coreutils';
 
-import {
-  KernelMessage
-} from '@jupyterlab/services';
+import { KernelMessage, Session } from '@jupyterlab/services';
 
-import {
-  CompletionHandler
-} from './handler';
+import { CompletionHandler } from './handler';
 
 /**
  * A kernel connector for completion handlers.
  */
-export
-class KernelConnector extends DataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest> {
+export class KernelConnector extends DataConnector<
+  CompletionHandler.IReply,
+  void,
+  CompletionHandler.IRequest
+> {
   /**
    * Create a new kernel connector for completion requests.
    *
@@ -37,7 +32,9 @@ class KernelConnector extends DataConnector<CompletionHandler.IReply, void, Comp
    *
    * @param request - The completion request text and details.
    */
-  fetch(request: CompletionHandler.IRequest): Promise<CompletionHandler.IReply> {
+  fetch(
+    request: CompletionHandler.IRequest
+  ): Promise<CompletionHandler.IReply> {
     const kernel = this._session.kernel;
 
     if (!kernel) {
@@ -65,23 +62,20 @@ class KernelConnector extends DataConnector<CompletionHandler.IReply, void, Comp
     });
   }
 
-  private _session: IClientSession;
+  private _session: IClientSession | Session.ISession;
 }
-
 
 /**
  * A namespace for kernel connector statics.
  */
-export
-namespace KernelConnector {
+export namespace KernelConnector {
   /**
    * The instantiation options for cell completion handlers.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The session used by the kernel connector.
      */
-    session: IClientSession;
+    session: IClientSession | Session.ISession;
   }
 }

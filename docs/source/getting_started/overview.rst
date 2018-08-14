@@ -3,37 +3,61 @@
 Overview
 --------
 
-*JupyterLab is the next generation user interface for Project Jupyter*
+JupyterLab is the next-generation web-based user interface for Project Jupyter.
 
-JupyterLab goes beyond the classic Jupyter Notebook by providing a
-flexible and :ref:`extensible <user_extensions>` web application with a set of reusable
-components. You can arrange multiple notebooks, text editors, terminals,
-output areas, and custom components using tabs/panels and collapsible
-sidebars. These :ref:`components <interface>` are carefully designed to enable you to use
-them together or on their own to support new workflows (for example, you
-can send code from a file to a :ref:`code console <code_console>` with a keystroke, or move
-cells around a :ref:`notebook <notebook>` or between notebooks with drag-and-drop).
+.. image:: ../user/images/interface_jupyterlab.png
+   :align: center
+   :class: jp-screenshot
 
-:ref:`JupyterLab has full support for Jupyter Notebook documents. <notebook>` In
-addition, it enables other models of interactive computing, such as:
+JupyterLab enables you to work with documents and activities such as
+:ref:`Jupyter notebooks <notebook>`, text editors, terminals, and custom
+components in a flexible, integrated, and extensible manner. You can
+:ref:`arrange <interface>` multiple documents and activities side by side in the
+work area using tabs and splitters. Documents and activities integrate with each
+other, enabling new workflows for interactive computing, for example:
 
--  :ref:`code_console` provide transient scratchpads for running code
-   interactively, with full support for rich output.
--  :ref:`Kernel-backed documents <kernel-backed-documents>` allow code in any text file (Markdown,
-   Python, R, LaTeX, etc.) to be run interactively in any Jupyter
-   kernel.
+-  :ref:`code-console` provide transient scratchpads for running code
+   interactively, with full support for rich output. A code console can be
+   linked to a notebook kernel as a computation log from the notebook, for
+   example.
+-  :ref:`Kernel-backed documents <kernel-backed-documents>` enable code in any
+   text file (Markdown, Python, R, LaTeX, etc.) to be run interactively in any
+   Jupyter kernel.
+-  Notebook cell outputs can be :ref:`mirrored into their own tab <cell-output-mirror>`,
+   side by side with the notebook, enabling simple dashboards with interactive controls
+   backed by a kernel.
+-  Multiple views of documents with different editors or viewers enable live
+   editing of documents reflected in other viewers. For example, it is easy to
+   have live preview of :ref:`markdown`, :ref:`csv`, or :ref:`vega-lite` documents.
 
-JupyterLab also offers a unified model for viewing and handling data
-formats. This allows data in many formats (images, CSV, JSON, Markdown,
-PDF, Vega, Vega-Lite, etc.) to be opened as a file or returned by a
-kernel as rich output. See :ref:`file-and-output-formats` for more
-information.
+JupyterLab also offers a unified model for viewing and handling data formats.
+JupyterLab understands many file formats (images, CSV, JSON, Markdown, PDF,
+Vega, Vega-Lite, etc.) and can also display rich kernel output in these formats.
+See :ref:`file-and-output-formats` for more information.
 
-To navigate the user interface, JupyterLab offers :ref:`customizable keyboard shortcuts <shortcuts>`
-and the ability to use key maps from vim, emacs, and Sublime Text.
+To navigate the user interface, JupyterLab offers :ref:`customizable keyboard
+shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor-keymaps>`
+from vim, emacs, and Sublime Text in the text editor.
 
-JupyterLab is served from the same
-`server <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses
-the same `notebook document
-format <http://nbformat.readthedocs.io/en/latest/>`__ as the classic
-Jupyter Notebook.
+JupyterLab :ref:`extensions <user_extensions>` can customize or enhance any part
+of JupyterLab, including new themes, file editors, and custom components.
+
+JupyterLab is served from the same `server
+<https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
+`notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
+classic Jupyter Notebook.
+
+.. _releases:
+
+JupyterLab Releases
+~~~~~~~~~~~~~~~~~~~
+
+The current release of JupyterLab is suitable for general daily use. Please
+review the :ref:`changelog` for detailed descriptions of each release.
+
+The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
+We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
+as we evolve towards a stable extension development API.
+
+JupyterLab will eventually replace the classic Jupyter Notebook.
+Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.

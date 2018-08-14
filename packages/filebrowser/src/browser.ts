@@ -1,46 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  showErrorMessage, Toolbar, ToolbarButton
-} from '@jupyterlab/apputils';
+import { showErrorMessage, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import {
-  DocumentManager
-} from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 
-import {
-  Contents, ServerConnection
-} from '@jupyterlab/services';
+import { Contents, ServerConnection } from '@jupyterlab/services';
 
-import {
-  IIterator
-} from '@phosphor/algorithm';
+import { IIterator } from '@phosphor/algorithm';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  PanelLayout, Widget
-} from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import {
-  BreadCrumbs
-} from './crumbs';
+import { BreadCrumbs } from './crumbs';
 
-import {
-  DirListing
-} from './listing';
+import { DirListing } from './listing';
 
-import {
-  FileBrowserModel
-} from './model';
+import { FileBrowserModel } from './model';
 
-import {
-  Uploader
-} from './upload';
-
+import { Uploader } from './upload';
 
 /**
  * The class name added to file browsers.
@@ -72,16 +51,14 @@ const REFRESH_BUTTON = 'jp-RefreshIcon';
  */
 const MATERIAL_CLASS = 'jp-MaterialIcon';
 
-
 /**
  * A widget which hosts a file browser.
  *
- * The widget uses the Jupyter Contents API to retreive contents,
+ * The widget uses the Jupyter Contents API to retrieve contents,
  * and presents itself as a flat list of files and directories with
  * breadcrumbs.
  */
-export
-class FileBrowser extends Widget {
+export class FileBrowser extends Widget {
   /**
    * Construct a new file browser.
    *
@@ -92,7 +69,7 @@ class FileBrowser extends Widget {
     this.addClass(FILE_BROWSER_CLASS);
     this.id = options.id;
 
-    const model = this.model = options.model;
+    const model = (this.model = options.model);
     const renderer = options.renderer;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
@@ -108,15 +85,18 @@ class FileBrowser extends Widget {
           return;
         }
         directoryPending = true;
-        this._manager.newUntitled({
-          path: model.path,
-          type: 'directory'
-        }).then(model => {
-          this._listing.selectItemByName(model.name);
-          directoryPending = false;
-        }).catch(err => {
-          directoryPending = false;
-        });
+        this._manager
+          .newUntitled({
+            path: model.path,
+            type: 'directory'
+          })
+          .then(model => {
+            this._listing.selectItemByName(model.name);
+            directoryPending = false;
+          })
+          .catch(err => {
+            directoryPending = false;
+          });
       },
       tooltip: 'New Folder'
     });
@@ -272,16 +252,14 @@ class FileBrowser extends Widget {
     this._showingError = true;
 
     let title = 'Server Connection Error';
-    let networkMsg = (
+    let networkMsg =
       'A connection to the Jupyter server could not be established.\n' +
       'JupyterLab will continue trying to reconnect.\n' +
-      'Check your network connection or Jupyter server configuration.\n'
-    );
+      'Check your network connection or Jupyter server configuration.\n';
 
     // Check for a fetch error.
     if (args instanceof ServerConnection.NetworkError) {
       args.message = networkMsg;
-
     } else if (args instanceof ServerConnection.ResponseError) {
       if (args.response.status === 404) {
         title = 'Directory not found';
@@ -300,17 +278,14 @@ class FileBrowser extends Widget {
   private _showingError = false;
 }
 
-
 /**
  * The namespace for the `FileBrowser` class statics.
  */
-export
-namespace FileBrowser {
+export namespace FileBrowser {
   /**
    * An options object for initializing a file browser widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The command registry for use with the file browser.
      */

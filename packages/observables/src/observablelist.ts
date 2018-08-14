@@ -2,23 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ArrayExt, ArrayIterator, IIterator, IterableOrArrayLike, each, toArray
+  ArrayExt,
+  ArrayIterator,
+  IIterator,
+  IterableOrArrayLike,
+  each,
+  toArray
 } from '@phosphor/algorithm';
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
-
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * A list which can be observed for changes.
  */
-export
-interface IObservableList<T> extends IDisposable {
+export interface IObservableList<T> extends IDisposable {
   /**
    * A signal emitted when the list has changed.
    */
@@ -238,42 +237,38 @@ interface IObservableList<T> extends IDisposable {
   set(index: number, value: T): void;
 }
 
-
 /**
  * The namespace for IObservableList related interfaces.
  */
-export
-namespace IObservableList {
+export namespace IObservableList {
   /**
    * The change types which occur on an observable list.
    */
-  export
-  type ChangeType =
+  export type ChangeType =
     /**
      * Item(s) were added to the list.
      */
-    'add' |
+    | 'add'
 
     /**
      * An item was moved within the list.
      */
-    'move' |
+    | 'move'
 
     /**
      * Item(s) were removed from the list.
      */
-    'remove' |
+    | 'remove'
 
     /**
      * An item was set in the list.
      */
-    'set';
+    | 'set';
 
   /**
    * The changed args object which is emitted by an observable list.
    */
-  export
-  interface IChangedArgs<T> {
+  export interface IChangedArgs<T> {
     /**
      * The type of change undergone by the vector.
      */
@@ -307,18 +302,18 @@ namespace IObservableList {
   }
 }
 
-
 /**
  * A concrete implementation of [[IObservableList]].
  */
-export
-class ObservableList<T> implements IObservableList<T> {
+export class ObservableList<T> implements IObservableList<T> {
   /**
    * Construct a new observable map.
    */
   constructor(options: ObservableList.IOptions<T> = {}) {
     if (options.values !== void 0) {
-      each(options.values, value => { this._array.push(value); });
+      each(options.values, value => {
+        this._array.push(value);
+      });
     }
     this._itemCmp = options.itemCmp || Private.itemCmp;
   }
@@ -362,7 +357,6 @@ class ObservableList<T> implements IObservableList<T> {
     Signal.clearData(this);
     this.clear();
   }
-
 
   /**
    * Create an iterator over the values in the list.
@@ -692,19 +686,16 @@ class ObservableList<T> implements IObservableList<T> {
   private _changed = new Signal<this, IObservableList.IChangedArgs<T>>(this);
 }
 
-
 /**
  * The namespace for `ObservableList` class statics.
  */
-export
-namespace ObservableList {
+export namespace ObservableList {
   /**
    * The options used to initialize an observable map.
    */
-  export
-  interface IOptions<T> {
+  export interface IOptions<T> {
     /**
-     * An optional intial set of values.
+     * An optional initial set of values.
      */
     values?: IterableOrArrayLike<T>;
 
@@ -717,7 +708,6 @@ namespace ObservableList {
   }
 }
 
-
 /**
  * The namespace for module private data.
  */
@@ -725,8 +715,7 @@ namespace Private {
   /**
    * The default strict equality item cmp.
    */
-  export
-  function itemCmp(first: any, second: any): boolean {
+  export function itemCmp(first: any, second: any): boolean {
     return first === second;
   }
 }

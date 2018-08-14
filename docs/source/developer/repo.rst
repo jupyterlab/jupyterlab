@@ -1,5 +1,7 @@
 .. _developer-guide:
 
+The JupyterLab Developer Guide is for developing JupyterLab extensions or developing JupyterLab itself.
+
 General Codebase Orientation
 ----------------------------
 
@@ -10,7 +12,7 @@ The ``jupyterlab/jupyterlab`` repository contains two packages:
 -  a Python package indicated by a ``setup.py`` file in the repo's root
    directory
 
-Th npm package and the Python package are both named ``jupyterlab``.
+The npm package and the Python package are both named ``jupyterlab``.
 
 See the `Contributing
 Guidelines <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
@@ -31,9 +33,6 @@ NPM package: ``src/``, ``lib/``, ``typings/``, ``buildutils/``
 -  ``typings/``: type definitions for external libraries that typescript
    needs.
 -  ``buildutils/``: Utilities for managing the repo
-
-                            75b8171af... Fix clean:slate script and
-                            update docs
 
 Examples: ``examples/``
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,31 +1,15 @@
 {
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES5",
-    "outDir": "./lib",
-    "lib": [
-      "ES5",
-      "ES2015.Core",
-      "ES2015.Collection",
-      "ES2015.Promise",
-      "DOM"
-    ],
     "baseUrl": ".",
-    "paths": {
-      "@jupyterlab/*": [
-        "../*/src"
-      ],
-      "@jupyterlab/mainmenu-extension": [
-        "../mainmenu-extension/src"
-      ]
-    },
-    "jsx": "react",
     "inlineSources": true,
-    "sourceMap": true
+    "jsx": "react",
+    "outDir": "./lib",
+    "paths": {
+      "@jupyterlab/*": ["../*/src"],
+      "@jupyterlab/mainmenu-extension": ["../mainmenu-extension/src"]
+    },
+    "sourceMap": true,
+    "types": ["node"]
   }
 }

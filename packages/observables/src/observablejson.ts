@@ -1,49 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONExt, JSONObject, JSONValue
-} from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  IObservableMap, ObservableMap
-} from './observablemap';
-
+import { IObservableMap, ObservableMap } from './observablemap';
 
 /**
  * An observable JSON value.
  */
-export
-interface IObservableJSON extends IObservableMap<JSONValue> {
+export interface IObservableJSON extends IObservableMap<JSONValue> {
   /**
    * Serialize the model to JSON.
    */
   toJSON(): JSONObject;
 }
 
-
 /**
  * The namespace for IObservableJSON related interfaces.
  */
-export
-namespace IObservableJSON {
+export namespace IObservableJSON {
   /**
    * A type alias for observable JSON changed args.
    */
-  export
-  type IChangedArgs = IObservableMap.IChangedArgs<JSONValue>;
+  export type IChangedArgs = IObservableMap.IChangedArgs<JSONValue>;
 }
-
 
 /**
  * A concrete Observable map for JSON data.
  */
-export
-class ObservableJSON extends ObservableMap<JSONValue> {
+export class ObservableJSON extends ObservableMap<JSONValue> {
   /**
    * Construct a new observable JSON object.
    */
@@ -72,17 +59,14 @@ class ObservableJSON extends ObservableMap<JSONValue> {
   }
 }
 
-
 /**
  * The namespace for ObservableJSON static data.
  */
-export
-namespace ObservableJSON {
+export namespace ObservableJSON {
   /**
    * The options use to initialize an observable JSON object.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The optional intitial value for the object.
      */
@@ -92,8 +76,7 @@ namespace ObservableJSON {
   /**
    * An observable JSON change message.
    */
-  export
-  class ChangeMessage extends Message {
+  export class ChangeMessage extends Message {
     /**
      * Create a new metadata changed message.
      */

@@ -3,24 +3,18 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
-
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The spinner class.
  */
-export
-class Spinner extends Widget {
+export class Spinner extends Widget {
   /**
    * Construct a spinner widget.
    */
-  constructor () {
+  constructor() {
     super();
     this.addClass('jp-Spinner');
     this.node.tabIndex = -1;

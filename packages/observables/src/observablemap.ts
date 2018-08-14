@@ -1,24 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IDisposable
-} from '@phosphor/disposable';
+import { IDisposable } from '@phosphor/disposable';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  IObservable
-} from './modeldb';
-
+import { IObservable } from './modeldb';
 
 /**
  * A map which can be observed for changes.
  */
-export
-interface IObservableMap<T> extends IDisposable, IObservable {
+export interface IObservableMap<T> extends IDisposable, IObservable {
   /**
    * The type of the Observable.
    */
@@ -99,37 +91,33 @@ interface IObservableMap<T> extends IDisposable, IObservable {
   dispose(): void;
 }
 
-
 /**
  * The interfaces associated with an IObservableMap.
  */
-export
-namespace IObservableMap {
+export namespace IObservableMap {
   /**
    * The change types which occur on an observable map.
    */
-  export
-  type ChangeType =
+  export type ChangeType =
     /**
      * An entry was added.
      */
-    'add' |
+    | 'add'
 
     /**
      * An entry was removed.
      */
-    'remove' |
+    | 'remove'
 
     /**
      * An entry was changed.
      */
-    'change';
+    | 'change';
 
   /**
    * The changed args object which is emitted by an observable map.
    */
-  export
-  interface IChangedArgs<T> {
+  export interface IChangedArgs<T> {
     /**
      * The type of change undergone by the map.
      */
@@ -152,12 +140,10 @@ namespace IObservableMap {
   }
 }
 
-
 /**
  * A concrete implementation of IObservbleMap<T>.
  */
-export
-class ObservableMap<T> implements IObservableMap<T> {
+export class ObservableMap<T> implements IObservableMap<T> {
   /**
    * Construct a new observable map.
    */
@@ -176,7 +162,6 @@ class ObservableMap<T> implements IObservableMap<T> {
   get type(): 'Map' {
     return 'Map';
   }
-
 
   /**
    * A signal emitted when the map has changed.
@@ -269,7 +254,6 @@ class ObservableMap<T> implements IObservableMap<T> {
     return keyList;
   }
 
-
   /**
    * Get a list of the values in the map.
    *
@@ -332,19 +316,16 @@ class ObservableMap<T> implements IObservableMap<T> {
   private _isDisposed = false;
 }
 
-
 /**
  * The namespace for `ObservableMap` class statics.
  */
-export
-namespace ObservableMap {
+export namespace ObservableMap {
   /**
    * The options used to initialize an observable map.
    */
-  export
-  interface IOptions<T> {
+  export interface IOptions<T> {
     /**
-     * An optional intial set of values.
+     * An optional initial set of values.
      */
     values?: { [key: string]: T };
 
@@ -357,7 +338,6 @@ namespace ObservableMap {
   }
 }
 
-
 /**
  * The namespace for module private data.
  */
@@ -365,8 +345,7 @@ namespace Private {
   /**
    * The default strict equality item comparator.
    */
-  export
-  function itemCmp(first: any, second: any): boolean {
+  export function itemCmp(first: any, second: any): boolean {
     return first === second;
   }
 }

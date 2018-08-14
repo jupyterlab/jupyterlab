@@ -11,12 +11,12 @@ CSS checklist
 
 -  CSS classnames are defined inline in the code. We used to put them as
    all caps file-level ``const``\ s, but we are moving away from that.
--  CSS files for packages are located within the ``src/style``
+-  CSS files for packages are located within the ``style``
    subdirectory and imported into the plugin's ``index.css``.
 -  The JupyterLab default CSS variables in the ``theme-light-extension``
    and ``theme-dark-extension`` packages are used to style packages
    where ever possible. Individual packages should not npm-depend on
-   these packages though, to allow the theme to be swapped out.
+   these packages though, to enable the theme to be swapped out.
 -  Additional public/private CSS variables are defined by plugins
    sparingly and in accordance with the conventions described below.
 
@@ -92,7 +92,7 @@ We are organizing our CSS files in the following manner:
    itself.
 -  Multiple CSS files may be used and organized as needed, but they
    should be imported into a single ``index.css`` at the top-level of
-   the plugin.
+   the plugin as `import '../style/index.css';`.
 
 CSS class names
 ~~~~~~~~~~~~~~~
@@ -147,7 +147,7 @@ CSS class name that gives a semantic naming of the component, such as:
 In general, the parent ``MyWidget`` should add these classes to the
 children. This applies when the children are plain DOM nodes or
 ``Widget`` instances/subclasses themselves. Thus, the general naming of
-CSS classes is of the form ``jp-WidgetName-semanticChild``. This allows
+CSS classes is of the form ``jp-WidgetName-semanticChild``. This enables
 the styling of these children in a manner that is independent of the
 children implementation or CSS classes they have themselves.
 
@@ -185,7 +185,7 @@ The reason is that these selectors are dependent on the implementation
 of the toolbar having the ``jp-Toolbar`` CSS class. When ``MyWidget``
 adds the ``jp-MyWidget-toolbar`` class, it can style the child
 independent of its implementation. The other reason to add the
-``jp-MyWidget-toolbar`` class is if the DOM stucture is highly
+``jp-MyWidget-toolbar`` class is if the DOM structure is highly
 recursive, the usual descendant selectors may not be specific to target
 only the desired children.
 

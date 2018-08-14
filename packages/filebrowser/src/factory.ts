@@ -1,41 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  IStateDB
-} from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Token
-} from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
-import {
-  FileBrowser
-} from './browser';
-
+import { FileBrowser } from './browser';
 
 /* tslint:disable */
 /**
  * The path tracker token.
  */
-export
-const IFileBrowserFactory = new Token<IFileBrowserFactory>('@jupyterlab/filebrowser:IFileBrowserFactory');
+export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
+  '@jupyterlab/filebrowser:IFileBrowserFactory'
+);
 /* tslint:enable */
-
 
 /**
  * The file browser factory interface.
  */
-export
-interface IFileBrowserFactory {
+export interface IFileBrowserFactory {
   /**
    * Create a new file browser instance.
    *
@@ -54,7 +42,10 @@ interface IFileBrowserFactory {
    * as the initial ID passed into the factory is used for only one file browser
    * instance.
    */
-  createFileBrowser(id: string, options?: IFileBrowserFactory.IOptions): FileBrowser;
+  createFileBrowser(
+    id: string,
+    options?: IFileBrowserFactory.IOptions
+  ): FileBrowser;
 
   /**
    * The instance tracker used by the factory to track file browsers.
@@ -67,12 +58,10 @@ interface IFileBrowserFactory {
   defaultBrowser: FileBrowser;
 }
 
-
 /**
  * A namespace for file browser factory interfaces.
  */
-export
-namespace IFileBrowserFactory {
+export namespace IFileBrowserFactory {
   /**
    * The options for creating a file browser using a file browser factory.
    *
@@ -83,8 +72,7 @@ namespace IFileBrowserFactory {
    * an application-wide notion of a singleton command registry and a singleton
    * state database.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The command registry used by the file browser.
      *

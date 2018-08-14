@@ -17,7 +17,7 @@ Initialization Options
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Objects will typically have an ``IOptions`` interface for initializing
-the widget. The use of this interface allows options to be later added
+the widget. The use of this interface enables options to be later added
 while preserving backward compatibility.
 
 ContentFactory Option
@@ -44,7 +44,7 @@ The "Private" module namespace is used to group variables and functions
 that are not intended to be exported and may have otherwise existed as
 module-level variables and functions. The use of the namespace also
 makes it clear when a variable access is to an imported name or from the
-module itself. Finally, the namespace allows the entire section to be
+module itself. Finally, the namespace enables the entire section to be
 collapsed in an editor if desired.
 
 Disposables
@@ -81,11 +81,11 @@ Signals are intended for one-to-many communication where outside objects
 react to changes on another object. Signals are always emitted with the
 sender as the first argument, and contain a single second argument with
 the payload. Signals should generally not be used to trigger the
-"default" behavior for an action, but to allow others to trigger
+"default" behavior for an action, but to enable others to trigger
 additional behavior. If a "default" behavior is intended to be provided
 by another object, then a callback should be provided by that object.
 Wherever possible as signal connection should be made with the pattern
-``.connect(this._onFoo, this)``. Providing the ``this`` context allows
+``.connect(this._onFoo, this)``. Providing the ``this`` context enables
 the connection to be properly cleared by ``clearSignalData(this)``.
 Using a private method avoids allocating a closure for each connection.
 
@@ -96,8 +96,8 @@ Some of the more advanced widgets have a model associated with them. The
 common pattern used is that the model is settable and must be set
 outside of the constructor. This means that any consumer of the widget
 must account for a model that may be ``null``, and may change at any
-time. The widget should emit a ``modelChanged`` signal to allow
-consumers to handle a change in model. The reason to allow a model to
+time. The widget should emit a ``modelChanged`` signal to enable
+consumers to handle a change in model. The reason to enable a model to
 swap is that the same widget could be used to display different model
 content while preserving the widget's location in the application. The
 reason the model cannot be provided in the constructor is the

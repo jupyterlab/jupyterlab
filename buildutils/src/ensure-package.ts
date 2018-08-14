@@ -17,8 +17,7 @@ import * as utils from './utils';
  *
  * @returns A list of changes that were made to ensure the package.
  */
-export
-function ensurePackage(options: IEnsurePackageOptions): string[] {
+export function ensurePackage(options: IEnsurePackageOptions): string[] {
   let { data, pkgPath } = options;
   let deps: { [key: string]: string } = data.dependencies || {};
   let devDeps: { [key: string]: string } = data.devDependencies || {};
@@ -65,9 +64,12 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
 
   // Extract all of the imports from the TypeScript files.
   filenames.forEach(fileName => {
-    let sourceFile = ts.createSourceFile(fileName,
-        fs.readFileSync(fileName).toString(), (ts.ScriptTarget as any).ES6,
-        /*setParentNodes */ true);
+    let sourceFile = ts.createSourceFile(
+      fileName,
+      fs.readFileSync(fileName).toString(),
+      (ts.ScriptTarget as any).ES6,
+      /*setParentNodes */ true
+    );
     imports = imports.concat(getImports(sourceFile));
   });
   let names: string[] = Array.from(new Set(imports)).sort();
@@ -103,7 +105,9 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
     }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];
-      messages.push(`Unused dependency: ${name}@${version}: remove or add to list of known unused dependencies for this package`);
+      messages.push(
+        `Unused dependency: ${name}@${version}: remove or add to list of known unused dependencies for this package`
+      );
     }
   });
 
@@ -124,12 +128,10 @@ function ensurePackage(options: IEnsurePackageOptions): string[] {
   return messages;
 }
 
-
 /**
  * The options used to ensure a package.
  */
-export
-interface IEnsurePackageOptions {
+export interface IEnsurePackageOptions {
   /**
    * The path to the package.
    */
@@ -146,7 +148,7 @@ interface IEnsurePackageOptions {
   depCache?: { [key: string]: string };
 
   /**
-   * A list of depedencies that can be unused.
+   * A list of dependencies that can be unused.
    */
   unused?: string[];
 
@@ -155,7 +157,6 @@ interface IEnsurePackageOptions {
    */
   missing?: string[];
 }
-
 
 /**
  * Extract the module imports from a TypeScript source file.
@@ -177,7 +178,7 @@ function getImports(sourceFile: ts.SourceFile): string[] {
         imports.push(node.moduleReference.expression.text);
         break;
       default:
-        // no-op
+      // no-op
     }
     ts.forEachChild(node, handleNode);
   }

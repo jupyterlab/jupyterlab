@@ -4,11 +4,15 @@
 declare var define: any;
 
 if (typeof define !== 'function') {
-    // tslint:disable-next-line
-    let define = require('amdefine')(module); 
+  // tslint:disable-next-line
+  const define = require('amdefine')(module);
 }
 
 module.exports = {
-  test: () => { return 1; },
-  test2: () => { throw Error('Nope'); }
+  test: () => {
+    return 1;
+  },
+  test2: () => {
+    throw Error('Nope');
+  }
 };

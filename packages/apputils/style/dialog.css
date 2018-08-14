@@ -1,10 +1,8 @@
-
 /*-----------------------------------------------------------------------------
 | Copyright (c) 2014-2017, Jupyter Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
 
 .jp-Dialog {
   position: absolute;
@@ -21,7 +19,6 @@
   height: 100%;
   background: var(--jp-dialog-background);
 }
-
 
 .jp-Dialog-content {
   display: flex;
@@ -45,7 +42,6 @@
   color: var(--jp-ui-font-color1);
 }
 
-
 .jp-Dialog-header {
   flex: 0 0 auto;
   padding-bottom: 12px;
@@ -53,7 +49,6 @@
   font-weight: 400;
   color: var(--jp-ui-font-color0);
 }
-
 
 .jp-Dialog-body {
   display: flex;
@@ -63,7 +58,6 @@
   background: var(--jp-layout-color1);
   overflow: auto;
 }
-
 
 .jp-Dialog-footer {
   display: flex;
@@ -75,23 +69,19 @@
   padding: 12px;
 }
 
-
 .jp-Dialog-title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-
 .jp-Dialog-body > .jp-select-wrapper {
   width: 100%;
 }
 
-
 .jp-Dialog-body > button {
   padding: 0px 16px;
 }
-
 
 .jp-Dialog-body > label {
   padding-top: 4px;
@@ -99,7 +89,6 @@
   line-height: 1.4;
   color: var(--jp-ui-font-color0);
 }
-
 
 .jp-Dialog-button.jp-mod-styled:not(:last-child) {
   margin-right: 12px;

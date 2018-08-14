@@ -4,11 +4,11 @@ Virtual DOM and React
 JupyterLab is based on `PhosphorJS <http://phosphorjs.github.io/>`__,
 which provides a flexible ``Widget`` class that handles the following:
 
--  Resize events that propagate down the Widget heirarchy.
+-  Resize events that propagate down the Widget hierarchy.
 -  Lifecycle events (``onBeforeDetach``, ``onAfterAttach``, etc.).
--  Both CSS-based and absolutely postioned layouts.
+-  Both CSS-based and absolutely positioned layouts.
 
-In situations where these feature are needed, we recommend using
+In situations where these features are needed, we recommend using
 Phosphor's ``Widget`` class directly.
 
 The idea of virtual DOM rendering, which became popular in the

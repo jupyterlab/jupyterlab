@@ -13,7 +13,6 @@
   --jp-private-tab-manager-tab-padding-top: 8px;
 }
 
-
 /*-----------------------------------------------------------------------------
 | Tabs in the dock panel
 |----------------------------------------------------------------------------*/
@@ -27,7 +26,6 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-
 #tab-manager header {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   flex: 0 0 auto;
@@ -39,7 +37,6 @@
   text-transform: uppercase;
 }
 
-
 #tab-manager .p-TabBar-tab {
   height: var(--jp-private-tab-manager-tab-height);
   padding: 0px 12px;
@@ -48,22 +45,18 @@
   overflow: visible;
 }
 
-
 #tab-manager .p-TabBar-tab:hover:not(.jp-mod-active) {
   background: var(--jp-layout-color2);
 }
-
 
 #tab-manager .p-TabBar-tab:first-child {
   margin-left: 0;
 }
 
-
 #tab-manager .p-TabBar-tab.jp-mod-active {
   color: white;
   background: var(--jp-brand-color1);
 }
-
 
 #tab-manager .p-TabBar-tabIcon,
 #tab-manager .p-TabBar-tabLabel,
@@ -71,12 +64,10 @@
   display: inline-block;
 }
 
-
 #tab-manager .p-TabBar-tabLabel {
   line-height: var(--jp-private-tab-manager-tab-height);
   padding-left: 4px;
 }
-
 
 #tab-manager .p-TabBar-tab .p-TabBar-tabIcon {
   width: 14px;
@@ -84,7 +75,6 @@
   background-repeat: no-repeat;
   margin-right: 2px;
 }
-
 
 #tab-manager .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
   padding: 4px 0px 4px 4px;
@@ -96,20 +86,23 @@
   background-repeat: no-repeat;
 }
 
-
-#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty > .p-TabBar-tabCloseIcon {
+#tab-manager
+  .p-TabBar-tab.p-mod-closable.jp-mod-dirty
+  > .p-TabBar-tabCloseIcon {
   background-size: 10px;
   background-image: var(--jp-icon-circle);
 }
 
-
-#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-dirty.jp-mod-active > .p-TabBar-tabCloseIcon {
+#tab-manager
+  .p-TabBar-tab.p-mod-closable.jp-mod-dirty.jp-mod-active
+  > .p-TabBar-tabCloseIcon {
   background-size: 10px;
   background-image: var(--jp-icon-inverse-circle);
 }
 
-
-#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon {
+#tab-manager
+  .p-TabBar-tab.p-mod-closable.jp-mod-active
+  > .p-TabBar-tabCloseIcon {
   background-image: var(--jp-icon-inverse-close);
 }
 
@@ -118,7 +111,9 @@
   background-image: var(--jp-icon-close-circle);
 }
 
-#tab-manager .p-TabBar-tab.p-mod-closable.jp-mod-active > .p-TabBar-tabCloseIcon:hover {
+#tab-manager
+  .p-TabBar-tab.p-mod-closable.jp-mod-active
+  > .p-TabBar-tabCloseIcon:hover {
   background-size: 16px;
   background-image: var(--jp-icon-inverse-close-circle);
 }

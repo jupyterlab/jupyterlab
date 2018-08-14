@@ -4,3 +4,7 @@ include CONTRIBUTING.md
 include README.md
 include package.json
 include setupbase.py
+
+# Documentation
+graft docs
+exclude docs/\#*

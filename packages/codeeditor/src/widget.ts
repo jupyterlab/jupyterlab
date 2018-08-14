@@ -1,42 +1,44 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  CodeEditor
-} from './';
-
+import { CodeEditor } from './';
 
 /**
  * The class name added to an editor widget that has a primary selection.
  */
 const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
 
+/**
+ * The class name added to an editor widget that has a cursor/selection
+ * within the whitespace at the beginning of a line
+ */
+const HAS_IN_LEADING_WHITESPACE_CLASS = 'jp-mod-in-leading-whitespace';
+
+/**
+ * RegExp to test for leading whitespace
+ */
+const leadingWhitespaceRe = /^\s+$/;
 
 /**
  * A widget which hosts a code editor.
  */
-export
-class CodeEditorWrapper extends Widget {
+export class CodeEditorWrapper extends Widget {
   /**
    * Construct a new code editor widget.
    */
   constructor(options: CodeEditorWrapper.IOptions) {
     super();
-    const editor = this.editor = options.factory({
+    const editor = (this.editor = options.factory({
       host: this.node,
       model: options.model,
       uuid: options.uuid,
       config: options.config,
       selectionStyle: options.selectionStyle
-    });
+    }));
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
   }
 
@@ -112,24 +114,35 @@ class CodeEditorWrapper extends Widget {
     const { start, end } = this.editor.getSelection();
 
     if (start.column !== end.column || start.line !== end.line) {
+      // a selection was made
       this.addClass(HAS_SELECTION_CLASS);
+      this.removeClass(HAS_IN_LEADING_WHITESPACE_CLASS);
     } else {
+      // the cursor was placed
       this.removeClass(HAS_SELECTION_CLASS);
+
+      if (
+        this.editor
+          .getLine(end.line)
+          .slice(0, end.column)
+          .match(leadingWhitespaceRe)
+      ) {
+        this.addClass(HAS_IN_LEADING_WHITESPACE_CLASS);
+      } else {
+        this.removeClass(HAS_IN_LEADING_WHITESPACE_CLASS);
+      }
     }
   }
 }
 
-
 /**
  * The namespace for the `CodeEditorWrapper` statics.
  */
-export
-namespace CodeEditorWrapper {
+export namespace CodeEditorWrapper {
   /**
    * The options used to initialize a code editor widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * A code editor factory.
      *
@@ -154,9 +167,9 @@ namespace CodeEditorWrapper {
      */
     config?: Partial<CodeEditor.IConfig>;
 
-   /**
-    * The default selection style for the editor.
-    */
+    /**
+     * The default selection style for the editor.
+     */
     selectionStyle?: CodeEditor.ISelectionStyle;
   }
 }

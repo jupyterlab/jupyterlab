@@ -7,7 +7,6 @@
 | Private CSS variables
 |----------------------------------------------------------------------------*/
 
-
 :root {
   --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
@@ -19,18 +18,14 @@
 | Imports
 |----------------------------------------------------------------------------*/
 
-
 @import './toolbar.css';
-
 
 /*-----------------------------------------------------------------------------
 | Notebook
 |----------------------------------------------------------------------------*/
 
-
 .jp-NotebookPanel {
-  display: flex;
-  flex-direction: column;
+  display: block;
   height: 100%;
 }
 
@@ -40,13 +35,11 @@
 }
 
 .jp-Notebook {
-  flex: 1 1 auto;
   padding: var(--jp-notebook-padding);
   outline: none;
   overflow: auto;
   background: var(--jp-layout-color0);
 }
-
 
 .jp-Notebook::after {
   display: block;
@@ -54,16 +47,13 @@
   min-height: var(--jp-notebook-scroll-padding);
 }
 
-
 .jp-Notebook .jp-Cell {
   overflow: visible;
 }
 
-
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
 }
-
 
 /*-----------------------------------------------------------------------------
 | Notebook state related styling
@@ -88,18 +78,15 @@
   color: var(--jp-cell-prompt-not-active-font-color);
 }
 
-
 .jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
   color: var(--jp-cell-prompt-not-active-font-color);
 }
 
-
 /* cell is active */
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser {
   background: var(--jp-brand-color1);
 }
-
 
 /* collapser is hovered */
 .jp-Notebook .jp-Cell .jp-Collapser:hover {
@@ -108,13 +95,11 @@
   opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
-
 /* cell is active and collapser is hovered */
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser:hover {
   background: var(--jp-brand-color0);
-  opacity: 1.0;
+  opacity: 1;
 }
-
 
 /* Command mode */
 
@@ -122,11 +107,10 @@
   background: var(--jp-notebook-multiselected-color);
 }
 
-
-.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
+.jp-Notebook.jp-mod-commandMode
+  .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
   background: transparent;
 }
-
 
 /* Edit mode */
 
@@ -136,24 +120,21 @@
   background-color: var(--jp-cell-editor-active-background);
 }
 
-
 /*-----------------------------------------------------------------------------
 | Notebook drag and drop
 |----------------------------------------------------------------------------*/
-
 
 .jp-Notebook-cell.jp-mod-dropSource {
   opacity: 0.5;
 }
 
-
 .jp-Notebook-cell.jp-mod-dropTarget,
-.jp-Notebook.jp-mod-commandMode .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
+.jp-Notebook.jp-mod-commandMode
+  .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
   border-top-color: var(--jp-private-notebook-selected-color);
   border-top-style: solid;
   border-top-width: 2px;
 }
-
 
 .jp-dragImage {
   display: flex;
@@ -165,24 +146,22 @@
   overflow: visible;
 }
 
-
 .jp-dragImage-singlePrompt {
-  box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
 }
 
-
 .jp-dragImage .jp-dragImage-content {
-    flex: 1 1 auto;
-    z-index: 2;
-    font-size: var(--jp-code-font-size);
-    font-family: var(--jp-code-font-family);
-    line-height: var(--jp-code-line-height);
-    padding: var(--jp-code-padding);
-    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-    background: var(--jp-cell-editor-background-color);
-    color: var(--jp-content-font-color3);
-    text-align: left;
-    margin: 4px 4px 4px 0px;
+  flex: 1 1 auto;
+  z-index: 2;
+  font-size: var(--jp-code-font-size);
+  font-family: var(--jp-code-font-family);
+  line-height: var(--jp-code-line-height);
+  padding: var(--jp-code-padding);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background-color);
+  color: var(--jp-content-font-color3);
+  text-align: left;
+  margin: 4px 4px 4px 0px;
 }
 
 .jp-dragImage .jp-dragImage-prompt {
@@ -207,13 +186,12 @@
   left: 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.12);
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
 }
 
 /*-----------------------------------------------------------------------------
 | Cell toolbar
 |----------------------------------------------------------------------------*/
-
 
 .jp-CellTools {
   display: flex;
@@ -226,7 +204,6 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-
 .jp-ActiveCellTool {
   padding: 12px;
   border-bottom: 1px solid var(--jp-border-color1);
@@ -235,12 +212,10 @@
   border-top: none !important;
 }
 
-
 .jp-ActiveCellTool .jp-InputArea-prompt {
   flex: 0 0 auto;
   padding-left: 0px;
 }
-
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
@@ -249,21 +224,17 @@
   box-shadow: var(--jp-cell-editor-box-shadow);
 }
 
-
 .jp-CellTools-tool:not(:nth-child(2)) {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
-
 
 .jp-MetadataEditorTool {
   flex-direction: column;
 }
 
-
 .jp-KeySelector {
   padding: 12px;
 }
-
 
 .jp-KeySelector select.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
@@ -271,40 +242,13 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-
 .jp-KeySelector label {
   line-height: 1.4;
 }
 
-
-/*-----------------------------------------------------------------------------
-| Output Area View
-|----------------------------------------------------------------------------*/
-
-
-.jp-LinkedOutputView .jp-OutputArea-prompt {
-  display: none;
-}
-
-
-.jp-LinkedOutputView .jp-OutputArea {
-  height: 100%;
-  padding: var(--jp-notebook-padding) 0px var(--jp-notebook-padding) var(--jp-notebook-padding);
-}
-
-
-.jp-LinkedOutputView-toolbar {
-  box-shadow: var(--jp-toolbar-box-shadow);
-  background: var(--jp-toolbar-background);
-  height: var(--jp-toolbar-micro-height);
-  z-index: 1;
-}
-
-
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
 |----------------------------------------------------------------------------*/
-
 
 .jp-mod-presentationMode .jp-Notebook {
   --jp-content-font-size1: var(--jp-content-presentation-font-size1);
@@ -315,4 +259,3 @@
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
   flex: 0 0 110px;
 }
-

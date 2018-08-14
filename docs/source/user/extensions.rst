@@ -3,15 +3,31 @@
 Extensions
 ----------
 
-JupyterLab extensions add functionality to the JupyterLab application.
-They can provide new file viewer types, launcher activities, and output
-renderers, among many other things. JupyterLab extensions are
-`npm <https://www.npmjs.com/>`__ packages (the standard package format
-in Javascript development). For information about developing extensions,
-see the :ref:`developer documentation <developer_extensions>`.
+Fundamentally, JupyterLab is designed as an extensible environment. JupyterLab
+extensions can customize or enhance any part of JupyterLab. They can provide new
+themes, file viewers and editors, or renderers for rich outputs in notebooks.
+Extensions can add items to the menu or command palette, keyboard shortcuts, or
+settings in the settings system. Extensions can provide an API for other
+extensions to use and can depend on other extensions. In fact, the whole of
+JupyterLab itself is simply a collection of extensions that are no more powerful
+or privileged than any custom extension.
 
-In order to install JupyterLab extensions, you need to have Node.js
-version 4+ installed.
+JupyterLab extensions are `npm <https://www.npmjs.com/>`__ packages (the
+standard package format in Javascript development). There are many
+community-developed extensions being built on GitHub. You can search for the
+GitHub topic `jupyterlab-extension
+<https://github.com/topics/jupyterlab-extension>`__ to find extensions. For
+information about developing extensions, see the :ref:`developer documentation
+<developer_extensions>`.
+
+.. note::
+
+   If you are a JupyterLab extension developer, please note that the extension
+   developer API is not stable and will evolve in the near future.
+
+
+In order to install JupyterLab extensions, you need to have `Node.js
+<https://nodejs.org/>`__ version 4 or later installed.
 
 If you use ``conda``, you can get it with:
 
@@ -25,6 +41,9 @@ If you use `Homebrew <https://brew.sh/>`__ on Mac OS X:
 
     brew install node
 
+You can also download Node.js from the `Node.js website <https://nodejs.org/>`__ and
+install it directly.
+
 Installing Extensions
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,21 +54,21 @@ using the command:
 
 .. code:: bash
 
-    jupyter labextension install <foo>
+    jupyter labextension install my-extension
 
-where ``<foo>`` is the name of a valid JupyterLab extension npm package
-on `npm <https://www.npmjs.com>`__. Use the ``<foo>@<foo version>``
+where ``my-extension`` is the name of a valid JupyterLab extension npm package
+on `npm <https://www.npmjs.com>`__. Use the ``my-extension@version``
 syntax to install a specific version of an extension, for example:
 
 .. code:: bash
 
-    jupyter labextension install <foo>@1.2.3
+    jupyter labextension install my-extension@1.2.3
 
 You can also install an extension that is not uploaded to npm, i.e.,
-``<foo>`` can be a local directory containing the extension, a gzipped
+``my-extension`` can be a local directory containing the extension, a gzipped
 tarball, or a URL to a gzipped tarball.
 
-We encourage extension authors to add the ``jupyterlab-extensions``
+We encourage extension authors to add the ``jupyterlab-extension``
 GitHub topic to any repository with a JupyterLab extension to facilitate
 discovery. You can see a list of extensions by searching GitHub for the
 `jupyterlab-extension <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
@@ -65,11 +84,11 @@ Uninstall an extension by running the command:
 
 .. code:: bash
 
-    jupyter labextension uninstall <bar>
+    jupyter labextension uninstall my-extension
 
-where ``<bar>`` is the name of the extension, as printed in the
+where ``my-extension`` is the name of the extension, as printed in the
 extension list. You can also uninstall core extensions using this
-command (which can later be re-installed).
+command (you can always re-install core extensions later).
 
 Installing and uninstalling extensions can take some time, as they are
 downloaded, bundled with the core extensions, and the whole application
@@ -93,22 +112,26 @@ extensions) without rebuilding the application by running the command:
 
 .. code:: bash
 
-    jupyter labextension disable <bar>
+    jupyter labextension disable my-extension
 
-where ``<bar>`` is the name of the extension. This will prevent the
-extension from loading in the browser, but does not require a rebuild.
+This will prevent the extension from loading in the browser, but does not
+require a rebuild.
 
 You can re-enable an extension using the command:
 
 .. code:: bash
 
-    jupyter labextension enable <foo>
+    jupyter labextension enable my-extension
 
 Advanced Usage
 ~~~~~~~~~~~~~~
 
-The JupyterLab application directory (where the application assets are
-built and the settings reside) can be overridden using ``--app-dir`` in
+Any information that JupyterLab persists is stored in its application directory,
+including settings and built assets.
+This is separate from where the Python package is installed (like in ``site_packages``)
+so that the install directory is immutable.
+
+The application directory can be overridden using ``--app-dir`` in
 any of the JupyterLab commands, or by setting the ``JUPYTERLAB_DIR``
 environment variable. If not specified, it will default to
 ``<sys-prefix>/share/jupyter/lab``, where ``<sys-prefix>`` is the
@@ -118,7 +141,7 @@ can query the current application path by running ``jupyter lab path``.
 JupyterLab Build Process
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To rebuild the app directory, run ``jupyter lab build``. By default the
+To rebuild the app directory, run ``jupyter lab build``. By default, the
 ``jupyter labextension install`` command builds the application, so you
 typically do not need to call ``build`` directly.
 
@@ -128,7 +151,12 @@ Building consists of:
 -  Handling any locally installed packages
 -  Ensuring all installed assets are available
 -  Bundling the assets
--  Copying the assets to the ``static`` directory
+-  Copying the bundled assets to the ``static`` directory
+
+Note that building will always use the latest JavaScript packages that meet
+the dependency requirements of JupyterLab itself and any installed extensions.
+If you wish to run JupyterLab with the set of pinned requirements that was
+shipped with the Python package, you can launch as `jupyter lab --core-mode`.
 
 JupyterLab Application Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,7 +203,7 @@ page_config.json
 The ``page_config.json`` data is used to provide config data to the
 application environment.
 
-Two important fields in the ``page_config.json`` file allow control of
+Two important fields in the ``page_config.json`` file enable control of
 which plugins load:
 
 1. ``disabledExtensions`` for extensions that should not load at all.

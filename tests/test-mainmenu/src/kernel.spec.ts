@@ -1,40 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  InstanceTracker
-} from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
-import {
-  KernelMenu, IKernelMenu
-} from '@jupyterlab/mainmenu';
+import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu';
 
-import {
-  delegateExecute
-} from './util';
+import { delegateExecute } from './util';
 
 class Wodget extends Widget {
   state: string;
 }
 
 describe('@jupyterlab/mainmenu', () => {
-
   describe('KernelMenu', () => {
-
     let commands: CommandRegistry;
     let menu: KernelMenu;
     let tracker: InstanceTracker<Wodget>;
-    let wodget = new Wodget();
+    const wodget = new Wodget();
 
     before(() => {
       commands = new CommandRegistry();
@@ -53,16 +41,13 @@ describe('@jupyterlab/mainmenu', () => {
     });
 
     describe('#constructor()', () => {
-
       it('should construct a new kernel menu', () => {
-        expect(menu).to.be.an(KernelMenu);
-        expect(menu.menu.title.label).to.be('Kernel');
+        expect(menu).to.be.an.instanceof(KernelMenu);
+        expect(menu.menu.title.label).to.equal('Kernel');
       });
-
     });
 
     describe('#kernelUsers', () => {
-
       it('should allow setting of an IKernelUser', () => {
         const user: IKernelMenu.IKernelUser<Wodget> = {
           tracker,
@@ -86,23 +71,20 @@ describe('@jupyterlab/mainmenu', () => {
           shutdownKernel: widget => {
             widget.state = 'shutdown';
             return Promise.resolve(void 0);
-          },
+          }
         };
         menu.kernelUsers.add(user);
         delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
-        expect(wodget.state).to.be('interrupt');
+        expect(wodget.state).to.equal('interrupt');
         delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
-        expect(wodget.state).to.be('restart');
+        expect(wodget.state).to.equal('restart');
         delegateExecute(wodget, menu.kernelUsers, 'restartKernelAndClear');
-        expect(wodget.state).to.be('restartAndClear');
+        expect(wodget.state).to.equal('restartAndClear');
         delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
-        expect(wodget.state).to.be('change');
+        expect(wodget.state).to.equal('change');
         delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
-        expect(wodget.state).to.be('shutdown');
+        expect(wodget.state).to.equal('shutdown');
       });
-
     });
-
   });
-
 });

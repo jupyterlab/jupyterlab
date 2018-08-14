@@ -1,48 +1,34 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  PageConfig, URLExt
-} from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import {
-  ArrayExt, each, map, toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
 
-import {
-  JSONPrimitive
-} from '@phosphor/coreutils';
+import { JSONPrimitive } from '@phosphor/coreutils';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  ServerConnection
-} from '..';
+import { ServerConnection } from '..';
 
-import {
-  TerminalSession
-} from './terminal';
-
+import { TerminalSession } from './terminal';
 
 /**
  * The url for the terminal service.
  */
 const TERMINAL_SERVICE_URL = 'api/terminals';
 
-
 /**
  * An implementation of a terminal interface.
  */
-export
-class DefaultTerminalSession implements TerminalSession.ISession {
+export class DefaultTerminalSession implements TerminalSession.ISession {
   /**
    * Construct a new terminal session.
    */
   constructor(name: string, options: TerminalSession.IOptions = {}) {
     this._name = name;
-    this.serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    this.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
     this._readyPromise = this._initializeSocket();
   }
 
@@ -108,7 +94,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.terminated.emit(void 0);
+    this.terminated.emit(undefined);
     this._isDisposed = true;
     if (this._ws) {
       this._ws.close();
@@ -150,6 +136,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
    * @returns A promise that resolves when the terminal has reconnected.
    */
   reconnect(): Promise<void> {
+    this._reconnectAttempt = 0;
     this._readyPromise = this._initializeSocket();
     return this._readyPromise;
   }
@@ -198,7 +185,7 @@ class DefaultTerminalSession implements TerminalSession.ISession {
       let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
 
       if (token) {
-        wsUrl = wsUrl + `?token=${token}`;
+        wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
       }
 
       socket = this._ws = new settings.WebSocket(wsUrl);
@@ -209,6 +196,14 @@ class DefaultTerminalSession implements TerminalSession.ISession {
         }
 
         const data = JSON.parse(event.data) as JSONPrimitive[];
+
+        if (this._reconnectAttempt > 0) {
+          // After reconnection, ignore all messages until a 'setup' message.
+          if (data[0] === 'setup') {
+            this._reconnectAttempt = 0;
+          }
+          return;
+        }
 
         this._messageReceived.emit({
           type: data[0] as TerminalSession.MessageType,
@@ -228,7 +223,42 @@ class DefaultTerminalSession implements TerminalSession.ISession {
           reject(event);
         }
       };
+
+      socket.onclose = (event: CloseEvent) => {
+        console.warn(`Terminal websocket closed: ${event.code}`);
+        this._reconnectSocket();
+      };
     });
+  }
+
+  private _reconnectSocket(): void {
+    if (this._isDisposed || !this._ws) {
+      return;
+    }
+
+    const attempt = this._reconnectAttempt;
+    const limit = this._reconnectLimit;
+
+    if (attempt >= limit) {
+      console.log(`Terminal reconnect aborted: ${attempt} attempts`);
+      return;
+    }
+
+    const timeout = Math.pow(2, attempt);
+
+    console.log(`Terminal will attempt to reconnect in ${timeout}s`);
+    this._isReady = false;
+    this._reconnectAttempt += 1;
+
+    setTimeout(() => {
+      this._initializeSocket()
+        .then(() => {
+          console.log('Terminal reconnected');
+        })
+        .catch(reason => {
+          console.warn(`Terminal reconnect failed`, reason);
+        });
+    }, 1e3 * timeout);
   }
 
   private _isDisposed = false;
@@ -239,20 +269,21 @@ class DefaultTerminalSession implements TerminalSession.ISession {
   private _readyPromise: Promise<void>;
   private _url: string;
   private _ws: WebSocket | null = null;
-  private _noOp = () => { /* no-op */};
+  private _noOp = () => {
+    /* no-op */
+  };
+  private _reconnectLimit = 7;
+  private _reconnectAttempt = 0;
 }
-
 
 /**
  * The static namespace for `DefaultTerminalSession`.
  */
-export
-namespace DefaultTerminalSession {
+export namespace DefaultTerminalSession {
   /**
    * Whether the terminal service is available.
    */
-  export
-  function isAvailable(): boolean {
+  export function isAvailable(): boolean {
     let available = String(PageConfig.getOption('terminalsAvailable'));
     return available.toLowerCase() === 'true';
   }
@@ -264,24 +295,28 @@ namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves with the session instance.
    */
-  export
-  function startNew(options: TerminalSession.IOptions = {}): Promise<TerminalSession.ISession> {
+  export function startNew(
+    options: TerminalSession.IOptions = {}
+  ): Promise<TerminalSession.ISession> {
     if (!TerminalSession.isAvailable()) {
       throw Private.unavailableMsg;
     }
-    let serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    let serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
     let url = Private.getServiceUrl(serverSettings.baseUrl);
     let init = { method: 'POST' };
 
-    return ServerConnection.makeRequest(url, init, serverSettings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then((data: TerminalSession.IModel) => {
-      let name = data.name;
-      return new DefaultTerminalSession(name, {...options, serverSettings });
-    });
+    return ServerConnection.makeRequest(url, init, serverSettings)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
+        }
+        return response.json();
+      })
+      .then((data: TerminalSession.IModel) => {
+        let name = data.name;
+        return new DefaultTerminalSession(name, { ...options, serverSettings });
+      });
   }
 
   /*
@@ -302,12 +337,15 @@ namespace DefaultTerminalSession {
    *
    * If the session does not exist on the server, the promise is rejected.
    */
-  export
-  function connectTo(name: string, options: TerminalSession.IOptions = {}): Promise<TerminalSession.ISession> {
+  export function connectTo(
+    name: string,
+    options: TerminalSession.IOptions = {}
+  ): Promise<TerminalSession.ISession> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    let serverSettings = options.serverSettings || ServerConnection.makeSettings();
+    let serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
     let url = Private.getTermUrl(serverSettings.baseUrl, name);
     if (url in Private.running) {
       return Promise.resolve(Private.running[url].clone());
@@ -317,7 +355,10 @@ namespace DefaultTerminalSession {
         return model.name === name;
       });
       if (index !== -1) {
-        let session = new DefaultTerminalSession(name, { ...options, serverSettings});
+        let session = new DefaultTerminalSession(name, {
+          ...options,
+          serverSettings
+        });
         return Promise.resolve(session);
       }
       return Promise.reject<TerminalSession.ISession>('Could not find session');
@@ -331,34 +372,39 @@ namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves with the list of running session models.
    */
-  export
-  function listRunning(settings?: ServerConnection.ISettings): Promise<TerminalSession.IModel[]> {
+  export function listRunning(
+    settings?: ServerConnection.ISettings
+  ): Promise<TerminalSession.IModel[]> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
     settings = settings || ServerConnection.makeSettings();
     let url = Private.getServiceUrl(settings.baseUrl);
-    return ServerConnection.makeRequest(url, {}, settings).then(response => {
-      if (response.status !== 200) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      return response.json();
-    }).then((data: TerminalSession.IModel[]) => {
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid terminal data');
-      }
-      // Update the local data store.
-      let urls = toArray(map(data, item => {
-          return URLExt.join(url, item.name);
-      }));
-      each(Object.keys(Private.running), runningUrl => {
-        if (urls.indexOf(runningUrl) === -1) {
-          let session = Private.running[runningUrl];
-          session.dispose();
+    return ServerConnection.makeRequest(url, {}, settings)
+      .then(response => {
+        if (response.status !== 200) {
+          throw new ServerConnection.ResponseError(response);
         }
+        return response.json();
+      })
+      .then((data: TerminalSession.IModel[]) => {
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid terminal data');
+        }
+        // Update the local data store.
+        let urls = toArray(
+          map(data, item => {
+            return URLExt.join(url, item.name);
+          })
+        );
+        each(Object.keys(Private.running), runningUrl => {
+          if (urls.indexOf(runningUrl) === -1) {
+            let session = Private.running[runningUrl];
+            session.dispose();
+          }
+        });
+        return data;
       });
-      return data;
-    });
   }
 
   /**
@@ -370,8 +416,10 @@ namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves when the session is shut down.
    */
-  export
-  function shutdown(name: string, settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdown(
+    name: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
@@ -399,8 +447,9 @@ namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves when all the sessions are shut down.
    */
-  export
-  function shutdownAll(settings?: ServerConnection.ISettings): Promise<void> {
+  export function shutdownAll(
+    settings?: ServerConnection.ISettings
+  ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
     return listRunning(settings).then(running => {
       each(running, s => {
@@ -410,7 +459,6 @@ namespace DefaultTerminalSession {
   }
 }
 
-
 /**
  * A namespace for private data.
  */
@@ -418,36 +466,33 @@ namespace Private {
   /**
    * A mapping of running terminals by url.
    */
-  export
-  const running: { [key: string]: DefaultTerminalSession } = Object.create(null);
+  export const running: {
+    [key: string]: DefaultTerminalSession;
+  } = Object.create(null);
 
   /**
    * A promise returned for when terminals are unavailable.
    */
-  export
-  const unavailableMsg = 'Terminals Unavailable';
+  export const unavailableMsg = 'Terminals Unavailable';
 
   /**
    * Get the url for a terminal.
    */
-  export
-  function getTermUrl(baseUrl: string, name: string): string {
+  export function getTermUrl(baseUrl: string, name: string): string {
     return URLExt.join(baseUrl, TERMINAL_SERVICE_URL, name);
   }
 
   /**
    * Get the base url.
    */
-  export
-  function getServiceUrl(baseUrl: string): string {
+  export function getServiceUrl(baseUrl: string): string {
     return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
   }
 
   /**
    * Kill a terminal by url.
    */
-  export
-  function killTerminal(url: string): void {
+  export function killTerminal(url: string): void {
     // Update the local data store.
     if (Private.running[url]) {
       let session = Private.running[url];

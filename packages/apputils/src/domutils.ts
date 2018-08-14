@@ -1,25 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt
-} from '@phosphor/algorithm';
+import { ArrayExt } from '@phosphor/algorithm';
 
-import {
-  ElementExt
-} from '@phosphor/domutils';
-
+import { ElementExt } from '@phosphor/domutils';
 
 /**
  * The namespace for DOM utilities.
  */
-export
-namespace DOMUtils {
+export namespace DOMUtils {
   /**
    * Get the index of the node at a client position, or `-1`.
    */
-  export
-  function hitTestNodes(nodes: HTMLElement[] | HTMLCollection, x: number, y: number): number {
+  export function hitTestNodes(
+    nodes: HTMLElement[] | HTMLCollection,
+    x: number,
+    y: number
+  ): number {
     return ArrayExt.findFirstIndex(nodes, node => {
       return ElementExt.hitTest(node, x, y);
     });
@@ -28,8 +25,10 @@ namespace DOMUtils {
   /**
    * Find the first element matching a class name.
    */
-  export
-  function findElement(parent: HTMLElement, className: string): HTMLElement {
+  export function findElement(
+    parent: HTMLElement,
+    className: string
+  ): HTMLElement {
     return parent.querySelector(`.${className}`) as HTMLElement;
   }
 }

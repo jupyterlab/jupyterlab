@@ -1,52 +1,49 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLab, JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import {
-  CompleterModel, Completer, CompletionHandler, ICompletionManager,
-  KernelConnector
+  CompleterModel,
+  Completer,
+  CompletionConnector,
+  CompletionHandler,
+  ContextConnector,
+  ICompletionManager
 } from '@jupyterlab/completer';
 
-import {
-  IConsoleTracker
-} from '@jupyterlab/console';
+import { IConsoleTracker } from '@jupyterlab/console';
 
-import {
-  INotebookTracker
-} from '@jupyterlab/notebook';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { Session } from '@jupyterlab/services';
 
+import { find } from '@phosphor/algorithm';
+
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the completer plugin.
  */
 namespace CommandIDs {
-  export
-  const invoke = 'completer:invoke';
+  export const invoke = 'completer:invoke';
 
-  export
-  const invokeConsole = 'completer:invoke-console';
+  export const invokeConsole = 'completer:invoke-console';
 
-  export
-  const invokeNotebook = 'completer:invoke-notebook';
+  export const invokeNotebook = 'completer:invoke-notebook';
 
-  export
-  const select = 'completer:select';
+  export const invokeFile = 'completer:invoke-file';
 
-  export
-  const selectConsole = 'completer:select-console';
+  export const select = 'completer:select';
 
-  export
-  const selectNotebook = 'completer:select-notebook';
+  export const selectConsole = 'completer:select-console';
+
+  export const selectNotebook = 'completer:select-notebook';
+
+  export const selectFile = 'completer:select-file';
 }
-
 
 /**
  * A plugin providing code completion for editors.
@@ -87,7 +84,9 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
     });
 
     return {
-      register: (completable: ICompletionManager.ICompletable): ICompletionManager.ICompletableAttributes => {
+      register: (
+        completable: ICompletionManager.ICompletable
+      ): ICompletionManager.ICompletableAttributes => {
         const { connector, editor, parent } = completable;
         const model = new CompleterModel();
         const completer = new Completer({ editor, model });
@@ -120,7 +119,6 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
   }
 };
 
-
 /**
  * An extension that registers consoles for code completion.
  */
@@ -128,7 +126,11 @@ const consoles: JupyterLabPlugin<void> = {
   id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
-  activate: (app: JupyterLab, manager: ICompletionManager, consoles: IConsoleTracker): void => {
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    consoles: IConsoleTracker
+  ): void => {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
@@ -136,12 +138,14 @@ const consoles: JupyterLabPlugin<void> = {
       const editor = cell && cell.editor;
       const session = anchor.session;
       const parent = panel;
-      const connector = new KernelConnector({ session });
+      const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
 
       // Listen for prompt creation.
       anchor.promptCellCreated.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+        const editor = cell && cell.editor;
+        handler.editor = editor;
+        handler.connector = new CompletionConnector({ session, editor });
       });
     });
 
@@ -183,19 +187,25 @@ const notebooks: JupyterLabPlugin<void> = {
   id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
-  activate: (app: JupyterLab, manager: ICompletionManager, notebooks: INotebookTracker): void => {
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    notebooks: INotebookTracker
+  ): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
-      const cell = panel.notebook.activeCell;
+      const cell = panel.content.activeCell;
       const editor = cell && cell.editor;
       const session = panel.session;
       const parent = panel;
-      const connector = new KernelConnector({ session });
+      const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
 
       // Listen for active cell changes.
-      panel.notebook.activeCellChanged.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+      panel.content.activeCellChanged.connect((sender, cell) => {
+        const editor = cell && cell.editor;
+        handler.editor = editor;
+        handler.connector = new CompletionConnector({ session, editor });
       });
     });
 
@@ -203,7 +213,7 @@ const notebooks: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
         const panel = notebooks.currentWidget;
-        if (panel && panel.notebook.activeCell.model.type === 'code') {
+        if (panel && panel.content.activeCell.model.type === 'code') {
           return app.commands.execute(CommandIDs.invoke, { id: panel.id });
         }
       }
@@ -230,7 +240,125 @@ const notebooks: JupyterLabPlugin<void> = {
 };
 
 /**
+ * An extension that registers file editors for completion.
+ */
+const files: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/completer-extension:files',
+  requires: [ICompletionManager, IEditorTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterLab,
+    manager: ICompletionManager,
+    editorTracker: IEditorTracker
+  ): void => {
+    // Keep a list of active ISessions so that we can
+    // clean them up when they are no longer needed.
+    const activeSessions: {
+      [id: string]: Session.ISession;
+    } = {};
+
+    // When a new file editor is created, make the completer for it.
+    editorTracker.widgetAdded.connect((sender, widget) => {
+      const sessions = app.serviceManager.sessions;
+      const editor = widget.content.editor;
+      const contextConnector = new ContextConnector({ editor });
+
+      // When the list of running sessions changes,
+      // check to see if there are any kernels with a
+      // matching path for this file editor.
+      const onRunningChanged = (
+        sender: Session.IManager,
+        models: Session.IModel[]
+      ) => {
+        const oldSession = activeSessions[widget.id];
+        // Search for a matching path.
+        const model = find(models, m => m.path === widget.context.path);
+        if (model) {
+          // If there is a matching path, but it is the same
+          // session as we previously had, do nothing.
+          if (oldSession && oldSession.id === model.id) {
+            return;
+          }
+          // Otherwise, dispose of the old session and reset to
+          // a new CompletionConnector.
+          if (oldSession) {
+            delete activeSessions[widget.id];
+            oldSession.dispose();
+          }
+          const session = sessions.connectTo(model);
+          handler.connector = new CompletionConnector({ session, editor });
+          activeSessions[widget.id] = session;
+        } else {
+          // If we didn't find a match, make sure
+          // the connector is the contextConnector and
+          // dispose of any previous connection.
+          handler.connector = contextConnector;
+          if (oldSession) {
+            delete activeSessions[widget.id];
+            oldSession.dispose();
+          }
+        }
+      };
+      Session.listRunning().then(models => {
+        onRunningChanged(sessions, models);
+      });
+      sessions.runningChanged.connect(onRunningChanged);
+
+      // Initially create the handler with the contextConnector.
+      // If a kernel session is found matching this file editor,
+      // it will be replaced in onRunningChanged().
+      const handler = manager.register({
+        connector: contextConnector,
+        editor,
+        parent: widget
+      });
+
+      // When the widget is disposed, do some cleanup.
+      widget.disposed.connect(() => {
+        sessions.runningChanged.disconnect(onRunningChanged);
+        const session = activeSessions[widget.id];
+        if (session) {
+          delete activeSessions[widget.id];
+          session.dispose();
+        }
+      });
+    });
+
+    // Add console completer invoke command.
+    app.commands.addCommand(CommandIDs.invokeFile, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.invoke, { id });
+        }
+      }
+    });
+
+    // Add console completer select command.
+    app.commands.addCommand(CommandIDs.selectFile, {
+      execute: () => {
+        const id =
+          editorTracker.currentWidget && editorTracker.currentWidget.id;
+
+        if (id) {
+          return app.commands.execute(CommandIDs.select, { id });
+        }
+      }
+    });
+
+    // Set enter key for console completer select command.
+    app.commands.addKeyBinding({
+      command: CommandIDs.selectFile,
+      keys: ['Enter'],
+      selector: `.jp-FileEditor .jp-mod-completer-active`
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks];
+const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks, files];
 export default plugins;

@@ -1,24 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  TerminalSession
-} from '@jupyterlab/services';
+import { TerminalSession } from '@jupyterlab/services';
 
-import {
-  ElementExt
-} from '@phosphor/domutils';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
-import {
-  Message, MessageLoop
-} from '@phosphor/messaging';
+import { Widget } from '@phosphor/widgets';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Terminal as Xterm, ITerminalOptions as IXtermOptions } from 'xterm';
 
-import * as Xterm
-  from 'xterm';
+import { fit } from 'xterm/lib/addons/fit';
 
 /**
  * The class name added to a terminal widget.
@@ -31,32 +22,9 @@ const TERMINAL_CLASS = 'jp-Terminal';
 const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 
 /**
- * The class name add to the terminal widget when it has the dark theme.
- */
-const TERMINAL_DARK_THEME = 'jp-Terminal-dark';
-
-/**
- * The class name add to the terminal widget when it has the light theme.
- */
-const TERMINAL_LIGHT_THEME = 'jp-Terminal-light';
-
-
-/**
- * The number of rows to use in the dummy terminal.
- */
-const DUMMY_ROWS = 24;
-
-/**
- * The number of cols to use in the dummy terminal.
- */
-const DUMMY_COLS = 80;
-
-
-/**
  * A widget which manages a terminal session.
  */
-export
-class Terminal extends Widget {
+export class Terminal extends Widget {
   /**
    * Construct a new terminal widget.
    *
@@ -66,16 +34,15 @@ class Terminal extends Widget {
     super();
     this.addClass(TERMINAL_CLASS);
 
-    // Create the xterm, dummy terminal, and private style sheet.
+    // Create the xterm.
     this._term = new Xterm(Private.getConfig(options));
     this._initializeTerm();
-    this._dummyTerm = Private.createDummyTerm();
 
     // Initialize settings.
     let defaults = Terminal.defaultOptions;
-    this._fontSize = options.fontSize || defaults.fontSize;
     this._initialCommand = options.initialCommand || defaults.initialCommand;
     this.theme = options.theme || defaults.theme;
+
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
   }
@@ -114,17 +81,17 @@ class Terminal extends Widget {
    * Get the font size of the terminal in pixels.
    */
   get fontSize(): number {
-    return this._fontSize;
+    return this._term.getOption('fontSize');
   }
 
   /**
    * Set the font size of the terminal in pixels.
    */
   set fontSize(size: number) {
-    if (this._fontSize === size) {
+    if (this.fontSize === size) {
       return;
     }
-    this._fontSize = size;
+    this._term.setOption('fontSize', size);
     this._needsResize = true;
     this.update();
   }
@@ -141,8 +108,14 @@ class Terminal extends Widget {
    */
   set theme(value: Terminal.Theme) {
     this._theme = value;
-    this.toggleClass(TERMINAL_LIGHT_THEME, value === 'light');
-    this.toggleClass(TERMINAL_DARK_THEME, value === 'dark');
+    if (value === 'light') {
+      this.addClass('jp-mod-light');
+      this._term.setOption('theme', Private.lightTheme);
+    } else {
+      this.removeClass('jp-mod-light');
+      this._term.setOption('theme', Private.darkTheme);
+    }
+    this.update();
   }
 
   /**
@@ -150,7 +123,6 @@ class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._box = null;
     super.dispose();
   }
 
@@ -200,14 +172,6 @@ class Terminal extends Widget {
   }
 
   /**
-   * Dispose of the terminal when closing.
-   */
-  protected onCloseRequest(msg: Message): void {
-    super.onCloseRequest(msg);
-    this.dispose();
-  }
-
-  /**
    * On resize, use the computed row and column sizes to resize the terminal.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
@@ -221,12 +185,18 @@ class Terminal extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (!this.isVisible) {
+    if (!this.isVisible || !this.isAttached) {
       return;
     }
 
+    // Open the terminal if necessary.
+    if (!this._termOpened) {
+      this._term.open(this.node);
+      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._termOpened = true;
+    }
+
     if (this._needsResize) {
-      this._snapTermSizing();
       this._resizeTerminal();
     }
   }
@@ -247,12 +217,9 @@ class Terminal extends Widget {
   }
 
   /**
-   * Create the terminal object.
+   * Initialize the terminal object.
    */
   private _initializeTerm(): void {
-    this._term.open(this.node, false);
-    this._term.element.classList.add(TERMINAL_BODY_CLASS);
-
     this._term.on('data', (data: string) => {
       if (this._session) {
         this._session.send({
@@ -263,99 +230,79 @@ class Terminal extends Widget {
     });
 
     this._term.on('title', (title: string) => {
-        this.title.label = title;
+      this.title.label = title;
     });
   }
 
   /**
    * Handle a message from the terminal session.
    */
-  private _onMessage(sender: TerminalSession.ISession, msg: TerminalSession.IMessage): void {
+  private _onMessage(
+    sender: TerminalSession.ISession,
+    msg: TerminalSession.IMessage
+  ): void {
     switch (msg.type) {
-    case 'stdout':
-      if (msg.content) {
-        this._term.write(msg.content[0] as string);
-      }
-      break;
-    case 'disconnect':
-      this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-      break;
-    default:
-      break;
+      case 'stdout':
+        if (msg.content) {
+          this._term.write(msg.content[0] as string);
+        }
+        break;
+      case 'disconnect':
+        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        break;
+      default:
+        break;
     }
-  }
-
-  /**
-   * Use the dummy terminal to measure the row and column sizes.
-   */
-  private _snapTermSizing(): void {
-    const node = this._dummyTerm;
-
-    this._term.element.style.fontSize = `${this.fontSize}px`;
-    this._term.element.appendChild(node);
-    this._rowHeight = node.offsetHeight / DUMMY_ROWS;
-    this._colWidth = node.offsetWidth / DUMMY_COLS;
-    this._term.element.removeChild(node);
   }
 
   /**
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    const { node } = this;
-    const offsetWidth = this._offsetWidth < 0 ? node.offsetWidth
-      : this._offsetWidth;
-    const offsetHeight = this._offsetHeight < 0 ? node.offsetHeight
-      : this._offsetHeight;
-    const box = this._box = ElementExt.boxSizing(this.node);
-    const height = offsetHeight - box.verticalSum;
-    const width = offsetWidth - box.horizontalSum;
-    const rows = Math.floor(height / this._rowHeight) - 1;
-    const cols = Math.floor(width / this._colWidth) - 1;
-
-    this._term.resize(cols, rows);
-    this._sessionSize = [rows, cols, height, width];
+    fit(this._term);
+    if (this._offsetWidth === -1) {
+      this._offsetWidth = this.node.offsetWidth;
+    }
+    if (this._offsetHeight === -1) {
+      this._offsetHeight = this.node.offsetHeight;
+    }
     this._setSessionSize();
     this._needsResize = false;
   }
 
   /**
-   * Send the size to the session.
+   * Set the size of the terminal in the session.
    */
   private _setSessionSize(): void {
-    const session = this._session;
-
-    if (session) {
-      session.send({ type: 'set_size', content: this._sessionSize });
+    let content = [
+      this._term.rows,
+      this._term.cols,
+      this._offsetHeight,
+      this._offsetWidth
+    ];
+    if (this._session) {
+      this._session.send({ type: 'set_size', content });
     }
   }
 
   private _term: Xterm;
-  private _dummyTerm: HTMLElement;
-  private _fontSize = -1;
   private _needsResize = true;
-  private _rowHeight = -1;
-  private _colWidth = -1;
-  private _offsetWidth = -1;
-  private _offsetHeight = -1;
-  private _sessionSize: [number, number, number, number] = [1, 1, 1, 1];
   private _theme: Terminal.Theme = 'dark';
-  private _box: ElementExt.IBoxSizing | null = null;
   private _session: TerminalSession.ISession | null = null;
   private _initialCommand: string;
+  private _termOpened = false;
+  private _offsetWidth = -1;
+  private _offsetHeight = -1;
 }
-
 
 /**
  * The namespace for `Terminal` class statics.
  */
-export
-namespace Terminal {
+export namespace Terminal {
   /**
    * Options for the terminal widget.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The font size of the terminal in pixels.
      */
@@ -380,8 +327,7 @@ namespace Terminal {
   /**
    * The default options used for creating terminals.
    */
-  export
-  const defaultOptions: IOptions = {
+  export const defaultOptions: IOptions = {
     theme: 'dark',
     fontSize: 13,
     cursorBlink: true,
@@ -391,10 +337,8 @@ namespace Terminal {
   /**
    * A type for the terminal theme.
    */
-  export
-  type Theme = 'light' | 'dark';
+  export type Theme = 'light' | 'dark';
 }
-
 
 /**
  * A namespace for private data.
@@ -403,40 +347,47 @@ namespace Private {
   /**
    * Get term.js options from ITerminalOptions.
    */
-  export
-  function getConfig(options: Partial<Terminal.IOptions>): Xterm.IOptions {
-    let config: Xterm.IOptions = {};
+  export function getConfig(
+    options: Partial<Terminal.IOptions>
+  ): IXtermOptions {
+    let config: IXtermOptions = {};
     if (options.cursorBlink !== void 0) {
       config.cursorBlink = options.cursorBlink;
     } else {
       config.cursorBlink = Terminal.defaultOptions.cursorBlink;
     }
+    if (options.fontSize !== void 0) {
+      config.fontSize = options.fontSize;
+    } else {
+      config.fontSize = Terminal.defaultOptions.fontSize;
+    }
     return config;
-  }
-
-  /**
-   * Create a dummy terminal element used to measure text size.
-   */
-  export
-  function createDummyTerm(): HTMLElement {
-    let node = document.createElement('div');
-    let rowspan = document.createElement('span');
-    rowspan.innerHTML = Array(DUMMY_ROWS).join('a<br>');
-    let colspan = document.createElement('span');
-    colspan.textContent = Array(DUMMY_COLS + 1).join('a');
-    node.appendChild(rowspan);
-    node.appendChild(colspan);
-    node.style.visibility = 'hidden';
-    node.style.position = 'absolute';
-    node.style.height = 'auto';
-    node.style.width = 'auto';
-    (node.style as any)['white-space'] = 'nowrap';
-    return node;
   }
 
   /**
    * An incrementing counter for ids.
    */
-  export
-  let id = 0;
+  export let id = 0;
+
+  /**
+   * The light terminal theme.
+   */
+  export const lightTheme = {
+    foreground: '#000',
+    background: '#fff',
+    cursor: '#616161', // md-grey-700
+    cursorAccent: '#F5F5F5', // md-grey-100
+    selection: 'rgba(97, 97, 97, 0.3)' // md-grey-700
+  };
+
+  /**
+   * The dark terminal theme.
+   */
+  export const darkTheme = {
+    foreground: '#fff',
+    background: '#000',
+    cursor: '#fff',
+    cursorAccent: '#000',
+    selection: 'rgba(255, 255, 255, 0.3)'
+  };
 }

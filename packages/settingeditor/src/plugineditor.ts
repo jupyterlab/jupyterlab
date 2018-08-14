@@ -3,66 +3,39 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  Dialog, showDialog
-} from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import {
-  CodeEditor
-} from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import {
-  CommandRegistry
-} from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-import {
-  JSONExt
-} from '@phosphor/coreutils';
+import { JSONExt } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
-import {
-  ISignal, Signal
-} from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
-import {
-  Widget, StackedLayout
-} from '@phosphor/widgets';
+import { Widget, StackedLayout } from '@phosphor/widgets';
 
-import {
-  RawEditor
-} from './raweditor';
+import { RawEditor } from './raweditor';
 
-import {
-  SettingEditor
-} from './settingeditor';
+import { SettingEditor } from './settingeditor';
 
-import {
-  TableEditor
-} from './tableeditor';
-
+import { TableEditor } from './tableeditor';
 
 /**
  * The class name added to all plugin editors.
  */
 const PLUGIN_EDITOR_CLASS = 'jp-PluginEditor';
 
-
 /**
  * An individual plugin settings editor.
  */
-export
-class PluginEditor extends Widget {
+export class PluginEditor extends Widget {
   /**
    * Create a new plugin editor.
    *
@@ -73,11 +46,15 @@ class PluginEditor extends Widget {
     this.addClass(PLUGIN_EDITOR_CLASS);
 
     const { commands, editorFactory, registry, rendermime } = options;
-    const layout = this.layout = new StackedLayout();
+    const layout = (this.layout = new StackedLayout());
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
-      commands, editorFactory, onSaveError, registry, rendermime
+      commands,
+      editorFactory,
+      onSaveError,
+      registry,
+      rendermime
     });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
@@ -153,7 +130,7 @@ class PluginEditor extends Widget {
    */
   confirm(): Promise<void> {
     if (this.isHidden || !this.isAttached || !this.isDirty) {
-      return Promise.resolve(void 0);
+      return Promise.resolve(undefined);
     }
 
     return showDialog({
@@ -162,7 +139,7 @@ class PluginEditor extends Widget {
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
       if (!result.button.accept) {
-        throw new Error('User cancelled.');
+        throw new Error('User canceled.');
       }
     });
   }
@@ -220,17 +197,14 @@ class PluginEditor extends Widget {
   private _stateChanged = new Signal<this, void>(this);
 }
 
-
 /**
  * A namespace for `PluginEditor` statics.
  */
-export
-namespace PluginEditor {
+export namespace PluginEditor {
   /**
    * The instantiation options for a plugin editor.
    */
-  export
-  interface IOptions {
+  export interface IOptions {
     /**
      * The toolbar commands and registry for the setting editor toolbar.
      */
@@ -273,7 +247,6 @@ namespace PluginEditor {
   }
 }
 
-
 /**
  * A namespace for private module data.
  */
@@ -281,8 +254,7 @@ namespace Private {
   /**
    * Handle save errors.
    */
-  export
-  function onSaveError(reason: any): void {
+  export function onSaveError(reason: any): void {
     console.error(`Saving setting editor value failed: ${reason.message}`);
 
     showDialog({

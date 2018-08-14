@@ -9,7 +9,6 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-// eslint-disable-next-line
 __webpack_public_path__ = PageConfig.getOption('publicUrl');
 
 // This needs to come after __webpack_public_path__ is set.
@@ -68,7 +67,6 @@ function main() {
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
-  // eslint-disable-next-line semi
   {{#each jupyterlab_mime_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -105,11 +103,9 @@ function main() {
   } catch (e) {
     console.error(e);
   }
-  // eslint-disable-next-line semi
   {{/each}}
 
   // Handled the registered standard extensions.
-  // eslint-disable-next-line semi
   {{#each jupyterlab_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -146,7 +142,6 @@ function main() {
   } catch (e) {
     console.error(e);
   }
-  // eslint-disable-next-line semi
   {{/each}}
 
   var lab = new JupyterLab({
@@ -162,9 +157,9 @@ function main() {
     window.lab = lab;
   }
 
-  // Handle a selenium test.
-  var seleniumTest = PageConfig.getOption('seleniumTest');
-  if (seleniumTest.toLowerCase() === 'true') {
+  // Handle a browser test.
+  var browserTest = PageConfig.getOption('browserTest');
+  if (browserTest.toLowerCase() === 'true') {
     var caught_errors = [];
     window.onerror = function(msg, url, line, col, error) {
       caught_errors.push(String(error));
@@ -174,7 +169,7 @@ function main() {
     };
     lab.restored.then(function() {
       var el = document.createElement('div');
-      el.id = 'seleniumResult';
+      el.id = 'browserResult';
       el.textContent = JSON.stringify(caught_errors);
       document.body.appendChild(el);
     });

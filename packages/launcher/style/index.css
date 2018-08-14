@@ -3,20 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-
 /* Private CSS variables */
 
-
 :root {
-  --jp-private-launcher-top-margin: 16px;
-  --jp-private-launcher-side-margin: 32px;
+  --jp-private-launcher-top-padding: 16px;
+  --jp-private-launcher-side-padding: 32px;
   --jp-private-launcher-card-size: 100px;
   --jp-private-launcher-card-label-height: 25px;
   --jp-private-launcher-card-icon-height: 75px;
   --jp-private-launcher-large-icon-size: 52px;
   --jp-private-launcher-small-icon-size: 32px;
 }
-
 
 /* Launcher */
 
@@ -33,19 +30,6 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-
-.jp-Launcher::before {
-  content: '';
-  display: block;
-  height: var(--jp-toolbar-micro-height);
-  width: 100%;
-  background: var(--jp-toolbar-background);
-  border-bottom: 1px solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  z-index: 1;
-}
-
-
 .jp-Launcher-body {
   width: 100%;
   height: 100%;
@@ -55,7 +39,6 @@
   justify-content: center;
 }
 
-
 .jp-Launcher-cwd h3 {
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
@@ -63,16 +46,14 @@
   margin: 1em 0px;
 }
 
-
 .jp-Launcher-content {
   width: 85%;
   height: 100%;
-  margin-top: var(--jp-private-launcher-top-margin);
-  margin-left: var(--jp-private-launcher-side-margin);
-  margin-right: var(--jp-private-launcher-side-margin);
+  padding-top: var(--jp-private-launcher-top-padding);
+  padding-left: var(--jp-private-launcher-side-padding);
+  padding-right: var(--jp-private-launcher-side-padding);
   box-sizing: border-box;
 }
-
 
 /* Launcher section */
 
@@ -81,7 +62,6 @@
   box-sizing: border-box;
   padding-bottom: 12px;
 }
-
 
 .jp-Launcher-sectionHeader {
   display: flex;
@@ -95,15 +75,14 @@
   margin-bottom: 8px;
 }
 
-
 .jp-Launcher-sectionHeader .jp-Launcher-sectionIcon {
   box-sizing: border-box;
   margin-right: 12px;
   height: var(--jp-private-launcher-small-icon-size);
   width: var(--jp-private-launcher-small-icon-size);
-  background-size: var(--jp-private-launcher-small-icon-size) var(--jp-private-launcher-small-icon-size);
+  background-size: var(--jp-private-launcher-small-icon-size)
+    var(--jp-private-launcher-small-icon-size);
 }
-
 
 .jp-Launcher-sectionTitle {
   font-size: var(--jp-ui-font-size2);
@@ -111,7 +90,6 @@
   color: var(--jp-ui-font-color1);
   box-sizing: border-box;
 }
-
 
 /* Launcher cards */
 
@@ -124,7 +102,6 @@
   flex-wrap: wrap;
 }
 
-
 .jp-LauncherCard {
   display: flex;
   flex-direction: column;
@@ -136,15 +113,13 @@
   border: 1px solid var(--jp-border-color1);
   background: var(--jp-layout-color1);
   box-shadow: var(--jp-elevation-z2);
-  transition: .2s box-shadow;
+  transition: 0.2s box-shadow;
   border-radius: var(--jp-border-radius);
 }
-
 
 .jp-LauncherCard:hover {
   box-shadow: var(--jp-elevation-z6);
 }
-
 
 .jp-LauncherCard-icon {
   width: 100%;
@@ -157,24 +132,20 @@
   align-items: center;
 }
 
-
 .jp-LauncherCard-noKernelIcon {
   font-weight: normal;
   font-size: var(--jp-private-launcher-large-icon-size);
 }
 
-
-.jp-LauncherCard[data-category="Notebook"] .jp-LauncherCard-noKernelIcon {
+.jp-LauncherCard[data-category='Notebook'] .jp-LauncherCard-noKernelIcon {
   /* This color is copied from the notebook icon. */
-  color: #EF6C00;
+  color: #ef6c00;
 }
 
-
-.jp-LauncherCard[data-category="Console"] .jp-LauncherCard-noKernelIcon {
+.jp-LauncherCard[data-category='Console'] .jp-LauncherCard-noKernelIcon {
   /* This color is copied from the console icon. */
-  color: #0288D1;
+  color: #0288d1;
 }
-
 
 .jp-LauncherCard-label {
   width: 100%;
@@ -190,7 +161,6 @@
   text-align: center;
 }
 
-
 /* Icons, kernel icons */
 
 .jp-Launcher-icon {
@@ -198,11 +168,11 @@
   padding: 0px;
   height: var(--jp-private-launcher-large-icon-size);
   width: var(--jp-private-launcher-large-icon-size);
-  background-size: var(--jp-private-launcher-large-icon-size) var(--jp-private-launcher-large-icon-size);
+  background-size: var(--jp-private-launcher-large-icon-size)
+    var(--jp-private-launcher-large-icon-size);
   background-repeat: no-repeat;
   cursor: pointer;
 }
-
 
 .jp-Launcher-kernelIcon {
   width: var(--jp-private-launcher-large-icon-size);
@@ -210,7 +180,3 @@
   margin: 0px;
   padding: 0px;
 }
-
-
-
-
