@@ -250,10 +250,3 @@ TOTAL SIZE REMAINS AT 24PX INCLUDING MARGINS AND PADDING */
   opacity: 0;
   overflow: hidden;
 }
-
-.eyeball-icon {
-  float: right;
-  padding: 0px;
-  margin: 0px;
-  padding-left: 7px;
-}
