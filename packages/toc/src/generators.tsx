@@ -19,9 +19,9 @@ import { IHeading, TableOfContents } from './toc';
 import { CodeComponent, ExperimentalCodeComponent } from './codemirror';
 
 import {
-  createDropdownMenu,
-  DropdownItem,
-  TagTypeDropdownItem
+  createDropdownMenu
+  // DropdownItem,
+  // TagTypeDropdownItem
 } from './plugins';
 
 import * as React from 'react';
@@ -153,11 +153,6 @@ function notebookItemRenderer(
     6: '10'
   };
   let jsx;
-  const hideOnClick = (cell?: Cell) => {
-    if (cell) {
-      cell.inputHidden = !cell.inputHidden;
-    }
-  };
   if (item.type === 'markdown' || item.type === 'header') {
     const paddingLeft = 24;
     const collapseOnClick = (cellRef?: Cell) => {
@@ -226,14 +221,6 @@ function notebookItemRenderer(
           <div className="toc-entry-holder">
             {item.hasChild && twistButton}
             {jsx}
-            <div className={'eyeball-icon'}>
-              <img
-                src={require('../static/eyeball_view.svg')}
-                onClick={event => {
-                  hideOnClick(item.cellRef);
-                }}
-              />
-            </div>
           </div>
         );
       }
@@ -284,14 +271,6 @@ function notebookItemRenderer(
           <div className="toc-entry-holder">
             {item.hasChild && twistButton}
             {jsx}
-            <div className={'eyeball-icon'}>
-              <img
-                src={require('../static/eyeball_view.svg')}
-                onClick={event => {
-                  hideOnClick(item.cellRef);
-                }}
-              />
-            </div>
           </div>
         );
       }
@@ -305,14 +284,6 @@ function notebookItemRenderer(
         <span className={'toc-code-span'}>
           <ExperimentalCodeComponent heading={item} />
         </span>
-        <div className={'eyeball-icon'}>
-          <img
-            src={require('../static/eyeball_view.svg')}
-            onClick={event => {
-              hideOnClick(item.cellRef);
-            }}
-          />
-        </div>
       </div>
     );
   } else if (item.type === 'raw' && options.showRaw) {
@@ -321,14 +292,6 @@ function notebookItemRenderer(
         <span className={'toc-code-span'}>
           <CodeComponent code={item.text!} theme="none" />
         </span>
-        <div className={'eyeball-icon'}>
-          <img
-            src={require('../static/eyeball_view.svg')}
-            onClick={event => {
-              hideOnClick(item.cellRef);
-            }}
-          />
-        </div>
       </div>
     );
   } else {
@@ -418,40 +381,40 @@ export function notebookGeneratorToolbar(
     renderedDropdownMenu: any = createDropdownMenu();
 
     render() {
-      const DropdownMenu = this.renderedDropdownMenu;
-      const dropDownMenuItems: DropdownItem[] = [
-        {
-          id: 0,
-          props: {
-            title: 'Code',
-            selectedByDefault: this.state.showCode,
-            onClickHandler: this.toggleCode.bind(this)
-          },
-          type: TagTypeDropdownItem
-        },
-        {
-          id: 1,
-          props: {
-            title: 'Raw',
-            selectedByDefault: this.state.showRaw,
-            onClickHandler: this.toggleRaw.bind(this)
-          },
-          type: TagTypeDropdownItem
-        },
-        {
-          id: 2,
-          props: {
-            title: 'Markdown text',
-            selectedByDefault: this.state.showMarkdown,
-            onClickHandler: this.toggleMarkdown.bind(this)
-          },
-          type: TagTypeDropdownItem
-        }
-      ];
+      // const DropdownMenu = this.renderedDropdownMenu;
+      // const dropDownMenuItems: DropdownItem[] = [
+      //   {
+      //     id: 0,
+      //     props: {
+      //       title: 'Code',
+      //       selectedByDefault: this.state.showCode,
+      //       onClickHandler: this.toggleCode.bind(this)
+      //     },
+      //     type: TagTypeDropdownItem
+      //   },
+      //   {
+      //     id: 1,
+      //     props: {
+      //       title: 'Raw',
+      //       selectedByDefault: this.state.showRaw,
+      //       onClickHandler: this.toggleRaw.bind(this)
+      //     },
+      //     type: TagTypeDropdownItem
+      //   },
+      //   {
+      //     id: 2,
+      //     props: {
+      //       title: 'Markdown text',
+      //       selectedByDefault: this.state.showMarkdown,
+      //       onClickHandler: this.toggleMarkdown.bind(this)
+      //     },
+      //     type: TagTypeDropdownItem
+      //   }
+      // ];
 
       return (
         <div className="toc-toolbar">
-          <DropdownMenu
+          {/* <DropdownMenu
             className="celltypes-dropdown"
             items={{
               stateIndicator: '',
@@ -466,7 +429,18 @@ export function notebookGeneratorToolbar(
                 />
               </span>
             }
-          />
+          /> */}
+          <div
+            className="auto-numbering-button"
+            onClick={event => this.toggleCode.bind(this)}
+          >
+            <img
+              alt="Toggle Code Cells"
+              title="Toggle Code Cells"
+              src={require('../static/code_selected.svg')}
+              className="numberingIcon"
+            />
+          </div>
           <div
             className="auto-numbering-button"
             onClick={event => this.toggleAutoNumbering()}
