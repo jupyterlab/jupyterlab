@@ -5,7 +5,9 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-toolbar-height: calc( 28px + var(--jp-border-width) ); /* leave 28px for content */
+  --jp-private-toolbar-height: calc(
+    28px + var(--jp-border-width)
+  ); /* leave 28px for content */
 }
 
 .jp-Toolbar {
@@ -107,8 +109,7 @@ button.jp-ToolbarButtonComponent span {
   flex: 0 0 auto;
 }
 
-button.jp-ToolbarButtonComponent
-  .jp-ToolbarButtonComponent-label {
+button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-size: var(--jp-ui-font-size1);
   line-height: 100%;
   padding-left: 2px;
