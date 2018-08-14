@@ -16,21 +16,6 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@jupyterlab/coreutils@~2.0.3":
-  version "2.0.3"
-  resolved "https://registry.npmjs.org/@jupyterlab/coreutils/-/coreutils-2.0.3.tgz#e68c250d33e6287f7ca73fb84216d7c6f9c28d3a"
-  dependencies:
-    "@phosphor/algorithm" "^1.1.2"
-    "@phosphor/coreutils" "^1.3.0"
-    "@phosphor/disposable" "^1.1.2"
-    "@phosphor/signaling" "^1.2.2"
-    ajv "~5.1.6"
-    comment-json "^1.1.3"
-    minimist "~1.2.0"
-    moment "~2.21.0"
-    path-posix "~1.0.0"
-    url-parse "~1.4.3"
-
 "@nteract/transform-vdom@^1.1.1":
   version "1.1.1"
   resolved "https://registry.npmjs.org/@nteract/transform-vdom/-/transform-vdom-1.1.1.tgz#49258c58a3704c89b20cc42b5be463d7802406fa"
