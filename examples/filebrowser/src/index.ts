@@ -88,7 +88,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    className: 'jp-AddIcon jp-Icon jp-Icon-16',
+    iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
     onClick: () => {
       docManager
         .newUntitled({

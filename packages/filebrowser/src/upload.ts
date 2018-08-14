@@ -14,29 +14,31 @@ export class Uploader extends ToolbarButton {
    */
   constructor(options: Uploader.IOptions) {
     super({
-      className: 'jp-FileUploadIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-FileUploadIcon jp-Icon jp-Icon-16',
       onClick: () => {
         this._input.click();
       },
       tooltip: 'Upload Files'
     });
-    this.model = options.model;
+    this.fileBrowserModel = options.model;
     this._input.onclick = this._onInputClicked;
     this._input.onchange = this._onInputChanged;
     this.addClass('jp-id-upload');
   }
 
   /**
-   * The underlying file browser model for the widget.
+   * The underlying file browser fileBrowserModel for the widget.
+   *
+   * This cannot be named model as that conflicts with the model property of VDomRenderer.
    */
-  readonly model: FileBrowserModel;
+  readonly fileBrowserModel: FileBrowserModel;
 
   /**
    * The 'change' handler for the input field.
    */
   private _onInputChanged = () => {
     let files = Array.prototype.slice.call(this._input.files) as File[];
-    let pending = files.map(file => this.model.upload(file));
+    let pending = files.map(file => this.fileBrowserModel.upload(file));
     Promise.all(pending).catch(error => {
       showErrorMessage('Upload Error', error);
     });
@@ -63,7 +65,7 @@ export namespace Uploader {
    */
   export interface IOptions {
     /**
-     * A file browser model instance.
+     * A file browser fileBrowserModel instance.
      */
     model: FileBrowserModel;
   }

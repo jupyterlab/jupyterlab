@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar } from '@jupyterlab/apputils';
+import { Toolbar, CommandToolbarButton } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -428,11 +428,8 @@ namespace Private {
     // the toolbar is in, the relative location of the revert button in the
     // toolbar remains the same.
     [revert, debug, save].forEach(name => {
-      const item = Toolbar.createFromCommand(registry, name);
-
-      if (item) {
-        toolbar.addItem(name, item);
-      }
+      const item = new CommandToolbarButton({ commands: registry, id: name });
+      toolbar.addItem(name, item);
     });
   }
 
