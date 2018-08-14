@@ -110,18 +110,10 @@ export namespace PageConfig {
   }
 
   /**
-   * Get the base url for a Jupyter application, or an empty string.
-   *
-   * #### Notes
-   * If the baseUrl is not provided in `jupyter-config-data`, it will use the
-   * root url `/` (in the browser).
+   * Get the base url for a Jupyter application, or the base url of the page.
    */
   export function getBaseUrl(): string {
-    const baseUrl = URLExt.normalize(getOption('baseUrl'));
-    if (!baseUrl && typeof window !== 'undefined') {
-      return URLExt.normalize('/');
-    }
-    return baseUrl;
+    return URLExt.normalize(getOption('baseUrl') || '/');
   }
 
   /**

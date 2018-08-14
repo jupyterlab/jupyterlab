@@ -202,9 +202,6 @@ namespace Private {
     const defaultSettings = ServerConnection.defaultSettings;
     const baseUrl =
       URLExt.normalize(options.baseUrl) || defaultSettings.baseUrl;
-    if (!baseUrl) {
-      throw Error('Could not determine baseUrl');
-    }
     let wsUrl = options.wsUrl;
     // Prefer the default wsUrl if we are using the default baseUrl.
     if (!wsUrl && baseUrl === defaultSettings.baseUrl) {
@@ -216,9 +213,6 @@ namespace Private {
     }
     // Otherwise fall back on the default wsUrl.
     wsUrl = wsUrl || defaultSettings.wsUrl;
-    if (!wsUrl) {
-      throw Error('Could not determine wsUrl');
-    }
     return {
       ...defaultSettings,
       ...options,
