@@ -1,7 +1,5 @@
 
 # -*- coding: utf-8 -*-
-from __future__ import print_function, absolute_import
-
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
 import os

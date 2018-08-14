@@ -4,6 +4,7 @@ import logging
 from ipykernel.kernelapp import IPKernelApp
 from ipykernel.kernelbase import Kernel
 
+
 class EchoKernel(Kernel):
     implementation = 'Echo'
     implementation_version = '1.0'
