@@ -14,7 +14,7 @@ import {
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 import { ISignal } from '@phosphor/signaling';
-import { Cell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
@@ -33,7 +33,11 @@ import {
 } from '../style/lineForm';
 import { classes } from 'typestyle/lib';
 import { Message } from '@phosphor/messaging';
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+import {
+    IConsoleTracker,
+    ConsolePanel,
+    CodeConsole
+} from '@jupyterlab/console';
 
 namespace LineForm {
     export interface IProps {
@@ -233,6 +237,10 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         this.model!.editor!.focus();
     };
 
+    private _onPromptCellCreated = (_console: CodeConsole, cell: CodeCell) => {
+        this.model!.editor = cell.editor;
+    };
+
     private _onActiveCellChange = (
         _tracker: INotebookTracker,
         cell: Cell | null
@@ -266,9 +274,21 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         shell: ApplicationShell,
         change: ApplicationShell.IChangedArgs
     ) => {
-        const { newValue } = change;
+        const { newValue, oldValue } = change;
         const editor = this._getFocusedEditor(newValue);
         this.model!.editor = editor;
+
+        if (newValue && this._consoleTracker.has(newValue)) {
+            (newValue as ConsolePanel).console.promptCellCreated.connect(
+                this._onPromptCellCreated
+            );
+        }
+
+        if (oldValue && this._consoleTracker.has(oldValue)) {
+            (oldValue as ConsolePanel).console.promptCellCreated.disconnect(
+                this._onPromptCellCreated
+            );
+        }
     };
 
     private _notebookTracker: INotebookTracker;
