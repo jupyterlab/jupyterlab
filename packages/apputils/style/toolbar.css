@@ -85,15 +85,15 @@ div.jp-ToolbarButton {
 }
 
 .jp-ToolbarButton button.jp-ToolbarButtonComponent:focus {
-  background: var(--jp-layout-color2);;
+  background: var(--jp-layout-color2);
 }
 
 .jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:hover {
-  background: var(--jp-layout-color2);;
+  background: var(--jp-layout-color2);
 }
 
 .jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:active {
-  background: var(--jp-layout-color3);;
+  background: var(--jp-layout-color3);
 }
 
 .jp-ToolbarButton button.jp-ToolbarButtonComponent:disabled {
@@ -105,12 +105,10 @@ div.jp-ToolbarButton {
   display: inline-block;
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+.jp-ToolbarButton
+  button.jp-ToolbarButtonComponent
+  .jp-ToolbarButtonComponent-label {
   font-size: var(--jp-ui-font-size1);
   line-height: 100%;
   padding-left: 4px;
 }
-
-
-
-
