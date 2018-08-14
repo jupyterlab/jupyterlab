@@ -25,7 +25,7 @@
     "@jupyterlab/completer-extension": "^0.17.2",
     "@jupyterlab/console": "^0.17.2",
     "@jupyterlab/console-extension": "^0.17.2",
-    "@jupyterlab/coreutils": "^2.0.2",
+    "@jupyterlab/coreutils": "^2.0.3",
     "@jupyterlab/csvviewer": "^0.17.2",
     "@jupyterlab/csvviewer-extension": "^0.17.2",
     "@jupyterlab/docmanager": "^0.17.2",
@@ -100,7 +100,7 @@
     "react-paginate": "^5.2.3",
     "sanitize-html": "~1.14.3",
     "semver": "^5.5.0",
-    "url-parse": "~1.1.9",
+    "url-parse": "~1.4.3",
     "xterm": "~3.3.0"
   },
   "devDependencies": {

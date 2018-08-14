@@ -33,7 +33,7 @@
     "@jupyterlab/application": "^0.17.2",
     "@jupyterlab/codeeditor": "^0.17.2",
     "@jupyterlab/codemirror": "^0.17.3",
-    "@jupyterlab/coreutils": "^2.0.2",
+    "@jupyterlab/coreutils": "^2.0.3",
     "@jupyterlab/docregistry": "^0.17.2",
     "@jupyterlab/fileeditor": "^0.17.2",
     "@jupyterlab/mainmenu": "^0.6.2",

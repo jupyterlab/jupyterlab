@@ -10,7 +10,7 @@
     "@jupyterlab/codemirror": "^0.17.3",
     "@jupyterlab/completer": "^0.17.2",
     "@jupyterlab/console": "^0.17.2",
-    "@jupyterlab/coreutils": "^2.0.2",
+    "@jupyterlab/coreutils": "^2.0.3",
     "@jupyterlab/csvviewer": "^0.17.2",
     "@jupyterlab/docmanager": "^0.17.2",
     "@jupyterlab/docregistry": "^0.17.2",
