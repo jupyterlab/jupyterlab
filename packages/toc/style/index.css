@@ -106,7 +106,7 @@
   box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
 }
 
-.numberingIcon {
+.toc-toolbar-icon {
   float: left;
   padding: 0px;
   margin: 4px;
@@ -164,7 +164,7 @@
   font-size: 16px;
 }
 
-.auto-numbering-button {
+.toc-toolbar-button {
   width: fit-content;
   float: left;
 }
@@ -256,7 +256,7 @@
 
 .cm-toc-plain-span {
   width: 100%;
-  white-space: pre-line;
+  white-space: pre-wrap;
   display: block;
 }
 
@@ -283,5 +283,5 @@
 }
 
 .cm-toc .CodeMirror-line {
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
