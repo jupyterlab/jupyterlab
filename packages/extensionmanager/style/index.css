@@ -11,6 +11,10 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.jp-extensionmanager-view > header > .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
+}
+
 .jp-extensionmanager-content {
   overflow: auto;
 }
