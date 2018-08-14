@@ -9,11 +9,12 @@ import argparse
 import atexit
 import glob
 import json
+import logging
 import os
+import pkg_resources
 import shutil
 import sys
 import tempfile
-import logging
 
 try:
     from unittest.mock import patch
@@ -27,6 +28,7 @@ from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 
 from jupyterlab_launcher.process_app import ProcessApp
+import jupyterlab_launcher
 
 
 HERE = osp.realpath(osp.dirname(__file__))
@@ -39,6 +41,30 @@ def _create_notebook_dir():
     os.mkdir(osp.join(root_dir, 'src'))
     with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
         fid.write('hello')
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
+def _create_schemas_dir():
+    """Create a temporary directory for schemas."""
+    root_dir = tempfile.mkdtemp(prefix='mock_schemas')
+    extension_dir = osp.join(root_dir, '@jupyterlab', 'apputils-extension')
+    os.makedirs(extension_dir)
+
+    # Get schema content.
+    schema_package = jupyterlab_launcher.__name__
+    schema_path = 'tests/schemas/@jupyterlab/apputils-extension/themes.json'
+    themes = pkg_resources.resource_string(schema_package, schema_path)
+
+    with open(osp.join(extension_dir, 'themes.json'), 'w') as fid:
+        fid.write(themes.decode('utf-8'))
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
+def _create_user_settings_dir():
+    """Create a temporary directory for workspaces."""
+    root_dir = tempfile.mkdtemp(prefix='mock_user_settings')
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
 
@@ -113,6 +139,8 @@ class ProcessTestApp(ProcessApp):
     """
     allow_origin = Unicode('*')
     notebook_dir = Unicode(_create_notebook_dir())
+    schemas_dir = Unicode(_create_schemas_dir())
+    user_settings_dir = Unicode(_create_user_settings_dir())
     workspaces_dir = Unicode(_create_workspaces_dir())
 
     def __init__(self):
@@ -127,6 +155,8 @@ class ProcessTestApp(ProcessApp):
     def start(self):
         _install_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
+        self.lab_config.schemas_dir = self.schemas_dir
+        self.lab_config.user_settings_dir = self.user_settings_dir
         self.lab_config.workspaces_dir = self.workspaces_dir
         ProcessApp.start(self)
 
