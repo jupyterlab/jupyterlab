@@ -61,6 +61,8 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
+import { CommandRegistry } from '@phosphor/commands';
+
 import { Menu } from '@phosphor/widgets';
 
 /**
@@ -194,6 +196,10 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const saveWithView = 'notebook:save-with-view';
+
+  export const moveToRightSidebar = 'celltools:move-to-right-area';
+
+  export const moveToLeftSidebar = 'celltools:move-to-left-area';
 }
 
 /**
@@ -311,6 +317,30 @@ function activateCellTools(
   celltools.addItem({ tool: metadataEditor, rank: 4 });
   MessageLoop.installMessageHook(celltools, hook);
 
+  addCellToolsCommands(app);
+  const { commands } = app;
+
+  let node = celltools.node.getElementsByClassName('jp-MetadataEditorTool')[0];
+  node.addEventListener('contextmenu', (event: MouseEvent) => {
+    event.preventDefault();
+    const menu = createContextMenu(commands);
+    menu.open(event.clientX, event.clientY);
+  });
+
+  node = celltools.node.getElementsByClassName('jp-KeySelector')[0];
+  node.addEventListener('contextmenu', (event: MouseEvent) => {
+    event.preventDefault();
+    const menu = createContextMenu(commands);
+    menu.open(event.clientX, event.clientY);
+  });
+
+  node = celltools.node.getElementsByClassName('p-Widget')[0];
+  node.addEventListener('contextmenu', (event: MouseEvent) => {
+    event.preventDefault();
+    const menu = createContextMenu(commands);
+    menu.open(event.clientX, event.clientY);
+  });
+
   // Wait until the application has finished restoring before rendering.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
     const open = !!(args && ((args as ReadonlyJSONObject)['open'] as boolean));
@@ -339,6 +369,32 @@ function activateCellTools(
   });
 
   return Promise.resolve(celltools);
+}
+
+function addCellToolsCommands(app: JupyterLab): void {
+  const { commands } = app;
+
+  commands.addCommand(CommandIDs.moveToRightSidebar, {
+    label: 'Move Cell Tools to Left Sidebar',
+    execute: args => {
+      app.shell.moveRightActiveToLeftArea();
+    }
+  });
+
+  commands.addCommand(CommandIDs.moveToLeftSidebar, {
+    label: 'Move Cell Tools to Right Sidebar',
+    execute: () => {
+      app.shell.moveLeftActiveToRightArea();
+    }
+  });
+}
+
+function createContextMenu(commands: CommandRegistry): Menu {
+  const menu = new Menu({ commands });
+  menu.addItem({ command: CommandIDs.moveToRightSidebar });
+  menu.addItem({ command: CommandIDs.moveToLeftSidebar });
+
+  return menu;
 }
 
 /**

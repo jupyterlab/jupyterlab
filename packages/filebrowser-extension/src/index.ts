@@ -81,6 +81,10 @@ namespace CommandIDs {
 
   // For main browser only.
   export const toggleBrowser = 'filebrowser:toggle-main';
+
+  export const moveToRightSidebar = 'filebrowser:move-to-right-area';
+
+  export const moveToLeftSidebar = 'filebrowser:move-to-left-area';
 }
 
 /**
@@ -157,6 +161,22 @@ function activateFactory(
       event.preventDefault();
       const model = widget.modelForClick(event);
       const menu = createContextMenu(model, commands, registry);
+      menu.open(event.clientX, event.clientY);
+    });
+
+    node = widget.node.getElementsByClassName('jp-FileBrowser-toolbar')[0];
+    node.addEventListener('contextmenu', (event: MouseEvent) => {
+      event.preventDefault();
+      const model = widget.modelForClick(event);
+      const menu = createToolbarContextMenu(model, commands, registry);
+      menu.open(event.clientX, event.clientY);
+    });
+
+    node = widget.node.getElementsByClassName('jp-FileBrowser-crumbs')[0];
+    node.addEventListener('contextmenu', (event: MouseEvent) => {
+      event.preventDefault();
+      const model = widget.modelForClick(event);
+      const menu = createToolbarContextMenu(model, commands, registry);
       menu.open(event.clientX, event.clientY);
     });
 
@@ -519,6 +539,20 @@ function addCommands(
     label: 'New Launcher',
     execute: () => createLauncher(commands, browser)
   });
+
+  commands.addCommand(CommandIDs.moveToRightSidebar, {
+    label: 'Move File Browser to Left Sidebar',
+    execute: args => {
+      app.shell.moveRightActiveToLeftArea();
+    }
+  });
+
+  commands.addCommand(CommandIDs.moveToLeftSidebar, {
+    label: 'Move File Browser to Right Sidebar',
+    execute: () => {
+      app.shell.moveLeftActiveToRightArea();
+    }
+  });
 }
 
 /**
@@ -539,6 +573,8 @@ function createContextMenu(
   // paste as a possibility.
   if (!model) {
     menu.addItem({ command: CommandIDs.paste });
+    menu.addItem({ command: CommandIDs.moveToRightSidebar });
+    menu.addItem({ command: CommandIDs.moveToLeftSidebar });
     return menu;
   }
 
@@ -599,4 +635,15 @@ function createLauncher(
       }, launcher);
       return launcher;
     });
+}
+
+function createToolbarContextMenu(
+  model: Contents.IModel | undefined,
+  commands: CommandRegistry,
+  registry: DocumentRegistry
+): Menu {
+  const menu = new Menu({ commands });
+  menu.addItem({ command: CommandIDs.moveToRightSidebar });
+  menu.addItem({ command: CommandIDs.moveToLeftSidebar });
+  return menu;
 }
