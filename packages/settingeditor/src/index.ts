@@ -23,5 +23,6 @@ export const ISettingEditorTracker = new Token<ISettingEditorTracker>(
 /**
  * A class that tracks the setting editor.
  */
-export interface ISettingEditorTracker
+export
+interface ISettingEditorTracker
   extends IInstanceTracker<MainAreaWidget<SettingEditor>> {}
