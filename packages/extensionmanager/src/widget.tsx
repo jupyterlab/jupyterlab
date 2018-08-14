@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -378,14 +378,13 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     } else if (!model.query && model.installed.length) {
       elements.push(
         <header key="installed-header">
-          Installed<button
-            className="jp-extensionmanager-refresh"
+          Installed<ToolbarButtonComponent
+            iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
             onClick={() => {
               model.refreshInstalled();
             }}
-          >
-            &#8635;
-          </button>
+            tooltip="Refresh extension list"
+          />
         </header>
       );
       content.push(

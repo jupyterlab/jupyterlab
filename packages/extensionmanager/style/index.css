@@ -47,7 +47,7 @@
 */
 
 .jp-extensionmanager-search-bar {
-  padding: 8px;
+  padding: 8px 8px 0px 8px;
   background-color: var(--jp-layout-color1);
   z-index: 2;
   flex: 0 0 auto;
@@ -127,6 +127,8 @@
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size0);
+  line-height: 24px;
+  height: 24px;
 }
 
 .jp-extensionmanager-view header button.jp-extensionmanager-refresh {
@@ -193,7 +195,7 @@
   width: 1em;
   display: none;
   position: relative;
-  top: 3px;
+  top: 1px;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
@@ -219,8 +221,24 @@
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   padding: 0 8px 0 0;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
+
+.jp-extensionmanager-entry-name a:link {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:visited {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 .jp-extensionmanager-entry-description {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color2);
