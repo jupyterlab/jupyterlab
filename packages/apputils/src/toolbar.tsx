@@ -375,7 +375,11 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   return (
     <button
-      className={(props.className || '') + ' jp-ToolbarButtonComponent'}
+      className={
+        props.className
+          ? props.className + ' jp-ToolbarButtonComponent'
+          : 'jp-ToolbarButtonComponent'
+      }
       onClick={props.onClick}
       title={props.tooltip || props.iconLabel}
     >
@@ -457,9 +461,13 @@ export class CommandToolbarButtonComponent extends React.Component<
   private _childProps: ToolbarButtonComponent.IProps;
 }
 
+/**
+ * Phosphor Widget version of ToolbarButtonComponent.
+ */
 export class CommandToolbarButton extends ReactElementWidget {
   constructor(props: CommandToolbarButtonComponent.IProps) {
     super(<CommandToolbarButtonComponent {...props} />);
+    this.addClass('jp-CommandToolbarButton');
   }
 }
 
@@ -526,11 +534,12 @@ namespace Private {
      */
     constructor(session: IClientSession) {
       super({
-        iconClassName: TOOLBAR_KERNEL_NAME_CLASS,
+        className: TOOLBAR_KERNEL_NAME_CLASS,
         onClick: () => {
           session.selectKernel();
         },
-        tooltip: 'Switch kernel'
+        tooltip: 'Switch kernel',
+        label: session.kernelDisplayName
       });
       this._onKernelChanged(session);
       session.kernelChanged.connect(this._onKernelChanged, this);

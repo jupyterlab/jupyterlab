@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-toolbar-height: 29px; /* leave 28px for content */
+  --jp-private-toolbar-height: calc( 28px + var(--jp-border-width) ); /* leave 28px for content */
 }
 
 .jp-Toolbar {
@@ -48,8 +48,8 @@
 .jp-Toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   display: flex;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 1px;
+  padding-right: 1px;
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-toolbar-height);
   height: 100%;
@@ -70,7 +70,7 @@ div.jp-ToolbarButton {
   margin: 0px;
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent {
+button.jp-ToolbarButtonComponent {
   background: var(--jp-layout-color1);
   border: none;
   box-sizing: border-box;
@@ -78,37 +78,39 @@ div.jp-ToolbarButton {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding: 0px 8px;
+  padding: 0px 6px;
   margin: 0px;
   height: 24px;
   border-radius: var(--jp-border-radius);
+  display: flex;
+  align-items: center;
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent:focus {
+button.jp-ToolbarButtonComponent:focus {
   background: var(--jp-layout-color2);
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:hover {
+button.jp-ToolbarButtonComponent:enabled:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:active {
+button.jp-ToolbarButtonComponent:enabled:active {
   background: var(--jp-layout-color3);
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent:disabled {
+button.jp-ToolbarButtonComponent:disabled {
   opacity: 0.4;
 }
 
-.jp-ToolbarButton button.jp-ToolbarButtonComponent span {
+button.jp-ToolbarButtonComponent span {
   padding: 0px;
-  display: inline-block;
+  flex: 0 0 auto;
 }
 
-.jp-ToolbarButton
-  button.jp-ToolbarButtonComponent
+button.jp-ToolbarButtonComponent
   .jp-ToolbarButtonComponent-label {
   font-size: var(--jp-ui-font-size1);
   line-height: 100%;
-  padding-left: 4px;
+  padding-left: 2px;
+  color: var(--jp-ui-font-color1);
 }
