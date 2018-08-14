@@ -4302,7 +4302,7 @@ https-proxy-agent@^2.2.1:
     agent-base "^4.1.0"
     debug "^3.1.0"
 
-"husky@1.0.0-rc.13 ":
+husky@1.0.0-rc.13:
   version "1.0.0-rc.13"
   resolved "https://registry.npmjs.org/husky/-/husky-1.0.0-rc.13.tgz#49c3cc210bfeac24d4ad272f770b7505c9091828"
   dependencies:
