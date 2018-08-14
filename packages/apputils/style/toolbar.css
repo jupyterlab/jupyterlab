@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-toolbar-height: 28px;
+  --jp-private-toolbar-height: 29px; /* leave 28px for content */
 }
 
 .jp-Toolbar {
@@ -21,41 +21,7 @@
   z-index: 1;
 }
 
-.jp-Toolbar > .jp-Toolbar-item {
-  flex: 0 0 auto;
-  display: flex;
-  padding-left: 8px;
-  padding-right: 8px;
-  font-size: var(--jp-ui-font-size1);
-  line-height: var(--jp-private-toolbar-height);
-  height: 100%;
-}
-
-.jp-Toolbar-item.jp-Toolbar-button {
-  display: inline-block;
-  height: 24px;
-  width: 24px;
-}
-
-.jp-Toolbar-item.jp-Toolbar-button:focus {
-  background: var(--jp-layout-color2);
-}
-
-.jp-Toolbar-button:enabled:hover {
-  background: var(--jp-layout-color2);
-}
-
-.jp-Toolbar-button:enabled:active {
-  background: blue;
-}
-
-.jp-Toolbar-button:disabled {
-  opacity: 0.4;
-}
-
-.jp-Toolbar-button.p-mod-toggled {
-  background: red;
-}
+/* Toolbar items */
 
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
@@ -78,3 +44,73 @@
   background-position: center;
   background-size: 16px;
 }
+
+.jp-Toolbar > .jp-Toolbar-item {
+  flex: 0 0 auto;
+  display: flex;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: var(--jp-private-toolbar-height);
+  height: 100%;
+}
+
+/* Toolbar buttons */
+
+/* This is the div we use to wrap the react component into a Widget */
+div.jp-ToolbarButton {
+  color: transparent;
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent {
+  background: var(--jp-layout-color1);
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0px 8px;
+  margin: 0px;
+  height: 24px;
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent:focus {
+  background: var(--jp-layout-color2);;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:hover {
+  background: var(--jp-layout-color2);;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent:enabled:active {
+  background: var(--jp-layout-color3);;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent:disabled {
+  opacity: 0.4;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent span {
+  padding: 0px;
+  display: inline-block;
+}
+
+.jp-ToolbarButton button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+  font-size: var(--jp-ui-font-size1);
+  line-height: 100%;
+  padding-left: 4px;
+}
+
+
+
+

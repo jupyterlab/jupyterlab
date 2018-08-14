@@ -14,7 +14,7 @@
 }
 
 .jp-Icon {
-  display: block;
+  display: inline-block;
   vertical-align: middle;
   background-repeat: no-repeat;
   background-position: center;

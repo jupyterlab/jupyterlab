@@ -375,14 +375,18 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   return (
     <button
-      className={props.className || ''}
+      className={(props.className || '') + ' jp-ToolbarButtonComponent'}
       onClick={props.onClick}
-      title={props.tooltip || ''}
+      title={props.tooltip || props.iconLabel}
     >
       {props.iconClassName && (
-        <span className={props.iconClassName} title={props.iconLabel || ''} />
+        <span
+          className={props.iconClassName + ' jp-ToolbarButtonComponent-icon'}
+        />
       )}
-      {props.label && <span>{props.label}</span>}
+      {props.label && (
+        <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
+      )}
     </button>
   );
 }
@@ -522,7 +526,7 @@ namespace Private {
      */
     constructor(session: IClientSession) {
       super({
-        className: TOOLBAR_KERNEL_NAME_CLASS,
+        iconClassName: TOOLBAR_KERNEL_NAME_CLASS,
         onClick: () => {
           session.selectKernel();
         },
