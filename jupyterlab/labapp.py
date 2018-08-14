@@ -13,7 +13,7 @@ from ._version import __version__
 from .extension import load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_user_settings_dir, get_app_version,
-    get_workspaces_dir
+    get_workspaces_dir, get_app_dir
 )
 
 
@@ -55,12 +55,15 @@ class LabBuildApp(JupyterApp):
     version = Unicode('', config=True,
         help="The version of the built application")
 
-    dev_build = Bool(False, config=True,
-        help="Whether to build in dev mode (defaults to production mode)")
+    dev_build = Bool(True, config=True,
+        help="Whether to build in dev mode (defaults to dev mode)")
 
     def start(self):
         command = 'build:prod' if not self.dev_build else 'build'
-        build(app_dir=self.app_dir, name=self.name, version=self.version,
+        app_dir = self.app_dir or get_app_dir()
+        self.log.info('JupyterLab %s', version)
+        self.log.info('Building in %s', app_dir)
+        build(app_dir=app_dir, name=self.name, version=self.version,
               command=command, logger=self.log)
 
 

@@ -9,7 +9,7 @@
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
-    "build:test": "jlpm run build:testutils && lerna run build:test",
+    "build:test": "jlpm run build:testutils && lerna run build:test && lerna run build --scope \"@jupyterlab/test-*\"",
     "build:testutils": "cd testutils && jlpm run build",
     "build:themes": "lerna run build:webpack --scope \"@jupyterlab/theme-*-extension\"",
     "build:update": "node buildutils/lib/update-core-mode.js",
