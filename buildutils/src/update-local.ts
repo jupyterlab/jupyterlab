@@ -8,12 +8,13 @@ import * as utils from './utils';
 import packageJson = require('package-json');
 
 // Ensure the repo is in a stable state.
-// utils.run('jlpm run clean:slate');
-// utils.run('jlpm run build:packages');
-// utils.run('jlpm run build:themes');
+utils.run('jlpm run clean:slate');
+utils.run('jlpm run build:packages');
+utils.run('jlpm run build:themes');
+
 
 console.log('Looking for outdated local package versions...');
-utils.getLernaPaths().forEach(async (pkgPath) => {
+let promises = utils.getLernaPaths().map(async (pkgPath) => {
   const packagePath = path.join(pkgPath, 'package.json');
   let data: any;
   try {
@@ -36,4 +37,4 @@ utils.getLernaPaths().forEach(async (pkgPath) => {
   utils.writePackageData(packagePath, data);
 });
 
-utils.run('jlpm integrity');
+Promise.all(promises).then(() => utils.run('jlpm integrity'));
