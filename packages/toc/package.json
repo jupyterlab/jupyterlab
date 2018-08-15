@@ -50,7 +50,8 @@
     "codemirror": "^5.39.2",
     "react": "~16.2.0",
     "react-codemirror": "^1.0.0",
-    "react-dom": "~16.2.0"
+    "react-dom": "~16.2.0",
+    "typestyle": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "~16.0.19",
