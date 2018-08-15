@@ -30,9 +30,7 @@
 
 .p-CommandPalette-search {
   padding: 8px;
-  background-color: var(--jp-layout-color2);
-  border-bottom: 1px solid var(--jp-border-color1);
-  box-shadow: var(--jp-toolbar-box-shadow);
+  background-color: var(--jp-layout-color1);
   z-index: 2;
 }
 
@@ -96,7 +94,7 @@
 |----------------------------------------------------------------------------*/
 
 .p-CommandPalette-header {
-  padding: 12px 0 4px 22px;
+  padding: 8px 0 8px 22px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;

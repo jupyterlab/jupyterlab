@@ -57,14 +57,16 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar > .jp-Toolbar-button {
-  flex: 1 1 auto;
-  height: var(--jp-private-filebrowser-button-height);
-  line-height: var(--jp-private-filebrowser-button-height);
-  color: var(--jp-layout-color1);
-  font-size: var(--jp-ui-icon-font-size);
-  outline: 0;
-  margin-bottom: 4px;
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  padding: 0px;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  justify-content: space-evenly;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
 }
 
 /*-----------------------------------------------------------------------------

@@ -41,11 +41,6 @@ input.jp-mod-styled:focus {
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
-button.jp-mod-styled:focus {
-  box-shadow: inset 0 0 0 1px #ffffff;
-  border: rgba(0, 0, 0, 0) solid 1px;
-}
-
 .jp-select-wrapper {
   display: flex;
   flex-direction: column;

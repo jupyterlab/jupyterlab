@@ -142,13 +142,12 @@ function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      className: 'jp-AddIcon',
+      iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
       onClick: () => {
         return createLauncher(commands, widget);
       },
       tooltip: 'New Launcher'
     });
-    launcher.addClass('jp-MaterialIcon');
     widget.toolbar.insertItem(0, 'launch', launcher);
 
     // Add a context menu handler to the file browser's directory listing.
@@ -191,7 +190,8 @@ function activateBrowser(
 
   addCommands(app, factory.tracker, browser);
 
-  browser.title.label = 'Files';
+  browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
+  browser.title.caption = 'File Browser';
   shell.addToLeftArea(browser, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.

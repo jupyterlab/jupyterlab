@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ReactElementWidget } from './vdom';
+
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -13,7 +15,7 @@ import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { IClientSession } from './clientsession';
 
-import { Styling } from './styling';
+import * as React from 'react';
 
 /**
  * The class name added to toolbars.
@@ -24,21 +26,6 @@ const TOOLBAR_CLASS = 'jp-Toolbar';
  * The class name added to toolbar items.
  */
 const TOOLBAR_ITEM_CLASS = 'jp-Toolbar-item';
-
-/**
- * The class name added to toolbar buttons.
- */
-const TOOLBAR_BUTTON_CLASS = 'jp-Toolbar-button';
-
-/**
- * The class name added to toolbar interrupt button.
- */
-const TOOLBAR_INTERRUPT_CLASS = 'jp-StopIcon';
-
-/**
- * The class name added to toolbar restart button.
- */
-const TOOLBAR_RESTART_CLASS = 'jp-RefreshIcon';
 
 /**
  * The class name added to toolbar kernel name text.
@@ -297,85 +284,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
  */
 export namespace Toolbar {
   /**
-   * Create a toolbar item for a command or `null` if the command does not exist
-   * in the registry.
-   *
-   * Notes:
-   * If the command has an icon label it will be added to the button.
-   * If there is no icon label, and no icon class, the main label will
-   * be added.
-   */
-  export function createFromCommand(
-    commands: CommandRegistry,
-    id: string
-  ): ToolbarButton | null {
-    if (!commands.hasCommand(id)) {
-      return null;
-    }
-
-    const button = new ToolbarButton({
-      onClick: () => {
-        commands.execute(id);
-        button.node.blur();
-      },
-      className: Private.commandClassName(commands, id),
-      tooltip: Private.commandTooltip(commands, id)
-    });
-    let oldClasses = Private.commandClassName(commands, id).split(/\s/);
-
-    (button.node as HTMLButtonElement).disabled = !commands.isEnabled(id);
-    Private.setNodeContentFromCommand(button.node, commands, id);
-
-    // Ensure that we pick up relevant changes to the command:
-    function onChange(
-      sender: CommandRegistry,
-      args: CommandRegistry.ICommandChangedArgs
-    ) {
-      if (args.id !== id) {
-        return; // Not our command
-      }
-
-      if (args.type === 'removed') {
-        // Dispose of button
-        button.dispose();
-        return;
-      }
-
-      if (args.type !== 'changed') {
-        return;
-      }
-
-      // Update all fields (onClick is already indirected)
-      const newClasses = Private.commandClassName(sender, id).split(/\s/);
-
-      for (let cls of oldClasses) {
-        if (cls && newClasses.indexOf(cls) === -1) {
-          button.removeClass(cls);
-        }
-      }
-      for (let cls of newClasses) {
-        if (cls && oldClasses.indexOf(cls) === -1) {
-          button.addClass(cls);
-        }
-      }
-      oldClasses = newClasses;
-      button.node.title = Private.commandTooltip(sender, id);
-      Private.setNodeContentFromCommand(button.node, sender, id);
-      (button.node as HTMLButtonElement).disabled = !sender.isEnabled(id);
-    }
-    commands.commandChanged.connect(onChange, button);
-
-    return button;
-  }
-
-  /**
    * Create an interrupt toolbar item.
    */
   export function createInterruptButton(
     session: IClientSession
   ): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INTERRUPT_CLASS,
+      iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
       onClick: () => {
         if (session.kernel) {
           session.kernel.interrupt();
@@ -390,7 +305,7 @@ export namespace Toolbar {
    */
   export function createRestartButton(session: IClientSession): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RESTART_CLASS,
+      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
       onClick: () => {
         session.restart();
       },
@@ -418,7 +333,7 @@ export namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export function createKernelNameItem(session: IClientSession): ToolbarButton {
-    return new Private.KernelName(session);
+    return new Private.KernelName({ session });
   }
 
   /**
@@ -436,95 +351,123 @@ export namespace Toolbar {
 }
 
 /**
- * A widget which acts as a button in a toolbar.
+ * Namespace for ToolbarButtonComponent.
  */
-export class ToolbarButton extends Widget {
+export namespace ToolbarButtonComponent {
   /**
-   * Construct a new toolbar button.
+   * Interface for ToolbarButttonComponent props.
    */
-  constructor(options: ToolbarButton.IOptions = {}) {
-    super({ node: document.createElement('button') });
-    Styling.styleNodeByTag(this.node, 'button');
-    this.addClass(TOOLBAR_BUTTON_CLASS);
-    this._onClick = options.onClick || Private.noOp;
-
-    const classes = options.className
-      ? options.className
-          .trim()
-          .replace(/\s{2,}/g, ' ')
-          .split(/\s/)
-      : null;
-
-    if (classes) {
-      classes.forEach(name => {
-        this.addClass(name);
-      });
-    }
-
-    this.node.title = options.tooltip || '';
+  export interface IProps {
+    className?: string;
+    label?: string;
+    iconClassName?: string;
+    iconLabel?: string;
+    tooltip?: string;
+    onClick?: () => void;
   }
-
-  /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
-   */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-      case 'click':
-        if ((event as MouseEvent).button === 0) {
-          this._onClick();
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
-  }
-
-  private _onClick: () => void;
 }
 
 /**
- * A namespace for `ToolbarButton` statics.
+ * React component for a toolbar button.
+ *
+ * @param props - The props for ToolbarButtonComponent.
  */
-export namespace ToolbarButton {
+export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
+  return (
+    <button
+      className={
+        props.className
+          ? props.className + ' jp-ToolbarButtonComponent'
+          : 'jp-ToolbarButtonComponent'
+      }
+      onClick={props.onClick}
+      title={props.tooltip || props.iconLabel}
+    >
+      {props.iconClassName && (
+        <span
+          className={props.iconClassName + ' jp-ToolbarButtonComponent-icon'}
+        />
+      )}
+      {props.label && (
+        <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
+      )}
+    </button>
+  );
+}
+
+/**
+ * Phosphor Widget version of ToolbarButtonComponent.
+ */
+export class ToolbarButton extends ReactElementWidget {
   /**
-   * The options used to construct a toolbar button.
+   * Create a ToolbarButton.
+   *
+   * @param props - Props for ToolbarButtonComponent.
    */
-  export interface IOptions {
-    /**
-     * The callback for a click event.
-     */
-    onClick?: () => void;
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
+    super(<ToolbarButtonComponent {...props} />);
+    this.addClass('jp-ToolbarButton');
+  }
+}
 
-    /**
-     * The class name added to the button.
-     */
-    className?: string;
+/**
+ * Namespace for CommandToolbarButtonComponent.
+ */
+export namespace CommandToolbarButtonComponent {
+  /**
+   * Interface for CommandToolbarButtonComponent props.
+   */
+  export interface IProps {
+    commands: CommandRegistry;
+    id: string;
+  }
+}
 
-    /**
-     * The tooltip added to the button node.
-     */
-    tooltip?: string;
+/**
+ * React component for a toolbar button that wraps a command.
+ *
+ * This wraps the ToolbarButtonComponent and watches the command registry
+ * for changes to the command.
+ */
+export class CommandToolbarButtonComponent extends React.Component<
+  CommandToolbarButtonComponent.IProps
+> {
+  constructor(props: CommandToolbarButtonComponent.IProps) {
+    super(props);
+    props.commands.commandChanged.connect(this._onChange, this);
+    this._childProps = Private.propsFromCommand(this.props);
+  }
+
+  public render() {
+    return <ToolbarButtonComponent {...this._childProps} />;
+  }
+
+  private _onChange(
+    sender: CommandRegistry,
+    args: CommandRegistry.ICommandChangedArgs
+  ) {
+    if (args.id !== this.props.id) {
+      return; // Not our command
+    }
+
+    if (args.type !== 'changed') {
+      return; // Not a change
+    }
+
+    this._childProps = Private.propsFromCommand(this.props);
+    this.forceUpdate();
+  }
+
+  private _childProps: ToolbarButtonComponent.IProps;
+}
+
+/**
+ * Phosphor Widget version of ToolbarButtonComponent.
+ */
+export class CommandToolbarButton extends ReactElementWidget {
+  constructor(props: CommandToolbarButtonComponent.IProps) {
+    super(<CommandToolbarButtonComponent {...props} />);
+    this.addClass('jp-CommandToolbarButton');
   }
 }
 
@@ -532,6 +475,28 @@ export namespace ToolbarButton {
  * A namespace for private data.
  */
 namespace Private {
+  export function propsFromCommand(
+    options: CommandToolbarButtonComponent.IProps
+  ): ToolbarButtonComponent.IProps {
+    let { commands, id } = options;
+    const iconClassName = commands.iconClass(id);
+    const iconLabel = commands.iconLabel(id);
+    const label = commands.label(id);
+    let className = commands.className(id);
+    // Add the boolean state classes.
+    if (commands.isToggled(id)) {
+      className += ' p-mod-toggled';
+    }
+    if (!commands.isVisible(id)) {
+      className += ' p-mod-hidden';
+    }
+    const tooltip = commands.caption(id) || label || iconLabel;
+    const onClick = () => {
+      commands.execute(id);
+    };
+    return { className, iconClassName, tooltip, onClick };
+  }
+
   /**
    * An attached property for the name of a toolbar item.
    */
@@ -541,59 +506,10 @@ namespace Private {
   });
 
   /**
-   * ToolbarButton tooltip formatter for a command.
-   */
-  export function commandTooltip(
-    commands: CommandRegistry,
-    id: string
-  ): string {
-    return commands.caption(id);
-  }
-
-  /**
    * A no-op function.
    */
   export function noOp() {
     /* no-op */
-  }
-
-  /**
-   * Get the class names for a command based ToolBarButton
-   */
-  export function commandClassName(
-    commands: CommandRegistry,
-    id: string
-  ): string {
-    let name = commands.className(id);
-    // Add the boolean state classes.
-    if (commands.isToggled(id)) {
-      name += ' p-mod-toggled';
-    }
-    if (!commands.isVisible(id)) {
-      name += ' p-mod-hidden';
-    }
-    return name;
-  }
-
-  /**
-   * Fill the node of a command based ToolBarButton.
-   */
-  export function setNodeContentFromCommand(
-    node: HTMLElement,
-    commands: CommandRegistry,
-    id: string
-  ): void {
-    const iconClass = commands.iconClass(id);
-    const iconLabel = commands.iconLabel(id);
-    const label = commands.label(id);
-
-    node.innerHTML = '';
-    if (iconClass) {
-      node.className += ` ${iconClass}`;
-      node.setAttribute('title', iconLabel || label);
-    } else {
-      node.innerText = label;
-    }
   }
 
   /**
@@ -610,29 +526,61 @@ namespace Private {
   }
 
   /**
-   * A kernel name widget.
+   * Namespace for KernelNameComponent.
    */
-  export class KernelName extends ToolbarButton {
+  export namespace KernelNameComponent {
     /**
-     * Construct a new kernel name widget.
+     * Interface for KernelNameComponent props.
      */
-    constructor(session: IClientSession) {
-      super({
+    export interface IProps {
+      session: IClientSession;
+    }
+  }
+
+  /**
+   * React component for a kernel name button.
+   *
+   * This wraps the ToolbarButtonComponent and watches the kernel
+   * session for changes.
+   */
+  export class KernelNameComponent extends React.Component<
+    KernelNameComponent.IProps
+  > {
+    constructor(props: KernelNameComponent.IProps) {
+      super(props);
+      props.session.kernelChanged.connect(this._onKernelChanged, this);
+      this._childProps = {
         className: TOOLBAR_KERNEL_NAME_CLASS,
         onClick: () => {
-          session.selectKernel();
+          this.props.session.selectKernel();
         },
-        tooltip: 'Switch kernel'
-      });
-      this._onKernelChanged(session);
-      session.kernelChanged.connect(this._onKernelChanged, this);
+        tooltip: 'Switch kernel',
+        label: props.session.kernelDisplayName
+      };
+    }
+
+    public render() {
+      return <ToolbarButtonComponent {...this._childProps} />;
     }
 
     /**
      * Update the text of the kernel name item.
      */
     private _onKernelChanged(session: IClientSession): void {
-      this.node.textContent = session.kernelDisplayName;
+      this._childProps.label = session.kernelDisplayName;
+      this.forceUpdate();
+    }
+
+    private _childProps: ToolbarButtonComponent.IProps;
+  }
+
+  /**
+   * Phosphor Widget version of ToolbarButtonComponent.
+   */
+  export class KernelName extends ReactElementWidget {
+    constructor(props: KernelNameComponent.IProps) {
+      super(<KernelNameComponent {...props} />);
+      this.addClass('jp-KernelName');
     }
   }
 

@@ -207,6 +207,11 @@ const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const FACTORY = 'Notebook';
 
 /**
+ * The rank of the cell tools tab in the sidebar
+ */
+const CELL_TOOLS_RANK = 400;
+
+/**
  * The allowed Export To ... formats and their human readable labels.
  */
 const EXPORT_TO_FORMATS = [
@@ -303,7 +308,8 @@ function activateCellTools(
     return true;
   };
 
-  celltools.title.label = 'Cell Tools';
+  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  celltools.title.caption = 'Cell Inspector';
   celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: slideShow, rank: 2 });
@@ -317,7 +323,7 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools);
+      app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
       if (open) {
         app.shell.activateById(celltools.id);
       }
@@ -329,7 +335,7 @@ function activateCellTools(
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools);
+          app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
         }
         return;
       }

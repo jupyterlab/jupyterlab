@@ -13,12 +13,42 @@
   background-position: center;
 }
 
+.jp-Icon {
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: auto;
+}
+
+.jp-Icon-16 {
+  min-width: 16px;
+  min-height: 16px;
+  background-size: 16px;
+}
+
+.jp-Icon-18 {
+  min-width: 18px;
+  min-height: 18px;
+  background-size: 18px;
+}
+
+.jp-Icon-20 {
+  min-width: 20px;
+  min-height: 20px;
+  background-size: 20px;
+}
+
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
 }
 
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
+}
+
+.jp-BuildIcon {
+  background-image: var(--jp-icon-build);
 }
 
 .jp-ChatIcon {
@@ -43,6 +73,10 @@
 
 .jp-CutIcon {
   background-image: var(--jp-icon-cut);
+}
+
+.jp-DirectionsRunIcon {
+  background-image: var(--jp-icon-directions-run);
 }
 
 .jp-DownCaretIcon {
@@ -73,6 +107,10 @@
   background-image: var(--jp-icon-expand-more);
 }
 
+.jp-ExtensionIcon {
+  background-image: var(--jp-icon-extension);
+}
+
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
@@ -81,8 +119,8 @@
   background-image: var(--jp-icon-circle);
 }
 
-.jp-newFolderIcon {
-  background-image: var(--jp-icon-new-directory);
+.jp-FolderIcon {
+  background-image: var(--jp-icon-folder);
 }
 
 .jp-HomeIcon {
@@ -139,12 +177,20 @@
   background-image: var(--jp-icon-more);
 }
 
+.jp-NewFolderIcon {
+  background-image: var(--jp-icon-new-folder);
+}
+
 .jp-NotebookIcon {
   background-image: var(--jp-icon-book);
 }
 
 .jp-OpenFolderIcon {
   background-image: var(--jp-icon-directory);
+}
+
+.jp-PaletteIcon {
+  background-image: var(--jp-icon-palette);
 }
 
 .jp-PasteIcon {
@@ -183,6 +229,10 @@
   background-image: var(--jp-icon-stop);
 }
 
+.jp-TabIcon {
+  background-image: var(--jp-icon-tab);
+}
+
 .jp-TerminalIcon {
   background-image: var(--jp-icon-terminal);
 }
@@ -195,8 +245,8 @@
   background-image: var(--jp-icon-undo);
 }
 
-.jp-UploadIcon {
-  background-image: var(--jp-icon-upload);
+.jp-FileUploadIcon {
+  background-image: var(--jp-icon-file-upload);
 }
 
 .jp-YamlIcon {

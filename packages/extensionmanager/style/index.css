@@ -11,6 +11,10 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.jp-extensionmanager-view > header > .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
+}
+
 .jp-extensionmanager-content {
   overflow: auto;
 }
@@ -26,17 +30,6 @@
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
-}
-
-.jp-extensionmanager-view header {
-  flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 12px 0 4px 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-extensionmanager-listview {
@@ -58,10 +51,8 @@
 */
 
 .jp-extensionmanager-search-bar {
-  padding: 8px;
-  background-color: var(--jp-layout-color2);
-  border-bottom: 1px solid var(--jp-border-color1);
-  box-shadow: var(--jp-toolbar-box-shadow);
+  padding: 8px 8px 0px 8px;
+  background-color: var(--jp-layout-color1);
   z-index: 2;
   flex: 0 0 auto;
 }
@@ -95,7 +86,7 @@
   height: 32px;
   width: 12px;
   padding: 0px 12px;
-  background-image: var(--jp-icon-search);
+  background-image: var(--jp-icon-search-white);
   background-size: 20px;
   background-repeat: no-repeat;
   background-position: center;
@@ -132,6 +123,16 @@
 .jp-extensionmanager-view header {
   display: flex;
   justify-content: space-between;
+  flex: 0 0 auto;
+  margin: 0px;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  line-height: 24px;
+  height: 24px;
 }
 
 .jp-extensionmanager-view header button.jp-extensionmanager-refresh {
@@ -198,7 +199,7 @@
   width: 1em;
   display: none;
   position: relative;
-  top: 3px;
+  top: 1px;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
@@ -224,8 +225,24 @@
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   padding: 0 8px 0 0;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
+
+.jp-extensionmanager-entry-name a:link {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:visited {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 .jp-extensionmanager-entry-description {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color2);

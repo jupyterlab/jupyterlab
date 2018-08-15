@@ -49,14 +49,15 @@ const plugin: JupyterLabPlugin<void> = {
     const createView = () => {
       const v = new ExtensionView(serviceManager);
       v.id = 'extensionmanager.main-view';
-      v.title.label = 'Extensions';
+      v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
+      v.title.caption = 'Extension Manager';
       restorer.add(v, v.id);
       return v;
     };
 
     if (enabled) {
       view = createView();
-      shell.addToLeftArea(view);
+      shell.addToLeftArea(view, { rank: 1000 });
     }
 
     // If the extension is enabled or disabled,

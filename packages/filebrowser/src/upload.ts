@@ -6,31 +6,6 @@ import { ToolbarButton, showErrorMessage } from '@jupyterlab/apputils';
 import { FileBrowserModel } from './model';
 
 /**
- * The class name added to a button content node.
- */
-const CONTENT_CLASS = 'jp-FileButtons-buttonContent';
-
-/**
- * The class name added to a button icon node.
- */
-const ICON_CLASS = 'jp-FileButtons-buttonIcon';
-
-/**
- * The class name added to the upload button.
- */
-const MATERIAL_UPLOAD = 'jp-UploadIcon';
-
-/**
- * The class name added to a material icon button.
- */
-const MATERIAL_CLASS = 'jp-MaterialIcon';
-
-/**
- * The class name added to the upload button.
- */
-const UPLOAD_CLASS = 'jp-id-upload';
-
-/**
  * A widget which provides an upload button.
  */
 export class Uploader extends ToolbarButton {
@@ -39,35 +14,31 @@ export class Uploader extends ToolbarButton {
    */
   constructor(options: Uploader.IOptions) {
     super({
-      className: UPLOAD_CLASS,
+      iconClassName: 'jp-FileUploadIcon jp-Icon jp-Icon-16',
       onClick: () => {
         this._input.click();
       },
       tooltip: 'Upload Files'
     });
-    let uploadContent = document.createElement('span');
-    let uploadIcon = document.createElement('span');
-    uploadContent.className = CONTENT_CLASS;
-    uploadIcon.className =
-      ICON_CLASS + ' ' + MATERIAL_CLASS + ' ' + MATERIAL_UPLOAD;
-    uploadContent.appendChild(uploadIcon);
-    this.node.appendChild(uploadContent);
-    this.model = options.model;
+    this.fileBrowserModel = options.model;
     this._input.onclick = this._onInputClicked;
     this._input.onchange = this._onInputChanged;
+    this.addClass('jp-id-upload');
   }
 
   /**
-   * The underlying file browser model for the widget.
+   * The underlying file browser fileBrowserModel for the widget.
+   *
+   * This cannot be named model as that conflicts with the model property of VDomRenderer.
    */
-  readonly model: FileBrowserModel;
+  readonly fileBrowserModel: FileBrowserModel;
 
   /**
    * The 'change' handler for the input field.
    */
   private _onInputChanged = () => {
     let files = Array.prototype.slice.call(this._input.files) as File[];
-    let pending = files.map(file => this.model.upload(file));
+    let pending = files.map(file => this.fileBrowserModel.upload(file));
     Promise.all(pending).catch(error => {
       showErrorMessage('Upload Error', error);
     });
@@ -94,7 +65,7 @@ export namespace Uploader {
    */
   export interface IOptions {
     /**
-     * A file browser model instance.
+     * A file browser fileBrowserModel instance.
      */
     model: FileBrowserModel;
   }

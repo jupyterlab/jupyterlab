@@ -88,7 +88,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    className: 'jp-AddIcon',
+    iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
     onClick: () => {
       docManager
         .newUntitled({
@@ -100,7 +100,6 @@ function createApp(manager: ServiceManager.IManager): void {
         });
     }
   });
-  creator.addClass('jp-MaterialIcon');
   fbWidget.toolbar.insertItem(0, 'create', creator);
 
   let panel = new SplitPanel();
