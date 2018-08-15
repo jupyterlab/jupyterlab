@@ -25,7 +25,8 @@ import {
   createNotebookContext,
   signalToPromise,
   sleep,
-  NBTestUtils
+  NBTestUtils,
+  framePromise
 } from '@jupyterlab/testutils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
@@ -53,64 +54,92 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createSaveButton(panel);
         Widget.attach(button, document.body);
         let promise = signalToPromise(context.fileChanged);
-        button.node.click();
+        await framePromise();
+        (button.node.firstChild as HTMLElement).click();
         await promise;
         button.dispose();
       });
 
-      it("should have the `'jp-SaveIcon'` class", () => {
+      it("should have the `'jp-SaveIcon'` class", async () => {
         const button = ToolbarItems.createSaveButton(panel);
-        expect(button.hasClass('jp-SaveIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-SaveIcon'
+          )
+        ).to.equal(true);
       });
     });
 
     describe('#createInsertButton()', () => {
-      it('should insert below when clicked', () => {
+      it('should insert below when clicked', async () => {
         const button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
-        button.node.click();
+        await framePromise();
+        (button.node.firstChild as HTMLElement).click();
         expect(panel.content.activeCellIndex).to.equal(1);
         expect(panel.content.activeCell).to.be.an.instanceof(CodeCell);
         button.dispose();
       });
 
-      it("should have the `'jp-AddIcon'` class", () => {
+      it("should have the `'jp-AddIcon'` class", async () => {
         const button = ToolbarItems.createInsertButton(panel);
-        expect(button.hasClass('jp-AddIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-AddIcon'
+          )
+        ).to.equal(true);
       });
     });
 
     describe('#createCutButton()', () => {
-      it('should cut when clicked', () => {
+      it('should cut when clicked', async () => {
         const button = ToolbarItems.createCutButton(panel);
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
-        button.node.click();
+        await framePromise();
+        (button.node.firstChild as HTMLElement).click();
         expect(panel.content.widgets.length).to.equal(count - 1);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
       });
 
-      it("should have the `'jp-CutIcon'` class", () => {
+      it("should have the `'jp-CutIcon'` class", async () => {
         const button = ToolbarItems.createCutButton(panel);
-        expect(button.hasClass('jp-CutIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-CutIcon'
+          )
+        ).to.equal(true);
       });
     });
 
     describe('#createCopyButton()', () => {
-      it('should copy when clicked', () => {
+      it('should copy when clicked', async () => {
         const button = ToolbarItems.createCopyButton(panel);
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
-        button.node.click();
+        await framePromise();
+        (button.node.firstChild as HTMLElement).click();
         expect(panel.content.widgets.length).to.equal(count);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
       });
 
-      it("should have the `'jp-CopyIcon'` class", () => {
+      it("should have the `'jp-CopyIcon'` class", async () => {
         const button = ToolbarItems.createCopyButton(panel);
-        expect(button.hasClass('jp-CopyIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-CopyIcon'
+          )
+        ).to.equal(true);
       });
     });
 
@@ -119,16 +148,23 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createPasteButton(panel);
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
+        await framePromise();
         NotebookActions.copy(panel.content);
-        button.node.click();
+        (button.node.firstChild as HTMLElement).click();
         await sleep();
         expect(panel.content.widgets.length).to.equal(count + 1);
         button.dispose();
       });
 
-      it("should have the `'jp-PasteIcon'` class", () => {
+      it("should have the `'jp-PasteIcon'` class", async () => {
         const button = ToolbarItems.createPasteButton(panel);
-        expect(button.hasClass('jp-PasteIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-PasteIcon'
+          )
+        ).to.equal(true);
       });
     });
 
@@ -159,13 +195,20 @@ describe('@jupyterlab/notebook', () => {
             p.resolve(0);
           }
         });
-        button.node.click();
+        await framePromise();
+        (button.node.firstChild as HTMLElement).click();
         await p.promise;
       });
 
-      it("should have the `'jp-RunIcon'` class", () => {
+      it("should have the `'jp-RunIcon'` class", async () => {
         const button = ToolbarItems.createRunButton(panel);
-        expect(button.hasClass('jp-RunIcon')).to.equal(true);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-RunIcon'
+          )
+        ).to.equal(true);
       });
     });
 
