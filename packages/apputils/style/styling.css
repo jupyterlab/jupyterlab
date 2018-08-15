@@ -21,10 +21,6 @@ button.jp-mod-styled {
   -moz-appearance: none;
 }
 
-button.jp-mod-styled:focus {
-  background: var(--jp-layout-color2);
-}
-
 input.jp-mod-styled {
   background: var(--jp-input-background);
   height: 28px;
