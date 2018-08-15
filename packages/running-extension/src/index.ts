@@ -75,6 +75,7 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
   let node = running.node;
   node.addEventListener('contextmenu', (event: MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     const menu = createContextMenu(commands);
     menu.open(event.clientX, event.clientY);
   });

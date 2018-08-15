@@ -159,6 +159,7 @@ function activateFactory(
     let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
+      event.stopPropagation();
       const model = widget.modelForClick(event);
       const menu = createContextMenu(model, commands, registry);
       menu.open(event.clientX, event.clientY);
@@ -167,6 +168,7 @@ function activateFactory(
     node = widget.node.getElementsByClassName('jp-FileBrowser-toolbar')[0];
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
+      event.stopPropagation();
       const model = widget.modelForClick(event);
       const menu = createToolbarContextMenu(model, commands, registry);
       menu.open(event.clientX, event.clientY);
@@ -175,6 +177,7 @@ function activateFactory(
     node = widget.node.getElementsByClassName('jp-FileBrowser-crumbs')[0];
     node.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
+      event.stopPropagation();
       const model = widget.modelForClick(event);
       const menu = createToolbarContextMenu(model, commands, registry);
       menu.open(event.clientX, event.clientY);

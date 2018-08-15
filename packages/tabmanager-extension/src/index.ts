@@ -65,6 +65,7 @@ const plugin: JupyterLabPlugin<void> = {
       let node = tabs.node.getElementsByClassName('p-TabBar-content')[0];
       node.addEventListener('contextmenu', (event: MouseEvent) => {
         event.preventDefault();
+        event.stopPropagation();
         const menu = createContextMenu(commands);
         menu.open(event.clientX, event.clientY);
       });
