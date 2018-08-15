@@ -134,7 +134,7 @@ setup_args['install_requires'] = [
     'jupyterlab_launcher>=0.11.2,<0.12.0',
     'ipython_genutils',
     'futures;python_version<"3.0"',
-    'subprocess32;python_version<"3.0"'
+    'subprocess32>=3.5;python_version<"3.0"'
 ]
 
 setup_args['extras_require'] = {
