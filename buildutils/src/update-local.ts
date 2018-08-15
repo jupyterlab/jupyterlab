@@ -1,0 +1,39 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+import * as path from 'path';
+import * as utils from './utils';
+import packageJson = require('package-json');
+
+// Ensure the repo is in a stable state.
+// utils.run('jlpm run clean:slate');
+// utils.run('jlpm run build:packages');
+// utils.run('jlpm run build:themes');
+
+console.log('Looking for outdated local package versions...');
+utils.getLernaPaths().forEach(async (pkgPath) => {
+  const packagePath = path.join(pkgPath, 'package.json');
+  let data: any;
+  try {
+    data = utils.readJSONFile(packagePath);
+  } catch (e) {
+    console.log('Skipping package ' + packagePath);
+    return;
+  }
+  if (data.private === true) {
+    return;
+  }
+  const releaseData = await packageJson(data.name);
+  const version = releaseData.version;
+  if (data.version === version) {
+    return;
+  }
+  data.version = version;
+  console.log('Updating', data.name, 'to', version);
+  // Write the file back to disk.
+  utils.writePackageData(packagePath, data);
+});
+
+utils.run('jlpm integrity');
