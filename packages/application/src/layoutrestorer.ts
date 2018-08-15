@@ -356,8 +356,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       return null;
     }
     let dehydrated: Private.ISideArea = {
-      collapsed: area.collapsed,
-      userMovedWidgets: area.userMovedWidgets
+      collapsed: area.collapsed
     };
     if (area.currentWidget) {
       let current = Private.nameProperty.get(area.currentWidget);
@@ -387,8 +386,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       return {
         collapsed: true,
         currentWidget: null,
-        widgets: null,
-        userMovedWidgets: null
+        widgets: null
       };
     }
     let internal = this._widgets;
@@ -409,8 +407,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     return {
       collapsed,
       currentWidget: currentWidget!,
-      widgets: widgets as Widget[] | null,
-      userMovedWidgets: area.userMovedWidgets
+      widgets: widgets as Widget[] | null
     };
   }
 
