@@ -24,6 +24,7 @@ import {
 } from '@phosphor/widgets';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /**
  * The class name added to AppShell instances.
@@ -464,6 +465,56 @@ export class ApplicationShell extends Widget {
     this._onLayoutModified();
   }
 
+  moveWidgetToRightArea(id: string) {
+    if (this._leftHandler.has(id)) {
+      let item = this._leftHandler.retrieveItemBy(id);
+      this._rightHandler.addWidget(item.widget, item.rank);
+      if (this._rightHandler.userMovedWidgets) {
+        let index = this._rightHandler.userMovedWidgets.indexOf(id);
+        if (index > -1) {
+          this._rightHandler.removeMovedWidgets(
+            'right',
+            this._appExtSettings,
+            index
+          );
+        }
+      }
+      this._leftHandler.addMovedWidgets('left', this._appExtSettings, id);
+      this._rightHandler.activate(id);
+    }
+  }
+
+  moveWidgetToLeftArea(id: string) {
+    if (this._rightHandler.has(id)) {
+      let item = this._rightHandler.retrieveItemBy(id);
+      this._leftHandler.addWidget(item.widget, item.rank);
+      if (this._leftHandler.userMovedWidgets) {
+        let index = this._leftHandler.userMovedWidgets.indexOf(id);
+        if (index > -1) {
+          this._leftHandler.removeMovedWidgets(
+            'left',
+            this._appExtSettings,
+            index
+          );
+        }
+      }
+      this._rightHandler.addMovedWidgets('right', this._appExtSettings, id);
+      this._leftHandler.activate(id);
+    }
+  }
+
+  moveLeftActiveToRightArea() {
+    if (this._leftHandler.current) {
+      this.moveWidgetToRightArea(this._leftHandler.current.id);
+    }
+  }
+
+  moveRightActiveToLeftArea() {
+    if (this._rightHandler.current) {
+      this.moveWidgetToLeftArea(this._rightHandler.current.id);
+    }
+  }
+
   /**
    * Add a widget to the top content area.
    *
@@ -614,6 +665,26 @@ export class ApplicationShell extends Widget {
       // application state has been restored.
       MessageLoop.flush();
       this._restored.resolve(layout);
+    }
+  }
+
+  set leftUserMovedWidgets(userMovedWidgets: string[]) {
+    this._leftHandler.userMovedWidgets = userMovedWidgets;
+    let widgetsToMove = this._leftHandler.userMovedWidgets;
+    if (widgetsToMove) {
+      for (let i = 0; i < widgetsToMove.length; i++) {
+        this.moveWidgetToRightArea(widgetsToMove[i]);
+      }
+    }
+  }
+
+  set rightUserMovedWidgets(userMovedWidgets: string[]) {
+    this._rightHandler.userMovedWidgets = userMovedWidgets;
+    let widgetsToMove = this._rightHandler.userMovedWidgets;
+    if (widgetsToMove) {
+      for (let i = 0; i < widgetsToMove.length; i++) {
+        this.moveWidgetToLeftArea(widgetsToMove[i]);
+      }
     }
   }
 
@@ -778,6 +849,11 @@ export class ApplicationShell extends Widget {
     return true;
   };
 
+  set appExtSettings(settings: ISettingRegistry) {
+    this._appExtSettings = settings;
+  }
+
+  private _appExtSettings: ISettingRegistry = null;
   private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(
     this
   );
@@ -979,6 +1055,10 @@ namespace Private {
       this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
     }
 
+    get current() {
+      return this._current;
+    }
+
     /**
      * Get the tab bar managed by the handler.
      */
@@ -991,6 +1071,46 @@ namespace Private {
      */
     get stackedPanel(): StackedPanel {
       return this._stackedPanel;
+    }
+
+    addMovedWidgets(side: string, settings: ISettingRegistry, id: string) {
+      const pluginId = '@jupyterlab/application-extension:main';
+      const key = side + 'UserMovedWidgets';
+      if (this._userMovedWidgets) {
+        if (this._userMovedWidgets.indexOf(id) === -1) {
+          this._userMovedWidgets.push(id);
+        }
+      } else {
+        this._userMovedWidgets = [id];
+      }
+      settings
+        .set(pluginId, key, this._userMovedWidgets)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        });
+    }
+
+    removeMovedWidgets(
+      side: string,
+      settings: ISettingRegistry,
+      index: number
+    ) {
+      const pluginId = '@jupyterlab/application-extension:main';
+      const key = side + 'UserMovedWidgets';
+      this._userMovedWidgets.splice(index, 1);
+      settings
+        .set(pluginId, key, this._userMovedWidgets)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        });
+    }
+
+    set userMovedWidgets(userMovedWidgets: string[]) {
+      this._userMovedWidgets = userMovedWidgets;
+    }
+
+    get userMovedWidgets() {
+      return this._userMovedWidgets;
     }
 
     /**
@@ -1033,6 +1153,11 @@ namespace Private {
      */
     collapse(): void {
       this._sideBar.currentTitle = null;
+    }
+
+    retrieveItemBy(id: string) {
+      let item = find(this._items, value => value.widget.id === id);
+      return item ? item : null;
     }
 
     /**
@@ -1130,6 +1255,7 @@ namespace Private {
         newWidget.show();
       }
       this._lastCurrent = newWidget || oldWidget;
+      this._current = newWidget;
       if (newWidget) {
         const id = newWidget.id;
         document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
@@ -1162,9 +1288,11 @@ namespace Private {
     }
 
     private _items = new Array<Private.IRankItem>();
+    private _userMovedWidgets: string[];
     private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
+    private _current: Widget | null;
   }
 }

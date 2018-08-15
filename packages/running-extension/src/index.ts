@@ -7,7 +7,20 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
+import { CommandRegistry } from '@phosphor/commands';
+
+import { Menu } from '@phosphor/widgets';
+
+namespace CommandIDs {
+  export const moveToRightSidebar = 'running:move-to-right-area';
+
+  export const moveToLeftSidebar = 'running:move-to-left-area';
+}
+
 import { RunningSessions } from '@jupyterlab/running';
+// import { CommandRegistry } from '@phosphor/commands';
+
+// import { Menu } from '@phosphor/widgets';
 
 /**
  * The default running sessions extension.
@@ -18,6 +31,12 @@ const plugin: JupyterLabPlugin<void> = {
   requires: [ILayoutRestorer],
   autoStart: true
 };
+
+// namespace CommandIDs {
+//   export const moveToRightSidebar = 'running:move-to-right-area';
+
+//   export const moveToLeftSidebar = 'running:move-to-left-area';
+// }
 
 /**
  * Export the plugin as default.
@@ -50,7 +69,44 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
     app.commands.execute('terminal:open', { name: model.name });
   });
 
+  addCommands(app);
+  const { commands } = app;
+
+  let node = running.node;
+  node.addEventListener('contextmenu', (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const menu = createContextMenu(commands);
+    menu.open(event.clientX, event.clientY);
+  });
+
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.addToLeftArea(running, { rank: 200 });
+}
+
+function addCommands(app: JupyterLab): void {
+  const { commands } = app;
+
+  commands.addCommand(CommandIDs.moveToRightSidebar, {
+    label: 'Move Running to Left Sidebar',
+    execute: args => {
+      app.shell.moveRightActiveToLeftArea();
+    }
+  });
+
+  commands.addCommand(CommandIDs.moveToLeftSidebar, {
+    label: 'Move Running to Right Sidebar',
+    execute: () => {
+      app.shell.moveLeftActiveToRightArea();
+    }
+  });
+}
+
+function createContextMenu(commands: CommandRegistry): Menu {
+  const menu = new Menu({ commands });
+  menu.addItem({ command: CommandIDs.moveToRightSidebar });
+  menu.addItem({ command: CommandIDs.moveToLeftSidebar });
+
+  return menu;
 }

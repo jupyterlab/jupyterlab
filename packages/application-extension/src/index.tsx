@@ -18,7 +18,13 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import {
+  IStateDB,
+  PageConfig,
+  ISettingRegistry,
+  PathExt,
+  URLExt
+} from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 
@@ -45,6 +51,10 @@ namespace CommandIDs {
     'application:toggle-presentation-mode';
 
   export const tree: string = 'router:tree';
+
+  export const moveToRightSidebar = 'application:move-to-right-area';
+
+  export const moveToLeftSidebar = 'application:move-to-left-area';
 }
 
 /**
@@ -60,17 +70,20 @@ namespace Patterns {
   );
 }
 
+const pluginId = '@jupyterlab/application-extension:main';
+
 /**
  * The main extension.
  */
 const main: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, IWindowResolver],
+  id: pluginId,
+  requires: [ICommandPalette, IRouter, IWindowResolver, ISettingRegistry],
   activate: (
     app: JupyterLab,
     palette: ICommandPalette,
     router: IRouter,
-    resolver: IWindowResolver
+    resolver: IWindowResolver,
+    settingRegistry: ISettingRegistry
   ) => {
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
@@ -89,6 +102,26 @@ const main: JupyterLabPlugin<void> = {
     }
 
     addCommands(app, palette);
+
+    app.shell.appExtSettings = settingRegistry;
+
+    const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+      const leftUserMovedWidgets = settings.get('leftUserMovedWidgets')
+        .composite as string[] | null;
+      app.shell.leftUserMovedWidgets = leftUserMovedWidgets;
+      const rightUserMovedWidgets = settings.get('rightUserMovedWidgets')
+        .composite as string[] | null;
+      app.shell.rightUserMovedWidgets = rightUserMovedWidgets;
+    };
+
+    Promise.all([settingRegistry.load(pluginId), app.restored])
+      .then(([settings]) => {
+        settings.changed.connect(onSettingsUpdated);
+        onSettingsUpdated(settings);
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -386,6 +419,24 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     },
     isToggled: () => !app.shell.rightCollapsed,
     isVisible: () => !app.shell.isEmpty('right')
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.moveToLeftSidebar;
+  app.commands.addCommand(command, {
+    label: 'Move Active Widget to Right Sidebar',
+    execute: () => {
+      app.shell.moveLeftActiveToRightArea();
+    }
+  });
+  palette.addItem({ command, category });
+
+  command = CommandIDs.moveToRightSidebar;
+  app.commands.addCommand(command, {
+    label: 'Move Active Widget to Left Sidebar',
+    execute: args => {
+      app.shell.moveRightActiveToLeftArea();
+    }
   });
   palette.addItem({ command, category });
 

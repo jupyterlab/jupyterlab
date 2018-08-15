@@ -1,0 +1,24 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "JupyterLab",
+  "title": "JupyterLab",
+  "description": "JupyterLab settings.",
+  "properties": {
+    "leftUserMovedWidgets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "title": "Widgets Moved to Right by User",
+      "description": "Widgets Moved to Right by User",
+      "default": []
+    },
+    "rightUserMovedWidgets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "title": "Widgets Moved to Left by User",
+      "description": "Widgets Moved to Left by User",
+      "default": []
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

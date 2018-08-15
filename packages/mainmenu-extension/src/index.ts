@@ -486,6 +486,14 @@ export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
     ],
     1000
   );
+
+  menu.addGroup(
+    [
+      { command: 'application:move-to-right-area' },
+      { command: 'application:move-to-left-area' }
+    ],
+    10000
+  );
 }
 
 export function createRunMenu(app: JupyterLab, menu: RunMenu): void {

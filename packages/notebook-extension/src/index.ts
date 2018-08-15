@@ -194,6 +194,10 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const saveWithView = 'notebook:save-with-view';
+
+  export const moveToRightSidebar = 'notebook:move-to-right-area';
+
+  export const moveToLeftSidebar = 'notebook:move-to-left-area';
 }
 
 /**
@@ -317,7 +321,7 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools);
+      app.shell.addToRightArea(celltools);
       if (open) {
         app.shell.activateById(celltools.id);
       }
@@ -329,7 +333,7 @@ function activateCellTools(
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools);
+          app.shell.addToRightArea(celltools);
         }
         return;
       }
@@ -643,6 +647,28 @@ function activateNotebookHandler(
     command: CommandIDs.createConsole,
     selector: '.jp-Notebook',
     rank: 9
+  });
+
+  // Sidebar Context Menu Group
+  app.contextMenu.addItem({
+    command: CommandIDs.moveToLeftSidebar,
+    selector: '#jp-left-stack',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.moveToLeftSidebar,
+    selector: '#jp-right-stack',
+    rank: 0
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.moveToRightSidebar,
+    selector: '#jp-left-stack',
+    rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.moveToRightSidebar,
+    selector: '#jp-right-stack',
+    rank: 1
   });
 
   return tracker;
@@ -1559,6 +1585,18 @@ function addCommands(
       }
     },
     isEnabled
+  });
+  commands.addCommand(CommandIDs.moveToRightSidebar, {
+    label: 'Move Cell Tools to Left Sidebar',
+    execute: args => {
+      app.shell.moveRightActiveToLeftArea();
+    }
+  });
+  commands.addCommand(CommandIDs.moveToLeftSidebar, {
+    label: 'Move Cell Tools to Right Sidebar',
+    execute: () => {
+      app.shell.moveLeftActiveToRightArea();
+    }
   });
 }
 

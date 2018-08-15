@@ -77,6 +77,10 @@ namespace CommandIDs {
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
 
   export const markdownPreview = 'markdownviewer:open';
+
+  export const moveToRightSidebar = 'docmanager:move-to-right-area';
+
+  export const moveToLeftSidebar = 'docmanager:move-to-left-area';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
