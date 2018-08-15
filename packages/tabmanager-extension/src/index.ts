@@ -29,7 +29,7 @@ const plugin: JupyterLabPlugin<void> = {
     tabs.title.caption = 'Open Tabs';
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
-    shell.addToRightArea(tabs, { rank: 600 });
+    shell.addToLeftArea(tabs, { rank: 600 });
 
     app.restored.then(() => {
       const populate = () => {
