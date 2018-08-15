@@ -490,11 +490,11 @@ namespace Private {
     if (!commands.isVisible(id)) {
       className += ' p-mod-hidden';
     }
-    const tooltip = commands.caption(id);
+    const tooltip = commands.caption(id) || label || iconLabel;
     const onClick = () => {
       commands.execute(id);
     };
-    return { className, label, iconClassName, iconLabel, tooltip, onClick };
+    return { className, iconClassName, tooltip, onClick };
   }
 
   /**
