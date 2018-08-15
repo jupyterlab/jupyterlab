@@ -17,7 +17,7 @@ import * as utils from './utils';
  *
  * @returns A list of changes that were made to ensure the package.
  */
-export function ensurePackage(options: IEnsurePackageOptions): string[] {
+export async function ensurePackage(options: IEnsurePackageOptions): Promise<string[]> {
   let { data, pkgPath } = options;
   let deps: { [key: string]: string } = data.dependencies || {};
   let devDeps: { [key: string]: string } = data.devDependencies || {};
@@ -27,9 +27,9 @@ export function ensurePackage(options: IEnsurePackageOptions): string[] {
   let messages: string[] = [];
 
   // Verify dependencies are consistent.
-  Object.keys(deps).forEach(name => {
+  let promises = Object.keys(deps).map(async (name) => {
     if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency(name);
+      seenDeps[name] = await getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
       messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
@@ -37,16 +37,20 @@ export function ensurePackage(options: IEnsurePackageOptions): string[] {
     deps[name] = seenDeps[name];
   });
 
+  await Promise.all(promises);
+
   // Verify devDependencies are consistent.
-  Object.keys(devDeps).forEach(name => {
+  promises = Object.keys(devDeps).map(async (name) => {
     if (!(name in seenDeps)) {
-      seenDeps[name] = getDependency(name);
+      seenDeps[name] = await getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
       messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
     }
     devDeps[name] = seenDeps[name];
   });
+
+  await Promise.all(promises)
 
   // For TypeScript files, verify imports match dependencies.
   let filenames: string[] = [];
@@ -82,7 +86,7 @@ export function ensurePackage(options: IEnsurePackageOptions): string[] {
   });
 
   // Look for imports with no dependencies.
-  names.forEach(name => {
+  promises = names.map(async (name) => {
     if (missing.indexOf(name) !== -1) {
       return;
     }
@@ -91,12 +95,14 @@ export function ensurePackage(options: IEnsurePackageOptions): string[] {
     }
     if (!deps[name]) {
       if (!(name in seenDeps)) {
-        seenDeps[name] = getDependency(name);
+        seenDeps[name] = await getDependency(name);
       }
       deps[name] = seenDeps[name];
       messages.push(`Added dependency: ${name}@${seenDeps[name]}`);
     }
   });
+
+  await Promise.all(promises);
 
   // Look for unused packages
   Object.keys(deps).forEach(name => {

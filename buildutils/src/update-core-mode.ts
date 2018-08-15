@@ -7,10 +7,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
-// Ensure the repo is in a stable state.
-utils.run('jlpm run build:utils');
-utils.run('jlpm integrity');
-
 // Get the dev mode package.json file.
 let data = utils.readJSONFile('./dev_mode/package.json');
 

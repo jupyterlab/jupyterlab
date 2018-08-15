@@ -7,11 +7,6 @@ import * as path from 'path';
 import * as utils from './utils';
 import packageJson = require('package-json');
 
-// Ensure the repo is in a stable state.
-utils.run('jlpm run clean:slate');
-utils.run('jlpm run build:packages');
-utils.run('jlpm run build:themes');
-
 
 console.log('Looking for outdated local package versions...');
 let promises = utils.getLernaPaths().map(async (pkgPath) => {

@@ -11,7 +11,6 @@
  * Ensure a consistent version of all packages.
  * Manage the metapackage meta package.
  */
-import * as childProcess from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
@@ -106,13 +105,14 @@ function ensureMetaPackage(): string[] {
   return messages;
 }
 
+
 /**
  * Ensure the jupyterlab application package.
  */
 function ensureJupyterlab(): string[] {
   // Get the current version of JupyterLab
   let cmd = 'python setup.py --version';
-  let version = String(childProcess.execSync(cmd)).trim();
+  let version = utils.run(cmd);
 
   let basePath = path.resolve('.');
   let corePath = path.join(basePath, 'dev_mode', 'package.json');
@@ -183,7 +183,7 @@ function ensureJupyterlab(): string[] {
 /**
  * Ensure the repo integrity.
  */
-export function ensureIntegrity(): boolean {
+export async function ensureIntegrity(): Promise<boolean> {
   let messages: { [key: string]: string[] } = {};
 
   // Pick up all the package versions.
@@ -218,7 +218,7 @@ export function ensureIntegrity(): boolean {
       missing: MISSING[name],
       unused: UNUSED[name]
     };
-    let pkgMessages = ensurePackage(options);
+    let pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }

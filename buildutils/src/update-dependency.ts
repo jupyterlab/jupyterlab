@@ -4,8 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import * as childProcess from 'child_process';
 import * as utils from './utils';
+import packageJson = require('package-json');
 
 // Make sure we have required command line arguments.
 if (process.argv.length !== 3) {
@@ -20,24 +20,28 @@ parts[0] = process.argv[2][0] + parts[0];
 
 // Translate @latest to a concrete version.
 if (parts.length === 1 || parts[1] === 'latest') {
-  let cmd = 'npm view ' + parts[0] + ' version';
-  let version = String(childProcess.execSync(cmd)).trim();
-  parts = [parts[0], `~${version}`];
+  packageJson(parts[0]).then(data => {
+    handlePackages(data.name, `~${data.version}`);
+  });
+} else {
+  handlePackages(parts[0], parts[1]);
 }
-let name = parts[0];
-let specifier = parts[1];
+
 
 // Handle the packages
-utils.getLernaPaths().forEach(pkgPath => {
-  handlePackage(pkgPath);
-});
-handlePackage(path.resolve('.'));
-utils.run('yarn');
+function handlePackages(name: string, specifier: string) {
+  utils.getLernaPaths().forEach(pkgPath => {
+    handlePackage(name, specifier, pkgPath);
+  });
+  handlePackage(name, specifier, path.resolve('.'));
+  utils.run('yarn');
+}
+
 
 /**
  * Handle an individual package on the path - update the dependency.
  */
-function handlePackage(packagePath: string): void {
+function handlePackage(name: string, specifier: string, packagePath: string): void {
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
   let data: any;
