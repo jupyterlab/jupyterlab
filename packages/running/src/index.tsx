@@ -192,15 +192,14 @@ function Section<M>(props: SessionProps<M>) {
     <div className={SECTION_CLASS}>
       {props.available && (
         <>
-          <div className={SECTION_HEADER_CLASS}>
+          <header className={SECTION_HEADER_CLASS}>
             <h2>{props.name} Sessions</h2>
-            <div className="jp-RunningSessions-sectionHeader-spacer" />
             <ToolbarButtonComponent
               tooltip={`Shutdown All ${props.name} Sessions…`}
               iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
               onClick={onShutdown}
             />
-          </div>
+          </header>
 
           <div className={CONTAINER_CLASS}>
             <List {...props} />

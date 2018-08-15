@@ -63,9 +63,11 @@
 
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
+  align-items: center;
   height: 28px;
   display: flex;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  margin-top: 8px;
 }
 
 .jp-RunningSessions-sectionHeader h2 {
@@ -74,17 +76,13 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size0);
-  padding: 8px 12px;
+  padding: 8px 8px 8px 12px;
+  margin: 0px;
 }
 
-.jp-RunningSessions-sectionHeader .jp-RunningSessions-sectionHeader-spacer {
-  flex-grow: 1;
-  flex-shrink: 1;
-}
 
 .jp-RunningSessions-sectionHeader .jp-ToolbarButtonComponent {
   flex: 0 0 auto;
-  padding: 0px 16px;
 }
 
 .jp-RunningSessions-sectionContainer {
