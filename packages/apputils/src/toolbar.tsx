@@ -333,7 +333,7 @@ export namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export function createKernelNameItem(session: IClientSession): ToolbarButton {
-    return new Private.KernelName(session);
+    return new Private.KernelName({ session });
   }
 
   /**
@@ -526,30 +526,61 @@ namespace Private {
   }
 
   /**
-   * A kernel name widget.
+   * Namespace for KernelNameComponent.
    */
-  export class KernelName extends ToolbarButton {
+  export namespace KernelNameComponent {
     /**
-     * Construct a new kernel name widget.
+     * Interface for KernelNameComponent props.
      */
-    constructor(session: IClientSession) {
-      super({
+    export interface IProps {
+      session: IClientSession;
+    }
+  }
+
+  /**
+   * React component for a kernel name button.
+   *
+   * This wraps the ToolbarButtonComponent and watches the kernel
+   * session for changes.
+   */
+  export class KernelNameComponent extends React.Component<
+    KernelNameComponent.IProps
+  > {
+    constructor(props: KernelNameComponent.IProps) {
+      super(props);
+      props.session.kernelChanged.connect(this._onKernelChanged, this);
+      this._childProps = {
         className: TOOLBAR_KERNEL_NAME_CLASS,
         onClick: () => {
-          session.selectKernel();
+          this.props.session.selectKernel();
         },
         tooltip: 'Switch kernel',
-        label: session.kernelDisplayName
-      });
-      this._onKernelChanged(session);
-      session.kernelChanged.connect(this._onKernelChanged, this);
+        label: props.session.kernelDisplayName
+      };
+    }
+
+    public render() {
+      return <ToolbarButtonComponent {...this._childProps} />;
     }
 
     /**
      * Update the text of the kernel name item.
      */
     private _onKernelChanged(session: IClientSession): void {
-      this.node.textContent = session.kernelDisplayName;
+      this._childProps.label = session.kernelDisplayName;
+      this.forceUpdate();
+    }
+
+    private _childProps: ToolbarButtonComponent.IProps;
+  }
+
+  /**
+   * Phosphor Widget version of ToolbarButtonComponent.
+   */
+  export class KernelName extends ReactElementWidget {
+    constructor(props: KernelNameComponent.IProps) {
+      super(<KernelNameComponent {...props} />);
+      this.addClass('jp-KernelName');
     }
   }
 

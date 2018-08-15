@@ -30,15 +30,6 @@
   flex-shrink: 1;
 }
 
-.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-kernelName {
-  width: auto;
-  text-transform: none; /* kernel names can benefit from visible case */
-  letter-spacing: normal;
-  text-align: left;
-  font-size: var(--jp-ui-font-size1);
-  line-height: 22px;
-}
-
 .jp-Toolbar-item.jp-Toolbar-kernelStatus {
   display: inline-block;
   width: 32px;
