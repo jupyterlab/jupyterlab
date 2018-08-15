@@ -7,9 +7,8 @@ import * as path from 'path';
 import * as utils from './utils';
 import packageJson = require('package-json');
 
-
 console.log('Looking for outdated local package versions...');
-utils.getLernaPaths().map(async (pkgPath) => {
+utils.getLernaPaths().map(async pkgPath => {
   const packagePath = path.join(pkgPath, 'package.json');
   let data: any;
   try {

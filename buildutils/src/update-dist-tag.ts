@@ -35,9 +35,7 @@ function handlePackage(packagePath: string): void {
   const pkg = data.name;
 
   cmd = `npm view ${pkg} versions --json`;
-  const versions: string[] = JSON.parse(
-    utils.run(cmd)
-  );
+  const versions: string[] = JSON.parse(utils.run(cmd));
 
   // Find latest stable
   versions.reverse();

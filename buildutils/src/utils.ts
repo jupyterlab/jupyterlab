@@ -68,5 +68,8 @@ export function run(
   options = options || {};
   options['stdio'] = ['ignore', 'pipe', 'pipe'];
   console.log('>', cmd);
-  return childProcess.execSync(cmd, options).toString().replace(/\n$/, '');
+  return childProcess
+    .execSync(cmd, options)
+    .toString()
+    .replace(/\n$/, '');
 }

@@ -27,7 +27,6 @@ if (parts.length === 1 || parts[1] === 'latest') {
   handlePackages(parts[0], parts[1]);
 }
 
-
 // Handle the packages
 function handlePackages(name: string, specifier: string) {
   utils.getLernaPaths().forEach(pkgPath => {
@@ -37,11 +36,14 @@ function handlePackages(name: string, specifier: string) {
   utils.run('yarn');
 }
 
-
 /**
  * Handle an individual package on the path - update the dependency.
  */
-function handlePackage(name: string, specifier: string, packagePath: string): void {
+function handlePackage(
+  name: string,
+  specifier: string,
+  packagePath: string
+): void {
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
   let data: any;

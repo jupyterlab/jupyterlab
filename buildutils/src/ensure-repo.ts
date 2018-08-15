@@ -105,7 +105,6 @@ function ensureMetaPackage(): string[] {
   return messages;
 }
 
-
 /**
  * Ensure the jupyterlab application package.
  */

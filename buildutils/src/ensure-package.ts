@@ -17,7 +17,9 @@ import * as utils from './utils';
  *
  * @returns A list of changes that were made to ensure the package.
  */
-export async function ensurePackage(options: IEnsurePackageOptions): Promise<string[]> {
+export async function ensurePackage(
+  options: IEnsurePackageOptions
+): Promise<string[]> {
   let { data, pkgPath } = options;
   let deps: { [key: string]: string } = data.dependencies || {};
   let devDeps: { [key: string]: string } = data.devDependencies || {};
@@ -27,7 +29,7 @@ export async function ensurePackage(options: IEnsurePackageOptions): Promise<str
   let messages: string[] = [];
 
   // Verify dependencies are consistent.
-  let promises = Object.keys(deps).map(async (name) => {
+  let promises = Object.keys(deps).map(async name => {
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
@@ -40,7 +42,7 @@ export async function ensurePackage(options: IEnsurePackageOptions): Promise<str
   await Promise.all(promises);
 
   // Verify devDependencies are consistent.
-  promises = Object.keys(devDeps).map(async (name) => {
+  promises = Object.keys(devDeps).map(async name => {
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
@@ -50,7 +52,7 @@ export async function ensurePackage(options: IEnsurePackageOptions): Promise<str
     devDeps[name] = seenDeps[name];
   });
 
-  await Promise.all(promises)
+  await Promise.all(promises);
 
   // For TypeScript files, verify imports match dependencies.
   let filenames: string[] = [];
@@ -86,7 +88,7 @@ export async function ensurePackage(options: IEnsurePackageOptions): Promise<str
   });
 
   // Look for imports with no dependencies.
-  promises = names.map(async (name) => {
+  promises = names.map(async name => {
     if (missing.indexOf(name) !== -1) {
       return;
     }
