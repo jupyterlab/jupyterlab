@@ -13,3 +13,5 @@ let branch = utils.run('git rev-parse --abbrev-ref HEAD 2>/dev/null');
 if (branch === 'master') {
   utils.run('jlpm run update:local');
 }
+
+utils.run('jlpm integrity');

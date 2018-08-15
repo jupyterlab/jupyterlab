@@ -31,5 +31,3 @@ let promises = utils.getLernaPaths().map(async (pkgPath) => {
   // Write the file back to disk.
   utils.writePackageData(packagePath, data);
 });
-
-Promise.all(promises).then(() => utils.run('jlpm integrity'));
