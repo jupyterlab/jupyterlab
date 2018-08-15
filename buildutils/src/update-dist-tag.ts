@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import * as childProcess from 'child_process';
 import * as utils from './utils';
 
 // Handle the packages
@@ -36,9 +35,7 @@ function handlePackage(packagePath: string): void {
   const pkg = data.name;
 
   cmd = `npm view ${pkg} versions --json`;
-  const versions: string[] = JSON.parse(
-    String(childProcess.execSync(cmd)).trim()
-  );
+  const versions: string[] = JSON.parse(utils.run(cmd));
 
   // Find latest stable
   versions.reverse();
@@ -55,9 +52,7 @@ function handlePackage(packagePath: string): void {
   }
 
   cmd = `npm dist-tag list ${pkg}`;
-  let tags = String(childProcess.execSync(cmd))
-    .trim()
-    .split('\n');
+  let tags = utils.run(cmd).split('\n');
 
   console.log();
   console.log(pkg, stable, prerelease, tags);

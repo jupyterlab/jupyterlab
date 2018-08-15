@@ -63,10 +63,16 @@ export function readJSONFile(filePath: string): any {
  */
 export function run(
   cmd: string,
-  options: childProcess.ExecSyncOptions = {}
-): void {
+  options: childProcess.ExecSyncOptions = {},
+  quiet?: boolean
+): string {
   options = options || {};
-  options['stdio'] = [0, 1, 2];
-  console.log('>', cmd);
-  childProcess.execSync(cmd, options);
+  options['stdio'] = options.stdio || ['ignore', 'pipe', 'pipe'];
+  if (!quiet) {
+    console.log('>', cmd);
+  }
+  return childProcess
+    .execSync(cmd, options)
+    .toString()
+    .replace(/\n$/, '');
 }

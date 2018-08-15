@@ -36,6 +36,7 @@
     "fs-extra": "~4.0.2",
     "glob": "~7.1.2",
     "inquirer": "~3.3.0",
+    "package-json": "~5.0.0",
     "path": "~0.12.7",
     "sort-package-json": "~1.7.1",
     "typescript": "~2.9.2"
