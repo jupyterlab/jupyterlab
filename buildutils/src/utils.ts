@@ -66,7 +66,7 @@ export function run(
   options: childProcess.ExecSyncOptions = {}
 ): string {
   options = options || {};
-  options['stdio'] = ['ignore', 'pipe', 'pipe'];
+  options['stdio'] = options.stdio || ['ignore', 'pipe', 'pipe'];
   console.log('>', cmd);
   return childProcess
     .execSync(cmd, options)

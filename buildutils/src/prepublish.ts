@@ -10,7 +10,9 @@ utils.run('jlpm run build:themes');
 
 // If we are on the main branch, make sure all of the local packages
 // are up to date with npm.
-let branch = utils.run('git rev-parse --abbrev-ref HEAD 2>/dev/null');
+let branch = utils.run('git rev-parse --abbrev-ref HEAD', {
+  stdio: ['ignore', 'pipe', 'ignore']
+});
 if (branch === 'master') {
   utils.run('jlpm run update:local');
 }
