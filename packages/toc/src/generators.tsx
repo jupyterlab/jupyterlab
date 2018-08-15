@@ -631,6 +631,17 @@ export function createNotebookGenerator(
             const onClickFactory = (line: number) => {
               return () => {
                 cell.node.scrollIntoView();
+                if (tracker && tracker.currentWidget) {
+                  let cells = tracker.currentWidget.model.cells;
+                  for (let i = 0; i < cells.length; i++) {
+                    let currCell = tracker.currentWidget.content.widgets[
+                      i
+                    ] as Cell;
+                    if (cell === currCell) {
+                      tracker.currentWidget.content.activeCellIndex = i;
+                    }
+                  }
+                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -663,6 +674,17 @@ export function createNotebookGenerator(
             const onClickFactory = (el: Element) => {
               return () => {
                 el.scrollIntoView();
+                if (tracker && tracker.currentWidget) {
+                  let cells = tracker.currentWidget.model.cells;
+                  for (let i = 0; i < cells.length; i++) {
+                    let currCell = tracker.currentWidget.content.widgets[
+                      i
+                    ] as Cell;
+                    if (cell === currCell) {
+                      tracker.currentWidget.content.activeCellIndex = i;
+                    }
+                  }
+                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -717,6 +739,17 @@ export function createNotebookGenerator(
                   cell.node.scrollIntoView();
                 } else {
                   el.scrollIntoView();
+                  if (tracker && tracker.currentWidget) {
+                    let cells = tracker.currentWidget.model.cells;
+                    for (let i = 0; i < cells.length; i++) {
+                      let currCell = tracker.currentWidget.content.widgets[
+                        i
+                      ] as Cell;
+                      if (cell === currCell) {
+                        tracker.currentWidget.content.activeCellIndex = i;
+                      }
+                    }
+                  }
                 }
               };
             };
@@ -763,6 +796,17 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
                 if (!(cell as MarkdownCell).rendered) {
                   cell.editor.setCursorPosition({ line, column: 0 });
+                }
+                if (tracker && tracker.currentWidget) {
+                  let cells = tracker.currentWidget.model.cells;
+                  for (let i = 0; i < cells.length; i++) {
+                    let currCell = tracker.currentWidget.content.widgets[
+                      i
+                    ] as Cell;
+                    if (cell === currCell) {
+                      tracker.currentWidget.content.activeCellIndex = i;
+                    }
+                  }
                 }
               };
             };
