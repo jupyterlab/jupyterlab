@@ -3,7 +3,13 @@
 
 import { expect } from 'chai';
 
-import { ClientSession, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import {
+  ClientSession,
+  Toolbar,
+  ToolbarButton,
+  CommandToolbarButton,
+  ToolbarButtonComponent
+} from '@jupyterlab/apputils';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -24,9 +30,14 @@ class LogToolbarButton extends ToolbarButton {
 
   methods: string[] = [];
 
-  handleEvent(event: Event): void {
-    super.handleEvent(event);
-    this.events.push(event.type);
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
+    super({
+      ...props,
+      onClick: () => {
+        props.onClick();
+        this.events.push('click');
+      }
+    });
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -135,32 +146,31 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should create a button', () => {
-        const button = Toolbar.createFromCommand(commands, testLogCommandId);
-        expect(button).to.be.an.instanceof(ToolbarButton);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        expect(button).to.be.an.instanceof(CommandToolbarButton);
         button.dispose();
       });
 
-      it('should dispose the button if the action is removed', () => {
-        const id = 'to-be-removed';
-        const cmd = commands.addCommand(id, {
-          execute: () => {
-            return;
-          }
-        });
-        const button = Toolbar.createFromCommand(commands, id);
-        cmd.dispose();
-        expect(button.isDisposed).to.equal(true);
-      });
-
       it('should add main class', () => {
-        const button = Toolbar.createFromCommand(commands, testLogCommandId);
-        expect(button.hasClass('test-log-class')).to.equal(true);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        expect(
+          (button.node as HTMLElement).classList.contains('test-log-class')
+        ).to.equal(true);
         button.dispose();
       });
 
       it('should add an icon with icon class and label', () => {
-        const button = Toolbar.createFromCommand(commands, testLogCommandId);
-        const iconNode = button.node as HTMLElement;
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        const iconNode = button.node.firstChild as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
         expect(iconNode.title).to.equal('Test log icon label');
         button.dispose();
@@ -170,7 +180,10 @@ describe('@jupyterlab/apputils', () => {
         enabled = false;
         toggled = true;
         visible = false;
-        const button = Toolbar.createFromCommand(commands, testLogCommandId);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
         expect((button.node as HTMLButtonElement).disabled).to.equal(true);
         expect(button.hasClass('p-mod-toggled')).to.equal(true);
         expect(button.hasClass('p-mod-hidden')).to.equal(true);
@@ -181,7 +194,10 @@ describe('@jupyterlab/apputils', () => {
         enabled = false;
         toggled = true;
         visible = false;
-        const button = Toolbar.createFromCommand(commands, testLogCommandId);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
         expect((button.node as HTMLButtonElement).disabled).to.equal(true);
         expect(button.hasClass('p-mod-toggled')).to.equal(true);
         expect(button.hasClass('p-mod-hidden')).to.equal(true);
@@ -204,7 +220,10 @@ describe('@jupyterlab/apputils', () => {
           },
           label: 'Label-only button'
         });
-        const button = Toolbar.createFromCommand(commands, id);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
         expect(button.node.childElementCount).to.equal(0);
         expect(button.node.innerText).to.equal('Label-only button');
         cmd.dispose();
@@ -220,7 +239,10 @@ describe('@jupyterlab/apputils', () => {
           label: 'Label-only button',
           iconClass: () => iconClassValue
         });
-        const button = Toolbar.createFromCommand(commands, id);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
         expect(button.node.childElementCount).to.equal(0);
         expect(button.node.innerText).to.equal('Label-only button');
 

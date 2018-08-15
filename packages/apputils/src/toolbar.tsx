@@ -404,7 +404,7 @@ export class ToolbarButton extends ReactElementWidget {
    *
    * @param props - Props for ToolbarButtonComponent.
    */
-  constructor(props: ToolbarButtonComponent.IProps) {
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
     super(<ToolbarButtonComponent {...props} />);
     this.addClass('jp-ToolbarButton');
   }
