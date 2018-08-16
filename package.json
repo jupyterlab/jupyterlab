@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcutui",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A JupyterLab extension for managing keyboard shortcuts",
   "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
   "keywords": [
@@ -30,8 +30,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.17.1",
-    "@jupyterlab/apputils": "^0.17.1",
+    "@jupyterlab/application": "^0.18.0",
+    "@jupyterlab/apputils": "^0.18.0",
     "@jupyterlab/coreutils": "^2.0.1",
     "@jupyterlab/mainmenu": "^0.6.0-1",
     "@phosphor/widgets": "^1.6.0",
