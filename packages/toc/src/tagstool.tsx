@@ -1,3 +1,5 @@
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { Cell, ICellModel } from '@jupyterlab/cells';
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
 //import StyleClasses from './styles';
@@ -6,6 +8,7 @@ import * as React from 'react';
 export interface TagsToolComponentProps {
   // widget: TagsWidget;
   allTagsList: string[];
+  tracker: INotebookTracker;
 }
 
 export interface TagsToolComponentState {
@@ -21,6 +24,7 @@ export class TagsToolComponent extends React.Component<
     this.state = {
       selected: []
     };
+    this.tracker = this.props.tracker;
     this.node = null;
   }
 
@@ -56,6 +60,47 @@ export class TagsToolComponent extends React.Component<
     this.setState({ selected: [] });
   };
 
+  cellModelContainsTag(tag: string, cellModel: ICellModel) {
+    let tagList = cellModel.metadata.get('tags') as string[];
+    if (tagList) {
+      for (let i = 0; i < tagList.length; i++) {
+        if (tagList[i] === tag) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
+  containsTag(tag: string, cell: Cell) {
+    if (cell === null) {
+      return false;
+    }
+    return this.cellModelContainsTag(tag, cell.model);
+  }
+
+  selectCells = () => {
+    let notebookPanel = this.tracker.currentWidget;
+    if (notebookPanel) {
+      let notebook = notebookPanel.content;
+      let first: boolean = true;
+      for (let i = 0; i < notebookPanel.model.cells.length; i++) {
+        let currentCell = notebook.widgets[i] as Cell;
+        for (let j = 0; j < this.state.selected.length; j++) {
+          if (this.containsTag(this.state.selected[j], currentCell)) {
+            if (first === true) {
+              notebook.deselectAll();
+              notebook.activeCellIndex = i;
+              first = false;
+            } else {
+              notebook.select(notebook.widgets[i] as Cell);
+            }
+          }
+        }
+      }
+    }
+  };
+
   handleClick = (e: any) => {
     if (this.node) {
       if (this.node.contains(e.target)) {
@@ -73,10 +118,19 @@ export class TagsToolComponent extends React.Component<
           selectionStateHandler={this.changeSelectionState}
           selectedTags={this.state.selected}
         />
-        <button onClick={() => this.deselectAllTags()}> Clear All </button>
+        <span className={'clear-button'} onClick={() => this.deselectAllTags()}>
+          {' '}
+          Clear All{' '}
+        </span>
+        <span className={'select-button'} onClick={() => this.selectCells()}>
+          {' '}
+          Select Cells{' '}
+        </span>
+        <span className={'filter-button'}> Filter</span>
       </div>
     );
   }
 
   private node: any;
+  private tracker: INotebookTracker;
 }

@@ -515,7 +515,10 @@ export function notebookGeneratorToolbar(
         tagDropdown = (
           <div className={'tag-dropdown'}>
             {' '}
-            <TagsToolComponent allTagsList={this.allTags} />{' '}
+            <TagsToolComponent
+              allTagsList={this.allTags}
+              tracker={tracker}
+            />{' '}
           </div>
         );
         tagIcon = (
