@@ -12,7 +12,8 @@ export namespace TagStyleClasses {
     //paddingRight: '25px',
     paddingTop: '0px',
     marginTop: '-1px',
-    marginBottom: '0px'
+    marginBottom: '0px',
+    userSelect: 'none'
   });
 
   export const addTagStyleClass = style(SharedStyles.tagStyleProperties, {

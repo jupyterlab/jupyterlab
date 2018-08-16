@@ -318,6 +318,7 @@
   font-size: 12px;
   padding-left: 15px;
   padding-top: 5px;
+  user-select: none;
 }
 
 .select-button {
@@ -332,6 +333,7 @@
   color: var(--jp-layout-color5);
   float: right;
   font-size: 12px;
+  user-select: none;
 }
 
 .filter-button {
@@ -346,4 +348,5 @@
   color: var(--jp-layout-color1);
   float: right;
   font-size: 12px;
+  user-select: none;
 }
