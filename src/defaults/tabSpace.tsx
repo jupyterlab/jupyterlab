@@ -307,7 +307,12 @@ namespace TabSpace {
 
         private _onTabSizeChanged = () => {
             const oldTabSpace = this._tabSpace;
-            this._tabSpace = this.settingConnector!.currentValue!.tabSize;
+            const currentValue = this.settingConnector!.currentValue;
+            if (currentValue && currentValue.tabSize) {
+                this._tabSpace = currentValue.tabSize;
+            } else {
+                this._tabSpace = 4;
+            }
 
             this._triggerChange(oldTabSpace, this._tabSpace);
         };
