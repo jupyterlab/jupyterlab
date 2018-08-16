@@ -131,6 +131,7 @@ function activateFactory(
     const model = new FileBrowserModel({
       manager: docManager,
       driveName: options.driveName || '',
+      refreshInterval: options.refreshInterval,
       state: options.state === null ? null : options.state || state
     });
     const widget = new FileBrowser({
