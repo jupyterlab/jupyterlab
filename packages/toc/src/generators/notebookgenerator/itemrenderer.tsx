@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ExperimentalCodeComponent } from './codemirror';
+import { CodeComponent } from './codemirror';
 
 import { Cell } from '@jupyterlab/cells';
 
@@ -156,18 +156,10 @@ export function notebookItemRenderer(
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>
         <span className={'toc-code-span'}>
-          <ExperimentalCodeComponent heading={item} />
+          <CodeComponent heading={item} />
         </span>
       </div>
     );
-    // } else if (item.type === 'raw' && options.showRaw) {
-    //   jsx = (
-    //     <div className="toc-code-cell-div">
-    //       <span className={'toc-code-span'}>
-    //         <CodeComponent code={item.text!} theme="none" />
-    //       </span>
-    //     </div>
-    //   );
   } else {
     jsx = null;
   }

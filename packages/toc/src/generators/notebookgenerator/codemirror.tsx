@@ -1,100 +1,26 @@
 import * as React from 'react';
 
-import * as CodeMirror from 'codemirror';
 import { INotebookHeading } from '../shared';
 
 export interface CodeComponentProps {
-  code: string;
-  theme: string;
+  heading: INotebookHeading;
 }
 
 export interface CodeComponentState {
-  code: string;
+  heading: INotebookHeading;
 }
 
 export class CodeComponent extends React.Component<
   CodeComponentProps,
   CodeComponentState
 > {
-  constructor(props: CodeComponentProps) {
-    super(props);
-    this.state = { code: props.code };
-  }
-
-  componentWillReceiveProps(nextProps: CodeComponentProps) {
-    this.setState({ code: nextProps.code });
-    if (this.codeMirror) {
-      this.codeMirror.refresh();
-    }
-  }
-
-  componentDidMount() {
-    /* this.codeMirror = CodeMirror.fromTextArea(
-      this.refs.editor as HTMLTextAreaElement,
-      {
-        theme: this.props.theme,
-        showCursorWhenSelecting: false,
-        readOnly: 'true',
-        cursorBlinkRate: -1,
-        lineWrapping: true
-      }
-    );
-    if (this.codeMirror) {
-    } */
-  }
-
-  render() {
-    return (
-      <div className="cm-toc">
-        <textarea
-          ref="editor"
-          autoComplete="off"
-          defaultValue={this.state.code}
-        />
-      </div>
-    );
-  }
-
-  private codeMirror: CodeMirror.EditorFromTextArea | null = null;
-}
-
-export interface ExperimentalCodeComponentProps {
-  heading: INotebookHeading;
-}
-
-export interface ExperimentalCodeComponentState {
-  heading: INotebookHeading;
-}
-
-export class ExperimentalCodeComponent extends React.Component<
-  ExperimentalCodeComponentProps,
-  ExperimentalCodeComponentState
-> {
-  constructor(props: ExperimentalCodeComponentState) {
+  constructor(props: CodeComponentState) {
     super(props);
     this.state = { heading: props.heading };
   }
 
-  componentWillReceiveProps(nextProps: ExperimentalCodeComponentState) {
+  componentWillReceiveProps(nextProps: CodeComponentState) {
     this.setState({ heading: nextProps.heading });
-    /* if (this.codeMirror) {
-      this.codeMirror.refresh();
-    } */
-  }
-
-  componentDidMount() {
-    /* this.codeMirror = CodeMirror.fromTextArea(
-      this.refs.editor as HTMLTextAreaElement,
-      {
-        theme: this.props.theme,
-        showCursorWhenSelecting: false,
-        readOnly: 'true',
-        cursorBlinkRate: -1,
-        lineWrapping: true
-      }
-    );
-    if (this.codeMirror) {
-    } */
   }
 
   render() {
