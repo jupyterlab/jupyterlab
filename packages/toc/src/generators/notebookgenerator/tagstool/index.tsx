@@ -2,10 +2,9 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
+import { NotebookGeneratorOptionsManager } from '../optionsmanager';
 
 export interface TagsToolComponentProps {
-  // widget: TagsWidget;
   allTagsList: string[];
   tracker: INotebookTracker;
   generatorOptionsRef: NotebookGeneratorOptionsManager;
