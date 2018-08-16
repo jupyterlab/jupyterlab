@@ -165,10 +165,10 @@ export class ListModel extends VDomModel {
    *
    * Setting its value triggers a new search.
    */
-  get query(): string {
+  get query(): string | null {
     return this._query;
   }
-  set query(value: string) {
+  set query(value: string | null) {
     this._query = value;
     this.update();
   }
@@ -320,7 +320,10 @@ export class ListModel extends VDomModel {
         if (discovery.kernel) {
           // match specs
           for (let kernelInfo of discovery.kernel) {
-            let matches = Private.matchSpecs(kernelInfo, this.serviceManager.specs);
+            let matches = Private.matchSpecs(
+              kernelInfo,
+              this.serviceManager.specs
+            );
             kernelCompanions.push({ kernelInfo, kernels: matches });
           }
         }
@@ -481,19 +484,56 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Update the current model.
+   * Search with current query.
    *
-   * This will query the NPM repository, and the notebook server.
+   * Sets searchError and totalEntries as appropriate.
    *
-   * Emits the `stateChanged` signal on successful completion.
+   * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
    */
-  protected async update(refreshInstalled = false) {
+  protected async performSearch(): Promise<{ [key: string]: IEntry }> {
+    if (this.query === null) {
+      this._searchResult = [];
+      this._totalEntries = 0;
+      this.searchError = null;
+      return {};
+    }
+
+    // Start the search without waiting for it:
     let search = this.searcher.searchExtensions(
       this.query,
       this.page,
       this.pagination
     );
     let searchMapPromise = this.translateSearchResult(search);
+
+    let searchMap: { [key: string]: IEntry };
+    try {
+      searchMap = await searchMapPromise;
+      this.searchError = null;
+    } catch (reason) {
+      searchMap = {};
+      this.searchError = reason.toString();
+    }
+
+    try {
+      this._totalEntries = (await search).total;
+    } catch (error) {
+      this._totalEntries = 0;
+    }
+
+    return searchMap;
+  }
+
+  /**
+   * Query the installed extensions.
+   *
+   * Sets installedError as appropriate.
+   *
+   * @returns {Promise<{ [key: string]: IEntry; }>} A map of installed extensions.
+   */
+  protected async queryInstalled(
+    refreshInstalled: boolean
+  ): Promise<{ [key: string]: IEntry }> {
     let installedMap;
     try {
       installedMap = await this.translateInstalled(
@@ -504,14 +544,26 @@ export class ListModel extends VDomModel {
       installedMap = {};
       this.installedError = reason.toString();
     }
-    let searchMap;
-    try {
-      searchMap = await searchMapPromise;
-      this.searchError = null;
-    } catch (reason) {
-      searchMap = {};
-      this.searchError = reason.toString();
-    }
+    return installedMap;
+  }
+
+  /**
+   * Update the current model.
+   *
+   * This will query the NPM repository, and the notebook server.
+   *
+   * Emits the `stateChanged` signal on successful completion.
+   */
+  protected async update(refreshInstalled = false) {
+    // Start both queries before awaiting:
+    const searchMapPromise = this.performSearch();
+    const installedMapPromise = this.queryInstalled(refreshInstalled);
+
+    // Await results:
+    const searchMap = await searchMapPromise;
+    const installedMap = await installedMapPromise;
+
+    // Map results to attributes:
     let installed: IEntry[] = [];
     for (let key of Object.keys(installedMap)) {
       installed.push(installedMap[key]);
@@ -520,6 +572,7 @@ export class ListModel extends VDomModel {
 
     let searchResult: IEntry[] = [];
     for (let key of Object.keys(searchMap)) {
+      // Filter out installed entries from search results:
       if (installedMap[key] === undefined) {
         searchResult.push(searchMap[key]);
       } else {
@@ -527,11 +580,8 @@ export class ListModel extends VDomModel {
       }
     }
     this._searchResult = searchResult.sort(Private.comparator);
-    try {
-      this._totalEntries = (await search).total;
-    } catch (error) {
-      this._totalEntries = 0;
-    }
+
+    // Signal updated state
     this.stateChanged.emit(undefined);
   }
 
@@ -614,6 +664,11 @@ export class ListModel extends VDomModel {
   serverConnectionError: string | null = null;
 
   /**
+   * Contains an error message if the server has unfulfilled requirements.
+   */
+  serverRequirementsError: string | null = null;
+
+  /**
    * Whether the model has finished async initialization.
    */
   initialized: boolean = false;
@@ -638,7 +693,7 @@ export class ListModel extends VDomModel {
    */
   protected serviceManager: ServiceManager;
 
-  private _query: string = '';
+  private _query: string | null = null;
   private _page: number = 0;
   private _pagination: number = 250;
   private _totalEntries: number = 0;
@@ -648,12 +703,10 @@ export class ListModel extends VDomModel {
   private _pendingActions: Promise<any>[] = [];
 }
 
-
 /**
  * ListModel statics.
  */
 export namespace ListModel {
-
   /**
    * Utility function to check whether an entry can be updated.
    *
@@ -665,15 +718,12 @@ export namespace ListModel {
     }
     return semver.lt(entry.installed_version, entry.latest_version);
   }
-
 }
-
 
 /**
  * A namespace for private functionality.
  */
 namespace Private {
-
   /**
    * A comparator function that sorts whitelisted orgs to the top.
    */
@@ -693,7 +743,6 @@ namespace Private {
       return 1;
     }
   }
-
 
   /**
    * Match kernel specs against kernel spec regexps
@@ -734,7 +783,6 @@ namespace Private {
     return matches;
   }
 
-
   /**
    * Convert a response to an exception on error.
    *
@@ -746,5 +794,4 @@ namespace Private {
     }
     return response;
   }
-
 }

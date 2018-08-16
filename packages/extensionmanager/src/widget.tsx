@@ -34,7 +34,7 @@ export class SearchBar extends React.Component<
   /**
    * Render the list view using the virtual DOM.
    */
-  render(): React.ReactElement<any> {
+  render(): React.ReactNode {
     return (
       <div className="jp-extensionmanager-search-bar">
         <div className="jp-extensionmanager-search-wrapper">
@@ -308,6 +308,153 @@ export namespace ListView {
 }
 
 /**
+ *
+ *
+ * @param {RefreshButton.IProperties} props
+ * @returns {React.ReactElement<any>}
+ */
+function RefreshButton(
+  props: RefreshButton.IProperties
+): React.ReactElement<any> {
+  return (
+    <ToolbarButtonComponent
+      key="refreshButton"
+      className="jp-extensionmanager-refresh"
+      iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+      onClick={props.onClick}
+      tooltip="Refresh extension list"
+    />
+  );
+}
+
+namespace RefreshButton {
+  export interface IProperties {
+    onClick: () => void;
+  }
+}
+
+function ErrorMessage(props: ErrorMessage.IProperties) {
+  return (
+    <div key="error-msg" className="jp-extensionmanager-error">
+      {props.children}
+    </div>
+  );
+}
+
+namespace ErrorMessage {
+  export interface IProperties {
+    children: React.ReactNode;
+  }
+}
+
+/**
+ *
+ */
+export class CollapsibleSection extends React.Component<
+  CollapsibleSection.IProperties,
+  CollapsibleSection.IState
+> {
+  constructor(props: CollapsibleSection.IProperties) {
+    super(props);
+    this.state = {
+      collapsed: props.startCollapsed
+    };
+  }
+
+  /**
+   * Render the collapsible section using the virtual DOM.
+   */
+  render(): React.ReactNode {
+    const elements: Array<React.ReactNode> = [
+      <header key="header">
+        <ToolbarButtonComponent
+          key="collapser"
+          iconClassName={
+            'jp-Icon jp-Icon-16 ' +
+            (this.state.collapsed
+              ? 'jp-extensionmanager-collapseIcon'
+              : 'jp-extensionmanager-expandIcon')
+          }
+          className={'jp-collapser-button'}
+          onClick={() => {
+            this.onCollapse();
+          }}
+        />
+        <span className="jp-extensionmanager-headerText">
+          {this.props.header}
+        </span>
+        {this.props.headerElements}
+      </header>
+    ];
+    if (!this.state.collapsed) {
+      if (Array.isArray(this.props.children)) {
+        elements.push(...this.props.children);
+      } else {
+        elements.push(this.props.children);
+      }
+    }
+    return elements;
+  }
+
+  /**
+   * Handler for search input changes.
+   */
+  onCollapse() {
+    if (this.props.onCollapse !== undefined) {
+      this.props.onCollapse(!this.state.collapsed);
+    }
+    this.setState({
+      collapsed: !this.state.collapsed
+    });
+  }
+}
+
+/**
+ * The namespace for collapsible section statics.
+ */
+export namespace CollapsibleSection {
+  /**
+   * React properties for collapsible section component.
+   */
+  export interface IProperties {
+    /**
+     * The header string for section list.
+     */
+    header: string;
+
+    /**
+     * Whether the view will be collapsed initially or not.
+     */
+    startCollapsed: boolean;
+
+    /**
+     * Callback for collapse action.
+     */
+    onCollapse?: (collapsed: boolean) => void;
+
+    /**
+     * Any additional elements to add to the header.
+     */
+    headerElements?: React.ReactNode;
+
+    /**
+     * If given, this will be diplayed instead of the children.
+     */
+    errorMessage?: string | null;
+  }
+
+  /**
+   * React state for collapsible section component.
+   */
+  export interface IState {
+    /**
+     * Whther the section is collapsed or not.
+     */
+    collapsed: boolean;
+  }
+}
+
+/**
  * The main view for the discovery extension.
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
@@ -363,9 +510,9 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           Updating extensions list
         </div>
       );
-    } else if (!model.query && model.serverConnectionError !== null) {
+    } else if (model.serverConnectionError !== null) {
       content.push(
-        <div key="error-msg" className="jp-extensionmanager-error">
+        <ErrorMessage key="error-msg">
           <p>
             Error communicating with server extension. Consult the documentation
             for how to ensure that it is enabled.
@@ -373,53 +520,102 @@ export class ExtensionView extends VDomRenderer<ListModel> {
 
           <p>Reason given:</p>
           <pre>{model.serverConnectionError}</pre>
-        </div>
+        </ErrorMessage>
       );
-    } else if (!model.query && model.installed.length) {
-      elements.push(
-        <header key="installed-header">
-          Installed<ToolbarButtonComponent
-            iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
-            onClick={() => {
-              model.refreshInstalled();
-            }}
-            tooltip="Refresh extension list"
-          />
-        </header>
-      );
+    } else if (model.serverRequirementsError !== null) {
       content.push(
-        <ListView
-          key="installed"
-          entries={model.installed}
-          numPages={1}
-          onPage={value => {
-            /* no-op */
-          }}
-          performAction={this.onAction.bind(this)}
-        />
-      );
-    } else if (model.searchError === null) {
-      elements.push(<header key="installable-header">Search results</header>);
-      content.push(
-        <ListView
-          key="installable"
-          entries={model.searchResult}
-          numPages={pages}
-          onPage={value => {
-            this.onPage(value);
-          }}
-          performAction={this.onAction.bind(this)}
-        />
+        <ErrorMessage key="error-msg">
+          <p>
+            The server has some missing requirements for installing extensions.
+          </p>
+
+          <p>Details:</p>
+          <pre>{model.serverRequirementsError}</pre>
+        </ErrorMessage>
       );
     } else {
+      // List installed and discovery sections
+
+      let installedContent = [];
+      if (model.installedError !== null) {
+        installedContent.push(
+          <ErrorMessage>
+            {`Error querying installed extensions${
+              model.installedError ? `: ${model.installedError}` : '.'
+            }`}
+          </ErrorMessage>
+        );
+      } else {
+        installedContent.push(
+          <ListView
+            entries={model.installed}
+            numPages={1}
+            onPage={value => {
+              /* no-op */
+            }}
+            performAction={this.onAction.bind(this)}
+          />
+        );
+      }
+
       content.push(
-        <div key="error-msg" className="jp-extensionmanager-error">
-          Error searching for extensions{model.searchError
-            ? `: ${model.searchError}`
-            : '.'}
-        </div>
+        <CollapsibleSection
+          header="Installed"
+          key="installed-section"
+          startCollapsed={false}
+          headerElements={
+            <RefreshButton
+              onClick={() => {
+                model.refreshInstalled();
+              }}
+            />
+          }
+        >
+          {installedContent}
+        </CollapsibleSection>
+      );
+
+      let searchContent = [];
+      if (model.searchError !== null) {
+        searchContent.push(
+          <ErrorMessage>
+            {`Error searching for extensions${
+              model.searchError ? `: ${model.searchError}` : '.'
+            }`}
+          </ErrorMessage>
+        );
+      } else {
+        searchContent.push(
+          <ListView
+            // Filter out installed extensions:
+            entries={model.searchResult.filter(
+              entry => model.installed.indexOf(entry) === -1
+            )}
+            numPages={pages}
+            onPage={value => {
+              this.onPage(value);
+            }}
+            performAction={this.onAction.bind(this)}
+          />
+        );
+      }
+
+      content.push(
+        <CollapsibleSection
+          header={model.query ? 'Search Results' : 'Discover'}
+          key="search-section"
+          startCollapsed={true}
+          onCollapse={(collapsed: boolean) => {
+            if (!collapsed && model.query === null) {
+              model.query = '';
+            }
+          }}
+        >
+          {searchContent}
+        </CollapsibleSection>
       );
     }
+
     elements.push(
       <div key="content" className="jp-extensionmanager-content">
         {content}
