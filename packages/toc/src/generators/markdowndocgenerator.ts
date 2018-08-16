@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { TableOfContentsRegistry } from '../registry';
 
 import { SharedMethods, INotebookHeading } from './shared';
+
+import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
 /**
  * Create a TOC generator for markdown files.
@@ -38,6 +40,42 @@ export function createMarkdownGenerator(
         model.value.text,
         onClickFactory,
         null
+      );
+    }
+  };
+}
+
+/**
+ * Create a TOC generator for rendered markdown files.
+ *
+ * @param tracker: A file editor tracker.
+ *
+ * @returns A TOC generator that can parse markdown files.
+ */
+export function createRenderedMarkdownGenerator(
+  tracker: IInstanceTracker<MimeDocument>,
+  sanitizer: ISanitizer
+): TableOfContentsRegistry.IGenerator<MimeDocument> {
+  return {
+    tracker,
+    usesLatex: true,
+    isEnabled: widget => {
+      // Only enable this if the editor mimetype matches
+      // one of a few markdown variants.
+      return SharedMethods.isMarkdown(widget.content.mimeType);
+    },
+    generate: widget => {
+      const onClickFactory = (el: Element) => {
+        return () => {
+          el.scrollIntoView();
+        };
+      };
+      return SharedMethods.getRenderedHTMLHeadings(
+        widget.content.node,
+        onClickFactory,
+        sanitizer,
+        null,
+        0
       );
     }
   };
