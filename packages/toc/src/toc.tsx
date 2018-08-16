@@ -116,25 +116,31 @@ export class TableOfContents extends Widget {
     if (this._current && this._current!.generator.itemRenderer) {
       itemRenderer = this._current!.generator.itemRenderer!;
     }
-    ReactDOM.render(
-      <TOCTree
-        widget={this}
-        title={title}
-        toc={toc}
-        contextChanged={contextChanged}
-        itemRenderer={itemRenderer}
-      />,
-      this.node,
-      () => {
-        if (
-          this._current &&
-          this._current.generator.usesLatex === true &&
-          this._rendermime.latexTypesetter
-        ) {
-          this._rendermime.latexTypesetter.typeset(this.node);
-        }
-      }
+    let renderedJSX = (
+      <div className="jp-TableOfContents">
+        <header>{title}</header>
+      </div>
     );
+    if (this._current && this._current.generator) {
+      renderedJSX = (
+        <TOCTree
+          widget={this}
+          title={title}
+          toc={toc}
+          contextChanged={contextChanged}
+          itemRenderer={itemRenderer}
+        />
+      );
+    }
+    ReactDOM.render(renderedJSX, this.node, () => {
+      if (
+        this._current &&
+        this._current.generator.usesLatex === true &&
+        this._rendermime.latexTypesetter
+      ) {
+        this._rendermime.latexTypesetter.typeset(this.node);
+      }
+    });
   }
 
   get generator() {
@@ -306,12 +312,15 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
   }
 
   componentWillReceiveProps(newProps: ITOCTreeProps) {
-    if (
-      newProps.contextChanged &&
-      this.props.widget.generator &&
-      this.props.widget.generator.toolbarGenerator
-    ) {
-      this.renderedToolbar = this.props.widget.generator.toolbarGenerator();
+    if (newProps.contextChanged) {
+      if (
+        this.props.widget.generator &&
+        this.props.widget.generator.toolbarGenerator
+      ) {
+        this.renderedToolbar = this.props.widget.generator.toolbarGenerator();
+      } else {
+        this.renderedToolbar = null;
+      }
     }
   }
 

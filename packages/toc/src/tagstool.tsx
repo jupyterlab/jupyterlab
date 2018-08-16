@@ -108,27 +108,31 @@ export class TagsToolComponent extends React.Component<
   };
 
   render() {
-    return (
-      <div>
-        <TagListComponent
-          allTagsList={this.props.allTagsList}
-          selectionStateHandler={this.changeSelectionState}
-          selectedTags={this.state.selected}
-        />
-        <span className={'clear-button'} onClick={() => this.deselectAllTags()}>
-          {' '}
-          Clear All{' '}
-        </span>
-        <span onClick={() => this.filterTags()} className={'filter-button'}>
-          {' '}
-          Filter
-        </span>
-        <span className={'select-button'} onClick={() => this.selectCells()}>
-          {' '}
-          Select Cells{' '}
-        </span>
-      </div>
-    );
+    let renderedJSX = <div>No Tags Available</div>;
+    if (this.props.allTagsList && this.props.allTagsList.length > 0) {
+      renderedJSX = (
+        <div>
+          <TagListComponent
+            allTagsList={this.props.allTagsList}
+            selectionStateHandler={this.changeSelectionState}
+            selectedTags={this.state.selected}
+          />
+          <span className={'clear-button'} onClick={() => this.deselectAllTags()}>
+            {' '}
+            Clear All{' '}
+          </span>
+          <span onClick={() => this.filterTags()} className={'filter-button'}>
+            {' '}
+            Filter
+          </span>
+          <span className={'select-button'} onClick={() => this.selectCells()}>
+            {' '}
+            Select Cells{' '}
+          </span>
+        </div>
+      );
+    }
+    return renderedJSX;
   }
 
   private node: any;
