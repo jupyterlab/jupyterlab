@@ -158,7 +158,7 @@ namespace MemoryUsage {
         private _currentMemory: number = 0;
         private _memoryLimit: number | null = null;
         private _units: MemoryUnit = 'B';
-        private _intervalId: number;
+        private _intervalId: any;
         private _refreshRate: number;
     }
 
