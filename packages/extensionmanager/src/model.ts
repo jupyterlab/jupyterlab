@@ -348,9 +348,16 @@ export class ListModel extends VDomModel {
       this.pagination
     );
     let searchMapPromise = this.translateSearchResult(search);
-    let installedMap = await this.translateInstalled(
-      this.fetchInstalled(refreshInstalled)
-    );
+    let installedMap;
+    try {
+      installedMap = await this.translateInstalled(
+        this.fetchInstalled(refreshInstalled)
+      );
+      this.installedError = null;
+    } catch (reason) {
+      installedMap = {};
+      this.installedError = reason.toString();
+    }
     let searchMap;
     try {
       searchMap = await searchMapPromise;
@@ -604,7 +611,12 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Contains an error message if an error occurred when updating the model.
+   * Contains an error message if an error occurred when querying installed extensions.
+   */
+  installedError: string | null = null;
+
+  /**
+   * Contains an error message if an error occurred when searching for extensions.
    */
   searchError: string | null = null;
 
