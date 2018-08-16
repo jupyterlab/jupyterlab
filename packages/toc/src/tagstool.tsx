@@ -1,11 +1,11 @@
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
-//import StyleClasses from './styles';
-// const TAG_TOOL_CLASS = 'jp-cellTags-Tools';
-//const TagsToolStyleClasses = StyleClasses.TagsToolStyleClasses;
+import { NotebookGeneratorOptionsManager } from './generators';
+
 export interface TagsToolComponentProps {
   // widget: TagsWidget;
   allTagsList: string[];
+  generatorOptionsRef: NotebookGeneratorOptionsManager;
 }
 
 export interface TagsToolComponentState {
@@ -56,6 +56,10 @@ export class TagsToolComponent extends React.Component<
     this.setState({ selected: [] });
   };
 
+  filterTags = () => {
+    this.props.generatorOptionsRef.filtered = this.state.selected;
+  };
+
   handleClick = (e: any) => {
     if (this.node) {
       if (this.node.contains(e.target)) {
@@ -74,6 +78,7 @@ export class TagsToolComponent extends React.Component<
           selectedTags={this.state.selected}
         />
         <button onClick={() => this.deselectAllTags()}> Clear All </button>
+        <button onClick={() => this.filterTags()}> Filter </button>
       </div>
     );
   }
