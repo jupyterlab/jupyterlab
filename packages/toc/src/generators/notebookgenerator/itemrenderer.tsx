@@ -70,7 +70,7 @@ export function notebookItemRenderer(
             <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
-              src={require('../static/downarrow.svg')}
+              src={require('../../../static/downarrow.svg')}
             />
           </div>
         );
@@ -86,7 +86,7 @@ export function notebookItemRenderer(
               <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
-                src={require('../static/rightarrow.svg')}
+                src={require('../../../static/rightarrow.svg')}
               />
             </div>
           );
@@ -120,7 +120,7 @@ export function notebookItemRenderer(
             <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
-              src={require('../static/downarrow.svg')}
+              src={require('../../../static/downarrow.svg')}
             />
           </div>
         );
@@ -136,7 +136,7 @@ export function notebookItemRenderer(
               <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
-                src={require('../static/rightarrow.svg')}
+                src={require('../../../static/rightarrow.svg')}
               />
             </div>
           );

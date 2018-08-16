@@ -358,3 +358,7 @@
   font-size: 12px;
   padding: 3px;
 }
+
+.tags-container {
+  width: 100%;
+}

@@ -135,7 +135,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../static/code_selected.svg')}
+            src={require('../../../static/code_selected.svg')}
             className="toc-toolbar-code-icon toc-toolbar-icon"
           />
         </div>
@@ -147,7 +147,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../static/code_unselected.svg')}
+            src={require('../../../static/code_unselected.svg')}
             className="toc-toolbar-code-icon toc-toolbar-icon"
           />
         </div>
@@ -161,7 +161,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../static/markdown_selected.svg')}
+            src={require('../../../static/markdown_selected.svg')}
             className="toc-toolbar-markdown-icon toc-toolbar-icon"
           />
         </div>
@@ -173,7 +173,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../static/markdown_unselected.svg')}
+            src={require('../../../static/markdown_unselected.svg')}
             className="toc-toolbar-markdown-icon toc-toolbar-icon"
           />
         </div>
@@ -187,7 +187,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../static/autonumbering_selected.svg')}
+            src={require('../../../static/autonumbering_selected.svg')}
             className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>
@@ -199,7 +199,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../static/autonumbering_unselected.svg')}
+            src={require('../../../static/autonumbering_unselected.svg')}
             className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>
@@ -210,7 +210,7 @@ export function notebookGeneratorToolbar(
         <img
           alt="Show Tag Dropdown"
           title="Show Tag Dropdown"
-          src={require('../static/tag_unselected.svg')}
+          src={require('../../../static/tag_unselected.svg')}
         />
       );
       if (this.state.showTags) {
@@ -229,7 +229,7 @@ export function notebookGeneratorToolbar(
           <img
             alt="Hide Tag Dropdown"
             title="Hide Tag Dropdown"
-            src={require('../static/tag_selected.svg')}
+            src={require('../../../static/tag_selected.svg')}
           />
         );
       }
