@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 import * as React from 'react';
 import { style, classes } from 'typestyle/lib';
 import { centeredFlex, leftToRight } from '../style/layout';
