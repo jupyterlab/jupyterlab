@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "pre-publish": "node buildutils/lib/prepublish.js",
+    "pre-publish": "cd buildutils && npm run build && cd .. && node buildutils/lib/prepublish.js",
     "add:sibling": "node buildutils/lib/add-sibling.js",
     "build": "jlpm run build:dev",
     "build:core": "cd jupyterlab/staging && jlpm && jlpm run build",
