@@ -67,7 +67,7 @@ export function run(
   quiet?: boolean
 ): string {
   options = options || {};
-  options['stdio'] = options.stdio || 'ignore';
+  options['stdio'] = options.stdio || 'inherit';
   if (!quiet) {
     console.log('>', cmd);
   }
