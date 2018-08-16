@@ -542,7 +542,7 @@ export function notebookGeneratorToolbar(
       }
 
       return (
-        <div className={'toolbar-shadow'}>
+        <div>
           <div className={'toc-toolbar'}>
             {codeIcon}
             {markdownIcon}

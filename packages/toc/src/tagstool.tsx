@@ -118,13 +118,13 @@ export class TagsToolComponent extends React.Component<
           {' '}
           Clear All{' '}
         </span>
-        <span className={'select-button'} onClick={() => this.selectCells()}>
-          {' '}
-          Select Cells{' '}
-        </span>
         <span onClick={() => this.filterTags()} className={'filter-button'}>
           {' '}
           Filter
+        </span>
+        <span className={'select-button'} onClick={() => this.selectCells()}>
+          {' '}
+          Select Cells{' '}
         </span>
       </div>
     );
