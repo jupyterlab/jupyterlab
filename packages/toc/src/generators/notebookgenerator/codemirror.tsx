@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as CodeMirror from 'codemirror';
-import { INotebookHeading } from './generators';
+import { INotebookHeading } from '../shared';
 
 export interface CodeComponentProps {
   code: string;
