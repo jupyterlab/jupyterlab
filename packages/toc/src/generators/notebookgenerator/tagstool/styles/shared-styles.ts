@@ -20,7 +20,7 @@ namespace SharedStyles {
     borderRadius: '20px',
     padding: '10px',
     paddingBottom: '4px',
-    paddingTop: '4px',
+    paddingTop: '3px',
     margin: '3px',
     width: 'fit-content',
     maxWidth: 'calc(100% - 25px)'
