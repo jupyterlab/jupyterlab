@@ -50,3 +50,11 @@
   padding: 12px 0 4px 12px;
   text-transform: uppercase;
 }
+
+[data-theme-light='true'] .jp-TableOfContents-icon {
+  background-image: url(list-light.svg);
+}
+
+[data-theme-light='false'] .jp-TableOfContents-icon {
+  background-image: url(list-dark.svg);
+}

@@ -66,7 +66,8 @@ function activateTOC(
   const registry = new TableOfContentsRegistry();
 
   // Add the ToC to the left area.
-  toc.title.label = 'Contents';
+  toc.title.iconClass = 'jp-TableOfContents-icon jp-SideBar-tabIcon';
+  toc.title.caption = 'Table of Contents';
   toc.id = 'table-of-contents';
   app.shell.addToLeftArea(toc, { rank: 700 });
 
