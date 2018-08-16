@@ -317,6 +317,7 @@
 .clear-button {
   font-size: 12px;
   padding-left: 15px;
+  padding-top: 5px;
 }
 
 .select-button {
@@ -327,7 +328,7 @@
   padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
-  margin-right: 10px;
+  margin-right: 17px;
   color: var(--jp-layout-color5);
   float: right;
   font-size: 12px;
@@ -341,7 +342,7 @@
   padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
-  margin-right: 60px;
+  margin-right: 15px;
   color: var(--jp-layout-color1);
   float: right;
   font-size: 12px;
