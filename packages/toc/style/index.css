@@ -296,22 +296,23 @@
 .tag-dropdown {
   position: relative;
   width: 100%;
-  height: 100px;
   padding: 5px;
   padding-bottom: 0px;
   margin-bottom: 18px;
   -webkit-box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
   -moz-box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
   box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
+  display: flex;
+  padding-left: 0px;
 }
 
 .toolbar-hr {
   width: 100%;
-  border-color: var(--jp-layout-color2);
-  color: var(--jp-layout-color2);
   background-color: var(--jp-layout-color2);
   padding-bottom: 0px;
   margin-bottom: 0px;
+  height: 1px;
+  border: 0px;
   /* border-width: 0px; */
 }
 
@@ -350,4 +351,10 @@
   float: right;
   font-size: 12px;
   user-select: none;
+  margin-bottom: 13px;
+}
+
+.no-tags-div {
+  font-size: 12px;
+  padding: 3px;
 }

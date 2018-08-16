@@ -108,7 +108,7 @@ export class TagsToolComponent extends React.Component<
   };
 
   render() {
-    let renderedJSX = <div>No Tags Available</div>;
+    let renderedJSX = <div className="no-tags-div">No Tags Available</div>;
     if (this.props.allTagsList && this.props.allTagsList.length > 0) {
       renderedJSX = (
         <div>
@@ -117,17 +117,20 @@ export class TagsToolComponent extends React.Component<
             selectionStateHandler={this.changeSelectionState}
             selectedTags={this.state.selected}
           />
-          <span className={'clear-button'} onClick={() => this.deselectAllTags()}>
+          <span
+            className={'clear-button'}
+            onClick={() => this.deselectAllTags()}
+          >
             {' '}
             Clear All{' '}
-          </span>
-          <span onClick={() => this.filterTags()} className={'filter-button'}>
-            {' '}
-            Filter
           </span>
           <span className={'select-button'} onClick={() => this.selectCells()}>
             {' '}
             Select Cells{' '}
+          </span>
+          <span onClick={() => this.filterTags()} className={'filter-button'}>
+            {' '}
+            Filter
           </span>
         </div>
       );
