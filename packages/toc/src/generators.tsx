@@ -588,7 +588,6 @@ export function createNotebookGenerator(
       return notebookItemRenderer(options, item);
     },
     generate: panel => {
-      console.log(options.filtered);
       let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
       let currentCollapseLevel = -1;
