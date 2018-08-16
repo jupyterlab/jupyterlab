@@ -20,7 +20,7 @@ utils.getLernaPaths().map(async pkgPath => {
   if (data.private === true) {
     return;
   }
-  const releaseData = await packageJson(data.name);
+  const releaseData = await packageJson(data.name, { version: 'next' });
   const version = releaseData.version;
   if (data.version === version) {
     return;
