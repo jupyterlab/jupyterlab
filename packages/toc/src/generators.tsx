@@ -527,6 +527,7 @@ export function notebookGeneratorToolbar(
             {' '}
             <TagsToolComponent
               allTagsList={this.allTags}
+              tracker={tracker}
               generatorOptionsRef={options}
             />{' '}
           </div>

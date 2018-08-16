@@ -16,10 +16,11 @@ namespace SharedStyles {
 
   export const tagStyleProperties = {
     boxSizing: 'border-box',
+    height: '24px',
     borderRadius: '20px',
     padding: '10px',
     paddingBottom: '4px',
-    paddingTop: '7px',
+    paddingTop: '4px',
     margin: '3px',
     width: 'fit-content',
     maxWidth: 'calc(100% - 25px)'
