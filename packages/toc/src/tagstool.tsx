@@ -28,14 +28,6 @@ export class TagsToolComponent extends React.Component<
     this.node = null;
   }
 
-  componentWillMount() {
-    document.addEventListener('mousedown', this.handleClick, false);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClick, false);
-  }
-
   changeSelectionState = (newState: string, add: boolean) => {
     if (add) {
       let selectedTags = this.state.selected;
@@ -99,7 +91,8 @@ export class TagsToolComponent extends React.Component<
         }
       }
     }
-    
+  };
+
   filterTags = () => {
     this.props.generatorOptionsRef.filtered = this.state.selected;
   };
@@ -129,7 +122,10 @@ export class TagsToolComponent extends React.Component<
           {' '}
           Select Cells{' '}
         </span>
-        <span onClick={() => this.filterTags()} className={'filter-button'}> Filter</span>
+        <span onClick={() => this.filterTags()} className={'filter-button'}>
+          {' '}
+          Filter
+        </span>
       </div>
     );
   }
