@@ -167,7 +167,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         } else {
             if (this._notebookTracker.has(val)) {
                 const activeCell = (val as NotebookPanel).content.activeCell;
-                if (activeCell === undefined) {
+                if (activeCell === null) {
                     return null;
                 } else {
                     if (activeCell.model.type === 'code') {

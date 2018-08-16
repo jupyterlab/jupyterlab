@@ -246,7 +246,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         } else {
             if (this._notebookTracker.has(val)) {
                 const activeCell = (val as NotebookPanel).content.activeCell;
-                if (activeCell === undefined) {
+                if (activeCell === null) {
                     return null;
                 } else {
                     return activeCell.editor;
