@@ -18,7 +18,8 @@
                 "notebook-trust-item",
                 "running-sessions-item",
                 "tab-space-item",
-                "memory-usage-item"
+                "memory-usage-item",
+                "saving-status-item"
             ]
         }
     },
