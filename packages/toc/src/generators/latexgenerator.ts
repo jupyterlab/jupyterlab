@@ -54,8 +54,6 @@ export function createLatexGenerator(
               column: 0
             });
           };
-          // TODO: HEADER!!!
-          // headings.push({ text, level, onClick, type: 'heading' });
           headings.push({ text, level, onClick });
         }
       });

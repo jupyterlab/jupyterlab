@@ -95,7 +95,6 @@ export class SharedMethods {
           numbering +
           '</span>';
         heading.innerHTML = numberingElement + html;
-        // TODO: HEADER!!! (type: header)
         headings.push({
           level,
           text,
@@ -141,7 +140,6 @@ export class SharedMethods {
       // Take special care to parse markdown links into raw text.
       const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = SharedMethods.generateNumbering(numberingDict, level);
-      // TODO: HEADER!!!
       headings.push({
         text,
         level,
@@ -159,7 +157,6 @@ export class SharedMethods {
       // Take special care to parse markdown links into raw text.
       const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = SharedMethods.generateNumbering(numberingDict, level);
-      // TODO: HEADER!!!
       headings.push({
         text,
         level,
@@ -178,7 +175,6 @@ export class SharedMethods {
       const level = parseInt(match3[1], 10);
       const text = match3[2];
       let numbering = SharedMethods.generateNumbering(numberingDict, level);
-      // TODO: HEADER!!!
       headings.push({
         text,
         level,

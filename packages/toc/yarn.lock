@@ -349,9 +349,20 @@
   dependencies:
     any-observable "^0.3.0"
 
+"@types/codemirror@*":
+  version "0.0.59"
+  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.59.tgz#b823e2c94b76c435c7e87768b644ec9a50b0b379"
+
 "@types/node@*":
   version "10.5.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.4.tgz#6eccc158504357d1da91434d75e86acde94bb10b"
+
+"@types/react-codemirror@^1.0.1":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/react-codemirror/-/react-codemirror-1.0.2.tgz#f70f6283e873e7e9c0cb551e85aa84968610c246"
+  dependencies:
+    "@types/codemirror" "*"
+    "@types/react" "*"
 
 "@types/react-dom@~16.0.5":
   version "16.0.6"
@@ -560,7 +571,7 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-codemirror@~5.39.0:
+codemirror@^5.39.2, codemirror@~5.39.0:
   version "5.39.2"
   resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.39.2.tgz#778aa13b55ebf280745c309cb1b148e3fc06f698"
 
@@ -626,6 +637,10 @@ cross-spawn@^5.0.1:
     lru-cache "^4.0.1"
     shebang-command "^1.2.0"
     which "^1.2.9"
+
+csstype@^2.4.0:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.6.tgz#2ae1db2319642d8b80a668d2d025c6196071e788"
 
 date-fns@^1.27.2:
   version "1.29.0"
@@ -844,6 +859,10 @@ fragment-cache@^0.2.1:
   resolved "https://registry.yarnpkg.com/fragment-cache/-/fragment-cache-0.2.1.tgz#4290fad27f13e89be7f33799c6bc5a0abfff0d19"
   dependencies:
     map-cache "^0.2.2"
+
+free-style@2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/free-style/-/free-style-2.5.1.tgz#5e3f684c470d3bba7e4dbb43524e0a08917e873c"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -1906,6 +1925,13 @@ tsutils@^2.27.2:
 typescript@~2.9.2:
   version "2.9.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
+
+typestyle@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/typestyle/-/typestyle-2.0.1.tgz#9593e6029ce5f23f1a5728ddd3ed6bf1ffa781f8"
+  dependencies:
+    csstype "^2.4.0"
+    free-style "2.5.1"
 
 ua-parser-js@^0.7.18:
   version "0.7.18"

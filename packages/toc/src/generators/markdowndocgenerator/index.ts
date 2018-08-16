@@ -139,7 +139,6 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = SharedMethods.generateNumbering(numberingDict, level);
-        // TODO: HEADER!!!
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
@@ -151,7 +150,6 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = SharedMethods.generateNumbering(numberingDict, level);
-        // TODO: HEADER!!!
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
@@ -164,7 +162,6 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = SharedMethods.generateNumbering(numberingDict, level);
-        // TODO: HEADER!!!
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
