@@ -1,9 +1,6 @@
 import { TagComponent } from './tag';
 
 import * as React from 'react';
-import StyleClasses from './styles';
-
-const TagListStyleClasses = StyleClasses.TagListStyleClasses;
 
 export interface TagListComponentProps {
   selectedTags: string[];
@@ -38,8 +35,8 @@ export class TagListComponent extends React.Component<
     return tags.map((tag, index) => {
       const tagClass =
         selectedTags.indexOf(tag) >= 0
-          ? TagListStyleClasses.selectedTagStyleClass
-          : TagListStyleClasses.unselectedTagStyleClass;
+          ? 'toc-selected-tag toc-tag'
+          : 'toc-unselected-tag toc-tag';
       return (
         <div
           key={tag}
@@ -65,10 +62,6 @@ export class TagListComponent extends React.Component<
     if (allTagsList) {
       renderedTagsForAllCells = this.renderElementForTags(allTagsList);
     }
-    return (
-      <div className={TagListStyleClasses.tagHolderStyleClass}>
-        {renderedTagsForAllCells}
-      </div>
-    );
+    return <div className="toc-tag-holder">{renderedTagsForAllCells}</div>;
   }
 }

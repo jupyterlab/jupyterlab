@@ -1,7 +1,4 @@
 import * as React from 'react';
-import StyleClasses from './styles';
-
-const TagStyleClasses = StyleClasses.TagStyleClasses;
 
 export interface TagComponentProps {
   selectionStateHandler: (newState: string, add: boolean) => void;
@@ -18,10 +15,7 @@ export abstract class TagComponent extends React.Component<TagComponentProps> {
     const tag = this.props.tag as string;
     return (
       <div>
-        <label
-          className={TagStyleClasses.tagLabelStyleClass}
-          key={new Date().toLocaleTimeString()}
-        >
+        <label className="toc-tag-label" key={new Date().toLocaleTimeString()}>
           {tag}
         </label>
       </div>
