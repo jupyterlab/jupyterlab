@@ -135,10 +135,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         super.onUpdateRequest(msg);
     }
 
-    private _onActiveCellChange = (
-        _tracker: INotebookTracker,
-        cell: Cell | null
-    ) => {
+    private _onActiveCellChange = (_tracker: INotebookTracker, cell: Cell | null) => {
         let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
         if (cell !== null) {
             if (cell.model.type === 'code') {
@@ -170,9 +167,9 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                 if (activeCell === undefined) {
                     return null;
                 } else {
-                    if (activeCell.model.type === 'code') {
+                    if (activeCell!.model.type === 'code') {
                         return 'notebookCode';
-                    } else if (activeCell.model.type === 'raw') {
+                    } else if (activeCell!.model.type === 'raw') {
                         return 'notebookRaw';
                     } else {
                         return 'notebookMarkdown';
