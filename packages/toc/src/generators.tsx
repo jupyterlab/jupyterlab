@@ -424,36 +424,6 @@ export function notebookGeneratorToolbar(
     renderedDropdownMenu: any = createDropdownMenu();
 
     render() {
-      // const DropdownMenu = this.renderedDropdownMenu;
-      // const dropDownMenuItems: DropdownItem[] = [
-      //   {
-      //     id: 0,
-      //     props: {
-      //       title: 'Code',
-      //       selectedByDefault: this.state.showCode,
-      //       onClickHandler: this.toggleCode.bind(this)
-      //     },
-      //     type: TagTypeDropdownItem
-      //   },
-      //   {
-      //     id: 1,
-      //     props: {
-      //       title: 'Raw',
-      //       selectedByDefault: this.state.showRaw,
-      //       onClickHandler: this.toggleRaw.bind(this)
-      //     },
-      //     type: TagTypeDropdownItem
-      //   },
-      //   {
-      //     id: 2,
-      //     props: {
-      //       title: 'Markdown text',
-      //       selectedByDefault: this.state.showMarkdown,
-      //       onClickHandler: this.toggleMarkdown.bind(this)
-      //     },
-      //     type: TagTypeDropdownItem
-      //   }
-      // ];
       let codeIcon = this.state.showCode ? (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
@@ -558,7 +528,7 @@ export function notebookGeneratorToolbar(
       }
 
       return (
-        <div>
+        <div className={'toolbar-shadow'}>
           <div className={'toc-toolbar'}>
             {codeIcon}
             {markdownIcon}
@@ -570,6 +540,7 @@ export function notebookGeneratorToolbar(
           >
             {tagIcon}
           </div>
+          <hr className={'toolbar-hr'} />
           {tagDropdown}
         </div>
       );

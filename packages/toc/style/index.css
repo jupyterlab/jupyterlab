@@ -192,10 +192,12 @@
 }
 
 .toc-toolbar {
-  height: 45px;
+  position: relative;
+  width: 100%;
   padding: 0px;
   margin: 0px;
   user-select: none;
+  background-color: pink;
 }
 
 .dropdown-menu-inner-clickable {
@@ -284,4 +286,28 @@
 
 .cm-toc .CodeMirror-line {
   white-space: pre-wrap;
+}
+
+.tag-dropdown-button {
+  float: right;
+  margin: 4px;
+}
+
+.tag-dropdown {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  padding: 5px;
+  margin-top: 40px;
+}
+
+.toolbar-hr {
+  width: 100%;
+  color: var(--jp-layout-color4);
+}
+
+.dropdown-shadow {
+  -webkit-box-shadow: 0 6px 4px -4px black;
+  -moz-box-shadow: 0 6px 4px -4px black;
+  box-shadow: 0 6px 4px -4px black;
 }
