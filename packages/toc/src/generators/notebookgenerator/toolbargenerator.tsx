@@ -67,7 +67,8 @@ export function notebookGeneratorToolbar(
             this.setState({
               showCode: options.showCode,
               showMarkdown: options.showMarkdown,
-              showTags: options.showTags
+              showTags: options.showTags,
+              numbering: options.numbering
             });
           }
         });
@@ -240,12 +241,12 @@ export function notebookGeneratorToolbar(
             {codeIcon}
             {markdownIcon}
             {numberingIcon}
-          </div>
-          <div
-            className={'tag-dropdown-button'}
-            onClick={event => this.toggleTagDropdown()}
-          >
-            {tagIcon}
+            <div
+              className={'tag-dropdown-button'}
+              onClick={event => this.toggleTagDropdown()}
+            >
+              {tagIcon}
+            </div>
           </div>
           <hr className={'toolbar-hr'} />
           {tagDropdown}

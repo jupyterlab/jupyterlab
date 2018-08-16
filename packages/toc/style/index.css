@@ -194,7 +194,7 @@
 .toc-toolbar {
   position: relative;
   width: 100%;
-  padding: 0px;
+  padding: 3px;
   margin: 0px;
   user-select: none;
 }
@@ -220,6 +220,8 @@
   position: relative;
   align-items: center;
   width: 100%;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .toc-collapse-button {
@@ -290,6 +292,7 @@
 .tag-dropdown-button {
   float: right;
   margin: 4px;
+  margin-right: 9px;
 }
 
 .tag-dropdown {
@@ -403,9 +406,9 @@
 .toc-tag-holder {
   display: flex;
   flex-wrap: wrap;
-  padding: 4px;
   height: fit-content;
-  width: 100%;
   margin-bottom: 20px;
-  padding-right: 10px;
+  padding-right: 20px;
+  padding-left: 9px;
+  padding-top: 6px;
 }
