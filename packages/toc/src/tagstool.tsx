@@ -49,6 +49,7 @@ export class TagsToolComponent extends React.Component<
   };
 
   deselectAllTags = () => {
+    this.props.generatorOptionsRef.filtered = [];
     this.setState({ selected: [] });
   };
 
