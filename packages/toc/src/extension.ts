@@ -82,13 +82,14 @@ function activateTOC(
   registry.addGenerator(notebookGenerator);
 
   // Create an markdown editor TableOfContentsRegistry.IGenerator
-  const markdownGenerator = createMarkdownGenerator(editorTracker);
+  const markdownGenerator = createMarkdownGenerator(editorTracker, toc);
   registry.addGenerator(markdownGenerator);
 
   // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
     mimeDocumentTracker,
-    rendermime.sanitizer
+    rendermime.sanitizer,
+    toc
   );
   registry.addGenerator(renderedMarkdownGenerator);
 
