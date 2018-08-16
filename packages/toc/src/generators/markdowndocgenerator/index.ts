@@ -5,11 +5,19 @@ import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { TableOfContentsRegistry } from '../registry';
+import { TableOfContentsRegistry } from '../../registry';
 
-import { SharedMethods, INotebookHeading } from './shared';
+import { SharedMethods, INotebookHeading } from '../shared';
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
+
+import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
+
+import { TableOfContents } from '../../toc';
+
+import { markdownDocItemRenderer } from './itemrenderer';
+
+import { markdownDocGeneratorToolbar } from './toolbargenerator';
 
 /**
  * Create a TOC generator for markdown files.
@@ -19,17 +27,29 @@ import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
  * @returns A TOC generator that can parse markdown files.
  */
 export function createMarkdownGenerator(
-  tracker: IEditorTracker
+  tracker: IEditorTracker,
+  widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
+  const options = new MarkdownDocGeneratorOptionsManager(widget, {
+    needNumbering: true
+  });
   return {
     tracker,
     usesLatex: true,
+    options: options,
+    toolbarGenerator: () => {
+      return markdownDocGeneratorToolbar(options);
+    },
+    itemRenderer: (item: INotebookHeading) => {
+      return markdownDocItemRenderer(options, item);
+    },
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
       return SharedMethods.isMarkdown(editor.content.model.mimeType);
     },
     generate: editor => {
+      let numberingDict: { [level: number]: number } = {};
       let model = editor.content.model;
       let onClickFactory = (line: number) => {
         return () => {
@@ -39,7 +59,7 @@ export function createMarkdownGenerator(
       return Private.getMarkdownDocHeadings(
         model.value.text,
         onClickFactory,
-        null
+        numberingDict
       );
     }
   };
@@ -54,17 +74,29 @@ export function createMarkdownGenerator(
  */
 export function createRenderedMarkdownGenerator(
   tracker: IInstanceTracker<MimeDocument>,
-  sanitizer: ISanitizer
+  sanitizer: ISanitizer,
+  widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<MimeDocument> {
+  const options = new MarkdownDocGeneratorOptionsManager(widget, {
+    needNumbering: true
+  });
   return {
     tracker,
     usesLatex: true,
+    options: options,
+    toolbarGenerator: () => {
+      return markdownDocGeneratorToolbar(options);
+    },
+    itemRenderer: (item: INotebookHeading) => {
+      return markdownDocItemRenderer(options, item);
+    },
     isEnabled: widget => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
       return SharedMethods.isMarkdown(widget.content.mimeType);
     },
     generate: widget => {
+      let numberingDict: { [level: number]: number } = {};
       const onClickFactory = (el: Element) => {
         return () => {
           el.scrollIntoView();
@@ -74,7 +106,7 @@ export function createRenderedMarkdownGenerator(
         widget.content.node,
         onClickFactory,
         sanitizer,
-        null,
+        numberingDict,
         0
       );
     }

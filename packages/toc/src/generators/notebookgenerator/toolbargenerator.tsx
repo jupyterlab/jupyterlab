@@ -73,7 +73,7 @@ export function notebookGeneratorToolbar(
         });
       }
     }
-    public allTags: string[];
+
     toggleCode = (component: React.Component) => {
       options.showCode = !options.showCode;
       this.setState({ showCode: options.showCode });
@@ -252,5 +252,7 @@ export function notebookGeneratorToolbar(
         </div>
       );
     }
+
+    allTags: string[];
   };
 }
