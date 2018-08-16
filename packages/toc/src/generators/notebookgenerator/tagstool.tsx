@@ -111,7 +111,7 @@ export class TagsToolComponent extends React.Component<
     let renderedJSX = <div className="no-tags-div">No Tags Available</div>;
     if (this.props.allTagsList && this.props.allTagsList.length > 0) {
       renderedJSX = (
-        <div className="tags-container">
+        <div className={'tags-container'}>
           <TagListComponent
             allTagsList={this.props.allTagsList}
             selectionStateHandler={this.changeSelectionState}

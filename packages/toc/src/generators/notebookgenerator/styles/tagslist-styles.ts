@@ -26,6 +26,7 @@ export namespace TagListStyleClasses {
     flexWrap: 'wrap',
     padding: '4px',
     height: 'fit-content',
+    width: '100%',
     marginBottom: '20px',
     paddingRight: '10px'
   });
