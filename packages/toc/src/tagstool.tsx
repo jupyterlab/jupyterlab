@@ -2,13 +2,13 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
-//import StyleClasses from './styles';
-// const TAG_TOOL_CLASS = 'jp-cellTags-Tools';
-//const TagsToolStyleClasses = StyleClasses.TagsToolStyleClasses;
+import { NotebookGeneratorOptionsManager } from './generators';
+
 export interface TagsToolComponentProps {
   // widget: TagsWidget;
   allTagsList: string[];
   tracker: INotebookTracker;
+  generatorOptionsRef: NotebookGeneratorOptionsManager;
 }
 
 export interface TagsToolComponentState {
@@ -99,6 +99,9 @@ export class TagsToolComponent extends React.Component<
         }
       }
     }
+    
+  filterTags = () => {
+    this.props.generatorOptionsRef.filtered = this.state.selected;
   };
 
   handleClick = (e: any) => {
@@ -126,7 +129,7 @@ export class TagsToolComponent extends React.Component<
           {' '}
           Select Cells{' '}
         </span>
-        <span className={'filter-button'}> Filter</span>
+        <span onClick={() => this.filterTags()} className={'filter-button'}> Filter</span>
       </div>
     );
   }

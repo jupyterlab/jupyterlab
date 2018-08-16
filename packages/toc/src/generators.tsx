@@ -39,7 +39,7 @@ export interface INotebookHeading extends IHeading {
   hasChild?: boolean;
 }
 
-class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
+export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
@@ -114,6 +114,15 @@ class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGenerator
     return this._showTags;
   }
 
+  set filtered(value: string[]) {
+    this._filtered = value;
+    this._widget.update();
+  }
+
+  get filtered() {
+    return this._filtered;
+  }
+
   updateWidget() {
     this._widget.update();
   }
@@ -133,6 +142,7 @@ class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGenerator
   }
 
   sanitizer: ISanitizer;
+  private _filtered: string[] = [];
   private _numbering: boolean;
   private _showCode = false;
   private _showMarkdown = false;
@@ -518,6 +528,7 @@ export function notebookGeneratorToolbar(
             <TagsToolComponent
               allTagsList={this.allTags}
               tracker={tracker}
+              generatorOptionsRef={options}
             />{' '}
           </div>
         );
@@ -627,10 +638,23 @@ export function createNotebookGenerator(
               lastLevel,
               cell
             );
-            if (currentCollapseLevel < 0) {
+            if (
+              currentCollapseLevel < 0 &&
+              !Private.headingIsFilteredOut(
+                renderedHeadings[0],
+                options.filtered
+              )
+            ) {
               headings = headings.concat(renderedHeadings);
             }
-            prevHeading = renderedHeadings[0];
+            if (
+              !Private.headingIsFilteredOut(
+                renderedHeadings[0],
+                options.filtered
+              )
+            ) {
+              prevHeading = renderedHeadings[0];
+            }
           }
           for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
             // Filter out the outputs that are not rendered HTML
@@ -674,7 +698,13 @@ export function createNotebookGenerator(
             );
             let renderedHeading = renderedHeadings[0];
             if (renderedHeading.type === 'markdown') {
-              if (currentCollapseLevel < 0) {
+              if (
+                currentCollapseLevel < 0 &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
+              ) {
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
@@ -686,8 +716,12 @@ export function createNotebookGenerator(
                 prevHeading.hasChild = false;
               }
               if (
-                currentCollapseLevel >= renderedHeading.level ||
-                currentCollapseLevel < 0
+                (currentCollapseLevel >= renderedHeading.level ||
+                  currentCollapseLevel < 0) &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
               ) {
                 headings = headings.concat(renderedHeadings);
                 if (collapsed) {
@@ -695,9 +729,25 @@ export function createNotebookGenerator(
                 } else {
                   currentCollapseLevel = -1;
                 }
+              } else {
+                if (
+                  Private.headingIsFilteredOut(
+                    renderedHeadings[0],
+                    options.filtered
+                  )
+                ) {
+                  currentCollapseLevel = -1;
+                }
               }
             }
-            prevHeading = renderedHeading;
+            if (
+              !Private.headingIsFilteredOut(
+                renderedHeadings[0],
+                options.filtered
+              )
+            ) {
+              prevHeading = renderedHeading;
+            }
           }
         } else if (model.type === 'markdown') {
           // If the cell is rendered, generate the ToC items from
@@ -740,7 +790,13 @@ export function createNotebookGenerator(
             );
             let renderedHeading = renderedHeadings[0];
             if (renderedHeading.type === 'markdown') {
-              if (currentCollapseLevel < 0) {
+              if (
+                currentCollapseLevel < 0 &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
+              ) {
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
@@ -752,8 +808,12 @@ export function createNotebookGenerator(
                 prevHeading.hasChild = false;
               }
               if (
-                currentCollapseLevel >= renderedHeading.level ||
-                currentCollapseLevel < 0
+                (currentCollapseLevel >= renderedHeading.level ||
+                  currentCollapseLevel < 0) &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
               ) {
                 headings = headings.concat(renderedHeadings);
                 if (collapsed) {
@@ -761,9 +821,25 @@ export function createNotebookGenerator(
                 } else {
                   currentCollapseLevel = -1;
                 }
+              } else {
+                if (
+                  Private.headingIsFilteredOut(
+                    renderedHeadings[0],
+                    options.filtered
+                  )
+                ) {
+                  currentCollapseLevel = -1;
+                }
               }
             }
-            prevHeading = renderedHeading;
+            if (
+              !Private.headingIsFilteredOut(
+                renderedHeadings[0],
+                options.filtered
+              )
+            ) {
+              prevHeading = renderedHeading;
+            }
           } else {
             const onClickFactory = (line: number) => {
               return () => {
@@ -794,7 +870,13 @@ export function createNotebookGenerator(
             );
             let renderedHeading = renderedHeadings[0];
             if (renderedHeading.type === 'markdown') {
-              if (currentCollapseLevel < 0) {
+              if (
+                currentCollapseLevel < 0 &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
+              ) {
                 headings = headings.concat(renderedHeadings);
               }
             } else if (renderedHeading.type === 'header') {
@@ -806,13 +888,26 @@ export function createNotebookGenerator(
                 prevHeading.hasChild = false;
               }
               if (
-                currentCollapseLevel >= renderedHeading.level ||
-                currentCollapseLevel < 0
+                (currentCollapseLevel >= renderedHeading.level ||
+                  currentCollapseLevel < 0) &&
+                !Private.headingIsFilteredOut(
+                  renderedHeadings[0],
+                  options.filtered
+                )
               ) {
                 headings = headings.concat(renderedHeadings);
                 if (collapsed) {
                   currentCollapseLevel = renderedHeading.level;
                 } else {
+                  currentCollapseLevel = -1;
+                }
+              } else {
+                if (
+                  Private.headingIsFilteredOut(
+                    renderedHeadings[0],
+                    options.filtered
+                  )
+                ) {
                   currentCollapseLevel = -1;
                 }
               }
@@ -954,6 +1049,32 @@ export function createLatexGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+  export function headingIsFilteredOut(
+    heading: INotebookHeading,
+    tags: string[]
+  ) {
+    if (tags.length === 0) {
+      return false;
+    }
+    if (heading && heading.cellRef) {
+      let cellMetadata = heading.cellRef.model.metadata;
+      let cellTagsData = cellMetadata.get('tags') as string[];
+      if (cellTagsData) {
+        for (var j = 0; j < cellTagsData.length; j++) {
+          let name = cellTagsData[j];
+          for (var k = 0; k < tags.length; k++) {
+            if (tags[k] === name) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+      return true;
+    }
+    return true;
+  }
+
   export function getLastLevel(headings: INotebookHeading[]) {
     if (headings.length > 0) {
       let location = headings.length - 1;
