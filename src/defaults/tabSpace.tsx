@@ -137,20 +137,22 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
 
     private _onActiveCellChange = (_tracker: INotebookTracker, cell: Cell) => {
         let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
-        if (cell) {
-            if (cell!.model.type === 'code') {
+        if (cell !== null) {
+            if (cell.model.type === 'code') {
                 settingsConnector = this._settingsProviderData['notebookCode']
                     .connector;
-            } else if (cell!.model.type === 'raw') {
+            } else if (cell.model.type === 'raw') {
                 settingsConnector = this._settingsProviderData['notebookRaw']
                     .connector;
+            } else {
+                settingsConnector = null;
             }
         } else {
             settingsConnector = this._settingsProviderData['notebookMarkdown']
                 .connector;
         }
 
-        this.model!.settingConnector = settingsConnector!;
+        this.model!.settingConnector = settingsConnector;
     };
 
     private _getFocusedSettingProvider(
