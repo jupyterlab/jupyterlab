@@ -11,6 +11,6 @@ export const progressBarItem = style({
 });
 
 export const fillerItem = style({
-    background: 'lightgreen',
+    background: 'var(--jp-brand-color2)',
     height: '10px'
 });
