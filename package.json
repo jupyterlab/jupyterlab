@@ -34,7 +34,8 @@
         "build": "npm run lint:ts && tsc",
         "clean": "rimraf lib",
         "watch": "tsc -w  --listEmittedFiles",
-        "lint:ts": "tslint -p tsconfig.json --exclude '**/*.d.ts'"
+        "lint:ts": "tslint -p tsconfig.json --exclude '**/*.d.ts'",
+        "typedoc": "typedoc --out docs/ src/ --exclude '**/src/+(component|style)/*.*'"
     },
     "dependencies": {
         "@jupyterlab/application": "^0.18.0",
@@ -74,6 +75,7 @@
         "prettier": "^1.14.2",
         "rimraf": "^2.6.1",
         "tslint": "^5.11.0",
+        "typedoc": "^0.11.1",
         "typescript": "^2.9.2"
     },
     "jupyterlab": {
