@@ -795,7 +795,7 @@
       "default": {},
       "properties": {
         "command": { "default": "notebook:run-in-console" },
-        "keys": { "default": ["Ctrl Shift Enter"] },
+        "keys": { "default": [""] },
         "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
         "title": { "default": "Run In Console" },
         "category": { "default": "Notebook Cell Operations" }
