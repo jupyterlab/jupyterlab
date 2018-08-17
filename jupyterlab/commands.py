@@ -875,7 +875,15 @@ class _AppHandler(object):
         templates = pjoin(staging, 'templates')
         if osp.exists(templates):
             shutil.rmtree(templates)
-        shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
+
+        try:
+            shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
+        except shutil.Error as error:
+            # `copytree` throws an error if copying to + from NFS even though
+            # the copy is successful (see https://bugs.python.org/issue24564)
+
+            if '[Errno 22]' not in str(error) or not osp.exists(templates):
+                raise
 
         # Ensure a clean linked packages directory.
         linked_dir = pjoin(staging, 'linked_packages')
