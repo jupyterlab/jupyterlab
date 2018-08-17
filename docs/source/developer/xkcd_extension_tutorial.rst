@@ -56,6 +56,9 @@ the ``conda`` package manager.
 
     source ~/miniconda/bin/activate
 
+For more detail on installing miniconda, see
+`Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
+
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 
 Install NodeJS, JupyterLab, etc. in a conda environment
