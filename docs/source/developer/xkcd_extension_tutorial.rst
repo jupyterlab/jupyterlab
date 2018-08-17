@@ -56,6 +56,9 @@ the ``conda`` package manager.
 
     source ~/miniconda/bin/activate
 
+For more detail on installing miniconda, see
+`Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
+
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 
 Install NodeJS, JupyterLab, etc. in a conda environment
@@ -106,6 +109,7 @@ Initialize the project from a cookiecutter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next use cookiecutter to create a new project for your extension.
+This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
@@ -117,10 +121,9 @@ cookiecutter prompts.
 ::
 
     author_name []: Your Name
-    extension_name [jupyterlab_myextension]: jupyterlab_xkcd
+    extension_name [myextension]: jupyterlab_xkcd
     project_short_description [A JupyterLab extension.]: Show a random xkcd.com comic in a JupyterLab panel
-    repository [https://github.com/my_name/jupyterlab_myextension]: Your repository
-    url
+    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_xkcd
 
 Note: if not using a repository, leave the field blank. You can come
 back and edit the repository links in the ``package.json`` file later.
