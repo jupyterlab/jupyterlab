@@ -257,7 +257,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
                 if (activeCell === undefined) {
                     return null;
                 } else {
-                    return activeCell.editor;
+                    return activeCell!.editor;
                 }
             } else if (this._editorTracker.has(val)) {
                 return (val as IDocumentWidget<FileEditor>).content.editor;
