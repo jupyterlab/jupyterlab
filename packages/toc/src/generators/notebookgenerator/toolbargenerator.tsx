@@ -244,7 +244,7 @@ export function notebookGeneratorToolbar(
       if (this.state.showTags) {
         this.getTags();
         tagDropdown = (
-          <div className={'tag-dropdown'}>
+          <div className={'toc-tag-dropdown'}>
             {' '}
             <TagsToolComponent
               allTagsList={this.allTags}
@@ -269,13 +269,13 @@ export function notebookGeneratorToolbar(
             {markdownIcon}
             {numberingIcon}
             <div
-              className={'tag-dropdown-button'}
+              className={'toc-tag-dropdown-button'}
               onClick={event => this.toggleTagDropdown()}
             >
               {tagIcon}
             </div>
           </div>
-          <hr className={'toolbar-hr'} />
+          <hr className={'toc-toolbar-hr'} />
           {tagDropdown}
         </div>
       );
