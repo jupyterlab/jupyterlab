@@ -37,7 +37,7 @@ const RunningSessionsComponent = (
             </GroupItem>
             <GroupItem spacing={vars.textIconHalfSpacing}>
                 <TextItem source={props.kernels} />
-                <IconItem source={'kernel-item'} offset={{ x: 0, y: 3 }} />
+                <IconItem source={'kernel-item'} offset={{ x: 0, y: 2 }} />
             </GroupItem>
         </GroupItem>
     );
