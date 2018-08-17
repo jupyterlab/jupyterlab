@@ -2,8 +2,7 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "./lib",
-    "jsx": "react",
-    "strictNullChecks": true
+    "jsx": "react"
   },
   "include": ["src/*"]
 }
