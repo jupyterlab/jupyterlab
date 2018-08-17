@@ -121,10 +121,9 @@ cookiecutter prompts.
 ::
 
     author_name []: Your Name
-    extension_name [jupyterlab_myextension]: jupyterlab_xkcd
+    extension_name [myextension]: jupyterlab_xkcd
     project_short_description [A JupyterLab extension.]: Show a random xkcd.com comic in a JupyterLab panel
-    repository [https://github.com/my_name/jupyterlab_myextension]: Your repository
-    url
+    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_xkcd
 
 Note: if not using a repository, leave the field blank. You can come
 back and edit the repository links in the ``package.json`` file later.
