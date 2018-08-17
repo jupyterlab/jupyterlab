@@ -34,7 +34,6 @@ import '@jupyterlab/inspector';
 import '@jupyterlab/inspector-extension';
 import '@jupyterlab/javascript-extension';
 import '@jupyterlab/json-extension';
-import '@jupyterlab/statusbar';
 import '@jupyterlab/launcher';
 import '@jupyterlab/launcher-extension';
 import '@jupyterlab/mainmenu';
