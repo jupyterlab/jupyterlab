@@ -109,6 +109,7 @@ Initialize the project from a cookiecutter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next use cookiecutter to create a new project for your extension.
+This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
