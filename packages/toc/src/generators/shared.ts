@@ -63,7 +63,7 @@ export function getRenderedHTMLHeadings(
         headings.push({
           level: lastLevel + 1,
           html: markdownCell.innerHTML,
-          text: markdownCell.textContent,
+          text: markdownCell.textContent ? markdownCell.textContent : '',
           onClick: onClickFactory(markdownCell),
           type: 'markdown',
           cellRef: cellRef,
@@ -73,7 +73,7 @@ export function getRenderedHTMLHeadings(
     } else {
       const heading = headingNodes[0];
       const level = parseInt(heading.tagName[1]);
-      const text = heading.textContent;
+      const text = heading.textContent ? heading.textContent : '';
       let shallHide = !needNumbering;
       if (heading.getElementsByClassName('numbering-entry').length > 0) {
         heading.removeChild(

@@ -194,7 +194,7 @@ export interface IHeading {
   /**
    * The text of the heading.
    */
-  text: string | null;
+  text: string;
 
   /**
    * The HTML header level for the heading.
