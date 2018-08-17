@@ -64,11 +64,13 @@ export class Popup extends Widget {
     protected onAfterAttach(msg: Message): void {
         document.addEventListener('click', this, false);
         this.node.addEventListener('keypress', this, false);
+        window.addEventListener('resize', this, false);
     }
 
     protected onAfterDetach(msg: Message): void {
         document.removeEventListener('click', this, false);
         this.node.removeEventListener('keypress', this, false);
+        window.removeEventListener('resize', this, false);
     }
 
     protected _evtClick(event: MouseEvent): void {
@@ -113,6 +115,9 @@ export class Popup extends Widget {
                 break;
             case 'click':
                 this._evtClick(event as MouseEvent);
+                break;
+            case 'resize':
+                this.onResize();
                 break;
             default:
                 break;
