@@ -293,7 +293,9 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       this.props.widget.generator &&
       this.props.widget.generator.toolbarGenerator
     ) {
-      this.renderedToolbar = this.props.widget.generator.toolbarGenerator();
+      this.renderedToolbar = this.props.widget.generator.toolbarGenerator(
+        this.props.widget
+      );
     }
   }
 
@@ -303,7 +305,9 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         this.props.widget.generator &&
         this.props.widget.generator.toolbarGenerator
       ) {
-        this.renderedToolbar = this.props.widget.generator.toolbarGenerator();
+        this.renderedToolbar = this.props.widget.generator.toolbarGenerator(
+          this.props.widget
+        );
       } else {
         this.renderedToolbar = null;
       }
