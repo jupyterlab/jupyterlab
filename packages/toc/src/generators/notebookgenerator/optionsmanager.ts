@@ -42,10 +42,16 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     }
   }
 
+  set notebookMetadata(value: [string, any]) {
+    if (this._notebook.currentWidget != null) {
+      this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
+    }
+  }
+
   set numbering(value: boolean) {
     this._numbering = value;
     this._widget.update();
-    this._widget.notebookMetadata = ['toc-autonumbering', this._numbering];
+    this.notebookMetadata = ['toc-autonumbering', this._numbering];
     this.changeNumberingStateForAllCells(this._numbering);
   }
 
@@ -55,7 +61,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   set showCode(value: boolean) {
     this._showCode = value;
-    this._widget.notebookMetadata = ['toc-showcode', this._showCode];
+    this.notebookMetadata = ['toc-showcode', this._showCode];
     this._widget.update();
   }
 
@@ -65,7 +71,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   set showMarkdown(value: boolean) {
     this._showMarkdown = value;
-    this._widget.notebookMetadata = ['toc-showmarkdowntxt', this._showMarkdown];
+    this.notebookMetadata = ['toc-showmarkdowntxt', this._showMarkdown];
     this._widget.update();
   }
 
@@ -75,7 +81,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   set showTags(value: boolean) {
     this._showTags = value;
-    this._widget.notebookMetadata = ['toc-showtags', this._showTags];
+    this.notebookMetadata = ['toc-showtags', this._showTags];
     this._widget.update();
   }
 
@@ -90,6 +96,14 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   get filtered() {
     return this._filtered;
+  }
+
+  set preRenderedToolbar(value: any) {
+    this._preRenderedToolbar = value;
+  }
+
+  get preRenderedToolbar() {
+    return this._preRenderedToolbar;
   }
 
   updateWidget() {
@@ -111,6 +125,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
   }
 
   sanitizer: ISanitizer;
+  private _preRenderedToolbar: any = null;
   private _filtered: string[] = [];
   private _numbering: boolean;
   private _showCode = false;

@@ -7,7 +7,7 @@ import { Cell } from '@jupyterlab/cells';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
-import { SharedConstants, INotebookHeading } from '../shared';
+import { sanitizerOptions, INotebookHeading } from '../shared';
 
 import * as React from 'react';
 
@@ -45,10 +45,7 @@ export function notebookItemRenderer(
           dangerouslySetInnerHTML={{
             __html:
               numbering +
-              options.sanitizer.sanitize(
-                item.html,
-                SharedConstants.sanitizerOptions
-              )
+              options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
           className={item.type + '-cell'}
           style={{ fontSize, paddingLeft }}
@@ -70,7 +67,7 @@ export function notebookItemRenderer(
             <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
-              src={require('../../../static/downarrow.svg')}
+              src={require('../../../style/img/downarrow.svg')}
             />
           </div>
         );
@@ -86,7 +83,7 @@ export function notebookItemRenderer(
               <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
-                src={require('../../../static/rightarrow.svg')}
+                src={require('../../../style/img/rightarrow.svg')}
               />
             </div>
           );
@@ -120,7 +117,7 @@ export function notebookItemRenderer(
             <div className="toc-twist-placeholder">placeholder</div>
             <img
               className="toc-arrow-img"
-              src={require('../../../static/downarrow.svg')}
+              src={require('../../../style/img/downarrow.svg')}
             />
           </div>
         );
@@ -136,7 +133,7 @@ export function notebookItemRenderer(
               <div className="toc-twist-placeholder">placeholder</div>
               <img
                 className="toc-arrow-img"
-                src={require('../../../static/rightarrow.svg')}
+                src={require('../../../style/img/rightarrow.svg')}
               />
             </div>
           );

@@ -35,7 +35,7 @@ export function markdownDocGeneratorToolbar(
           <img
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../static/autonumbering_selected.svg')}
+            src={require('../../../style/img/autonumbering_selected.svg')}
             className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>
@@ -47,7 +47,7 @@ export function markdownDocGeneratorToolbar(
           <img
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../static/autonumbering_unselected.svg')}
+            src={require('../../../style/img/autonumbering_unselected.svg')}
             className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>

@@ -18,7 +18,13 @@ import { TableOfContents } from '../../toc';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
-import { SharedMethods, INotebookHeading } from '../shared';
+import {
+  getRenderedHTMLHeadings,
+  getMarkdownHeadings,
+  isDOM,
+  isMarkdown,
+  INotebookHeading
+} from '../shared';
 
 /**
  * Create a TOC generator for notebooks.
@@ -119,9 +125,7 @@ export function createNotebookGenerator(
             // (that is, markdown, vdom, or text/html)
             const outputModel = (model as CodeCellModel).outputs.get(i);
             const dataTypes = Object.keys(outputModel.data);
-            const htmlData = dataTypes.filter(
-              t => SharedMethods.isMarkdown(t) || SharedMethods.isDOM(t)
-            );
+            const htmlData = dataTypes.filter(t => isMarkdown(t) || isDOM(t));
             if (!htmlData.length) {
               continue;
             }
@@ -145,7 +149,7 @@ export function createNotebookGenerator(
             };
             let lastLevel = Private.getLastLevel(headings);
             let numbering = options.numbering;
-            let renderedHeadings = SharedMethods.getRenderedHTMLHeadings(
+            let renderedHeadings = getRenderedHTMLHeadings(
               outputWidget.node,
               onClickFactory,
               sanitizer,
@@ -237,7 +241,7 @@ export function createNotebookGenerator(
             };
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings = SharedMethods.getRenderedHTMLHeadings(
+            let renderedHeadings = getRenderedHTMLHeadings(
               cell.node,
               onClickFactory,
               sanitizer,
@@ -319,7 +323,7 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings = SharedMethods.getMarkdownHeadings(
+            let renderedHeadings = getMarkdownHeadings(
               model.value.text,
               onClickFactory,
               numberingDict,

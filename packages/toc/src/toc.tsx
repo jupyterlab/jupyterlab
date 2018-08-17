@@ -15,7 +15,6 @@ import { TableOfContentsRegistry } from './registry';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * Timeout for throttling TOC rendering.
@@ -33,12 +32,7 @@ export class TableOfContents extends Widget {
     super();
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
-    this._notebook = options.notebookTracker;
   }
-
-  // filterByTag(name: string) {
-
-  // }
 
   /**
    * The current widget-generator tuple for the ToC.
@@ -157,13 +151,6 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
-  set notebookMetadata(value: [string, any]) {
-    if (this._notebook.currentWidget != null) {
-      this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
-    }
-  }
-
-  private _notebook: INotebookTracker;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
@@ -187,7 +174,6 @@ export namespace TableOfContents {
      * The rendermime for the application.
      */
     rendermime: IRenderMimeRegistry;
-    notebookTracker: INotebookTracker;
   }
 
   /**

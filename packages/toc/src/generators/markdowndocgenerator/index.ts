@@ -7,7 +7,12 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { TableOfContentsRegistry } from '../../registry';
 
-import { SharedMethods, INotebookHeading } from '../shared';
+import {
+  generateNumbering,
+  getRenderedHTMLHeadings,
+  isMarkdown,
+  INotebookHeading
+} from '../shared';
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
@@ -46,7 +51,7 @@ export function createMarkdownGenerator(
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
-      return SharedMethods.isMarkdown(editor.content.model.mimeType);
+      return isMarkdown(editor.content.model.mimeType);
     },
     generate: editor => {
       let numberingDict: { [level: number]: number } = {};
@@ -93,7 +98,7 @@ export function createRenderedMarkdownGenerator(
     isEnabled: widget => {
       // Only enable this if the editor mimetype matches
       // one of a few markdown variants.
-      return SharedMethods.isMarkdown(widget.content.mimeType);
+      return isMarkdown(widget.content.mimeType);
     },
     generate: widget => {
       let numberingDict: { [level: number]: number } = {};
@@ -102,7 +107,7 @@ export function createRenderedMarkdownGenerator(
           el.scrollIntoView();
         };
       };
-      return SharedMethods.getRenderedHTMLHeadings(
+      return getRenderedHTMLHeadings(
         widget.content.node,
         onClickFactory,
         sanitizer,
@@ -138,7 +143,7 @@ namespace Private {
         const level = match[1].length;
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-        let numbering = SharedMethods.generateNumbering(numberingDict, level);
+        let numbering = generateNumbering(numberingDict, level);
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
@@ -149,7 +154,7 @@ namespace Private {
         const level = match[1][0] === '=' ? 1 : 2;
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
-        let numbering = SharedMethods.generateNumbering(numberingDict, level);
+        let numbering = generateNumbering(numberingDict, level);
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
@@ -161,7 +166,7 @@ namespace Private {
       if (match) {
         const level = parseInt(match[1], 10);
         const text = match[2];
-        let numbering = SharedMethods.generateNumbering(numberingDict, level);
+        let numbering = generateNumbering(numberingDict, level);
         headings.push({ text, numbering, level, onClick, type: 'header' });
         return;
       }
