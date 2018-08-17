@@ -82,6 +82,10 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
                 return aName.localeCompare(bName);
             })
             .forEach(spec => {
+                if (spec.mode.indexOf('brainf') === 0) {
+                    return;
+                }
+
                 let args: JSONObject = {
                     insertSpaces: true,
                     name: spec.name!
