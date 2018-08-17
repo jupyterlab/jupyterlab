@@ -169,6 +169,15 @@
   float: left;
 }
 
+.toc-toolbar-button .toc-hover--on,
+.toc-toolbar-button:hover .toc-hover--off {
+  display: none;
+}
+
+.toc-toolbar-button:hover .toc-hover--on {
+  display: inline;
+}
+
 .toc-code-cell-prompt {
   flex: 0 0 27px;
   color: var(--jp-cell-prompt-not-active-font-color);
@@ -220,8 +229,8 @@
   position: relative;
   align-items: center;
   width: 100%;
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .toc-collapse-button {
@@ -320,6 +329,15 @@
 
 .clear-button {
   font-size: 12px;
+  color: var(--jp-ui-font-color1);
+  padding-left: 15px;
+  padding-top: 7px;
+  user-select: none;
+}
+
+.clear-button:hover {
+  font-size: 12px;
+  color: var(--jp-ui-font-color2);
   padding-left: 15px;
   padding-top: 7px;
   user-select: none;

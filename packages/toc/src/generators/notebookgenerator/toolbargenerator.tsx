@@ -149,7 +149,13 @@ export function notebookGeneratorToolbar(
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
             src={require('../../../static/code_unselected.svg')}
-            className="toc-toolbar-code-icon toc-toolbar-icon"
+            className="toc-toolbar-code-icon toc-toolbar-icon toc-hover--off"
+          />
+          <img
+            alt="Toggle Code Cells"
+            title="Toggle Code Cells"
+            src={require('../../../static/code_hover.svg')}
+            className="toc-toolbar-code-icon toc-toolbar-icon toc-hover--on"
           />
         </div>
       );
@@ -175,7 +181,13 @@ export function notebookGeneratorToolbar(
             alt="Toggle Code Cells"
             title="Toggle Code Cells"
             src={require('../../../static/markdown_unselected.svg')}
-            className="toc-toolbar-markdown-icon toc-toolbar-icon"
+            className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--off"
+          />
+          <img
+            alt="Toggle Code Cells"
+            title="Toggle Code Cells"
+            src={require('../../../static/markdown_hover.svg')}
+            className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--on"
           />
         </div>
       );
@@ -201,18 +213,33 @@ export function notebookGeneratorToolbar(
             alt="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
             src={require('../../../static/autonumbering_unselected.svg')}
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
+            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon toc-hover--off"
+          />
+          <img
+            alt="Toggle Auto-Numbering"
+            title="Toggle Auto-Numbering"
+            src={require('../../../static/autonumbering_hover.svg')}
+            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon toc-hover--on"
           />
         </div>
       );
 
       let tagDropdown = <div />;
       let tagIcon = (
-        <img
-          alt="Show Tag Dropdown"
-          title="Show Tag Dropdown"
-          src={require('../../../static/tag_unselected.svg')}
-        />
+        <div className="toc-toolbar-button">
+          <img
+            className="toc-hover--off"
+            alt="Show Tags Menu"
+            title="Show Tags Menu"
+            src={require('../../../static/tag_unselected.svg')}
+          />
+          <img
+            className="toc-hover--on"
+            alt="Show Tags Menu"
+            title="Show Tags Menu"
+            src={require('../../../static/tag_hover.svg')}
+          />
+        </div>
       );
       if (this.state.showTags) {
         this.getTags();
