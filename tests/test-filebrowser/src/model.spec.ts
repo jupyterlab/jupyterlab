@@ -433,6 +433,50 @@ describe('filebrowser/model', () => {
           expect(toArray(model.uploads())).to.deep.equal([]);
         });
 
+        it(`should produce progress as a large file fails`, async () => {
+          const fname = UUID.uuid4() + '.ipynb';
+          const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
+
+          const [start, first, second] = signalToPromises(
+            model.uploadChanged,
+            3
+          );
+
+          model.upload(file);
+          // expect(toArray(model.uploads())).to.deep.equal([]);
+          expect(await start).to.deep.equal([
+            model,
+            {
+              name: 'start',
+              oldValue: null,
+              newValue: { path: fname, progress: 0 }
+            }
+          ]);
+          expect(toArray(model.uploads())).to.deep.equal([
+            { path: fname, progress: 0 }
+          ]);
+          expect(await first).to.deep.equal([
+            model,
+            {
+              name: 'update',
+              oldValue: { path: fname, progress: 0 },
+              newValue: { path: fname, progress: 0 }
+            }
+          ]);
+          expect(toArray(model.uploads())).to.deep.equal([
+            { path: fname, progress: 0 }
+          ]);
+          expect(await second).to.deep.equal([
+            model,
+            {
+              name: 'failure',
+              oldValue: null,
+              newValue: { path: fname, progress: 0 }
+            }
+          ]);
+          expect(toArray(model.uploads())).to.deep.equal([]);
+        });
+
         after(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
