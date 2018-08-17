@@ -175,9 +175,10 @@ make them.
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After should open in your default web browser after it finishes building with your extension included..
+After building with your extension, JupyterLab should open in your
+default web browser.
 
-In that tab it opens in, open the JavaScript console
+In that window open the JavaScript console
 by following the instructions for your browser:
 
 -  `Accessing the DevTools in Google
@@ -274,8 +275,8 @@ Run the following to rebuild your extension.
 
     npm run build
 
-When your extension finishes building JupyterLab should rebuild. This
-will appear in thhe window you ran ``jupyter lab --watch`` in. After that
+JupyterLab will rebuild after the extension does. You can
+see it's progress in the ``jupyter lab --watch`` window. After that
 finishes, return to the browser tab that opened when you
 started JupyterLab. Refresh it and look in the console. You should see
 the same activation message as before, plus the new message about the
