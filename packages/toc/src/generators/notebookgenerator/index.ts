@@ -155,7 +155,7 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading.type === 'markdown') {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -165,7 +165,7 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading.type === 'header') {
+            } else if (renderedHeading && renderedHeading.type === 'header') {
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
@@ -247,7 +247,7 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading.type === 'markdown') {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -257,7 +257,7 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading.type === 'header') {
+            } else if (renderedHeading && renderedHeading.type === 'header') {
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
@@ -327,7 +327,7 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading.type === 'markdown') {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -337,7 +337,7 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading.type === 'header') {
+            } else if (renderedHeading && renderedHeading.type === 'header') {
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
