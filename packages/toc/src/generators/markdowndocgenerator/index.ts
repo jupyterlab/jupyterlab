@@ -89,7 +89,7 @@ export function createRenderedMarkdownGenerator(
     tracker,
     usesLatex: true,
     options: options,
-    toolbarGenerator: () => {
+    toolbarGenerator: widget => {
       return markdownDocGeneratorToolbar(options);
     },
     itemRenderer: (item: INotebookHeading) => {

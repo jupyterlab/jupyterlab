@@ -97,7 +97,7 @@ export namespace TableOfContentsRegistry {
 
     itemRenderer?: (item: IHeading) => JSX.Element | null;
 
-    toolbarGenerator?: () => any;
+    toolbarGenerator?: (widget: W) => any;
 
     /**
      * A function that takes the widget, and produces
