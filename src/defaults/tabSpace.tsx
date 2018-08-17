@@ -437,6 +437,8 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
 
         const editorMenu = new Menu({ commands: app.commands });
 
+        editorMenu.addClass('p-Menu');
+
         const args: JSONObject = {
             insertSpaces: false,
             size: 4,
