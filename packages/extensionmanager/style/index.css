@@ -54,7 +54,6 @@
   height: 24px;
 }
 
-
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
   padding: 0px 4px;
 }
@@ -73,7 +72,6 @@
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
   border: 1px solid var(--jp-brand-color1);
 }
-
 
 /*
   Error messages
@@ -155,7 +153,6 @@
   display: flex;
   justify-content: center;
 }
-
 
 /*
   Entry buttons visibility
@@ -405,7 +402,6 @@ input[type='checkbox'] {
   font-weight: 600;
   color: var(--jp-ui-font-color0);
 }
-
 
 .jp-extensionmanager-collapseIcon {
   background-image: var(--jp-image-caretright);
