@@ -20,7 +20,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
-import { showPopup } from '../component/hover';
+import { showPopup, Popup } from '../component/hover';
 import { interactiveItem } from '../style/statusBar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
@@ -84,7 +84,10 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         }
         const { menu } = this._settingsProviderData[provider];
 
-        showPopup({
+        if (this._popup) {
+            this._popup.dispose();
+        }
+        this._popup = showPopup({
             body: menu,
             anchor: this,
             align: 'right'
@@ -204,6 +207,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
     private _consoleTracker: IConsoleTracker;
     private _shell: ApplicationShell;
     private _settingsProviderData: TabSpace.ISettingProviderData;
+    private _popup: Popup | null = null;
 }
 
 namespace Private {

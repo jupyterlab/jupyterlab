@@ -15,7 +15,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
-import { showPopup } from '../component/hover';
+import { showPopup, Popup } from '../component/hover';
 import { interactiveItem } from '../style/statusBar';
 
 namespace EditorSyntaxComponent {
@@ -72,6 +72,9 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     private _handleClick = () => {
         const modeMenu = new Menu({ commands: this._commands });
         let command = 'codemirror:change-mode';
+        if (this._popup) {
+            this._popup.dispose();
+        }
         Mode.getModeInfo()
             .sort((a, b) => {
                 let aName = a.name || '';
@@ -89,7 +92,11 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
                     args
                 });
             });
-        showPopup({ body: modeMenu, anchor: this, align: 'left' });
+        this._popup = showPopup({
+            body: modeMenu,
+            anchor: this,
+            align: 'left'
+        });
     };
 
     private _onEditorChange = (
@@ -101,6 +108,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
 
     private _tracker: IEditorTracker;
     private _commands: CommandRegistry;
+    private _popup: Popup | null = null;
 }
 
 namespace EditorSyntax {
