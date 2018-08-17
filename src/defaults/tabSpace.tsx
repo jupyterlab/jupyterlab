@@ -135,22 +135,17 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         super.onUpdateRequest(msg);
     }
 
-    private _onActiveCellChange = (_tracker: INotebookTracker, cell: Cell | null) => {
+    private _onActiveCellChange = (_tracker: INotebookTracker, cell: Cell) => {
         let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
-        if (cell !== null) {
-            if (cell.model.type === 'code') {
-                settingsConnector = this._settingsProviderData['notebookCode']
-                    .connector;
-            } else if (cell.model.type === 'raw') {
-                settingsConnector = this._settingsProviderData['notebookRaw']
-                    .connector;
-            } else {
-                settingsConnector = this._settingsProviderData[
-                    'notebookMarkdown'
-                ].connector;
-            }
+        if (cell.model.type === 'code') {
+            settingsConnector = this._settingsProviderData['notebookCode']
+                .connector;
+        } else if (cell.model.type === 'raw') {
+            settingsConnector = this._settingsProviderData['notebookRaw']
+                .connector;
         } else {
-            settingsConnector = null;
+            settingsConnector = this._settingsProviderData['notebookMarkdown']
+                .connector;
         }
 
         this.model!.settingConnector = settingsConnector;
@@ -167,9 +162,9 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
                 if (activeCell === undefined) {
                     return null;
                 } else {
-                    if (activeCell!.model.type === 'code') {
+                    if (activeCell.model.type === 'code') {
                         return 'notebookCode';
-                    } else if (activeCell!.model.type === 'raw') {
+                    } else if (activeCell.model.type === 'raw') {
                         return 'notebookRaw';
                     } else {
                         return 'notebookMarkdown';

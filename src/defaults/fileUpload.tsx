@@ -17,7 +17,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '../component/progressBar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt, some, each } from '@phosphor/algorithm';
 import { IDefaultsManager } from './manager';
 import { GroupItem } from '../component/group';
 import vars from '../style/variables';
@@ -140,18 +140,35 @@ namespace FileUpload {
                     val => val.path === uploads.oldValue.path
                 );
 
-                this._items[idx].progress = uploads.newValue.progress * 100;
+                if (idx !== -1) {
+                    this._items[idx].progress = uploads.newValue.progress * 100;
+
+                    let isPresent = some(
+                        browse.uploads(),
+                        val => uploads.newValue.path === val.path
+                    );
+
+                    each(browse.uploads(), val => console.log(val));
+
+                    console.log(isPresent);
+                    if (!isPresent) {
+                        ArrayExt.removeAt(this._items, idx);
+                        console.log(this._items);
+                    }
+                }
             } else if (uploads.name === 'finish') {
                 const idx = ArrayExt.findFirstIndex(
                     this._items,
                     val => val.path === uploads.oldValue.path
                 );
 
-                this._items[idx].complete = true;
-                setTimeout(() => {
-                    ArrayExt.removeAt(this._items, idx);
-                    this.stateChanged.emit(void 0);
-                }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
+                if (idx !== -1) {
+                    this._items[idx].complete = true;
+                    setTimeout(() => {
+                        ArrayExt.removeAt(this._items, idx);
+                        this.stateChanged.emit(void 0);
+                    }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
+                }
             }
 
             this.stateChanged.emit(void 0);
