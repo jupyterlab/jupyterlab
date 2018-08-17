@@ -25,6 +25,8 @@
   -ms-user-select: none;
   user-select: none;
   cursor: pointer;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .jp-TableOfContents-content li:hover {
@@ -229,8 +231,6 @@
   position: relative;
   align-items: center;
   width: 100%;
-  padding-top: 3px;
-  padding-bottom: 3px;
 }
 
 .toc-collapse-button {
