@@ -501,6 +501,12 @@ export class FileBrowserModel implements IDisposable {
           return file.name === uploadIndex.path;
         });
 
+        this._uploadChanged.emit({
+          name: 'failure',
+          newValue: upload,
+          oldValue: null
+        });
+
         throw err;
       }
 
