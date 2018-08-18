@@ -3,7 +3,7 @@
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
-import { INotebookHeading, INotebookHeadingTypes } from '../shared';
+import { INotebookHeading } from '../shared';
 
 import * as React from 'react';
 
@@ -21,9 +21,7 @@ export function markdownDocItemRenderer(
   };
   let fontSize = '9px';
   let numbering = item.numbering && options.numbering ? item.numbering : '';
-  if (item.type === INotebookHeadingTypes.header) {
-    fontSize = levelsSizes[item.level] + 'px';
-  }
+  fontSize = levelsSizes[item.level] + 'px';
   let jsx = <span style={{ fontSize }}> {numbering + item.text}</span>;
   return jsx;
 }
