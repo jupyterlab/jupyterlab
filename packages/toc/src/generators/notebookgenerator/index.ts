@@ -203,12 +203,18 @@ export function createNotebookGenerator(
               }
             }
             if (
+              renderedHeadings[0] &&
               !Private.headingIsFilteredOut(
                 renderedHeadings[0],
                 options.filtered
               )
             ) {
-              prevHeading = renderedHeading;
+              if (
+                !(renderedHeading.type === 'markdown') ||
+                options.showMarkdown
+              ) {
+                prevHeading = renderedHeading;
+              }
             }
           }
         } else if (model.type === 'markdown') {
@@ -295,12 +301,18 @@ export function createNotebookGenerator(
               }
             }
             if (
+              renderedHeadings[0] &&
               !Private.headingIsFilteredOut(
                 renderedHeadings[0],
                 options.filtered
               )
             ) {
-              prevHeading = renderedHeading;
+              if (
+                !(renderedHeading.type === 'markdown') ||
+                options.showMarkdown
+              ) {
+                prevHeading = renderedHeading;
+              }
             }
           } else {
             const onClickFactory = (line: number) => {
