@@ -71,8 +71,9 @@ export function run(
   if (!quiet) {
     console.log('>', cmd);
   }
-  return childProcess
-    .execSync(cmd, options)
-    .toString()
-    .replace(/\n$/, '');
+  const value = childProcess.execSync(cmd, options);
+  if (value === null) {
+    return '';
+  }
+  return value.toString().replace(/\n$/, '');
 }
