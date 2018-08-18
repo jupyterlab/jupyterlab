@@ -1,4 +1,3 @@
-import { ISanitizer } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 import { IHeading } from '../toc';
 
@@ -45,73 +44,6 @@ export function generateNumbering(numberingDict: any, level: number) {
     }
   }
   return numbering;
-}
-
-/**
- * Given an HTML element, generate ToC headings
- * by finding all the headers and making IHeading objects for them.
- */
-export function getRenderedHTMLHeadings(
-  node: HTMLElement,
-  onClickFactory: (el: Element) => (() => void),
-  sanitizer: ISanitizer,
-  numberingDict: any,
-  lastLevel: number,
-  needNumbering = false,
-  cellRef?: Cell
-): INotebookHeading[] {
-  let headings: INotebookHeading[] = [];
-  let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-  if (headingNodes.length > 0) {
-    let markdownCell = headingNodes[0];
-    if (markdownCell.nodeName.toLowerCase() === 'p') {
-      if (markdownCell.innerHTML) {
-        let html = sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions);
-        html = html.replace('¶', '');
-        headings.push({
-          level: lastLevel + 1,
-          html: html,
-          text: markdownCell.textContent ? markdownCell.textContent : '',
-          onClick: onClickFactory(markdownCell),
-          type: INotebookHeadingTypes.markdown,
-          cellRef: cellRef,
-          hasChild: true
-        });
-      }
-    } else {
-      const heading = headingNodes[0];
-      const level = parseInt(heading.tagName[1]);
-      const text = heading.textContent ? heading.textContent : '';
-      let shallHide = !needNumbering;
-      if (heading.getElementsByClassName('numbering-entry').length > 0) {
-        heading.removeChild(
-          heading.getElementsByClassName('numbering-entry')[0]
-        );
-      }
-      let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
-      html = html.replace('¶', ''); // Remove the anchor symbol.
-      const onClick = onClickFactory(heading);
-      let numbering = generateNumbering(numberingDict, level);
-      let numberingElement =
-        '<span class="numbering-entry" ' +
-        (shallHide ? ' hidden="true"' : '') +
-        '>' +
-        numbering +
-        '</span>';
-      heading.innerHTML = numberingElement + html;
-      headings.push({
-        level,
-        text,
-        numbering,
-        html,
-        onClick,
-        type: INotebookHeadingTypes.header,
-        cellRef: cellRef,
-        hasChild: true
-      });
-    }
-  }
-  return headings;
 }
 
 /**
