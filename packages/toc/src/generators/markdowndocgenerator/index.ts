@@ -11,7 +11,8 @@ import {
   generateNumbering,
   sanitizerOptions,
   isMarkdown,
-  INotebookHeading
+  INotebookHeading,
+  INotebookHeadingTypes
 } from '../shared';
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
@@ -143,7 +144,13 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = generateNumbering(numberingDict, level);
-        headings.push({ text, numbering, level, onClick, type: 'header' });
+        headings.push({
+          text,
+          numbering,
+          level,
+          onClick,
+          type: INotebookHeadingTypes.header
+        });
         return;
       }
 
@@ -154,7 +161,13 @@ namespace Private {
         // Take special care to parse markdown links into raw text.
         const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = generateNumbering(numberingDict, level);
-        headings.push({ text, numbering, level, onClick, type: 'header' });
+        headings.push({
+          text,
+          numbering,
+          level,
+          onClick,
+          type: INotebookHeadingTypes.header
+        });
         return;
       }
 
@@ -166,7 +179,13 @@ namespace Private {
         const level = parseInt(match[1], 10);
         const text = match[2];
         let numbering = generateNumbering(numberingDict, level);
-        headings.push({ text, numbering, level, onClick, type: 'header' });
+        headings.push({
+          text,
+          numbering,
+          level,
+          onClick,
+          type: INotebookHeadingTypes.header
+        });
         return;
       }
     });
@@ -206,7 +225,14 @@ namespace Private {
         '</span>';
       heading.innerHTML = numberingElement + html;
       text = text.replace('¶', '');
-      headings.push({ level, text, numbering, html, onClick, type: 'header' });
+      headings.push({
+        level,
+        text,
+        numbering,
+        html,
+        onClick,
+        type: INotebookHeadingTypes.header
+      });
     }
     return headings;
   }

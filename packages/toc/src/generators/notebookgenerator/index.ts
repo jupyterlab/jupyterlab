@@ -23,7 +23,8 @@ import {
   getMarkdownHeadings,
   isDOM,
   isMarkdown,
-  INotebookHeading
+  INotebookHeading,
+  INotebookHeadingTypes
 } from '../shared';
 
 /**
@@ -159,7 +160,10 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading && renderedHeading.type === 'markdown') {
+            if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.markdown
+            ) {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -169,10 +173,13 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading && renderedHeading.type === 'header') {
+            } else if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.header
+            ) {
               if (
                 prevHeading &&
-                prevHeading.type === 'header' &&
+                prevHeading.type === INotebookHeadingTypes.header &&
                 prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
@@ -210,7 +217,7 @@ export function createNotebookGenerator(
               )
             ) {
               if (
-                !(renderedHeading.type === 'markdown') ||
+                !(renderedHeading.type === INotebookHeadingTypes.markdown) ||
                 options.showMarkdown
               ) {
                 prevHeading = renderedHeading;
@@ -257,7 +264,10 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading && renderedHeading.type === 'markdown') {
+            if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.markdown
+            ) {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -267,10 +277,13 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading && renderedHeading.type === 'header') {
+            } else if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.header
+            ) {
               if (
                 prevHeading &&
-                prevHeading.type === 'header' &&
+                prevHeading.type === INotebookHeadingTypes.header &&
                 prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
@@ -308,7 +321,7 @@ export function createNotebookGenerator(
               )
             ) {
               if (
-                !(renderedHeading.type === 'markdown') ||
+                !(renderedHeading.type === INotebookHeadingTypes.markdown) ||
                 options.showMarkdown
               ) {
                 prevHeading = renderedHeading;
@@ -343,7 +356,10 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (renderedHeading && renderedHeading.type === 'markdown') {
+            if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.markdown
+            ) {
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -353,10 +369,13 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (renderedHeading && renderedHeading.type === 'header') {
+            } else if (
+              renderedHeading &&
+              renderedHeading.type === INotebookHeadingTypes.header
+            ) {
               if (
                 prevHeading &&
-                prevHeading.type === 'header' &&
+                prevHeading.type === INotebookHeadingTypes.header &&
                 prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
@@ -428,7 +447,7 @@ namespace Private {
     if (headings.length > 0) {
       let location = headings.length - 1;
       while (location >= 0) {
-        if (headings[location].type === 'header') {
+        if (headings[location].type === INotebookHeadingTypes.header) {
           return headings[location].level;
         }
         location = location - 1;
@@ -460,7 +479,7 @@ namespace Private {
         text: headingText,
         level,
         onClick,
-        type: 'code',
+        type: INotebookHeadingTypes.code,
         prompt: executionCount,
         cellRef: cellRef,
         hasChild: false

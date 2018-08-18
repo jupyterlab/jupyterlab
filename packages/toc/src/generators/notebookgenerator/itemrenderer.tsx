@@ -7,7 +7,11 @@ import { Cell } from '@jupyterlab/cells';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
-import { sanitizerOptions, INotebookHeading } from '../shared';
+import {
+  sanitizerOptions,
+  INotebookHeading,
+  INotebookHeadingTypes
+} from '../shared';
 
 import * as React from 'react';
 
@@ -24,7 +28,10 @@ export function notebookItemRenderer(
     6: '10'
   };
   let jsx;
-  if (item.type === 'markdown' || item.type === 'header') {
+  if (
+    item.type === INotebookHeadingTypes.markdown ||
+    item.type === INotebookHeadingTypes.header
+  ) {
     const paddingLeft = 24;
     const collapseOnClick = (cellRef?: Cell) => {
       let collapsed = cellRef!.model.metadata.get(
@@ -36,10 +43,13 @@ export function notebookItemRenderer(
     };
     let fontSize = '9px';
     let numbering = item.numbering && options.numbering ? item.numbering : '';
-    if (item.type === 'header') {
+    if (item.type === INotebookHeadingTypes.header) {
       fontSize = levelsSizes[item.level] + 'px';
     }
-    if (item.html && (item.type === 'header' || options.showMarkdown)) {
+    if (
+      item.html &&
+      (item.type === INotebookHeadingTypes.header || options.showMarkdown)
+    ) {
       jsx = (
         <span
           dangerouslySetInnerHTML={{
@@ -51,7 +61,7 @@ export function notebookItemRenderer(
           style={{ fontSize, paddingLeft }}
         />
       );
-      if (item.type === 'header') {
+      if (item.type === INotebookHeadingTypes.header) {
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
@@ -95,13 +105,16 @@ export function notebookItemRenderer(
           </div>
         );
       }
-    } else if (item.type === 'header' || options.showMarkdown) {
+    } else if (
+      item.type === INotebookHeadingTypes.header ||
+      options.showMarkdown
+    ) {
       jsx = (
         <span className={item.type + '-cell'} style={{ fontSize, paddingLeft }}>
           {numbering + item.text}
         </span>
       );
-      if (item.type === 'header') {
+      if (item.type === INotebookHeadingTypes.header) {
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
@@ -148,7 +161,7 @@ export function notebookItemRenderer(
     } else {
       jsx = null;
     }
-  } else if (item.type === 'code' && options.showCode) {
+  } else if (item.type === INotebookHeadingTypes.code && options.showCode) {
     jsx = (
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>

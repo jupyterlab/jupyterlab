@@ -107,8 +107,8 @@ export class TableOfContents extends Widget {
     ) => {
       return <span>{item.text}</span>;
     };
-    if (this._current && this._current!.generator.itemRenderer) {
-      itemRenderer = this._current!.generator.itemRenderer!;
+    if (this._current && this._current.generator.itemRenderer) {
+      itemRenderer = this._current.generator.itemRenderer!;
     }
     let renderedJSX = (
       <div className="jp-TableOfContents">
@@ -216,7 +216,7 @@ export interface IHeading {
    * For instance, this can be used to render
    * already-renderd-to-html markdown headings.
    */
-  html?: string | null;
+  html?: string;
 }
 
 /**

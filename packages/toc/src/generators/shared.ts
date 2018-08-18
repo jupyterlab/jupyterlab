@@ -6,9 +6,15 @@ const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
 
+export enum INotebookHeadingTypes {
+  header,
+  markdown,
+  code
+}
+
 export interface INotebookHeading extends IHeading {
   numbering?: string | null;
-  type: string;
+  type: INotebookHeadingTypes;
   prompt?: string;
   cellRef?: Cell;
   hasChild?: boolean;
@@ -60,12 +66,14 @@ export function getRenderedHTMLHeadings(
     let markdownCell = headingNodes[0];
     if (markdownCell.nodeName.toLowerCase() === 'p') {
       if (markdownCell.innerHTML) {
+        let html = sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions);
+        html = html.replace('¶', '');
         headings.push({
           level: lastLevel + 1,
-          html: markdownCell.innerHTML,
+          html: html,
           text: markdownCell.textContent ? markdownCell.textContent : '',
           onClick: onClickFactory(markdownCell),
-          type: 'markdown',
+          type: INotebookHeadingTypes.markdown,
           cellRef: cellRef,
           hasChild: true
         });
@@ -97,7 +105,7 @@ export function getRenderedHTMLHeadings(
         numbering,
         html,
         onClick,
-        type: 'header',
+        type: INotebookHeadingTypes.header,
         cellRef: cellRef,
         hasChild: true
       });
@@ -141,7 +149,7 @@ export function getMarkdownHeadings(
       level,
       numbering,
       onClick,
-      type: 'header',
+      type: INotebookHeadingTypes.header,
       cellRef: cellRef,
       hasChild: true
     });
@@ -158,7 +166,7 @@ export function getMarkdownHeadings(
       level,
       numbering,
       onClick,
-      type: 'header',
+      type: INotebookHeadingTypes.header,
       cellRef: cellRef,
       hasChild: true
     });
@@ -176,7 +184,7 @@ export function getMarkdownHeadings(
       level,
       numbering,
       onClick,
-      type: 'header',
+      type: INotebookHeadingTypes.header,
       cellRef: cellRef,
       hasChild: true
     });
@@ -185,7 +193,7 @@ export function getMarkdownHeadings(
       text: line,
       level: lastLevel + 1,
       onClick,
-      type: 'markdown',
+      type: INotebookHeadingTypes.markdown,
       cellRef: cellRef,
       hasChild: false
     });
