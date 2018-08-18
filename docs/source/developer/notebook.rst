@@ -214,13 +214,10 @@ Copy the following to ``src/index.ts``:
         };
         let button = new ToolbarButton({
           className: 'myButton',
+          iconClassName: 'fa fa-fast-forward',
           onClick: callback,
           tooltip: 'Run All'
         });
-
-        let i = document.createElement('i');
-        i.classList.add('fa', 'fa-fast-forward');
-        button.node.appendChild(i);
 
         panel.toolbar.insertItem(0, 'runAll', button);
         return new DisposableDelegate(() => {
