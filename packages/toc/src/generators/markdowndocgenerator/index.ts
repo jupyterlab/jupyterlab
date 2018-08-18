@@ -9,7 +9,7 @@ import { TableOfContentsRegistry } from '../../registry';
 
 import {
   generateNumbering,
-  getRenderedHTMLHeadings,
+  sanitizerOptions,
   isMarkdown,
   INotebookHeading
 } from '../shared';
@@ -107,12 +107,11 @@ export function createRenderedMarkdownGenerator(
           el.scrollIntoView();
         };
       };
-      return getRenderedHTMLHeadings(
+      return Private.getRenderedHTMLHeadingsForMarkdownDoc(
         widget.content.node,
         onClickFactory,
         sanitizer,
-        numberingDict,
-        0
+        numberingDict
       );
     }
   };
@@ -171,6 +170,44 @@ namespace Private {
         return;
       }
     });
+    return headings;
+  }
+}
+
+namespace Private {
+  export function getRenderedHTMLHeadingsForMarkdownDoc(
+    node: HTMLElement,
+    onClickFactory: (el: Element) => (() => void),
+    sanitizer: ISanitizer,
+    numberingDict: any,
+    needNumbering = true
+  ): INotebookHeading[] {
+    let headings: INotebookHeading[] = [];
+    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    for (let i = 0; i < headingNodes.length; i++) {
+      const heading = headingNodes[i];
+      const level = parseInt(heading.tagName[1]);
+      let text = heading.textContent ? heading.textContent : '';
+      let shallHide = !needNumbering;
+      if (heading.getElementsByClassName('numbering-entry').length > 0) {
+        heading.removeChild(
+          heading.getElementsByClassName('numbering-entry')[0]
+        );
+      }
+      let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+      html = html.replace('¶', ''); // Remove the anchor symbol.
+      const onClick = onClickFactory(heading);
+      let numbering = generateNumbering(numberingDict, level);
+      let numberingElement =
+        '<span class="numbering-entry" ' +
+        (shallHide ? ' hidden="true"' : '') +
+        '>' +
+        numbering +
+        '</span>';
+      heading.innerHTML = numberingElement + html;
+      text = text.replace('¶', '');
+      headings.push({ level, text, numbering, html, onClick, type: 'header' });
+    }
     return headings;
   }
 }
