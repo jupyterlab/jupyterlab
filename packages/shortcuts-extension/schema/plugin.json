@@ -791,6 +791,17 @@
       },
       "type": "object"
     },
+    "notebook:run-in-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-in-console" },
+        "keys": { "default": [""] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run In Console" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
     "notebook:run-cell-and-select-next": {
       "default": {},
       "properties": {
