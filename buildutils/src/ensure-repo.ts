@@ -111,7 +111,7 @@ function ensureMetaPackage(): string[] {
 function ensureJupyterlab(): string[] {
   // Get the current version of JupyterLab
   let cmd = 'python setup.py --version';
-  let version = utils.run(cmd, {}, true);
+  let version = utils.run(cmd, { stdio: 'pipe' }, true);
 
   let basePath = path.resolve('.');
   let corePath = path.join(basePath, 'dev_mode', 'package.json');
