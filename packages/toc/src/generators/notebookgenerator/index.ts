@@ -391,6 +391,7 @@ export function createNotebookGenerator(
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.header
             ) {
+              // Determine whether the heading has children
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
@@ -398,6 +399,8 @@ export function createNotebookGenerator(
               ) {
                 prevHeading.hasChild = false;
               }
+              // Do not put the item in TOC if its header is collapsed
+              // or filtered out by tags
               if (
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
@@ -493,7 +496,9 @@ namespace Private {
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
-      let numLines = Math.min(lines.length, 10);
+
+      // Take at most first 3 lines
+      let numLines = Math.min(lines.length, 3);
       for (let i = 0; i < numLines - 1; i++) {
         headingText = headingText + lines[i] + '\n';
       }

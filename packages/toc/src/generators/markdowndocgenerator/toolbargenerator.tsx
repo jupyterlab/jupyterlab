@@ -11,6 +11,7 @@ interface NotebookGeneratorToolbarState {
 export function markdownDocGeneratorToolbar(
   options: MarkdownDocGeneratorOptionsManager
 ) {
+  // Render the toolbar
   return class extends React.Component<
     NotebookGeneratorToolbarProps,
     NotebookGeneratorToolbarState

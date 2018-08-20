@@ -20,6 +20,8 @@ export function markdownDocItemRenderer(
     6: '10'
   };
   let fontSize = '9px';
+
+  // Render numbering if needed
   let numbering = item.numbering && options.numbering ? item.numbering : '';
   fontSize = levelsSizes[item.level] + 'px';
   let jsx = <span style={{ fontSize }}> {numbering + item.text}</span>;

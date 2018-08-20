@@ -19,6 +19,7 @@ export function notebookGeneratorToolbar(
   options: NotebookGeneratorOptionsManager,
   tracker: INotebookTracker
 ) {
+  // Render the toolbar
   return class extends React.Component<
     NotebookGeneratorToolbarProps,
     NotebookGeneratorToolbarState
@@ -108,6 +109,7 @@ export function notebookGeneratorToolbar(
       }
     }
 
+    // Load all tags in the document
     getTags = () => {
       let notebook = tracker.currentWidget;
       if (notebook) {

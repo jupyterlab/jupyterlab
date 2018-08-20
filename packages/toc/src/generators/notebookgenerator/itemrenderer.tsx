@@ -61,11 +61,14 @@ export function notebookItemRenderer(
           style={{ fontSize, paddingLeft }}
         />
       );
+      // Render the headers
       if (item.type === INotebookHeadingTypes.header) {
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
         collapsed = collapsed != undefined ? collapsed : false;
+
+        // Render the twist button
         let twistButton = (
           <div
             className="toc-collapse-button"
@@ -98,6 +101,8 @@ export function notebookItemRenderer(
             </div>
           );
         }
+
+        // Render the header item
         jsx = (
           <div className="toc-entry-holder">
             {item.hasChild && twistButton}
@@ -109,6 +114,7 @@ export function notebookItemRenderer(
       item.type === INotebookHeadingTypes.header ||
       options.showMarkdown
     ) {
+      // Render headers/markdown for plain text
       jsx = (
         <span className={item.type + '-cell'} style={{ fontSize, paddingLeft }}>
           {numbering + item.text}
@@ -162,6 +168,7 @@ export function notebookItemRenderer(
       jsx = null;
     }
   } else if (item.type === INotebookHeadingTypes.code && options.showCode) {
+    // Render code cells
     jsx = (
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>
