@@ -128,7 +128,6 @@ namespace FileUpload {
             browse: FileBrowserModel,
             uploads: IChangedArgs<IUploadModel>
         ) => {
-            console.log(uploads.name);
             if (uploads.name === 'start') {
                 this._items.push({
                     path: uploads.newValue.path,
