@@ -75,5 +75,5 @@ export function run(
   if (value === null) {
     return '';
   }
-  return value.toString().trim();
+  return value.toString().trimEnd();
 }
