@@ -4,9 +4,10 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from notebook.notebookapp import NotebookApp, aliases, flags
-from jupyter_core.application import JupyterApp, base_aliases
+import sys
 
+from jupyter_core.application import JupyterApp, base_aliases
+from notebook.notebookapp import NotebookApp, aliases, flags
 from traitlets import Bool, Unicode
 
 from ._version import __version__
@@ -115,7 +116,14 @@ class LabWorkspaceExportApp(JupyterApp):
     """
 
     def start(self):
-        print('exporting...')
+        if not self.extra_args:
+            print('Export the default workspace.')
+            return 0
+        if len(self.extra_args) > 1:
+            print('Too many arguments were provided for workspace export.')
+            sys.exit(1)
+        workspace = self.extra_args[0]
+        print('Export the workspace: %s' % workspace)
 
 
 class LabWorkspaceImportApp(JupyterApp):
