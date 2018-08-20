@@ -128,6 +128,7 @@ namespace FileUpload {
             browse: FileBrowserModel,
             uploads: IChangedArgs<IUploadModel>
         ) => {
+            console.log(uploads.name);
             if (uploads.name === 'start') {
                 this._items.push({
                     path: uploads.newValue.path,
@@ -155,6 +156,14 @@ namespace FileUpload {
                         this.stateChanged.emit(void 0);
                     }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
                 }
+            } else {
+                const idx = ArrayExt.findFirstIndex(
+                    this._items,
+                    val => val.path === uploads.newValue.path
+                );
+                ArrayExt.removeAt(this._items, idx);
+
+                this.stateChanged.emit(void 0);
             }
 
             this.stateChanged.emit(void 0);
