@@ -118,6 +118,9 @@ export class StateDB implements IStateDB {
     });
   }
 
+  /**
+   * A signal that emits the change type any time a value changes.
+   */
   get changed(): ISignal<this, StateDB.Change> {
     return this._changed;
   }
