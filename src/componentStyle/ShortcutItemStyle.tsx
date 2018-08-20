@@ -133,7 +133,6 @@ export const ShortcutContainerStyle = style({
 });
 
 export const ShortcutKeysContainerStyle = style({
-  fontFamily: 'var(--jp-code-font-family)',
   fontSize: 'var(--jp-code-font-size)',
   display: 'flex'
 });
