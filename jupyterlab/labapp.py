@@ -12,8 +12,8 @@ from traitlets import Bool, Unicode
 from ._version import __version__
 from .extension import load_jupyter_server_extension
 from .commands import (
-    build, clean, get_app_dir, get_user_settings_dir, get_app_version,
-    get_workspaces_dir, get_app_dir
+    build, clean, get_app_dir, get_app_version, get_user_settings_dir,
+    get_workspaces_dir
 )
 
 
@@ -108,6 +108,42 @@ class LabPathApp(JupyterApp):
         print('Workspaces directory: %s' % get_workspaces_dir())
 
 
+class LabWorkspaceExportApp(JupyterApp):
+    version = version
+    description = """
+    Export a JupyterLab workspace
+    """
+
+    def start(self):
+        print('exporting...')
+
+
+class LabWorkspaceImportApp(JupyterApp):
+    version = version
+    description = """
+    Import a JupyterLab workspace
+    """
+
+    def start(self):
+        print('importing...')
+
+
+class LabWorkspaceApp(JupyterApp):
+    version = version
+    description = """
+    Import or export a JupyterLab workspace
+    """
+
+    subcommands = dict(
+        export=(
+            LabWorkspaceExportApp,
+            LabWorkspaceExportApp.description.splitlines()[0])
+    )
+    subcommands['import'] = (
+        LabWorkspaceImportApp,
+        LabWorkspaceImportApp.description.splitlines()[0])
+
+
 lab_aliases = dict(aliases)
 lab_aliases['app-dir'] = 'LabApp.app_dir'
 
@@ -165,7 +201,9 @@ class LabApp(NotebookApp):
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
         path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0])
+        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
+        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
     )
 
     default_url = Unicode('/lab', config=True,
