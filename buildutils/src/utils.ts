@@ -75,5 +75,8 @@ export function run(
   if (value === null) {
     return '';
   }
-  return value.toString().trimEnd();
+  return value
+    .toString()
+    .replace(/(\r\n|\n)$/, '')
+    .trim();
 }
