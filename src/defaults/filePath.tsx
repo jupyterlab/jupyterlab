@@ -1,3 +1,9 @@
+/**
+ * Default item to display the file path of the active document.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 
 import {

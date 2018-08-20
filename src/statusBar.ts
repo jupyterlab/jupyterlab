@@ -1,6 +1,9 @@
 /**
  * Main status bar object which contains all widgets.
  */
+/**
+ *
+ */
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 import { ApplicationShell } from '@jupyterlab/application';

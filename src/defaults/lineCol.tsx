@@ -1,3 +1,9 @@
+/**
+ * Default item to display and change the line and column number.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 import { TextItem } from '../component/text';
 import {

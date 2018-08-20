@@ -1,3 +1,9 @@
+/**
+ * Default item to display which notebook mode user is in.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import * as React from 'react';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';

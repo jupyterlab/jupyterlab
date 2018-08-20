@@ -1,3 +1,9 @@
+/**
+ * Default item to display the memory usage of the current process.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';

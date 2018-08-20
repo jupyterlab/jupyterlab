@@ -1,3 +1,9 @@
+/**
+ * Default item to display the status of the kernel of the active notbeook or console.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 import { TextItem } from '../component/text';
 
