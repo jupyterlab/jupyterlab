@@ -470,7 +470,7 @@ namespace Private {
 
     // Finally, compare by display name.
     const aLabel = commands.label(a.command, { ...a.args, cwd });
-    const bLabel = commands.label(a.command, { ...b.args, cwd });
+    const bLabel = commands.label(b.command, { ...b.args, cwd });
     return aLabel.localeCompare(bLabel);
   }
 }
