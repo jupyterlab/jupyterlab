@@ -19,7 +19,7 @@ import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+// import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
   FileBrowserModel,
@@ -29,7 +29,7 @@ import {
 
 import { Launcher } from '@jupyterlab/launcher';
 
-import { Contents } from '@jupyterlab/services';
+// import { Contents } from '@jupyterlab/services';
 
 import { map, toArray } from '@phosphor/algorithm';
 
@@ -66,6 +66,9 @@ namespace CommandIDs {
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
   export const paste = 'filebrowser:paste';
+
+  // paste command used when user did not click on an item
+  export const pasteNotItem = 'filebrowser:paste-not-item';
 
   export const rename = 'filebrowser:rename';
 
@@ -139,7 +142,7 @@ function activateFactory(
       model,
       commands: options.commands || commands
     });
-    const { registry } = docManager;
+    // const { registry } = docManager;
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
@@ -151,14 +154,14 @@ function activateFactory(
     });
     widget.toolbar.insertItem(0, 'launch', launcher);
 
-    // Add a context menu handler to the file browser's directory listing.
-    let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
-    node.addEventListener('contextmenu', (event: MouseEvent) => {
-      event.preventDefault();
-      const model = widget.modelForClick(event);
-      const menu = createContextMenu(model, commands, registry);
-      menu.open(event.clientX, event.clientY);
-    });
+    // // Add a context menu handler to the file browser's directory listing.
+    // let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
+    // node.addEventListener('contextmenu', (event: MouseEvent) => {
+    //   event.preventDefault();
+    //   const model = widget.modelForClick(event);
+    //   const menu = createContextMenu(model, commands, registry);
+    //   menu.open(event.clientX, event.clientY);
+    // });
 
     // Track the newly created file browser.
     tracker.add(widget);
@@ -413,14 +416,25 @@ function addCommands(
     mnemonic: 0
   });
 
-  commands.addCommand(CommandIDs.paste, {
-    execute: () => {
-      const widget = tracker.currentWidget;
+  function pasteExecute(): Promise<void> {
+    const widget = tracker.currentWidget;
 
-      if (widget) {
-        return widget.paste();
-      }
+    if (widget) {
+      return widget.paste();
+    }
+  }
+  commands.addCommand(CommandIDs.paste, {
+    execute: pasteExecute,
+    iconClass: 'jp-MaterialIcon jp-PasteIcon',
+    label: 'Paste',
+    mnemonic: 0
+  });
+  // paste command used when user did not click on an item
+  commands.addCommand(CommandIDs.pasteNotItem, {
+    isVisible: () => {
+      return app.contextMenuNodes[0].className === `jp-DirListing-content`;
     },
+    execute: pasteExecute,
     iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
@@ -533,75 +547,162 @@ function addCommands(
     label: 'New Launcher',
     execute: () => createLauncher(commands, browser)
   });
+
+  // matches anywhere on filebrowser that is not an item
+  const selectorNotItem = '[data-widget="filebrowser"]';
+  // matches all filebrowser items
+  const selectorItem = '[data-isdir^="filebrowser-"]';
+  // matches only non-directory items
+  const selectorNotDir = '[data-isdir="filebrowser-false"]';
+
+  app.contextMenu.addItem({
+    command: CommandIDs.pasteNotItem,
+    selector: selectorNotItem,
+    rank: 1
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.open,
+    // matches all filebrowser items
+    selector: selectorItem,
+    rank: 1
+  });
+
+  const openWith = new Menu({ commands });
+  openWith.title.label = 'Open With';
+  app.contextMenu.addItem({
+    type: 'submenu',
+    submenu: openWith,
+    selector: selectorNotDir,
+    rank: 2
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.openBrowserTab,
+    selector: selectorNotDir,
+    rank: 3
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.rename,
+    selector: selectorItem,
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.del,
+    selector: selectorItem,
+    rank: 5
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.cut,
+    selector: selectorItem,
+    rank: 6
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copy,
+    selector: selectorNotDir,
+    rank: 7
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.paste,
+    selector: selectorItem,
+    rank: 8
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.duplicate,
+    selector: selectorNotDir,
+    rank: 9
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.download,
+    selector: selectorNotDir,
+    rank: 10
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.shutdown,
+    selector: selectorNotDir,
+    rank: 11
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.share,
+    selector: selectorItem,
+    rank: 12
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.copyPath,
+    selector: selectorItem,
+    rank: 13
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.copyDownloadLink,
+    selector: selectorItem,
+    rank: 14
+  });
 }
 
-/**
- * Create a context menu for the file browser listing.
- *
- * #### Notes
- * This function generates temporary commands with an incremented name. These
- * commands are disposed when the menu itself is disposed.
- */
-function createContextMenu(
-  model: Contents.IModel | undefined,
-  commands: CommandRegistry,
-  registry: DocumentRegistry
-): Menu {
-  const menu = new Menu({ commands });
-
-  // If the user did not click on any file, we still want to show
-  // paste as a possibility.
-  if (!model) {
-    menu.addItem({ command: CommandIDs.paste });
-    return menu;
-  }
-
-  menu.addItem({ command: CommandIDs.open });
-
-  const path = model.path;
-  if (model.type !== 'directory') {
-    const factories = registry.preferredWidgetFactories(path).map(f => f.name);
-    const notebookFactory = registry.getWidgetFactory('notebook').name;
-    if (
-      model.type === 'notebook' &&
-      factories.indexOf(notebookFactory) === -1
-    ) {
-      factories.unshift(notebookFactory);
-    }
-    if (path && factories.length > 1) {
-      const command = 'docmanager:open';
-      const openWith = new Menu({ commands });
-      openWith.title.label = 'Open With';
-      factories.forEach(factory => {
-        openWith.addItem({ args: { factory, path }, command });
-      });
-      menu.addItem({ type: 'submenu', submenu: openWith });
-    }
-    menu.addItem({ command: CommandIDs.openBrowserTab });
-  }
-
-  menu.addItem({ command: CommandIDs.rename });
-  menu.addItem({ command: CommandIDs.del });
-  menu.addItem({ command: CommandIDs.cut });
-
-  if (model.type !== 'directory') {
-    menu.addItem({ command: CommandIDs.copy });
-  }
-
-  menu.addItem({ command: CommandIDs.paste });
-
-  if (model.type !== 'directory') {
-    menu.addItem({ command: CommandIDs.duplicate });
-    menu.addItem({ command: CommandIDs.download });
-    menu.addItem({ command: CommandIDs.shutdown });
-  }
-
-  menu.addItem({ command: CommandIDs.share });
-  menu.addItem({ command: CommandIDs.copyPath });
-  menu.addItem({ command: CommandIDs.copyDownloadLink });
-
-  return menu;
-}
+// /**
+//  * Create a context menu for the file browser listing.
+//  *
+//  * #### Notes
+//  * This function generates temporary commands with an incremented name. These
+//  * commands are disposed when the menu itself is disposed.
+//  */
+// function createContextMenu(
+//   model: Contents.IModel | undefined,
+//   commands: CommandRegistry,
+//   registry: DocumentRegistry
+// ): Menu {
+//   const menu = new Menu({ commands });
+//
+//   // If the user did not click on any file, we still want to show
+//   // paste as a possibility.
+//   if (!model) {
+//     menu.addItem({ command: CommandIDs.paste });
+//     return menu;
+//   }
+//
+//   menu.addItem({ command: CommandIDs.open });
+//
+//   const path = model.path;
+//   if (model.type !== 'directory') {
+//     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
+//     if (path && factories.length > 1) {
+//       const command = 'docmanager:open';
+//       const openWith = new Menu({ commands });
+//       openWith.title.label = 'Open With';
+//       factories.forEach(factory => {
+//         openWith.addItem({ args: { factory, path }, command });
+//       });
+//       menu.addItem({ type: 'submenu', submenu: openWith });
+//     }
+//     menu.addItem({ command: CommandIDs.openBrowserTab });
+//   }
+//
+//   menu.addItem({ command: CommandIDs.rename });
+//   menu.addItem({ command: CommandIDs.del });
+//   menu.addItem({ command: CommandIDs.cut });
+//
+//   if (model.type !== 'directory') {
+//     menu.addItem({ command: CommandIDs.copy });
+//   }
+//
+//   menu.addItem({ command: CommandIDs.paste });
+//
+//   if (model.type !== 'directory') {
+//     menu.addItem({ command: CommandIDs.duplicate });
+//     menu.addItem({ command: CommandIDs.download });
+//     menu.addItem({ command: CommandIDs.shutdown });
+//   }
+//
+//   menu.addItem({ command: CommandIDs.share });
+//   menu.addItem({ command: CommandIDs.copyPath });
+//   menu.addItem({ command: CommandIDs.copyDownloadLink });
+//
+//   return menu;
+// }
 
 /**
  * Create a launcher for a given filebrowser widget.

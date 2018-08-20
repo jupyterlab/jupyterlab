@@ -754,6 +754,13 @@ export class DirListing extends Widget {
           node.classList.add(CUT_CLASS);
         }
       }
+
+      // add metadata to the node
+      node.setAttribute(
+        'data-isdir',
+        item.type === 'directory' ? 'filebrowser-true' : 'filebrowser-false'
+      );
+      node.setAttribute('data-path', item.path);
     });
 
     // Handle the selectors on the widget node.
@@ -1625,6 +1632,7 @@ export namespace DirListing {
       let header = document.createElement('div');
       let content = document.createElement('ul');
       content.className = CONTENT_CLASS;
+      content.setAttribute('data-widget', 'filebrowser');
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
