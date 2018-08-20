@@ -1,3 +1,9 @@
+/**
+ * Default item to display and change the line and column number.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 import { TextItem } from '../component/text';
 import {
@@ -254,7 +260,7 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         } else {
             if (this._notebookTracker.has(val)) {
                 const activeCell = (val as NotebookPanel).content.activeCell;
-                if (activeCell === undefined) {
+                if (activeCell === null) {
                     return null;
                 } else {
                     return activeCell!.editor;

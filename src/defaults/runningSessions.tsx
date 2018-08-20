@@ -1,3 +1,9 @@
+/**
+ * Default item to display the amount of total running kernel and terminal sessions.
+ */
+/**
+ * Part of Jupyterlab status bar defaults.
+ */
 import React from 'react';
 import { IconItem } from '../component/icon';
 import { TextItem } from '../component/text';

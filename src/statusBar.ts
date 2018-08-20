@@ -1,3 +1,9 @@
+/**
+ * Main status bar object which contains all widgets.
+ */
+/**
+ *
+ */
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 import { ApplicationShell } from '@jupyterlab/application';
@@ -18,6 +24,12 @@ export const IStatusBar = new Token<IStatusBar>(
 );
 
 export interface IStatusBar {
+    /**
+     * Add an item to the status bar.
+     * @param id Id of the widget to be displayed in the Settings Registry.
+     * @param widget Widget added to the status bar.
+     * @param opts
+     */
     registerStatusItem(
         id: string,
         widget: Widget,
@@ -28,16 +40,34 @@ export interface IStatusBar {
 export namespace IStatusBar {
     export type Alignment = 'right' | 'left' | 'middle';
 
+    /**
+     * Options for status bar items.
+     */
     export interface IItemOptions {
+        /**
+         * Which side to place widget. Permanent widgets are intended for the right and left side, with more transient widgets in the middle.
+         */
         align?: IStatusBar.Alignment;
+        /**
+         *  Ordering of Items -- higher priority items are closer to the middle.
+         */
         priority?: number;
+        /**
+         * Whether the widget is shown or hidden.
+         */
         isActive?: () => boolean;
+        /**
+         * Determine when the widget updates.
+         */
         stateChanged?: ISignal<any, void>;
     }
 }
 
 const STATUS_BAR_ID = 'jp-main-status-bar';
 
+/**
+ * Main status bar object which contains all widgets.
+ */
 export class StatusBar extends Widget implements IStatusBar {
     constructor(options: StatusBar.IOptions) {
         super();
