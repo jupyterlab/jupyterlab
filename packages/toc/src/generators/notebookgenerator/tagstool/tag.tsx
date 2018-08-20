@@ -6,6 +6,9 @@ export interface TagComponentProps {
   tag: string;
 }
 
+/*
+* Create a React component containing one tag label
+*/
 export abstract class TagComponent extends React.Component<TagComponentProps> {
   constructor(props: TagComponentProps) {
     super(props);
