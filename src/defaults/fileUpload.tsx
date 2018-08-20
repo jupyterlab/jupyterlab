@@ -155,12 +155,11 @@ namespace FileUpload {
                         this.stateChanged.emit(void 0);
                     }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
                 }
-            } else {
-                const idx = ArrayExt.findFirstIndex(
+            } else if (uploads.name === 'failure') {
+                ArrayExt.removeFirstWhere(
                     this._items,
                     val => val.path === uploads.newValue.path
                 );
-                ArrayExt.removeAt(this._items, idx);
             }
 
             this.stateChanged.emit(void 0);
