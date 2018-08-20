@@ -124,7 +124,10 @@ class _test_env(object):
     def stop(self):
         self.env_patch.stop()
         self.path_patch.stop()
-        self.test_dir.cleanup()
+        try:
+            self.test_dir.cleanup()
+        except PermissionError as e:
+            pass
 
     def __enter__(self):
         self.start()
