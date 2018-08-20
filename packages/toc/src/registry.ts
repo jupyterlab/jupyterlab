@@ -93,10 +93,25 @@ export namespace TableOfContentsRegistry {
      */
     usesLatex?: boolean;
 
+    /**
+     * An object that manage user settings for the generator.
+     *
+     * Defaults to `undefined`.
+     */
     options?: IGeneratorOptionsManager;
 
+    /**
+     * A function that generates JSX element for each heading
+     *
+     * If not given, the default renderer will be used, which renders the text
+     */
     itemRenderer?: (item: IHeading) => JSX.Element | null;
 
+    /**
+     * A function that generates a toolbar for the generator
+     *
+     * If not given, no toolbar will show up
+     */
     toolbarGenerator?: (widget: W) => any;
 
     /**

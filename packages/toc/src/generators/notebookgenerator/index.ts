@@ -40,6 +40,7 @@ export function createNotebookGenerator(
   sanitizer: ISanitizer,
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
+  // Create a option manager to manage user settings
   const options = new NotebookGeneratorOptionsManager(widget, tracker, {
     needNumbering: true,
     sanitizer: sanitizer
@@ -58,13 +59,16 @@ export function createNotebookGenerator(
       let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
       let currentCollapseLevel = -1;
+
+      // Keep track of the previous heading that is shown in TOC, used for
+      // determine whether one header has child
       let prevHeading: INotebookHeading | null = null;
       each(panel.content.widgets, cell => {
         let collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
         collapsed = collapsed != undefined ? collapsed : false;
         let model = cell.model;
-        // Only parse markdown cells or code cell outputs
         if (model.type === 'code') {
+          // Get the execution count prompt for code cells
           let executionCountNumber = (cell as CodeCell).model
             .executionCount as number;
           let executionCount =
@@ -80,6 +84,7 @@ export function createNotebookGenerator(
           if (showCode) {
             let text = (model as CodeCellModel).value.text;
             const onClickFactory = (line: number) => {
+              // Activate the corresponding cell if user click on the TOC entry
               return () => {
                 cell.node.scrollIntoView();
                 if (tracker && tracker.currentWidget) {
@@ -104,6 +109,8 @@ export function createNotebookGenerator(
               lastLevel,
               cell
             );
+
+            // // Do not render the code cell in TOC if it is filtered out by tags
             if (
               currentCollapseLevel < 0 &&
               !Private.headingIsFilteredOut(
@@ -113,6 +120,8 @@ export function createNotebookGenerator(
             ) {
               headings = headings.concat(renderedHeadings);
             }
+
+            // Keep a copy of the TOC entry in prevHeadings
             if (
               !Private.headingIsFilteredOut(
                 renderedHeadings[0],
@@ -165,6 +174,7 @@ export function createNotebookGenerator(
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.markdown
             ) {
+              // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -178,6 +188,7 @@ export function createNotebookGenerator(
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.header
             ) {
+              // Determine whether the heading has children
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
@@ -185,6 +196,8 @@ export function createNotebookGenerator(
               ) {
                 prevHeading.hasChild = false;
               }
+              // Do not put the item in TOC if its header is collapsed
+              // or filtered out by tags
               if (
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
@@ -269,6 +282,7 @@ export function createNotebookGenerator(
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.markdown
             ) {
+              // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
@@ -282,6 +296,7 @@ export function createNotebookGenerator(
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.header
             ) {
+              // Determine whether the heading has children
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
@@ -289,6 +304,8 @@ export function createNotebookGenerator(
               ) {
                 prevHeading.hasChild = false;
               }
+              // Do not put the item in TOC if its header is collapsed
+              // or filtered out by tags
               if (
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
@@ -418,6 +435,10 @@ export function createNotebookGenerator(
  * A private namespace for miscellaneous things.
  */
 namespace Private {
+  /**
+   * Given a heading and the tags user selected,
+   * determine whether the heading is filtered out by these tags.
+   */
   export function headingIsFilteredOut(
     heading: INotebookHeading,
     tags: string[]
@@ -457,10 +478,13 @@ namespace Private {
     return 0;
   }
 
+  /**
+   * Given a string of code, get the code entry.
+   */
   export function getCodeCells(
     text: string,
     onClickFactory: (line: number) => (() => void),
-    numberingDict: any,
+    numberingDict: { [level: number]: number },
     executionCount: string,
     lastLevel: number,
     cellRef: Cell
@@ -499,7 +523,7 @@ namespace Private {
     node: HTMLElement,
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
-    numberingDict: any,
+    numberingDict: { [level: number]: number },
     lastLevel: number,
     needNumbering = false,
     cellRef?: Cell

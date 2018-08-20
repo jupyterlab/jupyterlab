@@ -21,6 +21,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this.sanitizer = options.sanitizer;
   }
 
+  // Show/hide numbering in the document
   private changeNumberingStateForAllCells(showNumbering: boolean) {
     if (this._notebook.currentWidget) {
       each(this._notebook.currentWidget.content.widgets, cell => {

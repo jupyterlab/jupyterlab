@@ -36,6 +36,7 @@ export function createMarkdownGenerator(
   tracker: IEditorTracker,
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
+  // Create a option manager to manage user settings
   const options = new MarkdownDocGeneratorOptionsManager(widget, {
     needNumbering: true
   });
@@ -125,7 +126,7 @@ namespace Private {
   export function getMarkdownDocHeadings(
     text: string,
     onClickFactory: (line: number) => (() => void),
-    numberingDict: any
+    numberingDict: { [level: number]: number }
   ): INotebookHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
@@ -194,11 +195,15 @@ namespace Private {
 }
 
 namespace Private {
+  /**
+   * Given a HTML DOM element, get the markdown headings
+   * in that string.
+   */
   export function getRenderedHTMLHeadingsForMarkdownDoc(
     node: HTMLElement,
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
-    numberingDict: any,
+    numberingDict: { [level: number]: number },
     needNumbering = true
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
@@ -208,6 +213,8 @@ namespace Private {
       const level = parseInt(heading.tagName[1]);
       let text = heading.textContent ? heading.textContent : '';
       let shallHide = !needNumbering;
+
+      // Show/hide numbering DOM element based on user settings
       if (heading.getElementsByClassName('numbering-entry').length > 0) {
         heading.removeChild(
           heading.getElementsByClassName('numbering-entry')[0]
@@ -216,13 +223,19 @@ namespace Private {
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
       const onClick = onClickFactory(heading);
+
+      // Get the numbering string
       let numbering = generateNumbering(numberingDict, level);
+
+      // Generate the DOM element for numbering
       let numberingElement =
         '<span class="numbering-entry" ' +
         (shallHide ? ' hidden="true"' : '') +
         '>' +
         numbering +
         '</span>';
+
+      // Add DOM numbering element to document
       heading.innerHTML = numberingElement + html;
       text = text.replace('¶', '');
       headings.push({

@@ -19,6 +19,10 @@ export interface INotebookHeading extends IHeading {
   hasChild?: boolean;
 }
 
+/**
+ * Given a dictionary that keep tracks of the numbering and the level,
+ * update the dictionary.
+ */
 function incrementNumberingDict(dict: any, level: number) {
   if (dict[level + 1] != undefined) {
     dict[level + 1] = undefined;
@@ -30,7 +34,14 @@ function incrementNumberingDict(dict: any, level: number) {
   }
 }
 
-export function generateNumbering(numberingDict: any, level: number) {
+/**
+ * Given a dictionary that keep tracks of the numbering and the current level,
+ * generate the current numbering based on the dictionary and current level.
+ */
+export function generateNumbering(
+  numberingDict: { [level: number]: number },
+  level: number
+) {
   let numbering = undefined;
   if (numberingDict != null) {
     incrementNumberingDict(numberingDict, level);

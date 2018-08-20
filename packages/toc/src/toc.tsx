@@ -327,10 +327,6 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
         />
       );
     });
-    // const filterByTag = (event: React.MouseEvent<HTMLButtonElement>) => {
-    //   this.props.widget.filterByTag("test");
-    // }
-    // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>

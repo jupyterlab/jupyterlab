@@ -24,6 +24,7 @@ export class CodeComponent extends React.Component<
   }
 
   render() {
+    // Grab the rendered CodeMirror DOM in the document, show it in TOC
     let node = this.state.heading.cellRef!.node.querySelectorAll(
       '.jp-InputArea.jp-Cell-inputArea'
     );

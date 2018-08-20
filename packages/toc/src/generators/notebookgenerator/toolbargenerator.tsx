@@ -32,6 +32,7 @@ export function notebookGeneratorToolbar(
         numbering: true
       };
       if (tracker.currentWidget) {
+        // Read saved user settings in notebook metadata
         tracker.currentWidget.context.ready.then(() => {
           if (tracker.currentWidget) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
