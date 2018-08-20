@@ -1,5 +1,5 @@
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell } from '@jupyterlab/cells';
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
 import { NotebookGeneratorOptionsManager } from '../optionsmanager';
@@ -14,6 +14,9 @@ export interface TagsToolComponentState {
   selected: string[];
 }
 
+/*
+* Create a React component that handles state for the tag dropdown
+*/
 export class TagsToolComponent extends React.Component<
   TagsToolComponentProps,
   TagsToolComponentState
@@ -24,9 +27,12 @@ export class TagsToolComponent extends React.Component<
       selected: []
     };
     this.tracker = this.props.tracker;
-    this.node = null;
   }
 
+  /*
+  * Manage the selection state of the dropdown, taking in the name of a tag and
+  * whether to add or remove it.
+  */
   changeSelectionState = (newState: string, add: boolean) => {
     if (add) {
       let selectedTags = this.state.selected;
@@ -47,13 +53,22 @@ export class TagsToolComponent extends React.Component<
     }
   };
 
+  /*
+  * Deselect all tags in the dropdown and clear filters in the TOC.
+  */
   deselectAllTags = () => {
     this.props.generatorOptionsRef.filtered = [];
     this.setState({ selected: [] });
   };
 
-  cellModelContainsTag(tag: string, cellModel: ICellModel) {
-    let tagList = cellModel.metadata.get('tags') as string[];
+  /* 
+  * Check whether a cell is tagged with a certain string
+  */
+  containsTag(tag: string, cell: Cell) {
+    if (cell === null) {
+      return false;
+    }
+    let tagList = cell.model.metadata.get('tags') as string[];
     if (tagList) {
       for (let i = 0; i < tagList.length; i++) {
         if (tagList[i] === tag) {
@@ -64,13 +79,10 @@ export class TagsToolComponent extends React.Component<
     }
   }
 
-  containsTag(tag: string, cell: Cell) {
-    if (cell === null) {
-      return false;
-    }
-    return this.cellModelContainsTag(tag, cell.model);
-  }
-
+  /*
+  * Selects cells in the document that are tagged with any of the selected tags
+  * in the TOC tags dropdown
+  */
   selectCells = () => {
     let notebookPanel = this.tracker.currentWidget;
     if (notebookPanel) {
@@ -93,19 +105,16 @@ export class TagsToolComponent extends React.Component<
     }
   };
 
+  /*
+  * Tells the generator to filter the TOC by the selected tags.
+  */
   filterTags = () => {
     this.props.generatorOptionsRef.filtered = this.state.selected;
   };
 
-  handleClick = (e: any) => {
-    if (this.node) {
-      if (this.node.contains(e.target)) {
-        return;
-      }
-      this.node = null;
-    }
-  };
-
+  /*
+  * Render the interior of the tag dropdown.
+  */
   render() {
     let renderedJSX = <div className="toc-no-tags-div">No Tags Available</div>;
     if (this.props.allTagsList && this.props.allTagsList.length > 0) {
@@ -143,6 +152,5 @@ export class TagsToolComponent extends React.Component<
     return renderedJSX;
   }
 
-  private node: any;
   private tracker: INotebookTracker;
 }
