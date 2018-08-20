@@ -24,6 +24,12 @@ export const IStatusBar = new Token<IStatusBar>(
 );
 
 export interface IStatusBar {
+    /**
+     * Add an item to the status bar.
+     * @param id Id of the widget to be displayed in the Settings Registry.
+     * @param widget Widget added to the status bar.
+     * @param opts
+     */
     registerStatusItem(
         id: string,
         widget: Widget,
@@ -100,12 +106,6 @@ export class StatusBar extends Widget implements IStatusBar {
             });
     }
 
-    /**
-     * Add an item to the status bar.
-     * @param id Id of the widget to be displayed in the Settings Registry.
-     * @param widget Widget added to the status bar.
-     * @param opts
-     */
     registerStatusItem(
         id: string,
         widget: Widget,
