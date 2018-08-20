@@ -15,7 +15,8 @@ export const lineFormSearch = style({
 export const lineFormCaption = style({
     fontSize: 'var(--jp-ui-font-size0)',
     lineHeight: 'var(--jp-ui-font-size1)',
-    marginTop: '4px'
+    marginTop: '4px',
+    color: 'var(--jp-ui-font-color0)'
 });
 
 export const lineFormButton = style({
