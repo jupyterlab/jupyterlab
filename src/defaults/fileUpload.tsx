@@ -162,8 +162,6 @@ namespace FileUpload {
                     val => val.path === uploads.newValue.path
                 );
                 ArrayExt.removeAt(this._items, idx);
-
-                this.stateChanged.emit(void 0);
             }
 
             this.stateChanged.emit(void 0);
