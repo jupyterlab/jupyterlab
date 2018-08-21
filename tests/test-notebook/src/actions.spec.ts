@@ -730,7 +730,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
@@ -743,7 +743,7 @@ describe('@jupyterlab/notebook', () => {
         const result = await NotebookActions.runAll(widget, session);
         expect(result).to.equal(true);
         expect(widget.mode).to.equal('command');
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
@@ -751,12 +751,12 @@ describe('@jupyterlab/notebook', () => {
         const result = await NotebookActions.runAll(widget, session);
         expect(result).to.equal(true);
         expect(widget.isSelected(widget.widgets[2])).to.equal(false);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should activate the last cell', async () => {
         await NotebookActions.runAll(widget, session);
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should stop executing code cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -767,7 +767,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.executionCount).to.be.null;
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -777,7 +777,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
     });
 
     describe('#selectAbove(`)', () => {
