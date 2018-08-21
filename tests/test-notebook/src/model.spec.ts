@@ -151,6 +151,8 @@ describe('@jupyterlab/notebook', () => {
           let promise = signalToPromise(model.cells.changed);
           model.cells.clear();
           await promise;
+          expect(model.cells.length).to.equal(0);
+          await signalToPromise(model.cells.changed);
           expect(model.cells.length).to.equal(1);
           expect(model.cells.get(0)).to.be.an.instanceof(CodeCellModel);
         });
