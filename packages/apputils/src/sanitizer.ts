@@ -71,12 +71,12 @@ class CssProp {
    * Base expressions of common CSS syntax elements
    */
   private static readonly B = {
-    angle: `0|${CssProp.N.number}(deg|rad|grad|turn)`,
+    angle: `(${CssProp.N.number}(deg|rad|grad|turn)|0)`,
     frequency: `${CssProp.N.number}(Hz|kHz)`,
     ident: String.raw`-?([_a-z]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*`,
-    len_or_perc: `0|${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc|%)`,
-    length: `0|${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc)`,
-    length_pos: `0|${CssProp.N.number_pos}(px|em|rem|ex|in|cm|mm|pt|pc)`,
+    len_or_perc: `(0|${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc|%))`,
+    length: `(${CssProp.N.number}(px|em|rem|ex|in|cm|mm|pt|pc)|0)`,
+    length_pos: `(${CssProp.N.number_pos}(px|em|rem|ex|in|cm|mm|pt|pc)|0)`,
     percentage: `${CssProp.N.number}%`,
     percentage_pos: `${CssProp.N.number_pos}%`,
     percentage_zero_hundred: `${CssProp.N.number_zero_hundred}%`,
@@ -234,13 +234,13 @@ class CssProp {
     border: `((${CssProp.C.border_width}|${CssProp.A.border_style}|${
       CssProp.C.color
     })\\s*){1,3}`,
-    border_radius: `(${CssProp.B.len_or_perc}\\s*){1,4}(\\/\\s*(${
+    border_radius: `((${CssProp.B.len_or_perc})\\s*){1,4}(\\/\\s*((${
       CssProp.B.len_or_perc
-    }\\s*){1,4})?`,
+    })\\s*){1,4})?`,
     border_spacing: `${CssProp.B.length}\\s*(${CssProp.B.length})?`,
     border_top_color: CssProp.C.color,
     border_top_style: CssProp.A.border_style,
-    border_width: `(${CssProp.C.border_width}\\s*){1,4}`,
+    border_width: `((${CssProp.C.border_width})\\s*){1,4}`,
     color: CssProp.C.color,
     cursor: `(${
       CssProp.B.url
@@ -262,7 +262,7 @@ class CssProp {
     opacity: CssProp.C.alphavalue,
     outline_color: `${CssProp.C.color}|invert`,
     outline_width: CssProp.C.border_width,
-    padding: `(${CssProp.C.padding_width}\\s*){1,4}`,
+    padding: `((${CssProp.C.padding_width})\\s*){1,4}`,
     padding_top: CssProp.C.padding_width,
     pitch_range: CssProp.N.number,
     right: `${CssProp.B.length}|${CssProp.B.percentage}|auto`,
@@ -284,7 +284,7 @@ class CssProp {
     border_color: `((${CssProp.C.color})\\s*){1,4}`,
     border_left_color: CssProp.C.color,
     border_right_color: CssProp.C.color,
-    border_style: `(${CssProp.A.border_style}\\s*){1,4}`,
+    border_style: `((${CssProp.A.border_style})\\s*){1,4}`,
     border_top_left_radius: `(${CssProp.B.length}|${
       CssProp.B.percentage
     })(\\s*(${CssProp.B.length}|${CssProp.B.percentage}))?`,
@@ -358,7 +358,7 @@ class CssProp {
     border_right: `((${CssProp.C.border_width}|${CssProp.A.border_style}|${
       CssProp.C.color
     })\\s*){1,3}`,
-    margin: `(${CssProp.C.margin_width}\\s*){1,4}`,
+    margin: `((${CssProp.C.margin_width})\\s*){1,4}`,
     padding_left: CssProp.C.padding_width,
     border_left: `((${CssProp.C.border_width}|${CssProp.A.border_style}|${
       CssProp.C.color
