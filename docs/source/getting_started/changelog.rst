@@ -3,6 +3,75 @@
 JupyterLab Changelog
 ====================
 
+`v0.34.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.34.0>`__
+---------------------------------------------------------------------------
+
+August 18, 2018
+^^^^^^^^^^^^^^^
+
+See the `JupyterLab
+0.34.0 <https://github.com/jupyterlab/jupyterlab/milestone/16?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues
+closed.
+
+
+Key Features:
+^^^^^^^^^^^^^
+* Notebooks, consoles, and text files now have access to completions for local tokens.
+* Python 3.5+ is now required to use JupyterLab. Python 2 kernels can still be run within JupyterLab.
+* Added the pipe (``|``) character as a CSV delimiter option.
+* Added "Open From Path..."" to top level ``File`` menu.
+* Added "Copy Download Link" to context menu for files.
+
+
+Changes for Developers:
+^^^^^^^^^^^^^^^^^^^^^^^
+* Notebooks, consoles, and text files now have access to completions for local tokens. If a text file has a running kernel associated with its path (as happens with an attached console), it also gets completions and tooltips from that kernel. ([#5049](https://github.com/jupyterlab/jupyterlab/pull/5049))
+* The `FileBrowser` widget has a new constructor option `refreshInterval`, allowing the creator to customize how often the widget polls the storage backend. This can be useful to prevent rate-limiting in certain contexts. ([#5048](https://github.com/jupyterlab/jupyterlab/pull/5048))
+* The application shell now gets a pair of CSS data attributes indicating the current theme, and whether it is light or dark. Extension authors can write CSS rules targeting these to have their extension UI elements respond to the application theme. For instance, to write a rule targeting whether the theme is overall light or dark, you can use
+  ```css
+  [data-theme-light="true"] your-ui-class {
+    background-color: white;
+  }
+  [data-theme-light="false"] your-ui-class {
+    background-color: black;
+  }
+  ```
+  The theme name can also be targeted by writing CSS rules for `data-theme-name`. ([#5078](https://github.com/jupyterlab/jupyterlab/pull/5078))
+* The `IThemeManager` interface now exposes a signal for `themeChanged`, allowing extension authors to react to changes in the theme. Theme extensions must also provide a new boolean property `isLight`, declaring whether they are broadly light colored. This data allows third-party extensions to react better to the active application theme. ([#5078](https://github.com/jupyterlab/jupyterlab/pull/5078))
+* Added a patch to update the `uploads` for each `FileBrowserModel` instantly whenever a file upload errors. Previously, the upload that erred was only being removed from uploads upon an update. This would allow the status bar component and other extensions that use the `FileBrowserModel` to be more precise. (#5077)
+* Cell IDs are now passed as part of the cell metadata when a cell is executed and a `Shell Message` is rendered. (#5033)
+* The IDs of all deleted cells since the last run cell are now passed as part of the cell metadata on execution. The IDs of deleted cells since the last run cell are stored as `deletedCells` in `NotebookModel`. (#5037)
+* The above two above changes would help accelerate development of a reactive kernel and other extensions.
+* The `ToolbarButton` in `apputils` has been refactored with an API change and now uses a React component `ToolbarButtonComponent`  to render its children. It is now a `div` with a single `button` child, which in turn as two `span`s for an icon and text label. Extensions that were using the `className` options should rename it as `iconClassName`. The `className` options still exists, but it used as the CSS class on the `button` element itself. The API changes were done to accommodate styling changes to the button. ([#5117](https://github.com/jupyterlab/jupyterlab/pull/5117))
+* The `Toolbar.createFromCommand` function has been replaced by a dedicated `ToolbarButton` subclass called `CommandToolbarButton`, that wraps a similarly named React component.  ([#5117](https://github.com/jupyterlab/jupyterlab/pull/5117))
+* The design and styling of the right and left sidebars tabs has been improved to address ([#5054](https://github.com/jupyterlab/jupyterlab/issues/5054)). We are now using icons to render tabs for the extensions we ship with JupyterLab and extension authors are encouraged to do the same (text labels still work). Icon based tabs can be used by removing `widget.caption` and adding `widget.iconClass = '<youriconclass> jp-SideBar-tabIcon';`. ([#5117](https://github.com/jupyterlab/jupyterlab/pull/5117))
+* The style of buttons in JupyterLab has been updated to a borderless design. ([#5117](https://github.com/jupyterlab/jupyterlab/pull/5117))
+* A new series of helper CSS classes for stying SVG-based icons at different sizes has been added: `jp-Icon`, `jp-Icon-16`, `jp-Icon-18`, `jp-Icon-20`.
+* The rank of the default sidebar widget has been updated. The main change is giving the extension manager a rank of `1000` so that it appears at the end of the default items.
+* Python 3.5+ is now required to use JupyterLab.  Python 2 kernels can still be run within JupyterLab.  (#5119).
+* JupyterLab now uses `yarn 1.9.4` (aliased as `jlpm`), which now allows uses to use Node 10+.  (#5121).
+* Clean up handling of `baseUrl` and `wsURL` for `PageConfig` and `ServerConnection`.  (#5111)
+
+
+Other Changes:
+^^^^^^^^^^^^^^
+* Added the pipe (`|`) character as a CSV delimiter option. (#5112)
+* Added `Open From Path...` to top level `File` menu. (#5108)
+* Added a `saveState` signal to the document context object. (#5096)
+* Added "Copy Download Link" to context menu for files.  (#5089)
+* Extensions marked as `deprecated` are no longer shown in the extension manager.  (#5058)
+* Remove `In` and `Out` text from cell prompts. Shrunk the prompt width from 90px to 64px. In the light theme, set the prompt colors of executed console cells to active prompt colors and reduced their opacity to 0.5. In the dark theme, set the prompt colors of executed console cells to active prompt colors and set their opacity to 1. ([#5097](https://github.com/jupyterlab/jupyterlab/pull/5097) and [#5130](https://github.com/jupyterlab/jupyterlab/pull/5130))
+
+
+Bug Fixes:
+^^^^^^^^^^
+* Fixed a bug in the rendering of the "New Notebook" item of the command palette. ([#5079](https://github.com/jupyterlab/jupyterlab/pull/5079))
+* We only create the extension manager widget if it is enabled. This prevents unnecessary network requests to `npmjs.com`. ([#5075](https://github.com/jupyterlab/jupyterlab/pull/5075))
+* The `running` panel now shows the running sessions at startup.  (#5118).
+* Double clicking a file in the file browser always opens it rather than sometimes selecting it for a rename.  (#5101).
+
+
 `v0.33.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.33.0>`__
 ---------------------------------------------------------------------------
 
