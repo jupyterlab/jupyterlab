@@ -27,9 +27,9 @@ class ServicesTestApp(ProcessTestApp):
         terminalsAvailable = self.web_app.settings['terminals_available']
         mocha = os.path.join(HERE, '..', 'node_modules', '.bin', '_mocha')
         mocha = os.path.realpath(mocha)
-        defaults = ['build/**/*.spec.js', 'build/*.spec.js']
-        defaults += ['--retries', '2',
-                     '--jupyter-config-data=./build/config.json']
+        files = ['build/**/*.spec.js', 'build/*.spec.js']
+        opts = ['--retries', '2',
+                '--jupyter-config-data=./build/config.json']
         default_timeout = ['--timeout', '20000']
         debug = self.log.level == logging.DEBUG
 
@@ -38,11 +38,11 @@ class ServicesTestApp(ProcessTestApp):
                 os.path.join(HERE, '..', 'node_modules', '.bin', 'istanbul')
             )
             cmd = [istanbul, 'cover', '--dir', 'coverage', '_mocha', '--']
-            cmd += default_timeout + defaults
+            cmd += opts + default_timeout + files
         elif self.devtool:
-            cmd = ['devtool', mocha, '-qc', '--timeout', '120000'] + defaults
+            cmd = ['devtool', mocha, '-qc', '--timeout', '120000'] + opts + files
         else:
-            cmd = [mocha] + default_timeout + defaults
+            cmd = [mocha] + default_timeout + opts + files
             if debug:
                 cmd += ['--debug-brk']
 
