@@ -322,7 +322,7 @@ describe('@jupyterlab/apputils', () => {
         };
         await future.done;
         expect(called).to.equal(true);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should show the current status in the node title', async () => {
         const item = Toolbar.createKernelStatusItem(session);
@@ -338,7 +338,7 @@ describe('@jupyterlab/apputils', () => {
         };
         await future.done;
         expect(called).to.equal(true);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should handle a starting session', async () => {
         await session.shutdown();
@@ -346,7 +346,7 @@ describe('@jupyterlab/apputils', () => {
         const item = Toolbar.createKernelStatusItem(session);
         expect(item.node.title).to.equal('Kernel Starting');
         expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-      });
+      }).timeout(20000); // Allow for slower CI
     });
   });
 

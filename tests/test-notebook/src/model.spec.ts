@@ -13,7 +13,7 @@ import { NotebookModel } from '@jupyterlab/notebook';
 
 import { ModelDB } from '@jupyterlab/observables';
 
-import { sleep, NBTestUtils } from '@jupyterlab/testutils';
+import { signalToPromise, NBTestUtils } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
@@ -148,8 +148,11 @@ describe('@jupyterlab/notebook', () => {
 
         it('should add a new code cell when cells are cleared', async () => {
           const model = new NotebookModel();
+          let promise = signalToPromise(model.cells.changed);
           model.cells.clear();
-          await sleep();
+          await promise;
+          expect(model.cells.length).to.equal(0);
+          await signalToPromise(model.cells.changed);
           expect(model.cells.length).to.equal(1);
           expect(model.cells.get(0)).to.be.an.instanceof(CodeCellModel);
         });
