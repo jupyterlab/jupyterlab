@@ -304,7 +304,16 @@ namespace TabSpace {
                 this._tabSpace = this._settingConnector.currentValue!.tabSize;
             }
 
-            this._triggerChange(oldTabSpace, this._tabSpace);
+            if (
+                (oldSettingConnector === null &&
+                    this._settingConnector !== null) ||
+                (oldSettingConnector !== null &&
+                    this._settingConnector === null)
+            ) {
+                this.stateChanged.emit(void 0);
+            } else {
+                this._triggerChange(oldTabSpace, this._tabSpace);
+            }
         }
 
         get tabSpace() {
