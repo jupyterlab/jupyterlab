@@ -539,7 +539,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         const cell = widget.model.contentFactory.createMarkdownCell({});
@@ -552,7 +552,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
     });
 
     describe('#runAndAdvance()', () => {
@@ -581,7 +581,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
@@ -626,7 +626,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -638,7 +638,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
     });
 
     describe('#runAndInsert()', () => {
@@ -700,7 +700,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
@@ -712,7 +712,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
         await ipySession.kernel.restart();
-      });
+      }).timeout(20000); // Allow for slower CI
     });
 
     describe('#runAll()', () => {
