@@ -317,7 +317,7 @@ describe('@jupyterlab/apputils', () => {
         await acceptDialog();
         expect(await restart).to.equal(true);
         expect(called).to.equal(true);
-      });
+      }).timeout(20000); // Allow for slower CI
 
       it('should not restart if the user rejects the dialog', async () => {
         let called = false;
