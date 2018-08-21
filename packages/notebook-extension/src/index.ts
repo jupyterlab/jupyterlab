@@ -503,9 +503,8 @@ function activateNotebookHandler(
       args['isLauncher'] || args['isPalette'] ? '' : 'jp-NotebookIcon',
     execute: args => {
       const cwd =
-        args['cwd'] || browserFactory
-          ? browserFactory.defaultBrowser.model.path
-          : '';
+        (args['cwd'] as string) ||
+        (browserFactory ? browserFactory.defaultBrowser.model.path : '');
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelName);
     }
