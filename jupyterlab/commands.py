@@ -971,10 +971,28 @@ class _AppHandler(object):
             # Reject incompatible extensions with a message.
             errors = compat_errors[key]
             if errors:
-                msg = _format_compatibility_errors(
-                    key, value['version'], errors
-                )
                 if not silent:
+                    msg = _format_compatibility_errors(
+                        key, value['version'], errors
+                    )
+                    name = value['name']
+                    # Add some helpful text for the benefit of the user:
+                    try:
+                        version = self._latest_compatible_package_version(name)
+                    except URLError:
+                        version = None
+                    if version is not None:
+                        msg = (
+                            '{0}\n\n'
+                            'A compatible version exists ({1}).\n'
+                            'Try running "jupyter lab update {2}".'
+                        ).format(msg, version, name)
+                    else:
+                        conflicts = '\n'.join(msg.splitlines()[2:])
+                        msg = ''.join((
+                            self._format_no_compatible_package_version(name),
+                            "\n\n",
+                            conflicts))
                     logger.warn(msg + '\n')
                 continue
 
