@@ -198,7 +198,7 @@ describe('@jupyterlab/notebook', () => {
         await framePromise();
         (button.node.firstChild as HTMLElement).click();
         await p.promise;
-      });
+      }).timeout(30000); // Allow for slower CI
 
       it("should have the `'jp-RunIcon'` class", async () => {
         const button = ToolbarItems.createRunButton(panel);
