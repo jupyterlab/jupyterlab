@@ -30,11 +30,11 @@ class TestParent extends Panel implements ForeignHandler.IReceiver {
 }
 
 class TestHandler extends ForeignHandler {
-  injected = new Signal<this, void>(this);
+  injected = new Signal<this, KernelMessage.IIOPubMessage>(this);
 
-  received = new Signal<this, void>(this);
+  received = new Signal<this, KernelMessage.IIOPubMessage>(this);
 
-  rejected = new Signal<this, void>(this);
+  rejected = new Signal<this, KernelMessage.IIOPubMessage>(this);
 
   methods: string[] = [];
 
@@ -43,9 +43,9 @@ class TestHandler extends ForeignHandler {
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     const injected = super.onIOPubMessage(sender, msg);
-    this.received.emit(void 0);
+    this.received.emit(msg);
     if (injected) {
-      this.injected.emit(void 0);
+      this.injected.emit(msg);
     } else {
       // If the message was not injected but otherwise would have been, emit
       // a rejected signal. This should only happen if `enabled` is `false`.
@@ -55,7 +55,7 @@ class TestHandler extends ForeignHandler {
         session !== this.session.kernel.clientId &&
         relevantTypes.has(msgType)
       ) {
-        this.rejected.emit(void 0);
+        this.rejected.emit(msg);
       }
     }
     return injected;
@@ -216,23 +216,22 @@ describe('@jupyterlab/console', () => {
 
       it('should not reject relevant iopub messages', async () => {
         const code = 'print("#onIOPubMessage:relevant")';
-        let called = 0;
+        let called = false;
         handler.enabled = true;
-        let finished = false;
         let errored = false;
         handler.rejected.connect(() => {
           errored = true;
         });
-        handler.injected.connect(() => {
-          if (++called === 2) {
-            finished = true;
+        handler.injected.connect((sender, msg) => {
+          if (KernelMessage.isStreamMsg(msg)) {
+            called = true;
           }
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
         if (errored) {
           throw new Error('rejected relevant iopub message');
         }
-        expect(finished).to.equal(true);
+        expect(called).to.equal(true);
       });
     });
   });
