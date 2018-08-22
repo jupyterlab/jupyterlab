@@ -292,7 +292,7 @@ Install this dependency as well:
 
 .. code:: bash
 
-    npm install --save @phosphor/widgets
+    jlpm add @phosphor/widgets
 
 
 Then modify the ``activate`` function again so that it has the following
