@@ -499,8 +499,7 @@ function activateNotebookHandler(
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: args =>
-      args['isLauncher'] || args['isPalette'] ? '' : 'jp-NotebookIcon',
+    iconClass: args => (args['isPalette'] ? '' : 'jp-NotebookIcon'),
     execute: args => {
       const cwd =
         args['cwd'] || browserFactory
