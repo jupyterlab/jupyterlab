@@ -171,7 +171,6 @@
   background-size: var(--jp-private-launcher-large-icon-size)
     var(--jp-private-launcher-large-icon-size);
   background-repeat: no-repeat;
-  cursor: pointer;
 }
 
 .jp-Launcher-kernelIcon {
