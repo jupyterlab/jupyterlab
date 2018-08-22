@@ -40,23 +40,7 @@ Setup a development environment
 Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start by opening your web browser and downloading the latest Python 3.x
-`Miniconda installer <https://conda.io/miniconda.html>`__ to your home
-directory. When the download completes, open a terminal and create a
-root conda environment by running this command.
-
-.. code:: bash
-
-    bash Miniconda3*.sh -b -p ~/miniconda
-
-Now activate the conda environment you just created so that you can run
-the ``conda`` package manager.
-
-.. code:: bash
-
-    source ~/miniconda/bin/activate
-
-For more detail on installing miniconda, see
+Start by installing miniconda, following
 `Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
 
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
@@ -88,7 +72,7 @@ work out of that environment.
 
 .. code:: bash
 
-    source ~/miniconda/bin/activate jupyterlab-ext
+    conda activate jupyterlab-ext
 
 Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
@@ -151,15 +135,15 @@ defer building since it will be built in the next step.
 
 .. note::
 
-   This tutorial uses ``npm`` to install Javascript packages and
-   run build commands. If you prefer, you can use another package
-   manager like ``yarn`` or ``jlpm``, which is JupyterLab's bundled
-   version of ``yarn``.
+   This tutorial uses ``jlpm`` to install Javascript packages and
+   run build commands, which is JupyterLab's bundled
+   version of ``yarn``. If you prefer, you can use another Javascript
+   package manager like ``npm`` or ``yarn`` itself.
 
 
 .. code:: bash
 
-    npm install
+    jlpm install
     jupyter labextension install . --no-build
 
 After the install completes, open a second terminal. Run these commands
@@ -169,7 +153,7 @@ make them.
 
 .. code:: bash
 
-    source ~/miniconda/bin/activate jupyterlab-ext
+    conda activate jupyterlab-ext
     jupyter lab --watch
 
 See the initial extension in action
@@ -241,7 +225,7 @@ repository root folder install the dependency and save it to your
 
 .. code:: bash
 
-    npm install --save @jupyterlab/apputils
+    jlpm add @jupyterlab/apputils
 
 Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
 definition so that it reads like so:
@@ -273,7 +257,7 @@ Run the following to rebuild your extension.
 
 .. code:: bash
 
-    npm run build
+    jlpm run build
 
 JupyterLab will rebuild after the extension does. You can
 see it's progress in the ``jupyter lab --watch`` window. After that
@@ -535,7 +519,7 @@ Install this dependency:
 
 .. code:: bash
 
-    npm install --save @phosphor/messaging
+    jlpm add @phosphor/messaging
 
 
 Then add the class just below the import statements in the ``index.ts``
@@ -704,7 +688,7 @@ Install this dependency:
 
 .. code:: bash
 
-    npm install --save @phosphor/coreutils
+    jlpm add @phosphor/coreutils
 
 Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
@@ -854,7 +838,7 @@ username where appropriate
 .. code:: bash
 
     conda create -n jupyterlab-xkcd jupyterlab nodejs
-    source activate jupyterlab-xkcd
+    conda activate jupyterlab-xkcd
     jupyter labextension install @your-npm-username/jupyterlab_xkcd
     jupyter lab
 
