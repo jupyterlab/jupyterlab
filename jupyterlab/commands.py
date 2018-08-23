@@ -975,22 +975,21 @@ class _AppHandler(object):
                     msg = _format_compatibility_errors(
                         key, value['version'], errors
                     )
-                    name = value['name']
                     # Add some helpful text for the benefit of the user:
                     try:
-                        version = self._latest_compatible_package_version(name)
+                        version = self._latest_compatible_package_version(key)
                     except URLError:
                         version = None
                     if version is not None:
                         msg = (
                             '{0}\n\n'
                             'A compatible version exists ({1}).\n'
-                            'Try running "jupyter lab update {2}".'
-                        ).format(msg, version, name)
+                            'Try running "jupyter labextension update {2}".'
+                        ).format(msg, version, key)
                     else:
                         conflicts = '\n'.join(msg.splitlines()[2:])
                         msg = ''.join((
-                            self._format_no_compatible_package_version(name),
+                            self._format_no_compatible_package_version(key),
                             "\n\n",
                             conflicts))
                     logger.warn(msg + '\n')
