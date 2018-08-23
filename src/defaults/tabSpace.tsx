@@ -93,11 +93,21 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
         if (this._popup) {
             this._popup.dispose();
         }
+
         this._popup = showPopup({
             body: menu,
             anchor: this,
             align: 'right'
         });
+
+        menu.aboutToClose.connect(this._onClickMenuDispose);
+    };
+
+    private _onClickMenuDispose = (sender: Menu) => {
+        sender.node.focus();
+        this._popup!.dispose();
+
+        sender.aboutToClose.connect(this._onClickMenuDispose);
     };
 
     render(): React.ReactElement<TabSpaceComponent.IProps> | null {
