@@ -1,7 +1,7 @@
 # JupyterLab Status Bar
 
 This extension creates a generic statusbar to showcase the various states of JupyterLab. Different components will render depending on the active context: notebook, console, file editor, and terminal. This extension can be used by other
-extensions to add custom elements into the statusbar. 
+extensions to add custom elements into the statusbar.
 
 Changing Contexts
 ![Context Changes](http://g.recordit.co/OndGalRjws.gif)
@@ -13,10 +13,14 @@ Component Interactions
 
 -   JupyterLab
 
-## Optional Dependencies 
+## Optional Dependencies
 
--   [nbresuse](https://github.com/yuvipanda/nbresuse) <br />
-    Upon installation, NB resource usage extension will appear in the status bar.
+-   [nbresuse](https://github.com/yuvipanda/nbresuse)
+
+```bash
+pip install nbresuse
+jupyter serverextension enable --py nbresuse
+```
 
 ## Installation
 
