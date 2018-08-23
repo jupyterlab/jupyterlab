@@ -280,6 +280,9 @@
 .toc-no-tags-div {
   font-size: 12px;
   padding: 3px;
+  padding-bottom: 6px;
+  margin: auto;
+  color: var(--jp-layout-color4);
 }
 
 .toc-tags-container {

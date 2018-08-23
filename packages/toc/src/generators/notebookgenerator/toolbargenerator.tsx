@@ -181,14 +181,14 @@ export function notebookGeneratorToolbar(
           onClick={event => this.toggleMarkdown.bind(this)()}
         >
           <img
-            alt="Toggle Code Cells"
-            title="Toggle Code Cells"
+            alt="Toggle Markdown Cells"
+            title="Toggle Markdown Cells"
             src={require('../../../style/img/markdown_unselected.svg')}
             className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--off"
           />
           <img
-            alt="Toggle Code Cells"
-            title="Toggle Code Cells"
+            alt="Toggle Markdown Cells"
+            title="Toggle Markdown Cells"
             src={require('../../../style/img/markdown_hover.svg')}
             className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--on"
           />
@@ -258,8 +258,8 @@ export function notebookGeneratorToolbar(
         );
         tagIcon = (
           <img
-            alt="Hide Tag Dropdown"
-            title="Hide Tag Dropdown"
+            alt="Hide Tags Menu"
+            title="Hide Tags Menu"
             src={require('../../../style/img/tag_selected.svg')}
           />
         );
