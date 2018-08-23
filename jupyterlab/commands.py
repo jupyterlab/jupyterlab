@@ -972,28 +972,9 @@ class _AppHandler(object):
             errors = compat_errors[key]
             if errors:
                 if not silent:
-                    msg = _format_compatibility_errors(
-                        key, value['version'], errors
+                    _log_single_compat_errors(
+                        logger, key, value['version'], errors
                     )
-                    name = value['name']
-                    # Add some helpful text for the benefit of the user:
-                    try:
-                        version = self._latest_compatible_package_version(name)
-                    except URLError:
-                        version = None
-                    if version is not None:
-                        msg = (
-                            '{0}\n\n'
-                            'A compatible version exists ({1}).\n'
-                            'Try running "jupyter lab update {2}".'
-                        ).format(msg, version, name)
-                    else:
-                        conflicts = '\n'.join(msg.splitlines()[2:])
-                        msg = ''.join((
-                            self._format_no_compatible_package_version(name),
-                            "\n\n",
-                            conflicts))
-                    logger.warn(msg + '\n')
                 continue
 
             data['dependencies'][key] = format_path(value['path'])
@@ -1173,9 +1154,10 @@ class _AppHandler(object):
 
         dname = info['%s_dir' % ext_type]
 
+        error_accumulator = {}
+
         logger.info('   %s dir: %s' % (ext_type, dname))
         for name in sorted(names):
-            logger.info(name)
             data = info['extensions'][name]
             version = data['version']
             errors = info['compat_errors'][name]
@@ -1192,10 +1174,10 @@ class _AppHandler(object):
                 extra += '*'
             logger.info('        %s v%s%s' % (name, version, extra))
             if errors:
-                msg = _format_compatibility_errors(
-                    name, version, errors
-                )
-                logger.warn(msg + '\n')
+                error_accumulator[name] = (version, errors)
+
+        # Write all errors at end:
+        _log_multiple_compat_errors(logger, error_accumulator)
 
     def _read_build_config(self):
         """Get the build config data for the app dir.
@@ -1718,6 +1700,67 @@ def _format_compatibility_errors(name, version, errors):
         msg += jlab.ljust(l0) + ext.ljust(l1) + pkg + '\n'
 
     return msg
+
+
+def _log_multiple_compat_errors(logger, errors_map):
+    """Log compatability errors for multiple extensions at once"""
+
+    outdated = []
+    others = []
+
+    for name, (version, errors) in errors_map.items():
+        age = _compat_error_age(errors)
+        if age > 0:
+            outdated.append(name)
+        else:
+            others.append(name)
+
+    if outdated:
+        logger.warn('\n        '.join(
+            ['\n   The following extension are outdated:'] +
+            outdated +
+            ['\n   Consider running "jupyter labextension update --all" '
+             'to check for updates.\n']
+        ))
+
+    for name in others:
+        version, errors = errors_map[name]
+        msg = _format_compatibility_errors(name, version, errors)
+        logger.warn(msg + '\n')
+
+
+def _log_single_compat_errors(logger, name, version, errors):
+    """Log compatability errors for a single extension"""
+
+    age = _compat_error_age(errors)
+    if age > 0:
+        logger.warn('The extension "%s" is outdated.\n', name)
+    else:
+        msg = _format_compatibility_errors(name, version, errors)
+        logger.warn(msg + '\n')
+
+
+def _compat_error_age(errors):
+    """Compare all incompatabilites for an extension.
+
+    Returns a number > 0 if all extensions are older than that supported by lab.
+    Returns a number < 0 if all extensions are newer than that supported by lab.
+    Returns 0 otherwise (i.e. a mix).
+    """
+    # Do any extensions depend on too old lab packages?
+    any_older = False
+    # Do any extensions depend on too new lab packages?
+    any_newer = False
+
+    for _, jlab, ext in errors:
+        c = _compare_ranges(ext, jlab)
+        any_newer = any_newer or c < 0
+        any_older = any_older or c > 0
+    if any_older and not any_newer:
+        return 1
+    elif any_newer and not any_older:
+        return -1
+    return 0
 
 
 def _get_core_extensions():
