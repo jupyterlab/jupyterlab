@@ -1071,7 +1071,7 @@ class _AppHandler(object):
             # homepage, repository  are optional
             if 'homepage' in data:
                 url = data['homepage']
-            elif 'repository' in data:
+            elif 'repository' in data and isinstance(data['repository'], dict):
                 url = data['repository'].get('url', '')
             else:
                 url = ''
