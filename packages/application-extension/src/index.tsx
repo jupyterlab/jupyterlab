@@ -51,12 +51,10 @@ namespace CommandIDs {
  * The routing regular expressions used by the application plugin.
  */
 namespace Patterns {
-  export const tree = new RegExp(
-    `^${PageConfig.getOption('treeUrl')}([^?\/]+)`
-  );
+  export const tree = new RegExp(`^${PageConfig.getOption('treeUrl')}([^?]+)`);
 
   export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?\/]+)`
+    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?]+)`
   );
 }
 
