@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -45,13 +45,13 @@ export class NbconvertManager {
         return response.json();
       })
       .then(data => {
-        if (typeof data.status !== 'string') {
-          throw new Error('Invalid data');
-        }
-        if (typeof data.message !== 'string') {
-          throw new Error('Invalid data');
-        }
-        return data;
+        // if (typeof data.status !== 'string') {
+        //   throw new Error('Invalid data');
+        // }
+        // if (typeof data.message !== 'string') {
+        //   throw new Error('Invalid data');
+        // }
+        return { exportList: data };
       });
   }
 
@@ -115,7 +115,7 @@ export namespace NbconvertManager {
    */
   export interface IExportFormats {
     /**
-     * The list of supported export formats. TODO: pre-process this in getExportFormats?
+     * The list of supported export formats.
      */
     readonly exportList: string;
   }

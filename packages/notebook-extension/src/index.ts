@@ -393,7 +393,7 @@ function activateNotebookHandler(
   registry.addWidgetFactory(factory);
 
   addCommands(app, services, tracker);
-  populatePalette(palette);
+  populatePalette(palette, services);
 
   let id = 0; // The ID counter for notebook panels.
 
@@ -1569,7 +1569,10 @@ function addCommands(
 /**
  * Populate the application's command palette with notebook commands.
  */
-function populatePalette(palette: ICommandPalette): void {
+function populatePalette(
+  palette: ICommandPalette,
+  services: ServiceManager
+): void {
   let category = 'Notebook Operations';
   [
     CommandIDs.interrupt,
@@ -1601,6 +1604,14 @@ function populatePalette(palette: ICommandPalette): void {
     args: { isPalette: true }
   });
 
+  services.nbconvert.getExportFormats().then(response => {
+    console.log('dumping exportlistformat');
+    console.log(response); // TODO - remove this dump
+    if (response.exportList) {
+      // convert exportList to palette items
+      console.log(response.exportList);
+    }
+  });
   EXPORT_TO_FORMATS.forEach(exportToFormat => {
     let args = {
       format: exportToFormat['format'],
