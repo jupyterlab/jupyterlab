@@ -1613,7 +1613,6 @@ function populatePalette(
   services.nbconvert.getExportFormats().then(response => {
     if (response.exportList) {
       // convert exportList to palette items
-      console.error(response.exportList);
       const formatList = Object.keys(response.exportList);
       formatList.forEach(function(key) {
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
@@ -1758,7 +1757,6 @@ function populateMenus(
   services.nbconvert.getExportFormats().then(response => {
     if (response.exportList) {
       // convert exportList to palette items
-      console.error(response.exportList);
       const formatList = Object.keys(response.exportList);
       formatList.forEach(function(key) {
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
