@@ -84,9 +84,13 @@ export function createRenderedMarkdownGenerator(
   sanitizer: ISanitizer,
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<MimeDocument> {
-  const options = new MarkdownDocGeneratorOptionsManager(widget, {
-    needNumbering: true
-  });
+  const options = new MarkdownDocGeneratorOptionsManager(
+    widget,
+    {
+      needNumbering: true
+    },
+    tracker
+  );
   return {
     tracker,
     usesLatex: true,
@@ -113,7 +117,8 @@ export function createRenderedMarkdownGenerator(
         widget.content.node,
         onClickFactory,
         sanitizer,
-        numberingDict
+        numberingDict,
+        options.numbering
       );
     }
   };

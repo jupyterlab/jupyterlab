@@ -24,6 +24,17 @@ export function markdownDocItemRenderer(
   // Render numbering if needed
   let numbering = item.numbering && options.numbering ? item.numbering : '';
   fontSize = levelsSizes[item.level] + 'px';
-  let jsx = <span style={{ fontSize }}> {numbering + item.text}</span>;
+  let jsx;
+  if (item.html) {
+    jsx = (
+      <span
+        dangerouslySetInnerHTML={{ __html: numbering + item.html }}
+        className={item.type + '-cell'}
+        style={{ fontSize }}
+      />
+    );
+  } else {
+    jsx = <span style={{ fontSize }}> {numbering + item.text}</span>;
+  }
   return jsx;
 }
