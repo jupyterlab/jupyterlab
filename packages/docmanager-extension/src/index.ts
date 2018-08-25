@@ -564,8 +564,9 @@ function addCommands(
     isEnabled,
     execute: args => {
       const widget = contextMenuWidget();
-      const options =
-        (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
+      const options = (args['options'] as DocumentRegistry.IOpenOptions) || {
+        mode: 'split-right'
+      };
       if (!widget) {
         return;
       }
