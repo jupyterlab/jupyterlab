@@ -212,17 +212,23 @@ const FACTORY = 'Notebook';
 const CELL_TOOLS_RANK = 400;
 
 /**
- * The allowed Export To ... formats and their human readable labels.
+ * The exluded Export To ...
+ * (returned from nbconvert's export list)
  */
-const EXPORT_TO_FORMATS = [
-  { format: 'html', label: 'HTML' },
-  { format: 'latex', label: 'LaTeX' },
-  { format: 'markdown', label: 'Markdown' },
-  { format: 'pdf', label: 'PDF' },
-  { format: 'rst', label: 'ReStructured Text' },
-  { format: 'script', label: 'Executable Script' },
-  { format: 'slides', label: 'Reveal.js Slides' }
-];
+const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * The default Export To ... formats and their human readable labels.
+ */
+const FORMAT_LABEL: { [k: string]: string } = {
+  html: 'HTML',
+  latex: 'LaTeX',
+  markdown: 'Markdown',
+  pdf: 'PDF',
+  rst: 'ReStructured Text',
+  script: 'Executable Script',
+  slides: 'Reveal.js Slides'
+};
 
 /**
  * The notebook widget tracker provider.
@@ -471,7 +477,7 @@ function activateNotebookHandler(
     });
 
   // Add main menu notebook menu.
-  populateMenus(app, mainMenu, tracker);
+  populateMenus(app, mainMenu, tracker, services);
 
   // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
@@ -1605,20 +1611,26 @@ function populatePalette(
   });
 
   services.nbconvert.getExportFormats().then(response => {
-    console.log('dumping exportlistformat');
-    console.log(response); // TODO - remove this dump
     if (response.exportList) {
       // convert exportList to palette items
-      console.log(response.exportList);
+      console.error(response.exportList);
+      const formatList = Object.keys(response.exportList);
+      formatList.forEach(function(key) {
+        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
+        let args = {
+          format: key,
+          label: labelStr,
+          isPalette: true
+        };
+        if (FORMAT_EXCLUDE.indexOf(labelStr) === -1) {
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args
+          });
+        }
+      });
     }
-  });
-  EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    let args = {
-      format: exportToFormat['format'],
-      label: exportToFormat['label'],
-      isPalette: true
-    };
-    palette.addItem({ command: CommandIDs.exportToFormat, category, args });
   });
 
   category = 'Notebook Cell Operations';
@@ -1676,7 +1688,8 @@ function populatePalette(
 function populateMenus(
   app: JupyterLab,
   mainMenu: IMainMenu,
-  tracker: INotebookTracker
+  tracker: INotebookTracker,
+  services: ServiceManager
 ): void {
   let { commands } = app;
 
@@ -1742,17 +1755,31 @@ function populateMenus(
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });
   exportTo.title.label = 'Export Notebook As…';
-  EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    exportTo.addItem({
-      command: CommandIDs.exportToFormat,
-      args: exportToFormat
-    });
+  services.nbconvert.getExportFormats().then(response => {
+    if (response.exportList) {
+      // convert exportList to palette items
+      console.error(response.exportList);
+      const formatList = Object.keys(response.exportList);
+      formatList.forEach(function(key) {
+        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
+        let args = {
+          format: key,
+          label: labelStr
+        };
+        if (FORMAT_EXCLUDE.indexOf(labelStr) === -1) {
+          exportTo.addItem({
+            command: CommandIDs.exportToFormat,
+            args: args
+          });
+        }
+      });
+      const fileGroup = [
+        { command: CommandIDs.trust },
+        { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+      ];
+      mainMenu.fileMenu.addGroup(fileGroup, 10);
+    }
   });
-  const fileGroup = [
-    { command: CommandIDs.trust },
-    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-  ];
-  mainMenu.fileMenu.addGroup(fileGroup, 10);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.add({

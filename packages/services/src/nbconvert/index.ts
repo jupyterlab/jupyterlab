@@ -8,7 +8,7 @@ import { ServerConnection } from '../serverconnection';
 /**
  * The url for the lab nbconvert service.
  */
-const NBCONVERT_SETTINGS_URL = 'lab/api/nbconvert';
+const NBCONVERT_SETTINGS_URL = 'api/nbconvert';
 
 /**
  * The static namespace for `NbconvertManager`.
@@ -45,12 +45,22 @@ export class NbconvertManager {
         return response.json();
       })
       .then(data => {
-        // if (typeof data.status !== 'string') {
-        //   throw new Error('Invalid data');
-        // }
-        // if (typeof data.message !== 'string') {
-        //   throw new Error('Invalid data');
-        // }
+        /* TODO: should we add a type check here?
+            or just return the export list object unmodified:
+         {
+            "custom": {
+              "output_mimetype": ""
+            },
+            "html": {
+              "output_mimetype": "text/html"
+            },
+            "slides": {
+              "output_mimetype": "text/html"
+           },
+
+            ...
+          }
+       */
         return { exportList: data };
       });
   }
@@ -117,6 +127,8 @@ export namespace NbconvertManager {
     /**
      * The list of supported export formats.
      */
+    // TODO: should this stay a string, or a typed object
+    // that includes an 'output_mimetype' string?
     readonly exportList: string;
   }
 }
