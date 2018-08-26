@@ -616,7 +616,8 @@ function addCommands(
       }
       return commands.execute('docmanager:open', {
         path,
-        factory: MARKDOWN_FACTORY
+        factory: MARKDOWN_FACTORY,
+        options: args['options']
       });
     }
   });

@@ -407,7 +407,12 @@ function activate(
         return;
       }
       let path = widget.context.path;
-      return commands.execute('markdownviewer:open', { path });
+      return commands.execute('markdownviewer:open', {
+        path,
+        options: {
+          mode: 'split-right'
+        }
+      });
     },
     isVisible: () => {
       let widget = tracker.currentWidget;
