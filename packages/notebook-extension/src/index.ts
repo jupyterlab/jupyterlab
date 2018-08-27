@@ -1611,9 +1611,9 @@ function populatePalette(
   });
 
   services.nbconvert.getExportFormats().then(response => {
-    if (response.exportList) {
+    if (response) {
       // convert exportList to palette items
-      const formatList = Object.keys(response.exportList);
+      const formatList = Object.keys(response);
       formatList.forEach(function(key) {
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
         let args = {
@@ -1755,9 +1755,9 @@ function populateMenus(
   let exportTo = new Menu({ commands });
   exportTo.title.label = 'Export Notebook As…';
   services.nbconvert.getExportFormats().then(response => {
-    if (response.exportList) {
+    if (response) {
       // convert exportList to palette items
-      const formatList = Object.keys(response.exportList);
+      const formatList = Object.keys(response);
       formatList.forEach(function(key) {
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
         let args = {

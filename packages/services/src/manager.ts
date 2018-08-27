@@ -7,7 +7,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Builder, BuildManager } from './builder';
 
-import { Nbconvert, NbconvertManager } from './nbconvert';
+import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
@@ -40,7 +40,7 @@ export class ServiceManager implements ServiceManager.IManager {
     this.terminals = new TerminalManager(options);
     this.builder = new BuildManager(options);
     this.workspaces = new WorkspaceManager(options);
-    this.nbconvert = new NbconvertManager(options);
+    this.nbconvert = new NbConvertManager(options);
 
     this.sessions.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
@@ -130,7 +130,7 @@ export class ServiceManager implements ServiceManager.IManager {
   /**
    * Get the nbconvert manager instance.
    */
-  readonly nbconvert: NbconvertManager;
+  readonly nbconvert: NbConvertManager;
 
   /**
    * Test whether the manager is ready.
@@ -218,7 +218,7 @@ export namespace ServiceManager {
     /**
      * The nbconvert manager for the manager.
      */
-    readonly nbconvert: Nbconvert.IManager;
+    readonly nbconvert: NbConvert.IManager;
   }
 
   /**

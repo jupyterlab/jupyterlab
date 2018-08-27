@@ -11,13 +11,13 @@ import { ServerConnection } from '../serverconnection';
 const NBCONVERT_SETTINGS_URL = 'api/nbconvert';
 
 /**
- * The static namespace for `NbconvertManager`.
+ * The nbconvert API service manager.
  */
-export class NbconvertManager {
+export class NbConvertManager {
   /**
    * Create a new nbconvert manager.
    */
-  constructor(options: NbconvertManager.IOptions = {}) {
+  constructor(options: NbConvertManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
   }
@@ -30,7 +30,7 @@ export class NbconvertManager {
   /**
    * Get whether the application should be built.
    */
-  getExportFormats(): Promise<NbconvertManager.IExportFormats> {
+  getExportFormats(): Promise<NbConvertManager.IExportFormats> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, NBCONVERT_SETTINGS_URL);
     const { serverSettings } = this;
@@ -45,71 +45,15 @@ export class NbconvertManager {
         return response.json();
       })
       .then(data => {
-        /* TODO: should we add a type check here?
-            or just return the export list object unmodified:
-         {
-            "custom": {
-              "output_mimetype": ""
-            },
-            "html": {
-              "output_mimetype": "text/html"
-            },
-            "slides": {
-              "output_mimetype": "text/html"
-           },
-
-            ...
-          }
-       */
-        return { exportList: data };
+        return data;
       });
-  }
-
-  /**
-   * Build the application.
-   */
-  build(): Promise<void> {
-    const base = this.serverSettings.baseUrl;
-    const url = URLExt.join(base, NBCONVERT_SETTINGS_URL);
-    const { serverSettings } = this;
-    const init = { method: 'POST' };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
-
-    return promise.then(response => {
-      if (response.status === 400) {
-        throw new ServerConnection.ResponseError(response, 'Build aborted');
-      }
-      if (response.status !== 200) {
-        let message = `Build failed with ${
-          response.status
-        }, please run 'jupyter lab build' on the server for full output`;
-        throw new ServerConnection.ResponseError(response, message);
-      }
-    });
-  }
-
-  /**
-   * Cancel an active build.
-   */
-  cancel(): Promise<void> {
-    const base = this.serverSettings.baseUrl;
-    const url = URLExt.join(base, NBCONVERT_SETTINGS_URL);
-    const { serverSettings } = this;
-    const init = { method: 'DELETE' };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
-
-    return promise.then(response => {
-      if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-    });
   }
 }
 
 /**
  * A namespace for `BuildManager` statics.
  */
-export namespace NbconvertManager {
+export namespace NbConvertManager {
   /**
    * The instantiation options for a setting manager.
    */
@@ -121,7 +65,7 @@ export namespace NbconvertManager {
   }
 
   /**
-   * The build status response from the server.
+   * A namespace for nbconvert API interfaces.
    */
   export interface IExportFormats {
     /**
@@ -129,16 +73,16 @@ export namespace NbconvertManager {
      */
     // TODO: should this stay a string, or a typed object
     // that includes an 'output_mimetype' string?
-    readonly exportList: string;
+    [key: string]: { output_mimetype: string };
   }
 }
 
 /**
  * A namespace for builder API interfaces.
  */
-export namespace Nbconvert {
+export namespace NbConvert {
   /**
    * The interface for the build manager.
    */
-  export interface IManager extends NbconvertManager {}
+  export interface IManager extends NbConvertManager {}
 }

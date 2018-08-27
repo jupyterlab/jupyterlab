@@ -11,7 +11,7 @@ import { ServerConnection } from '../serverconnection';
 const BUILD_SETTINGS_URL = 'lab/api/build';
 
 /**
- * The static namespace for `BuildManager`.
+ * The build API service manager.
  */
 export class BuildManager {
   /**
