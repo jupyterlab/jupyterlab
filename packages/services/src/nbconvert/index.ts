@@ -45,7 +45,13 @@ export class NbConvertManager {
         return response.json();
       })
       .then(data => {
-        return data;
+        let exportList: NbConvertManager.IExportFormats = {};
+        let keys = Object.keys(data);
+        keys.forEach(function(key) {
+          let mimeType: string = data[key].output_mimetype;
+          exportList[key] = { output_mimetype: mimeType };
+        });
+        return exportList;
       });
   }
 }
