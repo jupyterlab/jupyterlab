@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-extension",
-  "version": "0.18.4",
+  "version": "0.18.5",
   "description": "JupyterLab - Application Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
