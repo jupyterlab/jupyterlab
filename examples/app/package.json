@@ -19,7 +19,7 @@
     "@jupyterlab/docmanager-extension": "^0.18.5",
     "@jupyterlab/faq-extension": "^0.18.4",
     "@jupyterlab/filebrowser-extension": "^0.18.5",
-    "@jupyterlab/fileeditor-extension": "^0.18.4",
+    "@jupyterlab/fileeditor-extension": "^0.18.5",
     "@jupyterlab/help-extension": "^0.18.4",
     "@jupyterlab/imageviewer-extension": "^0.18.4",
     "@jupyterlab/inspector-extension": "^0.18.4",
