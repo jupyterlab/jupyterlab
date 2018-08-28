@@ -375,10 +375,8 @@ export class FileBrowserModel implements IDisposable {
   async upload(file: File): Promise<Contents.IModel> {
     const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
     const largeFile = file.size > LARGE_FILE_SIZE;
-    const isNotebook = file.name.indexOf('.ipynb') !== -1;
-    const canSendChunked = supportsChunked && !isNotebook;
 
-    if (largeFile && !canSendChunked) {
+    if (largeFile && !supportsChunked) {
       let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
         file.name
       }`;
@@ -401,7 +399,7 @@ export class FileBrowserModel implements IDisposable {
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
-    return await this._upload(file, isNotebook, chunkedUpload);
+    return await this._upload(file, chunkedUpload);
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -420,15 +418,14 @@ export class FileBrowserModel implements IDisposable {
    */
   private async _upload(
     file: File,
-    isNotebook: boolean,
     chunked: boolean
   ): Promise<Contents.IModel> {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
-    let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
-    let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
+    let type: Contents.ContentType = 'file';
+    let format: Contents.FileFormat = 'base64';
 
     const uploadInner = async (
       blob: Blob,
@@ -436,11 +433,7 @@ export class FileBrowserModel implements IDisposable {
     ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
       let reader = new FileReader();
-      if (isNotebook) {
-        reader.readAsText(blob);
-      } else {
-        reader.readAsArrayBuffer(blob);
-      }
+      reader.readAsDataURL(blob);
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
         reader.onerror = event =>
@@ -448,12 +441,15 @@ export class FileBrowserModel implements IDisposable {
       });
       await this._uploadCheckDisposed();
 
+      // remove header https://stackoverflow.com/a/24289420/907060
+      const content = (reader.result as string).split(',')[1];
+
       let model: Partial<Contents.IModel> = {
         type,
         format,
         name,
         chunk,
-        content: Private.getContent(reader)
+        content
       };
       return await this.manager.services.contents.save(path, model);
     };
@@ -698,27 +694,6 @@ export namespace FileBrowserModel {
  * The namespace for the file browser model private data.
  */
 namespace Private {
-  /**
-   * Parse the content of a `FileReader`.
-   *
-   * If the result is an `ArrayBuffer`, return a Base64-encoded string.
-   * Otherwise, return the JSON parsed result.
-   */
-  export function getContent(reader: FileReader): any {
-    if (reader.result instanceof ArrayBuffer) {
-      // Base64-encode binary file data.
-      let bytes = '';
-      let buf = new Uint8Array(reader.result);
-      let nbytes = buf.byteLength;
-      for (let i = 0; i < nbytes; i++) {
-        bytes += String.fromCharCode(buf[i]);
-      }
-      return btoa(bytes);
-    } else {
-      return JSON.parse(reader.result);
-    }
-  }
-
   /**
    * Normalize a path based on a root directory, accounting for relative paths.
    */

@@ -350,33 +350,36 @@ describe('filebrowser/model', () => {
           );
         });
 
-        it('should not upload large notebook file', async () => {
-          const fname = UUID.uuid4() + '.ipynb';
-          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
-          try {
-            await model.upload(file);
-            throw Error('Upload should have failed');
-          } catch (err) {
-            expect(err).to.equal(`Cannot upload file (>15 MB). ${fname}`);
+        for (const ending of ['.txt', '.ipynb']) {
+          for (const size of [
+            CHUNK_SIZE - 1,
+            CHUNK_SIZE,
+            CHUNK_SIZE + 1,
+            2 * CHUNK_SIZE
+          ]) {
+            it(`should upload a large ${ending} file of size ${size}`, async () => {
+              const fname = UUID.uuid4() + ending;
+              // minimal valid (according to server) notebook
+              let content =
+                '{"nbformat": 4, "metadata": {"_": ""}, "nbformat_minor": 2, "cells": []}';
+              // make metadata longer so that total document is `size` long
+              content = content.replace(
+                '"_": ""',
+                `"_": "${' '.repeat(size - content.length)}"`
+              );
+              const file = new File([content], fname, { type: 'text/plain' });
+              await model.upload(file);
+              const {
+                content: newContent
+              } = await model.manager.services.contents.get(fname);
+              // the contents of notebooks are returned as objects instead of strings
+              if (ending === '.ipynb') {
+                expect(newContent).to.deep.equal(JSON.parse(content));
+              } else {
+                expect(newContent).to.equal(content);
+              }
+            });
           }
-        });
-
-        for (const size of [
-          CHUNK_SIZE - 1,
-          CHUNK_SIZE,
-          CHUNK_SIZE + 1,
-          2 * CHUNK_SIZE
-        ]) {
-          it(`should upload a large file of size ${size}`, async () => {
-            const fname = UUID.uuid4() + '.txt';
-            const content = 'a'.repeat(size);
-            const file = new File([content], fname);
-            await model.upload(file);
-            const contentsModel = await model.manager.services.contents.get(
-              fname
-            );
-            expect(contentsModel.content).to.equal(content);
-          });
         }
         it(`should produce progress as a large file uploads`, async () => {
           const fname = UUID.uuid4() + '.txt';
@@ -428,50 +431,6 @@ describe('filebrowser/model', () => {
               name: 'finish',
               oldValue: { path: fname, progress: 1 / 2 },
               newValue: null
-            }
-          ]);
-          expect(toArray(model.uploads())).to.deep.equal([]);
-        });
-
-        it(`should produce progress as a large file fails`, async () => {
-          const fname = UUID.uuid4() + '.ipynb';
-          const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
-
-          const [start, first, second] = signalToPromises(
-            model.uploadChanged,
-            3
-          );
-
-          model.upload(file);
-          // expect(toArray(model.uploads())).to.deep.equal([]);
-          expect(await start).to.deep.equal([
-            model,
-            {
-              name: 'start',
-              oldValue: null,
-              newValue: { path: fname, progress: 0 }
-            }
-          ]);
-          expect(toArray(model.uploads())).to.deep.equal([
-            { path: fname, progress: 0 }
-          ]);
-          expect(await first).to.deep.equal([
-            model,
-            {
-              name: 'update',
-              oldValue: { path: fname, progress: 0 },
-              newValue: { path: fname, progress: 0 }
-            }
-          ]);
-          expect(toArray(model.uploads())).to.deep.equal([
-            { path: fname, progress: 0 }
-          ]);
-          expect(await second).to.deep.equal([
-            model,
-            {
-              name: 'failure',
-              oldValue: null,
-              newValue: { path: fname, progress: 0 }
             }
           ]);
           expect(toArray(model.uploads())).to.deep.equal([]);
