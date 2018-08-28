@@ -112,6 +112,13 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
 
+    if (menu.fileMenu.quitEntry) {
+      palette.addItem({
+        command: CommandIDs.quit,
+        category: 'Main Area'
+      });
+    }
+
     palette.addItem({
       command: CommandIDs.shutdownAllKernels,
       category: 'Kernel Operations'
