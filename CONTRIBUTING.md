@@ -38,13 +38,12 @@ a keyboard shortcut or automatically on save.
 
 ### Installing Node.js and jlpm
 
-Building JupyterLab from its GitHub source code requires Node.js version
-5+.
+Building JupyterLab from its GitHub source code requires Node.js.
 
 If you use `conda`, you can get it with:
 
 ```bash
-conda install -c conda-forge 'nodejs<10'
+conda install -c conda-forge 'nodejs'
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
@@ -95,8 +94,6 @@ jupyter lab build  # Build the app dir assets (optional)
 Notes:
 
 * A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
-
-* There are versions of Node that are too modern. You should use a version of Node < 10.
 
 * The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
   already, you can use the `yarn` command when developing, and it will use the
