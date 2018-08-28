@@ -24,10 +24,12 @@ class ExampleHandler(IPythonHandler):
 
     def get(self):
         """Get the main page for the application's interface."""
-        return self.write(self.render_template("index.html",
-            static=self.static_url, base_url=self.base_url,
-            token=self.settings['token'],
-            terminals_available=self.settings['terminals_available']))
+        available = self.settings['terminals_available']
+        return self.write(self.render_template('index.html',
+                                               static=self.static_url,
+                                               base_url=self.base_url,
+                                               token=self.settings['token'],
+                                               terminals_available=available))
 
     def get_template(self, name):
         loader = FileSystemLoader(HERE)
@@ -45,9 +47,9 @@ class ExampleApp(NotebookApp):
         default_handlers = [
             (r'/example/?', ExampleHandler),
             (r"/example/(.*)", FileFindHandler,
-                {'path': os.path.join(HERE, 'build')}),
+                {'path': os.path.join(HERE, 'build')})
         ]
-        self.web_app.add_handlers(".*$", default_handlers)
+        self.web_app.add_handlers('.*$', default_handlers)
 
 
 if __name__ == '__main__':

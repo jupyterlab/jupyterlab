@@ -103,8 +103,8 @@ def ensure_dev(logger=None):
     for theme in theme_packages:
         base_path = pjoin(parent, 'packages', theme)
         if not osp.exists(pjoin(base_path, 'static')):
-            yarn_proc = Process(['node', YARN_PATH, 'build:webpack'], cwd=base_path,
-                                logger=logger)
+            yarn_proc = Process(['node', YARN_PATH, 'build:webpack'],
+                                cwd=base_path, logger=logger)
             yarn_proc.wait()
 
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
@@ -156,7 +156,7 @@ def watch_packages(logger=None):
     # Run typescript watch and wait for the string indicating it is done.
     ts_regex = r'.* Found 0 errors\. Watching for file changes\.'
     ts_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
-        cwd=ts_dir, logger=logger, startup_regex=ts_regex)
+                          cwd=ts_dir, logger=logger, startup_regex=ts_regex)
 
     # Run the metapackage file watcher.
     tsf_regex = 'Watching the metapackage files...'
@@ -184,8 +184,8 @@ def watch_dev(logger=None):
 
     # Run webpack watch and wait for compilation.
     wp_proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
-        cwd=DEV_DIR, logger=logger,
-        startup_regex=WEBPACK_EXPECT)
+                          cwd=DEV_DIR, logger=logger,
+                          startup_regex=WEBPACK_EXPECT)
 
     return package_procs + [wp_proc]
 
@@ -260,14 +260,14 @@ def clean(app_dir=None):
 
 
 def build(app_dir=None, name=None, version=None, public_url=None,
-        logger=None, command='build:prod', kill_event=None,
-        clean_staging=False):
+          logger=None, command='build:prod', kill_event=None,
+          clean_staging=False):
     """Build the JupyterLab application.
     """
     _node_check()
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
     return handler.build(name=name, version=version, public_url=public_url,
-                  command=command, clean_staging=clean_staging)
+                         command=command, clean_staging=clean_staging)
 
 
 def get_app_info(app_dir=None, logger=None):
@@ -430,7 +430,7 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, public_url=None,
-            command='build:prod', clean_staging=False):
+              command='build:prod', clean_staging=False):
         """Build the application.
         """
         # Set up the build directory.
@@ -461,9 +461,9 @@ class _AppHandler(object):
         self._run(['node', YARN_PATH, 'install'], cwd=staging)
 
         proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
-            cwd=pjoin(self.app_dir, 'staging'),
-            startup_regex=WEBPACK_EXPECT,
-            logger=self.logger)
+                           cwd=pjoin(self.app_dir, 'staging'),
+                           startup_regex=WEBPACK_EXPECT,
+                           logger=self.logger)
         return [proc]
 
     def list_extensions(self):
@@ -659,7 +659,6 @@ class _AppHandler(object):
         self.logger.info('Updating %s to version %s' % (name, latest))
         return self.install_extension('%s@%s' % (name, latest))
 
-
     def link_package(self, path):
         """Link a package at the given path.
 
@@ -781,7 +780,8 @@ class _AppHandler(object):
 
         errors = self._get_extension_compat()[extension]
         if errors:
-            self.logger.info('%s:%s (compatibility errors)' % (extension, RED_X))
+            self.logger.info('%s:%s (compatibility errors)' %
+                             (extension, RED_X))
             return False
 
         if check_installed_only:
@@ -836,7 +836,7 @@ class _AppHandler(object):
         return info
 
     def _populate_staging(self, name=None, version=None, public_url=None,
-            clean=False):
+                          clean=False):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -908,7 +908,7 @@ class _AppHandler(object):
                 continue
             dname = pjoin(app_dir, 'extensions')
             self._update_local(key, source, dname, extensions[key],
-                'local_extensions')
+                               'local_extensions')
 
         # Update the list of local extensions if any were removed.
         if removed:

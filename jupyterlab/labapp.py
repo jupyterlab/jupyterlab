@@ -82,8 +82,7 @@ class LabCleanApp(JupyterApp):
     """
     aliases = clean_aliases
 
-    app_dir = Unicode('', config=True,
-        help="The app directory to clean")
+    app_dir = Unicode('', config=True, help='The app directory to clean')
 
     def start(self):
         clean(self.app_dir)
@@ -94,7 +93,8 @@ class LabPathApp(JupyterApp):
     description = """
     Print the configured paths for the JupyterLab application
 
-    The application path can be configured using the JUPYTERLAB_DIR environment variable.
+    The application path can be configured using the JUPYTERLAB_DIR
+        environment variable.
     The user settings path can be configured using the JUPYTERLAB_SETTINGS_DIR
         environment variable or it will fall back to
         `/lab/user-settings` in the default Jupyter configuration directory.

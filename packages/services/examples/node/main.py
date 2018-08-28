@@ -21,7 +21,8 @@ class NodeApp(ProcessApp):
         with open('config.json', 'w') as fid:
             json.dump(config, fid)
 
-        cmd = [which('node'), 'index.js', '--jupyter-config-data=./config.json']
+        cmd = [which('node'),
+               'index.js', '--jupyter-config-data=./config.json']
         return cmd, dict(cwd=HERE)
 
 
