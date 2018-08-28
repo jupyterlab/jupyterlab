@@ -200,6 +200,18 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-layout-color3: var(--md-grey-700);
   --jp-layout-color4: var(--md-grey-600);
 
+  /* Inverse Layout
+   *
+   * The following are the inverse layout colors use in JupyterLab. In a light
+   * theme these would go from dark to light.
+   */
+
+  --jp-inverse-layout-color0: white;
+  --jp-inverse-layout-color1: white;
+  --jp-inverse-layout-color2: var(--md-grey-200);
+  --jp-inverse-layout-color3: var(--md-grey-400);
+  --jp-inverse-layout-color4: var(--md-grey-600);
+
   /* Brand/accent */
 
   --jp-brand-color0: var(--md-blue-700);
