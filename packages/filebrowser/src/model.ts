@@ -248,7 +248,7 @@ export class FileBrowserModel implements IDisposable {
     } else {
       newValue = this._pendingPath || this._model.path;
     }
-    if (this._pendingPath && this._pending) {
+    if (this._pending) {
       // Collapse requests to the same directory.
       if (newValue === this._pendingPath) {
         return this._pending;
