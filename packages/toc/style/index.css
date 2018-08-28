@@ -336,3 +336,7 @@
   padding-left: 9px;
   padding-top: 6px;
 }
+
+.jp-TableOfContents-content code {
+  font-size: 9px;
+}
