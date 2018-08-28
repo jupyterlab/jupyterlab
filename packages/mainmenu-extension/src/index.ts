@@ -53,7 +53,7 @@ export namespace CommandIDs {
 
   export const createConsole = 'filemenu:create-console';
 
-  export const quit = 'filemenu:exit';
+  export const quit = 'filemenu:quit';
 
   export const interruptKernel = 'kernelmenu:interrupt';
 
@@ -268,13 +268,13 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   });
 
   commands.addCommand(CommandIDs.quit, {
-    label: 'Exit',
-    caption: 'Exit JupyterLab',
+    label: 'Quit',
+    caption: 'Quit JupyterLab',
     execute: () => {
       showDialog({
-        title: 'Exit confirmation',
+        title: 'Quit confirmation',
         body: 'Please confirm you want to quit JupyterLab.',
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Exit' })]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
       }).then(result => {
         if (result.button.accept) {
           let setting = ServerConnection.makeSettings();
@@ -345,7 +345,7 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   });
 
   // Add the quit group.
-  const quitGroup = [{ command: 'filemenu:exit' }];
+  const quitGroup = [{ command: 'filemenu:quit' }];
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
