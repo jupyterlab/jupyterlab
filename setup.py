@@ -76,7 +76,7 @@ def check_assets():
 
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
-    package_data_spec=package_data_spec)
+                           package_data_spec=package_data_spec)
 cmdclass['jsdeps'] = combine_commands(
     install_npm(build_cmd='build:prod', path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
@@ -90,7 +90,11 @@ class JupyterlabDevelop(develop):
     def run(self):
         if not skip_npm:
             if not which('node'):
-                log.error('Please install nodejs and npm before continuing installation. nodejs may be installed using conda or directly from the nodejs website.')
+                error_message = """
+Please install nodejs and npm before continuing installation.
+nodejs may be installed using conda or directly from: https://nodejs.org/
+"""
+                log.error(error_message)
                 return
             run(npm, cwd=HERE)
         develop.run(self)
@@ -101,19 +105,19 @@ cmdclass['develop'] = JupyterlabDevelop
 
 
 setup_args = dict(
-    name             = NAME,
-    description      = DESCRIPTION,
-    long_description = LONG_DESCRIPTION,
-    version          = VERSION,
-    packages         = find_packages(),
-    cmdclass         = cmdclass,
-    author           = 'Jupyter Development Team',
-    author_email     = 'jupyter@googlegroups.com',
-    url              = 'http://jupyter.org',
-    license          = 'BSD',
-    platforms        = "Linux, Mac OS X, Windows",
-    keywords         = ['ipython', 'jupyter', 'Web'],
-    classifiers      = [
+    name=NAME,
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
+    version=VERSION,
+    packages=find_packages(),
+    cmdclass=cmdclass,
+    author='Jupyter Development Team',
+    author_email='jupyter@googlegroups.com',
+    url='http://jupyter.org',
+    license='BSD',
+    platforms='Linux, Mac OS X, Windows',
+    keywords=['ipython', 'jupyter', 'Web'],
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
