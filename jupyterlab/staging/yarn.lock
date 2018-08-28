@@ -350,9 +350,9 @@
     "@phosphor/commands" "^1.5.0"
     "@phosphor/widgets" "^1.6.0"
 
-"@jupyterlab/filebrowser@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.18.4.tgz#bd6fbf4e7a1d3f1ec8ce516ec4a06725e6ecce98"
+"@jupyterlab/filebrowser@^0.18.4", "@jupyterlab/filebrowser@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser/-/filebrowser-0.18.5.tgz#2db38690d16c879a2dbc72e328e3c6f90070e9b6"
   dependencies:
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/coreutils" "^2.1.4"
@@ -1479,8 +1479,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000878"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000878.tgz#0d0c6d8500c3aea21441fad059bce4b8f3f509df"
+  version "1.0.30000880"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000880.tgz#e6d7ba9a6602086f6fc124b91eeacbb70c55b2c4"
 
 center-align@^0.1.1:
   version "0.1.3"
@@ -1638,16 +1638,12 @@ collection-visit@^1.0.0:
     object-visit "^1.0.0"
 
 color-convert@^1.3.0, color-convert@^1.9.0:
-  version "1.9.2"
-  resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.2.tgz#49881b8fba67df12a96bdf3f56c0aab9e7913147"
+  version "1.9.3"
+  resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
   dependencies:
-    color-name "1.1.1"
+    color-name "1.1.3"
 
-color-name@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.1.tgz#4b1415304cf50028ea81643643bd82ea05803689"
-
-color-name@^1.0.0:
+color-name@1.1.3, color-name@^1.0.0:
   version "1.1.3"
   resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
@@ -3075,8 +3071,8 @@ isurl@^1.0.0-alpha5:
     is-object "^1.0.1"
 
 js-base64@^2.1.9:
-  version "2.4.8"
-  resolved "https://registry.npmjs.org/js-base64/-/js-base64-2.4.8.tgz#57a9b130888f956834aa40c5b165ba59c758f033"
+  version "2.4.9"
+  resolved "https://registry.npmjs.org/js-base64/-/js-base64-2.4.9.tgz#748911fb04f48a60c4771b375cac45a80df11c03"
 
 "js-tokens@^3.0.0 || ^4.0.0":
   version "4.0.0"

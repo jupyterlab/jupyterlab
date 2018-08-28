@@ -34,7 +34,7 @@
     "@jupyterlab/extensionmanager": "^0.18.4",
     "@jupyterlab/extensionmanager-extension": "^0.18.4",
     "@jupyterlab/faq-extension": "^0.18.4",
-    "@jupyterlab/filebrowser": "^0.18.4",
+    "@jupyterlab/filebrowser": "^0.18.5",
     "@jupyterlab/filebrowser-extension": "^0.18.5",
     "@jupyterlab/fileeditor": "^0.18.4",
     "@jupyterlab/fileeditor-extension": "^0.18.5",
@@ -215,7 +215,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.34.3",
+    "version": "0.34.4",
     "linkedPackages": {},
     "staticDir": "../static"
   }
