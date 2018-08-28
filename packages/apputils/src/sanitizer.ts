@@ -1034,7 +1034,12 @@ class Sanitizer implements ISanitizer {
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
-    }
+    },
+    // Override of the default option, so we can skip 'src' attribute validation.
+    // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
+    // Since embedded data is no longer deemed to be a threat, validation can be skipped.
+    // See https://github.com/jupyterlab/jupyterlab/issues/5183
+    allowedSchemesAppliedToAttributes: [ 'href', 'cite' ]
   };
 }
 
