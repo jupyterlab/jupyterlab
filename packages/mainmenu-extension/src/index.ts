@@ -11,6 +11,8 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+
 import {
   IMainMenu,
   IMenuExtender,
@@ -23,6 +25,8 @@ import {
   ViewMenu,
   TabsMenu
 } from '@jupyterlab/mainmenu';
+
+import { ServerConnection } from '@jupyterlab/services';
 
 /**
  * A namespace for command IDs of semantic extension points.
@@ -48,6 +52,8 @@ export namespace CommandIDs {
   export const persistAndSave = 'filemenu:persist-and-save';
 
   export const createConsole = 'filemenu:create-console';
+
+  export const quit = 'filemenu:exit';
 
   export const interruptKernel = 'kernelmenu:interrupt';
 
@@ -93,6 +99,9 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     logo.addClass('jp-MainAreaPortraitIcon');
     logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
+
+    let quitButton = PageConfig.getOption('quit_button');
+    menu.fileMenu.quitEntry = quitButton === 'True';
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
@@ -258,6 +267,43 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
+  commands.addCommand(CommandIDs.quit, {
+    label: 'Exit',
+    caption: 'Exit JupyterLab',
+    execute: () => {
+      showDialog({
+        title: 'Exit confirmation',
+        body: 'Please confirm you want to quit JupyterLab.',
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Exit' })]
+      }).then(result => {
+        if (result.button.accept) {
+          let setting = ServerConnection.makeSettings();
+          let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
+          ServerConnection.makeRequest(apiURL, { method: 'POST' }, setting)
+            .then(result => {
+              if (result.ok) {
+                // Close this window if the shutdown request has been successful
+                let body = document.createElement('div');
+                body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
+                  <p>To use JupyterLab again, you will need to relaunch it.</p>`;
+                showDialog({
+                  title: 'Server stopped',
+                  body: new Widget({ node: body }),
+                  buttons: []
+                });
+                window.close();
+              } else {
+                throw new ServerConnection.ResponseError(result);
+              }
+            })
+            .catch(data => {
+              throw new ServerConnection.NetworkError(data);
+            });
+        }
+      });
+    }
+  });
+
   // Add the new group
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
@@ -298,11 +344,17 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     return { command };
   });
 
+  // Add the quit group.
+  const quitGroup = [{ command: 'filemenu:exit' }];
+
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
   menu.addGroup(closeGroup, 2);
   menu.addGroup(saveGroup, 3);
   menu.addGroup(reGroup, 4);
+  if (menu.quitEntry) {
+    menu.addGroup(quitGroup, 99);
+  }
 }
 
 /**

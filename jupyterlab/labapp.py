@@ -198,6 +198,13 @@ class LabApp(NotebookApp):
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
+    def init_webapp(self, *args, **kwargs):
+        super().init_webapp(*args, **kwargs)
+        settings = self.web_app.settings
+        if 'page_config_data' not in settings:
+            settings['page_config_data'] = {}
+        settings['page_config_data']['quit_button'] = self.quit_button
+
     def init_server_extensions(self):
         """Load any extensions specified by config.
 
