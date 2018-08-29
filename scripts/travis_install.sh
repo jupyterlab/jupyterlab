@@ -3,9 +3,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 set -ex
-#set -o pipefail
-
-node -v
+set -o pipefail
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn that Travis installs automatically.
