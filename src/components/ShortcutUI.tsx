@@ -10,7 +10,10 @@ import { TopNav } from './TopNav';
 
 import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
-import { TopWhitespaceStyle, ShortcutUIStyle } from '../componentStyle/ShortcutUIStyle';
+import {
+  TopWhitespaceStyle,
+  ShortcutUIStyle
+} from '../componentStyle/ShortcutUIStyle';
 
 import * as React from 'react';
 
@@ -209,28 +212,31 @@ function getShortcutObjects(
 }
 
 /** Get list of all shortcut keybindings currently in use
-* An object where keys are unique keyBinding_selector and values are shortcut objects **/
-function getKeyBindingsUsed(
-  shortcutObjects: { [index: string]: ShortcutObject }
-): { [index: string]: TakenByObject } {
+ * An object where keys are unique keyBinding_selector and values are shortcut objects **/
+function getKeyBindingsUsed(shortcutObjects: {
+  [index: string]: ShortcutObject;
+}): { [index: string]: TakenByObject } {
   let keyBindingsUsed: { [index: string]: TakenByObject } = {};
   Object.keys(shortcutObjects).forEach((shortcut: string) => {
     Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
-      const takenBy = new TakenByObject()
+      const takenBy = new TakenByObject();
       takenBy.takenByKey = key;
-      takenBy.takenByLabel = shortcutObjects[shortcut].category
-        + ': ' + shortcutObjects[shortcut].label
+      takenBy.takenByLabel =
+        shortcutObjects[shortcut].category +
+        ': ' +
+        shortcutObjects[shortcut].label;
       takenBy.takenBy = shortcutObjects[shortcut];
-      takenBy.id = shortcutObjects[shortcut].selector
-        + '_' + shortcutObjects[shortcut].commandName
+      takenBy.id =
+        shortcutObjects[shortcut].selector +
+        '_' +
+        shortcutObjects[shortcut].commandName;
 
       keyBindingsUsed[
-        shortcutObjects[shortcut].keys[key].join(" ") +
-        '_' +
-        shortcutObjects[shortcut].selector
-      ] =
-        takenBy;
-    })
+        shortcutObjects[shortcut].keys[key].join(' ') +
+          '_' +
+          shortcutObjects[shortcut].selector
+      ] = takenBy;
+    });
   });
   return keyBindingsUsed;
 }
@@ -239,7 +245,7 @@ function getKeyBindingsUsed(
 export class ShortcutUI extends React.Component<
   IShortcutUIProps,
   IShortcutUIState
-  > {
+> {
   constructor(props: any) {
     super(props);
   }
@@ -260,20 +266,17 @@ export class ShortcutUI extends React.Component<
   }
 
   /** Flag all user-set shortcuts as custom */
-  private async _getShortcutSource(
-    shortcutObjects: { [index: string]: ShortcutObject }
-  ): Promise<void> {
+  private async _getShortcutSource(shortcutObjects: {
+    [index: string]: ShortcutObject;
+  }): Promise<void> {
     const customShortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
     Object.keys(customShortcuts.user).forEach((key: string) => {
-      const userSettings: Object = customShortcuts.user[key]
-      const command: string = (userSettings as any)['command']
-      const selector: string = (userSettings as any)['selector']
-      shortcutObjects[
-        command + '_' + selector
-      ].source =
-        'Custom';
+      const userSettings: Object = customShortcuts.user[key];
+      const command: string = (userSettings as any)['command'];
+      const selector: string = (userSettings as any)['selector'];
+      shortcutObjects[command + '_' + selector].source = 'Custom';
     });
   }
 
@@ -282,7 +285,9 @@ export class ShortcutUI extends React.Component<
     const shortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    const shortcutObjects: { [index: string]: ShortcutObject } = getShortcutObjects(shortcuts);
+    const shortcutObjects: {
+      [index: string]: ShortcutObject;
+    } = getShortcutObjects(shortcuts);
     await this._getShortcutSource(shortcutObjects);
     this.setState(
       {
@@ -300,10 +305,11 @@ export class ShortcutUI extends React.Component<
 
   /** Set the current seach query */
   updateSearchQuery = (event: MouseEvent): void => {
-    this.setState({
-      searchQuery: (event.target as any)['value'],
-      currentSort: ''
-    }, () =>
+    this.setState(
+      {
+        searchQuery: (event.target as any)['value']
+      },
+      () =>
         this.setState(
           {
             filteredShortcutList: this.searchFilterShortcuts(
@@ -311,7 +317,7 @@ export class ShortcutUI extends React.Component<
             )
           },
           () => {
-            if (this.state.searchQuery == '') this.sortShortcuts();
+            this.sortShortcuts();
           }
         )
     );
@@ -335,60 +341,56 @@ export class ShortcutUI extends React.Component<
     );
     for (const key of Object.keys(settings.user)) {
       await this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
-    };
+    }
     this._getShortcutList();
   };
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    await this._getShortcutList()
+    await this._getShortcutList();
 
-    let shortcut: ShortcutObject = this.state.filteredShortcutList
-      .filter((s: ShortcutObject) => (
+    let shortcut: ShortcutObject = this.state.filteredShortcutList.filter(
+      (s: ShortcutObject) =>
         s.commandName === shortcutObject.commandName &&
         s.selector === shortcutObject.selector
-      ))[0]
+    )[0];
 
     shortcutObject = shortcut;
-    let nonEmptyKeys: string[] = Object.keys(shortcutObject.keys)
+    let nonEmptyKeys: string[] = Object.keys(shortcutObject.keys);
     nonEmptyKeys = nonEmptyKeys.filter((key: string) => {
-      return shortcutObject.keys[key][0] !== ""
-    })
-    let nonEmptyKey: string = nonEmptyKeys[0]
+      return shortcutObject.keys[key][0] !== '';
+    });
+    let nonEmptyKey: string = nonEmptyKeys[0];
 
     let commandId: string = shortcutObject.id;
     if (commandId === nonEmptyKey) {
       if (nonEmptyKey.split('-')[nonEmptyKey.split('-').length - 1] !== '2') {
         /** either command-name or command-name-1 is taken */
         if (commandId.split('-').indexOf('1') !== -1) {
-          commandId = shortcutObject.id.replace('-1', '-2')
+          commandId = shortcutObject.id.replace('-1', '-2');
         } else if (commandId.split('-').indexOf('2') === -1) {
           commandId = shortcutObject.id + '-2';
         }
       } else if (shortcutObject.numberOfShortcuts == 2) {
         /** there are 2 by default, -1 is not taken */
         if (commandId.split('-').indexOf('2') !== -1) {
-          commandId = shortcutObject.id.replace('-2', '-1')
+          commandId = shortcutObject.id.replace('-2', '-1');
         } else if (commandId.split('-').indexOf('1') === -1) {
           commandId = shortcutObject.id + '-1';
         }
       } else {
         /** there is 1 by default, it is not taken */
-        commandId = shortcutObject.id
+        commandId = shortcutObject.id;
       }
     }
 
-    await this.props.settingRegistry.set(
-      this.props.shortcutPlugin,
-      commandId,
-      {
-        command: shortcutObject.commandName,
-        keys: keys,
-        selector: shortcutObject.selector,
-        title: shortcutObject.label,
-        category: shortcutObject.category
-      }
-    );
+    await this.props.settingRegistry.set(this.props.shortcutPlugin, commandId, {
+      command: shortcutObject.commandName,
+      keys: keys,
+      selector: shortcutObject.selector,
+      title: shortcutObject.label,
+      category: shortcutObject.category
+    });
     this._getShortcutList();
   };
 
@@ -454,17 +456,19 @@ export class ShortcutUI extends React.Component<
     if (filterCritera === 'command') {
       filterCritera = 'label';
     }
-    shortcuts.sort((a: ShortcutObject, b: ShortcutObject) => {
-      const compareA: string = a.get(filterCritera);
-      const compareB: string = b.get(filterCritera);
-      if (compareA < compareB) {
-        return -1;
-      } else if (compareA > compareB) {
-        return 1;
-      } else {
-        return a['label'] < b['label'] ? -1 : a['label'] > b['label'] ? 1 : 0;
-      }
-    });
+    if (filterCritera !== '') {
+      shortcuts.sort((a: ShortcutObject, b: ShortcutObject) => {
+        const compareA: string = a.get(filterCritera);
+        const compareB: string = b.get(filterCritera);
+        if (compareA < compareB) {
+          return -1;
+        } else if (compareA > compareB) {
+          return 1;
+        } else {
+          return a['label'] < b['label'] ? -1 : a['label'] > b['label'] ? 1 : 0;
+        }
+      });
+    }
     this.setState({ filteredShortcutList: shortcuts });
   }
 
@@ -473,21 +477,16 @@ export class ShortcutUI extends React.Component<
     newShortcut: ShortcutObject,
     takenBy: TakenByObject
   ): void => {
+    const shortcutList = this.state.filteredShortcutList;
 
-    const shortcutList = this.state.filteredShortcutList
-
-    if (shortcutList.filter(shortcut =>
-      shortcut.id === 'error_row').length === 0
+    if (
+      shortcutList.filter(shortcut => shortcut.id === 'error_row').length === 0
     ) {
-      const errorRow = new ErrorObject()
-      errorRow.takenBy = takenBy
-      errorRow.id = 'error_row'
+      const errorRow = new ErrorObject();
+      errorRow.takenBy = takenBy;
+      errorRow.id = 'error_row';
 
-      shortcutList.splice(
-        shortcutList.indexOf(newShortcut) + 1,
-        0,
-        errorRow
-      );
+      shortcutList.splice(shortcutList.indexOf(newShortcut) + 1, 0, errorRow);
 
       errorRow.hasConflict = true;
       this.setState({ filteredShortcutList: shortcutList });
@@ -497,8 +496,9 @@ export class ShortcutUI extends React.Component<
   /** Remove conflict flag from all shortcuts */
   clearConflicts = (): void => {
     /** Remove error row */
-    const shortcutList = this.state.filteredShortcutList
-      .filter(shortcut => shortcut.id !== 'error_row')
+    const shortcutList = this.state.filteredShortcutList.filter(
+      shortcut => shortcut.id !== 'error_row'
+    );
 
     shortcutList.forEach((shortcut: ShortcutObject) => {
       shortcut.hasConflict = false;

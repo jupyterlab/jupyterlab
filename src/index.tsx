@@ -6,9 +6,9 @@ import { ICommandPalette, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Widget } from '@phosphor/widgets'
+import { Widget } from '@phosphor/widgets';
 
-import ShortcutWidget from './ShortcutWidget'
+import ShortcutWidget from './ShortcutWidget';
 
 import '../style/variables.css';
 
@@ -38,13 +38,13 @@ export class ShortcutObject {
 
   get(sortCriteria: string): string {
     if (sortCriteria === 'label') {
-      return this.label
+      return this.label;
     } else if (sortCriteria === 'selector') {
-      return this.selector
+      return this.selector;
     } else if (sortCriteria === 'category') {
-      return this.category
+      return this.category;
     } else if (sortCriteria === 'source') {
-      return this.source
+      return this.source;
     }
   }
 }
@@ -81,7 +81,6 @@ const plugin: JupyterLabPlugin<void> = {
     palette: ICommandPalette,
     menu: IMainMenu
   ): void => {
-
     /** Load keyboard shortcut settings from registry and create list of command id's */
     settingRegistry
       .load('@jupyterlab/shortcuts-extension:plugin')
@@ -95,7 +94,7 @@ const plugin: JupyterLabPlugin<void> = {
           commandlist,
           settingRegistry,
           app.commands,
-          '@jupyterlab/shortcuts-extension:plugin',
+          '@jupyterlab/shortcuts-extension:plugin'
         );
 
         widget.id = 'jupyterlab-shortcutui';
@@ -108,9 +107,10 @@ const plugin: JupyterLabPlugin<void> = {
           label: 'Keyboard Shortcut Editor',
           execute: () => {
             if (!widget.isAttached) {
-
               /** Attach the widget to the main work area if it's not there */
               app.shell.addToMainArea(widget as Widget);
+            } else {
+              widget.update();
             }
             /** Activate the widget */
             app.shell.activateById(widget.id);
@@ -125,8 +125,6 @@ const plugin: JupyterLabPlugin<void> = {
 
         /** Add command to help menu */
         menu.helpMenu.addGroup([{ command: command }], 7);
-
-
       });
   },
   autoStart: true
