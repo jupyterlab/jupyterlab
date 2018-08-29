@@ -9,7 +9,7 @@ import {
   ShortcutListContainerStyle
 } from '../componentStyle/ShortcutListStyle';
 
-const TOPNAV_HEIGHT: number = 174
+const TOPNAV_HEIGHT: number = 174;
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {
@@ -31,7 +31,7 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
     return (
       <div
         className={ShortcutListContainerStyle(TOPNAV_HEIGHT, this.props.height)}
-        id='shortcutListContainer'
+        id="shortcutListContainer"
       >
         <div className={ShortcutListStyle}>
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
