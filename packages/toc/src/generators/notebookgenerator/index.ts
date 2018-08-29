@@ -2,11 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 import { ISanitizer } from '@jupyterlab/apputils';
 
-import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  CodeCellModel,
+  MarkdownCell,
+  Cell,
+  ICellModel
+} from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
-import { each } from '@phosphor/algorithm';
 
 import { notebookItemRenderer } from './itemrenderer';
 
@@ -63,11 +67,22 @@ export function createNotebookGenerator(
       // Keep track of the previous heading that is shown in TOC, used for
       // determine whether one header has child
       let prevHeading: INotebookHeading | null = null;
-      each(panel.content.widgets, cell => {
-        let collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
+      let cellNum = panel.content.widgets.length;
+      for (var i = 0; i <= panel.content.widgets.length; i++) {
+        let cell: Cell | null = null;
+        if (i != cellNum) {
+          cell = panel.content.widgets[i];
+        }
+        let collapsed = false;
+        if (cell) {
+          collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
+        }
         collapsed = collapsed != undefined ? collapsed : false;
-        let model = cell.model;
-        if (model.type === 'code') {
+        let model: ICellModel | null = null;
+        if (cell) {
+          model = cell.model;
+        }
+        if (cell && model && model.type === 'code' && i != cellNum) {
           // Get the execution count prompt for code cells
           let executionCountNumber = (cell as CodeCell).model
             .executionCount as number;
@@ -86,7 +101,7 @@ export function createNotebookGenerator(
             const onClickFactory = (line: number) => {
               // Activate the corresponding cell if user click on the TOC entry
               return () => {
-                cell.node.scrollIntoView();
+                cell!.node.scrollIntoView();
                 if (tracker && tracker.currentWidget) {
                   let cells = tracker.currentWidget.model.cells;
                   for (let i = 0; i < cells.length; i++) {
@@ -238,16 +253,20 @@ export function createNotebookGenerator(
               }
             }
           }
-        } else if (model.type === 'markdown') {
+        } else if ((model && model.type === 'markdown') || i == cellNum) {
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if (
-            (cell as MarkdownCell).rendered &&
-            !(cell as MarkdownCell).inputHidden
+            i == cellNum ||
+            ((cell as MarkdownCell).rendered &&
+              !(cell as MarkdownCell).inputHidden)
           ) {
             const onClickFactory = (el: Element) => {
               return () => {
+                if (!cell) {
+                  return;
+                }
                 if (!(cell as MarkdownCell).rendered) {
                   cell.node.scrollIntoView();
                 } else {
@@ -268,16 +287,20 @@ export function createNotebookGenerator(
             };
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings = Private.getRenderedHTMLHeadings(
-              cell.node,
-              onClickFactory,
-              sanitizer,
-              numberingDict,
-              lastLevel,
-              numbering,
-              cell
-            );
-            let renderedHeading = renderedHeadings[0];
+            let renderedHeadings: INotebookHeading[] = [];
+            let renderedHeading: INotebookHeading | null = null;
+            if (i != cellNum) {
+              renderedHeadings = Private.getRenderedHTMLHeadings(
+                cell!.node,
+                onClickFactory,
+                sanitizer,
+                numberingDict,
+                lastLevel,
+                numbering,
+                cell!
+              );
+              renderedHeading = renderedHeadings[0];
+            }
             if (
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.markdown
@@ -293,20 +316,22 @@ export function createNotebookGenerator(
                 headings = headings.concat(renderedHeadings);
               }
             } else if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.header
+              (renderedHeading &&
+                renderedHeading.type === INotebookHeadingTypes.header) ||
+              !renderedHeading
             ) {
               // Determine whether the heading has children
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
-                prevHeading.level >= renderedHeading.level
+                (!renderedHeading || prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
               }
               // Do not put the item in TOC if its header is collapsed
               // or filtered out by tags
               if (
+                renderedHeading &&
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
                 !Private.headingIsFilteredOut(
@@ -339,7 +364,8 @@ export function createNotebookGenerator(
               )
             ) {
               if (
-                !(renderedHeading.type === INotebookHeadingTypes.markdown) ||
+                (renderedHeading &&
+                  !(renderedHeading.type === INotebookHeadingTypes.markdown)) ||
                 options.showMarkdown
               ) {
                 prevHeading = renderedHeading;
@@ -348,6 +374,9 @@ export function createNotebookGenerator(
           } else {
             const onClickFactory = (line: number) => {
               return () => {
+                if (!cell) {
+                  return;
+                }
                 cell.node.scrollIntoView();
                 if (!(cell as MarkdownCell).rendered) {
                   cell.editor.setCursorPosition({ line, column: 0 });
@@ -366,19 +395,24 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings = getMarkdownHeadings(
-              model.value.text,
-              onClickFactory,
-              numberingDict,
-              lastLevel,
-              cell
-            );
-            let renderedHeading = renderedHeadings[0];
+            let renderedHeadings: INotebookHeading[] = [];
+            let renderedHeading: INotebookHeading | null = null;
+            if (cell) {
+              renderedHeadings = getMarkdownHeadings(
+                model!.value.text,
+                onClickFactory,
+                numberingDict,
+                lastLevel,
+                cell
+              );
+              renderedHeading = renderedHeadings[0];
+            }
             if (
               renderedHeading &&
               renderedHeading.type === INotebookHeadingTypes.markdown
             ) {
               if (
+                renderedHeading &&
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(
                   renderedHeadings[0],
@@ -395,13 +429,14 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
-                prevHeading.level >= renderedHeading.level
+                (!renderedHeading || prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
               }
               // Do not put the item in TOC if its header is collapsed
               // or filtered out by tags
               if (
+                renderedHeading &&
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
                 !Private.headingIsFilteredOut(
@@ -417,6 +452,7 @@ export function createNotebookGenerator(
                 }
               } else {
                 if (
+                  renderedHeading &&
                   Private.headingIsFilteredOut(
                     renderedHeadings[0],
                     options.filtered
@@ -428,7 +464,7 @@ export function createNotebookGenerator(
             }
           }
         }
-      });
+      }
       return headings;
     }
   };

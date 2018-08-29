@@ -197,9 +197,7 @@ namespace Private {
     });
     return headings;
   }
-}
 
-namespace Private {
   /**
    * Given a HTML DOM element, get the markdown headings
    * in that string.
