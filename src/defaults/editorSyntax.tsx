@@ -53,7 +53,7 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
         );
 
         this.addClass(interactiveItem);
-        this.node.title = 'Set programming language';
+        this.node.title = 'Change text editor syntax highlighting';
     }
 
     render() {
