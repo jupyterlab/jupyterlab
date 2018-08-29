@@ -27,7 +27,7 @@ import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup, Popup } from '../component/hover';
-import { interactiveItem } from '../style/statusBar';
+import { interactiveItem, clickedItem } from '../style/statusBar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { Message } from '@phosphor/messaging';
@@ -89,6 +89,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             return;
         }
         const { menu } = this._settingsProviderData[provider];
+        menu.aboutToClose.connect(this._menuClosed);
 
         if (this._popup) {
             this._popup.dispose();
@@ -98,6 +99,10 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
             anchor: this,
             align: 'right'
         });
+    };
+
+    private _menuClosed = () => {
+        this.removeClass(clickedItem);
     };
 
     render(): React.ReactElement<TabSpaceComponent.IProps> | null {
