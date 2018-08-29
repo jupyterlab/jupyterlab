@@ -212,6 +212,7 @@ export class RenderedImage extends RenderedCommon {
       source: String(model.data[this.mimeType]),
       width: metadata && (metadata.width as number | undefined),
       height: metadata && (metadata.height as number | undefined),
+      needsBackground: model.metadata['needs_background'] as string | undefined,
       unconfined: metadata && (metadata.unconfined as boolean | undefined)
     });
   }

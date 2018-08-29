@@ -161,7 +161,15 @@ export function renderImage(
   options: renderImage.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  let { host, mimeType, source, width, height, unconfined } = options;
+  let {
+    host,
+    mimeType,
+    source,
+    width,
+    height,
+    needsBackground,
+    unconfined
+  } = options;
 
   // Clear the content in the host.
   host.textContent = '';
@@ -178,6 +186,12 @@ export function renderImage(
   }
   if (typeof width === 'number') {
     img.width = width;
+  }
+
+  if (needsBackground === 'light') {
+    img.classList.add('jp-needs-light-background');
+  } else if (needsBackground === 'dark') {
+    img.classList.add('jp-needs-dark-background');
   }
 
   if (unconfined === true) {
@@ -223,6 +237,11 @@ export namespace renderImage {
      * The optional height for the image.
      */
     height?: number;
+
+    /**
+     * Whether an image requires a background for legibility.
+     */
+    needsBackground?: string;
 
     /**
      * Whether the image should be unconfined.
