@@ -26,6 +26,8 @@ Running the core application with no additional extensions or settings
 
 
 def load_config(nbapp):
+    """Load the JupyterLab configuration and defaults for a given application.
+    """
     from jupyterlab_server import LabConfig
     from .commands import (
         get_app_dir,
@@ -47,8 +49,8 @@ def load_config(nbapp):
     config.app_dir = app_dir
     config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
-    config.app_version = info['version']
     config.app_settings_dir = pjoin(app_dir, 'settings')
+    config.app_version = info['version']
     config.cache_files = True
     config.schemas_dir = pjoin(app_dir, 'schemas')
     config.templates_dir = pjoin(app_dir, 'static')

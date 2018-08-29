@@ -130,7 +130,6 @@ class LabWorkspaceExportApp(JupyterApp):
             print('Too many arguments were provided for workspace export.')
             sys.exit(1)
 
-        slug = ''
         raw = (page_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
@@ -138,7 +137,7 @@ class LabWorkspaceExportApp(JupyterApp):
 
         if os.path.exists(workspace_path):
             with open(workspace_path) as fid:
-                try:  # to load and parse the workspace file.
+                try:  # to load the workspace file.
                     print(fid.read())
                 except Exception as e:
                     print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
