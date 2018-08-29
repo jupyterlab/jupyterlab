@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser",
-  "version": "0.18.5",
+  "version": "0.18.6",
   "description": "JupyterLab - FileBrowser Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
