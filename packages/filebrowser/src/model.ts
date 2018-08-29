@@ -238,7 +238,7 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A promise with the contents of the directory.
    */
-  cd(newValue = '.'): Promise<void> {
+  async cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
       newValue = Private.normalizePath(
         this.manager.services.contents,
@@ -248,9 +248,13 @@ export class FileBrowserModel implements IDisposable {
     } else {
       newValue = this._pendingPath || this._model.path;
     }
-    // Collapse requests to the same directory.
-    if (newValue === this._pendingPath && this._pending) {
-      return this._pending;
+    if (this._pending) {
+      // Collapse requests to the same directory.
+      if (newValue === this._pendingPath) {
+        return this._pending;
+      }
+      // Otherwise wait for the pending request to complete before continuing.
+      await this._pending;
     }
     let oldValue = this.path;
     let options: Contents.IFetchOptions = { content: true };
@@ -289,7 +293,7 @@ export class FileBrowserModel implements IDisposable {
           error.message = `Directory not found: "${this._model.path}"`;
           console.error(error);
           this._connectionFailure.emit(error);
-          this.cd('/');
+          return this.cd('/');
         } else {
           this._refreshDuration = this._baseRefreshDuration * 10;
           this._connectionFailure.emit(error);
