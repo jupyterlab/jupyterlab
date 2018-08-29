@@ -73,7 +73,28 @@ export class ShortcutItem extends React.Component<
       numShortcuts: Object.keys(this.props.shortcut.keys)
         .filter(key => this.props.shortcut.keys[key][0] !== '').length
     };
+  }
 
+  /** Toggle display state of input box */
+  private toggleInputNew = (): void => {
+    this.setState({
+      displayNewInput: !this.state.displayNewInput
+    });
+  };
+
+  private toggleInputReplaceLeft = (): void => {
+    this.setState({
+      displayReplaceInputLeft: !this.state.displayReplaceInputLeft
+    });
+  };
+
+  private toggleInputReplaceRight = (): void => {
+    this.setState({
+      displayReplaceInputRight: !this.state.displayReplaceInputRight
+    });
+  };
+
+  private handleRightClick = (e: any): void => {
     const key = this.props.shortcut.commandName + '_' + this.props.shortcut.selector
 
     if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
@@ -125,30 +146,41 @@ export class ShortcutItem extends React.Component<
         label: 'Reset',
         caption: 'Reset shortcut back to default',
         execute: () => {
-          this.props.resetShortcut()
+          this.props.resetShortcut(this.props.shortcut)
         }
       })
     }
+
+    this.setState({
+      numShortcuts: Object.keys(this.props.shortcut.keys)
+        .filter(key => this.props.shortcut.keys[key][0] !== '').length
+    }, () => {
+      let commandList = []
+      if (this.state.numShortcuts == 2){
+        commandList = commandList.concat([
+          CommandIDs.shortcutEditLeft + key, 
+          CommandIDs.shortcutEditRight + key, 
+        ])  
+      } else if (this.state.numShortcuts == 1) {
+        commandList = commandList.concat([
+          CommandIDs.shortcutEdit + key, 
+          CommandIDs.shortcutAddAnother + key, 
+        ])
+      } else {
+        commandList = commandList.concat([
+          CommandIDs.shortcutAddNew + key, 
+        ])
+      }
+
+      if(this.props.shortcut.source === 'Custom') {
+        commandList = commandList.concat([
+          CommandIDs.shortcutReset + key
+        ])
+      }
+
+      this.props.contextMenu(e, commandList)
+    })
   }
-
-  /** Toggle display state of input box */
-  private toggleInputNew = (): void => {
-    this.setState({
-      displayNewInput: !this.state.displayNewInput
-    });
-  };
-
-  private toggleInputReplaceLeft = (): void => {
-    this.setState({
-      displayReplaceInputLeft: !this.state.displayReplaceInputLeft
-    });
-  };
-
-  private toggleInputReplaceRight = (): void => {
-    this.setState({
-      displayReplaceInputRight: !this.state.displayReplaceInputRight
-    });
-  };
 
   /** Transform special key names into unicode characters */
   toSymbols = (value: string): string => {
@@ -173,7 +205,6 @@ export class ShortcutItem extends React.Component<
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
-    const key = this.props.shortcut.commandName + '_' + this.props.shortcut.selector
     if (this.props.shortcut.id === 'error_row') {
       return (
         <tr className={classes(RowStyle)}>
@@ -209,32 +240,7 @@ export class ShortcutItem extends React.Component<
         <div className={RowStyle}
           onContextMenu={e => {
             e.persist()
-            this.setState({
-              numShortcuts: Object.keys(this.props.shortcut.keys)
-                .filter(key => this.props.shortcut.keys[key][0] !== '').length
-            }, () => {
-              if (this.state.numShortcuts == 2) {
-                this.props.contextMenu(
-                  e,
-                  [
-                    CommandIDs.shortcutEditLeft + key, 
-                    CommandIDs.shortcutEditRight + key, 
-                  ]                )
-              } else if (this.state.numShortcuts == 1) {
-                this.props.contextMenu(
-                  e,
-                  [
-                    CommandIDs.shortcutEdit + key, 
-                    CommandIDs.shortcutAddAnother + key, 
-                  ]                )
-              } else {
-                this.props.contextMenu(
-                  e,
-                  [
-                    CommandIDs.shortcutAddNew + key, 
-                  ]                )
-              }
-            })
+            this.handleRightClick(e)
           }}
         >
           <div className={CellStyle}>{this.props.shortcut.category}</div>
