@@ -31,11 +31,11 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
         } else {
             let text: string;
             if (this.model.memoryLimit === null) {
-                text = `${this.model.currentMemory.toFixed(
+                text = `Mem: ${this.model.currentMemory.toFixed(
                     Private.DECIMAL_PLACES
                 )} ${this.model.units}`;
             } else {
-                text = `${this.model.currentMemory.toFixed(
+                text = `Mem: ${this.model.currentMemory.toFixed(
                     Private.DECIMAL_PLACES
                 )} / ${this.model.memoryLimit.toFixed(
                     Private.DECIMAL_PLACES
