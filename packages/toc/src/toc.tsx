@@ -74,10 +74,7 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(
-      this.update,
-      this
-    );
+    this._monitor.activityStopped.connect(this.update, this);
     this.updateTOC(true);
   }
 
@@ -254,10 +251,6 @@ export interface ITOCItemStates {}
  * A React component for a table of contents entry.
  */
 export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
-  constructor(props: ITOCItemProps) {
-    super(props);
-  }
-
   /**
    * Render the item.
    */
