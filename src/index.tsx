@@ -94,7 +94,8 @@ const plugin: JupyterLabPlugin<void> = {
           commandlist,
           settingRegistry,
           app.commands,
-          '@jupyterlab/shortcuts-extension:plugin'
+          '@jupyterlab/shortcuts-extension:plugin',
+          app
         );
 
         widget.id = 'jupyterlab-shortcutui';

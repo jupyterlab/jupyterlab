@@ -2,6 +2,8 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import * as React from 'react'
 
+import { JupyterLab } from '@jupyterlab/application';
+
 import { ShortcutUI } from './components/ShortcutUI';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
@@ -23,6 +25,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   isAttached: boolean;
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;
+  app: JupyterLab
 
   constructor(
     height: number, 
@@ -31,6 +34,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
     settingRegistry: ISettingRegistry,
     commandRegistry: CommandRegistry,
     shortcutPlugin: string,
+    app: JupyterLab
   ) {
     super();
     this.height = height;
@@ -39,6 +43,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
     this.settingRegistry = settingRegistry;
     this.commandRegistry = commandRegistry;
     this.shortcutPlugin = shortcutPlugin;
+    this.app = app
   }
 
   protected onUpdateRequest(): void {
@@ -50,6 +55,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
         commandRegistry={this.commandRegistry}
         height={this.height}
         width={this.width}
+        app={this.app}
       />
     ReactDOM.render(
       this.reactComponent, 
