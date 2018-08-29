@@ -4,9 +4,13 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { ArrayExt, StringExt } from '@phosphor/algorithm';
 
+import { JupyterLab } from '@jupyterlab/application';
+
 import { ShortcutList } from './ShortcutList';
 
 import { TopNav } from './TopNav';
+
+import { Menu } from '@phosphor/widgets';
 
 import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
@@ -32,6 +36,7 @@ export interface IShortcutUIProps {
   commandRegistry: CommandRegistry;
   height: number;
   width: number;
+  app: JupyterLab;
 }
 
 /** State for ShortcutUI component */
@@ -43,6 +48,7 @@ export interface IShortcutUIState {
   showSelectors: boolean;
   currentSort: string;
   keyBindingsUsed: { [index: string]: TakenByObject };
+  contextMenu: any;
 }
 
 /** Normalize the query text for a fuzzy search. */
@@ -248,17 +254,19 @@ export class ShortcutUI extends React.Component<
 > {
   constructor(props: any) {
     super(props);
-  }
+    const { commands } = this.props.app;
 
-  state = {
-    shortcutList: {},
-    filteredShortcutList: new Array<ShortcutObject>(),
-    shortcutsFetched: false,
-    searchQuery: '',
-    showSelectors: false,
-    currentSort: 'category',
-    keyBindingsUsed: {}
-  };
+    this.state = {
+      shortcutList: {},
+      filteredShortcutList: new Array<ShortcutObject>(),
+      shortcutsFetched: false,
+      searchQuery: '',
+      showSelectors: false,
+      currentSort: 'category',
+      keyBindingsUsed: {},
+      contextMenu: new Menu({ commands })
+    };
+  }
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
@@ -507,6 +515,23 @@ export class ShortcutUI extends React.Component<
     this.setState({ filteredShortcutList: shortcutList });
   };
 
+  contextMenu = (
+    event: any,
+    commandIDs: string[]
+  )=> {
+    event.persist()
+    const { commands } = this.props.app
+    this.setState({
+      contextMenu: new Menu({ commands })
+    }, () => {
+      event.preventDefault()
+      for (let command of commandIDs) {
+        this.state.contextMenu.addItem( {command: command } )
+      }
+      this.state.contextMenu.open(event.clientX, event.clientY)
+    })
+  }
+
   render() {
     if (!this.state.shortcutsFetched) {
       return null;
@@ -535,6 +560,8 @@ export class ShortcutUI extends React.Component<
           clearConflicts={this.clearConflicts}
           height={this.props.height}
           errorSize={this.props.width < 775 ? 'small' : 'regular'}
+          contextMenu={this.contextMenu}
+          app={this.props.app}
         />
       </div>
     );

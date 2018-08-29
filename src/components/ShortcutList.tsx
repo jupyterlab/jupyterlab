@@ -2,6 +2,8 @@ import { ShortcutItem } from './ShortcutItem';
 
 import { ShortcutObject, TakenByObject } from '..';
 
+import { JupyterLab } from '@jupyterlab/application';
+
 import * as React from 'react';
 
 import {
@@ -23,10 +25,15 @@ export interface IShortcutListProps {
   clearConflicts: Function;
   height: number;
   errorSize: string;
+  contextMenu: Function;
+  app: JupyterLab;
 }
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps, {}> {
+  constructor(props: any) {
+    super(props);
+  }
   render() {
     return (
       <div
@@ -47,6 +54,8 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
                 sortConflict={this.props.sortConflict}
                 clearConflicts={this.props.clearConflicts}
                 errorSize={this.props.errorSize}
+                contextMenu={this.props.contextMenu}
+                app={this.props.app}
               />
             );
           })}

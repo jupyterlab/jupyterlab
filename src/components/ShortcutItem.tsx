@@ -24,6 +24,7 @@ import {
   SourceCellStyle,
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
+import { JupyterLab } from '@jupyterlab/application';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -36,6 +37,8 @@ export interface IShortcutItemProps {
   sortConflict: Function;
   clearConflicts: Function;
   errorSize: string;
+  contextMenu: Function;
+  app: JupyterLab;
 }
 
 /** State for ShortcutItem component */
@@ -43,6 +46,16 @@ export interface IShortcutItemState {
   displayNewInput: boolean;
   displayReplaceInputLeft: boolean;
   displayReplaceInputRight: boolean;
+  numShortcuts: number;
+}
+
+export namespace CommandIDs {
+  export const shortcutEditLeft = 'shortcutui:EditLeft';
+  export const shortcutEditRight = 'shortcutui:EditRight';
+  export const shortcutEdit = 'shortcutui:Edit';
+  export const shortcutAddNew = 'shortcutui:AddNew';
+  export const shortcutAddAnother = 'shortcutui:AddAnother';
+  export const shortcutReset = 'shortcutui:Reset';
 }
 
 /** React component for each command shortcut item */
@@ -50,11 +63,73 @@ export class ShortcutItem extends React.Component<
   IShortcutItemProps,
   IShortcutItemState
 > {
-  state = {
-    displayNewInput: false,
-    displayReplaceInputLeft: false,
-    displayReplaceInputRight: false
-  };
+  constructor(props: any) {
+    super(props)
+
+    this.state = {
+      displayNewInput: false,
+      displayReplaceInputLeft: false,
+      displayReplaceInputRight: false,
+      numShortcuts: Object.keys(this.props.shortcut.keys)
+        .filter(key => this.props.shortcut.keys[key][0] !== '').length
+    };
+
+    const key = this.props.shortcut.commandName + '_' + this.props.shortcut.selector
+
+    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
+      this.props.app.commands.addCommand(CommandIDs.shortcutEdit + key, {
+        label: "Edit",
+        caption: "Edit existing sortcut",
+        execute: () => {
+          this.toggleInputReplaceLeft();
+        }
+      })
+    }
+    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEditLeft + key)) {
+      this.props.app.commands.addCommand(CommandIDs.shortcutEditLeft + key, {
+      label: 'Edit First',
+      caption: 'Edit existing shortcut',
+      execute: () => {
+        this.toggleInputReplaceLeft()
+      }
+    })}
+    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEditRight + key)){
+      this.props.app.commands.addCommand(CommandIDs.shortcutEditRight + key, {
+        label: "Edit Second",
+        caption: "Edit existing shortcut",
+        execute: () => {
+          this.toggleInputReplaceRight();
+        }
+      })
+    }
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)){
+      this.props.app.commands.addCommand(CommandIDs.shortcutAddNew + key, {
+        label: 'Add New',
+        caption: 'Add new shortcut',
+        execute: () => {
+          this.toggleInputNew()
+        }
+      })
+    }
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)){
+      this.props.app.commands.addCommand(CommandIDs.shortcutAddAnother + key, {
+        label: 'Add Another',
+        caption: 'Add another shortcut',
+        execute: () => {
+          this.toggleInputNew()
+        }
+      })
+    }
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutReset + key)){
+      this.props.app.commands.addCommand(CommandIDs.shortcutReset + key, {
+        label: 'Reset',
+        caption: 'Reset shortcut back to default',
+        execute: () => {
+          this.props.resetShortcut()
+        }
+      })
+    }
+  }
 
   /** Toggle display state of input box */
   private toggleInputNew = (): void => {
@@ -98,6 +173,7 @@ export class ShortcutItem extends React.Component<
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
     );
+    const key = this.props.shortcut.commandName + '_' + this.props.shortcut.selector
     if (this.props.shortcut.id === 'error_row') {
       return (
         <tr className={classes(RowStyle)}>
@@ -130,7 +206,37 @@ export class ShortcutItem extends React.Component<
       );
     } else {
       return (
-        <div className={RowStyle}>
+        <div className={RowStyle}
+          onContextMenu={e => {
+            e.persist()
+            this.setState({
+              numShortcuts: Object.keys(this.props.shortcut.keys)
+                .filter(key => this.props.shortcut.keys[key][0] !== '').length
+            }, () => {
+              if (this.state.numShortcuts == 2) {
+                this.props.contextMenu(
+                  e,
+                  [
+                    CommandIDs.shortcutEditLeft + key, 
+                    CommandIDs.shortcutEditRight + key, 
+                  ]                )
+              } else if (this.state.numShortcuts == 1) {
+                this.props.contextMenu(
+                  e,
+                  [
+                    CommandIDs.shortcutEdit + key, 
+                    CommandIDs.shortcutAddAnother + key, 
+                  ]                )
+              } else {
+                this.props.contextMenu(
+                  e,
+                  [
+                    CommandIDs.shortcutAddNew + key, 
+                  ]                )
+              }
+            })
+          }}
+        >
           <div className={CellStyle}>{this.props.shortcut.category}</div>
           <div className={CellStyle}>
             <div className="jp-label">{this.props.shortcut.label}</div>
