@@ -10,6 +10,11 @@ import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
  */
 export interface IFileMenu extends IJupyterLabMenu {
   /**
+   * Option to add a `Quit` entry in the File menu
+   */
+  quitEntry: boolean;
+
+  /**
    * A submenu for creating new files/launching new activities.
    */
   readonly newMenu: IJupyterLabMenu;
@@ -38,6 +43,8 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
     super(options);
 
     this.menu.title.label = 'File';
+
+    this.quitEntry = false;
 
     // Create the "New" submenu.
     this.newMenu = new JupyterLabMenu(options, false);
@@ -75,6 +82,11 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.consoleCreators.clear();
     super.dispose();
   }
+
+  /**
+   * Option to add a `Quit` entry in File menu
+   */
+  public quitEntry: boolean;
 }
 
 /**

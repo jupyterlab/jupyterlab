@@ -11,7 +11,11 @@ import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
-import { ServiceManager } from '@jupyterlab/services';
+import {
+  Contents,
+  ContentsManager,
+  ServiceManager
+} from '@jupyterlab/services';
 
 import {
   FileBrowserModel,
@@ -25,6 +29,29 @@ import {
   signalToPromises
 } from '@jupyterlab/testutils';
 import { toArray } from '@phosphor/algorithm';
+
+/**
+ * A contents manager that delays requests by less each time it is called
+ * in order to simulate out-of-order responses from the server.
+ */
+class DelayedContentsManager extends ContentsManager {
+  get(
+    path: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    return new Promise<Contents.IModel>(resolve => {
+      const delay = this._delay;
+      this._delay -= 500;
+      super.get(path, options).then(contents => {
+        setTimeout(() => {
+          resolve(contents);
+        }, Math.max(delay, 0));
+      });
+    });
+  }
+
+  private _delay = 1000;
+}
 
 describe('filebrowser/model', () => {
   let manager: IDocumentManager;
@@ -222,6 +249,33 @@ describe('filebrowser/model', () => {
         await model.cd('src');
         await model.cd('..');
         expect(model.path).to.equal('');
+      });
+
+      it('should be resilient to a slow initial fetch', async () => {
+        let delayedServiceManager = new ServiceManager();
+        (delayedServiceManager as any).contents = new DelayedContentsManager();
+        let manager = new DocumentManager({
+          registry,
+          opener,
+          manager: delayedServiceManager
+        });
+        model = new FileBrowserModel({ manager, state });
+
+        const paths: string[] = [];
+        // An initial refresh is called in the constructor.
+        // If it is too slow, it can come in after the directory change,
+        // causing a directory set by, e.g., the tree handler to be wrong.
+        // This checks to make sure we are handling that case correctly.
+        const refresh = model.refresh().then(() => paths.push(model.path));
+        const cd = model.cd('src').then(() => paths.push(model.path));
+        await Promise.all([refresh, cd]);
+        expect(model.path).to.equal('src');
+        expect(paths).to.eql(['', 'src']);
+
+        manager.dispose();
+        delayedServiceManager.contents.dispose();
+        delayedServiceManager.dispose();
+        model.dispose();
       });
     });
 
