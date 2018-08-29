@@ -4,14 +4,18 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import json
+import os
 import sys
 
 from jupyter_core.application import JupyterApp, base_aliases
+from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from notebook.notebookapp import NotebookApp, aliases, flags
+from notebook.utils import url_path_join as ujoin
 from traitlets import Bool, Unicode
 
 from ._version import __version__
-from .extension import load_jupyter_server_extension
+from .extension import load_config, load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
     get_workspaces_dir
@@ -116,14 +120,30 @@ class LabWorkspaceExportApp(JupyterApp):
     """
 
     def start(self):
-        if not self.extra_args:
-            print('Export the default workspace.')
-            return 0
+        app = LabApp()
+        base_url = app.base_url
+        config = load_config(app)
+        directory = config.workspaces_dir
+        page_url = config.page_url
+
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
             sys.exit(1)
-        workspace = self.extra_args[0]
-        print('Export the workspace: %s' % workspace)
+
+        slug = ''
+        raw = (page_url if not self.extra_args
+               else ujoin(config.workspaces_url, self.extra_args[0]))
+        slug = slugify(raw, base_url)
+        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+
+        if os.path.exists(workspace_path):
+            with open(workspace_path) as fid:
+                try:  # to load and parse the workspace file.
+                    print(fid.read())
+                except Exception as e:
+                    print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
+        else:
+            print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
 
 
 class LabWorkspaceImportApp(JupyterApp):
@@ -142,14 +162,15 @@ class LabWorkspaceApp(JupyterApp):
     Import or export a JupyterLab workspace
     """
 
-    subcommands = dict(
-        export=(
-            LabWorkspaceExportApp,
-            LabWorkspaceExportApp.description.splitlines()[0])
+    subcommands = dict()
+    subcommands['export'] = (
+        LabWorkspaceExportApp,
+        LabWorkspaceExportApp.description.splitlines()[0]
     )
     subcommands['import'] = (
         LabWorkspaceImportApp,
-        LabWorkspaceImportApp.description.splitlines()[0])
+        LabWorkspaceImportApp.description.splitlines()[0]
+    )
 
 
 lab_aliases = dict(aliases)
