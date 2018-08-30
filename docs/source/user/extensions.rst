@@ -27,7 +27,7 @@ information about developing extensions, see the :ref:`developer documentation
 
 
 In order to install JupyterLab extensions, you need to have `Node.js
-<https://nodejs.org/>`__ version 4 or later installed.
+<https://nodejs.org/>`__ installed.
 
 If you use ``conda``, you can get it with:
 

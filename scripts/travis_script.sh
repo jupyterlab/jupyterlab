@@ -6,6 +6,8 @@
 set -ex
 set -o pipefail
 
+python -c "from jupyterlab.commands import build_check; build_check()"
+
 
 if [[ $GROUP == python ]]; then
     # Run the python tests

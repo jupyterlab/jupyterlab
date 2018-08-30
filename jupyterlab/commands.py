@@ -1473,9 +1473,13 @@ def _node_check():
     """
     try:
         proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
-        proc.wait()
+        ret = proc.wait()
     except Exception:
-        msg = 'Please install nodejs 5+ and npm before continuing. nodejs may be installed using conda or directly from the nodejs website.'
+        ret = 1
+    if ret != 0:
+        data = _get_core_data()
+        ver = data['engines']['node']
+        msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
 
 

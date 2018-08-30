@@ -124,6 +124,9 @@
     "webpack-cli": "^3.0.3",
     "webpack-merge": "^4.1.1"
   },
+  "engines": {
+      "node": ">=6.11.5"
+    },
   "jupyterlab": {
     "extensions": {
       "@jupyterlab/application-extension": "",
