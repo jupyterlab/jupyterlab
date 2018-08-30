@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var pkg = require('./static/package.json');
+var pkg = require('./staging/package.json');
 
 function parser(part) {
   return parseInt(part, 10);
