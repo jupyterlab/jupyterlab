@@ -11,6 +11,8 @@ var eparts = engine.split('.').map(parser);
 var version = process.version.replace('v', '');
 var vparts = version.split('.').map(parser);
 
+console.log(eparts); // eslint-disable-line
+console.log(vparts); // eslint-disable-line
 if (vparts[0] > eparts[0]) {
   process.exit(0);
 }

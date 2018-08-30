@@ -1472,7 +1472,7 @@ def _node_check():
     """Check for the existence of nodejs with the correct version.
     """
     try:
-        proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
+        proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=False)
         ret = proc.wait()
     except Exception:
         ret = 1
