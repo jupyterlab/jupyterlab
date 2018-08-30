@@ -338,5 +338,9 @@
 }
 
 .jp-TableOfContents-content code {
-  font-size: 9px;
+  font-size: inherit;
+}
+
+.toc-cell-item {
+  padding-left: 24px;
 }

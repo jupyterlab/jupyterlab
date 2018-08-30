@@ -32,7 +32,6 @@ export function notebookItemRenderer(
     item.type === INotebookHeadingTypes.markdown ||
     item.type === INotebookHeadingTypes.header
   ) {
-    const paddingLeft = 24;
     const collapseOnClick = (cellRef?: Cell) => {
       let collapsed = cellRef!.model.metadata.get(
         'toc-hr-collapsed'
@@ -57,8 +56,8 @@ export function notebookItemRenderer(
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell'}
-          style={{ fontSize, paddingLeft }}
+          className={item.type + '-cell toc-cell-item'}
+          style={{ fontSize }}
         />
       );
       // Render the headers
@@ -116,7 +115,10 @@ export function notebookItemRenderer(
     ) {
       // Render headers/markdown for plain text
       jsx = (
-        <span className={item.type + '-cell'} style={{ fontSize, paddingLeft }}>
+        <span
+          className={item.type + '-cell toc-cell-item'}
+          style={{ fontSize }}
+        >
           {numbering + item.text}
         </span>
       );
