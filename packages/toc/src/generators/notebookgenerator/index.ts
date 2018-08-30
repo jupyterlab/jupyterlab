@@ -46,7 +46,7 @@ export function createNotebookGenerator(
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   // Create a option manager to manage user settings
   const options = new NotebookGeneratorOptionsManager(widget, tracker, {
-    needNumbering: true,
+    needsNumbering: true,
     sanitizer: sanitizer
   });
   return {
@@ -566,7 +566,7 @@ namespace Private {
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
     lastLevel: number,
-    needNumbering = false,
+    needsNumbering = false,
     cellRef?: Cell
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
@@ -594,7 +594,7 @@ namespace Private {
         const heading = headingNodes[0];
         const level = parseInt(heading.tagName[1]);
         const text = heading.textContent ? heading.textContent : '';
-        let shallHide = !needNumbering;
+        let shallHide = !needsNumbering;
         if (heading.getElementsByClassName('numbering-entry').length > 0) {
           heading.removeChild(
             heading.getElementsByClassName('numbering-entry')[0]

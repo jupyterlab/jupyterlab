@@ -38,7 +38,7 @@ export function createMarkdownGenerator(
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   // Create a option manager to manage user settings
   const options = new MarkdownDocGeneratorOptionsManager(widget, {
-    needNumbering: true
+    needsNumbering: true
   });
   return {
     tracker,
@@ -87,7 +87,7 @@ export function createRenderedMarkdownGenerator(
   const options = new MarkdownDocGeneratorOptionsManager(
     widget,
     {
-      needNumbering: true
+      needsNumbering: true
     },
     tracker
   );
@@ -207,7 +207,7 @@ namespace Private {
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
-    needNumbering = true
+    needsNumbering = true
   ): INotebookHeading[] {
     let headings: INotebookHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -215,7 +215,7 @@ namespace Private {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1]);
       let text = heading.textContent ? heading.textContent : '';
-      let shallHide = !needNumbering;
+      let shallHide = !needsNumbering;
 
       // Show/hide numbering DOM element based on user settings
       if (heading.getElementsByClassName('numbering-entry').length > 0) {

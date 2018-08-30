@@ -9,11 +9,11 @@ import { MimeDocument } from '@jupyterlab/docregistry';
 export class MarkdownDocGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
   constructor(
     widget: TableOfContents,
-    options: { needNumbering: boolean },
+    options: { needsNumbering: boolean },
     tracker?: IInstanceTracker<MimeDocument>
   ) {
     super();
-    this._numbering = options.needNumbering;
+    this._numbering = options.needsNumbering;
     this._widget = widget;
   }
 

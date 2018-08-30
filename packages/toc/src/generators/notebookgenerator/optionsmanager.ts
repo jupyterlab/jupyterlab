@@ -10,10 +10,10 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
-    options: { needNumbering: boolean; sanitizer: ISanitizer }
+    options: { needsNumbering: boolean; sanitizer: ISanitizer }
   ) {
     super();
-    this._numbering = options.needNumbering;
+    this._numbering = options.needsNumbering;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
