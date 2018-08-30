@@ -11,8 +11,7 @@ import {
   generateNumbering,
   sanitizerOptions,
   isMarkdown,
-  INotebookHeading,
-  INotebookHeadingTypes
+  INumberedHeading
 } from '../shared';
 
 import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
@@ -47,7 +46,7 @@ export function createMarkdownGenerator(
     toolbarGenerator: () => {
       return markdownDocGeneratorToolbar(options);
     },
-    itemRenderer: (item: INotebookHeading) => {
+    itemRenderer: (item: INumberedHeading) => {
       return markdownDocItemRenderer(options, item);
     },
     isEnabled: editor => {
@@ -98,7 +97,7 @@ export function createRenderedMarkdownGenerator(
     toolbarGenerator: () => {
       return markdownDocGeneratorToolbar(options);
     },
-    itemRenderer: (item: INotebookHeading) => {
+    itemRenderer: (item: INumberedHeading) => {
       return markdownDocItemRenderer(options, item);
     },
     isEnabled: widget => {
@@ -132,10 +131,10 @@ namespace Private {
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: { [level: number]: number }
-  ): INotebookHeading[] {
+  ): INumberedHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: INotebookHeading[] = [];
+    let headings: INumberedHeading[] = [];
 
     // Iterate over the lines to get the header level and
     // the text for the line.
@@ -154,8 +153,7 @@ namespace Private {
           text,
           numbering,
           level,
-          onClick,
-          type: INotebookHeadingTypes.header
+          onClick
         });
         return;
       }
@@ -171,8 +169,7 @@ namespace Private {
           text,
           numbering,
           level,
-          onClick,
-          type: INotebookHeadingTypes.header
+          onClick
         });
         return;
       }
@@ -189,8 +186,7 @@ namespace Private {
           text,
           numbering,
           level,
-          onClick,
-          type: INotebookHeadingTypes.header
+          onClick
         });
         return;
       }
@@ -208,8 +204,8 @@ namespace Private {
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
     needsNumbering = true
-  ): INotebookHeading[] {
-    let headings: INotebookHeading[] = [];
+  ): INumberedHeading[] {
+    let headings: INumberedHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
     for (let i = 0; i < headingNodes.length; i++) {
       const heading = headingNodes[i];
@@ -245,8 +241,7 @@ namespace Private {
         text,
         numbering,
         html,
-        onClick,
-        type: INotebookHeadingTypes.header
+        onClick
       });
     }
     return headings;

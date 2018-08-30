@@ -3,13 +3,13 @@
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
-import { INotebookHeading } from '../shared';
+import { INumberedHeading } from '../shared';
 
 import * as React from 'react';
 
 export function markdownDocItemRenderer(
   options: MarkdownDocGeneratorOptionsManager,
-  item: INotebookHeading
+  item: INumberedHeading
 ) {
   const levelsSizes: { [level: number]: string } = {
     1: '18.74',
@@ -29,7 +29,7 @@ export function markdownDocItemRenderer(
     jsx = (
       <span
         dangerouslySetInnerHTML={{ __html: numbering + item.html }}
-        className={item.type + '-cell'}
+        className={'toc-markdown-cell'}
         style={{ fontSize }}
       />
     );

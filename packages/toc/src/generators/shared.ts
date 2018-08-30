@@ -11,12 +11,15 @@ export enum INotebookHeadingTypes {
   code
 }
 
-export interface INotebookHeading extends IHeading {
-  numbering?: string | null;
+export interface INotebookHeading extends INumberedHeading {
   type: INotebookHeadingTypes;
   prompt?: string;
   cellRef?: Cell;
   hasChild?: boolean;
+}
+
+export interface INumberedHeading extends IHeading {
+  numbering?: string | null;
 }
 
 /**
