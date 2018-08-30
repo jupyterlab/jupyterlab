@@ -497,13 +497,15 @@
     "@phosphor/widgets" "^1.6.0"
     react "~16.4.0"
 
-"@jupyterlab/mainmenu-extension@^0.7.4":
-  version "0.7.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu-extension/-/mainmenu-extension-0.7.4.tgz#70d8cfc7f5dd5520c2ac6adadd570722c33a239a"
+"@jupyterlab/mainmenu-extension@^0.7.5":
+  version "0.7.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/mainmenu-extension/-/mainmenu-extension-0.7.5.tgz#04508d1d06835372ca2bf3bc2fb54ee87fe541b4"
   dependencies:
     "@jupyterlab/application" "^0.18.4"
     "@jupyterlab/apputils" "^0.18.4"
+    "@jupyterlab/coreutils" "^2.1.4"
     "@jupyterlab/mainmenu" "^0.7.4"
+    "@jupyterlab/services" "^3.1.4"
     "@phosphor/algorithm" "^1.1.2"
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/widgets" "^1.6.0"
@@ -927,7 +929,7 @@
 
 "@types/react@~16.0.19":
   version "16.0.41"
-  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.41.tgz#72146737f4d439dc95a53315de4bfb43ac8542ca"
+  resolved "http://registry.npmjs.org/@types/react/-/react-16.0.41.tgz#72146737f4d439dc95a53315de4bfb43ac8542ca"
 
 "@webassemblyjs/ast@1.5.12":
   version "1.5.12"
@@ -1479,8 +1481,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000882"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000882.tgz#d9d50e5189be253ffb31d347cd7f3c615b602f7f"
+  version "1.0.30000883"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000883.tgz#976f22d6a9be119b342d5ce6c7ee98fc6e0bc94a"
 
 center-align@^0.1.1:
   version "0.1.3"
@@ -5420,8 +5422,8 @@ webpack-merge@^4.1.1:
     lodash "^4.17.5"
 
 webpack-sources@^1.0.1, webpack-sources@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-1.1.0.tgz#a101ebae59d6507354d71d8013950a3a8b7a5a54"
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-1.2.0.tgz#18181e0d013fce096faf6f8e6d41eeffffdceac2"
   dependencies:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
