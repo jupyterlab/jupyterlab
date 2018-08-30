@@ -79,8 +79,7 @@
 }
 
 .cm-toc .CodeMirror-scroll {
-  overflow-x: hidden;
-  overflow-y: hidden;
+  overflow: hidden !important;
 }
 
 .CodeMirror-scroll::-webkit-scrollbar-track {
@@ -193,8 +192,9 @@
 }
 
 .cm-toc .CodeMirror-sizer {
-  min-height: 0px !important;
   min-width: 0px !important;
+  min-height: 0px !important;
+  margin-bottom: 0px !important;
 }
 
 .cm-toc .CodeMirror-line {
