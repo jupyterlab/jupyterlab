@@ -24,7 +24,7 @@
     "@jupyterlab/imageviewer-extension": "^0.18.4",
     "@jupyterlab/inspector-extension": "^0.18.4",
     "@jupyterlab/launcher-extension": "^0.18.4",
-    "@jupyterlab/mainmenu-extension": "^0.7.4",
+    "@jupyterlab/mainmenu-extension": "^0.7.5",
     "@jupyterlab/markdownviewer-extension": "^0.18.4",
     "@jupyterlab/mathjax2-extension": "^0.6.4",
     "@jupyterlab/notebook-extension": "^0.18.4",
