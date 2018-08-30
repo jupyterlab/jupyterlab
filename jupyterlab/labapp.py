@@ -178,6 +178,13 @@ class LabWorkspaceImportApp(JupyterApp):
                 print('%s is not a valid workspace:\n%s' % (file_name, e))
                 sys.exit(1)
 
+        if not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except Exception as e:
+                print('Workspaces directory could not be created:\n%s' % e)
+                sys.exit(1)
+
         slug = slugify(workspace['metadata']['id'], base_url)
         workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
 
