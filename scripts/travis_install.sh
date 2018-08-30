@@ -10,6 +10,10 @@ set -o pipefail
 sudo rm -rf $(which yarn)
 ! yarn
 
+# Use node 8
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
