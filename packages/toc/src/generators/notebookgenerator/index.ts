@@ -604,13 +604,11 @@ namespace Private {
         html = html.replace('¶', ''); // Remove the anchor symbol.
         const onClick = onClickFactory(heading);
         let numbering = generateNumbering(numberingDict, level);
-        let numberingElement =
-          '<span class="numbering-entry" ' +
-          (shallHide ? ' hidden="true"' : '') +
-          '>' +
-          numbering +
-          '</span>';
-        heading.innerHTML = numberingElement + html;
+        let numDOM = '';
+        if (!shallHide) {
+          numDOM = '<span class="numbering-entry">' + numbering + '</span>';
+        }
+        heading.innerHTML = numDOM + html;
         headings.push({
           level,
           text,

@@ -2,8 +2,6 @@ import { ISanitizer } from '@jupyterlab/apputils';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { each } from '@phosphor/algorithm';
-
 import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
@@ -21,28 +19,6 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this.sanitizer = options.sanitizer;
   }
 
-  // Show/hide numbering in the document
-  private changeNumberingStateForAllCells(showNumbering: boolean) {
-    if (this._notebook.currentWidget) {
-      each(this._notebook.currentWidget.content.widgets, cell => {
-        let headingNodes = cell.node.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        each(headingNodes, heading => {
-          if (heading.getElementsByClassName('numbering-entry').length > 0) {
-            if (!showNumbering) {
-              heading
-                .getElementsByClassName('numbering-entry')[0]
-                .setAttribute('hidden', 'true');
-            } else {
-              heading
-                .getElementsByClassName('numbering-entry')[0]
-                .removeAttribute('hidden');
-            }
-          }
-        });
-      });
-    }
-  }
-
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
       this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
@@ -53,7 +29,6 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this._numbering = value;
     this._widget.update();
     this.notebookMetadata = ['toc-autonumbering', this._numbering];
-    this.changeNumberingStateForAllCells(this._numbering);
   }
 
   get numbering() {

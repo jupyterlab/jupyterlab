@@ -231,15 +231,14 @@ namespace Private {
       let numbering = generateNumbering(numberingDict, level);
 
       // Generate the DOM element for numbering
-      let numberingElement =
-        '<span class="numbering-entry" ' +
-        (shallHide ? ' hidden="true"' : '') +
-        '>' +
-        numbering +
-        '</span>';
+      let numDOM = '';
+      if (!shallHide) {
+        numDOM = '<span class="numbering-entry">' + numbering + '</span>';
+      }
 
       // Add DOM numbering element to document
-      heading.innerHTML = numberingElement + html;
+      heading.innerHTML = numDOM + html;
+
       text = text.replace('¶', '');
       headings.push({
         level,
