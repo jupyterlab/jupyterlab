@@ -32,7 +32,9 @@ export class CodeComponent extends React.Component<
       return (
         <div
           className="cm-toc"
-          dangerouslySetInnerHTML={{ __html: node[0].children[1].innerHTML }}
+          dangerouslySetInnerHTML={{
+            __html: this.state.heading.cellRef!.editor.host.innerHTML
+          }}
         />
       );
     }
