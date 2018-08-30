@@ -52,6 +52,10 @@ export class TableOfContents extends Widget {
     }
     this._current = value;
 
+    if (this.generator && this.generator.toolbarGenerator) {
+      this._toolbar = this.generator.toolbarGenerator();
+    }
+
     // Dispose an old activity monitor if it existsd
     if (this._monitor) {
       this._monitor.dispose();
@@ -59,7 +63,7 @@ export class TableOfContents extends Widget {
     }
     // If we are wiping the ToC, update and return.
     if (!this._current) {
-      this.updateTOC(true);
+      this.updateTOC();
       return;
     }
 
@@ -74,8 +78,11 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(this.update, this);
-    this.updateTOC(true);
+    this._monitor.activityStopped.connect(
+      this.update,
+      this
+    );
+    this.updateTOC();
   }
 
   /**
@@ -86,10 +93,10 @@ export class TableOfContents extends Widget {
     /* if (!this.isVisible) {
       return;
     } */
-    this.updateTOC(false);
+    this.updateTOC();
   }
 
-  updateTOC(contextChanged: boolean) {
+  updateTOC() {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -115,11 +122,11 @@ export class TableOfContents extends Widget {
     if (this._current && this._current.generator) {
       renderedJSX = (
         <TOCTree
-          widget={this}
           title={title}
           toc={toc}
-          contextChanged={contextChanged}
+          generator={this.generator}
           itemRenderer={itemRenderer}
+          toolbar={this._toolbar}
         />
       );
     }
@@ -148,6 +155,7 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
+  private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
@@ -217,24 +225,6 @@ export interface IHeading {
 }
 
 /**
- * Props for the TOCTree component.
- */
-export interface ITOCTreeProps extends React.Props<TOCTree> {
-  /**
-   * A title to display.
-   */
-  title: string;
-
-  /**
-   * A list of IHeadings to render.
-   */
-  toc: IHeading[];
-  widget: TableOfContents;
-  contextChanged: boolean;
-  itemRenderer: (item: IHeading) => JSX.Element | null;
-}
-
-/**
  * Props for the TOCItem component.
  */
 export interface ITOCItemProps extends React.Props<TOCItem> {
@@ -273,6 +263,24 @@ export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
 export interface ITOCTreeStates {}
 
 /**
+ * Props for the TOCTree component.
+ */
+export interface ITOCTreeProps extends React.Props<TOCTree> {
+  /**
+   * A title to display.
+   */
+  title: string;
+
+  /**
+   * A list of IHeadings to render.
+   */
+  toc: IHeading[];
+  toolbar: any;
+  generator: TableOfContentsRegistry.IGenerator<Widget> | null;
+  itemRenderer: (item: IHeading) => JSX.Element | null;
+}
+
+/**
  * A React component for a table of contents.
  */
 export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
@@ -280,37 +288,10 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
    * Render the TOCTree.
    */
 
-  constructor(props: ITOCTreeProps) {
-    super(props);
-    if (
-      this.props.widget.generator &&
-      this.props.widget.generator.toolbarGenerator
-    ) {
-      this.renderedToolbar = this.props.widget.generator.toolbarGenerator(
-        this.props.widget
-      );
-    }
-  }
-
-  componentWillReceiveProps(newProps: ITOCTreeProps) {
-    if (newProps.contextChanged) {
-      if (
-        this.props.widget.generator &&
-        this.props.widget.generator.toolbarGenerator
-      ) {
-        this.renderedToolbar = this.props.widget.generator.toolbarGenerator(
-          this.props.widget
-        );
-      } else {
-        this.renderedToolbar = null;
-      }
-    }
-  }
-
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
-    const Toolbar = this.renderedToolbar;
+    const Toolbar = this.props.toolbar;
     let listing: JSX.Element[] = this.props.toc.map(el => {
       return (
         <TOCItem
@@ -328,6 +309,4 @@ export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
       </div>
     );
   }
-
-  private renderedToolbar: any = null;
 }

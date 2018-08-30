@@ -53,7 +53,7 @@ export function createNotebookGenerator(
     tracker,
     usesLatex: true,
     options: options,
-    toolbarGenerator: widget => {
+    toolbarGenerator: () => {
       return notebookGeneratorToolbar(options, tracker);
     },
     itemRenderer: (item: INotebookHeading) => {

@@ -112,7 +112,7 @@ export namespace TableOfContentsRegistry {
      *
      * If not given, no toolbar will show up
      */
-    toolbarGenerator?: (widget: W) => any;
+    toolbarGenerator?: () => any;
 
     /**
      * A function that takes the widget, and produces
