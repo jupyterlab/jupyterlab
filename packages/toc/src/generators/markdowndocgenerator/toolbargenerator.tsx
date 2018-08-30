@@ -22,16 +22,15 @@ export function markdownDocGeneratorToolbar(
       options.initializeOptions(true);
     }
 
-    toggleAutoNumbering = () => {
-      options.numbering = !options.numbering;
-      this.setState({ numbering: options.numbering });
-    };
-
     render() {
+      const toggleAutoNumbering = () => {
+        options.numbering = !options.numbering;
+        this.setState({ numbering: options.numbering });
+      };
       let numberingIcon = this.state.numbering ? (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => toggleAutoNumbering()}
         >
           <img
             alt="Toggle Auto-Numbering"
@@ -43,7 +42,7 @@ export function markdownDocGeneratorToolbar(
       ) : (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => toggleAutoNumbering()}
         >
           <img
             alt="Toggle Auto-Numbering"
