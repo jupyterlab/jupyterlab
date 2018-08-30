@@ -152,7 +152,59 @@ class LabWorkspaceImportApp(JupyterApp):
     """
 
     def start(self):
-        print('importing...')
+        app = LabApp()
+        base_url = app.base_url
+        config = load_config(app)
+        directory = config.workspaces_dir
+        page_url = config.page_url
+        workspaces_url = config.workspaces_url
+
+        if len(self.extra_args) != 1:
+            print('One argument is required for workspace import.')
+            sys.exit(1)
+
+        file_name = self.extra_args[0]
+        file_path = os.path.abspath(file_name)
+
+        if not os.path.exists(file_path):
+            print('%s does not exist.' % file_name)
+            sys.exit(1)
+
+        workspace = dict()
+        with open(file_path) as fid:
+            try:  # to load, parse, and validate the workspace file.
+                workspace = self._validate(fid, page_url, workspaces_url)
+            except Exception as e:
+                print('%s is not a valid workspace:\n%s' % (file_name, e))
+                sys.exit(1)
+
+        slug = slugify(workspace['metadata']['id'], base_url)
+        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+
+        # Write the workspace data to a file.
+        with open(workspace_path, 'w') as fid:
+            fid.write(json.dumps(workspace))
+
+        print('Saved workspace: %s' % workspace_path)
+
+    def _validate(self, data, page_url, workspaces_url):
+        workspace = json.load(data)
+
+        if 'data' not in workspace:
+            raise Exception('The `data` field is missing.')
+
+        if 'metadata' not in workspace:
+            raise Exception('The `metadata` field is missing.')
+
+        if 'id' not in workspace['metadata']:
+            raise Exception('The `id` field is missing in `metadata`.')
+
+        id = workspace['metadata']['id']
+        if id != page_url and not id.startswith(workspaces_url):
+            error = '%s does not match page_url or start with workspaces_url.'
+            raise Exception(error % id)
+
+        return workspace
 
 
 class LabWorkspaceApp(JupyterApp):
