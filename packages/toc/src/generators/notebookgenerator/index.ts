@@ -292,7 +292,6 @@ export function createNotebookGenerator(
             if (i != cellNum) {
               renderedHeadings = Private.getRenderedHTMLHeadings(
                 cell!.node,
-                onClickFactory,
                 sanitizer,
                 numberingDict,
                 lastLevel,
@@ -562,7 +561,6 @@ namespace Private {
    */
   export function getRenderedHTMLHeadings(
     node: HTMLElement,
-    onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
     lastLevel: number,

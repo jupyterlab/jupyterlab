@@ -107,14 +107,8 @@ export function createRenderedMarkdownGenerator(
     },
     generate: widget => {
       let numberingDict: { [level: number]: number } = {};
-      const onClickFactory = (el: Element) => {
-        return () => {
-          el.scrollIntoView();
-        };
-      };
       return Private.getRenderedHTMLHeadingsForMarkdownDoc(
         widget.content.node,
-        onClickFactory,
         sanitizer,
         numberingDict,
         options.numbering
@@ -200,7 +194,6 @@ namespace Private {
    */
   export function getRenderedHTMLHeadingsForMarkdownDoc(
     node: HTMLElement,
-    onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
     needsNumbering = true
@@ -221,7 +214,11 @@ namespace Private {
       }
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
-      const onClick = onClickFactory(heading);
+      const onClick = () => {
+        return () => {
+          heading.scrollIntoView();
+        };
+      };
 
       // Get the numbering string
       let numbering = generateNumbering(numberingDict, level);
