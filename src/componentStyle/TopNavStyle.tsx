@@ -18,7 +18,8 @@ export const SymbolsStyle = style({
   width: '15%',
   display: 'table',
   paddingLeft: '12px',
-  lineHeight: '24px'
+  lineHeight: '24px',
+  paddingTop: '5px'
 });
 
 export const SymbolsSmallStyle = style({
@@ -78,6 +79,7 @@ export const AdvancedOptionsContainerStyle = style({
 
 export const AdvancedOptionsStyle = style({
   display: 'block',
+  paddingTop: '5px'
 });
 
 export const AdvancedOptionsSmallStyle = style({
