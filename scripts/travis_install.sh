@@ -20,3 +20,7 @@ pip install -q -e ".[test]"
 jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab
+
+if [[ $GROUP == integrity ]]; then
+    pip install notebook==4.3
+fi
