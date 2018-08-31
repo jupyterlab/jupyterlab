@@ -19,14 +19,6 @@ export function notebookItemRenderer(
   options: NotebookGeneratorOptionsManager,
   item: INotebookHeading
 ) {
-  const levelsSizes: { [level: number]: string } = {
-    1: '18.74',
-    2: '16.02',
-    3: '13.69',
-    4: '12',
-    5: '11',
-    6: '10'
-  };
   let jsx;
   if (
     item.type === INotebookHeadingTypes.markdown ||
@@ -40,10 +32,10 @@ export function notebookItemRenderer(
       cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
       options.updateWidget();
     };
-    let fontSize = '9px';
+    let fontSizeClass = 'toc-level-size-default';
     let numbering = item.numbering && options.numbering ? item.numbering : '';
     if (item.type === INotebookHeadingTypes.header) {
-      fontSize = levelsSizes[item.level] + 'px';
+      fontSizeClass = 'toc-level-size-' + item.level;
     }
     if (
       item.html &&
@@ -56,8 +48,7 @@ export function notebookItemRenderer(
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell toc-cell-item'}
-          style={{ fontSize }}
+          className={item.type + '-cell toc-cell-item ' + fontSizeClass}
         />
       );
       // Render the headers
@@ -109,10 +100,7 @@ export function notebookItemRenderer(
     ) {
       // Render headers/markdown for plain text
       jsx = (
-        <span
-          className={item.type + '-cell toc-cell-item'}
-          style={{ fontSize }}
-        >
+        <span className={item.type + '-cell toc-cell-item ' + fontSizeClass}>
           {numbering + item.text}
         </span>
       );

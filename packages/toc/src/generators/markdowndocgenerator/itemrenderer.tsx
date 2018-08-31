@@ -11,30 +11,21 @@ export function markdownDocItemRenderer(
   options: MarkdownDocGeneratorOptionsManager,
   item: INumberedHeading
 ) {
-  const levelsSizes: { [level: number]: string } = {
-    1: '18.74',
-    2: '16.02',
-    3: '13.69',
-    4: '12',
-    5: '11',
-    6: '10'
-  };
-  let fontSize = '9px';
+  let fontSizeClass = 'toc-level-size-default';
 
   // Render numbering if needed
   let numbering = item.numbering && options.numbering ? item.numbering : '';
-  fontSize = levelsSizes[item.level] + 'px';
+  fontSizeClass = 'toc-level-size-' + item.level;
   let jsx;
   if (item.html) {
     jsx = (
       <span
         dangerouslySetInnerHTML={{ __html: numbering + item.html }}
-        className={'toc-markdown-cell'}
-        style={{ fontSize }}
+        className={'toc-markdown-cell ' + fontSizeClass}
       />
     );
   } else {
-    jsx = <span style={{ fontSize }}> {numbering + item.text}</span>;
+    jsx = <span className={fontSizeClass}> {numbering + item.text}</span>;
   }
   return jsx;
 }
