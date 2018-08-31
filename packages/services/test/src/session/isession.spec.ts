@@ -72,139 +72,6 @@ describe('session', () => {
     await defaultSession.shutdown();
   });
 
-  describe('Session.listRunning()', () => {
-    it('should yield a list of valid session models', async () => {
-      const response = await Session.listRunning();
-      const running = toArray(response);
-      expect(running.length).to.greaterThan(0);
-    });
-
-    it('should throw an error for an invalid model', async () => {
-      const data = { id: '1234', path: 'test' };
-      const serverSettings = getRequestHandler(200, data);
-      const list = Session.listRunning(serverSettings);
-      await expectFailure(list);
-    });
-
-    it('should throw an error for another invalid model', async () => {
-      const data = [{ id: '1234', kernel: { id: '', name: '' }, path: '' }];
-      const serverSettings = getRequestHandler(200, data);
-      const list = Session.listRunning(serverSettings);
-      await expectFailure(list);
-    });
-
-    it('should fail for wrong response status', async () => {
-      const serverSettings = getRequestHandler(201, [createSessionModel()]);
-      const list = Session.listRunning(serverSettings);
-      await expectFailure(list);
-    });
-
-    it('should fail for error response status', async () => {
-      const serverSettings = getRequestHandler(500, {});
-      const list = Session.listRunning(serverSettings);
-      await expectFailure(list, '');
-    });
-  });
-
-  describe('Session.startNew', () => {
-    it('should start a session', async () => {
-      session = await startNew();
-      expect(session.id).to.be.ok;
-    });
-
-    it('should accept ajax options', async () => {
-      const serverSettings = makeSettings();
-      const options: Session.IOptions = { path: UUID.uuid4(), serverSettings };
-      session = await Session.startNew(options);
-      expect(session.id).to.be.ok;
-    });
-
-    it('should start even if the websocket fails', async () => {
-      const tester = new SessionTester();
-      tester.initialStatus = 'dead';
-      await tester.startSession();
-      tester.dispose();
-    });
-
-    it('should fail for wrong response status', async () => {
-      const sessionModel = createSessionModel();
-      const serverSettings = getRequestHandler(200, sessionModel);
-      const options = createSessionOptions(sessionModel, serverSettings);
-      const sessionPromise = Session.startNew(options);
-      await expectFailure(sessionPromise);
-    });
-
-    it('should fail for error response status', async () => {
-      const serverSettings = getRequestHandler(500, {});
-      const sessionModel = createSessionModel();
-      const options = createSessionOptions(sessionModel, serverSettings);
-      const sessionPromise = Session.startNew(options);
-      await expectFailure(sessionPromise, '');
-    });
-
-    it('should fail for wrong response model', async () => {
-      const sessionModel = createSessionModel();
-      (sessionModel as any).path = 1;
-      const serverSettings = getRequestHandler(201, sessionModel);
-      const options = createSessionOptions(sessionModel, serverSettings);
-      const sessionPromise = Session.startNew(options);
-      const msg = `Property 'path' is not of type 'string'`;
-      await expectFailure(sessionPromise, msg);
-    });
-
-    it('should handle a deprecated response model', () => {
-      const sessionModel = createSessionModel();
-      const data = {
-        id: sessionModel.id,
-        kernel: sessionModel.kernel,
-        notebook: { path: sessionModel.path }
-      };
-      const serverSettings = getRequestHandler(201, data);
-      const options = createSessionOptions(sessionModel, serverSettings);
-      return Session.startNew(options);
-    });
-  });
-
-  describe('Session.findByPath()', () => {
-    it('should find an existing session by path', () => {
-      return Session.findByPath(defaultSession.path);
-    });
-  });
-
-  describe('Session.findById()', () => {
-    it('should find an existing session by id', () => {
-      return Session.findById(defaultSession.id);
-    });
-  });
-
-  describe('Session.connectTo()', () => {
-    it('should connect to a running session', () => {
-      const newSession = Session.connectTo(defaultSession.model);
-      expect(newSession.id).to.equal(defaultSession.id);
-      expect(newSession.kernel.id).to.equal(defaultSession.kernel.id);
-      expect(newSession).to.not.equal(defaultSession);
-      expect(newSession.kernel).to.not.equal(defaultSession.kernel);
-    });
-
-    it('should accept server settings', () => {
-      const serverSettings = makeSettings();
-      const session = Session.connectTo(defaultSession.model, serverSettings);
-      expect(session.id).to.be.ok;
-    });
-  });
-
-  describe('Session.shutdown()', () => {
-    it('should shut down a kernel by id', async () => {
-      session = await startNew();
-      await session.kernel.ready;
-      await Session.shutdown(session.id);
-    });
-
-    it('should handle a 404 status', () => {
-      return Session.shutdown(UUID.uuid4());
-    });
-  });
-
   describe('Session.ISession', () => {
     describe('#terminated', () => {
       it('should emit when the session is shut down', async () => {
@@ -224,13 +91,10 @@ describe('session', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.IKernelChangedArgs | null = null;
         const object = {};
-        defaultSession.kernelChanged.connect(
-          (s, args) => {
-            called = args;
-            Signal.disconnectReceiver(object);
-          },
-          object
-        );
+        defaultSession.kernelChanged.connect((s, args) => {
+          called = args;
+          Signal.disconnectReceiver(object);
+        }, object);
         const previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
         await defaultSession.kernel.ready;
@@ -297,15 +161,12 @@ describe('session', () => {
         const newPath = UUID.uuid4();
         let called = false;
         const object = {};
-        defaultSession.propertyChanged.connect(
-          (s, type) => {
-            expect(defaultSession.path).to.equal(newPath);
-            expect(type).to.equal('path');
-            called = true;
-            Signal.disconnectReceiver(object);
-          },
-          object
-        );
+        defaultSession.propertyChanged.connect((s, type) => {
+          expect(defaultSession.path).to.equal(newPath);
+          expect(type).to.equal('path');
+          called = true;
+          Signal.disconnectReceiver(object);
+        }, object);
         await defaultSession.setPath(newPath);
         expect(called).to.equal(true);
       });

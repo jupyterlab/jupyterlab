@@ -11,7 +11,7 @@ import {
   ConfigSection,
   ConfigWithDefaults,
   IConfigSection
-} from '../../../lib/config';
+} from '../../../src/config';
 
 import {
   expectFailure,

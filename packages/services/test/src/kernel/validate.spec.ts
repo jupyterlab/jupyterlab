@@ -5,14 +5,14 @@ import { expect } from 'chai';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import { Kernel, KernelMessage } from '../../../lib/kernel';
+import { Kernel, KernelMessage } from '../../../src/kernel';
 
 import {
   validateMessage,
   validateModel,
   validateSpecModel,
   validateSpecModels
-} from '../../../lib/kernel/validate';
+} from '../../../src/kernel/validate';
 
 import { PYTHON_SPEC } from '../utils';
 

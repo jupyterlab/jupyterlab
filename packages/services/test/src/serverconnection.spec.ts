@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { ServerConnection } from '../../lib';
+import { ServerConnection } from '../../src';
 
 import { getRequestHandler } from './utils';
 
@@ -62,7 +62,7 @@ describe('@jupyterlab/services', () => {
     describe('.makeError()', () => {
       it('should create a server error from a server response', async () => {
         const settings = getRequestHandler(200, 'hi');
-        const init = { body: 'hi' };
+        const init = { body: 'hi', method: 'POST' };
         const response = await ServerConnection.makeRequest(
           settings.baseUrl,
           init,

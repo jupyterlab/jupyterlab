@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { KernelMessage } from '../../../lib/kernel';
+import { KernelMessage } from '../../../src/kernel';
 
 describe('kernel/messages', () => {
   describe('KernelMessage.isStreamMsg()', () => {

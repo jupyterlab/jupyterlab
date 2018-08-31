@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { KernelMessage, Kernel } from '../../../lib/kernel';
+import { KernelMessage, Kernel } from '../../../src/kernel';
 
 import { init } from '../utils';
 
@@ -46,7 +46,7 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 describe('jupyter.services - Comm', () => {
   let kernel: Kernel.IKernel;
 
-  before(async () => {
+  beforeAll(async () => {
     kernel = await Kernel.startNew({ name: 'ipython' });
   });
 
@@ -57,12 +57,12 @@ describe('jupyter.services - Comm', () => {
     });
   });
 
-  after(() => {
+  afterAll(() => {
     return kernel.shutdown();
   });
 
   describe('Kernel', () => {
-    context('#connectToComm()', () => {
+    describe('#connectToComm()', () => {
       it('should create an instance of IComm', () => {
         const comm = kernel.connectToComm('test');
         expect(comm.targetName).to.equal('test');
@@ -82,7 +82,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#registerCommTarget()', () => {
+    describe('#registerCommTarget()', () => {
       it('should call the provided callback', async () => {
         const promise = new PromiseDelegate<
           [Kernel.IComm, KernelMessage.ICommOpenMsg]
@@ -105,7 +105,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#commInfo()', () => {
+    describe('#commInfo()', () => {
       it('should get the comm info', async () => {
         const commPromise = new PromiseDelegate<Kernel.IComm>();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
@@ -141,7 +141,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#isDisposed', () => {
+    describe('#isDisposed', () => {
       it('should be true after we dispose of the comm', () => {
         const comm = kernel.connectToComm('test');
         expect(comm.isDisposed).to.equal(false);
@@ -159,7 +159,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#dispose()', () => {
+    describe('#dispose()', () => {
       it('should dispose of the resources held by the comm', () => {
         const comm = kernel.connectToComm('foo');
         comm.dispose();
@@ -175,19 +175,19 @@ describe('jupyter.services - Comm', () => {
       comm = kernel.connectToComm('test');
     });
 
-    context('#id', () => {
+    describe('#id', () => {
       it('should be a string', () => {
         expect(typeof comm.commId).to.equal('string');
       });
     });
 
-    context('#name', () => {
+    describe('#name', () => {
       it('should be a string', () => {
         expect(comm.targetName).to.equal('test');
       });
     });
 
-    context('#onClose', () => {
+    describe('#onClose', () => {
       it('should be readable and writable function', async () => {
         expect(comm.onClose).to.be.undefined;
         let called = false;
@@ -211,7 +211,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#onMsg', () => {
+    describe('#onMsg', () => {
       it('should be readable and writable function', async () => {
         let called = false;
         comm.onMsg = msg => {
@@ -242,7 +242,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#open()', () => {
+    describe('#open()', () => {
       it('should send a message to the server', async () => {
         let future = kernel.requestExecute({ code: TARGET });
         await future.done;
@@ -256,7 +256,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#send()', () => {
+    describe('#send()', () => {
       it('should send a message to the server', async () => {
         await comm.open().done;
         const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
@@ -270,7 +270,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    context('#close()', () => {
+    describe('#close()', () => {
       it('should send a message to the server', async () => {
         await comm.open().done;
         const encoder = new TextEncoder();

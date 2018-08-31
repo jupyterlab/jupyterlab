@@ -16,7 +16,7 @@ import {
   ServerConnection,
   SessionManager,
   Session
-} from '../../../lib';
+} from '../../../src';
 
 import { KERNELSPECS, handleRequest, testEmission } from '../utils';
 
@@ -31,7 +31,7 @@ describe('session/manager', () => {
   let manager: SessionManager;
   let session: Session.ISession;
 
-  before(async () => {
+  beforeAll(async () => {
     session = await Session.startNew({ path: UUID.uuid4() });
     await session.kernel.ready;
   });
@@ -45,7 +45,7 @@ describe('session/manager', () => {
     manager.dispose();
   });
 
-  after(() => {
+  afterAll(() => {
     return Session.shutdownAll();
   });
 

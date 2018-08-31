@@ -18,9 +18,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
-from traitlets import Unicode
+from traitlets import Bool, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
+from jupyter_core.application import base_aliases
 
 from jupyterlab_launcher.process_app import ProcessApp
 import jupyterlab_launcher
@@ -174,6 +175,71 @@ class ProcessTestApp(ProcessApp):
             os._exit(1)
 
 
+jest_aliases = dict(base_aliases)
+jest_aliases.update({
+    'coverage': 'JestApp.coverage',
+    'pattern': 'JestApp.testPathPattern',
+    'watchAll': 'JestApp.watchAll'
+})
+
+
+class JestApp(ProcessTestApp):
+    """A notebook app that runs a jest test."""
+
+    coverage = Bool(False, help='Whether to run coverage').tag(config=True)
+
+    testPathPattern = Unicode('').tag(config=True)
+
+    watchAll = Bool(False).tag(config=True)
+
+    aliases = jest_aliases
+
+    jest_dir = Unicode('')
+
+    open_browser = False
+
+    def get_command(self):
+        """Get the command to run"""
+        terminalsAvailable = self.web_app.settings['terminals_available']
+        jest = './node_modules/.bin/jest'
+        debug = self.log.level == logging.DEBUG
+
+        if self.coverage:
+            cmd = [jest, '--coverage']
+        elif debug:
+            cmd = 'node --inspect-brk %s --no-cache' % jest
+            if self.watchAll:
+                cmd += ' --watchAll'
+            else:
+                cmd += ' --watch'
+            cmd = cmd.split()
+        else:
+            cmd = [jest]
+
+        if not debug:
+            cmd += ['--silent']
+
+        if self.testPathPattern:
+            cmd += ['--testPathPattern', self.testPathPattern]
+
+        cmd += ['--runInBand']
+
+        config = dict(baseUrl=self.connection_url,
+                      terminalsAvailable=str(terminalsAvailable),
+                      token=self.token)
+
+        td = tempfile.mkdtemp()
+        atexit.register(lambda: shutil.rmtree(td, True))
+
+        config_path = os.path.join(td, 'config.json')
+        with open(config_path, 'w') as fid:
+            json.dump(config, fid)
+
+        env = os.environ.copy()
+        env['JUPYTER_CONFIG_DATA'] = config_path
+        return cmd, dict(cwd=self.jest_dir, env=env)
+
+
 class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
@@ -236,6 +302,16 @@ class KarmaTestApp(ProcessTestApp):
         return cmd, dict(env=env, cwd=cwd)
 
 
+def run_jest(jest_dir):
+    """Run a jest test in the given base directory.
+    """
+    logging.disable(logging.WARNING)
+    app = JestApp.instance()
+    app.jest_dir = jest_dir
+    app.initialize()
+    app.start()
+
+
 def run_karma(base_dir):
     """Run a karma test in the given base directory.
     """
@@ -244,7 +320,3 @@ def run_karma(base_dir):
     app.karma_base_dir = base_dir
     app.initialize([])
     app.start()
-
-
-if __name__ == '__main__':
-    KarmaTestApp.launch_instance()

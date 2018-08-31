@@ -7,7 +7,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
 
-import { KernelManager, Kernel } from '../../../lib/kernel';
+import { KernelManager, Kernel } from '../../../src/kernel';
 
 import {
   PYTHON_SPEC,
@@ -26,7 +26,7 @@ describe('kernel/manager', () => {
   let specs: Kernel.ISpecModels;
   let kernel: Kernel.IKernel;
 
-  before(async () => {
+  beforeAll(async () => {
     specs = await Kernel.getSpecs();
     kernel = await Kernel.startNew();
   });
@@ -41,7 +41,7 @@ describe('kernel/manager', () => {
     manager.dispose();
   });
 
-  after(() => {
+  afterAll(() => {
     return Kernel.shutdownAll();
   });
 
