@@ -66,6 +66,9 @@ export namespace TableOfContentsRegistry {
    * An interface for an object that knows how to generate a table-of-contents
    * for a type of widget.
    */
+
+  export abstract class IGeneratorOptionsManager {}
+
   export interface IGenerator<W extends Widget = Widget> {
     /**
      * An instance tracker for the widget.
@@ -89,6 +92,27 @@ export namespace TableOfContentsRegistry {
      * Defaults to `false`.
      */
     usesLatex?: boolean;
+
+    /**
+     * An object that manage user settings for the generator.
+     *
+     * Defaults to `undefined`.
+     */
+    options?: IGeneratorOptionsManager;
+
+    /**
+     * A function that generates JSX element for each heading
+     *
+     * If not given, the default renderer will be used, which renders the text
+     */
+    itemRenderer?: (item: IHeading) => JSX.Element | null;
+
+    /**
+     * A function that generates a toolbar for the generator
+     *
+     * If not given, no toolbar will show up
+     */
+    toolbarGenerator?: () => any;
 
     /**
      * A function that takes the widget, and produces

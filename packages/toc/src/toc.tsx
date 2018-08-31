@@ -52,6 +52,10 @@ export class TableOfContents extends Widget {
     }
     this._current = value;
 
+    if (this.generator && this.generator.toolbarGenerator) {
+      this._toolbar = this.generator.toolbarGenerator();
+    }
+
     // Dispose an old activity monitor if it existsd
     if (this._monitor) {
       this._monitor.dispose();
@@ -59,7 +63,7 @@ export class TableOfContents extends Widget {
     }
     // If we are wiping the ToC, update and return.
     if (!this._current) {
-      this.update();
+      this.updateTOC();
       return;
     }
 
@@ -78,7 +82,7 @@ export class TableOfContents extends Widget {
       this.update,
       this
     );
-    this.update();
+    this.updateTOC();
   }
 
   /**
@@ -86,10 +90,13 @@ export class TableOfContents extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     // Don't bother if the TOC is not visible
-    if (!this.isVisible) {
+    /* if (!this.isVisible) {
       return;
-    }
+    } */
+    this.updateTOC();
+  }
 
+  updateTOC() {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -99,7 +106,31 @@ export class TableOfContents extends Widget {
         title = PathExt.basename(context.localPath);
       }
     }
-    ReactDOM.render(<TOCTree title={title} toc={toc} />, this.node, () => {
+    let itemRenderer: (item: IHeading) => JSX.Element | null = (
+      item: IHeading
+    ) => {
+      return <span>{item.text}</span>;
+    };
+    if (this._current && this._current.generator.itemRenderer) {
+      itemRenderer = this._current.generator.itemRenderer!;
+    }
+    let renderedJSX = (
+      <div className="jp-TableOfContents">
+        <header>{title}</header>
+      </div>
+    );
+    if (this._current && this._current.generator) {
+      renderedJSX = (
+        <TOCTree
+          title={title}
+          toc={toc}
+          generator={this.generator}
+          itemRenderer={itemRenderer}
+          toolbar={this._toolbar}
+        />
+      );
+    }
+    ReactDOM.render(renderedJSX, this.node, () => {
       if (
         this._current &&
         this._current.generator.usesLatex === true &&
@@ -110,6 +141,13 @@ export class TableOfContents extends Widget {
     });
   }
 
+  get generator() {
+    if (this._current) {
+      return this._current.generator;
+    }
+    return null;
+  }
+
   /**
    * Rerender after showing.
    */
@@ -117,6 +155,7 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
+  private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
   private _current: TableOfContents.ICurrentWidget | null;
@@ -186,6 +225,44 @@ export interface IHeading {
 }
 
 /**
+ * Props for the TOCItem component.
+ */
+export interface ITOCItemProps extends React.Props<TOCItem> {
+  /**
+   * An IHeading to render.
+   */
+  heading: IHeading;
+  itemRenderer: (item: IHeading) => JSX.Element | null;
+}
+
+export interface ITOCItemStates {}
+
+/**
+ * A React component for a table of contents entry.
+ */
+export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
+  /**
+   * Render the item.
+   */
+  render() {
+    const { heading } = this.props;
+
+    // Create an onClick handler for the TOC item
+    // that scrolls the anchor into view.
+    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      heading.onClick();
+    };
+
+    let content = this.props.itemRenderer(heading);
+    return content && <li onClick={handleClick}>{content}</li>;
+  }
+}
+
+export interface ITOCTreeStates {}
+
+/**
  * Props for the TOCTree component.
  */
 export interface ITOCTreeProps extends React.Props<TOCTree> {
@@ -198,77 +275,36 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    * A list of IHeadings to render.
    */
   toc: IHeading[];
-}
-
-/**
- * Props for the TOCItem component.
- */
-export interface ITOCItemProps extends React.Props<TOCItem> {
-  /**
-   * An IHeading to render.
-   */
-  heading: IHeading;
-}
-
-/**
- * A React component for a table of contents entry.
- */
-export class TOCItem extends React.Component<ITOCItemProps, {}> {
-  /**
-   * Render the item.
-   */
-  render() {
-    const { heading } = this.props;
-
-    let level = Math.round(heading.level);
-    // Clamp the header level between 1 and six.
-    level = Math.max(Math.min(level, 6), 1);
-
-    const paddingLeft = (level - 1) * 12;
-
-    // Create an onClick handler for the TOC item
-    // that scrolls the anchor into view.
-    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      heading.onClick();
-    };
-
-    let content;
-
-    if (heading.html) {
-      content = (
-        <span
-          dangerouslySetInnerHTML={{ __html: heading.html }}
-          style={{ paddingLeft }}
-        />
-      );
-    } else {
-      content = <span style={{ paddingLeft }}>{heading.text}</span>;
-    }
-
-    return <li onClick={handleClick}>{content}</li>;
-  }
+  toolbar: any;
+  generator: TableOfContentsRegistry.IGenerator<Widget> | null;
+  itemRenderer: (item: IHeading) => JSX.Element | null;
 }
 
 /**
  * A React component for a table of contents.
  */
-export class TOCTree extends React.Component<ITOCTreeProps, {}> {
+export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
   /**
    * Render the TOCTree.
    */
+
   render() {
     // Map the heading objects onto a list of JSX elements.
     let i = 0;
+    const Toolbar = this.props.toolbar;
     let listing: JSX.Element[] = this.props.toc.map(el => {
-      return <TOCItem heading={el} key={`${el.text}-${el.level}-${i++}`} />;
+      return (
+        <TOCItem
+          heading={el}
+          itemRenderer={this.props.itemRenderer}
+          key={`${el.text}-${el.level}-${i++}`}
+        />
+      );
     });
-
-    // Return the JSX component.
     return (
       <div className="jp-TableOfContents">
         <header>{this.props.title}</header>
+        {Toolbar && <Toolbar />}
         <ul className="jp-TableOfContents-content">{listing}</ul>
       </div>
     );
