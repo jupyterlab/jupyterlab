@@ -880,9 +880,11 @@ class _AppHandler(object):
             shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
         except shutil.Error as error:
             # `copytree` throws an error if copying to + from NFS even though
-            # the copy is successful (see https://bugs.python.org/issue24564)
+            # the copy is successful (see https://bugs.python.org/issue24564
+            # and https://github.com/jupyterlab/jupyterlab/issues/5233)
 
-            if '[Errno 22]' not in str(error) or not osp.exists(templates):
+            real_error = '[Errno 22]' not in str(error) and '[Errno 5]' not in str(error)
+            if real_error or not osp.exists(templates):
                 raise
 
         # Ensure a clean linked packages directory.
