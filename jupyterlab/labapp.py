@@ -208,7 +208,7 @@ class LabApp(NotebookApp):
         if hasattr(self, 'quit_button'):
             quit_button = self.quit_button
         else:
-            quit_button = self.shutdown_button
+            quit_button = False
         settings['page_config_data']['quit_button'] = quit_button
 
     def init_server_extensions(self):
