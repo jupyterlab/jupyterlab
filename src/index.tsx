@@ -48,7 +48,7 @@ export class ShortcutObject {
     }
   }
 }
-
+/** Object for conflicting shortcut error messages */
 export class ErrorObject extends ShortcutObject {
   takenBy: TakenByObject;
 
@@ -58,6 +58,7 @@ export class ErrorObject extends ShortcutObject {
   }
 }
 
+/** Object for showing which shortcut conflicts with the new one */
 export class TakenByObject {
   takenBy: ShortcutObject;
   takenByKey: string;
@@ -72,6 +73,7 @@ export class TakenByObject {
   }
 }
 
+/** Main plugin for extension */
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette, IMainMenu],
@@ -102,7 +104,7 @@ const plugin: JupyterLabPlugin<void> = {
         widget.title.label = 'Keyboard Shortcut Editor';
         widget.title.closable = true;
 
-        /** Add command to open extension widget */
+        /** Add command to open extension's widget */
         const command: string = 'shortcutui:open-ui';
         app.commands.addCommand(command, {
           label: 'Keyboard Shortcut Editor',
