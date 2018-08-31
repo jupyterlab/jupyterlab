@@ -136,11 +136,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-code-button toc-toolbar-button"
           onClick={event => this.toggleCode.bind(this)()}
         >
-          <img
-            alt="Toggle Code Cells"
+          <div
+            role="text"
+            aria-label="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../../../style/img/code_selected.svg')}
-            className="toc-toolbar-code-icon toc-toolbar-icon"
+            className="toc-toolbar-code-icon toc-toolbar-icon-selected"
           />
         </div>
       ) : (
@@ -148,17 +148,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-code-button toc-toolbar-button"
           onClick={event => this.toggleCode.bind(this)()}
         >
-          <img
-            alt="Toggle Code Cells"
+          <div
+            role="text"
+            aria-label="Toggle Code Cells"
             title="Toggle Code Cells"
-            src={require('../../../style/img/code_unselected.svg')}
-            className="toc-toolbar-code-icon toc-toolbar-icon toc-hover--off"
-          />
-          <img
-            alt="Toggle Code Cells"
-            title="Toggle Code Cells"
-            src={require('../../../style/img/code_hover.svg')}
-            className="toc-toolbar-code-icon toc-toolbar-icon toc-hover--on"
+            className="toc-toolbar-code-icon toc-toolbar-icon"
           />
         </div>
       );
@@ -168,11 +162,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-markdown-button toc-toolbar-button"
           onClick={event => this.toggleMarkdown.bind(this)()}
         >
-          <img
-            alt="Toggle Code Cells"
-            title="Toggle Code Cells"
-            src={require('../../../style/img/markdown_selected.svg')}
-            className="toc-toolbar-markdown-icon toc-toolbar-icon"
+          <div
+            role="text"
+            aria-label="Toggle Markdown Text Cells"
+            title="Toggle Markdown Text Cells"
+            className="toc-toolbar-markdown-icon toc-toolbar-icon-selected"
           />
         </div>
       ) : (
@@ -180,17 +174,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-markdown-button toc-toolbar-button"
           onClick={event => this.toggleMarkdown.bind(this)()}
         >
-          <img
-            alt="Toggle Markdown Cells"
-            title="Toggle Markdown Cells"
-            src={require('../../../style/img/markdown_unselected.svg')}
-            className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--off"
-          />
-          <img
-            alt="Toggle Markdown Cells"
-            title="Toggle Markdown Cells"
-            src={require('../../../style/img/markdown_hover.svg')}
-            className="toc-toolbar-markdown-icon toc-toolbar-icon toc-hover--on"
+          <div
+            role="text"
+            aria-label="Toggle Markdown Text Cells"
+            title="Toggle Markdown Text Cells"
+            className="toc-toolbar-markdown-icon toc-toolbar-icon"
           />
         </div>
       );
@@ -200,11 +188,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => this.toggleAutoNumbering()}
         >
-          <img
-            alt="Toggle Auto-Numbering"
+          <div
+            role="text"
+            aria-label="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../style/img/autonumbering_selected.svg')}
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
+            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon-selected"
           />
         </div>
       ) : (
@@ -212,17 +200,11 @@ export function notebookGeneratorToolbar(
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => this.toggleAutoNumbering()}
         >
-          <img
-            alt="Toggle Auto-Numbering"
+          <div
+            role="text"
+            aria-label="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../style/img/autonumbering_unselected.svg')}
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon toc-hover--off"
-          />
-          <img
-            alt="Toggle Auto-Numbering"
-            title="Toggle Auto-Numbering"
-            src={require('../../../style/img/autonumbering_hover.svg')}
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon toc-hover--on"
+            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>
       );
@@ -230,17 +212,11 @@ export function notebookGeneratorToolbar(
       let tagDropdown = <div />;
       let tagIcon = (
         <div className="toc-toolbar-button">
-          <img
-            className="toc-hover--off"
-            alt="Show Tags Menu"
+          <div
+            role="text"
+            aria-label="Show Tags Menu"
             title="Show Tags Menu"
-            src={require('../../../style/img/tag_unselected.svg')}
-          />
-          <img
-            className="toc-hover--on"
-            alt="Show Tags Menu"
-            title="Show Tags Menu"
-            src={require('../../../style/img/tag_hover.svg')}
+            className="toc-toolbar-tag-icon toc-toolbar-icon"
           />
         </div>
       );
@@ -257,10 +233,11 @@ export function notebookGeneratorToolbar(
           </div>
         );
         tagIcon = (
-          <img
-            alt="Hide Tags Menu"
+          <div
+            role="text"
+            aria-label="Hide Tags Menu"
             title="Hide Tags Menu"
-            src={require('../../../style/img/tag_selected.svg')}
+            className="toc-toolbar-tag-icon toc-toolbar-icon-selected"
           />
         );
       }
@@ -278,7 +255,6 @@ export function notebookGeneratorToolbar(
               {tagIcon}
             </div>
           </div>
-          <hr className={'toc-toolbar-hr'} />
           {tagDropdown}
         </div>
       );

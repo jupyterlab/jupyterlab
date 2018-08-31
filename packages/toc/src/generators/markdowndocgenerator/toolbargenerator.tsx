@@ -32,11 +32,11 @@ export function markdownDocGeneratorToolbar(
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => toggleAutoNumbering()}
         >
-          <img
-            alt="Toggle Auto-Numbering"
+          <div
+            role="text"
+            aria-label="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../style/img/autonumbering_selected.svg')}
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
+            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon-selected"
           />
         </div>
       ) : (
@@ -44,10 +44,10 @@ export function markdownDocGeneratorToolbar(
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => toggleAutoNumbering()}
         >
-          <img
-            alt="Toggle Auto-Numbering"
+          <div
+            role="text"
+            aria-label="Toggle Auto-Numbering"
             title="Toggle Auto-Numbering"
-            src={require('../../../style/img/autonumbering_unselected.svg')}
             className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
           />
         </div>
