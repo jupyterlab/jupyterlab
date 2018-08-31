@@ -11,7 +11,7 @@ import {
   ShortcutListContainerStyle
 } from '../componentStyle/ShortcutListStyle';
 
-const TOPNAV_HEIGHT: number = 174;
+const TOPNAV_HEIGHT: number = 115;
 
 /** Props for ShortcutList component */
 export interface IShortcutListProps {

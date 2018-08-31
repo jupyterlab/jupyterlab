@@ -518,7 +518,7 @@ export class ShortcutUI extends React.Component<
   contextMenu = (
     event: any,
     commandIDs: string[]
-  )=> {
+  ) => {
     event.persist()
     const { commands } = this.props.app
     this.setState({
@@ -548,6 +548,7 @@ export class ShortcutUI extends React.Component<
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           width={this.props.width}
+          app={this.props.app}
         />
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}

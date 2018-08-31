@@ -21,7 +21,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   settingRegistry: ISettingRegistry;
   shortcutPlugin: string;
   commandRegistry: CommandRegistry;
-  id: string;
+  id: string;14
   isAttached: boolean;
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;

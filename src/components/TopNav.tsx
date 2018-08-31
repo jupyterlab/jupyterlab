@@ -2,6 +2,10 @@ import * as React from 'react';
 
 import { classes } from 'typestyle';
 
+import { Menu } from '@phosphor/widgets';
+
+import { JupyterLab } from '@jupyterlab/application';
+
 import {
   TopStyle,
   TopNavStyle,
@@ -12,12 +16,10 @@ import {
   SearchStyle,
   AdvancedOptionsStyle,
   AdvancedOptionsSmallStyle,
-  AdvancedOptionsRightStyle,
-  AdvancedOptionsLinkStyle,
-  AdvancedOptionsRightLinkStyle,
   HeaderRowStyle,
   HeaderRowContainerStyle,
-  AdvancedOptionsContainerStyle
+  AdvancedOptionsContainerStyle,
+  AdvancedOptionsLinkStyle
 } from '../componentStyle/TopNavStyle';
 
 import { CellStyle } from '../componentStyle/ShortcutItemStyle';
@@ -30,10 +32,17 @@ export interface IAdvancedOptionsProps {
   toggleSelectors: Function;
   showSelectors: boolean;
   resetShortcuts: Function;
+  menu: Menu;
 }
 
 export interface ISymbolsProps {
-  size: string
+  size: string;
+}
+
+export namespace CommandIDs {
+  export const showSelectors = 'shortcutui:showSelectors';
+  export const advancedEditor = 'shortcutui:advancedEditor';
+  export const resetAll = 'shortcutui:resetAll';
 }
 
 class Symbols extends React.Component<ISymbolsProps, {}> {
@@ -42,38 +51,43 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
       return (
         <div className={SymbolsStyle}>
           <div className={SymbolsRowStyle}>
-            <div>Command   ⌘</div>
-            <div>Alt  ⌥</div>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <div>Shift  ⇧</div>
-            <div>Control   ⌃</div>
+            <div>Cmd ⌘</div>
+            <div>Alt ⌥</div>
+            <div>Ctrl ⌃</div>
+            <div>Shift ⇧</div>
           </div>
         </div>
-      )
+      );
+    } else if (this.props.size === 'small') {
+      return (
+        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+          <div className={SymbolsRowStyle}>
+            <div>Cmd ⌘</div>
+            <div>Alt ⌥</div>
+          </div>
+          <div className={SymbolsRowStyle}>
+            <div>Ctrl ⌃</div>
+            <div>Shift ⇧</div>
+          </div>
+        </div>
+      );
     } else {
       return (
         <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
           <div className={SymbolsRowStyle}>
-            <div>{this.props.size === 'tiny'
-              ? 'Cmd  ⌘'
-              : 'Command  ⌘'
-            }</div>
+            <div>Cmd ⌘</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Alt  ⌥</div>
+            <div>Alt ⌥</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Shift  ⇧</div>
+            <div>Ctrl ⌃</div>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>{this.props.size === 'tiny'
-              ? 'Ctrl  ⌃'
-              : 'Control  ⌃'
-            }</div>
+            <div>Shift ⇧</div>
           </div>
         </div>
-      )
+      );
     }
   }
 }
@@ -84,52 +98,55 @@ class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
       return (
         <div className={AdvancedOptionsContainerStyle}>
           <div className={AdvancedOptionsStyle}>
-            <a className={AdvancedOptionsLinkStyle}
-              onClick={() => this.props.openAdvanced()
-              }>
+            <a
+              className={AdvancedOptionsLinkStyle(this.props.size)}
+              onClick={() => this.props.openAdvanced()}
+            >
               Advanced Editor
             </a>
-            <a className={AdvancedOptionsLinkStyle}
+            <a
+              className={AdvancedOptionsLinkStyle(this.props.size)}
               onClick={() => this.props.toggleSelectors()}
             >
               {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
             </a>
-          </div>
-          <div
-            className={classes(AdvancedOptionsStyle, AdvancedOptionsRightStyle)}
-          >
-            <a className={classes(AdvancedOptionsLinkStyle, AdvancedOptionsRightLinkStyle)}
+            <a
+              className={classes(AdvancedOptionsLinkStyle(this.props.size))}
               onClick={() => this.props.resetShortcuts()}
             >
               Reset All
             </a>
           </div>
         </div>
-      )
+      );
     } else {
       return (
-        <div className={classes(AdvancedOptionsStyle, AdvancedOptionsSmallStyle)}>
-          <a className={AdvancedOptionsLinkStyle}
+        <div
+          className={classes(AdvancedOptionsStyle, AdvancedOptionsSmallStyle)}
+        >
+          <a
+            className={AdvancedOptionsLinkStyle(this.props.size)}
             onClick={() => this.props.openAdvanced()}
           >
             Advanced Editor
           </a>
-          <a className={AdvancedOptionsLinkStyle}
+          <a
+            className={AdvancedOptionsLinkStyle(this.props.size)}
             onClick={() => this.props.toggleSelectors()}
           >
             {this.props.showSelectors ? 'Hide Selectors' : 'Show Selectors'}
           </a>
-          <a className={classes(AdvancedOptionsLinkStyle)}
-            onClick={() => this.props.resetShortcuts()
-            }>
+          <a
+            className={classes(AdvancedOptionsLinkStyle(this.props.size))}
+            onClick={() => this.props.resetShortcuts()}
+          >
             Reset All
           </a>
         </div>
-      )
+      );
     }
   }
 }
-
 
 /** State for TopNav component */
 export interface ITopNavProps {
@@ -141,31 +158,68 @@ export interface ITopNavProps {
   updateSort: Function;
   currentSort: string;
   width: number;
+  app: JupyterLab;
 }
 
 /** React component for top navigation */
 export class TopNav extends React.Component<ITopNavProps, {}> {
+  menu: Menu;
   constructor(props: any) {
-    super(props)
+    super(props);
+
+    this.addMenuCommands();
+    const { commands } = this.props.app;
+    this.menu = new Menu({ commands });
+    this.menu.addItem({ command: CommandIDs.showSelectors });
+    this.menu.addItem({ command: CommandIDs.advancedEditor });
+    this.menu.addItem({ command: CommandIDs.resetAll });
+  }
+
+  addMenuCommands() {
+    if (!this.props.app.commands.hasCommand(CommandIDs.showSelectors)) {
+      this.props.app.commands.addCommand(CommandIDs.showSelectors, {
+        label: 'Toggle Selectors',
+        caption: 'Toggle command selectors',
+        execute: () => {
+          this.props.toggleSelectors();
+        }
+      });
+    }
+    if (!this.props.app.commands.hasCommand(CommandIDs.advancedEditor)) {
+      this.props.app.commands.addCommand(CommandIDs.advancedEditor, {
+        label: 'Advanced Editor',
+        caption: 'Open advanced editor',
+        execute: () => {
+          this.props.openAdvanced();
+        }
+      });
+    }
+    if (!this.props.app.commands.hasCommand(CommandIDs.resetAll)) {
+      this.props.app.commands.addCommand(CommandIDs.resetAll, {
+        label: 'Reset All',
+        caption: 'Reset all shortcuts',
+        execute: () => {
+          this.props.resetShortcuts();
+        }
+      });
+    }
   }
 
   getSize = (width: number): string => {
-    let size: string = 'regular'
-    if (width < 620) {
-      size = 'tiny'
-    } else if (width < 980) {
-      size = 'small'
+    let size: string = 'regular';
+    if (width < 730) {
+      size = 'tiny';
+    } else if (width < 1260) {
+      size = 'small';
     }
-    return size
-  }
+    return size;
+  };
 
   render() {
     return (
       <div className={TopStyle}>
         <div className={TopNavStyle}>
-          <Symbols
-            size={this.getSize(this.props.width)}
-          />
+          <Symbols size={this.getSize(this.props.width)} />
           <div className={SearchContainerStyle}>
             <input
               onChange={event => this.props.updateSearchQuery(event)}
@@ -179,6 +233,7 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
+            menu={this.menu}
           />
         </div>
         <div className={HeaderRowContainerStyle}>
