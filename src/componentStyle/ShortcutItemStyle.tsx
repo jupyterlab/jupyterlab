@@ -13,6 +13,20 @@ export const ShortcutCellStyle = style({
   flexWrap: 'wrap'
 });
 
+export const EmptyShortcutCellStyle = style({
+  height: '32px',
+
+  $nest: {
+    '& #add-link': {
+      //marginLeft: 'auto'
+    }
+  }
+})
+
+export const SingleShortcutCellStyle = style({
+  //justifyContent: 'space-between'
+})
+
 export const RowStyle = style({
   padding: '10px',
   width: '100%',
@@ -29,7 +43,10 @@ export const RowStyle = style({
       background: 'var(--jp-layout-color2)',
     },
     '&:hover #add-link': {
-      color: 'var(--jp-brand-color1)'
+      display: 'block'
+    },
+    '&:hover #or': {
+      display: 'block'
     }
   }
 });
@@ -151,8 +168,23 @@ export const OrStyle = style({
   marginRight: '12px',
   marginLeft: '12px',
   marginTop: '8px',
-  color: 'var(--jp-content-font-color3)'
+  color: 'var(--jp-content-font-color3)',
+  display: 'none',
+
+  $nest: {
+    '&:hover': {
+      display: 'block'
+    }
+  }
 });
+
+export const OrTwoStyle = style({
+  marginRight: '12px',
+  marginLeft: '12px',
+  marginTop: '8px',
+  color: 'var(--jp-content-font-color3)',
+  display: 'block',
+})
 
 export const CommaStyle = style({
   marginTop: '10px',
@@ -161,20 +193,32 @@ export const CommaStyle = style({
 });
 
 export const PlusStyle = style({
-  color: 'var(--jp-brand-color2)',
-  textDecoration: 'none',
-  display: 'block',
-  textAlign: 'center',
-  paddingLeft: '5px',
-  height: '31px',
-  lineHeight: '31px',
+  // backgroundColor: 'var(--jp-brand-color2)',
+  // color: 'var(--jp-layout-color0)',
+  // textDecoration: 'none',
+  // display: 'block',
+  // textAlign: 'center',
+  // textTransform: 'uppercase',
+  // boxSizing: 'border-box',
+  // padding: '0px 12px',
+  // height: '30px',
+  // lineHeight: '30px',
+  // border: '1px solid var(--jp-brand-color1)',
+
+  display: 'none',
+  background: 'var(--jp-brand-color3)',
+  borderColor: 'var(--jp-layout-color0)',
+  borderRadius: 'var(--jp-border-radius)',
+  borderWidth: 'var(--jp-border-width)',
+  margin: '3px 0',
+  padding: '5px 6px',
 
   $nest: {
     '&:hover': {
-      color: 'var(--jp-brand-color0)'
+      backgroundColor: 'var(--jp-brand-color2)',
     },
     '&:active': {
-      color: 'var(--jp-brand-color0)'
+      backgroundColor: 'var(--jp-brand-color2)',
     }
   }
 });

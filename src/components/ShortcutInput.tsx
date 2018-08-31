@@ -11,6 +11,7 @@ import {
   InputUnavailableStyle,
   InputBoxHiddenStyle,
   InputBoxStyle,
+  InputBoxNewStyle,
   InputTextStyle,
   InputWaitingStyle,
   InputSelectedTextStyle,
@@ -367,7 +368,10 @@ export class ShortcutInput extends React.Component<
     return (
       <div
         className={
-          this.props.displayInput ? InputBoxStyle : InputBoxHiddenStyle
+          this.props.displayInput ? (
+            this.props.newOrReplace === 'new' ? classes(InputBoxStyle, InputBoxNewStyle)
+            : InputBoxStyle
+          ) : InputBoxHiddenStyle
         }
         onBlur={(event) => this.handleBlur(event)}
       >
@@ -394,7 +398,7 @@ export class ShortcutInput extends React.Component<
               ? classes(SubmitStyle, SubmitNonFunctionalStyle)
               : !this.state.isAvailable
                 ? classes(SubmitStyle, SubmitConflictStyle)
-                : SubmitStyle
+                : classes(SubmitStyle)
           }
           id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}

@@ -2,8 +2,12 @@ import { style, keyframes } from 'typestyle';
 
 export const InputBoxStyle = style({
   display: 'inline-flex',
-  paddingTop: '2px'
+  paddingTop: '2px',
 });
+
+export const InputBoxNewStyle = style({
+  marginLeft: '10px'
+})
 
 export const InputBoxHiddenStyle = style({
   display: 'hidden'
@@ -28,7 +32,7 @@ export const InputStyle = style({
   borderColor: 'var(--jp-border-color3)',
   borderStyle: 'solid',
   backgroundColor: 'var(--jp-layout-color0)',
-  marginLeft: '10px',
+  marginLeft: 'auto',
   paddingLeft: '10px',
   width: '120px',
   height: '25px',
