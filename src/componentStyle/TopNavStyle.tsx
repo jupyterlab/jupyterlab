@@ -6,43 +6,40 @@ export const TopStyle = style({
 
 export const TopNavStyle = style({
   display: 'flex',
+  alignItems: 'center',
   boxSizing: 'border-box',
   fontSize: 'var(--jp-ui-font-size2)',
   backgroundColor: 'var(--jp-layout-color0)',
   zIndex: 1,
-  paddingTop: '30px',
-  paddingBottom: '30px',
-  height: 110
+  height: '56px'
 });
 
 export const SymbolsStyle = style({
   width: '15%',
   display: 'table',
-  paddingLeft: '5%',
+  paddingLeft: '12px',
   lineHeight: '24px'
 });
 
 export const SymbolsSmallStyle = style({
   lineHeight: '14px'
-})
+});
 
 export const SymbolsRowStyle = style({
   display: 'table-row',
   justifyContent: 'center',
-  paddingLeft: '20%',
 
   $nest: {
     '& div': {
       margin: '0px 10px',
       fontSize: 'var(--jp-ui-font-size1)',
-      display: 'table-cell',
-      width: '60%'
+      display: 'table-cell'
     }
   }
 });
 
 export const SearchContainerStyle = style({
-  width: ' 50%',
+  width: '60%',
   textAlign: 'center'
 });
 
@@ -50,25 +47,24 @@ export const SearchStyle = style({
   borderWidth: 'var(--jp-border-width)',
   borderStyle: 'solid',
   borderColor: 'var(--jp-layout-color3)',
-  borderRadius: '3px',
-  height: '20px',
+  height: '30px',
   width: '65%',
   fontSize: 'var(--jp-ui-font-size1)',
   color: 'var(--jp-ui-font-color0)',
-  padding: '3px',
   paddingLeft: '6px',
-  textIndent: '4px',
   backgroundColor: 'var(--jp-layout-color1)',
   backgroundImage: 'var(--jp-icon-search)',
   backgroundSize: '18px',
-  backgroundPositionY: '4px',
+  backgroundPositionY: '6px',
   backgroundPositionX: '98%',
   backgroundRepeat: 'no-repeat',
   marginTop: '8px',
+  outline: 'none',
 
   $nest: {
     '&:focus': {
-      outline: 'none'
+      border: 'var(--jp-border-width) solid var(--md-blue-500)',
+      boxShadow: 'inset 0 0 4px var(--md-blue-300)'
     },
     '&::placeholder': {
       color: 'var(--jp-ui-font-color2)'
@@ -76,49 +72,60 @@ export const SearchStyle = style({
   }
 });
 
-export const AdvancedOptionsContainerStyle = style(
-  {
-    display: 'contents'
-  }
-)
+export const AdvancedOptionsContainerStyle = style({
+  display: 'contents'
+});
 
 export const AdvancedOptionsStyle = style({
   display: 'block',
-  width: '15%'
 });
 
 export const AdvancedOptionsSmallStyle = style({
   width: '30%'
-})
+});
 
 export const AdvancedOptionsRightStyle = style({
-  marginTop: '8px',
+  marginTop: '8px'
 });
 
-export const AdvancedOptionsLinkStyle = style({
-  color: 'var(--jp-brand-color2)',
-  textDecoration: 'none',
-  display: 'block',
-  textAlign: 'center',
+export function AdvancedOptionsLinkStyle(size: string) {
+  if (size === 'regular') {
+    return style({
+      color: 'var(--jp-brand-color2)',
+      textDecoration: 'none',
+      marginRight: '20px',
 
-  $nest: {
-    '&:hover': {
-      color: 'var(--jp-brand-color1)'
-    },
-    '&:active': {
-      color: 'var(--jp-brand-color0)'
-    }
+      $nest: {
+        '&:hover': {
+          color: 'var(--jp-brand-color1)'
+        },
+        '&:active': {
+          color: 'var(--jp-brand-color0)'
+        }
+      }
+    });
+  } else {
+    return style({
+      color: 'var(--jp-brand-color2)',
+      textDecoration: 'none',
+      textAlign: 'center',
+      display: 'block',
+
+      $nest: {
+        '&:hover': {
+          color: 'var(--jp-brand-color1)'
+        },
+        '&:active': {
+          color: 'var(--jp-brand-color0)'
+        }
+      }
+    });
   }
-});
-
-export const AdvancedOptionsRightLinkStyle = style({
-  textAlign: 'left',
-  paddingLeft: '30px'
-})
+}
 
 export const HeaderRowContainerStyle = style({
-  paddingRight: '14px',
-})
+  paddingRight: '14px'
+});
 
 export const HeaderRowStyle = style({
   fontWeight: 'bold',
@@ -127,5 +134,5 @@ export const HeaderRowStyle = style({
   width: '100%',
   zIndex: 1,
   display: 'table',
-  padding: '10px 0',
+  padding: '10px 0'
 });

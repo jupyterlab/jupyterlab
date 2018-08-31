@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcutui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A JupyterLab extension for managing keyboard shortcuts",
   "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
   "keywords": [
