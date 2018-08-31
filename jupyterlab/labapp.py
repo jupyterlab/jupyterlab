@@ -203,7 +203,8 @@ class LabApp(NotebookApp):
         settings = self.web_app.settings
         if 'page_config_data' not in settings:
             settings['page_config_data'] = {}
-        # Support for Notebook < 5.6
+
+        # Handle quit button with support for Notebook < 5.6
         if hasattr(self, 'quit_button'):
             quit_button = self.quit_button
         else:
