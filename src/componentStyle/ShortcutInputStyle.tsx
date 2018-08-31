@@ -2,8 +2,12 @@ import { style, keyframes } from 'typestyle';
 
 export const InputBoxStyle = style({
   display: 'inline-flex',
-  paddingTop: '2px'
+  paddingTop: '2px',
 });
+
+export const InputBoxNewStyle = style({
+  marginLeft: 'auto'
+})
 
 export const InputBoxHiddenStyle = style({
   display: 'hidden'

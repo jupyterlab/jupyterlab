@@ -43,7 +43,6 @@ export const RowStyle = style({
       background: 'var(--jp-layout-color2)',
     },
     '&:hover #add-link': {
-      color: 'var(--jp-brand-color1)',
       display: 'block'
     }
   }
@@ -176,20 +175,32 @@ export const CommaStyle = style({
 });
 
 export const PlusStyle = style({
-  color: 'var(--jp-brand-color2)',
-  textDecoration: 'none',
+  // backgroundColor: 'var(--jp-brand-color2)',
+  // color: 'var(--jp-layout-color0)',
+  // textDecoration: 'none',
+  // display: 'block',
+  // textAlign: 'center',
+  // textTransform: 'uppercase',
+  // boxSizing: 'border-box',
+  // padding: '0px 12px',
+  // height: '30px',
+  // lineHeight: '30px',
+  // border: '1px solid var(--jp-brand-color1)',
+
   display: 'none',
-  textAlign: 'center',
-  paddingLeft: '5px',
-  height: '31px',
-  lineHeight: '31px',
+  background: 'var(--jp-brand-color3)',
+  borderColor: 'var(--jp-layout-color0)',
+  borderRadius: 'var(--jp-border-radius)',
+  borderWidth: 'var(--jp-border-width)',
+  margin: '3px 0',
+  padding: '5px 6px',
 
   $nest: {
     '&:hover': {
-      color: 'var(--jp-brand-color0)',
+      backgroundColor: 'var(--jp-brand-color2)',
     },
     '&:active': {
-      color: 'var(--jp-brand-color0)',
+      backgroundColor: 'var(--jp-brand-color2)',
     }
   }
 });
