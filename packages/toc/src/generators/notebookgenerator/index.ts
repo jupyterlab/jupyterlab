@@ -324,7 +324,9 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
-                (!renderedHeading || prevHeading.level >= renderedHeading.level)
+                (i === cellNum ||
+                  (renderedHeading &&
+                    prevHeading.level >= renderedHeading.level))
               ) {
                 prevHeading.hasChild = false;
               }
@@ -429,7 +431,7 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === INotebookHeadingTypes.header &&
-                (!renderedHeading || prevHeading.level >= renderedHeading.level)
+                (i === cellNum || prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
               }
