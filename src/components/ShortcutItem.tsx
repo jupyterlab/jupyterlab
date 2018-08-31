@@ -21,6 +21,7 @@ import {
   ShortcutKeysContainerStyle,
   ShortcutKeysStyle,
   OrStyle,
+  OrTwoStyle,
   CommaStyle,
   PlusStyle,
   SourceCellStyle,
@@ -313,7 +314,18 @@ export class ShortcutItem extends React.Component<
                       )}
                     />
                   )}
-                  {index === 0 && nonEmptyKeys.length === 2 && <div className={OrStyle}>or</div>}
+                  {index === 0 && 
+                    <div className={
+                        nonEmptyKeys.length == 2 || this.state.displayNewInput 
+                        ? OrTwoStyle 
+                        : OrStyle
+                      }
+                      id={nonEmptyKeys.length == 2 ? 'secondor': (
+                        this.state.displayReplaceInputLeft ? 'noor' :'or')}
+                    >
+                      or
+                    </div>
+                  }
                 </div>
               ))}
 

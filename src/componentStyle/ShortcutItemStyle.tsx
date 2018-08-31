@@ -18,13 +18,13 @@ export const EmptyShortcutCellStyle = style({
 
   $nest: {
     '& #add-link': {
-      marginLeft: 'auto'
+      //marginLeft: 'auto'
     }
   }
 })
 
 export const SingleShortcutCellStyle = style({
-  justifyContent: 'space-between'
+  //justifyContent: 'space-between'
 })
 
 export const RowStyle = style({
@@ -43,6 +43,9 @@ export const RowStyle = style({
       background: 'var(--jp-layout-color2)',
     },
     '&:hover #add-link': {
+      display: 'block'
+    },
+    '&:hover #or': {
       display: 'block'
     }
   }
@@ -165,8 +168,23 @@ export const OrStyle = style({
   marginRight: '12px',
   marginLeft: '12px',
   marginTop: '8px',
-  color: 'var(--jp-content-font-color3)'
+  color: 'var(--jp-content-font-color3)',
+  display: 'none',
+
+  $nest: {
+    '&:hover': {
+      display: 'block'
+    }
+  }
 });
+
+export const OrTwoStyle = style({
+  marginRight: '12px',
+  marginLeft: '12px',
+  marginTop: '8px',
+  color: 'var(--jp-content-font-color3)',
+  display: 'block',
+})
 
 export const CommaStyle = style({
   marginTop: '10px',

@@ -6,7 +6,7 @@ export const InputBoxStyle = style({
 });
 
 export const InputBoxNewStyle = style({
-  marginLeft: 'auto'
+  marginLeft: '10px'
 })
 
 export const InputBoxHiddenStyle = style({
