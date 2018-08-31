@@ -285,6 +285,11 @@
 
 .cm-toc .CodeMirror-line {
   white-space: pre-wrap;
+  cursor: pointer;
+}
+
+.cm-toc .CodeMirror-lines {
+  cursor: pointer;
 }
 
 .toc-tag-dropdown {
