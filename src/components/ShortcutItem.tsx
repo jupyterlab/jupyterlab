@@ -381,7 +381,7 @@ export class ShortcutItem extends React.Component<
                 className={ResetStyle}
                 onClick={() => this.props.resetShortcut(this.props.shortcut)}
               >
-                reset
+                Reset
               </a>
             )}
           </div>
