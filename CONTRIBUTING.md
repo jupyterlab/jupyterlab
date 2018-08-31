@@ -112,7 +112,6 @@ Notes:
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
-
 For installation instructions to write documentation, please see [Writing Documentation](#writing-documentation)
 
 ### Run JupyterLab
