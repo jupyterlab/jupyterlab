@@ -215,9 +215,7 @@ namespace Private {
       let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
       html = html.replace('¶', ''); // Remove the anchor symbol.
       const onClick = () => {
-        return () => {
-          heading.scrollIntoView();
-        };
+        heading.scrollIntoView();
       };
 
       // Get the numbering string
