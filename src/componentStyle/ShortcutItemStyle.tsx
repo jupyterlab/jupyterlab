@@ -13,6 +13,20 @@ export const ShortcutCellStyle = style({
   flexWrap: 'wrap'
 });
 
+export const EmptyShortcutCellStyle = style({
+  height: '32px',
+
+  $nest: {
+    '& #add-link': {
+      marginLeft: 'auto'
+    }
+  }
+})
+
+export const SingleShortcutCellStyle = style({
+  justifyContent: 'space-between'
+})
+
 export const RowStyle = style({
   padding: '10px',
   width: '100%',
@@ -29,7 +43,8 @@ export const RowStyle = style({
       background: 'var(--jp-layout-color2)',
     },
     '&:hover #add-link': {
-      color: 'var(--jp-brand-color1)'
+      color: 'var(--jp-brand-color1)',
+      display: 'block'
     }
   }
 });
@@ -163,7 +178,7 @@ export const CommaStyle = style({
 export const PlusStyle = style({
   color: 'var(--jp-brand-color2)',
   textDecoration: 'none',
-  display: 'block',
+  display: 'none',
   textAlign: 'center',
   paddingLeft: '5px',
   height: '31px',
@@ -171,10 +186,10 @@ export const PlusStyle = style({
 
   $nest: {
     '&:hover': {
-      color: 'var(--jp-brand-color0)'
+      color: 'var(--jp-brand-color0)',
     },
     '&:active': {
-      color: 'var(--jp-brand-color0)'
+      color: 'var(--jp-brand-color0)',
     }
   }
 });

@@ -11,6 +11,8 @@ import * as React from 'react';
 import {
   CellStyle,
   ShortcutCellStyle,
+  EmptyShortcutCellStyle,
+  SingleShortcutCellStyle,
   RowStyle,
   ErrorButtonStyle,
   ErrorMessageStyle,
@@ -125,7 +127,7 @@ export class ShortcutItem extends React.Component<
     }
     if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)){
       this.props.app.commands.addCommand(CommandIDs.shortcutAddNew + key, {
-        label: 'Add New',
+        label: 'Add',
         caption: 'Add new shortcut',
         execute: () => {
           this.toggleInputNew()
@@ -134,7 +136,7 @@ export class ShortcutItem extends React.Component<
     }
     if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)){
       this.props.app.commands.addCommand(CommandIDs.shortcutAddAnother + key, {
-        label: 'Add Another',
+        label: 'Add',
         caption: 'Add another shortcut',
         execute: () => {
           this.toggleInputNew()
@@ -248,7 +250,12 @@ export class ShortcutItem extends React.Component<
             <div className="jp-label">{this.props.shortcut.label}</div>
           </div>
           <div className={CellStyle}>
-            <div className={ShortcutCellStyle}>
+            <div className={nonEmptyKeys.length === 0 
+              ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
+              : (nonEmptyKeys.length === 1 
+                ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
+                : ShortcutCellStyle
+              )}>
               {nonEmptyKeys.map((key, index) => (
                 <div
                   className={ShortcutContainerStyle}
@@ -306,12 +313,13 @@ export class ShortcutItem extends React.Component<
                       )}
                     />
                   )}
-                  {index === 0 && <div className={OrStyle}>or</div>}
+                  {index === 0 && nonEmptyKeys.length === 2 && <div className={OrStyle}>or</div>}
                 </div>
               ))}
 
               {nonEmptyKeys.length === 1 &&
-                !this.state.displayNewInput && (
+                !this.state.displayNewInput && 
+                !this.state.displayReplaceInputLeft && (
                   <a
                     className={!this.state.displayNewInput ? PlusStyle : ''}
                     onClick={() => {
@@ -319,7 +327,7 @@ export class ShortcutItem extends React.Component<
                     }}
                     id="add-link"
                   >
-                    Add Another
+                    Add
                   </a>
                 )}
               {nonEmptyKeys.length === 0 &&
@@ -331,7 +339,7 @@ export class ShortcutItem extends React.Component<
                     }}
                     id="add-link"
                   >
-                    Add New
+                    Add
                   </a>
                 )}
 
