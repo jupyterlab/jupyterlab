@@ -548,6 +548,13 @@ function createContextMenu(
   const path = model.path;
   if (model.type !== 'directory') {
     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
+    const notebookFactory = registry.getWidgetFactory('notebook').name;
+    if (
+      model.type === 'notebook' &&
+      factories.indexOf(notebookFactory) === -1
+    ) {
+      factories.unshift(notebookFactory);
+    }
     if (path && factories.length > 1) {
       const command = 'docmanager:open';
       const openWith = new Menu({ commands });
