@@ -56,7 +56,7 @@ You can also use the installer from the [Node.js](https://nodejs.org) website.
 
 ## Installing JupyterLab
 
-JupyterLab requires Jupyter Notebook version 4.3 or later.
+JupyterLab requires Jupyter Notebook version 5.6 or later.
 
 If you use `conda`, you can install notebook using:
 
@@ -111,14 +111,6 @@ Notes:
 * You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
-
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab
-server extension:
-
-```bash
-jupyter serverextension enable --py --sys-prefix jupyterlab
-```
 
 For installation instructions to write documentation, please see [Writing Documentation](#writing-documentation)
 
@@ -281,7 +273,7 @@ jlpm run docs
 
 The Jupyter server extension source files are in the `jupyterlab/`
 subdirectory. To use this extension, make sure the Jupyter Notebook server
-version 4.3 or later is installed.
+version 5.6 or later is installed.
 
 ### Build the JupyterLab server extension
 

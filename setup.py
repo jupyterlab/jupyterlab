@@ -128,7 +128,7 @@ setup_args = dict(
 
 
 setup_args['install_requires'] = [
-    'notebook>=4.3.1',
+    'notebook>=5.6',
     'jupyterlab_launcher>=0.13.1,<0.14.0'
 ]
 
