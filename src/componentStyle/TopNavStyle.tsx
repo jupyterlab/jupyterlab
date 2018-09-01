@@ -8,7 +8,7 @@ export const TopNavStyle = style({
   display: 'flex',
   alignItems: 'center',
   boxSizing: 'border-box',
-  fontSize: 'var(--jp-ui-font-size2)',
+  fontSize: 'var(--jp-ui-font-size1)',
   backgroundColor: 'var(--jp-layout-color0)',
   zIndex: 1,
   height: '56px'
@@ -27,14 +27,19 @@ export const SymbolsSmallStyle = style({
 });
 
 export const SymbolsRowStyle = style({
-  display: 'table-row',
   justifyContent: 'center',
+  marginBottom: '8px',
+  display: 'table-row',
 
   $nest: {
     '& div': {
       margin: '0px 10px',
       fontSize: 'var(--jp-ui-font-size1)',
       display: 'table-cell'
+    },
+
+    '& span': {
+      fontSize: 'var(--jp-ui-font-size1)'
     }
   }
 });
@@ -95,7 +100,7 @@ export function AdvancedOptionsLinkStyle(size: string) {
     return style({
       color: 'var(--jp-brand-color2)',
       textDecoration: 'none',
-      marginRight: '20px',
+      marginRight: '15px',
 
       $nest: {
         '&:hover': {
@@ -131,10 +136,23 @@ export const HeaderRowContainerStyle = style({
 
 export const HeaderRowStyle = style({
   fontWeight: 'bold',
-  fontSize: 'var(--jp-ui-font-size2)',
+  fontSize: 'var(--jp-ui-font-size1)',
   backgroundColor: 'var(--jp-layout-color0)',
   width: '100%',
   zIndex: 1,
   display: 'table',
   padding: '10px 0'
+});
+
+export const commandIconStyle = style({
+  marginRight: '13px'
+});
+
+export const altIconStyle = style({
+  marginLeft: '14px'
+});
+
+export const controlIconStyle = style({
+  marginLeft: '8px',
+  marginRight: '16px'
 });
