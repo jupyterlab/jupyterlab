@@ -93,6 +93,8 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
  */
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
+const DEAD_SPACE_CLASS = 'jp-DirListing-deadSpace';
+
 /**
  * The class name added to the dir listing editor node.
  */
@@ -758,9 +760,8 @@ export class DirListing extends Widget {
       // add metadata to the node
       node.setAttribute(
         'data-isdir',
-        item.type === 'directory' ? 'filebrowser-true' : 'filebrowser-false'
+        item.type === 'directory' ? 'true' : 'false'
       );
-      node.setAttribute('data-path', item.path);
     });
 
     // Handle the selectors on the widget node.
@@ -1631,11 +1632,13 @@ export namespace DirListing {
       let node = document.createElement('div');
       let header = document.createElement('div');
       let content = document.createElement('ul');
+      let deadSpace = document.createElement('ul');
       content.className = CONTENT_CLASS;
-      content.setAttribute('data-widget', 'filebrowser');
+      deadSpace.className = DEAD_SPACE_CLASS;
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
+      node.appendChild(deadSpace);
       node.tabIndex = 1;
       return node;
     }

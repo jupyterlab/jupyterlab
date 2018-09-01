@@ -19,8 +19,6 @@ import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-// import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   FileBrowserModel,
   FileBrowser,
@@ -29,9 +27,7 @@ import {
 
 import { Launcher } from '@jupyterlab/launcher';
 
-// import { Contents } from '@jupyterlab/services';
-
-import { map, toArray } from '@phosphor/algorithm';
+import { each, every, map, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -229,6 +225,8 @@ function addCommands(
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser
 ): void {
+  const registry = app.docRegistry;
+
   const getBrowserForPath = (path: string): FileBrowser => {
     const driveName = app.serviceManager.contents.driveName(path);
 
@@ -351,7 +349,8 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
-    execute: () => {
+    execute: args => {
+      const factory = (args['factory'] as string) || void 0;
       const widget = tracker.currentWidget;
 
       if (!widget) {
@@ -365,13 +364,41 @@ function addCommands(
               return widget.model.cd(item.name);
             }
 
-            return commands.execute('docmanager:open', { path: item.path });
+            return commands.execute('docmanager:open', {
+              factory: factory,
+              path: item.path
+            });
           })
         )
       );
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
+    isVisible: (args): boolean => {
+      if ('factory' in args) {
+        // when factory is explicitly passed, show only when relevant
+        const factory = args['factory'] as string;
+        const widget = tracker.currentWidget;
+
+        return every(
+          map(widget.selectedItems(), item => {
+            if (item.type === 'directory') {
+              return false;
+            }
+
+            return (
+              registry
+                .preferredWidgetFactories(item.path)
+                .map(f => f.name)
+                .indexOf(factory) > -1
+            );
+          }),
+          bool => bool
+        );
+      }
+
+      return true;
+    },
+    label: args => (args['label'] || args['factory'] || 'Open') as string,
     mnemonic: 0
   });
 
@@ -416,25 +443,14 @@ function addCommands(
     mnemonic: 0
   });
 
-  function pasteExecute(): Promise<void> {
-    const widget = tracker.currentWidget;
-
-    if (widget) {
-      return widget.paste();
-    }
-  }
   commands.addCommand(CommandIDs.paste, {
-    execute: pasteExecute,
-    iconClass: 'jp-MaterialIcon jp-PasteIcon',
-    label: 'Paste',
-    mnemonic: 0
-  });
-  // paste command used when user did not click on an item
-  commands.addCommand(CommandIDs.pasteNotItem, {
-    isVisible: () => {
-      return app.contextMenuNodes[0].className === `jp-DirListing-content`;
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.paste();
+      }
     },
-    execute: pasteExecute,
     iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
@@ -549,26 +565,42 @@ function addCommands(
   });
 
   // matches anywhere on filebrowser that is not an item
-  const selectorNotItem = '[data-widget="filebrowser"]';
+  const selectorDeadSpace = '.jp-DirListing-deadSpace';
   // matches all filebrowser items
-  const selectorItem = '[data-isdir^="filebrowser-"]';
+  const selectorItem = '.jp-DirListing-item[data-isdir]';
   // matches only non-directory items
-  const selectorNotDir = '[data-isdir="filebrowser-false"]';
+  const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
+  // If the user did not click on any file, we still want to show paste
   app.contextMenu.addItem({
-    command: CommandIDs.pasteNotItem,
-    selector: selectorNotItem,
+    command: CommandIDs.paste,
+    selector: selectorDeadSpace,
     rank: 1
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.open,
-    // matches all filebrowser items
     selector: selectorItem,
     rank: 1
   });
 
+  // Create and populate the 'Open with' submenu
   const openWith = new Menu({ commands });
+  openWith.title.label = 'Open With';
+
+  const updateOpenWith = (): void => {
+    openWith.clearItems();
+    each(registry.widgetFactories(true), factory => {
+      openWith.addItem({
+        args: { factory: factory.name },
+        command: CommandIDs.open
+      });
+    });
+  };
+  updateOpenWith();
+  // run again whenever the registry changes
+  registry.changed.connect(updateOpenWith);
+
   openWith.title.label = 'Open With';
   app.contextMenu.addItem({
     type: 'submenu',
@@ -576,6 +608,7 @@ function addCommands(
     selector: selectorNotDir,
     rank: 2
   });
+
   app.contextMenu.addItem({
     command: CommandIDs.openBrowserTab,
     selector: selectorNotDir,
