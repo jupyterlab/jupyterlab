@@ -48,7 +48,7 @@ jupyter labextension link .
 npm run build # or yarn build
 ```
 
-To rebuild the package and the JupyterLab app:
+To rebuild both the package and the JupyterLab app:
 
 ```bash
 npm run build
