@@ -19,7 +19,10 @@ import {
   HeaderRowStyle,
   HeaderRowContainerStyle,
   AdvancedOptionsContainerStyle,
-  AdvancedOptionsLinkStyle
+  AdvancedOptionsLinkStyle,
+  commandIconStyle,
+  altIconStyle,
+  controlIconStyle
 } from '../componentStyle/TopNavStyle';
 
 import { CellStyle } from '../componentStyle/ShortcutItemStyle';
@@ -62,12 +65,16 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
       return (
         <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
           <div className={SymbolsRowStyle}>
-            <div>Cmd ⌘</div>
-            <div>Alt ⌥</div>
+            <span>Cmd </span>
+            <span className={commandIconStyle}>⌘</span>
+            <span>Alt </span>
+            <span className={altIconStyle}>⌥</span>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Ctrl ⌃</div>
-            <div>Shift ⇧</div>
+            <span>Ctrl </span>
+            <span className={controlIconStyle}>⌃</span>
+            <span>Shift </span>
+            <span>⇧</span>
           </div>
         </div>
       );
@@ -75,21 +82,63 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
       return (
         <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
           <div className={SymbolsRowStyle}>
-            <div>Cmd ⌘</div>
+            <span>Cmd</span>
+            <span>⌘</span>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Alt ⌥</div>
+            <span>Alt</span>
+            <span>⌥</span>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Ctrl ⌃</div>
+            <span>Ctrl</span>
+            <span>⌃</span>
           </div>
           <div className={SymbolsRowStyle}>
-            <div>Shift ⇧</div>
+            <span>Shift</span>
+            <span>⇧</span>
           </div>
         </div>
       );
     }
   }
+}
+
+{
+  /* <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+          <div className={SymbolsRowStyle}>
+            <span>Cmd </span>
+            <span>⌘</span>
+            <span>Alt </span>
+            <span>⌥</span>
+          </div>
+          <div className={SymbolsRowStyle}>
+            <span>Ctrl </span>
+            <span>⌃</span>
+            <span>Shift </span>
+            <span>⇧</span>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+          <div className={SymbolsRowStyle}>
+            <span>Cmd</span>
+            <span>⌘</span>
+          </div>
+          <div className={SymbolsRowStyle}>
+            <span>Alt</span>
+            <span>⌥</span>
+          </div>
+          <div className={SymbolsRowStyle}>
+            <span>Ctrl</span>
+            <span>⌃</span>
+          </div>
+          <div className={SymbolsRowStyle}>
+            <span>Shift</span>
+            <span>⇧</span>
+          </div>
+        </div> */
 }
 
 class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
