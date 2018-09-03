@@ -3,17 +3,17 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@phosphor/coreutils';
 
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2-extension';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
   MimeModel,
@@ -78,10 +78,14 @@ describe('rendermime/registry', () => {
       });
 
       it('should be clonable', () => {
-        const typesetter1 = new MathJaxTypesetter();
+        const args = {
+          url: PageConfig.getOption('mathjaxUrl'),
+          config: PageConfig.getOption('mathjaxConfig')
+        };
+        const typesetter1 = new MathJaxTypesetter(args);
         const clone1 = r.clone({ latexTypesetter: typesetter1 });
         expect(clone1.latexTypesetter).to.equal(typesetter1);
-        const typesetter2 = new MathJaxTypesetter();
+        const typesetter2 = new MathJaxTypesetter(args);
         const clone2 = r.clone({ latexTypesetter: typesetter2 });
         expect(clone2.latexTypesetter).to.equal(typesetter2);
       });

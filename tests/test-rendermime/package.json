@@ -18,7 +18,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^0.18.4",
     "@jupyterlab/coreutils": "^2.1.4",
-    "@jupyterlab/mathjax2-extension": "^0.6.4",
+    "@jupyterlab/mathjax2": "^0.6.0",
     "@jupyterlab/rendermime": "^0.18.4",
     "@jupyterlab/services": "^3.1.4",
     "@jupyterlab/testutils": "^0.2.4",
