@@ -49,10 +49,10 @@ export function generateNumbering(
   if (numberingDict != null) {
     incrementNumberingDict(numberingDict, level);
     numbering = '';
-    for (var j = 1; j <= level; j++) {
+    for (let j = 1; j <= level; j++) {
       numbering +=
         (numberingDict[j] == undefined ? '0' : numberingDict[j]) + '.';
-      if (j == level) {
+      if (j === level) {
         numbering += ' ';
       }
     }
@@ -99,10 +99,8 @@ export function getMarkdownHeadings(
       cellRef: cellRef,
       hasChild: true
     });
-  }
-
-  // Next test for '==='-style headers.
-  else if (match2 && idx > 0) {
+  } else if (match2 && idx > 0) {
+    // Next test for '==='-style headers.
     const level = match2[1][0] === '=' ? 1 : 2;
     // Take special care to parse markdown links into raw text.
     const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
@@ -116,12 +114,10 @@ export function getMarkdownHeadings(
       cellRef: cellRef,
       hasChild: true
     });
-  }
-
-  // Finally test for HTML headers. This will not catch multiline
-  // headers, nor will it catch multiple headers on the same line.
-  // It should do a decent job of catching many, though.
-  else if (match3) {
+  } else if (match3) {
+    // Finally test for HTML headers. This will not catch multiline
+    // headers, nor will it catch multiple headers on the same line.
+    // It should do a decent job of catching many, though.
     const level = parseInt(match3[1], 10);
     const text = match3[2];
     let numbering = generateNumbering(numberingDict, level);

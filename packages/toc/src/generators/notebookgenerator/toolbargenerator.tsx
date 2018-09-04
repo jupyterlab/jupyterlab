@@ -6,9 +6,9 @@ import * as React from 'react';
 
 import { TagsToolComponent } from './tagstool';
 
-interface NotebookGeneratorToolbarProps {}
+interface INotebookGeneratorToolbarProps {}
 
-interface NotebookGeneratorToolbarState {
+interface INotebookGeneratorToolbarState {
   showCode: boolean;
   showMarkdown: boolean;
   showTags: boolean;
@@ -21,10 +21,10 @@ export function notebookGeneratorToolbar(
 ) {
   // Render the toolbar
   return class extends React.Component<
-    NotebookGeneratorToolbarProps,
-    NotebookGeneratorToolbarState
+    INotebookGeneratorToolbarProps,
+    INotebookGeneratorToolbarState
   > {
-    constructor(props: NotebookGeneratorToolbarProps) {
+    constructor(props: INotebookGeneratorToolbarProps) {
       super(props);
       this.state = {
         showCode: true,
@@ -115,12 +115,12 @@ export function notebookGeneratorToolbar(
       if (notebook) {
         let cells = notebook.model.cells;
         this.allTags = [];
-        for (var i = 0; i < cells.length; i++) {
+        for (let i = 0; i < cells.length; i++) {
           if (cells.get(i)) {
             let cellMetadata = cells.get(i)!.metadata;
             let cellTagsData = cellMetadata.get('tags') as string[];
             if (cellTagsData) {
-              for (var j = 0; j < cellTagsData.length; j++) {
+              for (let j = 0; j < cellTagsData.length; j++) {
                 let name = cellTagsData[j];
                 this.addTagIntoAllTagsList(name);
               }

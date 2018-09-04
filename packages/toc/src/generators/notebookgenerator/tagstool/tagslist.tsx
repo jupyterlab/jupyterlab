@@ -6,7 +6,7 @@ import * as React from 'react';
 * The TagList takes a list of selected tags, a handler to change selection state,
 * and a list of all tags (strings).
 */
-export interface TagListComponentProps {
+export interface ITagListComponentProps {
   selectedTags: string[];
   selectionStateHandler: (newState: string, add: boolean) => void;
   allTagsList: string[] | null;
@@ -15,7 +15,7 @@ export interface TagListComponentProps {
 /*
 * The TagList state contains a list of selected tags
 */
-export interface TagListComponentState {
+export interface ITagListComponentState {
   selected: string[];
 }
 
@@ -23,10 +23,10 @@ export interface TagListComponentState {
 * Create a React component that renders all tags in a list.
 */
 export class TagListComponent extends React.Component<
-  TagListComponentProps,
-  TagListComponentState
+  ITagListComponentProps,
+  ITagListComponentState
 > {
-  constructor(props: TagListComponentProps) {
+  constructor(props: ITagListComponentProps) {
     super(props);
     this.state = { selected: this.props.selectedTags };
   }
@@ -77,7 +77,7 @@ export class TagListComponent extends React.Component<
   */
   render() {
     let allTagsList = this.props.allTagsList;
-    var renderedTagsForAllCells = null;
+    let renderedTagsForAllCells = null;
     if (allTagsList) {
       renderedTagsForAllCells = this.renderElementForTags(allTagsList);
     }

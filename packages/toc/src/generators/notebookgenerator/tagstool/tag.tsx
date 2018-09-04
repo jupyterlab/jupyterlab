@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export interface TagComponentProps {
+export interface ITagComponentProps {
   selectionStateHandler: (newState: string, add: boolean) => void;
   selectedTags: string[];
   tag: string;
@@ -9,8 +9,8 @@ export interface TagComponentProps {
 /*
 * Create a React component containing one tag label
 */
-export abstract class TagComponent extends React.Component<TagComponentProps> {
-  constructor(props: TagComponentProps) {
+export abstract class TagComponent extends React.Component<ITagComponentProps> {
+  constructor(props: ITagComponentProps) {
     super(props);
   }
 

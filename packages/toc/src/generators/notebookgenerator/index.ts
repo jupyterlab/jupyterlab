@@ -68,9 +68,9 @@ export function createNotebookGenerator(
       // determine whether one header has child
       let prevHeading: INotebookHeading | null = null;
       let cellNum = panel.content.widgets.length;
-      for (var i = 0; i <= panel.content.widgets.length; i++) {
+      for (let i = 0; i <= panel.content.widgets.length; i++) {
         let cell: Cell | null = null;
-        if (i != cellNum) {
+        if (i !== cellNum) {
           cell = panel.content.widgets[i];
         }
         let collapsed = false;
@@ -82,7 +82,7 @@ export function createNotebookGenerator(
         if (cell) {
           model = cell.model;
         }
-        if (cell && model && model.type === 'code' && i != cellNum) {
+        if (cell && model && model.type === 'code' && i !== cellNum) {
           // Get the execution count prompt for code cells
           let executionCountNumber = (cell as CodeCell).model
             .executionCount as number;
@@ -253,12 +253,12 @@ export function createNotebookGenerator(
               }
             }
           }
-        } else if ((model && model.type === 'markdown') || i == cellNum) {
+        } else if ((model && model.type === 'markdown') || i === cellNum) {
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if (
-            i == cellNum ||
+            i === cellNum ||
             ((cell as MarkdownCell).rendered &&
               !(cell as MarkdownCell).inputHidden)
           ) {
@@ -289,7 +289,7 @@ export function createNotebookGenerator(
             let lastLevel = Private.getLastLevel(headings);
             let renderedHeadings: INotebookHeading[] = [];
             let renderedHeading: INotebookHeading | null = null;
-            if (i != cellNum) {
+            if (i !== cellNum) {
               renderedHeadings = Private.getRenderedHTMLHeadings(
                 cell!.node,
                 onClickFactory,
@@ -491,9 +491,9 @@ namespace Private {
       let cellMetadata = heading.cellRef.model.metadata;
       let cellTagsData = cellMetadata.get('tags') as string[];
       if (cellTagsData) {
-        for (var j = 0; j < cellTagsData.length; j++) {
+        for (let j = 0; j < cellTagsData.length; j++) {
           let name = cellTagsData[j];
-          for (var k = 0; k < tags.length; k++) {
+          for (let k = 0; k < tags.length; k++) {
             if (tags[k] === name) {
               return false;
             }
@@ -594,7 +594,7 @@ namespace Private {
         }
       } else {
         const heading = headingNodes[0];
-        const level = parseInt(heading.tagName[1]);
+        const level = parseInt(heading.tagName[1], 10);
         const text = heading.textContent ? heading.textContent : '';
         let shallHide = !needsNumbering;
         if (heading.getElementsByClassName('numbering-entry').length > 0) {
