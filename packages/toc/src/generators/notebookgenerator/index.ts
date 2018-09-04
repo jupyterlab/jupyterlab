@@ -23,13 +23,12 @@ import { TableOfContents } from '../../toc';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
+import { INotebookHeading } from './heading';
+
 import {
   generateNumbering,
-  getMarkdownHeadings,
   isDOM,
   isMarkdown,
-  INotebookHeading,
-  INotebookHeadingTypes,
   sanitizerOptions
 } from '../shared';
 
@@ -186,10 +185,7 @@ export function createNotebookGenerator(
               cell
             );
             let renderedHeading = renderedHeadings[0];
-            if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.markdown
-            ) {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
@@ -200,14 +196,11 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.header
-            ) {
+            } else if (renderedHeading && renderedHeading.type === 'header') {
               // Determine whether the heading has children
               if (
                 prevHeading &&
-                prevHeading.type === INotebookHeadingTypes.header &&
+                prevHeading.type === 'header' &&
                 prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
@@ -247,7 +240,7 @@ export function createNotebookGenerator(
               )
             ) {
               if (
-                !(renderedHeading.type === INotebookHeadingTypes.markdown) ||
+                !(renderedHeading.type === 'markdown') ||
                 options.showMarkdown
               ) {
                 prevHeading = renderedHeading;
@@ -302,10 +295,7 @@ export function createNotebookGenerator(
               );
               renderedHeading = renderedHeadings[0];
             }
-            if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.markdown
-            ) {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
@@ -317,14 +307,13 @@ export function createNotebookGenerator(
                 headings = headings.concat(renderedHeadings);
               }
             } else if (
-              (renderedHeading &&
-                renderedHeading.type === INotebookHeadingTypes.header) ||
+              (renderedHeading && renderedHeading.type === 'header') ||
               !renderedHeading
             ) {
               // Determine whether the heading has children
               if (
                 prevHeading &&
-                prevHeading.type === INotebookHeadingTypes.header &&
+                prevHeading.type === 'header' &&
                 (i === cellNum ||
                   (renderedHeading &&
                     prevHeading.level >= renderedHeading.level))
@@ -367,8 +356,7 @@ export function createNotebookGenerator(
               )
             ) {
               if (
-                (renderedHeading &&
-                  !(renderedHeading.type === INotebookHeadingTypes.markdown)) ||
+                (renderedHeading && !(renderedHeading.type === 'markdown')) ||
                 options.showMarkdown
               ) {
                 prevHeading = renderedHeading;
@@ -401,7 +389,7 @@ export function createNotebookGenerator(
             let renderedHeadings: INotebookHeading[] = [];
             let renderedHeading: INotebookHeading | null = null;
             if (cell) {
-              renderedHeadings = getMarkdownHeadings(
+              renderedHeadings = Private.getMarkdownHeadings(
                 model!.value.text,
                 onClickFactory,
                 numberingDict,
@@ -410,10 +398,7 @@ export function createNotebookGenerator(
               );
               renderedHeading = renderedHeadings[0];
             }
-            if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.markdown
-            ) {
+            if (renderedHeading && renderedHeading.type === 'markdown') {
               if (
                 renderedHeading &&
                 currentCollapseLevel < 0 &&
@@ -424,14 +409,11 @@ export function createNotebookGenerator(
               ) {
                 headings = headings.concat(renderedHeadings);
               }
-            } else if (
-              renderedHeading &&
-              renderedHeading.type === INotebookHeadingTypes.header
-            ) {
+            } else if (renderedHeading && renderedHeading.type === 'header') {
               // Determine whether the heading has children
               if (
                 prevHeading &&
-                prevHeading.type === INotebookHeadingTypes.header &&
+                prevHeading.type === 'header' &&
                 (i === cellNum || prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
@@ -511,7 +493,7 @@ namespace Private {
     if (headings.length > 0) {
       let location = headings.length - 1;
       while (location >= 0) {
-        if (headings[location].type === INotebookHeadingTypes.header) {
+        if (headings[location].type === 'header') {
           return headings[location].level;
         }
         location = location - 1;
@@ -548,7 +530,7 @@ namespace Private {
         text: headingText,
         level,
         onClick,
-        type: INotebookHeadingTypes.code,
+        type: 'code',
         prompt: executionCount,
         cellRef: cellRef,
         hasChild: false
@@ -559,6 +541,89 @@ namespace Private {
 }
 
 namespace Private {
+  /**
+   * Given a string of markdown, get the markdown headings
+   * in that string.
+   */
+  export function getMarkdownHeadings(
+    text: string,
+    onClickFactory: (line: number) => (() => void),
+    numberingDict: any,
+    lastLevel: number,
+    cellRef: Cell
+  ): INotebookHeading[] {
+    // Split the text into lines.
+    const lines = text.split('\n');
+    let headings: INotebookHeading[] = [];
+    // Iterate over the lines to get the header level and
+    // the text for the line.
+    let line = lines[0];
+    let idx = 0;
+    // Make an onClick handler for this line.
+    const onClick = onClickFactory(idx);
+
+    // First test for '#'-style headers.
+    let match = line.match(/^([#]{1,6}) (.*)/);
+    let match2 = line.match(/^([=]{2,}|[-]{2,})/);
+    let match3 = line.match(/<h([1-6])>(.*)<\/h\1>/i);
+    if (match) {
+      const level = match[1].length;
+      // Take special care to parse markdown links into raw text.
+      const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
+      let numbering = generateNumbering(numberingDict, level);
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef,
+        hasChild: true
+      });
+    } else if (match2 && idx > 0) {
+      // Next test for '==='-style headers.
+      const level = match2[1][0] === '=' ? 1 : 2;
+      // Take special care to parse markdown links into raw text.
+      const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
+      let numbering = generateNumbering(numberingDict, level);
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef,
+        hasChild: true
+      });
+    } else if (match3) {
+      // Finally test for HTML headers. This will not catch multiline
+      // headers, nor will it catch multiple headers on the same line.
+      // It should do a decent job of catching many, though.
+      const level = parseInt(match3[1], 10);
+      const text = match3[2];
+      let numbering = generateNumbering(numberingDict, level);
+      headings.push({
+        text,
+        level,
+        numbering,
+        onClick,
+        type: 'header',
+        cellRef: cellRef,
+        hasChild: true
+      });
+    } else {
+      headings.push({
+        text: line,
+        level: lastLevel + 1,
+        onClick,
+        type: 'markdown',
+        cellRef: cellRef,
+        hasChild: false
+      });
+    }
+    return headings;
+  }
+
   /**
    * Given an HTML element, generate ToC headings
    * by finding all the headers and making IHeading objects for them.
@@ -588,7 +653,7 @@ namespace Private {
             html: html,
             text: markdownCell.textContent ? markdownCell.textContent : '',
             onClick: onClickFactory(markdownCell),
-            type: INotebookHeadingTypes.markdown,
+            type: 'markdown',
             cellRef: cellRef,
             hasChild: true
           });
@@ -618,7 +683,7 @@ namespace Private {
           numbering,
           html,
           onClick,
-          type: INotebookHeadingTypes.header,
+          type: 'header',
           cellRef: cellRef,
           hasChild: true
         });

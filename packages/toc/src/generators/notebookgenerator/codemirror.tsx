@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { INotebookHeading } from '../shared';
+import { INotebookHeading } from './heading';
 
 export interface ICodeComponentProps {
   heading: INotebookHeading;
