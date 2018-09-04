@@ -60,7 +60,7 @@
       "check-whitespace"
     ],
     "one-variable-per-declaration": [true, "ignore-for-loop"],
-    "quotemark": [true, "single", "avoid-escape"],
+    "quotemark": [true, "single", "avoid-escape", "jsx-double"],
     "radix": true,
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
