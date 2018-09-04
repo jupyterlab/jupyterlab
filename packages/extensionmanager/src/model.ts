@@ -147,18 +147,6 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Utility function to check whether an entry can be updated.
-   *
-   * @param entry The entry to check.
-   */
-  static entryHasUpdate(entry: IEntry): boolean {
-    if (!entry.installed || !entry.latest_version) {
-      return false;
-    }
-    return semver.lt(entry.installed_version, entry.latest_version);
-  }
-
-  /**
    * A readonly array of the installed extensions.
    */
   get installed(): ReadonlyArray<IEntry> {
@@ -173,77 +161,14 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Translate search results from an npm repository query into entries
-   * and remove entries with 'deprecated' in the keyword list
-   *
-   * @param res Promise to an npm query result.
-   */
-  protected async translateSearchResult(
-    res: Promise<ISearchResult>
-  ): Promise<{ [key: string]: IEntry }> {
-    let entries: { [key: string]: IEntry } = {};
-    for (let obj of (await res).objects) {
-      let pkg = obj.package;
-      if (pkg.keywords.indexOf('deprecated') >= 0) {
-        continue;
-      }
-      entries[pkg.name] = {
-        name: pkg.name,
-        description: pkg.description,
-        url:
-          'homepage' in pkg.links
-            ? pkg.links.homepage
-            : 'repository' in pkg.links ? pkg.links.repository : pkg.links.npm,
-        installed: false,
-        enabled: false,
-        status: null,
-        latest_version: pkg.version,
-        installed_version: ''
-      };
-    }
-    return entries;
-  }
-
-  /**
-   * Translate installed extensions information from the server into entries.
-   *
-   * @param res Promise to the server reply data.
-   */
-  protected async translateInstalled(
-    res: Promise<IInstalledEntry[]>
-  ): Promise<{ [key: string]: IEntry }> {
-    const promises = [];
-    const entries: { [key: string]: IEntry } = {};
-    for (let pkg of await res) {
-      promises.push(
-        res.then(info => {
-          entries[pkg.name] = {
-            name: pkg.name,
-            description: pkg.description,
-            url: pkg.url,
-            installed: pkg.installed !== false,
-            enabled: pkg.enabled,
-            status: pkg.status,
-            latest_version: pkg.latest_version,
-            installed_version: pkg.installed_version
-          };
-        })
-      );
-    }
-    return Promise.all(promises).then(() => {
-      return entries;
-    });
-  }
-
-  /**
    * The current NPM repository search query.
    *
    * Setting its value triggers a new search.
    */
-  get query(): string {
+  get query(): string | null {
     return this._query;
   }
-  set query(value: string) {
+  set query(value: string | null) {
     this._query = value;
     this.update();
   }
@@ -288,38 +213,6 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Make a request to the server for info about its installed extensions.
-   */
-  protected fetchInstalled(
-    refreshInstalled = false
-  ): Promise<IInstalledEntry[]> {
-    const url = new URL(
-      EXTENSION_API_PATH,
-      this.serverConnectionSettings.baseUrl
-    );
-    if (refreshInstalled) {
-      url.searchParams.append('refresh', '1');
-    }
-    const request = ServerConnection.makeRequest(
-      url.toString(),
-      {},
-      this.serverConnectionSettings
-    ).then(response => {
-      handleError(response);
-      return response.json() as Promise<IInstalledEntry[]>;
-    });
-    request.then(
-      () => {
-        this.serverConnectionError = null;
-      },
-      reason => {
-        this.serverConnectionError = reason.toString();
-      }
-    );
-    return request;
-  }
-
-  /**
    * Initialize the model.
    */
   initialize() {
@@ -332,117 +225,6 @@ export class ListModel extends VDomModel {
         this.initialized = true;
         this.stateChanged.emit(undefined);
       });
-  }
-
-  /**
-   * Update the current model.
-   *
-   * This will query the NPM repository, and the notebook server.
-   *
-   * Emits the `stateChanged` signal on successful completion.
-   */
-  protected async update(refreshInstalled = false) {
-    let search = this.searcher.searchExtensions(
-      this.query,
-      this.page,
-      this.pagination
-    );
-    let searchMapPromise = this.translateSearchResult(search);
-    let installedMap = await this.translateInstalled(
-      this.fetchInstalled(refreshInstalled)
-    );
-    let searchMap;
-    try {
-      searchMap = await searchMapPromise;
-      this.searchError = null;
-    } catch (reason) {
-      searchMap = {};
-      this.searchError = reason.toString();
-    }
-    let installed: IEntry[] = [];
-    for (let key of Object.keys(installedMap)) {
-      installed.push(installedMap[key]);
-    }
-    this._installed = installed.sort(Private.comparator);
-
-    let searchResult: IEntry[] = [];
-    for (let key of Object.keys(searchMap)) {
-      if (installedMap[key] === undefined) {
-        searchResult.push(searchMap[key]);
-      } else {
-        searchResult.push(installedMap[key]);
-      }
-    }
-    this._searchResult = searchResult.sort(Private.comparator);
-    try {
-      this._totalEntries = (await search).total;
-    } catch (error) {
-      this._totalEntries = 0;
-    }
-    this.stateChanged.emit(undefined);
-  }
-
-  /**
-   * Send a request to the server to perform an action on an extension.
-   *
-   * @param action A valid action to perform.
-   * @param entry The extension to perform the action on.
-   */
-  protected _performAction(
-    action: string,
-    entry: IEntry
-  ): Promise<IActionReply> {
-    const url = new URL(
-      EXTENSION_API_PATH,
-      this.serverConnectionSettings.baseUrl
-    );
-    let request: RequestInit = {
-      method: 'POST',
-      body: JSON.stringify({
-        cmd: action,
-        extension_name: entry.name
-      })
-    };
-    const completed = ServerConnection.makeRequest(
-      url.toString(),
-      request,
-      this.serverConnectionSettings
-    ).then(response => {
-      handleError(response);
-      this.triggerBuildCheck();
-      return response.json() as Promise<IActionReply>;
-    });
-    completed.then(
-      () => {
-        this.serverConnectionError = null;
-      },
-      reason => {
-        this.serverConnectionError = reason.toString();
-      }
-    );
-    this._addPendingAction(completed);
-    return completed;
-  }
-
-  /**
-   * Add a pending action.
-   *
-   * @param pending A promise that resolves when the action is completed.
-   */
-  protected _addPendingAction(pending: Promise<any>): void {
-    // Add to pending actions collection
-    this._pendingActions.push(pending);
-
-    // Ensure action is removed when resolved
-    const remove = () => {
-      const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
-      this.stateChanged.emit(undefined);
-    };
-    pending.then(remove, remove);
-
-    // Signal changed state
-    this.stateChanged.emit(undefined);
   }
 
   /**
@@ -538,7 +320,10 @@ export class ListModel extends VDomModel {
         if (discovery.kernel) {
           // match specs
           for (let kernelInfo of discovery.kernel) {
-            let matches = matchSpecs(kernelInfo, this.serviceManager.specs);
+            let matches = Private.matchSpecs(
+              kernelInfo,
+              this.serviceManager.specs
+            );
             kernelCompanions.push({ kernelInfo, kernels: matches });
           }
         }
@@ -604,7 +389,272 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Contains an error message if an error occurred when updating the model.
+   * Translate search results from an npm repository query into entries
+   * and remove entries with 'deprecated' in the keyword list
+   *
+   * @param res Promise to an npm query result.
+   */
+  protected async translateSearchResult(
+    res: Promise<ISearchResult>
+  ): Promise<{ [key: string]: IEntry }> {
+    let entries: { [key: string]: IEntry } = {};
+    for (let obj of (await res).objects) {
+      let pkg = obj.package;
+      if (pkg.keywords.indexOf('deprecated') >= 0) {
+        continue;
+      }
+      entries[pkg.name] = {
+        name: pkg.name,
+        description: pkg.description,
+        url:
+          'homepage' in pkg.links
+            ? pkg.links.homepage
+            : 'repository' in pkg.links ? pkg.links.repository : pkg.links.npm,
+        installed: false,
+        enabled: false,
+        status: null,
+        latest_version: pkg.version,
+        installed_version: ''
+      };
+    }
+    return entries;
+  }
+
+  /**
+   * Translate installed extensions information from the server into entries.
+   *
+   * @param res Promise to the server reply data.
+   */
+  protected async translateInstalled(
+    res: Promise<IInstalledEntry[]>
+  ): Promise<{ [key: string]: IEntry }> {
+    const promises = [];
+    const entries: { [key: string]: IEntry } = {};
+    for (let pkg of await res) {
+      promises.push(
+        res.then(info => {
+          entries[pkg.name] = {
+            name: pkg.name,
+            description: pkg.description,
+            url: pkg.url,
+            installed: pkg.installed !== false,
+            enabled: pkg.enabled,
+            status: pkg.status,
+            latest_version: pkg.latest_version,
+            installed_version: pkg.installed_version
+          };
+        })
+      );
+    }
+    return Promise.all(promises).then(() => {
+      return entries;
+    });
+  }
+
+  /**
+   * Make a request to the server for info about its installed extensions.
+   */
+  protected fetchInstalled(
+    refreshInstalled = false
+  ): Promise<IInstalledEntry[]> {
+    const url = new URL(
+      EXTENSION_API_PATH,
+      this.serverConnectionSettings.baseUrl
+    );
+    if (refreshInstalled) {
+      url.searchParams.append('refresh', '1');
+    }
+    const request = ServerConnection.makeRequest(
+      url.toString(),
+      {},
+      this.serverConnectionSettings
+    ).then(response => {
+      Private.handleError(response);
+      return response.json() as Promise<IInstalledEntry[]>;
+    });
+    request.then(
+      () => {
+        this.serverConnectionError = null;
+      },
+      reason => {
+        this.serverConnectionError = reason.toString();
+      }
+    );
+    return request;
+  }
+
+  /**
+   * Search with current query.
+   *
+   * Sets searchError and totalEntries as appropriate.
+   *
+   * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
+   */
+  protected async performSearch(): Promise<{ [key: string]: IEntry }> {
+    if (this.query === null) {
+      this._searchResult = [];
+      this._totalEntries = 0;
+      this.searchError = null;
+      return {};
+    }
+
+    // Start the search without waiting for it:
+    let search = this.searcher.searchExtensions(
+      this.query,
+      this.page,
+      this.pagination
+    );
+    let searchMapPromise = this.translateSearchResult(search);
+
+    let searchMap: { [key: string]: IEntry };
+    try {
+      searchMap = await searchMapPromise;
+      this.searchError = null;
+    } catch (reason) {
+      searchMap = {};
+      this.searchError = reason.toString();
+    }
+
+    try {
+      this._totalEntries = (await search).total;
+    } catch (error) {
+      this._totalEntries = 0;
+    }
+
+    return searchMap;
+  }
+
+  /**
+   * Query the installed extensions.
+   *
+   * Sets installedError as appropriate.
+   *
+   * @returns {Promise<{ [key: string]: IEntry; }>} A map of installed extensions.
+   */
+  protected async queryInstalled(
+    refreshInstalled: boolean
+  ): Promise<{ [key: string]: IEntry }> {
+    let installedMap;
+    try {
+      installedMap = await this.translateInstalled(
+        this.fetchInstalled(refreshInstalled)
+      );
+      this.installedError = null;
+    } catch (reason) {
+      installedMap = {};
+      this.installedError = reason.toString();
+    }
+    return installedMap;
+  }
+
+  /**
+   * Update the current model.
+   *
+   * This will query the NPM repository, and the notebook server.
+   *
+   * Emits the `stateChanged` signal on successful completion.
+   */
+  protected async update(refreshInstalled = false) {
+    // Start both queries before awaiting:
+    const searchMapPromise = this.performSearch();
+    const installedMapPromise = this.queryInstalled(refreshInstalled);
+
+    // Await results:
+    const searchMap = await searchMapPromise;
+    const installedMap = await installedMapPromise;
+
+    // Map results to attributes:
+    let installed: IEntry[] = [];
+    for (let key of Object.keys(installedMap)) {
+      installed.push(installedMap[key]);
+    }
+    this._installed = installed.sort(Private.comparator);
+
+    let searchResult: IEntry[] = [];
+    for (let key of Object.keys(searchMap)) {
+      // Filter out installed entries from search results:
+      if (installedMap[key] === undefined) {
+        searchResult.push(searchMap[key]);
+      } else {
+        searchResult.push(installedMap[key]);
+      }
+    }
+    this._searchResult = searchResult.sort(Private.comparator);
+
+    // Signal updated state
+    this.stateChanged.emit(undefined);
+  }
+
+  /**
+   * Send a request to the server to perform an action on an extension.
+   *
+   * @param action A valid action to perform.
+   * @param entry The extension to perform the action on.
+   */
+  protected _performAction(
+    action: string,
+    entry: IEntry
+  ): Promise<IActionReply> {
+    const url = new URL(
+      EXTENSION_API_PATH,
+      this.serverConnectionSettings.baseUrl
+    );
+    let request: RequestInit = {
+      method: 'POST',
+      body: JSON.stringify({
+        cmd: action,
+        extension_name: entry.name
+      })
+    };
+    const completed = ServerConnection.makeRequest(
+      url.toString(),
+      request,
+      this.serverConnectionSettings
+    ).then(response => {
+      Private.handleError(response);
+      this.triggerBuildCheck();
+      return response.json() as Promise<IActionReply>;
+    });
+    completed.then(
+      () => {
+        this.serverConnectionError = null;
+      },
+      reason => {
+        this.serverConnectionError = reason.toString();
+      }
+    );
+    this._addPendingAction(completed);
+    return completed;
+  }
+
+  /**
+   * Add a pending action.
+   *
+   * @param pending A promise that resolves when the action is completed.
+   */
+  protected _addPendingAction(pending: Promise<any>): void {
+    // Add to pending actions collection
+    this._pendingActions.push(pending);
+
+    // Ensure action is removed when resolved
+    const remove = () => {
+      const i = this._pendingActions.indexOf(pending);
+      this._pendingActions.splice(i, 1);
+      this.stateChanged.emit(undefined);
+    };
+    pending.then(remove, remove);
+
+    // Signal changed state
+    this.stateChanged.emit(undefined);
+  }
+
+  /**
+   * Contains an error message if an error occurred when querying installed extensions.
+   */
+  installedError: string | null = null;
+
+  /**
+   * Contains an error message if an error occurred when searching for extensions.
    */
   searchError: string | null = null;
 
@@ -612,6 +662,11 @@ export class ListModel extends VDomModel {
    * Contains an error message if an error occurred when querying the server extension.
    */
   serverConnectionError: string | null = null;
+
+  /**
+   * Contains an error message if the server has unfulfilled requirements.
+   */
+  serverRequirementsError: string | null = null;
 
   /**
    * Whether the model has finished async initialization.
@@ -638,7 +693,7 @@ export class ListModel extends VDomModel {
    */
   protected serviceManager: ServiceManager;
 
-  private _query: string = '';
+  private _query: string | null = null;
   private _page: number = 0;
   private _pagination: number = 250;
   private _totalEntries: number = 0;
@@ -649,54 +704,20 @@ export class ListModel extends VDomModel {
 }
 
 /**
- * Match kernel specs against kernel spec regexps
- *
- * @param kernelInfo The info containing the regexp patterns
- * @param specs The available kernel specs.
+ * ListModel statics.
  */
-function matchSpecs(
-  kernelInfo: IKernelInstallInfo,
-  specs: Kernel.ISpecModels | null
-): Kernel.ISpecModel[] {
-  if (!specs) {
-    return [];
-  }
-  let matches: Kernel.ISpecModel[] = [];
-  let reLang: RegExp | null = null;
-  let reName: RegExp | null = null;
-  if (kernelInfo.kernel_spec.language) {
-    reLang = new RegExp(kernelInfo.kernel_spec.language);
-  }
-  if (kernelInfo.kernel_spec.display_name) {
-    reName = new RegExp(kernelInfo.kernel_spec.display_name);
-  }
-  for (let key of Object.keys(specs.kernelspecs)) {
-    let spec = specs.kernelspecs[key];
-    let match = false;
-    if (reLang) {
-      match = reLang.test(spec.language);
+export namespace ListModel {
+  /**
+   * Utility function to check whether an entry can be updated.
+   *
+   * @param entry The entry to check.
+   */
+  export function entryHasUpdate(entry: IEntry): boolean {
+    if (!entry.installed || !entry.latest_version) {
+      return false;
     }
-    if (!match && reName) {
-      match = reName.test(spec.display_name);
-    }
-    if (match) {
-      matches.push(spec);
-      continue;
-    }
+    return semver.lt(entry.installed_version, entry.latest_version);
   }
-  return matches;
-}
-
-/**
- * Convert a response to an exception on error.
- *
- * @param response The response to inspect.
- */
-function handleError(response: Response): Response {
-  if (!response.ok) {
-    throw new Error(`${response.status} (${response.statusText})`);
-  }
-  return response;
 }
 
 /**
@@ -721,5 +742,56 @@ namespace Private {
     } else {
       return 1;
     }
+  }
+
+  /**
+   * Match kernel specs against kernel spec regexps
+   *
+   * @param kernelInfo The info containing the regexp patterns
+   * @param specs The available kernel specs.
+   */
+  export function matchSpecs(
+    kernelInfo: IKernelInstallInfo,
+    specs: Kernel.ISpecModels | null
+  ): Kernel.ISpecModel[] {
+    if (!specs) {
+      return [];
+    }
+    let matches: Kernel.ISpecModel[] = [];
+    let reLang: RegExp | null = null;
+    let reName: RegExp | null = null;
+    if (kernelInfo.kernel_spec.language) {
+      reLang = new RegExp(kernelInfo.kernel_spec.language);
+    }
+    if (kernelInfo.kernel_spec.display_name) {
+      reName = new RegExp(kernelInfo.kernel_spec.display_name);
+    }
+    for (let key of Object.keys(specs.kernelspecs)) {
+      let spec = specs.kernelspecs[key];
+      let match = false;
+      if (reLang) {
+        match = reLang.test(spec.language);
+      }
+      if (!match && reName) {
+        match = reName.test(spec.display_name);
+      }
+      if (match) {
+        matches.push(spec);
+        continue;
+      }
+    }
+    return matches;
+  }
+
+  /**
+   * Convert a response to an exception on error.
+   *
+   * @param response The response to inspect.
+   */
+  export function handleError(response: Response): Response {
+    if (!response.ok) {
+      throw new Error(`${response.status} (${response.statusText})`);
+    }
+    return response;
   }
 }
