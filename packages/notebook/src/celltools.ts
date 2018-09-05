@@ -662,14 +662,6 @@ export namespace CellTools {
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
       optionsMap: optionsMap,
-      // optionsMap: {
-      //   None: '-',
-      //   LaTeX: 'text/latex',
-      //   reST: 'text/restructuredtext',
-      //   HTML: 'text/html',
-      //   Markdown: 'text/markdown',
-      //   Python: 'text/x-python'
-      // },
       validCellTypes: ['raw']
     });
   }

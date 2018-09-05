@@ -300,7 +300,6 @@ function activateCellTools(
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
-  // const nbConvert = CellTools.createNBConvertSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
   const services = app.serviceManager;
