@@ -21,6 +21,11 @@
   "directories": {
     "lib": "lib/"
   },
+  "bin": {
+    "get:dependency": "./lib/get-dependency.js",
+    "update:dependency": "./lib/update-dependency.js",
+    "remove:dependency": "./lib/remove-dependency.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
