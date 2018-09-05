@@ -655,18 +655,21 @@ export namespace CellTools {
   /**
    * Create an nbcovert selector.
    */
-  export function createNBConvertSelector(): KeySelector {
+  export function createNBConvertSelector(optionsMap: {
+    [key: string]: JSONValue;
+  }): KeySelector {
     return new KeySelector({
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
-      optionsMap: {
-        None: '-',
-        LaTeX: 'text/latex',
-        reST: 'text/restructuredtext',
-        HTML: 'text/html',
-        Markdown: 'text/markdown',
-        Python: 'text/x-python'
-      },
+      optionsMap: optionsMap,
+      // optionsMap: {
+      //   None: '-',
+      //   LaTeX: 'text/latex',
+      //   reST: 'text/restructuredtext',
+      //   HTML: 'text/html',
+      //   Markdown: 'text/markdown',
+      //   Python: 'text/x-python'
+      // },
       validCellTypes: ['raw']
     });
   }

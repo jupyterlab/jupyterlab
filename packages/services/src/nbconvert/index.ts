@@ -77,8 +77,6 @@ export namespace NbConvertManager {
     /**
      * The list of supported export formats.
      */
-    // TODO: should this stay a string, or a typed object
-    // that includes an 'output_mimetype' string?
     [key: string]: { output_mimetype: string };
   }
 }

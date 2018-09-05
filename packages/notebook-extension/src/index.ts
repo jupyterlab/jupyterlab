@@ -57,7 +57,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -218,6 +218,12 @@ const CELL_TOOLS_RANK = 400;
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 
 /**
+ * The exluded Cell Inspector Raw NbConvert Formats
+ * (returned from nbconvert's export list)
+ */
+const RAW_FORMAT_EXCLUDE = ['pdf', 'slides', 'script', 'notebook', 'custom'];
+
+/**
  * The default Export To ... formats and their human readable labels.
  */
 const FORMAT_LABEL: { [k: string]: string } = {
@@ -294,9 +300,10 @@ function activateCellTools(
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
-  const nbConvert = CellTools.createNBConvertSelector();
+  // const nbConvert = CellTools.createNBConvertSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -313,15 +320,31 @@ function activateCellTools(
     }
     return true;
   };
-
-  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
-  celltools.title.caption = 'Cell Inspector';
-  celltools.id = id;
-  celltools.addItem({ tool: activeCellTool, rank: 1 });
-  celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: nbConvert, rank: 3 });
-  celltools.addItem({ tool: metadataEditor, rank: 4 });
-  MessageLoop.installMessageHook(celltools, hook);
+  let optionsMap: { [key: string]: JSONValue } = {};
+  optionsMap.None = '-';
+  services.nbconvert.getExportFormats().then(response => {
+    if (response) {
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      formatList.forEach(function(key) {
+        if (RAW_FORMAT_EXCLUDE.indexOf(key) === -1) {
+          let capCaseKey = key[0].toUpperCase() + key.substr(1);
+          let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
+          let mimeType = response[key].output_mimetype;
+          optionsMap[labelStr] = mimeType;
+        }
+      });
+      const nbConvert = CellTools.createNBConvertSelector(optionsMap);
+      celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+      celltools.title.caption = 'Cell Inspector';
+      celltools.id = id;
+      celltools.addItem({ tool: activeCellTool, rank: 1 });
+      celltools.addItem({ tool: slideShow, rank: 2 });
+      celltools.addItem({ tool: nbConvert, rank: 3 });
+      celltools.addItem({ tool: metadataEditor, rank: 4 });
+      MessageLoop.installMessageHook(celltools, hook);
+    }
+  });
 
   // Wait until the application has finished restoring before rendering.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {
@@ -477,7 +500,7 @@ function activateNotebookHandler(
     });
 
   // Add main menu notebook menu.
-  populateMenus(app, mainMenu, tracker, services);
+  populateMenus(app, mainMenu, tracker, services, palette);
 
   // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
@@ -1610,28 +1633,6 @@ function populatePalette(
     args: { isPalette: true }
   });
 
-  services.nbconvert.getExportFormats().then(response => {
-    if (response) {
-      // convert exportList to palette items
-      const formatList = Object.keys(response);
-      formatList.forEach(function(key) {
-        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
-        let args = {
-          format: key,
-          label: labelStr,
-          isPalette: true
-        };
-        if (FORMAT_EXCLUDE.indexOf(labelStr) === -1) {
-          palette.addItem({
-            command: CommandIDs.exportToFormat,
-            category,
-            args
-          });
-        }
-      });
-    }
-  });
-
   category = 'Notebook Cell Operations';
   [
     CommandIDs.run,
@@ -1688,7 +1689,8 @@ function populateMenus(
   app: JupyterLab,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
-  services: ServiceManager
+  services: ServiceManager,
+  palette: ICommandPalette
 ): void {
   let { commands } = app;
 
@@ -1756,18 +1758,26 @@ function populateMenus(
   exportTo.title.label = 'Export Notebook As…';
   services.nbconvert.getExportFormats().then(response => {
     if (response) {
-      // convert exportList to palette items
+      // convert exportList to palette and menu items
       const formatList = Object.keys(response);
+      const category = 'Notebook Operations';
       formatList.forEach(function(key) {
-        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : key;
+        let capCaseKey = key[0].toUpperCase() + key.substr(1);
+        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
         let args = {
           format: key,
-          label: labelStr
+          label: labelStr,
+          isPalette: true
         };
-        if (FORMAT_EXCLUDE.indexOf(labelStr) === -1) {
+        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
           exportTo.addItem({
             command: CommandIDs.exportToFormat,
             args: args
+          });
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args
           });
         }
       });
