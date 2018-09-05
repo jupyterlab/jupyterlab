@@ -18,6 +18,11 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "bin": {
+    "get-dependency": "./lib/get-dependency.js",
+    "remove-dependency": "./lib/remove-dependency.js",
+    "update-dependency": "./lib/update-dependency.js"
+  },
   "directories": {
     "lib": "lib/"
   },
