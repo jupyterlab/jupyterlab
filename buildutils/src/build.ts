@@ -110,7 +110,7 @@ export namespace Build {
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
           try {
-            const oldPackagePath = path.join(destination, 'package.json');
+            const oldPackagePath = path.join(destination, 'package.json.orig');
             const oldPackageData = utils.readJSONFile(oldPackagePath);
             if (oldPackageData.version === packageData.version) {
               fs.removeSync(destination);
@@ -126,16 +126,13 @@ export namespace Build {
         // Copy schemas.
         schemas.forEach(schema => {
           const file = path.basename(schema);
-          if (file === 'package.json') {
-            throw new Error('Cannot use name "package.json" for schema file');
-          }
           fs.copySync(schema, path.join(destination, file));
         });
 
         // Write the package.json file for future comparison.
         fs.copySync(
           path.join(packageDir, 'package.json'),
-          path.join(destination, 'package.json')
+          path.join(destination, 'package.json.orig')
         );
       }
 
@@ -147,10 +144,9 @@ export namespace Build {
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
           try {
-            const oldPackageData = require(path.join(
-              destination,
-              'package.json'
-            ));
+            const oldPackageData = utils.readJSONFile(
+              path.join(destination, 'package.json.orig')
+            );
             if (oldPackageData.version === packageData.version) {
               fs.removeSync(destination);
             }
@@ -168,7 +164,7 @@ export namespace Build {
         // Write the package.json file for future comparison.
         fs.copySync(
           path.join(packageDir, 'package.json'),
-          path.join(destination, 'package.json')
+          path.join(destination, 'package.json.orig')
         );
       }
     });
