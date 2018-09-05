@@ -1,25 +1,28 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import * as React from 'react';
 
-import { INotebookHeading } from '../shared';
+import { INotebookHeading } from './heading';
 
-export interface CodeComponentProps {
+export interface ICodeComponentProps {
   heading: INotebookHeading;
 }
 
-export interface CodeComponentState {
+export interface ICodeComponentState {
   heading: INotebookHeading;
 }
 
 export class CodeComponent extends React.Component<
-  CodeComponentProps,
-  CodeComponentState
+  ICodeComponentProps,
+  ICodeComponentState
 > {
-  constructor(props: CodeComponentState) {
+  constructor(props: ICodeComponentProps) {
     super(props);
     this.state = { heading: props.heading };
   }
 
-  componentWillReceiveProps(nextProps: CodeComponentState) {
+  componentWillReceiveProps(nextProps: ICodeComponentProps) {
     this.setState({ heading: nextProps.heading });
   }
 

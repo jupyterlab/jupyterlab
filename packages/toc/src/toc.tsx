@@ -78,10 +78,7 @@ export class TableOfContents extends Widget {
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(
-      this.update,
-      this
-    );
+    this._monitor.activityStopped.connect(this.update, this);
     this.updateTOC();
   }
 

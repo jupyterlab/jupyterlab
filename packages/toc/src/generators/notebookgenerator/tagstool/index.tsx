@@ -1,16 +1,19 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 import { TagListComponent } from './tagslist';
 import * as React from 'react';
 import { NotebookGeneratorOptionsManager } from '../optionsmanager';
 
-export interface TagsToolComponentProps {
+export interface ITagsToolComponentProps {
   allTagsList: string[];
   tracker: INotebookTracker;
   generatorOptionsRef: NotebookGeneratorOptionsManager;
 }
 
-export interface TagsToolComponentState {
+export interface ITagsToolComponentState {
   selected: string[];
 }
 
@@ -18,10 +21,10 @@ export interface TagsToolComponentState {
 * Create a React component that handles state for the tag dropdown
 */
 export class TagsToolComponent extends React.Component<
-  TagsToolComponentProps,
-  TagsToolComponentState
+  ITagsToolComponentProps,
+  ITagsToolComponentState
 > {
-  constructor(props: TagsToolComponentProps) {
+  constructor(props: ITagsToolComponentProps) {
     super(props);
     this.state = {
       selected: []
@@ -61,9 +64,9 @@ export class TagsToolComponent extends React.Component<
     this.setState({ selected: [] });
   };
 
-  /* 
-  * Check whether a cell is tagged with a certain string
-  */
+  /**
+   * Check whether a cell is tagged with a certain string
+   */
   containsTag(tag: string, cell: Cell) {
     if (cell === null) {
       return false;

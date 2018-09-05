@@ -1,10 +1,13 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
 import * as React from 'react';
 
-interface NotebookGeneratorToolbarProps {}
+interface INotebookGeneratorToolbarProps {}
 
-interface NotebookGeneratorToolbarState {
+interface INotebookGeneratorToolbarState {
   numbering: boolean;
 }
 
@@ -13,10 +16,10 @@ export function markdownDocGeneratorToolbar(
 ) {
   // Render the toolbar
   return class extends React.Component<
-    NotebookGeneratorToolbarProps,
-    NotebookGeneratorToolbarState
+    INotebookGeneratorToolbarProps,
+    INotebookGeneratorToolbarState
   > {
-    constructor(props: NotebookGeneratorToolbarProps) {
+    constructor(props: INotebookGeneratorToolbarProps) {
       super(props);
       this.state = { numbering: true };
       options.initializeOptions(true);

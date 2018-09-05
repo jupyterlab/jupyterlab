@@ -1,22 +1,11 @@
-import { Cell } from '@jupyterlab/cells';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { IHeading } from '../toc';
 
 const VDOM_MIME_TYPE = 'application/vdom.v1+json';
 
 const HTML_MIME_TYPE = 'text/html';
-
-export enum INotebookHeadingTypes {
-  header,
-  markdown,
-  code
-}
-
-export interface INotebookHeading extends INumberedHeading {
-  type: INotebookHeadingTypes;
-  prompt?: string;
-  cellRef?: Cell;
-  hasChild?: boolean;
-}
 
 export interface INumberedHeading extends IHeading {
   numbering?: string | null;
@@ -49,102 +38,15 @@ export function generateNumbering(
   if (numberingDict != null) {
     incrementNumberingDict(numberingDict, level);
     numbering = '';
-    for (var j = 1; j <= level; j++) {
+    for (let j = 1; j <= level; j++) {
       numbering +=
         (numberingDict[j] == undefined ? '0' : numberingDict[j]) + '.';
-      if (j == level) {
+      if (j === level) {
         numbering += ' ';
       }
     }
   }
   return numbering;
-}
-
-/**
- * Given a string of markdown, get the markdown headings
- * in that string.
- */
-export function getMarkdownHeadings(
-  text: string,
-  onClickFactory: (line: number) => (() => void),
-  numberingDict: any,
-  lastLevel: number,
-  cellRef: Cell
-): INotebookHeading[] {
-  // Split the text into lines.
-  const lines = text.split('\n');
-  let headings: INotebookHeading[] = [];
-  // Iterate over the lines to get the header level and
-  // the text for the line.
-  let line = lines[0];
-  let idx = 0;
-  // Make an onClick handler for this line.
-  const onClick = onClickFactory(idx);
-
-  // First test for '#'-style headers.
-  let match = line.match(/^([#]{1,6}) (.*)/);
-  let match2 = line.match(/^([=]{2,}|[-]{2,})/);
-  let match3 = line.match(/<h([1-6])>(.*)<\/h\1>/i);
-  if (match) {
-    const level = match[1].length;
-    // Take special care to parse markdown links into raw text.
-    const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-    let numbering = generateNumbering(numberingDict, level);
-    headings.push({
-      text,
-      level,
-      numbering,
-      onClick,
-      type: INotebookHeadingTypes.header,
-      cellRef: cellRef,
-      hasChild: true
-    });
-  }
-
-  // Next test for '==='-style headers.
-  else if (match2 && idx > 0) {
-    const level = match2[1][0] === '=' ? 1 : 2;
-    // Take special care to parse markdown links into raw text.
-    const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
-    let numbering = generateNumbering(numberingDict, level);
-    headings.push({
-      text,
-      level,
-      numbering,
-      onClick,
-      type: INotebookHeadingTypes.header,
-      cellRef: cellRef,
-      hasChild: true
-    });
-  }
-
-  // Finally test for HTML headers. This will not catch multiline
-  // headers, nor will it catch multiple headers on the same line.
-  // It should do a decent job of catching many, though.
-  else if (match3) {
-    const level = parseInt(match3[1], 10);
-    const text = match3[2];
-    let numbering = generateNumbering(numberingDict, level);
-    headings.push({
-      text,
-      level,
-      numbering,
-      onClick,
-      type: INotebookHeadingTypes.header,
-      cellRef: cellRef,
-      hasChild: true
-    });
-  } else {
-    headings.push({
-      text: line,
-      level: lastLevel + 1,
-      onClick,
-      type: INotebookHeadingTypes.markdown,
-      cellRef: cellRef,
-      hasChild: false
-    });
-  }
-  return headings;
 }
 
 /**

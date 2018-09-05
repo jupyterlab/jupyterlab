@@ -202,7 +202,7 @@ namespace Private {
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
     for (let i = 0; i < headingNodes.length; i++) {
       const heading = headingNodes[i];
-      const level = parseInt(heading.tagName[1]);
+      const level = parseInt(heading.tagName[1], 10);
       let text = heading.textContent ? heading.textContent : '';
       let shallHide = !needsNumbering;
 
