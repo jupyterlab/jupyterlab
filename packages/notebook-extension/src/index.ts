@@ -334,16 +334,16 @@ function activateCellTools(
         }
       });
       const nbConvert = CellTools.createNBConvertSelector(optionsMap);
-      celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
-      celltools.title.caption = 'Cell Inspector';
-      celltools.id = id;
-      celltools.addItem({ tool: activeCellTool, rank: 1 });
-      celltools.addItem({ tool: slideShow, rank: 2 });
       celltools.addItem({ tool: nbConvert, rank: 3 });
-      celltools.addItem({ tool: metadataEditor, rank: 4 });
-      MessageLoop.installMessageHook(celltools, hook);
     }
   });
+  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  celltools.title.caption = 'Cell Inspector';
+  celltools.id = id;
+  celltools.addItem({ tool: activeCellTool, rank: 1 });
+  celltools.addItem({ tool: slideShow, rank: 2 });
+  celltools.addItem({ tool: metadataEditor, rank: 4 });
+  MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.
   Promise.all([state.fetch(id), app.restored]).then(([args]) => {

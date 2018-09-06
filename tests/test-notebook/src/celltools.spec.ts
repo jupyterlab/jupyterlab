@@ -7,6 +7,8 @@ import { Message } from '@phosphor/messaging';
 
 import { TabPanel, Widget } from '@phosphor/widgets';
 
+import { JSONValue } from '@phosphor/coreutils';
+
 import { simulate } from 'simulate-event';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
@@ -413,7 +415,16 @@ describe('@jupyterlab/notebook', () => {
 
     describe('CellTools.createNBConvertSelector()', () => {
       it('should create a raw mimetype selector', () => {
-        const tool = CellTools.createNBConvertSelector();
+        let optionsMap: { [key: string]: JSONValue } = {
+          None: '-',
+          LaTeX: 'text/latex',
+          reST: 'text/restructuredtext',
+          HTML: 'text/html',
+          Markdown: 'text/markdown',
+          Python: 'text/x-python'
+        };
+        optionsMap.None = '-';
+        const tool = CellTools.createNBConvertSelector(optionsMap);
         tool.selectNode.selectedIndex = -1;
         celltools.addItem({ tool });
         simulate(panel0.node, 'focus');
@@ -433,7 +444,15 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should have no effect on a code cell', () => {
-        const tool = CellTools.createNBConvertSelector();
+        let optionsMap: { [key: string]: JSONValue } = {
+          None: '-',
+          LaTeX: 'text/latex',
+          reST: 'text/restructuredtext',
+          HTML: 'text/html',
+          Markdown: 'text/markdown',
+          Python: 'text/x-python'
+        };
+        const tool = CellTools.createNBConvertSelector(optionsMap);
         tool.selectNode.selectedIndex = -1;
         celltools.addItem({ tool });
         simulate(panel0.node, 'focus');
