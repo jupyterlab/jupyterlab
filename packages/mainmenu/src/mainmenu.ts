@@ -178,7 +178,10 @@ export class MainMenu extends MenuBar implements IMainMenu {
     let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
     // Upon disposal, remove the menu and its rank reference.
-    menu.disposed.connect(this._onMenuDisposed, this);
+    menu.disposed.connect(
+      this._onMenuDisposed,
+      this
+    );
 
     ArrayExt.insert(this._items, index, rankItem);
     /**

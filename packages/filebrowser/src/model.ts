@@ -91,8 +91,14 @@ export class FileBrowserModel implements IDisposable {
       options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(this._onFileChanged, this);
-    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+    services.contents.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
+    services.sessions.runningChanged.connect(
+      this._onRunningChanged,
+      this
+    );
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -389,7 +395,7 @@ export class FileBrowserModel implements IDisposable {
     }
 
     const err = 'File not uploaded';
-    if (largeFile && !await this._shouldUploadLarge(file)) {
+    if (largeFile && !(await this._shouldUploadLarge(file))) {
       throw 'Cancelled large file upload';
     }
     await this._uploadCheckDisposed();
@@ -397,7 +403,7 @@ export class FileBrowserModel implements IDisposable {
     await this._uploadCheckDisposed();
     if (
       find(this._items, i => i.name === file.name) &&
-      !await shouldOverwrite(file.name)
+      !(await shouldOverwrite(file.name))
     ) {
       throw err;
     }

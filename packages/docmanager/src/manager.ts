@@ -67,7 +67,10 @@ export class DocumentManager implements IDisposable {
     this._when = options.when || options.manager.ready;
 
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
-    widgetManager.activateRequested.connect(this._onActivateRequested, this);
+    widgetManager.activateRequested.connect(
+      this._onActivateRequested,
+      this
+    );
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
   }
@@ -459,7 +462,10 @@ export class DocumentManager implements IDisposable {
         handler.start();
       }
     });
-    context.disposed.connect(this._onContextDisposed, this);
+    context.disposed.connect(
+      this._onContextDisposed,
+      this
+    );
     this._contexts.push(context);
     return context;
   }

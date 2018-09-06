@@ -6,7 +6,7 @@ A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 4 and [
 
 ## Prerequisites
 
-* JupyterLab ^0.27.0
+- JupyterLab ^0.27.0
 
 ## Usage
 

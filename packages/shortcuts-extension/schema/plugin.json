@@ -997,8 +997,7 @@
         "command": { "default": "tooltip:launch-console" },
         "keys": { "default": ["Shift Tab"] },
         "selector": {
-          "default":
-            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+          "default": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
@@ -1011,8 +1010,7 @@
         "command": { "default": "tooltip:launch-notebook" },
         "keys": { "default": ["Shift Tab"] },
         "selector": {
-          "default":
-            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+          "default": ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }

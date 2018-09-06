@@ -221,7 +221,10 @@ export namespace CodeEditor {
 
       let mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
-      mimeType.changed.connect(this._onMimeTypeChanged, this);
+      mimeType.changed.connect(
+        this._onMimeTypeChanged,
+        this
+      );
 
       this.modelDB.createMap('selections');
     }

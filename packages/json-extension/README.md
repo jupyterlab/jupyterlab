@@ -6,7 +6,7 @@ A JupyterLab extension for rendering JSON as a tree
 
 ## Prerequisites
 
-* JupyterLab ^0.27.0
+- JupyterLab ^0.27.0
 
 ## Usage
 

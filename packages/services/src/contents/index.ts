@@ -529,7 +529,10 @@ export class ContentsManager implements Contents.IManager {
     let serverSettings = (this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings());
     this._defaultDrive = options.defaultDrive || new Drive({ serverSettings });
-    this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+    this._defaultDrive.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
   }
 
   /**
@@ -567,7 +570,10 @@ export class ContentsManager implements Contents.IManager {
    */
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
-    drive.fileChanged.connect(this._onFileChanged, this);
+    drive.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
   }
 
   /**

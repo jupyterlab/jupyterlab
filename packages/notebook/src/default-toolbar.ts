@@ -216,10 +216,16 @@ class CellTypeSwitcher extends Widget {
     }
 
     // Follow the type of the active cell.
-    widget.activeCellChanged.connect(this._updateValue, this);
+    widget.activeCellChanged.connect(
+      this._updateValue,
+      this
+    );
 
     // Follow a change in the selection.
-    widget.selectionChanged.connect(this._updateValue, this);
+    widget.selectionChanged.connect(
+      this._updateValue,
+      this
+    );
   }
 
   /**

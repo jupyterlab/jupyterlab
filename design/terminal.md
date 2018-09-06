@@ -12,31 +12,31 @@ An experienced data scientist with a graduate degree in a technical field and ha
 
 Some things they would do in the terminal include
 
-* Run command line git.
-* Small amounts of general software engineering to support their data science, such as running test suites, moving files around at the command line.
-* Run vim.
-* Run command line IPython.
+- Run command line git.
+- Small amounts of general software engineering to support their data science, such as running test suites, moving files around at the command line.
+- Run vim.
+- Run command line IPython.
 
 # User tasks
 
 Users should be able to:
 
-* Open a new terminal (command palette, top menu)
-* Close a terminal (UI)
-* Change the font size (bigger/smaller) (command palette, top menu)
-* Close all terminals (command palette, top menu)
-* See the name of the terminal in the dock area tab (UI)
-* Copy text from the terminal (UI+keyboard)
-* Paste text into the terminal (UI+keyboard)
-* Reconnect all terminals after a network outage (command palette)
-* Toggle between black/white and white/black (command palette, menu)
-* Copy and paste commands into the terminal (shortcut, mouse)
-* Go to different directories (commands inside terminal)
-* Access or use IPython from the terminal (commands inside terminal)
+- Open a new terminal (command palette, top menu)
+- Close a terminal (UI)
+- Change the font size (bigger/smaller) (command palette, top menu)
+- Close all terminals (command palette, top menu)
+- See the name of the terminal in the dock area tab (UI)
+- Copy text from the terminal (UI+keyboard)
+- Paste text into the terminal (UI+keyboard)
+- Reconnect all terminals after a network outage (command palette)
+- Toggle between black/white and white/black (command palette, menu)
+- Copy and paste commands into the terminal (shortcut, mouse)
+- Go to different directories (commands inside terminal)
+- Access or use IPython from the terminal (commands inside terminal)
 
 # Visual Design
 
-* Terminal menu should follow design guidelines for all menus.
-* Terminal theme can change from black/white to white/black
+- Terminal menu should follow design guidelines for all menus.
+- Terminal theme can change from black/white to white/black
 
 Team IO: @faricacarroll @spoorthyv @charnpreetsingh185 @katiewhite360

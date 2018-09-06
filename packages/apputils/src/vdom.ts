@@ -39,7 +39,10 @@ export abstract class VDomRenderer<
     }
     this._model = newValue;
     if (newValue) {
-      newValue.stateChanged.connect(this.update, this);
+      newValue.stateChanged.connect(
+        this.update,
+        this
+      );
     }
     this.update();
     this._modelChanged.emit(void 0);

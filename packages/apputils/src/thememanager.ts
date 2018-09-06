@@ -58,7 +58,10 @@ export class ThemeManager {
 
     registry.load(key).then(settings => {
       this._settings = settings;
-      this._settings.changed.connect(this._loadSettings, this);
+      this._settings.changed.connect(
+        this._loadSettings,
+        this
+      );
       this._loadSettings();
     });
   }

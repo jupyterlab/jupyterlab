@@ -137,11 +137,20 @@ export class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     // Connect change listeners.
-    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
-    this._tracker.activeChanged.connect(this._onActiveChanged, this);
+    this._tracker.currentChanged.connect(
+      this._onCurrentChanged,
+      this
+    );
+    this._tracker.activeChanged.connect(
+      this._onActiveChanged,
+      this
+    );
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+    this._dockPanel.layoutModified.connect(
+      this._onLayoutModified,
+      this
+    );
 
     // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(
@@ -684,7 +693,9 @@ export class ApplicationShell extends Widget {
     // Otherwise, direction is 'next'.
     return index < len - 1
       ? bars[index + 1]
-      : index === len - 1 ? bars[0] : null;
+      : index === len - 1
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -971,12 +982,18 @@ namespace Private {
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
-      this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.currentChanged.connect(
+        this._onCurrentChanged,
+        this
+      );
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
       );
-      this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+      this._stackedPanel.widgetRemoved.connect(
+        this._onWidgetRemoved,
+        this
+      );
     }
 
     /**

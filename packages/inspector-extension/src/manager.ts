@@ -49,7 +49,10 @@ export class InspectorManager implements IInspector {
     }
 
     if (this._source) {
-      this._source.disposed.connect(this._onSourceDisposed, this);
+      this._source.disposed.connect(
+        this._onSourceDisposed,
+        this
+      );
     }
   }
 
