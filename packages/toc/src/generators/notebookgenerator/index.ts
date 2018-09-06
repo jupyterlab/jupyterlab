@@ -175,7 +175,7 @@ export function createNotebookGenerator(
             };
             let lastLevel = Private.getLastLevel(headings);
             let numbering = options.numbering;
-            let renderedHeadings = Private.getRenderedHTMLHeadings(
+            let renderedHeading = Private.getRenderedHTMLHeading(
               outputWidget.node,
               onClickFactory,
               sanitizer,
@@ -184,17 +184,13 @@ export function createNotebookGenerator(
               numbering,
               cell
             );
-            let renderedHeading = renderedHeadings[0];
             if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
               }
             } else if (renderedHeading && renderedHeading.type === 'header') {
               // Determine whether the heading has children
@@ -210,12 +206,9 @@ export function createNotebookGenerator(
               if (
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
                 if (collapsed) {
                   currentCollapseLevel = renderedHeading.level;
                 } else {
@@ -224,7 +217,7 @@ export function createNotebookGenerator(
               } else {
                 if (
                   Private.headingIsFilteredOut(
-                    renderedHeadings[0],
+                    renderedHeading,
                     options.filtered
                   )
                 ) {
@@ -233,11 +226,8 @@ export function createNotebookGenerator(
               }
             }
             if (
-              renderedHeadings[0] &&
-              !Private.headingIsFilteredOut(
-                renderedHeadings[0],
-                options.filtered
-              )
+              renderedHeading &&
+              !Private.headingIsFilteredOut(renderedHeading, options.filtered)
             ) {
               if (
                 !(renderedHeading.type === 'markdown') ||
@@ -281,10 +271,9 @@ export function createNotebookGenerator(
             };
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings: INotebookHeading[] = [];
-            let renderedHeading: INotebookHeading | null = null;
+            let renderedHeading: INotebookHeading | undefined;
             if (i !== cellNum) {
-              renderedHeadings = Private.getRenderedHTMLHeadings(
+              renderedHeading = Private.getRenderedHTMLHeading(
                 cell!.node,
                 onClickFactory,
                 sanitizer,
@@ -293,18 +282,14 @@ export function createNotebookGenerator(
                 numbering,
                 cell!
               );
-              renderedHeading = renderedHeadings[0];
             }
             if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
               }
             } else if (
               (renderedHeading && renderedHeading.type === 'header') ||
@@ -326,34 +311,24 @@ export function createNotebookGenerator(
                 renderedHeading &&
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
                 if (collapsed) {
                   currentCollapseLevel = renderedHeading.level;
                 } else {
                   currentCollapseLevel = -1;
                 }
-              } else {
-                if (
-                  Private.headingIsFilteredOut(
-                    renderedHeadings[0],
-                    options.filtered
-                  )
-                ) {
-                  currentCollapseLevel = -1;
-                }
+              } else if (
+                renderedHeading &&
+                Private.headingIsFilteredOut(renderedHeading, options.filtered)
+              ) {
+                currentCollapseLevel = -1;
               }
             }
             if (
-              renderedHeadings[0] &&
-              !Private.headingIsFilteredOut(
-                renderedHeadings[0],
-                options.filtered
-              )
+              renderedHeading &&
+              !Private.headingIsFilteredOut(renderedHeading, options.filtered)
             ) {
               if (
                 (renderedHeading && !(renderedHeading.type === 'markdown')) ||
@@ -386,28 +361,23 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings: INotebookHeading[] = [];
             let renderedHeading: INotebookHeading | null = null;
             if (cell) {
-              renderedHeadings = Private.getMarkdownHeadings(
+              renderedHeading = Private.getMarkdownHeading(
                 model!.value.text,
                 onClickFactory,
                 numberingDict,
                 lastLevel,
                 cell
               );
-              renderedHeading = renderedHeadings[0];
             }
             if (renderedHeading && renderedHeading.type === 'markdown') {
               if (
                 renderedHeading &&
                 currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
               }
             } else if (renderedHeading && renderedHeading.type === 'header') {
               // Determine whether the heading has children
@@ -424,12 +394,9 @@ export function createNotebookGenerator(
                 renderedHeading &&
                 (currentCollapseLevel >= renderedHeading.level ||
                   currentCollapseLevel < 0) &&
-                !Private.headingIsFilteredOut(
-                  renderedHeadings[0],
-                  options.filtered
-                )
+                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
-                headings = headings.concat(renderedHeadings);
+                headings.push(renderedHeading);
                 if (collapsed) {
                   currentCollapseLevel = renderedHeading.level;
                 } else {
@@ -439,7 +406,7 @@ export function createNotebookGenerator(
                 if (
                   renderedHeading &&
                   Private.headingIsFilteredOut(
-                    renderedHeadings[0],
+                    renderedHeading,
                     options.filtered
                   )
                 ) {
@@ -545,33 +512,33 @@ namespace Private {
    * Given a string of markdown, get the markdown headings
    * in that string.
    */
-  export function getMarkdownHeadings(
+  export function getMarkdownHeading(
     text: string,
     onClickFactory: (line: number) => (() => void),
     numberingDict: any,
     lastLevel: number,
     cellRef: Cell
-  ): INotebookHeading[] {
+  ): INotebookHeading {
     // Split the text into lines.
     const lines = text.split('\n');
-    let headings: INotebookHeading[] = [];
+
     // Iterate over the lines to get the header level and
     // the text for the line.
-    let line = lines[0];
-    let idx = 0;
+    const line = lines[0];
+    const line2 = lines.length > 1 ? lines[1] : undefined;
     // Make an onClick handler for this line.
-    const onClick = onClickFactory(idx);
+    const onClick = onClickFactory(0);
 
     // First test for '#'-style headers.
     let match = line.match(/^([#]{1,6}) (.*)/);
-    let match2 = line.match(/^([=]{2,}|[-]{2,})/);
+    let match2 = line2 && line2.match(/^([=]{2,}|[-]{2,})/);
     let match3 = line.match(/<h([1-6])>(.*)<\/h\1>/i);
     if (match) {
       const level = match[1].length;
       // Take special care to parse markdown links into raw text.
       const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = generateNumbering(numberingDict, level);
-      headings.push({
+      return {
         text,
         level,
         numbering,
@@ -579,14 +546,14 @@ namespace Private {
         type: 'header',
         cellRef: cellRef,
         hasChild: true
-      });
-    } else if (match2 && idx > 0) {
+      };
+    } else if (match2) {
       // Next test for '==='-style headers.
       const level = match2[1][0] === '=' ? 1 : 2;
       // Take special care to parse markdown links into raw text.
-      const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
+      const text = line.replace(/\[(.+)\]\(.+\)/g, '$1');
       let numbering = generateNumbering(numberingDict, level);
-      headings.push({
+      return {
         text,
         level,
         numbering,
@@ -594,7 +561,7 @@ namespace Private {
         type: 'header',
         cellRef: cellRef,
         hasChild: true
-      });
+      };
     } else if (match3) {
       // Finally test for HTML headers. This will not catch multiline
       // headers, nor will it catch multiple headers on the same line.
@@ -602,7 +569,7 @@ namespace Private {
       const level = parseInt(match3[1], 10);
       const text = match3[2];
       let numbering = generateNumbering(numberingDict, level);
-      headings.push({
+      return {
         text,
         level,
         numbering,
@@ -610,25 +577,24 @@ namespace Private {
         type: 'header',
         cellRef: cellRef,
         hasChild: true
-      });
+      };
     } else {
-      headings.push({
+      return {
         text: line,
         level: lastLevel + 1,
         onClick,
         type: 'markdown',
         cellRef: cellRef,
         hasChild: false
-      });
+      };
     }
-    return headings;
   }
 
   /**
    * Given an HTML element, generate ToC headings
    * by finding all the headers and making IHeading objects for them.
    */
-  export function getRenderedHTMLHeadings(
+  export function getRenderedHTMLHeading(
     node: HTMLElement,
     onClickFactory: (el: Element) => (() => void),
     sanitizer: ISanitizer,
@@ -636,8 +602,7 @@ namespace Private {
     lastLevel: number,
     needsNumbering = false,
     cellRef?: Cell
-  ): INotebookHeading[] {
-    let headings: INotebookHeading[] = [];
+  ): INotebookHeading | undefined {
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
     if (headingNodes.length > 0) {
       let markdownCell = headingNodes[0];
@@ -648,7 +613,7 @@ namespace Private {
             sanitizerOptions
           );
           html = html.replace('¶', '');
-          headings.push({
+          return {
             level: lastLevel + 1,
             html: html,
             text: markdownCell.textContent ? markdownCell.textContent : '',
@@ -656,7 +621,7 @@ namespace Private {
             type: 'markdown',
             cellRef: cellRef,
             hasChild: true
-          });
+          };
         }
       } else {
         const heading = headingNodes[0];
@@ -677,7 +642,7 @@ namespace Private {
           numDOM = '<span class="numbering-entry">' + numbering + '</span>';
         }
         heading.innerHTML = numDOM + html;
-        headings.push({
+        return {
           level,
           text,
           numbering,
@@ -686,9 +651,9 @@ namespace Private {
           type: 'header',
           cellRef: cellRef,
           hasChild: true
-        });
+        };
       }
     }
-    return headings;
+    return undefined;
   }
 }
