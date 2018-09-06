@@ -100,10 +100,12 @@
   padding: 0px;
   margin: 4px;
   background-repeat: no-repeat;
-  height: 28px;
-  width: 28px;
-  margin: 4px;
   background-color: none;
+  background-size: 100%;
+  background-position: center;
+  height: 16px;
+  width: 16px;
+  margin: 4px;
   border-radius: 2px;
 }
 
@@ -132,10 +134,9 @@
 }
 
 .toc-toolbar-tag-icon {
-  width: 43px;
-  float: right;
-  margin: 4px;
-  margin-right: 9px;
+  width: 24px;
+  height: 16px;
+  margin: 4px 9px 4px 4px;
 }
 
 [data-theme-light='true'] .toc-toolbar-tag-icon {
@@ -187,12 +188,12 @@
 .toc-toolbar {
   position: relative;
   width: 100%;
-  padding: 3px;
   margin: 0px;
   user-select: none;
-  padding-top: 0px;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  height: 33px;
+  height: 36px;
+  display: flex;
+  align-items: center;
 }
 
 .toc-code-cell-div {
@@ -263,7 +264,7 @@
 .cm-toc-plain-textarea {
   font-size: 9px;
   z-index: 0;
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color2);
   border-radius: 0px;
   background: var(--jp-cell-editor-background);
   width: calc(100% - 9px);
@@ -293,16 +294,17 @@
 }
 
 .toc-tag-dropdown {
-  position: relative;
-  width: 100%;
-  padding: 5px;
-  padding-bottom: 0px;
-  margin-bottom: 8px;
-  -webkit-box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
-  -moz-box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
-  box-shadow: 0 9px 4px -7px var(--jp-layout-color2);
   display: flex;
-  padding-left: 0px;
+  width: 100%;
+}
+
+.toc-tag-dropdown-button {
+  margin-left: auto;
+}
+
+.toc-tags-container {
+  padding: 4px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .toc-clear-button {
@@ -326,7 +328,6 @@
   border: solid 1px var(--jp-layout-color4);
   border-radius: 3px;
   width: fit-content;
-  padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
   margin-right: 17px;
@@ -341,7 +342,6 @@
   border: solid 1px var(--jp-layout-color4);
   border-radius: 3px;
   width: fit-content;
-  padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
   margin-right: 15px;
