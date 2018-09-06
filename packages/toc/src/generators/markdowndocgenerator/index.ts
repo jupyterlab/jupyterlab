@@ -156,8 +156,15 @@ namespace Private {
       match = line.match(/^([=]{2,}|[-]{2,})/);
       if (match && idx > 0) {
         const level = match[1][0] === '=' ? 1 : 2;
+        const prev = lines[idx - 1];
+        // If the previous line is already a '#'-style heading,
+        // then this is not a '===' style heading.
+        const prevMatch = prev.match(/^([#]{1,6}) (.*)/);
+        if (prevMatch) {
+          return;
+        }
         // Take special care to parse markdown links into raw text.
-        const text = lines[idx - 1].replace(/\[(.+)\]\(.+\)/g, '$1');
+        const text = prev.replace(/\[(.+)\]\(.+\)/g, '$1');
         let numbering = generateNumbering(numberingDict, level);
         headings.push({
           text,
