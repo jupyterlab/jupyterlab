@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^0.18.4",
     "@jupyterlab/application-extension": "^0.18.5",
     "@jupyterlab/apputils-extension": "^0.18.4",
-    "@jupyterlab/buildutils": "^0.9.4",
+    "@jupyterlab/buildutils": "^0.10.0",
     "@jupyterlab/codemirror-extension": "^0.18.4",
     "@jupyterlab/completer-extension": "^0.18.4",
     "@jupyterlab/console-extension": "^0.18.4",
