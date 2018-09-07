@@ -3,6 +3,8 @@
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { JSONValue } from '@phosphor/coreutils';
+
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import * as React from 'react';
@@ -100,36 +102,21 @@ export function notebookGeneratorToolbar(
       this.setState({ showTags: options.showTags });
     };
 
-    addTagIntoAllTagsList(name: string) {
-      if (name === '') {
-        return;
-      } else if (this.allTags == null) {
-        this.allTags = [name];
-      } else {
-        if (this.allTags.indexOf(name) < 0) {
-          this.allTags.push(name);
-        }
-      }
-    }
-
     // Load all tags in the document
     getTags = () => {
       let notebook = tracker.currentWidget;
       if (notebook) {
-        let cells = notebook.model.cells;
+        const cells = notebook.model.cells;
+        const tagSet = new Set<string>();
         this.allTags = [];
         for (let i = 0; i < cells.length; i++) {
-          if (cells.get(i)) {
-            let cellMetadata = cells.get(i)!.metadata;
-            let cellTagsData = cellMetadata.get('tags') as string[];
-            if (cellTagsData) {
-              for (let j = 0; j < cellTagsData.length; j++) {
-                let name = cellTagsData[j];
-                this.addTagIntoAllTagsList(name);
-              }
-            }
+          const cell = cells.get(i)!;
+          const tagData = cell.metadata.get('tags') as JSONValue;
+          if (Array.isArray(tagData)) {
+            tagData.forEach((tag: string) => tag && tagSet.add(tag));
           }
         }
+        this.allTags = Array.from(tagSet);
       }
     };
 
