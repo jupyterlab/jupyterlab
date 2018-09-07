@@ -33,11 +33,13 @@ import { markdownDocGeneratorToolbar } from './toolbargenerator';
  */
 export function createMarkdownGenerator(
   tracker: IEditorTracker,
-  widget: TableOfContents
+  widget: TableOfContents,
+  sanitizer: ISanitizer
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   // Create a option manager to manage user settings
   const options = new MarkdownDocGeneratorOptionsManager(widget, {
-    needsNumbering: true
+    needsNumbering: true,
+    sanitizer
   });
   return {
     tracker,
@@ -83,13 +85,10 @@ export function createRenderedMarkdownGenerator(
   sanitizer: ISanitizer,
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<MimeDocument> {
-  const options = new MarkdownDocGeneratorOptionsManager(
-    widget,
-    {
-      needsNumbering: true
-    },
-    tracker
-  );
+  const options = new MarkdownDocGeneratorOptionsManager(widget, {
+    needsNumbering: true,
+    sanitizer
+  });
   return {
     tracker,
     usesLatex: true,

@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISanitizer } from '@jupyterlab/apputils';
+
 import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
-
-import { MimeDocument } from '@jupyterlab/docregistry';
-
 export class MarkdownDocGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
   constructor(
     widget: TableOfContents,
-    options: { needsNumbering: boolean },
-    tracker?: IInstanceTracker<MimeDocument>
+    options: { needsNumbering: boolean; sanitizer: ISanitizer }
   ) {
     super();
     this._numbering = options.needsNumbering;
     this._widget = widget;
+    this.sanitizer = options.sanitizer;
   }
+
+  readonly sanitizer: ISanitizer;
 
   set numbering(value: boolean) {
     this._numbering = value;

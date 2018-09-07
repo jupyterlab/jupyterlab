@@ -22,6 +22,8 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this.sanitizer = options.sanitizer;
   }
 
+  readonly sanitizer: ISanitizer;
+
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
       this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
@@ -103,7 +105,6 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this._widget.update();
   }
 
-  sanitizer: ISanitizer;
   private _preRenderedToolbar: any = null;
   private _filtered: string[] = [];
   private _numbering: boolean;

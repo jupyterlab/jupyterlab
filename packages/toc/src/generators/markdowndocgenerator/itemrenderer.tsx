@@ -3,7 +3,7 @@
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
-import { INumberedHeading } from '../shared';
+import { INumberedHeading, sanitizerOptions } from '../shared';
 
 import * as React from 'react';
 
@@ -20,7 +20,10 @@ export function markdownDocItemRenderer(
   if (item.html) {
     jsx = (
       <span
-        dangerouslySetInnerHTML={{ __html: numbering + item.html }}
+        dangerouslySetInnerHTML={{
+          __html:
+            numbering + options.sanitizer.sanitize(item.html, sanitizerOptions)
+        }}
         className={'toc-markdown-cell ' + fontSizeClass}
       />
     );
