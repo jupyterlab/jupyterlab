@@ -3,9 +3,14 @@
 
 import * as React from 'react';
 
+import { ISanitizer } from '@jupyterlab/apputils';
+
 import { INotebookHeading } from './heading';
 
+import { sanitizerOptions } from '../shared';
+
 export interface ICodeComponentProps {
+  sanitizer: ISanitizer;
   heading: INotebookHeading;
 }
 
@@ -27,26 +32,12 @@ export class CodeComponent extends React.Component<
   }
 
   render() {
-    // Grab the rendered CodeMirror DOM in the document, show it in TOC
-    let node = this.state.heading.cellRef!.node.querySelectorAll(
-      '.jp-InputArea.jp-Cell-inputArea'
-    );
-    if (node != null && node.length > 0 && node[0] != null) {
-      return (
-        <div
-          className="cm-toc"
-          dangerouslySetInnerHTML={{
-            __html: this.state.heading.cellRef!.editor.host.innerHTML
-          }}
-        />
-      );
-    }
+    // Grab the rendered CodeMirror DOM in the document, show it in TOC.
+    let html = this.state.heading.cellRef!.editor.host.innerHTML;
+    // Sanitize it to be safe.
+    html = this.props.sanitizer.sanitize(html, sanitizerOptions);
     return (
-      <div>
-        <div className="cm-toc-plain-textarea">
-          <span className="cm-toc-plain-span">{this.state.heading.text!}</span>
-        </div>
-      </div>
+      <div className="cm-toc" dangerouslySetInnerHTML={{ __html: html }} />
     );
   }
 }

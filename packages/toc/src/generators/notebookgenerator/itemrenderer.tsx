@@ -140,7 +140,7 @@ export function notebookItemRenderer(
       <div className="toc-code-cell-div">
         <div className="toc-code-cell-prompt">{item.prompt}</div>
         <span className={'toc-code-span'}>
-          <CodeComponent heading={item} />
+          <CodeComponent sanitizer={options.sanitizer} heading={item} />
         </span>
       </div>
     );
