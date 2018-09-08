@@ -364,6 +364,7 @@ export namespace ToolbarButtonComponent {
     iconLabel?: string;
     tooltip?: string;
     onClick?: () => void;
+    enabled?: boolean;
   }
 }
 
@@ -380,6 +381,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      disabled={props.enabled === false}
       onClick={props.onClick}
       title={props.tooltip || props.iconLabel}
     >
@@ -494,7 +496,8 @@ namespace Private {
     const onClick = () => {
       commands.execute(id);
     };
-    return { className, iconClassName, tooltip, onClick };
+    const enabled = commands.isEnabled(id);
+    return { className, iconClassName, tooltip, onClick, enabled };
   }
 
   /**
