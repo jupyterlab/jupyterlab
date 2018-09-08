@@ -191,8 +191,14 @@ export class InspectorPanel extends TabPanel implements IInspector {
     // Connect new signal handler.
     if (this._source) {
       this._source.standby = false;
-      this._source.inspected.connect(this.onInspectorUpdate, this);
-      this._source.disposed.connect(this.onSourceDisposed, this);
+      this._source.inspected.connect(
+        this.onInspectorUpdate,
+        this
+      );
+      this._source.disposed.connect(
+        this.onSourceDisposed,
+        this
+      );
     }
   }
 

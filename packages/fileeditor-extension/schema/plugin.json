@@ -50,8 +50,7 @@
   "properties": {
     "editorConfig": {
       "title": "Editor Configuration",
-      "description":
-        "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`, values from\ncurrent theme are used.",
+      "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`, values from\ncurrent theme are used.",
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,

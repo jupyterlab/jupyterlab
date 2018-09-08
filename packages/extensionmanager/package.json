@@ -33,7 +33,7 @@
     "@jupyterlab/apputils": "^0.18.4",
     "@jupyterlab/services": "^3.1.4",
     "@phosphor/messaging": "^1.2.2",
-    "react": "~16.4.0",
+    "react": "~16.4.2",
     "react-paginate": "^5.2.3",
     "semver": "^5.5.0"
   },

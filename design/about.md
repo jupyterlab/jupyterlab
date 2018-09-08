@@ -6,63 +6,63 @@ This document describes the design of the "About JupyterLab" plugin. This docume
 
 ### Ricardo Godfrey
 
-* Male 25, Full Stack Engineer
+- Male 25, Full Stack Engineer
 
-* Uses single notebook to explain a very specific topic or teach people something
+- Uses single notebook to explain a very specific topic or teach people something
 
-  * Done with charts, graphs, tables (Matplotlib and Pandas), live code, images integrated in text
+  - Done with charts, graphs, tables (Matplotlib and Pandas), live code, images integrated in text
 
 ### Krista
 
-* Female 40, Engineering Professor
+- Female 40, Engineering Professor
 
-* Uses the Jupyter notebooks to teach her entire college courses
+- Uses the Jupyter notebooks to teach her entire college courses
 
-  * Done with Matplotlib graphs, & embeds in notebook, live code
+  - Done with Matplotlib graphs, & embeds in notebook, live code
 
 ## Other Solutions
 
-* Making the whole experience more visual, using GIFs to show firsthand what you can do with Jupyter Lab
+- Making the whole experience more visual, using GIFs to show firsthand what you can do with Jupyter Lab
 
-  * Show that you can drag and drop tabs to rearrange, etc.
+  - Show that you can drag and drop tabs to rearrange, etc.
 
-* Outline the differences between Notebook and Lab to help users who are familiar with the former better understand the latter
+- Outline the differences between Notebook and Lab to help users who are familiar with the former better understand the latter
 
-  * Side-by-side GIFs showing some differences
+  - Side-by-side GIFs showing some differences
 
 ## User Tasks
 
 Users should be able to:
 
-* Learn how to get started using JupyterLab ("Scroll through tutorial")
+- Learn how to get started using JupyterLab ("Scroll through tutorial")
 
-  * _Mouse: Scrolling_
+  - _Mouse: Scrolling_
 
-  * _UI: Clicking side pagination_
+  - _UI: Clicking side pagination_
 
-  * _UI: Clicking "continue" arrow_
+  - _UI: Clicking "continue" arrow_
 
-  * _Keyboard: Arrow keys_
+  - _Keyboard: Arrow keys_
 
-  * _Keyboard: Numbers_
+  - _Keyboard: Numbers_
 
-* Easily close the page if they don’t need it
+- Easily close the page if they don’t need it
 
-  * _Mouse: Click to close_
+  - _Mouse: Click to close_
 
-* Show users (with visual animation) how to perform JupyterLab actions
+- Show users (with visual animation) how to perform JupyterLab actions
 
-  * i.e. Click and drag window tabs to move and split windows
+  - i.e. Click and drag window tabs to move and split windows
 
-* Not be intimidated by too many words ("About" should not feel like a commitment)
+- Not be intimidated by too many words ("About" should not feel like a commitment)
 
-* Have an **overview** of tutorial contents on "Page 1" before scrolling
+- Have an **overview** of tutorial contents on "Page 1" before scrolling
 
-* Read/Take action at the end (similar to launcher)
+- Read/Take action at the end (similar to launcher)
 
-  * _UI: Clicking Action_
+  - _UI: Clicking Action_
 
-* Have a short description of JupyterLab capabilities
+- Have a short description of JupyterLab capabilities
 
 ## Visual Design
 

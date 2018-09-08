@@ -11,7 +11,7 @@ The example can be installed as `npm install` and run as `python main.py`.
 
 Notes:
 
-* The example is written using _ES5_ syntax.
-* The example requires version 4.1+ of the Jupyter Notebook.
-* This example `require`s its dependencies from the root directory of the
+- The example is written using _ES5_ syntax.
+- The example requires version 4.1+ of the Jupyter Notebook.
+- This example `require`s its dependencies from the root directory of the
   repo, but typically the requirements would be directly in `package.json`

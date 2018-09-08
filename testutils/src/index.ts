@@ -58,19 +58,22 @@ export function testEmission<T, U, V>(
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
-  signal.connect((sender: T, args: U) => {
-    if (!options.find || options.find(sender, args)) {
-      try {
-        Signal.disconnectReceiver(object);
-        if (options.test) {
-          options.test(sender, args);
+  signal.connect(
+    (sender: T, args: U) => {
+      if (!options.find || options.find(sender, args)) {
+        try {
+          Signal.disconnectReceiver(object);
+          if (options.test) {
+            options.test(sender, args);
+          }
+        } catch (e) {
+          done.reject(e);
         }
-      } catch (e) {
-        done.reject(e);
+        done.resolve(options.value || undefined);
       }
-      done.resolve(options.value || undefined);
-    }
-  }, object);
+    },
+    object
+  );
   return done.promise;
 }
 

@@ -48,9 +48,15 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     content.node.tabIndex = -1;
 
     this._updateTitle();
-    content.title.changed.connect(this._updateTitle, this);
+    content.title.changed.connect(
+      this._updateTitle,
+      this
+    );
     this.title.closable = true;
-    this.title.changed.connect(this._updateContentTitle, this);
+    this.title.changed.connect(
+      this._updateContentTitle,
+      this
+    );
 
     if (options.reveal) {
       this.node.appendChild(spinner.node);

@@ -67,10 +67,13 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
 
       shell.addToMainArea(main, { activate: args['activate'] as boolean });
 
-      shell.layoutModified.connect(() => {
-        // If there is only a launcher open, remove the close icon.
-        main.title.closable = toArray(shell.widgets('main')).length > 1;
-      }, main);
+      shell.layoutModified.connect(
+        () => {
+          // If there is only a launcher open, remove the close icon.
+          main.title.closable = toArray(shell.widgets('main')).length > 1;
+        },
+        main
+      );
 
       return main;
     }

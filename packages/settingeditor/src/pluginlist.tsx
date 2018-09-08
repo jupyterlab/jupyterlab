@@ -31,9 +31,12 @@ export class PluginList extends Widget {
     this.registry = options.registry;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
-    this.registry.pluginChanged.connect(() => {
-      this.update();
-    }, this);
+    this.registry.pluginChanged.connect(
+      () => {
+        this.update();
+      },
+      this
+    );
   }
 
   /**

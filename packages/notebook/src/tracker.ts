@@ -87,8 +87,14 @@ export class NotebookTracker extends InstanceTracker<NotebookPanel>
    */
   add(panel: NotebookPanel): Promise<void> {
     const promise = super.add(panel);
-    panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
-    panel.content.selectionChanged.connect(this._onSelectionChanged, this);
+    panel.content.activeCellChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
+    panel.content.selectionChanged.connect(
+      this._onSelectionChanged,
+      this
+    );
     return promise;
   }
 

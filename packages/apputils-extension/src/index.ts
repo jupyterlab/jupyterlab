@@ -456,7 +456,10 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Any time the local state database changes, save the workspace.
         if (workspace) {
-          state.changed.connect(listener, state);
+          state.changed.connect(
+            listener,
+            state
+          );
         }
 
         const immediate = true;

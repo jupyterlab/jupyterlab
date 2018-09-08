@@ -66,7 +66,10 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (editor) {
       // Clear ephemeral inspectors in preparation for a new editor.
       this._ephemeralCleared.emit(void 0);
-      editor.model.value.changed.connect(this.onTextChanged, this);
+      editor.model.value.changed.connect(
+        this.onTextChanged,
+        this
+      );
     }
   }
 

@@ -23,19 +23,19 @@
 This is just a sample paragraph
 You can look at different level of nested unordered list ljbakjn arsvlasc asc asc awsc asc ascd ascd ascd asdc asc
 
-* level 1
-  * level 2
-  * level 2
-  * level 2
-    * level 3
-    * level 3
-      * level 4
-        * level 5
-          * level 6
-  * level 2
-* level 1
-* level 1
-* level 1
+- level 1
+  - level 2
+  - level 2
+  - level 2
+    - level 3
+    - level 3
+      - level 4
+        - level 5
+          - level 6
+  - level 2
+- level 1
+- level 1
+- level 1
   Ordered list
 
 1.  level 1

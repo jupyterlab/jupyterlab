@@ -3,6 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { find } from '@phosphor/algorithm';
+
+import { CommandRegistry } from '@phosphor/commands';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { CommandPalette } from '@phosphor/widgets';
@@ -73,6 +76,24 @@ class Palette implements ICommandPalette {
 export function activatePalette(app: JupyterLab): ICommandPalette {
   const { commands, shell } = app;
   const palette = Private.createPalette(app);
+
+  // Show the current palette shortcut in its title.
+  const updatePaletteTitle = () => {
+    const binding = find(
+      app.commands.keyBindings,
+      b => b.command === CommandIDs.activate
+    );
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      palette.title.caption = `Commands (${ks})`;
+    } else {
+      palette.title.caption = 'Commands';
+    }
+  };
+  updatePaletteTitle();
+  app.commands.keyBindingChanged.connect(() => {
+    updatePaletteTitle();
+  });
 
   commands.addCommand(CommandIDs.activate, {
     execute: () => {

@@ -158,17 +158,26 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.id = options.id || UUID.uuid4();
 
-    this.value.changed.connect(this.onGenericChange, this);
+    this.value.changed.connect(
+      this.onGenericChange,
+      this
+    );
 
     let cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
     let observableMetadata = this.modelDB.createMap('metadata');
-    observableMetadata.changed.connect(this.onGenericChange, this);
+    observableMetadata.changed.connect(
+      this.onGenericChange,
+      this
+    );
 
     let cell = options.cell;
     let trusted = this.modelDB.createValue('trusted');
-    trusted.changed.connect(this.onTrustedChanged, this);
+    trusted.changed.connect(
+      this.onTrustedChanged,
+      this
+    );
 
     if (!cell) {
       trusted.set(false);
@@ -327,7 +336,10 @@ export class AttachmentsCellModel extends CellModel {
       values: attachments,
       modelDB: this.modelDB
     });
-    this._attachments.stateChanged.connect(this.onGenericChange, this);
+    this._attachments.stateChanged.connect(
+      this.onGenericChange,
+      this
+    );
   }
 
   /**
@@ -466,14 +478,20 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
-    executionCount.changed.connect(this._onExecutionCountChanged, this);
+    executionCount.changed.connect(
+      this._onExecutionCountChanged,
+      this
+    );
 
     this._outputs = factory.createOutputArea({
       trusted,
       values: outputs,
       modelDB: this.modelDB
     });
-    this._outputs.changed.connect(this.onGenericChange, this);
+    this._outputs.changed.connect(
+      this.onGenericChange,
+      this
+    );
   }
 
   /**

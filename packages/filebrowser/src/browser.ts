@@ -62,7 +62,10 @@ export class FileBrowser extends Widget {
     const model = (this.model = options.model);
     const renderer = options.renderer;
 
-    model.connectionFailure.connect(this._onConnectionFailure, this);
+    model.connectionFailure.connect(
+      this._onConnectionFailure,
+      this
+    );
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();

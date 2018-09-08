@@ -436,7 +436,10 @@ export class CommandToolbarButtonComponent extends React.Component<
 > {
   constructor(props: CommandToolbarButtonComponent.IProps) {
     super(props);
-    props.commands.commandChanged.connect(this._onChange, this);
+    props.commands.commandChanged.connect(
+      this._onChange,
+      this
+    );
     this._childProps = Private.propsFromCommand(this.props);
   }
 
@@ -551,7 +554,10 @@ namespace Private {
   > {
     constructor(props: KernelNameComponent.IProps) {
       super(props);
-      props.session.kernelChanged.connect(this._onKernelChanged, this);
+      props.session.kernelChanged.connect(
+        this._onKernelChanged,
+        this
+      );
       this._childProps = {
         className: TOOLBAR_KERNEL_NAME_CLASS,
         onClick: () => {
@@ -598,7 +604,10 @@ namespace Private {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
-      session.statusChanged.connect(this._onStatusChanged, this);
+      session.statusChanged.connect(
+        this._onStatusChanged,
+        this
+      );
     }
 
     /**

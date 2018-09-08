@@ -72,8 +72,14 @@ export class Context<T extends DocumentRegistry.IModel>
       kernelPreference: options.kernelPreference || { shouldStart: false },
       setBusy: options.setBusy
     });
-    this.session.propertyChanged.connect(this._onSessionChanged, this);
-    manager.contents.fileChanged.connect(this._onFileChanged, this);
+    this.session.propertyChanged.connect(
+      this._onSessionChanged,
+      this
+    );
+    manager.contents.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
       session: this.session,

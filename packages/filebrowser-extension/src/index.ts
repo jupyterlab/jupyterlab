@@ -602,9 +602,12 @@ function createLauncher(
   return commands
     .execute('launcher:create', { cwd: model.path })
     .then((launcher: MainAreaWidget<Launcher>) => {
-      model.pathChanged.connect(() => {
-        launcher.content.cwd = model.path;
-      }, launcher);
+      model.pathChanged.connect(
+        () => {
+          launcher.content.cwd = model.path;
+        },
+        launcher
+      );
       return launcher;
     });
 }

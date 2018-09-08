@@ -65,7 +65,10 @@ export class Terminal extends Widget {
       if (this.isDisposed || value !== this._session) {
         return;
       }
-      value.messageReceived.connect(this._onMessage, this);
+      value.messageReceived.connect(
+        this._onMessage,
+        this
+      );
       this.title.label = `Terminal ${value.name}`;
       this._setSessionSize();
       if (this._initialCommand) {
