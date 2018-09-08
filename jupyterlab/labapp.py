@@ -205,11 +205,7 @@ class LabApp(NotebookApp):
             settings['page_config_data'] = {}
 
         # Handle quit button with support for Notebook < 5.6
-        if hasattr(self, 'quit_button'):
-            quit_button = self.quit_button
-        else:
-            quit_button = True
-        settings['page_config_data']['quit_button'] = quit_button
+        settings['page_config_data']['quit_button'] = getattr(self, 'quit_button', False)
 
     def init_server_extensions(self):
         """Load any extensions specified by config.
