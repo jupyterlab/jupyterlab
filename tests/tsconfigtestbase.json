@@ -1,6 +1,0 @@
-{
-  "extends": "../tsconfigbase",
-  "compilerOptions": {
-    "types": ["mocha", "node"]
-  }
-}

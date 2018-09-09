@@ -21,7 +21,7 @@ from unittest.mock import patch
 from traitlets import Bool, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
-from jupyter_core.application import base_aliases
+from jupyter_core.application import base_aliases, base_flags
 
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
@@ -177,10 +177,18 @@ class ProcessTestApp(ProcessApp):
 
 jest_aliases = dict(base_aliases)
 jest_aliases.update({
-    'coverage': 'JestApp.coverage',
-    'pattern': 'JestApp.testPathPattern',
-    'watchAll': 'JestApp.watchAll'
+    'pattern': 'JestApp.testPathPattern'
 })
+
+jest_flags = dict(base_flags)
+jest_flags['coverage'] = (
+    {'JestApp': {'coverage': True}},
+    'Run coverage'
+)
+jest_flags['watchAll'] = (
+    {'JestApp': {'watchAll': True}},
+    'Watch all test files'
+)
 
 
 class JestApp(ProcessTestApp):
@@ -193,6 +201,8 @@ class JestApp(ProcessTestApp):
     watchAll = Bool(False).tag(config=True)
 
     aliases = jest_aliases
+
+    flags = jest_flags
 
     jest_dir = Unicode('')
 
@@ -226,7 +236,7 @@ class JestApp(ProcessTestApp):
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
-                      token=self.token)
+                      token=self.token, foo='bar')
 
         td = tempfile.mkdtemp()
         atexit.register(lambda: shutil.rmtree(td, True))

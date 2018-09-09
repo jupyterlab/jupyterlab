@@ -42,8 +42,14 @@
     "url-parse": "~1.4.3"
   },
   "devDependencies": {
+    "@types/chai": "~4.0.10",
     "@types/comment-json": "^1.1.0",
+    "@types/jest": "^23.3.1",
     "@types/minimist": "~1.2.0",
+    "jest": "^23.5.0",
+    "karma": "~2.0.4",
+    "karma-chrome-launcher": "~2.2.0",
+    "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
     "typedoc": "~0.12.0",
     "typescript": "~3.1.1"

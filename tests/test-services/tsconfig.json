@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "types": ["jest", "ws", "node"],
+    "outDir": "./build"
+  }
+}

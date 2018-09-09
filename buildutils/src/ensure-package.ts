@@ -115,6 +115,9 @@ export async function ensurePackage(
     if (unused.indexOf(name) !== -1) {
       return;
     }
+    if (name === 'jest' || name === 'ts-jest') {
+      return;
+    }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];
       messages.push(
