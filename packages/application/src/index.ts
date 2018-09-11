@@ -54,10 +54,21 @@ export class JupyterLab extends Application<ApplicationShell> {
     // Set default workspace in page config.
     PageConfig.setOption('defaultWorkspace', defaultWorkspace);
 
+    // Instantiate public resources.
+    this.serviceManager = options.serviceManager || new ServiceManager();
+    this.commandLinker =
+      options.commandLinker || new CommandLinker({ commands: this.commands });
+    this.docRegistry = options.docRegistry || new DocumentRegistry();
+
+    // Remove extra resources (non-IInfo) from options object.
+    delete options.serviceManager;
+    delete options.commandLinker;
+    delete options.docRegistry;
+
     // Populate application info.
     this._info = {
       ...JupyterLab.defaultInfo,
-      ...options,
+      ...(options as Partial<JupyterLab.IInfo>),
       ...{ defaultWorkspace }
     };
 
@@ -69,11 +80,6 @@ export class JupyterLab extends Application<ApplicationShell> {
     Object.defineProperty(this._info, 'workspace', {
       get: () => PageConfig.getOption('workspace') || ''
     });
-
-    // Instantiate public resources.
-    this.serviceManager = new ServiceManager();
-    this.commandLinker = new CommandLinker({ commands: this.commands });
-    this.docRegistry = new DocumentRegistry();
 
     // Add initial model factory.
     this.docRegistry.addModelFactory(new Base64ModelFactory());
@@ -328,7 +334,22 @@ export namespace JupyterLab {
   /**
    * The options used to initialize a JupyterLab object.
    */
-  export interface IOptions extends Partial<IInfo> {}
+  export interface IOptions extends Partial<IInfo> {
+    /**
+     * The document registry instance used by the application.
+     */
+    docRegistry?: DocumentRegistry;
+
+    /**
+     * The command linker used by the application.
+     */
+    commandLinker?: CommandLinker;
+
+    /**
+     * The service manager used by the application.
+     */
+    serviceManager?: ServiceManager;
+  }
 
   /**
    * The information about a JupyterLab application.
