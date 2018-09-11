@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "noEmitOnError": true,
     "lib": ["es2015", "dom"],
-    "types": ["mocha"],
+    "types": ["jest", "ws", "node"],
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",

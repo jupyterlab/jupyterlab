@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { Session } from '../../../lib/session';
+import { Session } from '../../../src/session';
 
-import { validateModel } from '../../../lib/session/validate';
+import { validateModel } from '../../../src/session/validate';
 
 describe('session/validate', () => {
   describe('#validateModel()', () => {

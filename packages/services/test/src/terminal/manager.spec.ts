@@ -11,13 +11,13 @@ import {
   ServerConnection,
   TerminalSession,
   TerminalManager
-} from '../../../lib';
+} from '../../../src';
 
 describe('terminal', () => {
   let manager: TerminalSession.IManager;
   let session: TerminalSession.ISession;
 
-  before(async () => {
+  beforeAll(async () => {
     session = await TerminalSession.startNew();
   });
 
@@ -30,7 +30,7 @@ describe('terminal', () => {
     manager.dispose();
   });
 
-  after(() => {
+  afterAll(() => {
     return TerminalSession.shutdownAll();
   });
 

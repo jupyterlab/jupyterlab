@@ -43,7 +43,7 @@ if [[ $GROUP == js_services ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm run test:services
+    jlpm run test:services || jlpm run test:services
 
 fi
 

@@ -229,17 +229,10 @@ export class DefaultKernel implements Kernel.IKernel {
     this._isDisposed = true;
     this._terminated.emit(void 0);
     this._status = 'dead';
+    this._clearState();
     this._clearSocket();
-    this._futures.forEach(future => {
-      future.dispose();
-    });
-    this._comms.forEach(comm => {
-      comm.dispose();
-    });
     this._kernelSession = '';
     this._msgChain = null;
-    this._displayIdToParentIds.clear();
-    this._msgIdToDisplayIds.clear();
     ArrayExt.removeFirstOf(Private.runningKernels, this);
     Signal.clearData(this);
   }
@@ -386,7 +379,9 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   shutdown(): Promise<void> {
     if (this.status === 'dead') {
-      return Promise.reject(new Error('Kernel is dead'));
+      this._clearSocket();
+      this._clearState();
+      return;
     }
     return Private.shutdownKernel(this.id, this.serverSettings).then(() => {
       this._clearState();
@@ -977,6 +972,9 @@ export class DefaultKernel implements Kernel.IKernel {
    * Create the kernel websocket connection and add socket status handlers.
    */
   private _createSocket = () => {
+    if (this.isDisposed) {
+      return;
+    }
     let settings = this.serverSettings;
     let partialUrl = URLExt.join(
       settings.wsUrl,

@@ -3,17 +3,17 @@
 
 import { expect } from 'chai';
 
-import { ContentsManager } from '../../lib/contents';
+import { ContentsManager } from '../../src/contents';
 
-import { ServiceManager } from '../../lib/manager';
+import { ServiceManager } from '../../src/manager';
 
-import { SessionManager } from '../../lib/session';
+import { SessionManager } from '../../src/session';
 
-import { SettingManager } from '../../lib/setting';
+import { SettingManager } from '../../src/setting';
 
-import { TerminalManager } from '../../lib/terminal';
+import { TerminalManager } from '../../src/terminal';
 
-import { WorkspaceManager } from '../../lib/workspace';
+import { WorkspaceManager } from '../../src/workspace';
 
 describe('manager', () => {
   describe('ServiceManager', () => {

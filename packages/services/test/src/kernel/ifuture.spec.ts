@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Kernel, KernelMessage } from '../../../lib/kernel';
+import { Kernel, KernelMessage } from '../../../src/kernel';
 
 import { KernelTester, createMsg } from '../utils';
 
@@ -16,7 +16,7 @@ describe('Kernel.IFuture', () => {
     }
   });
 
-  after(() => {
+  afterAll(() => {
     Kernel.shutdownAll();
   });
 

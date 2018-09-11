@@ -10,7 +10,7 @@ import { Signal } from '@phosphor/signaling';
 import { expectFailure, isFulfilled, testEmission } from './utils';
 
 describe('test/utils', () => {
-  context('testEmission', () => {
+  describe('testEmission', () => {
     it('should resolve to the given value', async () => {
       const owner = {};
       const x = new Signal<{}, number>(owner);
@@ -67,7 +67,7 @@ describe('test/utils', () => {
     });
   });
 
-  context('isFulfilled', () => {
+  describe('isFulfilled', () => {
     it('should resolve to true only after a promise is fulfilled', async () => {
       const p = new PromiseDelegate<number>();
       expect(await isFulfilled(p.promise)).to.equal(false);

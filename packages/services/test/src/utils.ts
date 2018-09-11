@@ -19,13 +19,13 @@ import { Response } from 'node-fetch';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Contents, TerminalSession, ServerConnection } from '../../lib';
+import { Contents, TerminalSession, ServerConnection } from '../../src';
 
-import { Kernel, KernelMessage } from '../../lib/kernel';
+import { Kernel, KernelMessage } from '../../src/kernel';
 
-import { deserialize, serialize } from '../../lib/kernel/serialize';
+import { deserialize, serialize } from '../../src/kernel/serialize';
 
-import { Session } from '../../lib/session';
+import { Session } from '../../src/session';
 
 // stub for node global
 declare var global: any;
@@ -499,11 +499,11 @@ export class KernelTester extends SocketTester {
    * Dispose the tester.
    */
   dispose() {
-    super.dispose();
-    if (this._kernel && !this._kernel.isDisposed) {
+    if (this._kernel) {
       this._kernel.dispose();
       this._kernel = null;
     }
+    super.dispose();
   }
 
   /**

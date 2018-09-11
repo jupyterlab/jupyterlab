@@ -69,10 +69,14 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined') {
       try {
         const cli = minimist(process.argv.slice(2));
+        const path: any = require('path');
+        let fullPath = '';
         if ('jupyter-config-data' in cli) {
-          const path: any = require('path');
-          const fullPath = path.resolve(cli['jupyter-config-data']);
-
+          fullPath = path.resolve(cli['jupyter-config-data']);
+        } else if ('JUPYTER_CONFIG_DATA' in process.env) {
+          fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
+        }
+        if (fullPath) {
           /* tslint:disable */
           // Force Webpack to ignore this require.
           configData = eval('require')(fullPath) as { [key: string]: string };

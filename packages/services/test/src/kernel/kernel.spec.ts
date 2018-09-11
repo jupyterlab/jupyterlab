@@ -7,7 +7,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { Kernel } from '../../../lib/kernel';
+import { Kernel } from '../../../src/kernel';
 
 import {
   expectFailure,
@@ -27,7 +27,7 @@ describe('kernel', () => {
   let specs: Kernel.ISpecModels;
   let tester: KernelTester;
 
-  before(async () => {
+  beforeAll(async () => {
     specs = await Kernel.getSpecs();
     defaultKernel = await Kernel.startNew();
     // Start another kernel.
@@ -40,7 +40,7 @@ describe('kernel', () => {
     }
   });
 
-  after(() => {
+  afterEach(() => {
     return Kernel.shutdownAll();
   });
 
@@ -52,8 +52,10 @@ describe('kernel', () => {
 
     it('should accept server settings', async () => {
       const serverSettings = makeSettings();
+      const kernel = await Kernel.startNew({ serverSettings });
       const response = await Kernel.listRunning(serverSettings);
       expect(toArray(response).length).to.be.greaterThan(0);
+      await kernel.shutdown();
     });
 
     it('should throw an error for an invalid model', async () => {

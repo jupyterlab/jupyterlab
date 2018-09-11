@@ -9,7 +9,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { TerminalSession } from '../../../lib/terminal';
+import { TerminalSession } from '../../../src/terminal';
 
 import { handleRequest, testEmission } from '../utils';
 
@@ -17,7 +17,7 @@ describe('terminal', () => {
   let defaultSession: TerminalSession.ISession;
   let session: TerminalSession.ISession;
 
-  before(async () => {
+  beforeAll(async () => {
     defaultSession = await TerminalSession.startNew();
   });
 
@@ -109,7 +109,7 @@ describe('terminal', () => {
       });
     });
 
-    context('#serverSettings', () => {
+    describe('#serverSettings', () => {
       it('should be the server settings of the server', () => {
         expect(defaultSession.serverSettings.baseUrl).to.equal(
           PageConfig.getBaseUrl()
@@ -147,7 +147,7 @@ describe('terminal', () => {
       });
     });
 
-    context('#isReady', () => {
+    describe('#isReady', () => {
       it('should test whether the terminal is ready', async () => {
         session = await TerminalSession.startNew();
         expect(session.isReady).to.equal(false);

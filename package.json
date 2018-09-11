@@ -62,6 +62,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/mocha": "^5.2.5",
     "eslint": "^4.12.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",

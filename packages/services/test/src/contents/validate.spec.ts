@@ -6,7 +6,7 @@ import { expect } from 'chai';
 import {
   validateContentsModel,
   validateCheckpointModel
-} from '../../../lib/contents/validate';
+} from '../../../src/contents/validate';
 
 import { DEFAULT_FILE } from '../utils';
 

@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ServerConnection, SettingManager } from '../../../lib';
+import { ServerConnection, SettingManager } from '../../../src';
 
 import { init } from '../utils';
 
