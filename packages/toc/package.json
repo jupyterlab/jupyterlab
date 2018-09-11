@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "private": false,
   "description": "Table of Contents extension for JupyterLab",
   "keywords": [
@@ -8,12 +8,12 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/ian-r-rose/jupyterlab-toc",
+  "homepage": "https://github.com/jupyterlab/jupyterlab-toc",
   "bugs": {
-    "url": "https://github.com/ian-r-rose/jupyterlab-toc/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab-toc/issues"
   },
   "license": "BSD-3-Clause",
-  "author": "Ian Rose",
+  "author": "Project Jupyter",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
