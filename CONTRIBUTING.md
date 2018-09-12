@@ -4,8 +4,9 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using Jupyter Notebook, and introduce yourself on the mailing list and share
-what area of the project you are interested in working on.
+using JupyterLab, and introduce yourself on the mailing list and share
+what area of the project you are interested in working on.  Please see also the
+Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [help wanted](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 that we believe are good examples of small, self-contained changes.
