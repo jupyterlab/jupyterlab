@@ -207,13 +207,15 @@ namespace Private {
    * The light renderer for the data grid.
    */
   export const LIGHT_RENDERER = new TextRenderer({
-    textColor: '#111111'
+    textColor: '#111111',
+    horizontalAlignment: 'right'
   });
 
   /**
    * The dark renderer for the data grid.
    */
   export const DARK_RENDERER = new TextRenderer({
-    textColor: '#F5F5F5'
+    textColor: '#F5F5F5',
+    horizontalAlignment: 'right'
   });
 }
