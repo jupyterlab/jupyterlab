@@ -143,7 +143,7 @@ See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_start
 
 If you would like to contribute to the project, please read our [contributor documentation](CONTRIBUTING.md).
 
-JupyterLab follows the official [Jupyter Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
+JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 ### Extending JupyterLab
 
