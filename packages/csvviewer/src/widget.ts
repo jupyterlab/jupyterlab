@@ -52,7 +52,12 @@ export class CSVViewer extends Widget {
 
     this.addClass(CSV_CLASS);
 
-    this._grid = new DataGrid();
+    this._grid = new DataGrid({
+      baseRowSize: 24,
+      baseColumnSize: 144,
+      baseColumnHeaderSize: 36,
+      baseRowHeaderSize: 64
+    });
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
     layout.addWidget(this._grid);

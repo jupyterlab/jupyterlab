@@ -183,8 +183,11 @@ namespace Private {
    */
   export const LIGHT_STYLE: DataGrid.IStyle = {
     ...DataGrid.defaultStyle,
-    voidColor: 'white',
+    voidColor: '#F3F3F3',
+    backgroundColor: 'white',
     headerBackgroundColor: '#EEEEEE',
+    gridLineColor: 'rgba(20, 20, 20, 0.15)',
+    headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
     rowBackgroundColor: i => (i % 2 === 0 ? '#F5F5F5' : 'white')
   };
 
@@ -192,9 +195,11 @@ namespace Private {
    * The dark theme for the data grid.
    */
   export const DARK_STYLE: DataGrid.IStyle = {
-    ...DataGrid.defaultStyle,
-    voidColor: '#111111',
+    voidColor: 'black',
+    backgroundColor: '#111111',
     headerBackgroundColor: '#424242',
+    gridLineColor: 'rgba(235, 235, 235, 0.15)',
+    headerGridLineColor: 'rgba(235, 235, 235, 0.25)',
     rowBackgroundColor: i => (i % 2 === 0 ? '#212121' : '#111111')
   };
 
