@@ -341,7 +341,6 @@
 .jp-RenderedHTMLCommon td,
 .jp-RenderedHTMLCommon th,
 .jp-RenderedHTMLCommon tr {
-  text-align: right;
   vertical-align: middle;
   padding: 0.5em 0.5em;
   line-height: normal;
