@@ -21,6 +21,9 @@
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
