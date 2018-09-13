@@ -163,17 +163,22 @@ function main() {
   // Handle a browser test.
   var browserTest = PageConfig.getOption('browserTest');
   if (browserTest.toLowerCase() === 'true') {
-    var caught_errors = [];
+    var errors = [];
+    var el = document.createElement('div');
+
+    el.id = 'browserResult';
+
     window.onerror = function(msg, url, line, col, error) {
-      caught_errors.push(String(error));
+      errors.push(String(error));
     };
     console.error = function(message) {
-      caught_errors.push(String(message));
+      errors.push(String(message));
     };
     lab.restored.then(function() {
-      var el = document.createElement('div');
-      el.id = 'browserResult';
-      el.textContent = JSON.stringify(caught_errors);
+      el.textContent = JSON.stringify(errors);
+      document.body.appendChild(el);
+    }).catch(function(reason) {
+      el.textContent = JSON.stringify({ restoreError: reason.message })
       document.body.appendChild(el);
     });
   }
