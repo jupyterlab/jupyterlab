@@ -57,7 +57,7 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx_rtd_theme recommonmark
+    pip install "sphinx<1.8" sphinx_rtd_theme recommonmark
     make html
     popd
 fi
