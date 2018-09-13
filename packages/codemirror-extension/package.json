@@ -30,7 +30,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.4",
+    "@jupyterlab/application": "^0.18.5",
     "@jupyterlab/codeeditor": "^0.18.4",
     "@jupyterlab/codemirror": "^0.18.4",
     "@jupyterlab/coreutils": "^2.1.4",
