@@ -1,0 +1,52 @@
+{
+  "name": "@jupyterlab/shortcutui",
+  "version": "0.3.2",
+  "description": "A JupyterLab extension for managing keyboard shortcuts",
+  "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab-shortcutui/",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui/issues"
+  },
+  "license": "BSD-3-Clause",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab-shortcutui.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prettier": "prettier --write 'src/**'",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.18.0",
+    "@jupyterlab/apputils": "^0.18.0",
+    "@jupyterlab/coreutils": "^2.0.1",
+    "@jupyterlab/mainmenu": "^0.7.2",
+    "@phosphor/widgets": "^1.6.0",
+    "@phosphor/keyboard": "^1.1.2",
+    "@phosphor/domutils": "^1.1.0",
+    "@types/react-dom": "16.0.4",
+    "react": "^16.4.1",
+    "typestyle": "^2.0.1"
+  },
+  "devDependencies": {
+    "prettier": "^1.13.7",
+    "rimraf": "^2.6.1",
+    "typescript": "~2.6.0"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}
