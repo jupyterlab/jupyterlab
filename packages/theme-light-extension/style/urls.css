@@ -1,0 +1,103 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+  /* Images
+
+  These images are included with JupyterLab for showing the Project Jupyter logo
+  */
+  --jp-image-jupyter: url('images/jupyter.svg');
+  --jp-image-jupyterlab: url('images/jupyterlab.svg');
+  --jp-image-jupyterlab-workmark: url('images/jupyterlab-wordmark.svg');
+  --jp-image-jupyter-favicon: url('images/jupyter-favicon.svg');
+  --jp-image-caretleft: url('images/caretleft.png');
+  --jp-image-caretright: url('images/caretright.png');
+  --jp-image-caretup: url('images/caretup.png');
+  --jp-image-caretdown: url('images/caretdown.png');
+
+  /* Icons
+
+  These icons are used throughout JupyterLab.
+  */
+
+  /* The caret used for select dropdown styling. */
+
+  --jp-ui-select-caret: url('icons/md/down_caret.svg');
+
+  /* Icons used in the application. */
+
+  --jp-about-header-logo: url('icons/jupyter/jupyter.svg');
+  --jp-about-header-wordmark: url('images/jupyterlab-wordmark.svg');
+  --jp-icon-add: url('icons/md/ic_add_24px.svg');
+  --jp-icon-book-selected: url('icons/jupyter/book_selected.svg');
+  --jp-icon-book: url('icons/jupyter/book.svg');
+  --jp-icon-bug: url('icons/md/bug.svg');
+  --jp-icon-build: url('icons/md/ic_build_24px.svg');
+  --jp-icon-caretdown: url('icons/md/caretdown.svg');
+  --jp-icon-caretleft: url('icons/md/caretleft.svg');
+  --jp-icon-caretright: url('icons/md/caretright.svg');
+  --jp-icon-caretup: url('icons/md/caretup.svg');
+  --jp-icon-chat: url('icons/md/chat.svg');
+  --jp-icon-checkmark-disabled: url('icons/md/checkmark-disabled.svg');
+  --jp-icon-checkmark: url('icons/md/checkmark.svg');
+  --jp-icon-circle: url('icons/md/circle.svg');
+  --jp-icon-close-circle: url('icons/md/close-circle.svg');
+  --jp-icon-close: url('icons/md/close.svg');
+  --jp-icon-console: url('icons/jupyter/console.svg');
+  --jp-icon-copy: url('icons/md/copy.svg');
+  --jp-icon-cut: url('icons/md/cut.svg');
+  --jp-icon-directions-run: url('icons/md/ic_directions_run_24px.svg');
+  --jp-icon-directory-selected: url('icons/jupyter/directory_selected.svg');
+  --jp-icon-directory: url('icons/jupyter/directory.svg');
+  --jp-icon-download: url('icons/md/download.svg');
+  --jp-icon-edit: url('icons/md/edit.svg');
+  --jp-icon-ellipses: url('icons/md/ellipses.svg');
+  --jp-icon-expand-less: url('icons/md/expand-less.svg');
+  --jp-icon-expand-more: url('icons/md/expand-more.svg');
+  --jp-icon-extension: url('icons/md/ic_extension_24px.svg');
+  --jp-icon-file-selected: url('icons/jupyter/file_selected.svg');
+  --jp-icon-file-upload: url('icons/md/ic_file_upload_24px.svg');
+  --jp-icon-file: url('icons/jupyter/file.svg');
+  --jp-icon-folder: url('icons/md/ic_folder_24px.svg');
+  --jp-icon-home: url('icons/md/ic_home_24px.svg');
+  --jp-icon-image-selected: url('icons/jupyter/image_selected.svg');
+  --jp-icon-image: url('icons/jupyter/image.svg');
+  --jp-icon-inverse-circle: url('icons/md/circle-inverse.svg');
+  --jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');
+  --jp-icon-inverse-close: url('icons/md/close-inverse.svg');
+  --jp-icon-json-selected: url('icons/jupyter/json_selected.svg');
+  --jp-icon-json: url('icons/jupyter/json.svg');
+  --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
+  --jp-icon-kernel-running: url('icons/md/panorama_fish_eye.svg');
+  --jp-icon-launcher: url('icons/jupyter/launcher.svg');
+  --jp-icon-link: url('icons/md/link.svg');
+  --jp-icon-markdown-selected: url('icons/jupyter/markdown_selected.svg');
+  --jp-icon-markdown: url('icons/jupyter/markdown.svg');
+  --jp-icon-more: url('icons/md/more-horiz.svg');
+  --jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');
+  --jp-icon-palette: url('icons/md/ic_palette_24px.svg');
+  --jp-icon-paste: url('icons/md/paste.svg');
+  --jp-icon-python-selected: url('icons/jupyter/python_selected.svg');
+  --jp-icon-python: url('icons/jupyter/python.svg');
+  --jp-icon-question-mark: url('icons/jupyter/questionmark.svg');
+  --jp-icon-r-selected: url('icons/jupyter/r_selected.svg');
+  --jp-icon-r: url('icons/jupyter/r.svg');
+  --jp-icon-refresh: url('icons/md/ic_refresh_18px.svg');
+  --jp-icon-run: url('icons/md/run.svg');
+  --jp-icon-save: url('icons/md/save.svg');
+  --jp-icon-search-white: url('icons/md/search-white.svg');
+  --jp-icon-search: url('icons/md/search.svg');
+  --jp-icon-settings: url('icons/jupyter/settings.svg');
+  --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
+  --jp-icon-spreadsheet: url('icons/jupyter/csv.svg');
+  --jp-icon-stop: url('icons/md/stop.svg');
+  --jp-icon-tab: url('icons/md/ic_tab_24px.svg');
+  --jp-icon-terminal: url('icons/jupyter/terminal.svg');
+  --jp-icon-text-editor: url('icons/jupyter/texteditor.svg');
+  --jp-icon-undo: url('icons/md/undo.svg');
+  --jp-icon-vega: url('icons/jupyter/vega.svg');
+  --jp-icon-yaml-selected: url('icons/jupyter/yml_selected.svg');
+  --jp-icon-yaml: url('icons/jupyter/yml.svg');
+}

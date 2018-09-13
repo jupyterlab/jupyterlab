@@ -1,0 +1,16 @@
+{
+  "linters": {
+    "**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}": [
+      "prettier --write"
+    ],
+    "**/*{.ts,.tsx}": [
+      "tslint --fix -c tslint.json",
+      "git add"
+    ],
+    "**/*{.js,.jsx}": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "concurrent": false
+}

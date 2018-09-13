@@ -1,0 +1,188 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-sidebar-tab-width: 32px;
+}
+
+/*-----------------------------------------------------------------------------
+| SideBar
+|----------------------------------------------------------------------------*/
+
+.jp-SideBar {
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-SideBar.p-TabBar {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color2);
+  font-size: var(--jp-ui-font-size1);
+  min-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
+  max-width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
+  overflow: visible;
+  display: block;
+}
+
+.jp-SideBar .p-TabBar-content,
+.jp-SideBar .p-TabBar-content {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+  height: var(--jp-private-sidebar-tab-width);
+  transform-origin: 0 0 0;
+}
+
+.jp-SideBar .p-TabBar-tab {
+  padding: 0 16px;
+  border: none;
+  overflow: visible;
+}
+
+.jp-SideBar .p-TabBar-tab.p-mod-current {
+  min-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  max-height: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  /* transform: translateY(var(--jp-border-width)); */
+}
+
+.jp-SideBar .p-TabBar-tab:not(.p-mod-current) {
+  background: var(--jp-layout-color2);
+}
+
+.jp-SideBar .p-TabBar-tabIcon.jp-SideBar-tabIcon {
+  min-width: 20px;
+  min-height: 20px;
+  background-size: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-SideBar .p-TabBar-tabLabel {
+  line-height: var(--jp-private-sidebar-tab-width);
+}
+
+.jp-SideBar .p-TabBar-tab:hover:not(.p-mod-current) {
+  background: var(--jp-layout-color1);
+}
+
+/* Left */
+
+/* Borders */
+
+.jp-SideBar.p-TabBar.jp-mod-left {
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab + .p-TabBar-tab {
+  border-right: var(--jp-border-width) solid var(--jp-layout-color2);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab.p-mod-current + .p-TabBar-tab {
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab + .p-TabBar-tab.p-mod-current {
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab.p-mod-current:last-child {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+/* Transforms */
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-content {
+  flex-direction: row-reverse;
+  transform: rotate(-90deg) translateX(-100%);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left
+  .p-TabBar-tab:not(.p-mod-current)
+  .p-TabBar-tabIcon {
+  transform: rotate(90deg);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-left .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
+  transform: rotate(90deg)
+    translate(
+      calc(-0.5 * var(--jp-border-width)),
+      calc(-0.5 * var(--jp-border-width))
+    );
+}
+
+/* Right */
+
+/* Borders */
+
+.jp-SideBar.p-TabBar.jp-mod-right {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right .p-TabBar-tab + .p-TabBar-tab {
+  border-left: var(--jp-border-width) solid var(--jp-layout-color2);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right .p-TabBar-tab.p-mod-current + .p-TabBar-tab {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right .p-TabBar-tab + .p-TabBar-tab.p-mod-current {
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right .p-TabBar-tab.p-mod-current:last-child {
+  border-right: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+/* Transforms */
+
+.jp-SideBar.p-TabBar.jp-mod-right .p-TabBar-content {
+  flex-direction: row;
+  transform: rotate(90deg) translateY(-100%);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right
+  .p-TabBar-tab:not(.p-mod-current)
+  .p-TabBar-tabIcon {
+  transform: rotate(-90deg);
+}
+
+.jp-SideBar.p-TabBar.jp-mod-right
+  .p-TabBar-tab.p-mod-current
+  .p-TabBar-tabIcon {
+  transform: rotate(-90deg)
+    translate(
+      calc(0.5 * var(--jp-border-width)),
+      calc(-0.5 * var(--jp-border-width))
+    );
+}
+
+/* Stack panels */
+
+#jp-left-stack > .p-Widget,
+#jp-right-stack > .p-Widget {
+  min-width: var(--jp-sidebar-min-width);
+}
+
+#jp-right-stack {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+#jp-left-stack {
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+}

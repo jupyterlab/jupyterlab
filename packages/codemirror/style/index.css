@@ -1,0 +1,231 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import url('~codemirror/lib/codemirror.css');
+@import url('~codemirror/addon/dialog/dialog.css');
+
+@import url('~codemirror/theme/material.css');
+@import url('~codemirror/theme/zenburn.css');
+@import url('~codemirror/theme/abcdef.css');
+@import url('~codemirror/theme/base16-light.css');
+@import url('~codemirror/theme/base16-dark.css');
+@import url('~codemirror/theme/dracula.css');
+@import url('~codemirror/theme/hopscotch.css');
+@import url('~codemirror/theme/mbo.css');
+@import url('~codemirror/theme/mdn-like.css');
+@import url('~codemirror/theme/seti.css');
+@import url('~codemirror/theme/solarized.css');
+@import url('~codemirror/theme/the-matrix.css');
+@import url('~codemirror/theme/xq-light.css');
+
+.CodeMirror {
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  font-family: var(--jp-code-font-family);
+  height: auto;
+  /* Changed to auto to autogrow */
+}
+
+.CodeMirror pre {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-dialog {
+  background-color: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+}
+
+/* This causes https://github.com/jupyter/jupyterlab/issues/522 */
+/* May not cause it not because we changed it! */
+.CodeMirror-lines {
+  padding: var(--jp-code-padding);
+}
+
+.CodeMirror-linenumbers {
+  padding: 0 4px 0 4px;
+}
+
+.jp-CodeMirrorEditor-static {
+  margin: var(--jp-code-padding);
+}
+
+.jp-CodeMirrorEditor,
+.jp-CodeMirrorEditor-static {
+  cursor: text;
+}
+
+.jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
+  border-left: 1.4px solid var(--jp-editor-cursor-color);
+}
+
+/* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
+@media screen and (min-width: 2138px) and (max-width: 4319px) {
+  .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
+    border-left: 2px solid var(--jp-editor-cursor-color);
+  }
+}
+
+/* When zoomed out less than 33% */
+@media screen and (min-width: 4320px) {
+  .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
+    border-left: 4px solid var(--jp-editor-cursor-color);
+  }
+}
+
+.CodeMirror.jp-mod-readOnly .CodeMirror-cursor {
+  display: none;
+}
+
+.CodeMirror-gutters {
+  border-right: 1px solid var(--jp-border-color2);
+  background-color: var(--jp-layout-color2);
+}
+
+.CodeMirror-gutter-wrapper {
+  margin-left: calc(-1 * var(--jp-code-padding));
+}
+
+.jp-CollaboratorCursor {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: none;
+  border-bottom: 3px solid;
+  background-clip: content-box;
+  margin-left: -5px;
+  margin-right: -5px;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+  background-color: var(--jp-editor-selected-focused-background);
+}
+
+.CodeMirror-selected {
+  background-color: var(--jp-editor-selected-background);
+}
+
+.jp-CollaboratorCursor-hover {
+  position: absolute;
+  z-index: 1;
+  transform: translateX(-50%);
+  color: white;
+  border-radius: 3px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  text-align: center;
+  font-size: var(--jp-ui-font-size1);
+  white-space: nowrap;
+}
+
+/**
+ * Here is our jupyter theme for CodeMirror syntax highlighting
+ * This is used in our marked.js syntax highlighting and CodeMirror itself
+ * The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
+ * This came from the classic notebook, which came form highlight.js/GitHub
+ */
+
+/**
+ * CodeMirror themes are handling the background/color in this way. This works
+ * fine for CodeMirror editors outside the notebook, but the notebook styles
+ * these things differently.
+ */
+.CodeMirror.cm-s-jupyter {
+  background: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+}
+
+/* In the notebook, we want this styling to be handled by its container */
+.jp-CodeConsole .CodeMirror.cm-s-jupyter,
+.jp-Notebook .CodeMirror.cm-s-jupyter {
+  background: transparent;
+}
+
+.cm-s-jupyter .CodeMirror-cursor {
+  border-left: 1.4px solid var(--jp-editor-cursor-color);
+}
+.cm-s-jupyter span.cm-keyword {
+  color: var(--jp-mirror-editor-keyword-color);
+  font-weight: bold;
+}
+.cm-s-jupyter span.cm-atom {
+  color: var(--jp-mirror-editor-atom-color);
+}
+.cm-s-jupyter span.cm-number {
+  color: var(--jp-mirror-editor-number-color);
+}
+.cm-s-jupyter span.cm-def {
+  color: var(--jp-mirror-editor-def-color);
+}
+.cm-s-jupyter span.cm-variable {
+  color: var(--jp-mirror-editor-variable-color);
+}
+.cm-s-jupyter span.cm-variable-2 {
+  color: var(--jp-mirror-editor-variable-2-color);
+}
+.cm-s-jupyter span.cm-variable-3 {
+  color: var(--jp-mirror-editor-variable-3-color);
+}
+.cm-s-jupyter span.cm-punctuation {
+  color: var(--jp-mirror-editor-punctuation-color);
+}
+.cm-s-jupyter span.cm-property {
+  color: var(--jp-mirror-editor-property-color);
+}
+.cm-s-jupyter span.cm-operator {
+  color: var(--jp-mirror-editor-operator-color);
+  font-weight: bold;
+}
+.cm-s-jupyter span.cm-comment {
+  color: var(--jp-mirror-editor-comment-color);
+  font-style: italic;
+}
+.cm-s-jupyter span.cm-string {
+  color: var(--jp-mirror-editor-string-color);
+}
+.cm-s-jupyter span.cm-string-2 {
+  color: var(--jp-mirror-editor-string-2-color);
+}
+.cm-s-jupyter span.cm-meta {
+  color: var(--jp-mirror-editor-meta-color);
+}
+.cm-s-jupyter span.cm-qualifier {
+  color: var(--jp-mirror-editor-qualifier-color);
+}
+.cm-s-jupyter span.cm-builtin {
+  color: var(--jp-mirror-editor-builtin-color);
+}
+.cm-s-jupyter span.cm-bracket {
+  color: var(--jp-mirror-editor-bracket-color);
+}
+.cm-s-jupyter span.cm-tag {
+  color: var(--jp-mirror-editor-tag-color);
+}
+.cm-s-jupyter span.cm-attribute {
+  color: var(--jp-mirror-editor-attribute-color);
+}
+.cm-s-jupyter span.cm-header {
+  color: var(--jp-mirror-editor-header-color);
+}
+.cm-s-jupyter span.cm-quote {
+  color: var(--jp-mirror-editor-quote-color);
+}
+.cm-s-jupyter span.cm-link {
+  color: var(--jp-mirror-editor-link-color);
+}
+.cm-s-jupyter span.cm-error {
+  color: var(--jp-mirror-editor-error-color);
+}
+.cm-s-jupyter span.cm-hr {
+  color: #999;
+}
+
+.cm-s-jupyter span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}

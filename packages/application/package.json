@@ -1,0 +1,54 @@
+{
+  "name": "@jupyterlab/application",
+  "version": "0.18.4",
+  "description": "JupyterLab - Application",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "lib/*.js.map",
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w --listEmittedFiles"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.18.4",
+    "@jupyterlab/coreutils": "^2.1.4",
+    "@jupyterlab/docregistry": "^0.18.4",
+    "@jupyterlab/rendermime": "^0.18.4",
+    "@jupyterlab/rendermime-interfaces": "^1.1.7",
+    "@jupyterlab/services": "^3.1.4",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/application": "^1.6.0",
+    "@phosphor/commands": "^1.6.1",
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/disposable": "^1.1.2",
+    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/properties": "^1.1.2",
+    "@phosphor/signaling": "^1.2.2",
+    "@phosphor/widgets": "^1.6.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.9.2"
+  }
+}

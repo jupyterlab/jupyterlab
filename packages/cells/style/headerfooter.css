@@ -1,0 +1,20 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Header/Footer
+|----------------------------------------------------------------------------*/
+
+/* Hidden by zero height by default */
+.jp-CellHeader,
+.jp-CellFooter {
+  height: 0px;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  outline: none;
+  background: transparent;
+}

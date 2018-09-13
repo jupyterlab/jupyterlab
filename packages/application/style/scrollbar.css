@@ -1,0 +1,85 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.p-ScrollBar[data-orientation='horizontal'] {
+  min-height: 16px;
+  max-height: 16px;
+  min-width: 45px;
+  border-top: 1px solid #a0a0a0;
+}
+
+.p-ScrollBar[data-orientation='vertical'] {
+  min-width: 16px;
+  max-width: 16px;
+  min-height: 45px;
+  border-left: 1px solid #a0a0a0;
+}
+
+.p-ScrollBar-button {
+  background-color: #f0f0f0;
+  background-position: center center;
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 15px;
+  max-width: 15px;
+}
+
+.p-ScrollBar-button:hover {
+  background-color: #dadada;
+}
+
+.p-ScrollBar-button.p-mod-active {
+  background-color: #cdcdcd;
+}
+
+.p-ScrollBar-track {
+  background: #f0f0f0;
+}
+
+.p-ScrollBar-thumb {
+  background: #cdcdcd;
+}
+
+.p-ScrollBar-thumb:hover {
+  background: #bababa;
+}
+
+.p-ScrollBar-thumb.p-mod-active {
+  background: #a0a0a0;
+}
+
+.p-ScrollBar[data-orientation='horizontal'] .p-ScrollBar-thumb {
+  height: 100%;
+  min-width: 15px;
+  border-left: 1px solid #a0a0a0;
+  border-right: 1px solid #a0a0a0;
+}
+
+.p-ScrollBar[data-orientation='vertical'] .p-ScrollBar-thumb {
+  width: 100%;
+  min-height: 15px;
+  border-top: 1px solid #a0a0a0;
+  border-bottom: 1px solid #a0a0a0;
+}
+
+.p-ScrollBar[data-orientation='horizontal']
+  .p-ScrollBar-button[data-action='decrement'] {
+  background-image: var(--jp-image-caretleft);
+}
+
+.p-ScrollBar[data-orientation='horizontal']
+  .p-ScrollBar-button[data-action='increment'] {
+  background-image: var(--jp-image-caretright);
+}
+
+.p-ScrollBar[data-orientation='vertical']
+  .p-ScrollBar-button[data-action='decrement'] {
+  background-image: var(--jp-image-caretup);
+}
+
+.p-ScrollBar[data-orientation='vertical']
+  .p-ScrollBar-button[data-action='increment'] {
+  background-image: var(--jp-image-caretdown);
+}

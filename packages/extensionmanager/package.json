@@ -1,0 +1,46 @@
+{
+  "name": "@jupyterlab/extensionmanager",
+  "version": "0.18.4",
+  "description": "JupyterLab - Extension Manager",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.18.4",
+    "@jupyterlab/services": "^3.1.4",
+    "@phosphor/messaging": "^1.2.2",
+    "react": "~16.4.2",
+    "react-paginate": "^5.2.3",
+    "semver": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/react-paginate": "^4.3.2",
+    "@types/semver": "^5.5.0",
+    "rimraf": "~2.6.2",
+    "typescript": "~2.9.2"
+  }
+}

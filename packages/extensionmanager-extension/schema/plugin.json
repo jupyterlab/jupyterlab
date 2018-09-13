@@ -1,0 +1,16 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-SettingsIcon",
+  "jupyter.lab.setting-icon-label": "Extension Manager",
+  "title": "Extension Manager",
+  "description": "Extension manager settings.",
+  "properties": {
+    "enabled": {
+      "title": "Enabled Status",
+      "description": "Enables extension manager (requires Node.js/npm).\nWARNING: installing untrusted extensions may be unsafe.",
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@jupyterlab/services",
+  "version": "3.1.4",
+  "description": "Client APIs for the Jupyter services REST APIs",
+  "keywords": [
+    "jupyter",
+    "notebook",
+    "services"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/**/*.js",
+    "lib/*.js.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/*.js",
+    "lib/*.d.ts",
+    "dist/*.js",
+    "dist/**/*.js"
+  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab"
+  },
+  "scripts": {
+    "build": "jlpm run build:src",
+    "build:src": "tsc ",
+    "build:test": "tsc --project test",
+    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
+    "prepublishOnly": "jlpm run build:src && webpack",
+    "test": "python test/run-test.py",
+    "test:coverage": "python test/run-test.py --coverage True",
+    "watch": "tsc -w --listEmittedFiles",
+    "watch:all": "npm-run-all -p watch watch:test",
+    "watch:test": "python test/run-test.py --debug",
+    "watch:test:all": "python test/run-test.py --debug --watchAll"
+  },
+  "dependencies": {
+    "@jupyterlab/coreutils": "^2.1.4",
+    "@jupyterlab/observables": "^2.0.7",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/disposable": "^1.1.2",
+    "@phosphor/signaling": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/chai": "~4.0.10",
+    "@types/jest": "^23.3.1",
+    "@types/text-encoding": "0.0.33",
+    "@types/ws": "^6.0.0",
+    "chai": "~4.1.2",
+    "jest": "^23.5.0",
+    "npm-run-all": "~4.1.1",
+    "rimraf": "~2.6.2",
+    "text-encoding": "~0.5.5",
+    "ts-jest": "^23.1.4",
+    "typescript": "~2.9.2",
+    "ws": "~6.0.0"
+  }
+}

@@ -1,0 +1,87 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2017, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+button.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  border: none;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 32px;
+  height: 32px;
+  padding: 0px 12px;
+  letter-spacing: 0.8px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input.jp-mod-styled {
+  background: var(--jp-input-background);
+  height: 28px;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  padding-left: 7px;
+  padding-right: 7px;
+  font-size: var(--jp-ui-font-size2);
+  color: var(--jp-ui-font-color0);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input.jp-mod-styled:focus {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 1px;
+  background-color: var(--jp-layout-color1);
+  height: 28px;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.jp-select-wrapper.jp-mod-focused select.jp-mod-styled {
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-input-active-background);
+}
+
+select.jp-mod-styled:hover {
+  background-color: var(--jp-layout-color1);
+  cursor: pointer;
+  color: var(--jp-ui-font-color0);
+  background-color: var(--jp-input-hover-background);
+  box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.5);
+}
+
+select.jp-mod-styled {
+  flex: 1 1 auto;
+  height: 32px;
+  width: 100%;
+  font-size: var(--jp-ui-font-size2);
+  background: var(--jp-input-background);
+  color: var(--jp-ui-font-color0);
+  padding-left: 8px;
+  padding-right: 8px;
+  background-image: var(--jp-ui-select-caret);
+  background-repeat: no-repeat;
+  background-position: 99% center;
+  background-size: 18px;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: 0px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}

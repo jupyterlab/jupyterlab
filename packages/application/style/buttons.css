@@ -1,0 +1,57 @@
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-flat-button-height: 24px;
+  --jp-flat-button-padding: 8px 12px;
+}
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+button {
+  border-radius: var(--jp-border-radius);
+}
+
+button.jp-mod-styled.jp-mod-accept {
+  background: var(--jp-brand-color1);
+  color: white;
+  border: 1px solid var(--jp-brand-color1);
+}
+
+button.jp-mod-styled.jp-mod-reject {
+  background: var(--md-grey-500);
+  border: 1px solid var(--md-grey-500);
+  color: white;
+}
+
+button.jp-mod-styled.jp-mod-warn {
+  background: var(--jp-error-color1);
+  color: white;
+  border: 1px solid var(--jp-error-color1);
+}
+
+.jp-Button-flat {
+  text-decoration: none;
+  padding: var(--jp-flat-button-padding);
+  color: var(--jp-warn-color1);
+  font-weight: 500;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+
+.jp-Button-flat:hover {
+  background-color: rgba(153, 153, 153, 0.1);
+}
+
+.jp-Button-flat:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153, 153, 153, 0.2);
+}

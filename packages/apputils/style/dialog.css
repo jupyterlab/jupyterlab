@@ -1,0 +1,95 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2017, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Dialog {
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--jp-dialog-background);
+}
+
+.jp-Dialog-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--jp-layout-color1);
+  padding: 24px;
+  padding-bottom: 12px;
+  min-width: 300px;
+  min-height: 150px;
+  max-width: 500px;
+  max-height: 500px;
+  box-sizing: border-box;
+  box-shadow: var(--jp-elevation-z20);
+  word-wrap: break-word;
+  border-radius: var(--jp-border-radius);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-Dialog-header {
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+  font-size: var(--jp-ui-font-size3);
+  font-weight: 400;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-Dialog-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  font-size: var(--jp-ui-font-size1);
+  background: var(--jp-layout-color1);
+  overflow: auto;
+}
+
+.jp-Dialog-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  margin-left: -12px;
+  margin-right: -12px;
+  padding: 12px;
+}
+
+.jp-Dialog-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.jp-Dialog-body > .jp-select-wrapper {
+  width: 100%;
+}
+
+.jp-Dialog-body > button {
+  padding: 0px 16px;
+}
+
+.jp-Dialog-body > label {
+  padding-top: 4px;
+  padding-bottom: 8px;
+  line-height: 1.4;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-Dialog-button.jp-mod-styled:not(:last-child) {
+  margin-right: 12px;
+}

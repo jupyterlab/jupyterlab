@@ -1,0 +1,23 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+var Widget = require('@phosphor/widgets').Widget;
+
+var factory = {
+  safe: true,
+  mimeTypes: ['text/plain'],
+  defaultRank: 1000,
+  createRenderer: function() {
+    return new Widget();
+  }
+};
+
+module.exports = {
+  mimeType: 'text/plain',
+  rendererFactory: factory,
+  widgetFactoryOptions: {
+    name: 'Test',
+    fileExtensions: ['.txt'],
+    readOnly: true
+  }
+};

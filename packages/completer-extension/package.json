@@ -1,0 +1,48 @@
+{
+  "name": "@jupyterlab/completer-extension",
+  "version": "0.18.4",
+  "description": "JupyterLab - Completer Extension",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w --listEmittedFiles"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.18.4",
+    "@jupyterlab/completer": "^0.18.4",
+    "@jupyterlab/console": "^0.18.4",
+    "@jupyterlab/fileeditor": "^0.18.4",
+    "@jupyterlab/notebook": "^0.18.4",
+    "@jupyterlab/services": "^3.1.4",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/widgets": "^1.6.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.9.2"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}

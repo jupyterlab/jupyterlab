@@ -1,0 +1,104 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Help {
+  min-width: 240px;
+  min-height: 240px;
+  background: white;
+  outline: none;
+}
+
+.jp-Help > iframe {
+  border: none;
+}
+
+.jp-About-body {
+  display: flex;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  text-align: left;
+  flex-direction: column;
+  width: 100%;
+  min-width: 360px;
+  overflow: visible;
+}
+
+.jp-Dialog .jp-Dialog-content div.jp-About-header-wordmark {
+  flex: 0 0 auto;
+  height: 44px;
+  width: auto;
+  background-image: var(--jp-about-header-wordmark);
+  background-size: 196px 50px;
+  background-repeat: no-repeat;
+  padding-bottom: 0px;
+}
+
+.jp-About-version-info {
+  color: var(--jp-ui-font-color1);
+  /* Dialog-header sets the font size to 3, we reset to 1 */
+  font-size: var(--jp-ui-font-size1);
+  width: 200px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-align: left;
+  padding-top: 8px;
+  line-height: 1.12;
+}
+
+.jp-Dialog
+  .jp-Dialog-content
+  .jp-Dialog-footer
+  .jp-Dialog-button.jp-About-button {
+  margin-right: 0px;
+}
+
+.jp-About-version {
+  display: block;
+}
+
+.jp-About-version {
+  padding-top: 8px;
+}
+
+.jp-About-externalLinks {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.jp-About-externalLinks .jp-Button-flat {
+  color: #f37726;
+}
+
+.jp-About-copyright {
+  padding-top: 25px;
+}
+
+.jp-About-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.jp-About-body pre {
+  white-space: pre-wrap;
+}
+
+.jp-About-header-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+}
+
+.jp-About-header-logo {
+  height: 94px;
+  width: 77px;
+  background-image: var(--jp-about-header-logo);
+  background-repeat: no-repeat;
+  background-size: 58px auto;
+  background-position: center;
+}

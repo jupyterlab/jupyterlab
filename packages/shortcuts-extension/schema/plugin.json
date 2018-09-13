@@ -1,0 +1,1052 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-LauncherIcon",
+  "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
+  "title": "Keyboard Shortcuts",
+  "description": "Keyboard shortcut settings for JupyterLab.",
+  "properties": {
+    "application:activate-next-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:activate-next-tab" },
+        "keys": { "default": ["Ctrl Shift ]"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Next Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "application:activate-previous-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:activate-previous-tab" },
+        "keys": { "default": ["Ctrl Shift ["] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previous Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "tabmenu:activate-previously-used-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previously Used Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "application:toggle-mode": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:toggle-mode" },
+        "keys": { "default": ["Accel Shift D"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Single-Document Mode" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "application:toggle-left-area": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:toggle-left-area" },
+        "keys": { "default": ["Accel B"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Left Area" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "application:toggle-right-area": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:toggle-right-area" },
+        "keys": { "default": [""] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Right Area" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "application:toggle-presentation-mode": {
+      "default": {},
+      "properties": {
+        "command": { "default": "application:toggle-presentation-mode" },
+        "keys": { "default": [""] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Presentation Mode" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "apputils:activate-command-palette": {
+      "default": {},
+      "properties": {
+        "command": { "default": "apputils:activate-command-palette" },
+        "keys": { "default": ["Accel Shift C"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Command Palette" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "completer:invoke-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-console" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
+        },
+        "title": { "default": "Invoke Console Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
+    "completer:invoke-notebook": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-notebook" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
+        },
+        "title": { "default": "Invoke Notebook Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
+    "completer:invoke-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-file" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor .jp-mod-completer-enabled"
+        },
+        "title": { "default": "Invoke File Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
+    "console:linebreak": {
+      "default": {},
+      "properties": {
+        "command": { "default": "console:linebreak" },
+        "keys": { "default": ["Enter"] },
+        "selector": { "default": ".jp-CodeConsole-promptCell" },
+        "title": { "default": "Insert Line Break" },
+        "category": { "default": "Console" }
+      },
+      "type": "object"
+    },
+    "console:run-forced": {
+      "default": {},
+      "properties": {
+        "command": { "default": "console:run-forced" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": ".jp-CodeConsole-promptCell" },
+        "title": { "default": "Run Cell (forced)" },
+        "category": { "default": "Console" }
+      },
+      "type": "object"
+    },
+    "docmanager:close": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:close" },
+        "keys": { "default": ["Ctrl Q"] },
+        "selector": { "default": ".jp-Activity" },
+        "title": { "default": "Close Activity" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "docmanager:save": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save" },
+        "keys": { "default": ["Accel S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "docmanager:save-as": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save As" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "editmenu:undo": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:undo" },
+        "keys": { "default": ["Ctrl Z"] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Undo" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "editmenu:redo": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:redo" },
+        "keys": { "default": ["Ctrl Shift Z"] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Redo" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "editmenu:clear-current": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:clear-current" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Clear" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "editmenu:clear-all": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:clear-all" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Clear All" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "editmenu:find": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:find" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Find" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "editmenu:find-and-replace": {
+      "default": {},
+      "properties": {
+        "command": { "default": "editmenu:find-and-replace" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-undoer]" },
+        "title": { "default": "Find and Replace" },
+        "category": { "default": "Editing" }
+      },
+      "type": "object"
+    },
+    "filebrowser:create-main-launcher": {
+      "default": {},
+      "properties": {
+        "command": { "default": "filebrowser:create-main-launcher" },
+        "keys": { "default": ["Accel Shift L"] },
+        "selector": { "default": "body" },
+        "title": { "default": "New Launcher" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "filebrowser:toggle-main": {
+      "default": {},
+      "properties": {
+        "command": { "default": "filebrowser:toggle-main" },
+        "keys": { "default": ["Accel Shift F"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Filebrowser" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "help:toggle": {
+      "default": {},
+      "properties": {
+        "command": { "default": "help:toggle" },
+        "keys": { "default": ["Ctrl Shift H"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Toggle Help" },
+        "category": { "default": "Help" }
+      },
+      "type": "object"
+    },
+    "imageviewer:reset-image": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:reset-image" },
+        "keys": { "default": ["0"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Reset Image" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:zoom-in": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:zoom-in" },
+        "keys": { "default": ["="] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Zoom In" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:zoom-out": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:zoom-out" },
+        "keys": { "default": ["-"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Zoom Out" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-clockwise": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:rotate-clockwise" },
+        "keys": { "default": ["]"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Rotate Clockwise" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:rotate-counterclockwise": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:rotate-counterclockwise" },
+        "keys": { "default": ["["] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Rotate Counterclockwise" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-vertical": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:flip-vertical" },
+        "keys": { "default": ["V"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Flip Image Vertically" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:flip-horizontal": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:flip-horizontal" },
+        "keys": { "default": ["H"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Flip Image Horizontally" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "imageviewer:invert-colors": {
+      "default": {},
+      "properties": {
+        "command": { "default": "imageviewer:invert-colors" },
+        "keys": { "default": ["I"] },
+        "selector": { "default": ".jp-ImageViewer" },
+        "title": { "default": "Invert Colors" },
+        "category": { "default": "Image Viewer" }
+      },
+      "type": "object"
+    },
+    "inspector:open": {
+      "default": {},
+      "properties": {
+        "command": { "default": "inspector:open" },
+        "keys": { "default": ["Accel I"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Open Inspector" },
+        "category": { "default": "Inspector" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:interrupt": {
+      "default": {},
+      "properties": {
+        "command": { "default": "kernelmenu:interrupt" },
+        "keys": { "default": ["I", "I"] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" },
+        "title": { "default": "Interrupt Kernel" },
+        "category": { "default": "Kernel Operations" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:restart": {
+      "default": {},
+      "properties": {
+        "command": { "default": "kernelmenu:restart" },
+        "keys": { "default": ["0", "0"] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" },
+        "title": { "default": "Restart Kernel" },
+        "category": { "default": "Kernel Operations" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:restart-and-clear": {
+      "default": {},
+      "properties": {
+        "command": { "default": "kernelmenu:restart-and-clear" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" },
+        "title": { "default": "Restart Kernel and Clear" },
+        "category": { "default": "Kernel Operations" }
+      },
+      "type": "object"
+    },
+    "kernelmenu:shutdown": {
+      "default": {},
+      "properties": {
+        "command": { "default": "kernelmenu:shutdown" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-kernel-user]:focus" },
+        "title": { "default": "Shutdown Kernel" },
+        "category": { "default": "Kernel Operations" }
+      },
+      "type": "object"
+    },
+    "launcher:create": {
+      "default": {},
+      "properties": {
+        "command": { "default": "launcher:create" },
+        "keys": { "default": [""] },
+        "selector": { "default": "body" },
+        "title": { "default": "New Launcher" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "notebook:change-cell-to-code": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-code" },
+        "keys": { "default": ["Y"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Code Cell Type" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-1" },
+        "keys": { "default": ["1"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 1" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-2" },
+        "keys": { "default": ["2"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 2" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-3": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-3" },
+        "keys": { "default": ["3"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 3" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-4": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-4" },
+        "keys": { "default": ["4"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 4" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-5": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-5" },
+        "keys": { "default": ["5"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 5" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-to-cell-heading-6": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-heading-6" },
+        "keys": { "default": ["6"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Heading 6" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-cell-to-markdown": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-markdown" },
+        "keys": { "default": ["M"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Markdown Cell Type" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:change-cell-to-raw": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:change-cell-to-raw" },
+        "keys": { "default": ["R"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Change to Raw Cell Type" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:copy-cell": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:copy-cell" },
+        "keys": { "default": ["C"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Copy Cell(s)" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:cut-cell": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:cut-cell" },
+        "keys": { "default": ["X"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Cut Cell(s)" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:delete-cell": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:delete-cell" },
+        "keys": { "default": ["D", "D"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Delete Cell(s)" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:enter-command-mode-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:enter-command-mode" },
+        "keys": { "default": ["Escape"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Enter Command Mode" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:enter-command-mode-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:enter-command-mode" },
+        "keys": { "default": ["Ctrl M"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Enter Command Mode" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:enter-edit-mode": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:enter-edit-mode" },
+        "keys": { "default": ["Enter"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Enter Edit Mode" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:extend-marked-cells-above-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:extend-marked-cells-above" },
+        "keys": { "default": ["Shift ArrowUp"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Extend Selection Above" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:extend-marked-cells-above-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:extend-marked-cells-above" },
+        "keys": { "default": ["Shift K"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Extend Selection Above" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:extend-marked-cells-below-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:extend-marked-cells-below" },
+        "keys": { "default": ["Shift ArrowDown"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Extend Selection Below" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:extend-marked-cells-below-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:extend-marked-cells-below" },
+        "keys": { "default": ["Shift J"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Extend Selection Below" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:insert-cell-above": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:insert-cell-above" },
+        "keys": { "default": ["A"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Insert Cell Above" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:insert-cell-below": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:insert-cell-below" },
+        "keys": { "default": ["B"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Insert Cell Below" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:merge-cells": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:merge-cells" },
+        "keys": { "default": ["Shift M"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Merge Selected Cells" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:move-cursor-down-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:move-cursor-down" },
+        "keys": { "default": ["ArrowDown"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Move Cursor Down" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:move-cursor-down-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:move-cursor-down" },
+        "keys": { "default": ["J"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Move Cursor Down" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:move-cursor-up-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:move-cursor-up" },
+        "keys": { "default": ["ArrowUp"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Move Cursor Up" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:move-cursor-up-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:move-cursor-up" },
+        "keys": { "default": ["K"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Move Cursor Up" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:paste-cell-below": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:paste-cell-below" },
+        "keys": { "default": ["V"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Paste Cell(s) Below" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:redo-cell-action": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:redo-cell-action" },
+        "keys": { "default": ["Shift Z"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Redo Cell Operation" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-cell-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-cell" },
+        "keys": { "default": ["Ctrl Enter"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Run Cell(s)" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-cell-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-cell" },
+        "keys": { "default": ["Ctrl Enter"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run Cell(s)" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-cell-and-insert-below-1": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-cell-and-insert-below" },
+        "keys": { "default": ["Alt Enter"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Run Cell(s) and Insert Below" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-cell-and-insert-below-2": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-cell-and-insert-below" },
+        "keys": { "default": ["Alt Enter"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run Cell and Insert Below" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-in-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-in-console" },
+        "keys": { "default": [""] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run In Console" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:run-cell-and-select-next": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-cell-and-select-next" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run Cell and Select Next" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:line-numbering": {
+      "default": {},
+      "properties": {
+        "command": { "default": "viewmenu:line-numbering" },
+        "keys": { "default": [""] },
+        "selector": { "default": ".jp-Notebook.jp-mod-commandMode" },
+        "title": { "default": "Show Line Numbers" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:match-brackets": {
+      "default": {},
+      "properties": {
+        "command": { "default": "viewmenu:match-brackets" },
+        "keys": { "default": [""] },
+        "selector": { "default": ".jp-Notebook.jp-mod-commandMode" },
+        "title": { "default": "Match Brackets" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:select-all": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:select-all" },
+        "keys": { "default": ["Accel A"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Select All Cells" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:split-cell-at-cursor": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:split-cell-at-cursor" },
+        "keys": { "default": ["Ctrl Shift -"] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Split Cell at Cursor" },
+        "category": { "default": "Notebook Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:toggle-all-cell-line-numbers": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:toggle-all-cell-line-numbers" },
+        "keys": { "default": ["Shift L"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Toggle All Cell Line Numbers" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:toggle-cell-line-numbers": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:toggle-cell-line-numbers" },
+        "keys": { "default": ["L"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Toggle Cell Line Numbers" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "notebook:undo-cell-action": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:undo-cell-action" },
+        "keys": { "default": ["Z"] },
+        "selector": { "default": ".jp-Notebook:focus" },
+        "title": { "default": "Undo Cell Operation" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
+    "runmenu:run": {
+      "default": {},
+      "properties": {
+        "command": { "default": "runmenu:run" },
+        "keys": { "default": ["Shift Enter"] },
+        "selector": { "default": "[data-jp-code-runner]" },
+        "title": { "default": "Run" },
+        "category": { "default": "Run Menu" }
+      },
+      "type": "object"
+    },
+    "runmenu:run-all": {
+      "default": {},
+      "properties": {
+        "command": { "default": "runmenu:run-all" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-code-runner]" },
+        "title": { "default": "Run All" },
+        "category": { "default": "Run Menu" }
+      },
+      "type": "object"
+    },
+    "runmenu:restart-and-run-all": {
+      "default": {},
+      "properties": {
+        "command": { "default": "runmenu:restart-and-run-all" },
+        "keys": { "default": [""] },
+        "selector": { "default": "[data-jp-code-runner]" },
+        "title": { "default": "Restart Kernel and Run All" },
+        "category": { "default": "Run Menu" }
+      },
+      "type": "object"
+    },
+    "settingeditor:debug": {
+      "default": {},
+      "properties": {
+        "command": { "default": "settingeditor:debug" },
+        "keys": { "default": ["Accel I"] },
+        "selector": { "default": ".jp-SettingEditor" },
+        "title": { "default": "Open Debugger" },
+        "category": { "default": "Settings Editor" }
+      },
+      "type": "object"
+    },
+    "settingeditor:open": {
+      "default": {},
+      "properties": {
+        "command": { "default": "settingeditor:open" },
+        "keys": { "default": ["Accel ,"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Open Settings Editor" },
+        "category": { "default": "Settings Editor" }
+      },
+      "type": "object"
+    },
+    "settingeditor:save": {
+      "default": {},
+      "properties": {
+        "command": { "default": "settingeditor:save" },
+        "keys": { "default": ["Accel S"] },
+        "selector": { "default": ".jp-SettingEditor" },
+        "title": { "default": "Save Settings" },
+        "category": { "default": "Settings Editor" }
+      },
+      "type": "object"
+    },
+    "shortcutui:open-ui": {
+      "default": {},
+      "properties": {
+        "command": { "default": "shortcutui:open-ui" },
+        "keys": { "default": ["Ctrl Shift /"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Open Keyboard Shortcut Settings" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
+    "tooltip:dismiss-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:dismiss" },
+        "keys": { "default": ["Escape"] },
+        "selector": {
+          "default": "body.jp-mod-tooltip .jp-CodeConsole-promptCell"
+        },
+        "title": { "default": "Dismiss Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:dismiss-notebook": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:dismiss" },
+        "keys": { "default": ["Escape"] },
+        "selector": { "default": "body.jp-mod-tooltip .jp-Notebook" },
+        "title": { "default": "Dismiss Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:launch-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-console" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:launch-notebook": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-notebook" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:launch-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-file" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    }
+  },
+  "oneOf": [{ "$ref": "#/definitions/shortcut" }],
+  "type": "object",
+  "definitions": {
+    "shortcut": {
+      "properties": {
+        "command": { "type": "string" },
+        "keys": {
+          "items": { "type": "string" },
+          "minItems": 1,
+          "type": "array"
+        },
+        "selector": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "type": "object"
+    }
+  }
+}

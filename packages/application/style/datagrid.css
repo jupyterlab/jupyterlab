@@ -1,0 +1,24 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.p-DataGrid {
+  min-width: 64px;
+  min-height: 64px;
+  border: 1px solid #a0a0a0;
+}
+
+.p-DataGrid-scrollCorner {
+  background-color: #f0f0f0;
+}
+
+.p-DataGrid-scrollCorner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  background-color: #a0a0a0;
+}

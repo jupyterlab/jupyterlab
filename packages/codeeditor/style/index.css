@@ -1,0 +1,77 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-JSONEditor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.jp-JSONEditor-host {
+  flex: 1 1 auto;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: 0px;
+  background: var(--jp-layout-color0);
+  min-height: 50px;
+  margin-left: 12px;
+  margin-right: 12px;
+  padding: 1px;
+}
+
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
+  border-color: red;
+  outline-color: red;
+}
+
+.jp-JSONEditor-header {
+  display: flex;
+  flex: 1 0 auto;
+  min-height: 13px;
+  padding: 12px;
+}
+
+.jp-JSONEditor-header label {
+  flex: 0 0 auto;
+}
+
+.jp-JSONEditor-commitButton,
+.jp-JSONEditor-revertButton,
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled {
+  height: 16px;
+  width: 16px;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-JSONEditor-commitButton {
+  background-image: var(--jp-icon-checkmark);
+  margin-left: 8px;
+}
+
+.jp-JSONEditor-revertButton {
+  background-image: var(--jp-icon-undo);
+}
+
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled {
+  margin-left: 6px;
+  background-image: var(--jp-icon-caretup);
+}
+
+.jp-JSONEditor-collapser.jp-mod-collapse-enabled.jp-mod-collapsed {
+  margin-left: 6px;
+  background-image: var(--jp-icon-caretdown);
+}
+
+.jp-JSONEditor-host.jp-mod-collapsed {
+  display: none;
+}
+
+.jp-JSONEditor-host.jp-mod-focused {
+  background-color: var(--jp-input-active-background);
+  border: 1px solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}

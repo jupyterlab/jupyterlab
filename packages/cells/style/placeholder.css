@@ -1,0 +1,42 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Placeholder
+|----------------------------------------------------------------------------*/
+
+.jp-Placeholder {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+}
+
+.jp-Placeholder-prompt {
+  box-sizing: border-box;
+}
+
+.jp-Placeholder-content {
+  flex: 1 1 auto;
+  border: none;
+  background: transparent;
+  height: 20px;
+  box-sizing: border-box;
+}
+
+.jp-Placeholder-content .jp-MoreHorizIcon {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 32px;
+  width: 32px;
+  height: 16px;
+  border: 1px solid transparent;
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-Placeholder-content .jp-MoreHorizIcon:hover {
+  border: 1px solid var(--jp-border-color1);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+  background-color: var(--jp-layout-color0);
+}

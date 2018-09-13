@@ -1,0 +1,56 @@
+{
+  "name": "@jupyterlab/buildutils",
+  "version": "0.10.2",
+  "description": "JupyterLab - Build Utilities",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "template/package.json",
+    "template/tsconfig.json",
+    "template/src/index.ts"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "get-dependency": "./lib/get-dependency.js",
+    "remove-dependency": "./lib/remove-dependency.js",
+    "update-dependency": "./lib/update-dependency.js"
+  },
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w --listEmittedFiles"
+  },
+  "dependencies": {
+    "child_process": "~1.0.2",
+    "fs-extra": "~4.0.2",
+    "glob": "~7.1.2",
+    "inquirer": "~3.3.0",
+    "package-json": "~5.0.0",
+    "path": "~0.12.7",
+    "sort-package-json": "~1.7.1",
+    "typescript": "~2.9.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "~4.0.3",
+    "@types/glob": "~5.0.33",
+    "@types/inquirer": "0.0.36",
+    "@types/node": "~8.0.47",
+    "rimraf": "~2.6.2"
+  }
+}

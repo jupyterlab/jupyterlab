@@ -1,0 +1,38 @@
+{
+  "name": "@jupyterlab/example-filebrowser",
+  "version": "0.18.4",
+  "private": true,
+  "scripts": {
+    "build": "tsc && webpack",
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^0.18.4",
+    "@jupyterlab/codemirror": "^0.18.4",
+    "@jupyterlab/docmanager": "^0.18.4",
+    "@jupyterlab/docregistry": "^0.18.4",
+    "@jupyterlab/filebrowser": "^0.18.6",
+    "@jupyterlab/fileeditor": "^0.18.4",
+    "@jupyterlab/services": "^3.1.4",
+    "@jupyterlab/theme-light-extension": "^0.18.4",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/commands": "^1.6.1",
+    "@phosphor/widgets": "^1.6.0",
+    "es6-promise": "~4.1.1"
+  },
+  "devDependencies": {
+    "@types/codemirror": "~0.0.46",
+    "css-loader": "~0.28.7",
+    "file-loader": "~1.1.11",
+    "raw-loader": "~0.5.1",
+    "rimraf": "~2.6.2",
+    "style-loader": "~0.21.0",
+    "typescript": "~2.9.2",
+    "url-loader": "~1.0.1",
+    "watch": "~1.0.2",
+    "webpack": "~4.12.0",
+    "webpack-cli": "^3.0.3",
+    "whatwg-fetch": "~2.0.3"
+  }
+}

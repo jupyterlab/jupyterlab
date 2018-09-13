@@ -1,0 +1,108 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-toolbar-height: calc(
+    28px + var(--jp-border-width)
+  ); /* leave 28px for content */
+}
+
+.jp-Toolbar {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  min-height: var(--jp-toolbar-micro-height);
+  padding: 2px;
+  z-index: 1;
+}
+
+/* Toolbar items */
+
+.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.jp-Toolbar-item.jp-Toolbar-kernelStatus {
+  display: inline-block;
+  width: 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+.jp-Toolbar > .jp-Toolbar-item {
+  flex: 0 0 auto;
+  display: flex;
+  padding-left: 1px;
+  padding-right: 1px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: var(--jp-private-toolbar-height);
+  height: 100%;
+}
+
+/* Toolbar buttons */
+
+/* This is the div we use to wrap the react component into a Widget */
+div.jp-ToolbarButton {
+  color: transparent;
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+button.jp-ToolbarButtonComponent {
+  background: var(--jp-layout-color1);
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0px 6px;
+  margin: 0px;
+  height: 24px;
+  border-radius: var(--jp-border-radius);
+  display: flex;
+  align-items: center;
+}
+
+button.jp-ToolbarButtonComponent:focus {
+  background: var(--jp-layout-color2);
+}
+
+button.jp-ToolbarButtonComponent:enabled:hover {
+  background: var(--jp-layout-color2);
+}
+
+button.jp-ToolbarButtonComponent:enabled:active {
+  background: var(--jp-layout-color3);
+}
+
+button.jp-ToolbarButtonComponent:disabled {
+  opacity: 0.4;
+}
+
+button.jp-ToolbarButtonComponent span {
+  padding: 0px;
+  flex: 0 0 auto;
+}
+
+button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+  font-size: var(--jp-ui-font-size1);
+  line-height: 100%;
+  padding-left: 2px;
+  color: var(--jp-ui-font-color1);
+}

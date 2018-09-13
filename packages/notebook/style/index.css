@@ -1,0 +1,262 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Private CSS variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-notebook-dragImage-width: 304px;
+  --jp-private-notebook-dragImage-height: 36px;
+  --jp-private-notebook-selected-color: var(--md-blue-400);
+  --jp-private-notebook-active-color: var(--md-green-400);
+}
+
+/*-----------------------------------------------------------------------------
+| Imports
+|----------------------------------------------------------------------------*/
+
+@import './toolbar.css';
+
+/*-----------------------------------------------------------------------------
+| Notebook
+|----------------------------------------------------------------------------*/
+
+.jp-NotebookPanel {
+  display: block;
+  height: 100%;
+}
+
+.jp-NotebookPanel.jp-Document {
+  min-width: 240px;
+  min-height: 120px;
+}
+
+.jp-Notebook {
+  padding: var(--jp-notebook-padding);
+  outline: none;
+  overflow: auto;
+  background: var(--jp-layout-color0);
+}
+
+.jp-Notebook::after {
+  display: block;
+  content: '';
+  min-height: var(--jp-notebook-scroll-padding);
+}
+
+.jp-Notebook .jp-Cell {
+  overflow: visible;
+}
+
+.jp-Notebook .jp-Cell .jp-InputPrompt {
+  cursor: move;
+}
+
+/*-----------------------------------------------------------------------------
+| Notebook state related styling
+|
+| The notebook and cells each have states, here are the possibilities:
+|
+| - Notebook
+|   - Command
+|   - Edit
+| - Cell
+|   - None
+|   - Active (only one can be active)
+|   - Selected (the cells actions are applied to)
+|   - Multiselected (when multiple selected, the cursor)
+|   - No outputs
+|----------------------------------------------------------------------------*/
+
+/* Command or edit modes */
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-prompt-not-active-font-color);
+}
+
+.jp-Notebook .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-prompt-not-active-font-color);
+}
+
+/* cell is active */
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser {
+  background: var(--jp-brand-color1);
+}
+
+/* collapser is hovered */
+.jp-Notebook .jp-Cell .jp-Collapser:hover {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
+}
+
+/* cell is active and collapser is hovered */
+.jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser:hover {
+  background: var(--jp-brand-color0);
+  opacity: 1;
+}
+
+/* Command mode */
+
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-selected {
+  background: var(--jp-notebook-multiselected-color);
+}
+
+.jp-Notebook.jp-mod-commandMode
+  .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
+  background: transparent;
+}
+
+/* Edit mode */
+
+.jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-active-background);
+}
+
+/*-----------------------------------------------------------------------------
+| Notebook drag and drop
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook-cell.jp-mod-dropSource {
+  opacity: 0.5;
+}
+
+.jp-Notebook-cell.jp-mod-dropTarget,
+.jp-Notebook.jp-mod-commandMode
+  .jp-Notebook-cell.jp-mod-active.jp-mod-selected.jp-mod-dropTarget {
+  border-top-color: var(--jp-private-notebook-selected-color);
+  border-top-style: solid;
+  border-top-width: 2px;
+}
+
+.jp-dragImage {
+  display: flex;
+  flex-direction: row;
+  width: var(--jp-private-notebook-dragImage-width);
+  height: var(--jp-private-notebook-dragImage-height);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background);
+  overflow: visible;
+}
+
+.jp-dragImage-singlePrompt {
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+}
+
+.jp-dragImage .jp-dragImage-content {
+  flex: 1 1 auto;
+  z-index: 2;
+  font-size: var(--jp-code-font-size);
+  font-family: var(--jp-code-font-family);
+  line-height: var(--jp-code-line-height);
+  padding: var(--jp-code-padding);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background-color);
+  color: var(--jp-content-font-color3);
+  text-align: left;
+  margin: 4px 4px 4px 0px;
+}
+
+.jp-dragImage .jp-dragImage-prompt {
+  flex: 0 0 auto;
+  min-width: 36px;
+  color: var(--jp-cell-inprompt-font-color);
+  padding: var(--jp-code-padding);
+  padding-left: 12px;
+  font-family: var(--jp-cell-prompt-font-family);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: 1.9;
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
+}
+
+.jp-dragImage-multipleBack {
+  z-index: -1;
+  position: absolute;
+  height: 32px;
+  width: 300px;
+  top: 8px;
+  left: 8px;
+  background: var(--jp-layout-color2);
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+}
+
+/*-----------------------------------------------------------------------------
+| Cell toolbar
+|----------------------------------------------------------------------------*/
+
+.jp-CellTools {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-ActiveCellTool {
+  padding: 12px;
+  background-color: var(--jp-layout-color1);
+  border-top: none !important;
+}
+
+.jp-ActiveCellTool .jp-InputArea-prompt {
+  flex: 0 0 auto;
+  padding-left: 0px;
+}
+
+.jp-ActiveCellTool .jp-InputArea-editor {
+  flex: 1 1 auto;
+  background: var(--jp-cell-editor-background);
+  border-color: var(--jp-cell-editor-border-color);
+}
+
+.jp-ActiveCellTool .jp-InputArea-editor .CodeMirror {
+  background: transparent;
+}
+
+.jp-CellTools-tool:not(:nth-child(2)) {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-MetadataEditorTool {
+  flex-direction: column;
+}
+
+.jp-KeySelector {
+  padding: 12px;
+}
+
+.jp-KeySelector select.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.jp-KeySelector label {
+  line-height: 1.4;
+}
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+.jp-mod-presentationMode .jp-Notebook {
+  --jp-content-font-size1: var(--jp-content-presentation-font-size1);
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+.jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-InputPrompt,
+.jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
+  flex: 0 0 110px;
+}
