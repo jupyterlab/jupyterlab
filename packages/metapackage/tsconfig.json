@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "inlineSources": true,
+    "jsx": "react",
+    "outDir": "./lib",
+    "paths": {
+      "@jupyterlab/*": ["../*/src"],
+      "@jupyterlab/mainmenu-extension": ["../mainmenu-extension/src"]
+    },
+    "sourceMap": true,
+    "types": ["node"]
+  }
+}

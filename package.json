@@ -12,10 +12,10 @@
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-)*\"",
     "build:test": "jlpm run build:testutils && lerna run build:test && lerna run build --scope \"@jupyterlab/test-*\"",
     "build:testutils": "cd testutils && jlpm run build",
-    "build:themes": "node buildutils/lib/build-themes.js",
+    "build:themes": "lerna run build:webpack --scope \"@jupyterlab/theme-*-extension\"",
     "build:update": "jlpm run pre-publish && node buildutils/lib/update-core-mode.js",
     "build:utils": "cd buildutils && jlpm run build",
-    "clean": "jlpm run clean:dev && jlpm run clean:packages",
+    "clean": "jlpm run clean:dev",
     "clean:core": "cd jupyterlab/staging && jlpm run clean",
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
@@ -79,7 +79,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "jlpm run integrity && lint-staged"
+      "pre-commit": "lint-staged && jlpm run integrity"
     }
   },
   "workspaces": [

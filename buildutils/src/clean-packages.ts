@@ -38,10 +38,10 @@ for (let i = 0; i < packageConfig.length; i++) {
  */
 function handlePackage(packagePath: string): void {
   // Read in the package.json.
-  let packageJSONPath = path.join(packagePath, 'package.json');
+  packagePath = path.join(packagePath, 'package.json');
   let data: any;
   try {
-    data = require(packageJSONPath);
+    data = require(packagePath);
   } catch (e) {
     console.log('skipping', packagePath);
     return;
