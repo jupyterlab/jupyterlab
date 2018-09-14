@@ -47,6 +47,6 @@
   },
   "devDependencies": {
     "@types/node-fetch": "^2.1.2",
-    "typescript": "next"
+    "typescript": "~3.1.0-dev.20180914"
   }
 }
