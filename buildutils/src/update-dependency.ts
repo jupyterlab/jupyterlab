@@ -19,13 +19,14 @@ if (process.argv.length !== 3) {
 let parts = process.argv[2].slice(1).split('@');
 parts[0] = process.argv[2][0] + parts[0];
 
-// Handle the version.
-if (parts.length === 1) {
-  parts.push('latest');
+// Translate @latest to a concrete version.
+if (parts.length === 1 || parts[1] === 'latest') {
+  packageJson(parts[0]).then(data => {
+    handlePackages(data.name, `~${data.version}`);
+  });
+} else {
+  handlePackages(parts[0], parts[1]);
 }
-packageJson(parts[0], { version: parts[1] }).then(data => {
-  handlePackages(data.name, `~${data.version}`);
-});
 
 // Handle the packages
 function handlePackages(name: string, specifier: string) {

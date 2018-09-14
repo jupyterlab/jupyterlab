@@ -31,16 +31,13 @@
   },
   "scripts": {
     "build": "jlpm run build:src",
-    "build:src": "tsc -b src",
+    "build:src": "tsc ",
     "build:test": "tsc --project test",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "jlpm run build:src && webpack",
     "test": "python test/run-test.py",
-    "test:coverage": "python test/run_test.py --TestApp.coverage==True",
-    "test:debug": "python test/run_test.py --debug",
-    "test:devtool": "python test/run_test.py --TestApp.devtool==True",
-    "watch": "tsc -b src --watch",
+    "test:coverage": "python test/run-test.py --coverage True",
+    "watch": "tsc -w --listEmittedFiles",
     "watch:all": "npm-run-all -p watch watch:test",
     "watch:test": "python test/run-test.py --debug",
     "watch:test:all": "python test/run-test.py --debug --watchAll"
@@ -64,10 +61,7 @@
     "rimraf": "~2.6.2",
     "text-encoding": "~0.5.5",
     "ts-jest": "^23.1.4",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.0.3",
-    "webpack": "~4.12.0",
-    "webpack-cli": "^3.0.3",
+    "typescript": "~2.9.2",
     "ws": "~6.0.0"
   }
 }

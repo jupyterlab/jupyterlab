@@ -3,7 +3,6 @@ import glob = require('glob');
 import fs = require('fs-extra');
 import childProcess = require('child_process');
 import sortPackageJson = require('sort-package-json');
-import coreutils = require('@phosphor/coreutils');
 
 /**
  * Get all of the lerna package paths.
@@ -51,42 +50,10 @@ export function writePackageData(pkgJsonPath: string, data: any): boolean {
 }
 
 /**
- * Read a json file.
+ * Read a package.json file.
  */
 export function readJSONFile(filePath: string): any {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-/**
- * Write a json file.
- */
-export function writeJSONFile(filePath: string, data: any): boolean {
-  function sortObjByKey(value: any): any {
-    // https://stackoverflow.com/a/35810961
-    return typeof value === 'object'
-      ? Array.isArray(value)
-        ? value.map(sortObjByKey)
-        : Object.keys(value)
-            .sort()
-            .reduce((o: any, key) => {
-              const v = value[key];
-              o[key] = sortObjByKey(v);
-              return o;
-            }, {})
-      : value;
-  }
-  let text = JSON.stringify(data, sortObjByKey(data), 2) + '\n';
-  let orig = {};
-  try {
-    orig = readJSONFile(filePath);
-  } catch (e) {
-    // no-op
-  }
-  if (!coreutils.JSONExt.deepEqual(data, orig)) {
-    fs.writeFileSync(filePath, text, 'utf8');
-    return true;
-  }
-  return false;
 }
 
 /**

@@ -12,8 +12,9 @@
  * Manage the metapackage meta package.
  */
 import * as path from 'path';
+import * as fs from 'fs-extra';
 import * as utils from './utils';
-import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
+import { ensurePackage } from './ensure-package';
 
 // Data to ignore.
 let MISSING: { [key: string]: string[] } = {
@@ -35,7 +36,6 @@ let pkgData: { [key: string]: any } = {};
 let pkgPaths: { [key: string]: string } = {};
 let pkgNames: { [key: string]: string } = {};
 let depCache: { [key: string]: string } = {};
-let locals: { [key: string]: string } = {};
 
 /**
  * Ensure the metapackage package.
@@ -44,14 +44,20 @@ let locals: { [key: string]: string } = {};
  */
 function ensureMetaPackage(): string[] {
   let basePath = path.resolve('.');
-  let mpPath = path.join(basePath, 'packages', 'metapackage');
-  let mpJson = path.join(mpPath, 'package.json');
-  let mpData = utils.readJSONFile(mpJson);
+  let metaPackagePath = path.join(basePath, 'packages', 'metapackage');
+  let metaPackageJson = path.join(metaPackagePath, 'package.json');
+  let metaPackageData = utils.readJSONFile(metaPackageJson);
+  let indexPath = path.join(metaPackagePath, 'src', 'index.ts');
+  let index = fs
+    .readFileSync(indexPath, 'utf8')
+    .split('\r\n')
+    .join('\n');
+  let lines = index.split('\n').slice(0, 3);
   let messages: string[] = [];
   let seen: { [key: string]: boolean } = {};
 
   utils.getCorePaths().forEach(pkgPath => {
-    if (path.resolve(pkgPath) === path.resolve(mpPath)) {
+    if (path.resolve(pkgPath) === path.resolve(metaPackagePath)) {
       return;
     }
     let name = pkgNames[pkgPath];
@@ -63,10 +69,16 @@ function ensureMetaPackage(): string[] {
     let valid = true;
 
     // Ensure it is a dependency.
-    if (!mpData.dependencies[name]) {
+    if (!metaPackageData.dependencies[name]) {
       valid = false;
-      mpData.dependencies[name] = '^' + data.version;
+      metaPackageData.dependencies[name] = '^' + data.version;
     }
+
+    // Ensure it is in index.ts
+    if (index.indexOf(name) === -1) {
+      valid = false;
+    }
+    lines.push("import '" + name + "';");
 
     if (!valid) {
       messages.push(`Updated: ${name}`);
@@ -74,20 +86,22 @@ function ensureMetaPackage(): string[] {
   });
 
   // Make sure there are no extra deps.
-  Object.keys(mpData.dependencies).forEach(name => {
+  Object.keys(metaPackageData.dependencies).forEach(name => {
     if (!(name in seen)) {
       messages.push(`Removing dependency: ${name}`);
-      delete mpData.dependencies[name];
+      delete metaPackageData.dependencies[name];
     }
   });
 
   // Write the files.
   if (messages.length > 0) {
-    utils.writePackageData(mpJson, mpData);
+    utils.writePackageData(metaPackageJson, metaPackageData);
   }
-
-  // Update the global data.
-  pkgData[mpData.name] = mpData;
+  let newIndex = lines.join('\n') + '\n';
+  if (newIndex !== index) {
+    messages.push('Index changed');
+    fs.writeFileSync(indexPath, lines.join('\n') + '\n');
+  }
 
   return messages;
 }
@@ -193,33 +207,17 @@ export async function ensureIntegrity(): Promise<boolean> {
     pkgData[data.name] = data;
     pkgPaths[data.name] = pkgPath;
     pkgNames[pkgPath] = data.name;
-    locals[data.name] = pkgPath;
   });
-
-  // Update the metapackage.
-  let pkgMessages = ensureMetaPackage();
-  if (pkgMessages.length > 0) {
-    let pkgName = '@jupyterlab/metapackage';
-    if (!messages[pkgName]) {
-      messages[pkgName] = [];
-    }
-    messages[pkgName] = messages[pkgName].concat(pkgMessages);
-  }
 
   // Validate each package.
   for (let name in pkgData) {
-    let options: IEnsurePackageOptions = {
+    let options = {
       pkgPath: pkgPaths[name],
       data: pkgData[name],
       depCache,
       missing: MISSING[name],
-      unused: UNUSED[name],
-      locals
+      unused: UNUSED[name]
     };
-
-    if (name === '@jupyterlab/metapackage') {
-      options.noUnused = false;
-    }
     let pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
@@ -231,6 +229,16 @@ export async function ensureIntegrity(): Promise<boolean> {
   let coreData: any = utils.readJSONFile(corePath);
   if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
+  }
+
+  // Handle the metapackage metapackage.
+  let pkgMessages = ensureMetaPackage();
+  if (pkgMessages.length > 0) {
+    let pkgName = '@jupyterlab/metapackage';
+    if (!messages[pkgName]) {
+      messages[pkgName] = [];
+    }
+    messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
   // Handle the JupyterLab application top package.
@@ -246,7 +254,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Handle any messages.
   if (Object.keys(messages).length > 0) {
     console.log(JSON.stringify(messages, null, 2));
-    if ('--force' in process.argv) {
+    if (process.env.TRAVIS_BRANCH || process.env.APPVEYOR) {
       console.log(
         '\n\nPlease run `jlpm run integrity` locally and commit the changes'
       );
