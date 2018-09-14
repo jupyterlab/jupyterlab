@@ -17,6 +17,7 @@ from notebook.base.handlers import IPythonHandler, FileFindHandler
 from notebook.notebookapp import NotebookApp
 from traitlets import Unicode
 
+HERE = os.path.dirname(__file__)
 
 class ExampleHandler(IPythonHandler):
     """Handle requests between the main app page and notebook server."""
@@ -29,7 +30,7 @@ class ExampleHandler(IPythonHandler):
             terminals_available=self.settings['terminals_available']))
 
     def get_template(self, name):
-        loader = FileSystemLoader(os.getcwd())
+        loader = FileSystemLoader(HERE)
         return loader.load(self.settings['jinja2_env'], name)
 
 
@@ -44,7 +45,7 @@ class ExampleApp(NotebookApp):
         default_handlers = [
             (r'/example/?', ExampleHandler),
             (r"/example/(.*)", FileFindHandler,
-                {'path': 'build'}),
+                {'path': os.path.join(HERE, 'build')}),
         ]
         self.web_app.add_handlers(".*$", default_handlers)
 

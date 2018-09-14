@@ -1,7 +1,5 @@
-"""
-Copyright (c) Jupyter Development Team.
-Distributed under the terms of the Modified BSD License.
-"""
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
 
 from jupyterlab_server import LabServerApp, LabConfig
 import os
@@ -15,8 +13,8 @@ class ExampleApp(LabServerApp):
         app_version = '0.1.0',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
         settings_dir = os.path.join(HERE, 'build', 'settings'),
-        static_dir=os.path.join(HERE, 'build'),
-        templates_dir=os.path.join(HERE, 'templates'),
+        static_dir = os.path.join(HERE, 'build'),
+        templates_dir = os.path.join(HERE, 'templates'),
         themes_dir = os.path.join(HERE, 'build', 'themes'),
         user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
         workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),

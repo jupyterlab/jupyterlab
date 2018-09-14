@@ -12,7 +12,7 @@ module.exports = {
   },
   bail: true,
   devtool: 'cheap-source-map',
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
