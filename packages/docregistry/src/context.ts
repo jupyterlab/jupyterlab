@@ -386,6 +386,7 @@ export class Context<T extends DocumentRegistry.IModel>
           path: newPath
         };
       }
+      this._path = newPath;
       this.session.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
@@ -393,7 +394,6 @@ export class Context<T extends DocumentRegistry.IModel>
       };
       const localPath = this._manager.contents.localPath(newPath);
       this.session.setName(PathExt.basename(localPath));
-      this._path = newPath;
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
