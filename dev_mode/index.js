@@ -164,23 +164,32 @@ function main() {
   var browserTest = PageConfig.getOption('browserTest');
   if (browserTest.toLowerCase() === 'true') {
     var errors = [];
-    var el = document.createElement('div');
+    var reported = false;
+    var timeout = 60000;
+    var report = function(errors) {
+      if (reported) {
+        return;
+      }
+      reported = true;
 
-    el.id = 'browserResult';
+      var el = document.createElement('div');
+
+      el.id = 'browserResult';
+      el.textContent = JSON.stringify(errors)
+      document.body.appendChild(el);
+    }
 
     window.onerror = function(msg, url, line, col, error) {
       errors.push(String(error));
     };
-    console.error = function(message) {
-      errors.push(String(message));
-    };
-    lab.restored.then(function() {
-      el.textContent = JSON.stringify(errors);
-      document.body.appendChild(el);
-    }).catch(function(reason) {
-      el.textContent = JSON.stringify({ restoreError: reason.message })
-      document.body.appendChild(el);
-    });
+    console.error = function(message) { errors.push(String(message)); };
+
+    lab.restored
+      .then(function() { report(errors); })
+      .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
+
+    // Handle failures to restore after the timeout has elapsed.
+    window.setTimeout(function() { report(errors); }, timeout);
   }
 
 }
