@@ -56,7 +56,7 @@ let data = utils.readJSONFile(pkgJSONPath);
 if (data.private !== true) {
   data.publishConfig = {};
   data.publishConfig.access = 'public';
-  fs.writeJSONFile(pkgJSONPath, data);
+  utils.writeJSONFile(pkgJSONPath, data);
 }
 
 // Add the extension path to packages/metapackage/tsconfig.json
@@ -70,7 +70,7 @@ let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.compilerOptions.paths[data.name] = [
   path.join('..', packageDirName, 'src')
 ];
-fs.writeJSONFile(tsconfigPath, tsconfig);
+utils.writeJSONFile(tsconfigPath, tsconfig);
 
 // Update the core jupyterlab build dependencies.
 try {
