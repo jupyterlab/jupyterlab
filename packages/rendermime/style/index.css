@@ -354,6 +354,12 @@
   max-width: none;
 }
 
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon td,
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon th,
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon tr {
+  text-align: right;
+}
+
 .jp-RenderedHTMLCommon th {
   font-weight: bold;
 }
