@@ -23,9 +23,7 @@ class ExampleApp(LabServerApp):
     )
 
     def start(self):
-        from pprint import pprint
         self.web_app.settings.setdefault('terminals_available', True)
-        pprint(self.web_app.settings)
         super().start()
 
 if __name__ == '__main__':
