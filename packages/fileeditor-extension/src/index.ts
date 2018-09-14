@@ -330,6 +330,7 @@ function activate(
       return commands
         .execute('console:create', {
           activate: args['activate'],
+          name: widget.context.contentsModel.name,
           path: widget.context.path,
           preferredLanguage: widget.context.model.defaultKernelLanguage,
           ref: widget.id,
@@ -338,6 +339,7 @@ function activate(
         .then(console => {
           widget.context.pathChanged.connect((sender, value) => {
             console.session.setPath(value);
+            console.session.setName(widget.context.contentsModel.name);
           });
         });
     },
