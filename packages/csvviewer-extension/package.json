@@ -33,7 +33,8 @@
     "@jupyterlab/application": "^0.18.4",
     "@jupyterlab/apputils": "^0.18.4",
     "@jupyterlab/csvviewer": "^0.18.4",
-    "@jupyterlab/docregistry": "^0.18.4"
+    "@jupyterlab/docregistry": "^0.18.4",
+    "@phosphor/datagrid": "^0.1.6"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
