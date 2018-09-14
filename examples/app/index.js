@@ -17,7 +17,6 @@ window.addEventListener('load', function() {
     require('@jupyterlab/csvviewer-extension'),
     require('@jupyterlab/docmanager-extension'),
     require('@jupyterlab/fileeditor-extension'),
-    require('@jupyterlab/faq-extension'),
     require('@jupyterlab/filebrowser-extension'),
     require('@jupyterlab/help-extension'),
     require('@jupyterlab/imageviewer-extension'),

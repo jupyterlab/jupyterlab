@@ -3,14 +3,19 @@
 
 from jupyterlab_server import LabServerApp, LabConfig
 import os
+from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
 class ExampleApp(LabServerApp):
+
+    default_url = Unicode('/exampleapp',
+                          help='The default URL to redirect to from `/`')
+
     lab_config = LabConfig(
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        app_version = '0.1.0',
+        page_url = '/exampleapp',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
         settings_dir = os.path.join(HERE, 'build', 'settings'),
         static_dir = os.path.join(HERE, 'build'),
