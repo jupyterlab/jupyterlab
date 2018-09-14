@@ -9977,9 +9977,13 @@ typedoc@~0.12.0:
     typedoc-default-themes "^0.5.0"
     typescript "3.0.x"
 
-typescript@3.0.x, typescript@~3.0.3:
+typescript@3.0.x:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
+
+typescript@next:
+  version "3.1.0-dev.20180914"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.0-dev.20180914.tgz#cd2db3b6082f0965ee850726a777b58a851986fc"
 
 ua-parser-js@^0.7.18:
   version "0.7.18"

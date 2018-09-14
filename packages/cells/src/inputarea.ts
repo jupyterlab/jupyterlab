@@ -93,6 +93,7 @@ export class InputArea extends Widget {
    * Get the prompt node used by the cell.
    */
   get promptNode(): HTMLElement {
+    console.log('hi');
     return this._prompt.node;
   }
 
