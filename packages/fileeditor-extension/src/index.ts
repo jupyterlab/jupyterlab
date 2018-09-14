@@ -327,13 +327,19 @@ function activate(
         return;
       }
 
-      return commands.execute('console:create', {
-        activate: args['activate'],
-        path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
-        ref: widget.id,
-        insertMode: 'split-bottom'
-      });
+      return commands
+        .execute('console:create', {
+          activate: args['activate'],
+          path: widget.context.path,
+          preferredLanguage: widget.context.model.defaultKernelLanguage,
+          ref: widget.id,
+          insertMode: 'split-bottom'
+        })
+        .then(console => {
+          widget.context.pathChanged.connect((sender, value) => {
+            console.session.setPath(value);
+          });
+        });
     },
     isEnabled,
     label: 'Create Console for Editor'
