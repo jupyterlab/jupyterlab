@@ -168,14 +168,14 @@ export class Cell extends Widget {
     this.layout = new PanelLayout();
 
     // Header
-    let header = (this._header = contentFactory.createCellHeader());
+    let header = contentFactory.createCellHeader();
     header.addClass(CELL_HEADER_CLASS);
     (this.layout as PanelLayout).addWidget(header);
 
     // Input
     let inputWrapper = (this._inputWrapper = new Panel());
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
-    let inputCollapser = (this._inputCollapser = new InputCollapser());
+    let inputCollapser = new InputCollapser();
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
     let input = (this._input = new InputArea({ model, contentFactory }));
     input.addClass(CELL_INPUT_AREA_CLASS);
@@ -188,7 +188,7 @@ export class Cell extends Widget {
     });
 
     // Footer
-    let footer = (this._footer = this.contentFactory.createCellFooter());
+    let footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
@@ -340,9 +340,6 @@ export class Cell extends Widget {
     }
     this._input = null;
     this._model = null;
-    this._header = null;
-    this._footer = null;
-    this._inputCollapser = null;
     this._inputWrapper = null;
     this._inputPlaceholder = null;
     super.dispose();
@@ -378,11 +375,8 @@ export class Cell extends Widget {
 
   private _readOnly = false;
   private _model: ICellModel = null;
-  private _header: ICellHeader = null;
-  private _footer: ICellFooter = null;
   private _inputHidden = false;
   private _input: InputArea = null;
-  private _inputCollapser: InputCollapser = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
 }
@@ -540,7 +534,7 @@ export class CodeCell extends Cell {
     // Insert the output before the cell footer.
     let outputWrapper = (this._outputWrapper = new Panel());
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    let outputCollapser = (this._outputCollapser = new OutputCollapser());
+    let outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
     let output = (this._output = new OutputArea({
       model: model.outputs,
@@ -699,7 +693,6 @@ export class CodeCell extends Cell {
     this._rendermime = null;
     this._output = null;
     this._outputWrapper = null;
-    this._outputCollapser = null;
     this._outputPlaceholder = null;
     super.dispose();
   }
@@ -762,7 +755,6 @@ export class CodeCell extends Cell {
   private _outputHidden = false;
   private _outputsScrolled: boolean;
   private _outputWrapper: Widget = null;
-  private _outputCollapser: OutputCollapser = null;
   private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
 }

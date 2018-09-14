@@ -45,7 +45,7 @@
     "package-json": "~5.0.0",
     "path": "~0.12.7",
     "sort-package-json": "~1.7.1",
-    "typescript": "~3.0.3"
+    "typescript": "~3.1.0-dev.20180914"
   },
   "devDependencies": {
     "@types/fs-extra": "~4.0.3",
