@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 import threading
 
 from jupyterlab.labapp import LabApp
-from jupyterlab_launcher.tests.utils import APITester, LabTestBase
+from jupyterlab_server.tests.utils import APITester, LabTestBase
 from notebook.tests.launchnotebook import assert_http_error
 
 

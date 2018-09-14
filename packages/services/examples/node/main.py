@@ -4,8 +4,8 @@
 from __future__ import print_function, absolute_import
 import json
 import os
-from jupyterlab_launcher.process import which
-from jupyterlab_launcher.process_app import ProcessApp
+from jupyterlab_server.process import which
+from jupyterlab_server.process_app import ProcessApp
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 

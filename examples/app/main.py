@@ -3,12 +3,12 @@ Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
 """
 
-from jupyterlab_launcher import LabLauncherApp, LabConfig
+from jupyterlab_server import LabServerApp, LabConfig
 import os
 
 HERE = os.path.dirname(__file__)
 
-class ExampleApp(LabLauncherApp):
+class ExampleApp(LabServerApp):
     lab_config = LabConfig(
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),

@@ -30,7 +30,7 @@ def load_jupyter_server_extension(nbapp):
     """
     # Delay imports to speed up jlpmapp
     from json import dumps
-    from jupyterlab_launcher import add_handlers, LabConfig
+    from jupyterlab_server import add_handlers, LabConfig
     from notebook.utils import url_path_join as ujoin, url_escape
     from notebook._version import version_info
     from tornado.ioloop import IOLoop
