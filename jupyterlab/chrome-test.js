@@ -12,8 +12,7 @@ async function main() {
   await page.goto(URL);
   console.info('Waiting for application to start...');
 
-  const timeout = 90000; // Increase the timeout from 30s to 90s for slow CI.
-  const res = await page.waitForSelector('#browserResult', { timeout });
+  const res = await page.waitForSelector('#browserResult');
   const textContent = await res.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
