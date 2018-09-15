@@ -222,6 +222,8 @@ function activateConsole(
       .then(() => {
         // Add the console panel to the tracker.
         tracker.add(panel);
+        panel.session.propertyChanged.connect(() => tracker.save(panel));
+
         shell.addToMainArea(panel, {
           ref: options.ref,
           mode: options.insertMode,
