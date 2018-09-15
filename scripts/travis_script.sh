@@ -83,7 +83,7 @@ if [[ $GROUP == integrity ]]; then
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
     # Make sure we can successfully load the dev app.
-    jupyter lab build
+    jlpm run build
     python -m jupyterlab.browser_check --dev-mode
 
     # Make sure core mode works
