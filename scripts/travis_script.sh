@@ -76,12 +76,6 @@ if [[ $GROUP == integrity ]]; then
     # Make sure the examples build
     jlpm run build:examples
 
-    # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss-cli
-
-    jlpm config set prefix ~/.yarn
-    ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
-
     # Make sure we can successfully load the dev app.
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
@@ -97,6 +91,12 @@ if [[ $GROUP == integrity ]]; then
 
     # Make sure the deprecated `selenium_check` command still works
     python -m jupyterlab.selenium_check
+
+    # Make sure we have CSS that can be converted with postcss
+    jlpm global add postcss-cli
+
+    jlpm config set prefix ~/.yarn
+    ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
