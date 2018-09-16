@@ -144,12 +144,17 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     switch (event.type) {
       case 'mouseup':
       case 'mouseout':
+        // Refocus the content if we are done interacting with the toolabar.
+        // An exception is if we are in a dropdown select menu, since mouse
+        // interactions can leave the toolbar area even when we are still
+        // interacting with it.
         let target = event.target as HTMLElement;
         if (
           this._isRevealed &&
           this._content &&
           this.toolbar.node.contains(document.activeElement) &&
-          target.tagName !== 'SELECT'
+          target.tagName !== 'SELECT' &&
+          target.tagName !== 'OPTION'
         ) {
           this._focusContent();
         }
