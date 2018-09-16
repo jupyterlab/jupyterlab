@@ -36,5 +36,5 @@
   border: none;
   border-radius: 0;
   outline: none;
-  background-color: transparent;
+  background-color: var(--jp-layout-color1);
 }
