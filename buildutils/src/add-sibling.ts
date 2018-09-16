@@ -51,7 +51,13 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
 }
 
 // Get the package.json of the extension.
-let data = utils.readJSONFile(path.join(packagePath, 'package.json'));
+let pkgJSONPath = path.join(packagePath, 'package.json');
+let data = utils.readJSONFile(pkgJSONPath);
+if (data.private !== true) {
+  data.publishConfig = {};
+  data.publishConfig.access = 'public';
+  utils.writeJSONFile(pkgJSONPath, data);
+}
 
 // Add the extension path to packages/metapackage/tsconfig.json
 let tsconfigPath = path.join(
@@ -64,7 +70,7 @@ let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.compilerOptions.paths[data.name] = [
   path.join('..', packageDirName, 'src')
 ];
-fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+utils.writeJSONFile(tsconfigPath, tsconfig);
 
 // Update the core jupyterlab build dependencies.
 try {
