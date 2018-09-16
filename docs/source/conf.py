@@ -227,9 +227,14 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 # https://github.com/rtfd/recommonmark/blob/master/docs/conf.py#L296
 github_doc_root = 'https://github.com/jupyterlab/jupyterlab/tree/master/docs/'
 
+
+def url_resolver(url):
+    return github_doc_root + url
+
+
 def setup(app):
     app.add_config_value('recommonmark_config', {
-        'url_resolver': lambda url: github_doc_root + url,
+        'url_resolver': url_resolver,
         'auto_toc_tree_section': 'Contents',
         'enable_eval_rst': True,
         'enable_auto_doc_ref': False,
