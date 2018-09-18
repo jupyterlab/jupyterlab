@@ -18,7 +18,11 @@ async function main() {
     console.error(html);
   }
 
-  const res = await page.waitForSelector('#browserResult');
+  try {
+    const res = await page.waitForSelector('#browserResult');
+  } catch (e) {
+    console.error(e);
+  }
   const textContent = await res.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
