@@ -40,7 +40,8 @@ If available, please include the following details:
 
 <details><summary>Troubleshoot Output</summary>
 <pre>
-Past your output from running `jupyter troubleshoot` from the command line here.
+Paste your output from running `jupyter troubleshoot` from the command line here.
+You may want to sanitize the paths in the output.
 </pre>
 </details>
 
