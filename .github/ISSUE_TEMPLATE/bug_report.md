@@ -21,7 +21,6 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
-
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
@@ -41,7 +40,7 @@ If available, please include the following details:
 
 <details><summary>Troubleshoot Output</summary>
 <pre>
-The output from running `jupyter troubleshoot` from the command line.
+Past your output from running `jupyter troubleshoot` from the command line.
 </pre>
 </details>
 
