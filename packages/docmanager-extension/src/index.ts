@@ -187,6 +187,17 @@ function addCommands(
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
 
+  const isWritable = () => {
+    const { currentWidget } = shell;
+    const context = docManager.contextForWidget(currentWidget);
+    return !!(
+      currentWidget &&
+      context &&
+      context.contentsModel &&
+      context.contentsModel.writable
+    );
+  };
+
   // fetches the doc widget associated with the most recent contextmenu event
   const contextMenuWidget = (): Widget => {
     let pathRe = /[Pp]ath:\s?(.*)\n?/;
@@ -480,7 +491,7 @@ function addCommands(
   commands.addCommand(CommandIDs.save, {
     label: () => `Save ${fileType()}`,
     caption: 'Save and create checkpoint',
-    isEnabled,
+    isEnabled: isWritable,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
@@ -539,7 +550,7 @@ function addCommands(
   commands.addCommand(CommandIDs.saveAs, {
     label: () => `Save ${fileType()} As…`,
     caption: 'Save with new path',
-    isEnabled,
+    isEnabled: isWritable,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
@@ -550,7 +561,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.rename, {
     label: () => `Rename ${fileType(contextMenuWidget())}…`,
-    isEnabled,
+    isEnabled: isWritable,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(contextMenuWidget());
