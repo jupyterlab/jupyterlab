@@ -14,6 +14,7 @@ async function main() {
 
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
+    console.error('Error loading JupyterLab page:');
     console.error(html);
   }
 
