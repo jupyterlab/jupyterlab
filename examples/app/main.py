@@ -7,6 +7,10 @@ from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
+# Turn off the Jupyter configuration system so configuration files on disk do
+# not affect this app. This helps this app to truly be standalone.
+os.environ["JUPYTER_NO_CONFIG"]="1"
+
 class ExampleApp(LabServerApp):
 
     default_url = Unicode('/exampleapp',
@@ -28,13 +32,8 @@ class ExampleApp(LabServerApp):
     def start(self):
         settings = self.web_app.settings
 
-        # By default, terminals are available.
+        # By default, make terminals available.
         settings.setdefault('terminals_available', True)
-
-        # Override the build check setting from the jupyterlab server extension.
-        settings.setdefault('page_config_data', dict())
-        settings['page_config_data']['buildAvailable'] = False
-        settings['page_config_data']['buildCheck'] = False
 
         super().start()
 
