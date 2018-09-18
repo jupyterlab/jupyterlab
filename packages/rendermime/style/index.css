@@ -24,7 +24,7 @@
   padding: 0px;
 }
 
-/* ansi_up creates classed spans for console foregrounds and backgrounds. */
+/* console foregrounds and backgrounds */
 .jp-RenderedText pre .ansi-black-fg {
   color: #3e424d;
 }
@@ -75,54 +75,68 @@
   background-color: #c5c1b4;
 }
 
-.jp-RenderedText pre .ansi-bright-black-fg {
+.jp-RenderedText pre .ansi-black-intense-fg {
   color: #282c36;
 }
-.jp-RenderedText pre .ansi-bright-red-fg {
+.jp-RenderedText pre .ansi-red-intense-fg {
   color: #b22b31;
 }
-.jp-RenderedText pre .ansi-bright-green-fg {
+.jp-RenderedText pre .ansi-green-intense-fg {
   color: #007427;
 }
-.jp-RenderedText pre .ansi-bright-yellow-fg {
+.jp-RenderedText pre .ansi-yellow-intense-fg {
   color: #b27d12;
 }
-.jp-RenderedText pre .ansi-bright-blue-fg {
+.jp-RenderedText pre .ansi-blue-intense-fg {
   color: #0065ca;
 }
-.jp-RenderedText pre .ansi-bright-magenta-fg {
+.jp-RenderedText pre .ansi-magenta-intense-fg {
   color: #a03196;
 }
-.jp-RenderedText pre .ansi-bright-cyan-fg {
+.jp-RenderedText pre .ansi-cyan-intense-fg {
   color: #258f8f;
 }
-.jp-RenderedText pre .ansi-bright-white-fg {
+.jp-RenderedText pre .ansi-white-intense-fg {
   color: #a1a6b2;
 }
 
-.jp-RenderedText pre .ansi-bright-black-bg {
+.jp-RenderedText pre .ansi-black-intense-bg {
   background-color: #282c36;
 }
-.jp-RenderedText pre .ansi-bright-red-bg {
+.jp-RenderedText pre .ansi-red-intense-bg {
   background-color: #b22b31;
 }
-.jp-RenderedText pre .ansi-bright-green-bg {
+.jp-RenderedText pre .ansi-green-intense-bg {
   background-color: #007427;
 }
-.jp-RenderedText pre .ansi-bright-yellow-bg {
+.jp-RenderedText pre .ansi-yellow-intense-bg {
   background-color: #b27d12;
 }
-.jp-RenderedText pre .ansi-bright-blue-bg {
+.jp-RenderedText pre .ansi-blue-intense-bg {
   background-color: #0065ca;
 }
-.jp-RenderedText pre .ansi-bright-magenta-bg {
+.jp-RenderedText pre .ansi-magenta-intense-bg {
   background-color: #a03196;
 }
-.jp-RenderedText pre .ansi-bright-cyan-bg {
+.jp-RenderedText pre .ansi-cyan-intense-bg {
   background-color: #258f8f;
 }
-.jp-RenderedText pre .ansi-bright-white-bg {
+.jp-RenderedText pre .ansi-white-intense-bg {
   background-color: #a1a6b2;
+}
+
+.jp-RenderedText pre .ansi-default-inverse-fg {
+  color: #ffffff;
+}
+.jp-RenderedText pre .ansi-default-inverse-bg {
+  background-color: #000000;
+}
+
+.jp-RenderedText pre .ansi-bold {
+  font-weight: bold;
+}
+.jp-RenderedText pre .ansi-underline {
+  text-decoration: underline;
 }
 
 .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr'] {

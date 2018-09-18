@@ -42,9 +42,8 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
-    "ansi_up": "^3.0.0",
     "marked": "0.5.1"
-  },
+ },
   "devDependencies": {
     "@types/marked": "~0.3.0",
     "rimraf": "~2.6.2",
