@@ -40,7 +40,7 @@ If available, please include the following details:
 
 <details><summary>Troubleshoot Output</summary>
 <pre>
-Past your output from running `jupyter troubleshoot` from the command line.
+Past your output from running `jupyter troubleshoot` from the command line here.
 </pre>
 </details>
 
@@ -52,6 +52,6 @@ Paste your output from the command line here, use `--debug` if possible.
 
 <details><summary>Browser Output</summary>
 <pre>
-Paste your output from the browser console.
+Paste your output from the browser console here.
 </pre>
 </details>
