@@ -26,7 +26,16 @@ class ExampleApp(LabServerApp):
     )
 
     def start(self):
-        self.web_app.settings.setdefault('terminals_available', True)
+        settings = self.web_app.settings
+
+        # By default, terminals are available.
+        settings.setdefault('terminals_available', True)
+
+        # Override the build check setting from the jupyterlab server extension.
+        settings.setdefault('page_config_data', dict())
+        settings['page_config_data']['buildAvailable'] = False
+        settings['page_config_data']['buildCheck'] = False
+
         super().start()
 
 if __name__ == '__main__':
