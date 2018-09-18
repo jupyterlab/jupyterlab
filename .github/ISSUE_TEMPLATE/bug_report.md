@@ -52,6 +52,6 @@ Paste your output from the command line here, use `--debug` if possible.
 
 <details><summary>Browser Output</summary>
 <pre>
-Paste your output from the browser console here!
+Paste your output from the browser console.
 </pre>
 </details>
