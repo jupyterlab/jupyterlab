@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-
+const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
@@ -11,6 +11,13 @@ async function main() {
   console.info('Navigating to page:', URL);
   await page.goto(URL);
   console.info('Waiting for application to start...');
+
+  const head = await page.waitForSelector('head');
+  const html = await head.getProperty('innerHTML');
+  if (inspect(html).indexOf('jupyter-config-data') === -1) {
+    const content = await page.content();
+    console.error(content);
+  }
 
   const res = await page.waitForSelector('#browserResult');
   const textContent = await res.getProperty('textContent');
