@@ -21,6 +21,7 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
+
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
@@ -36,6 +37,22 @@ If applicable, add screenshots to help explain your problem.
 **Additional context**
 Add any other context about the problem here.
 
-- Running `jupyter troubleshoot` from the command line, if possible, and posting
-  its output would also be helpful.
-- Running in `--debug` mode can also be helpful for troubleshooting.
+If available, please include the following details:
+
+<details><summary>Troubleshoot Output</summary>
+<pre>
+The output from running `jupyter troubleshoot` from the command line.
+</pre>
+</details>
+
+<details><summary>Command Line Output</summary>
+<pre>
+Paste your output from the command line here, use `--debug` if possible.
+</pre>
+</details>
+
+<details><summary>Browser Output</summary>
+<pre>
+Paste your output from the browser console here!
+</pre>
+</details>
