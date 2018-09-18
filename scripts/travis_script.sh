@@ -77,7 +77,6 @@ if [[ $GROUP == integrity ]]; then
     jlpm run build:examples
 
     # Make sure we can successfully load the dev app.
-    jlpm run build
     python -m jupyterlab.browser_check --dev-mode
 
     # Make sure core mode works
