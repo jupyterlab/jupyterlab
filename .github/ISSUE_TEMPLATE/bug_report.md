@@ -30,8 +30,8 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
 
 - OS: [e.g. Windows 10]
-- Browser and version [e.g. chrome 69.0, firefox 62.0]
-- JupyterLab Version [e.g. 0.34.2]
+- Browser [e.g. chrome 69.0, firefox 62.0]
+- JupyterLab [e.g. 0.34.2]
 
 **Additional context**
 Add any other context about the problem here.
