@@ -13,7 +13,7 @@ async function main() {
   console.info('Waiting for application to start...');
 
   const html = await page.content();
-  if (inspect(html).indexOf('jupyter-config-data') === -1) {
+  if (String(inspect(html)).indexOf('jupyter-config-data') === -1) {
     console.error('Error loading JupyterLab page:');
     console.error(html);
   }
