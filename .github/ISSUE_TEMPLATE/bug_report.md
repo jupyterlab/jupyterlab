@@ -31,7 +31,7 @@ If applicable, add screenshots to help explain your problem.
 
 - OS: [e.g. Windows 10]
 - Browser and version [e.g. chrome 69.0, firefox 62.0]
-- Version [e.g. 0.34.2]
+- JupyterLab Version [e.g. 0.34.2]
 
 **Additional context**
 Add any other context about the problem here.
