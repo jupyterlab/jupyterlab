@@ -15,6 +15,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { toArray } from '@phosphor/algorithm';
 
+import escape = require('lodash.escape');
+
 import { removeMath, replaceMath } from './latex';
 
 /**
@@ -652,6 +654,7 @@ function _ansispan(str: string) {
   let start = 0;
 
   str += '\x1b[m'; // Ensure markup for trailing text
+  // tslint:disable-next-line
   while ((match = ansiRe.exec(str))) {
     if (match[2] === 'm') {
       let items = match[1].split(';');
@@ -660,7 +663,7 @@ function _ansispan(str: string) {
         if (item === '') {
           numbers.push(0);
         } else if (item.search(/^\d+$/) !== -1) {
-          numbers.push(parseInt(item));
+          numbers.push(parseInt(item, 10));
         } else {
           // Ignored: Invalid color specification
           numbers.length = 0;
@@ -776,8 +779,7 @@ function _ansispan(str: string) {
 // The actual colors used are set in the CSS file.
 // This is supposed to have the same behavior as nbconvert.filters.ansi2html()
 function fixConsole(txt: string) {
-  // TODO: escape HTML
-  // txt = _.escape(txt);
+  txt = escape(txt);
 
   // color ansi codes (and remove non-color escape sequences)
   txt = _ansispan(txt);
