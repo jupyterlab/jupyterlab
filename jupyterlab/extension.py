@@ -103,7 +103,7 @@ def load_jupyter_server_extension(nbapp):
     # Check for dev mode.
     dev_mode = False
     if getattr(nbapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
-        app_dir = DEV_DIR
+        app_dir = config.app_dir = DEV_DIR
         dev_mode = True
         logger.info('Running JupyterLab in dev mode')
 
