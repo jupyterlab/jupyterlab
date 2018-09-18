@@ -89,9 +89,10 @@ def load_jupyter_server_extension(nbapp):
     config = load_config(nbapp)
     app_dir = config.app_dir
 
-    # Print messages.
-    logger.info('JupyterLab extensions loaded from %s' % HERE)
-    logger.info('JupyterLab application directory is %s' % app_dir)
+    config.app_name = 'JupyterLab'
+    config.app_namespace = 'jupyterlab'
+    config.page_url = '/lab'
+    config.cache_files = True
 
     # Check for core mode.
     core_mode = False
@@ -102,8 +103,13 @@ def load_jupyter_server_extension(nbapp):
     # Check for dev mode.
     dev_mode = False
     if getattr(nbapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+        app_dir = DEV_DIR
         dev_mode = True
         logger.info('Running JupyterLab in dev mode')
+
+    # Print messages.
+    logger.info('JupyterLab extension loaded from %s' % HERE)
+    logger.info('JupyterLab application directory is %s' % app_dir)
 
     # Check for watch.
     watch_mode = getattr(nbapp, 'watch', False)
