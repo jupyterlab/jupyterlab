@@ -40,19 +40,19 @@ If available, please include the following details:
 
 <details><summary>Troubleshoot Output</summary>
 <pre>
-Paste your output from running `jupyter troubleshoot` from the command line here.
+Paste the output from running `jupyter troubleshoot` from the command line here.
 You may want to sanitize the paths in the output.
 </pre>
 </details>
 
 <details><summary>Command Line Output</summary>
 <pre>
-Paste your output from the command line here, use `--debug` if possible.
+Paste the output from your command line running `jupyter lab` here, use `--debug` if possible.
 </pre>
 </details>
 
 <details><summary>Browser Output</summary>
 <pre>
-Paste your output from the browser console here.
+Paste the output from your browser console here.
 </pre>
 </details>
