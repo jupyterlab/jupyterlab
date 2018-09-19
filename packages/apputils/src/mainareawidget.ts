@@ -155,7 +155,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
           this.toolbar.node.contains(document.activeElement) &&
           target.tagName !== 'SELECT' &&
           target.tagName !== 'OPTION' &&
-          target.tagName !== 'INPUT'
+          document.activeElement.tagName !== 'INPUT'
         ) {
           this._focusContent();
         }
