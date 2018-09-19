@@ -898,7 +898,7 @@ namespace Private {
       if (typeof fg === 'number') {
         classes.push(ANSI_COLORS[fg] + '-fg');
       } else if (fg.length) {
-        styles.push('color: rgb(' + fg + ')');
+        styles.push(`color: rgb(${fg})`);
       } else if (inverse) {
         classes.push('ansi-default-inverse-fg');
       }
@@ -906,7 +906,7 @@ namespace Private {
       if (typeof bg === 'number') {
         classes.push(ANSI_COLORS[bg] + '-bg');
       } else if (bg.length) {
-        styles.push('background-color: rgb(' + bg + ')');
+        styles.push(`background-color: rgb(${bg})`);
       } else if (inverse) {
         classes.push('ansi-default-inverse-bg');
       }
@@ -922,10 +922,10 @@ namespace Private {
       if (classes.length || styles.length) {
         out.push('<span');
         if (classes.length) {
-          out.push(' class="' + classes.join(' ') + '"');
+          out.push(` class="${classes.join(' ')}"`);
         }
         if (styles.length) {
-          out.push(' style="' + styles.join('; ') + '"');
+          out.push(` style="${styles.join('; ')}"`);
         }
         out.push('>');
         out.push(chunk);
@@ -949,11 +949,7 @@ namespace Private {
       r = numbers.shift();
       g = numbers.shift();
       b = numbers.shift();
-      if (
-        [r, g, b].some(function(c) {
-          return c < 0 || 255 < c;
-        })
-      ) {
+      if ([r, g, b].some(c => c < 0 || 255 < c)) {
         throw new RangeError('Invalid range for RGB colors');
       }
     } else if (n === 5 && numbers.length >= 1) {
