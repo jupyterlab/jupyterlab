@@ -81,18 +81,14 @@ def load_jupyter_server_extension(nbapp):
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
     from .commands import (
-        DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev
+        DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev, get_app_dir
     )
 
     web_app = nbapp.web_app
     logger = nbapp.log
-    config = load_config(nbapp)
-    app_dir = config.app_dir
 
-    config.app_name = 'JupyterLab'
-    config.app_namespace = 'jupyterlab'
-    config.page_url = '/lab'
-    config.cache_files = True
+    # Handle the app_dir
+    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
 
     # Check for core mode.
     core_mode = False
@@ -106,6 +102,15 @@ def load_jupyter_server_extension(nbapp):
         app_dir = DEV_DIR
         dev_mode = True
         logger.info('Running JupyterLab in dev mode')
+
+    # Set the value on nbapp so it will get picked up in load_config
+    nbapp.app_dir = app_dir
+
+    config = load_config(nbapp)
+    config.app_name = 'JupyterLab'
+    config.app_namespace = 'jupyterlab'
+    config.page_url = '/lab'
+    config.cache_files = True
 
     # Check for watch.
     watch_mode = getattr(nbapp, 'watch', False)
@@ -138,12 +143,10 @@ def load_jupyter_server_extension(nbapp):
         nbapp.file_to_run = ''
 
     if core_mode:
-        app_dir = config.app_dir = HERE
         logger.info(CORE_NOTE.strip())
         ensure_core(logger)
 
     elif dev_mode:
-        app_dir = config.app_dir = DEV_DIR
         ensure_dev(logger)
         if not watch_mode:
             logger.info(DEV_NOTE)

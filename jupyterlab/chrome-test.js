@@ -10,7 +10,7 @@ async function main() {
 
   console.info('Navigating to page:', URL);
   await page.goto(URL);
-  console.info('Waiting for application to start...');
+  console.info('Waiting for page to load...');
 
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
@@ -18,8 +18,16 @@ async function main() {
     console.error(html);
   }
 
-  const res = await page.waitForSelector('#browserResult', { timeout: 32000 });
-  const textContent = await res.getProperty('textContent');
+  const el = await page.waitForSelector('#browserTest', { timeout: 100000 });
+  console.log('Waiting for application to start...');
+  let testError = null;
+
+  try {
+    await page.waitForSelector('.completed');
+  } catch (e) {
+    testError = e;
+  }
+  const textContent = await el.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
   for (let error of errors) {
@@ -28,6 +36,9 @@ async function main() {
 
   await browser.close();
 
+  if (testError) {
+    throw testError;
+  }
   console.info('Chrome test complete');
 }
 

@@ -162,27 +162,32 @@ function main() {
 
   // Handle a browser test.
   var browserTest = PageConfig.getOption('browserTest');
+  var el = document.createElement('div');
+  el.id = 'browserTest';
+  document.body.appendChild(el);
+  el.textContent = '[]';
+
   if (browserTest.toLowerCase() === 'true') {
     var errors = [];
     var reported = false;
-    var timeout = 30000;
+    var timeout = 25000;
+
     var report = function(errors) {
       if (reported) {
         return;
       }
       reported = true;
-
-      var el = document.createElement('div');
-
-      el.id = 'browserResult';
-      el.textContent = JSON.stringify(errors)
-      document.body.appendChild(el);
+      el.className = 'completed';
     }
 
     window.onerror = function(msg, url, line, col, error) {
       errors.push(String(error));
+      el.textContent = JSON.stringify(errors)
     };
-    console.error = function(message) { errors.push(String(message)); };
+    console.error = function(message) {
+      errors.push(String(message));
+      el.textContent = JSON.stringify(errors)
+    };
 
     lab.restored
       .then(function() { report(errors); })
