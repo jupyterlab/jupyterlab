@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.18.4",
-    "@jupyterlab/application-extension": "^0.18.5",
+    "@jupyterlab/application-extension": "^0.18.6",
     "@jupyterlab/apputils-extension": "^0.18.4",
     "@jupyterlab/buildutils": "^0.10.2",
     "@jupyterlab/codemirror-extension": "^0.18.4",
@@ -18,7 +18,7 @@
     "@jupyterlab/csvviewer-extension": "^0.18.4",
     "@jupyterlab/docmanager-extension": "^0.18.5",
     "@jupyterlab/faq-extension": "^0.18.4",
-    "@jupyterlab/filebrowser-extension": "^0.18.5",
+    "@jupyterlab/filebrowser-extension": "^0.18.6",
     "@jupyterlab/fileeditor-extension": "^0.18.5",
     "@jupyterlab/help-extension": "^0.18.4",
     "@jupyterlab/imageviewer-extension": "^0.18.4",
