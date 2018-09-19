@@ -528,7 +528,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
   let { host, source } = options;
 
   // Create the HTML content.
-  let content = Private.fixConsole(source);
+  let content = Private.ansiSpan(source);
 
   // Set the inner HTML for the host node.
   host.innerHTML = `<pre>${content}</pre>`;
@@ -985,9 +985,13 @@ namespace Private {
   }
 
   /**
-   * Color ANSI codes (and remove non-color escape sequences)
+   * Transform ANSI color escape codes into HTML <span> tags with CSS
+   * classes such as "ansi-green-intense-fg".
+   * The actual colors used are set in the CSS file.
+   * This also removes non-color escape sequences.
+   * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
-  function ansiSpan(str: string) {
+  export function ansiSpan(str: string) {
     let ansiRe = /\x1b\[(.*?)([@-~])/g;
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
@@ -998,6 +1002,8 @@ namespace Private {
     let out: Array<string> = [];
     let numbers = [];
     let start = 0;
+
+    str = escape(str);
 
     str += '\x1b[m'; // Ensure markup for trailing text
     // tslint:disable-next-line
@@ -1118,19 +1124,5 @@ namespace Private {
       }
     }
     return out.join('');
-  }
-
-  /**
-   * Transform ANSI color escape codes into HTML <span> tags with CSS
-   * classes such as "ansi-green-intense-fg".
-   * The actual colors used are set in the CSS file.
-   * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
-   */
-  export function fixConsole(txt: string) {
-    txt = escape(txt);
-
-    // color ansi codes (and remove non-color escape sequences)
-    txt = ansiSpan(txt);
-    return txt;
   }
 }
