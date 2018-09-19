@@ -29,7 +29,7 @@ function main() {
   try {
     var tempDisabled = PageConfig.getOption('disabledExtensions');
     if (tempDisabled) {
-      disabledExtensions = JSON.parse(tempDisabled).map(function (pattern) {
+      disabledExtensions = JSON.parse(tempDisabled).map(function(pattern) {
         disabled.patterns.push(pattern);
         return { raw: pattern, rule: new RegExp(pattern) };
       });
@@ -45,7 +45,7 @@ function main() {
   try {
     var tempDeferred = PageConfig.getOption('deferredExtensions');
     if (tempDeferred) {
-      deferredExtensions = JSON.parse(tempDeferred).map(function (pattern) {
+      deferredExtensions = JSON.parse(tempDeferred).map(function(pattern) {
         deferred.patterns.push(pattern);
         return { raw: pattern, rule: new RegExp(pattern) };
       });
@@ -55,13 +55,13 @@ function main() {
   }
 
   function isDeferred(value) {
-    return deferredExtensions.some(function (pattern) {
+    return deferredExtensions.some(function(pattern) {
       return pattern.raw === value || pattern.rule.test(value);
     });
   }
 
   function isDisabled(value) {
-    return disabledExtensions.some(function (pattern) {
+    return disabledExtensions.some(function(pattern) {
       return pattern.raw === value || pattern.rule.test(value);
     });
   }
@@ -70,7 +70,7 @@ function main() {
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
-  { { #each jupyterlab_mime_extensions } }
+  {{#each jupyterlab_mime_extensions}}
   try {
     if (isDeferred('{{key}}')) {
       deferred.matches.push('{{key}}');
@@ -88,7 +88,7 @@ function main() {
       }
 
       if (Array.isArray(extension)) {
-        extension.forEach(function (plugin) {
+        extension.forEach(function(plugin) {
           if (isDeferred(plugin.id)) {
             deferred.matches.push(plugin.id);
             ignorePlugins.push(plugin.id);
@@ -106,101 +106,97 @@ function main() {
   } catch (e) {
     console.error(e);
   }
-  {
-    {
-      /each}}
+  {{/each}}
 
-      // Handled the registered standard extensions.
-      { { #each jupyterlab_extensions } }
-      try {
-        if (isDeferred('{{key}}')) {
-          deferred.matches.push('{{key}}');
-          ignorePlugins.push('{{key}}');
-        }
-        if (isDisabled('{{@key}}')) {
-          disabled.matches.push('{{@key}}');
-        } else {
-          module = require('{{@key}}/{{this}}');
-          extension = module.default;
+  // Handled the registered standard extensions.
+  {{#each jupyterlab_extensions}}
+  try {
+    if (isDeferred('{{key}}')) {
+      deferred.matches.push('{{key}}');
+      ignorePlugins.push('{{key}}');
+    }
+    if (isDisabled('{{@key}}')) {
+      disabled.matches.push('{{@key}}');
+    } else {
+      module = require('{{@key}}/{{this}}');
+      extension = module.default;
 
-          // Handle CommonJS exports.
-          if (!module.hasOwnProperty('__esModule')) {
-            extension = module;
-          }
-
-          if (Array.isArray(extension)) {
-            extension.forEach(function (plugin) {
-              if (isDeferred(plugin.id)) {
-                deferred.matches.push(plugin.id);
-                ignorePlugins.push(plugin.id);
-              }
-              if (isDisabled(plugin.id)) {
-                disabled.matches.push(plugin.id);
-                return;
-              }
-              register.push(plugin);
-            });
-          } else {
-            register.push(extension);
-          }
-        }
-      } catch (e) {
-        console.error(e);
+      // Handle CommonJS exports.
+      if (!module.hasOwnProperty('__esModule')) {
+        extension = module;
       }
-      {
-        {
-          /each}}
 
-          var lab = new JupyterLab({
-            mimeExtensions: mimeExtensions,
-            disabled: disabled,
-            deferred: deferred
-          });
-          register.forEach(function (item) { lab.registerPluginModule(item); });
-          lab.start({ ignorePlugins: ignorePlugins });
-
-          // Expose global lab instance when in dev mode.
-          if ((PageConfig.getOption('devMode') || '').toLowerCase() === 'true') {
-            window.lab = lab;
+      if (Array.isArray(extension)) {
+        extension.forEach(function(plugin) {
+          if (isDeferred(plugin.id)) {
+            deferred.matches.push(plugin.id);
+            ignorePlugins.push(plugin.id);
           }
-
-          // Handle a browser test.
-          var browserTest = PageConfig.getOption('browserTest');
-          var el = document.createElement('div');
-          el.id = 'browserTest';
-          document.body.appendChild(el);
-          el.textContent = '[]';
-
-          if (browserTest.toLowerCase() === 'true') {
-            var errors = [];
-            var reported = false;
-            var timeout = 25000;
-
-            var report = function (errors) {
-              if (reported) {
-                return;
-              }
-              reported = true;
-              el.className = 'completed';
-            }
-
-            window.onerror = function (msg, url, line, col, error) {
-              errors.push(String(error));
-              el.textContent = JSON.stringify(errors)
-            };
-            console.error = function (message) {
-              errors.push(String(message));
-              el.textContent = JSON.stringify(errors)
-            };
-
-            lab.restored
-              .then(function () { report(errors); })
-              .catch(function (reason) { report([`RestoreError: ${reason.message}`]); });
-
-            // Handle failures to restore after the timeout has elapsed.
-            window.setTimeout(function () { report(errors); }, timeout);
+          if (isDisabled(plugin.id)) {
+            disabled.matches.push(plugin.id);
+            return;
           }
+          register.push(plugin);
+        });
+      } else {
+        register.push(extension);
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  {{/each}}
 
-        }
+  var lab = new JupyterLab({
+    mimeExtensions: mimeExtensions,
+    disabled: disabled,
+    deferred: deferred
+  });
+  register.forEach(function(item) { lab.registerPluginModule(item); });
+  lab.start({ ignorePlugins: ignorePlugins });
 
-        window.addEventListener('load', main);
+  // Expose global lab instance when in dev mode.
+  if ((PageConfig.getOption('devMode') || '').toLowerCase() === 'true') {
+    window.lab = lab;
+  }
+
+  // Handle a browser test.
+  var browserTest = PageConfig.getOption('browserTest');
+  var el = document.createElement('div');
+  el.id = 'browserTest';
+  document.body.appendChild(el);
+  el.textContent = '[]';
+
+  if (browserTest.toLowerCase() === 'true') {
+    var errors = [];
+    var reported = false;
+    var timeout = 25000;
+
+    var report = function(errors) {
+      if (reported) {
+        return;
+      }
+      reported = true;
+      el.className = 'completed';
+    }
+
+    window.onerror = function(msg, url, line, col, error) {
+      errors.push(String(error));
+      el.textContent = JSON.stringify(errors)
+    };
+    console.error = function(message) {
+      errors.push(String(message));
+      el.textContent = JSON.stringify(errors)
+    };
+
+    lab.restored
+      .then(function() { report(errors); })
+      .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
+
+    // Handle failures to restore after the timeout has elapsed.
+    window.setTimeout(function() { report(errors); }, timeout);
+  }
+
+}
+
+window.addEventListener('load', main);
