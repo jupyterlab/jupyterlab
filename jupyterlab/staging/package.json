@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.18.5",
-    "@jupyterlab/application-extension": "^0.18.5",
+    "@jupyterlab/application-extension": "^0.18.6",
     "@jupyterlab/apputils": "^0.18.4",
     "@jupyterlab/apputils-extension": "^0.18.4",
     "@jupyterlab/attachments": "^0.18.4",
@@ -35,7 +35,7 @@
     "@jupyterlab/extensionmanager-extension": "^0.18.4",
     "@jupyterlab/faq-extension": "^0.18.4",
     "@jupyterlab/filebrowser": "^0.18.6",
-    "@jupyterlab/filebrowser-extension": "^0.18.5",
+    "@jupyterlab/filebrowser-extension": "^0.18.6",
     "@jupyterlab/fileeditor": "^0.18.4",
     "@jupyterlab/fileeditor-extension": "^0.18.5",
     "@jupyterlab/help-extension": "^0.18.4",
@@ -215,7 +215,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.34.10",
+    "version": "0.34.11",
     "linkedPackages": {},
     "staticDir": "../static"
   }

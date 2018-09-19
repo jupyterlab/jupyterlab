@@ -2,11 +2,11 @@
 # yarn lockfile v1
 
 
-"@jupyterlab/application-extension@^0.18.5":
-  version "0.18.5"
-  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.18.5.tgz#867913434171858d26c5ce306d23b79411d4cdc0"
+"@jupyterlab/application-extension@^0.18.6":
+  version "0.18.6"
+  resolved "https://registry.npmjs.org/@jupyterlab/application-extension/-/application-extension-0.18.6.tgz#5457fa35df7d606a79f25387111136b7745e1172"
   dependencies:
-    "@jupyterlab/application" "^0.18.4"
+    "@jupyterlab/application" "^0.18.5"
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/coreutils" "^2.1.4"
     react "~16.4.0"
@@ -334,16 +334,16 @@
     "@jupyterlab/rendermime" "^0.18.4"
     "@phosphor/coreutils" "^1.3.0"
 
-"@jupyterlab/filebrowser-extension@^0.18.5":
-  version "0.18.5"
-  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.18.5.tgz#147bf2dc5055a89d16b07c8b02192709398eaabe"
+"@jupyterlab/filebrowser-extension@^0.18.6":
+  version "0.18.6"
+  resolved "https://registry.npmjs.org/@jupyterlab/filebrowser-extension/-/filebrowser-extension-0.18.6.tgz#7a1554cc5481df3a072ef1410b08a1c3d1613e4b"
   dependencies:
-    "@jupyterlab/application" "^0.18.4"
+    "@jupyterlab/application" "^0.18.5"
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/coreutils" "^2.1.4"
     "@jupyterlab/docmanager" "^0.18.4"
     "@jupyterlab/docregistry" "^0.18.4"
-    "@jupyterlab/filebrowser" "^0.18.4"
+    "@jupyterlab/filebrowser" "^0.18.6"
     "@jupyterlab/launcher" "^0.18.4"
     "@jupyterlab/services" "^3.1.4"
     "@phosphor/algorithm" "^1.1.2"
@@ -1271,8 +1271,8 @@ big.js@^3.1.3:
   resolved "https://registry.npmjs.org/big.js/-/big.js-3.2.0.tgz#a5fc298b81b9e0dca2e458824784b65c52ba588e"
 
 binary-extensions@^1.0.0:
-  version "1.11.0"
-  resolved "https://registry.npmjs.org/binary-extensions/-/binary-extensions-1.11.0.tgz#46aa1751fb6a2f93ee5e689bb1087d4b14c6c205"
+  version "1.12.0"
+  resolved "https://registry.npmjs.org/binary-extensions/-/binary-extensions-1.12.0.tgz#c2d780f53d45bba8317a8902d4ceeaf3a6385b14"
 
 blacklist@^1.1.4:
   version "1.1.4"
@@ -1514,8 +1514,8 @@ chokidar@^2.0.2:
     fsevents "^1.2.2"
 
 chownr@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/chownr/-/chownr-1.0.1.tgz#e2a75042a9551908bebd25b8523d5f9769d79181"
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/chownr/-/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
 
 chrome-trace-event@^1.0.0:
   version "1.0.0"
@@ -2163,8 +2163,8 @@ duplicate-package-checker-webpack-plugin@^3.0.0:
     semver "^5.4.1"
 
 electron-to-chromium@^1.2.7:
-  version "1.3.67"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.67.tgz#5e8f3ffac89b4b0402c7e1a565be06f3a109abbc"
+  version "1.3.69"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.69.tgz#0fd5d4bfd89ba6a431a144375245aea65073e3ca"
 
 elliptic@^6.0.0:
   version "6.4.1"
@@ -3290,7 +3290,7 @@ memory-fs@^0.4.0, memory-fs@~0.4.1:
     errno "^0.1.3"
     readable-stream "^2.0.1"
 
-micromatch@^3.1.4, micromatch@^3.1.8:
+micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.8:
   version "3.1.10"
   resolved "https://registry.npmjs.org/micromatch/-/micromatch-3.1.10.tgz#70859bc95c9840952f359a068a3fc49f9ecfac23"
   dependencies:
@@ -3335,7 +3335,7 @@ minimalistic-crypto-utils@^1.0.0, minimalistic-crypto-utils@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
 
-minimatch@^3.0.2, minimatch@^3.0.4:
+minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   dependencies:
@@ -4293,13 +4293,12 @@ readable-stream@1.0:
     string_decoder "~0.10.x"
 
 readdirp@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/readdirp/-/readdirp-2.1.0.tgz#4ed0ad060df3073300c48440373f72d1cc642d78"
+  version "2.2.1"
+  resolved "https://registry.npmjs.org/readdirp/-/readdirp-2.2.1.tgz#0e87622a3325aa33e892285caf8b4e846529a525"
   dependencies:
-    graceful-fs "^4.1.2"
-    minimatch "^3.0.2"
+    graceful-fs "^4.1.11"
+    micromatch "^3.1.10"
     readable-stream "^2.0.2"
-    set-immediate-shim "^1.0.1"
 
 recast@~0.11.12:
   version "0.11.23"
@@ -4528,10 +4527,6 @@ serialize-javascript@^1.4.0:
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
-
-set-immediate-shim@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
 set-value@^0.4.3:
   version "0.4.3"
