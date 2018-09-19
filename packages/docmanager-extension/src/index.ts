@@ -522,7 +522,6 @@ function addCommands(
     isEnabled: () => {
       const iterator = shell.widgets('main');
       let widget = iterator.next();
-      let anyWritable = false;
       while (widget) {
         if (docManager.contextForWidget(widget)) {
           let context = docManager.contextForWidget(widget);
@@ -531,14 +530,14 @@ function addCommands(
             context.contentsModel &&
             context.contentsModel.writable
           ) {
-            anyWritable = true;
+            return true;
           }
         }
         widget = iterator.next();
       }
       // disable saveAll if all of the widgets models
       // have writable === false
-      return anyWritable;
+      return false;
     },
     execute: () => {
       const iterator = shell.widgets('main');
