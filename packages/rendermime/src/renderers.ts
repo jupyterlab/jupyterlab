@@ -883,7 +883,7 @@ namespace Private {
     underline: boolean,
     inverse: boolean,
     out: Array<string>
-  ) {
+  ): void {
     if (chunk) {
       let classes = [];
       let styles = [];
@@ -939,7 +939,7 @@ namespace Private {
   /**
    * Convert ANSI extended colors to R/G/B triple.
    */
-  function getExtendedColors(numbers: Array<number>) {
+  function getExtendedColors(numbers: Array<number>): number | Array<number> {
     let r;
     let g;
     let b;
@@ -987,7 +987,7 @@ namespace Private {
    * This also removes non-color escape sequences.
    * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
-  export function ansiSpan(str: string) {
+  export function ansiSpan(str: string): string {
     let ansiRe = /\x1b\[(.*?)([@-~])/g;
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
