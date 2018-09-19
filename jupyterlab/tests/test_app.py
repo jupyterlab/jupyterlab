@@ -23,8 +23,8 @@ from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases
 
-from jupyterlab_launcher.process_app import ProcessApp
-import jupyterlab_launcher
+from jupyterlab_server.process_app import ProcessApp
+import jupyterlab_server
 
 
 HERE = osp.realpath(osp.dirname(__file__))
@@ -53,7 +53,7 @@ def _create_schemas_dir():
     os.makedirs(extension_dir)
 
     # Get schema content.
-    schema_package = jupyterlab_launcher.__name__
+    schema_package = jupyterlab_server.__name__
     schema_path = 'tests/schemas/@jupyterlab/apputils-extension/themes.json'
     themes = pkg_resources.resource_string(schema_package, schema_path)
 

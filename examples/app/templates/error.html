@@ -28,14 +28,31 @@ div#header, div#site {
 
 <div class="error">
     {% block h1_error %}
-    <h2>JupyterLab assets not detected, please rebuild</h2>
-    <script>
-    console.error('Missing assets in "{{static_dir}}"');
-    </script>
+    <h1>{{status_code}} : {{status_message}}</h1>
     {% endblock h1_error %}
+    {% block error_detail %}
+    {% if message %}
+    <p>The error was:</p>
+    <div class="traceback-wrapper">
+    <pre class="traceback">{{message}}</pre>
+    </div>
+    {% endif %}
+    {% endblock %}
 </header>
 
 {% endblock %}
+
+{% block script %}
+<script type='text/javascript'>
+window.onload = function () {
+  var tb = document.getElementsByClassName('traceback')[0];
+  tb.scrollTop = tb.scrollHeight;
+  {% if message %}
+  console.error("{{message}}")
+  {% endif %}
+};
+</script>
+{% endblock script %}
 
 </body>
 

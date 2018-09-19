@@ -105,7 +105,7 @@ Notes:
   rebuild.
 
 - If `pip` gives a `VersionConflict` error, it usually means that the installed
-  version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade jupyterlab_launcher` to get the latest version.
+  version of `jupyterlab_server` is out of date. Run `pip install --upgrade jupyterlab_server` to get the latest version.
 
 - To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 

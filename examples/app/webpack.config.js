@@ -1,22 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// Support for Node 0.10
-// See https://github.com/webpack/css-loader/issues/144
-require('es6-promise').polyfill();
-
 module.exports = {
   entry: ['whatwg-fetch', './index.js'],
   output: {
     path: __dirname + '/build',
-    filename: 'bundle.js',
-    publicPath: 'example/static'
+    filename: 'bundle.js'
   },
   node: {
     fs: 'empty'
   },
   bail: true,
   devtool: 'cheap-source-map',
+  mode: 'production',
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },

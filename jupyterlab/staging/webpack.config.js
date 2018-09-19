@@ -40,7 +40,6 @@ fs.ensureDirSync(buildDir);
 
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
-fs.copySync('./templates/error.html', path.join(buildDir, 'error.html'));
 
 // Set up variables for watch mode.
 var localLinked = {};
