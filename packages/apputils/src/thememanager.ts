@@ -227,7 +227,7 @@ export class ThemeManager {
     const current = this._current;
     const links = this._links;
     const themes = this._themes;
-    const splash = this._splash.show();
+    const splash = this._splash.show(themes[theme].isLight);
 
     // Unload any CSS files that have been loaded.
     links.forEach(link => {
