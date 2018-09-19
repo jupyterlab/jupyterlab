@@ -440,7 +440,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.share, {
     execute: () => {
-      const path = encodeURIComponent(browser.selectedItems().next().path);
+      const path = encodeURI(browser.selectedItems().next().path);
       const tree = PageConfig.getTreeUrl({ workspace: true });
 
       Clipboard.copyToSystem(URLExt.join(tree, path));
