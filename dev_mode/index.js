@@ -165,7 +165,7 @@ function main() {
   if (browserTest.toLowerCase() === 'true') {
     var errors = [];
     var reported = false;
-    var timeout = 60000;
+    var timeout = 30000;
     var report = function(errors) {
       if (reported) {
         return;

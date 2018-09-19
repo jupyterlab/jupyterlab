@@ -18,11 +18,7 @@ async function main() {
     console.error(html);
   }
 
-  try {
-    const res = await page.waitForSelector('#browserResult');
-  } catch (e) {
-    console.error(e);
-  }
+  const res = await page.waitForSelector('#browserResult', { timeout: 32000 });
   const textContent = await res.getProperty('textContent');
   const errors = JSON.parse(await textContent.jsonValue());
 
