@@ -18,7 +18,15 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import {
+  PageConfig,
+  PathExt,
+  IStateDB,
+  ISettingRegistry,
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import { each } from '@phosphor/algorithm';
 
 import * as React from 'react';
 
@@ -319,6 +327,44 @@ const busy: JupyterLabPlugin<void> = {
 };
 
 /**
+ * Keep user settings for where to show the side panels.
+ */
+const sidebar: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/application-extension:sidebar',
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+    let overrides: { [id: string]: 'left' | 'right' } = {};
+    const handleLayoutOverrides = () => {
+      each(app.shell.widgets('left'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'right') {
+          app.shell.addToRightArea(widget);
+        }
+      });
+      each(app.shell.widgets('right'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'left') {
+          app.shell.addToLeftArea(widget);
+        }
+      });
+    };
+    app.shell.layoutModified.connect(handleLayoutOverrides);
+    // Fetch overrides from the settings system.
+    Promise.all([
+      settingRegistry.load('@jupyterlab/application-extension:sidebar'),
+      app.restored
+    ]).then(([settings]) => {
+      settings.changed.connect(settings => {
+        overrides =
+          (settings.get('overrides').composite as {
+            [id: string]: 'left' | 'right';
+          }) || {};
+        handleLayoutOverrides();
+      });
+    });
+  },
+  requires: [ISettingRegistry],
+  autoStart: true
+};
+
+/**
  * Add the main application commands.
  */
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
@@ -438,7 +484,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   router,
   tree,
   notfound,
-  busy
+  busy,
+  sidebar
 ];
 
 export default plugins;

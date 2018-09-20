@@ -1,0 +1,20 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "Sidebar",
+  "title": "Sidebar",
+  "description": "Sidebar layout settings.",
+  "properties": {
+    "overrides": {
+      "type": "object",
+      "title": "Overrides",
+      "description": "Overrides for where to show sidebar items",
+      "properties": {},
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["left", "right"]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
