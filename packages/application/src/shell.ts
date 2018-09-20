@@ -399,12 +399,14 @@ export class ApplicationShell extends Widget {
    */
   addToLeftArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -462,12 +464,14 @@ export class ApplicationShell extends Widget {
    */
   addToRightArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -811,6 +815,10 @@ export class ApplicationShell extends Widget {
   private _addOptionsCache = new Map<
     Widget,
     ApplicationShell.IMainAreaOptions
+  >();
+  private _sideOptionsCache = new Map<
+    Widget,
+    ApplicationShell.ISideAreaOptions
   >();
 }
 

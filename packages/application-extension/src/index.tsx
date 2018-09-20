@@ -332,7 +332,8 @@ const busy: JupyterLabPlugin<void> = {
 const sidebar: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:sidebar',
   activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
-    let overrides: { [id: string]: 'left' | 'right' } = {};
+    type overrideMap = { [id: string]: 'left' | 'right' };
+    let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
       each(app.shell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
@@ -351,11 +352,9 @@ const sidebar: JupyterLabPlugin<void> = {
       settingRegistry.load('@jupyterlab/application-extension:sidebar'),
       app.restored
     ]).then(([settings]) => {
+      overrides = (settings.get('overrides').composite as overrideMap) || {};
       settings.changed.connect(settings => {
-        overrides =
-          (settings.get('overrides').composite as {
-            [id: string]: 'left' | 'right';
-          }) || {};
+        overrides = (settings.get('overrides').composite as overrideMap) || {};
         handleLayoutOverrides();
       });
     });
