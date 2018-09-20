@@ -367,7 +367,7 @@ Changes for developers
    widget for a markdown file is a text editor, but the default rendered
    widget is the markdown viewer.
    (`#4692 <https://github.com/jupyterlab/jupyterlab/pull/4692>`__)
--  Add new workspace REST endpoints to ``jupyterlab_launcher`` and make
+-  Add new workspace REST endpoints to ``jupyterlab_server`` and make
    them available in ``@jupyterlab/services``.
    (`#4841 <https://github.com/jupyterlab/jupyterlab/pull/4841>`__)
 -  Documents created with a mimerenderer extension can now be accessed
@@ -481,7 +481,7 @@ Changes in the JupyterLab code infrastructure include:
    We will upgrade yarn, with NodeJS version 10 support, when a `bug in
    yarn <https://github.com/yarnpkg/yarn/issues/5935>`__ is fixed.
    (`#4804 <https://github.com/jupyterlab/jupyterlab/pull/4804>`__)
--  Various process utilities were moved to ``jupyterlab_launcher``.
+-  Various process utilities were moved to ``jupyterlab_server``.
    (`#4696 <https://github.com/jupyterlab/jupyterlab/pull/4696>`__)
 
 Other fixes

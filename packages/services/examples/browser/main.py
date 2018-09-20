@@ -18,9 +18,10 @@ class ExampleHander(IPythonHandler):
 
     def get(self):
         """Get the main page for the application's interface."""
-        return self.write(self.render_template("index.html",
-            static=self.static_url, base_url=self.base_url,
-            token=self.settings['token']))
+        return self.write(self.render_template('index.html',
+                                               static=self.static_url,
+                                               base_url=self.base_url,
+                                               token=self.settings['token']))
 
     def get_template(self, name):
         return LOADER.load(self.settings['jinja2_env'], name)
@@ -32,12 +33,12 @@ class ExampleApp(NotebookApp):
     default_url = Unicode('/example')
 
     def start(self):
+        path = os.path.join(HERE, 'build')
         handlers = [
             (r'/example/?', ExampleHander),
-            (r"/example/(.*)", FileFindHandler,
-                {'path': os.path.join(HERE, 'build')}),
+            (r'/example/(.*)', FileFindHandler, {'path': path}),
         ]
-        self.web_app.add_handlers(".*$", handlers)
+        self.web_app.add_handlers('.*$', handlers)
         super(ExampleApp, self).start()
 
 

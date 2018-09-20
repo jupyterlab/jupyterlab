@@ -605,9 +605,7 @@ namespace Private {
       type: 'split-area',
       orientation: area.orientation,
       sizes: area.sizes,
-      children: area.children.map(serializeArea).filter(area => !!area) as (
-        | ITabArea
-        | ISplitArea)[]
+      children: area.children.map(serializeArea).filter(area => !!area)
     };
   }
 

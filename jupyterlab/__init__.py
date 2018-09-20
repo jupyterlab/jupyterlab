@@ -3,10 +3,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from ._version import __version__
-from .extension import load_jupyter_server_extension
+from ._version import __version__                     # noqa
+from .extension import load_jupyter_server_extension  # noqa
+
 
 def _jupyter_server_extension_paths():
-    return [{
-        "module": "jupyterlab"
-    }]
+    return [{'module': 'jupyterlab'}]

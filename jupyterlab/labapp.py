@@ -4,16 +4,21 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from notebook.notebookapp import NotebookApp, aliases, flags
-from jupyter_core.application import JupyterApp, base_aliases
+import json
+import os
+import sys
 
+from jupyter_core.application import JupyterApp, base_aliases
+from jupyterlab_server import slugify, WORKSPACE_EXTENSION
+from notebook.notebookapp import NotebookApp, aliases, flags
+from notebook.utils import url_path_join as ujoin
 from traitlets import Bool, Unicode
 
 from ._version import __version__
-from .extension import load_jupyter_server_extension
+from .extension import load_config, load_jupyter_server_extension
 from .commands import (
-    build, clean, get_app_dir, get_user_settings_dir, get_app_version,
-    get_workspaces_dir, get_app_dir
+    build, clean, get_app_dir, get_app_version, get_user_settings_dir,
+    get_workspaces_dir
 )
 
 
@@ -81,8 +86,7 @@ class LabCleanApp(JupyterApp):
     """
     aliases = clean_aliases
 
-    app_dir = Unicode('', config=True,
-        help="The app directory to clean")
+    app_dir = Unicode('', config=True, help='The app directory to clean')
 
     def start(self):
         clean(self.app_dir)
@@ -93,7 +97,8 @@ class LabPathApp(JupyterApp):
     description = """
     Print the configured paths for the JupyterLab application
 
-    The application path can be configured using the JUPYTERLAB_DIR environment variable.
+    The application path can be configured using the JUPYTERLAB_DIR
+        environment variable.
     The user settings path can be configured using the JUPYTERLAB_SETTINGS_DIR
         environment variable or it will fall back to
         `/lab/user-settings` in the default Jupyter configuration directory.
@@ -106,6 +111,124 @@ class LabPathApp(JupyterApp):
         print('Application directory:   %s' % get_app_dir())
         print('User Settings directory: %s' % get_user_settings_dir())
         print('Workspaces directory: %s' % get_workspaces_dir())
+
+
+class LabWorkspaceExportApp(JupyterApp):
+    version = version
+    description = """
+    Export a JupyterLab workspace
+    """
+
+    def start(self):
+        app = LabApp()
+        base_url = app.base_url
+        config = load_config(app)
+        directory = config.workspaces_dir
+        page_url = config.page_url
+
+        if len(self.extra_args) > 1:
+            print('Too many arguments were provided for workspace export.')
+            sys.exit(1)
+
+        raw = (page_url if not self.extra_args
+               else ujoin(config.workspaces_url, self.extra_args[0]))
+        slug = slugify(raw, base_url)
+        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+
+        if os.path.exists(workspace_path):
+            with open(workspace_path) as fid:
+                try:  # to load the workspace file.
+                    print(fid.read())
+                except Exception as e:
+                    print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
+        else:
+            print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
+
+
+class LabWorkspaceImportApp(JupyterApp):
+    version = version
+    description = """
+    Import a JupyterLab workspace
+    """
+
+    def start(self):
+        app = LabApp()
+        base_url = app.base_url
+        config = load_config(app)
+        directory = config.workspaces_dir
+        page_url = config.page_url
+        workspaces_url = config.workspaces_url
+
+        if len(self.extra_args) != 1:
+            print('One argument is required for workspace import.')
+            sys.exit(1)
+
+        file_name = self.extra_args[0]
+        file_path = os.path.abspath(file_name)
+
+        if not os.path.exists(file_path):
+            print('%s does not exist.' % file_name)
+            sys.exit(1)
+
+        workspace = dict()
+        with open(file_path) as fid:
+            try:  # to load, parse, and validate the workspace file.
+                workspace = self._validate(fid, page_url, workspaces_url)
+            except Exception as e:
+                print('%s is not a valid workspace:\n%s' % (file_name, e))
+                sys.exit(1)
+
+        if not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except Exception as e:
+                print('Workspaces directory could not be created:\n%s' % e)
+                sys.exit(1)
+
+        slug = slugify(workspace['metadata']['id'], base_url)
+        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+
+        # Write the workspace data to a file.
+        with open(workspace_path, 'w') as fid:
+            fid.write(json.dumps(workspace))
+
+        print('Saved workspace: %s' % workspace_path)
+
+    def _validate(self, data, page_url, workspaces_url):
+        workspace = json.load(data)
+
+        if 'data' not in workspace:
+            raise Exception('The `data` field is missing.')
+
+        if 'metadata' not in workspace:
+            raise Exception('The `metadata` field is missing.')
+
+        if 'id' not in workspace['metadata']:
+            raise Exception('The `id` field is missing in `metadata`.')
+
+        id = workspace['metadata']['id']
+        if id != page_url and not id.startswith(workspaces_url):
+            error = '%s does not match page_url or start with workspaces_url.'
+            raise Exception(error % id)
+
+        return workspace
+
+
+class LabWorkspaceApp(JupyterApp):
+    version = version
+    description = """
+    Import or export a JupyterLab workspace
+    """
+
+    subcommands = dict()
+    subcommands['export'] = (
+        LabWorkspaceExportApp,
+        LabWorkspaceExportApp.description.splitlines()[0]
+    )
+    subcommands['import'] = (
+        LabWorkspaceImportApp,
+        LabWorkspaceImportApp.description.splitlines()[0]
+    )
 
 
 lab_aliases = dict(aliases)
@@ -165,7 +288,9 @@ class LabApp(NotebookApp):
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
         clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
         path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0])
+        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
+        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
     )
 
     default_url = Unicode('/lab', config=True,

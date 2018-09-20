@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # This file comes from https://github.com/podhmo/python-semver/blob/b42e9896e391e086b773fc621b23fa299d16b874/semver/__init__.py
-# 
+#
 # It is licensed under the following license:
-# 
+#
 # MIT License
 
 # Copyright (c) 2016 podhmo

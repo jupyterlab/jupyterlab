@@ -9,7 +9,7 @@ if os.name == 'nt':
     for (root, dnames, files) in os.walk(here):
         if 'node_modules' in dnames:
             subprocess.check_call(['rmdir', '/s', '/q', 'node_modules'],
-                cwd=root, shell=True)
+                                  cwd=root, shell=True)
             dnames.remove('node_modules')
 
 
