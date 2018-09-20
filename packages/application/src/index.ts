@@ -137,30 +137,6 @@ export class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * Gets the hierarchy of html nodes that was under the cursor
-   * when the most recent contextmenu event was issued
-   */
-  get contextMenuNodes(): HTMLElement[] {
-    if (!this._contextMenuEvent) {
-      return [];
-    }
-
-    // this one-liner doesn't work, but should at some point
-    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
-    // return this._contextMenuEvent.composedPath() as HTMLElement[];
-
-    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
-    while (
-      'parentNode' in nodes[nodes.length - 1] &&
-      nodes[nodes.length - 1].parentNode &&
-      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
-    ) {
-      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
-    }
-    return nodes;
-  }
-
-  /**
    * Whether the application is dirty.
    */
   get isDirty(): boolean {
@@ -206,33 +182,24 @@ export class JupyterLab extends Application<ApplicationShell> {
   }
 
   /**
-   * Gets all of the valid, non-empty values of a given property
-   * across all of the nodes in the hierarchy returned by contextMenuNodes
-   */
-  contextMenuValues(prop: string): any[] {
-    let vals: any[] = [];
-    for (let node of this.contextMenuNodes as any[]) {
-      if (prop in node && node[prop]) {
-        vals.push(node[prop]);
-      }
-    }
-    return vals;
-  }
-
-  /**
-   * Gets the first valid, non-empty value of a property
-   * in the node hierarchy returned by contextMenuNodes.
-   * Optionally, gets the first value that matches a passed-in RegExp
+   * Walks up the DOM hierarchy of the target of the active `contextmenu`
+   * event, testing the nodes for a user-supplied funcion. This can
+   * be used to find a node on which to operate, given a context menu click.
+   *
+   * @param test - a function that takes an `HTMLElement` and returns a
+   *   boolean for whether it is the element the requester is seeking.
+   *
+   * @returns an HTMLElement or undefined, if none is found.
    */
   contextMenuFirst(
     test: (node: HTMLElement) => boolean
   ): HTMLElement | undefined {
-    for (let node of this.contextMenuNodes as HTMLElement[]) {
+    for (let node of this._getContextMenuNodes()) {
       if (test(node)) {
         return node;
       }
     }
-    return null;
+    return undefined;
   }
 
   /**
@@ -307,6 +274,30 @@ export class JupyterLab extends Application<ApplicationShell> {
     mods.forEach(mod => {
       this.registerPluginModule(mod);
     });
+  }
+
+  /**
+   * Gets the hierarchy of html nodes that was under the cursor
+   * when the most recent contextmenu event was issued
+   */
+  private _getContextMenuNodes(): HTMLElement[] {
+    if (!this._contextMenuEvent) {
+      return [];
+    }
+
+    // this one-liner doesn't work, but should at some point
+    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+    // return this._contextMenuEvent.composedPath() as HTMLElement[];
+
+    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    while (
+      'parentNode' in nodes[nodes.length - 1] &&
+      nodes[nodes.length - 1].parentNode &&
+      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
+    ) {
+      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
+    }
+    return nodes;
   }
 
   private _contextMenuEvent: MouseEvent;
