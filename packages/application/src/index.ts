@@ -224,25 +224,15 @@ export class JupyterLab extends Application<ApplicationShell> {
    * in the node hierarchy returned by contextMenuNodes.
    * Optionally, gets the first value that matches a passed-in RegExp
    */
-  contextMenuFirst(prop: string, regexp: RegExp | null = null): any | null {
-    if (regexp) {
-      for (let node of this.contextMenuNodes as any[]) {
-        if (prop in node && node[prop]) {
-          let match = node[prop].match(regexp);
-          if (match) {
-            return match;
-          }
-        }
-      }
-    } else {
-      for (let node of this.contextMenuNodes as any[]) {
-        if (prop in node && node[prop]) {
-          return node[prop];
-        }
+  contextMenuFirst(
+    test: (node: HTMLElement) => boolean
+  ): HTMLElement | undefined {
+    for (let node of this.contextMenuNodes as HTMLElement[]) {
+      if (test(node)) {
+        return node;
       }
     }
-
-    return;
+    return null;
   }
 
   /**
