@@ -1072,7 +1072,10 @@ namespace Private {
       let index = this._findInsertIndex(item);
       ArrayExt.insert(this._items, index, item);
       this._stackedPanel.insertWidget(index, widget);
-      this._sideBar.insertTab(index, widget.title);
+      const title = this._sideBar.insertTab(index, widget.title);
+      // Store the parent id in the title dataset
+      // in order to dispatch click events to the right widget.
+      title.dataset = { id: widget.id };
       this._refreshVisibility();
     }
 
