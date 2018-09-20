@@ -93,6 +93,7 @@ def load_jupyter_server_extension(nbapp):
     # Check for core mode.
     core_mode = False
     if getattr(nbapp, 'core_mode', False) or app_dir.startswith(HERE):
+        app_dir = HERE
         core_mode = True
         logger.info('Running JupyterLab in core mode')
 
