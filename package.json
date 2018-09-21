@@ -79,7 +79,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && jlpm run integrity"
+      "pre-commit": "node scripts/precommit-disabled || (lint-staged && jlpm run integrity)"
     }
   },
   "workspaces": [
