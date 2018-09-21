@@ -374,6 +374,11 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
+  const handleMouseDown = (event: React.MouseEvent) => {
+    event.preventDefault();
+    props.onClick();
+  };
+
   return (
     <button
       className={
@@ -382,7 +387,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           : 'jp-ToolbarButtonComponent'
       }
       disabled={props.enabled === false}
-      onClick={props.onClick}
+      onMouseDown={handleMouseDown}
       title={props.tooltip || props.iconLabel}
     >
       {props.iconClassName && (
