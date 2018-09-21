@@ -302,10 +302,10 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
   provides: ISplashScreen,
   activate: app => {
     return {
-      show: () => {
+      show: (light = true) => {
         const { commands, restored } = app;
 
-        return Private.showSplash(restored, commands, CommandIDs.reset);
+        return Private.showSplash(restored, commands, CommandIDs.reset, light);
       }
     };
   }
@@ -722,9 +722,12 @@ namespace Private {
   export function showSplash(
     ready: Promise<any>,
     commands: CommandRegistry,
-    recovery: string
+    recovery: string,
+    light: boolean
   ): IDisposable {
     splash.classList.remove('splash-fade');
+    splash.classList.toggle('light', light);
+    splash.classList.toggle('dark', !light);
     splashCount++;
 
     if (debouncer) {

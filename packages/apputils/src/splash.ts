@@ -21,7 +21,9 @@ export interface ISplashScreen {
   /**
    * Show the application splash screen.
    *
+   * @param light - Whether to show the light splash screen or the dark one.
+   *
    * @returns A disposable used to clear the splash screen.
    */
-  show(): IDisposable;
+  show(light?: boolean): IDisposable;
 }
