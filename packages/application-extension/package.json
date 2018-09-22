@@ -11,7 +11,8 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -32,6 +33,7 @@
     "@jupyterlab/application": "^0.18.4",
     "@jupyterlab/apputils": "^0.18.4",
     "@jupyterlab/coreutils": "^2.1.4",
+    "@phosphor/algorithm": "^1.1.2",
     "react": "~16.4.2"
   },
   "devDependencies": {
@@ -39,6 +41,7 @@
     "typescript": "~2.9.2"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }

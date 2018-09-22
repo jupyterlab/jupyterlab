@@ -399,12 +399,14 @@ export class ApplicationShell extends Widget {
    */
   addToLeftArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -462,12 +464,14 @@ export class ApplicationShell extends Widget {
    */
   addToRightArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -812,6 +816,10 @@ export class ApplicationShell extends Widget {
     Widget,
     ApplicationShell.IMainAreaOptions
   >();
+  private _sideOptionsCache = new Map<
+    Widget,
+    ApplicationShell.ISideAreaOptions
+  >();
 }
 
 /**
@@ -1064,7 +1072,10 @@ namespace Private {
       let index = this._findInsertIndex(item);
       ArrayExt.insert(this._items, index, item);
       this._stackedPanel.insertWidget(index, widget);
-      this._sideBar.insertTab(index, widget.title);
+      const title = this._sideBar.insertTab(index, widget.title);
+      // Store the parent id in the title dataset
+      // in order to dispatch click events to the right widget.
+      title.dataset = { id: widget.id };
       this._refreshVisibility();
     }
 

@@ -18,7 +18,15 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import {
+  PageConfig,
+  PathExt,
+  IStateDB,
+  ISettingRegistry,
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import { each } from '@phosphor/algorithm';
 
 import * as React from 'react';
 
@@ -45,6 +53,8 @@ namespace CommandIDs {
     'application:toggle-presentation-mode';
 
   export const tree: string = 'router:tree';
+
+  export const switchSidebar = 'sidebar:switch';
 }
 
 /**
@@ -318,6 +328,89 @@ const busy: JupyterLabPlugin<void> = {
   autoStart: true
 };
 
+const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
+
+/**
+ * Keep user settings for where to show the side panels.
+ */
+const sidebar: JupyterLabPlugin<void> = {
+  id: SIDEBAR_ID,
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+    type overrideMap = { [id: string]: 'left' | 'right' };
+    let overrides: overrideMap = {};
+    const handleLayoutOverrides = () => {
+      each(app.shell.widgets('left'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'right') {
+          app.shell.addToRightArea(widget);
+        }
+      });
+      each(app.shell.widgets('right'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'left') {
+          app.shell.addToLeftArea(widget);
+        }
+      });
+    };
+    app.shell.layoutModified.connect(handleLayoutOverrides);
+    // Fetch overrides from the settings system.
+    Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
+      ([settings]) => {
+        overrides = (settings.get('overrides').composite as overrideMap) || {};
+        settings.changed.connect(settings => {
+          overrides =
+            (settings.get('overrides').composite as overrideMap) || {};
+          handleLayoutOverrides();
+        });
+      }
+    );
+
+    // Add a command to switch a side panels's side
+    app.commands.addCommand(CommandIDs.switchSidebar, {
+      label: 'Switch Sidebar Side',
+      execute: () => {
+        // First, try to find the right panel based on the
+        // application context menu click,
+        // If we can't find it there, look for use the active
+        // left/right widgets.
+        const contextNode: HTMLElement = app.contextMenuFirst(
+          node => !!node.dataset.id
+        );
+        let id: string;
+        let side: 'left' | 'right';
+        if (contextNode) {
+          id = contextNode.dataset['id'];
+          const leftPanel = document.getElementById('jp-left-stack');
+          const node = document.getElementById(id);
+          if (leftPanel && node && leftPanel.contains(node)) {
+            side = 'right';
+          } else {
+            side = 'left';
+          }
+        } else if (document.body.dataset.leftSidebarWidget) {
+          id = document.body.dataset.leftSidebarWidget;
+          side = 'right';
+        } else if (document.body.dataset.rightSidebarWidget) {
+          id = document.body.dataset.rightSidebarWidget;
+          side = 'left';
+        }
+
+        // Move the panel to the other side.
+        const newOverrides = { ...overrides };
+        newOverrides[id] = side;
+        settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
+      }
+    });
+
+    // Add a context menu item to sidebar tabs.
+    app.contextMenu.addItem({
+      command: CommandIDs.switchSidebar,
+      selector: '.jp-SideBar .p-TabBar-tab',
+      rank: 500
+    });
+  },
+  requires: [ISettingRegistry],
+  autoStart: true
+};
+
 /**
  * Add the main application commands.
  */
@@ -438,7 +531,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   router,
   tree,
   notfound,
-  busy
+  busy,
+  sidebar
 ];
 
 export default plugins;

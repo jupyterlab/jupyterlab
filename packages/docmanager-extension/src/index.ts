@@ -189,14 +189,16 @@ function addCommands(
 
   // fetches the doc widget associated with the most recent contextmenu event
   const contextMenuWidget = (): Widget => {
-    let pathRe = /[Pp]ath:\s?(.*)\n?/;
-    let pathMatch = app.contextMenuFirst('title', pathRe);
+    const pathRe = /[Pp]ath:\s?(.*)\n?/;
+    const test = (node: HTMLElement) =>
+      node['title'] && !!node['title'].match(pathRe);
+    const node = app.contextMenuFirst(test);
 
-    if (!pathMatch) {
+    if (!node) {
       // fall back to active doc widget if path cannot be obtained from event
       return app.shell.currentWidget;
     }
-
+    const pathMatch = node['title'].match(pathRe);
     return docManager.findWidget(pathMatch[1]);
   };
 
