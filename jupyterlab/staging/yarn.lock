@@ -11,9 +11,9 @@
     "@jupyterlab/coreutils" "^2.1.4"
     react "~16.4.0"
 
-"@jupyterlab/application@^0.18.4", "@jupyterlab/application@^0.18.5":
-  version "0.18.5"
-  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.18.5.tgz#32ae3d1d885a08ea64789be568d37deee4168395"
+"@jupyterlab/application@^0.18.4", "@jupyterlab/application@^0.18.5", "@jupyterlab/application@^0.18.6":
+  version "0.18.6"
+  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-0.18.6.tgz#59b80f2ea037403ee9194db48037233453327aef"
   dependencies:
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/coreutils" "^2.1.4"
@@ -440,9 +440,9 @@
     "@jupyterlab/notebook" "^0.18.4"
     "@phosphor/disposable" "^1.1.2"
 
-"@jupyterlab/inspector@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/inspector/-/inspector-0.18.4.tgz#83869c6c9205609c49dd599c4665b4f607c45c52"
+"@jupyterlab/inspector@^0.18.4", "@jupyterlab/inspector@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/inspector/-/inspector-0.18.5.tgz#24f035443466db522cd6ee0a46400320b2b34d92"
   dependencies:
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/codeeditor" "^0.18.4"
@@ -557,9 +557,9 @@
     "@phosphor/messaging" "^1.2.2"
     "@phosphor/widgets" "^1.6.0"
 
-"@jupyterlab/notebook@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.18.4.tgz#be2b990be0fb09d29d064530340e8fdee877bfe0"
+"@jupyterlab/notebook@^0.18.4", "@jupyterlab/notebook@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-0.18.5.tgz#a5fe6c148d7d62ed04a7d9703eac97fec6726469"
   dependencies:
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/cells" "^0.18.4"
@@ -654,9 +654,9 @@
     "@jupyterlab/application" "^0.18.4"
     "@jupyterlab/running" "^0.18.4"
 
-"@jupyterlab/running@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/running/-/running-0.18.4.tgz#33ab22345d02ced70f9ec0b7d67f7af232b5e926"
+"@jupyterlab/running@^0.18.4", "@jupyterlab/running@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/running/-/running-0.18.5.tgz#33dff6f2a8c4d2938c96c7c526034fa93cd90a63"
   dependencies:
     "@jupyterlab/apputils" "^0.18.4"
     "@jupyterlab/coreutils" "^2.1.4"
@@ -749,19 +749,19 @@
     "@phosphor/widgets" "^1.6.0"
     xterm "~3.3.0"
 
-"@jupyterlab/theme-dark-extension@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.18.4.tgz#4da2239c588f595eb2f4d9a91b2f0caaf606b768"
+"@jupyterlab/theme-dark-extension@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-dark-extension/-/theme-dark-extension-0.18.5.tgz#f5f944c1470233297d62a70a33c518052338b21b"
   dependencies:
-    "@jupyterlab/application" "^0.18.4"
+    "@jupyterlab/application" "^0.18.6"
     "@jupyterlab/apputils" "^0.18.4"
     font-awesome "~4.7.0"
 
-"@jupyterlab/theme-light-extension@^0.18.4":
-  version "0.18.4"
-  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.18.4.tgz#88b75f40b2112f29feee0aa17b78b063edaed164"
+"@jupyterlab/theme-light-extension@^0.18.5":
+  version "0.18.5"
+  resolved "https://registry.npmjs.org/@jupyterlab/theme-light-extension/-/theme-light-extension-0.18.5.tgz#42b245d6b556ecb8515aa9735a91ad4d97804f37"
   dependencies:
-    "@jupyterlab/application" "^0.18.4"
+    "@jupyterlab/application" "^0.18.6"
     "@jupyterlab/apputils" "^0.18.4"
     font-awesome "~4.7.0"
 
@@ -1461,8 +1461,8 @@ caniuse-api@^1.5.2:
     lodash.uniq "^4.5.0"
 
 caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000885"
-  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000885.tgz#cdc98dd168ed59678650071f7f6a70910e275bc8"
+  version "1.0.30000886"
+  resolved "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000886.tgz#a0b962dbaccb6d2fc795541bb9ec524582bf433b"
 
 chalk@^1.1.3:
   version "1.1.3"
@@ -1610,9 +1610,13 @@ color-convert@^1.3.0, color-convert@^1.9.0:
   dependencies:
     color-name "1.1.3"
 
-color-name@1.1.3, color-name@^1.0.0:
+color-name@1.1.3:
   version "1.1.3"
   resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
+
+color-name@^1.0.0:
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
 
 color-string@^0.3.0:
   version "0.3.0"
@@ -2163,8 +2167,8 @@ duplicate-package-checker-webpack-plugin@^3.0.0:
     semver "^5.4.1"
 
 electron-to-chromium@^1.2.7:
-  version "1.3.69"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.69.tgz#0fd5d4bfd89ba6a431a144375245aea65073e3ca"
+  version "1.3.70"
+  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.3.70.tgz#ded377256d92d81b4257d36c65aa890274afcfd2"
 
 elliptic@^6.0.0:
   version "6.4.1"
@@ -2592,6 +2596,10 @@ has-symbol-support-x@^1.4.1:
   version "1.4.2"
   resolved "https://registry.npmjs.org/has-symbol-support-x/-/has-symbol-support-x-1.4.2.tgz#1409f98bc00247da45da67cee0a36f282ff26455"
 
+has-symbols@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/has-symbols/-/has-symbols-1.0.0.tgz#ba1a8f1af2a0fc39650f5c850367704122063b44"
+
 has-to-string-tag-x@^1.2.0:
   version "1.4.1"
   resolved "https://registry.npmjs.org/has-to-string-tag-x/-/has-to-string-tag-x-1.4.1.tgz#a045ab383d7b4b2012a00148ab0aa5f290044d4d"
@@ -2990,8 +2998,10 @@ is-svg@^2.0.0:
     html-comment-regex "^1.1.0"
 
 is-symbol@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/is-symbol/-/is-symbol-1.0.1.tgz#3cc59f00025194b6ab2e38dbae6689256b660572"
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/is-symbol/-/is-symbol-1.0.2.tgz#a055f6ae57192caee329e7a860118b497a950f38"
+  dependencies:
+    has-symbols "^1.0.0"
 
 is-windows@^1.0.2:
   version "1.0.2"
@@ -3139,8 +3149,8 @@ leb@^0.3.0:
   resolved "https://registry.npmjs.org/leb/-/leb-0.3.0.tgz#32bee9fad168328d6aea8522d833f4180eed1da3"
 
 loader-runner@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.npmjs.org/loader-runner/-/loader-runner-2.3.0.tgz#f482aea82d543e07921700d5a46ef26fdac6b8a2"
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/loader-runner/-/loader-runner-2.3.1.tgz#026f12fe7c3115992896ac02ba022ba92971b979"
 
 loader-utils@^0.2.16:
   version "0.2.17"
@@ -4311,7 +4321,7 @@ recast@~0.11.12:
 
 reduce-css-calc@^1.2.6:
   version "1.3.0"
-  resolved "https://registry.npmjs.org/reduce-css-calc/-/reduce-css-calc-1.3.0.tgz#747c914e049614a4c9cfbba629871ad1d2927716"
+  resolved "http://registry.npmjs.org/reduce-css-calc/-/reduce-css-calc-1.3.0.tgz#747c914e049614a4c9cfbba629871ad1d2927716"
   dependencies:
     balanced-match "^0.4.2"
     math-expression-evaluator "^1.2.14"
@@ -4949,14 +4959,14 @@ uniqs@^2.0.0:
   resolved "https://registry.npmjs.org/uniqs/-/uniqs-2.0.0.tgz#ffede4b36b25290696e6e165d4a59edb998e6b02"
 
 unique-filename@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/unique-filename/-/unique-filename-1.1.0.tgz#d05f2fe4032560871f30e93cbe735eea201514f3"
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/unique-filename/-/unique-filename-1.1.1.tgz#1d69769369ada0583103a1e6ae87681b56573230"
   dependencies:
     unique-slug "^2.0.0"
 
 unique-slug@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/unique-slug/-/unique-slug-2.0.0.tgz#db6676e7c7cc0629878ff196097c78855ae9f4ab"
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/unique-slug/-/unique-slug-2.0.1.tgz#5e9edc6d1ce8fb264db18a507ef9bd8544451ca6"
   dependencies:
     imurmurhash "^0.1.4"
 
@@ -5367,8 +5377,8 @@ webpack-merge@^4.1.1:
     lodash "^4.17.5"
 
 webpack-sources@^1.0.1, webpack-sources@^1.1.0:
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-1.2.0.tgz#18181e0d013fce096faf6f8e6d41eeffffdceac2"
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-1.3.0.tgz#2a28dcb9f1f45fe960d8f1493252b5ee6530fa85"
   dependencies:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
