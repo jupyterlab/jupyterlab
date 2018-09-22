@@ -1480,8 +1480,9 @@ class _AppHandler(object):
 def _node_check(logger):
     """Check for the existence of nodejs with the correct version.
     """
+    node = which('node')
     try:
-        output = subprocess.check_output(['node', 'node-version-check.js'], cwd=HERE)
+        output = subprocess.check_output([node, 'node-version-check.js'], cwd=HERE)
         logger.info(output.decode('utf-8'))
     except Exception:
         data = _get_core_data()
