@@ -51,7 +51,7 @@
     "@jupyterlab/mainmenu-extension": "^0.7.5",
     "@jupyterlab/markdownviewer-extension": "^0.18.4",
     "@jupyterlab/mathjax2-extension": "^0.6.4",
-    "@jupyterlab/notebook": "^0.18.4",
+    "@jupyterlab/notebook": "^0.18.5",
     "@jupyterlab/notebook-extension": "^0.18.4",
     "@jupyterlab/observables": "^2.0.7",
     "@jupyterlab/outputarea": "^0.18.4",

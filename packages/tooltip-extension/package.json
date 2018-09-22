@@ -34,7 +34,7 @@
     "@jupyterlab/console": "^0.18.4",
     "@jupyterlab/coreutils": "^2.1.4",
     "@jupyterlab/fileeditor": "^0.18.4",
-    "@jupyterlab/notebook": "^0.18.4",
+    "@jupyterlab/notebook": "^0.18.5",
     "@jupyterlab/rendermime": "^0.18.4",
     "@jupyterlab/services": "^3.1.4",
     "@jupyterlab/tooltip": "^0.18.4",

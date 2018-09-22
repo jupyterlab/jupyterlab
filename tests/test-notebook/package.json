@@ -21,7 +21,7 @@
     "@jupyterlab/codemirror": "^0.18.4",
     "@jupyterlab/coreutils": "^2.1.4",
     "@jupyterlab/docregistry": "^0.18.4",
-    "@jupyterlab/notebook": "^0.18.4",
+    "@jupyterlab/notebook": "^0.18.5",
     "@jupyterlab/observables": "^2.0.7",
     "@jupyterlab/testutils": "^0.2.4",
     "@phosphor/algorithm": "^1.1.2",
