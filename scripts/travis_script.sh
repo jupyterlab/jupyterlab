@@ -50,7 +50,7 @@ fi
 if [[ $GROUP == docs ]]; then
 
     # Run the link check - allow for a link to fail once
-    #py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
     # Build the api docs
     jlpm run docs
