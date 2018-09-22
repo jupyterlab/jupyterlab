@@ -41,7 +41,7 @@
     "@jupyterlab/help-extension": "^0.18.4",
     "@jupyterlab/imageviewer": "^0.18.4",
     "@jupyterlab/imageviewer-extension": "^0.18.4",
-    "@jupyterlab/inspector": "^0.18.4",
+    "@jupyterlab/inspector": "^0.18.5",
     "@jupyterlab/inspector-extension": "^0.18.4",
     "@jupyterlab/javascript-extension": "^0.18.4",
     "@jupyterlab/json-extension": "^0.17.4",
