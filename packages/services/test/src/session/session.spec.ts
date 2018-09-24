@@ -152,7 +152,7 @@ describe('session', () => {
       await expectFailure(sessionPromise, msg);
     });
 
-    it('should handle a deprecated response model', () => {
+    it('should handle a deprecated response model', async () => {
       const sessionModel = createSessionModel();
       const data = {
         id: sessionModel.id,
@@ -161,7 +161,8 @@ describe('session', () => {
       };
       const serverSettings = getRequestHandler(201, data);
       const options = createSessionOptions(sessionModel, serverSettings);
-      return Session.startNew(options);
+      const model = await Session.startNew(options);
+      expect(model.path).not.empty;
     });
   });
 
