@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Widget } from '@phosphor/widgets';
+
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
@@ -35,7 +37,13 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this.toolbarItems = options.toolbarItems;
   }
+
+  /**
+   * Array of toolbar items to be added to NotebookPanel.
+   */
+  readonly toolbarItems: NotebookWidgetFactory.IToolbarItem[] | undefined;
 
   /*
    * The rendermime instance.
@@ -83,7 +91,14 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     let content = this.contentFactory.createNotebook(nbOptions);
 
     let widget = new NotebookPanel({ context, content });
-    ToolbarItems.populateDefaults(widget);
+    if (Array.isArray(this.toolbarItems)) {
+      const { toolbar } = widget;
+      this.toolbarItems.forEach(({ name, widget }) => {
+        toolbar.addItem(name, widget);
+      });
+    } else {
+      ToolbarItems.populateDefaults(widget);
+    }
     return widget;
   }
 
@@ -94,10 +109,20 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
  * The namespace for `NotebookWidgetFactory` statics.
  */
 export namespace NotebookWidgetFactory {
+  export interface IToolbarItem {
+    name: string;
+    widget: Widget;
+  }
+
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+    /**
+     * Array of toolbar items to be added to NotebookPanel.
+     */
+    toolbarItems?: IToolbarItem[];
+
     /*
       * A rendermime instance.
       */

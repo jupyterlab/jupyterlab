@@ -15,14 +15,17 @@ import { Context } from '@jupyterlab/docregistry';
 
 import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
+import { ToolbarButton } from '@jupyterlab/apputils';
+
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
 
-function createFactory(): NotebookWidgetFactory {
+function createFactory(toolbarItems?: any[]): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
     name: 'notebook',
     fileTypes: ['notebook'],
     rendermime,
+    toolbarItems,
     contentFactory,
     mimeTypeService: NBTestUtils.mimeTypeService,
     editorConfig: NBTestUtils.defaultEditorConfig
@@ -115,6 +118,17 @@ describe('@jupyterlab/notebook', () => {
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');
+      });
+
+      it('should populate the customized toolbar items', () => {
+        const toolbars = [
+          { name: 'foo', widget: new ToolbarButton() },
+          { name: 'bar', widget: new ToolbarButton() }
+        ];
+        const factory = createFactory(toolbars);
+        const panel = factory.createNew(context);
+        const items = toArray(panel.toolbar.names());
+        expect(items).to.deep.equal(['foo', 'bar']);
       });
     });
   });
