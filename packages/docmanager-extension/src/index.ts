@@ -189,13 +189,17 @@ function addCommands(
 
   const isWritable = () => {
     const { currentWidget } = shell;
-    const context = docManager.contextForWidget(currentWidget);
-    return !!(
-      currentWidget &&
-      context &&
-      context.contentsModel &&
-      context.contentsModel.writable
-    );
+    if (currentWidget) {
+      const context = docManager.contextForWidget(currentWidget);
+      return !!(
+        currentWidget &&
+        context &&
+        context.contentsModel &&
+        context.contentsModel.writable
+      );
+    } else {
+      return false;
+    }
   };
 
   // fetches the doc widget associated with the most recent contextmenu event
@@ -523,15 +527,13 @@ function addCommands(
       const iterator = shell.widgets('main');
       let widget = iterator.next();
       while (widget) {
-        if (docManager.contextForWidget(widget)) {
-          let context = docManager.contextForWidget(widget);
-          if (
-            context &&
-            context.contentsModel &&
-            context.contentsModel.writable
-          ) {
-            return true;
-          }
+        let context = docManager.contextForWidget(widget);
+        if (
+          context &&
+          context.contentsModel &&
+          context.contentsModel.writable
+        ) {
+          return true;
         }
         widget = iterator.next();
       }
