@@ -9981,10 +9981,6 @@ typescript@3.0.x:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
 
-typescript@^3.1.0-dev.20180925:
-  version "3.1.0-dev.20180925"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.0-dev.20180925.tgz#e2c8ce5cd70219a489904328efea87f81168dfa0"
-
 typescript@~3.1.0-dev.20180922:
   version "3.1.0-rc.20180911"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.0-rc.20180911.tgz#73654821f9064dfe75a0440899ff0e2238338584"
