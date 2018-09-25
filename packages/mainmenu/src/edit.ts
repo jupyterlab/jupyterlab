@@ -23,6 +23,11 @@ export interface IEditMenu extends IJupyterLabMenu {
    * A set storing IFindReplacers for the Edit menu.
    */
   readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
+
+  /**
+   * A set storing IGoToLiners for the Edit menu.
+   */
+  readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
 }
 
 /**
@@ -41,6 +46,8 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
     this.clearers = new Set<IEditMenu.IClearer<Widget>>();
 
     this.findReplacers = new Set<IEditMenu.IFindReplacer<Widget>>();
+
+    this.goToLiners = new Set<IEditMenu.IGoToLiner<Widget>>();
   }
 
   /**
@@ -57,6 +64,11 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
    * A set storing IFindReplacers for the Edit menu.
    */
   readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
+
+  /**
+   * A set storing IGoToLiners for the Edit menu.
+   */
+  readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
 
   /**
    * Dispose of the resources held by the edit menu.
@@ -126,5 +138,15 @@ export namespace IEditMenu {
      * Execute a find/replace command for the activity.
      */
     findAndReplace?: (widget: T) => void;
+  }
+
+  /**
+   * Interface for an activity that uses Go to Line.
+   */
+  export interface IGoToLiner<T extends Widget> extends IMenuExtender<T> {
+    /**
+     * Execute a go to line command for the activity.
+     */
+    goToLine?: (widget: T) => void;
   }
 }
