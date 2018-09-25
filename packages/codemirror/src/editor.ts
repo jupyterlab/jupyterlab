@@ -31,6 +31,7 @@ import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
+import 'codemirror/addon/search/jump-to-line';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';

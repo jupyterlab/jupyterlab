@@ -32,6 +32,8 @@ namespace CommandIDs {
   export const find = 'codemirror:find';
 
   export const findAndReplace = 'codemirror:find-and-replace';
+
+  export const goToLine = 'codemirror:go-to-line';
 }
 
 /**
@@ -212,6 +214,19 @@ function activateEditorCommands(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.goToLine, {
+    label: 'Go to Line...',
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let editor = widget.content.editor as CodeMirrorEditor;
+      editor.execCommand('jumpToLine');
+    },
+    isEnabled
+  });
+
   commands.addCommand(CommandIDs.changeMode, {
     label: args => args['name'] as string,
     execute: args => {
@@ -308,4 +323,17 @@ function activateEditorCommands(
       editor.execCommand('replace');
     }
   } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
+
+  // Add go to line capabilities to the edit menu.
+  mainMenu.editMenu.goToLiners.add({
+    tracker,
+    find: (widget: IDocumentWidget<FileEditor>) => {
+      let editor = widget.content.editor as CodeMirrorEditor;
+      editor.execCommand('jumpToLine');
+    },
+    goToLine: (widget: IDocumentWidget<FileEditor>) => {
+      let editor = widget.content.editor as CodeMirrorEditor;
+      editor.execCommand('jumpToLine');
+    }
+  } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
 }
