@@ -3,6 +3,8 @@
 
 import { expect } from 'chai';
 
+import { toArray } from '@phosphor/algorithm';
+
 import { UUID } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
@@ -173,6 +175,25 @@ describe('docregistry/default', () => {
           canStartKernel: true
         });
         expect(factory.canStartKernel).to.equal(true);
+      });
+
+      it('should have toolbar items', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text'],
+          toolbarItems: [
+            {
+              name: 'foo',
+              widget: new Widget()
+            },
+            {
+              name: 'bar',
+              widget: new Widget()
+            }
+          ]
+        });
+        const widget = factory.createNew(createFileContext());
+        expect(toArray(widget.toolbar.names())).to.deep.equal(['foo', 'bar']);
       });
     });
 

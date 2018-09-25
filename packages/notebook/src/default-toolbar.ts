@@ -193,6 +193,9 @@ export namespace ToolbarItems {
     );
   }
 
+  /**
+   * Get the default toolbar items for panel
+   */
   export function getDefaultItems(
     panel: NotebookPanel
   ): DocumentRegistry.IToolbarItem[] {

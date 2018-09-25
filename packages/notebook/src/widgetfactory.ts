@@ -86,7 +86,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     let content = this.contentFactory.createNotebook(nbOptions);
 
     let widget = new NotebookPanel({ context, content });
-    // ToolbarItems.populateDefaults(widget);
     if (!this.toolbarItems) {
       this.toolbarItems = ToolbarItems.getDefaultItems(widget);
     }
@@ -109,11 +108,6 @@ export namespace NotebookWidgetFactory {
    * The options used to construct a `NotebookWidgetFactory`.
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
-    /**
-     * Array of toolbar items to be added to NotebookPanel.
-     */
-    toolbarItems?: IToolbarItem[];
-
     /*
       * A rendermime instance.
       */
