@@ -20,7 +20,7 @@ export interface IEditMenu extends IJupyterLabMenu {
   readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A set storing IClearers for the Edit menu.
+   * A set storing IFindReplacers for the Edit menu.
    */
   readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
 }
@@ -54,7 +54,7 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
   readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A set storing IClearers for the Edit menu.
+   * A set storing IFindReplacers for the Edit menu.
    */
   readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
 
