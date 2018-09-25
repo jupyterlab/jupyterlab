@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -189,6 +191,37 @@ export namespace ToolbarItems {
       'kernelStatus',
       Toolbar.createKernelStatusItem(panel.session)
     );
+  }
+
+  export function getDefaultItems(
+    panel: NotebookPanel
+  ): DocumentRegistry.IToolbarItem[] {
+    return [
+      { name: 'save', widget: createSaveButton(panel) },
+      { name: 'insert', widget: createInsertButton(panel) },
+      { name: 'cut', widget: createCutButton(panel) },
+      { name: 'copy', widget: createCopyButton(panel) },
+      { name: 'paste', widget: createPasteButton(panel) },
+      { name: 'run', widget: createRunButton(panel) },
+      {
+        name: 'interrupt',
+        widget: Toolbar.createInterruptButton(panel.session)
+      },
+      {
+        name: 'restart',
+        widget: Toolbar.createRestartButton(panel.session)
+      },
+      { name: 'cellType', widget: createCellTypeItem(panel) },
+      { name: 'spacer', widget: Toolbar.createSpacerItem() },
+      {
+        name: 'kernelName',
+        widget: Toolbar.createKernelNameItem(panel.session)
+      },
+      {
+        name: 'kernelStatus',
+        widget: Toolbar.createKernelStatusItem(panel.session)
+      }
+    ];
   }
 }
 

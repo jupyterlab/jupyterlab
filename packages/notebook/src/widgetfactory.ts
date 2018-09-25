@@ -40,11 +40,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this.toolbarItems = options.toolbarItems;
   }
 
-  /**
-   * Array of toolbar items to be added to NotebookPanel.
-   */
-  readonly toolbarItems: NotebookWidgetFactory.IToolbarItem[] | undefined;
-
   /*
    * The rendermime instance.
    */
@@ -91,13 +86,9 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     let content = this.contentFactory.createNotebook(nbOptions);
 
     let widget = new NotebookPanel({ context, content });
-    if (Array.isArray(this.toolbarItems)) {
-      const { toolbar } = widget;
-      this.toolbarItems.forEach(({ name, widget }) => {
-        toolbar.addItem(name, widget);
-      });
-    } else {
-      ToolbarItems.populateDefaults(widget);
+    // ToolbarItems.populateDefaults(widget);
+    if (!this.toolbarItems) {
+      this.toolbarItems = ToolbarItems.getDefaultItems(widget);
     }
     return widget;
   }

@@ -290,6 +290,7 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
+    this.toolbarItems = options.toolbarItems;
   }
 
   /**
@@ -378,6 +379,11 @@ export abstract class ABCWidgetFactory<
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
+    if (this.toolbarItems) {
+      this.toolbarItems.forEach(({ name, widget: item }) => {
+        widget.toolbar.addItem(name, item);
+      });
+    }
     this._widgetCreated.emit(widget);
     return widget;
   }
@@ -386,6 +392,11 @@ export abstract class ABCWidgetFactory<
    * Create a widget for a context.
    */
   protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;
+
+  /**
+   * toolbar items to be added when createNew
+   */
+  toolbarItems?: DocumentRegistry.IToolbarItem[];
 
   private _isDisposed = false;
   private _name: string;
