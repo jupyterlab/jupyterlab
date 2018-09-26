@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@phosphor/widgets';
-
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
@@ -37,7 +35,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
-    this.toolbarItems = options.toolbarItems;
+    this._defaultToolbarItems = options.toolbarItems;
   }
 
   /*
@@ -86,8 +84,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     let content = this.contentFactory.createNotebook(nbOptions);
 
     let widget = new NotebookPanel({ context, content });
-    if (!this.toolbarItems) {
-      this.toolbarItems = ToolbarItems.getDefaultItems(widget);
+    if (!this._defaultToolbarItems) {
+      this._defaultToolbarItems = ToolbarItems.getDefaultItems(widget);
     }
     return widget;
   }
@@ -99,11 +97,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
  * The namespace for `NotebookWidgetFactory` statics.
  */
 export namespace NotebookWidgetFactory {
-  export interface IToolbarItem {
-    name: string;
-    widget: Widget;
-  }
-
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
