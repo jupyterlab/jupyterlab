@@ -15,6 +15,7 @@ import os.path as osp
 import re
 import shutil
 import site
+import subprocess
 import sys
 import tarfile
 from tempfile import TemporaryDirectory
@@ -150,7 +151,7 @@ def watch_packages(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
-    logger = logger or logging.getLogger('jupyterlab')
+    logger = _ensure_logger(logger)
     ts_dir = osp.realpath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
     # Run typescript watch and wait for the string indicating it is done.
@@ -178,7 +179,7 @@ def watch_dev(logger=None):
     -------
     A list of `WatchHelper` objects.
     """
-    logger = logger or logging.getLogger('jupyterlab')
+    logger = _ensure_logger(logger)
 
     package_procs = watch_packages(logger)
 
@@ -204,7 +205,8 @@ def watch(app_dir=None, logger=None):
     -------
     A list of processes to run asynchronously.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger)
     return handler.watch()
 
@@ -216,7 +218,8 @@ def install_extension(extension, app_dir=None, logger=None):
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger)
     return handler.install_extension(extension)
 
@@ -226,7 +229,8 @@ def uninstall_extension(name, app_dir=None, logger=None):
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger)
     return handler.uninstall_extension(name)
 
@@ -239,7 +243,8 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger)
     if all_ is True:
         return handler.update_all_extensions()
@@ -264,7 +269,8 @@ def build(app_dir=None, name=None, version=None, public_url=None,
           clean_staging=False):
     """Build the JupyterLab application.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
     return handler.build(name=name, version=version, public_url=public_url,
                          command=command, clean_staging=clean_staging)
@@ -307,7 +313,8 @@ def build_check(app_dir=None, logger=None):
 
     Returns a list of messages.
     """
-    _node_check()
+    logger = _ensure_logger(logger)
+    _node_check(logger)
     handler = _AppHandler(app_dir, logger)
     return handler.build_check()
 
@@ -377,7 +384,7 @@ class _AppHandler(object):
         """
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
-        self.logger = logger or logging.getLogger('jupyterlab')
+        self.logger = _ensure_logger(logger)
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
         # TODO: Make this configurable
@@ -1470,19 +1477,23 @@ class _AppHandler(object):
         return proc.wait()
 
 
-def _node_check():
+def _node_check(logger):
     """Check for the existence of nodejs with the correct version.
     """
+    node = which('node')
     try:
-        proc = Process(['node', 'node-version-check.js'], cwd=HERE, quiet=True)
-        ret = proc.wait()
+        output = subprocess.check_output([node, 'node-version-check.js'], cwd=HERE)
+        logger.info(output.decode('utf-8'))
     except Exception:
-        ret = 1
-    if ret != 0:
         data = _get_core_data()
         ver = data['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
+
+
+def _ensure_logger(logger=None):
+    """Ensure that we have a logger"""
+    return logger or logging.getLogger('jupyterlab')
 
 
 def _normalize_path(extension):

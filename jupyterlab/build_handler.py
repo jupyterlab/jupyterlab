@@ -89,7 +89,7 @@ class Builder(object):
 
     @run_on_executor
     def _run_build(self, app_dir, logger, kill_event):
-        kwargs = dict(app_dir=app_dir, logger=logger, kill_event=kill_event)
+        kwargs = dict(app_dir=app_dir, logger=logger, kill_event=kill_event, command='build')
         try:
             return build(**kwargs)
         except Exception as e:
