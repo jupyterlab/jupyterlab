@@ -732,8 +732,8 @@ namespace Private {
     node.setAttribute(name, '');
     return resolver
       .resolveUrl(source)
-      .then(path => {
-        return resolver.getDownloadUrl(path);
+      .then(urlPath => {
+        return resolver.getDownloadUrl(urlPath);
       })
       .then(url => {
         // Check protocol again in case it changed:
@@ -783,13 +783,15 @@ namespace Private {
     // Get the appropriate file path.
     return resolver
       .resolveUrl(href)
-      .then(path => {
+      .then(urlPath => {
+        // decode encoded url from url to api path
+        const path = decodeURI(urlPath);
         // Handle the click override.
         if (linkHandler) {
           linkHandler.handleLink(anchor, path, hash);
         }
         // Get the appropriate file download path.
-        return resolver.getDownloadUrl(path);
+        return resolver.getDownloadUrl(urlPath);
       })
       .then(url => {
         // Set the visible anchor.
