@@ -35,7 +35,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
-    this._defaultToolbarItems = options.toolbarItems;
   }
 
   /*
@@ -84,8 +83,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     let content = this.contentFactory.createNotebook(nbOptions);
 
     let widget = new NotebookPanel({ context, content });
-    if (!this._defaultToolbarItems) {
-      this._defaultToolbarItems = ToolbarItems.getDefaultItems(widget);
+    if (!this._overrideToolbarItems) {
+      this._overrideToolbarItems = ToolbarItems.getDefaultItems(widget);
     }
     return widget;
   }

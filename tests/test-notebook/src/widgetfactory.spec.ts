@@ -20,12 +20,12 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
 
-function createFactory(toolbarItems?: any[]): NotebookWidgetFactory {
+function createFactory(overrideToolbarItems?: any[]): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
     name: 'notebook',
     fileTypes: ['notebook'],
     rendermime,
-    toolbarItems,
+    overrideToolbarItems,
     contentFactory,
     mimeTypeService: NBTestUtils.mimeTypeService,
     editorConfig: NBTestUtils.defaultEditorConfig

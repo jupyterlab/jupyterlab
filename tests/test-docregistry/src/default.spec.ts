@@ -181,7 +181,7 @@ describe('docregistry/default', () => {
         const factory = new WidgetFactory({
           name: 'test',
           fileTypes: ['text'],
-          toolbarItems: [
+          overrideToolbarItems: [
             {
               name: 'foo',
               widget: new Widget()
