@@ -50,18 +50,47 @@ class RenderedIFrame extends Widget implements IRenderMime.IRenderer {
     this._iframe = new IFrame();
     layout.addWidget(this._iframe);
     this._mimeType = options.mimeType;
+    this._resolver = options.resolver;
   }
 
   /**
    * Render HTML in IFrame into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const data = model.data[this._mimeType] as string;
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    let data = model.data[this._mimeType] as string;
+    data = await this._setBase(data);
+
     const blob = new Blob([data], {type: "text/html"});
     this._iframe.url = URL.createObjectURL(blob);
     return Promise.resolve(void 0);
   }
 
+  /**
+   * Set a <base> element in the HTML string so that the iframe
+   * can correctly dereference relative links/
+   */
+  private async _setBase(data: string): Promise<string> {
+    const doc = this._parser.parseFromString(data, 'text/html');
+    let base: HTMLBaseElement;
+    base = doc.querySelector('base');
+    if (!base) {
+      base = doc.createElement('base');
+      doc.head.insertBefore(base, doc.head.firstChild);
+    }
+    const path = await this._resolver.resolveUrl('');
+    const baseUrl = await this._resolver.getDownloadUrl(path);
+
+    // Set the base href, plus a fake name for the url of this
+    // document. The fake name doesn't really matter, as long
+    // as the document can dereference relative links to resources
+    // (e.g. CSS and scripts).
+    base.href = `${baseUrl}/__fake__.html`;
+    base.target = '_blank';
+    return doc.documentElement.innerHTML;
+  }
+
+  private _parser = new DOMParser();
+  private _resolver: IRenderMime.IResolver;
   private _iframe: IFrame;
   private _mimeType: string;
 }
