@@ -934,7 +934,7 @@ export namespace DocumentRegistry {
     /**
      * Array of items to be added to document toolbar.
      */
-    readonly overrideToolbarItems?: DocumentRegistry.IToolbarItem[];
+    readonly toolbarItems?: DocumentRegistry.IToolbarItem[];
   }
 
   /**
