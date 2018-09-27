@@ -1562,7 +1562,9 @@ function addCommands(
         app.commands.execute('docmanager:save');
       }
     },
-    isEnabled
+    isEnabled: args => {
+      return isEnabled() && commands.isEnabled('docmanager:save', args);
+    }
   });
 }
 
