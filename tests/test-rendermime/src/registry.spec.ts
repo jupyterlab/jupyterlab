@@ -114,20 +114,21 @@ describe('rendermime/registry', () => {
 
       it('should send a url resolver', async () => {
         const model = createModel({
-          'text/html': '<img src="./foo">foo</img>'
+          'text/html': '<img src="./foo%2520">foo</img>'
         });
         let called0 = false;
         let called1 = false;
         r = r.clone({
           resolver: {
-            resolveUrl: (path: string) => {
+            resolveUrl: (url: string) => {
               called0 = true;
-              return Promise.resolve(path);
+              return Promise.resolve(url);
             },
-            getDownloadUrl: (path: string) => {
+            getDownloadUrl: (url: string) => {
               expect(called0).to.equal(true);
               called1 = true;
-              return Promise.resolve(path);
+              expect(url).to.equal('./foo%2520');
+              return Promise.resolve(url);
             }
           }
         });
@@ -146,6 +147,25 @@ describe('rendermime/registry', () => {
           linkHandler: {
             handleLink: (node: HTMLElement, url: string) => {
               expect(url).to.equal('foo/bar.txt');
+              called = true;
+            }
+          }
+        });
+        const w = r.createRenderer('text/html');
+        await w.renderModel(model);
+        expect(called).to.equal(true);
+      });
+
+      it('should send decoded paths to link handler', async () => {
+        const model = createModel({
+          'text/html': '<a href="foo%2520/b%C3%A5r.txt">foo</a>'
+        });
+        let called = false;
+        r = r.clone({
+          resolver: RESOLVER,
+          linkHandler: {
+            handleLink: (node: HTMLElement, path: string) => {
+              expect(path).to.equal('foo%20/bår.txt');
               called = true;
             }
           }
@@ -280,14 +300,17 @@ describe('rendermime/registry', () => {
       let resolver: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
       let session: Session.ISession;
+      const pathParent = 'has%20üni';
+      const urlParent = encodeURI(pathParent);
 
       before(async () => {
         const manager = new ServiceManager();
         const drive = new Drive({ name: 'extra' });
+        const path = pathParent + '/pr%25 ' + UUID.uuid4();
         contents = manager.contents;
         contents.addDrive(drive);
         await manager.ready;
-        session = await manager.sessions.startNew({ path: UUID.uuid4() });
+        session = await manager.sessions.startNew({ path: path });
         resolver = new RenderMimeRegistry.UrlResolver({
           session,
           contents: manager.contents
@@ -307,12 +330,17 @@ describe('rendermime/registry', () => {
       context('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
           const path = await resolver.resolveUrl('./foo');
-          expect(path).to.equal('foo');
+          expect(path).to.equal(urlParent + '/foo');
         });
 
         it('should ignore urls that have a protocol', async () => {
           const path = await resolver.resolveUrl('http://foo');
           expect(path).to.equal('http://foo');
+        });
+
+        it('should resolve URLs with escapes', async () => {
+          const url = await resolver.resolveUrl('has%20space');
+          expect(url).to.equal(urlParent + '/has%20space');
         });
       });
 
@@ -320,6 +348,13 @@ describe('rendermime/registry', () => {
         it('should resolve an absolute server url to a download url', async () => {
           const contextPromise = resolver.getDownloadUrl('foo');
           const contentsPromise = contents.getDownloadUrl('foo');
+          const values = await Promise.all([contextPromise, contentsPromise]);
+          expect(values[0]).to.equal(values[1]);
+        });
+
+        it('should resolve escapes correctly', async () => {
+          const contextPromise = resolver.getDownloadUrl('foo%2520test');
+          const contentsPromise = contents.getDownloadUrl('foo%20test');
           const values = await Promise.all([contextPromise, contentsPromise]);
           expect(values[0]).to.equal(values[1]);
         });

@@ -318,14 +318,14 @@ export namespace IRenderMime {
    */
   export interface IResolver {
     /**
-     * Resolve a relative url to a correct server path.
+     * Resolve a relative url to an absolute url path.
      */
     resolveUrl(url: string): Promise<string>;
 
     /**
-     * Get the download url of a given absolute server path.
+     * Get the download url for a given absolute url path.
      */
-    getDownloadUrl(path: string): Promise<string>;
+    getDownloadUrl(url: string): Promise<string>;
 
     /**
      * Whether the URL should be handled by the resolver
