@@ -625,6 +625,13 @@ export class DocumentRegistry implements IDisposable {
  */
 export namespace DocumentRegistry {
   /**
+   * The item to be added to document toolbar.
+   */
+  export interface IToolbarItem {
+    name: string;
+    widget: Widget;
+  }
+  /**
    * The options used to create a document registry.
    */
   export interface IOptions {
@@ -923,6 +930,11 @@ export namespace DocumentRegistry {
      * Whether the widgets can start a kernel when opened.
      */
     readonly canStartKernel?: boolean;
+
+    /**
+     * Array of items to be added to document toolbar.
+     */
+    readonly toolbarItems?: DocumentRegistry.IToolbarItem[];
   }
 
   /**
