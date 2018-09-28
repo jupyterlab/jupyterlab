@@ -250,6 +250,7 @@ def clean(app_dir=None, logger=None):
     """Clean the JupyterLab application directory."""
     logger = _ensure_logger(logger)
     app_dir = app_dir or get_app_dir()
+    logger.info(f'Cleaning {app_dir}...')
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
@@ -258,6 +259,7 @@ def clean(app_dir=None, logger=None):
         target = pjoin(app_dir, name)
         if osp.exists(target):
             _rmtree(target, logger)
+    logger.info('Success!')
 
 
 def build(app_dir=None, name=None, version=None, public_url=None,
