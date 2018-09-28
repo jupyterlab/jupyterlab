@@ -522,8 +522,7 @@ namespace Private {
     // Split the text into lines.
     const lines = text.split('\n');
 
-    // Iterate over the lines to get the header level and
-    // the text for the line.
+    // Get the first line an check if it is a header.
     const line = lines[0];
     const line2 = lines.length > 1 ? lines[1] : undefined;
     // Make an onClick handler for this line.
