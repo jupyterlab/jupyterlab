@@ -570,7 +570,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.rename, {
     label: () => `Rename ${fileType(contextMenuWidget())}…`,
-    isEnabled: isWritable,
+    isEnabled,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(contextMenuWidget());
