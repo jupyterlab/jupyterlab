@@ -133,8 +133,9 @@ export async function ensurePackage(
     if (!fs.existsSync(target)) {
       return;
     }
-    references[name] = path.relative(path.join(pkgPath, 'src'), locals[name]);
-    references[name] = path.join(references[name], 'src');
+    let ref = path.relative(path.join(pkgPath, 'src'), locals[name]);
+    ref = path.join(ref, 'src');
+    references[name] = ref.split(path.sep).join('/');
   });
   if (
     data.name.indexOf('test-') === -1 &&
