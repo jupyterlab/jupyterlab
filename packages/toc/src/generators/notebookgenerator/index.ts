@@ -87,18 +87,8 @@ export function createNotebookGenerator(
             const onClickFactory = (line: number) => {
               // Activate the corresponding cell if user click on the TOC entry
               return () => {
-                cell!.node.scrollIntoView();
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
+                panel.content.activeCellIndex = i;
+                cell.node.scrollIntoView();
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -146,6 +136,7 @@ export function createNotebookGenerator(
             const onClickFactory = (el: Element) => {
               return () => {
                 panel.content.activeCellIndex = i;
+                panel.content.mode = 'command';
                 el.scrollIntoView();
               };
             };
@@ -213,7 +204,7 @@ export function createNotebookGenerator(
               }
             }
           }
-        } else if (model && model.type === 'markdown') {
+        } else if (model.type === 'markdown') {
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
@@ -223,24 +214,12 @@ export function createNotebookGenerator(
           ) {
             const onClickFactory = (el: Element) => {
               return () => {
-                if (!cell) {
-                  return;
-                }
                 if (!(cell as MarkdownCell).rendered) {
-                  cell.node.scrollIntoView();
-                } else {
+                  panel.content.activeCellIndex = i;
                   el.scrollIntoView();
-                  if (tracker && tracker.currentWidget) {
-                    let cells = tracker.currentWidget.model.cells;
-                    for (let i = 0; i < cells.length; i++) {
-                      let currCell = tracker.currentWidget.content.widgets[
-                        i
-                      ] as Cell;
-                      if (cell === currCell) {
-                        tracker.currentWidget.content.activeCellIndex = i;
-                      }
-                    }
-                  }
+                } else {
+                  cell.node.scrollIntoView();
+                  panel.content.activeCellIndex = i;
                 }
               };
             };
@@ -311,24 +290,8 @@ export function createNotebookGenerator(
           } else {
             const onClickFactory = (line: number) => {
               return () => {
-                if (!cell) {
-                  return;
-                }
+                panel.content.activeCellIndex = i;
                 cell.node.scrollIntoView();
-                if (!(cell as MarkdownCell).rendered) {
-                  cell.editor.setCursorPosition({ line, column: 0 });
-                }
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
