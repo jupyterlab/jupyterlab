@@ -40,7 +40,7 @@ export function createNotebookGenerator(
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   // Create a option manager to manage user settings
   const options = new NotebookGeneratorOptionsManager(widget, tracker, {
-    needsNumbering: true,
+    needsNumbering: false,
     sanitizer: sanitizer
   });
   return {
