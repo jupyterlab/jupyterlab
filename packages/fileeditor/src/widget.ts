@@ -355,6 +355,6 @@ export namespace FileEditorFactory {
     /**
      * The factory options associated with the factory.
      */
-    factoryOptions: DocumentRegistry.IWidgetFactoryOptions;
+    factoryOptions: DocumentRegistry.IWidgetFactoryOptions<IDocumentWidget<FileEditor>>;
   }
 }
