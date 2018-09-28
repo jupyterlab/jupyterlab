@@ -121,14 +121,18 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should populate the customized toolbar items', () => {
+        const buttons = [new ToolbarButton(), new ToolbarButton()];
         const toolbars = [
-          { name: 'foo', widget: new ToolbarButton() },
-          { name: 'bar', widget: new ToolbarButton() }
+          { name: 'foo', widget: buttons[0] },
+          { name: 'bar', widget: buttons[1] }
         ];
         const factory = createFactory(toolbars);
         const panel = factory.createNew(context);
-        const items = toArray(panel.toolbar.names());
-        expect(items).to.deep.equal(['foo', 'bar']);
+        const panel2 = factory.createNew(context);
+        expect(toArray(panel.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel2.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel.toolbar.children())).to.deep.equal(buttons);
+        expect(toArray(panel2.toolbar.children())).to.deep.equal(buttons);
       });
     });
   });
