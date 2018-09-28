@@ -64,12 +64,13 @@ let tsconfigPath = path.join(
   basePath,
   'packages',
   'metapackage',
+  'src',
   'tsconfig.json'
 );
 let tsconfig = utils.readJSONFile(tsconfigPath);
-tsconfig.compilerOptions.paths[data.name] = [
-  path.join('..', packageDirName, 'src')
-];
+tsconfig.references.push({
+  path: path.join('..', '..', packageDirName, 'src')
+});
 utils.writeJSONFile(tsconfigPath, tsconfig);
 
 // Update the core jupyterlab build dependencies.
