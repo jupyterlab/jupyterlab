@@ -22,7 +22,7 @@
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ian-r-rose/jupyterlab-toc.git"
+    "url": "https://github.com/jupyterlab/jupyterlab-toc.git"
   },
   "scripts": {
     "build": "tsc",
