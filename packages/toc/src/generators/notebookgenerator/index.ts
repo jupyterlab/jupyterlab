@@ -132,31 +132,21 @@ export function createNotebookGenerator(
               prevHeading = renderedHeadings[0];
             }
           }
-          for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
+          for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
-            const outputModel = (model as CodeCellModel).outputs.get(i);
+            const outputModel = (model as CodeCellModel).outputs.get(j);
             const dataTypes = Object.keys(outputModel.data);
             const htmlData = dataTypes.filter(t => isMarkdown(t) || isDOM(t));
             if (!htmlData.length) {
               continue;
             }
             // If the output has rendered HTML, parse it for headers.
-            const outputWidget = (cell as CodeCell).outputArea.widgets[i];
+            const outputWidget = (cell as CodeCell).outputArea.widgets[j];
             const onClickFactory = (el: Element) => {
               return () => {
+                panel.content.activeCellIndex = i;
                 el.scrollIntoView();
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
