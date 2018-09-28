@@ -129,8 +129,11 @@ describe('@jupyterlab/notebook', () => {
         ];
         const factory = createFactory(getToolbars);
         const panel = factory.createNew(context);
-        const items = toArray(panel.toolbar.names());
-        expect(items).to.deep.equal(['foo', 'bar']);
+        const panel2 = factory.createNew(context);
+        expect(toArray(panel.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel2.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel.toolbar.children()).length).to.equal(2);
+        expect(toArray(panel2.toolbar.children()).length).to.equal(2);
       });
     });
   });
