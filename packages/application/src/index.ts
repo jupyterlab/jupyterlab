@@ -385,20 +385,6 @@ export namespace JupyterLab {
     };
 
     /**
-     * The local directories used by the application.
-     */
-    readonly directories: {
-      readonly appSettings: string;
-      readonly schemas: string;
-      readonly static: string;
-      readonly templates: string;
-      readonly themes: string;
-      readonly userSettings: string;
-      readonly serverRoot: string;
-      readonly workspaces: string;
-    };
-
-    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -433,16 +419,6 @@ export namespace JupyterLab {
       themes: PageConfig.getOption('themesUrl'),
       tree: PageConfig.getOption('treeUrl'),
       workspaces: PageConfig.getOption('workspacesUrl')
-    },
-    directories: {
-      appSettings: PageConfig.getOption('appSettingsDir'),
-      schemas: PageConfig.getOption('schemasDir'),
-      static: PageConfig.getOption('staticDir'),
-      templates: PageConfig.getOption('templatesDir'),
-      themes: PageConfig.getOption('themesDir'),
-      userSettings: PageConfig.getOption('userSettingsDir'),
-      serverRoot: PageConfig.getOption('serverRoot'),
-      workspaces: PageConfig.getOption('workspacesDir')
     },
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
     workspace: '',
