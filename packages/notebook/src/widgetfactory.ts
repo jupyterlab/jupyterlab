@@ -82,13 +82,13 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     };
     let content = this.contentFactory.createNotebook(nbOptions);
 
-    let widget = new NotebookPanel({ context, content });
-    if (!this._overrideToolbarItems) {
-      this._overrideToolbarItems = ToolbarItems.getDefaultItems(widget);
-    }
-    return widget;
+    return new NotebookPanel({ context, content });
   }
 
+  protected getDefaultToolbarItems: (
+    widget: NotebookPanel
+  ) => DocumentRegistry.IToolbarItem[] | undefined =
+    ToolbarItems.getDefaultItems;
   private _editorConfig: StaticNotebook.IEditorConfig;
 }
 

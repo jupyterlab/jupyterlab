@@ -11,7 +11,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { NotebookWidgetFactory } from '@jupyterlab/notebook';
 
-import { Context } from '@jupyterlab/docregistry';
+import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
 
 import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
@@ -20,12 +20,14 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
 
-function createFactory(toolbarItems?: any[]): NotebookWidgetFactory {
+function createFactory(
+  getToolbarItems?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
+): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
     name: 'notebook',
     fileTypes: ['notebook'],
     rendermime,
-    toolbarItems,
+    getToolbarItems,
     contentFactory,
     mimeTypeService: NBTestUtils.mimeTypeService,
     editorConfig: NBTestUtils.defaultEditorConfig
@@ -121,11 +123,11 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should populate the customized toolbar items', () => {
-        const toolbars = [
+        const getToolbars = () => [
           { name: 'foo', widget: new ToolbarButton() },
           { name: 'bar', widget: new ToolbarButton() }
         ];
-        const factory = createFactory(toolbars);
+        const factory = createFactory(getToolbars);
         const panel = factory.createNew(context);
         const items = toArray(panel.toolbar.names());
         expect(items).to.deep.equal(['foo', 'bar']);
