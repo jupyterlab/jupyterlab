@@ -290,9 +290,7 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
-    if (options.getToolbarItems) {
-      this.getDefaultToolbarItems = options.getToolbarItems;
-    }
+    this._overrideToolbarItems = options.getToolbarItems;
   }
 
   /**
@@ -381,12 +379,18 @@ export abstract class ABCWidgetFactory<
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
-    if (this.getDefaultToolbarItems) {
-      const items = this.getDefaultToolbarItems(widget);
-      items.forEach(({ name, widget: item }) => {
-        widget.toolbar.addItem(name, item);
-      });
+    const items: DocumentRegistry.IToolbarItem[] = [];
+
+    if (this._overrideToolbarItems) {
+      items.concat(this._overrideToolbarItems(widget));
+    } else if (this.getDefaultToolbarItems) {
+      items.concat(this.getDefaultToolbarItems(widget));
     }
+
+    items.forEach(({ name, widget: item }) => {
+      widget.toolbar.addItem(name, item);
+    });
+
     this._widgetCreated.emit(widget);
     return widget;
   }
@@ -400,6 +404,10 @@ export abstract class ABCWidgetFactory<
    * toolbar items to be added when createNew
    */
   protected getDefaultToolbarItems: (
+    widget: T
+  ) => DocumentRegistry.IToolbarItem[] | undefined;
+
+  private _overrideToolbarItems: (
     widget: T
   ) => DocumentRegistry.IToolbarItem[] | undefined;
   private _isDisposed = false;
