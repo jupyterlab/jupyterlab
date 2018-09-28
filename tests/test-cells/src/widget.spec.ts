@@ -183,6 +183,16 @@ describe('cells/widget', () => {
         await framePromise();
         expect(widget.methods).to.deep.equal(['onUpdateRequest']);
       });
+
+      it('should reflect model metadata', () => {
+        model.metadata.set('editable', false);
+
+        const widget = new Cell({
+          model,
+          contentFactory
+        });
+        expect(widget.readOnly).to.equal(false);
+      });
     });
 
     describe('#inputCollapsed', () => {
