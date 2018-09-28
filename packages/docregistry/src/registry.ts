@@ -932,9 +932,9 @@ export namespace DocumentRegistry {
     readonly canStartKernel?: boolean;
 
     /**
-     * Array of items to be added to document toolbar.
+     * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
-    readonly getToolbarItems?: (widget: T) => DocumentRegistry.IToolbarItem[];
+    readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
   }
 
   /**

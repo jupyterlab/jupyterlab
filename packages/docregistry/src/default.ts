@@ -281,7 +281,7 @@ export abstract class ABCWidgetFactory<
   /**
    * Construct a new `ABCWidgetFactory`.
    */
-  constructor(options: DocumentRegistry.IWidgetFactoryOptions) {
+  constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._name = options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
@@ -290,7 +290,7 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
-    this._overrideToolbarItems = options.getToolbarItems;
+    this._toolbarFactory = options.toolbarFactory;
   }
 
   /**
@@ -378,20 +378,23 @@ export abstract class ABCWidgetFactory<
    * It should emit the [widgetCreated] signal with the new widget.
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
-    let widget = this.createNewWidget(context);
-    let items: DocumentRegistry.IToolbarItem[] = [];
+    // Create the new widget
+    const widget = this.createNewWidget(context);
 
-    if (this._overrideToolbarItems) {
-      items = items.concat(this._overrideToolbarItems(widget));
-    } else if (this.getDefaultToolbarItems) {
-      items = items.concat(this.getDefaultToolbarItems(widget));
+    // Add toolbar items
+    let items: DocumentRegistry.IToolbarItem[];
+    if (this._toolbarFactory) {
+      items = this._toolbarFactory(widget);
+    } else {
+      items = this.defaultToolbarFactory(widget);
     }
-
     items.forEach(({ name, widget: item }) => {
       widget.toolbar.addItem(name, item);
     });
 
+    // Emit widget created signal
     this._widgetCreated.emit(widget);
+
     return widget;
   }
 
@@ -401,13 +404,13 @@ export abstract class ABCWidgetFactory<
   protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;
 
   /**
-   * toolbar items to be added when createNew
+   * Default factory for toolbar items to be added after the widget is created.
    */
-  protected getDefaultToolbarItems: (
-    widget: T
-  ) => DocumentRegistry.IToolbarItem[] | undefined;
+  protected defaultToolbarFactory(widget: T): DocumentRegistry.IToolbarItem[] {
+    return [];
+  }
 
-  private _overrideToolbarItems: (
+  private _toolbarFactory: (
     widget: T
   ) => DocumentRegistry.IToolbarItem[] | undefined;
   private _isDisposed = false;

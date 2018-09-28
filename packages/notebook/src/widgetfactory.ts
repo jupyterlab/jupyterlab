@@ -85,10 +85,9 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     return new NotebookPanel({ context, content });
   }
 
-  protected getDefaultToolbarItems: (
+  protected defaultToolbarFactory: (
     widget: NotebookPanel
-  ) => DocumentRegistry.IToolbarItem[] | undefined =
-    ToolbarItems.getDefaultItems;
+  ) => DocumentRegistry.IToolbarItem[] = ToolbarItems.getDefaultItems;
   private _editorConfig: StaticNotebook.IEditorConfig;
 }
 
@@ -99,7 +98,8 @@ export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions
+    extends DocumentRegistry.IWidgetFactoryOptions<NotebookPanel> {
     /*
       * A rendermime instance.
       */
