@@ -86,7 +86,12 @@ export namespace ToolbarItems {
         });
       },
       tooltip: 'Save the notebook contents and create checkpoint',
-      enabled: panel.context.contentsModel.writable
+      enabled: !!(
+        panel &&
+        panel.context &&
+        panel.context.contentsModel &&
+        panel.context.contentsModel.writable
+      )
     });
   }
 

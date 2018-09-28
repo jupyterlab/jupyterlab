@@ -189,17 +189,15 @@ function addCommands(
 
   const isWritable = () => {
     const { currentWidget } = shell;
-    if (currentWidget) {
-      const context = docManager.contextForWidget(currentWidget);
-      return !!(
-        currentWidget &&
-        context &&
-        context.contentsModel &&
-        context.contentsModel.writable
-      );
-    } else {
+    if (!currentWidget) {
       return false;
     }
+    const context = docManager.contextForWidget(currentWidget);
+    return !!(
+      context &&
+      context.contentsModel &&
+      context.contentsModel.writable
+    );
   };
 
   // fetches the doc widget associated with the most recent contextmenu event
@@ -561,7 +559,7 @@ function addCommands(
   commands.addCommand(CommandIDs.saveAs, {
     label: () => `Save ${fileType()} As…`,
     caption: 'Save with new path',
-    isEnabled: isWritable,
+    isEnabled,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
