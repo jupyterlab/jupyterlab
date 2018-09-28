@@ -21,8 +21,8 @@ export function markdownDocGeneratorToolbar(
   > {
     constructor(props: INotebookGeneratorToolbarProps) {
       super(props);
-      this.state = { numbering: true };
-      options.initializeOptions(true);
+      this.state = { numbering: false };
+      options.initializeOptions(false);
     }
 
     render() {

@@ -3,13 +3,7 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 
-import {
-  CodeCell,
-  CodeCellModel,
-  MarkdownCell,
-  Cell,
-  ICellModel
-} from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -46,7 +40,7 @@ export function createNotebookGenerator(
 ): TableOfContentsRegistry.IGenerator<NotebookPanel> {
   // Create a option manager to manage user settings
   const options = new NotebookGeneratorOptionsManager(widget, tracker, {
-    needsNumbering: true,
+    needsNumbering: false,
     sanitizer: sanitizer
   });
   return {
@@ -67,27 +61,19 @@ export function createNotebookGenerator(
       // Keep track of the previous heading that is shown in TOC, used for
       // determine whether one header has child
       let prevHeading: INotebookHeading | null = null;
-      let cellNum = panel.content.widgets.length;
-      for (let i = 0; i <= panel.content.widgets.length; i++) {
-        let cell: Cell | null = null;
-        if (i !== cellNum) {
-          cell = panel.content.widgets[i];
-        }
+      for (let i = 0; i < panel.content.widgets.length; i++) {
+        let cell: Cell = panel.content.widgets[i];
         let collapsed = false;
-        if (cell) {
-          collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
-        }
-        collapsed = collapsed != undefined ? collapsed : false;
-        let model: ICellModel | null = null;
-        if (cell) {
-          model = cell.model;
-        }
-        if (cell && model && model.type === 'code' && i !== cellNum) {
+        collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
+        collapsed = collapsed !== undefined ? collapsed : false;
+        let model = cell.model;
+        if (model.type === 'code') {
           // Get the execution count prompt for code cells
-          let executionCountNumber = (cell as CodeCell).model
-            .executionCount as number;
+          let executionCountNumber = (cell as CodeCell).model.executionCount as
+            | number
+            | null;
           let executionCount =
-            executionCountNumber != null
+            executionCountNumber !== null
               ? '[' + executionCountNumber + ']: '
               : '[ ]: ';
           // Iterate over the outputs, and parse them if they
@@ -101,18 +87,8 @@ export function createNotebookGenerator(
             const onClickFactory = (line: number) => {
               // Activate the corresponding cell if user click on the TOC entry
               return () => {
-                cell!.node.scrollIntoView();
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
+                panel.content.activeCellIndex = i;
+                cell.node.scrollIntoView();
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -125,7 +101,7 @@ export function createNotebookGenerator(
               cell
             );
 
-            // // Do not render the code cell in TOC if it is filtered out by tags
+            // Do not render the code cell in TOC if it is filtered out by tags
             if (
               currentCollapseLevel < 0 &&
               !Private.headingIsFilteredOut(
@@ -146,31 +122,22 @@ export function createNotebookGenerator(
               prevHeading = renderedHeadings[0];
             }
           }
-          for (let i = 0; i < (model as CodeCellModel).outputs.length; i++) {
+          for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
             // Filter out the outputs that are not rendered HTML
             // (that is, markdown, vdom, or text/html)
-            const outputModel = (model as CodeCellModel).outputs.get(i);
+            const outputModel = (model as CodeCellModel).outputs.get(j);
             const dataTypes = Object.keys(outputModel.data);
             const htmlData = dataTypes.filter(t => isMarkdown(t) || isDOM(t));
             if (!htmlData.length) {
               continue;
             }
             // If the output has rendered HTML, parse it for headers.
-            const outputWidget = (cell as CodeCell).outputArea.widgets[i];
+            const outputWidget = (cell as CodeCell).outputArea.widgets[j];
             const onClickFactory = (el: Element) => {
               return () => {
+                panel.content.activeCellIndex = i;
+                panel.content.mode = 'command';
                 el.scrollIntoView();
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -237,52 +204,37 @@ export function createNotebookGenerator(
               }
             }
           }
-        } else if ((model && model.type === 'markdown') || i === cellNum) {
+        } else if (model.type === 'markdown') {
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if (
-            i === cellNum ||
-            ((cell as MarkdownCell).rendered &&
-              !(cell as MarkdownCell).inputHidden)
+            (cell as MarkdownCell).rendered &&
+            !(cell as MarkdownCell).inputHidden
           ) {
             const onClickFactory = (el: Element) => {
               return () => {
-                if (!cell) {
-                  return;
-                }
                 if (!(cell as MarkdownCell).rendered) {
-                  cell.node.scrollIntoView();
-                } else {
+                  panel.content.activeCellIndex = i;
                   el.scrollIntoView();
-                  if (tracker && tracker.currentWidget) {
-                    let cells = tracker.currentWidget.model.cells;
-                    for (let i = 0; i < cells.length; i++) {
-                      let currCell = tracker.currentWidget.content.widgets[
-                        i
-                      ] as Cell;
-                      if (cell === currCell) {
-                        tracker.currentWidget.content.activeCellIndex = i;
-                      }
-                    }
-                  }
+                } else {
+                  cell.node.scrollIntoView();
+                  panel.content.activeCellIndex = i;
                 }
               };
             };
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
             let renderedHeading: INotebookHeading | undefined;
-            if (i !== cellNum) {
-              renderedHeading = Private.getRenderedHTMLHeading(
-                cell!.node,
-                onClickFactory,
-                sanitizer,
-                numberingDict,
-                lastLevel,
-                numbering,
-                cell!
-              );
-            }
+            renderedHeading = Private.getRenderedHTMLHeading(
+              cell.node,
+              onClickFactory,
+              sanitizer,
+              numberingDict,
+              lastLevel,
+              numbering,
+              cell
+            );
             if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
@@ -299,9 +251,7 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                (i === cellNum ||
-                  (renderedHeading &&
-                    prevHeading.level >= renderedHeading.level))
+                (renderedHeading && prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
               }
@@ -340,24 +290,8 @@ export function createNotebookGenerator(
           } else {
             const onClickFactory = (line: number) => {
               return () => {
-                if (!cell) {
-                  return;
-                }
+                panel.content.activeCellIndex = i;
                 cell.node.scrollIntoView();
-                if (!(cell as MarkdownCell).rendered) {
-                  cell.editor.setCursorPosition({ line, column: 0 });
-                }
-                if (tracker && tracker.currentWidget) {
-                  let cells = tracker.currentWidget.model.cells;
-                  for (let i = 0; i < cells.length; i++) {
-                    let currCell = tracker.currentWidget.content.widgets[
-                      i
-                    ] as Cell;
-                    if (cell === currCell) {
-                      tracker.currentWidget.content.activeCellIndex = i;
-                    }
-                  }
-                }
               };
             };
             let lastLevel = Private.getLastLevel(headings);
@@ -384,7 +318,7 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                (i === cellNum || prevHeading.level >= renderedHeading.level)
+                prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
               }
@@ -505,9 +439,7 @@ namespace Private {
     }
     return headings;
   }
-}
 
-namespace Private {
   /**
    * Given a string of markdown, get the markdown headings
    * in that string.

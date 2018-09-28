@@ -35,7 +35,7 @@ export function notebookGeneratorToolbar(
         showCode: true,
         showMarkdown: false,
         showTags: false,
-        numbering: true
+        numbering: false
       };
       if (tracker.currentWidget) {
         // Read saved user settings in notebook metadata
