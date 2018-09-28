@@ -250,7 +250,7 @@ def clean(app_dir=None, logger=None):
     """Clean the JupyterLab application directory."""
     logger = _ensure_logger(logger)
     app_dir = app_dir or get_app_dir()
-    logger.info(f'Cleaning {app_dir}...')
+    logger.info('Cleaning %s...', app_dir)
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
