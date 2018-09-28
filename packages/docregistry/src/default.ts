@@ -290,7 +290,9 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
-    this.getDefaultToolbarItems = options.getToolbarItems;
+    if (options.getToolbarItems) {
+      this.getDefaultToolbarItems = options.getToolbarItems;
+    }
   }
 
   /**
