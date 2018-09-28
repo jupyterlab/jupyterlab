@@ -255,11 +255,15 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
       return `Save ${name} ${action || 'with Extras'}`;
     },
-    isEnabled: Private.delegateEnabled(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    ),
+    isEnabled: args => {
+      return (
+        Private.delegateEnabled(
+          app,
+          menu.persistAndSavers,
+          'persistAndSave'
+        )() && commands.isEnabled('docmanager:save', args)
+      );
+    },
     execute: Private.delegateExecute(
       app,
       menu.persistAndSavers,
