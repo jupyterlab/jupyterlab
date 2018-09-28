@@ -3,13 +3,7 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 
-import {
-  CodeCell,
-  CodeCellModel,
-  MarkdownCell,
-  Cell,
-  ICellModel
-} from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -67,27 +61,19 @@ export function createNotebookGenerator(
       // Keep track of the previous heading that is shown in TOC, used for
       // determine whether one header has child
       let prevHeading: INotebookHeading | null = null;
-      let cellNum = panel.content.widgets.length;
-      for (let i = 0; i <= panel.content.widgets.length; i++) {
-        let cell: Cell | null = null;
-        if (i !== cellNum) {
-          cell = panel.content.widgets[i];
-        }
+      for (let i = 0; i < panel.content.widgets.length; i++) {
+        let cell: Cell = panel.content.widgets[i];
         let collapsed = false;
-        if (cell) {
-          collapsed = cell!.model.metadata.get('toc-hr-collapsed') as boolean;
-        }
-        collapsed = collapsed != undefined ? collapsed : false;
-        let model: ICellModel | null = null;
-        if (cell) {
-          model = cell.model;
-        }
-        if (cell && model && model.type === 'code' && i !== cellNum) {
+        collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
+        collapsed = collapsed !== undefined ? collapsed : false;
+        let model = cell.model;
+        if (model.type === 'code') {
           // Get the execution count prompt for code cells
-          let executionCountNumber = (cell as CodeCell).model
-            .executionCount as number;
+          let executionCountNumber = (cell as CodeCell).model.executionCount as
+            | number
+            | null;
           let executionCount =
-            executionCountNumber != null
+            executionCountNumber !== null
               ? '[' + executionCountNumber + ']: '
               : '[ ]: ';
           // Iterate over the outputs, and parse them if they
@@ -125,7 +111,7 @@ export function createNotebookGenerator(
               cell
             );
 
-            // // Do not render the code cell in TOC if it is filtered out by tags
+            // Do not render the code cell in TOC if it is filtered out by tags
             if (
               currentCollapseLevel < 0 &&
               !Private.headingIsFilteredOut(
@@ -237,14 +223,13 @@ export function createNotebookGenerator(
               }
             }
           }
-        } else if ((model && model.type === 'markdown') || i === cellNum) {
+        } else if (model && model.type === 'markdown') {
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
           if (
-            i === cellNum ||
-            ((cell as MarkdownCell).rendered &&
-              !(cell as MarkdownCell).inputHidden)
+            (cell as MarkdownCell).rendered &&
+            !(cell as MarkdownCell).inputHidden
           ) {
             const onClickFactory = (el: Element) => {
               return () => {
@@ -272,17 +257,15 @@ export function createNotebookGenerator(
             let numbering = options.numbering;
             let lastLevel = Private.getLastLevel(headings);
             let renderedHeading: INotebookHeading | undefined;
-            if (i !== cellNum) {
-              renderedHeading = Private.getRenderedHTMLHeading(
-                cell!.node,
-                onClickFactory,
-                sanitizer,
-                numberingDict,
-                lastLevel,
-                numbering,
-                cell!
-              );
-            }
+            renderedHeading = Private.getRenderedHTMLHeading(
+              cell.node,
+              onClickFactory,
+              sanitizer,
+              numberingDict,
+              lastLevel,
+              numbering,
+              cell
+            );
             if (renderedHeading && renderedHeading.type === 'markdown') {
               // Do not put the item in TOC if its filtered out by tags
               if (
@@ -299,9 +282,7 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                (i === cellNum ||
-                  (renderedHeading &&
-                    prevHeading.level >= renderedHeading.level))
+                (renderedHeading && prevHeading.level >= renderedHeading.level)
               ) {
                 prevHeading.hasChild = false;
               }
@@ -384,7 +365,7 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                (i === cellNum || prevHeading.level >= renderedHeading.level)
+                prevHeading.level >= renderedHeading.level
               ) {
                 prevHeading.hasChild = false;
               }
@@ -505,9 +486,7 @@ namespace Private {
     }
     return headings;
   }
-}
 
-namespace Private {
   /**
    * Given a string of markdown, get the markdown headings
    * in that string.
