@@ -178,18 +178,17 @@ describe('docregistry/default', () => {
       });
 
       it('should have toolbar items', () => {
-        const buttons = [new Widget(), new Widget()];
         const factory = new WidgetFactory({
           name: 'test',
           fileTypes: ['text'],
-          toolbarItems: [
+          getToolbarItems: () => [
             {
               name: 'foo',
-              widget: buttons[0]
+              widget: new Widget()
             },
             {
               name: 'bar',
-              widget: buttons[1]
+              widget: new Widget()
             }
           ]
         });
@@ -198,8 +197,8 @@ describe('docregistry/default', () => {
         const widget2 = factory.createNew(context);
         expect(toArray(widget.toolbar.names())).to.deep.equal(['foo', 'bar']);
         expect(toArray(widget2.toolbar.names())).to.deep.equal(['foo', 'bar']);
-        expect(toArray(widget.toolbar.children())).to.deep.equal(buttons);
-        expect(toArray(widget2.toolbar.children())).to.deep.equal(buttons);
+        expect(toArray(widget.toolbar.children()).length).to.equal(2);
+        expect(toArray(widget2.toolbar.children()).length).to.equal(2);
       });
     });
 
