@@ -87,8 +87,8 @@
 }
 
 .jp-Completer-item.jp-mod-active {
-  background: var(--jp-brand-color3);
-  opacity: 0.8;
+  background: var(--jp-brand-color1);
+  color: white;
 }
 
 .jp-Completer-item .jp-Completer-match mark {
