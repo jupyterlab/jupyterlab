@@ -312,7 +312,8 @@ function addCommands(
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
-      if (!browser.isHidden) {
+      const widget = tracker.currentWidget;
+      if (widget && !widget.isHidden) {
         app.shell.collapseLeft();
       }
     }
@@ -401,8 +402,8 @@ function addCommands(
         return;
       }
 
-      return browser.model.manager.services.contents
-        .getDownloadUrl(browser.selectedItems().next().path)
+      return widget.model.manager.services.contents
+        .getDownloadUrl(widget.selectedItems().next().path)
         .then(url => {
           Clipboard.copyToSystem(url);
         });
@@ -440,26 +441,38 @@ function addCommands(
 
   commands.addCommand(CommandIDs.share, {
     execute: () => {
-      const path = encodeURI(browser.selectedItems().next().path);
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const path = encodeURI(widget.selectedItems().next().path);
       const tree = PageConfig.getTreeUrl({ workspace: true });
 
       Clipboard.copyToSystem(URLExt.join(tree, path));
     },
-    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    isVisible: () =>
+      tracker.currentWidget &&
+      toArray(tracker.currentWidget.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',
     label: 'Copy Shareable Link'
   });
 
   commands.addCommand(CommandIDs.copyPath, {
     execute: () => {
-      const item = browser.selectedItems().next();
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const item = widget.selectedItems().next();
       if (!item) {
         return;
       }
 
       Clipboard.copyToSystem(item.path);
     },
-    isVisible: () => browser.selectedItems().next !== undefined,
+    isVisible: () =>
+      tracker.currentWidget &&
+      tracker.currentWidget.selectedItems().next !== undefined,
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     label: 'Copy Path'
   });
