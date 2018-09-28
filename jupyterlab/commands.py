@@ -246,8 +246,9 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
     return handler.update_extension(name)
 
 
-def clean(app_dir=None):
+def clean(app_dir=None, logger=None):
     """Clean the JupyterLab application directory."""
+    logger = _ensure_logger(logger)
     app_dir = app_dir or get_app_dir()
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
@@ -256,7 +257,7 @@ def clean(app_dir=None):
     for name in ['staging']:
         target = pjoin(app_dir, name)
         if osp.exists(target):
-            shutil.rmtree(target)
+            _rmtree(target, logger)
 
 
 def build(app_dir=None, name=None, version=None, public_url=None,
@@ -845,7 +846,7 @@ class _AppHandler(object):
         staging = pjoin(app_dir, 'staging')
         if clean and osp.exists(staging):
             self.logger.info("Cleaning %s", staging)
-            shutil.rmtree(staging)
+            _rmtree(staging, self.logger)
 
         self._ensure_app_dirs()
         if not version:
@@ -858,7 +859,7 @@ class _AppHandler(object):
             with open(pkg_path) as fid:
                 data = json.load(fid)
             if data['jupyterlab'].get('version', '') != version:
-                shutil.rmtree(staging)
+                _rmtree(staging, self.logger)
                 os.makedirs(staging)
 
         for fname in ['index.js', 'webpack.config.js',
@@ -876,7 +877,7 @@ class _AppHandler(object):
         # Ensure a clean templates directory
         templates = pjoin(staging, 'templates')
         if osp.exists(templates):
-            shutil.rmtree(templates)
+            _rmtree(templates, self.logger)
 
         try:
             shutil.copytree(pjoin(HERE, 'staging', 'templates'), templates)
@@ -892,7 +893,7 @@ class _AppHandler(object):
         # Ensure a clean linked packages directory.
         linked_dir = pjoin(staging, 'linked_packages')
         if osp.exists(linked_dir):
-            shutil.rmtree(linked_dir)
+            _rmtree(linked_dir, self.logger)
         os.makedirs(linked_dir)
 
         # Template the package.json file.
@@ -1498,6 +1499,14 @@ def _normalize_path(extension):
     if osp.exists(extension):
         extension = osp.abspath(extension)
     return extension
+
+
+def _rmtree(path, logger):
+    """Remove a tree, logging errors"""
+    def onerror(*exc_info):
+        logger.debug('Error in rmtree', exc_info=exc_info)
+
+    shutil.rmtree(path, onerror=onerror)
 
 
 def _validate_extension(data):
