@@ -210,6 +210,7 @@ export class Cell extends Widget {
   protected initializeState() {
     const jupyter = this.model.metadata.get('jupyter') || ({} as any);
     this.inputHidden = jupyter.source_hidden === true;
+    this._readOnly = this.model.metadata.get('editable') === false;
   }
 
   /**
@@ -740,6 +741,9 @@ export class CodeCell extends Cell {
       case 'collapsed':
       case 'scrolled':
         this.update();
+        break;
+      case 'editable':
+        this.readOnly = !args.newValue;
         break;
       default:
         break;
