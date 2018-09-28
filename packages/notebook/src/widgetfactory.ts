@@ -27,7 +27,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
    *
    * @param options - The options used to construct the factory.
    */
-  constructor(options: NotebookWidgetFactory.IOptions) {
+  constructor(options: NotebookWidgetFactory.IOptions<NotebookPanel>) {
     super(options);
     this.rendermime = options.rendermime;
     this.contentFactory =
@@ -98,8 +98,8 @@ export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export interface IOptions
-    extends DocumentRegistry.IWidgetFactoryOptions<NotebookPanel> {
+  export interface IOptions<T extends NotebookPanel>
+    extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /*
       * A rendermime instance.
       */
