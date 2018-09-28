@@ -87,7 +87,7 @@
 }
 
 .jp-Completer-item.jp-mod-active {
-  background: var(--jp-brand-color1);
+  background: var(--jp-ui-inverse-font-color1);
   opacity: 0.8;
 }
 
