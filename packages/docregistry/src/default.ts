@@ -379,12 +379,12 @@ export abstract class ABCWidgetFactory<
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
     let widget = this.createNewWidget(context);
-    const items: DocumentRegistry.IToolbarItem[] = [];
+    let items: DocumentRegistry.IToolbarItem[] = [];
 
     if (this._overrideToolbarItems) {
-      items.concat(this._overrideToolbarItems(widget));
+      items = items.concat(this._overrideToolbarItems(widget));
     } else if (this.getDefaultToolbarItems) {
-      items.concat(this.getDefaultToolbarItems(widget));
+      items = items.concat(this.getDefaultToolbarItems(widget));
     }
 
     items.forEach(({ name, widget: item }) => {
