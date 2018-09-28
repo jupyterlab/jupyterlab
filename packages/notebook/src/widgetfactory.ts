@@ -85,9 +85,15 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     return new NotebookPanel({ context, content });
   }
 
-  protected defaultToolbarFactory: (
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(
     widget: NotebookPanel
-  ) => DocumentRegistry.IToolbarItem[] = ToolbarItems.getDefaultItems;
+  ): DocumentRegistry.IToolbarItem[] {
+    return ToolbarItems.getDefaultItems(widget);
+  }
+
   private _editorConfig: StaticNotebook.IEditorConfig;
 }
 
