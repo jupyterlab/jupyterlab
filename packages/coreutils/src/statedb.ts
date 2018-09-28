@@ -128,7 +128,7 @@ export class StateDB implements IStateDB {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
-  readonly maxLength = 2000;
+  readonly maxLength: number = 2000;
 
   /**
    * The namespace prefix for all state database entries.
