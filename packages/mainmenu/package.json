@@ -23,9 +23,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b src",
     "clean": "rimraf lib",
-    "watch": "tsc -w --listEmittedFiles"
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "watch": "tsc -b src --watch"
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.18.4",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
   }
 }

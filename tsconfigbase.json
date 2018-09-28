@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
@@ -10,6 +11,7 @@
     "moduleResolution": "node",
     "target": "es2015",
     "lib": ["dom", "es2015"],
+    "jsx": "react",
     "types": []
   }
 }

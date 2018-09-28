@@ -1,0 +1,27 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../application/src"
+    },
+    {
+      "path": "../../completer/src"
+    },
+    {
+      "path": "../../console/src"
+    },
+    {
+      "path": "../../fileeditor/src"
+    },
+    {
+      "path": "../../notebook/src"
+    },
+    {
+      "path": "../../services/src"
+    }
+  ]
+}

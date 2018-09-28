@@ -23,10 +23,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b src",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b src --watch"
   },
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^1.1.7",
@@ -38,7 +39,8 @@
     "@types/json-stable-stringify": "^1.0.32",
     "@types/webpack-env": "~1.13.6",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
   },
   "jupyterlab": {
     "mimeExtension": true

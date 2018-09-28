@@ -1,8 +1,0 @@
-{
-  "extends": "../../tsconfigbase",
-  "compilerOptions": {
-    "outDir": "./lib"
-  },
-  "include": ["src/*"],
-  "exclude": ["src/typedoc.d.ts"]
-}

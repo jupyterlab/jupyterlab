@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../build",
+    "types": ["mocha"],
+    "composite": false
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../../packages/coreutils/src"
+    },
+    {
+      "path": "../../../packages/docmanager/src"
+    },
+    {
+      "path": "../../../packages/docregistry/src"
+    },
+    {
+      "path": "../../../packages/filebrowser/src"
+    },
+    {
+      "path": "../../../packages/services/src"
+    },
+    {
+      "path": "../../../testutils/src"
+    }
+  ]
+}

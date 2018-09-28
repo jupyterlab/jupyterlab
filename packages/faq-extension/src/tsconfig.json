@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib",
+    "types": ["node"]
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../application/src"
+    },
+    {
+      "path": "../../apputils/src"
+    },
+    {
+      "path": "../../rendermime/src"
+    }
+  ]
+}

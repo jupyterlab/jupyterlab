@@ -2,8 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-// tslint:disable-next-line
-/// <reference path="../../../node_modules/@types/webpack-env/index.d.ts"/>
 
 import { JSONObject } from '@phosphor/coreutils';
 

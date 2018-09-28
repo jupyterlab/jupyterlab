@@ -1,0 +1,39 @@
+{
+  "extends": "../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib"
+  },
+  "include": ["*"],
+  "references": [
+    {
+      "path": "../../application/src"
+    },
+    {
+      "path": "../../apputils/src"
+    },
+    {
+      "path": "../../codeeditor/src"
+    },
+    {
+      "path": "../../console/src"
+    },
+    {
+      "path": "../../coreutils/src"
+    },
+    {
+      "path": "../../docregistry/src"
+    },
+    {
+      "path": "../../filebrowser/src"
+    },
+    {
+      "path": "../../fileeditor/src"
+    },
+    {
+      "path": "../../launcher/src"
+    },
+    {
+      "path": "../../mainmenu/src"
+    }
+  ]
+}

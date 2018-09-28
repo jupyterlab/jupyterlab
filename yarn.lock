@@ -805,7 +805,7 @@
 
 "@types/marked@~0.3.0":
   version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@types/marked/-/marked-0.3.0.tgz#583c223dd33385a1dda01aaf77b0cd0411c4b524"
+  resolved "https://registry.npmjs.org/@types/marked/-/marked-0.3.0.tgz#583c223dd33385a1dda01aaf77b0cd0411c4b524"
 
 "@types/minimatch@*", "@types/minimatch@3.0.3":
   version "3.0.3"
@@ -9837,9 +9837,9 @@ ts-jest@^23.1.4:
     json5 "^0.5.0"
     lodash "^4.17.10"
 
-ts-loader@^4.4.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-4.5.0.tgz#a1ce70b2dc799941fb2197605f0d67874097859b"
+ts-loader@~5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-5.0.0.tgz#0715ee31ed229fcdc8df73e87ccd80e6a46cae04"
   dependencies:
     chalk "^2.3.0"
     enhanced-resolve "^4.0.0"
@@ -9981,9 +9981,9 @@ typescript@3.0.x:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
 
-typescript@~2.9.2:
-  version "2.9.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
+typescript@~3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.1.tgz#3362ba9dd1e482ebb2355b02dfe8bcd19a2c7c96"
 
 ua-parser-js@^0.7.18:
   version "0.7.18"
