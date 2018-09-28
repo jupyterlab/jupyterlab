@@ -187,6 +187,19 @@ function addCommands(
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
   };
 
+  const isWritable = () => {
+    const { currentWidget } = shell;
+    if (!currentWidget) {
+      return false;
+    }
+    const context = docManager.contextForWidget(currentWidget);
+    return !!(
+      context &&
+      context.contentsModel &&
+      context.contentsModel.writable
+    );
+  };
+
   // fetches the doc widget associated with the most recent contextmenu event
   const contextMenuWidget = (): Widget => {
     const pathRe = /[Pp]ath:\s?(.*)\n?/;
@@ -482,7 +495,7 @@ function addCommands(
   commands.addCommand(CommandIDs.save, {
     label: () => `Save ${fileType()}`,
     caption: 'Save and create checkpoint',
-    isEnabled,
+    isEnabled: isWritable,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
@@ -514,11 +527,18 @@ function addCommands(
       const iterator = shell.widgets('main');
       let widget = iterator.next();
       while (widget) {
-        if (docManager.contextForWidget(widget)) {
+        let context = docManager.contextForWidget(widget);
+        if (
+          context &&
+          context.contentsModel &&
+          context.contentsModel.writable
+        ) {
           return true;
         }
         widget = iterator.next();
       }
+      // disable saveAll if all of the widgets models
+      // have writable === false
       return false;
     },
     execute: () => {
