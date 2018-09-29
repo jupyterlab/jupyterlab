@@ -101,7 +101,7 @@ Notes:
   local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
   a built application directory.
 
-- At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`. This will clean the repository, and re-install and
+- At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
   rebuild.
 
 - If `pip` gives a `VersionConflict` error, it usually means that the installed
