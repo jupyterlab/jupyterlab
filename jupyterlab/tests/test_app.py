@@ -185,6 +185,10 @@ jest_flags['coverage'] = (
     {'JestApp': {'coverage': True}},
     'Run coverage'
 )
+jest_flags['silent'] = (
+    {'JestApp': {'silent': True}},
+    'Watch all test files'
+)
 jest_flags['watchAll'] = (
     {'JestApp': {'watchAll': True}},
     'Watch all test files'
@@ -199,6 +203,8 @@ class JestApp(ProcessTestApp):
     testPathPattern = Unicode('').tag(config=True)
 
     watchAll = Bool(False).tag(config=True)
+
+    silent = Bool(False).tag(config=True)
 
     aliases = jest_aliases
 
@@ -232,7 +238,7 @@ class JestApp(ProcessTestApp):
         else:
             cmd += [jest]
 
-        if not debug:
+        if self.silent:
             cmd += ['--silent']
 
         if self.testPathPattern:
