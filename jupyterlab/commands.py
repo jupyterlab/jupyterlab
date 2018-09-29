@@ -1484,7 +1484,7 @@ def _node_check(logger):
         logger.info(output.decode('utf-8'))
     except Exception:
         data = _get_core_data()
-        ver = data['engines']['node']
+        ver = data['jupyterlab']['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
 
