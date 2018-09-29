@@ -253,7 +253,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       process.exit(1);
     }
     utils.run('jlpm install');
-    console.log('\n\nPlease commit the changes by running:');
+    console.log('\n\nMade integrity changes!');
+    console.log('Please commit the changes by running:');
     console.log('git commit -a -m "Package integrity updates"');
     return false;
   }

@@ -14,3 +14,5 @@ if os.name == 'nt':
 
 
 subprocess.check_call(['git', 'clean', '-dfx'], cwd=here)
+
+subprocess.call('python -m pip uninstall -y jupyterlab'.split(), cwd=here)

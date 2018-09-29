@@ -3,15 +3,6 @@
     "**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}": [
       "prettier --write",
       "git add"
-    ],
-    "**/*{.ts,.tsx}": [
-      "tslint --fix -c tslint.json",
-      "git add"
-    ],
-    "**/*{.js,.jsx}": [
-      "eslint --fix",
-      "git add"
     ]
-  },
-  "concurrent": false
+  }
 }
