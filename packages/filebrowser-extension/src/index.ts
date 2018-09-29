@@ -27,7 +27,16 @@ import {
 
 import { Launcher } from '@jupyterlab/launcher';
 
-import { map, reduce, toArray } from '@phosphor/algorithm';
+import { Contents } from '@jupyterlab/services';
+
+import {
+  IterableOrArrayLike,
+  iter,
+  each,
+  map,
+  reduce,
+  toArray
+} from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -537,39 +546,76 @@ function addCommands(
    */
   class OpenwithMenu extends Menu {
     protected onBeforeAttach(msg: Message): void {
-      const widget = tracker.currentWidget;
-      let listings = widget.selectedItems();
-      let listing = listings.next();
-
       // clear the current menu items
       this.clearItems();
 
-      // listing will be undefined if widget.selectedItems() is empty
-      if (listing) {
-        // get the intersection of all the preferred factories in the current file browser selection
-        let factories = new Set(
-          registry.preferredWidgetFactories(listing.path)
-        );
-        factories = reduce(
-          listings,
-          (i, l) => {
-            return new Set(
-              registry.preferredWidgetFactories(l.path).filter(x => i.has(x))
-            );
-          },
-          factories
-        );
+      // get the widget factories that could be used to open all of the items in the current filebrowser selection
+      let factories = OpenwithMenu._intersection(
+        map(tracker.currentWidget.selectedItems(), i => {
+          return OpenwithMenu._getFactories(i);
+        })
+      );
 
-        // make new menu items from the preferred factories
+      if (factories) {
+        // make new menu items from the widget factories
         factories.forEach(factory => {
           this.addItem({
-            args: { factory: factory.name },
+            args: { factory: factory },
             command: CommandIDs.open
           });
         });
       }
 
       super.onBeforeAttach(msg);
+    }
+
+    static _getFactories(item: Contents.IModel): Array<string> {
+      let factories = registry
+        .preferredWidgetFactories(item.path)
+        .map(f => f.name);
+      const notebookFactory = registry.getWidgetFactory('notebook').name;
+      if (
+        item.type === 'notebook' &&
+        factories.indexOf(notebookFactory) === -1
+      ) {
+        factories.unshift(notebookFactory);
+      }
+
+      return factories;
+    }
+
+    static _intersection<T>(
+      object: IterableOrArrayLike<IterableOrArrayLike<T>>
+    ): Set<T> | void {
+      // coerce object to iterator and pop the first element
+      let it = iter(object);
+      let first = it.next();
+      // first will be undefined if iter is empty
+      if (!first) {
+        return;
+      }
+
+      // "initialize" the intersection from first
+      let isect = new Set<T>();
+      each(first, t => {
+        isect.add(t);
+      });
+      // reduce over the remaining elements of it
+      return reduce(
+        it,
+        (old, subiter) => {
+          // construct the new intersection as an empty set...
+          let isect = new Set<T>();
+          // ... then add only elements present in both old and subiter
+          each(subiter, t => {
+            if (old.has(t)) {
+              isect.add(t);
+            }
+          });
+          return isect;
+        },
+        isect
+      );
     }
   }
 
