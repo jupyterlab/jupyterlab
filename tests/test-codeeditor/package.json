@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codeeditor",
-  "version": "0.4.4",
+  "version": "0.5.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src",
@@ -16,10 +16,10 @@
     "watch:src": "tsp -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.18.4",
-    "@jupyterlab/codemirror": "^0.18.4",
-    "@jupyterlab/observables": "^2.0.7",
-    "@jupyterlab/testutils": "^0.2.4",
+    "@jupyterlab/codeeditor": "^0.19.0-alpha.0",
+    "@jupyterlab/codemirror": "^0.19.0-alpha.0",
+    "@jupyterlab/observables": "^2.1.0-alpha.0",
+    "@jupyterlab/testutils": "^0.3.0-alpha.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2",

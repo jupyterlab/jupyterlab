@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tabmanager-extension",
-  "version": "0.18.4",
+  "version": "0.19.0-alpha.0",
   "description": "JupyterLab - Tab Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,7 +31,7 @@
     "watch": "tsc -b src --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.4",
+    "@jupyterlab/application": "^0.19.0-alpha.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/widgets": "^1.6.0"
   },

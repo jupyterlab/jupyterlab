@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codemirror",
-  "version": "0.4.4",
+  "version": "0.5.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src",
@@ -16,8 +16,8 @@
     "watch:src": "tsp -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^0.18.4",
-    "@jupyterlab/codemirror": "^0.18.4",
+    "@jupyterlab/codeeditor": "^0.19.0-alpha.0",
+    "@jupyterlab/codemirror": "^0.19.0-alpha.0",
     "chai": "~4.1.2",
     "simulate-event": "~1.4.0"
   },
