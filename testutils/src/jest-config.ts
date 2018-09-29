@@ -15,12 +15,12 @@ module.exports = function(name: string, baseDir: string) {
     rootDir: path.resolve(path.join(baseDir, '..', '..')),
     collectCoverageFrom: [
       `packages/${name}/src/*.{ts,tsx}`,
-      `!packages/${name}/src/typings.d.ts`
+      `!packages/${name}/src/*.d.ts`
     ],
     testRegex: `tests\/test-${name}\/src\/.*\.spec\.ts$`,
     globals: {
       'ts-jest': {
-        tsConfigFile: `tests/test-${name}/tsconfig.json`
+        tsConfigFile: `tests/test-${name}/src/tsconfig.json`
       }
     }
   };

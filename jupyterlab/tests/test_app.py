@@ -18,7 +18,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
-from traitlets import Bool, Unicode
+from traitlets import Bool, Dict, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases, base_flags
@@ -206,25 +206,31 @@ class JestApp(ProcessTestApp):
 
     jest_dir = Unicode('')
 
+    test_config = Dict(dict(foo='bar'))
+
     open_browser = False
 
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.web_app.settings['terminals_available']
+
         jest = './node_modules/.bin/jest'
         debug = self.log.level == logging.DEBUG
+        jest = osp.realpath(osp.join(self.jest_dir, jest))
+        if os.name == 'nt':
+            jest += '.cmd'
 
+        cmd = []
         if self.coverage:
-            cmd = [jest, '--coverage']
+            cmd += [jest, '--coverage']
         elif debug:
-            cmd = 'node --inspect-brk %s --no-cache' % jest
+            cmd += ['node', '--inspect-brk', jest,  '--no-cache']
             if self.watchAll:
-                cmd += ' --watchAll'
+                cmd += [' --watchAll']
             else:
-                cmd += ' --watch'
-            cmd = cmd.split()
+                cmd += [' --watch']
         else:
-            cmd = [jest]
+            cmd += [jest]
 
         if not debug:
             cmd += ['--silent']
@@ -236,7 +242,8 @@ class JestApp(ProcessTestApp):
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
-                      token=self.token, foo='bar')
+                      token=self.token)
+        config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
         atexit.register(lambda: shutil.rmtree(td, True))
