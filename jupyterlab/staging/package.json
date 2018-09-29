@@ -216,7 +216,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.35.0rc0",
+    "version": "0.35.0rc1",
     "engines": {
       "node": ">=6.11.5"
     },
