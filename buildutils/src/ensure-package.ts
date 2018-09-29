@@ -141,7 +141,6 @@ export async function ensurePackage(
     references[name] = ref.split(path.sep).join('/');
   });
   if (
-    data.name.indexOf('test-') === -1 &&
     data.name.indexOf('example-') === -1 &&
     Object.keys(references).length > 0
   ) {

@@ -4,5 +4,13 @@
     "types": ["jest", "ws", "node"],
     "outDir": "../build"
   },
-  "include": ["**/*"]
+  "include": ["**/*"],
+  "references": [
+    {
+      "path": "../../../packages/coreutils/src"
+    },
+    {
+      "path": "../../../packages/services/src"
+    }
+  ]
 }
