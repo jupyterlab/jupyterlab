@@ -410,63 +410,12 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Create an iterator over the widget factories that have been registered.
    *
-   * @param preferredOrder - If this flag is set, the return value will
-   * iterate over the widget factories using the same ordering as
-   * [[preferredWidgetFactories]].
-   *
    * @returns A new iterator of widget factories.
    */
-  widgetFactories(
-    preferredOrder: boolean = false
-  ): IIterator<DocumentRegistry.WidgetFactory> {
-    if (preferredOrder) {
-      let factoryNames = new Set<string>();
-
-      // Start with the file type default factoryNames.
-      Object.keys(this._defaultWidgetFactories).forEach(name => {
-        factoryNames.add(this._defaultWidgetFactories[name]);
-      });
-
-      // Add the file type default rendered factoryNames.
-      Object.keys(this._defaultRenderedWidgetFactories).forEach(name => {
-        factoryNames.add(this._defaultRenderedWidgetFactories[name]);
-      });
-
-      // Add the global default factory.
-      if (this._defaultWidgetFactory) {
-        factoryNames.add(this._defaultWidgetFactory);
-      }
-
-      // Add the file type factoryNames in registration order.
-      Object.keys(this._widgetFactoryExtensions).forEach(name => {
-        each(this._widgetFactoryExtensions[name], n => {
-          factoryNames.add(n);
-        });
-      });
-
-      // Add the rest of the global factoryNames, in registration order.
-      if ('*' in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions['*'], n => {
-          factoryNames.add(n);
-        });
-      }
-
-      // Convert the set of factory names to an array of factories
-      let factories: DocumentRegistry.WidgetFactory[] = [];
-      factoryNames.forEach(name => {
-        let factory = this._widgetFactories[name];
-        if (!factory) {
-          return;
-        }
-        factories.push(factory);
-      });
-
-      return new ArrayIterator(factories);
-    } else {
-      return map(Object.keys(this._widgetFactories), name => {
-        return this._widgetFactories[name];
-      });
-    }
+  widgetFactories(): IIterator<DocumentRegistry.WidgetFactory> {
+    return map(Object.keys(this._widgetFactories), name => {
+      return this._widgetFactories[name];
+    });
   }
 
   /**

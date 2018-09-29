@@ -27,9 +27,11 @@ import {
 
 import { Launcher } from '@jupyterlab/launcher';
 
-import { each, every, map, toArray } from '@phosphor/algorithm';
+import { map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
+
+import { Message } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -138,7 +140,6 @@ function activateFactory(
       model,
       commands: options.commands || commands
     });
-    // const { registry } = docManager;
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
@@ -149,15 +150,6 @@ function activateFactory(
       tooltip: 'New Launcher'
     });
     widget.toolbar.insertItem(0, 'launch', launcher);
-
-    // // Add a context menu handler to the file browser's directory listing.
-    // let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
-    // node.addEventListener('contextmenu', (event: MouseEvent) => {
-    //   event.preventDefault();
-    //   const model = widget.modelForClick(event);
-    //   const menu = createContextMenu(model, commands, registry);
-    //   menu.open(event.clientX, event.clientY);
-    // });
 
     // Track the newly created file browser.
     tracker.add(widget);
@@ -373,31 +365,6 @@ function addCommands(
       );
     },
     iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
-    isVisible: (args): boolean => {
-      if ('factory' in args) {
-        // when factory is explicitly passed, show only when relevant
-        const factory = args['factory'] as string;
-        const widget = tracker.currentWidget;
-
-        return every(
-          map(widget.selectedItems(), item => {
-            if (item.type === 'directory') {
-              return false;
-            }
-
-            return (
-              registry
-                .preferredWidgetFactories(item.path)
-                .map(f => f.name)
-                .indexOf(factory) > -1
-            );
-          }),
-          bool => bool
-        );
-      }
-
-      return true;
-    },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
     mnemonic: 0
   });
@@ -564,6 +531,48 @@ function addCommands(
     execute: () => createLauncher(commands, browser)
   });
 
+  /**
+   * A menu widget that dynamically populates with different widget factories
+   * based on current filebrowser selection.
+   */
+  class OpenwithMenu extends Menu {
+    protected onBeforeAttach(msg: Message): void {
+      const widget = tracker.currentWidget;
+      let listings = widget.selectedItems();
+      let listing = listings.next();
+
+      // clear the current menu items
+      this.clearItems();
+
+      // listing will be undefined if widget.selectedItems() is empty
+      if (listing) {
+        // get the intersection of all the preferred factories in the current file browser selection
+        let factories = new Set(
+          registry.preferredWidgetFactories(listing.path)
+        );
+        factories = reduce(
+          listings,
+          (i, l) => {
+            return new Set(
+              registry.preferredWidgetFactories(l.path).filter(x => i.has(x))
+            );
+          },
+          factories
+        );
+
+        // make new menu items from the preferred factories
+        factories.forEach(factory => {
+          this.addItem({
+            args: { factory: factory.name },
+            command: CommandIDs.open
+          });
+        });
+      }
+
+      super.onBeforeAttach(msg);
+    }
+  }
+
   // matches anywhere on filebrowser that is not an item
   const selectorDeadSpace = '.jp-DirListing-deadSpace';
   // matches all filebrowser items
@@ -584,23 +593,7 @@ function addCommands(
     rank: 1
   });
 
-  // Create and populate the 'Open with' submenu
-  const openWith = new Menu({ commands });
-  openWith.title.label = 'Open With';
-
-  const updateOpenWith = (): void => {
-    openWith.clearItems();
-    each(registry.widgetFactories(true), factory => {
-      openWith.addItem({
-        args: { factory: factory.name },
-        command: CommandIDs.open
-      });
-    });
-  };
-  updateOpenWith();
-  // run again whenever the registry changes
-  registry.changed.connect(updateOpenWith);
-
+  const openWith = new OpenwithMenu({ commands });
   openWith.title.label = 'Open With';
   app.contextMenu.addItem({
     type: 'submenu',
@@ -675,67 +668,6 @@ function addCommands(
     rank: 14
   });
 }
-
-// /**
-//  * Create a context menu for the file browser listing.
-//  *
-//  * #### Notes
-//  * This function generates temporary commands with an incremented name. These
-//  * commands are disposed when the menu itself is disposed.
-//  */
-// function createContextMenu(
-//   model: Contents.IModel | undefined,
-//   commands: CommandRegistry,
-//   registry: DocumentRegistry
-// ): Menu {
-//   const menu = new Menu({ commands });
-//
-//   // If the user did not click on any file, we still want to show
-//   // paste as a possibility.
-//   if (!model) {
-//     menu.addItem({ command: CommandIDs.paste });
-//     return menu;
-//   }
-//
-//   menu.addItem({ command: CommandIDs.open });
-//
-//   const path = model.path;
-//   if (model.type !== 'directory') {
-//     const factories = registry.preferredWidgetFactories(path).map(f => f.name);
-//     if (path && factories.length > 1) {
-//       const command = 'docmanager:open';
-//       const openWith = new Menu({ commands });
-//       openWith.title.label = 'Open With';
-//       factories.forEach(factory => {
-//         openWith.addItem({ args: { factory, path }, command });
-//       });
-//       menu.addItem({ type: 'submenu', submenu: openWith });
-//     }
-//     menu.addItem({ command: CommandIDs.openBrowserTab });
-//   }
-//
-//   menu.addItem({ command: CommandIDs.rename });
-//   menu.addItem({ command: CommandIDs.del });
-//   menu.addItem({ command: CommandIDs.cut });
-//
-//   if (model.type !== 'directory') {
-//     menu.addItem({ command: CommandIDs.copy });
-//   }
-//
-//   menu.addItem({ command: CommandIDs.paste });
-//
-//   if (model.type !== 'directory') {
-//     menu.addItem({ command: CommandIDs.duplicate });
-//     menu.addItem({ command: CommandIDs.download });
-//     menu.addItem({ command: CommandIDs.shutdown });
-//   }
-//
-//   menu.addItem({ command: CommandIDs.share });
-//   menu.addItem({ command: CommandIDs.copyPath });
-//   menu.addItem({ command: CommandIDs.copyDownloadLink });
-//
-//   return menu;
-// }
 
 /**
  * Create a launcher for a given filebrowser widget.
