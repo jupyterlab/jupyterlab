@@ -20,7 +20,7 @@
     "clean:dev": "cd dev_mode && jlpm run clean",
     "clean:examples": "node buildutils/lib/clean-packages.js examples",
     "clean:packages": "node buildutils/lib/clean-packages.js packages",
-    "clean:slate": "python clean.py && pip install -v -e .",
+    "clean:slate": "python clean.py && python -m pip uninstall -y jupyterlab && python -m pip install -v -e .",
     "clean:src": "jlpm run clean",
     "clean:test": "lerna run clean --scope \"@jupyterlab/test-*\"",
     "clean:utils": "cd buildutils && jlpm run clean",
