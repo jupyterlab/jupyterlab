@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "0.19.0-alpha.0",
+  "version": "0.19.1-alpha.0",
   "description": "JupyterLab - Running Sessions Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,8 +30,8 @@
     "watch": "tsc -b src --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.0-alpha.0",
-    "@jupyterlab/running": "^0.19.0-alpha.0"
+    "@jupyterlab/application": "^0.19.1-alpha.0",
+    "@jupyterlab/running": "^0.19.1-alpha.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
