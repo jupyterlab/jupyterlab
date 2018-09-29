@@ -139,7 +139,9 @@ export function createRendermimePlugin(
           primaryFileType: registry.getFileType(option.primaryFileType),
           fileTypes: option.fileTypes,
           defaultFor: option.defaultFor,
-          defaultRendered: option.defaultRendered
+          defaultRendered: option.defaultRendered,
+          toolbarFactory: (w: MimeDocument) =>
+            option.toolbarFactory(w.content.renderer)
         });
         registry.addWidgetFactory(factory);
 

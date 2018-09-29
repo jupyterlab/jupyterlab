@@ -61,6 +61,14 @@ export namespace IRenderMime {
   }
 
   /**
+   * A toolbar item.
+   */
+  export interface IToolbarItem {
+    name: string;
+    widget: Widget;
+  }
+
+  /**
    * The options used to initialize a document widget factory.
    *
    * This interface is intended to be used by mime renderer extensions
@@ -98,6 +106,11 @@ export namespace IRenderMime {
      * If undefined, then it will fall back on the default file type.
      */
     readonly defaultRendered?: ReadonlyArray<string>;
+
+    /**
+     * A function returning a list of toolbar items to add to the toolbar.
+     */
+    readonly toolbarFactory?: (widget: IRenderer) => IToolbarItem[];
   }
 
   /**

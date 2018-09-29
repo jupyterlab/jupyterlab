@@ -888,7 +888,7 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions {
+  export interface IWidgetFactoryOptions<T extends Widget = Widget> {
     /**
      * The name of the widget to display in dialogs.
      */
@@ -932,9 +932,9 @@ export namespace DocumentRegistry {
     readonly canStartKernel?: boolean;
 
     /**
-     * Array of items to be added to document toolbar.
+     * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
-    readonly toolbarItems?: DocumentRegistry.IToolbarItem[];
+    readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
   }
 
   /**

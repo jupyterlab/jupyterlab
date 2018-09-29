@@ -27,7 +27,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
    *
    * @param options - The options used to construct the factory.
    */
-  constructor(options: NotebookWidgetFactory.IOptions) {
+  constructor(options: NotebookWidgetFactory.IOptions<NotebookPanel>) {
     super(options);
     this.rendermime = options.rendermime;
     this.contentFactory =
@@ -82,11 +82,16 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     };
     let content = this.contentFactory.createNotebook(nbOptions);
 
-    let widget = new NotebookPanel({ context, content });
-    if (!this._overrideToolbarItems) {
-      this._overrideToolbarItems = ToolbarItems.getDefaultItems(widget);
-    }
-    return widget;
+    return new NotebookPanel({ context, content });
+  }
+
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(
+    widget: NotebookPanel
+  ): DocumentRegistry.IToolbarItem[] {
+    return ToolbarItems.getDefaultItems(widget);
   }
 
   private _editorConfig: StaticNotebook.IEditorConfig;
@@ -99,7 +104,8 @@ export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions<T extends NotebookPanel>
+    extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /*
       * A rendermime instance.
       */

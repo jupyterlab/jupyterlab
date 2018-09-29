@@ -181,7 +181,7 @@ describe('docregistry/default', () => {
         const factory = new WidgetFactory({
           name: 'test',
           fileTypes: ['text'],
-          toolbarItems: [
+          toolbarFactory: () => [
             {
               name: 'foo',
               widget: new Widget()
@@ -192,8 +192,13 @@ describe('docregistry/default', () => {
             }
           ]
         });
-        const widget = factory.createNew(createFileContext());
+        const context = createFileContext();
+        const widget = factory.createNew(context);
+        const widget2 = factory.createNew(context);
         expect(toArray(widget.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(widget2.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(widget.toolbar.children()).length).to.equal(2);
+        expect(toArray(widget2.toolbar.children()).length).to.equal(2);
       });
     });
 
