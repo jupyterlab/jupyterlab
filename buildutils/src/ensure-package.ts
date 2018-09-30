@@ -137,7 +137,7 @@ export async function ensurePackage(
       return;
     }
     const target = locals[name];
-    if (!fs.existsSync(target)) {
+    if (!fs.existsSync(path.join(target, 'tsconfig.json'))) {
       return;
     }
     let ref = path.relative(pkgPath, locals[name]);
