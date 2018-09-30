@@ -6,7 +6,7 @@
     "composite": false,
     "rootDir": "src"
   },
-  "include": "src/*",
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../packages/codemirror"
