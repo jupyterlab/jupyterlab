@@ -526,6 +526,7 @@ describe('Kernel.IKernel', () => {
       const msg = KernelMessage.createShellMessage(options);
       expect(() => {
         kernel.sendShellMessage(msg, true);
+        expect(false).to.equal(true);
       }).to.throw(/Kernel is dead/);
       await tester.shutdown();
       tester.dispose();
@@ -707,7 +708,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(shutdown, '');
     });
 
-    it('should fail if the kernel is dead', async () => {
+    it('should still pass if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -717,7 +718,7 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
-      await expectFailure(kernel.shutdown(), 'Kernel is dead');
+      await kernel.shutdown();
       tester.dispose();
     });
 

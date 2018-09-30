@@ -177,8 +177,12 @@ class ProcessTestApp(ProcessApp):
 
 jest_aliases = dict(base_aliases)
 jest_aliases.update({
-    'pattern': 'JestApp.testPathPattern'
+    'testPathPattern': 'JestApp.testPathPattern'
 })
+jest_aliases.update({
+    'testNamePattern': 'JestApp.testNamePattern'
+})
+
 
 jest_flags = dict(base_flags)
 jest_flags['coverage'] = (
@@ -197,6 +201,8 @@ class JestApp(ProcessTestApp):
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
 
     testPathPattern = Unicode('').tag(config=True)
+
+    testNamePattern = Unicode('').tag(config=True)
 
     watchAll = Bool(False).tag(config=True)
 
@@ -226,14 +232,17 @@ class JestApp(ProcessTestApp):
         elif debug:
             cmd += ['node', '--inspect-brk', jest,  '--no-cache']
             if self.watchAll:
-                cmd += [' --watchAll']
+                cmd += ['--watchAll']
             else:
-                cmd += [' --watch']
+                cmd += ['--watch']
         else:
             cmd += [jest]
 
         if self.testPathPattern:
             cmd += ['--testPathPattern', self.testPathPattern]
+
+        if self.testNamePattern:
+            cmd += ['--testNamePattern', self.testNamePattern]
 
         cmd += ['--runInBand']
 
@@ -322,7 +331,6 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
-    logging.disable(logging.WARNING)
     app = JestApp.instance()
     app.jest_dir = jest_dir
     app.initialize()
