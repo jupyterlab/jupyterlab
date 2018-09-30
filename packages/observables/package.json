@@ -22,11 +22,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc -b src",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -b src --watch"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.1.2",

@@ -24,11 +24,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc -b src",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -b src --watch"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^2.2.1-alpha.0",

@@ -3,13 +3,13 @@
   "version": "0.5.1-alpha.0",
   "private": true,
   "scripts": {
-    "build": "tsc -b src",
+    "build": "tsc -b",
     "clean": "rimraf build && rimraf coverage",
     "coverage": "python run.py --coverage",
     "test": "python run.py",
     "watch": "python run.py --debug",
     "watch:all": "python run.py --debug --watchAll",
-    "watch:src": "tsc -b src --watch"
+    "watch:src": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^2.2.1-alpha.0",

@@ -31,10 +31,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc -p src",
+    "build": "tsc",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -p src -w --listEmittedFiles"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
     "@phosphor/coreutils": "^1.3.0",

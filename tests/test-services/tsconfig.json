@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "types": ["jest", "ws", "node"],
+    "outDir": "build",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../../packages/coreutils"
+    },
+    {
+      "path": "../../packages/services"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}
