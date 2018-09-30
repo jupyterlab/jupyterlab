@@ -18,6 +18,7 @@
   "dependencies": {
     "@jupyterlab/codeeditor": "^0.19.1-alpha.0",
     "@jupyterlab/codemirror": "^0.19.1-alpha.0",
+    "@jupyterlab/testutils": "^0.3.1-alpha.0",
     "chai": "~4.1.2",
     "simulate-event": "~1.4.0"
   },

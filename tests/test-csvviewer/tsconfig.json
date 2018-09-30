@@ -16,6 +16,9 @@
     },
     {
       "path": "../../packages/services"
+    },
+    {
+      "path": "../../testutils"
     }
   ]
 }

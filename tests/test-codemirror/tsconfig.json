@@ -13,6 +13,9 @@
     },
     {
       "path": "../../packages/codemirror"
+    },
+    {
+      "path": "../../testutils"
     }
   ]
 }
