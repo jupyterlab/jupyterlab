@@ -19,7 +19,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm coverage --loglevel success > /dev/null
+    jlpm coverage  # --loglevel success > /dev/null
     jlpm run clean
 
     # Run the services node example.
