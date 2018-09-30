@@ -5,10 +5,10 @@
   "scripts": {
     "build": "tsc -b src",
     "clean": "rimraf build && rimraf coverage",
-    "coverage": "python run_test.py --coverage",
-    "test": "python run_test.py",
-    "watch": "python run_test.py --debug",
-    "watch:all": "python run_test.py --debug --watchAll",
+    "coverage": "python run.py --coverage",
+    "test": "python run.py",
+    "watch": "python run.py --debug",
+    "watch:all": "python run.py --debug --watchAll",
     "watch:src": "tsc -b src --watch"
   },
   "dependencies": {
