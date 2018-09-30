@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "types": ["mocha"],
+    "composite": false,
+    "rootDir": "src"
+  },
+  "include": "src/*",
+  "references": [
+    {
+      "path": "../../packages/docregistry"
+    },
+    {
+      "path": "../../packages/rendermime"
+    },
+    {
+      "path": "../../packages/services"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}
