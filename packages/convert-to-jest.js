@@ -67,11 +67,8 @@ utils.writeJSONFile(path.join(testSrc, 'package.json'), targetData);
   utils.run(`git rm -f ../tests/test-${target}/${name}`);
 });
 
-// Copy run_test.py from coreutils
-fs.copySync(
-  path.join(coreUtils, 'run_test.py'),
-  path.join(testSrc, 'run_test.py')
-);
+// Copy run.py from coreutils
+fs.copySync(path.join(coreUtils, 'run.py'), path.join(testSrc, 'run.py'));
 
 // Update deps and build all
 utils.run('jlpm && jlpm build:packages', {

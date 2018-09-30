@@ -115,8 +115,12 @@ export async function ensurePackage(
     if (unused.indexOf(name) !== -1) {
       return;
     }
-    if (name === 'jest' || name === 'ts-jest') {
-      return;
+    const isTest = data.name.indexOf('test') !== -1;
+    if (isTest) {
+      const testLibs = ['jest', 'ts-jest', '@jupyterlab/testutils'];
+      if (testLibs.indexOf(name) !== -1) {
+        return;
+      }
     }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];

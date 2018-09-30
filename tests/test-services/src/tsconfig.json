@@ -11,6 +11,9 @@
     },
     {
       "path": "../../../packages/services/src"
+    },
+    {
+      "path": "../../../testutils/src"
     }
   ]
 }

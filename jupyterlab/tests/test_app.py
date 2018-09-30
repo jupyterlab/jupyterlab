@@ -222,7 +222,7 @@ class JestApp(ProcessTestApp):
 
         cmd = []
         if self.coverage:
-            cmd += [jest, '--coverage', '--silent']
+            cmd += [jest, '--coverage']
         elif debug:
             cmd += ['node', '--inspect-brk', jest,  '--no-cache']
             if self.watchAll:
@@ -236,6 +236,9 @@ class JestApp(ProcessTestApp):
             cmd += ['--testPathPattern', self.testPathPattern]
 
         cmd += ['--runInBand']
+
+        if self.log_level > logging.INFO:
+            cmd += ['--silent']
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
