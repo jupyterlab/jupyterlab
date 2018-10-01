@@ -22,7 +22,7 @@ module.exports = function(name: string, baseDir: string) {
     testRegex: `tests\/test-${name}\/src\/.*\.spec\.ts$`,
     globals: {
       'ts-jest': {
-        tsConfigFile: `tests/test-${name}/src/tsconfig.json`
+        tsConfigFile: `tests/test-${name}/tsconfig.json`
       }
     }
   };
