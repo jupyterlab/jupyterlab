@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "types": ["mocha"],
+    "composite": false,
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/codeeditor"
+    },
+    {
+      "path": "../../packages/codemirror"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}

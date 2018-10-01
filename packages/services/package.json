@@ -30,20 +30,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab"
   },
   "scripts": {
-    "build": "jlpm run build:src",
-    "build:src": "tsc -b src",
-    "build:test": "tsc --project test",
+    "build": "tsc -b",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
-    "prepublishOnly": "jlpm run build:src && webpack",
-    "test": "python test/run-test.py",
-    "test:coverage": "python test/run_test.py --TestApp.coverage==True",
-    "test:debug": "python test/run_test.py --debug",
-    "test:devtool": "python test/run_test.py --TestApp.devtool==True",
-    "watch": "tsc -b src --watch",
-    "watch:all": "npm-run-all -p watch watch:test",
-    "watch:test": "python test/run-test.py --debug",
-    "watch:test:all": "python test/run-test.py --debug --watchAll"
+    "prepublishOnly": "jlpm run build && webpack",
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^2.2.1-alpha.0",
@@ -54,21 +45,13 @@
     "@phosphor/signaling": "^1.2.2"
   },
   "devDependencies": {
-    "@types/chai": "~4.0.10",
-    "@types/jest": "^23.3.1",
     "@types/text-encoding": "0.0.33",
-    "@types/ws": "^6.0.0",
-    "chai": "~4.1.2",
-    "jest": "^23.5.0",
-    "npm-run-all": "~4.1.1",
     "rimraf": "~2.6.2",
     "text-encoding": "~0.5.5",
-    "ts-jest": "^23.1.4",
     "typedoc": "~0.12.0",
     "typescript": "~3.1.1",
     "webpack": "~4.12.0",
-    "webpack-cli": "^3.0.3",
-    "ws": "~6.0.0"
+    "webpack-cli": "^3.0.3"
   },
   "publishConfig": {
     "access": "public"

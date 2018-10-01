@@ -18,10 +18,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
-from traitlets import Bool, Unicode
+from traitlets import Bool, Dict, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
-from jupyter_core.application import base_aliases
+from jupyter_core.application import base_aliases, base_flags
 
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
@@ -177,10 +177,22 @@ class ProcessTestApp(ProcessApp):
 
 jest_aliases = dict(base_aliases)
 jest_aliases.update({
-    'coverage': 'JestApp.coverage',
-    'pattern': 'JestApp.testPathPattern',
-    'watchAll': 'JestApp.watchAll'
+    'testPathPattern': 'JestApp.testPathPattern'
 })
+jest_aliases.update({
+    'testNamePattern': 'JestApp.testNamePattern'
+})
+
+
+jest_flags = dict(base_flags)
+jest_flags['coverage'] = (
+    {'JestApp': {'coverage': True}},
+    'Run coverage'
+)
+jest_flags['watchAll'] = (
+    {'JestApp': {'watchAll': True}},
+    'Watch all test files'
+)
 
 
 class JestApp(ProcessTestApp):
@@ -190,43 +202,57 @@ class JestApp(ProcessTestApp):
 
     testPathPattern = Unicode('').tag(config=True)
 
+    testNamePattern = Unicode('').tag(config=True)
+
     watchAll = Bool(False).tag(config=True)
 
     aliases = jest_aliases
 
+    flags = jest_flags
+
     jest_dir = Unicode('')
+
+    test_config = Dict(dict(foo='bar'))
 
     open_browser = False
 
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.web_app.settings['terminals_available']
+
         jest = './node_modules/.bin/jest'
         debug = self.log.level == logging.DEBUG
+        jest = osp.realpath(osp.join(self.jest_dir, jest))
+        if os.name == 'nt':
+            jest += '.cmd'
 
+        cmd = []
         if self.coverage:
-            cmd = [jest, '--coverage']
+            cmd += [jest, '--coverage']
         elif debug:
-            cmd = 'node --inspect-brk %s --no-cache' % jest
+            cmd += ['node', '--inspect-brk', jest,  '--no-cache']
             if self.watchAll:
-                cmd += ' --watchAll'
+                cmd += ['--watchAll']
             else:
-                cmd += ' --watch'
-            cmd = cmd.split()
+                cmd += ['--watch']
         else:
-            cmd = [jest]
-
-        if not debug:
-            cmd += ['--silent']
+            cmd += [jest]
 
         if self.testPathPattern:
             cmd += ['--testPathPattern', self.testPathPattern]
 
+        if self.testNamePattern:
+            cmd += ['--testNamePattern', self.testNamePattern]
+
         cmd += ['--runInBand']
+
+        if self.log_level > logging.INFO:
+            cmd += ['--silent']
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
                       token=self.token)
+        config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
         atexit.register(lambda: shutil.rmtree(td, True))
@@ -305,7 +331,6 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
-    logging.disable(logging.WARNING)
     app = JestApp.instance()
     app.jest_dir = jest_dir
     app.initialize()

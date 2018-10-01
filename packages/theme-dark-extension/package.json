@@ -28,12 +28,12 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "run-p build:**",
+    "build": "tsc -b",
     "build:src": "tsc -b src",
     "build:webpack": "webpack",
     "clean": "rimraf lib && rimraf static",
     "prepublishOnly": "npm run build",
-    "watch": "run-p watch:**",
+    "watch": "tsc -b --watch",
     "watch:src": "tsc -b src --watch",
     "watch:webpack": "webpack --watch"
   },

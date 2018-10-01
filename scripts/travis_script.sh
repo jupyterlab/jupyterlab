@@ -19,16 +19,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm test --loglevel success > /dev/null
-    jlpm run clean
-fi
-
-
-if [[ $GROUP == js_cov ]]; then
-
-    jlpm run build:packages
-    jlpm run build:test
-    jlpm run coverage --loglevel success > /dev/null
+    jlpm coverage --loglevel success > /dev/null
 
     # Run the services node example.
     pushd packages/services/examples/node
@@ -38,14 +29,6 @@ if [[ $GROUP == js_cov ]]; then
     jlpm run clean
 fi
 
-
-if [[ $GROUP == js_services ]]; then
-
-    jlpm build:packages
-    jlpm build:test
-    jlpm run test:services || jlpm run test:services
-
-fi
 
 if [[ $GROUP == docs ]]; then
 
@@ -73,6 +56,9 @@ if [[ $GROUP == integrity ]]; then
 
     # Build the packages individually.
     jlpm run build:src
+
+    # Build the themes
+    jlpm run build:themes
 
     # Make sure the examples build
     jlpm run build:examples

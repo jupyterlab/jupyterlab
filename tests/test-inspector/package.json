@@ -3,7 +3,7 @@
   "version": "0.5.1-alpha.0",
   "private": true,
   "scripts": {
-    "build": "tsc -p src",
+    "build": "tsc -b",
     "clean": "rimraf build && rimraf coverage",
     "coverage": "python run-test.py --browsers=ChromeHeadless karma-cov.conf.js",
     "test": "jlpm run test:firefox",
@@ -12,11 +12,12 @@
     "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true --browserNoActivityTimeout=10000000 karma.conf.js",
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch": "python run-test.py --singleRun=false",
+    "watch": "tsc -b --watch",
     "watch:src": "tsp -p src --watch"
   },
   "dependencies": {
     "@jupyterlab/inspector": "^0.19.1-alpha.0",
+    "@jupyterlab/testutils": "^0.3.1-alpha.0",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2"

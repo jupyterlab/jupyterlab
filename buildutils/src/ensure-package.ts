@@ -60,7 +60,7 @@ export async function ensurePackage(
   filenames = glob.sync(path.join(pkgPath, 'src/*.ts*'));
   filenames = filenames.concat(glob.sync(path.join(pkgPath, 'src/**/*.ts*')));
 
-  if (!fs.existsSync(path.join(pkgPath, 'src', 'tsconfig.json'))) {
+  if (!fs.existsSync(path.join(pkgPath, 'tsconfig.json'))) {
     if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
       messages.push('Updated package.json');
     }
@@ -115,6 +115,13 @@ export async function ensurePackage(
     if (unused.indexOf(name) !== -1) {
       return;
     }
+    const isTest = data.name.indexOf('test') !== -1;
+    if (isTest) {
+      const testLibs = ['jest', 'ts-jest', '@jupyterlab/testutils'];
+      if (testLibs.indexOf(name) !== -1) {
+        return;
+      }
+    }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];
       messages.push(
@@ -129,20 +136,18 @@ export async function ensurePackage(
     if (!(name in locals)) {
       return;
     }
-    const target = path.join(locals[name], 'src');
-    if (!fs.existsSync(target)) {
+    const target = locals[name];
+    if (!fs.existsSync(path.join(target, 'tsconfig.json'))) {
       return;
     }
-    let ref = path.relative(path.join(pkgPath, 'src'), locals[name]);
-    ref = path.join(ref, 'src');
+    let ref = path.relative(pkgPath, locals[name]);
     references[name] = ref.split(path.sep).join('/');
   });
   if (
-    data.name.indexOf('test-') === -1 &&
     data.name.indexOf('example-') === -1 &&
     Object.keys(references).length > 0
   ) {
-    const tsConfigPath = path.join(pkgPath, 'src', 'tsconfig.json');
+    const tsConfigPath = path.join(pkgPath, 'tsconfig.json');
     const tsConfigData = utils.readJSONFile(tsConfigPath);
     tsConfigData.references = [];
     Object.keys(references).forEach(name => {

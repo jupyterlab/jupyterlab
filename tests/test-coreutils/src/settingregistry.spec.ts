@@ -10,7 +10,7 @@ import {
   SettingRegistry,
   Settings,
   StateDB
-} from '@jupyterlab/coreutils';
+} from '@jupyterlab/coreutils/src';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 

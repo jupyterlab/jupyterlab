@@ -64,12 +64,11 @@ let tsconfigPath = path.join(
   basePath,
   'packages',
   'metapackage',
-  'src',
   'tsconfig.json'
 );
 let tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.references.push({
-  path: path.join('..', '..', packageDirName, 'src')
+  path: path.join('..', '..', packageDirName)
 });
 utils.writeJSONFile(tsconfigPath, tsconfig);
 

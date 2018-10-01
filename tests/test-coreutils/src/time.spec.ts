@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Time } from '@jupyterlab/coreutils';
+import { Time } from '@jupyterlab/coreutils/src';
 
 describe('@jupyterlab/coreutils', () => {
   describe('Time', () => {

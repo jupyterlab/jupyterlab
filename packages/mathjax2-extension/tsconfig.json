@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../mathjax2"
+    },
+    {
+      "path": "../rendermime"
+    }
+  ]
+}

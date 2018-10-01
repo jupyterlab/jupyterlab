@@ -22,10 +22,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc -p src",
+    "build": "tsc",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -p src -w --listEmittedFiles"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

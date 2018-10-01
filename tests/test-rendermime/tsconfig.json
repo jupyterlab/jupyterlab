@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "types": ["mocha", "node"],
+    "composite": false,
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/apputils"
+    },
+    {
+      "path": "../../packages/coreutils"
+    },
+    {
+      "path": "../../packages/mathjax2"
+    },
+    {
+      "path": "../../packages/rendermime"
+    },
+    {
+      "path": "../../packages/services"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}

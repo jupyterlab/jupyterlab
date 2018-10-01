@@ -15,9 +15,7 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [
-          { loader: 'ts-loader', options: { context: process.cwd() + '/src' } }
-        ]
+        use: [{ loader: 'ts-loader', options: { context: process.cwd() } }]
       },
       {
         test: /\.js$/,
