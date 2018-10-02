@@ -271,6 +271,7 @@ class KarmaTestApp(ProcessTestApp):
     """
     karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
+    karma_coverage_dir = Unicode('')
 
     def get_command(self):
         """Get the command to run."""
@@ -308,21 +309,24 @@ class KarmaTestApp(ProcessTestApp):
         if not files:
             msg = 'No files matching "%s" found in "%s"'
             raise ValueError(msg % (pattern, cwd))
-        # Find and validate the coverage folder
-        with open(pjoin(cwd, 'package.json')) as fid:
-            data = json.load(fid)
-        name = data['name'].replace('@jupyterlab/test-', '')
-        folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
-        if not osp.exists(folder):
-            raise ValueError(
-                'No source package directory found for "%s", use the pattern '
-                '"@jupyterlab/test-<package_dir_name>"' % name
-            )
+
+        # Find and validate the coverage folder if not specified
+        if not self.karma_coverage_dir:
+            with open(pjoin(cwd, 'package.json')) as fid:
+                data = json.load(fid)
+            name = data['name'].replace('@jupyterlab/test-', '')
+            folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
+            if not osp.exists(folder):
+                raise ValueError(
+                    'No source package directory found for "%s", use the pattern '
+                    '"@jupyterlab/test-<package_dir_name>"' % name
+                )
+            self.karma_coverage_dir = folder
 
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
         env.setdefault('KARMA_FILE_PATTERN', pattern)
-        env.setdefault('KARMA_COVER_FOLDER', folder)
+        env.setdefault('KARMA_COVER_FOLDER', self.karma_coverage_dir)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
         return cmd, dict(env=env, cwd=cwd)
@@ -337,11 +341,12 @@ def run_jest(jest_dir):
     app.start()
 
 
-def run_karma(base_dir):
+def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
+    app.karma_coverage_dir = coverage_dir
     app.initialize([])
     app.start()
