@@ -18,7 +18,7 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
+import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer/src';
 
 import { createFileContext } from '@jupyterlab/testutils';
 
@@ -61,7 +61,7 @@ describe('ImageViewer', () => {
   let manager: ServiceManager.IManager;
   let widget: LogImage;
 
-  before(async () => {
+  beforeAll(async () => {
     manager = new ServiceManager();
     await manager.ready;
     return manager.contents.save(IMAGE.path, IMAGE);
