@@ -5,14 +5,14 @@ import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { HelpMenu } from '@jupyterlab/mainmenu';
+import { HelpMenu } from '@jupyterlab/mainmenu/src';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('HelpMenu', () => {
     let commands: CommandRegistry;
     let menu: HelpMenu;
 
-    before(() => {
+    beforeAll(() => {
       commands = new CommandRegistry();
     });
 

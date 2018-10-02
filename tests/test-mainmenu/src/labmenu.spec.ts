@@ -7,14 +7,14 @@ import { ArrayExt } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { JupyterLabMenu } from '@jupyterlab/mainmenu';
+import { JupyterLabMenu } from '@jupyterlab/mainmenu/src';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('JupyterLabMenu', () => {
     let commands: CommandRegistry;
     let menu: JupyterLabMenu;
 
-    before(() => {
+    beforeAll(() => {
       commands = new CommandRegistry();
       commands.addCommand('run1', {
         label: 'Run 1',

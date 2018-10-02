@@ -19,14 +19,14 @@ import {
   SettingsMenu,
   TabsMenu,
   ViewMenu
-} from '@jupyterlab/mainmenu';
+} from '@jupyterlab/mainmenu/src';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('MainMenu', () => {
     let commands: CommandRegistry;
     let mainMenu: MainMenu;
 
-    before(() => {
+    beforeAll(() => {
       commands = new CommandRegistry();
     });
 
