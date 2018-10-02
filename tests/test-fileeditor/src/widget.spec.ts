@@ -29,7 +29,7 @@ import {
   FileEditor,
   FileEditorCodeWrapper,
   FileEditorFactory
-} from '@jupyterlab/fileeditor';
+} from '@jupyterlab/fileeditor/src';
 
 import { framePromise } from '@jupyterlab/testutils';
 
@@ -66,7 +66,7 @@ describe('fileeditorcodewrapper', () => {
   let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 
-  before(() => {
+  beforeAll(() => {
     manager = new ServiceManager();
     return manager.ready;
   });
