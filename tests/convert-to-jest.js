@@ -66,6 +66,12 @@ targetData.devDependencies = coreUtilsData.devDependencies;
 // Write out the package.json file.
 utils.writeJSONFile(path.join(testSrc, 'package.json'), targetData);
 
+// Update tsconfig to use jest types.
+const tsData = utils.readJSONFile(path.join(testSrc, 'tsconfig.json'));
+const index = tsData.compilerOptions.types.indexOf('mocha');
+tsData.compilerOptions.types[index] = 'jest';
+utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
+
 // Git remove old tests infra
 ['karma-cov.conf.js', 'karma.conf.js', 'run-test.py'].forEach(fname => {
   utils.run(`git rm -f ./test-${name}/${fname}`);
