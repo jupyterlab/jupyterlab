@@ -129,9 +129,9 @@ jupyter notebook --version
 
 The latest versions of the following browsers are currently _known to work_:
 
-* Firefox
-* Chrome
-* Safari
+- Firefox
+- Chrome
+- Safari
 
 See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html) for additional details.
 
@@ -160,24 +160,24 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-* Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
+- Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
-* Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
+- Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
-* Jessica Forde, Project Jupyter (demo, documentation)
-* Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
-* Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+- Jessica Forde, Project Jupyter (demo, documentation)
+- Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
+- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-* Jason Grout, Bloomberg (co-creator, vision, general development).
-* Fernando Perez, UC Berkeley (co-creator, vision).
-* Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
-* Saul Shanabrook, Quansight (general development, extensions)
-* Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
+- Jason Grout, Bloomberg (co-creator, vision, general development).
+- Fernando Perez, UC Berkeley (co-creator, vision).
+- Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+- Saul Shanabrook, Quansight (general development, extensions)
+- Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
 Maintainer emeritus:
 
-* Cameron Oelsen, Cal Poly (UI/UX design).
+- Cameron Oelsen, Cal Poly (UI/UX design).
 
 This list is provided to help provide context about who we are and how our team functions.
 If you would like to be listed, please submit a pull request with your information.
