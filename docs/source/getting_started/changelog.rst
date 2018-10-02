@@ -3,6 +3,83 @@
 JupyterLab Changelog
 ====================
 
+`v0.35.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.35.0>`__
+---------------------------------------------------------------------------
+
+October 1, 2018
+^^^^^^^^^^^^^^^
+
+See the `JupyterLab
+0.35.0 <https://github.com/jupyterlab/jupyterlab/milestone/18?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues closed.
+
+* Add Karma_coverage_dir To Karmatestapp (`#5415 <https://github.com/jupyterlab/jupyterlab/pull/5415>`__)
+* Add Release Script For Checking The Milestone Prs Against The Commit History (`#5414 <https://github.com/jupyterlab/jupyterlab/pull/5414>`__)
+* Build And Publish Script Cleanup (`#5407 <https://github.com/jupyterlab/jupyterlab/pull/5407>`__)
+* Tweak The Dark Splash Screen To Be A Bit Darker. (`#5403 <https://github.com/jupyterlab/jupyterlab/pull/5403>`__)
+* Support `enabled` Field Of Cell Metadata Toggling A Cell's Read-Only State. (`#5401 <https://github.com/jupyterlab/jupyterlab/pull/5401>`__, `#1312 <https://github.com/jupyterlab/jupyterlab/issues/1312>`__)
+* Handle Rmtree Errors (`#5400 <https://github.com/jupyterlab/jupyterlab/pull/5400>`__, `#5397 <https://github.com/jupyterlab/jupyterlab/issues/5397>`__)
+* Fix Default Toolbar Items (`#5398 <https://github.com/jupyterlab/jupyterlab/pull/5398>`__)
+* Fix Browser Test (`#5396 <https://github.com/jupyterlab/jupyterlab/pull/5396>`__, `#5393 <https://github.com/jupyterlab/jupyterlab/issues/5393>`__)
+* Make Persist And Save Use Save Enabled (`#5391 <https://github.com/jupyterlab/jupyterlab/pull/5391>`__)
+* Use The Current Filebrowser For Several Commands. (`#5390 <https://github.com/jupyterlab/jupyterlab/pull/5390>`__)
+* Decode Url Link Targets (`#5383 <https://github.com/jupyterlab/jupyterlab/pull/5383>`__, `#5153 <https://github.com/jupyterlab/jupyterlab/issues/5153>`__)
+* "go To Line" Action In Text Editor (`#5377 <https://github.com/jupyterlab/jupyterlab/pull/5377>`__)
+* [Master] Adding 'writable' Checks To Some Of The Menu And Toolbar Options (`#5376 <https://github.com/jupyterlab/jupyterlab/pull/5376>`__)
+* Notebookwidgetfactory Add Toolbaritems Option (#5363) (`#5370 <https://github.com/jupyterlab/jupyterlab/pull/5370>`__, `#5363 <https://github.com/jupyterlab/jupyterlab/issues/5363>`__)
+* Add More Test For Deprecated Response Model (`#5369 <https://github.com/jupyterlab/jupyterlab/pull/5369>`__, `#306 <https://github.com/jupyter/kernel_gateway/issues/306>`__)
+* Fix Issue #5349 By Using A Darker Color As Background When Row Selected (`#5364 <https://github.com/jupyterlab/jupyterlab/pull/5364>`__, `#5349 <https://github.com/jupyterlab/jupyterlab/issues/5349>`__)
+* Reinstate Link Checks (`#5361 <https://github.com/jupyterlab/jupyterlab/pull/5361>`__)
+* Use Typescript 3.1 (`#5360 <https://github.com/jupyterlab/jupyterlab/pull/5360>`__)
+* Remove Sphinx Pin (`#5359 <https://github.com/jupyterlab/jupyterlab/pull/5359>`__, `#5356 <https://github.com/jupyterlab/jupyterlab/issues/5356>`__, `#5307 <https://github.com/jupyterlab/jupyterlab/issues/5307>`__)
+* Fix Typeerror When Canceling File Renaming Dialog (`#5357 <https://github.com/jupyterlab/jupyterlab/pull/5357>`__)
+* Build Cleanup (`#5351 <https://github.com/jupyterlab/jupyterlab/pull/5351>`__, `#5275 <https://github.com/jupyterlab/jupyterlab/issues/5275>`__, `#5225 <https://github.com/jupyterlab/jupyterlab/issues/5225>`__)
+* Switch Left Right Panel (`#5347 <https://github.com/jupyterlab/jupyterlab/pull/5347>`__, `#5054 <https://github.com/jupyterlab/jupyterlab/issues/5054>`__, `#3707 <https://github.com/jupyterlab/jupyterlab/issues/3707>`__)
+* Prevent Focus Loss On `mouseout` For `input` Elements Inside Toolbar (`#5344 <https://github.com/jupyterlab/jupyterlab/pull/5344>`__)
+* Fix Vega-Embed Version  (`#5342 <https://github.com/jupyterlab/jupyterlab/pull/5342>`__)
+* Use Encodeuri Instead Of Encodeuricomponent For Shareable Links (`#5340 <https://github.com/jupyterlab/jupyterlab/pull/5340>`__)
+*  Add A New Optional Splash Screen Parameter To Show A Light Or Dark Splash Screen. (`#5339 <https://github.com/jupyterlab/jupyterlab/pull/5339>`__, `#5338 <https://github.com/jupyterlab/jupyterlab/issues/5338>`__)
+* Add Github Templates (`#5335 <https://github.com/jupyterlab/jupyterlab/pull/5335>`__)
+* Prevent Focus Loss On `input` Elements Inside Toolbar. (`#5328 <https://github.com/jupyterlab/jupyterlab/pull/5328>`__)
+* Fix Select Focus (`#5324 <https://github.com/jupyterlab/jupyterlab/pull/5324>`__, `#5168 <https://github.com/jupyterlab/jupyterlab/issues/5168>`__, `#2995 <https://github.com/jupyterlab/jupyterlab/issues/2995>`__)
+* Track File Path (`#5321 <https://github.com/jupyterlab/jupyterlab/pull/5321>`__, `#4435 <https://github.com/jupyterlab/jupyterlab/issues/4435>`__)
+* Revert "convert To Ts 3.0" (`#5320 <https://github.com/jupyterlab/jupyterlab/pull/5320>`__)
+* Fix The Examples, Migrate To Jupyterlab_server (`#5316 <https://github.com/jupyterlab/jupyterlab/pull/5316>`__)
+* Publish Public Packages With Access Public (`#5310 <https://github.com/jupyterlab/jupyterlab/pull/5310>`__, `#2463 <https://github.com/jupyterlab/jupyterlab/issues/2463>`__)
+* Pin Sphinx Version (`#5306 <https://github.com/jupyterlab/jupyterlab/pull/5306>`__)
+* Dark Csv Viewer (`#5304 <https://github.com/jupyterlab/jupyterlab/pull/5304>`__, `#3456 <https://github.com/jupyterlab/jupyterlab/issues/3456>`__)
+* Don't Force Table Alignment. (`#5301 <https://github.com/jupyterlab/jupyterlab/pull/5301>`__, `#3180 <https://github.com/jupyterlab/jupyterlab/issues/3180>`__)
+* Fix Syntax Highlighting For Markdown Lists. (`#5297 <https://github.com/jupyterlab/jupyterlab/pull/5297>`__, `#2741 <https://github.com/jupyterlab/jupyterlab/issues/2741>`__)
+* Add Links To The Community Guides (`#5296 <https://github.com/jupyterlab/jupyterlab/pull/5296>`__)
+* Expand Jupyterlab.ioptions To Allow For Custom Documentregistry, Commandlinker, Servicemanager To Be Passed Into App (`#5291 <https://github.com/jupyterlab/jupyterlab/pull/5291>`__)
+* @jupyterlab/buildutils V0.10.2 (`#5289 <https://github.com/jupyterlab/jupyterlab/pull/5289>`__)
+* Rename Package.json To Package.json.orig When Copying Schemas. (`#5288 <https://github.com/jupyterlab/jupyterlab/pull/5288>`__)
+* Fix Python Versions Of Build Wheels By Removing The Universal Flag (`#5287 <https://github.com/jupyterlab/jupyterlab/pull/5287>`__)
+* Jest Conversion Continued (`#5282 <https://github.com/jupyterlab/jupyterlab/pull/5282>`__)
+* Hide Quit Entry For Older Notebook Versions. (`#5280 <https://github.com/jupyterlab/jupyterlab/pull/5280>`__)
+* Allow For Disabled Toolbar Buttons (`#5278 <https://github.com/jupyterlab/jupyterlab/pull/5278>`__)
+* Show Palette Shortcut (`#5268 <https://github.com/jupyterlab/jupyterlab/pull/5268>`__)
+* Add Npm Executables To Buildutils (`#5267 <https://github.com/jupyterlab/jupyterlab/pull/5267>`__)
+* Update Lerna (`#5262 <https://github.com/jupyterlab/jupyterlab/pull/5262>`__)
+* Fix #5181: Remove Maxlength So As To Not Cut Off Kernel Name In Kernel Selector Dialog. (`#5260 <https://github.com/jupyterlab/jupyterlab/pull/5260>`__, `#5181 <https://github.com/jupyterlab/jupyterlab/issues/5181>`__)
+* Move Mathjax2 Typesetter To Library Package (`#5259 <https://github.com/jupyterlab/jupyterlab/pull/5259>`__, `#5257 <https://github.com/jupyterlab/jupyterlab/issues/5257>`__)
+* Notebook 4.3 Shim (`#5252 <https://github.com/jupyterlab/jupyterlab/pull/5252>`__, `#5246 <https://github.com/jupyterlab/jupyterlab/issues/5246>`__)
+* Use Jest For Services Tests (`#5251 <https://github.com/jupyterlab/jupyterlab/pull/5251>`__)
+* Allow Other Files To Open With -> Notebook (`#5247 <https://github.com/jupyterlab/jupyterlab/pull/5247>`__, `#4924 <https://github.com/jupyterlab/jupyterlab/issues/4924>`__)
+* Add Sidebar Min-Width Css Variable (`#5245 <https://github.com/jupyterlab/jupyterlab/pull/5245>`__)
+* Ignore False Errno 5 On Nfs (`#5237 <https://github.com/jupyterlab/jupyterlab/pull/5237>`__, `#5233 <https://github.com/jupyterlab/jupyterlab/issues/5233>`__)
+* Makes Matplotlib Figs With Dark Text Legible In The Dark Theme (And Related Fixes) (`#5232 <https://github.com/jupyterlab/jupyterlab/pull/5232>`__)
+* Specify And Enforce A Node Version (`#5227 <https://github.com/jupyterlab/jupyterlab/pull/5227>`__)
+* Add Exit Entry To File Menu (`#5226 <https://github.com/jupyterlab/jupyterlab/pull/5226>`__)
+* Await Pending Directory Change In Filebrowser Model. (`#5224 <https://github.com/jupyterlab/jupyterlab/pull/5224>`__)
+* Adding Nbconvert To Services And Using To Load Exporter List From Nbconvert (`#5217 <https://github.com/jupyterlab/jupyterlab/pull/5217>`__)
+* Workspaces Cli (`#5166 <https://github.com/jupyterlab/jupyterlab/pull/5166>`__)
+* Extensions Manager Results Sections (`#5147 <https://github.com/jupyterlab/jupyterlab/pull/5147>`__, `#5042 <https://github.com/jupyterlab/jupyterlab/issues/5042>`__)
+* [Wip] Upgrade To Ts 3.0 (`#5030 <https://github.com/jupyterlab/jupyterlab/pull/5030>`__)
+* Allow Safe Inline Css Styles In Markdown (`#5012 <https://github.com/jupyterlab/jupyterlab/pull/5012>`__, `#1812 <https://github.com/jupyterlab/jupyterlab/issues/1812>`__)
+
+
+
 `v0.34.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.34.0>`__
 ---------------------------------------------------------------------------
 
