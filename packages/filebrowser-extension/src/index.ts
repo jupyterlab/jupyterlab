@@ -29,14 +29,7 @@ import { Launcher } from '@jupyterlab/launcher';
 
 import { Contents } from '@jupyterlab/services';
 
-import {
-  IterableOrArrayLike,
-  iter,
-  each,
-  map,
-  reduce,
-  toArray
-} from '@phosphor/algorithm';
+import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -544,15 +537,16 @@ function addCommands(
    * A menu widget that dynamically populates with different widget factories
    * based on current filebrowser selection.
    */
-  class OpenwithMenu extends Menu {
+  class OpenWithMenu extends Menu {
     protected onBeforeAttach(msg: Message): void {
       // clear the current menu items
       this.clearItems();
 
-      // get the widget factories that could be used to open all of the items in the current filebrowser selection
-      let factories = OpenwithMenu._intersection(
+      // get the widget factories that could be used to open all of the items
+      // in the current filebrowser selection
+      let factories = OpenWithMenu._intersection(
         map(tracker.currentWidget.selectedItems(), i => {
-          return OpenwithMenu._getFactories(i);
+          return OpenWithMenu._getFactories(i);
         })
       );
 
@@ -584,35 +578,23 @@ function addCommands(
       return factories;
     }
 
-    static _intersection<T>(
-      object: IterableOrArrayLike<IterableOrArrayLike<T>>
-    ): Set<T> | void {
-      // coerce object to iterator and pop the first element
-      let it = iter(object);
-      let first = it.next();
+    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+      // pop the first element of iter
+      let first = iter.next();
       // first will be undefined if iter is empty
       if (!first) {
         return;
       }
 
       // "initialize" the intersection from first
-      let isect = new Set<T>();
-      each(first, t => {
-        isect.add(t);
-      });
-      // reduce over the remaining elements of it
+      let isect = new Set(first);
+      // reduce over the remaining elements of iter
       return reduce(
-        it,
-        (old, subiter) => {
-          // construct the new intersection as an empty set...
-          let isect = new Set<T>();
-          // ... then add only elements present in both old and subiter
-          each(subiter, t => {
-            if (old.has(t)) {
-              isect.add(t);
-            }
-          });
-          return isect;
+        iter,
+        (isect, subarr) => {
+          // filter out all elements not present in both isect and subarr,
+          // accumulate result in new set
+          return new Set(subarr.filter(x => isect.has(x)));
         },
         isect
       );
@@ -639,7 +621,7 @@ function addCommands(
     rank: 1
   });
 
-  const openWith = new OpenwithMenu({ commands });
+  const openWith = new OpenWithMenu({ commands });
   openWith.title.label = 'Open With';
   app.contextMenu.addItem({
     type: 'submenu',
