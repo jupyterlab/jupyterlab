@@ -106,6 +106,7 @@ on it, or the work may be blocked by other factors.
 and the right motivation to learn._ Open-source software projects offer a unique
 path to innovation by bringing together users and contributors with diverse
 needs and usage cases. Even if fully resourced, the resulting innovation can be
-slow, possibly much slower than your corporation's desired timeline. Successful
-open-source engagement will require long term thinking and strategy. Be patient
-with us, set appropriate expectations, and find ways to mitigate the risk.
+slow, possibly much slower than your corporation's desired timeline in the short
+term. However, in the long-term, sustainable open-source can lead to rapid
+growth and development. Help us build a sustainable project through long-term
+thinking, strategy, and resource allocation.
