@@ -29,6 +29,9 @@ window.focus = () => {};
   };
 };
 
+(window as any).document.elementFromPoint = (left: number, top: number) =>
+  document.body;
+
 process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');
   console.error(error);

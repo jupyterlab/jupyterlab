@@ -15,7 +15,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import { Completer, CompleterModel } from '@jupyterlab/completer';
+import { Completer, CompleterModel } from '@jupyterlab/completer/src';
 
 import { framePromise, sleep } from '@jupyterlab/testutils';
 const TEST_ITEM_CLASS = 'jp-TestItem';
@@ -284,7 +284,7 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
-      context('keydown', () => {
+      describe('keydown', () => {
         it('should reset if keydown is outside anchor', () => {
           let model = new CompleterModel();
           let anchor = createEditorWidget();
@@ -438,7 +438,7 @@ describe('completer/widget', () => {
         });
       });
 
-      context('mousedown', () => {
+      describe('mousedown', () => {
         it('should trigger a selected signal on mouse down', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
@@ -551,7 +551,7 @@ describe('completer/widget', () => {
         });
       });
 
-      context('scroll', () => {
+      describe('scroll', () => {
         it('should position itself according to the anchor', async () => {
           let panel = new Panel();
           let code = createEditorWidget();
@@ -605,6 +605,7 @@ describe('completer/widget', () => {
           await sleep(500);
           let top = parseInt(window.getComputedStyle(widget.node).top, 10);
           let bottom = Math.floor(coords.bottom);
+          debugger;
           expect(top + panel.node.scrollTop).to.equal(bottom);
           widget.dispose();
           code.dispose();
