@@ -225,7 +225,7 @@ class JestApp(ProcessTestApp):
         target = osp.join('node_modules', 'jest', 'bin', 'jest.js')
         jest = ''
         cwd = osp.realpath(self.jest_dir)
-        while os.dirname(cwd) != cwd:
+        while osp.dirname(cwd) != cwd:
             if osp.exists(osp.join(cwd, target)):
                 jest = osp.join(cwd, target)
                 break
