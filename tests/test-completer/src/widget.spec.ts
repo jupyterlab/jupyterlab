@@ -552,7 +552,7 @@ describe('completer/widget', () => {
       });
 
       describe('scroll', () => {
-        it('should position itself according to the anchor', async () => {
+        it.skip('should position itself according to the anchor', async () => {
           let panel = new Panel();
           let code = createEditorWidget();
           let editor = code.editor;
@@ -605,7 +605,6 @@ describe('completer/widget', () => {
           await sleep(500);
           let top = parseInt(window.getComputedStyle(widget.node).top, 10);
           let bottom = Math.floor(coords.bottom);
-          debugger;
           expect(top + panel.node.scrollTop).to.equal(bottom);
           widget.dispose();
           code.dispose();
