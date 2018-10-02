@@ -18,7 +18,7 @@ import {
   IDocumentWidget,
   TextModelFactory,
   Context
-} from '@jupyterlab/docregistry';
+} from '@jupyterlab/docregistry/src';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -543,7 +543,7 @@ describe('docregistry/default', () => {
       widget = new DocumentWidget({ context, content });
     };
 
-    before(async () => {
+    beforeAll(async () => {
       manager = new ServiceManager();
       await manager.ready;
     });

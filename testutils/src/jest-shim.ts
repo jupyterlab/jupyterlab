@@ -5,7 +5,9 @@ const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disa
 (window as any).Headers = fetchMod.Headers;
 
 (global as any).Image = (window as any).Image;
-(global as any).Range = function Range() {};
+(global as any).Range = function Range() {
+  /* no-op */
+};
 
 const createContextualFragment = (html: string) => {
   const div = document.createElement('div');
@@ -16,13 +18,19 @@ const createContextualFragment = (html: string) => {
 (global as any).Range.prototype.createContextualFragment = (html: string) =>
   createContextualFragment(html);
 
-window.focus = () => {};
+window.focus = () => {
+  /* no-op */
+};
 
 // HACK: Polyfill that allows codemirror to render in a JSDOM env.
 (window as any).document.createRange = function createRange() {
   return {
-    setEnd: () => {},
-    setStart: () => {},
+    setEnd: () => {
+      /* no-op */
+    },
+    setStart: () => {
+      /* no-op */
+    },
     getBoundingClientRect: () => ({ right: 0 }),
     getClientRects: (): ClientRect[] => [],
     createContextualFragment
