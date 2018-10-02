@@ -3,19 +3,25 @@ const glob = require('glob');
 const fs = require('fs-extra');
 const utils = require('@jupyterlab/buildutils');
 
-const target = process.argv[2];
+let target = process.argv[2];
 if (!target) {
   console.error('Specify a target dir');
   process.exit(1);
 }
+if (target.indexOf('test-') !== 0) {
+  target = 'test-' + target;
+}
 
-// Make sure tests folder exists
-let testSrc = path.join(__dirname, '..', 'tests', 'test-' + target);
+// Make sure folder exists
+let testSrc = path.join(__dirname, target);
+
 console.log(testSrc); // eslint-disable-line
 if (!fs.existsSync(testSrc)) {
   console.log('bailing'); // eslint-disable-line
   process.exit(1);
 }
+
+const name = target.replace('test-', '');
 
 // Update the test files
 glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
@@ -27,9 +33,7 @@ glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
   src = src.split('after(').join('afterAll(');
 
   // Use imports from /src
-  src = src
-    .split(`'@jupyterlab/${target}';`)
-    .join(`'@jupyterlab/${target}/src';`);
+  src = src.split(`'@jupyterlab/${name}';`).join(`'@jupyterlab/${name}/src';`);
 
   fs.writeFileSync(filePath, src, 'utf8');
 });
@@ -37,16 +41,16 @@ glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
 // Create jest.config.js.
 const jestConfig = `
 const func = require('@jupyterlab/testutils/lib/jest-config');
-module.exports = func(${target}, __dirname);
-```;
+module.exports = func('${name}', __dirname);
+`;
 fs.writeFileSync(path.join(testSrc, 'jest.config.js'), jestConfig, 'utf8');
 
 // Open coreutils package.json
-const coreUtils = path.resolve(__dirname, '..', 'tests', 'test-coreutils');
-const coreUtilsData = require('../tests/test-coreutils/package.json');
+const coreUtils = path.resolve(__dirname, 'test-coreutils');
+const coreUtilsData = require('./test-coreutils/package.json');
 
 // Open target package.json
-const targetData = require(`../tests/test-${target}/package.json`);
+const targetData = utils.readJSONFile(path.join(testSrc, 'package.json'));
 
 // Assign scripts from coreutils
 targetData.scripts = coreUtilsData.scripts;
@@ -63,12 +67,15 @@ targetData.devDependencies = coreUtilsData.devDependencies;
 utils.writeJSONFile(path.join(testSrc, 'package.json'), targetData);
 
 // Git remove old tests infra
-['karma-cov.conf.js', 'karma.conf.js', 'run-test.py'].forEach(name => {
-  utils.run(`git rm -f ../tests/test-${target}/${name}`);
+['karma-cov.conf.js', 'karma.conf.js', 'run-test.py'].forEach(fname => {
+  utils.run(`git rm -f ./test-${name}/${fname}`);
 });
 
 // Copy run.py from coreutils
 fs.copySync(path.join(coreUtils, 'run.py'), path.join(testSrc, 'run.py'));
+
+// Add new files to git
+utils.run(`git add ./test-${name}/run.py ./test-${name}/jest.config.js`);
 
 // Update deps and build all
 utils.run('jlpm && jlpm build:packages', {
