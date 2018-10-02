@@ -7,7 +7,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { InputArea, InputPrompt, CodeCellModel } from '@jupyterlab/cells';
+import { InputArea, InputPrompt, CodeCellModel } from '@jupyterlab/cells/src';
 
 const PROMPT_CLASS = 'jp-InputArea-prompt';
 

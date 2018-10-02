@@ -83,10 +83,8 @@ fs.copySync(path.join(coreUtils, 'run.py'), path.join(testSrc, 'run.py'));
 // Add new files to git
 utils.run(`git add ./test-${name}/run.py ./test-${name}/jest.config.js`);
 
-// Update deps and build all
-utils.run('jlpm && jlpm build:packages', {
-  cwd: path.resolve(__dirname, '..')
-});
+// Update deps and build test
+utils.run('jlpm && jlpm build', { cwd: testSrc });
 
 // Test
 utils.run('jlpm test', { cwd: testSrc });
