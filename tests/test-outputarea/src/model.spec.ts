@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { OutputModel } from '@jupyterlab/rendermime';
 
-import { OutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaModel } from '@jupyterlab/outputarea/src';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
 
