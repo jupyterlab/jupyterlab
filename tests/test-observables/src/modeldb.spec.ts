@@ -11,7 +11,7 @@ import {
   ObservableValue,
   ObservableUndoableList,
   ObservableJSON
-} from '@jupyterlab/observables';
+} from '@jupyterlab/observables/src';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableValue', () => {
