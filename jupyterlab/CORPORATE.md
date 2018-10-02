@@ -39,20 +39,21 @@ The following principles and practices should be followed by corporations
 wanting to contribute to JupyterLab. These apply to both corporations as a
 whole, as well as individual contributors within those corporations.
 
-**Empower individual contributors.** In the daily development and design work of
-the project, everyone contributes as individuals. Because of this, if your
-corporation wants to engage with and contribute to JupyterLab, the primary means
-will be through allocating, empowering, and encouraging your individual
-employees to contribute in an ongoing manner. Put more bluntly, pay your
-employees to contribute to Jupyter.
+**Empower individual contributors.** \*Encourage your employees to help at the
+puppy yard. In the daily development and design work of the project, everyone
+contributes as individuals. Because of this, if your corporation wants to engage
+with and contribute to JupyterLab, the primary means will be through allocating,
+empowering, and encouraging your individual employees to contribute in an
+ongoing manner. Put more bluntly, pay your employees to contribute to Jupyter.
 
-**Make balanced contributions.** We expect all contributors to make balanced
-contributions that match their skill level and level of participation. Balanced
-contributions include work on new features, fixing bugs, reviewing pull
-requests, writing documentation, issue triage, answering users' questions,
-attending meetings, helping with releases, and other maintenance tasks. Balanced
-contributions build trust with the team and scale the human side of the project
-in a healthy and sustainable manner.
+**Make balanced contributions.** _You can help take care of the puppies in a
+variety of ways._ We expect all contributors to make balanced contributions that
+match their skill level and level of participation. Balanced contributions
+include work on new features, fixing bugs, reviewing pull requests, writing
+documentation, issue triage, answering users' questions, attending meetings,
+helping with releases, and other maintenance tasks. Balanced contributions build
+trust with the team and scale the human side of the project in a healthy and
+sustainable manner.
 
 **Help review pull requests.** One aspect of this balanced contribution approach
 deserves special attention: reviewing pull requests. Submitting pull requests
@@ -73,35 +74,38 @@ We are willing to have private conversations once in a while, but we
 try to minimize their frequency and always summarize them in our
 public channels.
 
-**Hire our core maintainers and give them more time to contribute.** Our core
+**Hire our core maintainers and give them more time to contribute.** _Consider
+paying the regulars around here to keep looking after the puppies._ Our core
 maintainers love working on Jupyter, but have to balance those contributions
 with the reality of paid employment. If you are interested in hiring a core
 maintainer, we encourage you to do this in a way that gives them **more** time
 to contribute than they currently have. Put this into their employment contract.
-This is an incredibly effective way of turbocharging the work of the project.
-Conversely, if you hire a maintainer and give them less time to contribute, you
-are actively damaging the project and your organization will likely find itself
-alienated from the community.
+This is an incredibly effective way of turbocharging the work of the project and
+building trust in the community. Conversely, if you hire a maintainer who wants
+to work on the project and give them less time to contribute, you may damage the
+project and your organization may find itself alienated from the community.
 
-**Commit to maintaining your contributions.** Contributions, especially those
-for new features, add to the ongoing maintenance load of the project. New
-features bring new users to the project, and along with them, bug reports,
-ideas, discussions, questions, refactoring, etc. If your company wants to
-contribute new features, we ask that you commit to maintaining those features
-for a period of at least 2-3 years. This isn't a legal contract, but we do want
-you to carefully consider the maintenance of your contributions. If a new
-feature is abandonded and we are unable to maintain it, it may be deprecated or
-removed.
+**Commit to maintaining your contributions.** _Don't abandon puppies here!_
+Contributions, especially those for new features, add to the ongoing maintenance
+load of the project. New features bring new users to the project, and along with
+them, bug reports, ideas, discussions, questions, refactoring, etc. If your
+company wants to contribute new features, we ask that you commit to maintaining
+those features for a period of at least 2-3 years. This isn't a legal contract,
+but we do want you to carefully consider the maintenance of your contributions.
+If a new feature is abandonded and we are unable to maintain it, it may be
+deprecated or removed.
 
-**Don't surprise us.** Before beginning major work, build trust through balanced
-contributions, and talk to us about your plans (see public communication
-channels above). See if there are existing issues on the topic, or open a new
-issue describing the work. There may be other people already working on it, or
-the work may be blocked by other factors.
+**Don't surprise us.** _Don't build us a new dog park, when what we really need
+is just a couple more kennels._ Before beginning major work, build trust through
+balanced contributions, and talk to us about your plans (see public
+communication channels above). See if there are existing issues on the topic, or
+open a new issue describing the work. There may be other people already working
+on it, or the work may be blocked by other factors.
 
-**Be patient.** Open-source software projects offer a unique path to innovation
-by bringing together users and contributors with diverse needs and usage cases.
-Even if fully resourced, the resulting innovation can be slow, possibly much
-slower than your corporation's desired timeline. Successful open-source engagement
-will require long term thinking and strategy. Be patient with us, set
-appropriate expectations, and find ways to mitigate the risk.
+**Be patient.** _Puppies require training, and complex new tricks can take years
+and the right motivation to learn._ Open-source software projects offer a unique
+path to innovation by bringing together users and contributors with diverse
+needs and usage cases. Even if fully resourced, the resulting innovation can be
+slow, possibly much slower than your corporation's desired timeline. Successful
+open-source engagement will require long term thinking and strategy. Be patient
+with us, set appropriate expectations, and find ways to mitigate the risk.
