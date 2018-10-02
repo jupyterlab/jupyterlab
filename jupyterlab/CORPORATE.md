@@ -39,8 +39,8 @@ The following principles and practices should be followed by corporations
 wanting to contribute to JupyterLab. These apply to both corporations as a
 whole, as well as individual contributors within those corporations.
 
-**Empower individual contributors.** \*Encourage your employees to help at the
-puppy yard. In the daily development and design work of the project, everyone
+**Empower individual contributors.** _Encourage your employees to help at the
+puppy yard._ In the daily development and design work of the project, everyone
 contributes as individuals. Because of this, if your corporation wants to engage
 with and contribute to JupyterLab, the primary means will be through allocating,
 empowering, and encouraging your individual employees to contribute in an
