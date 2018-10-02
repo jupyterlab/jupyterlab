@@ -7,7 +7,7 @@ import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
 import { ObservableJSON } from '@jupyterlab/observables';
 
-import { JSONEditor } from '@jupyterlab/codeeditor';
+import { JSONEditor } from '@jupyterlab/codeeditor/src';
 
 import { framePromise } from '@jupyterlab/testutils';
 
@@ -189,7 +189,7 @@ describe('codeeditor', () => {
       });
     });
 
-    context('model.value.changed', () => {
+    describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
         editor.model.value.text = 'foo';
         expect(editor.hasClass('jp-mod-error')).to.be.true;
@@ -217,7 +217,7 @@ describe('codeeditor', () => {
         Widget.attach(editor, document.body);
       });
 
-      context('blur', () => {
+      describe('blur', () => {
         it('should handle blur events on the host node', () => {
           editor.editor.focus();
           simulate(editor.editorHostNode, 'blur');
@@ -247,7 +247,7 @@ describe('codeeditor', () => {
         });
       });
 
-      context('click', () => {
+      describe('click', () => {
         it('should handle click events on the revert button', () => {
           simulate(editor.revertButtonNode, 'click');
           expect(editor.events).to.contain('click');
@@ -395,7 +395,7 @@ describe('codeeditor', () => {
       });
     });
 
-    context('#source.changed', () => {
+    describe('#source.changed', () => {
       it('should update the value', () => {
         editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
