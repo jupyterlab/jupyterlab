@@ -124,7 +124,7 @@ export class ApplicationShell extends Widget {
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
     // This will still respect the min-size of children widget in the stacked panel.
-    hsplitPanel.setRelativeSizes([1, 3, 0]);
+    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
