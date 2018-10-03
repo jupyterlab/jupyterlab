@@ -115,7 +115,7 @@ Examples
   the 'latest' tag currently points to, with a caret range:
 
       update-dependency --regex '^@jupyterlab/' ^latest
-    
+
   Update all packages starting with '@jupyterlab/' in all lerna
   workspaces and the root package.json to whatever version the
   'next' tag for each package currently points to:
