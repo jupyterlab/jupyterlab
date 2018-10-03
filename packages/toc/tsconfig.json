@@ -10,7 +10,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES6",
-    "outDir": "./lib",
+    "outDir": "lib",
+    "rootDir": "src",
     "jsx": "react"
   },
   "include": ["src/**/*"]
