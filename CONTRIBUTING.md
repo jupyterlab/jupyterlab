@@ -23,7 +23,7 @@ All source code is written in
 Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
 All source code is formatted using [prettier](https://prettier.io).
-When code is modified and committed, all staged files will be automtically
+When code is modified and committed, all staged files will be automatically
 formatted using pre-commit git hooks (with help from the
 [lint-staged](https://github.com/okonet/lint-staged) and
 [husky](https://github.com/typicode/husky) libraries). The benefit of using a
