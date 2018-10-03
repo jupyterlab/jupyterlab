@@ -1420,7 +1420,7 @@ namespace Private {
         return results.every(result => result);
       })
       .catch(reason => {
-        if (reason.message == 'KernelReplyNotOK') {
+        if (reason.message === 'KernelReplyNotOK') {
           selected.map((cell: CodeCell) => {
             // Remove '*' prompt from cells that didn't execute
             if (cell.model.executionCount == null) {
