@@ -1431,6 +1431,8 @@ namespace Private {
           throw reason;
         }
 
+        notebook.update();
+
         return false;
       });
   }
