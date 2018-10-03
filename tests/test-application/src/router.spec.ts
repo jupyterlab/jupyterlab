@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Router } from '@jupyterlab/application';
+import { Router } from '@jupyterlab/application/src';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -43,9 +43,7 @@ describe('apputils', () => {
 
     describe('#current', () => {
       it('should return the current window location as an object', () => {
-        // The karma test window location is the path `/context.html`
-        // without any query string parameters or hash.
-        const path = '/context.html';
+        const path = '/';
         const request = path;
         const search = '';
         const hash = '';

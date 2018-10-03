@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils/src';
 
 import { each } from '@phosphor/algorithm';
 
@@ -169,7 +169,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#handleEvent()', () => {
-      context('keydown', () => {
+      describe('keydown', () => {
         it('should reject on escape key', async () => {
           const prompt = dialog.launch();
 
@@ -198,7 +198,7 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      context('contextmenu', () => {
+      describe('contextmenu', () => {
         it('should cancel context menu events', async () => {
           const prompt = dialog.launch();
 
@@ -212,7 +212,7 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      context('click', () => {
+      describe('click', () => {
         it('should prevent clicking outside of the content area', async () => {
           const prompt = dialog.launch();
 
@@ -234,7 +234,7 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      context('focus', () => {
+      describe('focus', () => {
         it('should focus the default button when focus leaves the dialog', async () => {
           const host = document.createElement('div');
           const target = document.createElement('div');

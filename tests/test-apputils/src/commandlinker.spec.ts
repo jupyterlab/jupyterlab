@@ -9,7 +9,7 @@ import { h, VirtualNode, VirtualDOM } from '@phosphor/virtualdom';
 
 import { simulate } from 'simulate-event';
 
-import { CommandLinker } from '@jupyterlab/apputils';
+import { CommandLinker } from '@jupyterlab/apputils/src';
 
 describe('@jupyterlab/apputils', () => {
   describe('CommandLinker', () => {

@@ -7,7 +7,7 @@ import { VirtualDOM, h } from '@phosphor/virtualdom';
 
 import { simulate } from 'simulate-event';
 
-import { Styling } from '@jupyterlab/apputils';
+import { Styling } from '@jupyterlab/apputils/src';
 
 describe('@jupyterlab/apputils', () => {
   describe('Styling', () => {

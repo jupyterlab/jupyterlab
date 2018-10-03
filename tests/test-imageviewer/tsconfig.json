@@ -2,7 +2,7 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
-    "types": ["mocha"],
+    "types": ["jest"],
     "composite": false,
     "rootDir": "src"
   },

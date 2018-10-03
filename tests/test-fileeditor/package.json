@@ -5,15 +5,11 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf build && rimraf coverage",
-    "coverage": "python run-test.py --browsers=ChromeHeadless karma-cov.conf.js",
-    "test": "jlpm run test:firefox",
-    "test:chrome": "python run-test.py --browsers=Chrome karma.conf.js",
-    "test:chrome-headless": "python run-test.py --browsers=ChromeHeadless karma.conf.js",
-    "test:debug": "python run-test.py  --browsers=Chrome --singleRun=false --debug=true --browserNoActivityTimeout=10000000 karma.conf.js",
-    "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
-    "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
-    "watch": "tsc -b --watch",
-    "watch:src": "tsp -p src --watch"
+    "coverage": "python run.py --coverage",
+    "test": "python run.py",
+    "watch": "python run.py --debug",
+    "watch:all": "python run.py --debug --watchAll",
+    "watch:src": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^0.19.1-alpha.0",
@@ -25,13 +21,13 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2",
-    "simulate-event": "~1.4.0"
+    "jest": "^23.5.0",
+    "simulate-event": "~1.4.0",
+    "ts-jest": "^23.1.4"
   },
   "devDependencies": {
     "@types/chai": "~4.0.10",
-    "karma": "~2.0.4",
-    "karma-chrome-launcher": "~2.2.0",
-    "puppeteer": "^1.5.0",
+    "@types/jest": "^23.3.1",
     "rimraf": "~2.6.2",
     "typescript": "~3.1.1"
   }

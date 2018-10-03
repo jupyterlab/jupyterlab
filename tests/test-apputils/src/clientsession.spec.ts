@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { SessionManager } from '@jupyterlab/services';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils/src';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -16,7 +16,7 @@ describe('@jupyterlab/apputils', () => {
     const manager = new SessionManager();
     let session: ClientSession;
 
-    before(() => manager.ready);
+    beforeAll(() => manager.ready);
 
     beforeEach(() => {
       session = new ClientSession({
@@ -317,7 +317,7 @@ describe('@jupyterlab/apputils', () => {
         await acceptDialog();
         expect(await restart).to.equal(true);
         expect(called).to.equal(true);
-      }).timeout(20000); // Allow for slower CI
+      });
 
       it('should not restart if the user rejects the dialog', async () => {
         let called = false;

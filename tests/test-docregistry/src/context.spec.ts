@@ -13,7 +13,7 @@ import {
   Context,
   DocumentRegistry,
   TextModelFactory
-} from '@jupyterlab/docregistry';
+} from '@jupyterlab/docregistry/src';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -29,7 +29,7 @@ describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
   const factory = new TextModelFactory();
 
-  before(() => {
+  beforeAll(() => {
     manager = new ServiceManager();
     return manager.ready;
   });

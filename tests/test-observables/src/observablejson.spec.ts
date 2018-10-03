@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables/src';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableJSON', () => {

@@ -219,18 +219,25 @@ class JestApp(ProcessTestApp):
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.web_app.settings['terminals_available']
-
-        jest = './node_modules/.bin/jest'
         debug = self.log.level == logging.DEBUG
-        jest = osp.realpath(osp.join(self.jest_dir, jest))
-        if os.name == 'nt':
-            jest += '.cmd'
 
-        cmd = []
+        # find jest
+        target = osp.join('node_modules', 'jest', 'bin', 'jest.js')
+        jest = ''
+        cwd = osp.realpath(self.jest_dir)
+        while osp.dirname(cwd) != cwd:
+            if osp.exists(osp.join(cwd, target)):
+                jest = osp.join(cwd, target)
+                break
+            cwd = osp.dirname(cwd)
+        if not jest:
+            raise RuntimeError('jest not found!')
+
+        cmd = ['node']
         if self.coverage:
             cmd += [jest, '--coverage']
         elif debug:
-            cmd += ['node', '--inspect-brk', jest,  '--no-cache']
+            cmd += ['--inspect-brk', jest,  '--no-cache']
             if self.watchAll:
                 cmd += ['--watchAll']
             else:

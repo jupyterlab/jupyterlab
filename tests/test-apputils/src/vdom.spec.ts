@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils/src';
 
 import { framePromise } from '@jupyterlab/testutils';
 

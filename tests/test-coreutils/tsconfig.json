@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "build",
     "rootDir": "src",
-    "types": ["mocha"],
+    "types": ["jest"],
     "composite": false
   },
   "include": ["src/*"],

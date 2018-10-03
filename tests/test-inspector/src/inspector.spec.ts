@@ -7,7 +7,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
+import { IInspector, InspectorPanel } from '@jupyterlab/inspector/src';
 
 class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];

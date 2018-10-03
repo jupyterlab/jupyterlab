@@ -19,7 +19,7 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm coverage --loglevel success > /dev/null
+    FORCE_COLOR=1 jlpm coverage --loglevel success
 
     # Run the services node example.
     pushd packages/services/examples/node

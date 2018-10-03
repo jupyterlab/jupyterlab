@@ -24,7 +24,7 @@ import {
   CellFooter,
   CellHeader,
   InputArea
-} from '@jupyterlab/cells';
+} from '@jupyterlab/cells/src';
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 
@@ -448,7 +448,6 @@ describe('cells/widget', () => {
         try {
           await CodeCell.execute(widget, session);
         } catch (error) {
-          console.log('IT BREAKS HERE');
           throw error;
         }
       });
