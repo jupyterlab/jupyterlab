@@ -175,5 +175,5 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 }
 
 .jp-LinkedOutputView .jp-OutputArea-output:only-child {
-   height: 100%;
+  height: 100%;
 }
