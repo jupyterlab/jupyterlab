@@ -8,8 +8,8 @@ import coreutils = require('@phosphor/coreutils');
 /**
  * Get all of the lerna package paths.
  */
-export function getLernaPaths(): string[] {
-  let basePath = path.resolve('.');
+export function getLernaPaths(basePath = '.'): string[] {
+  basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
   for (let config of baseConfig.workspaces) {

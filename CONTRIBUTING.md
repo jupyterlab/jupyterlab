@@ -304,7 +304,7 @@ jupyter lab --dev-mode --watch
 
 There is a range of build utilities for maintaining the repository.
 To get a suggested version for a library use `jlpm run get:dependency foo`.
-To update the version of a library across the repo use `jlpm run update:dependency foo@^x.x`.
+To update the version of a library across the repo use `jlpm run update:dependency foo ^latest`.
 To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 
 The key utility is `jlpm run integrity`, which ensures the integrity of
