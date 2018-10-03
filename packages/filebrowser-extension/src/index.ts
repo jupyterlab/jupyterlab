@@ -366,7 +366,22 @@ function addCommands(
         )
       );
     },
-    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
+    iconClass: args => {
+      const factory = (args['factory'] as string) || void 0;
+      if (factory) {
+        // if an explicit factory is passed...
+        const ft = registry.getFileType(factory);
+        if (ft) {
+          // ...set an icon if the factory name corresponds to a file type name...
+          return ft.iconClass;
+        } else {
+          // ...or leave the icon blank
+          return '';
+        }
+      } else {
+        return 'jp-MaterialIcon jp-OpenFolderIcon';
+      }
+    },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
     mnemonic: 0
   });
