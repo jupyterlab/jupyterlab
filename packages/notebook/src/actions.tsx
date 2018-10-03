@@ -1419,13 +1419,18 @@ namespace Private {
 
         return results.every(result => result);
       })
-      .catch(err => {
-        selected.map((cell: CodeCell) => {
-          // Remove '*' prompt from cells that didn't execute
-          if (cell.model.executionCount == null) {
-            cell.setPrompt('');
-          }
-        });
+      .catch(reason => {
+        if (reason.message == 'KernelReplyNotOK') {
+          selected.map((cell: CodeCell) => {
+            // Remove '*' prompt from cells that didn't execute
+            if (cell.model.executionCount == null) {
+              cell.setPrompt('');
+            }
+          });
+        } else {
+          throw reason;
+        }
+
         return false;
       });
   }
@@ -1471,7 +1476,7 @@ namespace Private {
 
                 return true;
               } else {
-                throw new Error('Kernel reply status was not ok');
+                throw new Error('KernelReplyNotOK');
               }
             })
             .catch(reason => {
