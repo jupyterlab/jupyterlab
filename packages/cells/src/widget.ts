@@ -1018,14 +1018,12 @@ export namespace CodeCell {
       model.outputs.clear();
       return;
     }
-
-    let cellId = { cellId: model.id };
-    metadata = { ...metadata, ...cellId };
+    metadata = { ...metadata, cellId: model.id };
+    const { recordTiming } = metadata;
     model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
-//
     let future: Kernel.IFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
@@ -1037,6 +1035,8 @@ export namespace CodeCell {
         session,
         metadata
       );
+    // cell.outputArea.future assigned synchronously in `execute`
+    if (recordTiming) {
       cell.outputArea.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
         let label: string;
         switch (msg.header.msg_type) {
@@ -1054,17 +1054,17 @@ export namespace CodeCell {
           return;
         }
         model.metadata.set(`timing.iopub.${label}`, value);
-      };
+      }};
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = await msgPromise;
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
-      if (started) {
+      if (recordTiming && started) {
         model.metadata.set('timing.shell.execute_reply.started', started);
       }
       const date = msg.header.date as string;
-      if (date) {
+      if (recordTiming && date) {
         model.metadata.set('timing.shell.execute_reply', date);
       }
       return msg;
@@ -1075,7 +1075,7 @@ export namespace CodeCell {
       }
       throw e;
     }
-   }
+  }
 }
 
 /******************************************************************************

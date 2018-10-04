@@ -173,6 +173,8 @@ namespace CommandIDs {
 
   export const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
+  export const toggleRecordTiming = 'notebook:toggle-record-timing';
+
   export const undoCellAction = 'notebook:undo-cell-action';
 
   export const redoCellAction = 'notebook:redo-cell-action';
@@ -1520,6 +1522,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.toggleRecordTiming, {
+    label: 'Toggle Recording Cell Timing',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.toggleRecordTiming(current.content);
+      }
+    },
+    isEnabled
+  })
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
@@ -1858,6 +1871,7 @@ function populatePalette(
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
+    CommandIDs.toggleRecordTiming,
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.changeKernel,
