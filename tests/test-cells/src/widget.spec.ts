@@ -516,7 +516,7 @@ describe('cells/widget', () => {
         const updates = widget.methods.filter(method => {
           return method === 'onUpdateRequest';
         });
-        expect(updates).to.have.length(1);
+        expect(updates).to.be.greaterThan(0);
         widget.dispose();
       });
     });
