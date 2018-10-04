@@ -61,7 +61,9 @@ function flatten(a: any[]) {
 
 commander
   .description(
-    'Print out commands to update npm latest and next tags appropriately'
+    `Print out commands to update npm 'latest' and 'next' dist-tags
+so that 'latest' points to the latest stable release and 'next'
+points to the latest prerelease after it.`
   )
   // .option('--dry-run', 'Do not perform actions, just print output')
   .option('--lerna', 'Update dist-tags in all lerna packages')
