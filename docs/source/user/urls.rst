@@ -34,18 +34,21 @@ JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
 areas and tabs, etc. When the page is refreshed, the workspace is restored.
 
-The default workspace is not named, it is the primary ``/lab`` URL.
+The default workspace does not have a name and resides at the primary ``/lab``
+URL:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab
 
-Workspaces save their state on the server and can be shared between
-multiple users (or browsers) as long as they have access to the same server:
+All other workspaces have a name that is part of the URL:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/workspaces/foo
+
+Workspaces save their state on the server and can be shared between
+multiple users (or browsers) as long as they have access to the same server.
 
 A workspace should only be open in a single browser tab at a time. If JupyterLab
 detects that a workspace is being opened multiple times simultaneously, it will
