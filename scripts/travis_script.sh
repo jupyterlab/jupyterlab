@@ -51,6 +51,9 @@ if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity --force
 
+    # Check yarn.lock file
+    jlpm check --integrity
+
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 
