@@ -21,7 +21,8 @@
   "bin": {
     "get-dependency": "./lib/get-dependency.js",
     "remove-dependency": "./lib/remove-dependency.js",
-    "update-dependency": "./lib/update-dependency.js"
+    "update-dependency": "./lib/update-dependency.js",
+    "update-dist-tag": "./lib/update-dist-tag.js"
   },
   "directories": {
     "lib": "lib/"
