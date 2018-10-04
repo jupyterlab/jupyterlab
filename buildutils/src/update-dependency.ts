@@ -41,8 +41,12 @@ async function handlePackage(
   name: string | RegExp,
   specifier: string,
   packagePath: string,
-  regex = false
+  regex = false,
+  dryRun = false
 ) {
+  let updated = false;
+  let updates: string[] = [];
+
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
   let data: any;
@@ -58,21 +62,35 @@ async function handlePackage(
     let deps = data[dtype] || {};
     if (typeof name === 'string') {
       if (name in deps) {
-        deps[name] = await getVersion(name, specifier);
+        let version = await getVersion(name, specifier);
+        updates.push(`${name} ${deps[name]} -> ${version}`);
+        deps[name] = version;
+        updated = true;
       }
     } else {
       await Promise.all(
         Object.keys(deps).map(async dep => {
           if (dep.match(name)) {
-            deps[dep] = await getVersion(dep, specifier);
+            let version = await getVersion(dep, specifier);
+            updates.push(`${dep} ${deps[dep]} -> ${version}`);
+            deps[dep] = version;
+            updated = true;
           }
         })
       );
     }
   }
 
+  if (updated) {
+    console.log(packagePath);
+    console.log(updates.join('\n'));
+    console.log();
+  }
+
   // Write the file back to disk.
-  utils.writePackageData(packagePath, data);
+  if (!dryRun && updated) {
+    utils.writePackageData(packagePath, data);
+  }
 }
 
 let run = false;
@@ -80,22 +98,23 @@ let run = false;
 commander
   .description('Update dependency versions')
   .usage('[options] <package> [versionspec], versionspec defaults to ^latest')
+  .option('--dry-run', 'Do not perform actions, just print output')
   .option('--regex', 'Package is a regular expression')
   .option('--lerna', 'Update dependencies in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
   .arguments('<package> [versionspec]')
   .action((name: string | RegExp, version: string = '^latest', args: any) => {
     run = true;
-    let basePath = path.resolve(commander.path || '.');
-    let pkg = commander.regex ? new RegExp(name) : name;
+    let basePath = path.resolve(args.path || '.');
+    let pkg = args.regex ? new RegExp(name) : name;
 
-    if (commander.lerna) {
+    if (args.lerna) {
       utils.getLernaPaths(basePath).forEach(pkgPath => {
-        handlePackage(pkg, version, pkgPath);
+        handlePackage(pkg, version, pkgPath, args.dryRun);
       });
     }
 
-    handlePackage(pkg, version, basePath);
+    handlePackage(pkg, version, basePath, args.dryRun);
   });
 
 commander.on('--help', function() {
