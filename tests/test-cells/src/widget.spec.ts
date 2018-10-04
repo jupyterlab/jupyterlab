@@ -754,6 +754,14 @@ describe('cells/widget', () => {
         await CodeCell.execute(widget, session);
         const executionCount = widget.model.executionCount;
         expect(executionCount).not.toEqual(originalCount);
+        expect(widget.model.metadata.get('timing.iopub.execute_input')).to
+        .exist;
+        expect(widget.model.metadata.get('timing.shell.execute_reply.started'))
+          .to.exist;
+        expect(widget.model.metadata.get('timing.shell.execute_reply')).to
+          .exist;
+        expect(widget.model.metadata.get('timing.iopub.status.busy')).to.exist;
+        expect(widget.model.metadata.get('timing.iopub.status.idle')).to.exist;
       });
 
       it('should set the cell prompt properly while executing', async () => {
