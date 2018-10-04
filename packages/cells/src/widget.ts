@@ -805,9 +805,38 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session, metadata)
+    const p = OutputArea.execute(code, cell.outputArea, session, metadata);
+    // cell.outputArea.future assigned synchronously in `execute`
+    cell.outputArea.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+      let label: string;
+      switch (msg.header.msg_type) {
+        case 'status':
+          label = `status.${msg.content.execution_state}`;
+          break;
+        case 'execute_input':
+          label = 'execute_input';
+          break;
+        default:
+          return;
+      }
+      const value = msg.header.date;
+      if (!value) {
+        return;
+      }
+      model.metadata.set(`timing.iopub.${label}`, value);
+    };
+    return p
       .then(msg => {
         model.executionCount = msg.content.execution_count;
+        const started = msg.metadata.started as string;
+        if (started) {
+          model.metadata.set('timing.shell.execute_reply.started', started);
+        }
+        const date = msg.header.date as string;
+        if (date) {
+          model.metadata.set('timing.shell.execute_reply', date);
+        }
+
         return msg;
       })
       .catch(e => {
