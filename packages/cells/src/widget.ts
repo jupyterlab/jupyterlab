@@ -797,9 +797,8 @@ export namespace CodeCell {
       model.outputs.clear();
       return Promise.resolve(void 0);
     }
-
-    let cellId = { cellId: model.id };
-    metadata = { ...metadata, ...cellId };
+    metadata = { ...metadata, cellId: model.id };
+    const { recordTiming } = metadata;
     model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
@@ -807,33 +806,36 @@ export namespace CodeCell {
 
     const p = OutputArea.execute(code, cell.outputArea, session, metadata);
     // cell.outputArea.future assigned synchronously in `execute`
-    cell.outputArea.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-      let label: string;
-      switch (msg.header.msg_type) {
-        case 'status':
-          label = `status.${msg.content.execution_state}`;
-          break;
-        case 'execute_input':
-          label = 'execute_input';
-          break;
-        default:
+    if (recordTiming) {
+      cell.outputArea.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+        let label: string;
+        switch (msg.header.msg_type) {
+          case 'status':
+            label = `status.${msg.content.execution_state}`;
+            break;
+          case 'execute_input':
+            label = 'execute_input';
+            break;
+          default:
+            return;
+        }
+        const value = msg.header.date;
+        if (!value) {
           return;
-      }
-      const value = msg.header.date;
-      if (!value) {
-        return;
-      }
-      model.metadata.set(`timing.iopub.${label}`, value);
-    };
+        }
+        model.metadata.set(`timing.iopub.${label}`, value);
+      };
+    }
+
     return p
       .then(msg => {
         model.executionCount = msg.content.execution_count;
         const started = msg.metadata.started as string;
-        if (started) {
+        if (recordTiming && started) {
           model.metadata.set('timing.shell.execute_reply.started', started);
         }
         const date = msg.header.date as string;
-        if (date) {
+        if (recordTiming && date) {
           model.metadata.set('timing.shell.execute_reply', date);
         }
 
