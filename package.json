@@ -51,7 +51,7 @@
     "tslint:check": "tslint -c tslint.json '**/*{.ts,.tsx}'",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "update:dependency": "node buildutils/lib/update-dependency.js",
+    "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "update:dist-tag": "node buildutils/lib/update-dist-tag.js",
     "update:local": "node buildutils/lib/update-local.js",
     "watch": "run-p watch:dev watch:themes",
