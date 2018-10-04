@@ -65,7 +65,6 @@ commander
 so that 'latest' points to the latest stable release and 'next'
 points to the latest prerelease after it.`
   )
-  // .option('--dry-run', 'Do not perform actions, just print output')
   .option('--lerna', 'Update dist-tags in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
   .action(async (args: any) => {
