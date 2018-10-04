@@ -123,6 +123,11 @@ class LabWorkspaceExportApp(JupyterApp):
     version = version
     description = """
     Export a JupyterLab workspace
+
+    If no arguments are passed in, this command will export the default
+        workspace.
+    If a workspace name is passed in, this command will export that workspace.
+    If no workspace is found, this command will export an empty workspace.
     """
 
     def start(self):
@@ -155,6 +160,9 @@ class LabWorkspaceImportApp(JupyterApp):
     version = version
     description = """
     Import a JupyterLab workspace
+
+    This command will import a workspace from a JSON file. The format of the
+        file must be the same as what the export functionality emits.
     """
 
     def start(self):
@@ -224,6 +232,9 @@ class LabWorkspaceApp(JupyterApp):
     version = version
     description = """
     Import or export a JupyterLab workspace
+
+    There are two sub-commands for export or import of workspaces. This app
+        should not otherwise do any work.
     """
 
     subcommands = dict()
@@ -235,6 +246,11 @@ class LabWorkspaceApp(JupyterApp):
         LabWorkspaceImportApp,
         LabWorkspaceImportApp.description.splitlines()[0]
     )
+
+    def start(self):
+        super().start()
+        print('Either `export` or `import` must be specified.')
+        sys.exit(1)
 
 
 lab_aliases = dict(aliases)

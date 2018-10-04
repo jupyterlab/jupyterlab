@@ -509,14 +509,31 @@ describe('cells/widget', () => {
           rendermime,
           contentFactory
         });
+        widget.rendered = false;
         Widget.attach(widget, document.body);
-        widget.rendered = false;
-        widget.rendered = false;
+
+        // Count how many update requests were processed.
         await framePromise();
-        const updates = widget.methods.filter(method => {
+        const original = widget.methods.filter(method => {
           return method === 'onUpdateRequest';
-        });
-        expect(updates).to.be.greaterThan(0);
+        }).length;
+
+        widget.rendered = false;
+        widget.rendered = false;
+        widget.rendered = false;
+        widget.rendered = false;
+
+        // Count how many update requests were processed
+        await framePromise();
+        const delta =
+          widget.methods.filter(method => {
+            return method === 'onUpdateRequest';
+          }).length - original;
+
+        // Make sure every single `rendered` toggle did not trigger an update.
+        expect(delta)
+          .to.be.gte(0)
+          .and.lte(1);
         widget.dispose();
       });
     });
