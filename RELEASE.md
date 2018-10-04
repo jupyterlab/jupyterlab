@@ -64,7 +64,12 @@ twine upload dist/*
 
 ### Post prerelease checklist
 
-- [ ] Test the `rc` in a clean environment
+- [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
+- [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:
+  ```bash
+  loghub jupyterlab/jupyterlab -m XXX -t $GITHUB_TOKEN --template scripts/release_template.txt
+  ```
+- [ ] Test the release candidate in a clean environment
 - [ ] Make sure the CI builds pass
   - The build will fail if we publish a new package because by default it is
     private. Use `npm access public @jupyterlab/<name>` to make it public.
@@ -82,13 +87,22 @@ twine upload dist/*
 - [ ] Update the extension examples:
   - [ ] https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar
 - [ ] Update the xkcd tutorial
+- [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
+- [ ] Publish the final (not prerelease) JavaScript packages using `jlpm run publish:next` at some point.
+
+Now do the actual final release:
+
 - [ ] Update `jupyterlab/_version.py` with a final version
-- [ ] Make another Python release
-- [ ] Publish the final JavaScript packages using `jlpm run publish`
+- [ ] Make a final Python release
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
+- [ ] Update the `latest` npm tags by running `jlpm run update:dist-tags` and running the commands it prints out
 - [ ] Publish to conda-forge (see below)
+
+After a few days (to allow for possible patch releases), set up development for
+the next release:
+
 - [ ] Update `jupyterlab/_version.py` with a `dev` version
 - [ ] Run `jlpm integrity` to update the `dev_mode` version
 - [ ] Commit and push the version update to master
