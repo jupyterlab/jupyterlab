@@ -9,9 +9,11 @@ import subprocess
 import requests
 import os
 
-# Get authentication token
-import getpass
-token = getpass.getpass('GitHub token:')
+try:
+  api_token = os.environ['GITHUB_TOKEN']
+except KeyError:
+  print('Error: set the environment variable GITHUB_TOKEN to a GitHub authentication token (see https://github.com/settings/tokens)')
+  exit(1)
 
 MILESTONE=18
 
@@ -54,7 +56,6 @@ query test($milestone: Int!) {
        }
        }
 
-api_token = os.environ['GITHUB_TOKEN']
 headers = {'Authorization': 'token %s' % api_token}
 
 r = requests.post(url=url, json=json, headers=headers)
