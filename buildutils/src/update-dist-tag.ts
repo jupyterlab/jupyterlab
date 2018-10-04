@@ -40,15 +40,12 @@ async function handlePackage(packagePath: string): Promise<string[]> {
   let next = semver.prerelease(versions[0]) ? versions[0] : undefined;
   let latest = versions.find(i => !semver.prerelease(i));
 
-  // If the tag is defined, but not supposed to be, remove it. If the tag is
-  // supposed to be defined, but is not the same as what is currently there,
-  // change it.
-  if (!latest && tags.latest) {
-    cmds.push(`npm dist-tag rm ${pkg} latest`);
-  } else if (latest && latest !== tags.latest) {
+  if (latest && latest !== tags.latest) {
     cmds.push(`npm dist-tag add ${pkg}@${latest} latest`);
   }
 
+  // If next is defined, but not supposed to be, remove it. If next is supposed
+  // to be defined, but is not the same as the current next, change it.
   if (!next && tags.next) {
     cmds.push(`npm dist-tag rm ${pkg} next`);
   } else if (next && next !== tags.next) {
