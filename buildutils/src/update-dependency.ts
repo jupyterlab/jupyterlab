@@ -35,17 +35,60 @@ async function getVersion(pkg: string, specifier: string) {
 }
 
 /**
+ * A very simple subset comparator
+ *
+ * @returns true if we can determine if range1 is a subset of range2, otherwise false
+ *
+ * #### Notes
+ * This will not be able to determine if range1 is a subset of range2 in many cases.
+ */
+function subset(range1: string, range2: string): boolean {
+  try {
+    const [, r1, version1] = range1.match(tags);
+    const [, r2] = range2.match(tags);
+    return (
+      ['', '~', '^'].indexOf(r1) >= 0 &&
+      r1 === r2 &&
+      semver.valid(version1) &&
+      semver.satisfies(version1, range2)
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+async function handleDependency(
+  dependencies: { [key: string]: string },
+  dep: string,
+  specifier: string,
+  minimal: boolean
+): Promise<{ updated: boolean; log: string[] }> {
+  let log = [];
+  let updated = false;
+  let newRange = await getVersion(dep, specifier);
+  let oldRange = dependencies[dep];
+  if (minimal && subset(newRange, oldRange)) {
+    log.push(`SKIPPING ${dep} ${oldRange} -> ${newRange}`);
+  } else {
+    log.push(`${dep} ${oldRange} -> ${newRange}`);
+    dependencies[dep] = newRange;
+    updated = true;
+  }
+  return { updated, log };
+}
+
+/**
  * Handle an individual package on the path - update the dependency.
  */
 async function handlePackage(
   name: string | RegExp,
   specifier: string,
   packagePath: string,
-  regex = false,
-  dryRun = false
+  dryRun = false,
+  minimal = false
 ) {
-  let updated = false;
-  let updates: string[] = [];
+  let fileUpdated = false;
+  let fileLog: string[] = [];
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
@@ -61,34 +104,47 @@ async function handlePackage(
   for (let dtype of ['dependencies', 'devDependencies']) {
     let deps = data[dtype] || {};
     if (typeof name === 'string') {
-      if (name in deps) {
-        let version = await getVersion(name, specifier);
-        updates.push(`${name} ${deps[name]} -> ${version}`);
-        deps[name] = version;
-        updated = true;
+      let dep = name;
+      if (dep in deps) {
+        let { updated, log } = await handleDependency(
+          deps,
+          dep,
+          specifier,
+          minimal
+        );
+        if (updated) {
+          fileUpdated = true;
+        }
+        fileLog.push(...log);
       }
     } else {
-      await Promise.all(
-        Object.keys(deps).map(async dep => {
-          if (dep.match(name)) {
-            let version = await getVersion(dep, specifier);
-            updates.push(`${dep} ${deps[dep]} -> ${version}`);
-            deps[dep] = version;
-            updated = true;
+      let keys = Object.keys(deps);
+      keys.sort();
+      for (let dep of keys) {
+        if (dep.match(name)) {
+          let { updated, log } = await handleDependency(
+            deps,
+            dep,
+            specifier,
+            minimal
+          );
+          if (updated) {
+            fileUpdated = true;
           }
-        })
-      );
+          fileLog.push(...log);
+        }
+      }
     }
   }
 
-  if (updated) {
+  if (fileLog.length > 0) {
     console.log(packagePath);
-    console.log(updates.join('\n'));
+    console.log(fileLog.join('\n'));
     console.log();
   }
 
   // Write the file back to disk.
-  if (!dryRun && updated) {
+  if (!dryRun && fileUpdated) {
     utils.writePackageData(packagePath, data);
   }
 }
@@ -102,20 +158,24 @@ commander
   .option('--regex', 'Package is a regular expression')
   .option('--lerna', 'Update dependencies in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
+  .option('--minimal', 'only update if the change is substantial')
   .arguments('<package> [versionspec]')
-  .action((name: string | RegExp, version: string = '^latest', args: any) => {
-    run = true;
-    let basePath = path.resolve(args.path || '.');
-    let pkg = args.regex ? new RegExp(name) : name;
+  .action(
+    async (name: string | RegExp, version: string = '^latest', args: any) => {
+      run = true;
+      let basePath = path.resolve(args.path || '.');
+      let pkg = args.regex ? new RegExp(name) : name;
 
-    if (args.lerna) {
-      utils.getLernaPaths(basePath).forEach(pkgPath => {
-        handlePackage(pkg, version, pkgPath, args.dryRun);
-      });
+      if (args.lerna) {
+        let paths = utils.getLernaPaths(basePath);
+        paths.sort();
+        for (let pkgPath of paths) {
+          await handlePackage(pkg, version, pkgPath, args.dryRun, args.minimal);
+        }
+      }
+      await handlePackage(pkg, version, basePath, args.dryRun, args.minimal);
     }
-
-    handlePackage(pkg, version, basePath, args.dryRun);
-  });
+  );
 
 commander.on('--help', function() {
   console.log(`
