@@ -71,9 +71,16 @@ twine upload dist/*
   - The build will fail if we forget to include `style/` in the `files:`
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
-- [ ] Update the other repos listed below
+- [ ] Update the other repos:
+  - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
+  - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
+  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/jupyter-renderers
+  - [ ] https://github.com/jupyterhub/jupyterlab-hub
 - [ ] Add a tag to `extension-cookiecutter-ts` with the new JupyterLab version
-- [ ] Update the extension examples listed below
+- [ ] Update the extension examples:
+  - [ ] https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar
 - [ ] Update the xkcd tutorial
 - [ ] Update `jupyterlab/_version.py` with a final version
 - [ ] Make another Python release
@@ -87,19 +94,6 @@ twine upload dist/*
 - [ ] Commit and push the version update to master
 - [ ] Release the other repos as appropriate
 - [ ] Update version for binder (see below)
-
-### Other repos to update
-
-- https://github.com/jupyterlab/extension-cookiecutter-js
-- https://github.com/jupyterlab/extension-cookiecutter-ts
-- https://github.com/jupyterlab/mimerender-cookiecutter
-- https://github.com/jupyterlab/mimerender-cookiecutter-ts
-- https://github.com/jupyterlab/jupyter-renderers
-- https://github.com/jupyterhub/jupyterlab-hub
-
-### Extension examples to update
-
-- https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar
 
 ### Updating the xkcd tutorial
 
