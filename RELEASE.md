@@ -40,7 +40,7 @@ JavaScript packages using the `next` tag until we are ready for the
 final release.
 
 ```bash
-jlpm run prerelease
+jlpm run publish:next
 ```
 
 ### Publish the Python package
