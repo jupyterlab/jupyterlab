@@ -149,8 +149,6 @@ async function handlePackage(
   }
 }
 
-let run = false;
-
 commander
   .description('Update dependency versions')
   .usage('[options] <package> [versionspec], versionspec defaults to ^latest')
@@ -162,13 +160,14 @@ commander
   .arguments('<package> [versionspec]')
   .action(
     async (name: string | RegExp, version: string = '^latest', args: any) => {
-      run = true;
       let basePath = path.resolve(args.path || '.');
       let pkg = args.regex ? new RegExp(name) : name;
 
       if (args.lerna) {
-        let paths = utils.getLernaPaths(basePath);
-        paths.sort();
+        let paths = utils.getLernaPaths(basePath).sort();
+
+        // We use a loop instead of Promise.all so that the output is in
+        // alphabetical order.
         for (let pkgPath of paths) {
           await handlePackage(pkg, version, pkgPath, args.dryRun, args.minimal);
         }
@@ -208,11 +207,11 @@ Examples
       update-dependency --lerna --regex --minimal '^@jupyterlab/' ^next
 `);
 });
+
 commander.parse(process.argv);
 
-if (!run) {
-  console.error(`
-  error: missing required argument 'package'
-  `);
+// If no arguments supplied
+if (!process.argv.slice(2).length) {
+  commander.outputHelp();
   process.exit(1);
 }
