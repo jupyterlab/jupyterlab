@@ -1,9 +1,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  Widget
+  PanelLayout, Widget
 } from '@phosphor/widgets';
 
+import {
+  IFrame
+} from '@jupyterlab/apputils';
 
 import {
   IRenderMime
@@ -17,15 +20,17 @@ import '../style/index.css';
 const CSS_CLASS = 'jp-RenderedIFrame';
 
 /**
- * The CSS class for a Plotly icon.
+ * The CSS class for an HTML5 icon.
  */
 const CSS_ICON_CLASS = 'jp-MaterialIcon jp-HTMLIcon';
 
 /**
- * The MIME type for HTML.
+ * The MIME type for HTML. We don't use `text/html` because that
+ * will conflict with the already existing `text/html` mimetype
+ * used for inline HTML in JupyterLab.
  */
 export
-const MIME_TYPE = 'application/jupyterlab_html';
+const MIME_TYPE = 'application/vnd.jupyter.iframe.text';
 
 export
 const HTML_CLASS = 'jp-HTMLViewer';
@@ -39,8 +44,11 @@ class RenderedIFrame extends Widget implements IRenderMime.IRenderer {
    * Create a new widget for rendering HTML.
    */
   constructor(options: IRenderMime.IRendererOptions) {
-    super({ node: Private.createNode() });
+    super();
+    const layout = this.layout = new PanelLayout();
     this.addClass(CSS_CLASS);
+    this._iframe = new IFrame();
+    layout.addWidget(this._iframe);
     this._mimeType = options.mimeType;
   }
 
@@ -50,10 +58,11 @@ class RenderedIFrame extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as string;
     const blob = new Blob([data], {type: "text/html"});
-    this.node.querySelector('iframe').setAttribute('src', URL.createObjectURL(blob));
+    this._iframe.url = URL.createObjectURL(blob);
     return Promise.resolve(void 0);
   }
 
+  private _iframe: IFrame;
   private _mimeType: string;
 }
 
@@ -91,25 +100,3 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
 ];
 
 export default extensions;
-
-
-/**
- * A namespace for HTML widget private data.
- */
-namespace Private {
-  /**
-   * Create the node for the HTML widget.
-   */
-  export
-  function createNode(): HTMLElement {
-    let node = document.createElement('div');
-    node.className = HTML_CONTAINER_CLASS;
-    let iframe = document.createElement('iframe');
-    iframe.style.height = '100%';
-    iframe.style.width = '100%';
-    iframe.className = HTML_CLASS;
-    iframe.setAttribute('type', MIME_TYPE);
-    node.appendChild(iframe);
-    return node;
-  }
-}
