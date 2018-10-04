@@ -5,18 +5,15 @@
 
 import * as path from 'path';
 import * as utils from './utils';
-
-// Handle the packages
-utils.getLernaPaths().forEach(pkgPath => {
-  handlePackage(pkgPath);
-});
-handlePackage(path.resolve('.'));
+import packageJson from 'package-json';
+import commander from 'commander';
+import semver from 'semver';
 
 /**
  * Handle an individual package on the path - update the dependency.
  */
-function handlePackage(packagePath: string): void {
-  let cmd: string;
+async function handlePackage(packagePath: string): Promise<string[]> {
+  const cmds: string[] = [];
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
@@ -25,53 +22,64 @@ function handlePackage(packagePath: string): void {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
     console.log('Skipping package ' + packagePath);
-    return;
+    return cmds;
   }
 
   if (data.private) {
-    return;
+    return cmds;
   }
 
   const pkg = data.name;
 
-  cmd = `npm view ${pkg} versions --json`;
-  const versions: string[] = JSON.parse(utils.run(cmd, { stdio: 'pipe' }));
+  let npmData = await packageJson(pkg, { allVersions: true });
+  let versions = Object.keys(npmData.versions).sort(semver.rcompare);
+  let tags = npmData['dist-tags'];
 
-  // Find latest stable
-  versions.reverse();
-  let prerelease = versions.find(v => !!v.match(/-\d$/));
-  let stable = versions.find(v => !v.match(/-\d$/));
+  // Go through the versions. The latest prerelease is 'next', the latest
+  // non-prerelease should be 'stable'.
+  let next = semver.prerelease(versions[0]) ? versions[0] : undefined;
+  let latest = versions.find(i => !semver.prerelease(i));
 
-  // Make sure the prerelease we found is *after* the stable release
-  if (
-    prerelease &&
-    stable &&
-    versions.indexOf(prerelease) > versions.indexOf(stable)
-  ) {
-    prerelease = undefined;
+  // If the tag is defined, but not supposed to be, remove it. If the tag is
+  // supposed to be defined, but is not the same as what is currently there,
+  // change it.
+  if (!latest && tags.latest) {
+    cmds.push(`npm dist-tag rm ${pkg} latest`);
+  } else if (latest && latest !== tags.latest) {
+    cmds.push(`npm dist-tag add ${pkg}@${latest} latest`);
   }
 
-  cmd = `npm dist-tag list ${pkg}`;
-  let tags = utils.run(cmd).split('\n');
-
-  console.log();
-  console.log(pkg, stable, prerelease, tags);
-
-  let stableCmd: string;
-  let prereleaseCmd: string;
-
-  if (stable) {
-    stableCmd = `npm dist-tag add ${pkg}@${stable} latest`;
-  } else {
-    stableCmd = `npm dist-tag rm ${pkg} latest`;
+  if (!next && tags.next) {
+    cmds.push(`npm dist-tag rm ${pkg} next`);
+  } else if (next && next !== tags.next) {
+    cmds.push(`npm dist-tag add ${pkg}@${next} next`);
   }
 
-  if (prerelease) {
-    prereleaseCmd = `npm dist-tag add ${pkg}@${prerelease} next`;
-  } else {
-    prereleaseCmd = `npm dist-tag rm ${pkg} next`;
-  }
-
-  console.log(stableCmd);
-  console.log(prereleaseCmd);
+  return cmds;
 }
+
+function flatten(a: any[]) {
+  return a.reduce((acc, val) => acc.concat(val), []);
+}
+
+commander
+  .description(
+    'Print out commands to update npm latest and next tags appropriately'
+  )
+  // .option('--dry-run', 'Do not perform actions, just print output')
+  .option('--lerna', 'Update dist-tags in all lerna packages')
+  .option('--path [path]', 'Path to package or monorepo to update')
+  .action(async (args: any) => {
+    let basePath = path.resolve(args.path || '.');
+    let cmds: string[][] = [];
+    let paths: string[] = [];
+    if (args.lerna) {
+      paths = utils.getLernaPaths(basePath).sort();
+      cmds = await Promise.all(paths.map(handlePackage));
+    }
+    cmds.push(await handlePackage(basePath));
+
+    console.log(flatten(cmds).join('\n'));
+  });
+
+commander.parse(process.argv);
