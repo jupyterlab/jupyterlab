@@ -186,9 +186,14 @@ Examples
 
       update-dependency webpack ^4.0.0
 
-  Update all packages to the latest version, with a caret:
+  Update all packages to the latest version, with a caret.
+  Only update if the update is substantial:
 
-      update-dependency --regex '.*' ^latest
+      update-dependency --minimal --regex '.*' ^latest
+
+  Print the log of the above without actually making any changes.
+
+  update-dependency --dry-run --minimal --regex '.*' ^latest
 
   Update all packages starting with '@jupyterlab/' to the version
   the 'latest' tag currently points to, with a caret range:
@@ -196,10 +201,11 @@ Examples
       update-dependency --regex '^@jupyterlab/' ^latest
 
   Update all packages starting with '@jupyterlab/' in all lerna
-  workspaces and the root package.json to whatever version the
-  'next' tag for each package currently points to:
+  workspaces and the root package.json to whatever version the 'next'
+  tag for each package currently points to (with a caret tag).
+  Update the version range only if the change is substantial.
 
-      update-dependency --lerna --regex '^@jupyterlab/' next
+      update-dependency --lerna --regex --minimal '^@jupyterlab/' ^next
 `);
 });
 commander.parse(process.argv);
