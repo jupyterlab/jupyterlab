@@ -34,7 +34,6 @@
     "@jupyterlab/apputils": "^0.19.1-alpha.0",
     "@jupyterlab/coreutils": "^2.2.1-alpha.0",
     "@jupyterlab/docmanager": "^0.19.1-alpha.0",
-    "@jupyterlab/docregistry": "^0.19.1-alpha.0",
     "@jupyterlab/filebrowser": "^0.19.1-alpha.0",
     "@jupyterlab/launcher": "^0.19.1-alpha.0",
     "@jupyterlab/services": "^3.2.1-alpha.0",
