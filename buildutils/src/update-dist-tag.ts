@@ -75,8 +75,10 @@ commander
       cmds = await Promise.all(paths.map(handlePackage));
     }
     cmds.push(await handlePackage(basePath));
-
-    console.log(flatten(cmds).join('\n'));
+    let out = flatten(cmds).join('\n');
+    if (out) {
+      console.log(out);
+    }
   });
 
 commander.parse(process.argv);
