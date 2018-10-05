@@ -35,8 +35,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1-alpha.0",
-    "@jupyterlab/rendermime": "^0.19.1-alpha.0",
+    "@jupyterlab/application": "^0.19.1",
+    "@jupyterlab/rendermime": "^0.19.1",
     "mathjax3": "3.0.0-beta.1"
   },
   "devDependencies": {
