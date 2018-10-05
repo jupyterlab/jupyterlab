@@ -170,10 +170,11 @@ rm -rf jupyterlab_xkcd
   git tag 0.XX-05-restore-panel-state HEAD~1
   git tag 0.XX-06-prepare-to-publish HEAD
   ```
-- Push the branch with the new tags and [set it as the default branch](https://github.com/jupyterlab/jupyterlab_xkcd/settings/branches) for the tutorial repo.
+- Push the branch with the new tags
   ```bash
   git push origin 0.XX --tags
   ```
+  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_xkcd/settings/branches`).
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
 - Publish the new `@jupyterlab/xkcd` npm package. Make sure to update the version
   number in the last commit of the branch.
