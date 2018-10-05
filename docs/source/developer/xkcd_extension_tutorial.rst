@@ -65,7 +65,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext nodejs jupyterlab cookiecutter git -c conda-forge
+    conda create -n jupyterlab-ext -c conda-forge --override-channels nodejs jupyterlab cookiecutter git -c conda-forge
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -272,10 +272,10 @@ of the build command for errors and correct your code.
     JupyterLab extension jupyterlab_xkcd is activated!
     ICommandPalette: Palette {_palette: CommandPalette}
 
-Note that we had to run ``npm run build`` in order for the bundle to
+Note that we had to run ``jlpm run build`` in order for the bundle to
 update, because it is using the compiled JavaScript files in ``/lib``.
-If you wish to avoid running ``npm run build`` after each change, you
-can open a third terminal, and run the ``npm run watch`` command from
+If you wish to avoid running ``jlpm run build`` after each change, you
+can open a third terminal, and run the ``jlpm run watch`` command from
 your extension directory, which will automatically compile the
 TypeScript files as they change.
 
@@ -335,8 +335,8 @@ it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
 the command to the command palette in a section called *Tutorial*.
 
-Build your extension again using ``npm run build`` (unless you are using
-``npm run watch`` already) and refresh the browser tab. Open the command
+Build your extension again using ``jlpm run build`` (unless you are using
+``jlpm run watch`` already) and refresh the browser tab. Open the command
 palette on the left side by clicking on *Commands* and type *xkcd* in
 the search box. Your *Random xkcd comic*
 command should appear. Click it or select it with the keyboard and press
@@ -389,7 +389,7 @@ API that returns information about a random xkcd comic, and set the
 image source, alternate text, and title attributes based on the
 response.
 
-Rebuild your extension if necessary (``npm run build``), refresh your
+Rebuild your extension if necessary (``jlpm run build``), refresh your
 browser tab, and run the *Random xkcd comic* command again. You should
 now see a comic in the xkcd.com panel when it opens.
 
@@ -475,7 +475,7 @@ The beginning of the function should read like the following:
         // Keep all the remaining fetch and command lines the same
         // as before from here down ...
 
-Build your extension if necessary (``npm run build``) and refresh your
+Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random xkcd comic* command and
 confirm the comic is centered with an attribution badge below it. Resize
 the browser window or the panel so that the comic is larger than the
