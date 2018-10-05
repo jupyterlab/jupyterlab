@@ -32,15 +32,15 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.0",
-    "@jupyterlab/apputils": "^0.18.0",
-    "@jupyterlab/cells": "^0.18.0",
-    "@jupyterlab/coreutils": "^2.1.0",
-    "@jupyterlab/docmanager": "^0.18.0",
-    "@jupyterlab/docregistry": "^0.18.0",
-    "@jupyterlab/fileeditor": "^0.18.0",
-    "@jupyterlab/notebook": "^0.18.0",
-    "@jupyterlab/rendermime": "^0.18.0",
+    "@jupyterlab/application": "^0.19.1-alpha.0",
+    "@jupyterlab/apputils": "^0.19.1-alpha.0",
+    "@jupyterlab/cells": "^0.19.1-alpha.0",
+    "@jupyterlab/coreutils": "^2.2.1-alpha.0",
+    "@jupyterlab/docmanager": "^0.19.1-alpha.0",
+    "@jupyterlab/docregistry": "^0.19.1-alpha.0",
+    "@jupyterlab/fileeditor": "^0.19.1-alpha.0",
+    "@jupyterlab/notebook": "^0.19.1-alpha.0",
+    "@jupyterlab/rendermime": "^0.19.1-alpha.0",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",
@@ -49,7 +49,7 @@
     "react-dom": "~16.4.2"
   },
   "devDependencies": {
-    "@types/react": "~16.0.19",
+    "@types/react": "~16.4.13",
     "@types/react-dom": "~16.0.5",
     "husky": "^0.14.3",
     "lint-staged": "^7.2.0",
@@ -58,10 +58,10 @@
     "tslint": "^5.10.0",
     "tslint-config-prettier": "^1.13.0",
     "tslint-plugin-prettier": "^1.3.0",
-    "typescript": "~2.9.2"
+    "typescript": "~3.1.1"
   },
-  "resolutions": {
-    "@types/react": "~16.0.19"
+  "jupyterlab": {
+    "extension": "lib/extension.js"
   },
   "lint-staged": {
     "**/*{.ts,.tsx,.css,.json,.md}": [
@@ -69,7 +69,7 @@
       "git add"
     ]
   },
-  "jupyterlab": {
-    "extension": "lib/extension.js"
+  "resolutions": {
+    "@types/react": "~16.4.13"
   }
 }
