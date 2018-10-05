@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-inspector",
-  "version": "0.5.1-alpha.0",
+  "version": "0.5.1",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,8 +12,8 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/inspector": "^0.19.1-alpha.0",
-    "@jupyterlab/testutils": "^0.3.1-alpha.0",
+    "@jupyterlab/inspector": "^0.19.1",
+    "@jupyterlab/testutils": "^0.3.1",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2",
