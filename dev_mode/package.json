@@ -219,7 +219,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.35.0rc2",
+    "version": "0.35.0",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
