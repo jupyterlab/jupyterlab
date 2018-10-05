@@ -1296,7 +1296,7 @@ function addCommands(
       }
     },
     isEnabled
-  })
+  });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
