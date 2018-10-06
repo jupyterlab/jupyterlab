@@ -67,9 +67,6 @@ namespace CommandIDs {
 
   export const paste = 'filebrowser:paste';
 
-  // paste command used when user did not click on an item
-  export const pasteNotItem = 'filebrowser:paste-not-item';
-
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
@@ -616,17 +613,18 @@ function addCommands(
     }
   }
 
-  // matches anywhere on filebrowser that is not an item
-  const selectorDeadSpace = '.jp-DirListing-deadSpace';
+  // matches anywhere on filebrowser
+  const selectorContent = '.jp-DirListing-content';
   // matches all filebrowser items
   const selectorItem = '.jp-DirListing-item[data-isdir]';
   // matches only non-directory items
   const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
-  // If the user did not click on any file, we still want to show paste
+  // If the user did not click on any file, we still want to show paste,
+  // so target the content rather than an item.
   app.contextMenu.addItem({
     command: CommandIDs.paste,
-    selector: selectorDeadSpace,
+    selector: selectorContent,
     rank: 1
   });
 
@@ -671,12 +669,6 @@ function addCommands(
     command: CommandIDs.copy,
     selector: selectorNotDir,
     rank: 7
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.paste,
-    selector: selectorItem,
-    rank: 8
   });
 
   app.contextMenu.addItem({
