@@ -131,7 +131,7 @@ class LabWorkspaceExportApp(JupyterApp):
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
@@ -166,7 +166,7 @@ class LabWorkspaceImportApp(JupyterApp):
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
