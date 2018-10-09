@@ -58,7 +58,7 @@ def load_config(nbapp):
     config.user_settings_dir = user_settings_dir
     config.workspaces_dir = workspaces_dir
 
-    if geattr(nbapp, 'override_static_url', ''):
+    if getattr(nbapp, 'override_static_url', ''):
         config.public_url = nbapp.override_static_url
     if getattr(nbapp, 'override_theme_url', ''):
         config.themes_url = nbapp.override_theme_url
