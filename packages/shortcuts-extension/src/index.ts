@@ -43,10 +43,10 @@ import { DisposableSet, IDisposable } from '@phosphor/disposable';
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
-  activate: (app: JupyterLab, settingReqistry: ISettingRegistry): void => {
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry): void => {
     const { commands } = app;
 
-    settingReqistry
+    settingRegistry
       .load(plugin.id)
       .then(settings => {
         Private.loadShortcuts(commands, settings.composite);
