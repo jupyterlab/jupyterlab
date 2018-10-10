@@ -32,6 +32,11 @@ export const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
 export const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
 /**
+ * The key in the schema for keyboard shortcuts.
+ */
+export const SHORTCUTS_KEY = 'jupyter.lab.keyboard-shortcuts';
+
+/**
  * An alias for the JSON deep copy function.
  */
 const copy = JSONExt.deepCopy;
@@ -970,7 +975,28 @@ export namespace Private {
     additionalProperties: true,
     properties: {
       [ICON_CLASS_KEY]: { type: 'string', default: 'jp-FileIcon' },
-      [ICON_LABEL_KEY]: { type: 'string', default: 'Plugin' }
+      [ICON_LABEL_KEY]: { type: 'string', default: 'Plugin' },
+      [SHORTCUTS_KEY]: {
+        items: { $ref: '#/definitions/shortcut' },
+        type: 'array',
+        default: []
+      }
+    },
+    definitions: {
+      shortcut: {
+        properties: {
+          command: { type: 'string' },
+          keys: {
+            items: { type: 'string' },
+            minItems: 1,
+            type: 'array'
+          },
+          selector: { type: 'string' },
+          title: { type: 'string' },
+          category: { type: 'string' }
+        },
+        type: 'object'
+      }
     }
   };
   /* tslint:enable */
