@@ -969,8 +969,8 @@ export namespace Private {
    */
   export const SCHEMA: ISettingRegistry.ISchema = {
     $schema: 'http://json-schema.org/draft-06/schema',
-    title: 'Jupyter Settings/Preferences Schema',
-    description: 'Jupyter settings/preferences schema v0.1.0',
+    title: 'JupyterLab Plugin Settings/Preferences Schema',
+    description: 'JupyterLab plugin settings/preferences schema v1.0.0',
     type: 'object',
     additionalProperties: true,
     properties: {
