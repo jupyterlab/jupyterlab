@@ -131,7 +131,7 @@ class LabWorkspaceExportApp(JupyterApp):
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
@@ -166,7 +166,7 @@ class LabWorkspaceImportApp(JupyterApp):
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
@@ -187,7 +187,7 @@ class LabWorkspaceImportApp(JupyterApp):
         workspace = dict()
         with open(file_path) as fid:
             try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, page_url, workspaces_url)
+                workspace = self._validate(fid, base_url, page_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (file_name, e))
                 sys.exit(1)
@@ -208,7 +208,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
         print('Saved workspace: %s' % workspace_path)
 
-    def _validate(self, data, page_url, workspaces_url):
+    def _validate(self, data, base_url, page_url, workspaces_url):
         workspace = json.load(data)
 
         if 'data' not in workspace:
@@ -221,7 +221,7 @@ class LabWorkspaceImportApp(JupyterApp):
             raise Exception('The `id` field is missing in `metadata`.')
 
         id = workspace['metadata']['id']
-        if id != page_url and not id.startswith(workspaces_url):
+        if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
             error = '%s does not match page_url or start with workspaces_url.'
             raise Exception(error % id)
 
