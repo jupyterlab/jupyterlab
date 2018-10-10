@@ -87,7 +87,7 @@ twine upload dist/*
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/xkcd_extension_tutorial.rst)
+- [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-xkcd-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 - [ ] Publish the final (not prerelease) JavaScript packages using `jlpm run publish:next` at some point.
 
@@ -99,7 +99,7 @@ Now do the actual final release:
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
 - [ ] Update the `latest` npm tags by running `jlpm run update:dist-tags` and running the commands it prints out
-- [ ] Publish to conda-forge (see below)
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
@@ -108,7 +108,7 @@ the next release:
 - [ ] Run `jlpm integrity` to update the `dev_mode` version
 - [ ] Commit and push the version update to master
 - [ ] Release the other repos as appropriate
-- [ ] Update version for binder (see below)
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
 ### Updating the xkcd tutorial
 
@@ -191,6 +191,8 @@ git tag | grep 0.XX | xargs git tag -d
 
 ### Publishing to conda-forge
 
+- If no requirements have changed, wait for the conda-forge autotick-bot.
+- Otherwise:
 - Get the sha256 hash for conda-forge release:
 
 ```bash
