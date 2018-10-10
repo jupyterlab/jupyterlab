@@ -66,8 +66,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
    * Create a new widget.
    *
    * #### Notes
-   * The factory will start the appropriate kernel and populate
-   * the default toolbar items using `ToolbarItems.populateDefaults`.
+   * The factory will start the appropriate kernel.
    */
   protected createNewWidget(
     context: DocumentRegistry.IContext<INotebookModel>

@@ -178,28 +178,6 @@ export namespace ToolbarItems {
   }
 
   /**
-   * Add the default items to the panel toolbar.
-   */
-  export function populateDefaults(panel: NotebookPanel): void {
-    let toolbar = panel.toolbar;
-    toolbar.addItem('save', createSaveButton(panel));
-    toolbar.addItem('insert', createInsertButton(panel));
-    toolbar.addItem('cut', createCutButton(panel));
-    toolbar.addItem('copy', createCopyButton(panel));
-    toolbar.addItem('paste', createPasteButton(panel));
-    toolbar.addItem('run', createRunButton(panel));
-    toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
-    toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
-    toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('spacer', Toolbar.createSpacerItem());
-    toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
-    toolbar.addItem(
-      'kernelStatus',
-      Toolbar.createKernelStatusItem(panel.session)
-    );
-  }
-
-  /**
    * Get the default toolbar items for panel
    */
   export function getDefaultItems(
