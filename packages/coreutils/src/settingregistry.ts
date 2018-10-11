@@ -21,20 +21,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDataConnector } from './interfaces';
 
-/**
- * The key in the schema for setting editor icon class hints.
- */
-export const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
-
-/**
- * The key in the schema for setting editor icon label hints.
- */
-export const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
-
-/**
- * The key in the schema for keyboard shortcuts.
- */
-export const SHORTCUTS_KEY = 'jupyter.lab.keyboard-shortcuts';
+import SCHEMA from './plugin-schema.json';
 
 /**
  * An alias for the JSON deep copy function.
@@ -326,8 +313,8 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    this._composer.addSchema(Private.SCHEMA, 'main');
-    this._validator.addSchema(Private.SCHEMA, 'main');
+    this._composer.addSchema(SCHEMA, 'main');
+    this._validator.addSchema(SCHEMA, 'main');
   }
 
   /**
@@ -470,7 +457,7 @@ export class SettingRegistry {
   /**
    * The schema of the setting registry.
    */
-  readonly schema = Private.SCHEMA;
+  readonly schema: ISettingRegistry.ISchema = SCHEMA;
 
   /**
    * The schema validator used by the setting registry.
@@ -963,44 +950,6 @@ export namespace Settings {
  * A namespace for private module data.
  */
 export namespace Private {
-  /* tslint:disable */
-  /**
-   * The schema for settings.
-   */
-  export const SCHEMA: ISettingRegistry.ISchema = {
-    $schema: 'http://json-schema.org/draft-06/schema',
-    title: 'JupyterLab Plugin Settings/Preferences Schema',
-    description: 'JupyterLab plugin settings/preferences schema v1.0.0',
-    type: 'object',
-    additionalProperties: true,
-    properties: {
-      [ICON_CLASS_KEY]: { type: 'string', default: 'jp-FileIcon' },
-      [ICON_LABEL_KEY]: { type: 'string', default: 'Plugin' },
-      [SHORTCUTS_KEY]: {
-        items: { $ref: '#/definitions/shortcut' },
-        type: 'array',
-        default: []
-      }
-    },
-    definitions: {
-      shortcut: {
-        properties: {
-          command: { type: 'string' },
-          keys: {
-            items: { type: 'string' },
-            minItems: 1,
-            type: 'array'
-          },
-          selector: { type: 'string' },
-          title: { type: 'string' },
-          category: { type: 'string' }
-        },
-        type: 'object'
-      }
-    }
-  };
-  /* tslint:enable */
-
   /**
    * The default indentation level, uses spaces instead of tabs.
    */

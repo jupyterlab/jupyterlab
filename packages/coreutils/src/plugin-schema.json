@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema",
+  "title": "JupyterLab Plugin Settings/Preferences Schema",
+  "description": "JupyterLab plugin settings/preferences schema",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "jupyter.lab.setting-icon-class": {
+      "type": "string",
+      "default": "jp-FileIcon"
+    },
+    "jupyter.lab.setting-icon-label": {
+      "type": "string",
+      "default": "Plugin"
+    },
+    "jupyter.lab.keyboard-shortcuts": {
+      "items": { "$ref": "#/definitions/shortcut" },
+      "type": "array",
+      "default": []
+    }
+  },
+  "definitions": {
+    "shortcut": {
+      "properties": {
+        "command": { "type": "string" },
+        "keys": {
+          "items": { "type": "string" },
+          "minItems": 1,
+          "type": "array"
+        },
+        "selector": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "type": "object"
+    }
+  }
+}
