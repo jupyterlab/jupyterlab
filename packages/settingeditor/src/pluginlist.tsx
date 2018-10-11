@@ -3,11 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  ICON_CLASS_KEY,
-  ICON_LABEL_KEY,
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -217,6 +213,16 @@ export namespace PluginList {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * The JupyterLab plugin schema key for the setting editor icon of a plugin.
+   */
+  const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
+
+  /**
+   * The JupyterLab plugin schema key for the setting editor label of a plugin.
+   */
+  const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
+
   /**
    * Check the plugin for a rendering hint's value.
    *
