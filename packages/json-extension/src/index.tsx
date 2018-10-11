@@ -3,6 +3,8 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { Message } from '@phosphor/messaging';
+
 import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
@@ -51,6 +53,14 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
         resolve();
       });
     });
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down.
+    ReactDOM.unmountComponentAtNode(this.node);
   }
 
   private _mimeType: string;
