@@ -14,7 +14,8 @@ import {
   Dialog,
   Styling,
   Toolbar,
-  ToolbarButton
+  ToolbarButton,
+  DynamicToolbarButton
 } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -70,25 +71,39 @@ export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export function createSaveButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton({
-      iconClassName: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
-      onClick: () => {
-        if (panel.context.model.readOnly) {
-          return showDialog({
-            title: 'Cannot Save',
-            body: 'Document is read-only',
-            buttons: [Dialog.okButton()]
-          });
-        }
-        panel.context.save().then(() => {
-          if (!panel.isDisposed) {
-            return panel.context.createCheckpoint();
-          }
+  export function createSaveButton(panel: NotebookPanel): DynamicToolbarButton {
+    let onClick = () => {
+      if (panel.context.model.readOnly) {
+        return showDialog({
+          title: 'Cannot Save',
+          body: 'Document is read-only',
+          buttons: [Dialog.okButton()]
         });
-      },
-      tooltip: 'Save the notebook contents and create checkpoint'
+      }
+      panel.context.save().then(() => {
+        if (!panel.isDisposed) {
+          return panel.context.createCheckpoint();
+        }
+      });
+    };
+    let propFactory = () => {
+      return {
+        iconClassName: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
+        onClick,
+        tooltip: 'Save the notebook contents and create checkpoint',
+        enabled: !!(
+          panel &&
+          panel.context &&
+          panel.context.contentsModel &&
+          panel.context.contentsModel.writable
+        )
+      };
+    };
+    let button = new DynamicToolbarButton(propFactory);
+    panel.context.fileChanged.connect(() => {
+      button.update();
     });
+    return button;
   }
 
   /**
