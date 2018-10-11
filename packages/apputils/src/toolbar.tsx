@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactElementWidget } from './vdom';
+import { ReactWidget } from './vdom';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
@@ -12,8 +12,6 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 import { AttachedProperty } from '@phosphor/properties';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
-
-import { ReactWidget } from '@jupyterlab/apputils';
 
 import { IClientSession } from './clientsession';
 
@@ -334,7 +332,7 @@ export namespace Toolbar {
    * or `'No Kernel!'` if there is no kernel.
    * It can handle a change in context or kernel.
    */
-  export function createKernelNameItem(session: IClientSession): ToolbarButton {
+  export function createKernelNameItem(session: IClientSession): Widget {
     return new Private.KernelName({ session });
   }
 
@@ -510,13 +508,23 @@ export class CommandToolbarButtonComponent extends React.Component<
 }
 
 /**
- * Phosphor Widget version of ToolbarButtonComponent.
+ * Phosphor Widget version of CommandToolbarButtonComponent.
+ *
+ * #### Notes
+ * Use this for command buttons where the props will not ever change.
  */
-export class CommandToolbarButton extends ReactElementWidget {
+export class CommandToolbarButton extends ReactWidget {
   constructor(props: CommandToolbarButtonComponent.IProps) {
-    super(<CommandToolbarButtonComponent {...props} />);
+    super();
+    this._component = <CommandToolbarButtonComponent {...props} />;
     this.addClass('jp-CommandToolbarButton');
   }
+
+  render() {
+    return this._component;
+  }
+
+  private _component: React.ReactElement<any>;
 }
 
 /**
@@ -627,13 +635,20 @@ namespace Private {
   }
 
   /**
-   * Phosphor Widget version of ToolbarButtonComponent.
+   * Phosphor widget version of KernelNameComponent.
    */
-  export class KernelName extends ReactElementWidget {
+  export class KernelName extends ReactWidget {
     constructor(props: KernelNameComponent.IProps) {
-      super(<KernelNameComponent {...props} />);
+      super();
+      this._component = <KernelNameComponent {...props} />;
       this.addClass('jp-KernelName');
     }
+
+    render() {
+      return this._component;
+    }
+
+    private _component: React.ReactElement<any>;
   }
 
   /**
