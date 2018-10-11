@@ -3,15 +3,11 @@
 
 import * as React from 'react';
 
-import * as ReactDOM from 'react-dom';
-
 import { IIterator, toArray } from '@phosphor/algorithm';
-
-import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import {
   Dialog,
@@ -279,7 +275,7 @@ function RunningSessionsComponent({
 /**
  * A class that exposes the running terminal and kernel sessions.
  */
-export class RunningSessions extends Widget {
+export class RunningSessions extends ReactWidget {
   /**
    * Construct a new running widget.
    */
@@ -291,23 +287,14 @@ export class RunningSessions extends Widget {
     this.addClass(RUNNING_CLASS);
   }
 
-  protected onUpdateRequest(msg: Message): void {
-    ReactDOM.render(
+  protected render() {
+    return (
       <RunningSessionsComponent
         manager={this.options.manager}
         sessionOpenRequested={this._sessionOpenRequested}
         terminalOpenRequested={this._terminalOpenRequested}
-      />,
-      this.node
+      />
     );
-  }
-
-  /* Called after the widget is attached to the DOM
-   *
-   * Make sure the widget is rendered, even if the model has not changed.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this.update();
   }
 
   /**
