@@ -14,11 +14,73 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 /**
- * Phosphor widget that encodes best practices for VDOM based rendering.
+ * An abstract class for a Phosphor widget which renders a React component.
+ */
+export abstract class ReactWidget extends Widget {
+  /**
+   * Render the content of this widget using the virtual DOM.
+   *
+   * This method will be called anytime the widget needs to be rendered, which
+   * includes layout triggered rendering.
+   *
+   * Subclasses should define this method and return the root React nodes here.
+   */
+  protected abstract render():
+    | Array<React.ReactElement<any>>
+    | React.ReactElement<any>
+    | null;
+
+  /**
+   * Called to update the state of the widget.
+   *
+   * The default implementation of this method triggers
+   * VDOM based rendering by calling the this.render() method.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.renderDOM();
+  }
+
+  /**
+   * Called after the widget is attached to the DOM
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Make *sure* the widget is rendered.
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down.
+    ReactDOM.unmountComponentAtNode(this.node);
+  }
+
+  /**
+   * Render the React nodes to the DOM.
+   *
+   * @returns a promise that resolves when the rendering is done.
+   */
+  protected async renderDOM(): Promise<void> {
+    return new Promise<void>(resolve => {
+      let vnode = this.render();
+      // Split up the array/element cases so type inference chooses the right
+      // signature.
+      if (Array.isArray(vnode)) {
+        ReactDOM.render(vnode, this.node, resolve);
+      } else {
+        ReactDOM.render(vnode, this.node, resolve);
+      }
+    });
+  }
+}
+
+/**
+ * An abstract ReactWidget with a model.
  */
 export abstract class VDomRenderer<
   T extends VDomRenderer.IModel | null
-> extends Widget {
+> extends ReactWidget {
   /**
    * A signal emitted when the model changes.
    */
@@ -63,43 +125,6 @@ export abstract class VDomRenderer<
     super.dispose();
   }
 
-  /**
-   * Called to update the state of the widget.
-   *
-   * The default implementation of this method triggers
-   * VDOM based rendering by calling the this.render() method.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    let vnode = this.render();
-    if (Array.isArray(vnode)) {
-      ReactDOM.render(vnode, this.node);
-    } else {
-      ReactDOM.render<any>(vnode, this.node);
-    }
-  }
-
-  /* Called after the widget is attached to the DOM
-   *
-   * Make sure the widget is rendered, even if the model has not changed.
-   */
-  protected onAfterAttach(msg: Message): void {
-    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-  }
-
-  /**
-   * Render the content of this widget using the virtual DOM.
-   *
-   * This method will be called anytime the widget needs to be rendered,
-   * which includes layout triggered rendering and all model changes.
-   *
-   * Subclasses should define this method and use the current model state
-   * to create a virtual node or nodes to render.
-   */
-  protected abstract render():
-    | Array<React.ReactElement<any>>
-    | React.ReactElement<any>
-    | null;
-
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
 }
@@ -109,7 +134,7 @@ export abstract class VDomRenderer<
  *
  * All messages will re-render the element.
  */
-export class ReactElementWidget extends VDomRenderer<any> {
+export class ReactElementWidget extends ReactWidget {
   /**
    * Creates a Phosphor widget that renders the element(s) `es`.
    */
