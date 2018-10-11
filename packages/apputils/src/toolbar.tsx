@@ -13,6 +13,8 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
+import { ReactWidget } from '@jupyterlab/apputils';
+
 import { IClientSession } from './clientsession';
 
 import * as React from 'react';
@@ -403,18 +405,54 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
 }
 
 /**
- * Phosphor Widget version of ToolbarButtonComponent.
+ * Phosphor Widget version of static ToolbarButtonComponent.
+ *
+ * #### Notes
+ * Use this for buttons where the props will not ever change.
  */
-export class ToolbarButton extends ReactElementWidget {
+export class ToolbarButton extends ReactWidget {
   /**
    * Create a ToolbarButton.
    *
    * @param props - Props for ToolbarButtonComponent.
    */
   constructor(props: ToolbarButtonComponent.IProps = {}) {
-    super(<ToolbarButtonComponent {...props} />);
+    super();
+    this._component = <ToolbarButtonComponent {...props} />;
     this.addClass('jp-ToolbarButton');
   }
+
+  render() {
+    return this._component;
+  }
+
+  private _component: React.ReactElement<any>;
+}
+
+/**
+ * Phosphor Widget version of ToolbarButtonComponent.
+ *
+ * #### Notes
+ * Use this when the props for the button could change, and should be generated
+ * each time the button is updated.
+ */
+export class DynamicToolbarButton extends ReactWidget {
+  /**
+   * Create a ToolbarButton.
+   *
+   * @param props - a factor for props for ToolbarButtonComponent.
+   */
+  constructor(propFactory: () => ToolbarButtonComponent.IProps) {
+    super();
+    this._propFactory = propFactory;
+    this.addClass('jp-ToolbarButton');
+  }
+
+  render() {
+    return <ToolbarButtonComponent {...this._propFactory()} />;
+  }
+
+  private _propFactory: () => ToolbarButtonComponent.IProps;
 }
 
 /**
