@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser-extension",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "description": "JupyterLab - Filebrowser Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
