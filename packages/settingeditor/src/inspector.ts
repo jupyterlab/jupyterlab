@@ -94,8 +94,9 @@ class InspectorConnector extends DataConnector<
     const id = editor.settings.plugin;
     const schema = editor.settings.schema;
     const validator = editor.registry.validator;
+    const version = editor.settings.version;
 
-    return validator.validateData({ data, id, raw, schema }, false);
+    return validator.validateData({ data, id, raw, schema, version }, false);
   }
 
   private _current = 0;

@@ -273,19 +273,20 @@ namespace Private {
   ): void {
     const plugins = sortPlugins(registry.plugins);
     const items = plugins.map(plugin => {
-      const itemTitle = `(${plugin.id}) ${plugin.schema.description}`;
+      const { id, schema, version } = plugin;
+      const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
       return (
         <li
-          className={plugin.id === selection ? 'jp-mod-selected' : ''}
-          data-id={plugin.id}
-          key={plugin.id}
+          className={id === selection ? 'jp-mod-selected' : ''}
+          data-id={id}
+          key={id}
           title={itemTitle}
         >
           <span className={iconClass} title={iconTitle} />
-          <span>{plugin.schema.title || plugin.id}</span>
+          <span>{schema.title || id}</span>
         </li>
       );
     });

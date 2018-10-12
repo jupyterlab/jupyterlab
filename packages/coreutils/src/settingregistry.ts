@@ -121,6 +121,11 @@ export namespace ISettingRegistry {
      * The JSON schema for the plugin.
      */
     schema: ISchema;
+
+    /**
+     * The published version of the NPM package containing the plugin.
+     */
+    version: string;
   }
 
   /**
@@ -211,7 +216,7 @@ export namespace ISettingRegistry {
     readonly changed: ISignal<this, void>;
 
     /**
-     * Get the composite of user settings and extension defaults.
+     * The composite of user settings and extension defaults.
      */
     readonly composite: JSONObject;
 
@@ -226,14 +231,19 @@ export namespace ISettingRegistry {
     readonly raw: string;
 
     /**
-     * Get the plugin settings schema.
+     * The plugin's schema.
      */
     readonly schema: ISettingRegistry.ISchema;
 
     /**
-     * Get the user settings.
+     * The user settings.
      */
     readonly user: JSONObject;
+
+    /**
+     * The published version of the NPM package containing these settings.
+     */
+    readonly version: string;
 
     /**
      * Return the defaults in a commented JSON format.
@@ -705,17 +715,18 @@ export class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    const { plugin } = options;
+    const { plugin, registry } = options;
 
     this.plugin = plugin.id;
-    this.registry = options.registry;
+    this.registry = registry;
+    this.version = plugin.version;
 
     this._composite = plugin.data.composite || {};
     this._raw = plugin.raw || '{ }';
     this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || {};
 
-    this.registry.pluginChanged.connect(
+    registry.pluginChanged.connect(
       this._onPluginChanged,
       this
     );
@@ -729,7 +740,7 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * Get the composite of user settings and extension defaults.
+   * The composite of user settings and extension defaults.
    */
   get composite(): JSONObject {
     return this._composite;
@@ -743,21 +754,21 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * Get the plugin settings schema.
+   * The plugin's schema.
    */
   get schema(): ISettingRegistry.ISchema {
     return this._schema;
   }
 
   /**
-   * Get the plugin settings raw text value.
+   * The plugin settings raw text value.
    */
   get raw(): string {
     return this._raw;
   }
 
   /**
-   * Get the user settings.
+   * The user settings.
    */
   get user(): JSONObject {
     return this._user;
@@ -772,6 +783,11 @@ export class Settings implements ISettingRegistry.ISettings {
    * The system registry instance used by the settings manager.
    */
   readonly registry: SettingRegistry;
+
+  /**
+   * The published version of the NPM package containing these settings.
+   */
+  readonly version: string;
 
   /**
    * Return the defaults in a commented JSON format.
@@ -872,8 +888,9 @@ export class Settings implements ISettingRegistry.ISettings {
     const id = this.plugin;
     const schema = this._schema;
     const validator = this.registry.validator;
+    const version = this.version;
 
-    return validator.validateData({ data, id, raw, schema }, false);
+    return validator.validateData({ data, id, raw, schema, version }, false);
   }
 
   /**
