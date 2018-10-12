@@ -105,14 +105,19 @@ class SettingsConnector extends DataConnector<
 
   /**
    * Retrieve a saved bundle from the data connector.
+   *
+   * #### Notes
+   * If `id` is empty, this method will fetch all setting bundles.
    */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    return this._manager.settings.fetch(id).then(data => {
-      // Replace the server ID with the original unmodified version.
-      data.id = id;
+  async fetch(id = ''): Promise<ISettingRegistry.IPlugin> {
+    const data = await this._manager.settings.fetch(id);
 
-      return data;
-    });
+    // Replace the server ID with the original unmodified version.
+    if (id) {
+      data.id = id;
+    }
+
+    return data;
   }
 
   /**

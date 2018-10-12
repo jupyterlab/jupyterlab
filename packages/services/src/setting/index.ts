@@ -28,13 +28,13 @@ export class SettingManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Fetch a plugin's settings.
+   * Fetch a plugin's settings or list of all setting bundles.
    *
-   * @param id - The plugin's ID.
+   * @param id - The plugin's ID. If left empty, will fetch all setting bundles.
    *
    * @returns A promise that resolves if successful.
    */
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+  async fetch(id = ''): Promise<ISettingRegistry.IPlugin> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;

@@ -1,0 +1,18 @@
+{
+  "title": "JupyterLab Application ",
+  "description": "Main JupyterLab application settings.",
+  "jupyter.lab.setting-icon-class": "jp-JupyterIcon",
+  "jupyter.lab.setting-icon-label": "JupyterLab Application",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "application:activate-next-tab",
+      "keys": ["Ctrl Shift ]"],
+      "selector": "body",
+      "title": "Activate Next Tab",
+      "category": "Main Area"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

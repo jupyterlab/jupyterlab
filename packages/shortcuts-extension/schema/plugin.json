@@ -4,17 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "application:activate-next-tab": {
-      "default": {},
-      "properties": {
-        "command": { "default": "application:activate-next-tab" },
-        "keys": { "default": ["Ctrl Shift ]"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Activate Next Tab" },
-        "category": { "default": "Main Area" }
-      },
-      "type": "object"
-    },
     "application:activate-previous-tab": {
       "default": {},
       "properties": {
