@@ -34,7 +34,7 @@
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/docmanager": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.1",
+    "@jupyterlab/filebrowser": "^0.19.3",
     "@jupyterlab/launcher": "^0.19.1",
     "@jupyterlab/services": "^3.2.1",
     "@phosphor/algorithm": "^1.1.2",

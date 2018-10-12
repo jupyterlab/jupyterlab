@@ -37,7 +37,7 @@
     "@jupyterlab/console": "^0.19.1",
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.1",
+    "@jupyterlab/filebrowser": "^0.19.3",
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/launcher": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",

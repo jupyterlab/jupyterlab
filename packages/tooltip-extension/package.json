@@ -35,7 +35,7 @@
     "@jupyterlab/console": "^0.19.1",
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/fileeditor": "^0.19.1",
-    "@jupyterlab/notebook": "^0.19.1",
+    "@jupyterlab/notebook": "^0.19.2",
     "@jupyterlab/rendermime": "^0.19.1",
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/tooltip": "^0.19.1",
