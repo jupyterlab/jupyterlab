@@ -219,7 +219,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.35.1",
+    "version": "1.0.0a0",
     "linkedPackages": {},
     "staticDir": "../static"
   }
