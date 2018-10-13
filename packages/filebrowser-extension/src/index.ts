@@ -106,6 +106,24 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
 };
 
 /**
+ * The default file browser share-file plugin
+ *
+ * This extension adds a "Copy Shareable Link" command that generates a copy-
+ * pastable URL. This url can be used to open a particular file in JupyterLab,
+ * handy for emailing links or bookmarking for reference.
+ *
+ * If you need to change how this link is generated (for instance, to copy a
+ * /user-redirect URL for JupyterHub), disable this plugin and replace it
+ * with another implementation.
+ */
+const shareFile: JupyterLabPlugin<void> = {
+  activate: activateShareFile,
+  id: '@jupyterlab/filebrowser-extension:share-file',
+  requires: [IFileBrowserFactory],
+  autoStart: true
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -113,7 +131,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, browser];
+const plugins: JupyterLabPlugin<any>[] = [factory, browser, shareFile];
 export default plugins;
 
 /**
@@ -207,6 +225,32 @@ function activateBrowser(
       maybeCreate();
     });
     maybeCreate();
+  });
+}
+
+function activateShareFile(
+  app: JupyterLab,
+  factory: IFileBrowserFactory
+): void {
+  const { commands } = app;
+  const { tracker } = factory;
+
+  commands.addCommand(CommandIDs.share, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const path = encodeURI(widget.selectedItems().next().path);
+      const tree = PageConfig.getTreeUrl({ workspace: true });
+
+      Clipboard.copyToSystem(URLExt.join(tree, path));
+    },
+    isVisible: () =>
+      tracker.currentWidget &&
+      toArray(tracker.currentWidget.selectedItems()).length === 1,
+    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    label: 'Copy Shareable Link'
   });
 }
 
@@ -462,24 +506,6 @@ function addCommands(
     iconClass: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
-  });
-
-  commands.addCommand(CommandIDs.share, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      const path = encodeURI(widget.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: true });
-
-      Clipboard.copyToSystem(URLExt.join(tree, path));
-    },
-    isVisible: () =>
-      tracker.currentWidget &&
-      toArray(tracker.currentWidget.selectedItems()).length === 1,
-    iconClass: 'jp-MaterialIcon jp-LinkIcon',
-    label: 'Copy Shareable Link'
   });
 
   commands.addCommand(CommandIDs.copyPath, {
