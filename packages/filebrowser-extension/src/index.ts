@@ -67,6 +67,8 @@ namespace CommandIDs {
 
   export const paste = 'filebrowser:paste';
 
+  export const createNewDirectory = 'filebrowser:create-new-directory';
+
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
@@ -437,6 +439,18 @@ function addCommands(
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.createNewDirectory, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewDirectory();
+      }
+    },
+    iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
+    label: 'New Folder'
+  });
+
   commands.addCommand(CommandIDs.rename, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -620,12 +634,18 @@ function addCommands(
   // matches only non-directory items
   const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
-  // If the user did not click on any file, we still want to show paste,
+  // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
+  app.contextMenu.addItem({
+    command: CommandIDs.createNewDirectory,
+    selector: selectorContent,
+    rank: 1
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.paste,
     selector: selectorContent,
-    rank: 1
+    rank: 2
   });
 
   app.contextMenu.addItem({
@@ -674,33 +694,33 @@ function addCommands(
   app.contextMenu.addItem({
     command: CommandIDs.duplicate,
     selector: selectorNotDir,
-    rank: 9
+    rank: 8
   });
   app.contextMenu.addItem({
     command: CommandIDs.download,
     selector: selectorNotDir,
-    rank: 10
+    rank: 9
   });
   app.contextMenu.addItem({
     command: CommandIDs.shutdown,
     selector: selectorNotDir,
-    rank: 11
+    rank: 10
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.share,
     selector: selectorItem,
-    rank: 12
+    rank: 11
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyPath,
     selector: selectorItem,
-    rank: 13
+    rank: 12
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyDownloadLink,
     selector: selectorItem,
-    rank: 14
+    rank: 13
   });
 }
 
