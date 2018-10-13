@@ -65,7 +65,7 @@
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/settingeditor": "^0.8.1",
     "@jupyterlab/settingeditor-extension": "^0.14.1",
-    "@jupyterlab/shortcuts-extension": "^0.19.6",
+    "@jupyterlab/shortcuts-extension": "^0.19.3",
     "@jupyterlab/tabmanager-extension": "^0.19.1",
     "@jupyterlab/terminal": "^0.19.1",
     "@jupyterlab/terminal-extension": "^0.19.1",
@@ -219,7 +219,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.35.0",
+    "version": "0.35.1",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
