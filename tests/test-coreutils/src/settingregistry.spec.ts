@@ -34,7 +34,8 @@ export class TestConnector extends StateDB
     const composite = {};
     const user = {};
     const raw = (data as string) || '{ }';
-    return { id, data: { composite, user }, raw, schema };
+    const version = 'test';
+    return { id, data: { composite, user }, raw, schema, version };
   }
 }
 
@@ -62,7 +63,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {};
         const user = {};
         const raw = '{ "bar": "baz" }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.equal(null);
@@ -81,7 +83,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {};
         const user = {};
         const raw = '{ "baz": "qux" }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.not.equal(null);
@@ -100,7 +103,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {} as JSONObject;
         const user = {} as JSONObject;
         const raw = '{ }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.equal(null);
@@ -327,7 +331,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings).to.be.an.instanceof(Settings);
@@ -388,7 +393,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.equal(false);
@@ -403,7 +409,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.schema).to.deep.equal(schema);
@@ -435,7 +442,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.plugin).to.equal(id);
@@ -448,7 +456,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.registry).to.equal(registry);
@@ -461,7 +470,8 @@ describe('@jupyterlab/coreutils', () => {
         const data = { composite: {}, user: {} };
         const schema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.equal(false);

@@ -4,5 +4,6 @@
     "outDir": "lib",
     "rootDir": "src"
   },
+  "files": ["src/plugin-schema.json"],
   "include": ["src/*"]
 }
