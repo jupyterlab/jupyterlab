@@ -5,8 +5,6 @@ import { expect } from 'chai';
 
 import { simulate } from 'simulate-event';
 
-import { toArray } from '@phosphor/algorithm';
-
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
@@ -15,13 +13,12 @@ import { Context } from '@jupyterlab/docregistry';
 
 import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
 
-import { NotebookActions } from '@jupyterlab/notebook';
-
-import { ToolbarItems } from '@jupyterlab/notebook';
-
-import { INotebookModel } from '@jupyterlab/notebook';
-
-import { NotebookPanel } from '@jupyterlab/notebook';
+import {
+  INotebookModel,
+  NotebookActions,
+  NotebookPanel,
+  ToolbarItems
+} from '@jupyterlab/notebook';
 
 import {
   createNotebookContext,
@@ -248,10 +245,12 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('#populateDefaults()', () => {
-      it('should add the default items to the panel toolbar', () => {
-        ToolbarItems.populateDefaults(panel);
-        expect(toArray(panel.toolbar.names())).to.deep.equal([
+    describe('#getDefaultItems()', () => {
+      it('should return the default items of the panel toolbar', () => {
+        const names = ToolbarItems.getDefaultItems(panel).map(
+          item => item.name
+        );
+        expect(names).to.deep.equal([
           'save',
           'insert',
           'cut',
