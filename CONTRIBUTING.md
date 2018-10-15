@@ -98,22 +98,22 @@ jupyter lab build  # Build the app dir assets (optional)
 
 Notes:
 
-* A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
+- A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
 
-* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
+- The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
   already, you can use the `yarn` command when developing, and it will use the
   local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
   a built application directory.
 
-* At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
+- At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
   rebuild.
 
-* If `pip` gives a `VersionConflict` error, it usually means that the installed
+- If `pip` gives a `VersionConflict` error, it usually means that the installed
   version of `jupyterlab_server` is out of date. Run `pip install --upgrade jupyterlab_server` to get the latest version.
 
-* To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
+- To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
-* You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
+- You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
@@ -225,8 +225,8 @@ while debugging test options. See [above](#build-and-run-the-tests) for more inf
 
 The JupyterLab application is made up of two major parts:
 
-* an npm package
-* a Jupyter server extension (Python package)
+- an npm package
+- a Jupyter server extension (Python package)
 
 Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
@@ -314,10 +314,10 @@ To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 The key utility is `jlpm run integrity`, which ensures the integrity of
 the packages in the repo. It will:
 
-* Ensure the core package version dependencies match everywhere.
-* Ensure imported packages match dependencies.
-* Ensure a consistent version of all packages.
-* Manage the meta package.
+- Ensure the core package version dependencies match everywhere.
+- Ensure imported packages match dependencies.
+- Ensure a consistent version of all packages.
+- Manage the meta package.
 
 The `packages/metapackage` package is used to build all of the TypeScript
 in the repository at once, instead of 50+ individual builds.
@@ -337,18 +337,18 @@ If you want to make changes to one of JupyterLab's external packages (for exampl
 
 1.  Make your changes and then build the external package
 2.  Register a link to the modified external package
-    * navigate to the external package dir and run `jlpm link`
+    - navigate to the external package dir and run `jlpm link`
 3.  Link JupyterLab to modded package
-    * navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
+    - navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
 
 You can then (re)build JupyterLab (eg `jlpm run build`) and your changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the `unlink` command:
 
 1.  Unlink JupyterLab and modded package
-    * navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
+    - navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
 2.  Reinstall original version of the external package in JupyterLab
-    * run `jlpm install --check-files`
+    - run `jlpm install --check-files`
 
 You can then (re)build JupyterLab and everything should be back to default.
 
@@ -360,15 +360,15 @@ Specifically, when working with Phosphor, you'll probably have to link your copy
 
 ## Notes
 
-* By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
+- By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
   the core application in `<git root>/jupyterlab/build`,
   run `jupyter lab --core-mode`. This is the core application that will
   be shipped.
 
-* If working with extensions, see the extension documentation on
+- If working with extensions, see the extension documentation on
   https://jupyterlab.readthedocs.io/en/latest/index.html.
 
-* The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
+- The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
   omit the type declarations when using a language other than TypeScript.
 
-* For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).
+- For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).
