@@ -6,22 +6,44 @@
   },
   "include": ["src/**/*"],
   "references": [
-    { "path": "../application" },
-    { "path": "../apputils" },
-    { "path": "../cells" },
-    { "path": "../codeeditor" },
-    { "path": "../codemirror" },
-    { "path": "../console" },
-    { "path": "../coreutils" },
-    { "path": "../docmanager" },
-    { "path": "../docregistry" },
-    { "path": "../filebrowser" },
-    { "path": "../fileeditor" },
-    { "path": "../inspector" },
-    { "path": "../mainmenu" },
-    { "path": "../notebook" },
-    { "path": "../observables" },
-    { "path": "../services" },
-    { "path": "../tooltip" }
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../services"
+    }
   ]
 }

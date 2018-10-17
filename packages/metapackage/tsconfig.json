@@ -13,9 +13,6 @@
       "path": "../application-extension"
     },
     {
-      "path": "../statusbar-extension"
-    },
-    {
       "path": "../apputils"
     },
     {
@@ -170,6 +167,9 @@
     },
     {
       "path": "../shortcuts-extension"
+    },
+    {
+      "path": "../statusbar-extension"
     },
     {
       "path": "../tabmanager-extension"
