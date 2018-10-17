@@ -5,9 +5,6 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: './example/'
   },
-  node: {
-    fs: 'empty'
-  },
   bail: true,
   devtool: 'cheap-source-map',
   mode: 'production',
