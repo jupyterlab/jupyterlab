@@ -3,7 +3,7 @@
   "version": "0.20.1",
   "private": true,
   "scripts": {
-    "build": "node extract-data && webpack",
+    "build": "webpack",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build"
   },
