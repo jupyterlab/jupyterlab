@@ -11,7 +11,7 @@ steps:
   inputs:
     versionSpec: '3.6'
     architecture: 'x64'
-- bash: rm -rf $(which yarn)
+- bash: sudo rm -rf $(which yarn)
 - bash: '! which yarn'
 
 - bash: mkdir ~/.jupyter
