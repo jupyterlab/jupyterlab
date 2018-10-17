@@ -1,18 +1,13 @@
 {
   "name": "@jupyterlab/statusbar-extension",
   "version": "0.5.0",
-  "description": "A status bar for JupyterLab",
-  "keywords": [
-    "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension"
-  ],
-  "homepage": "https://github.com/jupyterlab/jupyterlab-statusbar",
+  "description": "JupyterLab - Statusbar Extension",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/jupyterlab/jupyterlab-statusbar/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "license": "BSD-3-Clause",
-  "author": "Richa Gadgil, Takahiro Shimokobe, Declan Kelly",
+  "author": "Project Jupyter, Richa Gadgil, Takahiro Shimokobe, Declan Kelly",
   "files": [
     "lib/**/*.d.ts",
     "lib/**/*.js.map",
@@ -28,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-statusbar.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "npm run lint:ts && tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
-    "lint:ts": "tslint -p tsconfig.json --exclude '**/*.d.ts'",
-    "typedoc": "typedoc --out docs/ src/ --exclude '**/src/+(component|style)/*.*'",
-    "watch": "tsc -w  --listEmittedFiles"
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^0.19.1",
@@ -81,5 +76,8 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
