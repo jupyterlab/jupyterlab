@@ -11,7 +11,7 @@ steps:
   inputs:
     versionSpec: '3.6'
     architecture: 'x64'
-- script: ! yarn
+- script: '! yarn'
   displayName: 'Verify yarn not installed'
 
 - script: mkdir ~/.jupyter
@@ -19,7 +19,7 @@ steps:
 - script: python -m pip install --upgrade pip
 - script: pip --version
   displayName: 'Show pip version'
-- script: python -m pip install -e ".[test]"
+- script: 'python -m pip install -e ".[test]"'
 - script: jlpm versions
 - script: jlpm config current
 - script: jupyter serverextension enable --py jupyterlab
