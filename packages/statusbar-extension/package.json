@@ -1,6 +1,6 @@
 {
-  "name": "@jupyterlab/statusbar",
-  "version": "0.4.3",
+  "name": "@jupyterlab/statusbar-extension",
+  "version": "0.5.0",
   "description": "A status bar for JupyterLab",
   "keywords": [
     "jupyter",

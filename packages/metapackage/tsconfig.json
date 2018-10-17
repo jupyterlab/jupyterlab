@@ -13,6 +13,9 @@
       "path": "../application-extension"
     },
     {
+      "path": "../statusbar-extension"
+    },
+    {
       "path": "../apputils"
     },
     {
