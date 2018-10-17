@@ -1,24 +1,27 @@
 {
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true,
-    "preserveWatchOutput": true,
-    "noImplicitThis": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2015",
-    "outDir": "./lib",
-    "lib": ["dom", "es2015"],
-    "types": [],
-    "jsx": "react",
-    "skipLibCheck": true,
-    "strict": true
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": [
-    "./src/**/*.*"
+  "include": ["src/*"],
+  "references": [
+    { "path": "../application" },
+    { "path": "../apputils" },
+    { "path": "../cells" },
+    { "path": "../codeeditor" },
+    { "path": "../codemirror" },
+    { "path": "../console" },
+    { "path": "../coreutils" },
+    { "path": "../docmanager" },
+    { "path": "../docregistry" },
+    { "path": "../filebrowser" },
+    { "path": "../fileeditor" },
+    { "path": "../inspector" },
+    { "path": "../mainmenu" },
+    { "path": "../notebook" },
+    { "path": "../observables" },
+    { "path": "../services" },
+    { "path": "../tooltip" }
   ]
 }
