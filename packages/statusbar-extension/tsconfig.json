@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "preserveWatchOutput": true,
+    "noImplicitThis": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "outDir": "./lib",
+    "lib": ["dom", "es2015"],
+    "types": [],
+    "jsx": "react",
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": [
+    "./src/**/*.*"
+  ]
+}
