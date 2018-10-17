@@ -41,9 +41,36 @@ jobs:
     inputs:
       testResultsFiles: '**/test-*.xml'
       testRunTitle: 'pytest'
-    condition: eq(variables['group'], 'python'))
+    condition: eq(variables['group'], 'python')
   - task: Bash@3
     displayName: 'after_success'
     inputs:
       targetType: 'filePath'
       filePath: ./scripts/travis_after_success.sh
+- job: 'Appveyor'
+  pool:
+    vmImage: 'vs2017-win2016'
+  variables:
+    python.version: '3.6'
+  strategy:
+    matrix:
+      JS:
+        name: 'javascript'
+        python.version: '3.5'
+      Python:
+        name: 'python'
+      Integrity:
+        group: 'integrity'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: 'python -m pip install -U pip'
+  - script: 'pip install --upgrade -e ".[test]"'
+  - script: 'jupyter kernelspec list'
+  - script: 'jlpm versions'
+  - script: 'jlpm config current'
+  - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
