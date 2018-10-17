@@ -43,7 +43,7 @@ jobs:
       testRunTitle: 'pytest'
     condition: eq(variables['group'], 'python'))
   - task: Bash@3
-    displayName: 'success'
+    displayName: 'after_success'
     inputs:
       targetType: 'filePath'
-      filePath: ./scripts/travis_success.sh
+      filePath: ./scripts/travis_after_success.sh
