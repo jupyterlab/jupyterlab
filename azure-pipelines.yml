@@ -1,0 +1,21 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+steps:
+- task: CondaEnvironment@0
+  inputs:
+    packageSpecs: '-c conda-forge python=3.6 notebook pytest'
+    updateConda: true
+- script: conda info -a
+- script: mkdir ~/.jupyter
+- script: pip install -v -e ".[test]"
+- script: jlpm versions
+- script: jlpm config current
+- script: jupyter serverextension enable --py jupyterlab
+- script: python -c "from jupyterlab.commands import build_check; build_check()"
+- script: py.test -v
