@@ -7,15 +7,22 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 steps:
-- task: CondaEnvironment@0
+- task: UsePythonVersion@0
   inputs:
-    packageSpecs: '-c conda-forge python=3.6 notebook pytest'
-    updateConda: true
-- script: conda info -a
+    versionSpec: '3.6'
+    architecture: 'x64'
+- script: ! yarn
+  displayName: 'Verify yarn not installed'
+
 - script: mkdir ~/.jupyter
-- script: pip install -v -e ".[test]"
+
+- script: python -m pip install --upgrade pip
+- script: pip --version
+  displayName: 'Show pip version'
+- script: python -m pip install -e ".[test]"
 - script: jlpm versions
 - script: jlpm config current
 - script: jupyter serverextension enable --py jupyterlab
+
 - script: python -c "from jupyterlab.commands import build_check; build_check()"
 - script: py.test -v
