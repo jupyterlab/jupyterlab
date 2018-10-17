@@ -9,16 +9,16 @@ jobs:
     gh.ref: github.com/jupyterlab/jupyterlab.git
   strategy:
     matrix:
-      js:
+      JS:
         group: 'js'
-      integrity:
+      Integrity:
         group: 'integrity'
-      python:
+      Python:
         group: 'python'
-      cli:
+      CLI:
         group: 'cli'
         python.version: '3.5'
-      docs:
+      Docs:
         group: 'docs'
 
   steps:
@@ -26,12 +26,22 @@ jobs:
     inputs:
       versionSpec: '$(python.version)'
       architecture: 'x64'
-  - bash: ./scripts/travis_install.sh
+
+  - task: Bash@3
     displayName: 'install'
-  - bash: ./scripts/travis_script.sh
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/travis_install.sh
+  - task: Bash@3
     displayName: 'script'
-  - bash: ./scripts/travis_after_success.sh
-    displayName: 'after_success'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/travis_script.sh
+  - task: Bash@3
+    displayName: 'success'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/travis_success.sh
 
   - task: PublishTestResults@2
     inputs:
