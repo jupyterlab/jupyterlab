@@ -4,23 +4,23 @@ import icon from '../style/icon';
 import { classes, style } from 'typestyle/lib';
 
 export namespace IconItem {
-    export interface IProps {
-        source: string;
-    }
+  export interface IProps {
+    source: string;
+  }
 }
 
 // tslint:disable-next-line:variable-name
 export const IconItem = (
-    props: IconItem.IProps &
-        React.HTMLAttributes<HTMLDivElement> & {
-            offset: { x: number; y: number };
-        }
+  props: IconItem.IProps &
+    React.HTMLAttributes<HTMLDivElement> & {
+      offset: { x: number; y: number };
+    }
 ): React.ReactElement<IconItem.IProps> => {
-    const { source, className, offset, ...rest } = props;
-    return (
-        <div
-            className={classes(className, source, style(icon(offset)))}
-            {...rest}
-        />
-    );
+  const { source, className, offset, ...rest } = props;
+  return (
+    <div
+      className={classes(className, source, style(icon(offset)))}
+      {...rest}
+    />
+  );
 };

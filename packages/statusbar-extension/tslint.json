@@ -1,42 +1,25 @@
 {
   "rules": {
-    "align": [
-      true,
-      "parameters",
-      "statements"
-    ],
+    "align": [true, "parameters", "statements"],
     "ban": [
-      true, ["_", "forEach"],
+      true,
+      ["_", "forEach"],
       ["_", "each"],
       ["$", "each"],
       ["angular", "forEach"]
     ],
     "class-name": true,
-    "comment-format": [
-      true,
-      "check-space"
-    ],
+    "comment-format": [true, "check-space"],
     "curly": true,
     "eofline": true,
     "forin": false,
-    "indent": [
-      true,
-      "spaces",
-      2
-    ],
-    "interface-name": [
-      true,
-      "always-prefix"
-    ],
+    "indent": [true, "spaces", 2],
+    "interface-name": [true, "always-prefix"],
     "jsdoc-format": true,
     "label-position": true,
-    "max-line-length": [
-      false
-    ],
+    "max-line-length": [false],
     "member-access": false,
-    "member-ordering": [
-      false
-    ],
+    "member-ordering": [false],
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,
@@ -46,12 +29,7 @@
     "no-consecutive-blank-lines": false,
     "no-console": {
       "severity": "warning",
-      "options": ["debug",
-        "info",
-        "time",
-        "timeEnd",
-        "trace"
-      ]
+      "options": ["debug", "info", "time", "timeEnd", "trace"]
     },
     "no-construct": true,
     "no-debugger": true,
@@ -61,10 +39,7 @@
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
-    "no-invalid-this": [
-      true,
-      "check-function-in-method"
-    ],
+    "no-invalid-this": [true, "check-function-in-method"],
     "no-null-keyword": false,
     "no-reference": true,
     "no-require-imports": false,
@@ -85,15 +60,8 @@
       "check-finally",
       "check-whitespace"
     ],
-    "one-variable-per-declaration": [true,
-      "ignore-for-loop"
-    ],
-    "quotemark": [
-      true,
-      "single",
-      "avoid-escape",
-      "jsx-double"
-    ],
+    "one-variable-per-declaration": [true, "ignore-for-loop"],
+    "quotemark": [true, "single", "avoid-escape", "jsx-double"],
     "radix": true,
     "semicolon": [true, "always", "ignore-bound-class-methods"],
     "switch-default": true,
@@ -104,14 +72,8 @@
         "singleline": "never"
       }
     ],
-    "triple-equals": [
-      true,
-      "allow-null-check",
-      "allow-undefined-check"
-    ],
-    "typedef": [
-      false
-    ],
+    "triple-equals": [true, "allow-null-check", "allow-undefined-check"],
+    "typedef": [false],
     "typedef-whitespace": [
       false,
       {
@@ -130,9 +92,7 @@
       }
     ],
     "use-isnan": true,
-    "use-strict": [
-      false
-    ],
+    "use-strict": [false],
     "variable-name": [
       true,
       "check-format",

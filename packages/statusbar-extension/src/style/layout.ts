@@ -1,18 +1,18 @@
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const centeredFlex: NestedCSSProperties = {
-    display: 'flex',
-    alignItems: 'center'
+  display: 'flex',
+  alignItems: 'center'
 };
 
 export const leftToRight: NestedCSSProperties = {
-    flexDirection: 'row'
+  flexDirection: 'row'
 };
 
 export const rightToLeft: NestedCSSProperties = {
-    flexDirection: 'row-reverse'
+  flexDirection: 'row-reverse'
 };
 
 export const equiDistant: NestedCSSProperties = {
-    justifyContent: 'space-between'
+  justifyContent: 'space-between'
 };

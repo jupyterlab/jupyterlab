@@ -11,11 +11,11 @@ Component Interactions
 
 ## Dependencies
 
--   JupyterLab
+- JupyterLab
 
 ## Optional Dependencies
 
--   [nbresuse](https://github.com/yuvipanda/nbresuse)
+- [nbresuse](https://github.com/yuvipanda/nbresuse)
 
 ```bash
 pip install nbresuse
