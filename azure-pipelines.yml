@@ -32,6 +32,7 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: ./scripts/travis_install.sh
+  - script: python -m pip install virtualenv
   - task: Bash@3
     displayName: 'script'
     inputs:
