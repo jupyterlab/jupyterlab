@@ -35,5 +35,9 @@ steps:
 
 - script: python -c "from jupyterlab.commands import build_check; build_check()"
   displayName: 'Run build check'
-- script: py.test -v
+- script: py.test --junitxml=junit/test-results.xml
   displayName: 'Run pytest'
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python'
