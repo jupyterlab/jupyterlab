@@ -1,43 +1,39 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-pool:
-  vmImage: 'Ubuntu 16.04'
+jobs:
+- job: 'Travis'
+  pool:
+    vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+  variables:
+    python.version: '3.6'
+    gh.ref: github.com/jupyterlab/jupyterlab.git
+  strategy:
+    matrix:
+      js:
+        group: 'js'
+      integrity:
+        group: 'integrity'
+      python:
+        group: 'python'
+      cli:
+        group: 'cli'
+        python.version: '3.5'
+      docs:
+        group: 'docs'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.6'
-    architecture: 'x64'
-- bash: sudo rm -rf $(which yarn)
-  displayName: 'Remove yarn'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+  - bash: ./scripts/travis_install.sh
+    displayName: 'install'
+  - bash: ./scripts/travis_script.sh
+    displayName: 'script'
+  - bash: ./scripts/travis_after_success.sh
+    displayName: 'after_success'
 
-- bash: '! which yarn'
-  displayName: 'Verify yarn removed'
-
-- bash: mkdir ~/.jupyter
-  displayName: 'Make .jupyter folder'
-
-- script: python -m pip install --upgrade pip
-  displayName: 'Upgrade pip'
-- script: pip --version
-  displayName: 'Show pip version'
-- script: 'python -m pip install -e ".[test]"'
-  displayName: 'Install python deps'
-- script: jlpm versions
-  displayName: 'Show JL version'
-- script: jlpm config current
-  displayName: 'Show JL config'
-- script: jupyter serverextension enable --py jupyterlab
-  displayName: 'Show JL server extension'
-
-- script: python -c "from jupyterlab.commands import build_check; build_check()"
-  displayName: 'Run build check'
-- script: py.test -v --durations=0 --junitxml=junit/test-results.xml
-  displayName: 'Run pytest'
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: '**/test-*.xml'
-    testRunTitle: 'Publish test results for Python'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+      testRunTitle: 'Publish pytest'
