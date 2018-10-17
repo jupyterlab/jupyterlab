@@ -23,15 +23,17 @@
   "definitions": {
     "shortcut": {
       "properties": {
-        "command": { "type": "string" },
+        "args": { "required": false, "type": "object" },
+        "command": { "required": true, "type": "string" },
         "keys": {
           "items": { "type": "string" },
           "minItems": 1,
+          "required": true,
           "type": "array"
         },
-        "selector": { "type": "string" },
-        "title": { "type": "string" },
-        "category": { "type": "string" }
+        "selector": { "required": true, "type": "string" },
+        "title": { "required": true, "type": "string" },
+        "category": { "required": true, "type": "string" }
       },
       "type": "object"
     }
