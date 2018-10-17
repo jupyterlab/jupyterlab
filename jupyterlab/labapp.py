@@ -318,9 +318,9 @@ class LabApp(NotebookApp):
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
-    override_static_url = Unicode('', help=('The override url for static lab assets, typically a CDN.'))
+    override_static_url = Unicode('', config=True, help=('The override url for static lab assets, typically a CDN.'))
 
-    override_theme_url = Unicode('', help=('The override url for static lab theme assets, typically a CDN.'))
+    override_theme_url = Unicode('', config=True, help=('The override url for static lab theme assets, typically a CDN.'))
 
     app_dir = Unicode(get_app_dir(), config=True,
         help="The app directory to launch JupyterLab from.")
