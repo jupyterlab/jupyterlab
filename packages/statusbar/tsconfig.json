@@ -11,6 +11,12 @@
     },
     {
       "path": "../apputils"
+    },
+    {
+      "path": ""
+    },
+    {
+      "path": "../coreutils"
     }
   ]
 }

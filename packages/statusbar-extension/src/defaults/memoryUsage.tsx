@@ -9,11 +9,10 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-import { IDefaultsManager } from './manager';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
-import { TextItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, TextItem } from '@jupyterlab/statusbar';
 
 class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
   implements IMemoryUsage {

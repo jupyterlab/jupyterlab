@@ -23,10 +23,9 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
-import { IDefaultsManager } from './manager';
 import { GroupItem } from '@jupyterlab/statusbar';
 import vars from '../style/variables';
-import { interactiveItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, interactiveItem } from '@jupyterlab/statusbar';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (

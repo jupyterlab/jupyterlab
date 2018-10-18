@@ -5,7 +5,7 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '@jupyterlab/statusbar';
+import { TextItem, SettingsConnector } from '@jupyterlab/statusbar';
 
 import {
   JupyterLabPlugin,
@@ -19,7 +19,6 @@ import { ISignal } from '@phosphor/signaling';
 import { Cell } from '@jupyterlab/cells';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
-import { IDefaultsManager } from './manager';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { CommandRegistry } from '@phosphor/commands';
@@ -27,11 +26,14 @@ import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup, Popup } from '@jupyterlab/statusbar';
-import { interactiveItem, clickedItem } from '@jupyterlab/statusbar';
+import {
+  IDefaultsManager,
+  interactiveItem,
+  clickedItem
+} from '@jupyterlab/statusbar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { Message } from '@phosphor/messaging';
-import { SettingsConnector } from '../util/settings';
 
 namespace TabSpaceComponent {
   export interface IProps {

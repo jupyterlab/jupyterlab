@@ -24,8 +24,7 @@ import { Token } from '@phosphor/coreutils';
 import { ProgressBar } from '@jupyterlab/statusbar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
-import { IDefaultsManager } from './manager';
-import { GroupItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, GroupItem } from '@jupyterlab/statusbar';
 import vars from '../style/variables';
 
 // tslint:disable-next-line:variable-name

@@ -14,13 +14,12 @@ import {
   Notebook
 } from '@jupyterlab/notebook';
 import { toArray } from '@phosphor/algorithm';
-import { IDefaultsManager } from './manager';
 import { Cell } from '@jupyterlab/cells';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
-import { IconItem } from '@jupyterlab/statusbar';
+import { IconItem, IDefaultsManager } from '@jupyterlab/statusbar';
 import { IStatusContext } from '../contexts';
 
 export const cellStatus = (

@@ -5,7 +5,7 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, TextItem, TextExt } from '@jupyterlab/statusbar';
 
 import {
   JupyterLabPlugin,
@@ -15,8 +15,6 @@ import {
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { IDefaultsManager } from './manager';
-
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { ISignal } from '@phosphor/signaling';
@@ -25,7 +23,6 @@ import { IDisposable } from '@phosphor/disposable';
 import { Kernel, Session } from '@jupyterlab/services';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
 import { interactiveItem } from '@jupyterlab/statusbar';
 import { Message } from '@phosphor/messaging';

@@ -15,17 +15,13 @@ import {
   NotebookMode
 } from '@jupyterlab/notebook';
 
-import { IDefaultsManager } from './manager';
-
-import { TextItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, TextItem, TextExt } from '@jupyterlab/statusbar';
 
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-// import { CommandRegistry } from '@phosphor/commands';
 import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IStatusContext } from '../contexts';
-import { TextExt } from '../util/text';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (

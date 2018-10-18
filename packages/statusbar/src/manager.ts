@@ -1,14 +1,10 @@
 import { Token } from '@phosphor/coreutils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
-import { IStatusBar } from '@jupyterlab/statusbar';
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { STATUSBAR_PLUGIN_ID } from '..';
-import { SetExt } from '../util/set';
+import { IStatusBar } from './statusbar';
+import { SetExt, SignalExt, SettingsConnector } from './util';
 import { Widget } from '@phosphor/widgets';
 import { Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
-import { SignalExt } from '../util/signal';
-import { SettingsConnector } from '../util/settings';
 
 export interface IDefaultsManager {
   addDefaultStatus(
@@ -31,11 +27,11 @@ export const IDefaultsManager = new Token<IDefaultsManager>(
   '@jupyterlab/statusbar:IDefaultStatusesManager'
 );
 
-class DefaultsManager implements IDefaultsManager, IDisposable {
+export class DefaultsManager implements IDefaultsManager, IDisposable {
   constructor(opts: DefaultsManager.IOptions) {
     this._statusBar = opts.statusBar;
     this._settingsConnector = new SettingsConnector({
-      pluginId: STATUSBAR_PLUGIN_ID,
+      pluginId: opts.id,
       registry: opts.settings,
       settingKey: 'enabledDefaultItems'
     });
@@ -139,8 +135,9 @@ class DefaultsManager implements IDefaultsManager, IDisposable {
   private _statusBar: IStatusBar;
 }
 
-namespace DefaultsManager {
+export namespace DefaultsManager {
   export interface IOptions {
+    id: string;
     settings: ISettingRegistry;
     statusBar: IStatusBar;
   }
@@ -149,20 +146,3 @@ namespace DefaultsManager {
     stateChanged: SignalExt.CombinedSignal<any, void>;
   }
 }
-
-/**
- * Initialization data for the statusbar extension.
- */
-export const defaultsManager: JupyterLabPlugin<IDefaultsManager> = {
-  id: '@jupyterlab/statusbar:defaults-manager',
-  provides: IDefaultsManager,
-  autoStart: true,
-  requires: [ISettingRegistry, IStatusBar],
-  activate: (
-    _app: JupyterLab,
-    settings: ISettingRegistry,
-    statusBar: IStatusBar
-  ) => {
-    return new DefaultsManager({ settings, statusBar });
-  }
-};

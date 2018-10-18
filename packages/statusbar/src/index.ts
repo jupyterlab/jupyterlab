@@ -4,5 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 export * from './statusbar';
+export * from './manager';
 export * from './style/statusbar';
 export * from './components';
+export * from './util';

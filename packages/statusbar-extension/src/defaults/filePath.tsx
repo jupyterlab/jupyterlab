@@ -11,8 +11,7 @@ import {
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultsManager } from './manager';
-import { TextItem } from '@jupyterlab/statusbar';
+import { IDefaultsManager, TextItem } from '@jupyterlab/statusbar';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';

@@ -26,9 +26,12 @@ import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
-import { showPopup, Popup } from '@jupyterlab/statusbar';
-import { IDefaultsManager } from './manager';
-import { interactiveItem } from '@jupyterlab/statusbar';
+import {
+  IDefaultsManager,
+  interactiveItem,
+  showPopup,
+  Popup
+} from '@jupyterlab/statusbar';
 import {
   lineFormWrapper,
   lineFormInput,
