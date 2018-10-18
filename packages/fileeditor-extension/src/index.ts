@@ -456,9 +456,9 @@ function activate(
 
   // Add a command for creating a new text file.
   commands.addCommand(CommandIDs.createNew, {
-    label: 'Text File',
+    label: args => (args['isPalette'] ? 'New Text File' : 'Text File'),
     caption: 'Create a new text file',
-    iconClass: EDITOR_ICON_CLASS,
+    iconClass: args => (args['isPalette'] ? '' : EDITOR_ICON_CLASS),
     execute: args => {
       let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
       return createNew(cwd as string);
@@ -528,6 +528,10 @@ function activate(
       };
       palette.addItem({ command, args, category: 'Text Editor' });
     }
+
+    args = { isPalette: true };
+    command = CommandIDs.createNew;
+    palette.addItem({ command, args, category: 'Text Editor' });
 
     args = { name: 'Increase Font Size', delta: 1 };
     command = CommandIDs.changeFontSize;
