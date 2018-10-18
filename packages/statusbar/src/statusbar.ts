@@ -61,9 +61,9 @@ export namespace IStatusBar {
      */
     align?: Alignment;
     /**
-     *  Ordering of Items -- higher priority items are closer to the middle.
+     *  Ordering of Items -- higher rank items are closer to the middle.
      */
-    priority?: number;
+    rank?: number;
     /**
      * Whether the widget is shown or hidden.
      */
@@ -140,7 +140,7 @@ export class StatusBar extends Widget implements IStatusBar {
     }
 
     let align = options.align || 'left';
-    let priority = options.priority || 0;
+    let rank = options.rank || 0;
     let isActive = options.isActive || (() => true);
     let stateChanged = options.stateChanged || null;
     let changeCallback =
@@ -153,7 +153,7 @@ export class StatusBar extends Widget implements IStatusBar {
     let wrapper = {
       widget,
       align,
-      priority,
+      rank,
       isActive,
       stateChanged,
       changeCallback
@@ -161,7 +161,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
     let rankItem = {
       id,
-      priority
+      rank
     };
 
     widget.addClass(itemStyle);
@@ -230,10 +230,7 @@ export class StatusBar extends Widget implements IStatusBar {
     side: Private.IRankItem[],
     newItem: Private.IRankItem
   ): number {
-    return ArrayExt.findFirstIndex(
-      side,
-      item => item.priority > newItem.priority
-    );
+    return ArrayExt.findFirstIndex(side, item => item.rank > newItem.rank);
   }
 
   private _refreshItem({ isActive, widget }: StatusBar.IItem) {
@@ -283,7 +280,7 @@ export namespace StatusBar {
    */
   export interface IItem {
     align: IStatusBar.Alignment;
-    priority: number;
+    rank: number;
     widget: Widget;
     isActive: () => boolean;
     stateChanged: ISignal<any, void> | null;
@@ -300,6 +297,6 @@ namespace Private {
    */
   export interface IRankItem {
     id: string;
-    priority: number;
+    rank: number;
   }
 }

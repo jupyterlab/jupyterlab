@@ -183,7 +183,7 @@ export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
 
     manager.addDefaultStatus('command-edit-item', item, {
       align: 'right',
-      priority: 4,
+      rank: 4,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
     });
 

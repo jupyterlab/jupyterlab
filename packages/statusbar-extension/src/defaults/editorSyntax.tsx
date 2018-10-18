@@ -217,7 +217,7 @@ export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
     let item = new EditorSyntax({ tracker, commands: app.commands });
     manager.addDefaultStatus('editor-syntax-item', item, {
       align: 'left',
-      priority: 0,
+      rank: 0,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
     });
 

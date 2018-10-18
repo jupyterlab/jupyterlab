@@ -299,7 +299,7 @@ export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
 
     manager.addDefaultStatus('kernel-status-item', item, {
       align: 'left',
-      priority: 1,
+      rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: consoleTracker }

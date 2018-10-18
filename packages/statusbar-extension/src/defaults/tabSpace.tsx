@@ -504,7 +504,7 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
 
     defaultsManager.addDefaultStatus('tab-space-item', item, {
       align: 'right',
-      priority: 1,
+      rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: editorTracker },

@@ -263,7 +263,7 @@ export const memoryUsageItem: JupyterLabPlugin<IMemoryUsage> = {
 
     defaultsManager.addDefaultStatus('memory-usage-item', item, {
       align: 'left',
-      priority: 2,
+      rank: 2,
       isActive: () => item.model!.metricsAvailable,
       stateChanged: item.model!.stateChanged
     });

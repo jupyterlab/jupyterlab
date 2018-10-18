@@ -190,7 +190,7 @@ export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
 
     manager.addDefaultStatus('running-sessions-item', item, {
       align: 'left',
-      priority: 0
+      rank: 0
     });
 
     return item;

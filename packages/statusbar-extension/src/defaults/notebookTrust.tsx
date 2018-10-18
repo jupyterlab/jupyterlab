@@ -286,7 +286,7 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
 
     manager.addDefaultStatus('notebook-trust-item', item, {
       align: 'right',
-      priority: 3,
+      rank: 3,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
     });
 

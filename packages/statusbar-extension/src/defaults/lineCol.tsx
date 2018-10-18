@@ -412,7 +412,7 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
 
     defaultsManager.addDefaultStatus('line-col-item', item, {
       align: 'right',
-      priority: 2,
+      rank: 2,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: editorTracker },

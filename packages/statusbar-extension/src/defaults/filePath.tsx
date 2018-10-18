@@ -212,7 +212,7 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
 
     manager.addDefaultStatus('file-path-item', item, {
       align: 'right',
-      priority: 0,
+      rank: 0,
       isActive: () => {
         return true;
       }
