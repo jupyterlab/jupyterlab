@@ -25,14 +25,15 @@ import { ProgressBar } from '@jupyterlab/statusbar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 import { IDefaultsManager, GroupItem } from '@jupyterlab/statusbar';
-import vars from '../style/variables';
+
+const HALF_SPACING = 4;
 
 // tslint:disable-next-line:variable-name
 const FileUploadComponent = (
   props: FileUploadComponent.IProps
 ): React.ReactElement<FileUploadComponent.IProps> => {
   return (
-    <GroupItem spacing={vars.textIconHalfSpacing}>
+    <GroupItem spacing={HALF_SPACING}>
       <TextItem source={'Uploading'} />
       <ProgressBar percentage={props.upload} />
     </GroupItem>

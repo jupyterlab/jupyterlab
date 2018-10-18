@@ -2,8 +2,13 @@ import { Widget, PanelLayout } from '@phosphor/widgets';
 import { HoverBox } from '@jupyterlab/apputils';
 
 import { Message } from '@phosphor/messaging';
-import { hoverItem } from '../style/lineForm';
 import { clickedItem, interactiveItem } from '../style/statusbar';
+
+import { style } from 'typestyle/lib';
+
+const hoverItem = style({
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+});
 
 export function showPopup(options: Popup.IOptions): Popup | null {
   let dialog = new Popup(options);

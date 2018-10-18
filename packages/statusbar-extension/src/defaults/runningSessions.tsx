@@ -24,20 +24,21 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { GroupItem } from '@jupyterlab/statusbar';
-import vars from '../style/variables';
 import { IDefaultsManager, interactiveItem } from '@jupyterlab/statusbar';
+
+const HALF_SPACING = 4;
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
   return (
-    <GroupItem spacing={vars.textIconHalfSpacing} onClick={props.handleClick}>
-      <GroupItem spacing={vars.textIconHalfSpacing}>
+    <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
+      <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
         <IconItem source={'terminal-item'} offset={{ x: 1, y: 3 }} />
       </GroupItem>
-      <GroupItem spacing={vars.textIconHalfSpacing}>
+      <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
         <IconItem source={'kernel-item'} offset={{ x: 0, y: 2 }} />
       </GroupItem>
