@@ -22,7 +22,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 import { showPopup, Popup } from '../component/hover';
-import { interactiveItem } from '../style/statusBar';
+import { interactiveItem } from '@jupyterlab/statusbar';
 
 namespace EditorSyntaxComponent {
   export interface IProps {

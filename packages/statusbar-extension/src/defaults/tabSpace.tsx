@@ -27,7 +27,7 @@ import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup, Popup } from '../component/hover';
-import { interactiveItem, clickedItem } from '../style/statusBar';
+import { interactiveItem, clickedItem } from '@jupyterlab/statusbar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { Message } from '@phosphor/messaging';

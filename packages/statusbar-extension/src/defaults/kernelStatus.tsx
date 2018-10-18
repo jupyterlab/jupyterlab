@@ -27,7 +27,7 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { TextExt } from '../util/text';
 import { CommandRegistry } from '@phosphor/commands';
-import { interactiveItem } from '../style/statusBar';
+import { interactiveItem } from '@jupyterlab/statusbar';
 import { Message } from '@phosphor/messaging';
 import { IFilePath } from './filePath';
 

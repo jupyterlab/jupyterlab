@@ -3,7 +3,7 @@ import '../style/index.css';
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import { StatusBar, IStatusBar } from './statusBar';
+import { StatusBar, IStatusBar } from '@jupyterlab/statusbar';
 
 // Export default status bar items
 
@@ -22,7 +22,7 @@ import {
   savingStatusItem
 } from './defaults';
 
-export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar:plugin';
+export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 
 /**
  * Initialization data for the statusbar extension.
@@ -53,5 +53,3 @@ const plugins: JupyterLabPlugin<any>[] = [
 ];
 
 export default plugins;
-
-export * from './statusBar';

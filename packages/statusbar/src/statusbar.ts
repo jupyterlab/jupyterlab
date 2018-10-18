@@ -1,9 +1,3 @@
-/**
- * Main status bar object which contains all widgets.
- */
-/**
- *
- */
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Token } from '@phosphor/coreutils';
 import { ApplicationShell } from '@jupyterlab/application';
@@ -15,7 +9,7 @@ import {
   item as itemStyle,
   leftSide as leftSideStyle,
   rightSide as rightSideStyle
-} from './style/statusBar';
+} from './style/statusbar';
 import { Message } from '@phosphor/messaging';
 
 // tslint:disable-next-line:variable-name
@@ -23,6 +17,9 @@ export const IStatusBar = new Token<IStatusBar>(
   '@jupyterlab/statusbar:IStatusBar'
 );
 
+/**
+ * Main status bar object which contains all widgets.
+ */
 export interface IStatusBar {
   /**
    * Add an item to the status bar.

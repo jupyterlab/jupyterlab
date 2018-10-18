@@ -44,6 +44,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

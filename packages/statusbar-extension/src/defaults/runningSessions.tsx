@@ -26,7 +26,7 @@ import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
 import { GroupItem } from '../component/group';
 import vars from '../style/variables';
-import { interactiveItem } from '../style/statusBar';
+import { interactiveItem } from '@jupyterlab/statusbar';
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (

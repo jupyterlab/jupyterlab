@@ -28,7 +28,7 @@ import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import { showPopup, Popup } from '../component/hover';
 import { IDefaultsManager } from './manager';
-import { interactiveItem } from '../style/statusBar';
+import { interactiveItem } from '@jupyterlab/statusbar';
 import {
   lineFormWrapper,
   lineFormInput,

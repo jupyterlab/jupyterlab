@@ -1,6 +1,6 @@
 import { Token } from '@phosphor/coreutils';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
-import { IStatusBar } from '../statusBar';
+import { IStatusBar } from '@jupyterlab/statusbar';
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { STATUSBAR_PLUGIN_ID } from '..';
 import { SetExt } from '../util/set';
