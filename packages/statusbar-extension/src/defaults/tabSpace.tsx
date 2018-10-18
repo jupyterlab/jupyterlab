@@ -27,7 +27,7 @@ import { Menu } from '@phosphor/widgets';
 import { JSONObject } from '@phosphor/coreutils';
 import { showPopup, Popup } from '@jupyterlab/statusbar';
 import {
-  IDefaultsManager,
+  IStatusBar,
   interactiveItem,
   clickedItem
 } from '@jupyterlab/statusbar';
@@ -399,7 +399,7 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
   autoStart: true,
   provides: ITabSpace,
   requires: [
-    IDefaultsManager,
+    IStatusBar,
     INotebookTracker,
     IEditorTracker,
     IConsoleTracker,
@@ -407,7 +407,7 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
   ],
   activate: (
     app: JupyterLab,
-    defaultsManager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker,
@@ -504,7 +504,7 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
       settingsProviderData
     });
 
-    defaultsManager.addDefaultStatus('tab-space-item', item, {
+    statusBar.registerStatusItem('tab-space-item', item, {
       align: 'right',
       rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [

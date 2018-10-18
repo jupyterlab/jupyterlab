@@ -21,7 +21,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 import {
-  IDefaultsManager,
+  IStatusBar,
   interactiveItem,
   showPopup,
   Popup
@@ -211,14 +211,14 @@ export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
   id: '@jupyterlab/statusbar:editor-syntax-item',
   autoStart: true,
   provides: IEditorSyntax,
-  requires: [IDefaultsManager, IEditorTracker],
+  requires: [IStatusBar, IEditorTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: IEditorTracker
   ) => {
     let item = new EditorSyntax({ tracker, commands: app.commands });
-    manager.addDefaultStatus('editor-syntax-item', item, {
+    statusBar.registerStatusItem('editor-syntax-item', item, {
       align: 'left',
       rank: 0,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])

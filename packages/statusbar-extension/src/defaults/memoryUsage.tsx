@@ -12,7 +12,7 @@ import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
-import { IDefaultsManager, TextItem } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
 class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
   implements IMemoryUsage {
@@ -256,11 +256,11 @@ export const memoryUsageItem: JupyterLabPlugin<IMemoryUsage> = {
   id: '@jupyterlab/statusbar:memory-usage-item',
   autoStart: true,
   provides: IMemoryUsage,
-  requires: [IDefaultsManager],
-  activate: (app: JupyterLab, defaultsManager: IDefaultsManager) => {
+  requires: [IStatusBar],
+  activate: (app: JupyterLab, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
-    defaultsManager.addDefaultStatus('memory-usage-item', item, {
+    statusBar.registerStatusItem('memory-usage-item', item, {
       align: 'left',
       rank: 2,
       isActive: () => item.model!.metricsAvailable,

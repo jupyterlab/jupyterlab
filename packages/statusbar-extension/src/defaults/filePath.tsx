@@ -11,7 +11,7 @@ import {
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultsManager, TextItem } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
@@ -201,15 +201,15 @@ export const filePathItem: JupyterLabPlugin<IFilePath> = {
   id: '@jupyterlab/statusbar:file-path-item',
   autoStart: true,
   provides: IFilePath,
-  requires: [IDefaultsManager, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     docManager: IDocumentManager
   ) => {
     let item = new FilePath({ shell: app.shell, docManager });
 
-    manager.addDefaultStatus('file-path-item', item, {
+    statusBar.registerStatusItem('file-path-item', item, {
       align: 'right',
       rank: 0,
       isActive: () => {

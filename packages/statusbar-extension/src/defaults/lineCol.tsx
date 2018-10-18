@@ -27,7 +27,7 @@ import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
 import { IStatusContext } from '../contexts';
 import {
-  IDefaultsManager,
+  IStatusBar,
   interactiveItem,
   showPopup,
   Popup
@@ -393,15 +393,10 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
   id: '@jupyterlab/statusbar:line-col-item',
   autoStart: true,
   provides: ILineCol,
-  requires: [
-    IDefaultsManager,
-    INotebookTracker,
-    IEditorTracker,
-    IConsoleTracker
-  ],
+  requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
   activate: (
     app: JupyterLab,
-    defaultsManager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker
@@ -413,7 +408,7 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
       consoleTracker
     });
 
-    defaultsManager.addDefaultStatus('line-col-item', item, {
+    statusBar.registerStatusItem('line-col-item', item, {
       align: 'right',
       rank: 2,
       isActive: IStatusContext.delegateActive(app.shell, [

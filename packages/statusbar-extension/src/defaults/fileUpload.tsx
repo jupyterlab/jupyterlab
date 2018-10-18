@@ -24,7 +24,7 @@ import { Token } from '@phosphor/coreutils';
 import { ProgressBar } from '@jupyterlab/statusbar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
-import { IDefaultsManager, GroupItem } from '@jupyterlab/statusbar';
+import { IStatusBar, GroupItem } from '@jupyterlab/statusbar';
 
 const HALF_SPACING = 4;
 
@@ -203,17 +203,17 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
   id: '@jupyterlab/statusbar:file-upload-item',
   autoStart: true,
   provides: IFileUpload,
-  requires: [IDefaultsManager, IFileBrowserFactory],
+  requires: [IStatusBar, IFileBrowserFactory],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     browser: IFileBrowserFactory
   ) => {
     const item = new FileUpload({
       tracker: browser.tracker
     });
 
-    manager.addDefaultStatus('file-upload-item', item, {
+    statusBar.registerStatusItem('file-upload-item', item, {
       align: 'middle',
       isActive: () => {
         return !!item.model && item.model.items.length > 0;

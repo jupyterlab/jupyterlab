@@ -15,7 +15,7 @@ import {
   NotebookMode
 } from '@jupyterlab/notebook';
 
-import { IDefaultsManager, TextItem, TextExt } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem, TextExt } from '@jupyterlab/statusbar';
 
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { ISignal } from '@phosphor/signaling';
@@ -167,17 +167,17 @@ export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
   id: '@jupyterlab/statusbar:command-edit-item',
   autoStart: true,
   provides: ICommandEdit,
-  requires: [IDefaultsManager, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
     const item = new CommandEdit({
       tracker
     });
 
-    manager.addDefaultStatus('command-edit-item', item, {
+    statusBar.registerStatusItem('command-edit-item', item, {
       align: 'right',
       rank: 4,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])

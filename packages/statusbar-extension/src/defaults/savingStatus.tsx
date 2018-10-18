@@ -5,7 +5,7 @@ import {
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultsManager, TextItem } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
@@ -158,15 +158,15 @@ export const savingStatusItem: JupyterLabPlugin<ISavingStatus> = {
   id: '@jupyterlab/statusbar:saving-status-item',
   autoStart: true,
   provides: ISavingStatus,
-  requires: [IDefaultsManager, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     docManager: IDocumentManager
   ) => {
     let item = new SavingStatus({ shell: app.shell, docManager });
 
-    manager.addDefaultStatus('saving-status-item', item, {
+    statusBar.registerStatusItem('saving-status-item', item, {
       align: 'middle',
       isActive: () => {
         return true;

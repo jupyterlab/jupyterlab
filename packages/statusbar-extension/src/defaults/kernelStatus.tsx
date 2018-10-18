@@ -5,7 +5,7 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { IDefaultsManager, TextItem, TextExt } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem, TextExt } from '@jupyterlab/statusbar';
 
 import {
   JupyterLabPlugin,
@@ -278,10 +278,10 @@ export const IKernelStatus = new Token<IKernelStatus>(
 export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
   id: '@jupyterlab/statusbar:kernel-status-item',
   autoStart: true,
-  requires: [IDefaultsManager, INotebookTracker, IConsoleTracker, IFilePath],
+  requires: [IStatusBar, INotebookTracker, IConsoleTracker, IFilePath],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
     filePath: IFilePath
@@ -294,7 +294,7 @@ export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
       filePath
     });
 
-    manager.addDefaultStatus('kernel-status-item', item, {
+    statusBar.registerStatusItem('kernel-status-item', item, {
       align: 'left',
       rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [

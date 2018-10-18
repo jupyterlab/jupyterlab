@@ -19,7 +19,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
-import { IconItem, IDefaultsManager } from '@jupyterlab/statusbar';
+import { IconItem, IStatusBar } from '@jupyterlab/statusbar';
 import { IStatusContext } from '../contexts';
 
 export const cellStatus = (
@@ -275,15 +275,15 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
   id: '@jupyterlab/statusbar:trusted-notebook-item',
   autoStart: true,
   provides: INotebookTrust,
-  requires: [IDefaultsManager, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
     const item = new NotebookTrust({ tracker });
 
-    manager.addDefaultStatus('notebook-trust-item', item, {
+    statusBar.registerStatusItem('notebook-trust-item', item, {
       align: 'right',
       rank: 3,
       isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])

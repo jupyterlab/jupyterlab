@@ -3,14 +3,7 @@ import '../style/index.css';
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import {
-  DefaultsManager,
-  IDefaultsManager,
-  StatusBar,
-  IStatusBar
-} from '@jupyterlab/statusbar';
+import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
 
 // Export default status bar items
 
@@ -42,30 +35,8 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   }
 };
 
-/**
- * Initialization data for the statusbar extension.
- */
-export const defaultsManager: JupyterLabPlugin<IDefaultsManager> = {
-  id: '@jupyterlab/statusbar:defaults-manager',
-  provides: IDefaultsManager,
-  autoStart: true,
-  requires: [ISettingRegistry, IStatusBar],
-  activate: (
-    _app: JupyterLab,
-    settings: ISettingRegistry,
-    statusBar: IStatusBar
-  ) => {
-    return new DefaultsManager({
-      id: STATUSBAR_PLUGIN_ID,
-      settings,
-      statusBar
-    });
-  }
-};
-
 const plugins: JupyterLabPlugin<any>[] = [
   statusBar,
-  defaultsManager,
   lineColItem,
   notebookTrustItem,
   fileUploadItem,

@@ -24,7 +24,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { GroupItem } from '@jupyterlab/statusbar';
-import { IDefaultsManager, interactiveItem } from '@jupyterlab/statusbar';
+import { IStatusBar, interactiveItem } from '@jupyterlab/statusbar';
 
 const HALF_SPACING = 4;
 
@@ -181,14 +181,14 @@ export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
   id: '@jupyterlab/statusbar:running-sessions-item',
   autoStart: true,
   provides: IRunningSessions,
-  requires: [IDefaultsManager],
-  activate: (app: JupyterLab, manager: IDefaultsManager) => {
+  requires: [IStatusBar],
+  activate: (app: JupyterLab, statusBar: IStatusBar) => {
     const item = new RunningSessions({
       host: app.shell,
       serviceManager: app.serviceManager
     });
 
-    manager.addDefaultStatus('running-sessions-item', item, {
+    statusBar.registerStatusItem('running-sessions-item', item, {
       align: 'left',
       rank: 0
     });
