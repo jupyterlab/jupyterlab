@@ -63,6 +63,10 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
 
+import { commandEditItem } from './modestatus';
+
+import { notebookTrustItem } from './truststatus';
+
 /**
  * The command IDs used by the notebook plugin.
  */
@@ -284,7 +288,13 @@ const tools: JupyterLabPlugin<ICellTools> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, trackerPlugin, tools];
+const plugins: JupyterLabPlugin<any>[] = [
+  factory,
+  trackerPlugin,
+  tools,
+  commandEditItem,
+  notebookTrustItem
+];
 export default plugins;
 
 /**

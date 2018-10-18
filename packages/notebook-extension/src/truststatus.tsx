@@ -7,20 +7,25 @@
 import React from 'react';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
 import {
   INotebookTracker,
   NotebookPanel,
   INotebookModel,
   Notebook
 } from '@jupyterlab/notebook';
-import { toArray } from '@phosphor/algorithm';
+
 import { Cell } from '@jupyterlab/cells';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { IDisposable } from '@phosphor/disposable';
-import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
+
 import { IconItem, IStatusBar } from '@jupyterlab/statusbar';
-import { IStatusContext } from '../contexts';
+
+import { toArray } from '@phosphor/algorithm';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal } from '@phosphor/signaling';
 
 export const cellStatus = (
   prop: NotebookTrustComponent.IProps | NotebookTrust.Model
@@ -266,15 +271,9 @@ export namespace INotebookTrust {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const INotebookTrust = new Token<INotebookTrust>(
-  '@jupyterlab/statusbar:INotebookTrust'
-);
-
-export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
+export const notebookTrustItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:trusted-notebook-item',
   autoStart: true,
-  provides: INotebookTrust,
   requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
@@ -286,9 +285,10 @@ export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
     statusBar.registerStatusItem('notebook-trust-item', item, {
       align: 'right',
       rank: 3,
-      isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
     });
-
-    return item;
   }
 };

@@ -8,11 +8,9 @@ import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
 // Export default status bar items
 
 import {
-  notebookTrustItem,
   lineColItem,
   fileUploadItem,
   kernelStatusItem,
-  commandEditItem,
   runningSessionsItem,
   filePathItem,
   tabSpaceItem,
@@ -38,10 +36,8 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 const plugins: JupyterLabPlugin<any>[] = [
   statusBar,
   lineColItem,
-  notebookTrustItem,
   fileUploadItem,
   kernelStatusItem,
-  commandEditItem,
   runningSessionsItem,
   filePathItem,
   tabSpaceItem,

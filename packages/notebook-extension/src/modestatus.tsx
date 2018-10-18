@@ -1,12 +1,8 @@
-/**
- * Default item to display which notebook mode user is in.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import * as React from 'react';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   INotebookTracker,
@@ -17,11 +13,9 @@ import {
 
 import { IStatusBar, TextItem, TextExt } from '@jupyterlab/statusbar';
 
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { ISignal } from '@phosphor/signaling';
+
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { IStatusContext } from '../contexts';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -36,6 +30,9 @@ namespace CommandEditComponent {
   }
 }
 
+/**
+ * StatusBar item to display which notebook mode user is in.
+ */
 class CommandEdit extends VDomRenderer<CommandEdit.Model>
   implements ICommandEdit {
   constructor(opts: CommandEdit.IOptions) {
@@ -158,15 +155,9 @@ export namespace ICommandEdit {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ICommandEdit = new Token<ICommandEdit>(
-  '@jupyterlab/statusbar:ICommandEdit'
-);
-
-export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
+export const commandEditItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:command-edit-item',
   autoStart: true,
-  provides: ICommandEdit,
   requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
@@ -180,9 +171,10 @@ export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
     statusBar.registerStatusItem('command-edit-item', item, {
       align: 'right',
       rank: 4,
-      isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
     });
-
-    return item;
   }
 };
