@@ -272,7 +272,7 @@ export namespace INotebookTrust {
 }
 
 export const notebookTrustItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:trusted-notebook-item',
+  id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker],
   activate: (

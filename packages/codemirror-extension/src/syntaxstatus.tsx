@@ -209,7 +209,7 @@ export namespace IEditorSyntax {
 }
 
 export const editorSyntaxStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:editor-syntax-item',
+  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
   requires: [IStatusBar, IEditorTracker],
   activate: (

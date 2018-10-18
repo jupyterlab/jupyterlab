@@ -9,7 +9,6 @@ import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
 
 import {
   lineColItem,
-  fileUploadItem,
   kernelStatusItem,
   runningSessionsItem,
   filePathItem,
@@ -35,7 +34,6 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 const plugins: JupyterLabPlugin<any>[] = [
   statusBar,
   lineColItem,
-  fileUploadItem,
   kernelStatusItem,
   runningSessionsItem,
   filePathItem,

@@ -1,9 +1,3 @@
-/**
- * Default item to display file upload progress.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import React from 'react';
 import { TextItem } from '@jupyterlab/statusbar';
 
@@ -19,7 +13,6 @@ import {
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
 
 import { ProgressBar } from '@jupyterlab/statusbar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
@@ -48,6 +41,9 @@ namespace FileUploadComponent {
 
 const UPLOAD_COMPLETE_MESSAGE_MILLIS: number = 2000;
 
+/**
+ * Status bar item to display file upload progress.
+ */
 class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
   constructor(opts: FileUpload.IOptions) {
     super();
@@ -181,11 +177,6 @@ export interface IFileUpload extends IDisposable {
   readonly modelChanged: ISignal<this, void>;
 }
 
-// tslint:disable-next-line:variable-name
-export const IFileUpload = new Token<IFileUpload>(
-  '@jupyterlab/statusbar:IFileUpload'
-);
-
 export namespace IFileUpload {
   export interface IModel {
     readonly items: Array<IFileUpload.IItem>;
@@ -199,10 +190,9 @@ export namespace IFileUpload {
   }
 }
 
-export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
-  id: '@jupyterlab/statusbar:file-upload-item',
+export const fileUploadStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:file-upload-item',
   autoStart: true,
-  provides: IFileUpload,
   requires: [IStatusBar, IFileBrowserFactory],
   activate: (
     app: JupyterLab,
@@ -220,7 +210,5 @@ export const fileUploadItem: JupyterLabPlugin<IFileUpload> = {
       },
       stateChanged: item.model!.stateChanged
     });
-
-    return item;
   }
 };

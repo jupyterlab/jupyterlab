@@ -156,7 +156,7 @@ export namespace ICommandEdit {
 }
 
 export const commandEditItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:command-edit-item',
+  id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker],
   activate: (
