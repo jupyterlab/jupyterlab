@@ -9,6 +9,8 @@ import { ISignal } from '@phosphor/signaling';
 
 import { Token } from '@phosphor/coreutils';
 
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
@@ -38,12 +40,14 @@ export interface IStatusBar {
    * @param widget - The item to add to the status bar.
    *
    * @param options - The options for how to add the status item.
+   *
+   * @returns an `IDisposable` that can be disposed to remove the item.
    */
   registerStatusItem(
     id: string,
     widget: Widget,
     options: IStatusBar.IItemOptions
-  ): void;
+  ): IDisposable;
 }
 
 /**
@@ -134,7 +138,7 @@ export class StatusBar extends Widget implements IStatusBar {
     id: string,
     widget: Widget,
     options: IStatusBar.IItemOptions = {}
-  ): void {
+  ): IDisposable {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
@@ -194,6 +198,13 @@ export class StatusBar extends Widget implements IStatusBar {
     } else {
       this._middlePanel.addWidget(widget);
     }
+
+    return new DisposableDelegate(() => {
+      delete this._statusItems[id];
+      ArrayExt.removeFirstOf(this._statusIds, id);
+      widget.parent = null;
+      widget.dispose();
+    });
   }
 
   /**
