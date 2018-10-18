@@ -26,6 +26,12 @@
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

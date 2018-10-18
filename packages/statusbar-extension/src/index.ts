@@ -14,7 +14,6 @@ import {
   runningSessionsItem,
   filePathItem,
   tabSpaceItem,
-  editorSyntax,
   memoryUsageItem,
   savingStatusItem
 } from './defaults';
@@ -41,7 +40,6 @@ const plugins: JupyterLabPlugin<any>[] = [
   runningSessionsItem,
   filePathItem,
   tabSpaceItem,
-  editorSyntax,
   memoryUsageItem,
   savingStatusItem
 ];
