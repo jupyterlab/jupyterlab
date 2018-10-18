@@ -49,6 +49,11 @@ import { Menu } from '@phosphor/widgets';
 const EDITOR_ICON_CLASS = 'jp-TextEditorIcon';
 
 /**
+ * The class name for the text editor icon from the default theme.
+ */
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+
+/**
  * The name of the factory that creates editor widgets.
  */
 const FACTORY = 'Editor';
@@ -58,6 +63,8 @@ const FACTORY = 'Editor';
  */
 namespace CommandIDs {
   export const createNew = 'fileeditor:create-new';
+
+  export const createNewMarkdown = 'fileeditor:create-new-markdown-file';
 
   export const changeFontSize = 'fileeditor:change-font-size';
 
@@ -467,6 +474,43 @@ function activate(
     });
   }
 
+  // Function to create a new untitled markdown file, given
+  // the current working directory.
+  const createNewMarkdown = (cwd: string) => {
+    return commands
+      .execute('docmanager:new-untitled', {
+        path: cwd,
+        type: 'file',
+        ext: 'md'
+      })
+      .then(model => {
+        return commands.execute('docmanager:open', {
+          path: model.path,
+          factory: FACTORY
+        });
+      });
+  };
+
+  // Add a command for creating a new Markdown file.
+  commands.addCommand(CommandIDs.createNewMarkdown, {
+    label: 'Markdown File',
+    caption: 'Create a new markdown file',
+    iconClass: MARKDOWN_ICON_CLASS,
+    execute: args => {
+      let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+      return createNewMarkdown(cwd as string);
+    }
+  });
+
+  // Add a launcher item if the launcher is available.
+  if (launcher) {
+    launcher.add({
+      command: CommandIDs.createNewMarkdown,
+      category: 'Other',
+      rank: 2
+    });
+  }
+
   if (palette) {
     let args: JSONObject = {
       insertSpaces: false,
@@ -533,6 +577,12 @@ function activate(
 
     // Add new text file creation to the file menu.
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
+
+    // Add new markdown file creation to the file menu.
+    menu.fileMenu.newMenu.addGroup(
+      [{ command: CommandIDs.createNewMarkdown }],
+      30
+    );
 
     // Add undo/redo hooks to the edit menu.
     menu.editMenu.undoers.add({
