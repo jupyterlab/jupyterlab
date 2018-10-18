@@ -6,7 +6,7 @@ import {
   ApplicationShell
 } from '@jupyterlab/application';
 import { IDefaultsManager } from './manager';
-import { TextItem } from '../component/text';
+import { TextItem } from '@jupyterlab/statusbar';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';

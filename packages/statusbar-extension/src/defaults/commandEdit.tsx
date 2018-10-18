@@ -17,7 +17,7 @@ import {
 
 import { IDefaultsManager } from './manager';
 
-import { TextItem } from '../component/text';
+import { TextItem } from '@jupyterlab/statusbar';
 
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 // import { CommandRegistry } from '@phosphor/commands';

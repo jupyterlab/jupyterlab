@@ -20,7 +20,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
-import { IconItem } from '../component/icon';
+import { IconItem } from '@jupyterlab/statusbar';
 import { IStatusContext } from '../contexts';
 
 export const cellStatus = (

@@ -5,7 +5,7 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '../component/text';
+import { TextItem } from '@jupyterlab/statusbar';
 
 import {
   JupyterLabPlugin,
@@ -26,7 +26,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
-import { showPopup, Popup } from '../component/hover';
+import { showPopup, Popup } from '@jupyterlab/statusbar';
 import { interactiveItem, clickedItem } from '@jupyterlab/statusbar';
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/coreutils';

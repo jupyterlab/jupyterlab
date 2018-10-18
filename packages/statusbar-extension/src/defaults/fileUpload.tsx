@@ -5,7 +5,7 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '../component/text';
+import { TextItem } from '@jupyterlab/statusbar';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
@@ -21,11 +21,11 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 
-import { ProgressBar } from '../component/progressBar';
+import { ProgressBar } from '@jupyterlab/statusbar';
 import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 import { IDefaultsManager } from './manager';
-import { GroupItem } from '../component/group';
+import { GroupItem } from '@jupyterlab/statusbar';
 import vars from '../style/variables';
 
 // tslint:disable-next-line:variable-name

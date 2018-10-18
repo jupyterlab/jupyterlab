@@ -13,7 +13,7 @@ import { IDefaultsManager } from './manager';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { ServerConnection } from '@jupyterlab/services';
 import { URLExt } from '@jupyterlab/coreutils';
-import { TextItem } from '../component';
+import { TextItem } from '@jupyterlab/statusbar';
 
 class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
   implements IMemoryUsage {

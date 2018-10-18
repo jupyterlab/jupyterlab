@@ -5,8 +5,8 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { IconItem } from '../component/icon';
-import { TextItem } from '../component/text';
+import { IconItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 import {
   JupyterLabPlugin,
   JupyterLab,
@@ -24,7 +24,7 @@ import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { Token } from '@phosphor/coreutils';
 import { IDefaultsManager } from './manager';
-import { GroupItem } from '../component/group';
+import { GroupItem } from '@jupyterlab/statusbar';
 import vars from '../style/variables';
 import { interactiveItem } from '@jupyterlab/statusbar';
 

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { TextItem } from '../component';
+import { TextItem } from '@jupyterlab/statusbar';
 import { ISignal } from '@phosphor/signaling';
 import { Token } from '@phosphor/coreutils';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
@@ -21,7 +21,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
-import { showPopup, Popup } from '../component/hover';
+import { showPopup, Popup } from '@jupyterlab/statusbar';
 import { interactiveItem } from '@jupyterlab/statusbar';
 
 namespace EditorSyntaxComponent {
