@@ -151,7 +151,7 @@ When using local extensions and linked packages, you can run the command
 
 This will cause the application to incrementally rebuild when one of the
 linked packages changes. Note that only compiled JavaScript files (and
-the CSS files) are watched by the WebPack process. This means that if 
+the CSS files) are watched by the WebPack process. This means that if
 your extension is in TypeScript you'll have to run a `jlpm run build`
 before the changes will be reflected in JupyterLab. To avoid this step
 you can also watch the TypeScript sources in your extension which is
@@ -257,18 +257,16 @@ Themes
 A theme is a JupyterLab extension that uses a ``ThemeManager`` and can
 be loaded and unloaded dynamically. The package must include all static
 assets that are referenced by ``url()`` in its CSS files. Local URLs can
-be used to reference files relative to the location of the referring CSS
-file in the theme directory. For example ``url('images/foo.png')`` or
+be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or
 ``url('../foo/bar.css')``\ can be used to refer local files in the
 theme. Absolute URLs (starting with a ``/``) or external URLs (e.g.
 ``https:``) can be used to refer to external assets. The path to the
-theme assets is specified ``package.json`` under the ``"jupyterlab"``
-key as ``"themeDir"``. See the `JupyterLab Light
+theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
+key as ``"themePath"``. See the `JupyterLab Light
 Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
 for an example. Ensure that the theme files are included in the
-``"files"`` metadata in package.json. A theme can optionally specify an
-``embed.css`` file that can be consumed outside of a JupyterLab
-application.
+``"files"`` metadata in package.json.  Note that if you want to use SCSS, SASS, or LESS files,
+you must compile them to CSS and point JupyterLab to the CSS files.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing

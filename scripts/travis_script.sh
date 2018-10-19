@@ -60,9 +60,6 @@ if [[ $GROUP == integrity ]]; then
     # Build the packages individually.
     jlpm run build:src
 
-    # Build the themes
-    jlpm run build:themes
-
     # Make sure the examples build
     jlpm run build:examples
 
