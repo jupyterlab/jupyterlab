@@ -300,9 +300,11 @@ function activate(
           </a>
         </span>
       );
+
+      let currentYear = new Date().getFullYear();
       let copyright = (
         <span className="jp-About-copyright">
-          © 2015 Project Jupyter Contributors
+          © {currentYear} Project Jupyter Contributors
         </span>
       );
       let body = (
