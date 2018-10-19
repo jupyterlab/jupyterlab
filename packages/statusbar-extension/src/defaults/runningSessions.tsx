@@ -5,13 +5,15 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { IconItem } from '@jupyterlab/statusbar';
-import { TextItem } from '@jupyterlab/statusbar';
+
 import {
   JupyterLabPlugin,
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
 import {
   ServiceManager,
   Kernel,
@@ -19,12 +21,18 @@ import {
   TerminalManager,
   SessionManager
 } from '@jupyterlab/services';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { ISignal } from '@phosphor/signaling';
+
+import {
+  GroupItem,
+  IconItem,
+  IStatusBar,
+  interactiveItem,
+  TextItem
+} from '@jupyterlab/statusbar';
+
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { GroupItem } from '@jupyterlab/statusbar';
-import { IStatusBar, interactiveItem } from '@jupyterlab/statusbar';
+
+import { ISignal } from '@phosphor/signaling';
 
 const HALF_SPACING = 4;
 
@@ -169,18 +177,12 @@ export namespace IRunningSessions {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IRunningSessions = new Token<IRunningSessions>(
-  '@jupyterlab/statusbar:IRunningSessions'
-);
-
 /*
  * Initialization data for the statusbar extension.
  */
-export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
+export const runningSessionsItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:running-sessions-item',
   autoStart: true,
-  provides: IRunningSessions,
   requires: [IStatusBar],
   activate: (app: JupyterLab, statusBar: IStatusBar) => {
     const item = new RunningSessions({
@@ -192,7 +194,5 @@ export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
       align: 'left',
       rank: 0
     });
-
-    return item;
   }
 };

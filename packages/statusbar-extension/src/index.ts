@@ -11,7 +11,7 @@ import {
   lineColItem,
   kernelStatus,
   runningSessionsItem,
-  filePathItem,
+  filePathStatus,
   tabSpaceItem,
   memoryUsageItem,
   savingStatusItem
@@ -36,7 +36,7 @@ const plugins: JupyterLabPlugin<any>[] = [
   lineColItem,
   kernelStatus,
   runningSessionsItem,
-  filePathItem,
+  filePathStatus,
   tabSpaceItem,
   memoryUsageItem,
   savingStatusItem

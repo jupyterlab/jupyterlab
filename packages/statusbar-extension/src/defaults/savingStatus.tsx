@@ -5,14 +5,20 @@ import {
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { IDisposable } from '@phosphor/disposable';
-import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
-import { Widget } from '@phosphor/widgets';
+
 import { IDocumentManager } from '@jupyterlab/docmanager';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal } from '@phosphor/signaling';
+
+import { Widget } from '@phosphor/widgets';
 
 namespace SavingStatusComponent {
   export interface IProps {
@@ -149,15 +155,9 @@ export namespace ISavingStatus {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ISavingStatus = new Token<ISavingStatus>(
-  '@jupyterlab/statusbar:ISavingStatus'
-);
-
-export const savingStatusItem: JupyterLabPlugin<ISavingStatus> = {
+export const savingStatusItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:saving-status-item',
   autoStart: true,
-  provides: ISavingStatus,
   requires: [IStatusBar, IDocumentManager],
   activate: (
     app: JupyterLab,
@@ -173,7 +173,5 @@ export const savingStatusItem: JupyterLabPlugin<ISavingStatus> = {
       },
       stateChanged: item.model!.stateChanged
     });
-
-    return item;
   }
 };

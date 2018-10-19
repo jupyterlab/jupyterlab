@@ -5,35 +5,48 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem, SettingsConnector } from '@jupyterlab/statusbar';
 
 import {
   JupyterLabPlugin,
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { ISignal } from '@phosphor/signaling';
-import { Cell } from '@jupyterlab/cells';
-import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { Widget } from '@phosphor/widgets';
-import { IStatusContext } from '../contexts';
-import { CommandRegistry } from '@phosphor/commands';
-import { Menu } from '@phosphor/widgets';
 
-import { JSONObject } from '@phosphor/coreutils';
-import { showPopup, Popup } from '@jupyterlab/statusbar';
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
+import { Cell } from '@jupyterlab/cells';
+
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
 import {
   IStatusBar,
   interactiveItem,
-  clickedItem
+  clickedItem,
+  Popup,
+  showPopup,
+  TextItem,
+  SettingsConnector
 } from '@jupyterlab/statusbar';
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { CommandRegistry } from '@phosphor/commands';
+
+import { JSONObject } from '@phosphor/coreutils';
+
+import { IDisposable } from '@phosphor/disposable';
+
 import { Message } from '@phosphor/messaging';
+
+import { ISignal } from '@phosphor/signaling';
+
+import { Menu, Widget } from '@phosphor/widgets';
+
+import { IStatusContext } from '../contexts';
 
 namespace TabSpaceComponent {
   export interface IProps {
@@ -389,15 +402,9 @@ export namespace ITabSpace {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ITabSpace = new Token<ITabSpace>(
-  '@jupyterlab/statusbar:ITabSpace'
-);
-
-export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
+export const tabSpaceItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:tab-space-item',
   autoStart: true,
-  provides: ITabSpace,
   requires: [
     IStatusBar,
     INotebookTracker,
@@ -513,8 +520,6 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
         { tracker: consoleTracker }
       ])
     });
-
-    return item;
   }
 };
 
