@@ -265,7 +265,8 @@ theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
 key as ``"themePath"``. See the `JupyterLab Light
 Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
 for an example. Ensure that the theme files are included in the
-``"files"`` metadata in package.json.
+``"files"`` metadata in package.json.  Note that if you want to use SCSS, SASS, or LESS files,
+you must compile them to CSS and point JupyterLab to the CSS files.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing
