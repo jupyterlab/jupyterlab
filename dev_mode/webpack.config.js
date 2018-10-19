@@ -75,7 +75,8 @@ function maybeSync(localPath, name, rest) {
 }
 
 /**
- * A WebPack Plugin that copies the assets to the static directory.
+ * A WebPack Plugin that copies the assets to the static directory and
+ * fixes the output of the HTMLWebpackPlugin
  */
 function JupyterLabPlugin() {}
 
@@ -83,6 +84,15 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
     'JupyterLabPlugin',
     function() {
+      // Fix the template output.
+      var indexPath = path.join(buildDir, 'index.html');
+      var indexData = fs.readFileSync(indexPath, 'utf8');
+      indexData = indexData
+        .split('{{page_config.publicUrl}}/')
+        .join('{{page_config.publicUrl}}');
+      fs.writeFileSync(indexPath, indexData, 'utf8');
+
+      // Copy the static assets.
       var staticDir = jlab.staticDir;
       if (!staticDir) {
         return;
