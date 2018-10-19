@@ -440,11 +440,12 @@ function activate(
 
   // Function to create a new untitled text file, given
   // the current working directory.
-  const createNew = (cwd: string) => {
+  const createNew = (cwd: string, ext: string = 'txt') => {
     return commands
       .execute('docmanager:new-untitled', {
         path: cwd,
-        type: 'file'
+        type: 'file',
+        ext
       })
       .then(model => {
         return commands.execute('docmanager:open', {
@@ -465,32 +466,6 @@ function activate(
     }
   });
 
-  // Add a launcher item if the launcher is available.
-  if (launcher) {
-    launcher.add({
-      command: CommandIDs.createNew,
-      category: 'Other',
-      rank: 1
-    });
-  }
-
-  // Function to create a new untitled markdown file, given
-  // the current working directory.
-  const createNewMarkdown = (cwd: string) => {
-    return commands
-      .execute('docmanager:new-untitled', {
-        path: cwd,
-        type: 'file',
-        ext: 'md'
-      })
-      .then(model => {
-        return commands.execute('docmanager:open', {
-          path: model.path,
-          factory: FACTORY
-        });
-      });
-  };
-
   // Add a command for creating a new Markdown file.
   commands.addCommand(CommandIDs.createNewMarkdown, {
     label: args => (args['isPalette'] ? 'New Markdown File' : 'Markdown File'),
@@ -498,12 +473,18 @@ function activate(
     iconClass: args => (args['isPalette'] ? '' : MARKDOWN_ICON_CLASS),
     execute: args => {
       let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-      return createNewMarkdown(cwd as string);
+      return createNew(cwd as string, 'md');
     }
   });
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
+    launcher.add({
+      command: CommandIDs.createNew,
+      category: 'Other',
+      rank: 1
+    });
+
     launcher.add({
       command: CommandIDs.createNewMarkdown,
       category: 'Other',
