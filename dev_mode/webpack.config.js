@@ -107,7 +107,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(buildDir),
-      publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
+      publicPath: '{{page_config.publicUrl}}',
       filename: '[name].[chunkhash].js'
     },
     optimization: {
