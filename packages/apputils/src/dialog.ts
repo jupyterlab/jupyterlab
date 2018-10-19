@@ -37,13 +37,19 @@ export function showDialog<T>(
  * @param error - the error to show in the dialog body (either a string
  *   or an object with a string `message` property).
  */
-export function showErrorMessage(title: string, error: any): Promise<void> {
+export function showErrorMessage(
+  title: string,
+  error: any,
+  buttons: ReadonlyArray<Dialog.IButton> = [
+    Dialog.okButton({ label: 'DISMISS' })
+  ]
+): Promise<void> {
   console.warn('Showing error:', error);
 
   return showDialog({
     title: title,
     body: error.message || title,
-    buttons: [Dialog.okButton({ label: 'DISMISS' })]
+    buttons: buttons
   }).then(() => {
     /* no-op */
   });
