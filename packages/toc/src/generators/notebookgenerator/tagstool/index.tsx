@@ -29,7 +29,6 @@ export class TagsToolComponent extends React.Component<
     this.state = {
       selected: []
     };
-    this.tracker = this.props.tracker;
   }
 
   /*
@@ -41,6 +40,7 @@ export class TagsToolComponent extends React.Component<
       let selectedTags = this.state.selected;
       selectedTags.push(newState);
       this.setState({ selected: selectedTags });
+      this.filterTags(selectedTags);
     } else {
       let selectedTags = this.state.selected;
       let newSelectedTags: string[] = [];
@@ -53,6 +53,7 @@ export class TagsToolComponent extends React.Component<
         newSelectedTags = [];
       }
       this.setState({ selected: newSelectedTags });
+      this.filterTags(newSelectedTags);
     }
   };
 
@@ -83,36 +84,10 @@ export class TagsToolComponent extends React.Component<
   }
 
   /*
-  * Selects cells in the document that are tagged with any of the selected tags
-  * in the TOC tags dropdown
-  */
-  selectCells = () => {
-    let notebookPanel = this.tracker.currentWidget;
-    if (notebookPanel) {
-      let notebook = notebookPanel.content;
-      let first: boolean = true;
-      for (let i = 0; i < notebookPanel.model.cells.length; i++) {
-        let currentCell = notebook.widgets[i] as Cell;
-        for (let j = 0; j < this.state.selected.length; j++) {
-          if (this.containsTag(this.state.selected[j], currentCell)) {
-            if (first === true) {
-              notebook.deselectAll();
-              notebook.activeCellIndex = i;
-              first = false;
-            } else {
-              notebook.select(notebook.widgets[i] as Cell);
-            }
-          }
-        }
-      }
-    }
-  };
-
-  /*
   * Tells the generator to filter the TOC by the selected tags.
   */
-  filterTags = () => {
-    this.props.generatorOptionsRef.filtered = this.state.selected;
+  filterTags = (selected: string[]) => {
+    this.props.generatorOptionsRef.filtered = selected;
   };
 
   /*
@@ -120,6 +95,32 @@ export class TagsToolComponent extends React.Component<
   */
   render() {
     let renderedJSX = <div className="toc-no-tags-div">No Tags Available</div>;
+    let filterText;
+    if (this.state.selected.length === 0) {
+      filterText = (
+        <span className={'toc-filter-button-na'}> Clear Filters </span>
+      );
+    } else if (this.state.selected.length === 1) {
+      filterText = (
+        <span
+          className={'toc-filter-button'}
+          onClick={() => this.deselectAllTags()}
+        >
+          {' '}
+          Clear 1 Filter{' '}
+        </span>
+      );
+    } else {
+      filterText = (
+        <span
+          className={'toc-filter-button'}
+          onClick={() => this.deselectAllTags()}
+        >
+          {' '}
+          Clear {this.state.selected.length} Filters{' '}
+        </span>
+      );
+    }
     if (this.props.allTagsList && this.props.allTagsList.length > 0) {
       renderedJSX = (
         <div className={'toc-tags-container'}>
@@ -128,32 +129,10 @@ export class TagsToolComponent extends React.Component<
             selectionStateHandler={this.changeSelectionState}
             selectedTags={this.state.selected}
           />
-          <span
-            className={'toc-clear-button'}
-            onClick={() => this.deselectAllTags()}
-          >
-            {' '}
-            Clear All{' '}
-          </span>
-          <span
-            onClick={() => this.filterTags()}
-            className={'toc-filter-button'}
-          >
-            {' '}
-            Filter
-          </span>
-          <span
-            className={'toc-select-button'}
-            onClick={() => this.selectCells()}
-          >
-            {' '}
-            Select Cells{' '}
-          </span>
+          {filterText}
         </div>
       );
     }
     return renderedJSX;
   }
-
-  private tracker: INotebookTracker;
 }
