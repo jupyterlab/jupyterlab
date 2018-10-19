@@ -493,9 +493,9 @@ function activate(
 
   // Add a command for creating a new Markdown file.
   commands.addCommand(CommandIDs.createNewMarkdown, {
-    label: 'Markdown File',
+    label: args => (args['isPalette'] ? 'New Markdown File' : 'Markdown File'),
     caption: 'Create a new markdown file',
-    iconClass: MARKDOWN_ICON_CLASS,
+    iconClass: args => (args['isPalette'] ? '' : MARKDOWN_ICON_CLASS),
     execute: args => {
       let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
       return createNewMarkdown(cwd as string);
@@ -532,6 +532,10 @@ function activate(
 
     args = { isPalette: true };
     command = CommandIDs.createNew;
+    palette.addItem({ command, args, category });
+
+    args = { isPalette: true };
+    command = CommandIDs.createNewMarkdown;
     palette.addItem({ command, args, category });
 
     args = { name: 'Increase Font Size', delta: 1 };
