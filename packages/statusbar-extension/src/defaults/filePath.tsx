@@ -11,16 +11,22 @@ import {
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { IDefaultsManager } from './manager';
-import { TextItem } from '../component/text';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { IDisposable } from '@phosphor/disposable';
-import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
+
 import { PathExt } from '@jupyterlab/coreutils';
-import { Widget, Title } from '@phosphor/widgets';
+
 import { IDocumentManager } from '@jupyterlab/docmanager';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal } from '@phosphor/signaling';
+
+import { Widget, Title } from '@phosphor/widgets';
 
 namespace FilePathComponent {
   export interface IProps {
@@ -193,31 +199,23 @@ export namespace IFilePath {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IFilePath = new Token<IFilePath>(
-  '@jupyterlab/statusbar:IFilePath'
-);
-
-export const filePathItem: JupyterLabPlugin<IFilePath> = {
-  id: '@jupyterlab/statusbar:file-path-item',
+export const filePathStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/statusbar:file-path-status',
   autoStart: true,
-  provides: IFilePath,
-  requires: [IDefaultsManager, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     docManager: IDocumentManager
   ) => {
     let item = new FilePath({ shell: app.shell, docManager });
 
-    manager.addDefaultStatus('file-path-item', item, {
+    statusBar.registerStatusItem('file-path-item', item, {
       align: 'right',
-      priority: 0,
+      rank: 0,
       isActive: () => {
         return true;
       }
     });
-
-    return item;
   }
 };

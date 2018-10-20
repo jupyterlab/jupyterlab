@@ -1,28 +1,34 @@
-/**
- * Default item to change the language syntax highlighting of the file editor.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import React from 'react';
 
-import { TextItem } from '../component';
-import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-import { IDefaultsManager } from './manager';
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { IStatusContext } from '../contexts';
+
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Mode } from '@jupyterlab/codemirror';
+
 import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import {
+  IStatusBar,
+  interactiveItem,
+  Popup,
+  showPopup,
+  TextItem
+} from '@jupyterlab/statusbar';
+
+import { Mode } from '@jupyterlab/codemirror';
+
 import { CommandRegistry } from '@phosphor/commands';
+
 import { JSONObject } from '@phosphor/coreutils';
+
+import { ISignal } from '@phosphor/signaling';
+
 import { Menu } from '@phosphor/widgets';
-import { showPopup, Popup } from '../component/hover';
-import { interactiveItem } from '../style/statusBar';
 
 namespace EditorSyntaxComponent {
   export interface IProps {
@@ -38,6 +44,9 @@ const EditorSyntaxComponent = (
   return <TextItem source={props.mode} onClick={props.handleClick} />;
 };
 
+/**
+ * StatusBar item to change the language syntax highlighting of the file editor.
+ */
 class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
   implements IEditorSyntax {
   constructor(opts: EditorSyntax.IOptions) {
@@ -199,28 +208,23 @@ export namespace IEditorSyntax {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IEditorSyntax = new Token<IEditorSyntax>(
-  '@jupyterlab/statusbar:IEditorSyntax'
-);
-
-export const editorSyntax: JupyterLabPlugin<IEditorSyntax> = {
-  id: '@jupyterlab/statusbar:editor-syntax-item',
+export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
-  provides: IEditorSyntax,
-  requires: [IDefaultsManager, IEditorTracker],
+  requires: [IStatusBar, IEditorTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: IEditorTracker
   ) => {
     let item = new EditorSyntax({ tracker, commands: app.commands });
-    manager.addDefaultStatus('editor-syntax-item', item, {
+    statusBar.registerStatusItem('editor-syntax-item', item, {
       align: 'left',
-      priority: 0,
-      isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
+      rank: 0,
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
     });
-
-    return item;
   }
 };

@@ -1,12 +1,8 @@
-/**
- * Default item to display which notebook mode user is in.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import * as React from 'react';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   INotebookTracker,
@@ -15,17 +11,11 @@ import {
   NotebookMode
 } from '@jupyterlab/notebook';
 
-import { IDefaultsManager } from './manager';
+import { IStatusBar, TextItem, TextExt } from '@jupyterlab/statusbar';
 
-import { TextItem } from '../component/text';
-
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-// import { CommandRegistry } from '@phosphor/commands';
 import { ISignal } from '@phosphor/signaling';
+
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { IStatusContext } from '../contexts';
-import { TextExt } from '../util/text';
 
 // tslint:disable-next-line:variable-name
 const CommandEditComponent = (
@@ -40,6 +30,9 @@ namespace CommandEditComponent {
   }
 }
 
+/**
+ * StatusBar item to display which notebook mode user is in.
+ */
 class CommandEdit extends VDomRenderer<CommandEdit.Model>
   implements ICommandEdit {
   constructor(opts: CommandEdit.IOptions) {
@@ -162,31 +155,26 @@ export namespace ICommandEdit {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ICommandEdit = new Token<ICommandEdit>(
-  '@jupyterlab/statusbar:ICommandEdit'
-);
-
-export const commandEditItem: JupyterLabPlugin<ICommandEdit> = {
-  id: '@jupyterlab/statusbar:command-edit-item',
+export const commandEditItem: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  provides: ICommandEdit,
-  requires: [IDefaultsManager, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
     const item = new CommandEdit({
       tracker
     });
 
-    manager.addDefaultStatus('command-edit-item', item, {
+    statusBar.registerStatusItem('command-edit-item', item, {
       align: 'right',
-      priority: 4,
-      isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
+      rank: 4,
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
     });
-
-    return item;
   }
 };

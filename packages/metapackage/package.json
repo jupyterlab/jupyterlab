@@ -84,6 +84,7 @@
     "@jupyterlab/settingeditor": "^0.8.1",
     "@jupyterlab/settingeditor-extension": "^0.14.1",
     "@jupyterlab/shortcuts-extension": "^0.19.3",
+    "@jupyterlab/statusbar": "^0.7.1",
     "@jupyterlab/statusbar-extension": "^0.5.0",
     "@jupyterlab/tabmanager-extension": "^0.19.1",
     "@jupyterlab/terminal": "^0.19.1",

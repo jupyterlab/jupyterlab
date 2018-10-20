@@ -19,6 +19,8 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
+import { editorSyntaxStatus } from './syntaxstatus';
+
 /**
  * The command IDs used by the codemirror plugin.
  */
@@ -58,7 +60,11 @@ const commands: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [commands, services];
+const plugins: JupyterLabPlugin<any>[] = [
+  commands,
+  services,
+  editorSyntaxStatus
+];
 export default plugins;
 
 /**

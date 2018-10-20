@@ -7,21 +7,25 @@
 import React from 'react';
 
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
 import {
   INotebookTracker,
   NotebookPanel,
   INotebookModel,
   Notebook
 } from '@jupyterlab/notebook';
-import { toArray } from '@phosphor/algorithm';
-import { IDefaultsManager } from './manager';
+
 import { Cell } from '@jupyterlab/cells';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
+import { IconItem, IStatusBar } from '@jupyterlab/statusbar';
+
+import { toArray } from '@phosphor/algorithm';
+
 import { IDisposable } from '@phosphor/disposable';
+
 import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
-import { IconItem } from '../component/icon';
-import { IStatusContext } from '../contexts';
 
 export const cellStatus = (
   prop: NotebookTrustComponent.IProps | NotebookTrust.Model
@@ -267,29 +271,24 @@ export namespace INotebookTrust {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const INotebookTrust = new Token<INotebookTrust>(
-  '@jupyterlab/statusbar:INotebookTrust'
-);
-
-export const notebookTrustItem: JupyterLabPlugin<INotebookTrust> = {
-  id: '@jupyterlab/statusbar:trusted-notebook-item',
+export const notebookTrustItem: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  provides: INotebookTrust,
-  requires: [IDefaultsManager, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
     const item = new NotebookTrust({ tracker });
 
-    manager.addDefaultStatus('notebook-trust-item', item, {
+    statusBar.registerStatusItem('notebook-trust-item', item, {
       align: 'right',
-      priority: 3,
-      isActive: IStatusContext.delegateActive(app.shell, [{ tracker }])
+      rank: 3,
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
     });
-
-    return item;
   }
 };

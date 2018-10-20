@@ -19,9 +19,6 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../console"
     },
     {
@@ -34,9 +31,6 @@
       "path": "../docregistry"
     },
     {
-      "path": "../filebrowser"
-    },
-    {
       "path": "../fileeditor"
     },
     {
@@ -44,6 +38,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

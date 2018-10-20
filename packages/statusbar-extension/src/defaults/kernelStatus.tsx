@@ -5,7 +5,6 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '../component/text';
 
 import {
   JupyterLabPlugin,
@@ -13,23 +12,32 @@ import {
   ApplicationShell
 } from '@jupyterlab/application';
 
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
-import { IDefaultsManager } from './manager';
+import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
-import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { ISignal } from '@phosphor/signaling';
-import { Token } from '@phosphor/coreutils';
-import { IDisposable } from '@phosphor/disposable';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
 import { Kernel, Session } from '@jupyterlab/services';
-import { Widget } from '@phosphor/widgets';
-import { IStatusContext } from '../contexts';
-import { TextExt } from '../util/text';
+
+import {
+  interactiveItem,
+  IStatusBar,
+  TextItem,
+  TextExt
+} from '@jupyterlab/statusbar';
+
 import { CommandRegistry } from '@phosphor/commands';
-import { interactiveItem } from '../style/statusBar';
+
+import { IDisposable } from '@phosphor/disposable';
+
 import { Message } from '@phosphor/messaging';
-import { IFilePath } from './filePath';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { Widget } from '@phosphor/widgets';
+
+import { IStatusContext } from '../contexts';
 
 // tslint:disable-next-line:variable-name
 const KernelStatusComponent = (
@@ -62,21 +70,20 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     this._consoleTracker = opts.consoleTracker;
     this._commands = opts.commands;
     this._shell = opts.shell;
-    this._filePath = opts.filePath;
 
-    this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
-    this._filePath.model!.stateChanged.connect(this._onFilePathChange);
+    this._shell.currentChanged.connect(
+      this._onCurrentChanged,
+      this
+    );
 
     this.model = new KernelStatus.Model(
       this._getFocusedSession(this._shell.currentWidget)
     );
 
-    if (this.model!.type === 'notebook') {
-      this.addClass(interactiveItem);
-    }
-
-    this._onFilePathChange();
+    this.addClass(interactiveItem);
   }
+
+  readonly model: KernelStatus.Model;
 
   render() {
     if (this.model === null) {
@@ -94,40 +101,30 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
 
   dispose() {
     super.dispose();
-
-    this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
+    Signal.disconnectAll(this);
+    this._shell.currentChanged.disconnect(this._onCurrentChanged);
   }
 
   protected onUpdateRequest(msg: Message) {
-    this.model!.session = this._getFocusedSession(this._shell.currentWidget);
-
-    if (this.model!.type === 'notebook') {
-      this.addClass(interactiveItem);
-    } else {
-      this.removeClass(interactiveItem);
-    }
-
+    this.model.session = this._getFocusedSession(this._shell.currentWidget);
     super.onUpdateRequest(msg);
   }
 
   private _handleClick = () => {
-    if (this.model!.type === 'notebook') {
-      this._commands.execute('notebook:change-kernel');
-    }
+    // The kernel menu flavor of change kernel delegates
+    // based on the active widget, so use that.
+    this._commands.execute('kernelmenu:change');
   };
 
-  private _onFilePathChange = () => {
-    if (this.model!.type === 'notebook') {
-      this.node.title = `Change active kernel for ${
-        this._filePath.model!.name
-      }`;
-    } else {
-      this.node.title = `Active kernel type for ${this._filePath.model!.name}`;
-    }
+  private _onTitleChanged = () => {
+    const name = this._shell.currentWidget
+      ? this._shell.currentWidget.title.label
+      : 'activity';
+    this.node.title = `Change active kernel for ${name}`;
   };
 
   private _getFocusedSession(val: Widget | null): IClientSession | null {
-    if (val === null) {
+    if (!val) {
       return null;
     } else {
       if (this._notebookTracker.has(val)) {
@@ -140,25 +137,27 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
     }
   }
 
-  private _onMainAreaCurrentChange = (
+  private _onCurrentChanged(
     shell: ApplicationShell,
     change: ApplicationShell.IChangedArgs
-  ) => {
-    const { newValue } = change;
-    const editor = this._getFocusedSession(newValue);
-    this.model!.session = editor;
-    if (this.model!.type === 'notebook') {
-      this.addClass(interactiveItem);
-    } else {
-      this.removeClass(interactiveItem);
+  ): void {
+    if (this._current) {
+      this._current.title.changed.disconnect(this._onTitleChanged, this);
     }
-  };
+    this._current = change.newValue;
+    this._current.title.changed.connect(
+      this._onTitleChanged,
+      this
+    );
+    const session = this._getFocusedSession(this._current);
+    this.model.session = session;
+  }
 
+  private _current: Widget | undefined;
   private _notebookTracker: INotebookTracker;
   private _consoleTracker: IConsoleTracker;
   private _shell: ApplicationShell;
   private _commands: CommandRegistry;
-  private _filePath: IFilePath;
 }
 
 namespace KernelStatus {
@@ -255,7 +254,6 @@ namespace KernelStatus {
     consoleTracker: IConsoleTracker;
     shell: ApplicationShell;
     commands: CommandRegistry;
-    filePath: IFilePath;
   }
 }
 
@@ -273,39 +271,30 @@ export namespace IKernelStatus {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IKernelStatus = new Token<IKernelStatus>(
-  '@jupyterlab/statusbar:IKernelStatus'
-);
-
-export const kernelStatusItem: JupyterLabPlugin<IKernelStatus> = {
-  id: '@jupyterlab/statusbar:kernel-status-item',
+export const kernelStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/statusbar:kernel-status',
   autoStart: true,
-  requires: [IDefaultsManager, INotebookTracker, IConsoleTracker, IFilePath],
+  requires: [IStatusBar, INotebookTracker, IConsoleTracker],
   activate: (
     app: JupyterLab,
-    manager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker,
-    filePath: IFilePath
+    consoleTracker: IConsoleTracker
   ) => {
     const item = new KernelStatus({
       shell: app.shell,
       notebookTracker,
       consoleTracker,
-      commands: app.commands,
-      filePath
+      commands: app.commands
     });
 
-    manager.addDefaultStatus('kernel-status-item', item, {
+    statusBar.registerStatusItem('kernel-status-item', item, {
       align: 'left',
-      priority: 1,
+      rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: consoleTracker }
       ])
     });
-
-    return item;
   }
 };

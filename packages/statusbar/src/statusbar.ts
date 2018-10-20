@@ -1,42 +1,58 @@
-/**
- * Main status bar object which contains all widgets.
- */
-/**
- *
- */
-import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
-import { Token } from '@phosphor/coreutils';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ApplicationShell } from '@jupyterlab/application';
+
 import { ArrayExt } from '@phosphor/algorithm';
+
 import { ISignal } from '@phosphor/signaling';
+
+import { Token } from '@phosphor/coreutils';
+
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
+import { Message } from '@phosphor/messaging';
+
+import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
+
 import {
   statusBar as barStyle,
   side as sideStyle,
   item as itemStyle,
   leftSide as leftSideStyle,
   rightSide as rightSideStyle
-} from './style/statusBar';
-import { Message } from '@phosphor/messaging';
+} from './style/statusbar';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
   '@jupyterlab/statusbar:IStatusBar'
 );
 
+/**
+ * Main status bar object which contains all widgets.
+ */
 export interface IStatusBar {
   /**
-   * Add an item to the status bar.
-   * @param id Id of the widget to be displayed in the Settings Registry.
-   * @param widget Widget added to the status bar.
-   * @param opts
+   * Register a new status item.
+   *
+   * @param id - a unique id for the status item.
+   *
+   * @param widget - The item to add to the status bar.
+   *
+   * @param options - The options for how to add the status item.
+   *
+   * @returns an `IDisposable` that can be disposed to remove the item.
    */
   registerStatusItem(
     id: string,
     widget: Widget,
-    opts: IStatusBar.IItemOptions
-  ): void;
+    options: IStatusBar.IItemOptions
+  ): IDisposable;
 }
 
+/**
+ * A namespace for status bar statics.
+ */
 export namespace IStatusBar {
   export type Alignment = 'right' | 'left' | 'middle';
 
@@ -47,11 +63,11 @@ export namespace IStatusBar {
     /**
      * Which side to place widget. Permanent widgets are intended for the right and left side, with more transient widgets in the middle.
      */
-    align?: IStatusBar.Alignment;
+    align?: Alignment;
     /**
-     *  Ordering of Items -- higher priority items are closer to the middle.
+     *  Ordering of Items -- higher rank items are closer to the middle.
      */
-    priority?: number;
+    rank?: number;
     /**
      * Whether the widget is shown or hidden.
      */
@@ -63,6 +79,9 @@ export namespace IStatusBar {
   }
 }
 
+/**
+ * The DOM id for the status bar.
+ */
 const STATUS_BAR_ID = 'jp-main-status-bar';
 
 /**
@@ -106,22 +125,30 @@ export class StatusBar extends Widget implements IStatusBar {
       });
   }
 
+  /**
+   * Register a new status item.
+   *
+   * @param id - a unique id for the status item.
+   *
+   * @param widget - The item to add to the status bar.
+   *
+   * @param options - The options for how to add the status item.
+   */
   registerStatusItem(
     id: string,
     widget: Widget,
-    opts: IStatusBar.IItemOptions = {}
-  ) {
+    options: IStatusBar.IItemOptions = {}
+  ): IDisposable {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    let align = opts.align ? opts.align : 'left';
-    let priority = opts.priority !== undefined ? opts.priority : 0;
-    let isActive = opts.isActive !== undefined ? opts.isActive : () => true;
-    let stateChanged =
-      opts.stateChanged !== undefined ? opts.stateChanged : null;
+    let align = options.align || 'left';
+    let rank = options.rank || 0;
+    let isActive = options.isActive || (() => true);
+    let stateChanged = options.stateChanged || null;
     let changeCallback =
-      opts.stateChanged !== undefined
+      options.stateChanged !== undefined
         ? () => {
             this._onIndividualStateChange(id);
           }
@@ -130,7 +157,7 @@ export class StatusBar extends Widget implements IStatusBar {
     let wrapper = {
       widget,
       align,
-      priority,
+      rank,
       isActive,
       stateChanged,
       changeCallback
@@ -138,7 +165,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
     let rankItem = {
       id,
-      priority
+      rank
     };
 
     widget.addClass(itemStyle);
@@ -171,8 +198,18 @@ export class StatusBar extends Widget implements IStatusBar {
     } else {
       this._middlePanel.addWidget(widget);
     }
+
+    return new DisposableDelegate(() => {
+      delete this._statusItems[id];
+      ArrayExt.removeFirstOf(this._statusIds, id);
+      widget.parent = null;
+      widget.dispose();
+    });
   }
 
+  /**
+   * Dispose of the status bar.
+   */
   dispose() {
     super.dispose();
 
@@ -188,6 +225,9 @@ export class StatusBar extends Widget implements IStatusBar {
     });
   }
 
+  /**
+   * Handle an 'update-request' message to the status bar.
+   */
   protected onUpdateRequest(msg: Message) {
     this._statusIds.forEach(statusId => {
       this._statusItems[statusId].widget.update();
@@ -198,13 +238,10 @@ export class StatusBar extends Widget implements IStatusBar {
   }
 
   private _findInsertIndex(
-    side: StatusBar.IRankItem[],
-    newItem: StatusBar.IRankItem
+    side: Private.IRankItem[],
+    newItem: Private.IRankItem
   ): number {
-    return ArrayExt.findFirstIndex(
-      side,
-      item => item.priority > newItem.priority
-    );
+    return ArrayExt.findFirstIndex(side, item => item.rank > newItem.rank);
   }
 
   private _refreshItem({ isActive, widget }: StatusBar.IItem) {
@@ -229,8 +266,8 @@ export class StatusBar extends Widget implements IStatusBar {
     this._refreshItem(this._statusItems[statusId]);
   };
 
-  private _leftRankItems: StatusBar.IRankItem[] = [];
-  private _rightRankItems: StatusBar.IRankItem[] = [];
+  private _leftRankItems: Private.IRankItem[] = [];
+  private _rightRankItems: Private.IRankItem[] = [];
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _statusIds: Array<string> = [];
 
@@ -242,11 +279,6 @@ export class StatusBar extends Widget implements IStatusBar {
 }
 
 export namespace StatusBar {
-  export interface IRankItem {
-    id: string;
-    priority: number;
-  }
-
   /**
    * Options for creating a new StatusBar instance
    */
@@ -254,12 +286,28 @@ export namespace StatusBar {
     host: ApplicationShell;
   }
 
+  /**
+   * The interface for a status bar item.
+   */
   export interface IItem {
     align: IStatusBar.Alignment;
-    priority: number;
+    rank: number;
     widget: Widget;
     isActive: () => boolean;
     stateChanged: ISignal<any, void> | null;
     changeCallback: (() => void) | null;
+  }
+}
+
+/**
+ * A namespace for private functionality.
+ */
+namespace Private {
+  /**
+   * An interface for storing the rank of a status item.
+   */
+  export interface IRankItem {
+    id: string;
+    rank: number;
   }
 }

@@ -25,6 +25,8 @@ import {
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
+import { fileUploadStatus } from './uploadstatus';
+
 import { Launcher } from '@jupyterlab/launcher';
 
 import { Contents } from '@jupyterlab/services';
@@ -131,7 +133,12 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, browser, shareFile];
+const plugins: JupyterLabPlugin<any>[] = [
+  factory,
+  browser,
+  shareFile,
+  fileUploadStatus
+];
 export default plugins;
 
 /**

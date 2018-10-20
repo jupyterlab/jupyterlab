@@ -5,13 +5,15 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { IconItem } from '../component/icon';
-import { TextItem } from '../component/text';
+
 import {
   JupyterLabPlugin,
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
+
+import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
 import {
   ServiceManager,
   Kernel,
@@ -19,26 +21,32 @@ import {
   TerminalManager,
   SessionManager
 } from '@jupyterlab/services';
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { ISignal } from '@phosphor/signaling';
+
+import {
+  GroupItem,
+  IconItem,
+  IStatusBar,
+  interactiveItem,
+  TextItem
+} from '@jupyterlab/statusbar';
+
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { IDefaultsManager } from './manager';
-import { GroupItem } from '../component/group';
-import vars from '../style/variables';
-import { interactiveItem } from '../style/statusBar';
+
+import { ISignal } from '@phosphor/signaling';
+
+const HALF_SPACING = 4;
 
 // tslint:disable-next-line:variable-name
 const RunningSessionsComponent = (
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> => {
   return (
-    <GroupItem spacing={vars.textIconHalfSpacing} onClick={props.handleClick}>
-      <GroupItem spacing={vars.textIconHalfSpacing}>
+    <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
+      <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
         <IconItem source={'terminal-item'} offset={{ x: 1, y: 3 }} />
       </GroupItem>
-      <GroupItem spacing={vars.textIconHalfSpacing}>
+      <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
         <IconItem source={'kernel-item'} offset={{ x: 0, y: 2 }} />
       </GroupItem>
@@ -169,30 +177,22 @@ export namespace IRunningSessions {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IRunningSessions = new Token<IRunningSessions>(
-  '@jupyterlab/statusbar:IRunningSessions'
-);
-
 /*
  * Initialization data for the statusbar extension.
  */
-export const runningSessionsItem: JupyterLabPlugin<IRunningSessions> = {
+export const runningSessionsItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:running-sessions-item',
   autoStart: true,
-  provides: IRunningSessions,
-  requires: [IDefaultsManager],
-  activate: (app: JupyterLab, manager: IDefaultsManager) => {
+  requires: [IStatusBar],
+  activate: (app: JupyterLab, statusBar: IStatusBar) => {
     const item = new RunningSessions({
       host: app.shell,
       serviceManager: app.serviceManager
     });
 
-    manager.addDefaultStatus('running-sessions-item', item, {
+    statusBar.registerStatusItem('running-sessions-item', item, {
       align: 'left',
-      priority: 0
+      rank: 0
     });
-
-    return item;
   }
 };

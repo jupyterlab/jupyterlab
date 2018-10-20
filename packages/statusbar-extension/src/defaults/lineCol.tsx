@@ -4,31 +4,55 @@
 /**
  * Part of Jupyterlab status bar defaults.
  */
+
 import React from 'react';
-import { TextItem } from '../component/text';
+
 import {
   JupyterLabPlugin,
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
 import {
   VDomRenderer,
   VDomModel,
   ReactElementWidget
 } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-import { ISignal } from '@phosphor/signaling';
+
 import { Cell, CodeCell } from '@jupyterlab/cells';
+
+import {
+  IConsoleTracker,
+  ConsolePanel,
+  CodeConsole
+} from '@jupyterlab/console';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
+import {
+  IStatusBar,
+  interactiveItem,
+  showPopup,
+  Popup,
+  TextItem
+} from '@jupyterlab/statusbar';
+
 import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
+
+import { Message } from '@phosphor/messaging';
+
+import { ISignal } from '@phosphor/signaling';
+
 import { Widget } from '@phosphor/widgets';
+
 import { IStatusContext } from '../contexts';
-import { showPopup, Popup } from '../component/hover';
-import { IDefaultsManager } from './manager';
-import { interactiveItem } from '../style/statusBar';
+
 import {
   lineFormWrapper,
   lineFormInput,
@@ -37,13 +61,8 @@ import {
   lineFormCaption,
   lineFormButton
 } from '../style/lineForm';
+
 import { classes } from 'typestyle/lib';
-import { Message } from '@phosphor/messaging';
-import {
-  IConsoleTracker,
-  ConsolePanel,
-  CodeConsole
-} from '@jupyterlab/console';
 
 namespace LineForm {
   export interface IProps {
@@ -383,22 +402,13 @@ export namespace ILineCol {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ILineCol = new Token<ILineCol>('@jupyterlab/statusbar:ILineCol');
-
-export const lineColItem: JupyterLabPlugin<ILineCol> = {
+export const lineColItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:line-col-item',
   autoStart: true,
-  provides: ILineCol,
-  requires: [
-    IDefaultsManager,
-    INotebookTracker,
-    IEditorTracker,
-    IConsoleTracker
-  ],
+  requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
   activate: (
     app: JupyterLab,
-    defaultsManager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker
@@ -410,16 +420,14 @@ export const lineColItem: JupyterLabPlugin<ILineCol> = {
       consoleTracker
     });
 
-    defaultsManager.addDefaultStatus('line-col-item', item, {
+    statusBar.registerStatusItem('line-col-item', item, {
       align: 'right',
-      priority: 2,
+      rank: 2,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: editorTracker },
         { tracker: consoleTracker }
       ])
     });
-
-    return item;
   }
 };

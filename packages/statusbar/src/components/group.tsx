@@ -18,11 +18,11 @@ export const GroupItem = (
     <div className={classes(groupItemLayout, className)} {...rest}>
       {React.Children.map(children, (child, i) => {
         if (i === 0) {
-          return <div style={{ marginRight: spacing }}>{child}</div>;
+          return <div style={{ marginRight: `${spacing}px` }}>{child}</div>;
         } else if (i === numChildren - 1) {
-          return <div style={{ marginLeft: spacing }}>{child}</div>;
+          return <div style={{ marginLeft: `${spacing}px` }}>{child}</div>;
         } else {
-          return <div style={{ margin: `0px ${spacing}` }}>{child}</div>;
+          return <div style={{ margin: `0px ${spacing}px` }}>{child}</div>;
         }
       })}
     </div>
@@ -31,7 +31,7 @@ export const GroupItem = (
 
 export namespace GroupItem {
   export interface IProps {
-    spacing: string;
+    spacing: number;
     children: JSX.Element[];
   }
 }

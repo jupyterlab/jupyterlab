@@ -5,33 +5,48 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { TextItem } from '../component/text';
 
 import {
   JupyterLabPlugin,
   JupyterLab,
   ApplicationShell
 } from '@jupyterlab/application';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { ISignal } from '@phosphor/signaling';
+
 import { Cell } from '@jupyterlab/cells';
-import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
-import { IDefaultsManager } from './manager';
-import { Widget } from '@phosphor/widgets';
-import { IStatusContext } from '../contexts';
+
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
+import {
+  IStatusBar,
+  interactiveItem,
+  clickedItem,
+  Popup,
+  showPopup,
+  TextItem,
+  SettingsConnector
+} from '@jupyterlab/statusbar';
+
 import { CommandRegistry } from '@phosphor/commands';
-import { Menu } from '@phosphor/widgets';
 
 import { JSONObject } from '@phosphor/coreutils';
-import { showPopup, Popup } from '../component/hover';
-import { interactiveItem, clickedItem } from '../style/statusBar';
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IDisposable } from '@phosphor/disposable';
+
 import { Message } from '@phosphor/messaging';
-import { SettingsConnector } from '../util/settings';
+
+import { ISignal } from '@phosphor/signaling';
+
+import { Menu, Widget } from '@phosphor/widgets';
+
+import { IStatusContext } from '../contexts';
 
 namespace TabSpaceComponent {
   export interface IProps {
@@ -387,17 +402,11 @@ export namespace ITabSpace {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const ITabSpace = new Token<ITabSpace>(
-  '@jupyterlab/statusbar:ITabSpace'
-);
-
-export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
+export const tabSpaceItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:tab-space-item',
   autoStart: true,
-  provides: ITabSpace,
   requires: [
-    IDefaultsManager,
+    IStatusBar,
     INotebookTracker,
     IEditorTracker,
     IConsoleTracker,
@@ -405,7 +414,7 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
   ],
   activate: (
     app: JupyterLab,
-    defaultsManager: IDefaultsManager,
+    statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker,
@@ -502,17 +511,15 @@ export const tabSpaceItem: JupyterLabPlugin<ITabSpace> = {
       settingsProviderData
     });
 
-    defaultsManager.addDefaultStatus('tab-space-item', item, {
+    statusBar.registerStatusItem('tab-space-item', item, {
       align: 'right',
-      priority: 1,
+      rank: 1,
       isActive: IStatusContext.delegateActive(app.shell, [
         { tracker: notebookTracker },
         { tracker: editorTracker },
         { tracker: consoleTracker }
       ])
     });
-
-    return item;
   }
 };
 

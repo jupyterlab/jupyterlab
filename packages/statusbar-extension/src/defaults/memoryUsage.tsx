@@ -5,15 +5,20 @@
  * Part of Jupyterlab status bar defaults.
  */
 import React from 'react';
-import { ISignal } from '@phosphor/signaling';
-import { IDisposable } from '@phosphor/disposable';
-import { Token } from '@phosphor/coreutils';
+
 import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-import { IDefaultsManager } from './manager';
+
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { ServerConnection } from '@jupyterlab/services';
+
 import { URLExt } from '@jupyterlab/coreutils';
-import { TextItem } from '../component';
+
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+
+import { ServerConnection } from '@jupyterlab/services';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal } from '@phosphor/signaling';
 
 class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
   implements IMemoryUsage {
@@ -248,26 +253,18 @@ namespace Private {
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IMemoryUsage = new Token<IMemoryUsage>(
-  '@jupyterlab/statusbar:IMemoryUsage'
-);
-
-export const memoryUsageItem: JupyterLabPlugin<IMemoryUsage> = {
+export const memoryUsageItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:memory-usage-item',
   autoStart: true,
-  provides: IMemoryUsage,
-  requires: [IDefaultsManager],
-  activate: (app: JupyterLab, defaultsManager: IDefaultsManager) => {
+  requires: [IStatusBar],
+  activate: (app: JupyterLab, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
-    defaultsManager.addDefaultStatus('memory-usage-item', item, {
+    statusBar.registerStatusItem('memory-usage-item', item, {
       align: 'left',
-      priority: 2,
+      rank: 2,
       isActive: () => item.model!.metricsAvailable,
       stateChanged: item.model!.stateChanged
     });
-
-    return item;
   }
 };

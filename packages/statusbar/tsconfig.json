@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../application"
@@ -14,21 +14,6 @@
     },
     {
       "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../filebrowser"
-    },
-    {
-      "path": "../launcher"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statusbar"
     }
   ]
 }
