@@ -16,13 +16,14 @@ import {
 
 import {
   CSVViewer,
+  TextRenderConfig,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { DataGrid, TextRenderer } from '@phosphor/datagrid';
+import { DataGrid } from '@phosphor/datagrid';
 import { Widget } from '@phosphor/widgets';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
@@ -88,12 +89,37 @@ const tsv: JupyterLabPlugin<void> = {
 };
 
 /**
- * Connect menu entry for go to line.
+ * Connect menu entries for find and go to line.
  */
 function addMenuEntries(
   mainMenu: IMainMenu,
   tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
 ) {
+  // Add find capability to the edit menu.
+  mainMenu.editMenu.findReplacers.add({
+    tracker,
+    find: (widget: IDocumentWidget<CSVViewer>) => {
+      const buttons = {
+        Cancel: Dialog.cancelButton(),
+        OK: Dialog.okButton({ label: 'Find' })
+      };
+      return showDialog({
+        title: 'Find...',
+        body: new PromptWidget(
+          'Search Text',
+          'text',
+          widget.content.searchService.searchText
+        ),
+        buttons: [buttons.Cancel, buttons.OK],
+        focusNodeSelector: 'input'
+      }).then(value => {
+        if (value.button === buttons.OK) {
+          widget.content.searchService.find(value.value);
+        }
+      });
+    }
+  } as IEditMenu.IFindReplacer<IDocumentWidget<CSVViewer>>);
+
   // Add go to line capability to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
@@ -137,7 +163,7 @@ function activateCsv(
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
-  let renderer: TextRenderer = Private.LIGHT_RENDERER;
+  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -162,17 +188,19 @@ function activateCsv(
     }
     // Set the theme for the new widget.
     widget.content.style = style;
-    widget.content.renderer = renderer;
+    widget.content.rendererConfig = rendererConfig;
   });
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
     const isLight = themeManager.isLight(themeManager.theme);
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    renderer = isLight ? Private.LIGHT_RENDERER : Private.DARK_RENDERER;
+    rendererConfig = isLight
+      ? Private.LIGHT_TEXT_CONFIG
+      : Private.DARK_TEXT_CONFIG;
     tracker.forEach(grid => {
       grid.content.style = style;
-      grid.content.renderer = renderer;
+      grid.content.rendererConfig = rendererConfig;
     });
   };
   themeManager.themeChanged.connect(updateThemes);
@@ -201,7 +229,7 @@ function activateTsv(
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
-  let renderer: TextRenderer = Private.LIGHT_RENDERER;
+  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -226,17 +254,19 @@ function activateTsv(
     }
     // Set the theme for the new widget.
     widget.content.style = style;
-    widget.content.renderer = renderer;
+    widget.content.rendererConfig = rendererConfig;
   });
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
     const isLight = themeManager.isLight(themeManager.theme);
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    renderer = isLight ? Private.LIGHT_RENDERER : Private.DARK_RENDERER;
+    rendererConfig = isLight
+      ? Private.LIGHT_TEXT_CONFIG
+      : Private.DARK_TEXT_CONFIG;
     tracker.forEach(grid => {
       grid.content.style = style;
-      grid.content.renderer = renderer;
+      grid.content.rendererConfig = rendererConfig;
     });
   };
   themeManager.themeChanged.connect(updateThemes);
@@ -280,18 +310,22 @@ namespace Private {
   };
 
   /**
-   * The light renderer for the data grid.
+   * The light config for the data grid renderer.
    */
-  export const LIGHT_RENDERER = new TextRenderer({
+  export const LIGHT_TEXT_CONFIG: TextRenderConfig = {
     textColor: '#111111',
+    matchBackgroundColor: '#FFFFE0',
+    currentMatchBackgroundColor: '#FFFF00',
     horizontalAlignment: 'right'
-  });
+  };
 
   /**
-   * The dark renderer for the data grid.
+   * The dark config for the data grid renderer.
    */
-  export const DARK_RENDERER = new TextRenderer({
+  export const DARK_TEXT_CONFIG: TextRenderConfig = {
     textColor: '#F5F5F5',
+    matchBackgroundColor: '#838423',
+    currentMatchBackgroundColor: '#A3807A',
     horizontalAlignment: 'right'
-  });
+  };
 }

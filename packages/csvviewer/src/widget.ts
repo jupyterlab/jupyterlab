@@ -12,7 +12,7 @@ import {
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { DataGrid, TextRenderer } from '@phosphor/datagrid';
+import { DataGrid, TextRenderer, CellRenderer } from '@phosphor/datagrid';
 
 import { Message } from '@phosphor/messaging';
 
@@ -38,6 +38,121 @@ const CSV_GRID_CLASS = 'jp-CSVViewer-grid';
 const RENDER_TIMEOUT = 1000;
 
 /**
+ * Configuration for cells textrenderer.
+ */
+export class TextRenderConfig {
+  /**
+   * default text color
+   */
+  textColor: string;
+  /**
+   * background color for a search match
+   */
+  matchBackgroundColor: string;
+  /**
+   * background color for the current search match.
+   */
+  currentMatchBackgroundColor: string;
+  /**
+   * horizontalAlignment of the text
+   */
+  horizontalAlignment: TextRenderer.HorizontalAlignment;
+}
+
+/**
+ * Search service remembers the search state and the location of the last
+ * match, for incremental searching.
+ * Search service is also responsible of providing a cell renderer function
+ * to set the background color of cells matching the search text.
+ */
+export class GridSearchService {
+  constructor(grid: DataGrid) {
+    this._grid = grid;
+    this._searchText = '';
+    this._row = 0;
+    this._column = 0;
+  }
+
+  /**
+   * Returs a cellrenderer config function to render each cell background.
+   * If cell match, background is matchBackgroundColor, if it's the current
+   * match, background is currentMatchBackgroundColor.
+   */
+  cellBackgroundColorRendererFunc(
+    config: TextRenderConfig
+  ): CellRenderer.ConfigFunc<string> {
+    return ({ value, row, column }) => {
+      if (this._searchText) {
+        if ((value as string).indexOf(this._searchText) !== -1) {
+          if (this._row === row && this._column === column) {
+            return config.currentMatchBackgroundColor;
+          }
+          return config.matchBackgroundColor;
+        }
+      }
+    };
+  }
+
+  /**
+   * incrementally look for searchText.
+   */
+  find(searchText: string) {
+    const model = this._grid.model;
+    if (this._searchText !== searchText) {
+      // reset search
+      this._row = 0;
+      this._column = -1;
+    }
+    this._column++; // incremental search
+    this._searchText = searchText;
+
+    // check if the match is in current viewport
+    const minRow = this._grid.scrollY / this._grid.baseRowSize;
+    const maxRow =
+      (this._grid.scrollY + this._grid.pageHeight) / this._grid.baseRowSize;
+    const minColumn = this._grid.scrollX / this._grid.baseColumnSize;
+    const maxColumn =
+      (this._grid.scrollX + this._grid.pageWidth) / this._grid.baseColumnSize;
+    const isMatchInViewport = () => {
+      return (
+        this._row >= minRow &&
+        this._row <= maxRow &&
+        this._column >= minColumn &&
+        this._column <= maxColumn
+      );
+    };
+
+    for (; this._row < model.rowCount('body'); this._row++) {
+      for (; this._column < model.columnCount('body'); this._column++) {
+        const cellData = model.data('body', this._row, this._column) as string;
+        if (cellData.indexOf(searchText) !== -1) {
+          // to update the background of matching cells.
+          this._grid.repaint();
+          if (!isMatchInViewport()) {
+            // scroll the matching cell into view
+            this._grid.scrollTo(
+              this._grid.baseColumnSize * this._column,
+              this._grid.baseRowSize * this._row
+            );
+          }
+          return;
+        }
+      }
+      this._column = 0;
+    }
+  }
+
+  get searchText(): string {
+    return this._searchText;
+  }
+
+  private _grid: DataGrid;
+  private _searchText: string;
+  private _row: number;
+  private _column: number;
+}
+
+/**
  * A viewer for CSV tables.
  */
 export class CSVViewer extends Widget {
@@ -61,6 +176,8 @@ export class CSVViewer extends Widget {
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
     layout.addWidget(this._grid);
+
+    this._searchService = new GridSearchService(this._grid);
 
     this._context.ready.then(() => {
       this._updateGrid();
@@ -116,13 +233,23 @@ export class CSVViewer extends Widget {
   }
 
   /**
-   * The text renderer used by the data grid.
+   * The config used to create text renderer.
    */
-  get renderer(): TextRenderer {
-    return this._grid.defaultRenderer as TextRenderer;
+  set rendererConfig(rendererConfig: TextRenderConfig) {
+    this._grid.defaultRenderer = new TextRenderer({
+      textColor: rendererConfig.textColor,
+      horizontalAlignment: rendererConfig.horizontalAlignment,
+      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
+        rendererConfig
+      )
+    });
   }
-  set renderer(value: TextRenderer) {
-    this._grid.defaultRenderer = value;
+
+  /**
+   * The search service
+   */
+  get searchService(): GridSearchService {
+    return this._searchService;
   }
 
   /**
@@ -168,6 +295,7 @@ export class CSVViewer extends Widget {
 
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
+  private _searchService: GridSearchService;
   private _monitor: ActivityMonitor<any, any> | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();

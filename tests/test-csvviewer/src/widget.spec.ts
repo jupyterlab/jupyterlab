@@ -7,13 +7,14 @@ import { UUID } from '@phosphor/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { CSVViewer } from '@jupyterlab/csvviewer';
+import { CSVViewer, GridSearchService } from '@jupyterlab/csvviewer';
 
 import {
   Context,
   DocumentRegistry,
   TextModelFactory
 } from '@jupyterlab/docregistry';
+import { JSONModel, DataGrid, CellRenderer } from '@phosphor/datagrid';
 
 function createContext(): Context<DocumentRegistry.IModel> {
   const factory = new TextModelFactory();
@@ -56,6 +57,67 @@ describe('csvviewer/widget', () => {
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
+    });
+  });
+
+  describe('GridSearchService', () => {
+    function createModel(): JSONModel {
+      return new JSONModel({
+        data: [
+          { index: 0, a: 'other', b: 'match 1' },
+          { index: 1, a: 'other', b: 'match 2' }
+        ],
+        schema: {
+          primaryKey: ['index'],
+          fields: [
+            {
+              name: 'a'
+            },
+            { name: 'b' }
+          ]
+        }
+      });
+    }
+    function createGridSearchService(model: JSONModel): GridSearchService {
+      const grid = new DataGrid();
+      grid.model = model;
+      return new GridSearchService(grid);
+    }
+
+    it('searches incrementally and set background color', () => {
+      const model = createModel();
+      const searchService = createGridSearchService(model);
+
+      const cellRenderer = searchService.cellBackgroundColorRendererFunc({
+        matchBackgroundColor: 'anotherMatch',
+        currentMatchBackgroundColor: 'currentMatch',
+        textColor: '',
+        horizontalAlignment: 'right'
+      });
+
+      /**
+       * fake rendering a cell and returns the background color for this coordinate.
+       */
+      function fakeRenderCell(row: number, column: number) {
+        const cellConfig = {
+          value: model.data('body', row, column),
+          row,
+          column
+        } as CellRenderer.ICellConfig;
+        return cellRenderer(cellConfig);
+      }
+
+      // searching for "match", cells at (0,1) and (1,1) should match.
+      // (0,1) is the current match
+      searchService.find('match');
+      expect(fakeRenderCell(0, 1)).to.equal('currentMatch');
+      expect(fakeRenderCell(1, 1)).to.equal('anotherMatch');
+      expect(fakeRenderCell(0, 0)).to.equal(undefined);
+
+      // search again, the current match "moves" to be (1,1)
+      searchService.find('match');
+      expect(fakeRenderCell(0, 1)).to.equal('anotherMatch');
+      expect(fakeRenderCell(1, 1)).to.equal('currentMatch');
     });
   });
 });
