@@ -136,6 +136,16 @@ export class CSVViewer extends Widget {
   }
 
   /**
+   * Go to line
+   */
+  goToLine(lineNumber: number) {
+    this._grid.scrollTo(
+      this._grid.scrollX,
+      this._grid.baseRowSize * (lineNumber - 1)
+    );
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {

@@ -7,7 +7,12 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker, IThemeManager } from '@jupyterlab/apputils';
+import {
+  InstanceTracker,
+  IThemeManager,
+  showDialog,
+  Dialog
+} from '@jupyterlab/apputils';
 
 import {
   CSVViewer,
@@ -18,6 +23,9 @@ import {
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { DataGrid, TextRenderer } from '@phosphor/datagrid';
+import { Widget } from '@phosphor/widgets';
+
+import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
 /**
  * The name of the factories that creates widgets.
@@ -26,13 +34,46 @@ const FACTORY_CSV = 'CSVTable';
 const FACTORY_TSV = 'TSVTable';
 
 /**
+ * A widget used to prompt for a simple value.
+ */
+class PromptWidget extends Widget {
+  constructor(labelText: string, inputType: string, value?: string) {
+    let body = document.createElement('div');
+    let label = document.createElement('label');
+    label.textContent = labelText;
+    let input = document.createElement('input');
+    input.type = inputType;
+    if (value) {
+      input.value = value;
+    }
+    body.appendChild(label);
+    body.appendChild(input);
+
+    super({ node: body });
+  }
+
+  /**
+   * Get the input text node.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
+
+  /**
+   * Get the value of the widget.
+   */
+  getValue(): string {
+    return this.inputNode.value;
+  }
+}
+
+/**
  * The CSV file handler extension.
  */
-
 const csv: JupyterLabPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [ILayoutRestorer, IThemeManager],
+  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
   autoStart: true
 };
 
@@ -42,9 +83,38 @@ const csv: JupyterLabPlugin<void> = {
 const tsv: JupyterLabPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
-  requires: [ILayoutRestorer, IThemeManager],
+  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
   autoStart: true
 };
+
+/**
+ * Connect menu entry for go to line.
+ */
+function addMenuEntries(
+  mainMenu: IMainMenu,
+  tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
+) {
+  // Add go to line capability to the edit menu.
+  mainMenu.editMenu.goToLiners.add({
+    tracker,
+    goToLine: (widget: IDocumentWidget<CSVViewer>) => {
+      const buttons = {
+        Cancel: Dialog.cancelButton(),
+        OK: Dialog.okButton({ label: 'Go To Line' })
+      };
+      return showDialog({
+        title: 'Go to Line',
+        body: new PromptWidget('Line Number', 'number'),
+        buttons: [buttons.Cancel, buttons.OK],
+        focusNodeSelector: 'input'
+      }).then(value => {
+        if (value.button === buttons.OK) {
+          widget.content.goToLine(parseInt(value.value, 10));
+        }
+      });
+    }
+  } as IEditMenu.IGoToLiner<IDocumentWidget<CSVViewer>>);
+}
 
 /**
  * Activate cssviewer extension for CSV files
@@ -52,7 +122,8 @@ const tsv: JupyterLabPlugin<void> = {
 function activateCsv(
   app: JupyterLab,
   restorer: ILayoutRestorer,
-  themeManager: IThemeManager
+  themeManager: IThemeManager,
+  mainMenu: IMainMenu
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
@@ -105,6 +176,8 @@ function activateCsv(
     });
   };
   themeManager.themeChanged.connect(updateThemes);
+
+  addMenuEntries(mainMenu, tracker);
 }
 
 /**
@@ -113,7 +186,8 @@ function activateCsv(
 function activateTsv(
   app: JupyterLab,
   restorer: ILayoutRestorer,
-  themeManager: IThemeManager
+  themeManager: IThemeManager,
+  mainMenu: IMainMenu
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
@@ -166,6 +240,8 @@ function activateTsv(
     });
   };
   themeManager.themeChanged.connect(updateThemes);
+
+  addMenuEntries(mainMenu, tracker);
 }
 
 /**
