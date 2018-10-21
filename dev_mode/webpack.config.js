@@ -84,14 +84,6 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
     'JupyterLabPlugin',
     function() {
-      // Fix the template output.
-      var indexPath = path.join(buildDir, 'index.html');
-      var indexData = fs.readFileSync(indexPath, 'utf8');
-      indexData = indexData
-        .split('{{page_config.publicUrl}}/')
-        .join('{{page_config.publicUrl}}');
-      fs.writeFileSync(indexPath, indexData, 'utf8');
-
       // Copy the static assets.
       var staticDir = jlab.staticDir;
       if (!staticDir) {
@@ -117,7 +109,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(buildDir),
-      publicPath: '{{page_config.publicUrl}}',
+      publicPath: '{{page_config.bundleUrl}}',
       filename: '[name].[chunkhash].js'
     },
     optimization: {

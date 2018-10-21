@@ -135,6 +135,16 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
+
+    # Handle bundle url
+    bundle_url = config.public_url
+    if bundle_url.startswith(config.page_url):
+        bundle_url = ujoin(nbapp.base_url, bundle_url)
+    # Account for HTMLWebPackPlugin adding a slash
+    if bundle_url.endswith('/'):
+        bundle_url = bundle_url[:-1]
+    page_config['bundleUrl'] = bundle_url
+
     # Export the version info tuple to a JSON array. This gets printed
     # inside double quote marks, so we render it to a JSON string of the
     # JSON data (so that we can call JSON.parse on the frontend on it).
