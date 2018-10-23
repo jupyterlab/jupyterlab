@@ -90,6 +90,26 @@ export class TagsToolComponent extends React.Component<
     this.props.generatorOptionsRef.filtered = selected;
   };
 
+  updateFilters = () => {
+    let temp: string[] = [];
+    let idx = 0;
+    for (let i = 0; i < this.props.generatorOptionsRef.filtered.length; i++) {
+      if (
+        this.props.allTagsList.indexOf(this.props.generatorOptionsRef.filtered[
+          i
+        ] as string) > -1
+      ) {
+        temp[idx] = this.props.generatorOptionsRef.filtered[i];
+        idx++;
+      }
+    }
+    this.filterTags(temp);
+  };
+
+  componentWillUpdate() {
+    this.updateFilters();
+  }
+
   /*
   * Render the interior of the tag dropdown.
   */
