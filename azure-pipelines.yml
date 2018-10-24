@@ -42,7 +42,9 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          testRunTitle: 'Travis CI $(group)'
+          buildPlatform: 'Linux'
+          testRunTitle: '$(group)'
+          mergeTestResults: true
       - task: PublishCodeCoverageResults@1
         condition: always()
         inputs:
@@ -86,7 +88,8 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          testRunTitle: 'Appveyor'
+          buildPlatform: 'Windows'
+          mergeTestResults: true
       - task: PublishCodeCoverageResults@1
         condition: always()
         inputs:
