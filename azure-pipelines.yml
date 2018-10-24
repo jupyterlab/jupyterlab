@@ -39,12 +39,12 @@ jobs:
           targetType: 'filePath'
           filePath: ./scripts/travis_script.sh
       - task: PublishTestResults@2
-        condition: always
+        condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
           testRunTitle: '$(group)'
       - task: PublishCodeCoverageResults@1
-        condition: always
+        condition: always()
         inputs:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
@@ -83,7 +83,13 @@ jobs:
       - script: 'jlpm config current'
       - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
       - task: PublishTestResults@2
-        condition: always
+        condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
           testRunTitle: '$(group)'
+      - task: PublishCodeCoverageResults@1
+        condition: always()
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
