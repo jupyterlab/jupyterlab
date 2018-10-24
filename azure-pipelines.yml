@@ -1,80 +1,89 @@
 # https://aka.ms/yaml
 
 jobs:
-- job: 'Travis'
-  pool:
-    vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
-  variables:
-    python.version: '3.6'
-    gh.ref: github.com/jupyterlab/jupyterlab.git
-  strategy:
-    matrix:
-      JS:
-        group: 'js'
-      Integrity:
-        group: 'integrity'
-      Python:
-        group: 'python'
-      CLI:
-        group: 'cli'
-        python.version: '3.5'
-      Docs:
-        group: 'docs'
+  - job: 'Travis'
+    pool:
+      vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+    variables:
+      python.version: '3.6'
+      gh.ref: github.com/jupyterlab/jupyterlab.git
+    strategy:
+      matrix:
+        JS:
+          group: 'js'
+        Integrity:
+          group: 'integrity'
+        Python:
+          group: 'python'
+        CLI:
+          group: 'cli'
+          python.version: '3.5'
+        Docs:
+          group: 'docs'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
 
-  - task: Bash@3
-    displayName: 'install'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/travis_install.sh
-  - script: python -m pip install virtualenv
-  - task: Bash@3
-    displayName: 'script'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/travis_script.sh
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/junit.xml'
-      testRunTitle: '$(group)'
-  - task: Bash@3
-    displayName: 'after_success'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/travis_after_success.sh
-- job: 'Appveyor'
-  pool:
-    vmImage: 'vs2017-win2016'
-  variables:
-    python.version: '3.6'
-  strategy:
-    matrix:
-      JS:
-        name: 'javascript'
-        python.version: '3.5'
-      Python:
-        name: 'python'
-      Integrity:
-        group: 'integrity'
+      - task: Bash@3
+        displayName: 'install'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_install.sh
+      - script: python -m pip install virtualenv
+      - task: Bash@3
+        displayName: 'script'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_script.sh
+      - task: PublishTestResults@2
+        condition: always
+        inputs:
+          testResultsFiles: '**/junit.xml'
+          testRunTitle: '$(group)'
+      - task: PublishCodeCoverageResults@1
+        condition: always
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+      - task: Bash@3
+        displayName: 'after_success'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_after_success.sh
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+  - job: 'Appveyor'
+    pool:
+      vmImage: 'vs2017-win2016'
+    variables:
+      python.version: '3.6'
+    strategy:
+      matrix:
+        JS:
+          name: 'javascript'
+          python.version: '3.5'
+        Python:
+          name: 'python'
+        Integrity:
+          group: 'integrity'
 
-  - script: 'python -m pip install -U pip'
-  - script: 'pip install --upgrade -e ".[test]"'
-  - script: 'jupyter kernelspec list'
-  - script: 'jlpm versions'
-  - script: 'jlpm config current'
-  - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/junit.xml'
-      testRunTitle: '$(group)'
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: 'python -m pip install -U pip'
+      - script: 'pip install --upgrade -e ".[test]"'
+      - script: 'jupyter kernelspec list'
+      - script: 'jlpm versions'
+      - script: 'jlpm config current'
+      - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
+      - task: PublishTestResults@2
+        condition: always
+        inputs:
+          testResultsFiles: '**/junit.xml'
+          testRunTitle: '$(group)'

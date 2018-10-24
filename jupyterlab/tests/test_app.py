@@ -194,14 +194,11 @@ jest_flags['watchAll'] = (
     'Watch all test files'
 )
 
-AZURE_PIPELINES = bool(os.environ.get("AGENT_OS", False))
 
 class JestApp(ProcessTestApp):
     """A notebook app that runs a jest test."""
 
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
-
-    junit = Bool(AZURE_PIPELINES, help='Whether to export junit').tag(config=True)
 
     testPathPattern = Unicode('').tag(config=True)
 
@@ -247,9 +244,6 @@ class JestApp(ProcessTestApp):
                 cmd += ['--watch']
         else:
             cmd += [jest]
-
-        if self.junit:
-            cmd += ["--reporters=default", "--reporters=jest-junit"]
 
         if self.testPathPattern:
             cmd += ['--testPathPattern', self.testPathPattern]
