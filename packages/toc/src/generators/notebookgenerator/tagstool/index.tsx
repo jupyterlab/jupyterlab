@@ -15,6 +15,7 @@ export interface ITagsToolComponentProps {
 
 export interface ITagsToolComponentState {
   selected: string[];
+  filtered: string[];
 }
 
 /*
@@ -27,7 +28,8 @@ export class TagsToolComponent extends React.Component<
   constructor(props: ITagsToolComponentProps) {
     super(props);
     this.state = {
-      selected: []
+      selected: [],
+      filtered: []
     };
   }
 
@@ -57,12 +59,16 @@ export class TagsToolComponent extends React.Component<
     }
   };
 
+  public getFiltered() {
+    return this.state.filtered;
+  }
+
   /*
   * Deselect all tags in the dropdown and clear filters in the TOC.
   */
   deselectAllTags = () => {
-    this.props.generatorOptionsRef.filtered = [];
-    this.setState({ selected: [] });
+    this.setState({ selected: [], filtered: [] });
+    this.props.generatorOptionsRef.updateWidget();
   };
 
   /**
@@ -87,23 +93,28 @@ export class TagsToolComponent extends React.Component<
   * Tells the generator to filter the TOC by the selected tags.
   */
   filterTags = (selected: string[]) => {
-    this.props.generatorOptionsRef.filtered = selected;
+    this.setState({ filtered: selected });
+    this.props.generatorOptionsRef.updateWidget();
   };
 
   updateFilters = () => {
     let temp: string[] = [];
     let idx = 0;
-    for (let i = 0; i < this.props.generatorOptionsRef.filtered.length; i++) {
+    let needsUpdate = false;
+    for (let i = 0; i < this.state.filtered.length; i++) {
       if (
-        this.props.allTagsList.indexOf(this.props.generatorOptionsRef.filtered[
-          i
-        ] as string) > -1
+        this.props.allTagsList.indexOf(this.state.filtered[i] as string) > -1
       ) {
-        temp[idx] = this.props.generatorOptionsRef.filtered[i];
+        temp[idx] = this.state.filtered[i];
         idx++;
+      } else {
+        needsUpdate = true;
       }
     }
-    this.filterTags(temp);
+    if (needsUpdate) {
+      this.filterTags(temp);
+      this.setState({ selected: temp });
+    }
   };
 
   componentWillUpdate() {

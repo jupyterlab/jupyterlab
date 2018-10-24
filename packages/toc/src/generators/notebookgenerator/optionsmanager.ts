@@ -9,20 +9,28 @@ import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
+import { TagsToolComponent } from './tagstool';
+
 export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
-    options: { needsNumbering: boolean; sanitizer: ISanitizer }
+    options: {
+      needsNumbering: boolean;
+      sanitizer: ISanitizer;
+      tagTool?: TagsToolComponent;
+    }
   ) {
     super();
     this._numbering = options.needsNumbering;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
+    this.tagTool = null;
   }
 
   readonly sanitizer: ISanitizer;
+  public tagTool?: TagsToolComponent | null;
 
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
@@ -70,12 +78,12 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     return this._showTags;
   }
 
-  set filtered(value: string[]) {
-    this._filtered = value;
-    this._widget.update();
-  }
-
   get filtered() {
+    if (this.tagTool) {
+      this._filtered = this.tagTool.getFiltered();
+    } else {
+      this._filtered = [];
+    }
     return this._filtered;
   }
 
@@ -89,6 +97,10 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   updateWidget() {
     this._widget.update();
+  }
+
+  setTagTool(tagTool: TagsToolComponent | null) {
+    this.tagTool = tagTool;
   }
 
   // initialize options, will NOT change notebook metadata

@@ -31,6 +31,7 @@ export function notebookGeneratorToolbar(
   > {
     constructor(props: INotebookGeneratorToolbarProps) {
       super(props);
+      this.tagTool = null;
       this.state = {
         showCode: true,
         showMarkdown: false,
@@ -212,16 +213,16 @@ export function notebookGeneratorToolbar(
       );
       if (this.state.showTags) {
         this.getTags();
-        tagDropdown = (
-          <div className={'toc-tag-dropdown'}>
-            {' '}
-            <TagsToolComponent
-              allTagsList={this.allTags}
-              tracker={tracker}
-              generatorOptionsRef={options}
-            />{' '}
-          </div>
+        let tagTool = (
+          <TagsToolComponent
+            allTagsList={this.allTags}
+            tracker={tracker}
+            generatorOptionsRef={options}
+            ref={tagTool => (this.tagTool = tagTool)}
+          />
         );
+        options.setTagTool(this.tagTool);
+        tagDropdown = <div className={'toc-tag-dropdown'}> {tagTool} </div>;
         tagIcon = (
           <div
             role="text"
@@ -251,5 +252,6 @@ export function notebookGeneratorToolbar(
     }
 
     allTags: string[];
+    tagTool: TagsToolComponent | null;
   };
 }
