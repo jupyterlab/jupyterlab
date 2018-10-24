@@ -42,7 +42,7 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          testRunTitle: '$(group)'
+          testRunTitle: 'Travis CI $(group)'
       - task: PublishCodeCoverageResults@1
         condition: always()
         inputs:
@@ -86,7 +86,7 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          testRunTitle: '$(group)'
+          testRunTitle: 'Appveyor'
       - task: PublishCodeCoverageResults@1
         condition: always()
         inputs:
