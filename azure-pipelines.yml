@@ -40,9 +40,8 @@ jobs:
       filePath: ./scripts/travis_script.sh
   - task: PublishTestResults@2
     inputs:
-      testResultsFiles: '**/test-*.xml'
-      testRunTitle: 'pytest'
-    condition: eq(variables['group'], 'python')
+      testResultsFiles: '**/junit.xml'
+      testRunTitle: '$(group)'
   - task: Bash@3
     displayName: 'after_success'
     inputs:
@@ -75,3 +74,7 @@ jobs:
   - script: 'jlpm versions'
   - script: 'jlpm config current'
   - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/junit.xml'
+      testRunTitle: '$(group)'
