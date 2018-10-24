@@ -91,5 +91,5 @@ jobs:
         condition: always()
         inputs:
           codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/cobertura-coverage.xml'
           reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
