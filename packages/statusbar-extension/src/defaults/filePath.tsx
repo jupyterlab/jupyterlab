@@ -1,16 +1,6 @@
-/**
- * Default item to display the file path of the active document.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import React from 'react';
 
-import {
-  JupyterLabPlugin,
-  JupyterLab,
-  ApplicationShell
-} from '@jupyterlab/application';
+import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
@@ -22,92 +12,113 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { ISignal } from '@phosphor/signaling';
-
 import { Widget, Title } from '@phosphor/widgets';
 
+/**
+ * A namespace for FilePathComponent statics.
+ */
 namespace FilePathComponent {
+  /**
+   * The props for rendering a FilePathComponent.
+   */
   export interface IProps {
+    /**
+     * The full path for a document.
+     */
     fullPath: string;
+
+    /**
+     * The shorter name for a document or activity.
+     */
     name: string;
   }
 }
 
-// tslint:disable-next-line:variable-name
-const FilePathComponent = (
+/**
+ * A pure component for rendering a file path (or activity name).
+ *
+ * @param props - the props for the component.
+ *
+ * @returns a tsx component for a file path.
+ */
+function FilePathComponent(
   props: FilePathComponent.IProps
-): React.ReactElement<FilePathComponent.IProps> => {
+): React.ReactElement<FilePathComponent.IProps> {
   return <TextItem source={props.name} />;
-};
+}
 
-class FilePath extends VDomRenderer<FilePath.Model> implements IFilePath {
+/**
+ * A status bar item for the current file path (or activity name).
+ */
+class FilePath extends VDomRenderer<FilePath.Model> {
+  /**
+   * Construct a new FilePath status item.
+   */
   constructor(opts: FilePath.IOptions) {
     super();
-
-    this._shell = opts.shell;
     this._docManager = opts.docManager;
 
-    this._shell.currentChanged.connect(this._onShellCurrentChanged);
-
-    this.model = new FilePath.Model(
-      this._shell.currentWidget,
-      this._docManager
-    );
+    this.model = new FilePath.Model(this._docManager);
 
     this.node.title = this.model.path;
   }
 
+  /**
+   * Render the status item.
+   */
   render() {
     if (this.model === null) {
       return null;
     } else {
-      this.node.title = this.model.path;
+      this.title.caption = this.model.path;
       return (
         <FilePathComponent fullPath={this.model.path} name={this.model.name!} />
       );
     }
   }
 
-  dispose() {
-    super.dispose();
-
-    this._shell.currentChanged.disconnect(this._onShellCurrentChanged);
-  }
-
-  private _onShellCurrentChanged = (
-    shell: ApplicationShell,
-    change: ApplicationShell.IChangedArgs
-  ) => {
-    this.model!.widget = change.newValue;
-  };
-
-  private _shell: ApplicationShell;
   private _docManager: IDocumentManager;
 }
 
+/**
+ * A namespace for FilePath statics.
+ */
 namespace FilePath {
-  export class Model extends VDomModel implements IFilePath.IModel {
-    constructor(widget: Widget | null, docManager: IDocumentManager) {
+  /**
+   * A VDomModel for rendering the FilePath status item.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Construct a new model.
+     *
+     * @param docManager: the application document manager. Used to check
+     *   whether the current widget is a document.
+     */
+    constructor(docManager: IDocumentManager) {
       super();
-
-      this.widget = widget;
       this._docManager = docManager;
     }
 
-    get path() {
+    /**
+     * The current path for the application.
+     */
+    get path(): string {
       return this._path;
     }
 
-    get name() {
+    /**
+     * The name of the current activity.
+     */
+    get name(): string {
       return this._name;
     }
 
-    get widget() {
+    /**
+     * The current widget for the application.
+     */
+    get widget(): Widget | null {
       return this._widget;
     }
-
     set widget(widget: Widget | null) {
       const oldWidget = this._widget;
       if (oldWidget !== null) {
@@ -142,13 +153,18 @@ namespace FilePath {
       this._triggerChange(oldState, this._getAllState());
     }
 
+    /**
+     * React to a title change for the current widget.
+     */
     private _onTitleChange = (title: Title<Widget>) => {
       const oldState = this._getAllState();
       this._name = title.label;
-
       this._triggerChange(oldState, this._getAllState());
     };
 
+    /**
+     * React to a path change for the current document.
+     */
     private _onPathChange = (
       _documentModel: DocumentRegistry.IContext<DocumentRegistry.IModel>,
       newPath: string
@@ -160,10 +176,16 @@ namespace FilePath {
       this._triggerChange(oldState, this._getAllState());
     };
 
+    /**
+     * Get the current state of the model.
+     */
     private _getAllState(): [string, string] {
       return [this._path, this._name];
     }
 
+    /**
+     * Trigger a state change to rerender.
+     */
     private _triggerChange(
       oldState: [string, string],
       newState: [string, string]
@@ -179,26 +201,20 @@ namespace FilePath {
     private _docManager: IDocumentManager;
   }
 
+  /**
+   * Options for creating the FilePath widget.
+   */
   export interface IOptions {
-    shell: ApplicationShell;
+    /**
+     * The application document manager.
+     */
     docManager: IDocumentManager;
   }
 }
 
-export interface IFilePath extends IDisposable {
-  readonly model: IFilePath.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace IFilePath {
-  export interface IModel {
-    readonly path: string;
-    readonly name: string;
-    readonly widget: Widget | null;
-    readonly stateChanged: ISignal<this, void>;
-  }
-}
-
+/**
+ * A plugin providing a file path widget to the status bar.
+ */
 export const filePathStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:file-path-status',
   autoStart: true,
@@ -208,7 +224,13 @@ export const filePathStatus: JupyterLabPlugin<void> = {
     statusBar: IStatusBar,
     docManager: IDocumentManager
   ) => {
-    let item = new FilePath({ shell: app.shell, docManager });
+    let item = new FilePath({ docManager });
+
+    // Keep the file path widget up-to-date with the application active widget.
+    item.model.widget = app.shell.currentWidget;
+    app.shell.currentChanged.connect(() => {
+      item.model.widget = app.shell.currentWidget;
+    });
 
     statusBar.registerStatusItem('file-path-item', item, {
       align: 'right',
