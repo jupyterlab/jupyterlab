@@ -227,8 +227,11 @@ export class InspectorPanel extends TabPanel implements IInspector {
     this._items[item.type] = widget;
     this.addWidget(widget);
 
-    // display the tabBar even if there is only one tab
-    this.tabBar.show();
+    if (Object.keys(this._items).length < 2) {
+      this.tabBar.hide();
+    } else {
+      this.tabBar.show();
+    }
 
     return new DisposableDelegate(() => {
       if (widget.isDisposed || this.isDisposed) {
@@ -287,7 +290,7 @@ export class InspectorPanel extends TabPanel implements IInspector {
     if (args.content) {
       for (let type in items) {
         let inspector = this._items[type];
-        if (inspector.rank < widget.rank && inspector.content) {
+        if (inspector.rank > widget.rank && inspector.content) {
           return;
         }
       }

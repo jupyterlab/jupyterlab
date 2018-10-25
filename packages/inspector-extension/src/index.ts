@@ -7,19 +7,19 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-// FIXME: Not sure how to handle restore of this side panel
-// import { InstanceTracker } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  InstanceTracker,
+  MainAreaWidget
+} from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
-
-import { ICommandPalette } from '@jupyterlab/apputils';
 
 import {
   IInspector,
   InspectionHandler,
   InspectorPanel,
   KernelConnector,
-  InfoHandler,
   KernelInfoHandler
 } from '@jupyterlab/inspector';
 
@@ -27,27 +27,40 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { InspectorManager } from './manager';
 
-import { KernelMessage } from '@jupyterlab/services';
+/**
+ * The command IDs used by the inspector plugin.
+ */
+namespace CommandIDs {
+  export const open = 'inspector:open';
+}
 
 /**
  * A service providing code introspection.
  */
 const inspector: JupyterLabPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
-  requires: [ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
-  activate: (app: JupyterLab, restorer: ILayoutRestorer): IInspector => {
-    const { shell } = app;
+  activate: (
+    app: JupyterLab,
+    palette: ICommandPalette,
+    restorer: ILayoutRestorer
+  ): IInspector => {
+    const { commands, shell } = app;
     const manager = new InspectorManager();
-    // const namespace = 'inspector';
-    // const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
-    //     namespace
-    // });
+    const category = 'Inspector';
+    const command = CommandIDs.open;
+    const label = 'Open Inspector';
+    const namespace = 'inspector';
+    const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
+      namespace
+    });
+
     /**
      * Create and track a new inspector.
      */
-    if (!manager.inspector || manager.inspector.isDisposed) {
+    function newInspectorPanel(): InspectorPanel {
       const inspector = new InspectorPanel();
 
       inspector.id = 'jp-inspector';
@@ -58,28 +71,39 @@ const inspector: JupyterLabPlugin<IInspector> = {
         }
       });
 
+      // Track the inspector.
+      let widget = new MainAreaWidget({ content: inspector });
+      tracker.add(widget);
+
       // Add the default inspector child items.
       Private.defaultInspectorItems.forEach(item => {
         inspector.add(item);
       });
 
-      manager.inspector = inspector;
-
-      if (!manager.inspector.isAttached) {
-        shell.addToLeftArea(manager.inspector, { rank: 300 });
-      }
-    }
-
-    if (manager.inspector.isAttached) {
-      shell.activateById(manager.inspector.id);
+      return inspector;
     }
 
     // Handle state restoration.
-    // restorer.restore(tracker, {
-    //   command,
-    //   args: () => null,
-    //   name: () => 'inspector'
-    // });
+    restorer.restore(tracker, {
+      command,
+      args: () => null,
+      name: () => 'inspector'
+    });
+
+    // Add command to registry and palette.
+    commands.addCommand(command, {
+      label,
+      execute: () => {
+        if (!manager.inspector || manager.inspector.isDisposed) {
+          manager.inspector = newInspectorPanel();
+        }
+        if (!manager.inspector.isAttached) {
+          shell.addToMainArea(manager.inspector.parent, { activate: false });
+        }
+        shell.activateById(manager.inspector.parent.id);
+      }
+    });
+    palette.addItem({ command, category });
 
     return manager;
   }
@@ -137,6 +161,11 @@ const consoles: JupyterLabPlugin<void> = {
         manager.source = source;
       }
     });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-CodeConsole-promptCell'
+    });
   }
 };
 
@@ -192,6 +221,11 @@ const notebooks: JupyterLabPlugin<void> = {
         manager.source = source;
       }
     });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.open,
+      selector: '.jp-Notebook'
+    });
   }
 };
 
@@ -232,72 +266,13 @@ const infopanels: JupyterLabPlugin<void> = {
 };
 
 /**
- * The command IDs used by the inspector plugin.
- */
-namespace CommandIDs {
-  export const display = 'inspector:test_transient_message';
-}
-/**
- * An extension that allows notebooks to display transient_display_data
- * message in tabs of the inspection panel.
- */
-const testpanels: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/inspector-extension:testpanels',
-  requires: [ICommandPalette, IInspector, INotebookTracker],
-  autoStart: true,
-  activate: (
-    app: JupyterLab,
-    palette: ICommandPalette,
-    inspector: IInspector,
-    notebooks: INotebookTracker
-  ): void => {
-    const { commands } = app;
-
-    const handler = new InfoHandler({ inspector });
-
-    const category = 'Inspector';
-    const command = CommandIDs.display;
-    const label = 'Send as transient_display_data';
-
-    commands.addCommand(command, {
-      label,
-      execute: () => {
-        // get the current notebook and cell
-        let widget = notebooks.currentWidget;
-        if (!widget) return;
-        let cell = widget.content.activeCell;
-        if (!cell) return;
-        let content = cell.model.value.text;
-        let transient_msg = KernelMessage.createMessage(
-          {
-            msgType: 'transient_display_data',
-            channel: 'iopub',
-            session: 'whatever'
-          },
-          eval('(' + content + ')')
-        );
-        handler.displayTransientMessage(
-          transient_msg as KernelMessage.ITransientDisplayDataMsg
-        );
-      }
-    });
-    palette.addItem({ command, category });
-    app.contextMenu.addItem({
-      command: CommandIDs.display,
-      selector: '.jp-Notebook .jp-Cell'
-    });
-  }
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
   inspector,
   consoles,
   notebooks,
-  infopanels,
-  testpanels
+  infopanels
 ];
 export default plugins;
 
