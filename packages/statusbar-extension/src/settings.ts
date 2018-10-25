@@ -3,8 +3,8 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { JSONValue } from '@phosphor/coreutils';
 
-export class SettingsConnector<I extends JSONValue> implements IDisposable {
-  constructor(opts: SettingsConnector.IOptions) {
+export class SettingsWrapper<I extends JSONValue> implements IDisposable {
+  constructor(opts: SettingsWrapper.IOptions) {
     this._registry = opts.registry;
     this._pluginId = opts.pluginId;
     this._settingKey = opts.settingKey;
@@ -30,7 +30,7 @@ export class SettingsConnector<I extends JSONValue> implements IDisposable {
     return this._registry;
   }
 
-  get changed(): ISignal<this, SettingsConnector.IChangedArgs<I>> {
+  get changed(): ISignal<this, SettingsWrapper.IChangedArgs<I>> {
     return this._changed;
   }
 
@@ -78,10 +78,10 @@ export class SettingsConnector<I extends JSONValue> implements IDisposable {
   }
 
   private _isDisposed: boolean = false;
-  private _changed: Signal<
+  private _changed: Signal<this, SettingsWrapper.IChangedArgs<I>> = new Signal<
     this,
-    SettingsConnector.IChangedArgs<I>
-  > = new Signal<this, SettingsConnector.IChangedArgs<I>>(this);
+    SettingsWrapper.IChangedArgs<I>
+  >(this);
 
   private _registry: ISettingRegistry;
   private _settings: ISettingRegistry.ISettings | null = null;
@@ -90,7 +90,7 @@ export class SettingsConnector<I extends JSONValue> implements IDisposable {
   private _value: I | null = null;
 }
 
-export namespace SettingsConnector {
+export namespace SettingsWrapper {
   export interface IOptions {
     registry: ISettingRegistry;
     pluginId: string;

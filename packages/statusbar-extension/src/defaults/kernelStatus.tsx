@@ -16,16 +16,13 @@ import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
+import { Text } from '@jupyterlab/coreutils';
+
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Kernel, Session } from '@jupyterlab/services';
 
-import {
-  interactiveItem,
-  IStatusBar,
-  TextItem,
-  TextExt
-} from '@jupyterlab/statusbar';
+import { interactiveItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -46,9 +43,7 @@ const KernelStatusComponent = (
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${TextExt.titleCase(props.name)} | ${TextExt.titleCase(
-        props.status
-      )}`}
+      source={`${Text.titleCase(props.name)} | ${Text.titleCase(props.status)}`}
     />
   );
 };

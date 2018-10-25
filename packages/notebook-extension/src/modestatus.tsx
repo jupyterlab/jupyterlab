@@ -4,6 +4,8 @@ import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
+import { Text } from '@jupyterlab/coreutils';
+
 import {
   INotebookTracker,
   Notebook,
@@ -11,7 +13,7 @@ import {
   NotebookMode
 } from '@jupyterlab/notebook';
 
-import { IStatusBar, TextItem, TextExt } from '@jupyterlab/statusbar';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -21,7 +23,7 @@ import { IDisposable } from '@phosphor/disposable';
 const CommandEditComponent = (
   props: CommandEditComponent.IProps
 ): React.ReactElement<CommandEditComponent.IProps> => {
-  return <TextItem source={`Mode: ${TextExt.titleCase(props.notebookMode)}`} />;
+  return <TextItem source={`Mode: ${Text.titleCase(props.notebookMode)}`} />;
 };
 
 namespace CommandEditComponent {

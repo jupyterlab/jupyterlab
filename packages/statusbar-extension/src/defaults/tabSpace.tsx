@@ -30,8 +30,7 @@ import {
   clickedItem,
   Popup,
   showPopup,
-  TextItem,
-  SettingsConnector
+  TextItem
 } from '@jupyterlab/statusbar';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -46,7 +45,9 @@ import { ISignal } from '@phosphor/signaling';
 
 import { Menu, Widget } from '@phosphor/widgets';
 
-import { IStatusContext } from '../contexts';
+import { IStatusContext } from '../context';
+
+import { SettingsWrapper } from '../settings';
 
 namespace TabSpaceComponent {
   export interface IProps {
@@ -166,7 +167,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
   }
 
   private _onActiveCellChange = (_tracker: INotebookTracker, cell: Cell) => {
-    let settingsConnector: SettingsConnector<TabSpace.SettingData> | null;
+    let settingsConnector: SettingsWrapper<TabSpace.SettingData> | null;
     if (cell !== null) {
       if (cell.model.type === 'code') {
         settingsConnector = this._settingsProviderData['notebookCode']
@@ -244,8 +245,8 @@ namespace Private {
     settingKey: string,
     commandId: string,
     tracker: INotebookTracker
-  ): [SettingsConnector<TabSpace.SettingData>, Menu] {
-    const connector = new SettingsConnector<TabSpace.SettingData>({
+  ): [SettingsWrapper<TabSpace.SettingData>, Menu] {
+    const connector = new SettingsWrapper<TabSpace.SettingData>({
       registry: settings,
       pluginId,
       settingKey
@@ -296,18 +297,18 @@ namespace Private {
 
 namespace TabSpace {
   export class Model extends VDomModel implements ITabSpace.IModel {
-    constructor(settingConnector: SettingsConnector<SettingData> | null) {
+    constructor(settingConnector: SettingsWrapper<SettingData> | null) {
       super();
 
       this.settingConnector = settingConnector;
     }
 
-    get settingConnector(): SettingsConnector<SettingData> | null {
+    get settingConnector(): SettingsWrapper<SettingData> | null {
       return this._settingConnector;
     }
 
     set settingConnector(
-      settingConnector: SettingsConnector<SettingData> | null
+      settingConnector: SettingsWrapper<SettingData> | null
     ) {
       const oldTabSpace = this._tabSpace;
       const oldSettingConnector = this._settingConnector;
@@ -357,7 +358,7 @@ namespace TabSpace {
     }
 
     private _tabSpace: number = 4;
-    private _settingConnector: SettingsConnector<
+    private _settingConnector: SettingsWrapper<
       TabSpace.SettingData
     > | null = null;
   }
@@ -370,7 +371,7 @@ namespace TabSpace {
 
   export type ISettingProviderData = {
     [P in SettingProvider]: {
-      connector: SettingsConnector<TabSpace.SettingData>;
+      connector: SettingsWrapper<TabSpace.SettingData>;
       menu: Menu;
     }
   };
@@ -396,7 +397,7 @@ export interface ITabSpace extends IDisposable {
 export namespace ITabSpace {
   export interface IModel {
     readonly tabSpace: number;
-    readonly settingConnector: SettingsConnector<{
+    readonly settingConnector: SettingsWrapper<{
       tabSize: number;
     }> | null;
   }
@@ -456,7 +457,7 @@ export const tabSpaceItem: JupyterLabPlugin<void> = {
       notebookTracker
     );
 
-    const editorConnector = new SettingsConnector<TabSpace.SettingData>({
+    const editorConnector = new SettingsWrapper<TabSpace.SettingData>({
       registry: settings,
       pluginId: '@jupyterlab/fileeditor-extension:plugin',
       settingKey: 'editorConfig'
