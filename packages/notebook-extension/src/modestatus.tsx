@@ -15,19 +15,30 @@ import {
 
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
-import { ISignal } from '@phosphor/signaling';
-
-import { IDisposable } from '@phosphor/disposable';
-
-// tslint:disable-next-line:variable-name
-const CommandEditComponent = (
+/**
+ * A pure function for rendering a Command/Edit mode component.
+ *
+ * @param props: the props for rendering the component.
+ *
+ * @returns a tsx component for command/edit mode.
+ */
+function CommandEditComponent(
   props: CommandEditComponent.IProps
-): React.ReactElement<CommandEditComponent.IProps> => {
+): React.ReactElement<CommandEditComponent.IProps> {
   return <TextItem source={`Mode: ${Text.titleCase(props.notebookMode)}`} />;
-};
+}
 
+/**
+ * A namespace for CommandEditComponent statics.
+ */
 namespace CommandEditComponent {
+  /**
+   * The props for the CommandEditComponent.
+   */
   export interface IProps {
+    /**
+     * The current mode of the current notebook.
+     */
     notebookMode: NotebookMode;
   }
 }
@@ -35,8 +46,10 @@ namespace CommandEditComponent {
 /**
  * StatusBar item to display which notebook mode user is in.
  */
-class CommandEdit extends VDomRenderer<CommandEdit.Model>
-  implements ICommandEdit {
+class CommandEdit extends VDomRenderer<CommandEdit.Model> {
+  /**
+   * Construct a new CommandEdit status item.
+   */
   constructor(opts: CommandEdit.IOptions) {
     super();
     this._tracker = opts.tracker;
@@ -46,54 +59,68 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model>
     this.model = new CommandEdit.Model(
       this._tracker.currentWidget && this._tracker.currentWidget.content
     );
-    this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
+    this.title.caption = `Notebook is in ${this.model.notebookMode} mode`;
   }
 
+  /**
+   * Render the CommandEdit status item.
+   */
   render() {
-    if (this.model === null) {
-      return null;
-    } else {
-      this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
-      return <CommandEditComponent notebookMode={this.model.notebookMode} />;
-    }
+    this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
+    return <CommandEditComponent notebookMode={this.model.notebookMode} />;
   }
 
+  /**
+   * Dispose of the status item.
+   */
   dispose() {
     super.dispose();
-
     this._tracker.currentChanged.disconnect(this._onNotebookChange);
   }
 
+  /**
+   * Update the model when the tracker current widget changes.
+   */
   private _onNotebookChange = (
     tracker: INotebookTracker,
     notebook: NotebookPanel | null
   ) => {
     if (notebook === null) {
-      this.model!.notebook = null;
+      this.model.notebook = null;
     } else {
-      this.model!.notebook = notebook.content;
+      this.model.notebook = notebook.content;
     }
   };
 
   private _tracker: INotebookTracker;
 }
 
+/**
+ * A namespace for CommandEdit statics.
+ */
 namespace CommandEdit {
-  export class Model extends VDomModel implements ICommandEdit.IModel {
+  /**
+   * A VDomModle for the CommandEdit renderer.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Construct a new CommandEdit model.
+     */
     constructor(notebook: Notebook | null) {
       super();
-
       this.notebook = notebook;
     }
 
+    /**
+     * The current mode of the current notebook.
+     */
     get notebookMode() {
       return this._notebookMode;
     }
 
-    set notebookMode(notebookMode: NotebookMode) {
-      this._notebookMode = notebookMode;
-    }
-
+    /**
+     * Set the current notebook for the model.
+     */
     set notebook(notebook: Notebook | null) {
       const oldNotebook = this._notebook;
       if (oldNotebook !== null) {
@@ -102,7 +129,7 @@ namespace CommandEdit {
         oldNotebook.modelContentChanged.disconnect(this._onChanged);
       }
 
-      const oldState = this._getAllState();
+      const oldMode = this._notebookMode;
       this._notebook = notebook;
       if (this._notebook === null) {
         this._notebookMode = 'command';
@@ -113,23 +140,25 @@ namespace CommandEdit {
         this._notebook.modelContentChanged.connect(this._onChanged);
       }
 
-      this._triggerChange(oldState, this._getAllState());
+      this._triggerChange(oldMode, this._notebookMode);
     }
 
+    /**
+     * On a change to the notebook, update the mode.
+     */
     private _onChanged = (_notebook: Notebook) => {
-      const oldState = this._getAllState();
-      if (_notebook !== null && _notebook !== undefined) {
+      const oldMode = this._notebookMode;
+      if (this._notebook) {
         this._notebookMode = _notebook.mode;
       } else {
         this._notebookMode = 'command';
       }
-      this._triggerChange(oldState, this._getAllState());
+      this._triggerChange(oldMode, this._notebookMode);
     };
 
-    private _getAllState(): NotebookMode {
-      return this._notebookMode;
-    }
-
+    /**
+     * Trigger a state change for the renderer.
+     */
     private _triggerChange(oldState: NotebookMode, newState: NotebookMode) {
       if (oldState !== newState) {
         this.stateChanged.emit(void 0);
@@ -140,23 +169,17 @@ namespace CommandEdit {
     private _notebook: Notebook | null = null;
   }
 
+  /**
+   * Options for creating a CommandEdit status item.
+   */
   export interface IOptions {
     tracker: INotebookTracker;
   }
 }
 
-export interface ICommandEdit extends IDisposable {
-  readonly model: ICommandEdit.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace ICommandEdit {
-  export interface IModel {
-    readonly notebookMode: NotebookMode;
-    readonly notebook: Notebook | null;
-  }
-}
-
+/**
+ * A plugin providing a CommandEdit status item.
+ */
 export const commandEditItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
