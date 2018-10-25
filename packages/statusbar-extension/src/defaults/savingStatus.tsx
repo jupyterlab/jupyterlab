@@ -1,10 +1,6 @@
 import React from 'react';
 
-import {
-  JupyterLabPlugin,
-  JupyterLab,
-  ApplicationShell
-} from '@jupyterlab/application';
+import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
@@ -14,43 +10,58 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { ISignal } from '@phosphor/signaling';
-
 import { Widget } from '@phosphor/widgets';
 
+/**
+ * A namespace for SavingStatusComponent statics.
+ */
 namespace SavingStatusComponent {
+  /**
+   * The props for the SavingStatusComponent.
+   */
   export interface IProps {
-    fileStatus: string | null;
+    /**
+     * The current saving status.
+     */
+    fileStatus: DocumentRegistry.SaveState | null;
   }
 }
 
-// tslint:disable-next-line:variable-name
-const SavingStatusComponent = (
+/**
+ * A pure functional component for a Saving status item.
+ *
+ * @param props - the props for the component.
+ *
+ * @returns a tsx component for rendering the saving state.
+ */
+function SavingStatusComponent(
   props: SavingStatusComponent.IProps
-): React.ReactElement<SavingStatusComponent.IProps> => {
+): React.ReactElement<SavingStatusComponent.IProps> {
   return <TextItem source={`Saving ${props.fileStatus}`} />;
-};
+}
 
+/**
+ * The amount of time (in ms) to retain the saving completed message
+ * before hiding the status item.
+ */
 const SAVING_COMPLETE_MESSAGE_MILLIS = 2000;
 
-class SavingStatus extends VDomRenderer<SavingStatus.Model>
-  implements ISavingStatus {
+/**
+ * A VDomRenderer for a saving status item.
+ */
+class SavingStatus extends VDomRenderer<SavingStatus.Model> {
+  /**
+   * Create a new SavingStatus item.
+   */
   constructor(opts: SavingStatus.IOptions) {
     super();
-
-    this._shell = opts.shell;
     this._docManager = opts.docManager;
-
-    this._shell.currentChanged.connect(this._onShellCurrentChanged);
-
-    this.model = new SavingStatus.Model(
-      this._shell.currentWidget,
-      this._docManager
-    );
+    this.model = new SavingStatus.Model(this._docManager);
   }
 
+  /**
+   * Render the SavingStatus item.
+   */
   render() {
     if (this.model === null || this.model.status === null) {
       return null;
@@ -59,41 +70,43 @@ class SavingStatus extends VDomRenderer<SavingStatus.Model>
     }
   }
 
-  dispose() {
-    super.dispose();
-
-    this._shell.currentChanged.disconnect(this._onShellCurrentChanged);
-  }
-
-  private _onShellCurrentChanged = (
-    shell: ApplicationShell,
-    change: ApplicationShell.IChangedArgs
-  ) => {
-    this.model!.widget = change.newValue;
-  };
-
-  private _shell: ApplicationShell;
   private _docManager: IDocumentManager;
 }
 
+/**
+ * A namespace for SavingStatus statics.
+ */
 namespace SavingStatus {
-  export class Model extends VDomModel implements ISavingStatus.IModel {
-    constructor(widget: Widget | null, docManager: IDocumentManager) {
+  /**
+   * A VDomModel for the SavingStatus item.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Create a new SavingStatus model.
+     */
+    constructor(docManager: IDocumentManager) {
       super();
 
       this._status = null;
-      this.widget = widget;
+      this.widget = null;
       this._docManager = docManager;
     }
 
-    get status() {
+    /**
+     * The current status of the model.
+     */
+    get status(): DocumentRegistry.SaveState | null {
       return this._status!;
     }
 
+    /**
+     * The current widget for the model. Any widget can be assigned,
+     * but it only has any effect if the widget is an IDocument widget
+     * known to the application document manager.
+     */
     get widget() {
       return this._widget;
     }
-
     set widget(widget: Widget | null) {
       const oldWidget = this._widget;
       if (oldWidget !== null) {
@@ -114,6 +127,9 @@ namespace SavingStatus {
       }
     }
 
+    /**
+     * React to a saving status change from the current document widget.
+     */
     private _onStatusChange = (
       _documentModel: DocumentRegistry.IContext<DocumentRegistry.IModel>,
       newStatus: DocumentRegistry.SaveState
@@ -131,30 +147,25 @@ namespace SavingStatus {
       }
     };
 
-    private _status: DocumentRegistry.SaveState | null;
+    private _status: DocumentRegistry.SaveState | null = null;
     private _widget: Widget | null = null;
     private _docManager: IDocumentManager;
   }
 
+  /**
+   * Options for creating a new SaveStatus item
+   */
   export interface IOptions {
-    shell: ApplicationShell;
+    /**
+     * The application document manager.
+     */
     docManager: IDocumentManager;
   }
 }
 
-export interface ISavingStatus extends IDisposable {
-  readonly model: ISavingStatus.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace ISavingStatus {
-  export interface IModel {
-    readonly status: DocumentRegistry.SaveState;
-    readonly widget: Widget | null;
-    readonly stateChanged: ISignal<this, void>;
-  }
-}
-
+/**
+ * A plugin for adding a saving status item to the status bar.
+ */
 export const savingStatusItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:saving-status-item',
   autoStart: true,
@@ -164,7 +175,13 @@ export const savingStatusItem: JupyterLabPlugin<void> = {
     statusBar: IStatusBar,
     docManager: IDocumentManager
   ) => {
-    let item = new SavingStatus({ shell: app.shell, docManager });
+    let item = new SavingStatus({ docManager });
+
+    // Keep the currently active widget synchronized.
+    item.model.widget = app.shell.currentWidget;
+    app.shell.currentChanged.connect(
+      () => (item.model.widget = app.shell.currentWidget)
+    );
 
     statusBar.registerStatusItem('saving-status-item', item, {
       align: 'middle',
