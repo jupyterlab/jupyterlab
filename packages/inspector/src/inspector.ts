@@ -67,6 +67,11 @@ export interface IInspector {
    * The source of events the inspector listens for.
    */
   source: IInspector.IInspectable | null;
+
+  /**
+   * IInspector reacts to IInspectorUpdate
+   */
+  onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void;
 }
 
 /**
@@ -148,6 +153,23 @@ export namespace IInspector {
      * The type of the inspector being updated.
      */
     type: string;
+
+    /**
+     * The optional class name added to the inspector child widget
+     * if a new inspector is created.
+     */
+    className?: string;
+
+    /**
+     * The rank order of display priority for inspector updates. A lower rank
+     * denotes a higher display priority. Used if a new inspector is created.
+     */
+    rank?: number;
+
+    /**
+     * The display name of the inspector child if a new inspector is created.
+     */
+    name?: string;
   }
 }
 
@@ -264,13 +286,16 @@ export class InspectorPanel extends TabPanel implements IInspector {
   /**
    * Handle inspector update signals.
    */
-  protected onInspectorUpdate(
-    sender: any,
-    args: IInspector.IInspectorUpdate
-  ): void {
+  onInspectorUpdate(sender: any, args: IInspector.IInspectorUpdate): void {
     let widget = this._items[args.type];
     if (!widget) {
-      return;
+      this.add({
+        className: args.className,
+        name: args.name,
+        rank: args.rank,
+        type: args.type
+      });
+      widget = this._items[args.type];
     }
 
     // Update the content of the inspector widget.
@@ -282,7 +307,7 @@ export class InspectorPanel extends TabPanel implements IInspector {
     if (args.content) {
       for (let type in items) {
         let inspector = this._items[type];
-        if (inspector.rank < widget.rank && inspector.content) {
+        if (inspector.rank > widget.rank && inspector.content) {
           return;
         }
       }
