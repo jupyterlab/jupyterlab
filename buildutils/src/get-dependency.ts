@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -5,7 +6,7 @@
 
 import * as path from 'path';
 import * as utils from './utils';
-import * as childProcess from 'child_process';
+import packageJson = require('package-json');
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];
@@ -17,7 +18,7 @@ let allDevDeps: string[] = [];
  *
  * @returns The dependency version specifier.
  */
-export function getDependency(name: string): string {
+export async function getDependency(name: string): Promise<string> {
   let version = '';
   let versions: { [key: string]: number } = {};
   allDeps = [];
@@ -68,11 +69,11 @@ export function getDependency(name: string): string {
       return versions[a] > versions[b] ? a : b;
     });
   } else {
-    let cmd = `npm view ${name} version`;
-    version = '~' + String(childProcess.execSync(cmd)).trim();
+    const releaseData = await packageJson(name);
+    version = '~' + releaseData.version;
   }
 
-  return version;
+  return Promise.resolve(version);
 }
 
 if (require.main === module) {
@@ -83,8 +84,9 @@ if (require.main === module) {
     process.exit(1);
   }
   let name = process.argv[2];
-  let version = getDependency(name);
-  console.log('dependency of: ', allDeps);
-  console.log('devDependency of:', allDevDeps);
-  console.log(`\n    "${name}": "${version}"`);
+  getDependency(name).then(version => {
+    console.log('dependency of: ', allDeps);
+    console.log('devDependency of:', allDevDeps);
+    console.log(`\n    "${name}": "${version}"`);
+  });
 }

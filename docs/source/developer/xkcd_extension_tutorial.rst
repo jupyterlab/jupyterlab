@@ -5,8 +5,8 @@ Let's Make an xkcd JupyterLab Extension
 
 .. warning::
 
-   The extension developer API is not stable and will evolve in JupyterLab beta
-   releases. The extension developer API will be stable in JupyterLab 1.0.
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -40,21 +40,8 @@ Setup a development environment
 Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start by opening your web browser and downloading the latest Python 3.x
-`Miniconda installer <https://conda.io/miniconda.html>`__ to your home
-directory. When the download completes, open a terminal and create a
-root conda environment by running this command.
-
-.. code:: bash
-
-    bash Miniconda3*.sh -b -p ~/miniconda
-
-Now activate the conda environment you just created so that you can run
-the ``conda`` package manager.
-
-.. code:: bash
-
-    source ~/miniconda/bin/activate
+Start by installing miniconda, following
+`Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
 
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 
@@ -78,14 +65,14 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext nodejs jupyterlab cookiecutter git -c conda-forge
+    conda create -n jupyterlab-ext -c conda-forge --override-channels nodejs jupyterlab cookiecutter git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
 
 .. code:: bash
 
-    source ~/miniconda/bin/activate jupyterlab-ext
+    conda activate jupyterlab-ext
 
 Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
@@ -106,6 +93,7 @@ Initialize the project from a cookiecutter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next use cookiecutter to create a new project for your extension.
+This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
@@ -117,10 +105,9 @@ cookiecutter prompts.
 ::
 
     author_name []: Your Name
-    extension_name [jupyterlab_myextension]: jupyterlab_xkcd
+    extension_name [myextension]: jupyterlab_xkcd
     project_short_description [A JupyterLab extension.]: Show a random xkcd.com comic in a JupyterLab panel
-    repository [https://github.com/my_name/jupyterlab_myextension]: Your repository
-    url
+    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_xkcd
 
 Note: if not using a repository, leave the field blank. You can come
 back and edit the repository links in the ``package.json`` file later.
@@ -146,10 +133,17 @@ your JupyterLab. Run the following commands to install the initial
 project dependencies and install it in the JupyterLab environment. We
 defer building since it will be built in the next step.
 
+.. note::
+
+   This tutorial uses ``jlpm`` to install Javascript packages and
+   run build commands, which is JupyterLab's bundled
+   version of ``yarn``. If you prefer, you can use another Javascript
+   package manager like ``npm`` or ``yarn`` itself.
+
+
 .. code:: bash
 
-    npm install
-    npm run build
+    jlpm install
     jupyter labextension install . --no-build
 
 After the install completes, open a second terminal. Run these commands
@@ -159,50 +153,16 @@ make them.
 
 .. code:: bash
 
-    source ~/miniconda/bin/activate jupyterlab-ext
+    conda activate jupyterlab-ext
     jupyter lab --watch
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-JupyterLab should appear momentarily in your default web browser. If all
-goes well, the last bunch of messages you should see in your terminal
-should look something like the following:
+After building with your extension, JupyterLab should open in your
+default web browser.
 
-::
-
-    Webpack is watching the files…
-
-    Hash: 1c15fc765a97c45c075c
-    Version: webpack 2.7.0
-    Time: 6423ms
-                                     Asset     Size  Chunks                    Chunk Names
-      674f50d287a8c48dc19ba404d20fe713.eot   166 kB          [emitted]
-    af7ae505a9eed503f8b8e6982036873e.woff2  77.2 kB          [emitted]
-     fee66e712a8a08eef5805a46892932ad.woff    98 kB          [emitted]
-      b06871f281fee6b241d60582ae9369b9.ttf   166 kB          [emitted]
-      912ec66d7572ff821749319396470bde.svg   444 kB          [emitted]  [big]
-                               0.bundle.js   890 kB       0  [emitted]  [big]
-                            main.bundle.js  6.82 MB       1  [emitted]  [big]  main
-                           0.bundle.js.map  1.08 MB       0  [emitted]
-                        main.bundle.js.map  8.19 MB       1  [emitted]         main
-      [27] ./~/@jupyterlab/application/lib/index.js 5.66 kB {1} [built]
-     [427] ./~/@jupyterlab/application-extension/lib/index.js 6.14 kB {1} [optional] [built]
-     [443] ./~/@jupyterlab/pdf-extension/lib/index.js 4.98 kB {1} [optional] [built]
-     [445] ./~/@jupyterlab/settingeditor-extension/lib/index.js 2.67 kB {1} [optional] [built]
-     [446] ./~/@jupyterlab/shortcuts-extension/lib/index.js 3.75 kB {1} [optional] [built]
-     [447] ./~/@jupyterlab/tabmanager-extension/lib/index.js 1.8 kB {1} [optional] [built]
-     [448] ./~/@jupyterlab/terminal-extension/lib/index.js 7.33 kB {1} [optional] [built]
-     [449] ./~/@jupyterlab/theme-dark-extension/lib/index.js 800 bytes {1} [optional] [built]
-     [450] ./~/@jupyterlab/theme-light-extension/lib/index.js 804 bytes {1} [optional] [built]
-     [451] ./~/@jupyterlab/tooltip-extension/lib/index.js 5.61 kB {1} [optional] [built]
-     [453] ./~/es6-promise/auto.js 179 bytes {1} [built]
-     [454] /Users/foo/workspace/xkcd/lib/index.js 353 bytes {1} [optional] [built]
-     [455] ./~/font-awesome/css/font-awesome.min.css 892 bytes {1} [built]
-     [860] ./build/index.out.js 35.2 kB {1} [built]
-        + 1114 hidden modules
-
-Return to the browser. Open the JavaScript console in the JupyterLab tab
+In that window open the JavaScript console
 by following the instructions for your browser:
 
 -  `Accessing the DevTools in Google
@@ -210,11 +170,11 @@ by following the instructions for your browser:
 -  `Opening the Web Console in
    Firefox <https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console>`__
 
-You should see a message that says
+After you reload the page with the console open, you should see a message that says
 ``JupyterLab extension jupyterlab_xkcd is activated!`` in the console.
 If you do, congrats, you're ready to start modifying the the extension!
 If not, go back, make sure you didn't miss a step, and `reach
-out <README.html#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 Note: Leave the terminal running the ``jupyter lab --watch`` command
 open.
@@ -265,7 +225,7 @@ repository root folder install the dependency and save it to your
 
 .. code:: bash
 
-    npm install --save @jupyterlab/apputils
+    jlpm add @jupyterlab/apputils
 
 Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
 definition so that it reads like so:
@@ -297,9 +257,11 @@ Run the following to rebuild your extension.
 
 .. code:: bash
 
-    npm run build
+    jlpm run build
 
-When the build completes, return to the browser tab that opened when you
+JupyterLab will rebuild after the extension does. You can
+see it's progress in the ``jupyter lab --watch`` window. After that
+finishes, return to the browser tab that opened when you
 started JupyterLab. Refresh it and look in the console. You should see
 the same activation message as before, plus the new message about the
 ICommandPalette instance you just added. If you don't, check the output
@@ -310,10 +272,10 @@ of the build command for errors and correct your code.
     JupyterLab extension jupyterlab_xkcd is activated!
     ICommandPalette: Palette {_palette: CommandPalette}
 
-Note that we had to run ``npm run build`` in order for the bundle to
+Note that we had to run ``jlpm run build`` in order for the bundle to
 update, because it is using the compiled JavaScript files in ``/lib``.
-If you wish to avoid running ``npm run build`` after each change, you
-can open a third terminal, and run the ``npm run watch`` command from
+If you wish to avoid running ``jlpm run build`` after each change, you
+can open a third terminal, and run the ``jlpm run watch`` command from
 your extension directory, which will automatically compile the
 TypeScript files as they change.
 
@@ -330,7 +292,7 @@ Install this dependency as well:
 
 .. code:: bash
 
-    npm install --save @phosphor/widgets
+    jlpm add @phosphor/widgets
 
 
 Then modify the ``activate`` function again so that it has the following
@@ -373,9 +335,10 @@ it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
 the command to the command palette in a section called *Tutorial*.
 
-Build your extension again using ``npm run build`` (unless you are using
-``npm run watch`` already) and refresh the browser tab. Open the command
-palette on the left side and type *xkcd*. Your *Random xkcd comic*
+Build your extension again using ``jlpm run build`` (unless you are using
+``jlpm run watch`` already) and refresh the browser tab. Open the command
+palette on the left side by clicking on *Commands* and type *xkcd* in
+the search box. Your *Random xkcd comic*
 command should appear. Click it or select it with the keyboard and press
 *Enter*. You should see a new, blank panel appear with the tab title
 *xkcd.com*. Click the *x* on the tab to close it and activate the
@@ -388,7 +351,7 @@ single *xkcd.com* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -426,7 +389,7 @@ API that returns information about a random xkcd comic, and set the
 image source, alternate text, and title attributes based on the
 response.
 
-Rebuild your extension if necessary (``npm run build``), refresh your
+Rebuild your extension if necessary (``jlpm run build``), refresh your
 browser tab, and run the *Random xkcd comic* command again. You should
 now see a comic in the xkcd.com panel when it opens.
 
@@ -439,7 +402,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with the
 `02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-02-show-a-comic>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-02-show-a-comic>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -512,7 +475,7 @@ The beginning of the function should read like the following:
         // Keep all the remaining fetch and command lines the same
         // as before from here down ...
 
-Build your extension if necessary (``npm run build``) and refresh your
+Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random xkcd comic* command and
 confirm the comic is centered with an attribution badge below it. Resize
 the browser window or the panel so that the comic is larger than the
@@ -523,7 +486,7 @@ of the comic.
 
 If anything is misbehaving, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -556,7 +519,7 @@ Install this dependency:
 
 .. code:: bash
 
-    npm install --save @phosphor/messaging
+    jlpm add @phosphor/messaging
 
 
 Then add the class just below the import statements in the ``index.ts``
@@ -675,7 +638,7 @@ comic.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-04-refactor-and-refresh>`__
 to debug. Once it's working properly, commit it.
 
 .. code:: bash
@@ -725,7 +688,7 @@ Install this dependency:
 
 .. code:: bash
 
-    npm install --save @phosphor/coreutils
+    jlpm add @phosphor/coreutils
 
 Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
@@ -802,7 +765,7 @@ the panel and refresh the browser tab. You should not see an xkcd tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-05-restore-panel-state>`__
 if your extension is misbehaving. Make a commit when the state of your
 extension persists properly.
 
@@ -829,7 +792,7 @@ the prompts.
 
 Next, open the project ``package.json`` file in your text editor. Prefix
 the ``name`` field value with ``@your-npm-username>/`` so that the
-entire field reads ``"name": "@your-npm-username/xkcd-extension"`` where
+entire field reads ``"name": "@your-npm-username/jupyterlab_xkcd"`` where
 you've replaced the string ``your-npm-username`` with your real
 username. Review the homepage, repository, license, and `other supported
 package.json <https://docs.npmjs.com/files/package.json>`__ fields while
@@ -840,7 +803,7 @@ file. For example:
 
 .. code:: bash
 
-    jupyter labextension install @your-npm-username/xkcd-extension
+    jupyter labextension install @your-npm-username/jupyterlab_xkcd
 
 Return to your terminal window and make one more git commit:
 
@@ -862,20 +825,21 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.32-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-06-prepare-to-publish>`__
 for further debugging.
 
 |Extension page on npmjs.com|
 
 You can now try installing your extension as a user would. Open a new
 terminal and run the following commands, again substituting your npm
-username where appropriate:
+username where appropriate
+(make sure to stop the existing ``jupyter lab --watch`` command first):
 
 .. code:: bash
 
     conda create -n jupyterlab-xkcd jupyterlab nodejs
-    source activate jupyterlab-xkcd
-    jupyter labextension install @your-npm-username/xkcd-extension
+    conda activate jupyterlab-xkcd
+    jupyter labextension install @your-npm-username/jupyterlab_xkcd
     jupyter lab
 
 You should see a fresh JupyterLab browser tab appear. When it does,

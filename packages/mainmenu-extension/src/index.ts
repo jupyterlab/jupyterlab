@@ -3,11 +3,15 @@
 
 import { each } from '@phosphor/algorithm';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { Menu, Widget } from '@phosphor/widgets';
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
+
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import {
   IMainMenu,
@@ -21,6 +25,8 @@ import {
   ViewMenu,
   TabsMenu
 } from '@jupyterlab/mainmenu';
+
+import { ServerConnection } from '@jupyterlab/services';
 
 /**
  * A namespace for command IDs of semantic extension points.
@@ -41,11 +47,15 @@ export namespace CommandIDs {
 
   export const findAndReplace = 'editmenu:find-and-replace';
 
+  export const goToLine = 'editmenu:go-to-line';
+
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export const persistAndSave = 'filemenu:persist-and-save';
 
   export const createConsole = 'filemenu:create-console';
+
+  export const quit = 'filemenu:quit';
 
   export const interruptKernel = 'kernelmenu:interrupt';
 
@@ -92,6 +102,9 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
 
+    let quitButton = PageConfig.getOption('quit_button');
+    menu.fileMenu.quitEntry = quitButton === 'True';
+
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
     createFileMenu(app, menu.fileMenu);
@@ -100,6 +113,13 @@ const menuPlugin: JupyterLabPlugin<IMainMenu> = {
     createSettingsMenu(app, menu.settingsMenu);
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
+
+    if (menu.fileMenu.quitEntry) {
+      palette.addItem({
+        command: CommandIDs.quit,
+        category: 'Main Area'
+      });
+    }
 
     palette.addItem({
       command: CommandIDs.shutdownAllKernels,
@@ -187,6 +207,12 @@ export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
     [{ command: CommandIDs.find }, { command: CommandIDs.findAndReplace }],
     200
   );
+  commands.addCommand(CommandIDs.goToLine, {
+    label: 'Go to Line…',
+    isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),
+    execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine')
+  });
+  menu.addGroup([{ command: CommandIDs.goToLine }], 200);
 }
 
 /**
@@ -229,11 +255,15 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
       return `Save ${name} ${action || 'with Extras'}`;
     },
-    isEnabled: Private.delegateEnabled(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    ),
+    isEnabled: args => {
+      return (
+        Private.delegateEnabled(
+          app,
+          menu.persistAndSavers,
+          'persistAndSave'
+        )() && commands.isEnabled('docmanager:save', args)
+      );
+    },
     execute: Private.delegateExecute(
       app,
       menu.persistAndSavers,
@@ -256,6 +286,43 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
+  commands.addCommand(CommandIDs.quit, {
+    label: 'Quit',
+    caption: 'Quit JupyterLab',
+    execute: () => {
+      showDialog({
+        title: 'Quit confirmation',
+        body: 'Please confirm you want to quit JupyterLab.',
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
+      }).then(result => {
+        if (result.button.accept) {
+          let setting = ServerConnection.makeSettings();
+          let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
+          ServerConnection.makeRequest(apiURL, { method: 'POST' }, setting)
+            .then(result => {
+              if (result.ok) {
+                // Close this window if the shutdown request has been successful
+                let body = document.createElement('div');
+                body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
+                  <p>To use JupyterLab again, you will need to relaunch it.</p>`;
+                showDialog({
+                  title: 'Server stopped',
+                  body: new Widget({ node: body }),
+                  buttons: []
+                });
+                window.close();
+              } else {
+                throw new ServerConnection.ResponseError(result);
+              }
+            })
+            .catch(data => {
+              throw new ServerConnection.NetworkError(data);
+            });
+        }
+      });
+    }
+  });
+
   // Add the new group
   const newGroup = [
     { type: 'submenu' as Menu.ItemType, submenu: menu.newMenu.menu },
@@ -264,7 +331,8 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 
   const newViewGroup = [
     { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole }
+    { command: CommandIDs.createConsole },
+    { command: 'docmanager:open-direct' }
   ];
 
   // Add the close group
@@ -295,11 +363,17 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
     return { command };
   });
 
+  // Add the quit group.
+  const quitGroup = [{ command: 'filemenu:quit' }];
+
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
   menu.addGroup(closeGroup, 2);
   menu.addGroup(saveGroup, 3);
   menu.addGroup(reGroup, 4);
+  if (menu.quitEntry) {
+    menu.addGroup(quitGroup, 99);
+  }
 }
 
 /**
@@ -557,7 +631,10 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     0
   );
 
-  let tabGroup: Menu.IItemOptions[] = [];
+  // A list of the active tabs in the main area.
+  const tabGroup: Menu.IItemOptions[] = [];
+  // A disposable for getting rid of the out-of-date tabs list.
+  let disposable: IDisposable;
 
   // Utility function to create a command to activate
   // a given tab, or get it if it already exists.
@@ -591,8 +668,12 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     // main area, and add them to the tab group
     // of the menu.
     const populateTabs = () => {
-      menu.removeGroup(tabGroup);
+      // remove the previous tab list
+      if (disposable && !disposable.isDisposed) {
+        disposable.dispose();
+      }
       tabGroup.length = 0;
+
       let isPreviouslyUsedTabAttached = false;
       each(app.shell.widgets('main'), widget => {
         if (widget.id === previousId) {
@@ -600,7 +681,7 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
         }
         tabGroup.push(createMenuItem(widget));
       });
-      menu.addGroup(tabGroup, 1);
+      disposable = menu.addGroup(tabGroup, 1);
       previousId = isPreviouslyUsedTabAttached ? previousId : '';
     };
     populateTabs();
@@ -626,21 +707,19 @@ export default menuPlugin;
  */
 namespace Private {
   /**
-   * Given a widget and a set containing IMenuExtenders,
-   * check the tracker and return the extender, if any,
-   * that holds the widget.
+   * Return the first value of the iterable that satisfies the predicate
+   * function.
    */
-  function findExtender<E extends IMenuExtender<Widget>>(
-    widget: Widget,
-    s: Set<E>
-  ): E {
-    let extender: E;
-    s.forEach(value => {
-      if (value.tracker.has(widget)) {
-        extender = value;
+  function find<T>(
+    it: Iterable<T>,
+    predicate: (value: T) => boolean
+  ): T | undefined {
+    for (let value of it) {
+      if (predicate(value)) {
+        return value;
       }
-    });
-    return extender;
+    }
+    return undefined;
   }
 
   /**
@@ -652,7 +731,7 @@ namespace Private {
     label: keyof E
   ): string {
     let widget = app.shell.currentWidget;
-    const extender = findExtender(widget, s);
+    const extender = find(s, value => value.tracker.has(widget));
     if (!extender) {
       return '';
     }
@@ -673,7 +752,7 @@ namespace Private {
   ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -696,7 +775,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       return (
         !!extender &&
         !!extender[executor] &&
@@ -716,7 +795,7 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = findExtender(widget, s);
+      const extender = find(s, value => value.tracker.has(widget));
       // Coerce extender[toggled] to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.

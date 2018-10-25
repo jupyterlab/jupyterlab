@@ -27,9 +27,9 @@ one or more files or a diretory of files with a group of individuals.
 During the RTC sessions, the participants are focused on the following aspects of their
 work:
 
-* Collaborative editing of content.
-* Side channel live discussions (Bluejeans, appear.in, phonecalls).
-* Discussion and exploration of results.
+- Collaborative editing of content.
+- Side channel live discussions (Bluejeans, appear.in, phonecalls).
+- Discussion and exploration of results.
 
 All individuals in the collaboration already have access to the files (Git/GitHub).
 Because of this, during the RTC they need to be able to collaborative edit the same exact

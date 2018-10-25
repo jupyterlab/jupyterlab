@@ -47,31 +47,17 @@ JupyterLab is served from the same `server
 `notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
 classic Jupyter Notebook.
 
-.. _stability:
+.. _releases:
 
-Stability of JupyterLab
-~~~~~~~~~~~~~~~~~~~~~~~
+JupyterLab Releases
+~~~~~~~~~~~~~~~~~~~
 
-The current beta release of JupyterLab is stable for daily use.
-Likewise, all future releases in the beta series will be stable for daily use.
+The current release of JupyterLab is suitable for general daily use. Please
+review the :ref:`changelog` for detailed descriptions of each release.
 
-.. _classic:
-
-Classic Jupyter Notebook
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-JupyterLab 1.0 will eventually replace the classic Jupyter Notebook.
-Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.
-
-.. _beta:
-
-Beta Series and Beyond
-~~~~~~~~~~~~~~~~~~~~~~
-The developer API will evolve in beta releases and will stabilize in JupyterLab 1.0.
+The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
 We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
-as we evolve towards a stable extension development API for JupyterLab 1.0.
+as we evolve towards a stable extension development API.
 
-We plan to release JupyterLab 1.0 later in 2018.
-The beta releases leading up to 1.0 will focus on
-stabilizing the extension development API, UI/UX improvements,
-and additional core features.
+JupyterLab will eventually replace the classic Jupyter Notebook.
+Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.

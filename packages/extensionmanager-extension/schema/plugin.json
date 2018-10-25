@@ -6,7 +6,7 @@
   "properties": {
     "enabled": {
       "title": "Enabled Status",
-      "description": "Requires Node.js/npm so the manager disabled by default.",
+      "description": "Enables extension manager (requires Node.js/npm).\nWARNING: installing untrusted extensions may be unsafe.",
       "default": false,
       "type": "boolean"
     }

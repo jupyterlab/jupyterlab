@@ -35,7 +35,7 @@ import { DocumentRegistry } from './registry';
 /**
  * An implementation of a document context.
  *
- * This class is typically instantiated by the document manger.
+ * This class is typically instantiated by the document manager.
  */
 export class Context<T extends DocumentRegistry.IModel>
   implements DocumentRegistry.IContext<T> {
@@ -72,8 +72,14 @@ export class Context<T extends DocumentRegistry.IModel>
       kernelPreference: options.kernelPreference || { shouldStart: false },
       setBusy: options.setBusy
     });
-    this.session.propertyChanged.connect(this._onSessionChanged, this);
-    manager.contents.fileChanged.connect(this._onFileChanged, this);
+    this.session.propertyChanged.connect(
+      this._onSessionChanged,
+      this
+    );
+    manager.contents.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
       session: this.session,
@@ -93,6 +99,13 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   get fileChanged(): ISignal<this, Contents.IModel> {
     return this._fileChanged;
+  }
+
+  /**
+   * A signal emitted on the start and end of a saving operation.
+   */
+  get saveState(): ISignal<this, DocumentRegistry.SaveState> {
+    return this._saveState;
   }
 
   /**
@@ -373,6 +386,7 @@ export class Context<T extends DocumentRegistry.IModel>
           path: newPath
         };
       }
+      this._path = newPath;
       this.session.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
@@ -380,7 +394,6 @@ export class Context<T extends DocumentRegistry.IModel>
       };
       const localPath = this._manager.contents.localPath(newPath);
       this.session.setName(PathExt.basename(localPath));
-      this._path = newPath;
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -451,6 +464,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Save the document contents to disk.
    */
   private _save(): Promise<void> {
+    this._saveState.emit('started');
     let model = this._model;
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
@@ -476,6 +490,7 @@ export class Context<T extends DocumentRegistry.IModel>
         if (this.isDisposed) {
           return;
         }
+
         model.dirty = false;
         this._updateContentsModel(value);
 
@@ -496,7 +511,20 @@ export class Context<T extends DocumentRegistry.IModel>
         const name = PathExt.basename(localPath);
         this._handleError(err, `File Save Error for ${name}`);
         throw err;
-      });
+      })
+      .then(
+        value => {
+          // Capture all success paths and emit completion.
+          this._saveState.emit('completed');
+          return value;
+        },
+        err => {
+          // Capture all error paths and emit failure.
+          this._saveState.emit('failed');
+          throw err;
+        }
+      )
+      .catch();
   }
 
   /**
@@ -659,7 +687,7 @@ export class Context<T extends DocumentRegistry.IModel>
   ): Promise<Contents.IModel> {
     let tDisk = new Date(model.last_modified);
     console.warn(
-      `Last saving peformed ${tClient} ` +
+      `Last saving performed ${tClient} ` +
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );
@@ -746,6 +774,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
 }
 

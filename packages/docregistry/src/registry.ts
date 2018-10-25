@@ -625,6 +625,13 @@ export class DocumentRegistry implements IDisposable {
  */
 export namespace DocumentRegistry {
   /**
+   * The item to be added to document toolbar.
+   */
+  export interface IToolbarItem {
+    name: string;
+    widget: Widget;
+  }
+  /**
    * The options used to create a document registry.
    */
   export interface IOptions {
@@ -745,6 +752,11 @@ export namespace DocumentRegistry {
     fileChanged: ISignal<this, Contents.IModel>;
 
     /**
+     * A signal emitted on the start and end of a saving operation.
+     */
+    saveState: ISignal<this, SaveState>;
+
+    /**
      * A signal emitted when the context is disposed.
      */
     disposed: ISignal<this, void>;
@@ -861,6 +873,8 @@ export namespace DocumentRegistry {
     addSibling(widget: Widget, options?: IOpenOptions): IDisposable;
   }
 
+  export type SaveState = 'started' | 'completed' | 'failed';
+
   /**
    * A type alias for a context.
    */
@@ -874,7 +888,7 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions {
+  export interface IWidgetFactoryOptions<T extends Widget = Widget> {
     /**
      * The name of the widget to display in dialogs.
      */
@@ -916,6 +930,11 @@ export namespace DocumentRegistry {
      * Whether the widgets can start a kernel when opened.
      */
     readonly canStartKernel?: boolean;
+
+    /**
+     * A function producing toolbar widgets, overriding the default toolbar widgets.
+     */
+    readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
   }
 
   /**

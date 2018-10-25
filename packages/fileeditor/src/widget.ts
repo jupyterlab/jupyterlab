@@ -73,7 +73,10 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
           color: localCollaborator.color
         };
 
-        collaborators.changed.connect(this._onCollaboratorsChanged, this);
+        collaborators.changed.connect(
+          this._onCollaboratorsChanged,
+          this
+        );
         // Trigger an initial onCollaboratorsChanged event.
         this._onCollaboratorsChanged();
       });
@@ -112,7 +115,10 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     editor.clearHistory();
 
     // Wire signal connections.
-    contextModel.contentChanged.connect(this._onContentChanged, this);
+    contextModel.contentChanged.connect(
+      this._onContentChanged,
+      this
+    );
 
     // Resolve the ready promise.
     this._ready.resolve(undefined);
@@ -172,7 +178,10 @@ export class FileEditor extends Widget {
     this.model = editorWidget.model;
 
     // Listen for changes to the path.
-    context.pathChanged.connect(this._onPathChanged, this);
+    context.pathChanged.connect(
+      this._onPathChanged,
+      this
+    );
     this._onPathChanged();
 
     let layout = (this.layout = new StackedLayout());
@@ -346,6 +355,8 @@ export namespace FileEditorFactory {
     /**
      * The factory options associated with the factory.
      */
-    factoryOptions: DocumentRegistry.IWidgetFactoryOptions;
+    factoryOptions: DocumentRegistry.IWidgetFactoryOptions<
+      IDocumentWidget<FileEditor>
+    >;
   }
 }

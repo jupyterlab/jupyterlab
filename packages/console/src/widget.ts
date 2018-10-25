@@ -133,8 +133,14 @@ export class CodeConsole extends Widget {
     });
 
     this._onKernelChanged();
-    this.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
+    this.session.kernelChanged.connect(
+      this._onKernelChanged,
+      this
+    );
+    this.session.statusChanged.connect(
+      this._onKernelStatusChanged,
+      this
+    );
   }
 
   /**
@@ -203,7 +209,10 @@ export class CodeConsole extends Widget {
   addCell(cell: Cell) {
     this._content.addWidget(cell);
     this._cells.push(cell);
-    cell.disposed.connect(this._onCellDisposed, this);
+    cell.disposed.connect(
+      this._onCellDisposed,
+      this
+    );
     this.update();
   }
 
@@ -212,7 +221,10 @@ export class CodeConsole extends Widget {
       // An old banner just becomes a normal cell now.
       let cell = this._banner;
       this._cells.push(this._banner);
-      cell.disposed.connect(this._onCellDisposed, this);
+      cell.disposed.connect(
+        this._onCellDisposed,
+        this
+      );
     }
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
@@ -298,6 +310,7 @@ export class CodeConsole extends Widget {
       if (should) {
         // Create a new prompt cell before kernel execution to allow typeahead.
         this.newPromptCell();
+        this.promptCell!.editor.focus();
         return this._execute(promptCell);
       } else {
         // add a newline if we shouldn't execute
@@ -490,7 +503,10 @@ export class CodeConsole extends Widget {
       this.clear();
       return Promise.resolve(void 0);
     }
-    cell.model.contentChanged.connect(this.update, this);
+    cell.model.contentChanged.connect(
+      this.update,
+      this
+    );
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       if (this.isDisposed) {
         return;
@@ -777,7 +793,7 @@ export namespace CodeConsole {
      * @param options - The options used to create the cell.
      *
      * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
 
@@ -787,7 +803,7 @@ export namespace CodeConsole {
      * @param options - The options used to create the cell.
      *
      * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel;
   }
@@ -815,7 +831,7 @@ export namespace CodeConsole {
      * @param source - The data to use for the original source data.
      *
      * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      *   If the contentFactory is not provided, the instance
      *   `codeCellContentFactory` will be used.
      */
@@ -832,7 +848,7 @@ export namespace CodeConsole {
      * @param source - The data to use for the original source data.
      *
      * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be intialized with the data from the source.
+     *   new cell will be initialized with the data from the source.
      */
     createRawCell(options: CellModel.IOptions): IRawCellModel {
       return new RawCellModel(options);

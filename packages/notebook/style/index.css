@@ -196,7 +196,7 @@
 .jp-CellTools {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+  min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   /* This is needed so that all font sizing of children done in ems is
@@ -206,9 +206,7 @@
 
 .jp-ActiveCellTool {
   padding: 12px;
-  border-bottom: 1px solid var(--jp-border-color1);
-  background-color: var(--jp-layout-color2);
-  box-shadow: var(--jp-toolbar-box-shadow);
+  background-color: var(--jp-layout-color1);
   border-top: none !important;
 }
 
@@ -219,9 +217,12 @@
 
 .jp-ActiveCellTool .jp-InputArea-editor {
   flex: 1 1 auto;
-  background-color: var(--jp-cell-editor-active-background);
-  border-color: var(--jp-cell-editor-active-border-color);
-  box-shadow: var(--jp-cell-editor-box-shadow);
+  background: var(--jp-cell-editor-background);
+  border-color: var(--jp-cell-editor-border-color);
+}
+
+.jp-ActiveCellTool .jp-InputArea-editor .CodeMirror {
+  background: transparent;
 }
 
 .jp-CellTools-tool:not(:nth-child(2)) {

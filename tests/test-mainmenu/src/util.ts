@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IMenuExtender } from '@jupyterlab/mainmenu';
+import { IMenuExtender } from '@jupyterlab/mainmenu/src';
 
 import { Widget } from '@phosphor/widgets';
 

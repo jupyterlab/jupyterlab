@@ -42,7 +42,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Inspector .p-TabBar {
-  min-width: 300px;
+  min-width: var(--jp-sidebar-min-width);
   min-height: var(--jp-private-inspector-tab-height);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);

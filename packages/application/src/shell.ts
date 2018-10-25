@@ -71,11 +71,11 @@ export class ApplicationShell extends Widget {
 
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let topPanel = (this._topPanel = new Panel());
-    let hboxPanel = (this._hboxPanel = new BoxPanel());
+    let hboxPanel = new BoxPanel();
     let dockPanel = (this._dockPanel = new DockPanel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    let hsplitPanel = (this._hsplitPanel = new SplitPanel());
+    let hsplitPanel = new SplitPanel();
     let leftHandler = (this._leftHandler = new Private.SideBarHandler('left'));
     let rightHandler = (this._rightHandler = new Private.SideBarHandler(
       'right'
@@ -122,6 +122,9 @@ export class ApplicationShell extends Widget {
 
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
+    // Use relative sizing to set the width of the side panels.
+    // This will still respect the min-size of children widget in the stacked panel.
+    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
@@ -137,11 +140,20 @@ export class ApplicationShell extends Widget {
     this.layout = rootLayout;
 
     // Connect change listeners.
-    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
-    this._tracker.activeChanged.connect(this._onActiveChanged, this);
+    this._tracker.currentChanged.connect(
+      this._onCurrentChanged,
+      this
+    );
+    this._tracker.activeChanged.connect(
+      this._onActiveChanged,
+      this
+    );
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+    this._dockPanel.layoutModified.connect(
+      this._onLayoutModified,
+      this
+    );
 
     // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(
@@ -390,12 +402,14 @@ export class ApplicationShell extends Widget {
    */
   addToLeftArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -453,12 +467,14 @@ export class ApplicationShell extends Widget {
    */
   addToRightArea(
     widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
+    options?: ApplicationShell.ISideAreaOptions
   ): void {
     if (!widget.id) {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
     let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._rightHandler.addWidget(widget, rank!);
     this._onLayoutModified();
@@ -684,7 +700,9 @@ export class ApplicationShell extends Widget {
     // Otherwise, direction is 'next'.
     return index < len - 1
       ? bars[index + 1]
-      : index === len - 1 ? bars[0] : null;
+      : index === len - 1
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -786,8 +804,6 @@ export class ApplicationShell extends Widget {
     this
   );
   private _dockPanel: DockPanel;
-  private _hboxPanel: BoxPanel;
-  private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _leftHandler: Private.SideBarHandler;
@@ -800,6 +816,10 @@ export class ApplicationShell extends Widget {
   private _addOptionsCache = new Map<
     Widget,
     ApplicationShell.IMainAreaOptions
+  >();
+  private _sideOptionsCache = new Map<
+    Widget,
+    ApplicationShell.ISideAreaOptions
   >();
 }
 
@@ -971,12 +991,18 @@ namespace Private {
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
-      this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.currentChanged.connect(
+        this._onCurrentChanged,
+        this
+      );
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
       );
-      this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+      this._stackedPanel.widgetRemoved.connect(
+        this._onWidgetRemoved,
+        this
+      );
     }
 
     /**
@@ -1047,7 +1073,10 @@ namespace Private {
       let index = this._findInsertIndex(item);
       ArrayExt.insert(this._items, index, item);
       this._stackedPanel.insertWidget(index, widget);
-      this._sideBar.insertTab(index, widget.title);
+      const title = this._sideBar.insertTab(index, widget.title);
+      // Store the parent id in the title dataset
+      // in order to dispatch click events to the right widget.
+      title.dataset = { id: widget.id };
       this._refreshVisibility();
     }
 

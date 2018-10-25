@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "2.0.0-1",
+  "version": "2.1.1",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -22,10 +22,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.1.2",
@@ -36,6 +37,10 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

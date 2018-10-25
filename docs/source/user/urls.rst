@@ -25,35 +25,42 @@ Entering this URL will open the notebook in JupyterLab in
 :ref:`single-document mode <tabs>`.
 
 
-.. _url-workspaces:
+.. _url-workspaces-ui:
 
-Managing Workspaces
-~~~~~~~~~~~~~~~~~~~
+Managing Workspaces (UI)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
 areas and tabs, etc. When the page is refreshed, the workspace is restored.
 
-The default workspace is not named and only saves its state on the
-user's local browser:
+The default workspace does not have a name and resides at the primary ``/lab``
+URL:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab
 
-Named workspaces save their state on the server and can be shared between
-multiple users (or browsers) as long as they have access to the same server:
+All other workspaces have a name that is part of the URL:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/workspaces/foo
+
+Workspaces save their state on the server and can be shared between
+multiple users (or browsers) as long as they have access to the same server.
+
+A workspace should only be open in a single browser tab at a time. If JupyterLab
+detects that a workspace is being opened multiple times simultaneously, it will
+prompt for a new workspace name. Opening a document in two different browser
+tabs simultaneously is also not supported.
 
 .. _url-clone:
 
 Cloning Workspaces
 ~~~~~~~~~~~~~~~~~~
 
-Workspaces can the ability ``clone`` their contents into a new workspace.
+You can copy the contents of a workspace into another workspace with the ``clone`` url parameter.
 
 To copy the contents of the workspace ``foo`` into the workspace ``bar``:
 
@@ -78,7 +85,7 @@ To copy the contents of the workspace ``foo`` into the default workspace:
 Resetting a Workspace
 ~~~~~~~~~~~~~~~~~~~~~
 
-To clear a workspace of its contents, it can be ``reset``.
+Use the ``reset`` url parameter to clear a workspace of its contents.
 
 To reset the contents of the workspace ``foo``:
 
@@ -97,10 +104,9 @@ To reset the contents of the default workspace:
 Combining URL Functions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+These URL functions can be used separately, as above, or in combination.
 
-These URL functions can be used separately as above, or in combination, e.g.:
-
-To reset the workspace ``foo`` and to load a specific notebook afterward:
+To reset the workspace ``foo`` and load a specific notebook afterward:
 
 .. code-block:: none
 
@@ -113,8 +119,42 @@ load a notebook afterward:
 
   http(s)://<server:port>/<lab-location>/lab/workspaces/foo/tree/path/to/notebook.ipynb?clone=bar
 
-To reset the contents of the default workspace and to load a notebook:
+To reset the contents of the default workspace and load a notebook:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?reset
+
+.. _url-workspaces-cli:
+
+Managing Workspaces (CLI)
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+JupyterLab provides a command-line interface for workspace ``import`` and
+``export``:
+
+.. code-block:: bash
+
+  $ # Exports the default JupyterLab workspace
+  $ jupyter lab workspaces export
+  {"data": {}, "metadata": {"id": "/lab"}}
+  $
+  $ # Exports the workspaces named `foo`
+  $ jupyter lab workspaces export foo
+  {"data": {}, "metadata": {"id": "/lab/workspaces/foo"}}
+  $
+  $ # Exports the workspace named `foo` into a file called `file_name.json`
+  $ jupyter lab workspaces export foo > file_name.json
+  $
+  $ # Imports the workspace file `file_name.json`.
+  $ jupyter lab workspaces import file_name.json
+  Saved workspace: <workspaces-directory>/labworkspacesfoo-54d5.jupyterlab-workspace
+
+The ``export`` functionality is as friendly as possible: if a workspace does not
+exist, it will still generate an empty workspace for export.
+
+The ``import`` functionality validates the structure of the workspace file and
+validates the ``id`` field in the workspace ``metadata`` to make sure its URL is
+compatible with either the ``workspaces_url`` configuration or the ``page_url``
+configuration to verify that it is a correctly named workspace or it is the
+default workspace.

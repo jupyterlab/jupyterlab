@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils/src';
 
 describe('@jupyterlab/coreutils', () => {
   describe('PageConfig', () => {
@@ -45,7 +45,18 @@ describe('@jupyterlab/coreutils', () => {
     describe('#getWsUrl()', () => {
       it('should get the base ws url of the page', () => {
         // The value was passed as a command line arg.
-        expect(PageConfig.getWsUrl()).to.contain('ws://localhost');
+        const expected = 'ws' + PageConfig.getBaseUrl().slice(4);
+        expect(PageConfig.getWsUrl()).to.equal(expected);
+      });
+
+      it('should handle a good base url', () => {
+        const url = 'http://foo.com';
+        expect(PageConfig.getWsUrl(url)).to.equal('ws://foo.com/');
+      });
+
+      it('should be an empty string for a bad base url', () => {
+        const url = 'blargh://foo.com';
+        expect(PageConfig.getWsUrl(url)).to.equal('');
       });
     });
   });

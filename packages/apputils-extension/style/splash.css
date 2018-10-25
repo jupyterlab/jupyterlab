@@ -13,7 +13,14 @@
   background-position: center 40%;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+#jupyterlab-splash.light {
   background-color: white;
+}
+
+#jupyterlab-splash.dark {
+  background-color: var(--md-grey-900);
 }
 
 .splash-fade {
@@ -75,14 +82,12 @@
 }
 
 #moon1 .planet {
-  background-color: #6f7070;
   height: 12px;
   width: 12px;
   border-radius: 50%;
 }
 
 #moon2 .planet {
-  background-color: #767677;
   height: 16px;
   width: 16px;
   border-radius: 50%;
@@ -90,10 +95,27 @@
 }
 
 #moon3 .planet {
-  background-color: #989798;
   height: 20px;
   width: 20px;
   border-radius: 50%;
+}
+
+#jupyterlab-splash.light #moon1 .planet {
+  background-color: #6f7070;
+}
+
+#jupyterlab-splash.light #moon2 .planet {
+  background-color: #767677;
+}
+
+#jupyterlab-splash.light #moon3 .planet {
+  background-color: #989798;
+}
+
+#jupyterlab-splash.dark #moon1 .planet,
+#jupyterlab-splash.dark #moon2 .planet,
+#jupyterlab-splash.dark #moon3 .planet {
+  background-color: white;
 }
 
 .orbit {
@@ -102,47 +124,6 @@
   top: 50%;
   left: 50%;
   border-radius: 50%;
-}
-
-.dot1,
-.dot2 {
-  width: 60%;
-  height: 60%;
-  display: inline-block;
-  position: absolute;
-  top: 0;
-  background-color: #333;
-  border-radius: 100%;
-
-  -webkit-animation: sk-bounce 2s infinite ease-in-out;
-  animation: sk-bounce 2s infinite ease-in-out;
-}
-
-.dot2 {
-  top: auto;
-  bottom: 0;
-}
-
-@-webkit-keyframes sk-bounce {
-  0%,
-  100% {
-    -webkit-transform: scale(0);
-  }
-  50% {
-    -webkit-transform: scale(1);
-  }
-}
-
-@keyframes sk-bounce {
-  0%,
-  100% {
-    transform: scale(0);
-    -webkit-transform: scale(0);
-  }
-  50% {
-    transform: scale(1);
-    -webkit-transform: scale(1);
-  }
 }
 
 @keyframes orbit {

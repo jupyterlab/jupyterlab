@@ -57,11 +57,15 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
+
+import { commandEditItem } from './modestatus';
+
+import { notebookTrustItem } from './truststatus';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -207,17 +211,34 @@ const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const FACTORY = 'Notebook';
 
 /**
- * The allowed Export To ... formats and their human readable labels.
+ * The rank of the cell tools tab in the sidebar
  */
-const EXPORT_TO_FORMATS = [
-  { format: 'html', label: 'HTML' },
-  { format: 'latex', label: 'LaTeX' },
-  { format: 'markdown', label: 'Markdown' },
-  { format: 'pdf', label: 'PDF' },
-  { format: 'rst', label: 'ReStructured Text' },
-  { format: 'script', label: 'Executable Script' },
-  { format: 'slides', label: 'Reveal.js Slides' }
-];
+const CELL_TOOLS_RANK = 400;
+
+/**
+ * The exluded Export To ...
+ * (returned from nbconvert's export list)
+ */
+const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * The exluded Cell Inspector Raw NbConvert Formats
+ * (returned from nbconvert's export list)
+ */
+const RAW_FORMAT_EXCLUDE = ['pdf', 'slides', 'script', 'notebook', 'custom'];
+
+/**
+ * The default Export To ... formats and their human readable labels.
+ */
+const FORMAT_LABEL: { [k: string]: string } = {
+  html: 'HTML',
+  latex: 'LaTeX',
+  markdown: 'Markdown',
+  pdf: 'PDF',
+  rst: 'ReStructured Text',
+  script: 'Executable Script',
+  slides: 'Reveal.js Slides'
+};
 
 /**
  * The notebook widget tracker provider.
@@ -267,7 +288,13 @@ const tools: JupyterLabPlugin<ICellTools> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, trackerPlugin, tools];
+const plugins: JupyterLabPlugin<any>[] = [
+  factory,
+  trackerPlugin,
+  tools,
+  commandEditItem,
+  notebookTrustItem
+];
 export default plugins;
 
 /**
@@ -283,9 +310,9 @@ function activateCellTools(
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
-  const nbConvert = CellTools.createNBConvertSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -302,12 +329,29 @@ function activateCellTools(
     }
     return true;
   };
-
-  celltools.title.label = 'Cell Tools';
+  let optionsMap: { [key: string]: JSONValue } = {};
+  optionsMap.None = '-';
+  services.nbconvert.getExportFormats().then(response => {
+    if (response) {
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      formatList.forEach(function(key) {
+        if (RAW_FORMAT_EXCLUDE.indexOf(key) === -1) {
+          let capCaseKey = key[0].toUpperCase() + key.substr(1);
+          let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
+          let mimeType = response[key].output_mimetype;
+          optionsMap[labelStr] = mimeType;
+        }
+      });
+      const nbConvert = CellTools.createNBConvertSelector(optionsMap);
+      celltools.addItem({ tool: nbConvert, rank: 3 });
+    }
+  });
+  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  celltools.title.caption = 'Cell Inspector';
   celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: nbConvert, rank: 3 });
   celltools.addItem({ tool: metadataEditor, rank: 4 });
   MessageLoop.installMessageHook(celltools, hook);
 
@@ -317,7 +361,7 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools);
+      app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
       if (open) {
         app.shell.activateById(celltools.id);
       }
@@ -329,7 +373,7 @@ function activateCellTools(
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools);
+          app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
         }
         return;
       }
@@ -387,7 +431,7 @@ function activateNotebookHandler(
   registry.addWidgetFactory(factory);
 
   addCommands(app, services, tracker);
-  populatePalette(palette);
+  populatePalette(palette, services);
 
   let id = 0; // The ID counter for notebook panels.
 
@@ -465,7 +509,7 @@ function activateNotebookHandler(
     });
 
   // Add main menu notebook menu.
-  populateMenus(app, mainMenu, tracker);
+  populateMenus(app, mainMenu, tracker, services, palette);
 
   // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
@@ -487,15 +531,17 @@ function activateNotebookHandler(
       if (args['isLauncher'] && args['kernelName']) {
         return services.specs.kernelspecs[kernelName].display_name;
       }
+      if (args['isPalette']) {
+        return 'New Notebook';
+      }
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: args => (args['isLauncher'] ? '' : 'jp-NotebookIcon'),
+    iconClass: args => (args['isPalette'] ? '' : 'jp-NotebookIcon'),
     execute: args => {
       const cwd =
-        args['cwd'] || browserFactory
-          ? browserFactory.defaultBrowser.model.path
-          : '';
+        (args['cwd'] as string) ||
+        (browserFactory ? browserFactory.defaultBrowser.model.path : '');
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelName);
     }
@@ -1554,17 +1600,21 @@ function addCommands(
         app.commands.execute('docmanager:save');
       }
     },
-    isEnabled
+    isEnabled: args => {
+      return isEnabled() && commands.isEnabled('docmanager:save', args);
+    }
   });
 }
 
 /**
  * Populate the application's command palette with notebook commands.
  */
-function populatePalette(palette: ICommandPalette): void {
+function populatePalette(
+  palette: ICommandPalette,
+  services: ServiceManager
+): void {
   let category = 'Notebook Operations';
   [
-    CommandIDs.createNew,
     CommandIDs.interrupt,
     CommandIDs.restart,
     CommandIDs.restartClear,
@@ -1588,13 +1638,10 @@ function populatePalette(palette: ICommandPalette): void {
     palette.addItem({ command, category });
   });
 
-  EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    let args = {
-      format: exportToFormat['format'],
-      label: exportToFormat['label'],
-      isPalette: true
-    };
-    palette.addItem({ command: CommandIDs.exportToFormat, category, args });
+  palette.addItem({
+    command: CommandIDs.createNew,
+    category,
+    args: { isPalette: true }
   });
 
   category = 'Notebook Cell Operations';
@@ -1652,7 +1699,9 @@ function populatePalette(palette: ICommandPalette): void {
 function populateMenus(
   app: JupyterLab,
   mainMenu: IMainMenu,
-  tracker: INotebookTracker
+  tracker: INotebookTracker,
+  services: ServiceManager,
+  palette: ICommandPalette
 ): void {
   let { commands } = app;
 
@@ -1718,17 +1767,38 @@ function populateMenus(
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });
   exportTo.title.label = 'Export Notebook As…';
-  EXPORT_TO_FORMATS.forEach(exportToFormat => {
-    exportTo.addItem({
-      command: CommandIDs.exportToFormat,
-      args: exportToFormat
-    });
+  services.nbconvert.getExportFormats().then(response => {
+    if (response) {
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      const category = 'Notebook Operations';
+      formatList.forEach(function(key) {
+        let capCaseKey = key[0].toUpperCase() + key.substr(1);
+        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
+        let args = {
+          format: key,
+          label: labelStr,
+          isPalette: true
+        };
+        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+          exportTo.addItem({
+            command: CommandIDs.exportToFormat,
+            args: args
+          });
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args
+          });
+        }
+      });
+      const fileGroup = [
+        { command: CommandIDs.trust },
+        { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
+      ];
+      mainMenu.fileMenu.addGroup(fileGroup, 10);
+    }
   });
-  const fileGroup = [
-    { command: CommandIDs.trust },
-    { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
-  ];
-  mainMenu.fileMenu.addGroup(fileGroup, 10);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.add({

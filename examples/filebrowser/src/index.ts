@@ -2,7 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto'; // polyfill Promise on IE
-import '@jupyterlab/theme-light-extension/static/embed.css';
+import 'font-awesome/css/font-awesome.min.css';
+import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
 import { each } from '@phosphor/algorithm';
@@ -88,7 +90,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    className: 'jp-AddIcon',
+    iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
     onClick: () => {
       docManager
         .newUntitled({
@@ -100,7 +102,6 @@ function createApp(manager: ServiceManager.IManager): void {
         });
     }
   });
-  creator.addClass('jp-MaterialIcon');
   fbWidget.toolbar.insertItem(0, 'create', creator);
 
   let panel = new SplitPanel();

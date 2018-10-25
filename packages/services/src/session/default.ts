@@ -312,10 +312,22 @@ export class DefaultSession implements Session.ISession {
    */
   protected setupKernel(kernel: Kernel.IKernel): void {
     this._kernel = kernel;
-    kernel.statusChanged.connect(this.onKernelStatus, this);
-    kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
-    kernel.iopubMessage.connect(this.onIOPubMessage, this);
-    kernel.anyMessage.connect(this.onAnyMessage, this);
+    kernel.statusChanged.connect(
+      this.onKernelStatus,
+      this
+    );
+    kernel.unhandledMessage.connect(
+      this.onUnhandledMessage,
+      this
+    );
+    kernel.iopubMessage.connect(
+      this.onIOPubMessage,
+      this
+    );
+    kernel.anyMessage.connect(
+      this.onAnyMessage,
+      this
+    );
   }
 
   /**
@@ -619,8 +631,8 @@ namespace Private {
         return response.json();
       })
       .then(data => {
-        validate.validateModel(data);
-        return updateFromServer(data, settings!.baseUrl);
+        const model = validate.validateModel(data);
+        return updateFromServer(model, settings!.baseUrl);
       });
   }
 
@@ -663,7 +675,7 @@ namespace Private {
           throw new Error('Invalid Session list');
         }
         for (let i = 0; i < data.length; i++) {
-          validate.validateModel(data[i]);
+          data[i] = validate.validateModel(data[i]);
         }
         return updateRunningSessions(data, settings!.baseUrl);
       });
@@ -753,8 +765,8 @@ namespace Private {
         return response.json();
       })
       .then(data => {
-        validate.validateModel(data);
-        return updateFromServer(data, settings.baseUrl);
+        const model = validate.validateModel(data);
+        return updateFromServer(model, settings.baseUrl);
       });
   }
 

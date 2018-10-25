@@ -695,7 +695,7 @@ export namespace ObservableList {
    */
   export interface IOptions<T> {
     /**
-     * An optional intial set of values.
+     * An optional initial set of values.
      */
     values?: IterableOrArrayLike<T>;
 

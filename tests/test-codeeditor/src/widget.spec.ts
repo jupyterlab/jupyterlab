@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -9,9 +9,11 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor/src';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
+import { framePromise } from '@jupyterlab/testutils';
 
 class LogEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -80,7 +82,7 @@ describe('CodeEditorWrapper', () => {
 
   describe('#constructor()', () => {
     it('should be a CodeEditorWrapper', () => {
-      expect(widget).to.be.a(CodeEditorWrapper);
+      expect(widget).to.be.an.instanceof(CodeEditorWrapper);
     });
 
     it('should add a focus listener', () => {
@@ -93,24 +95,24 @@ describe('CodeEditorWrapper', () => {
 
   describe('#editor', () => {
     it('should be a a code editor', () => {
-      expect(widget.editor.getOption('lineNumbers')).to.be(false);
+      expect(widget.editor.getOption('lineNumbers')).to.be.false;
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the widget', () => {
-      expect(widget.isDisposed).to.be(false);
+      expect(widget.isDisposed).to.be.false;
       widget.dispose();
-      expect(widget.isDisposed).to.be(true);
+      expect(widget.isDisposed).to.be.true;
       widget.dispose();
-      expect(widget.isDisposed).to.be(true);
+      expect(widget.isDisposed).to.be.true;
     });
 
     it('should remove the focus listener', () => {
       let editor = widget.editor as LogEditor;
-      expect(editor.isDisposed).to.be(false);
+      expect(editor.isDisposed).to.be.false;
       widget.dispose();
-      expect(editor.isDisposed).to.be(true);
+      expect(editor.isDisposed).to.be.true;
 
       widget.node.tabIndex = -1;
       simulate(widget.node, 'focus');
@@ -119,7 +121,7 @@ describe('CodeEditorWrapper', () => {
   });
 
   describe('#handleEvent()', () => {
-    context('focus', () => {
+    describe('focus', () => {
       it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
         let editor = widget.editor as LogEditor;
@@ -134,7 +136,7 @@ describe('CodeEditorWrapper', () => {
         MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.eql(['refresh']);
+        expect(editor.methods).to.deep.equal(['refresh']);
       });
     });
   });
@@ -144,33 +146,29 @@ describe('CodeEditorWrapper', () => {
       Widget.attach(widget, document.body);
       MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
       expect(widget.methods).to.contain('onActivateRequest');
-      expect(widget.editor.hasFocus()).to.be(true);
+      expect(widget.editor.hasFocus()).to.be.true;
     });
   });
 
   describe('#onAfterAttach()', () => {
-    it('should refresh the editor', done => {
+    it('should refresh the editor', async () => {
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
   });
 
   describe('#onAfterShow()', () => {
-    it('should refresh the editor', done => {
+    it('should refresh the editor', async () => {
       widget.hide();
       Widget.attach(widget, document.body);
       let editor = widget.editor as LogEditor;
       expect(editor.methods).to.not.contain('refresh');
       widget.show();
       expect(widget.methods).to.contain('onAfterShow');
-      requestAnimationFrame(() => {
-        expect(editor.methods).to.contain('refresh');
-        done();
-      });
+      await framePromise();
+      expect(editor.methods).to.contain('refresh');
     });
   });
 

@@ -31,6 +31,7 @@
   border-bottom: none;
   height: auto;
   margin: var(--jp-toolbar-header-margin);
+  box-shadow: none;
 }
 
 .jp-BreadCrumbs {
@@ -39,8 +40,14 @@
 }
 
 .jp-BreadCrumbs-item {
-  margin: 0px 4px;
+  margin: 0px 2px;
+  padding: 0px 2px;
+  border-radius: var(--jp-border-radius);
   cursor: pointer;
+}
+
+.jp-BreadCrumbs-item:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-BreadCrumbs-item:first-child {
@@ -56,14 +63,16 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar.jp-Toolbar > .jp-Toolbar-button {
-  flex: 1 1 auto;
-  height: var(--jp-private-filebrowser-button-height);
-  line-height: var(--jp-private-filebrowser-button-height);
-  color: var(--jp-layout-color1);
-  font-size: var(--jp-ui-icon-font-size);
-  outline: 0;
-  margin-bottom: 4px;
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  padding: 0px;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  justify-content: space-evenly;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -192,7 +201,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 108px;
+  flex: 0 0 125px;
   text-align: right;
 }
 
@@ -264,6 +273,15 @@
   border-radius: 0px;
   color: var(--jp-ui-font-color1);
   transform: translateX(-40%) translateY(-58%);
+}
+
+.jp-DirListing-deadSpace {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-Document {

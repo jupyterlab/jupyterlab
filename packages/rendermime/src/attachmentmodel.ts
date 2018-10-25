@@ -135,7 +135,7 @@ export class AttachmentModel implements IAttachmentModel {
   }
 
   // All attachments are untrusted
-  readonly trusted = false;
+  readonly trusted: boolean = false;
 
   /**
    * Update an observable JSON object using a readonly JSON object.

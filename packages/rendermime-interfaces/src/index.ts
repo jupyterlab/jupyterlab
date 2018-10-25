@@ -61,6 +61,14 @@ export namespace IRenderMime {
   }
 
   /**
+   * A toolbar item.
+   */
+  export interface IToolbarItem {
+    name: string;
+    widget: Widget;
+  }
+
+  /**
    * The options used to initialize a document widget factory.
    *
    * This interface is intended to be used by mime renderer extensions
@@ -98,6 +106,11 @@ export namespace IRenderMime {
      * If undefined, then it will fall back on the default file type.
      */
     readonly defaultRendered?: ReadonlyArray<string>;
+
+    /**
+     * A function returning a list of toolbar items to add to the toolbar.
+     */
+    readonly toolbarFactory?: (widget: IRenderer) => IToolbarItem[];
   }
 
   /**
@@ -318,14 +331,14 @@ export namespace IRenderMime {
    */
   export interface IResolver {
     /**
-     * Resolve a relative url to a correct server path.
+     * Resolve a relative url to an absolute url path.
      */
     resolveUrl(url: string): Promise<string>;
 
     /**
-     * Get the download url of a given absolute server path.
+     * Get the download url for a given absolute url path.
      */
-    getDownloadUrl(path: string): Promise<string>;
+    getDownloadUrl(url: string): Promise<string>;
 
     /**
      * Whether the URL should be handled by the resolver

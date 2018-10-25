@@ -89,9 +89,18 @@ export class SettingEditor extends Widget {
     SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
 
-    editor.stateChanged.connect(this._onStateChanged, this);
-    list.changed.connect(this._onStateChanged, this);
-    panel.handleMoved.connect(this._onStateChanged, this);
+    editor.stateChanged.connect(
+      this._onStateChanged,
+      this
+    );
+    list.changed.connect(
+      this._onStateChanged,
+      this
+    );
+    panel.handleMoved.connect(
+      this._onStateChanged,
+      this
+    );
   }
 
   /**

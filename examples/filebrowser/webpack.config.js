@@ -5,34 +5,25 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: './example/'
   },
-  node: {
-    fs: 'empty'
-  },
   bail: true,
   devtool: 'cheap-source-map',
+  mode: 'production',
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.html$/, use: 'file-loader' },
       { test: /\.md$/, use: 'raw-loader' },
-      { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
       { test: /\.js.map$/, use: 'file-loader' },
       {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
+        test: /\.svg/,
+        use: [
+          { loader: 'svg-url-loader', options: {} },
+          { loader: 'svgo-loader', options: { plugins: [] } }
+        ]
       },
       {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-      },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-      {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: [{ loader: 'url-loader', options: { limit: 10000 } }]
       }
     ]
   }

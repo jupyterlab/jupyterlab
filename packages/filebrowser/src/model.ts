@@ -17,7 +17,8 @@ import {
   each,
   find,
   IIterator,
-  IterableOrArrayLike
+  IterableOrArrayLike,
+  ArrayExt
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -29,9 +30,9 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
- * The duration of auto-refresh in ms.
+ * The default duration of the auto-refresh in ms
  */
-const REFRESH_DURATION = 10000;
+const DEFAULT_REFRESH_INTERVAL = 10000;
 
 /**
  * The enforced time between refreshes in ms.
@@ -86,10 +87,18 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
+    this._baseRefreshDuration =
+      options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(this._onFileChanged, this);
-    services.sessions.runningChanged.connect(this._onRunningChanged, this);
+    services.contents.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
+    services.sessions.runningChanged.connect(
+      this._onRunningChanged,
+      this
+    );
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -114,6 +123,13 @@ export class FileBrowserModel implements IDisposable {
    */
   get connectionFailure(): ISignal<this, Error> {
     return this._connectionFailure;
+  }
+
+  /**
+   * The drive name that gets prepended to the path.
+   */
+  get driveName(): string {
+    return this._driveName;
   }
 
   /**
@@ -228,7 +244,7 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A promise with the contents of the directory.
    */
-  cd(newValue = '.'): Promise<void> {
+  async cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
       newValue = Private.normalizePath(
         this.manager.services.contents,
@@ -238,9 +254,13 @@ export class FileBrowserModel implements IDisposable {
     } else {
       newValue = this._pendingPath || this._model.path;
     }
-    // Collapse requests to the same directory.
-    if (newValue === this._pendingPath && this._pending) {
-      return this._pending;
+    if (this._pending) {
+      // Collapse requests to the same directory.
+      if (newValue === this._pendingPath) {
+        return this._pending;
+      }
+      // Otherwise wait for the pending request to complete before continuing.
+      await this._pending;
     }
     let oldValue = this.path;
     let options: Contents.IFetchOptions = { content: true };
@@ -255,7 +275,7 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._refreshDuration = REFRESH_DURATION;
+        this._refreshDuration = this._baseRefreshDuration;
         this._handleContents(contents);
         this._pendingPath = null;
         if (oldValue !== newValue) {
@@ -279,9 +299,9 @@ export class FileBrowserModel implements IDisposable {
           error.message = `Directory not found: "${this._model.path}"`;
           console.error(error);
           this._connectionFailure.emit(error);
-          this.cd('/');
+          return this.cd('/');
         } else {
-          this._refreshDuration = REFRESH_DURATION * 10;
+          this._refreshDuration = this._baseRefreshDuration * 10;
           this._connectionFailure.emit(error);
         }
       });
@@ -365,10 +385,8 @@ export class FileBrowserModel implements IDisposable {
   async upload(file: File): Promise<Contents.IModel> {
     const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
     const largeFile = file.size > LARGE_FILE_SIZE;
-    const isNotebook = file.name.indexOf('.ipynb') !== -1;
-    const canSendChunked = supportsChunked && !isNotebook;
 
-    if (largeFile && !canSendChunked) {
+    if (largeFile && !supportsChunked) {
       let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
         file.name
       }`;
@@ -377,7 +395,7 @@ export class FileBrowserModel implements IDisposable {
     }
 
     const err = 'File not uploaded';
-    if (largeFile && !await this._shouldUploadLarge(file)) {
+    if (largeFile && !(await this._shouldUploadLarge(file))) {
       throw 'Cancelled large file upload';
     }
     await this._uploadCheckDisposed();
@@ -385,13 +403,13 @@ export class FileBrowserModel implements IDisposable {
     await this._uploadCheckDisposed();
     if (
       find(this._items, i => i.name === file.name) &&
-      !await shouldOverwrite(file.name)
+      !(await shouldOverwrite(file.name))
     ) {
       throw err;
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
-    return await this._upload(file, isNotebook, chunkedUpload);
+    return await this._upload(file, chunkedUpload);
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -410,15 +428,14 @@ export class FileBrowserModel implements IDisposable {
    */
   private async _upload(
     file: File,
-    isNotebook: boolean,
     chunked: boolean
   ): Promise<Contents.IModel> {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
     let name = file.name;
-    let type: Contents.ContentType = isNotebook ? 'notebook' : 'file';
-    let format: Contents.FileFormat = isNotebook ? 'json' : 'base64';
+    let type: Contents.ContentType = 'file';
+    let format: Contents.FileFormat = 'base64';
 
     const uploadInner = async (
       blob: Blob,
@@ -426,29 +443,36 @@ export class FileBrowserModel implements IDisposable {
     ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
       let reader = new FileReader();
-      if (isNotebook) {
-        reader.readAsText(blob);
-      } else {
-        reader.readAsArrayBuffer(blob);
-      }
+      reader.readAsDataURL(blob);
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
         reader.onerror = event =>
           reject(`Failed to upload "${file.name}":` + event);
       });
       await this._uploadCheckDisposed();
+
+      // remove header https://stackoverflow.com/a/24289420/907060
+      const content = (reader.result as string).split(',')[1];
+
       let model: Partial<Contents.IModel> = {
         type,
         format,
         name,
         chunk,
-        content: Private.getContent(reader)
+        content
       };
       return await this.manager.services.contents.save(path, model);
     };
 
     if (!chunked) {
-      return await uploadInner(file);
+      try {
+        return await uploadInner(file);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+        throw err;
+      }
     }
 
     let finalModel: Contents.IModel;
@@ -475,7 +499,22 @@ export class FileBrowserModel implements IDisposable {
       });
       upload = newUpload;
 
-      const currentModel = await uploadInner(file.slice(start, end), chunk);
+      let currentModel: Contents.IModel;
+      try {
+        currentModel = await uploadInner(file.slice(start, end), chunk);
+      } catch (err) {
+        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
+          return file.name === uploadIndex.path;
+        });
+
+        this._uploadChanged.emit({
+          name: 'failure',
+          newValue: upload,
+          oldValue: null
+        });
+
+        throw err;
+      }
 
       if (lastChunk) {
         finalModel = currentModel;
@@ -618,7 +657,8 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _timeoutId = -1;
-  private _refreshDuration = REFRESH_DURATION;
+  private _refreshDuration: number;
+  private _baseRefreshDuration: number;
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
@@ -652,6 +692,11 @@ export namespace FileBrowserModel {
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+
+    /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
   }
 }
 
@@ -659,27 +704,6 @@ export namespace FileBrowserModel {
  * The namespace for the file browser model private data.
  */
 namespace Private {
-  /**
-   * Parse the content of a `FileReader`.
-   *
-   * If the result is an `ArrayBuffer`, return a Base64-encoded string.
-   * Otherwise, return the JSON parsed result.
-   */
-  export function getContent(reader: FileReader): any {
-    if (reader.result instanceof ArrayBuffer) {
-      // Base64-encode binary file data.
-      let bytes = '';
-      let buf = new Uint8Array(reader.result);
-      let nbytes = buf.byteLength;
-      for (let i = 0; i < nbytes; i++) {
-        bytes += String.fromCharCode(buf[i]);
-      }
-      return btoa(bytes);
-    } else {
-      return JSON.parse(reader.result);
-    }
-  }
-
   /**
    * Normalize a path based on a root directory, accounting for relative paths.
    */

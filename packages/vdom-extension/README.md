@@ -6,7 +6,7 @@ A JupyterLab extension for rendering VirtualDOM using React
 
 ## Prerequisites
 
-* JupyterLab ^0.27.0
+- JupyterLab ^0.27.0
 
 ## Usage
 

@@ -4,7 +4,7 @@ A JupyterLab extension for running Javascript from a notebook in JupyterLab
 
 ## Prerequisites
 
-* JupyterLab ^0.27.0
+- JupyterLab ^0.27.0
 
 ## Usage
 

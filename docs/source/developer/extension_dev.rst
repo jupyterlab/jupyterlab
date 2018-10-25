@@ -5,8 +5,8 @@ Extension Developer Guide
 
 .. warning::
 
-   The extension developer API is not stable and will evolve in JupyterLab beta
-   releases. The extension developer API will be stable in JupyterLab 1.0.
+   The extension developer API is not stable and will evolve in JupyterLab
+   releases in the near future.
 
 JupyterLab can be extended in four ways via:
 
@@ -151,7 +151,11 @@ When using local extensions and linked packages, you can run the command
 
 This will cause the application to incrementally rebuild when one of the
 linked packages changes. Note that only compiled JavaScript files (and
-the CSS files) are watched by the WebPack process.
+the CSS files) are watched by the WebPack process. This means that if
+your extension is in TypeScript you'll have to run a `jlpm run build`
+before the changes will be reflected in JupyterLab. To avoid this step
+you can also watch the TypeScript sources in your extension which is
+usually assigned to the `tsc -w` shortcut.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. If your extension depends on JupyterLab
@@ -176,7 +180,7 @@ subsequently reversed by running
 
     jlpm run remove:package <extension-dir-name>
 
-This will remove the package metadata from the source tree, but wil
+This will remove the package metadata from the source tree, but will
 **not** remove any files added by the ``addsibling`` script, which
 should be removed manually.
 
@@ -201,6 +205,12 @@ path on the user's machine or a provided tarball. Any valid
 ``npm install`` specifier can be used in
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
+
+There are a number of helper functions in `testutils` in this repo (which is a public npm package called `@jupyterlab/testutils`) that can be used when writing
+tests for an extension.  See `tests/test-application` for an example of the infrastructure needed to run tests.  There is a `karma` config file that points
+to the parent directory's `karma` config, and a test runner, `run-test.py` that
+starts a Jupyter server.
+
 
 Mime Renderer Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -247,18 +257,16 @@ Themes
 A theme is a JupyterLab extension that uses a ``ThemeManager`` and can
 be loaded and unloaded dynamically. The package must include all static
 assets that are referenced by ``url()`` in its CSS files. Local URLs can
-be used to reference files relative to the location of the referring CSS
-file in the theme directory. For example ``url('images/foo.png')`` or
+be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or
 ``url('../foo/bar.css')``\ can be used to refer local files in the
 theme. Absolute URLs (starting with a ``/``) or external URLs (e.g.
 ``https:``) can be used to refer to external assets. The path to the
-theme assets is specified ``package.json`` under the ``"jupyterlab"``
-key as ``"themeDir"``. See the `JupyterLab Light
+theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
+key as ``"themePath"``. See the `JupyterLab Light
 Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
 for an example. Ensure that the theme files are included in the
-``"files"`` metadata in package.json. A theme can optionally specify an
-``embed.css`` file that can be consumed outside of a JupyterLab
-application.
+``"files"`` metadata in package.json.  Note that if you want to use SCSS, SASS, or LESS files,
+you must compile them to CSS and point JupyterLab to the CSS files.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing

@@ -34,10 +34,10 @@ export class MimeContent extends Widget {
     this.mimeType = options.mimeType;
     this._dataType = options.dataType || 'string';
     this._context = options.context;
-    this._renderer = options.renderer;
+    this.renderer = options.renderer;
 
     const layout = (this.layout = new StackedLayout());
-    layout.addWidget(this._renderer);
+    layout.addWidget(this.renderer);
 
     this._context.ready
       .then(() => {
@@ -49,7 +49,7 @@ export class MimeContent extends Widget {
         if (this.node === document.activeElement) {
           // We want to synchronously send (not post) the activate message, while
           // we know this node still has focus.
-          MessageLoop.sendMessage(this._renderer, Widget.Msg.ActivateRequest);
+          MessageLoop.sendMessage(this.renderer, Widget.Msg.ActivateRequest);
         }
 
         // Throttle the rendering rate of the widget.
@@ -57,7 +57,10 @@ export class MimeContent extends Widget {
           signal: this._context.model.contentChanged,
           timeout: options.renderTimeout
         });
-        this._monitor.activityStopped.connect(this.update, this);
+        this._monitor.activityStopped.connect(
+          this.update,
+          this
+        );
 
         this._ready.resolve(undefined);
       })
@@ -135,7 +138,7 @@ export class MimeContent extends Widget {
     try {
       // Do the rendering asynchronously.
       this._isRendering = true;
-      await this._renderer.renderModel(mimeModel);
+      await this.renderer.renderModel(mimeModel);
       this._isRendering = false;
 
       // If there is an outstanding request to render, go ahead and render
@@ -168,8 +171,9 @@ export class MimeContent extends Widget {
     }
   };
 
+  readonly renderer: IRenderMime.IRenderer;
+
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
-  private _renderer: IRenderMime.IRenderer;
   private _monitor: ActivityMonitor<any, any> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
@@ -222,9 +226,9 @@ export class MimeDocument extends DocumentWidget<MimeContent> {}
  */
 export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   /**
-   * Construct a new markdown widget factory.
+   * Construct a new mimetype widget factory.
    */
-  constructor(options: MimeDocumentFactory.IOptions) {
+  constructor(options: MimeDocumentFactory.IOptions<MimeDocument>) {
     super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
     this._renderTimeout = options.renderTimeout || 1000;
@@ -273,7 +277,8 @@ export namespace MimeDocumentFactory {
   /**
    * The options used to initialize a MimeDocumentFactory.
    */
-  export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
+  export interface IOptions<T extends MimeDocument>
+    extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /**
      * The primary file type associated with the document.
      */
@@ -304,11 +309,11 @@ namespace Private {
    * Create the document registry options.
    */
   export function createRegistryOptions(
-    options: MimeDocumentFactory.IOptions
-  ): DocumentRegistry.IWidgetFactoryOptions {
+    options: MimeDocumentFactory.IOptions<MimeDocument>
+  ): DocumentRegistry.IWidgetFactoryOptions<MimeDocument> {
     return {
       ...options,
       readOnly: true
-    } as DocumentRegistry.IWidgetFactoryOptions;
+    } as DocumentRegistry.IWidgetFactoryOptions<MimeDocument>;
   }
 }

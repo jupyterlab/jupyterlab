@@ -50,6 +50,9 @@ export function renameDialog(
     focusNodeSelector: 'input',
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
   }).then(result => {
+    if (!result.value) {
+      return;
+    }
     if (!isValidFileName(result.value)) {
       showErrorMessage(
         'Rename Error',

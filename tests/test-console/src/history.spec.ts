@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
@@ -13,7 +13,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsoleHistory } from '@jupyterlab/console';
 
-import { createClientSession } from '../../utils';
+import { createClientSession, signalToPromise } from '@jupyterlab/testutils';
 
 const mockHistory: KernelMessage.IHistoryReplyMsg = {
   header: null,
@@ -51,10 +51,8 @@ class TestHistory extends ConsoleHistory {
 describe('console/history', () => {
   let session: IClientSession;
 
-  beforeEach(() => {
-    return createClientSession().then(s => {
-      session = s;
-    });
+  beforeEach(async () => {
+    session = await createClientSession();
   });
 
   after(() => {
@@ -64,105 +62,96 @@ describe('console/history', () => {
   describe('ConsoleHistory', () => {
     describe('#constructor()', () => {
       it('should create a console history object', () => {
-        let history = new ConsoleHistory({ session });
-        expect(history).to.be.a(ConsoleHistory);
+        const history = new ConsoleHistory({ session });
+        expect(history).to.be.an.instanceof(ConsoleHistory);
       });
     });
 
     describe('#isDisposed', () => {
       it('should get whether the object is disposed', () => {
-        let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        const history = new ConsoleHistory({ session });
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
     });
 
     describe('#session', () => {
       it('should be the client session object', () => {
-        let history = new ConsoleHistory({ session });
-        expect(history.session).to.be(session);
+        const history = new ConsoleHistory({ session });
+        expect(history.session).to.equal(session);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose the history object', () => {
-        let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        const history = new ConsoleHistory({ session });
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
 
       it('should be safe to dispose multiple times', () => {
-        let history = new ConsoleHistory({ session });
-        expect(history.isDisposed).to.be(false);
+        const history = new ConsoleHistory({ session });
+        expect(history.isDisposed).to.equal(false);
         history.dispose();
         history.dispose();
-        expect(history.isDisposed).to.be(true);
+        expect(history.isDisposed).to.equal(true);
       });
     });
 
     describe('#back()', () => {
-      it('should return an empty string if no history exists', () => {
-        let history = new ConsoleHistory({ session });
-        return history.back('').then(result => {
-          expect(result).to.be('');
-        });
+      it('should return an empty string if no history exists', async () => {
+        const history = new ConsoleHistory({ session });
+        const result = await history.back('');
+        expect(result).to.equal('');
       });
 
-      it('should return previous items if they exist', done => {
-        let history = new TestHistory({ session });
+      it('should return previous items if they exist', async () => {
+        const history = new TestHistory({ session });
         history.onHistory(mockHistory);
-        history.back('').then(result => {
-          let index = mockHistory.content.history.length - 1;
-          let last = (mockHistory.content.history[index] as any)[2];
-          expect(result).to.be(last);
-          done();
-        });
+        const result = await history.back('');
+        const index = mockHistory.content.history.length - 1;
+        const last = (mockHistory.content.history[index] as any)[2];
+        expect(result).to.equal(last);
       });
     });
 
     describe('#forward()', () => {
-      it('should return an emptry string if no history exists', () => {
-        let history = new ConsoleHistory({ session });
-        return history.forward('').then(result => {
-          expect(result).to.be('');
-        });
+      it('should return an empty string if no history exists', async () => {
+        const history = new ConsoleHistory({ session });
+        const result = await history.forward('');
+        expect(result).to.equal('');
       });
 
-      it('should return next items if they exist', done => {
-        let history = new TestHistory({ session });
+      it('should return next items if they exist', async () => {
+        const history = new TestHistory({ session });
         history.onHistory(mockHistory);
-        Promise.all([history.back(''), history.back('')]).then(() => {
-          history.forward('').then(result => {
-            let index = mockHistory.content.history.length - 1;
-            let last = (mockHistory.content.history[index] as any)[2];
-            expect(result).to.be(last);
-            done();
-          });
-        });
+        await Promise.all([history.back(''), history.back('')]);
+        const result = await history.forward('');
+        const index = mockHistory.content.history.length - 1;
+        const last = (mockHistory.content.history[index] as any)[2];
+        expect(result).to.equal(last);
       });
     });
 
     describe('#push()', () => {
-      it('should allow addition of history items', done => {
-        let history = new ConsoleHistory({ session });
-        let item = 'foo';
+      it('should allow addition of history items', async () => {
+        const history = new ConsoleHistory({ session });
+        const item = 'foo';
         history.push(item);
-        history.back('').then(result => {
-          expect(result).to.be(item);
-          done();
-        });
+        const result = await history.back('');
+        expect(result).to.equal(item);
       });
     });
 
     describe('#onTextChange()', () => {
       it('should be called upon an editor text change', () => {
-        let history = new TestHistory({ session });
+        const history = new TestHistory({ session });
         expect(history.methods).to.not.contain('onTextChange');
-        let model = new CodeEditor.Model();
-        let host = document.createElement('div');
-        let editor = new CodeMirrorEditor({ model, host });
+        const model = new CodeEditor.Model();
+        const host = document.createElement('div');
+        const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         model.value.text = 'foo';
         expect(history.methods).to.contain('onTextChange');
@@ -170,20 +159,19 @@ describe('console/history', () => {
     });
 
     describe('#onEdgeRequest()', () => {
-      it('should be called upon an editor edge request', done => {
-        let history = new TestHistory({ session });
+      it('should be called upon an editor edge request', async () => {
+        const history = new TestHistory({ session });
         expect(history.methods).to.not.contain('onEdgeRequest');
-        let host = document.createElement('div');
-        let model = new CodeEditor.Model();
-        let editor = new CodeMirrorEditor({ model, host });
+        const host = document.createElement('div');
+        const model = new CodeEditor.Model();
+        const editor = new CodeMirrorEditor({ model, host });
         history.editor = editor;
         history.push('foo');
-        editor.model.value.changed.connect(() => {
-          expect(editor.model.value.text).to.be('foo');
-          done();
-        });
+        const promise = signalToPromise(editor.model.value.changed);
         editor.edgeRequested.emit('top');
         expect(history.methods).to.contain('onEdgeRequest');
+        await promise;
+        expect(editor.model.value.text).to.equal('foo');
       });
     });
   });

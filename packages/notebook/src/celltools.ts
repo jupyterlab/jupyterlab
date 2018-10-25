@@ -78,8 +78,14 @@ export class CellTools extends Widget {
     this.addClass(CELLTOOLS_CLASS);
     this.layout = new PanelLayout();
     this._tracker = options.tracker;
-    this._tracker.activeCellChanged.connect(this._onActiveCellChanged, this);
-    this._tracker.selectionChanged.connect(this._onSelectionChanged, this);
+    this._tracker.activeCellChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
+    this._tracker.selectionChanged.connect(
+      this._onSelectionChanged,
+      this
+    );
     this._onActiveCellChanged();
     this._onSelectionChanged();
   }
@@ -154,7 +160,10 @@ export class CellTools extends Widget {
     let activeCell = this._tracker.activeCell;
     this._prevActive = activeCell ? activeCell.model : null;
     if (activeCell) {
-      activeCell.model.metadata.changed.connect(this._onMetadataChanged, this);
+      activeCell.model.metadata.changed.connect(
+        this._onMetadataChanged,
+        this
+      );
     }
     each(this.children(), widget => {
       MessageLoop.sendMessage(widget, CellTools.ActiveCellMessage);
@@ -264,7 +273,7 @@ export namespace CellTools {
      * Handle a change to the active cell.
      *
      * #### Notes
-     * The default implemenatation is a no-op.
+     * The default implementation is a no-op.
      */
     protected onActiveCellChanged(msg: Message): void {
       /* no-op */
@@ -349,8 +358,14 @@ export namespace CellTools {
       let factory = activeCell.contentFactory.editorFactory;
 
       let cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this._onValueChanged, this);
-      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+      cellModel.value.changed.connect(
+        this._onValueChanged,
+        this
+      );
+      cellModel.mimeTypeChanged.connect(
+        this._onMimeTypeChanged,
+        this
+      );
       this._model.value.text = cellModel.value.text.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
 
@@ -655,18 +670,13 @@ export namespace CellTools {
   /**
    * Create an nbcovert selector.
    */
-  export function createNBConvertSelector(): KeySelector {
+  export function createNBConvertSelector(optionsMap: {
+    [key: string]: JSONValue;
+  }): KeySelector {
     return new KeySelector({
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',
-      optionsMap: {
-        None: '-',
-        LaTeX: 'text/latex',
-        reST: 'text/restructuredtext',
-        HTML: 'text/html',
-        Markdown: 'text/markdown',
-        Python: 'text/x-python'
-      },
+      optionsMap: optionsMap,
       validCellTypes: ['raw']
     });
   }

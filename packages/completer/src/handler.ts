@@ -34,8 +34,14 @@ export class CompletionHandler implements IDisposable {
    */
   constructor(options: CompletionHandler.IOptions) {
     this.completer = options.completer;
-    this.completer.selected.connect(this.onCompletionSelected, this);
-    this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
+    this.completer.selected.connect(
+      this.onCompletionSelected,
+      this
+    );
+    this.completer.visibilityChanged.connect(
+      this.onVisibilityChanged,
+      this
+    );
     this._connector = options.connector;
   }
 
@@ -101,8 +107,14 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       this._enabled = false;
-      model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.value.changed.connect(this.onTextChanged, this);
+      model.selections.changed.connect(
+        this.onSelectionsChanged,
+        this
+      );
+      model.value.changed.connect(
+        this.onTextChanged,
+        this
+      );
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -310,7 +322,7 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
-   * Handle a visiblity change signal from a completer widget.
+   * Handle a visibility change signal from a completer widget.
    */
   protected onVisibilityChanged(completer: Completer): void {
     // Completer is not active.
@@ -485,7 +497,7 @@ export namespace CompletionHandler {
     /**
      * A list of matching completion strings.
      */
-    matches: string[];
+    matches: ReadonlyArray<string>;
 
     /**
      * Any metadata that accompanies the completion reply.

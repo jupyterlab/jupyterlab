@@ -212,13 +212,14 @@ export class RenderedImage extends RenderedCommon {
       source: String(model.data[this.mimeType]),
       width: metadata && (metadata.width as number | undefined),
       height: metadata && (metadata.height as number | undefined),
+      needsBackground: model.metadata['needs_background'] as string | undefined,
       unconfined: metadata && (metadata.unconfined as boolean | undefined)
     });
   }
 }
 
 /**
- * A mime renderer for displaying Markdown with embeded latex.
+ * A mime renderer for displaying Markdown with embedded latex.
  */
 export class RenderedMarkdown extends RenderedHTMLCommon {
   /**

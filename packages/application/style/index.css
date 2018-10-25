@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('~font-awesome/css/font-awesome.min.css');
 @import url('~@phosphor/widgets/style/index.css');
 
 .p-Widget.p-mod-hidden {
@@ -41,7 +42,6 @@ body {
 }
 
 #jp-bottom-panel {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
   background: var(--jp-layout-color1);
   display: flex;
 }
@@ -51,7 +51,6 @@ body {
 @import './dockpanel.css';
 @import './images.css';
 @import './icons.css';
-@import './materialcolors.css';
 @import './menus.css';
 @import './scrollbar.css';
 @import './tabs.css';

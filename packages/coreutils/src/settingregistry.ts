@@ -723,7 +723,10 @@ export class Settings implements ISettingRegistry.ISettings {
     this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || {};
 
-    this.registry.pluginChanged.connect(this._onPluginChanged, this);
+    this.registry.pluginChanged.connect(
+      this._onPluginChanged,
+      this
+    );
   }
 
   /**

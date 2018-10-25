@@ -108,7 +108,10 @@ export class Completer extends Widget {
     }
     this._model = model;
     if (this._model) {
-      this._model.stateChanged.connect(this.onModelStateChanged, this);
+      this._model.stateChanged.connect(
+        this.onModelStateChanged,
+        this
+      );
     }
   }
 
@@ -710,7 +713,7 @@ export namespace Completer {
         let typeNode = document.createElement('span');
         let type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex = orderedTypes.indexOf(type) % N_COLORS + 1;
+        let colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
         li.title = type;

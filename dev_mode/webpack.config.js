@@ -17,7 +17,8 @@ var package_data = require('./package.json');
 var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
-Build.ensureAssets({
+
+var extraConfig = Build.ensureAssets({
   packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
   output: jlab.outputDir
 });
@@ -40,7 +41,6 @@ fs.ensureDirSync(buildDir);
 
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
-fs.copySync('./templates/error.html', path.join(buildDir, 'error.html'));
 
 // Set up variables for watch mode.
 var localLinked = {};
@@ -99,107 +99,109 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
 JupyterLabPlugin.prototype._first = true;
 
-module.exports = {
-  mode: 'development',
-  entry: {
-    main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
-  },
-  output: {
-    path: path.resolve(buildDir),
-    publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
-    filename: '[name].[chunkhash].js'
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  },
-  module: {
-    rules: [
-      { test: /^JUPYTERLAB_RAW_LOADER_/, use: 'raw-loader' },
-      { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
-      { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.md$/, use: 'raw-loader' },
-      { test: /\.txt$/, use: 'raw-loader' },
-      {
-        test: /\.js$/,
-        use: ['source-map-loader'],
-        enforce: 'pre',
-        // eslint-disable-next-line no-undef
-        exclude: /node_modules/
-      },
-      { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-      { test: /\.js.map$/, use: 'file-loader' },
-      {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-      },
-      {
-        test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-      },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-      {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+module.exports = [
+  {
+    mode: 'development',
+    entry: {
+      main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
+    },
+    output: {
+      path: path.resolve(buildDir),
+      publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
+      filename: '[name].[chunkhash].js'
+    },
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
       }
+    },
+    module: {
+      rules: [
+        { test: /^JUPYTERLAB_RAW_LOADER_/, use: 'raw-loader' },
+        { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
+        { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
+        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+        { test: /\.md$/, use: 'raw-loader' },
+        { test: /\.txt$/, use: 'raw-loader' },
+        {
+          test: /\.js$/,
+          use: ['source-map-loader'],
+          enforce: 'pre',
+          // eslint-disable-next-line no-undef
+          exclude: /node_modules/
+        },
+        { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
+        { test: /\.js.map$/, use: 'file-loader' },
+        {
+          test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+        },
+        {
+          test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/font-woff'
+        },
+        {
+          test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+        },
+        {
+          test: /\.otf(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+        },
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+        {
+          test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+          use: 'url-loader?limit=10000&mimetype=image/svg+xml'
+        }
+      ]
+    },
+    watchOptions: {
+      ignored: function(localPath) {
+        localPath = path.resolve(localPath);
+        if (localPath in ignoreCache) {
+          return ignoreCache[localPath];
+        }
+        // Limit the watched files to those in our local linked package dirs.
+        var ignore = true;
+        Object.keys(localLinked).some(function(name) {
+          // Bail if already found.
+          var rootPath = localLinked[name];
+          var contained = localPath.indexOf(rootPath + path.sep) !== -1;
+          if (localPath !== rootPath && !contained) {
+            return false;
+          }
+          var rest = localPath.slice(rootPath.length);
+          if (rest.indexOf('node_modules') === -1) {
+            ignore = false;
+            maybeSync(localPath, name, rest);
+          }
+          return true;
+        });
+        ignoreCache[localPath] = ignore;
+        return ignore;
+      }
+    },
+    node: {
+      fs: 'empty'
+    },
+    bail: true,
+    devtool: 'source-map',
+    plugins: [
+      new DuplicatePackageCheckerPlugin({
+        verbose: true,
+        exclude(instance) {
+          // ignore known duplicates
+          return ['domelementtype', 'hash-base', 'inherits'].includes(
+            instance.name
+          );
+        }
+      }),
+      new HtmlWebpackPlugin({
+        template: path.join('templates', 'template.html'),
+        title: jlab.name || 'JupyterLab'
+      }),
+      new webpack.HashedModuleIdsPlugin(),
+      new JupyterLabPlugin({})
     ]
-  },
-  watchOptions: {
-    ignored: function(localPath) {
-      localPath = path.resolve(localPath);
-      if (localPath in ignoreCache) {
-        return ignoreCache[localPath];
-      }
-      // Limit the watched files to those in our local linked package dirs.
-      var ignore = true;
-      Object.keys(localLinked).some(function(name) {
-        // Bail if already found.
-        var rootPath = localLinked[name];
-        var contained = localPath.indexOf(rootPath + path.sep) !== -1;
-        if (localPath !== rootPath && !contained) {
-          return false;
-        }
-        var rest = localPath.slice(rootPath.length);
-        if (rest.indexOf('node_modules') === -1) {
-          ignore = false;
-          maybeSync(localPath, name, rest);
-        }
-        return true;
-      });
-      ignoreCache[localPath] = ignore;
-      return ignore;
-    }
-  },
-  node: {
-    fs: 'empty'
-  },
-  bail: true,
-  devtool: 'source-map',
-  plugins: [
-    new DuplicatePackageCheckerPlugin({
-      verbose: true,
-      exclude(instance) {
-        // ignore known duplicates
-        return ['domelementtype', 'hash-base', 'inherits'].includes(
-          instance.name
-        );
-      }
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join('templates', 'template.html'),
-      title: jlab.name || 'JupyterLab'
-    }),
-    new webpack.HashedModuleIdsPlugin(),
-    new JupyterLabPlugin({})
-  ]
-};
+  }
+].concat(extraConfig);

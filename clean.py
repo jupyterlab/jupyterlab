@@ -9,8 +9,15 @@ if os.name == 'nt':
     for (root, dnames, files) in os.walk(here):
         if 'node_modules' in dnames:
             subprocess.check_call(['rmdir', '/s', '/q', 'node_modules'],
-                cwd=root, shell=True)
+                                  cwd=root, shell=True)
             dnames.remove('node_modules')
 
 
-subprocess.check_call(['git', 'clean', '-dfx'], cwd=here)
+git_clean_exclude = [
+    '-e',
+    '/.vscode',
+]
+git_clean_command = ['git', 'clean', '-dfx'] + git_clean_exclude
+subprocess.check_call(git_clean_command, cwd=here)
+
+subprocess.call('python -m pip uninstall -y jupyterlab'.split(), cwd=here)

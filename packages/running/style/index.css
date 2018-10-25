@@ -17,7 +17,7 @@
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+  min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   /* This is needed so that all font sizing of children done in ems is
@@ -30,25 +30,11 @@
   display: flex;
   flex-direction: row;
   margin: var(--jp-toolbar-header-margin);
+  justify-content: flex-end;
 }
 
-.jp-RunningSessions-headerRefresh {
-  flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
-  width: var(--jp-private-running-button-width);
-  max-width: 100px;
-  min-width: 16px;
-  min-height: 16px;
-  padding: 4px 6px;
-  background: var(--jp-layout-color1);
-  border: none;
-  outline: 0;
-  background-image: var(--jp-icon-refresh);
-  background-size: 16px;
-  display: block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
+.jp-RunningSessions-header .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
 }
 
 .jp-RunningSessions-shutdownAll {
@@ -75,30 +61,27 @@
   flex-direction: column;
 }
 
-.jp-RunningSessions-headerRefresh:hover,
-.jp-RunningSessions-shutdownAll:hover {
-  background-color: var(--jp-layout-color0);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  border: 1px solid var(--jp-toolbar-border-color);
-  z-index: 1; /* raise overlapping border */
-}
-
-.jp-RunningSessions-headerRefresh:active,
-.jp-RunningSessions-shutdownAll:active {
-  border: 1px solid var(--jp-toolbar-border-color);
-  background-color: var(--jp-toolbar-active-background);
-  box-shadow: var(--jp-toolbar-box-shadow);
-}
-
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
-  margin: 4px 0px;
-  padding: 12px 0 4px 12px;
+  align-items: center;
+  height: 28px;
+  display: flex;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  margin-top: 8px;
+}
+
+.jp-RunningSessions-sectionHeader h2 {
+  flex: 0 0 auto;
   font-weight: 600;
   text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size0);
+  padding: 8px 8px 8px 12px;
+  margin: 0px;
+}
+
+.jp-RunningSessions-sectionHeader .jp-ToolbarButtonComponent {
+  flex: 0 0 auto;
 }
 
 .jp-RunningSessions-sectionContainer {

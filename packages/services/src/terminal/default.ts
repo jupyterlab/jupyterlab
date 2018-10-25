@@ -251,6 +251,9 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
     this._reconnectAttempt += 1;
 
     setTimeout(() => {
+      if (this.isDisposed) {
+        return;
+      }
       this._initializeSocket()
         .then(() => {
           console.log('Terminal reconnected');

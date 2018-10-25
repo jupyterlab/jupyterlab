@@ -75,7 +75,10 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    this._model.refreshed.connect(this.update, this);
+    this._model.refreshed.connect(
+      this.update,
+      this
+    );
   }
 
   /**

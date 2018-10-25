@@ -1,7 +1,21 @@
 {
-  "extends": "../tsconfigtestbase",
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./build"
+    "outDir": "build",
+    "types": ["jest", "node"],
+    "composite": false,
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/codeeditor"
+    },
+    {
+      "path": "../../packages/codemirror"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
 }

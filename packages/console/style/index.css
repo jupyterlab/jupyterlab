@@ -46,12 +46,12 @@
 
 .jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
-  color: var(--jp-cell-prompt-not-active-font-color);
+  color: var(--jp-cell-inprompt-font-color);
 }
 
 .jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
-  color: var(--jp-cell-prompt-not-active-font-color);
+  color: var(--jp-cell-outprompt-font-color);
 }
 
 /* This rule is for styling cell run by another activity in this console */

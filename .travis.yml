@@ -12,17 +12,10 @@ cache:
 matrix:
   include:
   - env: GROUP=js
-  - env: GROUP=js_cov
-  - env: GROUP=python
-    python: 2.7
-  - env: GROUP=python
-    python: 3.5
-  - env: GROUP=python
   - env: GROUP=integrity
-  - env: GROUP=js_services
+  - env: GROUP=python
   - env: GROUP=cli
-    python: 2.7
-  - env: GROUP=cli
+    python: 3.5
   - env: GROUP=docs
 env:
   global:

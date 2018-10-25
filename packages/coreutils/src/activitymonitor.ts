@@ -13,7 +13,10 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    * Construct a new activity monitor.
    */
   constructor(options: ActivityMonitor.IOptions<Sender, Args>) {
-    options.signal.connect(this._onSignalFired, this);
+    options.signal.connect(
+      this._onSignalFired,
+      this
+    );
     this._timeout = options.timeout || 1000;
   }
 

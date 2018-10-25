@@ -103,7 +103,7 @@ export namespace NotebookModelFactory {
 
     /**
      * The content factory used by the NotebookModelFactory.  If
-     * given, it will supercede the `codeCellContentFactory`.
+     * given, it will supersede the `codeCellContentFactory`.
      */
     contentFactory?: NotebookModel.IContentFactory;
   }

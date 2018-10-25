@@ -5,7 +5,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { DataConnector } from '@jupyterlab/coreutils';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { CompletionHandler } from './handler';
 
@@ -62,7 +62,7 @@ export class KernelConnector extends DataConnector<
     });
   }
 
-  private _session: IClientSession;
+  private _session: IClientSession | Session.ISession;
 }
 
 /**
@@ -76,6 +76,6 @@ export namespace KernelConnector {
     /**
      * The session used by the kernel connector.
      */
-    session: IClientSession;
+    session: IClientSession | Session.ISession;
   }
 }

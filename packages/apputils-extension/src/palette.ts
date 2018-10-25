@@ -3,6 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { find } from '@phosphor/algorithm';
+
+import { CommandRegistry } from '@phosphor/commands';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { CommandPalette } from '@phosphor/widgets';
@@ -28,6 +31,9 @@ class Palette implements ICommandPalette {
    */
   constructor(palette: CommandPalette) {
     this._palette = palette;
+    this._palette.title.iconClass = 'jp-PaletteIcon jp-SideBar-tabIcon';
+    this._palette.title.label = '';
+    this._palette.title.caption = 'Command Palette';
   }
 
   /**
@@ -71,6 +77,24 @@ export function activatePalette(app: JupyterLab): ICommandPalette {
   const { commands, shell } = app;
   const palette = Private.createPalette(app);
 
+  // Show the current palette shortcut in its title.
+  const updatePaletteTitle = () => {
+    const binding = find(
+      app.commands.keyBindings,
+      b => b.command === CommandIDs.activate
+    );
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      palette.title.caption = `Commands (${ks})`;
+    } else {
+      palette.title.caption = 'Commands';
+    }
+  };
+  updatePaletteTitle();
+  app.commands.keyBindingChanged.connect(() => {
+    updatePaletteTitle();
+  });
+
   commands.addCommand(CommandIDs.activate, {
     execute: () => {
       shell.activateById(palette.id);
@@ -80,7 +104,7 @@ export function activatePalette(app: JupyterLab): ICommandPalette {
 
   palette.inputNode.placeholder = 'SEARCH';
 
-  shell.addToLeftArea(palette);
+  shell.addToLeftArea(palette, { rank: 300 });
 
   return new Palette(palette);
 }

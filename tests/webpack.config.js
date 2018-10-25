@@ -1,9 +1,3 @@
-var ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-
-var cpus = require('os').cpus().length;
-var forkCheckerCpus = cpus > 2 ? 2 : 1;
-var threadCpus = cpus - forkCheckerCpus;
-
 // Use sourcemaps if in watch or debug mode;
 var devtool = 'eval';
 if (process.argv.indexOf('--watch') !== -1) {
@@ -16,20 +10,12 @@ module.exports = {
   },
   bail: true,
   devtool: devtool,
-  plugins: [
-    new ForkTsCheckerWebpackPlugin({
-      workers: forkCheckerCpus,
-      checkSyntacticErrors: true
-    })
-  ],
+  mode: 'development',
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [
-          { loader: 'thread-loader', options: { workers: threadCpus } },
-          { loader: 'ts-loader', options: { happyPackMode: true } }
-        ]
+        use: [{ loader: 'ts-loader', options: { context: process.cwd() } }]
       },
       {
         test: /\.js$/,

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ApplicationShell,
   ILayoutRestorer,
   JupyterLab,
   JupyterLabPlugin
@@ -18,21 +19,23 @@ import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   FileBrowserModel,
   FileBrowser,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
+import { fileUploadStatus } from './uploadstatus';
+
 import { Launcher } from '@jupyterlab/launcher';
 
 import { Contents } from '@jupyterlab/services';
 
-import { map, toArray } from '@phosphor/algorithm';
+import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
+
+import { Message } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -41,6 +44,8 @@ import { Menu } from '@phosphor/widgets';
  */
 namespace CommandIDs {
   export const copy = 'filebrowser:copy';
+
+  export const copyDownloadLink = 'filebrowser:copy-download-link';
 
   // For main browser only.
   export const createLauncher = 'filebrowser:create-main-launcher';
@@ -56,14 +61,15 @@ namespace CommandIDs {
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
-  // For main browser only.
-  export const navigate = 'filebrowser:navigate-main';
+  export const navigate = 'filebrowser:navigate';
 
   export const open = 'filebrowser:open';
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
   export const paste = 'filebrowser:paste';
+
+  export const createNewDirectory = 'filebrowser:create-new-directory';
 
   export const rename = 'filebrowser:rename';
 
@@ -73,8 +79,7 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  // For main browser only.
-  export const showBrowser = 'filebrowser:activate-main';
+  export const showBrowser = 'filebrowser:activate';
 
   export const shutdown = 'filebrowser:shutdown';
 
@@ -103,6 +108,24 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
 };
 
 /**
+ * The default file browser share-file plugin
+ *
+ * This extension adds a "Copy Shareable Link" command that generates a copy-
+ * pastable URL. This url can be used to open a particular file in JupyterLab,
+ * handy for emailing links or bookmarking for reference.
+ *
+ * If you need to change how this link is generated (for instance, to copy a
+ * /user-redirect URL for JupyterHub), disable this plugin and replace it
+ * with another implementation.
+ */
+const shareFile: JupyterLabPlugin<void> = {
+  activate: activateShareFile,
+  id: '@jupyterlab/filebrowser-extension:share-file',
+  requires: [IFileBrowserFactory],
+  autoStart: true
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -110,7 +133,12 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, browser];
+const plugins: JupyterLabPlugin<any>[] = [
+  factory,
+  browser,
+  shareFile,
+  fileUploadStatus
+];
 export default plugins;
 
 /**
@@ -130,6 +158,7 @@ function activateFactory(
     const model = new FileBrowserModel({
       manager: docManager,
       driveName: options.driveName || '',
+      refreshInterval: options.refreshInterval,
       state: options.state === null ? null : options.state || state
     });
     const widget = new FileBrowser({
@@ -137,27 +166,16 @@ function activateFactory(
       model,
       commands: options.commands || commands
     });
-    const { registry } = docManager;
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      className: 'jp-AddIcon',
+      iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
       onClick: () => {
         return createLauncher(commands, widget);
       },
       tooltip: 'New Launcher'
     });
-    launcher.addClass('jp-MaterialIcon');
     widget.toolbar.insertItem(0, 'launch', launcher);
-
-    // Add a context menu handler to the file browser's directory listing.
-    let node = widget.node.getElementsByClassName('jp-DirListing-content')[0];
-    node.addEventListener('contextmenu', (event: MouseEvent) => {
-      event.preventDefault();
-      const model = widget.modelForClick(event);
-      const menu = createContextMenu(model, commands, registry);
-      menu.open(event.clientX, event.clientY);
-    });
 
     // Track the newly created file browser.
     tracker.add(widget);
@@ -190,7 +208,8 @@ function activateBrowser(
 
   addCommands(app, factory.tracker, browser);
 
-  browser.title.label = 'Files';
+  browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
+  browser.title.caption = 'File Browser';
   shell.addToLeftArea(browser, { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
@@ -216,6 +235,32 @@ function activateBrowser(
   });
 }
 
+function activateShareFile(
+  app: JupyterLab,
+  factory: IFileBrowserFactory
+): void {
+  const { commands } = app;
+  const { tracker } = factory;
+
+  commands.addCommand(CommandIDs.share, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const path = encodeURI(widget.selectedItems().next().path);
+      const tree = PageConfig.getTreeUrl({ workspace: true });
+
+      Clipboard.copyToSystem(URLExt.join(tree, path));
+    },
+    isVisible: () =>
+      tracker.currentWidget &&
+      toArray(tracker.currentWidget.selectedItems()).length === 1,
+    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    label: 'Copy Shareable Link'
+  });
+}
+
 /**
  * Add the main file browser commands to the application's command registry.
  */
@@ -224,6 +269,28 @@ function addCommands(
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser
 ): void {
+  const registry = app.docRegistry;
+
+  const getBrowserForPath = (path: string): FileBrowser => {
+    const driveName = app.serviceManager.contents.driveName(path);
+
+    if (driveName) {
+      let browserForPath = tracker.find(fb => fb.model.driveName === driveName);
+
+      if (!browserForPath) {
+        // warn that no filebrowser could be found for this driveName
+        console.warn(
+          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+        );
+        return;
+      }
+
+      return browserForPath;
+    }
+
+    // if driveName is empty, assume the main filebrowser
+    return browser;
+  };
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -290,7 +357,8 @@ function addCommands(
 
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
-      if (!browser.isHidden) {
+      const widget = tracker.currentWidget;
+      if (widget && !widget.isHidden) {
         app.shell.collapseLeft();
       }
     }
@@ -299,8 +367,9 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
+      const browserForPath = getBrowserForPath(path);
       const services = app.serviceManager;
-      const open = 'docmanager:open';
+      const localPath = services.contents.localPath(path);
       const failure = (reason: any) => {
         console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
       };
@@ -308,23 +377,24 @@ function addCommands(
       return services.ready
         .then(() => services.contents.get(path))
         .then(value => {
-          const { model } = browser;
+          const { model } = browserForPath;
           const { restored } = model;
 
           if (value.type === 'directory') {
-            return restored.then(() => model.cd(`/${path}`));
+            return restored.then(() => model.cd(`/${localPath}`));
           }
 
           return restored
-            .then(() => model.cd(`/${PathExt.dirname(path)}`))
-            .then(() => commands.execute(open, { path }));
+            .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
+            .then(() => commands.execute('docmanager:open', { path: path }));
         })
         .catch(failure);
     }
   });
 
   commands.addCommand(CommandIDs.open, {
-    execute: () => {
+    execute: args => {
+      const factory = (args['factory'] as string) || void 0;
       const widget = tracker.currentWidget;
 
       if (!widget) {
@@ -335,16 +405,34 @@ function addCommands(
         toArray(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
-              return widget.model.cd(item.path);
+              return widget.model.cd(item.name);
             }
 
-            return commands.execute('docmanager:open', { path: item.path });
+            return commands.execute('docmanager:open', {
+              factory: factory,
+              path: item.path
+            });
           })
         )
       );
     },
-    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon',
-    label: 'Open',
+    iconClass: args => {
+      const factory = (args['factory'] as string) || void 0;
+      if (factory) {
+        // if an explicit factory is passed...
+        const ft = registry.getFileType(factory);
+        if (ft) {
+          // ...set an icon if the factory name corresponds to a file type name...
+          return ft.iconClass;
+        } else {
+          // ...or leave the icon blank
+          return '';
+        }
+      } else {
+        return 'jp-MaterialIcon jp-OpenFolderIcon';
+      }
+    },
+    label: args => (args['label'] || args['factory'] || 'Open') as string,
     mnemonic: 0
   });
 
@@ -371,6 +459,24 @@ function addCommands(
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.copyDownloadLink, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+
+      return widget.model.manager.services.contents
+        .getDownloadUrl(widget.selectedItems().next().path)
+        .then(url => {
+          Clipboard.copyToSystem(url);
+        });
+    },
+    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    label: 'Copy Download Link',
+    mnemonic: 0
+  });
+
   commands.addCommand(CommandIDs.paste, {
     execute: () => {
       const widget = tracker.currentWidget;
@@ -382,6 +488,18 @@ function addCommands(
     iconClass: 'jp-MaterialIcon jp-PasteIcon',
     label: 'Paste',
     mnemonic: 0
+  });
+
+  commands.addCommand(CommandIDs.createNewDirectory, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewDirectory();
+      }
+    },
+    iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
+    label: 'New Folder'
   });
 
   commands.addCommand(CommandIDs.rename, {
@@ -397,35 +515,53 @@ function addCommands(
     mnemonic: 0
   });
 
-  commands.addCommand(CommandIDs.share, {
-    execute: () => {
-      const path = encodeURIComponent(browser.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: true });
-
-      Clipboard.copyToSystem(URLExt.join(tree, path));
-    },
-    isVisible: () => toArray(browser.selectedItems()).length === 1,
-    iconClass: 'jp-MaterialIcon jp-LinkIcon',
-    label: 'Copy Shareable Link'
-  });
-
   commands.addCommand(CommandIDs.copyPath, {
     execute: () => {
-      const item = browser.selectedItems().next();
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const item = widget.selectedItems().next();
       if (!item) {
         return;
       }
 
       Clipboard.copyToSystem(item.path);
     },
-    isVisible: () => toArray(browser.selectedItems()).length === 1,
+    isVisible: () =>
+      tracker.currentWidget &&
+      tracker.currentWidget.selectedItems().next !== undefined,
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     label: 'Copy Path'
   });
 
   commands.addCommand(CommandIDs.showBrowser, {
-    execute: () => {
-      app.shell.activateById(browser.id);
+    execute: args => {
+      const path = (args.path as string) || '';
+      const browserForPath = getBrowserForPath(path);
+
+      // Check for browser not found
+      if (!browserForPath) {
+        return;
+      }
+      // Shortcut if we are using the main file browser
+      if (browser === browserForPath) {
+        app.shell.activateById(browser.id);
+        return;
+      } else {
+        const areas: ApplicationShell.Area[] = ['left', 'right'];
+        for (let area of areas) {
+          const it = app.shell.widgets(area);
+          let widget = it.next();
+          while (widget) {
+            if (widget.contains(browserForPath)) {
+              app.shell.activateById(widget.id);
+              return;
+            }
+            widget = it.next();
+          }
+        }
+      }
     }
   });
 
@@ -455,66 +591,170 @@ function addCommands(
     label: 'New Launcher',
     execute: () => createLauncher(commands, browser)
   });
-}
 
-/**
- * Create a context menu for the file browser listing.
- *
- * #### Notes
- * This function generates temporary commands with an incremented name. These
- * commands are disposed when the menu itself is disposed.
- */
-function createContextMenu(
-  model: Contents.IModel | undefined,
-  commands: CommandRegistry,
-  registry: DocumentRegistry
-): Menu {
-  const menu = new Menu({ commands });
+  /**
+   * A menu widget that dynamically populates with different widget factories
+   * based on current filebrowser selection.
+   */
+  class OpenWithMenu extends Menu {
+    protected onBeforeAttach(msg: Message): void {
+      // clear the current menu items
+      this.clearItems();
 
-  // If the user did not click on any file, we still want to show
-  // paste as a possibility.
-  if (!model) {
-    menu.addItem({ command: CommandIDs.paste });
-    return menu;
-  }
+      // get the widget factories that could be used to open all of the items
+      // in the current filebrowser selection
+      let factories = OpenWithMenu._intersection(
+        map(tracker.currentWidget.selectedItems(), i => {
+          return OpenWithMenu._getFactories(i);
+        })
+      );
 
-  menu.addItem({ command: CommandIDs.open });
+      if (factories) {
+        // make new menu items from the widget factories
+        factories.forEach(factory => {
+          this.addItem({
+            args: { factory: factory },
+            command: CommandIDs.open
+          });
+        });
+      }
 
-  const path = model.path;
-  if (model.type !== 'directory') {
-    const factories = registry.preferredWidgetFactories(path).map(f => f.name);
-    if (path && factories.length > 1) {
-      const command = 'docmanager:open';
-      const openWith = new Menu({ commands });
-      openWith.title.label = 'Open With';
-      factories.forEach(factory => {
-        openWith.addItem({ args: { factory, path }, command });
-      });
-      menu.addItem({ type: 'submenu', submenu: openWith });
+      super.onBeforeAttach(msg);
     }
-    menu.addItem({ command: CommandIDs.openBrowserTab });
+
+    static _getFactories(item: Contents.IModel): Array<string> {
+      let factories = registry
+        .preferredWidgetFactories(item.path)
+        .map(f => f.name);
+      const notebookFactory = registry.getWidgetFactory('notebook').name;
+      if (
+        item.type === 'notebook' &&
+        factories.indexOf(notebookFactory) === -1
+      ) {
+        factories.unshift(notebookFactory);
+      }
+
+      return factories;
+    }
+
+    static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
+      // pop the first element of iter
+      let first = iter.next();
+      // first will be undefined if iter is empty
+      if (!first) {
+        return;
+      }
+
+      // "initialize" the intersection from first
+      let isect = new Set(first);
+      // reduce over the remaining elements of iter
+      return reduce(
+        iter,
+        (isect, subarr) => {
+          // filter out all elements not present in both isect and subarr,
+          // accumulate result in new set
+          return new Set(subarr.filter(x => isect.has(x)));
+        },
+        isect
+      );
+    }
   }
 
-  menu.addItem({ command: CommandIDs.rename });
-  menu.addItem({ command: CommandIDs.del });
-  menu.addItem({ command: CommandIDs.cut });
+  // matches anywhere on filebrowser
+  const selectorContent = '.jp-DirListing-content';
+  // matches all filebrowser items
+  const selectorItem = '.jp-DirListing-item[data-isdir]';
+  // matches only non-directory items
+  const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
-  if (model.type !== 'directory') {
-    menu.addItem({ command: CommandIDs.copy });
-  }
+  // If the user did not click on any file, we still want to show paste and new folder,
+  // so target the content rather than an item.
+  app.contextMenu.addItem({
+    command: CommandIDs.createNewDirectory,
+    selector: selectorContent,
+    rank: 1
+  });
 
-  menu.addItem({ command: CommandIDs.paste });
+  app.contextMenu.addItem({
+    command: CommandIDs.paste,
+    selector: selectorContent,
+    rank: 2
+  });
 
-  if (model.type !== 'directory') {
-    menu.addItem({ command: CommandIDs.duplicate });
-    menu.addItem({ command: CommandIDs.download });
-    menu.addItem({ command: CommandIDs.shutdown });
-  }
+  app.contextMenu.addItem({
+    command: CommandIDs.open,
+    selector: selectorItem,
+    rank: 1
+  });
 
-  menu.addItem({ command: CommandIDs.share });
-  menu.addItem({ command: CommandIDs.copyPath });
+  const openWith = new OpenWithMenu({ commands });
+  openWith.title.label = 'Open With';
+  app.contextMenu.addItem({
+    type: 'submenu',
+    submenu: openWith,
+    selector: selectorNotDir,
+    rank: 2
+  });
 
-  return menu;
+  app.contextMenu.addItem({
+    command: CommandIDs.openBrowserTab,
+    selector: selectorNotDir,
+    rank: 3
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.rename,
+    selector: selectorItem,
+    rank: 4
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.del,
+    selector: selectorItem,
+    rank: 5
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.cut,
+    selector: selectorItem,
+    rank: 6
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.copy,
+    selector: selectorNotDir,
+    rank: 7
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.duplicate,
+    selector: selectorNotDir,
+    rank: 8
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.download,
+    selector: selectorNotDir,
+    rank: 9
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.shutdown,
+    selector: selectorNotDir,
+    rank: 10
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.share,
+    selector: selectorItem,
+    rank: 11
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.copyPath,
+    selector: selectorItem,
+    rank: 12
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.copyDownloadLink,
+    selector: selectorItem,
+    rank: 13
+  });
 }
 
 /**
@@ -529,9 +769,12 @@ function createLauncher(
   return commands
     .execute('launcher:create', { cwd: model.path })
     .then((launcher: MainAreaWidget<Launcher>) => {
-      model.pathChanged.connect(() => {
-        launcher.content.cwd = model.path;
-      }, launcher);
+      model.pathChanged.connect(
+        () => {
+          launcher.content.cwd = model.path;
+        },
+        launcher
+      );
       return launcher;
     });
 }

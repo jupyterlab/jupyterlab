@@ -5,13 +5,19 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+import { IIterator, toArray } from '@phosphor/algorithm';
+
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  showDialog,
+  ToolbarButtonComponent
+} from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -28,16 +34,6 @@ const RUNNING_CLASS = 'jp-RunningSessions';
  * The class name added to a running widget header.
  */
 const HEADER_CLASS = 'jp-RunningSessions-header';
-
-/**
- * The class name added to a running widget header refresh button.
- */
-const REFRESH_CLASS = 'jp-RunningSessions-headerRefresh';
-
-/**
- * The class name added to shutdown all buttons.
- */
-const SHUTDOWN_CLASS = 'jp-RunningSessions-shutdownAll';
 
 /**
  * The class name added to the running terminal sessions section.
@@ -110,6 +106,8 @@ type SessionProps<M> = {
     shutdownAll(): void;
     // A signal that should emit a new list of items whenever they are changed
     runningChanged: ISignal<any, M[]>;
+    // list the running models.
+    running(): IIterator<M>;
   };
   // called when the shutdown button is pressed on a particular item
   shutdown: (model: M) => void;
@@ -130,11 +128,12 @@ type SessionProps<M> = {
 function Item<M>(props: SessionProps<M> & { model: M }) {
   const { model } = props;
   return (
-    <li className={ITEM_CLASS} onClick={() => props.openRequested.emit(model)}>
+    <li className={ITEM_CLASS}>
       <span className={`${ITEM_ICON_CLASS} ${props.iconClass(model)}`} />
       <span
         className={ITEM_LABEL_CLASS}
         title={props.labelTitle ? props.labelTitle(model) : ''}
+        onClick={() => props.openRequested.emit(model)}
       >
         {props.label(model)}
       </span>
@@ -151,7 +150,7 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
 class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
   constructor(props: SessionProps<M>) {
     super(props);
-    this.state = { models: [] };
+    this.state = { models: toArray(props.manager.running()) };
   }
   render() {
     return (
@@ -193,14 +192,14 @@ function Section<M>(props: SessionProps<M>) {
     <div className={SECTION_CLASS}>
       {props.available && (
         <>
-          <div className={SECTION_HEADER_CLASS}>
-            {props.name} Sessions
-            <button
-              title={`Shutdown All ${props.name} Sessions…`}
-              className={SHUTDOWN_CLASS}
+          <header className={SECTION_HEADER_CLASS}>
+            <h2>{props.name} Sessions</h2>
+            <ToolbarButtonComponent
+              tooltip={`Shutdown All ${props.name} Sessions…`}
+              iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
               onClick={onShutdown}
             />
-          </div>
+          </header>
 
           <div className={CONTAINER_CLASS}>
             <List {...props} />
@@ -227,9 +226,9 @@ function RunningSessionsComponent({
   return (
     <>
       <div className={HEADER_CLASS}>
-        <button
-          title="Refresh List"
-          className={REFRESH_CLASS}
+        <ToolbarButtonComponent
+          tooltip="Refresh List"
+          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
           onClick={() => {
             if (terminalsAvailable) {
               manager.terminals.refreshRunning();
@@ -289,8 +288,9 @@ export class RunningSessions extends Widget {
     this.options = options;
 
     // this can't be in the react element, because then it would be too nested
-    this.node.className = RUNNING_CLASS;
+    this.addClass(RUNNING_CLASS);
   }
+
   protected onUpdateRequest(msg: Message): void {
     ReactDOM.render(
       <RunningSessionsComponent

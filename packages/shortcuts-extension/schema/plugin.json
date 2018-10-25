@@ -26,6 +26,17 @@
       },
       "type": "object"
     },
+    "tabmenu:activate-previously-used-tab": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tabmenu:activate-previously-used-tab" },
+        "keys": { "default": ["Accel Shift '"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Activate Previously Used Tab" },
+        "category": { "default": "Main Area" }
+      },
+      "type": "object"
+    },
     "application:toggle-mode": {
       "default": {},
       "properties": {
@@ -89,7 +100,7 @@
         "selector": {
           "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Console Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -102,7 +113,20 @@
         "selector": {
           "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
         },
-        "title": { "default": "Invoke Completion" },
+        "title": { "default": "Invoke Notebook Completion" },
+        "category": { "default": "Completer" }
+      },
+      "type": "object"
+    },
+    "completer:invoke-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "completer:invoke-file" },
+        "keys": { "default": ["Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor .jp-mod-completer-enabled"
+        },
+        "title": { "default": "Invoke File Completion" },
         "category": { "default": "Completer" }
       },
       "type": "object"
@@ -147,6 +171,17 @@
         "keys": { "default": ["Accel S"] },
         "selector": { "default": "body" },
         "title": { "default": "Save" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
+    "docmanager:save-as": {
+      "default": {},
+      "properties": {
+        "command": { "default": "docmanager:save-as" },
+        "keys": { "default": ["Accel Shift S"] },
+        "selector": { "default": "body" },
+        "title": { "default": "Save As" },
         "category": { "default": "File Operations" }
       },
       "type": "object"
@@ -756,6 +791,17 @@
       },
       "type": "object"
     },
+    "notebook:run-in-console": {
+      "default": {},
+      "properties": {
+        "command": { "default": "notebook:run-in-console" },
+        "keys": { "default": [""] },
+        "selector": { "default": ".jp-Notebook.jp-mod-editMode" },
+        "title": { "default": "Run In Console" },
+        "category": { "default": "Notebook Cell Operations" }
+      },
+      "type": "object"
+    },
     "notebook:run-cell-and-select-next": {
       "default": {},
       "properties": {
@@ -951,8 +997,7 @@
         "command": { "default": "tooltip:launch-console" },
         "keys": { "default": ["Shift Tab"] },
         "selector": {
-          "default":
-            ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+          "default": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }
@@ -965,8 +1010,20 @@
         "command": { "default": "tooltip:launch-notebook" },
         "keys": { "default": ["Shift Tab"] },
         "selector": {
-          "default":
-            ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection)"
+          "default": ".jp-Notebook.jp-mod-editMode .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)"
+        },
+        "title": { "default": "Invoke Completer" },
+        "category": { "default": "Tooltips" }
+      },
+      "type": "object"
+    },
+    "tooltip:launch-file": {
+      "default": {},
+      "properties": {
+        "command": { "default": "tooltip:launch-file" },
+        "keys": { "default": ["Shift Tab"] },
+        "selector": {
+          "default": ".jp-FileEditor"
         },
         "title": { "default": "Invoke Completer" },
         "category": { "default": "Tooltips" }

@@ -30,7 +30,8 @@ export default plugin;
 function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
-  running.title.label = 'Running';
+  running.title.iconClass = 'jp-DirectionsRunIcon jp-SideBar-tabIcon';
+  running.title.caption = 'Running Terminals and Kernels';
 
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar

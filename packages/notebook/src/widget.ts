@@ -372,9 +372,18 @@ export class StaticNotebook extends Widget {
     each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
-    cells.changed.connect(this._onCellsChanged, this);
-    newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    cells.changed.connect(
+      this._onCellsChanged,
+      this
+    );
+    newValue.contentChanged.connect(
+      this.onModelContentChanged,
+      this
+    );
+    newValue.metadata.changed.connect(
+      this.onMetadataChanged,
+      this
+    );
   }
 
   /**
@@ -646,19 +655,19 @@ export namespace StaticNotebook {
   export const defaultEditorConfig: IEditorConfig = {
     code: {
       ...CodeEditor.defaultConfig,
-      lineWrap: false,
+      lineWrap: 'off',
       matchBrackets: true,
       autoClosingBrackets: true
     },
     markdown: {
       ...CodeEditor.defaultConfig,
-      lineWrap: true,
+      lineWrap: 'on',
       matchBrackets: false,
       autoClosingBrackets: false
     },
     raw: {
       ...CodeEditor.defaultConfig,
-      lineWrap: true,
+      lineWrap: 'on',
       matchBrackets: false,
       autoClosingBrackets: false
     }
@@ -855,9 +864,9 @@ export class Notebook extends StaticNotebook {
    * Get the active cell widget.
    *
    * #### Notes
-   * This is a cell or undefined if there is no active cell.
+   * This is a cell or `null` if there is no active cell.
    */
-  get activeCell(): Cell | undefined {
+  get activeCell(): Cell | null {
     return this._activeCell;
   }
 
@@ -868,7 +877,7 @@ export class Notebook extends StaticNotebook {
     if (this.isDisposed) {
       return;
     }
-    this._activeCell = undefined;
+    this._activeCell = null;
     super.dispose();
   }
 
@@ -1101,7 +1110,7 @@ export class Notebook extends StaticNotebook {
     let node = this.node;
     let ar = node.getBoundingClientRect();
     let delta = position - ar.top - ar.height / 2;
-    if (Math.abs(delta) > ar.height * threshold / 100) {
+    if (Math.abs(delta) > (ar.height * threshold) / 100) {
       node.scrollTop += delta;
     }
   }
@@ -1273,7 +1282,10 @@ export class Notebook extends StaticNotebook {
         }
       });
     }
-    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
+    cell.editor.edgeRequested.connect(
+      this._onEdgeRequest,
+      this
+    );
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -1962,7 +1974,7 @@ export class Notebook extends StaticNotebook {
   }
 
   private _activeCellIndex = -1;
-  private _activeCell: Cell | undefined = undefined;
+  private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
   private _dragData: { pressX: number; pressY: number; index: number } = null;
@@ -2052,7 +2064,7 @@ namespace Private {
               { className: DRAG_IMAGE_CLASS },
               h.span(
                 { className: CELL_DRAG_PROMPT_CLASS },
-                'In [' + promptNumber + ']:'
+                '[' + promptNumber + ']:'
               ),
               h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             ),
@@ -2079,7 +2091,7 @@ namespace Private {
               { className: `${DRAG_IMAGE_CLASS} ${SINGLE_DRAG_IMAGE_CLASS}` },
               h.span(
                 { className: CELL_DRAG_PROMPT_CLASS },
-                'In [' + promptNumber + ']:'
+                '[' + promptNumber + ']:'
               ),
               h.span({ className: CELL_DRAG_CONTENT_CLASS }, cellContent)
             )

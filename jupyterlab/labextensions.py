@@ -3,8 +3,6 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-from __future__ import print_function
-
 import os
 import sys
 import traceback
@@ -66,8 +64,8 @@ class BaseExtensionApp(JupyterApp):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    dev_build = Bool(False, config=True,
-        help="Whether to build in dev mode (defaults to production mode)")
+    dev_build = Bool(True, config=True,
+        help="Whether to build in dev mode (defaults to dev mode)")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")

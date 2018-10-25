@@ -106,8 +106,14 @@ export class OutputArea extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    model.changed.connect(this.onModelChanged, this);
-    model.stateChanged.connect(this.onStateChanged, this);
+    model.changed.connect(
+      this.onModelChanged,
+      this
+    );
+    model.stateChanged.connect(
+      this.onStateChanged,
+      this
+    );
   }
 
   /**
@@ -121,7 +127,7 @@ export class OutputArea extends Widget {
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
-   * Te rendermime instance used by the widget.
+   * The rendermime instance used by the widget.
    */
   readonly rendermime: RenderMimeRegistry;
 
@@ -454,7 +460,7 @@ export class OutputArea extends Widget {
    */
   private _onExecuteReply = (msg: KernelMessage.IExecuteReplyMsg) => {
     // API responses that contain a pager are special cased and their type
-    // is overriden from 'execute_reply' to 'display_data' in order to
+    // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
     let model = this.model;
     let content = msg.content as KernelMessage.IExecuteOkReply;
@@ -531,7 +537,8 @@ export namespace OutputArea {
   export function execute(
     code: string,
     output: OutputArea,
-    session: IClientSession
+    session: IClientSession,
+    metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
     let content: KernelMessage.IExecuteRequest = {
@@ -542,7 +549,7 @@ export namespace OutputArea {
     if (!session.kernel) {
       return Promise.reject('Session has no kernel.');
     }
-    let future = session.kernel.requestExecute(content, false);
+    let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
   }
@@ -627,7 +634,7 @@ export class OutputPrompt extends Widget implements IOutputPrompt {
     if (value === null) {
       this.node.textContent = '';
     } else {
-      this.node.textContent = `Out[${value}]:`;
+      this.node.textContent = `[${value}]:`;
     }
   }
 

@@ -2,8 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-// tslint:disable-next-line
-/// <reference path="../../../node_modules/@types/webpack-env/index.d.ts"/>
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -50,6 +48,8 @@ export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v2+json';
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export class RenderedVega extends Widget implements IRenderMime.IRenderer {
+  private _result: VegaModuleType.Result;
+
   /**
    * Create a new widget for rendering Vega/Vega-Lite.
    */
@@ -87,7 +87,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     this.node.innerHTML = '';
     this.node.appendChild(el);
 
-    const result = await vega.default(el, spec, {
+    this._result = await vega.default(el, spec, {
       actions: true,
       defaultStyle: true,
       ...embedOptions,
@@ -103,10 +103,17 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     }
 
     // Add png representation of vega chart to output
-    const imageURL = await result.view.toImageURL('png');
+    const imageURL = await this._result.view.toImageURL('png');
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }
     });
+  }
+
+  dispose(): void {
+    if (this._result) {
+      this._result.view.finalize();
+    }
+    super.dispose();
   }
 
   private _mimeType: string;

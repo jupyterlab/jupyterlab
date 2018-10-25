@@ -57,7 +57,10 @@ export class PluginEditor extends Widget {
       rendermime
     });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
-    this._rawEditor.handleMoved.connect(this._onStateChanged, this);
+    this._rawEditor.handleMoved.connect(
+      this._onStateChanged,
+      this
+    );
 
     layout.addWidget(this._rawEditor);
     layout.addWidget(this._tableEditor);
@@ -139,7 +142,7 @@ export class PluginEditor extends Widget {
       buttons: [Dialog.cancelButton(), Dialog.okButton()]
     }).then(result => {
       if (!result.button.accept) {
-        throw new Error('User cancelled.');
+        throw new Error('User canceled.');
       }
     });
   }

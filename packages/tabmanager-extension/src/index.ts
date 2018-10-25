@@ -25,7 +25,8 @@ const plugin: JupyterLabPlugin<void> = {
 
     restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
-    tabs.title.label = 'Tabs';
+    tabs.title.iconClass = 'jp-TabIcon jp-SideBar-tabIcon';
+    tabs.title.caption = 'Open Tabs';
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
     shell.addToLeftArea(tabs, { rank: 600 });

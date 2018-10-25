@@ -22,6 +22,8 @@ import {
 
 import { ArrayExt, each, toArray } from '@phosphor/algorithm';
 
+import { JSONObject } from '@phosphor/coreutils';
+
 import { ElementExt } from '@phosphor/domutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -699,7 +701,7 @@ export namespace NotebookActions {
   /**
    * Select all of the cells of the notebook.
    *
-   * @param notebook - the targe notebook widget.
+   * @param notebook - the target notebook widget.
    */
   export function selectAll(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -1372,13 +1374,13 @@ namespace Private {
   ): ICellModel {
     switch (cell.type) {
       case 'code':
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
       case 'markdown':
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
       default:
-        // TODO why isnt modeldb or id passed here?
+        // TODO why isn't modeldb or id passed here?
         return model.contentFactory.createRawCell({ cell: cell.toJSON() });
     }
   }
@@ -1406,18 +1408,33 @@ namespace Private {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    return Promise.all(
-      selected.map(child => runCell(notebook, child, session))
-    ).then(results => {
-      if (notebook.isDisposed) {
+    return Promise.all(selected.map(child => runCell(notebook, child, session)))
+      .then(results => {
+        if (notebook.isDisposed) {
+          return false;
+        }
+
+        // Post an update request.
+        notebook.update();
+
+        return results.every(result => result);
+      })
+      .catch(reason => {
+        if (reason.message === 'KernelReplyNotOK') {
+          selected.map((cell: CodeCell) => {
+            // Remove '*' prompt from cells that didn't execute
+            if (cell.model.executionCount == null) {
+              cell.setPrompt('');
+            }
+          });
+        } else {
+          throw reason;
+        }
+
+        notebook.update();
+
         return false;
-      }
-
-      // Post an update request.
-      notebook.update();
-
-      return results.every(result => result);
-    });
+      });
   }
 
   /**
@@ -1436,8 +1453,14 @@ namespace Private {
         break;
       case 'code':
         if (session) {
-          return CodeCell.execute(cell as CodeCell, session)
+          return CodeCell.execute(cell as CodeCell, session, {
+            deletedCells: notebook.model.deletedCells
+          })
             .then(reply => {
+              notebook.model.deletedCells.splice(
+                0,
+                notebook.model.deletedCells.length
+              );
               if (cell.isDisposed) {
                 return false;
               }
@@ -1454,9 +1477,9 @@ namespace Private {
                 }
 
                 return true;
+              } else {
+                throw new Error('KernelReplyNotOK');
               }
-
-              return false;
             })
             .catch(reason => {
               if (reason.message !== 'Canceled') {
@@ -1542,9 +1565,15 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = notebook.widgets
+    let data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => cell.model.toJSON());
+      .map(cell => cell.model.toJSON())
+      .map(cellJSON => {
+        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+          delete (cellJSON.metadata as JSONObject).deletable;
+        }
+        return cellJSON;
+      });
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
@@ -1636,6 +1665,7 @@ namespace Private {
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
+        notebook.model.deletedCells.push(child.model.id);
       }
     });
 

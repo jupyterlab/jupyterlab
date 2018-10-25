@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -44,3 +45,6 @@ function handlePackage(packagePath: string): void {
   // Write the file back to disk.
   utils.writePackageData(packagePath, data);
 }
+
+// Update the core jupyterlab build dependencies.
+utils.run('jlpm run integrity');

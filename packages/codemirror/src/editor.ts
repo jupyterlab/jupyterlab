@@ -31,6 +31,7 @@ import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
+import 'codemirror/addon/search/jump-to-line';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';
@@ -114,11 +115,20 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }, 3000);
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
-    model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-    model.selections.changed.connect(this._onSelectionsChanged, this);
+    model.value.changed.connect(
+      this._onValueChanged,
+      this
+    );
+    model.mimeTypeChanged.connect(
+      this._onMimeTypeChanged,
+      this
+    );
+    model.selections.changed.connect(
+      this._onSelectionsChanged,
+      this
+    );
 
-    CodeMirror.on(editor, 'keydown', (editor, event) => {
+    CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
           event.preventDefault();
@@ -264,7 +274,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Don't bother setting the option if it is already the same.
     if (this._config[option] !== value) {
       this._config[option] = value;
-      Private.setOption(this.editor, option, value);
+      Private.setOption(this.editor, option, value, this._config);
     }
   }
 
@@ -286,7 +296,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Find a position fot the given offset.
+   * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
     const { ch, line } = this.doc.posFromIndex(offset);
@@ -485,6 +495,38 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.doc.setSelections(cmSelections, 0);
   }
 
+  /**
+   * Get a list of tokens for the current editor text content.
+   */
+  getTokens(): CodeEditor.IToken[] {
+    let tokens: CodeEditor.IToken[] = [];
+    for (let i = 0; i < this.lineCount; ++i) {
+      const lineTokens = this.editor.getLineTokens(i).map(t => ({
+        offset: this.getOffsetAt({ column: t.start, line: i }),
+        value: t.string,
+        type: t.type || ''
+      }));
+      tokens = tokens.concat(lineTokens);
+    }
+    return tokens;
+  }
+
+  /**
+   * Get the token at a given editor position.
+   */
+  getTokenForPosition(position: CodeEditor.IPosition): CodeEditor.IToken {
+    const cursor = this._toCodeMirrorPosition(position);
+    const token = this.editor.getTokenAt(cursor);
+    return {
+      offset: this.getOffsetAt({ column: token.start, line: cursor.line }),
+      value: token.string,
+      type: token.type
+    };
+  }
+
+  /**
+   * Insert a new indented line at the current cursor position.
+   */
   newIndentedLine(): void {
     this.execCommand('newlineAndIndent');
   }
@@ -823,6 +865,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this.refresh();
     }
     this.host.classList.add('jp-mod-focused');
+
+    // Update the selections on editor gaining focus because
+    // the onCursorActivity function filters usual cursor events
+    // based on the editor's focus.
+    this._onCursorActivity();
   }
 
   /**
@@ -1127,6 +1174,7 @@ namespace Private {
       insertSpaces,
       lineHeight,
       lineWrap,
+      wordWrapColumn,
       tabSize,
       readOnly,
       ...otherOptions
@@ -1135,7 +1183,7 @@ namespace Private {
       autoCloseBrackets: autoClosingBrackets,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
-      lineWrapping: lineWrap,
+      lineWrapping: lineWrap === 'off' ? false : true,
       readOnly,
       ...otherOptions
     };
@@ -1151,6 +1199,14 @@ namespace Private {
       }
       if (readOnly) {
         el.classList.add(READ_ONLY_CLASS);
+      }
+      if (lineWrap === 'wordWrapColumn') {
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        lines.style.width = `${wordWrapColumn}ch`;
+      }
+      if (lineWrap === 'bounded') {
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        lines.style.maxWidth = `${wordWrapColumn}ch`;
       }
       host.appendChild(el);
     }, bareConfig);
@@ -1174,7 +1230,11 @@ namespace Private {
     if (/^\s*$/.test(before)) {
       CodeMirror.commands['indentMore'](cm);
     } else {
-      CodeMirror.commands['insertSoftTab'](cm);
+      if (cm.getOption('indentWithTabs')) {
+        CodeMirror.commands['insertTab'](cm);
+      } else {
+        CodeMirror.commands['insertSoftTab'](cm);
+      }
     }
   }
 
@@ -1227,12 +1287,29 @@ namespace Private {
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
     editor: CodeMirror.Editor,
     option: K,
-    value: CodeMirrorEditor.IConfig[K]
+    value: CodeMirrorEditor.IConfig[K],
+    config: CodeMirrorEditor.IConfig
   ): void {
     let el = editor.getWrapperElement();
     switch (option) {
       case 'lineWrap':
-        editor.setOption('lineWrapping', value);
+        const lineWrapping = value === 'off' ? false : true;
+        const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+        const maxWidth =
+          value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
+        const width =
+          value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
+        lines.style.maxWidth = maxWidth;
+        lines.style.width = width;
+        editor.setOption('lineWrapping', lineWrapping);
+        break;
+      case 'wordWrapColumn':
+        const { lineWrap } = config;
+        if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
+          const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+          const prop = lineWrap === 'wordWrapColumn' ? 'width' : 'maxWidth';
+          lines.style[prop] = `${value}ch`;
+        }
         break;
       case 'tabSize':
         editor.setOption('indentUnit', value);

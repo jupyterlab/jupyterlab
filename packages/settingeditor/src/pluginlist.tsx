@@ -31,9 +31,12 @@ export class PluginList extends Widget {
     this.registry = options.registry;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
-    this.registry.pluginChanged.connect(() => {
-      this.update();
-    }, this);
+    this.registry.pluginChanged.connect(
+      () => {
+        this.update();
+      },
+      this
+    );
   }
 
   /**
@@ -229,7 +232,7 @@ namespace Private {
     registry: ISettingRegistry,
     plugin: ISettingRegistry.IPlugin
   ): string {
-    // First, give priorty to checking if the hint exists in the user data.
+    // First, give priority to checking if the hint exists in the user data.
     let hint = plugin.data.user[key];
 
     // Second, check to see if the hint exists in composite data, which folds

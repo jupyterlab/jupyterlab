@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mainmenu",
-  "version": "0.6.0-1",
+  "version": "0.8.1",
   "description": "JupyterLab - Main Menu",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,21 +23,26 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
-    "watch": "tsc -w --listEmittedFiles"
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.17.0-1",
-    "@jupyterlab/services": "^3.0.0-1",
+    "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/services": "^3.2.1",
     "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/commands": "^1.5.0",
+    "@phosphor/commands": "^1.6.1",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/widgets": "^1.6.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

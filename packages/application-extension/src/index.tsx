@@ -18,7 +18,15 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig } from '@jupyterlab/coreutils';
+import {
+  PageConfig,
+  PathExt,
+  IStateDB,
+  ISettingRegistry,
+  URLExt
+} from '@jupyterlab/coreutils';
+
+import { each } from '@phosphor/algorithm';
 
 import * as React from 'react';
 
@@ -45,13 +53,19 @@ namespace CommandIDs {
     'application:toggle-presentation-mode';
 
   export const tree: string = 'router:tree';
+
+  export const switchSidebar = 'sidebar:switch';
 }
 
 /**
  * The routing regular expressions used by the application plugin.
  */
 namespace Patterns {
-  export const tree = /[^?]*(\/tree\/([^?]+))/;
+  export const tree = new RegExp(`^${PageConfig.getOption('treeUrl')}([^?]+)`);
+
+  export const workspace = new RegExp(
+    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?]+)`
+  );
 }
 
 /**
@@ -69,7 +83,7 @@ const main: JupyterLabPlugin<void> = {
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
-    const workspace = resolver.name ? `"${resolver.name}"` : '[default: /lab]';
+    const workspace = resolver.name;
 
     console.log(`Starting application in workspace: ${workspace}`);
 
@@ -193,7 +207,7 @@ const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
   activate: (app: JupyterLab) => {
     const { commands } = app;
-    const base = PageConfig.getOption('pageUrl');
+    const base = PageConfig.getOption('baseUrl');
     const router = new Router({ base, commands });
 
     app.started.then(() => {
@@ -223,25 +237,34 @@ const tree: JupyterLabPlugin<void> = {
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
-      execute: (args: IRouter.ILocation) => {
-        const { request } = args;
-        const path = decodeURIComponent(args.path.match(Patterns.tree)[2]);
-        const url = request.replace(request.match(Patterns.tree)[1], '');
+      execute: async (args: IRouter.ILocation) => {
+        const treeMatch = args.path.match(Patterns.tree);
+        const workspaceMatch = args.path.match(Patterns.workspace);
+        const match = treeMatch || workspaceMatch;
+        const path = decodeURI(match[1]);
+        const { page, workspaces } = app.info.urls;
+        const workspace = PathExt.basename(app.info.workspace);
+        const url =
+          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
+          args.search +
+          args.hash;
         const immediate = true;
+        const silent = true;
 
         // Silently remove the tree portion of the URL leaving the rest intact.
-        router.navigate(url, { silent: true });
+        router.navigate(url, { silent });
 
-        return commands
-          .execute('filebrowser:navigate-main', { path })
-          .then(() => commands.execute('apputils:save-statedb', { immediate }))
-          .catch(reason => {
-            console.warn(`Tree routing failed:`, reason);
-          });
+        try {
+          await commands.execute('filebrowser:navigate', { path });
+          await commands.execute('apputils:save-statedb', { immediate });
+        } catch (error) {
+          console.warn('Tree routing failed.', error);
+        }
       }
     });
 
     router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
+    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
   }
 };
 
@@ -278,14 +301,113 @@ const busy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
   activate: async (app: JupyterLab) => {
     app.busySignal.connect((_, isBusy) => {
-      const filename = isBusy ? 'favicon-busy-1.ico' : 'favicon.ico';
       const favicon = document.querySelector(
-        'link[rel="shortcut icon"]'
+        `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
-      favicon.href = `/static/base/images/${filename}`;
+      if (!favicon) {
+        return;
+      }
+      const newFavicon = document.querySelector(
+        `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
+      ) as HTMLLinkElement;
+      if (!newFavicon) {
+        return;
+      }
+      // If we have the two icons with the special classes, then toggle them.
+      if (favicon !== newFavicon) {
+        favicon.rel = '';
+        newFavicon.rel = 'icon';
+
+        // Firefox doesn't seem to recognize just changing rel, so we also
+        // reinsert the link into the DOM.
+        newFavicon.parentNode.replaceChild(newFavicon, newFavicon);
+      }
     });
   },
   requires: [],
+  autoStart: true
+};
+
+const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
+
+/**
+ * Keep user settings for where to show the side panels.
+ */
+const sidebar: JupyterLabPlugin<void> = {
+  id: SIDEBAR_ID,
+  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+    type overrideMap = { [id: string]: 'left' | 'right' };
+    let overrides: overrideMap = {};
+    const handleLayoutOverrides = () => {
+      each(app.shell.widgets('left'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'right') {
+          app.shell.addToRightArea(widget);
+        }
+      });
+      each(app.shell.widgets('right'), widget => {
+        if (overrides[widget.id] && overrides[widget.id] === 'left') {
+          app.shell.addToLeftArea(widget);
+        }
+      });
+    };
+    app.shell.layoutModified.connect(handleLayoutOverrides);
+    // Fetch overrides from the settings system.
+    Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
+      ([settings]) => {
+        overrides = (settings.get('overrides').composite as overrideMap) || {};
+        settings.changed.connect(settings => {
+          overrides =
+            (settings.get('overrides').composite as overrideMap) || {};
+          handleLayoutOverrides();
+        });
+      }
+    );
+
+    // Add a command to switch a side panels's side
+    app.commands.addCommand(CommandIDs.switchSidebar, {
+      label: 'Switch Sidebar Side',
+      execute: () => {
+        // First, try to find the right panel based on the
+        // application context menu click,
+        // If we can't find it there, look for use the active
+        // left/right widgets.
+        const contextNode: HTMLElement = app.contextMenuFirst(
+          node => !!node.dataset.id
+        );
+        let id: string;
+        let side: 'left' | 'right';
+        if (contextNode) {
+          id = contextNode.dataset['id'];
+          const leftPanel = document.getElementById('jp-left-stack');
+          const node = document.getElementById(id);
+          if (leftPanel && node && leftPanel.contains(node)) {
+            side = 'right';
+          } else {
+            side = 'left';
+          }
+        } else if (document.body.dataset.leftSidebarWidget) {
+          id = document.body.dataset.leftSidebarWidget;
+          side = 'right';
+        } else if (document.body.dataset.rightSidebarWidget) {
+          id = document.body.dataset.rightSidebarWidget;
+          side = 'left';
+        }
+
+        // Move the panel to the other side.
+        const newOverrides = { ...overrides };
+        newOverrides[id] = side;
+        settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
+      }
+    });
+
+    // Add a context menu item to sidebar tabs.
+    app.contextMenu.addItem({
+      command: CommandIDs.switchSidebar,
+      selector: '.jp-SideBar .p-TabBar-tab',
+      rank: 500
+    });
+  },
+  requires: [ISettingRegistry],
   autoStart: true
 };
 
@@ -409,7 +531,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   router,
   tree,
   notfound,
-  busy
+  busy,
+  sidebar
 ];
 
 export default plugins;

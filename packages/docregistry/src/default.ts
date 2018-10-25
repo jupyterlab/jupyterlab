@@ -32,7 +32,10 @@ export class DocumentModel extends CodeEditor.Model
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(this.triggerContentChange, this);
+    this.value.changed.connect(
+      this.triggerContentChange,
+      this
+    );
   }
 
   /**
@@ -278,7 +281,7 @@ export abstract class ABCWidgetFactory<
   /**
    * Construct a new `ABCWidgetFactory`.
    */
-  constructor(options: DocumentRegistry.IWidgetFactoryOptions) {
+  constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._name = options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
@@ -287,6 +290,7 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
+    this._toolbarFactory = options.toolbarFactory;
   }
 
   /**
@@ -374,8 +378,23 @@ export abstract class ABCWidgetFactory<
    * It should emit the [widgetCreated] signal with the new widget.
    */
   createNew(context: DocumentRegistry.IContext<U>): T {
-    let widget = this.createNewWidget(context);
+    // Create the new widget
+    const widget = this.createNewWidget(context);
+
+    // Add toolbar items
+    let items: DocumentRegistry.IToolbarItem[];
+    if (this._toolbarFactory) {
+      items = this._toolbarFactory(widget);
+    } else {
+      items = this.defaultToolbarFactory(widget);
+    }
+    items.forEach(({ name, widget: item }) => {
+      widget.toolbar.addItem(name, item);
+    });
+
+    // Emit widget created signal
     this._widgetCreated.emit(widget);
+
     return widget;
   }
 
@@ -384,6 +403,16 @@ export abstract class ABCWidgetFactory<
    */
   protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;
 
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(widget: T): DocumentRegistry.IToolbarItem[] {
+    return [];
+  }
+
+  private _toolbarFactory: (
+    widget: T
+  ) => DocumentRegistry.IToolbarItem[] | undefined;
   private _isDisposed = false;
   private _name: string;
   private _readOnly: boolean;
@@ -418,11 +447,17 @@ export class DocumentWidget<
     this.context = options.context;
 
     // Handle context path changes
-    this.context.pathChanged.connect(this._onPathChanged, this);
+    this.context.pathChanged.connect(
+      this._onPathChanged,
+      this
+    );
     this._onPathChanged(this.context, this.context.path);
 
     // Listen for changes in the dirty state.
-    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    this.context.model.stateChanged.connect(
+      this._onModelStateChanged,
+      this
+    );
     this.context.ready.then(() => {
       this._handleDirtyState();
     });

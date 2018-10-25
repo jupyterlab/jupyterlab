@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar } from '@jupyterlab/apputils';
+import { Toolbar, CommandToolbarButton } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -84,7 +84,10 @@ export class RawEditor extends SplitPanel {
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.value.changed.connect(this._onTextChanged, this);
+    user.editor.model.value.changed.connect(
+      this._onTextChanged,
+      this
+    );
 
     // Create and set up an inspector.
     this._inspector = createInspector(this, options.rendermime);
@@ -163,7 +166,10 @@ export class RawEditor extends SplitPanel {
 
     if (settings) {
       this._settings = settings;
-      this._settings.changed.connect(this._onSettingsChanged, this);
+      this._settings.changed.connect(
+        this._onSettingsChanged,
+        this
+      );
       this._onSettingsChanged();
     } else {
       this._settings = null;
@@ -428,11 +434,8 @@ namespace Private {
     // the toolbar is in, the relative location of the revert button in the
     // toolbar remains the same.
     [revert, debug, save].forEach(name => {
-      const item = Toolbar.createFromCommand(registry, name);
-
-      if (item) {
-        toolbar.addItem(name, item);
-      }
+      const item = new CommandToolbarButton({ commands: registry, id: name });
+      toolbar.addItem(name, item);
     });
   }
 

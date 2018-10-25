@@ -3,6 +3,8 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { UUID } from '@phosphor/coreutils';
 
 import {
@@ -65,7 +67,10 @@ export class DocumentManager implements IDisposable {
     this._when = options.when || options.manager.ready;
 
     let widgetManager = new DocumentWidgetManager({ registry: this.registry });
-    widgetManager.activateRequested.connect(this._onActivateRequested, this);
+    widgetManager.activateRequested.connect(
+      this._onActivateRequested,
+      this
+    );
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
   }
@@ -266,15 +271,16 @@ export class DocumentManager implements IDisposable {
     path: string,
     widgetName = 'default'
   ): IDocumentWidget | undefined {
+    let newPath = PathExt.normalize(path);
     if (widgetName === 'default') {
-      let factory = this.registry.defaultWidgetFactory(path);
+      let factory = this.registry.defaultWidgetFactory(newPath);
       if (!factory) {
         return undefined;
       }
       widgetName = factory.name;
     }
 
-    for (let context of this._contextsForPath(path)) {
+    for (let context of this._contextsForPath(newPath)) {
       let widget = this._widgetManager.findWidget(context, widgetName);
       if (widget) {
         return widget;
@@ -456,7 +462,10 @@ export class DocumentManager implements IDisposable {
         handler.start();
       }
     });
-    context.disposed.connect(this._onContextDisposed, this);
+    context.disposed.connect(
+      this._onContextDisposed,
+      this
+    );
     this._contexts.push(context);
     return context;
   }

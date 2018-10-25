@@ -23,7 +23,7 @@ import sys
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'): os.remove('MANIFEST') # noqa
 
 
 from distutils.cmd import Command
@@ -113,7 +113,7 @@ def find_packages(top=HERE):
         if os.path.exists(pjoin(d, '__init__.py')):
             packages.append(os.path.relpath(d, top).replace(os.path.sep, '.'))
         elif d != top:
-            # Do not look for packages in subfolders if current is not a package
+            # Don't look for packages in subfolders if current isn't a package.
             dirs[:] = []
     return packages
 
@@ -130,13 +130,14 @@ class bdist_egg_disabled(bdist_egg):
     Prevents setup.py install performing setuptools' default easy_install,
     which it should never ever do.
     """
+
     def run(self):
         sys.exit("Aborting implicit building of eggs. Use `pip install .` "
                  " to install from source.")
 
 
 def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
-        data_files_spec=None):
+                    data_files_spec=None):
     """Create a command class with the given optional prerelease class.
 
     Parameters
@@ -313,7 +314,8 @@ def mtime(path):
     return os.stat(path).st_mtime
 
 
-def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build', force=False, npm=None):
+def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build',
+                force=False, npm=None):
     """Return a Command for managing an npm installation.
 
     Note: The command is skipped if the `--skip-npm` flag is used.
@@ -354,11 +356,13 @@ def install_npm(path=None, build_dir=None, source_dir=None, build_cmd='build', f
 
             if not which(npm_cmd[0]):
                 log.error("`{0}` unavailable.  If you're running this command "
-                          "using sudo, make sure `{0}` is availble to sudo"
+                          "using sudo, make sure `{0}` is available to sudo"
                           .format(npm_cmd[0]))
                 return
 
-            if force or is_stale(node_modules, pjoin(node_package, 'package.json')):
+            stale_package = is_stale(node_modules,
+                                     pjoin(node_package, 'package.json'))
+            if force or stale_package:
                 log.info('Installing build dependencies with npm.  This may '
                          'take a while...')
                 run(npm_cmd + ['install'], cwd=node_package)
@@ -459,7 +463,7 @@ def _wrap_command(cmds, cls, strict=True):
     cmds: list(str)
         The names of the other commands to run prior to the command.
     strict: boolean, optional
-        Wether to raise errors when a pre-command fails.
+        Whether to raise errors when a pre-command fails.
     """
     class WrappedCommand(cls):
 
@@ -507,7 +511,7 @@ def _get_data_files(data_specs, existing):
     data_specs: list of tuples
         See [createcmdclass] for description.
     existing: list of tuples
-        The existing distrubution data_files metadata.
+        The existing distribution data_files metadata.
 
     Returns
     -------

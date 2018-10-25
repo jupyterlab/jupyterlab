@@ -16,8 +16,8 @@ can be used to polyfill browsers that do not support the `fetch` API.
 
 **Prerequisites**
 
-* [node](http://nodejs.org/)
-* [python](https://www.anaconda.com/download)
+- [node](http://nodejs.org/)
+- [python](https://www.anaconda.com/download)
 
 ```bash
 npm install --save @jupyterlab/services
@@ -28,9 +28,9 @@ conda install notebook  # notebook 4.3+ required
 
 **Prerequisites**
 
-* [git](http://git-scm.com/)
-* [node 0.12+](http://nodejs.org/)
-* [python](https://www.anaconda.com/download)
+- [git](http://git-scm.com/)
+- [node 0.12+](http://nodejs.org/)
+- [python](https://www.anaconda.com/download)
 
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git
@@ -70,10 +70,10 @@ Navigate to `docs/index.html`.
 The runtime versions which are currently _known to work_ are listed below.
 Earlier versions may also work, but come with no guarantees.
 
-* Node 0.12.7+
-* IE 11+
-* Firefox 32+
-* Chrome 38+
+- Node 0.12.7+
+- IE 11+
+- Firefox 32+
+- Chrome 38+
 
 Note: "requirejs" may need be included in a global context for `Comm` targets
 using the a `target_module` (in the classic Notebook).
@@ -121,7 +121,7 @@ import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-  Kernel.connectTo(kernelModels[0]).then(kernel => {
+    const kernel = Kernel.connectTo(kernelModels[0]);
     console.log(kernel.name);
   });
 });
@@ -183,9 +183,8 @@ import { Session } from '@jupyterlab/services';
 
 // Get a list of available sessions and connect to one.
 Session.listRunning().then(sessionModels => {
-  Session.connectTo(sessionModels[0]).then(session => {
-    console.log(session.kernel.name);
-  });
+  const session = Session.connectTo(sessionModels[0]);
+  console.log(session.kernel.name);
 });
 
 // Start a new session.

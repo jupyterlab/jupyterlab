@@ -2,7 +2,6 @@ include package.json
 include LICENSE
 include CONTRIBUTING.md
 include README.md
-include package.json
 include setupbase.py
 
 # Documentation

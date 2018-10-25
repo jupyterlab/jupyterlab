@@ -25,12 +25,58 @@ Running the core application with no additional extensions or settings
 """
 
 
+def load_config(nbapp):
+    """Load the JupyterLab configuration and defaults for a given application.
+    """
+    from jupyterlab_server import LabConfig
+    from .commands import (
+        get_app_dir,
+        get_app_info,
+        get_workspaces_dir,
+        get_user_settings_dir,
+        pjoin
+    )
+
+    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+    info = get_app_info(app_dir)
+    public_url = info['publicUrl']
+    user_settings_dir = getattr(
+        nbapp, 'user_settings_dir', get_user_settings_dir()
+    )
+    workspaces_dir = getattr(nbapp, 'workspaces_dir', get_workspaces_dir())
+
+    config = LabConfig()
+    config.app_dir = app_dir
+    config.app_name = 'JupyterLab'
+    config.app_namespace = 'jupyterlab'
+    config.app_settings_dir = pjoin(app_dir, 'settings')
+    config.app_version = info['version']
+    config.cache_files = True
+    config.schemas_dir = pjoin(app_dir, 'schemas')
+    config.templates_dir = pjoin(app_dir, 'static')
+    config.themes_dir = pjoin(app_dir, 'themes')
+    config.user_settings_dir = user_settings_dir
+    config.workspaces_dir = workspaces_dir
+
+    if getattr(nbapp, 'override_static_url', ''):
+        config.public_url = nbapp.override_static_url
+    if getattr(nbapp, 'override_theme_url', ''):
+        config.themes_url = nbapp.override_theme_url
+
+    if public_url:
+        config.public_url = public_url
+    else:
+        config.static_dir = pjoin(app_dir, 'static')
+
+    return config
+
+
 def load_jupyter_server_extension(nbapp):
     """Load the JupyterLab server extension.
     """
     # Delay imports to speed up jlpmapp
     from json import dumps
-    from jupyterlab_launcher import add_handlers, LabConfig
+    from jupyterlab_server import add_handlers
     from notebook.utils import url_path_join as ujoin, url_escape
     from notebook._version import version_info
     from tornado.ioloop import IOLoop
@@ -40,41 +86,37 @@ def load_jupyter_server_extension(nbapp):
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
     from .commands import (
-        get_app_dir, get_user_settings_dir, watch, ensure_dev, watch_dev,
-        pjoin, DEV_DIR, HERE, get_app_info, ensure_core, get_workspaces_dir
+        DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev, get_app_dir
     )
 
     web_app = nbapp.web_app
     logger = nbapp.log
-    config = LabConfig()
+
+    # Handle the app_dir
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
-    user_settings_dir = getattr(
-        nbapp, 'user_settings_dir', get_user_settings_dir()
-    )
-    workspaces_dir = getattr(
-        nbapp, 'workspaces_dir', get_workspaces_dir()
-    )
-
-    # Print messages.
-    logger.info('JupyterLab beta preview extension loaded from %s' % HERE)
-    logger.info('JupyterLab application directory is %s' % app_dir)
-
-    config.app_name = 'JupyterLab Beta'
-    config.app_namespace = 'jupyterlab'
-    config.page_url = '/lab'
-    config.cache_files = True
 
     # Check for core mode.
     core_mode = False
     if getattr(nbapp, 'core_mode', False) or app_dir.startswith(HERE):
+        app_dir = HERE
         core_mode = True
         logger.info('Running JupyterLab in core mode')
 
     # Check for dev mode.
     dev_mode = False
     if getattr(nbapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+        app_dir = DEV_DIR
         dev_mode = True
         logger.info('Running JupyterLab in dev mode')
+
+    # Set the value on nbapp so it will get picked up in load_config
+    nbapp.app_dir = app_dir
+
+    config = load_config(nbapp)
+    config.app_name = 'JupyterLab'
+    config.app_namespace = 'jupyterlab'
+    config.page_url = '/lab'
+    config.cache_files = True
 
     # Check for watch.
     watch_mode = getattr(nbapp, 'watch', False)
@@ -92,7 +134,7 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
-    # Export the version info tuple to a JSON array. This get's printed
+    # Export the version info tuple to a JSON array. This gets printed
     # inside double quote marks, so we render it to a JSON string of the
     # JSON data (so that we can call JSON.parse on the frontend on it).
     # We also have to wrap it in `Markup` so that it isn't escaped
@@ -107,32 +149,17 @@ def load_jupyter_server_extension(nbapp):
         nbapp.file_to_run = ''
 
     if core_mode:
-        app_dir = HERE
         logger.info(CORE_NOTE.strip())
         ensure_core(logger)
 
     elif dev_mode:
-        app_dir = DEV_DIR
         ensure_dev(logger)
         if not watch_mode:
             logger.info(DEV_NOTE)
 
-    config.app_settings_dir = pjoin(app_dir, 'settings')
-    config.schemas_dir = pjoin(app_dir, 'schemas')
-    config.themes_dir = pjoin(app_dir, 'themes')
-    config.workspaces_dir = workspaces_dir
-    info = get_app_info(app_dir)
-    config.app_version = info['version']
-    public_url = info['publicUrl']
-    if public_url:
-        config.public_url = public_url
-    else:
-        config.static_dir = pjoin(app_dir, 'static')
-
-    config.user_settings_dir = user_settings_dir
-
-    # The templates end up in the built static directory.
-    config.templates_dir = pjoin(app_dir, 'static')
+    # Print messages.
+    logger.info('JupyterLab extension loaded from %s' % HERE)
+    logger.info('JupyterLab application directory is %s' % app_dir)
 
     if watch_mode:
         logger.info('Starting JupyterLab watch mode...')

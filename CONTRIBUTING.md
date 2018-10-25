@@ -4,32 +4,51 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using Jupyter Notebook, and introduce yourself on the mailing list and share
-what area of the project you are interested in working on.
+using JupyterLab, and introduce yourself on the mailing list and share
+what area of the project you are interested in working on. Please see also the
+Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [help wanted](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
+## Tag Issues with Labels
+
+Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
+
 ## General Guidelines
 
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
 
-All source code is written in [TypeScript](http://www.typescriptlang.org/Handbook). See the [Style Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+All source code is written in
+[TypeScript](http://www.typescriptlang.org/Handbook). See the [Style
+Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
+
+All source code is formatted using [prettier](https://prettier.io).
+When code is modified and committed, all staged files will be automatically
+formatted using pre-commit git hooks (with help from the
+[lint-staged](https://github.com/okonet/lint-staged) and
+[husky](https://github.com/typicode/husky) libraries). The benefit of using a
+code formatter like prettier is that it removes the topic of code style from the conversation
+when reviewing pull requests, thereby speeding up the review process.
+
+You may also use the prettier npm script (e.g. `npm run prettier` or `yarn prettier` or `jlpm prettier`) to format the entire code base. We recommend
+installing a prettier
+extension for your code editor and configuring it to format your code with
+a keyboard shortcut or automatically on save.
 
 ## Setting Up a Development Environment
 
 ### Installing Node.js and jlpm
 
-Building JupyterLab from its GitHub source code requires Node.js version
-5+.
+Building JupyterLab from its GitHub source code requires Node.js.
 
 If you use `conda`, you can get it with:
 
 ```bash
-conda install -c conda-forge nodejs
+conda install -c conda-forge 'nodejs'
 ```
 
 If you use [Homebrew](http://brew.sh/) on Mac OS X:
@@ -79,24 +98,22 @@ jupyter lab build  # Build the app dir assets (optional)
 
 Notes:
 
-* A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
+- A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
 
-* There are versions of Node that are too modern. You should use a version of Node < 10.
-
-* The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
+- The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
   already, you can use the `yarn` command when developing, and it will use the
   local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
   a built application directory.
 
-* At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`. This will clean the repository, and re-install and
+- At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
   rebuild.
 
-* If `pip` gives a `VersionConflict` error, it usually means that the installed
-  version of `jupyterlab_launcher` is out of date. Run `pip install --upgrade jupyterlab_launcher` to get the latest version.
+- If `pip` gives a `VersionConflict` error, it usually means that the installed
+  version of `jupyterlab_server` is out of date. Run `pip install --upgrade jupyterlab_server` to get the latest version.
 
-* To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
+- To install JupyterLab in isolation for a single conda/virtual environment, you can add the `--sys-prefix` flag to the extension activation above; this will tie the installation to the `sys.prefix` location of your environment, without writing anything in your user-wide settings area (which are visible to all your envs):
 
-* You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
+- You can run `jlpm run build:dev:prod` to build more accurate sourcemaps that show the original
   Typescript code when debugging. However, it takes a bit longer to build the sources, so is used only to build for production
   by default.
 
@@ -152,8 +169,14 @@ of your choice after it says `No captured browser`. You can put a `debugger`
 statement on a line and open the browser debugger to debug specific tests.
 `jlpm watch` also accepts the `--pattern` argument.
 
-Note that there are some helper functions in `tests/utils.ts` and
-`tests/notebook-utils.ts` that are used by many of the tests.
+Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
+
+We use `karma` to run our tests in a browser, `mocha` as the test framework, and `chai` for test assertions. We use [async/await](https://mochajs.org/#using-async--await) for asynchronous tests. We have
+a helper function in `@jupyterlab/testutils` called `testEmission` to help with
+writing tests that use `Phosphor` signals, as well as a `framePromise` function
+to get a `Promise` for a `requestAnimationFrame`. We sometimes have to set
+a sentinel value inside a `Promise` and then check that the sentinel was set if
+we need a promise to run without blocking.
 
 To create a new test for a package in `packages/`, use the following
 command, where `<package-directory-name>` is the name of the folder in
@@ -202,8 +225,8 @@ while debugging test options. See [above](#build-and-run-the-tests) for more inf
 
 The JupyterLab application is made up of two major parts:
 
-* an npm package
-* a Jupyter server extension (Python package)
+- an npm package
+- a Jupyter server extension (Python package)
 
 Each part is named `jupyterlab`. The [developer tutorial documentation](https://jupyterlab.readthedocs.io/en/latest/index.html)
 provides additional architecture information.
@@ -285,16 +308,16 @@ jupyter lab --dev-mode --watch
 
 There is a range of build utilities for maintaining the repository.
 To get a suggested version for a library use `jlpm run get:dependency foo`.
-To update the version of a library across the repo use `jlpm run update:dependency foo@^x.x`.
+To update the version of a library across the repo use `jlpm run update:dependency foo ^latest`.
 To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 
 The key utility is `jlpm run integrity`, which ensures the integrity of
 the packages in the repo. It will:
 
-* Ensure the core package version dependencies match everywhere.
-* Ensure imported packages match dependencies.
-* Ensure a consistent version of all packages.
-* Manage the meta package.
+- Ensure the core package version dependencies match everywhere.
+- Ensure imported packages match dependencies.
+- Ensure a consistent version of all packages.
+- Manage the meta package.
 
 The `packages/metapackage` package is used to build all of the TypeScript
 in the repository at once, instead of 50+ individual builds.
@@ -306,17 +329,46 @@ a package by importing from it in the TypeScript file, and then running:
 We also have scripts for creating and removing packages in `packages/`,
 `jlpm run create:package` and `jlpm run remove:package`.
 
+## Testing Changes to External Packages
+
+### Linking/Unlinking Packages to JupyterLab
+
+If you want to make changes to one of JupyterLab's external packages (for example, [Phosphor](https://github.com/phosphorjs/phosphor)) and test them out against your copy of JupyterLab, you can easily do so using the `link` command:
+
+1.  Make your changes and then build the external package
+2.  Register a link to the modified external package
+    - navigate to the external package dir and run `jlpm link`
+3.  Link JupyterLab to modded package
+    - navigate to top level of your JupyterLab repo, then run `jlpm link "<package-of-interest>"`
+
+You can then (re)build JupyterLab (eg `jlpm run build`) and your changes should be picked up by the build.
+
+To restore JupyterLab to its original state, you use the `unlink` command:
+
+1.  Unlink JupyterLab and modded package
+    - navigate to top level of your JupyterLab repo, then run `jlpm unlink "<package-of-interest>"`
+2.  Reinstall original version of the external package in JupyterLab
+    - run `jlpm install --check-files`
+
+You can then (re)build JupyterLab and everything should be back to default.
+
+### Possible Linking Pitfalls
+
+If you're working on an external project with more than one package, you'll probably have to link in your copies of every package in the project, including those you made no changes to. Failing to do so may cause issues relating to duplication of shared state.
+
+Specifically, when working with Phosphor, you'll probably have to link your copy of the `"@phosphor/messaging"` package (in addition to whatever packages you actually made changes to). This is due to potential duplication of objects contained in the `MessageLoop` namespace provided by the `messaging` package.
+
 ## Notes
 
-* By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
+- By default, the application will load from the JupyterLab staging directory (default is `<sys-prefix>/share/jupyter/lab/build`. If you wish to run
   the core application in `<git root>/jupyterlab/build`,
   run `jupyter lab --core-mode`. This is the core application that will
   be shipped.
 
-* If working with extensions, see the extension documentation on
+- If working with extensions, see the extension documentation on
   https://jupyterlab.readthedocs.io/en/latest/index.html.
 
-* The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
+- The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
   omit the type declarations when using a language other than TypeScript.
 
-* For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).
+- For more information, read the [documentation](http://jupyterlab.readthedocs.io/en/latest/).

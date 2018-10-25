@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{page_config['appName']}}</title>
+</head>
+<body>
+  <script id='jupyter-config-data' type="application/json">{
+  {% for key, value in page_config.items() -%}
+  "{{ key }}": "{{ value }}",
+  {% endfor -%}
+  "baseUrl": "{{base_url}}",
+  "wsUrl": "{{ws_url}}"
+ }</script>
+  <script src="{{page_config['publicUrl']}}bundle.js" main="index"></script>
+
+  <script type="text/javascript">
+    /* Remove token from URL. */
+    (function () {
+      var parsedUrl = new URL(window.location.href);
+      if (parsedUrl.searchParams.get('token')) {
+        parsedUrl.searchParams.delete('token');
+        window.history.replaceState({ }, '', parsedUrl.href);
+      }
+    })();
+  </script>
+</body>
+</html>

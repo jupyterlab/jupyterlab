@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import expect = require('expect.js');
+import { expect } from 'chai';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
 import { ObservableJSON } from '@jupyterlab/observables';
 
-import { JSONEditor } from '@jupyterlab/codeeditor';
+import { JSONEditor } from '@jupyterlab/codeeditor/src';
+
+import { framePromise } from '@jupyterlab/testutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -46,7 +48,7 @@ class LogEditor extends JSONEditor {
   }
 }
 
-describe('apputils', () => {
+describe('codeeditor', () => {
   describe('JSONEditor', () => {
     let editor: LogEditor;
     let editorServices = new CodeMirrorEditorFactory();
@@ -63,52 +65,56 @@ describe('apputils', () => {
     describe('#constructor', () => {
       it('should create a new metadata editor', () => {
         let newEditor = new JSONEditor({ editorFactory });
-        expect(newEditor).to.be.a(JSONEditor);
+        expect(newEditor).to.be.an.instanceof(JSONEditor);
       });
     });
 
     describe('#collapsible', () => {
       it('should default to false', () => {
-        expect(editor.collapsible).to.be(false);
+        expect(editor.collapsible).to.be.false;
       });
 
       it('should be settable in the constructor', () => {
         let newEditor = new JSONEditor({ editorFactory, collapsible: true });
-        expect(newEditor.collapsible).to.be(true);
+        expect(newEditor.collapsible).to.be.true;
       });
     });
 
     describe('#editorTitle', () => {
       it('should default to empty string', () => {
-        expect(editor.editorTitle).to.be('');
+        expect(editor.editorTitle).to.equal('');
       });
 
       it('should be settable in the constructor', () => {
         let newEditor = new JSONEditor({ editorFactory, title: 'foo' });
-        expect(newEditor.editorTitle).to.be('foo');
+        expect(newEditor.editorTitle).to.equal('foo');
       });
 
       it('should be settable', () => {
         editor.editorTitle = 'foo';
-        expect(editor.editorTitle).to.be('foo');
+        expect(editor.editorTitle).to.equal('foo');
       });
     });
 
     describe('#headerNode', () => {
       it('should be the header node used by the editor', () => {
-        expect(editor.headerNode.classList).to.contain('jp-JSONEditor-header');
+        expect(Array.from(editor.headerNode.classList)).to.contain(
+          'jp-JSONEditor-header'
+        );
       });
     });
 
     describe('#titleNode', () => {
       it('should be the title node used by the editor', () => {
-        expect(editor.titleNode.classList).to.contain('jp-JSONEditor-title');
+        expect(Array.from(editor.titleNode.classList)).to.contain(
+          'jp-JSONEditor-title'
+        );
       });
     });
 
     describe('#collapserNode', () => {
       it('should be the collapser node used by the editor', () => {
-        expect(editor.collapserNode.classList).to.contain(
+        expect(Array.from(editor.collapserNode.classList)).to.contain(
           'jp-JSONEditor-collapser'
         );
       });
@@ -116,7 +122,7 @@ describe('apputils', () => {
 
     describe('#editorHostNode', () => {
       it('should be the editor host node used by the editor', () => {
-        expect(editor.editorHostNode.classList).to.contain(
+        expect(Array.from(editor.editorHostNode.classList)).to.contain(
           'jp-JSONEditor-host'
         );
       });
@@ -124,7 +130,7 @@ describe('apputils', () => {
 
     describe('#revertButtonNode', () => {
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.classList).to.contain(
+        expect(Array.from(editor.revertButtonNode.classList)).to.contain(
           'jp-JSONEditor-revertButton'
         );
       });
@@ -132,7 +138,7 @@ describe('apputils', () => {
 
     describe('#commitButtonNode', () => {
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.classList).to.contain(
+        expect(Array.from(editor.commitButtonNode.classList)).to.contain(
           'jp-JSONEditor-commitButton'
         );
       });
@@ -140,69 +146,69 @@ describe('apputils', () => {
 
     describe('#source', () => {
       it('should be the source of the metadata', () => {
-        expect(editor.source).to.be(null);
+        expect(editor.source).to.equal(null);
       });
 
       it('should be settable', () => {
         let source = new ObservableJSON();
         editor.source = source;
-        expect(editor.source).to.be(source);
+        expect(editor.source).to.equal(source);
       });
 
       it('should update the text area value', () => {
         let model = editor.model;
-        expect(model.value.text).to.be('No data!');
+        expect(model.value.text).to.equal('No data!');
         editor.source = new ObservableJSON();
-        expect(model.value.text).to.be('{}');
+        expect(model.value.text).to.equal('{}');
       });
     });
 
     describe('#isDirty', () => {
       it('should test whether the editor value is dirty', () => {
-        expect(editor.isDirty).to.be(false);
+        expect(editor.isDirty).to.be.false;
         Widget.attach(editor, document.body);
         editor.model.value.text = 'a';
-        expect(editor.isDirty).to.be(true);
+        expect(editor.isDirty).to.be.true;
       });
 
       it('should be dirty if the value changes while focused', () => {
         editor.source = new ObservableJSON();
         Widget.attach(editor, document.body);
         editor.editor.focus();
-        expect(editor.isDirty).to.be(false);
+        expect(editor.isDirty).to.be.false;
         editor.source.set('foo', 1);
-        expect(editor.isDirty).to.be(true);
+        expect(editor.isDirty).to.be.true;
       });
 
       it('should not be set if not focused', () => {
         editor.source = new ObservableJSON();
         Widget.attach(editor, document.body);
-        expect(editor.isDirty).to.be(false);
+        expect(editor.isDirty).to.be.false;
         editor.source.set('foo', 1);
-        expect(editor.isDirty).to.be(false);
+        expect(editor.isDirty).to.be.false;
       });
     });
 
-    context('model.value.changed', () => {
+    describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
         editor.model.value.text = 'foo';
-        expect(editor.hasClass('jp-mod-error')).to.be(true);
+        expect(editor.hasClass('jp-mod-error')).to.be.true;
       });
 
       it('should show the commit button if the value has changed', () => {
         editor.model.value.text = '{"foo": 2}';
         editor.model.value.text = '{"foo": 1}';
-        expect(editor.commitButtonNode.hidden).to.be(false);
+        expect(editor.commitButtonNode.hidden).to.be.false;
       });
 
       it('should not show the commit button if the value is invalid', () => {
         editor.model.value.text = 'foo';
-        expect(editor.commitButtonNode.hidden).to.be(true);
+        expect(editor.commitButtonNode.hidden).to.be.true;
       });
 
       it('should show the revert button if the value has changed', () => {
         editor.model.value.text = 'foo';
-        expect(editor.revertButtonNode.hidden).to.be(false);
+        expect(editor.revertButtonNode.hidden).to.be.false;
       });
     });
 
@@ -211,7 +217,7 @@ describe('apputils', () => {
         Widget.attach(editor, document.body);
       });
 
-      context('blur', () => {
+      describe('blur', () => {
         it('should handle blur events on the host node', () => {
           editor.editor.focus();
           simulate(editor.editorHostNode, 'blur');
@@ -223,9 +229,9 @@ describe('apputils', () => {
           editor.editor.focus();
           editor.source.set('foo', 1);
           let model = editor.model;
-          expect(model.value.text).to.be('{}');
+          expect(model.value.text).to.equal('{}');
           simulate(editor.editorHostNode, 'blur');
-          expect(model.value.text).to.be('{\n    "foo": 1\n}');
+          expect(model.value.text).to.equal('{\n    "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
@@ -233,15 +239,15 @@ describe('apputils', () => {
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           let model = editor.model;
-          expect(model.value.text).to.be('foo');
+          expect(model.value.text).to.equal('foo');
           simulate(editor.editorHostNode, 'blur');
-          expect(model.value.text).to.be('foo');
-          expect(editor.commitButtonNode.hidden).to.be(true);
-          expect(editor.revertButtonNode.hidden).to.be(false);
+          expect(model.value.text).to.equal('foo');
+          expect(editor.commitButtonNode.hidden).to.be.true;
+          expect(editor.revertButtonNode.hidden).to.be.false;
         });
       });
 
-      context('click', () => {
+      describe('click', () => {
         it('should handle click events on the revert button', () => {
           simulate(editor.revertButtonNode, 'click');
           expect(editor.events).to.contain('click');
@@ -251,7 +257,7 @@ describe('apputils', () => {
           editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           simulate(editor.revertButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{}');
+          expect(editor.model.value.text).to.equal('{}');
         });
 
         it('should handle programmatic changes', () => {
@@ -259,7 +265,7 @@ describe('apputils', () => {
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
+          expect(editor.model.value.text).to.equal('{\n    "foo": 1\n}');
         });
 
         it('should handle click events on the commit button', () => {
@@ -272,7 +278,7 @@ describe('apputils', () => {
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('foo');
+          expect(editor.model.value.text).to.equal('foo');
         });
 
         it('should override a key that was set programmatically', () => {
@@ -280,7 +286,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo": 2}';
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n    "foo": 2\n}');
+          expect(editor.model.value.text).to.equal('{\n    "foo": 2\n}');
         });
 
         it('should allow a programmatic key to update', () => {
@@ -291,7 +297,7 @@ describe('apputils', () => {
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n    "foo": 2,\n    "bar": 2\n}';
-          expect(editor.model.value.text).to.be(expected);
+          expect(editor.model.value.text).to.equal(expected);
         });
 
         it('should allow a key to be added by the user', () => {
@@ -302,7 +308,7 @@ describe('apputils', () => {
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           let value = '{\n    "foo": 2,\n    "bar": 2,\n    "baz": 3\n}';
-          expect(editor.model.value.text).to.be(value);
+          expect(editor.model.value.text).to.equal(value);
         });
 
         it('should allow a key to be removed by the user', () => {
@@ -311,7 +317,7 @@ describe('apputils', () => {
           editor.source.set('bar', 1);
           editor.model.value.text = '{"foo": 1}';
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
+          expect(editor.model.value.text).to.equal('{\n    "foo": 1\n}');
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
@@ -321,7 +327,7 @@ describe('apputils', () => {
           editor.model.value.text = '{"foo": 1, "bar": 3}';
           editor.source.delete('foo');
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).to.be('{\n    "bar": 3\n}');
+          expect(editor.model.value.text).to.equal('{\n    "bar": 3\n}');
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
@@ -332,7 +338,7 @@ describe('apputils', () => {
           editor.source.set('foo', null);
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n    "foo": 2,\n    "bar": 3\n}';
-          expect(editor.model.value.text).to.be(expected);
+          expect(editor.model.value.text).to.equal(expected);
         });
 
         it('should collapse the editor', () => {
@@ -340,14 +346,14 @@ describe('apputils', () => {
           editor = new LogEditor({ editorFactory, collapsible: true });
           Widget.attach(editor, document.body);
           simulate(editor.titleNode, 'click');
-          expect(editor.editorHostNode.classList).to.contain(
+          expect(Array.from(editor.editorHostNode.classList)).to.contain(
             'jp-mod-collapsed'
           );
         });
 
         it('should have no effect if the editor is not collapsible', () => {
           simulate(editor.titleNode, 'click');
-          expect(editor.editorHostNode.classList).to.not.contain(
+          expect(Array.from(editor.editorHostNode.classList)).to.not.contain(
             'jp-mod-collapsed'
           );
         });
@@ -367,14 +373,12 @@ describe('apputils', () => {
     });
 
     describe('#onAfterShow()', () => {
-      it('should update the editor', done => {
+      it('should update the editor', async () => {
         editor.hide();
         Widget.attach(editor, document.body);
         editor.show();
-        requestAnimationFrame(() => {
-          expect(editor.methods).to.contain('onUpdateRequest');
-          done();
-        });
+        await framePromise();
+        expect(editor.methods).to.contain('onUpdateRequest');
       });
     });
 
@@ -391,11 +395,11 @@ describe('apputils', () => {
       });
     });
 
-    context('#source.changed', () => {
+    describe('#source.changed', () => {
       it('should update the value', () => {
         editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
-        expect(editor.model.value.text).to.be('{\n    "foo": 1\n}');
+        expect(editor.model.value.text).to.equal('{\n    "foo": 1\n}');
       });
 
       it('should bail if the input is dirty', () => {
@@ -403,7 +407,7 @@ describe('apputils', () => {
         editor.source = new ObservableJSON();
         editor.model.value.text = 'ha';
         editor.source.set('foo', 2);
-        expect(editor.model.value.text).to.be('ha');
+        expect(editor.model.value.text).to.equal('ha');
       });
 
       it('should bail if the input is focused', () => {
@@ -412,7 +416,7 @@ describe('apputils', () => {
         editor.source = new ObservableJSON();
         editor.editor.focus();
         editor.source.set('foo', 2);
-        expect(editor.model.value.text).to.be('{}');
+        expect(editor.model.value.text).to.equal('{}');
       });
     });
   });

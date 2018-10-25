@@ -10,5 +10,6 @@ module.exports = {
     publicPath: 'https://unpkg.com/@jupyterlab/services@' + version + '/dist/'
   },
   bail: true,
+  mode: 'production',
   devtool: 'source-map'
 };

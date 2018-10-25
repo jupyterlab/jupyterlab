@@ -71,12 +71,12 @@ export interface IClientSession extends IDisposable {
   readonly kernel: Kernel.IKernelConnection | null;
 
   /**
-   * The current path associated with the client sesssion.
+   * The current path associated with the client session.
    */
   readonly path: string;
 
   /**
-   * The current name associated with the client sesssion.
+   * The current name associated with the client session.
    */
   readonly name: string;
 
@@ -668,12 +668,30 @@ export class ClientSession implements IClientSession {
       this._propertyChanged.emit('type');
     }
 
-    session.terminated.connect(this._onTerminated, this);
-    session.propertyChanged.connect(this._onPropertyChanged, this);
-    session.kernelChanged.connect(this._onKernelChanged, this);
-    session.statusChanged.connect(this._onStatusChanged, this);
-    session.iopubMessage.connect(this._onIopubMessage, this);
-    session.unhandledMessage.connect(this._onUnhandledMessage, this);
+    session.terminated.connect(
+      this._onTerminated,
+      this
+    );
+    session.propertyChanged.connect(
+      this._onPropertyChanged,
+      this
+    );
+    session.kernelChanged.connect(
+      this._onKernelChanged,
+      this
+    );
+    session.statusChanged.connect(
+      this._onStatusChanged,
+      this
+    );
+    session.iopubMessage.connect(
+      this._onIopubMessage,
+      this
+    );
+    session.unhandledMessage.connect(
+      this._onUnhandledMessage,
+      this
+    );
     this._prevKernelName = session.kernel.name;
 
     // The session kernel was disposed above when the session was disposed, so
@@ -1055,7 +1073,6 @@ namespace Private {
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
-    let maxLength = 10;
 
     let { preference, sessions, specs } = options;
     let { name, id, language, canStart, shouldStart } = preference;
@@ -1075,7 +1092,6 @@ namespace Private {
     for (let name in specs.kernelspecs) {
       let spec = specs.kernelspecs[name];
       displayNames[name] = spec.display_name;
-      maxLength = Math.max(maxLength, displayNames[name].length);
       languages[name] = spec.language;
     }
 
@@ -1174,7 +1190,7 @@ namespace Private {
 
       each(matchingSessions, session => {
         let name = displayNames[session.kernel.name];
-        matching.appendChild(optionForSession(session, name, maxLength));
+        matching.appendChild(optionForSession(session, name));
       });
     }
 
@@ -1189,9 +1205,7 @@ namespace Private {
 
       each(otherSessions, session => {
         let name = displayNames[session.kernel.name] || session.kernel.name;
-        otherSessionsNode.appendChild(
-          optionForSession(session, name, maxLength)
-        );
+        otherSessionsNode.appendChild(optionForSession(session, name));
       });
     }
   }
@@ -1237,14 +1251,10 @@ namespace Private {
    */
   function optionForSession(
     session: Session.IModel,
-    displayName: string,
-    maxLength: number
+    displayName: string
   ): HTMLOptionElement {
     let option = document.createElement('option');
     let sessionName = session.name || PathExt.basename(session.path);
-    if (sessionName.length > maxLength) {
-      sessionName = sessionName.slice(0, maxLength - 3) + '...';
-    }
     option.text = sessionName;
     option.value = JSON.stringify({ id: session.kernel.id });
     option.title =

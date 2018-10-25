@@ -130,6 +130,9 @@ export function createRendermimePlugin(
       }
 
       options.forEach(option => {
+        const toolbarFactory = option.toolbarFactory
+          ? (w: MimeDocument) => option.toolbarFactory(w.content.renderer)
+          : undefined;
         let factory = new MimeDocumentFactory({
           renderTimeout: item.renderTimeout,
           dataType: item.dataType,
@@ -139,7 +142,8 @@ export function createRendermimePlugin(
           primaryFileType: registry.getFileType(option.primaryFileType),
           fileTypes: option.fileTypes,
           defaultFor: option.defaultFor,
-          defaultRendered: option.defaultRendered
+          defaultRendered: option.defaultRendered,
+          toolbarFactory
         });
         registry.addWidgetFactory(factory);
 

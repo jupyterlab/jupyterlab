@@ -8,6 +8,7 @@
   background: var(--jp-layout-color1);
   display: flex;
   flex-direction: column;
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-extensionmanager-content {
@@ -27,15 +28,49 @@
   flex: 0 0 auto;
 }
 
-.jp-extensionmanager-view header {
-  padding: 0 5px;
-}
-
 .jp-extensionmanager-listview {
   list-style-type: none;
   margin: 0;
   padding: 0;
   min-height: 0;
+}
+
+/*
+  Section headers
+*/
+
+.jp-extensionmanager-view header {
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  margin: 0px;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  line-height: 24px;
+  height: 24px;
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+  padding: 0px 4px;
+}
+
+.jp-extensionmanager-view header .jp-extensionmanager-headerText {
+  flex: 1 0 auto;
+  margin: 0px 2px;
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+  border: 1px solid transparent;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
+  border: 1px solid var(--jp-brand-color1);
 }
 
 /*
@@ -50,10 +85,8 @@
 */
 
 .jp-extensionmanager-search-bar {
-  padding: 8px;
-  background-color: var(--jp-border-color3);
-  border-bottom: 1px solid var(--jp-border-color1);
-  box-shadow: var(--jp-toolbar-box-shadow);
+  padding: 8px 8px 0px 8px;
+  background-color: var(--jp-layout-color1);
   z-index: 2;
   flex: 0 0 auto;
 }
@@ -73,7 +106,7 @@
   overflow: overlay;
   padding: 0px 8px;
   border: 1px solid var(--jp-border-color0);
-  background-color: var(--jp-input-background-color-active);
+  background-color: var(--jp-input-active-background);
   height: 30px;
 }
 
@@ -87,7 +120,7 @@
   height: 32px;
   width: 12px;
   padding: 0px 12px;
-  background-image: var(--jp-icon-search);
+  background-image: var(--jp-icon-search-white);
   background-size: 20px;
   background-repeat: no-repeat;
   background-position: center;
@@ -119,21 +152,6 @@
 .jp-extensionmanager-pagination {
   display: flex;
   justify-content: center;
-}
-
-.jp-extensionmanager-view header {
-  display: flex;
-  justify-content: space-between;
-}
-
-.jp-extensionmanager-view header button.jp-extensionmanager-refresh {
-  border: 1px solid transparent;
-  background-color: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color1);
-}
-
-.jp-extensionmanager-view header button.jp-extensionmanager-refresh:hover {
-  border: 1px solid var(--jp-brand-color1);
 }
 
 /*
@@ -178,6 +196,26 @@
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
+.jp-extensionmanager-entry-title {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-extensionmanager-entry-jupyter-org {
+  background-image: var(--jp-image-jupyter);
+  background-size: 1em;
+  background-repeat: no-repeat;
+  width: 1em;
+  display: none;
+  position: relative;
+  top: 1px;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
+  .jp-extensionmanager-entry-jupyter-org {
+  display: inline;
+}
+
 /* Precedence order update/error/warning matters! */
 .jp-extensionmanager-entry.jp-extensionmanager-entry-update {
   border-left: solid 8px var(--jp-brand-color2);
@@ -190,15 +228,30 @@
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
-  border-left: solid 8px var(--jp-warn-color2);
-  padding-left: 4px;
 }
 
 .jp-extensionmanager-entry-name {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
-  margin-bottom: 3px;
+  padding: 0 8px 0 0;
+  margin-bottom: 4px;
 }
+
+.jp-extensionmanager-entry-name a:link {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:visited {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 .jp-extensionmanager-entry-description {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color2);
@@ -230,6 +283,7 @@
   width: 100%;
   position: relative;
   overflow: hidden;
+  flex: 0 0 auto;
   background-color: var(--jp-layout-color1);
 }
 
@@ -347,4 +401,12 @@ input[type='checkbox'] {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   color: var(--jp-ui-font-color0);
+}
+
+.jp-extensionmanager-collapseIcon {
+  background-image: var(--jp-image-caretright);
+}
+
+.jp-extensionmanager-expandIcon {
+  background-image: var(--jp-image-caretdown);
 }

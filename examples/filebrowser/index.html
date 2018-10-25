@@ -9,5 +9,17 @@
         "token": "{{token}}"
     }</script>
     <script src="example/bundle.js"></script>
+
+    <script type="text/javascript">
+      /* Remove token from URL. */
+      (function () {
+        var parsedUrl = new URL(window.location.href);
+        if (parsedUrl.searchParams.get('token')) {
+          parsedUrl.searchParams.delete('token');
+          window.history.replaceState({ }, '', parsedUrl.href);
+        }
+      })();
+    </script>
+  
   </body>
 </html>

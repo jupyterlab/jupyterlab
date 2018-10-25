@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 # This file comes from https://github.com/podhmo/python-semver/blob/b42e9896e391e086b773fc621b23fa299d16b874/semver/__init__.py
-# 
+#
 # It is licensed under the following license:
-# 
+#
 # MIT License
 
 # Copyright (c) 2016 podhmo
@@ -269,7 +269,7 @@ src[HYPHENRANGELOOSE] = ('^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
 STAR = R()
 src[STAR] = '(<|>)?=?\\s*\\*'
 
-# version name recovery for convinient
+# version name recovery for convenient
 RECOVERYVERSIONNAME = R()
 src[RECOVERYVERSIONNAME] = ('v?({n})(?:\\.({n}))?{pre}?'.format(n=src[NUMERICIDENTIFIER], pre=src[PRERELEASELOOSE]))
 
@@ -483,7 +483,7 @@ class SemVer(object):
                 self.patch += 1
             self.prerelease = []
         elif release == "pre":
-            #  This probably shouldn't be used publically.
+            #  This probably shouldn't be used publicly.
             #  1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
             logger.debug("inc prerelease %s", self.prerelease)
             if len(self.prerelease) == 0:

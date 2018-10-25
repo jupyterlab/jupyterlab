@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -70,7 +72,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_SAVE_CLASS,
+      iconClassName: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
       onClick: () => {
         if (panel.context.model.readOnly) {
           return showDialog({
@@ -94,7 +96,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_INSERT_CLASS,
+      iconClassName: TOOLBAR_INSERT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -107,7 +109,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_CUT_CLASS,
+      iconClassName: TOOLBAR_CUT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -120,7 +122,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_COPY_CLASS,
+      iconClassName: TOOLBAR_COPY_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -133,7 +135,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_PASTE_CLASS,
+      iconClassName: TOOLBAR_PASTE_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -146,7 +148,7 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): ToolbarButton {
     return new ToolbarButton({
-      className: TOOLBAR_RUN_CLASS,
+      iconClassName: TOOLBAR_RUN_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
         NotebookActions.runAndAdvance(panel.content, panel.session);
       },
@@ -170,25 +172,37 @@ export namespace ToolbarItems {
   }
 
   /**
-   * Add the default items to the panel toolbar.
+   * Get the default toolbar items for panel
    */
-  export function populateDefaults(panel: NotebookPanel): void {
-    let toolbar = panel.toolbar;
-    toolbar.addItem('save', createSaveButton(panel));
-    toolbar.addItem('insert', createInsertButton(panel));
-    toolbar.addItem('cut', createCutButton(panel));
-    toolbar.addItem('copy', createCopyButton(panel));
-    toolbar.addItem('paste', createPasteButton(panel));
-    toolbar.addItem('run', createRunButton(panel));
-    toolbar.addItem('interrupt', Toolbar.createInterruptButton(panel.session));
-    toolbar.addItem('restart', Toolbar.createRestartButton(panel.session));
-    toolbar.addItem('cellType', createCellTypeItem(panel));
-    toolbar.addItem('spacer', Toolbar.createSpacerItem());
-    toolbar.addItem('kernelName', Toolbar.createKernelNameItem(panel.session));
-    toolbar.addItem(
-      'kernelStatus',
-      Toolbar.createKernelStatusItem(panel.session)
-    );
+  export function getDefaultItems(
+    panel: NotebookPanel
+  ): DocumentRegistry.IToolbarItem[] {
+    return [
+      { name: 'save', widget: createSaveButton(panel) },
+      { name: 'insert', widget: createInsertButton(panel) },
+      { name: 'cut', widget: createCutButton(panel) },
+      { name: 'copy', widget: createCopyButton(panel) },
+      { name: 'paste', widget: createPasteButton(panel) },
+      { name: 'run', widget: createRunButton(panel) },
+      {
+        name: 'interrupt',
+        widget: Toolbar.createInterruptButton(panel.session)
+      },
+      {
+        name: 'restart',
+        widget: Toolbar.createRestartButton(panel.session)
+      },
+      { name: 'cellType', widget: createCellTypeItem(panel) },
+      { name: 'spacer', widget: Toolbar.createSpacerItem() },
+      {
+        name: 'kernelName',
+        widget: Toolbar.createKernelNameItem(panel.session)
+      },
+      {
+        name: 'kernelStatus',
+        widget: Toolbar.createKernelStatusItem(panel.session)
+      }
+    ];
   }
 }
 
@@ -216,10 +230,16 @@ class CellTypeSwitcher extends Widget {
     }
 
     // Follow the type of the active cell.
-    widget.activeCellChanged.connect(this._updateValue, this);
+    widget.activeCellChanged.connect(
+      this._updateValue,
+      this
+    );
 
     // Follow a change in the selection.
-    widget.selectionChanged.connect(this._updateValue, this);
+    widget.selectionChanged.connect(
+      this._updateValue,
+      this
+    );
   }
 
   /**

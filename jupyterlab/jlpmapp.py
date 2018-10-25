@@ -6,7 +6,7 @@
 import sys
 
 import os
-from jupyterlab_launcher.process import which, subprocess
+from jupyterlab_server.process import which, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 YARN_PATH = os.path.join(HERE, 'staging', 'yarn.js')
@@ -33,6 +33,7 @@ def execvp(cmd, argv):
         sys.exit(p.returncode)
     else:
         os.execvp(cmd, argv)
+
 
 def main(argv=None):
     """Run node and return the result.

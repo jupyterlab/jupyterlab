@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "2.0.0-1",
+  "version": "2.2.1",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,10 +23,11 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@phosphor/algorithm": "^1.1.2",
@@ -38,12 +39,16 @@
     "minimist": "~1.2.0",
     "moment": "~2.21.0",
     "path-posix": "~1.0.0",
-    "url-parse": "~1.1.9"
+    "url-parse": "~1.4.3"
   },
   "devDependencies": {
     "@types/comment-json": "^1.1.0",
     "@types/minimist": "~1.2.0",
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -21,7 +21,7 @@ module.exports = function(config) {
     ],
     preprocessors: {
       'build/injector.js': ['webpack'],
-      'src/*.spec.ts': ['webpack', 'sourcemap']
+      'src/*.spec.{ts,tsx}': ['webpack', 'sourcemap']
     },
     mime: {
       'text/x-typescript': ['ts', 'tsx']

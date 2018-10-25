@@ -12,7 +12,7 @@ import {
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { DataGrid } from '@phosphor/datagrid';
+import { DataGrid, TextRenderer } from '@phosphor/datagrid';
 
 import { Message } from '@phosphor/messaging';
 
@@ -52,7 +52,12 @@ export class CSVViewer extends Widget {
 
     this.addClass(CSV_CLASS);
 
-    this._grid = new DataGrid();
+    this._grid = new DataGrid({
+      baseRowSize: 24,
+      baseColumnSize: 144,
+      baseColumnHeaderSize: 36,
+      baseRowHeaderSize: 64
+    });
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
     layout.addWidget(this._grid);
@@ -65,7 +70,10 @@ export class CSVViewer extends Widget {
         signal: context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(this._updateGrid, this);
+      this._monitor.activityStopped.connect(
+        this._updateGrid,
+        this
+      );
     });
   }
 
@@ -95,6 +103,26 @@ export class CSVViewer extends Widget {
     }
     this._delimiter = value;
     this._updateGrid();
+  }
+
+  /**
+   * The style used by the data grid.
+   */
+  get style(): DataGrid.IStyle {
+    return this._grid.style;
+  }
+  set style(value: DataGrid.IStyle) {
+    this._grid.style = value;
+  }
+
+  /**
+   * The text renderer used by the data grid.
+   */
+  get renderer(): TextRenderer {
+    return this._grid.defaultRenderer as TextRenderer;
+  }
+  set renderer(value: TextRenderer) {
+    this._grid.defaultRenderer = value;
   }
 
   /**

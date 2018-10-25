@@ -80,7 +80,10 @@ export class ConsoleHistory implements IConsoleHistory {
   constructor(options: ConsoleHistory.IOptions) {
     this.session = options.session;
     this._handleKernel();
-    this.session.kernelChanged.connect(this._handleKernel, this);
+    this.session.kernelChanged.connect(
+      this._handleKernel,
+      this
+    );
   }
 
   /**
@@ -108,8 +111,14 @@ export class ConsoleHistory implements IConsoleHistory {
     this._editor = value;
 
     if (value) {
-      value.edgeRequested.connect(this.onEdgeRequest, this);
-      value.model.value.changed.connect(this.onTextChange, this);
+      value.edgeRequested.connect(
+        this.onEdgeRequest,
+        this
+      );
+      value.model.value.changed.connect(
+        this.onTextChange,
+        this
+      );
     }
   }
 

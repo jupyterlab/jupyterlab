@@ -3,12 +3,13 @@ import glob = require('glob');
 import fs = require('fs-extra');
 import childProcess = require('child_process');
 import sortPackageJson = require('sort-package-json');
+import coreutils = require('@phosphor/coreutils');
 
 /**
  * Get all of the lerna package paths.
  */
-export function getLernaPaths(): string[] {
-  let basePath = path.resolve('.');
+export function getLernaPaths(basePath = '.'): string[] {
+  basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
   for (let config of baseConfig.workspaces) {
@@ -50,10 +51,42 @@ export function writePackageData(pkgJsonPath: string, data: any): boolean {
 }
 
 /**
- * Read a package.json file.
+ * Read a json file.
  */
 export function readJSONFile(filePath: string): any {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+/**
+ * Write a json file.
+ */
+export function writeJSONFile(filePath: string, data: any): boolean {
+  function sortObjByKey(value: any): any {
+    // https://stackoverflow.com/a/35810961
+    return typeof value === 'object'
+      ? Array.isArray(value)
+        ? value.map(sortObjByKey)
+        : Object.keys(value)
+            .sort()
+            .reduce((o: any, key) => {
+              const v = value[key];
+              o[key] = sortObjByKey(v);
+              return o;
+            }, {})
+      : value;
+  }
+  let text = JSON.stringify(data, sortObjByKey(data), 2) + '\n';
+  let orig = {};
+  try {
+    orig = readJSONFile(filePath);
+  } catch (e) {
+    // no-op
+  }
+  if (!coreutils.JSONExt.deepEqual(data, orig)) {
+    fs.writeFileSync(filePath, text, 'utf8');
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -63,10 +96,20 @@ export function readJSONFile(filePath: string): any {
  */
 export function run(
   cmd: string,
-  options: childProcess.ExecSyncOptions = {}
-): void {
+  options: childProcess.ExecSyncOptions = {},
+  quiet?: boolean
+): string {
   options = options || {};
-  options['stdio'] = [0, 1, 2];
-  console.log('>', cmd);
-  childProcess.execSync(cmd, options);
+  options['stdio'] = options.stdio || 'inherit';
+  if (!quiet) {
+    console.log('>', cmd);
+  }
+  const value = childProcess.execSync(cmd, options);
+  if (value === null) {
+    return '';
+  }
+  return value
+    .toString()
+    .replace(/(\r\n|\n)$/, '')
+    .trim();
 }

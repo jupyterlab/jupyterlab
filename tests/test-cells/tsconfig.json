@@ -1,7 +1,30 @@
 {
-  "extends": "../tsconfigtestbase",
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./build"
+    "outDir": "build",
+    "types": ["jest"],
+    "composite": false,
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/apputils"
+    },
+    {
+      "path": "../../packages/cells"
+    },
+    {
+      "path": "../../packages/codeeditor"
+    },
+    {
+      "path": "../../packages/coreutils"
+    },
+    {
+      "path": "../../packages/outputarea"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
 }

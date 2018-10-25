@@ -7,6 +7,8 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Builder, BuildManager } from './builder';
 
+import { NbConvert, NbConvertManager } from './nbconvert';
+
 import { Contents, ContentsManager } from './contents';
 
 import { Kernel } from './kernel';
@@ -19,7 +21,7 @@ import { TerminalSession, TerminalManager } from './terminal';
 
 import { ServerConnection } from './serverconnection';
 
-import { WorkspaceManager } from './workspace';
+import { Workspace, WorkspaceManager } from './workspace';
 
 /**
  * A Jupyter services manager.
@@ -38,6 +40,7 @@ export class ServiceManager implements ServiceManager.IManager {
     this.terminals = new TerminalManager(options);
     this.builder = new BuildManager(options);
     this.workspaces = new WorkspaceManager(options);
+    this.nbconvert = new NbConvertManager(options);
 
     this.sessions.specsChanged.connect((sender, specs) => {
       this._specsChanged.emit(specs);
@@ -125,6 +128,11 @@ export class ServiceManager implements ServiceManager.IManager {
   readonly workspaces: WorkspaceManager;
 
   /**
+   * Get the nbconvert manager instance.
+   */
+  readonly nbconvert: NbConvertManager;
+
+  /**
    * Test whether the manager is ready.
    */
   get isReady(): boolean {
@@ -153,14 +161,24 @@ export namespace ServiceManager {
    */
   export interface IManager extends IDisposable {
     /**
-     * A signal emitted when the kernel specs change.
+     * The builder for the manager.
      */
-    specsChanged: ISignal<IManager, Kernel.ISpecModels>;
+    readonly builder: Builder.IManager;
 
     /**
-     * The kernel spec models.
+     * The contents manager for the manager.
      */
-    readonly specs: Kernel.ISpecModels | null;
+    readonly contents: Contents.IManager;
+
+    /**
+     * Test whether the manager is ready.
+     */
+    readonly isReady: boolean;
+
+    /**
+     * A promise that fulfills when the manager is initially ready.
+     */
+    readonly ready: Promise<void>;
 
     /**
      * The server settings of the manager.
@@ -178,14 +196,14 @@ export namespace ServiceManager {
     readonly settings: Setting.IManager;
 
     /**
-     * The builder for the manager.
+     * The kernel spec models.
      */
-    readonly builder: Builder.IManager;
+    readonly specs: Kernel.ISpecModels | null;
 
     /**
-     * The contents manager for the manager.
+     * A signal emitted when the kernel specs change.
      */
-    readonly contents: Contents.IManager;
+    readonly specsChanged: ISignal<IManager, Kernel.ISpecModels>;
 
     /**
      * The terminals manager for the manager.
@@ -193,14 +211,14 @@ export namespace ServiceManager {
     readonly terminals: TerminalSession.IManager;
 
     /**
-     * Test whether the manager is ready.
+     * The workspace manager for the manager.
      */
-    readonly isReady: boolean;
+    readonly workspaces: Workspace.IManager;
 
     /**
-     * A promise that fulfills when the manager is initially ready.
+     * The nbconvert manager for the manager.
      */
-    readonly ready: Promise<void>;
+    readonly nbconvert: NbConvert.IManager;
   }
 
   /**

@@ -154,11 +154,6 @@ const RUNNING_CLASS = 'jp-mod-running';
 const DESCENDING_CLASS = 'jp-mod-descending';
 
 /**
- * The minimum duration for a rename select in ms.
- */
-const RENAME_DURATION = 1000;
-
-/**
  * The maximum duration between two key presses when selecting files by prefix.
  */
 const PREFIX_APPEND_DURATION = 1000;
@@ -193,9 +188,18 @@ export class DirListing extends Widget {
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
-    this._model.fileChanged.connect(this._onFileChanged, this);
-    this._model.refreshed.connect(this._onModelRefreshed, this);
-    this._model.pathChanged.connect(this._onPathChanged, this);
+    this._model.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
+    this._model.refreshed.connect(
+      this._onModelRefreshed,
+      this
+    );
+    this._model.pathChanged.connect(
+      this._onPathChanged,
+      this
+    );
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
@@ -203,7 +207,10 @@ export class DirListing extends Widget {
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
-    this._manager.activateRequested.connect(this._onActivateRequested, this);
+    this._manager.activateRequested.connect(
+      this._onActivateRequested,
+      this
+    );
   }
 
   /**
@@ -747,6 +754,12 @@ export class DirListing extends Widget {
           node.classList.add(CUT_CLASS);
         }
       }
+
+      // add metadata to the node
+      node.setAttribute(
+        'data-isdir',
+        item.type === 'directory' ? 'true' : 'false'
+      );
     });
 
     // Handle the selectors on the widget node.
@@ -978,10 +991,6 @@ export class DirListing extends Widget {
     event.stopPropagation();
 
     clearTimeout(this._selectTimer);
-    this._noSelectTimer = window.setTimeout(() => {
-      this._noSelectTimer = -1;
-    }, RENAME_DURATION);
-
     this._editNode.blur();
 
     // Find a valid double click target.
@@ -1216,8 +1225,6 @@ export class DirListing extends Widget {
     // Fetch common variables.
     let items = this._sortedItems;
     let index = Private.hitTestNodes(this._items, event.clientX, event.clientY);
-    let target = event.target as HTMLElement;
-    let inText = target.classList.contains(ITEM_TEXT_CLASS);
 
     clearTimeout(this._selectTimer);
 
@@ -1249,14 +1256,6 @@ export class DirListing extends Widget {
 
       // Default to selecting the only the item.
     } else {
-      // Handle a rename.
-      if (inText && selected.length === 1 && selected[0] === name) {
-        this._selectTimer = window.setTimeout(() => {
-          if (this._noSelectTimer === -1) {
-            this._doRename();
-          }
-        }, RENAME_DURATION);
-      }
       // Select only the given item.
       this._selection = Object.create(null);
       this._selection[name] = true;
@@ -1495,7 +1494,6 @@ export class DirListing extends Widget {
     index: number;
   } | null = null;
   private _selectTimer = -1;
-  private _noSelectTimer = -1;
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
