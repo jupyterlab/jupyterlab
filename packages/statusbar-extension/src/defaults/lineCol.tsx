@@ -51,7 +51,7 @@ import { ISignal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IStatusContext } from '../contexts';
+import { IStatusContext } from '../context';
 
 import {
   lineFormWrapper,
