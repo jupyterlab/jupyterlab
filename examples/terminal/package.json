@@ -8,6 +8,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@jupyterlab/application": "^0.19.1",
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/terminal": "^0.19.1",
     "@jupyterlab/theme-light-extension": "^0.19.1",

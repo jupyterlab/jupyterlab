@@ -8,6 +8,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@jupyterlab/application": "^0.19.1",
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/cells": "^0.19.1",
     "@jupyterlab/codemirror": "^0.19.1",
