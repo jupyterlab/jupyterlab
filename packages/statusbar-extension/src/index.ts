@@ -27,7 +27,15 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   provides: IStatusBar,
   autoStart: true,
   activate: (app: JupyterLab) => {
-    return new StatusBar({ host: app.shell });
+    const statusBar = new StatusBar();
+    statusBar.id = 'jp-main-statusbar';
+    app.shell.addToBottomArea(statusBar);
+    // Trigger a refresh of active status items if
+    // the application layout is modified.
+    app.shell.layoutModified.connect(() => {
+      statusBar.update();
+    });
+    return statusBar;
   }
 };
 
