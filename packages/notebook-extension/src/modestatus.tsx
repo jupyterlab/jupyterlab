@@ -54,7 +54,10 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model> {
     super();
     this._tracker = opts.tracker;
 
-    this._tracker.currentChanged.connect(this._onNotebookChange);
+    this._tracker.currentChanged.connect(
+      this._onNotebookChange,
+      this
+    );
 
     this.model = new CommandEdit.Model(
       this._tracker.currentWidget && this._tracker.currentWidget.content
@@ -75,22 +78,22 @@ class CommandEdit extends VDomRenderer<CommandEdit.Model> {
    */
   dispose() {
     super.dispose();
-    this._tracker.currentChanged.disconnect(this._onNotebookChange);
+    this._tracker.currentChanged.disconnect(this._onNotebookChange, this);
   }
 
   /**
    * Update the model when the tracker current widget changes.
    */
-  private _onNotebookChange = (
+  private _onNotebookChange(
     tracker: INotebookTracker,
     notebook: NotebookPanel | null
-  ) => {
+  ): void {
     if (notebook === null) {
       this.model.notebook = null;
     } else {
       this.model.notebook = notebook.content;
     }
-  };
+  }
 
   private _tracker: INotebookTracker;
 }
@@ -124,9 +127,9 @@ namespace CommandEdit {
     set notebook(notebook: Notebook | null) {
       const oldNotebook = this._notebook;
       if (oldNotebook !== null) {
-        oldNotebook.stateChanged.disconnect(this._onChanged);
-        oldNotebook.activeCellChanged.disconnect(this._onChanged);
-        oldNotebook.modelContentChanged.disconnect(this._onChanged);
+        oldNotebook.stateChanged.disconnect(this._onChanged, this);
+        oldNotebook.activeCellChanged.disconnect(this._onChanged, this);
+        oldNotebook.modelContentChanged.disconnect(this._onChanged, this);
       }
 
       const oldMode = this._notebookMode;
@@ -135,9 +138,18 @@ namespace CommandEdit {
         this._notebookMode = 'command';
       } else {
         this._notebookMode = this._notebook.mode;
-        this._notebook.stateChanged.connect(this._onChanged);
-        this._notebook.activeCellChanged.connect(this._onChanged);
-        this._notebook.modelContentChanged.connect(this._onChanged);
+        this._notebook.stateChanged.connect(
+          this._onChanged,
+          this
+        );
+        this._notebook.activeCellChanged.connect(
+          this._onChanged,
+          this
+        );
+        this._notebook.modelContentChanged.connect(
+          this._onChanged,
+          this
+        );
       }
 
       this._triggerChange(oldMode, this._notebookMode);

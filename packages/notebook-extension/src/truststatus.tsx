@@ -101,7 +101,10 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
   constructor(opts: NotebookTrust.IOptions) {
     super();
     this._tracker = opts.tracker;
-    this._tracker.currentChanged.connect(this._onNotebookChange);
+    this._tracker.currentChanged.connect(
+      this._onNotebookChange,
+      this
+    );
     this.model = new NotebookTrust.Model(
       this._tracker.currentWidget && this._tracker.currentWidget.content
     );
@@ -131,7 +134,7 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
    */
   dispose() {
     super.dispose();
-    this._tracker.currentChanged.disconnect(this._onNotebookChange);
+    this._tracker.currentChanged.disconnect(this._onNotebookChange, this);
   }
 
   /**
@@ -197,9 +200,12 @@ namespace NotebookTrust {
     set notebook(model: Notebook | null) {
       const oldNotebook = this._notebook;
       if (oldNotebook !== null) {
-        oldNotebook.activeCellChanged.disconnect(this._onActiveCellChanged);
+        oldNotebook.activeCellChanged.disconnect(
+          this._onActiveCellChanged,
+          this
+        );
 
-        oldNotebook.modelContentChanged.disconnect(this._onModelChanged);
+        oldNotebook.modelContentChanged.disconnect(this._onModelChanged, this);
       }
 
       const oldState = this._getAllState();
@@ -210,8 +216,14 @@ namespace NotebookTrust {
         this._activeCellTrusted = false;
       } else {
         // Add listeners
-        this._notebook.activeCellChanged.connect(this._onActiveCellChanged);
-        this._notebook.modelContentChanged.connect(this._onModelChanged);
+        this._notebook.activeCellChanged.connect(
+          this._onActiveCellChanged,
+          this
+        );
+        this._notebook.modelContentChanged.connect(
+          this._onModelChanged,
+          this
+        );
 
         // Derive values
         if (this._notebook.activeCell !== undefined) {
@@ -246,7 +258,7 @@ namespace NotebookTrust {
     /**
      * When the active cell changes, update the trust state.
      */
-    private _onActiveCellChanged = (model: Notebook, cell: Cell | null) => {
+    private _onActiveCellChanged(model: Notebook, cell: Cell | null): void {
       const oldState = this._getAllState();
       if (cell) {
         this._activeCellTrusted = cell.model.trusted;
@@ -254,7 +266,7 @@ namespace NotebookTrust {
         this._activeCellTrusted = false;
       }
       this._triggerChange(oldState, this._getAllState());
-    };
+    }
 
     /**
      * Given a notebook model, figure out how many of the cells are trusted.

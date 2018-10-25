@@ -67,14 +67,10 @@ class FilePath extends VDomRenderer<FilePath.Model> {
    * Render the status item.
    */
   render() {
-    if (this.model === null) {
-      return null;
-    } else {
-      this.title.caption = this.model.path;
-      return (
-        <FilePathComponent fullPath={this.model.path} name={this.model.name!} />
-      );
-    }
+    this.title.caption = this.model.path;
+    return (
+      <FilePathComponent fullPath={this.model.path} name={this.model.name!} />
+    );
   }
 
   private _docManager: IDocumentManager;
