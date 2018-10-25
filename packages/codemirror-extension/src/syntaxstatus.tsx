@@ -26,29 +26,50 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import { ISignal } from '@phosphor/signaling';
-
 import { Menu } from '@phosphor/widgets';
 
+/**
+ * A namespace for `EditorSyntaxComponentStatics`.
+ */
 namespace EditorSyntaxComponent {
+  /**
+   * The props for the `EditorSyntaxComponent`.
+   */
   export interface IProps {
+    /**
+     * The current CodeMirror mode for an editor.
+     */
     mode: string;
+
+    /**
+     * A function to execute on clicking the component.
+     * By default we provide a function that opens a menu
+     * for CodeMirror mode selection.
+     */
     handleClick: () => void;
   }
 }
 
-// tslint:disable-next-line:variable-name
-const EditorSyntaxComponent = (
+/**
+ * A pure function that returns a tsx component for an editor syntax item.
+ *
+ * @param props: the props for the component.
+ *
+ * @returns an editor syntax component.
+ */
+function EditorSyntaxComponent(
   props: EditorSyntaxComponent.IProps
-): React.ReactElement<EditorSyntaxComponent.IProps> => {
+): React.ReactElement<EditorSyntaxComponent.IProps> {
   return <TextItem source={props.mode} onClick={props.handleClick} />;
-};
+}
 
 /**
  * StatusBar item to change the language syntax highlighting of the file editor.
  */
-class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
-  implements IEditorSyntax {
+class EditorSyntax extends VDomRenderer<EditorSyntax.Model> {
+  /**
+   * Construct a new VDomRenderer for the status item.
+   */
   constructor(opts: EditorSyntax.IOptions) {
     super();
 
@@ -61,28 +82,32 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     );
 
     this.addClass(interactiveItem);
-    this.node.title = 'Change text editor syntax highlighting';
+    this.title.caption = 'Change text editor syntax highlighting';
   }
 
+  /**
+   * Render the status item.
+   */
   render() {
-    if (this.model === null) {
-      return null;
-    } else {
-      return (
-        <EditorSyntaxComponent
-          mode={this.model.mode}
-          handleClick={this._handleClick}
-        />
-      );
-    }
+    return (
+      <EditorSyntaxComponent
+        mode={this.model.mode}
+        handleClick={this._handleClick}
+      />
+    );
   }
 
+  /**
+   * Dispose of the widget.
+   */
   dispose() {
     super.dispose();
-
     this._tracker.currentChanged.disconnect(this._onEditorChange);
   }
 
+  /**
+   * Create a menu for selecting the mode of the editor.
+   */
   private _handleClick = () => {
     const modeMenu = new Menu({ commands: this._commands });
     let command = 'codemirror:change-mode';
@@ -117,11 +142,14 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
     });
   };
 
+  /**
+   * When the editor changes, update the model.
+   */
   private _onEditorChange = (
     tracker: IEditorTracker,
     editor: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
   ) => {
-    this.model!.editor = editor && editor.content.editor;
+    this.model.editor = editor && editor.content.editor;
   };
 
   private _tracker: IEditorTracker;
@@ -129,29 +157,42 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model>
   private _popup: Popup | null = null;
 }
 
+/**
+ * A namespace for EditorSyntax statics.
+ */
 namespace EditorSyntax {
-  export class Model extends VDomModel implements IEditorSyntax.IModel {
+  /**
+   * A VDomModel for the current editor/mode combination.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Construct a new EditorSyntax model.
+     */
     constructor(editor: CodeEditor.IEditor | null) {
       super();
-
       this.editor = editor;
     }
 
-    get mode() {
+    /**
+     * The current mode for the editor. If no editor is present,
+     * returns the empty string.
+     */
+    get mode(): string {
       return this._mode;
     }
 
-    get editor() {
+    /**
+     * The current editor for the application editor tracker.
+     */
+    get editor(): CodeEditor.IEditor | null {
       return this._editor;
     }
-
     set editor(editor: CodeEditor.IEditor | null) {
       const oldEditor = this._editor;
       if (oldEditor !== null) {
         oldEditor.model.mimeTypeChanged.disconnect(this._onMIMETypeChange);
       }
-
-      const oldState = this._getAllState();
+      const oldMode = this._mode;
       this._editor = editor;
       if (this._editor === null) {
         this._mode = '';
@@ -162,24 +203,26 @@ namespace EditorSyntax {
         this._editor.model.mimeTypeChanged.connect(this._onMIMETypeChange);
       }
 
-      this._triggerChange(oldState, this._getAllState());
+      this._triggerChange(oldMode, this._mode);
     }
 
+    /**
+     * If the editor mode changes, update the model.
+     */
     private _onMIMETypeChange = (
       mode: CodeEditor.IModel,
       change: IChangedArgs<string>
     ) => {
-      const oldState = this._getAllState();
+      const oldMode = this._mode;
       const spec = Mode.findByMIME(change.newValue);
       this._mode = spec.name || spec.mode;
 
-      this._triggerChange(oldState, this._getAllState());
+      this._triggerChange(oldMode, this._mode);
     };
 
-    private _getAllState(): string {
-      return this._mode;
-    }
-
+    /**
+     * Trigger a rerender of the model.
+     */
     private _triggerChange(oldState: string, newState: string) {
       if (oldState !== newState) {
         this.stateChanged.emit(void 0);
@@ -190,24 +233,25 @@ namespace EditorSyntax {
     private _editor: CodeEditor.IEditor | null = null;
   }
 
+  /**
+   * Options for the EditorSyntax status item.
+   */
   export interface IOptions {
+    /**
+     * The application editor tracker.
+     */
     tracker: IEditorTracker;
+
+    /**
+     * The application command registry.
+     */
     commands: CommandRegistry;
   }
 }
 
-export interface IEditorSyntax {
-  readonly model: IEditorSyntax.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace IEditorSyntax {
-  export interface IModel {
-    readonly mode: string;
-    readonly editor: CodeEditor.IEditor | null;
-  }
-}
-
+/**
+ * The JupyterLab plugin for the EditorSyntax status item.
+ */
 export const editorSyntaxStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
