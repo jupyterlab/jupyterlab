@@ -1,40 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterLabPlugin } from '@jupyterlab/application';
 
-import {
-  ILatexTypesetter
-} from '@jupyterlab/rendermime';
+import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 // MathJax core
-import {
-  MathJax
-} from 'mathjax3/mathjax3/mathjax';
+import { MathJax } from 'mathjax3/mathjax3/mathjax';
 
 // TeX input
-import {
-TeX
-} from 'mathjax3/mathjax3/input/tex';
+import { TeX } from 'mathjax3/mathjax3/input/tex';
 
 // HTML output
-import {
-  CHTML
-} from 'mathjax3/mathjax3/output/chtml';
+import { CHTML } from 'mathjax3/mathjax3/output/chtml';
 
-import {
-  browserAdaptor
-} from 'mathjax3/mathjax3/adaptors/browserAdaptor';
+import { browserAdaptor } from 'mathjax3/mathjax3/adaptors/browserAdaptor';
 
-import {
-  TeXFont
-} from 'mathjax3/mathjax3/output/chtml/fonts/tex';
+import { TeXFont } from 'mathjax3/mathjax3/output/chtml/fonts/tex';
 
-import {
-  RegisterHTMLHandler
-} from "mathjax3/mathjax3/handlers/html";
+import { RegisterHTMLHandler } from 'mathjax3/mathjax3/handlers/html';
 
 RegisterHTMLHandler(browserAdaptor());
 
@@ -49,12 +33,10 @@ class emptyFont extends TeXFont {}
 /**
  * The MathJax 3 Typesetter.
  */
-export
-class MathJax3Typesetter implements ILatexTypesetter {
-
+export class MathJax3Typesetter implements ILatexTypesetter {
   constructor() {
     const chtml = new CHTML({ font: new emptyFont() });
-    const tex = new TeX({inlineMath: [['$', '$'], ['\\(', '\\)'] ]});
+    const tex = new TeX({ inlineMath: [['$', '$'], ['\\(', '\\)']] });
     this._html = MathJax.document(window.document, {
       InputJax: tex,
       OutputJax: chtml
@@ -65,12 +47,13 @@ class MathJax3Typesetter implements ILatexTypesetter {
    * Typeset the math in a node.
    */
   typeset(node: HTMLElement): void {
-    this._html.clear()
-    .findMath({elements: [node]})
-    .compile()
-    .getMetrics()
-    .typeset()
-    .updateDocument();
+    this._html
+      .clear()
+      .findMath({ elements: [node] })
+      .compile()
+      .getMetrics()
+      .typeset()
+      .updateDocument();
   }
   private _html: any;
 }
@@ -84,6 +67,6 @@ const mathJax3Plugin: JupyterLabPlugin<ILatexTypesetter> = {
   provides: ILatexTypesetter,
   activate: () => new MathJax3Typesetter(),
   autoStart: true
-}
+};
 
 export default mathJax3Plugin;
