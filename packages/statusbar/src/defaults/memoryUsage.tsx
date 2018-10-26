@@ -3,20 +3,18 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '..';
 
 import { ServerConnection } from '@jupyterlab/services';
 
 /**
  * A VDomRenderer for showing memory usage by a kernel.
  */
-class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
+export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
   /**
    * Construct a new memory usage status item.
    */
@@ -53,7 +51,7 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
 /**
  * A namespace for MemoryUsage statics.
  */
-namespace MemoryUsage {
+export namespace MemoryUsage {
   /**
    * A VDomModel for the memory usage status item.
    */
@@ -314,26 +312,3 @@ namespace Private {
     return request;
   }
 }
-
-/**
- * A plugin providing memory usage statistics to the application.
- *
- * #### Notes
- * This plugin will not work unless the memory usage server extension
- * is installed.
- */
-export const memoryUsageItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:memory-usage-item',
-  autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
-    let item = new MemoryUsage();
-
-    statusBar.registerStatusItem('memory-usage-item', item, {
-      align: 'left',
-      rank: 2,
-      isActive: () => item.model!.metricsAvailable,
-      stateChanged: item.model!.stateChanged
-    });
-  }
-};

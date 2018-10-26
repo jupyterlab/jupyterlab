@@ -8,6 +8,15 @@
   "references": [
     {
       "path": "../apputils"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../services"
     }
   ]
 }

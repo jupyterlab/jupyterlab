@@ -1,19 +1,12 @@
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
-import {
-  INotebookTracker,
-  NotebookPanel,
-  INotebookModel,
-  Notebook
-} from '@jupyterlab/notebook';
+import { INotebookModel, Notebook } from '.';
 
 import { Cell } from '@jupyterlab/cells';
 
-import { IconItem, IStatusBar } from '@jupyterlab/statusbar';
+import { IconItem } from '@jupyterlab/statusbar';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -21,7 +14,7 @@ import { toArray } from '@phosphor/algorithm';
  * Determine the notebook trust status message.
  */
 function cellTrust(
-  props: NotebookTrustComponent.IProps | NotebookTrust.Model
+  props: NotebookTrustComponent.IProps | NotebookTrustStatus.Model
 ): string[] {
   if (props.trustedCells === props.totalCells) {
     return [
@@ -94,28 +87,24 @@ namespace NotebookTrustComponent {
 /**
  * The NotebookTrust status item.
  */
-class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
+export class NotebookTrustStatus extends VDomRenderer<
+  NotebookTrustStatus.Model
+> {
   /**
    * Construct a new status item.
    */
-  constructor(opts: NotebookTrust.IOptions) {
+  constructor() {
     super();
-    this._tracker = opts.tracker;
-    this._tracker.currentChanged.connect(
-      this._onNotebookChange,
-      this
-    );
-    this.model = new NotebookTrust.Model(
-      this._tracker.currentWidget && this._tracker.currentWidget.content
-    );
-
-    this.title.caption = cellTrust(this.model)[0];
+    this.model = new NotebookTrustStatus.Model();
   }
 
   /**
    * Render the NotebookTrust status item.
    */
   render() {
+    if (!this.model) {
+      return null;
+    }
     this.node.title = cellTrust(this.model)[0];
     return (
       <div>
@@ -128,48 +117,16 @@ class NotebookTrust extends VDomRenderer<NotebookTrust.Model> {
       </div>
     );
   }
-
-  /**
-   * Dispose of the notebook trust item.
-   */
-  dispose() {
-    super.dispose();
-    this._tracker.currentChanged.disconnect(this._onNotebookChange, this);
-  }
-
-  /**
-   * When update the trust model when the notebook changes.
-   */
-  private _onNotebookChange(
-    tracker: INotebookTracker,
-    notebook: NotebookPanel | null
-  ): void {
-    if (notebook === null) {
-      this.model.notebook = null;
-    } else {
-      this.model.notebook = notebook.content;
-    }
-  }
-
-  private _tracker: INotebookTracker;
 }
 
 /**
  * A namespace for NotebookTrust statics.
  */
-namespace NotebookTrust {
+export namespace NotebookTrustStatus {
   /**
    * A VDomModel for the NotebookTrust status item.
    */
   export class Model extends VDomModel {
-    /**
-     * Construct a new NotebookTrust model.
-     */
-    constructor(notebook: Notebook | null) {
-      super();
-      this.notebook = notebook;
-    }
-
     /**
      * The number of trusted cells in the current notebook.
      */
@@ -320,36 +277,4 @@ namespace NotebookTrust {
     private _activeCellTrusted: boolean = false;
     private _notebook: Notebook | null = null;
   }
-
-  /**
-   * Options for creating a NotebookTrust status item.
-   */
-  export interface IOptions {
-    tracker: INotebookTracker;
-  }
 }
-
-/**
- * A plugin that adds a notebook trust status item to the status bar.
- */
-export const notebookTrustItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:trust-status',
-  autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
-  ) => {
-    const item = new NotebookTrust({ tracker });
-
-    statusBar.registerStatusItem('notebook-trust-item', item, {
-      align: 'right',
-      rank: 3,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
-  }
-};

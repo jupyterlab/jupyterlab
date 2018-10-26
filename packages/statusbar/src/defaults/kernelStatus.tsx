@@ -3,25 +3,15 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
-
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { Kernel, Session } from '@jupyterlab/services';
 
-import { interactiveItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { interactiveItem, TextItem } from '..';
 
 import { JSONExt } from '@phosphor/coreutils';
-
-import { Title, Widget } from '@phosphor/widgets';
-
-import { IStatusContext } from '../context';
 
 /**
  * A pure functional component for rendering kernel status.
@@ -74,7 +64,7 @@ namespace KernelStatusComponent {
 /**
  * A VDomRenderer widget for displaying the status of a kernel.
  */
-class KernelStatus extends VDomRenderer<KernelStatus.Model> {
+export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Construct the kernel status widget.
    */
@@ -109,7 +99,7 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model> {
 /**
  * A namespace for KernelStatus statics.
  */
-namespace KernelStatus {
+export namespace KernelStatus {
   /**
    * A VDomModel for the kernel status indicator.
    */
@@ -233,69 +223,3 @@ namespace KernelStatus {
     onClick: () => void;
   }
 }
-
-export const kernelStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:kernel-status',
-  autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IConsoleTracker],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker
-  ) => {
-    // When the status item is clicked, launch the kernel
-    // selection dialog for the current session.
-    let currentSession: IClientSession | null = null;
-    const changeKernel = () => {
-      if (!currentSession) {
-        return;
-      }
-      currentSession.selectKernel();
-    };
-
-    // Create the status item.
-    const item = new KernelStatus({
-      onClick: changeKernel
-    });
-
-    // When the title of the active widget changes, update the label
-    // of the hover text.
-    const onTitleChanged = (title: Title<Widget>) => {
-      item.model!.activityName = title.label;
-    };
-
-    // Keep the session object on the status item up-to-date.
-    app.shell.currentChanged.connect((shell, change) => {
-      const { oldValue, newValue } = change;
-
-      // Clean up after the old value if it exists,
-      // listen for changes to the title of the activity
-      if (oldValue) {
-        oldValue.title.changed.disconnect(onTitleChanged);
-      }
-      if (newValue) {
-        newValue.title.changed.connect(onTitleChanged);
-      }
-
-      // Grab the session off of the current widget, if it exists.
-      if (newValue && consoleTracker.has(newValue)) {
-        currentSession = (newValue as ConsolePanel).session;
-      } else if (newValue && notebookTracker.has(newValue)) {
-        currentSession = (newValue as NotebookPanel).session;
-      } else {
-        currentSession = null;
-      }
-      item.model!.session = currentSession;
-    });
-
-    statusBar.registerStatusItem('kernel-status-item', item, {
-      align: 'left',
-      rank: 1,
-      isActive: IStatusContext.delegateActive(app.shell, [
-        { tracker: notebookTracker },
-        { tracker: consoleTracker }
-      ])
-    });
-  }
-};

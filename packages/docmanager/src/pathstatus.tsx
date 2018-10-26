@@ -3,26 +3,24 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentManager } from './manager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 
 import { Widget, Title } from '@phosphor/widgets';
 
 /**
- * A namespace for FilePathComponent statics.
+ * A namespace for PathStatusComponent statics.
  */
-namespace FilePathComponent {
+namespace PathStatusComponent {
   /**
-   * The props for rendering a FilePathComponent.
+   * The props for rendering a PathStatusComponent.
    */
   export interface IProps {
     /**
@@ -44,23 +42,23 @@ namespace FilePathComponent {
  *
  * @returns a tsx component for a file path.
  */
-function FilePathComponent(
-  props: FilePathComponent.IProps
-): React.ReactElement<FilePathComponent.IProps> {
+function PathStatusComponent(
+  props: PathStatusComponent.IProps
+): React.ReactElement<PathStatusComponent.IProps> {
   return <TextItem source={props.name} title={props.fullPath} />;
 }
 
 /**
  * A status bar item for the current file path (or activity name).
  */
-class FilePath extends VDomRenderer<FilePath.Model> {
+export class PathStatus extends VDomRenderer<PathStatus.Model> {
   /**
-   * Construct a new FilePath status item.
+   * Construct a new PathStatus status item.
    */
-  constructor(opts: FilePath.IOptions) {
+  constructor(opts: PathStatus.IOptions) {
     super();
     this._docManager = opts.docManager;
-    this.model = new FilePath.Model(this._docManager);
+    this.model = new PathStatus.Model(this._docManager);
     this.node.title = this.model.path;
   }
 
@@ -69,7 +67,10 @@ class FilePath extends VDomRenderer<FilePath.Model> {
    */
   render() {
     return (
-      <FilePathComponent fullPath={this.model!.path} name={this.model!.name!} />
+      <PathStatusComponent
+        fullPath={this.model!.path}
+        name={this.model!.name!}
+      />
     );
   }
 
@@ -77,11 +78,11 @@ class FilePath extends VDomRenderer<FilePath.Model> {
 }
 
 /**
- * A namespace for FilePath statics.
+ * A namespace for PathStatus statics.
  */
-namespace FilePath {
+export namespace PathStatus {
   /**
-   * A VDomModel for rendering the FilePath status item.
+   * A VDomModel for rendering the PathStatus status item.
    */
   export class Model extends VDomModel {
     /**
@@ -198,7 +199,7 @@ namespace FilePath {
   }
 
   /**
-   * Options for creating the FilePath widget.
+   * Options for creating the PathStatus widget.
    */
   export interface IOptions {
     /**
@@ -207,33 +208,3 @@ namespace FilePath {
     docManager: IDocumentManager;
   }
 }
-
-/**
- * A plugin providing a file path widget to the status bar.
- */
-export const filePathStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:file-path-status',
-  autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    docManager: IDocumentManager
-  ) => {
-    let item = new FilePath({ docManager });
-
-    // Keep the file path widget up-to-date with the application active widget.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(() => {
-      item.model!.widget = app.shell.currentWidget;
-    });
-
-    statusBar.registerStatusItem('file-path-item', item, {
-      align: 'right',
-      rank: 0,
-      isActive: () => {
-        return true;
-      }
-    });
-  }
-};

@@ -3,15 +3,13 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentManager } from './manager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -52,7 +50,7 @@ const SAVING_COMPLETE_MESSAGE_MILLIS = 2000;
 /**
  * A VDomRenderer for a saving status item.
  */
-class SavingStatus extends VDomRenderer<SavingStatus.Model> {
+export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
   /**
    * Create a new SavingStatus item.
    */
@@ -79,7 +77,7 @@ class SavingStatus extends VDomRenderer<SavingStatus.Model> {
 /**
  * A namespace for SavingStatus statics.
  */
-namespace SavingStatus {
+export namespace SavingStatus {
   /**
    * A VDomModel for the SavingStatus item.
    */
@@ -165,33 +163,3 @@ namespace SavingStatus {
     docManager: IDocumentManager;
   }
 }
-
-/**
- * A plugin for adding a saving status item to the status bar.
- */
-export const savingStatusItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:saving-status-item',
-  autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    docManager: IDocumentManager
-  ) => {
-    let item = new SavingStatus({ docManager });
-
-    // Keep the currently active widget synchronized.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(
-      () => (item.model!.widget = app.shell.currentWidget)
-    );
-
-    statusBar.registerStatusItem('saving-status-item', item, {
-      align: 'middle',
-      isActive: () => {
-        return true;
-      },
-      stateChanged: item.model!.stateChanged
-    });
-  }
-};

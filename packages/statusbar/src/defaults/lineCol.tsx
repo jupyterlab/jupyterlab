@@ -3,43 +3,15 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import {
   VDomRenderer,
   VDomModel,
   ReactElementWidget
 } from '@jupyterlab/apputils';
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
-
-import {
-  IConsoleTracker,
-  ConsolePanel,
-  CodeConsole
-} from '@jupyterlab/console';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-
-import {
-  INotebookTracker,
-  Notebook,
-  NotebookPanel
-} from '@jupyterlab/notebook';
-
-import {
-  IStatusBar,
-  interactiveItem,
-  showPopup,
-  Popup,
-  TextItem
-} from '@jupyterlab/statusbar';
-
-import { IStatusContext } from '../context';
+import { interactiveItem, showPopup, Popup, TextItem } from '..';
 
 import {
   lineFormWrapper,
@@ -246,7 +218,7 @@ function LineColComponent(
 /**
  * A widget implementing a line/column status item.
  */
-class LineCol extends VDomRenderer<LineCol.Model> {
+export class LineCol extends VDomRenderer<LineCol.Model> {
   /**
    * Construct a new LineCol status item.
    */
@@ -312,7 +284,7 @@ class LineCol extends VDomRenderer<LineCol.Model> {
 /**
  * A namespace for LineCol statics.
  */
-namespace LineCol {
+export namespace LineCol {
   /**
    * A VDom model for a status item tracking the line/column of an editor.
    */
@@ -389,77 +361,3 @@ namespace LineCol {
     private _editor: CodeEditor.IEditor | null = null;
   }
 }
-
-/**
- * A plugin providing a line/column status item to the application.
- */
-export const lineColItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:line-col-item',
-  autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    notebookTracker: INotebookTracker,
-    editorTracker: IEditorTracker,
-    consoleTracker: IConsoleTracker
-  ) => {
-    const item = new LineCol();
-
-    const onActiveCellChanged = (notebook: Notebook, cell: Cell) => {
-      item.model!.editor = cell && cell.editor;
-    };
-
-    const onPromptCreated = (console: CodeConsole, prompt: CodeCell) => {
-      item.model!.editor = prompt && prompt.editor;
-    };
-
-    app.shell.currentChanged.connect((shell, change) => {
-      const { oldValue, newValue } = change;
-
-      // Check if we need to disconnect the console listener
-      // or the notebook active cell listener
-      if (oldValue && consoleTracker.has(oldValue)) {
-        (oldValue as ConsolePanel).console.promptCellCreated.disconnect(
-          onPromptCreated
-        );
-      } else if (oldValue && notebookTracker.has(oldValue)) {
-        (oldValue as NotebookPanel).content.activeCellChanged.disconnect(
-          onActiveCellChanged
-        );
-      }
-
-      // Wire up the new editor to the model if it exists
-      if (newValue && consoleTracker.has(newValue)) {
-        (newValue as ConsolePanel).console.promptCellCreated.connect(
-          onPromptCreated
-        );
-        const prompt = (newValue as ConsolePanel).console.promptCell;
-        item.model!.editor = prompt && prompt.editor;
-      } else if (newValue && notebookTracker.has(newValue)) {
-        (newValue as NotebookPanel).content.activeCellChanged.connect(
-          onActiveCellChanged
-        );
-        const cell = (newValue as NotebookPanel).content.activeCell;
-        item.model!.editor = cell && cell.editor;
-      } else if (newValue && editorTracker.has(newValue)) {
-        item.model!.editor = (newValue as IDocumentWidget<
-          FileEditor
-        >).content.editor;
-      } else {
-        item.model!.editor = null;
-      }
-    });
-
-    // Add the status item to the status bar.
-    statusBar.registerStatusItem('line-col-item', item, {
-      align: 'right',
-      rank: 2,
-      isActive: IStatusContext.delegateActive(app.shell, [
-        { tracker: notebookTracker },
-        { tracker: editorTracker },
-        { tracker: consoleTracker }
-      ])
-    });
-  }
-};

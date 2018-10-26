@@ -1,19 +1,12 @@
 import * as React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import {
-  INotebookTracker,
-  Notebook,
-  NotebookPanel,
-  NotebookMode
-} from '@jupyterlab/notebook';
+import { Notebook, NotebookMode } from '.';
 
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 
 /**
  * A pure function for rendering a Command/Edit mode component.
@@ -46,74 +39,35 @@ namespace CommandEditComponent {
 /**
  * StatusBar item to display which notebook mode user is in.
  */
-class CommandEdit extends VDomRenderer<CommandEdit.Model> {
+export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
   /**
    * Construct a new CommandEdit status item.
    */
-  constructor(opts: CommandEdit.IOptions) {
+  constructor() {
     super();
-    this._tracker = opts.tracker;
-
-    this._tracker.currentChanged.connect(
-      this._onNotebookChange,
-      this
-    );
-
-    this.model = new CommandEdit.Model(
-      this._tracker.currentWidget && this._tracker.currentWidget.content
-    );
-    this.title.caption = `Notebook is in ${this.model.notebookMode} mode`;
+    this.model = new CommandEditStatus.Model();
   }
 
   /**
    * Render the CommandEdit status item.
    */
   render() {
+    if (!this.model) {
+      return null;
+    }
     this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
     return <CommandEditComponent notebookMode={this.model.notebookMode} />;
   }
-
-  /**
-   * Dispose of the status item.
-   */
-  dispose() {
-    super.dispose();
-    this._tracker.currentChanged.disconnect(this._onNotebookChange, this);
-  }
-
-  /**
-   * Update the model when the tracker current widget changes.
-   */
-  private _onNotebookChange(
-    tracker: INotebookTracker,
-    notebook: NotebookPanel | null
-  ): void {
-    if (notebook === null) {
-      this.model.notebook = null;
-    } else {
-      this.model.notebook = notebook.content;
-    }
-  }
-
-  private _tracker: INotebookTracker;
 }
 
 /**
  * A namespace for CommandEdit statics.
  */
-namespace CommandEdit {
+export namespace CommandEditStatus {
   /**
    * A VDomModle for the CommandEdit renderer.
    */
   export class Model extends VDomModel {
-    /**
-     * Construct a new CommandEdit model.
-     */
-    constructor(notebook: Notebook | null) {
-      super();
-      this.notebook = notebook;
-    }
-
     /**
      * The current mode of the current notebook.
      */
@@ -180,38 +134,4 @@ namespace CommandEdit {
     private _notebookMode: NotebookMode = 'command';
     private _notebook: Notebook | null = null;
   }
-
-  /**
-   * Options for creating a CommandEdit status item.
-   */
-  export interface IOptions {
-    tracker: INotebookTracker;
-  }
 }
-
-/**
- * A plugin providing a CommandEdit status item.
- */
-export const commandEditItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:mode-status',
-  autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
-  ) => {
-    const item = new CommandEdit({
-      tracker
-    });
-
-    statusBar.registerStatusItem('command-edit-item', item, {
-      align: 'right',
-      rank: 4,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
-  }
-};

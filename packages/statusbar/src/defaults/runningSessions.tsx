@@ -3,8 +3,6 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
@@ -15,13 +13,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import {
-  GroupItem,
-  IconItem,
-  IStatusBar,
-  interactiveItem,
-  TextItem
-} from '@jupyterlab/statusbar';
+import { GroupItem, IconItem, interactiveItem, TextItem } from '..';
 
 /**
  * Half spacing between subitems in a status item.
@@ -81,7 +73,7 @@ namespace RunningSessionsComponent {
 /**
  * A VDomRenderer for a RunningSessions status item.
  */
-class RunningSessions extends VDomRenderer<RunningSessions.Model> {
+export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   /**
    * Create a new RunningSessions widget.
    */
@@ -165,7 +157,7 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model> {
 /**
  * A namespace for RunninSessions statics.
  */
-namespace RunningSessions {
+export namespace RunningSessions {
   /**
    * A VDomModel for the RunninSessions status item.
    */
@@ -220,24 +212,3 @@ namespace RunningSessions {
     onClick: () => void;
   }
 }
-
-/*
- * A plugin providing running terminals and sessions information
- * to the status bar.
- */
-export const runningSessionsItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:running-sessions-item',
-  autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
-    const item = new RunningSessions({
-      onClick: () => app.shell.activateById('jp-running-sessions'),
-      serviceManager: app.serviceManager
-    });
-
-    statusBar.registerStatusItem('running-sessions-item', item, {
-      align: 'left',
-      rank: 0
-    });
-  }
-};

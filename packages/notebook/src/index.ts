@@ -12,3 +12,5 @@ export * from './panel';
 export * from './tracker';
 export * from './widget';
 export * from './widgetfactory';
+export * from './modestatus';
+export * from './truststatus';

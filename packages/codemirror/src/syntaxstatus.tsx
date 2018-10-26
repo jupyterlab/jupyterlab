@@ -1,26 +1,19 @@
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
-
 import {
-  IStatusBar,
   interactiveItem,
   Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { Mode } from '@jupyterlab/codemirror';
+import { Mode } from '.';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -66,21 +59,14 @@ function EditorSyntaxComponent(
 /**
  * StatusBar item to change the language syntax highlighting of the file editor.
  */
-class EditorSyntax extends VDomRenderer<EditorSyntax.Model> {
+export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   /**
    * Construct a new VDomRenderer for the status item.
    */
-  constructor(opts: EditorSyntax.IOptions) {
+  constructor(opts: EditorSyntaxStatus.IOptions) {
     super();
-
-    this._tracker = opts.tracker;
+    this.model = new EditorSyntaxStatus.Model();
     this._commands = opts.commands;
-
-    this._tracker.currentChanged.connect(this._onEditorChange);
-    this.model = new EditorSyntax.Model(
-      this._tracker.currentWidget && this._tracker.currentWidget.content.editor
-    );
-
     this.addClass(interactiveItem);
     this.title.caption = 'Change text editor syntax highlighting';
   }
@@ -89,20 +75,15 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model> {
    * Render the status item.
    */
   render() {
+    if (!this.model) {
+      return null;
+    }
     return (
       <EditorSyntaxComponent
         mode={this.model.mode}
         handleClick={this._handleClick}
       />
     );
-  }
-
-  /**
-   * Dispose of the widget.
-   */
-  dispose() {
-    super.dispose();
-    this._tracker.currentChanged.disconnect(this._onEditorChange);
   }
 
   /**
@@ -142,17 +123,6 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model> {
     });
   };
 
-  /**
-   * When the editor changes, update the model.
-   */
-  private _onEditorChange = (
-    tracker: IEditorTracker,
-    editor: IDocumentWidget<FileEditor, DocumentRegistry.IModel> | null
-  ) => {
-    this.model.editor = editor && editor.content.editor;
-  };
-
-  private _tracker: IEditorTracker;
   private _commands: CommandRegistry;
   private _popup: Popup | null = null;
 }
@@ -160,19 +130,11 @@ class EditorSyntax extends VDomRenderer<EditorSyntax.Model> {
 /**
  * A namespace for EditorSyntax statics.
  */
-namespace EditorSyntax {
+export namespace EditorSyntaxStatus {
   /**
    * A VDomModel for the current editor/mode combination.
    */
   export class Model extends VDomModel {
-    /**
-     * Construct a new EditorSyntax model.
-     */
-    constructor(editor: CodeEditor.IEditor | null) {
-      super();
-      this.editor = editor;
-    }
-
     /**
      * The current mode for the editor. If no editor is present,
      * returns the empty string.
@@ -238,37 +200,8 @@ namespace EditorSyntax {
    */
   export interface IOptions {
     /**
-     * The application editor tracker.
-     */
-    tracker: IEditorTracker;
-
-    /**
      * The application command registry.
      */
     commands: CommandRegistry;
   }
 }
-
-/**
- * The JupyterLab plugin for the EditorSyntax status item.
- */
-export const editorSyntaxStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
-  autoStart: true,
-  requires: [IStatusBar, IEditorTracker],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    tracker: IEditorTracker
-  ) => {
-    let item = new EditorSyntax({ tracker, commands: app.commands });
-    statusBar.registerStatusItem('editor-syntax-item', item, {
-      align: 'left',
-      rank: 0,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
-  }
-};

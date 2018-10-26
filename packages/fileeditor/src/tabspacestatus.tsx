@@ -3,18 +3,11 @@
 
 import React from 'react';
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-
 import {
-  IStatusBar,
   interactiveItem,
   clickedItem,
   Popup,
@@ -22,11 +15,7 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { JSONObject } from '@phosphor/coreutils';
-
 import { Menu } from '@phosphor/widgets';
-
-import { IStatusContext } from '../context';
 
 /**
  * A namespace for TabSpaceComponent statics.
@@ -73,14 +62,14 @@ function TabSpaceComponent(
 /**
  * A VDomRenderer for a tabs vs. spaces status item.
  */
-class TabSpace extends VDomRenderer<TabSpace.Model> {
+export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
   /**
    * Create a new tab/space status item.
    */
-  constructor(options: TabSpace.IOptions) {
+  constructor(options: TabSpaceStatus.IOptions) {
     super();
     this._menu = options.menu;
-    this.model = new TabSpace.Model();
+    this.model = new TabSpaceStatus.Model();
     this.addClass(interactiveItem);
   }
 
@@ -133,7 +122,7 @@ class TabSpace extends VDomRenderer<TabSpace.Model> {
 /**
  * A namespace for TabSpace statics.
  */
-namespace TabSpace {
+export namespace TabSpaceStatus {
   /**
    * A VDomModel for the TabSpace status item.
    */
@@ -177,68 +166,3 @@ namespace TabSpace {
     menu: Menu;
   }
 }
-
-/**
- * A plugin that provides a status item allowing the user to
- * switch tabs vs spaces and tab widths for text editors.
- */
-export const tabSpaceItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:tab-space-item',
-  autoStart: true,
-  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    editorTracker: IEditorTracker,
-    settingRegistry: ISettingRegistry
-  ) => {
-    // Create a menu for switching tabs vs spaces.
-    const menu = new Menu({ commands: app.commands });
-    const command = 'fileeditor:change-tabs';
-    const args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
-      name: 'Indent with Tab'
-    };
-    menu.addItem({ command, args });
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
-        insertSpaces: true,
-        size,
-        name: `Spaces: ${size} `
-      };
-      menu.addItem({ command, args });
-    }
-
-    // Create the status item.
-    const item = new TabSpace({ menu });
-
-    // Keep a reference to the code editor config from the settings system.
-    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      const cached = settings.get('editorConfig').composite as Partial<
-        CodeEditor.IConfig
-      >;
-      const config: CodeEditor.IConfig = {
-        ...CodeEditor.defaultConfig,
-        ...cached
-      };
-      item.model!.config = config;
-    };
-    Promise.all([
-      settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
-      app.restored
-    ]).then(([settings]) => {
-      updateSettings(settings);
-      settings.changed.connect(updateSettings);
-    });
-
-    // Add the status item.
-    statusBar.registerStatusItem('tab-space-item', item, {
-      align: 'right',
-      rank: 1,
-      isActive: IStatusContext.delegateActive(app.shell, [
-        { tracker: editorTracker }
-      ])
-    });
-  }
-};

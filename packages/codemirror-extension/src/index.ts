@@ -11,7 +11,12 @@ import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { editorServices, CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
+import {
+  editorServices,
+  EditorSyntaxStatus,
+  CodeMirrorEditor,
+  Mode
+} from '@jupyterlab/codemirror';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
@@ -19,7 +24,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
-import { editorSyntaxStatus } from './syntaxstatus';
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -55,6 +60,38 @@ const commands: JupyterLabPlugin<void> = {
   requires: [IEditorTracker, IMainMenu, IStateDB, ISettingRegistry],
   activate: activateEditorCommands,
   autoStart: true
+};
+
+/**
+ * The JupyterLab plugin for the EditorSyntax status item.
+ */
+export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
+  autoStart: true,
+  requires: [IStatusBar, IEditorTracker],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    tracker: IEditorTracker
+  ) => {
+    let item = new EditorSyntaxStatus({ commands: app.commands });
+    app.shell.currentChanged.connect(() => {
+      const current = app.shell.currentWidget;
+      if (current && tracker.has(current)) {
+        item.model.editor = (current as IDocumentWidget<
+          FileEditor
+        >).content.editor;
+      }
+    });
+    statusBar.registerStatusItem('editor-syntax-item', item, {
+      align: 'left',
+      rank: 0,
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
+    });
+  }
 };
 
 /**

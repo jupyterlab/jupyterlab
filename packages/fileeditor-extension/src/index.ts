@@ -26,7 +26,8 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorFactory,
-  IEditorTracker
+  IEditorTracker,
+  TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -38,6 +39,8 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -104,9 +107,77 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 };
 
 /**
+ * A plugin that provides a status item allowing the user to
+ * switch tabs vs spaces and tab widths for text editors.
+ */
+export const tabSpaceStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:tab-space-item',
+  autoStart: true,
+  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    editorTracker: IEditorTracker,
+    settingRegistry: ISettingRegistry
+  ) => {
+    // Create a menu for switching tabs vs spaces.
+    const menu = new Menu({ commands: app.commands });
+    const command = 'fileeditor:change-tabs';
+    const args: JSONObject = {
+      insertSpaces: false,
+      size: 4,
+      name: 'Indent with Tab'
+    };
+    menu.addItem({ command, args });
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true,
+        size,
+        name: `Spaces: ${size} `
+      };
+      menu.addItem({ command, args });
+    }
+
+    // Create the status item.
+    const item = new TabSpaceStatus({ menu });
+
+    // Keep a reference to the code editor config from the settings system.
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const cached = settings.get('editorConfig').composite as Partial<
+        CodeEditor.IConfig
+      >;
+      const config: CodeEditor.IConfig = {
+        ...CodeEditor.defaultConfig,
+        ...cached
+      };
+      item.model!.config = config;
+    };
+    Promise.all([
+      settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
+      app.restored
+    ]).then(([settings]) => {
+      updateSettings(settings);
+      settings.changed.connect(updateSettings);
+    });
+
+    // Add the status item.
+    statusBar.registerStatusItem('tab-space-item', item, {
+      align: 'right',
+      rank: 1,
+      isActive: () => {
+        return (
+          app.shell.currentWidget && editorTracker.has(app.shell.currentWidget)
+        );
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [plugin, tabSpaceStatus];
+export default plugins;
 
 /**
  * Activate the editor tracker plugin.
