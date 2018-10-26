@@ -248,8 +248,6 @@ export function createNotebookGenerator(
               !renderedHeading
             ) {
               // Determine whether the heading has children
-              if (renderedHeading) {
-              }
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
