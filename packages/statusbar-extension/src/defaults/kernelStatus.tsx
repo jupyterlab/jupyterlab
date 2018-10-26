@@ -143,7 +143,7 @@ namespace KernelStatus {
     /**
      * The current client session associated with the kernel status indicator.
      */
-    get session(): IClientSession {
+    get session(): IClientSession | null {
       return this._session;
     }
     set session(session: IClientSession | null) {
@@ -259,7 +259,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
     // When the title of the active widget changes, update the label
     // of the hover text.
     const onTitleChanged = (title: Title<Widget>) => {
-      item.model.activityName = title.label;
+      item.model!.activityName = title.label;
     };
 
     // Keep the session object on the status item up-to-date.
@@ -283,7 +283,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
       } else {
         currentSession = null;
       }
-      item.model.session = currentSession;
+      item.model!.session = currentSession;
     });
 
     statusBar.registerStatusItem('kernel-status-item', item, {

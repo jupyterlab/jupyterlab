@@ -178,9 +178,9 @@ export const savingStatusItem: JupyterLabPlugin<void> = {
     let item = new SavingStatus({ docManager });
 
     // Keep the currently active widget synchronized.
-    item.model.widget = app.shell.currentWidget;
+    item.model!.widget = app.shell.currentWidget;
     app.shell.currentChanged.connect(
-      () => (item.model.widget = app.shell.currentWidget)
+      () => (item.model!.widget = app.shell.currentWidget)
     );
 
     statusBar.registerStatusItem('saving-status-item', item, {

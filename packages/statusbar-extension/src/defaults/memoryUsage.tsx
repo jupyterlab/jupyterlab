@@ -28,6 +28,9 @@ class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
    * Render the memory usage status item.
    */
   render() {
+    if (!this.model) {
+      return null;
+    }
     let text: string;
     if (this.model.memoryLimit === null) {
       text = `Mem: ${this.model.currentMemory.toFixed(
@@ -83,9 +86,9 @@ namespace MemoryUsage {
     }
 
     /**
-     * The current memory limit.
+     * The current memory limit, or null if not specified.
      */
-    get memoryLimit(): number {
+    get memoryLimit(): number | null {
       return this._memoryLimit;
     }
 
@@ -326,8 +329,8 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
     statusBar.registerStatusItem('memory-usage-item', item, {
       align: 'left',
       rank: 2,
-      isActive: () => item.model.metricsAvailable,
-      stateChanged: item.model.stateChanged
+      isActive: () => item.model!.metricsAvailable,
+      stateChanged: item.model!.stateChanged
     });
   }
 };

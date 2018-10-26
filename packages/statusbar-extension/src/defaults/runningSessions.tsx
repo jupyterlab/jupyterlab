@@ -104,6 +104,9 @@ class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    * Render the running sessions widget.
    */
   render() {
+    if (!this.model) {
+      return null;
+    }
     this.title.caption = `${this.model.terminals} Terminals, ${
       this.model!.kernels
     } Kernels`;

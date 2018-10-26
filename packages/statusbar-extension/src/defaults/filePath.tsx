@@ -66,7 +66,7 @@ class FilePath extends VDomRenderer<FilePath.Model> {
    */
   render() {
     return (
-      <FilePathComponent fullPath={this.model.path} name={this.model.name!} />
+      <FilePathComponent fullPath={this.model!.path} name={this.model!.name!} />
     );
   }
 
@@ -220,9 +220,9 @@ export const filePathStatus: JupyterLabPlugin<void> = {
     let item = new FilePath({ docManager });
 
     // Keep the file path widget up-to-date with the application active widget.
-    item.model.widget = app.shell.currentWidget;
+    item.model!.widget = app.shell.currentWidget;
     app.shell.currentChanged.connect(() => {
-      item.model.widget = app.shell.currentWidget;
+      item.model!.widget = app.shell.currentWidget;
     });
 
     statusBar.registerStatusItem('file-path-item', item, {

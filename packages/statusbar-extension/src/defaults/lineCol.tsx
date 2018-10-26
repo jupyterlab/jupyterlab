@@ -404,11 +404,11 @@ export const lineColItem: JupyterLabPlugin<void> = {
     const item = new LineCol();
 
     const onActiveCellChanged = (notebook: Notebook, cell: Cell) => {
-      item.model.editor = cell && cell.editor;
+      item.model!.editor = cell && cell.editor;
     };
 
     const onPromptCreated = (console: CodeConsole, prompt: CodeCell) => {
-      item.model.editor = prompt && prompt.editor;
+      item.model!.editor = prompt && prompt.editor;
     };
 
     app.shell.currentChanged.connect((shell, change) => {
@@ -431,19 +431,20 @@ export const lineColItem: JupyterLabPlugin<void> = {
         (newValue as ConsolePanel).console.promptCellCreated.connect(
           onPromptCreated
         );
-        item.model.editor = (newValue as ConsolePanel).console.promptCell.editor;
+        const prompt = (newValue as ConsolePanel).console.promptCell;
+        item.model!.editor = prompt && prompt.editor;
       } else if (newValue && notebookTracker.has(newValue)) {
         (newValue as NotebookPanel).content.activeCellChanged.connect(
           onActiveCellChanged
         );
         const cell = (newValue as NotebookPanel).content.activeCell;
-        item.model.editor = cell && cell.editor;
+        item.model!.editor = cell && cell.editor;
       } else if (newValue && editorTracker.has(newValue)) {
-        item.model.editor = (newValue as IDocumentWidget<
+        item.model!.editor = (newValue as IDocumentWidget<
           FileEditor
         >).content.editor;
       } else {
-        item.model.editor = null;
+        item.model!.editor = null;
       }
     });
 

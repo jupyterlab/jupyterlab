@@ -148,8 +148,8 @@ namespace TabSpace {
     }
 
     private _triggerChange(
-      oldValue: CodeEditor.IConfig,
-      newValue: CodeEditor.IConfig
+      oldValue: CodeEditor.IConfig | null,
+      newValue: CodeEditor.IConfig | null
     ): void {
       const oldSpaces = oldValue && oldValue.insertSpaces;
       const oldSize = oldValue && oldValue.tabSize;
@@ -219,7 +219,7 @@ export const tabSpaceItem: JupyterLabPlugin<void> = {
         ...CodeEditor.defaultConfig,
         ...cached
       };
-      item.model.config = config;
+      item.model!.config = config;
     };
     Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
