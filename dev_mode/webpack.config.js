@@ -49,7 +49,7 @@ Object.keys(jlab.linkedPackages).forEach(function(name) {
   var localPath = require.resolve(path.join(name, 'package.json'));
   localLinked[name] = path.dirname(localPath);
 });
-var ignorePatterns = [/^\.\#/];
+var ignorePatterns = [/^\.\#/]; // eslint-disable-line
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
@@ -164,7 +164,7 @@ module.exports = [
         }
 
         // Ignore files with certain patterns
-        var baseName = localPath.replace(/^.*[\\\/]/, '');
+        var baseName = localPath.replace(/^.*[\\\/]/, ''); // eslint-disable-line
         if (
           ignorePatterns.some(function(rexp) {
             return baseName.match(rexp);
