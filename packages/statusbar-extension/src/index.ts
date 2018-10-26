@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 

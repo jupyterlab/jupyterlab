@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ISignal, Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 import { ISettingRegistry } from '@jupyterlab/coreutils';

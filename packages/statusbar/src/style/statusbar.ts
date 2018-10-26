@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { style } from 'typestyle/lib';
 import vars from './variables';
 import { rightToLeft, leftToRight, centeredFlex } from './layout';

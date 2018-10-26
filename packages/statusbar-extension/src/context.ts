@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { IInstanceTracker } from '@jupyterlab/apputils';
 import { Widget } from '@phosphor/widgets';
 import { ApplicationShell } from '@jupyterlab/application';
