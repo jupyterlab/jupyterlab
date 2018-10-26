@@ -16,16 +16,7 @@
       "path": "../cells"
     },
     {
-      "path": "../codeeditor"
-    },
-    {
       "path": "../console"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
@@ -35,9 +26,6 @@
     },
     {
       "path": "../notebook"
-    },
-    {
-      "path": "../services"
     },
     {
       "path": "../statusbar"
