@@ -48,6 +48,6 @@ For Mac users:
 
 
 For Windows users (Power shell):
-..................
+................................
 Copy : ``Ctrl`` + ``Insert``
 Paste: ``Shift`` + ``Insert``
