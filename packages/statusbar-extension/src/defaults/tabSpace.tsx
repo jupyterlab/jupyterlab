@@ -1,12 +1,10 @@
 import React from 'react';
 
-import {
-  JupyterLabPlugin,
-  JupyterLab,
-  ApplicationShell
-} from '@jupyterlab/application';
+import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
@@ -21,264 +19,166 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { JSONObject } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { Message } from '@phosphor/messaging';
-
-import { ISignal } from '@phosphor/signaling';
-
-import { Menu, Widget } from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
 import { IStatusContext } from '../context';
 
-import { SettingsWrapper } from '../settings';
-
+/**
+ * A namespace for TabSpaceComponent statics.
+ */
 namespace TabSpaceComponent {
+  /**
+   * The props for TabSpaceComponent.
+   */
   export interface IProps {
+    /**
+     * The number of spaces to insert on tab.
+     */
     tabSpace: number;
+
+    /**
+     * Whether to use spaces or tabs.
+     */
     isSpaces: boolean;
+
+    /**
+     * A click handler for the TabSpace component. By default
+     * opens a menu allowing the user to select tabs vs spaces.
+     */
     handleClick: () => void;
   }
 }
 
-// tslint:disable-next-line:variable-name
-const TabSpaceComponent = (
+/**
+ * A pure functional component for rendering the TabSpace status.
+ */
+function TabSpaceComponent(
   props: TabSpaceComponent.IProps
-): React.ReactElement<TabSpaceComponent.IProps> => {
+): React.ReactElement<TabSpaceComponent.IProps> {
   const description = props.isSpaces ? 'Spaces' : 'Tab Size';
   return (
     <TextItem
       onClick={props.handleClick}
       source={`${description}: ${props.tabSpace}`}
+      title={`Change Tab indentation…`}
     />
   );
-};
+}
 
-class TabSpace extends VDomRenderer<TabSpace.Model> implements ITabSpace {
-  constructor(opts: TabSpace.IOptions) {
+/**
+ * A VDomRenderer for a tabs vs. spaces status item.
+ */
+class TabSpace extends VDomRenderer<TabSpace.Model> {
+  /**
+   * Create a new tab/space status item.
+   */
+  constructor(options: TabSpace.IOptions) {
     super();
-
-    this._editorTracker = opts.editorTracker;
-    this._shell = opts.shell;
-    this._settingsProviderData = opts.settingsProviderData;
-
-    this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
-
-    const provider = this._getFocusedSettingProvider(this._shell.currentWidget);
-    this.model = new TabSpace.Model(
-      provider && this._settingsProviderData[provider].connector
-    );
-
-    this.node.title = 'Change tab spacing';
-
+    this._menu = options.menu;
+    this.model = new TabSpace.Model();
     this.addClass(interactiveItem);
   }
 
-  private _handleClick = () => {
-    const provider = this._getFocusedSettingProvider(this._shell.currentWidget);
-    if (!provider) {
-      return;
+  /**
+   * Render the TabSpace status item.
+   */
+  render(): React.ReactElement<TabSpaceComponent.IProps> | null {
+    if (!this.model || !this.model.config) {
+      return null;
+    } else {
+      return (
+        <TabSpaceComponent
+          isSpaces={this.model.config.insertSpaces}
+          tabSpace={this.model.config.tabSize}
+          handleClick={() => this._handleClick()}
+        />
+      );
     }
-    const { menu } = this._settingsProviderData[provider];
-    menu.aboutToClose.connect(this._menuClosed);
+  }
 
+  /**
+   * Handle a click on the status item.
+   */
+  private _handleClick(): void {
+    const menu = this._menu;
     if (this._popup) {
       this._popup.dispose();
     }
+
+    menu.aboutToClose.connect(
+      this._menuClosed,
+      this
+    );
 
     this._popup = showPopup({
       body: menu,
       anchor: this,
       align: 'right'
     });
+  }
 
-    menu.aboutToClose.connect(this._onClickMenuDispose);
-  };
-
-  private _onClickMenuDispose = (sender: Menu) => {
-    sender.node.focus();
-    this._popup!.dispose();
-
-    sender.aboutToClose.connect(this._onClickMenuDispose);
-  };
-
-  private _menuClosed = () => {
+  private _menuClosed(): void {
     this.removeClass(clickedItem);
-  };
-
-  render(): React.ReactElement<TabSpaceComponent.IProps> | null {
-    if (this.model === null) {
-      return null;
-    } else {
-      const provider = this._getFocusedSettingProvider(
-        this._shell.currentWidget
-      );
-      const currentValue =
-        provider && this._settingsProviderData[provider].connector.currentValue;
-
-      if (!currentValue) {
-        return null;
-      }
-
-      return (
-        <TabSpaceComponent
-          isSpaces={currentValue.insertSpaces}
-          tabSpace={this.model.tabSpace}
-          handleClick={this._handleClick}
-        />
-      );
-    }
   }
 
-  dispose() {
-    super.dispose();
-    this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
-  }
-
-  protected onUpdateRequest(msg: Message) {
-    const provider = this._getFocusedSettingProvider(this._shell.currentWidget);
-    this.model!.settingConnector =
-      provider && this._settingsProviderData[provider].connector;
-
-    super.onUpdateRequest(msg);
-  }
-
-  private _getFocusedSettingProvider(
-    val: Widget | null
-  ): TabSpace.SettingProvider | null {
-    if (val === null) {
-      return null;
-    } else {
-      if (this._editorTracker.has(val)) {
-        return 'editor';
-      } else {
-        return null;
-      }
-    }
-  }
-
-  private _onMainAreaCurrentChange = (
-    shell: ApplicationShell,
-    change: ApplicationShell.IChangedArgs
-  ) => {
-    const { newValue } = change;
-    const provider = this._getFocusedSettingProvider(newValue);
-    this.model!.settingConnector =
-      provider && this._settingsProviderData[provider].connector;
-  };
-
-  private _editorTracker: IEditorTracker;
-  private _shell: ApplicationShell;
-  private _settingsProviderData: TabSpace.ISettingProviderData;
+  private _menu: Menu;
   private _popup: Popup | null = null;
 }
 
+/**
+ * A namespace for TabSpace statics.
+ */
 namespace TabSpace {
-  export class Model extends VDomModel implements ITabSpace.IModel {
-    constructor(settingConnector: SettingsWrapper<SettingData> | null) {
-      super();
-
-      this.settingConnector = settingConnector;
+  /**
+   * A VDomModel for the TabSpace status item.
+   */
+  export class Model extends VDomModel {
+    /**
+     * The editor config from the settings system.
+     */
+    get config(): CodeEditor.IConfig | null {
+      return this._config;
+    }
+    set config(val: CodeEditor.IConfig | null) {
+      const oldConfig = this._config;
+      this._config = val;
+      this._triggerChange(oldConfig, this._config);
     }
 
-    get settingConnector(): SettingsWrapper<SettingData> | null {
-      return this._settingConnector;
-    }
-
-    set settingConnector(
-      settingConnector: SettingsWrapper<SettingData> | null
-    ) {
-      const oldTabSpace = this._tabSpace;
-      const oldSettingConnector = this._settingConnector;
-      if (oldSettingConnector !== null) {
-        oldSettingConnector.changed.disconnect(this._onTabSizeChanged);
-      }
-      this._settingConnector = settingConnector;
-
-      if (this._settingConnector === null) {
-        this._tabSpace = 4;
-      } else {
-        this._settingConnector.changed.connect(this._onTabSizeChanged);
-
-        this._tabSpace = this._settingConnector.currentValue!.tabSize;
-      }
-
-      if (
-        (oldSettingConnector === null && this._settingConnector !== null) ||
-        (oldSettingConnector !== null && this._settingConnector === null)
-      ) {
-        this.stateChanged.emit(void 0);
-      } else {
-        this._triggerChange(oldTabSpace, this._tabSpace);
-      }
-    }
-
-    get tabSpace() {
-      return this._tabSpace;
-    }
-
-    private _onTabSizeChanged = () => {
-      const oldTabSpace = this._tabSpace;
-      const currentValue = this.settingConnector!.currentValue;
-      if (currentValue && currentValue.tabSize) {
-        this._tabSpace = currentValue.tabSize;
-      } else {
-        this._tabSpace = 4;
-      }
-
-      this._triggerChange(oldTabSpace, this._tabSpace);
-    };
-
-    private _triggerChange(oldValue: number, newValue: number): void {
-      if (oldValue !== newValue) {
+    private _triggerChange(
+      oldValue: CodeEditor.IConfig,
+      newValue: CodeEditor.IConfig
+    ): void {
+      const oldSpaces = oldValue && oldValue.insertSpaces;
+      const oldSize = oldValue && oldValue.tabSize;
+      const newSpaces = newValue && newValue.insertSpaces;
+      const newSize = newValue && newValue.tabSize;
+      if (oldSpaces !== newSpaces || oldSize !== newSize) {
         this.stateChanged.emit(void 0);
       }
     }
 
-    private _tabSpace: number = 4;
-    private _settingConnector: SettingsWrapper<
-      TabSpace.SettingData
-    > | null = null;
+    private _config: CodeEditor.IConfig | null = null;
   }
 
-  export type SettingProvider = 'editor';
-
-  export type ISettingProviderData = {
-    [P in SettingProvider]: {
-      connector: SettingsWrapper<TabSpace.SettingData>;
-      menu: Menu;
-    }
-  };
-
+  /**
+   * Options for creating a TabSpace status item.
+   */
   export interface IOptions {
-    editorTracker: IEditorTracker;
-    shell: ApplicationShell;
-    commands: CommandRegistry;
-    settings: ISettingRegistry;
-    settingsProviderData: ISettingProviderData;
-  }
-
-  export type SettingData = { tabSize: number; insertSpaces: boolean };
-}
-
-export interface ITabSpace extends IDisposable {
-  readonly model: ITabSpace.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace ITabSpace {
-  export interface IModel {
-    readonly tabSpace: number;
-    readonly settingConnector: SettingsWrapper<{
-      tabSize: number;
-    }> | null;
+    /**
+     * A menu to open when clicking on the status item. This should allow
+     * the user to make a different selection about tabs/spaces.
+     */
+    menu: Menu;
   }
 }
 
+/**
+ * A plugin that provides a status item allowing the user to
+ * switch tabs vs spaces and tab widths for text editors.
+ */
 export const tabSpaceItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:tab-space-item',
   autoStart: true,
@@ -287,49 +187,49 @@ export const tabSpaceItem: JupyterLabPlugin<void> = {
     app: JupyterLab,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
-    settings: ISettingRegistry
+    settingRegistry: ISettingRegistry
   ) => {
-    const editorConnector = new SettingsWrapper<TabSpace.SettingData>({
-      registry: settings,
-      pluginId: '@jupyterlab/fileeditor-extension:plugin',
-      settingKey: 'editorConfig'
-    });
-
-    const editorMenu = new Menu({ commands: app.commands });
-
-    editorMenu.addClass('p-Menu');
-
+    // Create a menu for switching tabs vs spaces.
+    const menu = new Menu({ commands: app.commands });
+    const command = 'fileeditor:change-tabs';
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
       name: 'Indent with Tab'
     };
-    editorMenu.addItem({ command: CommandIDs.changeTabsEditor, args });
-
+    menu.addItem({ command, args });
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
         insertSpaces: true,
         size,
-        name: `Spaces: ${size}`
+        name: `Spaces: ${size} `
       };
-      editorMenu.addItem({ command: CommandIDs.changeTabsEditor, args });
+      menu.addItem({ command, args });
     }
 
-    const settingsProviderData: TabSpace.ISettingProviderData = {
-      editor: {
-        connector: editorConnector,
-        menu: editorMenu
-      }
-    };
+    // Create the status item.
+    const item = new TabSpace({ menu });
 
-    const item = new TabSpace({
-      shell: app.shell,
-      editorTracker,
-      commands: app.commands,
-      settings,
-      settingsProviderData
+    // Keep a reference to the code editor config from the settings system.
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const cached = settings.get('editorConfig').composite as Partial<
+        CodeEditor.IConfig
+      >;
+      const config: CodeEditor.IConfig = {
+        ...CodeEditor.defaultConfig,
+        ...cached
+      };
+      item.model.config = config;
+    };
+    Promise.all([
+      settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
+      app.restored
+    ]).then(([settings]) => {
+      updateSettings(settings);
+      settings.changed.connect(updateSettings);
     });
 
+    // Add the status item.
     statusBar.registerStatusItem('tab-space-item', item, {
       align: 'right',
       rank: 1,
@@ -339,10 +239,3 @@ export const tabSpaceItem: JupyterLabPlugin<void> = {
     });
   }
 };
-
-/**
- * Command IDs used by the plugin.
- */
-namespace CommandIDs {
-  export const changeTabsEditor = 'fileeditor:change-tabs';
-}
