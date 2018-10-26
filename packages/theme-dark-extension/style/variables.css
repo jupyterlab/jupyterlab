@@ -277,7 +277,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Notebook specific styles */
 
   --jp-notebook-padding: 10px;
-  --jp-notebook-scroll-padding: 100px;
+  --jp-notebook-scroll-padding: 50%;
   --jp-notebook-select-background: var(--jp-layout-color1);
   --jp-notebook-multiselected-color: rgba(33, 150, 243, 0.24);
 
