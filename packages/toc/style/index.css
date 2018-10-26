@@ -103,8 +103,8 @@
   background-color: none;
   background-size: 100%;
   background-position: center;
-  height: 16px;
-  width: 16px;
+  height: 24px;
+  width: 24px;
   margin: 4px;
   border-radius: 2px;
 }
@@ -134,8 +134,8 @@
 }
 
 .toc-toolbar-tag-icon {
-  width: 24px;
-  height: 16px;
+  width: 30px;
+  height: 22px;
   margin: 4px 9px 4px 4px;
 }
 
@@ -311,41 +311,51 @@
   font-size: 12px;
   color: var(--jp-ui-font-color1);
   padding-left: 15px;
-  padding-top: 7px;
+  /* padding-top: 7px; */
   user-select: none;
+  float: right;
 }
 
 .toc-clear-button:hover {
   font-size: 12px;
   color: var(--jp-ui-font-color2);
   padding-left: 15px;
-  padding-top: 7px;
+  /* padding-top: 7px; */
   user-select: none;
 }
 
-.toc-select-button {
+.toc-filter-button {
   background-color: var(--jp-layout-color1);
   border: solid 1px var(--jp-layout-color4);
   border-radius: 3px;
   width: fit-content;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 5px;
+  padding-left: 6px;
+  padding-right: 6px;
   margin-right: 17px;
   color: var(--jp-layout-color5);
   float: right;
   font-size: 12px;
   user-select: none;
+  margin-bottom: 13px;
 }
 
-.toc-filter-button {
+.toc-filter-button:hover {
   background-color: var(--jp-layout-color4);
   border: solid 1px var(--jp-layout-color4);
+  color: var(--jp-layout-color1);
+}
+
+.toc-filter-button-na {
+  background-color: var(--jp-layout-color1);
+  border: solid 1px var(--jp-ui-font-color3);
   border-radius: 3px;
   width: fit-content;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-right: 15px;
-  color: var(--jp-layout-color1);
+  padding: 5px;
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-right: 17px;
+  color: var(--jp-ui-font-color3);
   float: right;
   font-size: 12px;
   user-select: none;
@@ -393,7 +403,7 @@
   border-radius: 20px;
   padding: 10px;
   padding-bottom: 4px;
-  padding-top: 3px;
+  padding-top: 5px;
   margin: 3px;
   width: fit-content;
   max-width: calc(100% - 25px);
@@ -414,7 +424,7 @@
   display: flex;
   flex-wrap: wrap;
   height: fit-content;
-  margin-bottom: 20px;
+  padding-bottom: 6px;
   padding-right: 20px;
   padding-left: 9px;
   padding-top: 6px;

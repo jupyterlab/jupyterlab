@@ -100,7 +100,6 @@ export function createNotebookGenerator(
               lastLevel,
               cell
             );
-
             // Do not render the code cell in TOC if it is filtered out by tags
             if (
               currentCollapseLevel < 0 &&
@@ -208,6 +207,7 @@ export function createNotebookGenerator(
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
+
           if (
             (cell as MarkdownCell).rendered &&
             !(cell as MarkdownCell).inputHidden
@@ -236,7 +236,7 @@ export function createNotebookGenerator(
               cell
             );
             if (renderedHeading && renderedHeading.type === 'markdown') {
-              // Do not put the item in TOC if its filtered out by tags
+              // Do not put the item in TOC if it's filtered out by tags
               if (
                 currentCollapseLevel < 0 &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
