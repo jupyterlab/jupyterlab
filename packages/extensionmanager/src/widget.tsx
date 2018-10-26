@@ -386,6 +386,7 @@ export class CollapsibleSection extends React.Component<
         {this.props.headerElements}
       </header>
     ];
+
     if (!this.state.collapsed) {
       if (Array.isArray(this.props.children)) {
         elements.push(...this.props.children);
@@ -393,6 +394,7 @@ export class CollapsibleSection extends React.Component<
         elements.push(this.props.children);
       }
     }
+
     return elements;
   }
 
@@ -548,6 +550,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         installedContent.push(
           <ListView
+            key="list-view"
             entries={model.installed}
             numPages={1}
             onPage={value => {
@@ -587,6 +590,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         searchContent.push(
           <ListView
+            key="list-view"
             // Filter out installed extensions:
             entries={model.searchResult.filter(
               entry => model.installed.indexOf(entry) === -1
