@@ -45,6 +45,8 @@ For both Windows and Mac users, press ``shift`` + ``righ-click`` to get to the r
 
 For Mac users:
 ..............
+Copy : ``Cmd`` + ``c``
+Paste: ``Cmd`` + ``v``
 
 
 For Windows users (Power shell):
