@@ -522,7 +522,7 @@ export class DirListing extends Widget {
    * Select the first item that starts with prefix being typed.
    */
   selectByPrefix(): void {
-    const prefix = this._searchPrefix;
+    const prefix = this._searchPrefix.toLowerCase();
     let items = this._sortedItems;
 
     let index = ArrayExt.findFirstIndex(items, value => {
