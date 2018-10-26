@@ -142,12 +142,11 @@ const main: JupyterLabPlugin<void> = {
 
         const body = (
           <div>
-            <p>
+             <br>
               JupyterLab build is suggested:
-              <br />
               <pre>{response.message}</pre>
-            </p>
           </div>
+            
         );
 
         showDialog({
