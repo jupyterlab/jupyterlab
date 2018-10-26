@@ -12,7 +12,7 @@ import { IInspector, InspectorPanel } from '@jupyterlab/inspector/src';
 class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];
 
-  protected onInspectorUpdate(
+  public onInspectorUpdate(
     sender: any,
     args: IInspector.IInspectorUpdate
   ): void {
