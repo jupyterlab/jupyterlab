@@ -145,7 +145,7 @@ const main: JupyterLabPlugin<void> = {
             <p>
               JupyterLab build is suggested:
               <br />
-              <pre>{response.message}</pre>
+              <p>{response.message}</p>
             </p>
           </div>
         );
