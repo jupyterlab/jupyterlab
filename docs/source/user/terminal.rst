@@ -31,11 +31,19 @@ select the terminal in the new Launcher tab:
 Closing a terminal tab will leave it running on the server, but you can
 re-open it using the Running tab in the left sidebar:
 
-.. _Copy/Paste
-copy pasting 
-
 .. raw:: html
 
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/gDM5lwU6Dmo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+.. _Copy/Paste:
+
+Copy/Paste
+++++++++++
+
+For Mac users:
+..............
+
+For Windows users:
+..................
