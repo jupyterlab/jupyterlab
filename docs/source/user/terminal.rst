@@ -41,9 +41,11 @@ re-open it using the Running tab in the left sidebar:
 
 Copy/Paste
 ++++++++++
+For both windows and Mac users, press ``shift`` + ``righ-click` to get to the right-click menu from inside Jupyterlab terminal. Or by using shortcut keys as follows:
 
 For Mac users:
 ..............
+
 
 For Windows users:
 ..................
