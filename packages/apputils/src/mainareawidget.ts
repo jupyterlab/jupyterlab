@@ -30,7 +30,6 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     super(options);
     this.addClass('jp-MainAreaWidget');
     this.id = DOMUtils.createDomID();
-    console.log('The ID is:', this.id);
 
     const content = (this._content = options.content);
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
