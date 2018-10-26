@@ -11,11 +11,11 @@ export interface ITagsToolComponentProps {
   allTagsList: string[];
   tracker: INotebookTracker;
   generatorOptionsRef: NotebookGeneratorOptionsManager;
+  inputFilter: string[];
 }
 
 export interface ITagsToolComponentState {
   selected: string[];
-  filtered: string[];
 }
 
 /*
@@ -28,8 +28,7 @@ export class TagsToolComponent extends React.Component<
   constructor(props: ITagsToolComponentProps) {
     super(props);
     this.state = {
-      selected: [],
-      filtered: []
+      selected: this.props.inputFilter
     };
   }
 
@@ -60,14 +59,14 @@ export class TagsToolComponent extends React.Component<
   };
 
   public getFiltered() {
-    return this.state.filtered;
+    return this.state.selected;
   }
 
   /*
   * Deselect all tags in the dropdown and clear filters in the TOC.
   */
   deselectAllTags = () => {
-    this.setState({ selected: [], filtered: [] });
+    this.setState({ selected: [] });
     this.props.generatorOptionsRef.updateWidget();
   };
 
@@ -93,7 +92,7 @@ export class TagsToolComponent extends React.Component<
   * Tells the generator to filter the TOC by the selected tags.
   */
   filterTags = (selected: string[]) => {
-    this.setState({ filtered: selected });
+    this.setState({ selected });
     this.props.generatorOptionsRef.updateWidget();
   };
 
@@ -101,13 +100,13 @@ export class TagsToolComponent extends React.Component<
     let temp: string[] = [];
     let idx = 0;
     let needsUpdate = false;
-    for (let i = 0; i < this.state.filtered.length; i++) {
+    for (let i = 0; i < this.state.selected.length; i++) {
       if (
-        this.props.allTagsList.indexOf(this.state.filtered[i] as string) > -1
+        this.props.allTagsList.indexOf(this.state.selected[i] as string) > -1
       ) {
-        temp[idx] = this.state.filtered[i];
+        temp[idx] = this.state.selected[i];
         idx++;
-      } else {
+      } else if (this.props.generatorOptionsRef.showTags === true) {
         needsUpdate = true;
       }
     }

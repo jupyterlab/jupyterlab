@@ -99,6 +99,9 @@ export function notebookGeneratorToolbar(
     };
 
     toggleTagDropdown = () => {
+      if (options.showTags && this.tagTool) {
+        options.storeTags = this.tagTool.state.selected;
+      }
       options.showTags = !options.showTags;
       this.setState({ showTags: options.showTags });
     };
@@ -218,10 +221,13 @@ export function notebookGeneratorToolbar(
             allTagsList={this.allTags}
             tracker={tracker}
             generatorOptionsRef={options}
+            inputFilter={options.storeTags}
             ref={tagTool => (this.tagTool = tagTool)}
           />
         );
         options.setTagTool(this.tagTool);
+        if (this.tagTool) {
+        }
         tagDropdown = <div className={'toc-tag-dropdown'}> {tagTool} </div>;
         tagIcon = (
           <div

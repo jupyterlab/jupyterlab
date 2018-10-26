@@ -27,6 +27,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
     this.tagTool = null;
+    this.storeTags = [];
   }
 
   readonly sanitizer: ISanitizer;
@@ -81,6 +82,8 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
   get filtered() {
     if (this.tagTool) {
       this._filtered = this.tagTool.getFiltered();
+    } else if (this.storeTags.length > 0) {
+      this._filtered = this.storeTags;
     } else {
       this._filtered = [];
     }
@@ -125,4 +128,5 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
   private _showTags = false;
   private _notebook: INotebookTracker;
   private _widget: TableOfContents;
+  public storeTags: string[];
 }
