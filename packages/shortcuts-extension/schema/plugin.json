@@ -433,7 +433,7 @@
       "properties": {
         "command": { "default": "filemenu:close-and-cleanup" },
         "keys": { "default": ["Ctrl Shift Q"] },
-        "selector": { "default": "body" },
+        "selector": { "default": ".jp-Activity" },
         "title": { "default": "Close and cleanup file" },
         "category": { "default": "File Operations" }
       },
