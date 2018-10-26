@@ -75,6 +75,7 @@
     "@jupyterlab/theme-light-extension": "^0.19.1",
     "@jupyterlab/tooltip": "^0.19.1",
     "@jupyterlab/tooltip-extension": "^0.19.1",
+    "@jupyterlab/ui-components": "^0.0.1",
     "@jupyterlab/vdom-extension": "^0.18.1",
     "@jupyterlab/vega4-extension": "^0.18.1",
     "@phosphor/algorithm": "^1.1.2",
@@ -290,6 +291,7 @@
       "@jupyterlab/theme-light-extension": "../packages/theme-light-extension",
       "@jupyterlab/tooltip": "../packages/tooltip",
       "@jupyterlab/tooltip-extension": "../packages/tooltip-extension",
+      "@jupyterlab/ui-components": "../packages/ui-components",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega4-extension": "../packages/vega4-extension"
     }

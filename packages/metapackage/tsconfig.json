@@ -196,6 +196,9 @@
       "path": "../tooltip-extension"
     },
     {
+      "path": "../ui-components"
+    },
+    {
       "path": "../vdom-extension"
     },
     {
