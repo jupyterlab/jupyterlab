@@ -4,7 +4,54 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Button {
+  border-radius: var(--jp-border-radius);
+  padding: 0px 12px;
+  font-size: var(--jp-ui-font-size1);
+  text-transform: uppercase;
 }
 
-.jp-Select {
+.jp-Button.minimal {
+  color: unset !important;
 }
+
+.jp-InputGroup {
+  border-radius: 0;
+}
+
+.jp-InputGroup input {
+  box-sizing: border-box;
+}
+
+.jp-InputGroup input:focus {
+  box-shadow: inset 0 0 0 1px rgba(19, 124, 189, 0.3),
+    inset 0 0 0 3px rgba(19, 124, 189, 0.3);
+}
+
+.jp-Icon {
+  color: var(--jp-layout-color4);
+}
+
+.jp-InputGroupAction {
+  line-height: 24px;
+  font-size: 20px;
+}
+
+.jp-InputGroupAction.left {
+  padding-left: 8px;
+}
+
+.jp-InputGroupAction.right {
+  padding-right: 8px;
+}
+
+.jp-HTMLSelect select {
+  height: 24;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  display: block;
+}
+
+/* .jp-Select {
+
+} */
