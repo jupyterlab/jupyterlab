@@ -1,16 +1,6 @@
-/**
- * Default item to display the status of the kernel of the active notbeook or console.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
 import React from 'react';
 
-import {
-  JupyterLabPlugin,
-  JupyterLab,
-  ApplicationShell
-} from '@jupyterlab/application';
+import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
@@ -24,62 +14,77 @@ import { Kernel, Session } from '@jupyterlab/services';
 
 import { interactiveItem, IStatusBar, TextItem } from '@jupyterlab/statusbar';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { JSONExt } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { Message } from '@phosphor/messaging';
-
-import { ISignal, Signal } from '@phosphor/signaling';
-
-import { Widget } from '@phosphor/widgets';
+import { Title, Widget } from '@phosphor/widgets';
 
 import { IStatusContext } from '../context';
 
-// tslint:disable-next-line:variable-name
-const KernelStatusComponent = (
+/**
+ * A pure functional component for rendering kernel status.
+ */
+function KernelStatusComponent(
   props: KernelStatusComponent.IProps
-): React.ReactElement<KernelStatusComponent.IProps> => {
+): React.ReactElement<KernelStatusComponent.IProps> {
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${Text.titleCase(props.name)} | ${Text.titleCase(props.status)}`}
+      source={`${Text.titleCase(props.kernelName)} | ${Text.titleCase(
+        props.status
+      )}`}
+      title={`Change kernel for ${props.activityName}`}
     />
   );
-};
+}
 
+/**
+ * A namespace for KernelStatusComponent statics.
+ */
 namespace KernelStatusComponent {
+  /**
+   * Props for the kernel status component.
+   */
   export interface IProps {
+    /**
+     * A click handler for the kernel status component. By default
+     * we have it bring up the kernel change dialog.
+     */
     handleClick: () => void;
-    name: string;
+
+    /**
+     * The name the kernel.
+     */
+    kernelName: string;
+
+    /**
+     * The name of the activity using the kernel.
+     */
+    activityName: string;
+
+    /**
+     * The status of the kernel.
+     */
     status: Kernel.Status;
   }
 }
 
-class KernelStatus extends VDomRenderer<KernelStatus.Model>
-  implements IKernelStatus {
+/**
+ * A VDomRenderer widget for displaying the status of a kernel.
+ */
+class KernelStatus extends VDomRenderer<KernelStatus.Model> {
+  /**
+   * Construct the kernel status widget.
+   */
   constructor(opts: KernelStatus.IOptions) {
     super();
-
-    this._notebookTracker = opts.notebookTracker;
-    this._consoleTracker = opts.consoleTracker;
-    this._commands = opts.commands;
-    this._shell = opts.shell;
-
-    this._shell.currentChanged.connect(
-      this._onCurrentChanged,
-      this
-    );
-
-    this.model = new KernelStatus.Model(
-      this._getFocusedSession(this._shell.currentWidget)
-    );
-
+    this._handleClick = opts.onClick;
+    this.model = new KernelStatus.Model();
     this.addClass(interactiveItem);
   }
 
-  readonly model: KernelStatus.Model;
-
+  /**
+   * Render the kernel status item.
+   */
   render() {
     if (this.model === null) {
       return null;
@@ -87,97 +92,60 @@ class KernelStatus extends VDomRenderer<KernelStatus.Model>
       return (
         <KernelStatusComponent
           status={this.model.status}
-          name={this.model.name}
+          kernelName={this.model.kernelName}
+          activityName={this.model.activityName}
           handleClick={this._handleClick}
         />
       );
     }
   }
 
-  dispose() {
-    super.dispose();
-    Signal.disconnectAll(this);
-    this._shell.currentChanged.disconnect(this._onCurrentChanged);
-  }
-
-  protected onUpdateRequest(msg: Message) {
-    this.model.session = this._getFocusedSession(this._shell.currentWidget);
-    super.onUpdateRequest(msg);
-  }
-
-  private _handleClick = () => {
-    // The kernel menu flavor of change kernel delegates
-    // based on the active widget, so use that.
-    this._commands.execute('kernelmenu:change');
-  };
-
-  private _onTitleChanged = () => {
-    const name = this._shell.currentWidget
-      ? this._shell.currentWidget.title.label
-      : 'activity';
-    this.node.title = `Change active kernel for ${name}`;
-  };
-
-  private _getFocusedSession(val: Widget | null): IClientSession | null {
-    if (!val) {
-      return null;
-    } else {
-      if (this._notebookTracker.has(val)) {
-        return (val as NotebookPanel).session;
-      } else if (this._consoleTracker.has(val)) {
-        return (val as ConsolePanel).session;
-      } else {
-        return null;
-      }
-    }
-  }
-
-  private _onCurrentChanged(
-    shell: ApplicationShell,
-    change: ApplicationShell.IChangedArgs
-  ): void {
-    if (this._current) {
-      this._current.title.changed.disconnect(this._onTitleChanged, this);
-    }
-    this._current = change.newValue;
-    this._current.title.changed.connect(
-      this._onTitleChanged,
-      this
-    );
-    const session = this._getFocusedSession(this._current);
-    this.model.session = session;
-  }
-
-  private _current: Widget | undefined;
-  private _notebookTracker: INotebookTracker;
-  private _consoleTracker: IConsoleTracker;
-  private _shell: ApplicationShell;
-  private _commands: CommandRegistry;
+  private _handleClick: () => void;
 }
 
+/**
+ * A namespace for KernelStatus statics.
+ */
 namespace KernelStatus {
-  export class Model extends VDomModel implements IKernelStatus.IModel {
-    constructor(session: IClientSession | null) {
-      super();
-      this.session = session;
-    }
-
-    get name() {
+  /**
+   * A VDomModel for the kernel status indicator.
+   */
+  export class Model extends VDomModel {
+    /**
+     * The name of the kernel.
+     */
+    get kernelName() {
       return this._kernelName;
     }
 
+    /**
+     * The current status of the kernel.
+     */
     get status() {
       return this._kernelStatus;
     }
 
-    get type() {
-      return this._session && this._session.type;
+    /**
+     * A display name for the activity.
+     */
+    get activityName(): string {
+      return this._activityName;
+    }
+    set activityName(val: string) {
+      const oldVal = this._activityName;
+      if (oldVal === val) {
+        return;
+      }
+      this._activityName = val;
+      this.stateChanged.emit(void 0);
     }
 
-    get session() {
+    /**
+     * The current client session associated with the kernel status indicator.
+     */
+    get session(): IClientSession {
       return this._session;
     }
-
     set session(session: IClientSession | null) {
       const oldSession = this._session;
       if (oldSession !== null) {
@@ -201,6 +169,9 @@ namespace KernelStatus {
       this._triggerChange(oldState, this._getAllState());
     }
 
+    /**
+     * React to changes to the kernel status.
+     */
     private _onKernelStatusChanged = (
       _session: IClientSession,
       status: Kernel.Status
@@ -209,6 +180,9 @@ namespace KernelStatus {
       this.stateChanged.emit(void 0);
     };
 
+    /**
+     * React to changes in the kernel.
+     */
     private _onKernelChanged = (
       _session: IClientSession,
       change: Session.IKernelChangedArgs
@@ -226,43 +200,34 @@ namespace KernelStatus {
       this._triggerChange(oldState, this._getAllState());
     };
 
-    private _getAllState(): [string, string] {
-      return [this._kernelName, this._kernelStatus];
+    private _getAllState(): [string, string, string] {
+      return [this._kernelName, this._kernelStatus, this._activityName];
     }
 
     private _triggerChange(
-      oldState: [string, string],
-      newState: [string, string]
+      oldState: [string, string, string],
+      newState: [string, string, string]
     ) {
-      if (oldState[0] !== newState[0] || oldState[1] !== newState[1]) {
+      if (JSONExt.deepEqual(oldState, newState)) {
         this.stateChanged.emit(void 0);
       }
     }
 
+    private _activityName: string = 'activity';
     private _kernelName: string = 'unknown';
     private _kernelStatus: Kernel.Status = 'unknown';
     private _session: IClientSession | null = null;
   }
 
+  /**
+   * Options for creating a KernelStatus object.
+   */
   export interface IOptions {
-    notebookTracker: INotebookTracker;
-    consoleTracker: IConsoleTracker;
-    shell: ApplicationShell;
-    commands: CommandRegistry;
-  }
-}
-
-export interface IKernelStatus extends IDisposable {
-  readonly model: IKernelStatus.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace IKernelStatus {
-  export interface IModel {
-    readonly name: string;
-    readonly status: Kernel.Status;
-    readonly type: string | null;
-    readonly session: IClientSession | null;
+    /**
+     * A click handler for the item. By default
+     * we launch a kernel selection dialog.
+     */
+    onClick: () => void;
   }
 }
 
@@ -276,11 +241,49 @@ export const kernelStatus: JupyterLabPlugin<void> = {
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker
   ) => {
+    // When the status item is clicked, launch the kernel
+    // selection dialog for the current session.
+    let currentSession: IClientSession | null = null;
+    const changeKernel = () => {
+      if (!currentSession) {
+        return;
+      }
+      currentSession.selectKernel();
+    };
+
+    // Create the status item.
     const item = new KernelStatus({
-      shell: app.shell,
-      notebookTracker,
-      consoleTracker,
-      commands: app.commands
+      onClick: changeKernel
+    });
+
+    // When the title of the active widget changes, update the label
+    // of the hover text.
+    const onTitleChanged = (title: Title<Widget>) => {
+      item.model.activityName = title.label;
+    };
+
+    // Keep the session object on the status item up-to-date.
+    app.shell.currentChanged.connect((shell, change) => {
+      const { oldValue, newValue } = change;
+
+      // Clean up after the old value if it exists,
+      // listen for changes to the title of the activity
+      if (oldValue) {
+        oldValue.title.changed.disconnect(onTitleChanged);
+      }
+      if (newValue) {
+        newValue.title.changed.connect(onTitleChanged);
+      }
+
+      // Grab the session off of the current widget, if it exists.
+      if (newValue && consoleTracker.has(newValue)) {
+        currentSession = (newValue as ConsolePanel).session;
+      } else if (newValue && notebookTracker.has(newValue)) {
+        currentSession = (newValue as NotebookPanel).session;
+      } else {
+        currentSession = null;
+      }
+      item.model.session = currentSession;
     });
 
     statusBar.registerStatusItem('kernel-status-item', item, {
