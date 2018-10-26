@@ -98,7 +98,8 @@
       true,
       "check-format",
       "allow-leading-underscore",
-      "ban-keywords"
+      "ban-keywords",
+      "allow-pascal-case"
     ],
     "whitespace": [
       true,
