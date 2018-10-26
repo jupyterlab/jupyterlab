@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 export default {
   hoverColor: '#8a8a8a',
   clickColor: '#a6a6a6',

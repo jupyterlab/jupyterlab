@@ -13,6 +13,8 @@ import '../style/index.css';
 
 export * from './widget';
 
+export * from './tabspacestatus';
+
 /**
  * A class that tracks editor widgets.
  */

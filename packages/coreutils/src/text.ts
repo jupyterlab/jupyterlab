@@ -70,4 +70,19 @@ export namespace Text {
     }
     return jsIdx;
   }
+
+  /**
+   * Given a string, title case the words in the string.
+   *
+   * @param str: the string to title case.
+   *
+   * @returns the same string, but with each word capitalized.
+   */
+  export function titleCase(str: string) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
 }

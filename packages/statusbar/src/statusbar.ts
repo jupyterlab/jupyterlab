@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ApplicationShell } from '@jupyterlab/application';
-
 import { ArrayExt } from '@phosphor/algorithm';
 
 import { ISignal } from '@phosphor/signaling';
@@ -80,20 +78,11 @@ export namespace IStatusBar {
 }
 
 /**
- * The DOM id for the status bar.
- */
-const STATUS_BAR_ID = 'jp-main-status-bar';
-
-/**
  * Main status bar object which contains all widgets.
  */
 export class StatusBar extends Widget implements IStatusBar {
-  constructor(options: StatusBar.IOptions) {
+  constructor() {
     super();
-
-    this._host = options.host;
-
-    this.id = STATUS_BAR_ID;
     this.addClass(barStyle);
 
     let rootLayout = (this.layout = new PanelLayout());
@@ -113,16 +102,6 @@ export class StatusBar extends Widget implements IStatusBar {
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
     rootLayout.addWidget(rightPanel);
-
-    this._host.addToBottomArea(this);
-    this._host.currentChanged.connect(this._onAppShellCurrentChanged);
-    this._host.restored
-      .then(() => {
-        this.update();
-      })
-      .catch(() => {
-        console.error(`Failed to refresh statusbar items`);
-      });
   }
 
   /**
@@ -212,8 +191,6 @@ export class StatusBar extends Widget implements IStatusBar {
    */
   dispose() {
     super.dispose();
-
-    this._host.currentChanged.disconnect(this._onAppShellCurrentChanged);
     this._statusIds.forEach(id => {
       const { stateChanged, changeCallback, widget } = this._statusItems[id];
 
@@ -258,10 +235,6 @@ export class StatusBar extends Widget implements IStatusBar {
     });
   }
 
-  private _onAppShellCurrentChanged = () => {
-    this._refreshAll();
-  };
-
   private _onIndividualStateChange = (statusId: string) => {
     this._refreshItem(this._statusItems[statusId]);
   };
@@ -271,21 +244,12 @@ export class StatusBar extends Widget implements IStatusBar {
   private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
   private _statusIds: Array<string> = [];
 
-  private _host: ApplicationShell;
-
   private _leftSide: Panel;
   private _middlePanel: Panel;
   private _rightSide: Panel;
 }
 
 export namespace StatusBar {
-  /**
-   * Options for creating a new StatusBar instance
-   */
-  export interface IOptions {
-    host: ApplicationShell;
-  }
-
   /**
    * The interface for a status bar item.
    */
