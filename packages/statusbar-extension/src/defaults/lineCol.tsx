@@ -1,17 +1,6 @@
-/**
- * Default item to display and change the line and column number.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
-
 import React from 'react';
 
-import {
-  JupyterLabPlugin,
-  JupyterLab,
-  ApplicationShell
-} from '@jupyterlab/application';
+import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
 
 import {
   VDomRenderer,
@@ -33,7 +22,11 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  INotebookTracker,
+  Notebook,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 
 import {
   IStatusBar,
@@ -42,14 +35,6 @@ import {
   Popup,
   TextItem
 } from '@jupyterlab/statusbar';
-
-import { IDisposable } from '@phosphor/disposable';
-
-import { Message } from '@phosphor/messaging';
-
-import { ISignal } from '@phosphor/signaling';
-
-import { Widget } from '@phosphor/widgets';
 
 import { IStatusContext } from '../context';
 
@@ -64,57 +49,75 @@ import {
 
 import { classes } from 'typestyle/lib';
 
-namespace LineForm {
+/**
+ * A namespace for LineFormComponent statics.
+ */
+namespace LineFormComponent {
+  /**
+   * The props for LineFormComponent.
+   */
   export interface IProps {
+    /**
+     * A callback for when the form is submitted.
+     */
     handleSubmit: (value: number) => void;
+
+    /**
+     * The current line of the form.
+     */
     currentLine: number;
+
+    /**
+     * The maximum line the form can take (typically the
+     * maximum line of the relevant editor).
+     */
     maxLine: number;
   }
 
+  /**
+   * The props for LineFormComponent.
+   */
   export interface IState {
+    /**
+     * The current value of the form.
+     */
     value: string;
+
+    /**
+     * Whether the form has focus.
+     */
     hasFocus: boolean;
   }
 }
 
-class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
-  state = {
-    value: '',
-    hasFocus: false
-  };
+/**
+ * A component for rendering a "go-to-line" form.
+ */
+class LineFormComponent extends React.Component<
+  LineFormComponent.IProps,
+  LineFormComponent.IState
+> {
+  /**
+   * Construct a new LineFormComponent.
+   */
+  constructor(props: LineFormComponent.IProps) {
+    super(props);
+    this.state = {
+      value: '',
+      hasFocus: false
+    };
+  }
 
-  private _handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ value: event.currentTarget.value });
-  };
-
-  private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const value = parseInt(this._textInput!.value, 10);
-    if (
-      !isNaN(value) &&
-      isFinite(value) &&
-      1 <= value &&
-      value <= this.props.maxLine
-    ) {
-      this.props.handleSubmit(value);
-    }
-
-    return false;
-  };
-
-  private _handleFocus = () => {
-    this.setState({ hasFocus: true });
-  };
-
-  private _handleBlur = () => {
-    this.setState({ hasFocus: false });
-  };
-
+  /**
+   * Focus the element on mount.
+   */
   componentDidMount() {
     this._textInput!.focus();
   }
 
+  /**
+   * Render the LineFormComponent.
+   */
   render() {
     return (
       <div className={lineFormSearch}>
@@ -152,49 +155,107 @@ class LineForm extends React.Component<LineForm.IProps, LineForm.IState> {
     );
   }
 
+  /**
+   * Handle a change to the value in the input field.
+   */
+  private _handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ value: event.currentTarget.value });
+  };
+
+  /**
+   * Handle submission of the input field.
+   */
+  private _handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const value = parseInt(this._textInput!.value, 10);
+    if (
+      !isNaN(value) &&
+      isFinite(value) &&
+      1 <= value &&
+      value <= this.props.maxLine
+    ) {
+      this.props.handleSubmit(value);
+    }
+
+    return false;
+  };
+
+  /**
+   * Handle focusing of the input field.
+   */
+  private _handleFocus = () => {
+    this.setState({ hasFocus: true });
+  };
+
+  /**
+   * Handle blurring of the input field.
+   */
+  private _handleBlur = () => {
+    this.setState({ hasFocus: false });
+  };
+
   private _textInput: HTMLInputElement | null = null;
 }
 
+/**
+ * A namespace for LineColComponent.
+ */
 namespace LineColComponent {
+  /**
+   * Props for LineColComponent.
+   */
   export interface IProps {
+    /**
+     * The current line number.
+     */
     line: number;
+
+    /**
+     * The current column number.
+     */
     column: number;
+
+    /**
+     * A click handler for the LineColComponent, which
+     * we use to launch the LineFormComponent.
+     */
     handleClick: () => void;
   }
 }
 
-// tslint:disable-next-line:variable-name
-const LineColComponent = (
+/**
+ * A pure functional component for rendering a line/column
+ * status item.
+ */
+function LineColComponent(
   props: LineColComponent.IProps
-): React.ReactElement<LineColComponent.IProps> => {
+): React.ReactElement<LineColComponent.IProps> {
   return (
     <TextItem
       onClick={props.handleClick}
       source={`Ln ${props.line}, Col ${props.column}`}
     />
   );
-};
+}
 
-class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
-  constructor(opts: LineCol.IOptions) {
+/**
+ * A widget implementing a line/column status item.
+ */
+class LineCol extends VDomRenderer<LineCol.Model> {
+  /**
+   * Construct a new LineCol status item.
+   */
+  constructor() {
     super();
-
-    this._notebookTracker = opts.notebookTracker;
-    this._editorTracker = opts.editorTracker;
-    this._consoleTracker = opts.consoleTracker;
-    this._shell = opts.shell;
-
-    this._notebookTracker.activeCellChanged.connect(this._onActiveCellChange);
-    this._shell.currentChanged.connect(this._onMainAreaCurrentChange);
-
-    this.model = new LineCol.Model(
-      this._getFocusedEditor(this._shell.currentWidget)
-    );
-
-    this.node.title = 'Go to line number';
+    this.model = new LineCol.Model();
+    this.title.caption = 'Go to line number';
     this.addClass(interactiveItem);
   }
 
+  /**
+   * Render the status item.
+   */
   render(): React.ReactElement<LineColComponent.IProps> | null {
     if (this.model === null) {
       return null;
@@ -203,35 +264,23 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
         <LineColComponent
           line={this.model.line}
           column={this.model.column}
-          handleClick={this._handleClick}
+          handleClick={() => this._handleClick()}
         />
       );
     }
   }
 
-  dispose() {
-    super.dispose();
-
-    this._notebookTracker.activeCellChanged.disconnect(
-      this._onActiveCellChange
-    );
-    this._shell.currentChanged.disconnect(this._onMainAreaCurrentChange);
-  }
-
-  protected onUpdateRequest(msg: Message) {
-    this.model!.editor = this._getFocusedEditor(this._shell.currentWidget);
-
-    super.onUpdateRequest(msg);
-  }
-
-  private _handleClick = () => {
+  /**
+   * A click handler for the widget.
+   */
+  private _handleClick(): void {
     if (this._popup) {
       this._popup.dispose();
     }
     const body = new ReactElementWidget(
       (
-        <LineForm
-          handleSubmit={this._handleSubmit}
+        <LineFormComponent
+          handleSubmit={val => this._handleSubmit(val)}
           currentLine={this.model!.line}
           maxLine={this.model!.editor!.lineCount}
         />
@@ -243,87 +292,34 @@ class LineCol extends VDomRenderer<LineCol.Model> implements ILineCol {
       anchor: this,
       align: 'right'
     });
-  };
+  }
 
-  private _handleSubmit = (value: number) => {
+  /**
+   * Handle submission for the widget.
+   */
+  private _handleSubmit(value: number): void {
     this.model!.editor!.setCursorPosition({ line: value - 1, column: 0 });
     this._popup!.dispose();
     this.model!.editor!.focus();
-  };
-
-  private _onPromptCellCreated = (_console: CodeConsole, cell: CodeCell) => {
-    this.model!.editor = cell.editor;
-  };
-
-  private _onActiveCellChange = (
-    _tracker: INotebookTracker,
-    cell: Cell | null
-  ) => {
-    this.model!.editor = cell && cell.editor;
-  };
-
-  private _getFocusedEditor(val: Widget | null): CodeEditor.IEditor | null {
-    if (val === null) {
-      return null;
-    } else {
-      if (this._notebookTracker.has(val)) {
-        const activeCell = (val as NotebookPanel).content.activeCell;
-        if (activeCell === null) {
-          return null;
-        } else {
-          return activeCell!.editor;
-        }
-      } else if (this._editorTracker.has(val)) {
-        return (val as IDocumentWidget<FileEditor>).content.editor;
-      } else if (this._consoleTracker.has(val)) {
-        const promptCell = (val as ConsolePanel).console.promptCell;
-        return promptCell && promptCell.editor;
-      } else {
-        return null;
-      }
-    }
   }
 
-  private _onMainAreaCurrentChange = (
-    shell: ApplicationShell,
-    change: ApplicationShell.IChangedArgs
-  ) => {
-    const { newValue, oldValue } = change;
-    const editor = this._getFocusedEditor(newValue);
-    this.model!.editor = editor;
-
-    if (newValue && this._consoleTracker.has(newValue)) {
-      (newValue as ConsolePanel).console.promptCellCreated.connect(
-        this._onPromptCellCreated
-      );
-    }
-
-    if (oldValue && this._consoleTracker.has(oldValue)) {
-      (oldValue as ConsolePanel).console.promptCellCreated.disconnect(
-        this._onPromptCellCreated
-      );
-    }
-  };
-
-  private _notebookTracker: INotebookTracker;
-  private _editorTracker: IEditorTracker;
-  private _consoleTracker: IConsoleTracker;
-  private _shell: ApplicationShell;
   private _popup: Popup | null = null;
 }
 
+/**
+ * A namespace for LineCol statics.
+ */
 namespace LineCol {
-  export class Model extends VDomModel implements ILineCol.IModel {
-    constructor(editor: CodeEditor.IEditor | null) {
-      super();
-
-      this.editor = editor;
-    }
-
+  /**
+   * A VDom model for a status item tracking the line/column of an editor.
+   */
+  export class Model extends VDomModel {
+    /**
+     * The current editor of the model.
+     */
     get editor(): CodeEditor.IEditor | null {
       return this._editor;
     }
-
     set editor(editor: CodeEditor.IEditor | null) {
       const oldEditor = this._editor;
       if (oldEditor !== null) {
@@ -346,14 +342,23 @@ namespace LineCol {
       this._triggerChange(oldState, this._getAllState());
     }
 
+    /**
+     * The current line of the model.
+     */
     get line(): number {
       return this._line;
     }
 
+    /**
+     * The current column of the model.
+     */
     get column(): number {
       return this._column;
     }
 
+    /**
+     * React to a change in the cursors of the current editor.
+     */
     private _onSelectionChanged = () => {
       const oldState = this._getAllState();
       const pos = this.editor!.getCursorPosition();
@@ -380,28 +385,11 @@ namespace LineCol {
     private _column: number = 1;
     private _editor: CodeEditor.IEditor | null = null;
   }
-
-  export interface IOptions {
-    notebookTracker: INotebookTracker;
-    editorTracker: IEditorTracker;
-    consoleTracker: IConsoleTracker;
-    shell: ApplicationShell;
-  }
 }
 
-export interface ILineCol extends IDisposable {
-  readonly model: ILineCol.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace ILineCol {
-  export interface IModel {
-    readonly line: number;
-    readonly column: number;
-    readonly editor: CodeEditor.IEditor | null;
-  }
-}
-
+/**
+ * A plugin providing a line/column status item to the application.
+ */
 export const lineColItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar:line-col-item',
   autoStart: true,
@@ -413,13 +401,53 @@ export const lineColItem: JupyterLabPlugin<void> = {
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker
   ) => {
-    let item = new LineCol({
-      shell: app.shell,
-      notebookTracker,
-      editorTracker,
-      consoleTracker
+    const item = new LineCol();
+
+    const onActiveCellChanged = (notebook: Notebook, cell: Cell) => {
+      item.model.editor = cell && cell.editor;
+    };
+
+    const onPromptCreated = (console: CodeConsole, prompt: CodeCell) => {
+      item.model.editor = prompt && prompt.editor;
+    };
+
+    app.shell.currentChanged.connect((shell, change) => {
+      const { oldValue, newValue } = change;
+
+      // Check if we need to disconnect the console listener
+      // or the notebook active cell listener
+      if (oldValue && consoleTracker.has(oldValue)) {
+        (oldValue as ConsolePanel).console.promptCellCreated.disconnect(
+          onPromptCreated
+        );
+      } else if (oldValue && notebookTracker.has(oldValue)) {
+        (oldValue as NotebookPanel).content.activeCellChanged.disconnect(
+          onActiveCellChanged
+        );
+      }
+
+      // Wire up the new editor to the model if it exists
+      if (newValue && consoleTracker.has(newValue)) {
+        (newValue as ConsolePanel).console.promptCellCreated.connect(
+          onPromptCreated
+        );
+        item.model.editor = (newValue as ConsolePanel).console.promptCell.editor;
+      } else if (newValue && notebookTracker.has(newValue)) {
+        (newValue as NotebookPanel).content.activeCellChanged.connect(
+          onActiveCellChanged
+        );
+        const cell = (newValue as NotebookPanel).content.activeCell;
+        item.model.editor = cell && cell.editor;
+      } else if (newValue && editorTracker.has(newValue)) {
+        item.model.editor = (newValue as IDocumentWidget<
+          FileEditor
+        >).content.editor;
+      } else {
+        item.model.editor = null;
+      }
     });
 
+    // Add the status item to the status bar.
     statusBar.registerStatusItem('line-col-item', item, {
       align: 'right',
       rank: 2,
