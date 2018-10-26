@@ -235,6 +235,7 @@ function LineColComponent(
     <TextItem
       onClick={props.handleClick}
       source={`Ln ${props.line}, Col ${props.column}`}
+      title="Go to line number…"
     />
   );
 }
@@ -249,7 +250,6 @@ class LineCol extends VDomRenderer<LineCol.Model> {
   constructor() {
     super();
     this.model = new LineCol.Model();
-    this.title.caption = 'Go to line number';
     this.addClass(interactiveItem);
   }
 

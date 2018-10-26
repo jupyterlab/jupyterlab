@@ -44,7 +44,7 @@ namespace FilePathComponent {
 function FilePathComponent(
   props: FilePathComponent.IProps
 ): React.ReactElement<FilePathComponent.IProps> {
-  return <TextItem source={props.name} />;
+  return <TextItem source={props.name} title={props.fullPath} />;
 }
 
 /**
@@ -57,9 +57,7 @@ class FilePath extends VDomRenderer<FilePath.Model> {
   constructor(opts: FilePath.IOptions) {
     super();
     this._docManager = opts.docManager;
-
     this.model = new FilePath.Model(this._docManager);
-
     this.node.title = this.model.path;
   }
 
@@ -67,7 +65,6 @@ class FilePath extends VDomRenderer<FilePath.Model> {
    * Render the status item.
    */
   render() {
-    this.title.caption = this.model.path;
     return (
       <FilePathComponent fullPath={this.model.path} name={this.model.name!} />
     );
