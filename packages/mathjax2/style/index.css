@@ -5,10 +5,12 @@
 
 /* Left-justify the MathJax preview in cell outputs. */
 .jp-OutputArea-output.jp-RenderedLatex .MathJax_Preview .MJXp-display {
+  padding: var(--jp-code-padding);
   text-align: left !important;
 }
 
 /* Left-justify the MathJax display equation in cell outputs. */
 .jp-OutputArea-output.jp-RenderedLatex .MathJax_Display {
+  padding: var(--jp-code-padding);
   text-align: left !important;
 }

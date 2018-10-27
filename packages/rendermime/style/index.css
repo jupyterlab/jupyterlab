@@ -10,7 +10,6 @@
 .jp-RenderedText {
   text-align: left;
   padding-left: var(--jp-code-padding);
-  font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   font-family: var(--jp-code-font-family);
 }
@@ -19,6 +18,7 @@
 .jp-RenderedJavaScript pre,
 .jp-RenderedHTMLCommon pre {
   color: var(--jp-content-font-color1);
+  font-size: var(--jp-code-font-size);
   border: none;
   margin: 0px;
   padding: 0px;
@@ -156,6 +156,7 @@
 
 /* Left-justify outputs.*/
 .jp-OutputArea-output.jp-RenderedLatex {
+  padding: var(--jp-code-padding);
   text-align: left;
 }
 
