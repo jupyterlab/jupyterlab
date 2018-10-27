@@ -428,6 +428,17 @@
       },
       "type": "object"
     },
+    "filemenu:close-and-cleanup": {
+      "default": {},
+      "properties": {
+        "command": { "default": "filemenu:close-and-cleanup" },
+        "keys": { "default": ["Ctrl Shift Q"] },
+        "selector": { "default": ".jp-Activity" },
+        "title": { "default": "Close and cleanup file" },
+        "category": { "default": "File Operations" }
+      },
+      "type": "object"
+    },
     "launcher:create": {
       "default": {},
       "properties": {
