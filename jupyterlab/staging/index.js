@@ -9,10 +9,7 @@ import {
   PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
-__webpack_public_path__ = URLExt.join(
-  PageConfig.getOption('baseUrl'),
-  PageConfig.getOption('publicUrl')
-);
+__webpack_public_path__ = PageConfig.getOption('bundleUrl');
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
