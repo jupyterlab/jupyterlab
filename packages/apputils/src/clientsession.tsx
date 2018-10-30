@@ -569,7 +569,7 @@ export class ClientSession implements IClientSession {
       return Promise.reject('Disposed');
     }
     let session = this._session;
-    if (session) {
+    if (session && session.status !== 'dead') {
       return session.changeKernel(options);
     } else {
       return this._startSession(options);
