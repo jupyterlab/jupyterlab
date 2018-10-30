@@ -7,12 +7,7 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-  InstanceTracker,
-  IThemeManager,
-  showDialog,
-  Dialog
-} from '@jupyterlab/apputils';
+import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
 
 import {
   CSVViewer,
@@ -24,7 +19,6 @@ import {
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { DataGrid } from '@phosphor/datagrid';
-import { Widget } from '@phosphor/widgets';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
@@ -33,40 +27,6 @@ import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
  */
 const FACTORY_CSV = 'CSVTable';
 const FACTORY_TSV = 'TSVTable';
-
-/**
- * A widget used to prompt for a simple value.
- */
-class PromptWidget extends Widget {
-  constructor(labelText: string, inputType: string, value?: string) {
-    let body = document.createElement('div');
-    let label = document.createElement('label');
-    label.textContent = labelText;
-    let input = document.createElement('input');
-    input.type = inputType;
-    if (value) {
-      input.value = value;
-    }
-    body.appendChild(label);
-    body.appendChild(input);
-
-    super({ node: body });
-  }
-
-  /**
-   * Get the input text node.
-   */
-  get inputNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
-  }
-
-  /**
-   * Get the value of the widget.
-   */
-  getValue(): string {
-    return this.inputNode.value;
-  }
-}
 
 /**
  * The CSV file handler extension.
@@ -99,21 +59,11 @@ function addMenuEntries(
   mainMenu.editMenu.findReplacers.add({
     tracker,
     find: (widget: IDocumentWidget<CSVViewer>) => {
-      const buttons = {
-        Cancel: Dialog.cancelButton(),
-        OK: Dialog.okButton({ label: 'Find' })
-      };
-      return showDialog({
-        title: 'Find...',
-        body: new PromptWidget(
-          'Search Text',
-          'text',
-          widget.content.searchService.searchText
-        ),
-        buttons: [buttons.Cancel, buttons.OK],
-        focusNodeSelector: 'input'
-      }).then(value => {
-        if (value.button === buttons.OK) {
+      return Dialog.prompt<string>(
+        'Search Text',
+        widget.content.searchService.searchText
+      ).then(value => {
+        if (value.button.accept) {
           widget.content.searchService.find(value.value);
         }
       });
@@ -124,18 +74,9 @@ function addMenuEntries(
   mainMenu.editMenu.goToLiners.add({
     tracker,
     goToLine: (widget: IDocumentWidget<CSVViewer>) => {
-      const buttons = {
-        Cancel: Dialog.cancelButton(),
-        OK: Dialog.okButton({ label: 'Go To Line' })
-      };
-      return showDialog({
-        title: 'Go to Line',
-        body: new PromptWidget('Line Number', 'number'),
-        buttons: [buttons.Cancel, buttons.OK],
-        focusNodeSelector: 'input'
-      }).then(value => {
-        if (value.button === buttons.OK) {
-          widget.content.goToLine(parseInt(value.value, 10));
+      return Dialog.prompt<number>('Go to Line', 0).then(value => {
+        if (value.button.accept) {
+          widget.content.goToLine(value.value);
         }
       });
     }
