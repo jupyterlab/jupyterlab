@@ -7,17 +7,20 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker, IThemeManager } from '@jupyterlab/apputils';
+import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
 
 import {
   CSVViewer,
+  TextRenderConfig,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { DataGrid, TextRenderer } from '@phosphor/datagrid';
+import { DataGrid } from '@phosphor/datagrid';
+
+import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
 /**
  * The name of the factories that creates widgets.
@@ -28,11 +31,10 @@ const FACTORY_TSV = 'TSVTable';
 /**
  * The CSV file handler extension.
  */
-
 const csv: JupyterLabPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [ILayoutRestorer, IThemeManager],
+  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
   autoStart: true
 };
 
@@ -42,9 +44,44 @@ const csv: JupyterLabPlugin<void> = {
 const tsv: JupyterLabPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
-  requires: [ILayoutRestorer, IThemeManager],
+  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
   autoStart: true
 };
+
+/**
+ * Connect menu entries for find and go to line.
+ */
+function addMenuEntries(
+  mainMenu: IMainMenu,
+  tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
+) {
+  // Add find capability to the edit menu.
+  mainMenu.editMenu.findReplacers.add({
+    tracker,
+    find: (widget: IDocumentWidget<CSVViewer>) => {
+      return Dialog.prompt<string>(
+        'Search Text',
+        widget.content.searchService.searchText
+      ).then(value => {
+        if (value.button.accept) {
+          widget.content.searchService.find(value.value);
+        }
+      });
+    }
+  } as IEditMenu.IFindReplacer<IDocumentWidget<CSVViewer>>);
+
+  // Add go to line capability to the edit menu.
+  mainMenu.editMenu.goToLiners.add({
+    tracker,
+    goToLine: (widget: IDocumentWidget<CSVViewer>) => {
+      return Dialog.prompt<number>('Go to Line', 0).then(value => {
+        if (value.button.accept) {
+          widget.content.goToLine(value.value);
+        }
+      });
+    }
+  } as IEditMenu.IGoToLiner<IDocumentWidget<CSVViewer>>);
+}
 
 /**
  * Activate cssviewer extension for CSV files
@@ -52,7 +89,8 @@ const tsv: JupyterLabPlugin<void> = {
 function activateCsv(
   app: JupyterLab,
   restorer: ILayoutRestorer,
-  themeManager: IThemeManager
+  themeManager: IThemeManager,
+  mainMenu: IMainMenu
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
@@ -66,7 +104,7 @@ function activateCsv(
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
-  let renderer: TextRenderer = Private.LIGHT_RENDERER;
+  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -91,20 +129,24 @@ function activateCsv(
     }
     // Set the theme for the new widget.
     widget.content.style = style;
-    widget.content.renderer = renderer;
+    widget.content.rendererConfig = rendererConfig;
   });
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
     const isLight = themeManager.isLight(themeManager.theme);
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    renderer = isLight ? Private.LIGHT_RENDERER : Private.DARK_RENDERER;
+    rendererConfig = isLight
+      ? Private.LIGHT_TEXT_CONFIG
+      : Private.DARK_TEXT_CONFIG;
     tracker.forEach(grid => {
       grid.content.style = style;
-      grid.content.renderer = renderer;
+      grid.content.rendererConfig = rendererConfig;
     });
   };
   themeManager.themeChanged.connect(updateThemes);
+
+  addMenuEntries(mainMenu, tracker);
 }
 
 /**
@@ -113,7 +155,8 @@ function activateCsv(
 function activateTsv(
   app: JupyterLab,
   restorer: ILayoutRestorer,
-  themeManager: IThemeManager
+  themeManager: IThemeManager,
+  mainMenu: IMainMenu
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
@@ -127,7 +170,7 @@ function activateTsv(
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
-  let renderer: TextRenderer = Private.LIGHT_RENDERER;
+  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -152,20 +195,24 @@ function activateTsv(
     }
     // Set the theme for the new widget.
     widget.content.style = style;
-    widget.content.renderer = renderer;
+    widget.content.rendererConfig = rendererConfig;
   });
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
     const isLight = themeManager.isLight(themeManager.theme);
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    renderer = isLight ? Private.LIGHT_RENDERER : Private.DARK_RENDERER;
+    rendererConfig = isLight
+      ? Private.LIGHT_TEXT_CONFIG
+      : Private.DARK_TEXT_CONFIG;
     tracker.forEach(grid => {
       grid.content.style = style;
-      grid.content.renderer = renderer;
+      grid.content.rendererConfig = rendererConfig;
     });
   };
   themeManager.themeChanged.connect(updateThemes);
+
+  addMenuEntries(mainMenu, tracker);
 }
 
 /**
@@ -204,18 +251,22 @@ namespace Private {
   };
 
   /**
-   * The light renderer for the data grid.
+   * The light config for the data grid renderer.
    */
-  export const LIGHT_RENDERER = new TextRenderer({
+  export const LIGHT_TEXT_CONFIG: TextRenderConfig = {
     textColor: '#111111',
+    matchBackgroundColor: '#FFFFE0',
+    currentMatchBackgroundColor: '#FFFF00',
     horizontalAlignment: 'right'
-  });
+  };
 
   /**
-   * The dark renderer for the data grid.
+   * The dark config for the data grid renderer.
    */
-  export const DARK_RENDERER = new TextRenderer({
+  export const DARK_TEXT_CONFIG: TextRenderConfig = {
     textColor: '#F5F5F5',
+    matchBackgroundColor: '#838423',
+    currentMatchBackgroundColor: '#A3807A',
     horizontalAlignment: 'right'
-  });
+  };
 }

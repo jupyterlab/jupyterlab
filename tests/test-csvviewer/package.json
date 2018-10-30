@@ -21,6 +21,7 @@
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/testutils": "^0.3.1",
     "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/datagrid": "^0.1.6",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2",
     "csv-spectrum": "~1.0.0",

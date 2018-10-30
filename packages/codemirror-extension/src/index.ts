@@ -370,10 +370,6 @@ function activateEditorCommands(
   // Add go to line capabilities to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
-    find: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('jumpToLine');
-    },
     goToLine: (widget: IDocumentWidget<FileEditor>) => {
       let editor = widget.content.editor as CodeMirrorEditor;
       editor.execCommand('jumpToLine');
