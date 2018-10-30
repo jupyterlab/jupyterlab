@@ -130,10 +130,16 @@ export class GridSearchService {
           this._grid.repaint();
           if (!isMatchInViewport()) {
             // scroll the matching cell into view
-            this._grid.scrollTo(
-              this._grid.baseColumnSize * this._column,
-              this._grid.baseRowSize * this._row
-            );
+            let scrollX = this._grid.scrollX;
+            let scrollY = this._grid.scrollY;
+            /* see also https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 */
+            for (let i = scrollY; i < this._row - 1; i++) {
+              scrollY += this._grid.sectionSize('row', i);
+            }
+            for (let j = scrollX; j < this._column - 1; j++) {
+              scrollX += this._grid.sectionSize('column', j);
+            }
+            this._grid.scrollTo(scrollX, scrollY);
           }
           return;
         }
@@ -266,10 +272,15 @@ export class CSVViewer extends Widget {
    * Go to line
    */
   goToLine(lineNumber: number) {
-    this._grid.scrollTo(
-      this._grid.scrollX,
-      this._grid.baseRowSize * (lineNumber - 1)
-    );
+    let scrollY = this._grid.scrollY;
+    /* The lines might not all have uniform height, so we can't just scroll to lineNumber * this._grid.baseRowSize
+    see https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 for discussions around
+    this. It would be nice if DataGrid had a method to scroll to cell, which could be implemented more efficiently
+    because datagrid knows more about the shape of the cells. */
+    for (let i = scrollY; i < lineNumber - 1; i++) {
+      scrollY += this._grid.sectionSize('row', i);
+    }
+    this._grid.scrollTo(this._grid.scrollX, scrollY);
   }
 
   /**
