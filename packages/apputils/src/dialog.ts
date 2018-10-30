@@ -717,6 +717,76 @@ export namespace Dialog {
    * The default renderer instance.
    */
   export const defaultRenderer = new Renderer();
+
+  /** A simple type for prompt widget */
+  type PromptValueType = string | number | boolean;
+  /**
+   * Create and show a prompt dialog
+   */
+  class PromptWidget<T extends PromptValueType> extends Widget {
+    constructor(value: T) {
+      let body = document.createElement('div');
+      let input = document.createElement('input');
+      if (typeof value === 'string') {
+        input.type = 'text';
+        if (value) {
+          input.value = value;
+        }
+      }
+      if (typeof value === 'number') {
+        input.type = 'number';
+        if (value) {
+          input.value = value.toFixed(2);
+        }
+      }
+      if (typeof value === 'boolean') {
+        input.type = 'checkbox';
+        input.checked = value;
+      }
+      body.appendChild(input);
+      super({ node: body });
+    }
+
+    /**
+     * Get the input text node.
+     */
+    get inputNode(): HTMLInputElement {
+      return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+    }
+
+    /**
+     * Get the value of the widget.
+     */
+    getValue(): T {
+      if (this.inputNode.type === 'number') {
+        // In this branch T extends number.
+        return parseFloat(this.inputNode.value) as T;
+      }
+      if (this.inputNode.type === 'checkbox') {
+        // In this branch T extends boolean.
+        return this.inputNode.checked as T;
+      }
+      return this.inputNode.value as T;
+    }
+  }
+
+  /**
+   * Simple dialog to prompt for a value
+   * @param prompt Text to show on the prompt
+   * @param defaultValue Initial value
+   * @returns a Promise which will resolve with the value entered by user.
+   */
+  export function prompt<T extends PromptValueType>(
+    prompt: string,
+    defaultValue: PromptValueType
+  ): Promise<Dialog.IResult<T>> {
+    return showDialog({
+      title: prompt,
+      body: new PromptWidget<T>(defaultValue as T),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
+    });
+  }
 }
 
 /**
