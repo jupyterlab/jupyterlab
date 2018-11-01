@@ -1,0 +1,18 @@
+{
+  "title": "Command Palette",
+  "description": "Command palette settings.",
+  "jupyter.lab.setting-icon-class": "jp-JupyterIcon",
+  "jupyter.lab.setting-icon-label": "Command Palette",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "apputils:activate-command-palette",
+      "keys": ["Accel Shift C"],
+      "selector": "body",
+      "title": "Activate Command Palette",
+      "category": "Main Area"
+    }
+  ],
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+}

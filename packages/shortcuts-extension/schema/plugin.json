@@ -4,17 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "apputils:activate-command-palette": {
-      "default": {},
-      "properties": {
-        "command": { "default": "apputils:activate-command-palette" },
-        "keys": { "default": ["Accel Shift C"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Activate Command Palette" },
-        "category": { "default": "Main Area" }
-      },
-      "type": "object"
-    },
     "completer:invoke-console": {
       "default": {},
       "properties": {
