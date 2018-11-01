@@ -1759,7 +1759,7 @@ export namespace DirListing {
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified));
+        modTitle = Time.format(new Date(model.last_modified), 'lll');
       }
       modified.textContent = modText;
       modified.title = modTitle;
