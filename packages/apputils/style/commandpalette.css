@@ -150,7 +150,7 @@
 }
 
 .p-CommandPalette-item.p-mod-disabled mark {
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(131, 131, 131, 0.863);
 }
 
 .p-CommandPalette-item.p-mod-toggled .p-CommandPalette-itemIcon {
