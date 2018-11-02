@@ -77,7 +77,9 @@ describe('@jupyterlab/statusbar', () => {
           align: 'right',
           rank: 1
         });
-        expect(item2.node.nextSibling).to.equal(item1.node);
+        // Reverse order than what one might expect, as right-to-left
+        // is set in the styling of the right panel.
+        expect(item1.node.nextSibling).to.equal(item2.node);
       });
 
       it('should allow insertion of status items in the middle', () => {
