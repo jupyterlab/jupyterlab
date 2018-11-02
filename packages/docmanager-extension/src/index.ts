@@ -179,13 +179,17 @@ export const savingStatusPlugin: JupyterLabPlugin<void> = {
       () => (item.model!.widget = app.shell.currentWidget)
     );
 
-    statusBar.registerStatusItem('saving-status', item, {
-      align: 'middle',
-      isActive: () => {
-        return true;
-      },
-      stateChanged: item.model!.stateChanged
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab.docmanager-extension:saving-status',
+      {
+        item,
+        align: 'middle',
+        isActive: () => {
+          return true;
+        },
+        activeStateChanged: item.model!.stateChanged
+      }
+    );
   }
 };
 
@@ -209,13 +213,17 @@ export const pathStatusPlugin: JupyterLabPlugin<void> = {
       item.model!.widget = app.shell.currentWidget;
     });
 
-    statusBar.registerStatusItem('path-status', item, {
-      align: 'right',
-      rank: 0,
-      isActive: () => {
-        return true;
+    statusBar.registerStatusItem(
+      '@jupyterlab/docmanager-extension:path-status',
+      {
+        item,
+        align: 'right',
+        rank: 0,
+        isActive: () => {
+          return true;
+        }
       }
-    });
+    );
   }
 };
 

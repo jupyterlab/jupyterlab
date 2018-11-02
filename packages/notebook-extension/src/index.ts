@@ -305,7 +305,8 @@ export const commandEditItem: JupyterLabPlugin<void> = {
       item.model.notebook = current && current.content;
     });
 
-    statusBar.registerStatusItem('command-edit-item', item, {
+    statusBar.registerStatusItem('@jupyterlab/notebook-extension:mode-status', {
+      item,
       align: 'right',
       rank: 4,
       isActive: () =>
@@ -336,14 +337,18 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
       item.model.notebook = current && current.content;
     });
 
-    statusBar.registerStatusItem('notebook-trust-item', item, {
-      align: 'right',
-      rank: 3,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/notebook-extension:trust-status',
+      {
+        item,
+        align: 'right',
+        rank: 3,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
   }
 };
 

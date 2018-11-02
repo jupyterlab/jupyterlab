@@ -39,17 +39,11 @@ export interface IStatusBar {
    *
    * @param id - a unique id for the status item.
    *
-   * @param widget - The item to add to the status bar.
-   *
    * @param options - The options for how to add the status item.
    *
    * @returns an `IDisposable` that can be disposed to remove the item.
    */
-  registerStatusItem(
-    id: string,
-    widget: Widget,
-    options: IStatusBar.IItemOptions
-  ): IDisposable;
+  registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable;
 }
 
 /**
@@ -61,11 +55,16 @@ export namespace IStatusBar {
   /**
    * Options for status bar items.
    */
-  export interface IItemOptions {
+  export interface IItem {
     /**
-     * Which side to place widget.
-     * Permanent widgets are intended for the right and left side,
-     * with more transient widgets in the middle.
+     * The item to add to the status bar.
+     */
+    item: Widget;
+
+    /**
+     * Which side to place item.
+     * Permanent items are intended for the right and left side,
+     * with more transient items in the middle.
      */
     align?: Alignment;
 
@@ -75,19 +74,19 @@ export namespace IStatusBar {
     rank?: number;
 
     /**
-     * Whether the widget is shown or hidden.
+     * Whether the item is shown or hidden.
      */
     isActive?: () => boolean;
 
     /**
-     * A signal that is fired when the widget active state changes.
+     * A signal that is fired when the item active state changes.
      */
     activeStateChanged?: ISignal<any, void>;
   }
 }
 
 /**
- * Main status bar object which contains all widgets.
+ * Main status bar object which contains all items.
  */
 export class StatusBar extends Widget implements IStatusBar {
   constructor() {
@@ -118,75 +117,60 @@ export class StatusBar extends Widget implements IStatusBar {
    *
    * @param id - a unique id for the status item.
    *
-   * @param widget - The item to add to the status bar.
-   *
-   * @param options - The options for how to add the status item.
+   * @param statusItem - The item to add to the status bar.
    */
-  registerStatusItem(
-    id: string,
-    widget: Widget,
-    options: IStatusBar.IItemOptions = {}
-  ): IDisposable {
+  registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    const align = options.align || 'left';
-    const rank = options.rank || 0;
-    const isActive = options.isActive || (() => true);
-    const activeStateChanged = options.activeStateChanged || null;
+    // Populate defaults for the optional properties of the status item.
+    statusItem = { ...Private.statusItemDefaults, ...statusItem };
+    const { align, item, rank } = statusItem;
 
+    // Connect the activeStateChanged signal to refreshing the status item,
+    // if the signal was provided.
     const onActiveStateChanged = () => {
       this._refreshItem(id);
     };
-    if (activeStateChanged) {
-      activeStateChanged.connect(onActiveStateChanged);
+    if (statusItem.activeStateChanged) {
+      statusItem.activeStateChanged.connect(onActiveStateChanged);
     }
 
-    let wrapper = {
-      widget,
-      align,
-      rank,
-      isActive,
-      activeStateChanged
-    };
+    let rankItem = { id, rank };
 
-    let rankItem = {
-      id,
-      rank
-    };
-
-    widget.addClass(itemStyle);
-
-    this._statusItems[id] = wrapper;
+    statusItem.item.addClass(itemStyle);
+    this._statusItems[id] = statusItem;
 
     if (align === 'left') {
       let insertIndex = this._findInsertIndex(this._leftRankItems, rankItem);
       if (insertIndex === -1) {
-        this._leftSide.addWidget(widget);
+        this._leftSide.addWidget(item);
         this._leftRankItems.push(rankItem);
       } else {
         ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
-        this._leftSide.insertWidget(insertIndex, widget);
+        this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
       let insertIndex = this._findInsertIndex(this._rightRankItems, rankItem);
       if (insertIndex === -1) {
-        this._rightSide.addWidget(widget);
+        this._rightSide.addWidget(item);
         this._rightRankItems.push(rankItem);
       } else {
         ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
-        this._rightSide.insertWidget(insertIndex, widget);
+        this._rightSide.insertWidget(insertIndex, item);
       }
     } else {
-      this._middlePanel.addWidget(widget);
+      this._middlePanel.addWidget(item);
     }
 
     const disposable = new DisposableDelegate(() => {
       delete this._statusItems[id];
-      activeStateChanged.disconnect(onActiveStateChanged);
-      widget.parent = null;
-      widget.dispose();
+      if (statusItem.activeStateChanged) {
+        statusItem.activeStateChanged.disconnect(onActiveStateChanged);
+      }
+      item.parent = null;
+      item.dispose();
     });
     this._disposables.add(disposable);
     return disposable;
@@ -220,10 +204,10 @@ export class StatusBar extends Widget implements IStatusBar {
   private _refreshItem(id: string) {
     const statusItem = this._statusItems[id];
     if (statusItem.isActive()) {
-      statusItem.widget.show();
-      statusItem.widget.update();
+      statusItem.item.show();
+      statusItem.item.update();
     } else {
-      statusItem.widget.hide();
+      statusItem.item.hide();
     }
   }
 
@@ -235,30 +219,28 @@ export class StatusBar extends Widget implements IStatusBar {
 
   private _leftRankItems: Private.IRankItem[] = [];
   private _rightRankItems: Private.IRankItem[] = [];
-  private _statusItems: { [id: string]: StatusBar.IItem } = {};
+  private _statusItems: { [id: string]: IStatusBar.IItem } = {};
   private _disposables = new DisposableSet();
   private _leftSide: Panel;
   private _middlePanel: Panel;
   private _rightSide: Panel;
 }
 
-export namespace StatusBar {
-  /**
-   * The interface for a status bar item.
-   */
-  export interface IItem {
-    align: IStatusBar.Alignment;
-    rank: number;
-    widget: Widget;
-    isActive: () => boolean;
-    activeStateChanged: ISignal<any, void> | null;
-  }
-}
-
 /**
  * A namespace for private functionality.
  */
 namespace Private {
+  type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+  /**
+   * Default options for a status item, less the item itself.
+   */
+  export const statusItemDefaults: Omit<IStatusBar.IItem, 'item'> = {
+    align: 'left',
+    rank: 0,
+    isActive: () => true,
+    activeStateChanged: undefined
+  };
+
   /**
    * An interface for storing the rank of a status item.
    */

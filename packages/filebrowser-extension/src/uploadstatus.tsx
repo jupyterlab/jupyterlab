@@ -243,7 +243,7 @@ interface IFileUploadItem {
  * A plugin providing file upload status.
  */
 export const fileUploadStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:file-upload-item',
+  id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
   requires: [IStatusBar, IFileBrowserFactory],
   activate: (
@@ -255,12 +255,16 @@ export const fileUploadStatus: JupyterLabPlugin<void> = {
       tracker: browser.tracker
     });
 
-    statusBar.registerStatusItem('file-upload-item', item, {
-      align: 'middle',
-      isActive: () => {
-        return !!item.model && item.model.items.length > 0;
-      },
-      stateChanged: item.model.stateChanged
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/filebrowser-extension:file-upload-status',
+      {
+        item,
+        align: 'middle',
+        isActive: () => {
+          return !!item.model && item.model.items.length > 0;
+        },
+        activeStateChanged: item.model.stateChanged
+      }
+    );
   }
 };

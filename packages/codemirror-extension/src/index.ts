@@ -83,14 +83,18 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
         >).content.editor;
       }
     });
-    statusBar.registerStatusItem('editor-syntax-item', item, {
-      align: 'left',
-      rank: 0,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/codemirror-extension:editor-syntax-status',
+      {
+        item,
+        align: 'left',
+        rank: 0,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
   }
 };
 
