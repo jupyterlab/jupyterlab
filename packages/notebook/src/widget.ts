@@ -1195,10 +1195,13 @@ export class Notebook extends StaticNotebook {
     node.addEventListener('dblclick', this);
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    // Capture drag events for the notebook widget
+    // in order to preempt the drag/drop handlers in the
+    // code editor widgets, which can take text data.
+    node.addEventListener('p-dragenter', this, true);
+    node.addEventListener('p-dragleave', this, true);
+    node.addEventListener('p-dragover', this, true);
+    node.addEventListener('p-drop', this, true);
   }
 
   /**
@@ -1213,10 +1216,10 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('p-dragenter', this, true);
+    node.removeEventListener('p-dragleave', this, true);
+    node.removeEventListener('p-dragover', this, true);
+    node.removeEventListener('p-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -1852,6 +1855,10 @@ export class Notebook extends StaticNotebook {
     // case where the target is in the same notebook and we
     // can just move the cells.
     this._drag.mimeData.setData('internal:cells', toMove);
+    // Add mimeData for the text content of the selected cells,
+    // allowing for drag/drop into plain text fields.
+    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
