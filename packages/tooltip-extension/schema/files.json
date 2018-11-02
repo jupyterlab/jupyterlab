@@ -1,0 +1,16 @@
+{
+  "title": "File Editor Tooltips",
+  "description": "File editor tooltip settings.",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "tooltip:launch-file",
+      "keys": ["Shift Tab"],
+      "selector": ".jp-FileEditor",
+      "title": "Launch Tooltip",
+      "category": "Tooltips"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

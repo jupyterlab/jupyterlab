@@ -1,8 +1,6 @@
 {
   "title": "Command Palette",
   "description": "Command palette settings.",
-  "jupyter.lab.setting-icon-class": "jp-JupyterIcon",
-  "jupyter.lab.setting-icon-label": "Command Palette",
   "jupyter.lab.keyboard-shortcuts": [
     {
       "command": "apputils:activate-command-palette",

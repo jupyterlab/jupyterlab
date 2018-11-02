@@ -1,0 +1,23 @@
+{
+  "title": "Console Tooltips",
+  "description": "Console tooltip settings.",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "tooltip:dismiss",
+      "keys": ["Escape"],
+      "selector": "body.jp-mod-tooltip .jp-CodeConsole-promptCell",
+      "title": "Dismiss Tooltip",
+      "category": "Tooltips"
+    },
+    {
+      "command": "tooltip:launch-console",
+      "keys": ["Shift Tab"],
+      "selector": ".jp-CodeConsole-promptCell .jp-InputArea-editor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace)",
+      "title": "Launch Tooltip",
+      "category": "Tooltips"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

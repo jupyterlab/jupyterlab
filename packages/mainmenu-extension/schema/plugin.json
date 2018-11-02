@@ -1,8 +1,6 @@
 {
-  "title": "JupyterLab Main Menu ",
+  "title": "Main Menu ",
   "description": "Main JupyterLab menu settings.",
-  "jupyter.lab.setting-icon-class": "jp-JupyterIcon",
-  "jupyter.lab.setting-icon-label": "Main Menu",
   "jupyter.lab.keyboard-shortcuts": [
     {
       "command": "tabmenu:activate-previously-used-tab",
