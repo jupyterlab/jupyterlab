@@ -7,7 +7,11 @@ import { ISignal } from '@phosphor/signaling';
 
 import { Token } from '@phosphor/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import {
+  DisposableDelegate,
+  DisposableSet,
+  IDisposable
+} from '@phosphor/disposable';
 
 import { Message } from '@phosphor/messaging';
 
@@ -59,21 +63,26 @@ export namespace IStatusBar {
    */
   export interface IItemOptions {
     /**
-     * Which side to place widget. Permanent widgets are intended for the right and left side, with more transient widgets in the middle.
+     * Which side to place widget.
+     * Permanent widgets are intended for the right and left side,
+     * with more transient widgets in the middle.
      */
     align?: Alignment;
+
     /**
      *  Ordering of Items -- higher rank items are closer to the middle.
      */
     rank?: number;
+
     /**
      * Whether the widget is shown or hidden.
      */
     isActive?: () => boolean;
+
     /**
-     * Determine when the widget updates.
+     * A signal that is fired when the widget active state changes.
      */
-    stateChanged?: ISignal<any, void>;
+    activeStateChanged?: ISignal<any, void>;
   }
 }
 
@@ -122,24 +131,24 @@ export class StatusBar extends Widget implements IStatusBar {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    let align = options.align || 'left';
-    let rank = options.rank || 0;
-    let isActive = options.isActive || (() => true);
-    let stateChanged = options.stateChanged || null;
-    let changeCallback =
-      options.stateChanged !== undefined
-        ? () => {
-            this._onIndividualStateChange(id);
-          }
-        : null;
+    const align = options.align || 'left';
+    const rank = options.rank || 0;
+    const isActive = options.isActive || (() => true);
+    const activeStateChanged = options.activeStateChanged || null;
+
+    const onActiveStateChanged = () => {
+      this._refreshItem(id);
+    };
+    if (activeStateChanged) {
+      activeStateChanged.connect(onActiveStateChanged);
+    }
 
     let wrapper = {
       widget,
       align,
       rank,
       isActive,
-      stateChanged,
-      changeCallback
+      activeStateChanged
     };
 
     let rankItem = {
@@ -150,11 +159,6 @@ export class StatusBar extends Widget implements IStatusBar {
     widget.addClass(itemStyle);
 
     this._statusItems[id] = wrapper;
-    this._statusIds.push(id);
-
-    if (stateChanged) {
-      stateChanged.connect(changeCallback!);
-    }
 
     if (align === 'left') {
       let insertIndex = this._findInsertIndex(this._leftRankItems, rankItem);
@@ -178,38 +182,30 @@ export class StatusBar extends Widget implements IStatusBar {
       this._middlePanel.addWidget(widget);
     }
 
-    return new DisposableDelegate(() => {
+    const disposable = new DisposableDelegate(() => {
       delete this._statusItems[id];
-      ArrayExt.removeFirstOf(this._statusIds, id);
+      activeStateChanged.disconnect(onActiveStateChanged);
       widget.parent = null;
       widget.dispose();
     });
+    this._disposables.add(disposable);
+    return disposable;
   }
 
   /**
    * Dispose of the status bar.
    */
   dispose() {
+    this._leftRankItems.length = 0;
+    this._rightRankItems.length = 0;
+    this._disposables.dispose();
     super.dispose();
-    this._statusIds.forEach(id => {
-      const { stateChanged, changeCallback, widget } = this._statusItems[id];
-
-      if (stateChanged) {
-        stateChanged.disconnect(changeCallback!);
-      }
-
-      widget.dispose();
-    });
   }
 
   /**
    * Handle an 'update-request' message to the status bar.
    */
   protected onUpdateRequest(msg: Message) {
-    this._statusIds.forEach(statusId => {
-      this._statusItems[statusId].widget.update();
-    });
-
     this._refreshAll();
     super.onUpdateRequest(msg);
   }
@@ -221,29 +217,26 @@ export class StatusBar extends Widget implements IStatusBar {
     return ArrayExt.findFirstIndex(side, item => item.rank > newItem.rank);
   }
 
-  private _refreshItem({ isActive, widget }: StatusBar.IItem) {
-    if (isActive()) {
-      widget.show();
+  private _refreshItem(id: string) {
+    const statusItem = this._statusItems[id];
+    if (statusItem.isActive()) {
+      statusItem.widget.show();
+      statusItem.widget.update();
     } else {
-      widget.hide();
+      statusItem.widget.hide();
     }
   }
 
   private _refreshAll(): void {
-    this._statusIds.forEach(statusId => {
-      this._refreshItem(this._statusItems[statusId]);
+    Object.keys(this._statusItems).forEach(id => {
+      this._refreshItem(id);
     });
   }
 
-  private _onIndividualStateChange = (statusId: string) => {
-    this._refreshItem(this._statusItems[statusId]);
-  };
-
   private _leftRankItems: Private.IRankItem[] = [];
   private _rightRankItems: Private.IRankItem[] = [];
-  private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
-  private _statusIds: Array<string> = [];
-
+  private _statusItems: { [id: string]: StatusBar.IItem } = {};
+  private _disposables = new DisposableSet();
   private _leftSide: Panel;
   private _middlePanel: Panel;
   private _rightSide: Panel;
@@ -258,8 +251,7 @@ export namespace StatusBar {
     rank: number;
     widget: Widget;
     isActive: () => boolean;
-    stateChanged: ISignal<any, void> | null;
-    changeCallback: (() => void) | null;
+    activeStateChanged: ISignal<any, void> | null;
   }
 }
 
