@@ -22,7 +22,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   FileBrowserModel,
   FileBrowser,
-  FileUpload,
+  FileUploadStatus,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
@@ -138,7 +138,7 @@ export const fileUploadStatus: JupyterLabPlugin<void> = {
     statusBar: IStatusBar,
     browser: IFileBrowserFactory
   ) => {
-    const item = new FileUpload({
+    const item = new FileUploadStatus({
       tracker: browser.tracker
     });
 
