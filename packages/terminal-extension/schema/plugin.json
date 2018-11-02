@@ -13,7 +13,8 @@
       "maximum": 72
     },
     "lineHeight": {
-      "type": "number"
+      "type": "number",
+      "minimum": 1.0
     },
     "theme": {
       "enum": ["dark", "light"]

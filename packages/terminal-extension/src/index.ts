@@ -151,7 +151,7 @@ function activate(
   ].map(command => {
     return { command };
   });
-  mainMenu.viewMenu.addGroup(viewGroup, 30);
+  mainMenu.settingsMenu.addGroup(viewGroup, 40);
 
   // Add command palette items.
   [
@@ -195,16 +195,6 @@ export function addCommands(
   settingRegistry: ISettingRegistry
 ) {
   let { commands, shell } = app;
-
-  /**
-   * Whether there is an active terminal.
-   */
-  function isEnabled(): boolean {
-    return (
-      tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
-    );
-  }
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
@@ -287,8 +277,7 @@ export function addCommands(
           .set(plugin.id, 'fontSize', fontSize + 1)
           .catch(showErrorMessage);
       }
-    },
-    isEnabled
+    }
   });
 
   commands.addCommand(CommandIDs.decreaseFont, {
@@ -300,8 +289,7 @@ export function addCommands(
           .set(plugin.id, 'fontSize', fontSize - 1)
           .catch(showErrorMessage);
       }
-    },
-    isEnabled
+    }
   });
 
   commands.addCommand(CommandIDs.toggleTheme, {
@@ -315,7 +303,6 @@ export function addCommands(
         .set(plugin.id, 'theme', theme)
         .then(() => commands.notifyCommandChanged(CommandIDs.toggleTheme))
         .catch(showErrorMessage);
-    },
-    isEnabled
+    }
   });
 }
