@@ -110,6 +110,11 @@
     ]
   },
   "linterOptions": {
-    "exclude": ["node_modules/**/*.ts", "**/*.d.ts", "jupyterlab/**/*.ts"]
+    "exclude": [
+      "node_modules/**/*.ts",
+      "node_modules/**/*.tsx",
+      "**/*.d.ts",
+      "jupyterlab/**/*.ts"
+    ]
   }
 }
