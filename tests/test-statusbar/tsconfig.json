@@ -2,7 +2,17 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
+    "types": ["jest"],
+    "composite": false,
     "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/statusbar"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
 }
