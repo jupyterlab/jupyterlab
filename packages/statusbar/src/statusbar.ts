@@ -163,6 +163,7 @@ export class StatusBar extends Widget implements IStatusBar {
     } else {
       this._middlePanel.addWidget(item);
     }
+    this._refreshItem(id); // Initially refresh the status item.
 
     const disposable = new DisposableDelegate(() => {
       delete this._statusItems[id];
