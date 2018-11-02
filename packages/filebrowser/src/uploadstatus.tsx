@@ -46,7 +46,7 @@ namespace FileUploadComponent {
    */
   export interface IProps {
     /**
-     * The current upload fraction.
+     * The current upload percentage, from 0 to 100.
      */
     upload: number;
   }
