@@ -302,7 +302,7 @@ export const commandEditItem: JupyterLabPlugin<void> = {
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
       const current = tracker.currentWidget;
-      item.model.notebook = current.content;
+      item.model.notebook = current && current.content;
     });
 
     statusBar.registerStatusItem('command-edit-item', item, {
@@ -333,7 +333,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
       const current = tracker.currentWidget;
-      item.model.notebook = current.content;
+      item.model.notebook = current && current.content;
     });
 
     statusBar.registerStatusItem('notebook-trust-item', item, {
