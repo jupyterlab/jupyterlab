@@ -23,6 +23,11 @@ const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
 const HAS_IN_LEADING_WHITESPACE_CLASS = 'jp-mod-in-leading-whitespace';
 
 /**
+ * A class used to indicate a drop target.
+ */
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
+/**
  * RegExp to test for leading whitespace
  */
 const leadingWhitespaceRe = /^\s+$/;
@@ -190,18 +195,26 @@ export class CodeEditorWrapper extends Widget {
    * Handle the `'p-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
     const data = Private.findTextData(event.mimeData);
     if (data === undefined) {
       return;
     }
     event.preventDefault();
     event.stopPropagation();
+    this.addClass('jp-mod-dropTarget');
   }
 
   /**
    * Handle the `'p-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
+    this.removeClass(DROP_TARGET_CLASS);
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
     const data = Private.findTextData(event.mimeData);
     if (data === undefined) {
       return;
@@ -214,6 +227,10 @@ export class CodeEditorWrapper extends Widget {
    * Handle the `'p-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
+    this.removeClass(DROP_TARGET_CLASS);
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
     const data = Private.findTextData(event.mimeData);
     if (data === undefined) {
       return;
@@ -221,16 +238,21 @@ export class CodeEditorWrapper extends Widget {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = 'copy';
+    this.addClass(DROP_TARGET_CLASS);
   }
 
   /**
    * Handle the `'p-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
     const data = Private.findTextData(event.mimeData);
     if (data === undefined) {
       return;
     }
+    this.removeClass(DROP_TARGET_CLASS);
     event.preventDefault();
     event.stopPropagation();
     if (event.proposedAction === 'none') {
