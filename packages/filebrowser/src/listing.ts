@@ -1905,43 +1905,28 @@ namespace Private {
     state: DirListing.ISortState
   ): Contents.IModel[] {
     let copy = toArray(items);
+    let reverse = state.direction === 'descending' ? 1 : -1;
 
     if (state.key === 'last_modified') {
-      // Sort by type and then by last modified.
+      // Sort by last modified (grouping directories first)
       copy.sort((a, b) => {
-        // Compare based on type.
-        let t1 = typeWeight(a);
-        let t2 = typeWeight(b);
-        if (t1 !== t2) {
-          return t1 < t2 ? -1 : 1; // Infinity safe
-        }
+        let t1 = a.type === 'directory' ? 0 : 1;
+        let t2 = b.type === 'directory' ? 0 : 1;
 
         let valA = new Date(a.last_modified).getTime();
         let valB = new Date(b.last_modified).getTime();
 
-        if (state.direction === 'descending') {
-          return valA - valB;
-        }
-        return valB - valA;
+        return t1 - t2 || (valA - valB) * reverse;
       });
     } else {
-      // Sort by type and then by name.
+      // Sort by name (grouping directories first)
       copy.sort((a, b) => {
-        // Compare based on type.
-        let t1 = typeWeight(a);
-        let t2 = typeWeight(b);
-        if (t1 !== t2) {
-          return t1 < t2 ? -1 : 1; // Infinity safe
-        }
+        let t1 = a.type === 'directory' ? 0 : 1;
+        let t2 = b.type === 'directory' ? 0 : 1;
 
-        // Compare by display name.
-        if (state.direction === 'descending') {
-          return b.name.localeCompare(a.name);
-        }
-        return a.name.localeCompare(b.name);
+        return t1 - t2 || b.name.localeCompare(a.name) * reverse;
       });
     }
-
     return copy;
   }
 
@@ -1956,21 +1941,5 @@ namespace Private {
     return ArrayExt.findFirstIndex(nodes, node =>
       ElementExt.hitTest(node, x, y)
     );
-  }
-
-  /**
-   * Weight a contents model by type.
-   */
-  function typeWeight(model: Contents.IModel): number {
-    switch (model.type) {
-      case 'directory':
-        return 0;
-      case 'notebook':
-        return 1;
-      case 'file':
-        return 2;
-      default:
-        return Infinity;
-    }
   }
 }
