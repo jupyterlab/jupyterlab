@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../launcher"
     },
     {

@@ -32,6 +32,7 @@
   "dependencies": {
     "@jupyterlab/application": "^0.19.1",
     "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/launcher": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/services": "^3.2.1",
@@ -46,6 +47,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }
