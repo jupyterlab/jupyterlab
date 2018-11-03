@@ -63,7 +63,7 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
  * A plugin that provides a kernel status item to the status bar.
  */
 export const kernelStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:kernel-status',
+  id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IConsoleTracker],
   activate: (
@@ -117,17 +117,21 @@ export const kernelStatus: JupyterLabPlugin<void> = {
       item.model!.session = currentSession;
     });
 
-    statusBar.registerStatusItem('kernel-status-item', item, {
-      align: 'left',
-      rank: 1,
-      isActive: () => {
-        const current = app.shell.currentWidget;
-        return (
-          current &&
-          (notebookTracker.has(current) || consoleTracker.has(current))
-        );
+    statusBar.registerStatusItem(
+      '@jupyterlab/statusbar-extension:kernel-status',
+      {
+        item,
+        align: 'left',
+        rank: 1,
+        isActive: () => {
+          const current = app.shell.currentWidget;
+          return (
+            current &&
+            (notebookTracker.has(current) || consoleTracker.has(current))
+          );
+        }
       }
-    });
+    );
   }
 };
 
@@ -135,7 +139,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
  * A plugin providing a line/column status item to the application.
  */
 export const lineColItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:line-col-item',
+  id: '@jupyterlab/statusbar-extension:line-col-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
   activate: (
@@ -193,19 +197,23 @@ export const lineColItem: JupyterLabPlugin<void> = {
     });
 
     // Add the status item to the status bar.
-    statusBar.registerStatusItem('line-col-item', item, {
-      align: 'right',
-      rank: 2,
-      isActive: () => {
-        const current = app.shell.currentWidget;
-        return (
-          current &&
-          (notebookTracker.has(current) ||
-            editorTracker.has(current) ||
-            consoleTracker.has(current))
-        );
+    statusBar.registerStatusItem(
+      '@jupyterlab/statusbar-extension:line-col-status',
+      {
+        item,
+        align: 'right',
+        rank: 2,
+        isActive: () => {
+          const current = app.shell.currentWidget;
+          return (
+            current &&
+            (notebookTracker.has(current) ||
+              editorTracker.has(current) ||
+              consoleTracker.has(current))
+          );
+        }
       }
-    });
+    );
   }
 };
 
@@ -217,18 +225,22 @@ export const lineColItem: JupyterLabPlugin<void> = {
  * is installed.
  */
 export const memoryUsageItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:memory-usage-item',
+  id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
   requires: [IStatusBar],
   activate: (app: JupyterLab, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
-    statusBar.registerStatusItem('memory-usage-item', item, {
-      align: 'left',
-      rank: 2,
-      isActive: () => item.model!.metricsAvailable,
-      stateChanged: item.model!.stateChanged
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/statusbar-extension:memory-usage-status',
+      {
+        item,
+        align: 'left',
+        rank: 2,
+        isActive: () => item.model!.metricsAvailable,
+        activeStateChanged: item.model!.stateChanged
+      }
+    );
   }
 };
 
@@ -237,7 +249,7 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
  * to the status bar.
  */
 export const runningSessionsItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:running-sessions-item',
+  id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
   requires: [IStatusBar],
   activate: (app: JupyterLab, statusBar: IStatusBar) => {
@@ -246,10 +258,14 @@ export const runningSessionsItem: JupyterLabPlugin<void> = {
       serviceManager: app.serviceManager
     });
 
-    statusBar.registerStatusItem('running-sessions-item', item, {
-      align: 'left',
-      rank: 0
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/statusbar-extension:running-sessions-status',
+      {
+        item,
+        align: 'left',
+        rank: 0
+      }
+    );
   }
 };
 

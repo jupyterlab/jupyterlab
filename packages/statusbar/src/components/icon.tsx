@@ -3,22 +3,34 @@
 
 import * as React from 'react';
 
-import icon from '../style/icon';
 import { classes, style } from 'typestyle/lib';
 
+import icon from '../style/icon';
+
+/**
+ * A namespace for IconItem statics.
+ */
 export namespace IconItem {
+  /**
+   * Props for an IconItem
+   */
   export interface IProps {
+    /**
+     * A CSS class name for the icon.
+     */
     source: string;
   }
 }
 
-// tslint:disable-next-line:variable-name
-export const IconItem = (
+/**
+ * A functional tsx component for an icon.
+ */
+export function IconItem(
   props: IconItem.IProps &
     React.HTMLAttributes<HTMLDivElement> & {
       offset: { x: number; y: number };
     }
-): React.ReactElement<IconItem.IProps> => {
+): React.ReactElement<IconItem.IProps> {
   const { source, className, offset, ...rest } = props;
   return (
     <div
@@ -26,4 +38,4 @@ export const IconItem = (
       {...rest}
     />
   );
-};
+}

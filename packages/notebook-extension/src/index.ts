@@ -302,10 +302,11 @@ export const commandEditItem: JupyterLabPlugin<void> = {
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
       const current = tracker.currentWidget;
-      item.model.notebook = current.content;
+      item.model.notebook = current && current.content;
     });
 
-    statusBar.registerStatusItem('command-edit-item', item, {
+    statusBar.registerStatusItem('@jupyterlab/notebook-extension:mode-status', {
+      item,
       align: 'right',
       rank: 4,
       isActive: () =>
@@ -333,17 +334,21 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
       const current = tracker.currentWidget;
-      item.model.notebook = current.content;
+      item.model.notebook = current && current.content;
     });
 
-    statusBar.registerStatusItem('notebook-trust-item', item, {
-      align: 'right',
-      rank: 3,
-      isActive: () =>
-        app.shell.currentWidget &&
-        tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
-    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/notebook-extension:trust-status',
+      {
+        item,
+        align: 'right',
+        rank: 3,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
   }
 };
 

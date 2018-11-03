@@ -303,7 +303,7 @@ export namespace LineCol {
 
       const oldState = this._getAllState();
       this._editor = editor;
-      if (this._editor === null) {
+      if (!this._editor) {
         this._column = 1;
         this._line = 1;
       } else {

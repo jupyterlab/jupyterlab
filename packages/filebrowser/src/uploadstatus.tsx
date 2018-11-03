@@ -1,21 +1,18 @@
-import React from 'react';
-import { TextItem } from '@jupyterlab/statusbar';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+//
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
-import {
-  IUploadModel,
-  FileBrowserModel,
-  IFileBrowserFactory,
-  FileBrowser
-} from '@jupyterlab/filebrowser';
+import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { ProgressBar } from '@jupyterlab/statusbar';
-import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
+import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
+
 import { ArrayExt } from '@phosphor/algorithm';
-import { IStatusBar, GroupItem } from '@jupyterlab/statusbar';
+
+import { IUploadModel, FileBrowserModel, FileBrowser } from '.';
+
+import React from 'react';
 
 /**
  * Half-spacing between items in the overall status item.
@@ -49,7 +46,7 @@ namespace FileUploadComponent {
    */
   export interface IProps {
     /**
-     * The current upload fraction.
+     * The current upload percentage, from 0 to 100.
      */
     upload: number;
   }
@@ -63,16 +60,16 @@ const UPLOAD_COMPLETE_MESSAGE_MILLIS: number = 2000;
 /**
  * Status bar item to display file upload progress.
  */
-class FileUpload extends VDomRenderer<FileUpload.Model> {
+export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
   /**
    * Construct a new FileUpload status item.
    */
-  constructor(opts: FileUpload.IOptions) {
+  constructor(opts: FileUploadStatus.IOptions) {
     super();
     this._tracker = opts.tracker;
     this._tracker.currentChanged.connect(this._onBrowserChange);
 
-    this.model = new FileUpload.Model(
+    this.model = new FileUploadStatus.Model(
       this._tracker.currentWidget && this._tracker.currentWidget.model
     );
   }
@@ -117,7 +114,7 @@ class FileUpload extends VDomRenderer<FileUpload.Model> {
 /**
  * A namespace for FileUpload class statics.
  */
-namespace FileUpload {
+export namespace FileUploadStatus {
   /**
    * The VDomModel for the FileUpload renderer.
    */
@@ -238,29 +235,3 @@ interface IFileUploadItem {
    */
   complete: boolean;
 }
-
-/**
- * A plugin providing file upload status.
- */
-export const fileUploadStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:file-upload-item',
-  autoStart: true,
-  requires: [IStatusBar, IFileBrowserFactory],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    browser: IFileBrowserFactory
-  ) => {
-    const item = new FileUpload({
-      tracker: browser.tracker
-    });
-
-    statusBar.registerStatusItem('file-upload-item', item, {
-      align: 'middle',
-      isActive: () => {
-        return !!item.model && item.model.items.length > 0;
-      },
-      stateChanged: item.model.stateChanged
-    });
-  }
-};
