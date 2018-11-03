@@ -169,6 +169,8 @@ export class StaticNotebook extends Widget {
       options.contentFactory || StaticNotebook.defaultContentFactory;
     this.editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this.notebookConfig =
+      options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -259,6 +261,17 @@ export class StaticNotebook extends Widget {
   set editorConfig(value: StaticNotebook.IEditorConfig) {
     this._editorConfig = value;
     this._updateEditorConfig();
+  }
+
+  /**
+   * A configuration object for notebook settings.
+   */
+  get notebookConfig(): StaticNotebook.INotebookConfig {
+    return this._notebookConfig;
+  }
+  set notebookConfig(value: StaticNotebook.INotebookConfig) {
+    this._notebookConfig = value;
+    this._updateNotebookConfig();
   }
 
   /**
@@ -558,7 +571,18 @@ export class StaticNotebook extends Widget {
     }
   }
 
+  /**
+   * Update editor settings for notebook.
+   */
+  private _updateNotebookConfig() {
+    this.toggleClass(
+      'jp-mod-scrollPastEnd',
+      this._notebookConfig.scrollPastEnd
+    );
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
+  private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -593,6 +617,11 @@ export namespace StaticNotebook {
      * A configuration object for the cell editor settings.
      */
     editorConfig?: IEditorConfig;
+
+    /**
+     * A configuration object for notebook settings.
+     */
+    notebookConfig?: INotebookConfig;
 
     /**
      * The service used to look up mime types.
@@ -671,6 +700,22 @@ export namespace StaticNotebook {
       matchBrackets: false,
       autoClosingBrackets: false
     }
+  };
+
+  /**
+   * A config object for the notebook widget
+   */
+  export interface INotebookConfig {
+    /**
+     * Enable scrolling past the last cell
+     */
+    scrollPastEnd: boolean;
+  }
+  /**
+   * Default configuration options for notebooks.
+   */
+  export const defaultNotebookConfig: INotebookConfig = {
+    scrollPastEnd: true
   };
 
   /**

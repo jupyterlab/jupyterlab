@@ -465,6 +465,7 @@ function activateNotebookHandler(
   const services = app.serviceManager;
   // An object for tracking the current notebook settings.
   let editorConfig = StaticNotebook.defaultEditorConfig;
+  let notebookConfig = StaticNotebook.defaultNotebookConfig;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -475,6 +476,7 @@ function activateNotebookHandler(
     rendermime: rendermime,
     contentFactory,
     editorConfig,
+    notebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
   const { commands, restored } = app;
@@ -544,6 +546,9 @@ function activateNotebookHandler(
           : cached[key];
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
+    factory.notebookConfig = notebookConfig = {
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+    };
   }
 
   /**
@@ -552,6 +557,7 @@ function activateNotebookHandler(
   function updateTracker(): void {
     tracker.forEach(widget => {
       widget.content.editorConfig = editorConfig;
+      widget.content.notebookConfig = notebookConfig;
     });
   }
 
