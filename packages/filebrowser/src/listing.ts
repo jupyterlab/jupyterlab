@@ -1091,7 +1091,6 @@ export class DirListing extends Widget {
     if (!event.mimeData.hasData(CONTENTS_MIME)) {
       return;
     }
-    event.dropAction = event.proposedAction;
 
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
@@ -1114,6 +1113,12 @@ export class DirListing extends Widget {
     // Handle the items.
     const promises: Promise<Contents.IModel | null>[] = [];
     const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+
+    if (event.ctrlKey && event.proposedAction === 'move') {
+      event.dropAction = 'copy';
+    } else {
+      event.dropAction = event.proposedAction;
+    }
     for (let path of paths) {
       let localPath = manager.services.contents.localPath(path);
       let name = PathExt.basename(localPath);
@@ -1122,10 +1127,15 @@ export class DirListing extends Widget {
       if (newPath === path) {
         continue;
       }
-      promises.push(renameFile(manager, path, newPath));
+
+      if (event.dropAction === 'copy') {
+        promises.push(manager.copy(path, basePath));
+      } else {
+        promises.push(renameFile(manager, path, newPath));
+      }
     }
     Promise.all(promises).catch(error => {
-      showErrorMessage('Move Error', error);
+      showErrorMessage('Error while copying/moving files', error);
     });
   }
 
