@@ -600,7 +600,7 @@ export namespace CodeEditor {
     getTokens(): IToken[];
 
     /**
-     * Finds definitions of variable or function, depending on given type.
+     * Finds definitions of variable or function matching given name.
      */
     findDefinitions(name: string): Array<IToken>;
   }

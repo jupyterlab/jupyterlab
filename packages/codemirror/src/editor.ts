@@ -135,8 +135,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         let target = event.target as HTMLElement;
         const { button, altKey } = event;
         if (altKey && button === 0) {
-          // offset is needed to handle same-cell jumping
-          // to get offset we could either derive it from the DOM
+          // Offset is needed to handle same-cell jumping.
+          // To get offset we could either derive it from the DOM
           // or from the tokens. Tokens sound better, but there is
           // no direct link between DOM and tokens.
           // This can be worked around using:
@@ -167,10 +167,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
               let nextSibling = sibling.previousSibling;
 
               if (nextSibling == null) {
-                // try to traverse to previous line, if there is one
+                // Try to traverse to previous line (if there is one).
 
-                // the additional parent/child which is traversed
-                // both ways is a non-relevant presentation container
+                // The additional parent (child) which is traversed
+                // both ways is a non-relevant presentation container.
                 let thisLine = sibling.parentNode.parentNode as HTMLElement;
                 let previousLine = thisLine.previousElementSibling;
 
@@ -642,7 +642,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Find definitions using the HTML nodes from source tokenized and classed by CodeMirror.
+   * Find definitions among tokens of this editor instance.
    */
   findDefinitions(name: string): Array<CodeEditor.IToken> {
     // try to find variable assignment
@@ -653,7 +653,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         return false;
       }
       if (token.type === 'variable') {
-        // matching variable assignment
+        // Matching variable assignment.
         let nextMeaningfulToken = null;
         while (nextMeaningfulToken == null) {
           if (i >= cellTokens.length - 1) {
@@ -672,8 +672,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           nextToken && nextToken.type === 'operator' && nextToken.value === '='
         );
       } else if (token.type === 'def') {
-        // matching function definition
-        // we could double-check that an opening parenthesis follows,
+        // Matching function definition.
+
+        // We could double-check that an opening parenthesis follows,
         // but we can assume that it is the responsibility of CodeMirror.
         return true;
       } else {
