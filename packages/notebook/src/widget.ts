@@ -1289,6 +1289,10 @@ export class Notebook extends StaticNotebook {
       this._onEdgeRequest,
       this
     );
+    cell.editor.jumpRequested.connect(
+      this._onJumpRequest,
+      this
+    );
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -1367,6 +1371,44 @@ export class Notebook extends StaticNotebook {
     this.mode = 'edit';
   }
 
+  private _onJumpRequest(
+    editor: CodeEditor.IEditor,
+    jump: CodeEditor.IJump
+  ): void {
+    // Using `index = this._findCell(editor.host)` does not work,
+    // as the host editor has not switched to the clicked cell yet.
+    let index;
+
+    // The mouse event is utilized to workaround Firefox's issue.
+    if (jump.mouseEvent !== undefined) {
+      index = this._findTargetCell(jump.mouseEvent).index;
+    } else {
+      index = this._findCell(jump.origin);
+    }
+
+    let { token, cellIndex } = this._findLastDefinition(jump.token, index);
+
+    // nothing found
+    if (!token) {
+      return;
+    }
+
+    // Prevents event propagation issues
+    setTimeout(() => {
+      this.deselectAll();
+      this.activeCellIndex = cellIndex;
+      this._ensureFocus();
+      this.mode = 'edit';
+
+      // find out offset for the element
+      let activeEditor = this.activeCell.editor;
+
+      // place cursor in the line with the definition
+      let position = activeEditor.getPositionAt(token.offset);
+      activeEditor.setSelection({ start: position, end: position });
+    }, 0);
+  }
+
   /**
    * Ensure that the notebook has proper focus.
    */
@@ -1417,19 +1459,7 @@ export class Notebook extends StaticNotebook {
     if (event.shiftKey) {
       return;
     }
-    // `event.target` sometimes gives an orphaned node in Firefox 57, which
-    // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.target`, try again using a target reconstructed from
-    // the position of the click event.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
-    if (index === -1) {
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      index = this._findCell(target);
-    }
+    let { target, index } = this._findTargetCell(event);
     let widget = this.widgets[index];
 
     if (widget && widget.editorWidget.node.contains(target)) {
@@ -1478,6 +1508,26 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Find the target and the target cell.
+   */
+  private _findTargetCell(event: MouseEvent) {
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      // `event.target` sometimes gives an orphaned node in
+      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+      // to find a cell using `event.target`, try again using a target
+      // reconstructed from the position of the click event.
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
+      index = this._findCell(target);
+    }
+    return { target: target, index: index };
+  }
+
+  /**
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
@@ -1493,20 +1543,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    // Find the target cell.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
-    if (index === -1) {
-      // `event.target` sometimes gives an orphaned node in
-      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
-      // to find a cell using `event.target`, try again using a target
-      // reconstructed from the position of the click event.
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      index = this._findCell(target);
-    }
+    let { target, index } = this._findTargetCell(event);
     let widget = this.widgets[index];
 
     let targetArea: 'input' | 'prompt' | 'cell' | 'notebook';
@@ -1586,6 +1623,43 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Find the last definition of given variable.
+   */
+  private _findLastDefinition(token: CodeEditor.IToken, stopIndex: number) {
+    let definitionToken = null;
+    let definitionIndex = null;
+
+    for (let i = 0; i <= stopIndex; i++) {
+      let cell = this.widgets[i];
+
+      let definitions = cell.editor.findDefinitions(token.value);
+
+      if (definitions.length) {
+        // get the last one that appears before token
+        // (is in an earlier cell or has lower offset)
+        let filtered = definitions.filter(
+          otherToken => i < stopIndex || otherToken.offset < token.offset
+        );
+        if (filtered.length) {
+          definitionToken = filtered[filtered.length - 1];
+          definitionIndex = i;
+        } else if (!definitionToken && i === stopIndex) {
+          // but if there is no definition at all, and we are in the last cell,
+          // just return the token of origin (the clicked element), so the
+          // editor will focus on the clicked element rather than ignore the
+          // click altogether.
+          definitionToken = token;
+          definitionIndex = i;
+        }
+      }
+    }
+    return {
+      token: definitionToken,
+      cellIndex: definitionIndex
+    };
+  }
+
+  /**
    * Handle the `'mouseup'` event on the document.
    */
   private _evtDocumentMouseup(event: MouseEvent): void {
@@ -1596,20 +1670,7 @@ export class Notebook extends StaticNotebook {
     if (this._mouseMode === 'couldDrag') {
       // We didn't end up dragging if we are here, so treat it as a click event.
 
-      // Find the target cell.
-      let target = event.target as HTMLElement;
-      let index = this._findCell(target);
-      if (index === -1) {
-        // `event.target` sometimes gives an orphaned node in
-        // Firefox 57, which can have `null` anywhere in its parent line. If we fail
-        // to find a cell using `event.target`, try again using a target
-        // reconstructed from the position of the click event.
-        target = document.elementFromPoint(
-          event.clientX,
-          event.clientY
-        ) as HTMLElement;
-        index = this._findCell(target);
-      }
+      let { index } = this._findTargetCell(event);
 
       this.deselectAll();
       this.activeCellIndex = index;

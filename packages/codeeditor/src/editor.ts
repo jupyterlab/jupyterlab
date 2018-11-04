@@ -150,6 +150,31 @@ export namespace CodeEditor {
   }
 
   /**
+   * An interface for jump-to-definition event.
+   *
+   * #### Notes
+   * Combination of target and mouseEvent are used to determine clicked cell,
+   * instead of CodeEditor instance which is being passed, as its host attribute
+   * behaves non-reliably when clicking on a cell different form the current one.
+   */
+  export interface IJump {
+    /**
+     * The token of origin (variable/function usage).
+     */
+    token: IToken;
+    /**
+     * The clicked (or active) element of origin used to find the cell from which
+     * the request originated.
+     */
+    origin: HTMLElement;
+    /**
+     * Optional mouse event used as a fallback to determine the cell of origin in
+     * Firefox 57.
+     */
+    mouseEvent?: MouseEvent;
+  }
+
+  /**
    * An interface to manage selections by selection owners.
    *
    * #### Definitions
@@ -387,6 +412,11 @@ export namespace CodeEditor {
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
 
     /**
+     * A signal emitted when the jump to definition (go to definition) is requested.
+     */
+    readonly jumpRequested: ISignal<IEditor, IJump>;
+
+    /**
      * The default selection style for the editor.
      */
     selectionStyle: CodeEditor.ISelectionStyle;
@@ -412,7 +442,7 @@ export namespace CodeEditor {
     readonly charWidth: number;
 
     /**
-     * Get the number of lines in the eidtor.
+     * Get the number of lines in the editor.
      */
     readonly lineCount: number;
 
@@ -568,6 +598,11 @@ export namespace CodeEditor {
      * Gets the list of tokens for the editor model.
      */
     getTokens(): IToken[];
+
+    /**
+     * Finds definitions of variable or function, depending on given type.
+     */
+    findDefinitions(name: string): Array<IToken>;
   }
 
   /**

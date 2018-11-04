@@ -128,6 +128,102 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this
     );
 
+    CodeMirror.on(
+      editor,
+      'mousedown',
+      (editor: CodeMirror.Editor, event: MouseEvent) => {
+        let target = event.target as HTMLElement;
+        const { button, altKey } = event;
+        if (altKey && button === 0) {
+          // offset is needed to handle same-cell jumping
+          // to get offset we could either derive it from the DOM
+          // or from the tokens. Tokens sound better, but there is
+          // no direct link between DOM and tokens.
+          // This can be worked around using:
+          //    CodeMirror.display.renderView.measure.map
+          // (see: https://stackoverflow.com/a/35937312/6646912)
+          // or by simply counting the number of tokens before.
+          // For completeness - using cursor does not work reliably:
+          // const cursor = this.getCursorPosition();
+          // const token = this.getTokenForPosition(cursor);
+
+          const classes = ['cm-variable', 'cm-property'];
+
+          if (classes.indexOf(target.className) !== -1) {
+            let cellTokens = this.getTokens();
+            let lookupName = target.textContent;
+
+            // count tokens with same value that occur before
+            // (not all the tokens - to reduce the hurdle of
+            // mapping DOM into tokens)
+            let usagesBeforeTarget = -1;
+            let sibling = target as Node;
+
+            while (sibling != null) {
+              if (sibling.textContent === lookupName) {
+                usagesBeforeTarget += 1;
+              }
+
+              let nextSibling = sibling.previousSibling;
+
+              if (nextSibling == null) {
+                // try to traverse to previous line, if there is one
+
+                // the additional parent/child which is traversed
+                // both ways is a non-relevant presentation container
+                let thisLine = sibling.parentNode.parentNode as HTMLElement;
+                let previousLine = thisLine.previousElementSibling;
+
+                // is is really a line?
+                if (
+                  previousLine &&
+                  previousLine.className.indexOf('CodeMirror-line') !== -1
+                ) {
+                  nextSibling = previousLine.firstChild.lastChild;
+                }
+              }
+              sibling = nextSibling;
+            }
+
+            // select relevant token
+            let token = null;
+            let matchedTokensCount = 0;
+            for (let j = 0; j < cellTokens.length; j++) {
+              let testedToken = cellTokens[j];
+              if (testedToken.value === lookupName) {
+                matchedTokensCount += 1;
+                if (matchedTokensCount - 1 === usagesBeforeTarget) {
+                  token = testedToken;
+                  break;
+                }
+              }
+            }
+
+            if (token.value !== target.textContent) {
+              console.error(
+                `Token ${token.value} does not match element ${
+                  target.textContent
+                }`
+              );
+              // fallback
+              token = {
+                value: target.textContent,
+                offset: 0, // dummy offset
+                type: 'variable'
+              };
+            }
+
+            this.jumpRequested.emit({
+              token: token,
+              mouseEvent: event,
+              origin: target
+            });
+          }
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    );
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
         if (handler(this, event) === true) {
@@ -164,6 +260,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * A signal emitted when either the top or bottom edge is requested.
    */
   readonly edgeRequested = new Signal<this, CodeEditor.EdgeLocation>(this);
+
+  /**
+   * A signal emitted when the jump to definition (go to definition) is requested.
+   */
+  readonly jumpRequested = new Signal<this, CodeEditor.IJump>(this);
 
   /**
    * The DOM node that hosts the editor.
@@ -538,6 +639,48 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   execCommand(command: string): void {
     this._editor.execCommand(command);
+  }
+
+  /**
+   * Find definitions using the HTML nodes from source tokenized and classed by CodeMirror.
+   */
+  findDefinitions(name: string): Array<CodeEditor.IToken> {
+    // try to find variable assignment
+    let cellTokens = this.getTokens();
+
+    return Array.from(cellTokens).filter((token, i) => {
+      if (token.value !== name) {
+        return false;
+      }
+      if (token.type === 'variable') {
+        // matching variable assignment
+        let nextMeaningfulToken = null;
+        while (nextMeaningfulToken == null) {
+          if (i >= cellTokens.length - 1) {
+            return false;
+          }
+          let nextToken = cellTokens[i + 1];
+          if (nextToken.type !== '') {
+            nextMeaningfulToken = nextToken;
+          } else {
+            i++;
+          }
+        }
+
+        let nextToken = nextMeaningfulToken;
+        return (
+          nextToken && nextToken.type === 'operator' && nextToken.value === '='
+        );
+      } else if (token.type === 'def') {
+        // matching function definition
+        // we could double-check that an opening parenthesis follows,
+        // but we can assume that it is the responsibility of CodeMirror.
+        return true;
+      } else {
+        // nothing matched
+        return false;
+      }
+    });
   }
 
   /**
