@@ -1628,6 +1628,7 @@ export class Notebook extends StaticNotebook {
   private _findLastDefinition(token: CodeEditor.IToken, stopIndex: number) {
     let definitionToken = null;
     let definitionIndex = null;
+    const originToken = token;
 
     for (let i = 0; i <= stopIndex; i++) {
       let cell = this.widgets[i];
@@ -1635,11 +1636,30 @@ export class Notebook extends StaticNotebook {
       let definitions = cell.editor.findDefinitions(token.value);
 
       if (definitions.length) {
-        // get the last one that appears before token
-        // (is in an earlier cell or has lower offset)
+        // Get the last definition / assignment that appears before
+        // token of origin (is in an earlier cell or has lower offset),
         let filtered = definitions.filter(
-          otherToken => i < stopIndex || otherToken.offset < token.offset
+          otherToken => i < stopIndex || otherToken.offset < originToken.offset
         );
+
+        // but ignore ones that are part of the same assignment expression,
+        // for example in a cell like this:
+        // >>> a = 1
+        // >>> a = a + 1
+        // clicking on the last 'a' should jump to the first line,
+        // and not to beginning of the second line.
+        filtered = definitions.filter(otherToken => {
+          // If otherToken is in previous cell, we don't need to worry.
+          if (i < stopIndex) {
+            return true;
+          }
+          return !this._isTokenInSameAssignmentExpression(
+            otherToken,
+            token,
+            cell
+          );
+        });
+
         if (filtered.length) {
           definitionToken = filtered[filtered.length - 1];
           definitionIndex = i;
@@ -1657,6 +1677,92 @@ export class Notebook extends StaticNotebook {
       token: definitionToken,
       cellIndex: definitionIndex
     };
+  }
+
+  /**
+   * Check whether testedToken belongs to same assignment expression as originToken
+   *
+   * #### Notes
+   * To verify if token belongs to same assignment expression, the tokens
+   * between testedToken and originToken as tested. The token is in same
+   * assignment expression if there is an assignment token in between and
+   * there are no expression-terminating tokens after such an assignment.
+   *
+   * We only need to look at the first assignment token, see this example:
+   * a = 1; b = a
+   *
+   * Expression-terminating token is one of following:
+   * - new line (if not within brackets)
+   * - semicolon
+   */
+  private _isTokenInSameAssignmentExpression(
+    testedToken: CodeEditor.IToken,
+    originToken: CodeEditor.IToken,
+    cell: Cell
+  ): boolean {
+    // Find tokens between token.offset and otherToken.offset.
+    let tokensSet = new Set();
+
+    for (
+      let offset = testedToken.offset + 1;
+      offset < originToken.offset;
+      offset++
+    ) {
+      let position = cell.editor.getPositionAt(offset);
+      let token = cell.editor.getTokenForPosition(position);
+      if (token.offset === testedToken.offset) {
+        continue;
+      }
+      tokensSet.add(token);
+    }
+    let tokensBetween = Array.from(tokensSet);
+
+    // If there is no assignment token, we don't need to worry
+    let assignments = tokensBetween.filter(
+      token => token.type === 'operator' && token.value.indexOf('=') !== -1
+    );
+    if (!assignments.length) {
+      return true;
+    }
+
+    let firstAssignment = assignments.sort(
+      (a, b) => (a.offset > b.offset ? 1 : -1)
+    )[0];
+
+    // Select terminating tokens
+    // ';' and new line (which are locally outside of brackets)
+    let terminatingTokens = [];
+    let openedBrackets = 0;
+    const openingBrackets = '([{';
+    const closingBrackets = ')]}';
+    for (let token of tokensBetween) {
+      // let's assume that the code is properly formatted,
+      // and do not check the order of brackets
+      if (token.value !== '') {
+        if (openingBrackets.includes(token.value)) {
+          openedBrackets += 1;
+          continue;
+        } else if (closingBrackets.includes(token.value)) {
+          openedBrackets -= 1;
+          continue;
+        }
+      }
+      // empty string is used by as a token representing new-line
+      let terminator = token.value === ';' || token.value === '';
+      if (openedBrackets === 0 && terminator) {
+        terminatingTokens.push(token);
+      }
+    }
+
+    let terminatorsAfterAssignment = terminatingTokens.filter(
+      token => token.offset > firstAssignment.offset
+    );
+
+    if (!terminatorsAfterAssignment.length) {
+      return true;
+    }
+
+    return false;
   }
 
   /**

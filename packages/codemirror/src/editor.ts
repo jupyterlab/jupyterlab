@@ -209,7 +209,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
               token = {
                 value: target.textContent,
                 offset: 0, // dummy offset
-                type: 'variable'
+                type:
+                  target.className.indexOf('cm-variable') !== -1
+                    ? 'variable'
+                    : 'property'
               };
             }
 
