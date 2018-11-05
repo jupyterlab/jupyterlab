@@ -655,25 +655,29 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       if (token.value !== name) {
         return false;
       }
+
       if (token.type === 'variable') {
         // Matching variable assignment.
-        let nextMeaningfulToken = null;
-        while (nextMeaningfulToken == null) {
-          if (i >= cellTokens.length - 1) {
-            return false;
-          }
-          let nextToken = cellTokens[i + 1];
-          if (nextToken.type !== '') {
-            nextMeaningfulToken = nextToken;
-          } else {
-            i++;
-          }
+        let nextToken = this._closestMeaningfulToken(i, cellTokens, +1);
+        if (
+          nextToken &&
+          nextToken.type === 'operator' &&
+          nextToken.value === '='
+        ) {
+          return true;
         }
 
-        let nextToken = nextMeaningfulToken;
-        return (
-          nextToken && nextToken.type === 'operator' && nextToken.value === '='
-        );
+        // Matching import.
+        let previousToken = this._closestMeaningfulToken(i, cellTokens, -1);
+        if (
+          previousToken &&
+          previousToken.type === 'keyword' &&
+          previousToken.value === 'import'
+        ) {
+          return true;
+        }
+        // nothing matched
+        return false;
       } else if (token.type === 'def') {
         // Matching function definition.
 
@@ -685,6 +689,25 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         return false;
       }
     });
+  }
+
+  private _closestMeaningfulToken(
+    tokenIndex: number,
+    tokens: Array<CodeEditor.IToken>,
+    direction: number
+  ): CodeEditor.IToken {
+    let nextMeaningfulToken = null;
+    while (nextMeaningfulToken == null) {
+      tokenIndex += direction;
+      if (tokenIndex < 0 || tokenIndex >= tokens.length) {
+        return null;
+      }
+      let nextToken = tokens[tokenIndex];
+      if (nextToken.type !== '') {
+        nextMeaningfulToken = nextToken;
+      }
+    }
+    return nextMeaningfulToken;
   }
 
   /**
