@@ -317,7 +317,7 @@ function activate(
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
     },
-    isEnabled,
+    //isEnabled,
     label: args => args['name'] as string
   });
 
@@ -366,7 +366,7 @@ function activate(
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
     },
-    isEnabled,
+    //isEnabled,
     isToggled: args => {
       const insertSpaces = !!args['insertSpaces'];
       const size = (args['size'] as number) || 4;
@@ -398,7 +398,7 @@ function activate(
         });
     },
     label: 'Auto Close Brackets for Text Editor',
-    isEnabled,
+    //isEnabled,
     isToggled: () => config.autoClosingBrackets
   });
 
