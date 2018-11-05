@@ -24,7 +24,7 @@ IF "%NAME%"=="python" (
     if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run build:test
     if !errorlevel! neq 0 exit /b !errorlevel!
-    setx FORCE_COLOR=1 jlpm coverage --loglevel success
+    setx FORCE_COLOR 1 && jlpm coverage --loglevel success
 )
 
 if !errorlevel! neq 0 exit /b !errorlevel!
