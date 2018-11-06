@@ -4,28 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "filebrowser:create-main-launcher": {
-      "default": {},
-      "properties": {
-        "command": { "default": "filebrowser:create-main-launcher" },
-        "keys": { "default": ["Accel Shift L"] },
-        "selector": { "default": "body" },
-        "title": { "default": "New Launcher" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
-    "filebrowser:toggle-main": {
-      "default": {},
-      "properties": {
-        "command": { "default": "filebrowser:toggle-main" },
-        "keys": { "default": ["Accel Shift F"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Toggle Filebrowser" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
     "help:toggle": {
       "default": {},
       "properties": {

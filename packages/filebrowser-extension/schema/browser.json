@@ -1,0 +1,23 @@
+{
+  "title": "File Browser",
+  "description": "File browser settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "filebrowser:create-main-launcher",
+      "keys": ["Accel Shift L"],
+      "selector": "body",
+      "title": "New Launcher",
+      "category": "File Operations"
+    },
+    {
+      "command": "filebrowser:toggle-main",
+      "keys": ["Accel Shift F"],
+      "selector": "body",
+      "title": "Toggle Filebrowser",
+      "category": "File Operations"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
