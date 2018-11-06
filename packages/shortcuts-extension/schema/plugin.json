@@ -256,17 +256,6 @@
         "category": { "default": "Inspector" }
       },
       "type": "object"
-    },
-    "launcher:create": {
-      "default": {},
-      "properties": {
-        "command": { "default": "launcher:create" },
-        "keys": { "default": [""] },
-        "selector": { "default": "body" },
-        "title": { "default": "New Launcher" },
-        "category": { "default": "Main Area" }
-      },
-      "type": "object"
     }
   },
   "oneOf": [{ "$ref": "#/definitions/shortcut" }],

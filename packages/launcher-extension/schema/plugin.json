@@ -1,0 +1,16 @@
+{
+  "title": "Launcher",
+  "description": "Launcher settings.",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "launcher:create",
+      "keys": [""],
+      "selector": "body",
+      "title": "New Launcher",
+      "category": "Main Area"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
