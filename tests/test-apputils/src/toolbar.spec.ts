@@ -9,7 +9,7 @@ import {
   ToolbarButton
   // CommandToolbarButton,
   // ToolbarButtonComponent
-} from '@jupyterlab/apputils';
+} from '@jupyterlab/apputils/src';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -24,32 +24,6 @@ import { Widget } from '@phosphor/widgets';
 import { simulate } from 'simulate-event';
 
 import { createClientSession, framePromise } from '@jupyterlab/testutils';
-
-// class LogToolbarButton extends ToolbarButton {
-//   events: string[] = [];
-
-//   methods: string[] = [];
-
-//   constructor(props: ToolbarButtonComponent.IProps = {}) {
-//     super({
-//       ...props,
-//       onClick: () => {
-//         props.onClick();
-//         this.events.push('click');
-//       }
-//     });
-//   }
-
-//   protected onAfterAttach(msg: Message): void {
-//     super.onAfterAttach(msg);
-//     this.methods.push('onAfterAttach');
-//   }
-
-//   protected onBeforeDetach(msg: Message): void {
-//     super.onBeforeDetach(msg);
-//     this.methods.push('onBeforeDetach');
-//   }
-// }
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
@@ -322,7 +296,7 @@ describe('@jupyterlab/apputils', () => {
         };
         await future.done;
         expect(called).to.equal(true);
-      }).timeout(20000); // Allow for slower CI
+      });
 
       it('should show the current status in the node title', async () => {
         const item = Toolbar.createKernelStatusItem(session);
@@ -338,7 +312,7 @@ describe('@jupyterlab/apputils', () => {
         };
         await future.done;
         expect(called).to.equal(true);
-      }).timeout(20000); // Allow for slower CI
+      });
 
       it('should handle a starting session', async () => {
         await session.shutdown();
@@ -346,7 +320,7 @@ describe('@jupyterlab/apputils', () => {
         const item = Toolbar.createKernelStatusItem(session);
         expect(item.node.title).to.equal('Kernel Starting');
         expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-      }).timeout(20000); // Allow for slower CI
+      });
     });
   });
 
@@ -393,7 +367,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#handleEvent()', () => {
-      context('click', () => {
+      describe('click', () => {
         it('should activate the callback', async () => {
           let called = false;
           const button = new ToolbarButton({

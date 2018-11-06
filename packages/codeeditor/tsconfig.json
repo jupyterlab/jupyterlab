@@ -1,8 +1,16 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./lib",
-    "jsx": "react"
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../observables"
+    }
+  ]
 }

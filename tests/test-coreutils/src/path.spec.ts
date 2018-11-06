@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils/src';
 
 const TESTPATH = 'foo/test/simple/test-path.js';
 
@@ -67,14 +67,14 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('.resolve()', () => {
       it('should resolve a sequence of paths to an absolute path on the server', () => {
-        const path = PathExt.resolve('var/lib', '../', 'file/');
-        expect(path).to.equal('var/file');
+        const path = PathExt.resolve('var/src', '../', 'file/');
+        expect(path.indexOf('var/file')).to.not.equal(-1);
       });
     });
 
     describe('.relative()', () => {
       it('should solve the relative path', () => {
-        const path = PathExt.relative('var/lib', 'var/apache');
+        const path = PathExt.relative('var/src', 'var/apache');
         expect(path).to.equal('../apache');
       });
     });

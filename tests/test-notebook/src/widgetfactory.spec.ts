@@ -11,18 +11,23 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { NotebookWidgetFactory } from '@jupyterlab/notebook';
 
-import { Context } from '@jupyterlab/docregistry';
+import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
 
 import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+
+import { ToolbarButton } from '@jupyterlab/apputils';
 
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
 
-function createFactory(): NotebookWidgetFactory {
+function createFactory(
+  toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
+): NotebookWidgetFactory {
   return new NotebookWidgetFactory({
     name: 'notebook',
     fileTypes: ['notebook'],
     rendermime,
+    toolbarFactory,
     contentFactory,
     mimeTypeService: NBTestUtils.mimeTypeService,
     editorConfig: NBTestUtils.defaultEditorConfig
@@ -115,6 +120,20 @@ describe('@jupyterlab/notebook', () => {
         expect(items).to.contain('save');
         expect(items).to.contain('restart');
         expect(items).to.contain('kernelStatus');
+      });
+
+      it('should populate the customized toolbar items', () => {
+        const toolbarFactory = () => [
+          { name: 'foo', widget: new ToolbarButton() },
+          { name: 'bar', widget: new ToolbarButton() }
+        ];
+        const factory = createFactory(toolbarFactory);
+        const panel = factory.createNew(context);
+        const panel2 = factory.createNew(context);
+        expect(toArray(panel.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel2.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(panel.toolbar.children()).length).to.equal(2);
+        expect(toArray(panel2.toolbar.children()).length).to.equal(2);
       });
     });
   });

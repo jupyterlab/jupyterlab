@@ -47,6 +47,8 @@ export namespace CommandIDs {
 
   export const findAndReplace = 'editmenu:find-and-replace';
 
+  export const goToLine = 'editmenu:go-to-line';
+
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export const persistAndSave = 'filemenu:persist-and-save';
@@ -205,6 +207,12 @@ export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
     [{ command: CommandIDs.find }, { command: CommandIDs.findAndReplace }],
     200
   );
+  commands.addCommand(CommandIDs.goToLine, {
+    label: 'Go to Line…',
+    isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),
+    execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine')
+  });
+  menu.addGroup([{ command: CommandIDs.goToLine }], 200);
 }
 
 /**
@@ -247,11 +255,15 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
       const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
       return `Save ${name} ${action || 'with Extras'}`;
     },
-    isEnabled: Private.delegateEnabled(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    ),
+    isEnabled: args => {
+      return (
+        Private.delegateEnabled(
+          app,
+          menu.persistAndSavers,
+          'persistAndSave'
+        )() && commands.isEnabled('docmanager:save', args)
+      );
+    },
     execute: Private.delegateExecute(
       app,
       menu.persistAndSavers,

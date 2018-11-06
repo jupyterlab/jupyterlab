@@ -1,7 +1,28 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./lib"
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    }
+  ]
 }

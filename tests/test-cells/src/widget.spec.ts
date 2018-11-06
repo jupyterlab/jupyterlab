@@ -24,7 +24,7 @@ import {
   CellFooter,
   CellHeader,
   InputArea
-} from '@jupyterlab/cells';
+} from '@jupyterlab/cells/src';
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 
@@ -182,6 +182,16 @@ describe('cells/widget', () => {
         widget.readOnly = true;
         await framePromise();
         expect(widget.methods).to.deep.equal(['onUpdateRequest']);
+      });
+
+      it('should reflect model metadata', () => {
+        model.metadata.set('editable', false);
+
+        const widget = new Cell({
+          model,
+          contentFactory
+        });
+        expect(widget.readOnly).to.equal(false);
       });
     });
 
@@ -438,7 +448,6 @@ describe('cells/widget', () => {
         try {
           await CodeCell.execute(widget, session);
         } catch (error) {
-          console.log('IT BREAKS HERE');
           throw error;
         }
       });
@@ -500,14 +509,31 @@ describe('cells/widget', () => {
           rendermime,
           contentFactory
         });
+        widget.rendered = false;
         Widget.attach(widget, document.body);
-        widget.rendered = false;
-        widget.rendered = false;
+
+        // Count how many update requests were processed.
         await framePromise();
-        const updates = widget.methods.filter(method => {
+        const original = widget.methods.filter(method => {
           return method === 'onUpdateRequest';
-        });
-        expect(updates).to.have.length(1);
+        }).length;
+
+        widget.rendered = false;
+        widget.rendered = false;
+        widget.rendered = false;
+        widget.rendered = false;
+
+        // Count how many update requests were processed
+        await framePromise();
+        const delta =
+          widget.methods.filter(method => {
+            return method === 'onUpdateRequest';
+          }).length - original;
+
+        // Make sure every single `rendered` toggle did not trigger an update.
+        expect(delta)
+          .to.be.gte(0)
+          .and.lte(1);
         widget.dispose();
       });
     });

@@ -13,7 +13,7 @@ import {
   MimeContent,
   MimeDocument,
   MimeDocumentFactory
-} from '@jupyterlab/docregistry';
+} from '@jupyterlab/docregistry/src';
 
 import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
 
@@ -107,7 +107,7 @@ describe('docregistry/mimedocument', () => {
       });
     });
 
-    context('contents changed', () => {
+    describe('contents changed', () => {
       it('should change the document contents', async () => {
         RENDERMIME.addFactory(fooFactory);
         await dContext.initialize(true);

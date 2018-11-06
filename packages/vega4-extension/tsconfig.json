@@ -1,7 +1,14 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./lib"
+    "outDir": "lib",
+    "types": ["webpack-env"],
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../rendermime-interfaces"
+    }
+  ]
 }

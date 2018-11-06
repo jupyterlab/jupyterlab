@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer-extension",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "description": "JupyterLab - Image Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,20 +23,25 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.4",
-    "@jupyterlab/apputils": "^0.18.4",
-    "@jupyterlab/docregistry": "^0.18.4",
-    "@jupyterlab/imageviewer": "^0.18.4"
+    "@jupyterlab/application": "^0.19.1",
+    "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/imageviewer": "^0.19.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "jupyterlab": {
     "extension": true

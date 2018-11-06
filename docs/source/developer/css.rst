@@ -4,7 +4,7 @@ CSS Patterns
 This document describes the patterns we are using to organize and write
 CSS for JupyterLab. JupyterLab is developed using a set of npm packages
 that are located in ``packages``. Each of these packages has its own
-style, but depend on CSS variables dfined in a main theme package.
+style, but depend on CSS variables defined in a main theme package.
 
 CSS checklist
 ~~~~~~~~~~~~~

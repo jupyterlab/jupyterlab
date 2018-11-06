@@ -1,15 +1,205 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "baseUrl": ".",
-    "inlineSources": true,
-    "jsx": "react",
-    "outDir": "./lib",
-    "paths": {
-      "@jupyterlab/*": ["../*/src"],
-      "@jupyterlab/mainmenu-extension": ["../mainmenu-extension/src"]
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../application"
     },
-    "sourceMap": true,
-    "types": ["node"]
-  }
+    {
+      "path": "../application-extension"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../apputils-extension"
+    },
+    {
+      "path": "../attachments"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../codemirror-extension"
+    },
+    {
+      "path": "../completer"
+    },
+    {
+      "path": "../completer-extension"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../console-extension"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../csvviewer"
+    },
+    {
+      "path": "../csvviewer-extension"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../extensionmanager"
+    },
+    {
+      "path": "../extensionmanager-extension"
+    },
+    {
+      "path": "../faq-extension"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
+      "path": "../filebrowser-extension"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../fileeditor-extension"
+    },
+    {
+      "path": "../help-extension"
+    },
+    {
+      "path": "../imageviewer"
+    },
+    {
+      "path": "../imageviewer-extension"
+    },
+    {
+      "path": "../inspector"
+    },
+    {
+      "path": "../inspector-extension"
+    },
+    {
+      "path": "../javascript-extension"
+    },
+    {
+      "path": "../json-extension"
+    },
+    {
+      "path": "../launcher"
+    },
+    {
+      "path": "../launcher-extension"
+    },
+    {
+      "path": "../mainmenu"
+    },
+    {
+      "path": "../mainmenu-extension"
+    },
+    {
+      "path": "../markdownviewer-extension"
+    },
+    {
+      "path": "../mathjax2"
+    },
+    {
+      "path": "../mathjax2-extension"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../notebook-extension"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../outputarea"
+    },
+    {
+      "path": "../pdf-extension"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../rendermime-extension"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../running"
+    },
+    {
+      "path": "../running-extension"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../settingeditor"
+    },
+    {
+      "path": "../settingeditor-extension"
+    },
+    {
+      "path": "../shortcuts-extension"
+    },
+    {
+      "path": "../statusbar"
+    },
+    {
+      "path": "../statusbar-extension"
+    },
+    {
+      "path": "../tabmanager-extension"
+    },
+    {
+      "path": "../terminal"
+    },
+    {
+      "path": "../terminal-extension"
+    },
+    {
+      "path": "../theme-dark-extension"
+    },
+    {
+      "path": "../theme-light-extension"
+    },
+    {
+      "path": "../tooltip"
+    },
+    {
+      "path": "../tooltip-extension"
+    },
+    {
+      "path": "../vdom-extension"
+    },
+    {
+      "path": "../vega4-extension"
+    }
+  ]
 }

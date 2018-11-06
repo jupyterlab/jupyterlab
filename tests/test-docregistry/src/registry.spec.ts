@@ -17,7 +17,7 @@ import {
   DocumentRegistry,
   DocumentWidget,
   IDocumentWidget
-} from '@jupyterlab/docregistry';
+} from '@jupyterlab/docregistry/src';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(

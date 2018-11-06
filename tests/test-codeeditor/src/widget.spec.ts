@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor/src';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
@@ -121,7 +121,7 @@ describe('CodeEditorWrapper', () => {
   });
 
   describe('#handleEvent()', () => {
-    context('focus', () => {
+    describe('focus', () => {
       it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
         let editor = widget.editor as LogEditor;

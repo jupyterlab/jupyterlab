@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
+import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils/src';
 
 import { MessageLoop } from '@phosphor/messaging';
 
@@ -49,7 +49,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    context('title', () => {
+    describe('title', () => {
       it('should proxy from content to main', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
@@ -65,7 +65,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    context('dispose', () => {
+    describe('dispose', () => {
       it('should dispose of main', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });

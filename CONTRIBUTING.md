@@ -13,6 +13,10 @@ that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
+## Tag Issues with Labels
+
+Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
+
 ## General Guidelines
 
 For general documentation about contributing to Jupyter projects, see the
@@ -23,7 +27,7 @@ All source code is written in
 Guide](https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide).
 
 All source code is formatted using [prettier](https://prettier.io).
-When code is modified and committed, all staged files will be automtically
+When code is modified and committed, all staged files will be automatically
 formatted using pre-commit git hooks (with help from the
 [lint-staged](https://github.com/okonet/lint-staged) and
 [husky](https://github.com/typicode/husky) libraries). The benefit of using a
@@ -101,7 +105,7 @@ Notes:
   local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
   a built application directory.
 
-- At times, it may be necessary to clean your local repo with the command `jlpm run clean:slate`. This will clean the repository, and re-install and
+- At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
   rebuild.
 
 - If `pip` gives a `VersionConflict` error, it usually means that the installed
@@ -304,7 +308,7 @@ jupyter lab --dev-mode --watch
 
 There is a range of build utilities for maintaining the repository.
 To get a suggested version for a library use `jlpm run get:dependency foo`.
-To update the version of a library across the repo use `jlpm run update:dependency foo@^x.x`.
+To update the version of a library across the repo use `jlpm run update:dependency foo ^latest`.
 To remove an unwanted dependency use `jlpm run remove:dependency foo`.
 
 The key utility is `jlpm run integrity`, which ensures the integrity of

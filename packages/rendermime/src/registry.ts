@@ -361,24 +361,25 @@ export namespace RenderMimeRegistry {
     }
 
     /**
-     * Resolve a relative url to a correct server path.
+     * Resolve a relative url to an absolute url path.
      */
     resolveUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
-        let cwd = PathExt.dirname(this._session.path);
+        const cwd = encodeURI(PathExt.dirname(this._session.path));
         url = PathExt.resolve(cwd, url);
       }
       return Promise.resolve(url);
     }
 
     /**
-     * Get the download url of a given absolute server path.
+     * Get the download url of a given absolute url path.
      */
-    getDownloadUrl(path: string): Promise<string> {
-      if (this.isLocal(path)) {
-        return this._contents.getDownloadUrl(path);
+    getDownloadUrl(url: string): Promise<string> {
+      if (this.isLocal(url)) {
+        // decode url->path before passing to contents api
+        return this._contents.getDownloadUrl(decodeURI(url));
       }
-      return Promise.resolve(path);
+      return Promise.resolve(url);
     }
 
     /**
@@ -392,7 +393,8 @@ export namespace RenderMimeRegistry {
      * manager.
      */
     isLocal(url: string): boolean {
-      return URLExt.isLocal(url) || !!this._contents.driveName(url);
+      const path = decodeURI(url);
+      return URLExt.isLocal(url) || !!this._contents.driveName(path);
     }
 
     private _session: Session.ISession | IClientSession;

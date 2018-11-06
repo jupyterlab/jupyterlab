@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { EditMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { EditMenu, IEditMenu } from '@jupyterlab/mainmenu/src';
 
 import { delegateExecute } from './util';
 
@@ -24,7 +24,7 @@ describe('@jupyterlab/mainmenu', () => {
     let tracker: InstanceTracker<Wodget>;
     const wodget = new Wodget();
 
-    before(() => {
+    beforeAll(() => {
       commands = new CommandRegistry();
     });
 

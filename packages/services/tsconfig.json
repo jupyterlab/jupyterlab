@@ -1,8 +1,16 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./lib"
+    "outDir": "lib",
+    "rootDir": "src"
   },
-  "include": ["src/*"],
-  "exclude": ["src/typedoc.d.ts"]
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../observables"
+    }
+  ]
 }

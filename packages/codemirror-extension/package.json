@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -24,25 +24,31 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.18.4",
-    "@jupyterlab/codeeditor": "^0.18.4",
-    "@jupyterlab/codemirror": "^0.18.4",
-    "@jupyterlab/coreutils": "^2.1.4",
-    "@jupyterlab/docregistry": "^0.18.4",
-    "@jupyterlab/fileeditor": "^0.18.4",
-    "@jupyterlab/mainmenu": "^0.7.4",
+    "@jupyterlab/application": "^0.19.1",
+    "@jupyterlab/codeeditor": "^0.19.1",
+    "@jupyterlab/codemirror": "^0.19.1",
+    "@jupyterlab/coreutils": "^2.2.1",
+    "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/fileeditor": "^0.19.1",
+    "@jupyterlab/mainmenu": "^0.8.1",
+    "@jupyterlab/statusbar": "^0.7.1",
     "@phosphor/widgets": "^1.6.0",
     "codemirror": "~5.39.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "jupyterlab": {
     "extension": true,

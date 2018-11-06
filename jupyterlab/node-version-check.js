@@ -11,6 +11,9 @@ var eparts = engine.split('.').map(parser);
 var version = process.version.replace('v', '');
 var vparts = version.split('.').map(parser);
 
+// eslint-disable-next-line
+console.log('Node', process.version);
+
 if (vparts[0] > eparts[0]) {
   process.exit(0);
 }

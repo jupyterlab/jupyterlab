@@ -18,10 +18,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 
-from traitlets import Bool, Unicode
+from traitlets import Bool, Dict, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
-from jupyter_core.application import base_aliases
+from jupyter_core.application import base_aliases, base_flags
 
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
@@ -177,10 +177,22 @@ class ProcessTestApp(ProcessApp):
 
 jest_aliases = dict(base_aliases)
 jest_aliases.update({
-    'coverage': 'JestApp.coverage',
-    'pattern': 'JestApp.testPathPattern',
-    'watchAll': 'JestApp.watchAll'
+    'testPathPattern': 'JestApp.testPathPattern'
 })
+jest_aliases.update({
+    'testNamePattern': 'JestApp.testNamePattern'
+})
+
+
+jest_flags = dict(base_flags)
+jest_flags['coverage'] = (
+    {'JestApp': {'coverage': True}},
+    'Run coverage'
+)
+jest_flags['watchAll'] = (
+    {'JestApp': {'watchAll': True}},
+    'Watch all test files'
+)
 
 
 class JestApp(ProcessTestApp):
@@ -190,43 +202,64 @@ class JestApp(ProcessTestApp):
 
     testPathPattern = Unicode('').tag(config=True)
 
+    testNamePattern = Unicode('').tag(config=True)
+
     watchAll = Bool(False).tag(config=True)
 
     aliases = jest_aliases
 
+    flags = jest_flags
+
     jest_dir = Unicode('')
+
+    test_config = Dict(dict(foo='bar'))
 
     open_browser = False
 
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.web_app.settings['terminals_available']
-        jest = './node_modules/.bin/jest'
         debug = self.log.level == logging.DEBUG
 
-        if self.coverage:
-            cmd = [jest, '--coverage']
-        elif debug:
-            cmd = 'node --inspect-brk %s --no-cache' % jest
-            if self.watchAll:
-                cmd += ' --watchAll'
-            else:
-                cmd += ' --watch'
-            cmd = cmd.split()
-        else:
-            cmd = [jest]
+        # find jest
+        target = osp.join('node_modules', 'jest', 'bin', 'jest.js')
+        jest = ''
+        cwd = osp.realpath(self.jest_dir)
+        while osp.dirname(cwd) != cwd:
+            if osp.exists(osp.join(cwd, target)):
+                jest = osp.join(cwd, target)
+                break
+            cwd = osp.dirname(cwd)
+        if not jest:
+            raise RuntimeError('jest not found!')
 
-        if not debug:
-            cmd += ['--silent']
+        cmd = ['node']
+        if self.coverage:
+            cmd += [jest, '--coverage']
+        elif debug:
+            cmd += ['--inspect-brk', jest,  '--no-cache']
+            if self.watchAll:
+                cmd += ['--watchAll']
+            else:
+                cmd += ['--watch']
+        else:
+            cmd += [jest]
 
         if self.testPathPattern:
             cmd += ['--testPathPattern', self.testPathPattern]
 
+        if self.testNamePattern:
+            cmd += ['--testNamePattern', self.testNamePattern]
+
         cmd += ['--runInBand']
+
+        if self.log_level > logging.INFO:
+            cmd += ['--silent']
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
                       token=self.token)
+        config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
         atexit.register(lambda: shutil.rmtree(td, True))
@@ -245,6 +278,7 @@ class KarmaTestApp(ProcessTestApp):
     """
     karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
+    karma_coverage_dir = Unicode('')
 
     def get_command(self):
         """Get the command to run."""
@@ -282,21 +316,24 @@ class KarmaTestApp(ProcessTestApp):
         if not files:
             msg = 'No files matching "%s" found in "%s"'
             raise ValueError(msg % (pattern, cwd))
-        # Find and validate the coverage folder
-        with open(pjoin(cwd, 'package.json')) as fid:
-            data = json.load(fid)
-        name = data['name'].replace('@jupyterlab/test-', '')
-        folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
-        if not osp.exists(folder):
-            raise ValueError(
-                'No source package directory found for "%s", use the pattern '
-                '"@jupyterlab/test-<package_dir_name>"' % name
-            )
+
+        # Find and validate the coverage folder if not specified
+        if not self.karma_coverage_dir:
+            with open(pjoin(cwd, 'package.json')) as fid:
+                data = json.load(fid)
+            name = data['name'].replace('@jupyterlab/test-', '')
+            folder = osp.realpath(pjoin(HERE, '..', '..', 'packages', name))
+            if not osp.exists(folder):
+                raise ValueError(
+                    'No source package directory found for "%s", use the pattern '
+                    '"@jupyterlab/test-<package_dir_name>"' % name
+                )
+            self.karma_coverage_dir = folder
 
         env = os.environ.copy()
         env['KARMA_INJECT_FILE'] = karma_inject_file
         env.setdefault('KARMA_FILE_PATTERN', pattern)
-        env.setdefault('KARMA_COVER_FOLDER', folder)
+        env.setdefault('KARMA_COVER_FOLDER', self.karma_coverage_dir)
         cwd = self.karma_base_dir
         cmd = ['karma', 'start'] + sys.argv[1:]
         return cmd, dict(env=env, cwd=cwd)
@@ -305,18 +342,18 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
-    logging.disable(logging.WARNING)
     app = JestApp.instance()
     app.jest_dir = jest_dir
     app.initialize()
     app.start()
 
 
-def run_karma(base_dir):
+def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
     app = KarmaTestApp.instance()
     app.karma_base_dir = base_dir
+    app.karma_coverage_dir = coverage_dir
     app.initialize([])
     app.start()

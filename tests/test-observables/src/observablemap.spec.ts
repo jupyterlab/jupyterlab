@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables/src';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableMap', () => {

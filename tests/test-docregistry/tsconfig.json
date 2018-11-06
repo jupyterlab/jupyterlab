@@ -1,7 +1,24 @@
 {
-  "extends": "../tsconfigtestbase",
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./build"
+    "outDir": "build",
+    "types": ["jest"],
+    "composite": false,
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/docregistry"
+    },
+    {
+      "path": "../../packages/rendermime"
+    },
+    {
+      "path": "../../packages/services"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
 }

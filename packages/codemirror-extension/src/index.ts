@@ -11,13 +11,20 @@ import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { editorServices, CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
+import {
+  editorServices,
+  EditorSyntaxStatus,
+  CodeMirrorEditor,
+  Mode
+} from '@jupyterlab/codemirror';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -32,6 +39,8 @@ namespace CommandIDs {
   export const find = 'codemirror:find';
 
   export const findAndReplace = 'codemirror:find-and-replace';
+
+  export const goToLine = 'codemirror:go-to-line';
 }
 
 /**
@@ -54,9 +63,49 @@ const commands: JupyterLabPlugin<void> = {
 };
 
 /**
+ * The JupyterLab plugin for the EditorSyntax status item.
+ */
+export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
+  autoStart: true,
+  requires: [IStatusBar, IEditorTracker],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    tracker: IEditorTracker
+  ) => {
+    let item = new EditorSyntaxStatus({ commands: app.commands });
+    app.shell.currentChanged.connect(() => {
+      const current = app.shell.currentWidget;
+      if (current && tracker.has(current)) {
+        item.model.editor = (current as IDocumentWidget<
+          FileEditor
+        >).content.editor;
+      }
+    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/codemirror-extension:editor-syntax-status',
+      {
+        item,
+        align: 'left',
+        rank: 0,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [commands, services];
+const plugins: JupyterLabPlugin<any>[] = [
+  commands,
+  services,
+  editorSyntaxStatus
+];
 export default plugins;
 
 /**
@@ -212,6 +261,19 @@ function activateEditorCommands(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.goToLine, {
+    label: 'Go to Line...',
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let editor = widget.content.editor as CodeMirrorEditor;
+      editor.execCommand('jumpToLine');
+    },
+    isEnabled
+  });
+
   commands.addCommand(CommandIDs.changeMode, {
     label: args => args['name'] as string,
     execute: args => {
@@ -308,4 +370,13 @@ function activateEditorCommands(
       editor.execCommand('replace');
     }
   } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
+
+  // Add go to line capabilities to the edit menu.
+  mainMenu.editMenu.goToLiners.add({
+    tracker,
+    goToLine: (widget: IDocumentWidget<FileEditor>) => {
+      let editor = widget.content.editor as CodeMirrorEditor;
+      editor.execCommand('jumpToLine');
+    }
+  } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
 }

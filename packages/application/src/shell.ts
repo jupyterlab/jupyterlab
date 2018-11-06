@@ -71,11 +71,11 @@ export class ApplicationShell extends Widget {
 
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let topPanel = (this._topPanel = new Panel());
-    let hboxPanel = (this._hboxPanel = new BoxPanel());
+    let hboxPanel = new BoxPanel();
     let dockPanel = (this._dockPanel = new DockPanel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    let hsplitPanel = (this._hsplitPanel = new SplitPanel());
+    let hsplitPanel = new SplitPanel();
     let leftHandler = (this._leftHandler = new Private.SideBarHandler('left'));
     let rightHandler = (this._rightHandler = new Private.SideBarHandler(
       'right'
@@ -122,6 +122,9 @@ export class ApplicationShell extends Widget {
 
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
+    // Use relative sizing to set the width of the side panels.
+    // This will still respect the min-size of children widget in the stacked panel.
+    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
@@ -801,8 +804,6 @@ export class ApplicationShell extends Widget {
     this
   );
   private _dockPanel: DockPanel;
-  private _hboxPanel: BoxPanel;
-  private _hsplitPanel: SplitPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _leftHandler: Private.SideBarHandler;

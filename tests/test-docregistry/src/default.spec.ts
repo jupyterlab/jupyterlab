@@ -3,6 +3,8 @@
 
 import { expect } from 'chai';
 
+import { toArray } from '@phosphor/algorithm';
+
 import { UUID } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
@@ -16,7 +18,7 @@ import {
   IDocumentWidget,
   TextModelFactory,
   Context
-} from '@jupyterlab/docregistry';
+} from '@jupyterlab/docregistry/src';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -173,6 +175,30 @@ describe('docregistry/default', () => {
           canStartKernel: true
         });
         expect(factory.canStartKernel).to.equal(true);
+      });
+
+      it('should have toolbar items', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text'],
+          toolbarFactory: () => [
+            {
+              name: 'foo',
+              widget: new Widget()
+            },
+            {
+              name: 'bar',
+              widget: new Widget()
+            }
+          ]
+        });
+        const context = createFileContext();
+        const widget = factory.createNew(context);
+        const widget2 = factory.createNew(context);
+        expect(toArray(widget.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(widget2.toolbar.names())).to.deep.equal(['foo', 'bar']);
+        expect(toArray(widget.toolbar.children()).length).to.equal(2);
+        expect(toArray(widget2.toolbar.children()).length).to.equal(2);
       });
     });
 
@@ -517,7 +543,7 @@ describe('docregistry/default', () => {
       widget = new DocumentWidget({ context, content });
     };
 
-    before(async () => {
+    beforeAll(async () => {
       manager = new ServiceManager();
       await manager.ready;
     });

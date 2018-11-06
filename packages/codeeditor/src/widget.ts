@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { MimeData } from '@phosphor/coreutils';
+
+import { IDragEvent } from '@phosphor/dragdrop';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -17,6 +21,11 @@ const HAS_SELECTION_CLASS = 'jp-mod-has-primary-selection';
  * within the whitespace at the beginning of a line
  */
 const HAS_IN_LEADING_WHITESPACE_CLASS = 'jp-mod-in-leading-whitespace';
+
+/**
+ * A class used to indicate a drop target.
+ */
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
 /**
  * RegExp to test for leading whitespace
@@ -69,6 +78,35 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'p-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'p-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'p-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'p-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -80,9 +118,25 @@ export class CodeEditorWrapper extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
+    let node = this.node;
+    node.addEventListener('p-dragenter', this);
+    node.addEventListener('p-dragleave', this);
+    node.addEventListener('p-dragover', this);
+    node.addEventListener('p-drop', this);
     if (this.isVisible) {
       this.update();
     }
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('p-dragenter', this);
+    node.removeEventListener('p-dragleave', this);
+    node.removeEventListener('p-dragover', this);
+    node.removeEventListener('p-drop', this);
   }
 
   /**
@@ -136,6 +190,89 @@ export class CodeEditorWrapper extends Widget {
       }
     }
   }
+
+  /**
+   * Handle the `'p-dragenter'` event for the widget.
+   */
+  private _evtDragEnter(event: IDragEvent): void {
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
+    const data = Private.findTextData(event.mimeData);
+    if (data === undefined) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.addClass('jp-mod-dropTarget');
+  }
+
+  /**
+   * Handle the `'p-dragleave'` event for the widget.
+   */
+  private _evtDragLeave(event: IDragEvent): void {
+    this.removeClass(DROP_TARGET_CLASS);
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
+    const data = Private.findTextData(event.mimeData);
+    if (data === undefined) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Handle the `'p-dragover'` event for the widget.
+   */
+  private _evtDragOver(event: IDragEvent): void {
+    this.removeClass(DROP_TARGET_CLASS);
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
+    const data = Private.findTextData(event.mimeData);
+    if (data === undefined) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dropAction = 'copy';
+    this.addClass(DROP_TARGET_CLASS);
+  }
+
+  /**
+   * Handle the `'p-drop'` event for the widget.
+   */
+  private _evtDrop(event: IDragEvent): void {
+    if (this.editor.getOption('readOnly') === true) {
+      return;
+    }
+    const data = Private.findTextData(event.mimeData);
+    if (data === undefined) {
+      return;
+    }
+    this.removeClass(DROP_TARGET_CLASS);
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
+      return;
+    }
+    const coordinate = {
+      top: event.y,
+      bottom: event.y,
+      left: event.x,
+      right: event.x,
+      x: event.x,
+      y: event.y,
+      width: 0,
+      height: 0
+    };
+    const position = this.editor.getPositionForCoordinate(coordinate);
+    const offset = this.editor.getOffsetAt(position);
+    this.model.value.insert(offset, data);
+  }
 }
 
 /**
@@ -174,5 +311,22 @@ export namespace CodeEditorWrapper {
      * The default selection style for the editor.
      */
     selectionStyle?: CodeEditor.ISelectionStyle;
+  }
+}
+
+/**
+ * A namespace for private functionality.
+ */
+namespace Private {
+  /**
+   * Given a MimeData instance, extract the first text data, if any.
+   */
+  export function findTextData(mime: MimeData): string | undefined {
+    const types = mime.types();
+    const textType = types.find(t => t.indexOf('text') === 0);
+    if (textType === undefined) {
+      return undefined;
+    }
+    return mime.getData(textType) as string;
   }
 }

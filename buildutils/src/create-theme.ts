@@ -45,6 +45,7 @@ const plugin: JupyterLabPlugin<void> = {
   activate: function(app: JupyterLab, manager: IThemeManager) {
     manager.register({
       name: '{{title}}',
+      isLight: true,
       load: function() {
         return manager.loadCSS('{{name}}/index.css');
       },

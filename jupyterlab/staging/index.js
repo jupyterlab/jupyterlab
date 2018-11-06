@@ -162,12 +162,12 @@ function main() {
 
   // Handle a browser test.
   var browserTest = PageConfig.getOption('browserTest');
-  var el = document.createElement('div');
-  el.id = 'browserTest';
-  document.body.appendChild(el);
-  el.textContent = '[]';
-
   if (browserTest.toLowerCase() === 'true') {
+    var el = document.createElement('div');
+    el.id = 'browserTest';
+    document.body.appendChild(el);
+    el.textContent = '[]';
+    el.style.display = 'none';
     var errors = [];
     var reported = false;
     var timeout = 25000;

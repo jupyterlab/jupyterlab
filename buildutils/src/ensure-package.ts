@@ -27,6 +27,7 @@ export async function ensurePackage(
   let missing = options.missing || [];
   let unused = options.unused || [];
   let messages: string[] = [];
+  let locals = options.locals || {};
 
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
@@ -59,7 +60,7 @@ export async function ensurePackage(
   filenames = glob.sync(path.join(pkgPath, 'src/*.ts*'));
   filenames = filenames.concat(glob.sync(path.join(pkgPath, 'src/**/*.ts*')));
 
-  if (filenames.length === 0) {
+  if (!fs.existsSync(path.join(pkgPath, 'tsconfig.json'))) {
     if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
       messages.push('Updated package.json');
     }
@@ -108,8 +109,18 @@ export async function ensurePackage(
 
   // Look for unused packages
   Object.keys(deps).forEach(name => {
+    if (options.noUnused === false) {
+      return;
+    }
     if (unused.indexOf(name) !== -1) {
       return;
+    }
+    const isTest = data.name.indexOf('test') !== -1;
+    if (isTest) {
+      const testLibs = ['jest', 'ts-jest', '@jupyterlab/testutils'];
+      if (testLibs.indexOf(name) !== -1) {
+        return;
+      }
     }
     if (names.indexOf(name) === -1) {
       let version = data.dependencies[name];
@@ -118,6 +129,32 @@ export async function ensurePackage(
       );
     }
   });
+
+  // Handle references.
+  let references: { [key: string]: string } = Object.create(null);
+  Object.keys(deps).forEach(name => {
+    if (!(name in locals)) {
+      return;
+    }
+    const target = locals[name];
+    if (!fs.existsSync(path.join(target, 'tsconfig.json'))) {
+      return;
+    }
+    let ref = path.relative(pkgPath, locals[name]);
+    references[name] = ref.split(path.sep).join('/');
+  });
+  if (
+    data.name.indexOf('example-') === -1 &&
+    Object.keys(references).length > 0
+  ) {
+    const tsConfigPath = path.join(pkgPath, 'tsconfig.json');
+    const tsConfigData = utils.readJSONFile(tsConfigPath);
+    tsConfigData.references = [];
+    Object.keys(references).forEach(name => {
+      tsConfigData.references.push({ path: references[name] });
+    });
+    utils.writeJSONFile(tsConfigPath, tsConfigData);
+  }
 
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
@@ -164,6 +201,16 @@ export interface IEnsurePackageOptions {
    * A list of dependencies that can be missing.
    */
   missing?: string[];
+
+  /**
+   * A map of local package names and their relative path.
+   */
+  locals?: { [key: string]: string };
+
+  /**
+   * Whether to enforce that dependencies get used.  Default is true.
+   */
+  noUnused?: boolean;
 }
 
 /**

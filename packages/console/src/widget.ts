@@ -524,6 +524,12 @@ export class CodeConsole extends Widget {
             cell.model.value.text = text;
           }
         }
+      } else if (value && value.content.status === 'error') {
+        each(this._cells, (cell: CodeCell) => {
+          if (cell.model.executionCount === null) {
+            cell.setPrompt('');
+          }
+        });
       }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();

@@ -1,0 +1,18 @@
+`v0.xx.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.xx.0>`__
+---------------------------------------------------------------------------
+
+{{ close_date }}
+^^^^^^^^^^^^^^^
+
+See the `JupyterLab
+0.xx.0 <https://github.com/jupyterlab/jupyterlab/milestone/xx?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues closed.
+
+{%   for pr in pull_requests -%}
+* {{ pr['title']|title }} (`#{{ pr['number'] }} <{{pr['html_url']}}>`__
+{%-      if pr['loghub_related_issues']|length %}
+{%-          for pri in pr['loghub_related_issues'] -%}
+                 , `#{{ pri['text'] }} <{{ pri['url'] }}>`__
+{%-          endfor -%}
+{%- endif %})
+{%   endfor %}

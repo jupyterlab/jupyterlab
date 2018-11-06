@@ -63,10 +63,16 @@ class LabBuildApp(JupyterApp):
     dev_build = Bool(True, config=True,
         help="Whether to build in dev mode (defaults to dev mode)")
 
+    pre_clean = Bool(True, config=True,
+        help="Whether to clean before building (defaults to True)")
+
     def start(self):
         command = 'build:prod' if not self.dev_build else 'build'
         app_dir = self.app_dir or get_app_dir()
         self.log.info('JupyterLab %s', version)
+        if self.pre_clean:
+            self.log.info('Cleaning %s' % app_dir)
+            clean(self.app_dir)
         self.log.info('Building in %s', app_dir)
         build(app_dir=app_dir, name=self.name, version=self.version,
               command=command, logger=self.log)
@@ -89,7 +95,7 @@ class LabCleanApp(JupyterApp):
     app_dir = Unicode('', config=True, help='The app directory to clean')
 
     def start(self):
-        clean(self.app_dir)
+        clean(self.app_dir, logger=self.log)
 
 
 class LabPathApp(JupyterApp):
@@ -117,10 +123,15 @@ class LabWorkspaceExportApp(JupyterApp):
     version = version
     description = """
     Export a JupyterLab workspace
+
+    If no arguments are passed in, this command will export the default
+        workspace.
+    If a workspace name is passed in, this command will export that workspace.
+    If no workspace is found, this command will export an empty workspace.
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
@@ -149,10 +160,13 @@ class LabWorkspaceImportApp(JupyterApp):
     version = version
     description = """
     Import a JupyterLab workspace
+
+    This command will import a workspace from a JSON file. The format of the
+        file must be the same as what the export functionality emits.
     """
 
     def start(self):
-        app = LabApp()
+        app = LabApp(config=self.config)
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
@@ -173,7 +187,7 @@ class LabWorkspaceImportApp(JupyterApp):
         workspace = dict()
         with open(file_path) as fid:
             try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, page_url, workspaces_url)
+                workspace = self._validate(fid, base_url, page_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (file_name, e))
                 sys.exit(1)
@@ -194,7 +208,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
         print('Saved workspace: %s' % workspace_path)
 
-    def _validate(self, data, page_url, workspaces_url):
+    def _validate(self, data, base_url, page_url, workspaces_url):
         workspace = json.load(data)
 
         if 'data' not in workspace:
@@ -207,7 +221,7 @@ class LabWorkspaceImportApp(JupyterApp):
             raise Exception('The `id` field is missing in `metadata`.')
 
         id = workspace['metadata']['id']
-        if id != page_url and not id.startswith(workspaces_url):
+        if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
             error = '%s does not match page_url or start with workspaces_url.'
             raise Exception(error % id)
 
@@ -218,6 +232,9 @@ class LabWorkspaceApp(JupyterApp):
     version = version
     description = """
     Import or export a JupyterLab workspace
+
+    There are two sub-commands for export or import of workspaces. This app
+        should not otherwise do any work.
     """
 
     subcommands = dict()
@@ -229,6 +246,11 @@ class LabWorkspaceApp(JupyterApp):
         LabWorkspaceImportApp,
         LabWorkspaceImportApp.description.splitlines()[0]
     )
+
+    def start(self):
+        super().start()
+        print('Either `export` or `import` must be specified.')
+        sys.exit(1)
 
 
 lab_aliases = dict(aliases)
@@ -295,6 +317,10 @@ class LabApp(NotebookApp):
 
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
+
+    override_static_url = Unicode('', config=True, help=('The override url for static lab assets, typically a CDN.'))
+
+    override_theme_url = Unicode('', config=True, help=('The override url for static lab theme assets, typically a CDN.'))
 
     app_dir = Unicode(get_app_dir(), config=True,
         help="The app directory to launch JupyterLab from.")

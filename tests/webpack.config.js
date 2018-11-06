@@ -10,11 +10,12 @@ module.exports = {
   },
   bail: true,
   devtool: devtool,
+  mode: 'development',
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: [{ loader: 'ts-loader' }]
+        use: [{ loader: 'ts-loader', options: { context: process.cwd() } }]
       },
       {
         test: /\.js$/,

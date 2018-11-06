@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -25,18 +25,19 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.18.4",
-    "@jupyterlab/coreutils": "^2.1.4",
-    "@jupyterlab/docregistry": "^0.18.4",
-    "@jupyterlab/rendermime": "^0.18.4",
-    "@jupyterlab/rendermime-interfaces": "^1.1.7",
-    "@jupyterlab/services": "^3.1.4",
+    "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/coreutils": "^2.2.1",
+    "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/rendermime": "^0.19.1",
+    "@jupyterlab/rendermime-interfaces": "^1.2.1",
+    "@jupyterlab/services": "^3.2.1",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/application": "^1.6.0",
     "@phosphor/commands": "^1.6.1",
@@ -45,10 +46,15 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/properties": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "font-awesome": "~4.7.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~2.9.2"
+    "typedoc": "~0.12.0",
+    "typescript": "~3.1.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

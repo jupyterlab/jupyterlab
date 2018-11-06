@@ -1,7 +1,21 @@
 {
-  "extends": "../tsconfigtestbase",
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "./build"
+    "outDir": "build",
+    "types": ["mocha"],
+    "composite": false,
+    "rootDir": "src"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/services"
+    },
+    {
+      "path": "../../packages/terminal"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
 }

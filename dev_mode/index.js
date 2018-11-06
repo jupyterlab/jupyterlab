@@ -9,10 +9,7 @@ import {
   PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
-__webpack_public_path__ = URLExt.join(
-  PageConfig.getOption('baseUrl'),
-  PageConfig.getOption('publicUrl')
-);
+__webpack_public_path__ = PageConfig.getOption('bundleUrl');
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');
@@ -162,12 +159,12 @@ function main() {
 
   // Handle a browser test.
   var browserTest = PageConfig.getOption('browserTest');
-  var el = document.createElement('div');
-  el.id = 'browserTest';
-  document.body.appendChild(el);
-  el.textContent = '[]';
-
   if (browserTest.toLowerCase() === 'true') {
+    var el = document.createElement('div');
+    el.id = 'browserTest';
+    document.body.appendChild(el);
+    el.textContent = '[]';
+    el.style.display = 'none';
     var errors = [];
     var reported = false;
     var timeout = 25000;
