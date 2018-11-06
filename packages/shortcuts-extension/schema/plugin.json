@@ -4,28 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "console:linebreak": {
-      "default": {},
-      "properties": {
-        "command": { "default": "console:linebreak" },
-        "keys": { "default": ["Enter"] },
-        "selector": { "default": ".jp-CodeConsole-promptCell" },
-        "title": { "default": "Insert Line Break" },
-        "category": { "default": "Console" }
-      },
-      "type": "object"
-    },
-    "console:run-forced": {
-      "default": {},
-      "properties": {
-        "command": { "default": "console:run-forced" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": ".jp-CodeConsole-promptCell" },
-        "title": { "default": "Run Cell (forced)" },
-        "category": { "default": "Console" }
-      },
-      "type": "object"
-    },
     "docmanager:close": {
       "default": {},
       "properties": {

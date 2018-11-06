@@ -1,0 +1,23 @@
+{
+  "title": "Console",
+  "description": "Console settings.",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "console:linebreak",
+      "keys": ["Enter"],
+      "selector": ".jp-CodeConsole-promptCell",
+      "title": "Insert Line Break",
+      "category": "Console"
+    },
+    {
+      "command": "console:run-forced",
+      "keys": ["Shift Enter"],
+      "selector": ".jp-CodeConsole-promptCell",
+      "title": "Run Cell (forced)",
+      "category": "Console"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
