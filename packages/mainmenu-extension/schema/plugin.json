@@ -3,6 +3,27 @@
   "description": "Main JupyterLab menu settings.",
   "jupyter.lab.keyboard-shortcuts": [
     {
+      "command": "runmenu:run",
+      "keys": ["Shift Enter"],
+      "selector": "[data-jp-code-runner]",
+      "title": "Run",
+      "category": "Run Menu"
+    },
+    {
+      "command": "runmenu:run-all",
+      "keys": [""],
+      "selector": "[data-jp-code-runner]",
+      "title": "Run All",
+      "category": "Run Menu"
+    },
+    {
+      "command": "runmenu:restart-and-run-all",
+      "keys": [""],
+      "selector": "[data-jp-code-runner]",
+      "title": "Restart Kernel and Run All",
+      "category": "Run Menu"
+    },
+    {
       "command": "tabmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
       "selector": "body",

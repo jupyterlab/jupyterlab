@@ -322,39 +322,6 @@
         "category": { "default": "Main Area" }
       },
       "type": "object"
-    },
-    "runmenu:run": {
-      "default": {},
-      "properties": {
-        "command": { "default": "runmenu:run" },
-        "keys": { "default": ["Shift Enter"] },
-        "selector": { "default": "[data-jp-code-runner]" },
-        "title": { "default": "Run" },
-        "category": { "default": "Run Menu" }
-      },
-      "type": "object"
-    },
-    "runmenu:run-all": {
-      "default": {},
-      "properties": {
-        "command": { "default": "runmenu:run-all" },
-        "keys": { "default": [""] },
-        "selector": { "default": "[data-jp-code-runner]" },
-        "title": { "default": "Run All" },
-        "category": { "default": "Run Menu" }
-      },
-      "type": "object"
-    },
-    "runmenu:restart-and-run-all": {
-      "default": {},
-      "properties": {
-        "command": { "default": "runmenu:restart-and-run-all" },
-        "keys": { "default": [""] },
-        "selector": { "default": "[data-jp-code-runner]" },
-        "title": { "default": "Restart Kernel and Run All" },
-        "category": { "default": "Run Menu" }
-      },
-      "type": "object"
     }
   },
   "oneOf": [{ "$ref": "#/definitions/shortcut" }],
