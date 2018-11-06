@@ -355,39 +355,6 @@
         "category": { "default": "Run Menu" }
       },
       "type": "object"
-    },
-    "settingeditor:debug": {
-      "default": {},
-      "properties": {
-        "command": { "default": "settingeditor:debug" },
-        "keys": { "default": ["Accel I"] },
-        "selector": { "default": ".jp-SettingEditor" },
-        "title": { "default": "Open Debugger" },
-        "category": { "default": "Settings Editor" }
-      },
-      "type": "object"
-    },
-    "settingeditor:open": {
-      "default": {},
-      "properties": {
-        "command": { "default": "settingeditor:open" },
-        "keys": { "default": ["Accel ,"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Open Settings Editor" },
-        "category": { "default": "Settings Editor" }
-      },
-      "type": "object"
-    },
-    "settingeditor:save": {
-      "default": {},
-      "properties": {
-        "command": { "default": "settingeditor:save" },
-        "keys": { "default": ["Accel S"] },
-        "selector": { "default": ".jp-SettingEditor" },
-        "title": { "default": "Save Settings" },
-        "category": { "default": "Settings Editor" }
-      },
-      "type": "object"
     }
   },
   "oneOf": [{ "$ref": "#/definitions/shortcut" }],

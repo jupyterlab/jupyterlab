@@ -1,0 +1,30 @@
+{
+  "title": "Setting Editor",
+  "description": "Setting editor settings.",
+  "jupyter.lab.keyboard-shortcuts": [
+    {
+      "command": "settingeditor:debug",
+      "keys": ["Accel I"],
+      "selector": ".jp-SettingEditor",
+      "title": "Open Debugger",
+      "category": "Settings Editor"
+    },
+    {
+      "command": "settingeditor:open",
+      "keys": ["Accel ,"],
+      "selector": "body",
+      "title": "Open Settings Editor",
+      "category": "Settings Editor"
+    },
+    {
+      "command": "settingeditor:save",
+      "keys": ["Accel S"],
+      "selector": ".jp-SettingEditor",
+      "title": "Save Settings",
+      "category": "Settings Editor"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
