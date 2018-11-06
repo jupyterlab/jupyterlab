@@ -4,45 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "completer:invoke-console": {
-      "default": {},
-      "properties": {
-        "command": { "default": "completer:invoke-console" },
-        "keys": { "default": ["Tab"] },
-        "selector": {
-          "default": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled"
-        },
-        "title": { "default": "Invoke Console Completion" },
-        "category": { "default": "Completer" }
-      },
-      "type": "object"
-    },
-    "completer:invoke-notebook": {
-      "default": {},
-      "properties": {
-        "command": { "default": "completer:invoke-notebook" },
-        "keys": { "default": ["Tab"] },
-        "selector": {
-          "default": ".jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled"
-        },
-        "title": { "default": "Invoke Notebook Completion" },
-        "category": { "default": "Completer" }
-      },
-      "type": "object"
-    },
-    "completer:invoke-file": {
-      "default": {},
-      "properties": {
-        "command": { "default": "completer:invoke-file" },
-        "keys": { "default": ["Tab"] },
-        "selector": {
-          "default": ".jp-FileEditor .jp-mod-completer-enabled"
-        },
-        "title": { "default": "Invoke File Completion" },
-        "category": { "default": "Completer" }
-      },
-      "type": "object"
-    },
     "console:linebreak": {
       "default": {},
       "properties": {
@@ -425,17 +386,6 @@
         "selector": { "default": ".jp-SettingEditor" },
         "title": { "default": "Save Settings" },
         "category": { "default": "Settings Editor" }
-      },
-      "type": "object"
-    },
-    "shortcutui:open-ui": {
-      "default": {},
-      "properties": {
-        "command": { "default": "shortcutui:open-ui" },
-        "keys": { "default": ["Ctrl Shift /"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Open Keyboard Shortcut Settings" },
-        "category": { "default": "Main Area" }
       },
       "type": "object"
     }
