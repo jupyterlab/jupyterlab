@@ -1,8 +1,31 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-FileIcon",
-  "jupyter.lab.setting-icon-label": "Document Manager",
   "title": "Document Manager",
   "description": "Document Manager settings.",
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "Document Manager",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "docmanager:close",
+      "keys": ["Ctrl Q"],
+      "selector": ".jp-Activity",
+      "title": "Close Activity",
+      "category": "File Operations"
+    },
+    {
+      "command": "docmanager:save",
+      "keys": ["Accel S"],
+      "selector": "body",
+      "title": "Save",
+      "category": "File Operations"
+    },
+    {
+      "command": "docmanager:save-as",
+      "keys": ["Accel Shift S"],
+      "selector": "body",
+      "title": "Save As",
+      "category": "File Operations"
+    }
+  ],
   "properties": {
     "autosave": {
       "type": "boolean",

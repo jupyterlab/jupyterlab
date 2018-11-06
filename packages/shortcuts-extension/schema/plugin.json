@@ -4,39 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "docmanager:close": {
-      "default": {},
-      "properties": {
-        "command": { "default": "docmanager:close" },
-        "keys": { "default": ["Ctrl Q"] },
-        "selector": { "default": ".jp-Activity" },
-        "title": { "default": "Close Activity" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
-    "docmanager:save": {
-      "default": {},
-      "properties": {
-        "command": { "default": "docmanager:save" },
-        "keys": { "default": ["Accel S"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Save" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
-    "docmanager:save-as": {
-      "default": {},
-      "properties": {
-        "command": { "default": "docmanager:save-as" },
-        "keys": { "default": ["Accel Shift S"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Save As" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
     "filebrowser:create-main-launcher": {
       "default": {},
       "properties": {
