@@ -3,6 +3,48 @@
   "description": "Main JupyterLab menu settings.",
   "jupyter.lab.keyboard-shortcuts": [
     {
+      "command": "editmenu:clear-all",
+      "keys": [""],
+      "selector": "[data-jp-undoer]",
+      "title": "Clear All",
+      "category": "Editing"
+    },
+    {
+      "command": "editmenu:clear-current",
+      "keys": [""],
+      "selector": "[data-jp-undoer]",
+      "title": "Clear",
+      "category": "Editing"
+    },
+    {
+      "command": "editmenu:find",
+      "keys": [""],
+      "selector": "[data-jp-undoer]",
+      "title": "Find",
+      "category": "Editing"
+    },
+    {
+      "command": "editmenu:find-and-replace",
+      "keys": [""],
+      "selector": "[data-jp-undoer]",
+      "title": "Find and Replace",
+      "category": "Editing"
+    },
+    {
+      "command": "editmenu:redo",
+      "keys": ["Ctrl Shift Z"],
+      "selector": "[data-jp-undoer]",
+      "title": "Redo",
+      "category": "Editing"
+    },
+    {
+      "command": "editmenu:undo",
+      "keys": ["Ctrl Z"],
+      "selector": "[data-jp-undoer]",
+      "title": "Undo",
+      "category": "Editing"
+    },
+    {
       "command": "filemenu:close-and-cleanup",
       "keys": ["Ctrl Shift Q"],
       "selector": ".jp-Activity",
@@ -38,6 +80,13 @@
       "category": "Kernel Operations"
     },
     {
+      "command": "runmenu:restart-and-run-all",
+      "keys": [""],
+      "selector": "[data-jp-code-runner]",
+      "title": "Restart Kernel and Run All",
+      "category": "Run Menu"
+    },
+    {
       "command": "runmenu:run",
       "keys": ["Shift Enter"],
       "selector": "[data-jp-code-runner]",
@@ -49,13 +98,6 @@
       "keys": [""],
       "selector": "[data-jp-code-runner]",
       "title": "Run All",
-      "category": "Run Menu"
-    },
-    {
-      "command": "runmenu:restart-and-run-all",
-      "keys": [""],
-      "selector": "[data-jp-code-runner]",
-      "title": "Restart Kernel and Run All",
       "category": "Run Menu"
     },
     {
