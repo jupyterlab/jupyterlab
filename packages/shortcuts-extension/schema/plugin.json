@@ -257,61 +257,6 @@
       },
       "type": "object"
     },
-    "kernelmenu:interrupt": {
-      "default": {},
-      "properties": {
-        "command": { "default": "kernelmenu:interrupt" },
-        "keys": { "default": ["I", "I"] },
-        "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Interrupt Kernel" },
-        "category": { "default": "Kernel Operations" }
-      },
-      "type": "object"
-    },
-    "kernelmenu:restart": {
-      "default": {},
-      "properties": {
-        "command": { "default": "kernelmenu:restart" },
-        "keys": { "default": ["0", "0"] },
-        "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Restart Kernel" },
-        "category": { "default": "Kernel Operations" }
-      },
-      "type": "object"
-    },
-    "kernelmenu:restart-and-clear": {
-      "default": {},
-      "properties": {
-        "command": { "default": "kernelmenu:restart-and-clear" },
-        "keys": { "default": [""] },
-        "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Restart Kernel and Clear" },
-        "category": { "default": "Kernel Operations" }
-      },
-      "type": "object"
-    },
-    "kernelmenu:shutdown": {
-      "default": {},
-      "properties": {
-        "command": { "default": "kernelmenu:shutdown" },
-        "keys": { "default": [""] },
-        "selector": { "default": "[data-jp-kernel-user]:focus" },
-        "title": { "default": "Shutdown Kernel" },
-        "category": { "default": "Kernel Operations" }
-      },
-      "type": "object"
-    },
-    "filemenu:close-and-cleanup": {
-      "default": {},
-      "properties": {
-        "command": { "default": "filemenu:close-and-cleanup" },
-        "keys": { "default": ["Ctrl Shift Q"] },
-        "selector": { "default": ".jp-Activity" },
-        "title": { "default": "Close and cleanup file" },
-        "category": { "default": "File Operations" }
-      },
-      "type": "object"
-    },
     "launcher:create": {
       "default": {},
       "properties": {
