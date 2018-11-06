@@ -152,7 +152,7 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   font-size: inherit;
   color: inherit;
   background-color: inherit;
-  width: 50%;
+  width: 42%;
   min-width: 200px;
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
