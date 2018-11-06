@@ -1722,15 +1722,15 @@ export class Notebook extends StaticNotebook {
       token => token.type === 'operator' && token.value.indexOf('=') !== -1
     );
     if (!assignments.length) {
-      return true;
+      return false;
     }
 
     let firstAssignment = assignments.sort(
       (a, b) => (a.offset > b.offset ? 1 : -1)
     )[0];
 
-    // Select terminating tokens
-    // ';' and new line (which are locally outside of brackets)
+    // Select terminating tokens:
+    // semicolons and new lines (which are locally outside of brackets)
     let terminatingTokens = [];
     let openedBrackets = 0;
     const openingBrackets = '([{';
@@ -1747,7 +1747,7 @@ export class Notebook extends StaticNotebook {
           continue;
         }
       }
-      // empty string is used by as a token representing new-line
+      // empty string is used as a token representing new-line
       let terminator = token.value === ';' || token.value === '';
       if (openedBrackets === 0 && terminator) {
         terminatingTokens.push(token);

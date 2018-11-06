@@ -648,6 +648,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find definitions among tokens of this editor instance.
    */
   findDefinitions(name: string): Array<CodeEditor.IToken> {
+    // TODO: this could go to the CodeEditor, as it does not depend on CodeMirror directly
     // try to find variable assignment
     let cellTokens = this.getTokens();
 
@@ -657,7 +658,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
 
       if (token.type === 'variable') {
-        // Matching variable assignment.
+        // Matching variable assignment:
         let nextToken = this._closestMeaningfulToken(i, cellTokens, +1);
         if (
           nextToken &&
@@ -667,7 +668,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           return true;
         }
 
-        // Matching import.
+        // Matching imports:
         let previousToken = this._closestMeaningfulToken(i, cellTokens, -1);
         if (
           previousToken &&
@@ -676,6 +677,29 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         ) {
           return true;
         }
+
+        // Matching `as`:
+        // e.g. `with open('name') as f:` or `except Exception as e:`
+        if (
+          previousToken &&
+          previousToken.type === 'keyword' &&
+          previousToken.value === 'as'
+        ) {
+          return true;
+        }
+
+        // Matching `for` loop and comprehensions:
+        if (
+          previousToken &&
+          previousToken.type === 'keyword' &&
+          previousToken.value === 'for' &&
+          nextToken &&
+          nextToken.type === 'keyword' &&
+          nextToken.value === 'in'
+        ) {
+          return true;
+        }
+
         // nothing matched
         return false;
       } else if (token.type === 'def') {
