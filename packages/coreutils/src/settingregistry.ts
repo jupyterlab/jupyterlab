@@ -99,6 +99,17 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
  */
 export namespace ISettingRegistry {
   /**
+   * The primitive types available in a JSON schema.
+   */
+  export type Primitive =
+    | 'array'
+    | 'boolean'
+    | 'null'
+    | 'number'
+    | 'object'
+    | 'string';
+
+  /**
    * The settings for a specific plugin.
    */
   export interface IPlugin extends JSONObject {
@@ -129,22 +140,9 @@ export namespace ISettingRegistry {
   }
 
   /**
-   * A schema type that is a minimal subset of the formal JSON Schema along with
-   * optional JupyterLab rendering hints.
+   * A minimal subset of the formal JSON Schema.
    */
-  export interface ISchema extends JSONObject {
-    /**
-     * The JupyterLab icon class hint for a plugin can be overridden by user
-     * settings. It can also be root level and therefore "private".
-     */
-    'jupyter.lab.setting-icon-class'?: string;
-
-    /**
-     * The JupyterLab icon label hint for a plugin can be overridden by user
-     * settings. It can also be root level and therefore "private".
-     */
-    'jupyter.lab.setting-icon-label'?: string;
-
+  export interface IProperty extends JSONObject {
     /**
      * The default value, if any.
      */
@@ -158,34 +156,43 @@ export namespace ISettingRegistry {
     /**
      * The schema's child properties.
      */
-    properties?: {
-      /**
-       * The JupyterLab icon class hint for a plugin can be overridden by user
-       * settings. It can also be root level and therefore "private".
-       */
-      'jupyter.lab.setting-icon-class'?: ISchema;
-
-      /**
-       * The JupyterLab icon label hint for a plugin can be overridden by user
-       * settings. It can also be root level and therefore "private".
-       */
-      'jupyter.lab.setting-icon-label'?: ISchema;
-
-      /**
-       * Arbitrary setting keys can be added.
-       */
-      [key: string]: ISchema;
-    };
+    properties?: { [property: string]: IProperty };
 
     /**
-     * The title of the schema.
+     * The title of a property.
      */
     title?: string;
 
     /**
      * The type or types of the data.
      */
-    type?: string | string[];
+    type?: Primitive | Primitive[];
+  }
+
+  /**
+   * A schema type that is a minimal subset of the formal JSON Schema along with
+   * optional JupyterLab rendering hints.
+   */
+  export interface ISchema extends IProperty {
+    /**
+     * The JupyterLab icon class hint.
+     */
+    'jupyter.lab.setting-icon-class'?: string;
+
+    /**
+     * The JupyterLab icon label hint.
+     */
+    'jupyter.lab.setting-icon-label'?: string;
+
+    /**
+     * The JupyterLab shortcuts that are creaed by a plugin's schema.
+     */
+    'jupyter.lab.shortcuts'?: IShortcut[];
+
+    /**
+     * The root schema is always an object.
+     */
+    type: 'object';
   }
 
   /**
@@ -307,6 +314,36 @@ export namespace ISettingRegistry {
      * @returns A list of errors or `null` if valid.
      */
     validate(raw: string): ISchemaValidator.IError[] | null;
+  }
+
+  /**
+   * An interface describing a JupyterLab keyboard shortcut.
+   */
+  export interface IShortcut extends JSONObject {
+    /**
+     * The shortcut category for rendering and organization of shortcuts.
+     */
+    category: string;
+
+    /**
+     * The command invoked by the shortcut.
+     */
+    command: string;
+
+    /**
+     * The key combination of the shortcut.
+     */
+    keys: string[];
+
+    /**
+     * The CSS selector applicable to the shortcut.
+     */
+    selector: string;
+
+    /**
+     * The title of the shortcut.
+     */
+    title: string;
   }
 }
 
@@ -467,7 +504,7 @@ export class SettingRegistry {
   /**
    * The schema of the setting registry.
    */
-  readonly schema: ISettingRegistry.ISchema = SCHEMA;
+  readonly schema = SCHEMA as ISettingRegistry.ISchema;
 
   /**
    * The schema validator used by the setting registry.
@@ -1099,7 +1136,7 @@ export namespace Private {
    * Create a fully extrapolated default value for a root key in a schema.
    */
   export function reifyDefault(
-    schema: ISettingRegistry.ISchema,
+    schema: ISettingRegistry.IProperty,
     root?: string
   ): JSONValue | undefined {
     // If the property is at the root level, traverse its schema.
