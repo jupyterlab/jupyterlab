@@ -3,19 +3,7 @@
   "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
-  "properties": {
-    "inspector:open": {
-      "default": {},
-      "properties": {
-        "command": { "default": "inspector:open" },
-        "keys": { "default": ["Accel I"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Open Inspector" },
-        "category": { "default": "Inspector" }
-      },
-      "type": "object"
-    }
-  },
+  "properties": {},
   "oneOf": [{ "$ref": "#/definitions/shortcut" }],
   "type": "object",
   "definitions": {
