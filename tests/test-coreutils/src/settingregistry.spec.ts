@@ -30,7 +30,9 @@ export class TestConnector extends StateDB
       return null;
     }
 
-    const schema = this.schemas[id] || { type: 'object' };
+    const schema: ISettingRegistry.ISchema = this.schemas[id] || {
+      type: 'object'
+    };
     const composite = {};
     const user = {};
     const raw = (data as string) || '{ }';
@@ -53,7 +55,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should validate data against a schema', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string' }
@@ -73,7 +75,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should return errors if the data fails to validate', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string' }
@@ -93,7 +95,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should populate the composite data', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string', default: 'baz' }
@@ -196,10 +198,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -212,10 +217,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -329,7 +337,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should create a new settings object for a plugin', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -342,7 +350,7 @@ describe('@jupyterlab/coreutils', () => {
     describe('#changed', () => {
       it('should emit when a plugin changes', async () => {
         const id = 'alpha';
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
@@ -357,10 +365,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -373,10 +384,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -391,7 +405,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should test whether the settings object is disposed', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -407,7 +421,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should expose the plugin schema', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -422,10 +436,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -440,7 +457,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should expose the plugin ID', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -454,7 +471,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should expose the setting registry', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -468,7 +485,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should dispose the settings object', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
         const version = 'test';
         const plugin = { id, data, raw, schema, version };
@@ -553,10 +570,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -571,10 +591,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
