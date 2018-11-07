@@ -1,0 +1,16 @@
+{
+  "title": "Help",
+  "description": "Help settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "help:toggle",
+      "keys": ["Ctrl Shift H"],
+      "selector": "body",
+      "title": "Toggle Help",
+      "category": "Help"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

@@ -4,17 +4,6 @@
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {
-    "help:toggle": {
-      "default": {},
-      "properties": {
-        "command": { "default": "help:toggle" },
-        "keys": { "default": ["Ctrl Shift H"] },
-        "selector": { "default": "body" },
-        "title": { "default": "Toggle Help" },
-        "category": { "default": "Help" }
-      },
-      "type": "object"
-    },
     "inspector:open": {
       "default": {},
       "properties": {
