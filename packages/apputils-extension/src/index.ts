@@ -480,7 +480,6 @@ const state: JupyterLabPlugin<IStateDB> = {
 
           // After the state has been cloned, navigate to the URL.
           cloned.then(() => {
-            console.log(`HERE: ${url}`);
             router.navigate(url, { silent: true });
           });
 
@@ -495,7 +494,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     router.register({
       command: CommandIDs.loadState,
       pattern: /.?/,
-      rank: 20 // Very high priority: 20/100.
+      rank: 20 // Very high priority: 20:100.
     });
 
     commands.addCommand(CommandIDs.reset, {
@@ -564,7 +563,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     router.register({
       command: CommandIDs.resetOnLoad,
       pattern: Patterns.resetOnLoad,
-      rank: 10 // Set reset rank at a higher priority than the default 100.
+      rank: 10 // Very high priority: 10:100.
     });
 
     // Clean up state database when the window unloads.
@@ -722,7 +721,11 @@ namespace Private {
    *
    * @param ready - A promise that must be resolved before splash disappears.
    *
+   * @param commands - The application's command registry.
+   *
    * @param recovery - A command that recovers from a hanging splash.
+   *
+   * @param light - A flag indicating whether the theme is light or dark.
    */
   export function showSplash(
     ready: Promise<any>,
