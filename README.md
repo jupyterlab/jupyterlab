@@ -147,7 +147,7 @@ JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io
 
 ### Extending JupyterLab
 
-To start developing extension, see the [developers documentation](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html) and [API docs](http://jupyterlab.github.io/jupyterlab/index.html).
+To start developing an extension, see the [developer documentation](https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html) and the [API docs](http://jupyterlab.github.io/jupyterlab/index.html).
 
 ### License
 
