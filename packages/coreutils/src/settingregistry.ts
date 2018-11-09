@@ -497,9 +497,40 @@ export class SettingRegistry {
    * Create a new setting registry.
    */
   constructor(options: SettingRegistry.IOptions) {
-    this._connector = options.connector;
+    this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
+
+    // Preload any available plugins.
+    if (options.plugins) {
+      options.plugins.forEach(data => {
+        const plugin = data.id;
+
+        // Validate and preload the data.
+        try {
+          this._validate(data);
+        } catch (errors) {
+          const output = [`Preloading ${plugin} failed:`];
+
+          (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+            const { dataPath, schemaPath, keyword, message } = error;
+
+            output.push(
+              `${index} - schema @ ${schemaPath}, data @ ${dataPath}`
+            );
+            output.push(`\t${keyword} ${message}`);
+          });
+
+          // Warn about preload failures and continue instantiating registry.
+          console.warn(output.join('\n'));
+        }
+      });
+    }
   }
+
+  /**
+   * The data connector used by the setting registry.
+   */
+  readonly connector: IDataConnector<ISettingRegistry.IPlugin, string, string>;
 
   /**
    * The schema of the setting registry.
@@ -589,12 +620,11 @@ export class SettingRegistry {
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const connector = this._connector;
     const plugins = this._plugins;
     const registry = this;
 
     // If the plugin needs to be loaded from the connector, fetch.
-    return connector.fetch(plugin).then(data => {
+    return this.connector.fetch(plugin).then(data => {
       // Validate the response from the connector; populate `composite` field.
       try {
         this._validate(data);
@@ -717,13 +747,13 @@ export class SettingRegistry {
       return Promise.reject(new Error(message));
     }
 
-    return this._connector.save(plugin, plugins[plugin].raw).then(() => {
+    return this.connector.save(plugin, plugins[plugin].raw).then(() => {
       this._pluginChanged.emit(plugin);
     });
   }
 
   /**
-   * Validate a plugin's data and schema, compose the `composite` data.
+   * Validate and preload a plugin, compose the `composite` data.
    */
   private _validate(plugin: ISettingRegistry.IPlugin): void {
     // Validate the user data and create the composite data.
@@ -737,7 +767,6 @@ export class SettingRegistry {
     this._plugins[plugin.id] = plugin;
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: {
     [name: string]: ISettingRegistry.IPlugin;
@@ -972,6 +1001,11 @@ export namespace SettingRegistry {
      * The data connector used by the setting registry.
      */
     connector: IDataConnector<ISettingRegistry.IPlugin, string>;
+
+    /**
+     * Preloaded plugin data to populate the setting registry.
+     */
+    plugins?: ISettingRegistry.IPlugin[];
 
     /**
      * The validator used to enforce the settings JSON schema.
