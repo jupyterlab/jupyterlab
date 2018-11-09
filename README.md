@@ -151,7 +151,7 @@ To start developing extension, see the [developers documentation](https://jupyte
 
 ### License
 
-A shared copyright model enables all contributors to maintain the
+JupyterLab uses a shared copyright model that enables all contributors to maintain the
 copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE).
 
 ### Team
