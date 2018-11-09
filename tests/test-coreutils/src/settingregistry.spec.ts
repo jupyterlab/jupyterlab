@@ -16,17 +16,17 @@ import { signalToPromise } from '@jupyterlab/testutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-export class TestConnector extends StateDB
+export class TestConnector
   implements IDataConnector<ISettingRegistry.IPlugin, string> {
-  constructor(
-    public schemas: { [key: string]: ISettingRegistry.ISchema } = {}
-  ) {
-    super({ namespace: 'setting-registry-tests' });
+  schemas: { [key: string]: ISettingRegistry.ISchema } = {};
+
+  clear(silent = false): Promise<void> {
+    return this._db.clear(silent);
   }
 
   async fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    const data = await super.fetch(id);
-    if (!data && !this.schemas[id]) {
+    const data = await this._db.fetch(id);
+    if (!data.value && !this.schemas[id]) {
       return null;
     }
 
@@ -35,10 +35,26 @@ export class TestConnector extends StateDB
     };
     const composite = {};
     const user = {};
-    const raw = (data as string) || '{ }';
+    const raw = (data.value as string) || '{ }';
     const version = 'test';
     return { id, data: { composite, user }, raw, schema, version };
   }
+
+  async list(filter: string): Promise<ISettingRegistry.IPlugin[]> {
+    const list = await this._db.list(filter);
+
+    return list.map(item => item.value as ISettingRegistry.IPlugin);
+  }
+
+  remove(id: string): Promise<void> {
+    return this._db.remove(id);
+  }
+
+  save(id: string, raw: string): Promise<void> {
+    return this._db.save(id, raw);
+  }
+
+  private _db = new StateDB({ namespace: 'setting-registry-tests' });
 }
 
 describe('@jupyterlab/coreutils', () => {

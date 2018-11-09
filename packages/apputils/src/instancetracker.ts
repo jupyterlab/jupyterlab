@@ -324,8 +324,8 @@ export class InstanceTracker<T extends Widget>
     const { command, registry, state, when } = options;
     const namespace = this.namespace;
     const promises = when
-      ? [state.fetchNamespace(namespace)].concat(when)
-      : [state.fetchNamespace(namespace)];
+      ? [state.list(namespace)].concat(when)
+      : [state.list(namespace)];
 
     this._restore = options;
 

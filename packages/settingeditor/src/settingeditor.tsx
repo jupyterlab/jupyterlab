@@ -240,14 +240,14 @@ export class SettingEditor extends Widget {
     const { key, state } = this;
     const promises = [state.fetch(key), this._when];
 
-    return (this._fetching = Promise.all(promises).then(([saved]) => {
+    return (this._fetching = Promise.all(promises).then(([{ value }]) => {
       this._fetching = null;
 
       if (this._saving) {
         return;
       }
 
-      this._state = Private.normalizeState(saved, this._state);
+      this._state = Private.normalizeState(value, this._state);
     }));
   }
 

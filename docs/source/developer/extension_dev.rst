@@ -445,7 +445,7 @@ a plugin:
         // Load the saved plugin state and apply it once the app
         // has finished restoring its former layout.
         Promise.all([state.fetch(key), app.restored])
-          .then(([saved]) => { /* Update `foo` with `saved`. */ });
+          .then(([{value}]) => { /* Update `foo` with `value`. */ });
 
         // Fulfill the plugin contract by returning an `IFoo`.
         return foo;
