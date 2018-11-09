@@ -658,7 +658,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
 
       if (token.type === 'variable') {
-        // Matching variable assignment:
+        // Matching standalone variable assignment:
         let nextToken = this._closestMeaningfulToken(i, cellTokens, +1);
         if (
           nextToken &&
@@ -700,6 +700,38 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           return true;
         }
 
+        // Matching variables in tuple unpacking:
+
+        // Considering: `a, [b, c], (d, ) = 1, [1, 2], (1,)`, if the tested
+        // token is `x`, then next expected token would be a comma,
+        // or an opening bracket (for simplicity brackets can be ignored).
+        let commaExpected = true;
+
+        let indexShift = 1;
+
+        // here `nextToken` is any token, not necessarily a meaningful one
+        nextToken = cellTokens[i + 1];
+
+        while (nextToken && !this._isTerminatingToken(nextToken)) {
+          if ('()[]'.includes(nextToken.value)) {
+            // ignoring parentheses
+          } else if (nextToken.value === ' ' || nextToken.value === '\t') {
+            // ignoring whitespaces
+          } else {
+            if (nextToken.type === 'operator' && nextToken.value === '=') {
+              return true;
+            }
+
+            if (commaExpected && nextToken.value !== ',') {
+              break;
+            }
+
+            commaExpected = !commaExpected;
+          }
+          indexShift += 1;
+          nextToken = cellTokens[i + indexShift];
+        }
+
         // nothing matched
         return false;
       } else if (token.type === 'def') {
@@ -713,6 +745,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         return false;
       }
     });
+  }
+
+  private _isTerminatingToken(token: CodeEditor.IToken) {
+    return token.value === '' || token.value === '#';
   }
 
   private _closestMeaningfulToken(

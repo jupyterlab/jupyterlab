@@ -1705,7 +1705,7 @@ export class Notebook extends StaticNotebook {
 
     for (
       let offset = testedToken.offset + 1;
-      offset < originToken.offset;
+      offset < originToken.offset + 1;
       offset++
     ) {
       let position = cell.editor.getPositionAt(offset);
@@ -1749,7 +1749,9 @@ export class Notebook extends StaticNotebook {
       }
       // empty string is used as a token representing new-line
       let terminator = token.value === ';' || token.value === '';
-      if (openedBrackets === 0 && terminator) {
+      // if there is a closing bracket, completing a previously opened one,
+      // which proceeds the token of origin, that is fine too (hence <= 0)
+      if (openedBrackets <= 0 && terminator) {
         terminatingTokens.push(token);
       }
     }
