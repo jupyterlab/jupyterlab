@@ -36,7 +36,8 @@ export interface IStateItem {
 /**
  * The description of a state database.
  */
-export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
+export interface IStateDB
+  extends IDataConnector<IStateItem, ReadonlyJSONValue> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -51,24 +52,6 @@ export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
    * app could have multiple, mutually exclusive state databases.
    */
   readonly namespace: string;
-
-  /**
-   * Retrieve all the saved bundles for a namespace.
-   *
-   * @param namespace - The namespace to retrieve.
-   *
-   * @returns A promise that bears a collection data payloads for a namespace.
-   *
-   * #### Notes
-   * Namespaces are entirely conventional entities. The `id` values of stored
-   * items in the state database are formatted: `'namespace:identifier'`, which
-   * is the same convention that command identifiers in JupyterLab use as well.
-   *
-   * If there are any errors in retrieving the data, they will be logged to the
-   * console in order to optimistically return any extant data without failing.
-   * This promise will always succeed.
-   */
-  fetchNamespace(namespace: string): Promise<IStateItem[]>;
 
   /**
    * Return a serialized copy of the state database's entire contents.
@@ -167,19 +150,22 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(filter: string)` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed with `null`.
+   * retrieving the data. Non-existence of an `id` will succeed with the `value`
+   * `undefined`.
    */
-  fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    return this._ready.then(() => this._fetch(id));
+  async fetch(id: string): Promise<IStateItem> {
+    const value = await this._ready.then(() => this._fetch(id));
+
+    return { id, value };
   }
 
   /**
    * Retrieve all the saved bundles for a namespace.
    *
-   * @param namespace - The namespace to retrieve.
+   * @param filter - The namespace prefix to retrieve.
    *
    * @returns A promise that bears a collection of payloads for a namespace.
    *
@@ -192,12 +178,12 @@ export class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateItem[]> {
+  list(filter: string): Promise<IStateItem[]> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace(`${prefix}${namespace}:`, mask);
+      return StateDB.fetchNamespace(`${prefix}${filter}:`, mask);
     });
   }
 
@@ -229,7 +215,7 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(filter: string)` method.
    */
   save(id: string, value: ReadonlyJSONValue): Promise<void> {
     return this._ready.then(() => {
