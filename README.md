@@ -40,7 +40,7 @@ Read the latest version's documentation on [ReadTheDocs](http://jupyterlab.readt
 
 [install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`. Conda is recommended if you have no installation preference.
 
-Project instalation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
+Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
 #### conda
 
