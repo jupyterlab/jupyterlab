@@ -24,7 +24,7 @@ powerful user interface.
 JupyterLab will eventually replace the classic Jupyter Notebook.
 
 JupyterLab can be extended using [npm](https://www.npmjs.com/) packages
-and our public APIs. To find extensions search for the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension). To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
+that use our public APIs. To find JupyterLab extensions, search for the npm keyword [jupyterlab-extension](https://www.npmjs.com/search?q=keywords:jupyterlab-extension) or the GitHub topic [jupyterlab-extension](https://github.com/topics/jupyterlab-extension). To learn more about extensions, see the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html).
 
 The current JupyterLab releases are suitable for general
 usage, and the extension APIs will continue to
