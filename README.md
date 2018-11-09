@@ -121,7 +121,7 @@ JupyterLab will open automatically in the browser. See the [documentation](http:
 
 ### Prerequisites and Supported Browsers
 
-Jupyter notebook version 4.3 or later is required. To check the notebook version run the command:
+Jupyter notebook version 4.3 or later is required. To check the notebook version, run the command:
 
 ```bash
 jupyter notebook --version
