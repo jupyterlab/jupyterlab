@@ -104,20 +104,25 @@ class SettingsConnector extends DataConnector<
   }
 
   /**
-   * Retrieve a saved bundle from the data connector.
-   *
-   * #### Notes
-   * If `id` is empty, this method will fetch all setting bundles.
+   * Retrieve a plugin from the data connector.
    */
-  async fetch(id = ''): Promise<ISettingRegistry.IPlugin> {
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     const data = await this._manager.settings.fetch(id);
 
-    // Replace the server ID with the original unmodified version.
-    if (id) {
+    // If ID exists, replace server ID with the original requested ID.
+    // This only applies to non-empty plugin requests and ignores list requests.
+    if (data.id) {
       data.id = id;
     }
 
     return data;
+  }
+
+  /**
+   * Retrieve all available plugins from the data connector.
+   */
+  list(): Promise<ISettingRegistry.IPlugin[]> {
+    return this._manager.settings.list();
   }
 
   /**
@@ -161,10 +166,11 @@ const paletteRestorer: JupyterLabPlugin<void> = {
  */
 const settings: JupyterLabPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: (app: JupyterLab): ISettingRegistry => {
+  activate: async (app: JupyterLab): Promise<ISettingRegistry> => {
     const connector = new SettingsConnector(app.serviceManager);
+    const plugins = await connector.list();
 
-    return new SettingRegistry({ connector });
+    return new SettingRegistry({ connector, plugins });
   },
   autoStart: true,
   provides: ISettingRegistry
