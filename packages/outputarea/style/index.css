@@ -152,7 +152,8 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   font-size: inherit;
   color: inherit;
   background-color: inherit;
-  width: auto;
+  width: 42%;
+  min-width: 200px;
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
   /* padding + margin = 0.5em between prompt and cursor */
