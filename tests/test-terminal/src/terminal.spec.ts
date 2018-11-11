@@ -98,6 +98,12 @@ describe('terminal/index', () => {
       });
     });
 
+    describe('#scrollback', () => {
+      it('should be 1000 by default', () => {
+        expect(widget.getOption('scrollback')).to.equal(1000);
+      });
+    });
+
     describe('#theme', () => {
       it('should be dark by default', () => {
         expect(widget.getOption('theme')).to.equal('dark');

@@ -18,6 +18,9 @@
     },
     "theme": {
       "enum": ["dark", "light"]
+    },
+    "scrollback": {
+      "type": "number"
     }
   },
   "properties": {
@@ -44,6 +47,12 @@
       "description": "The theme for the terminal.",
       "$ref": "#/definitions/theme",
       "default": "dark"
+    },
+    "scrollback": {
+      "title": "Scrollback Buffer",
+      "description": "The amount of scrollback beyond initial viewport",
+      "$ref": "#/definitions/lineHeight",
+      "default": 1000
     }
   },
   "additionalProperties": false,

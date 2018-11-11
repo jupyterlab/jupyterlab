@@ -334,6 +334,12 @@ export namespace Terminal {
     theme: Theme;
 
     /**
+     * The amount of buffer scrollback to be used
+     * with the terminal
+     */
+    scrollback: number | null;
+
+    /**
      * Whether to blink the cursor.  Can only be set at startup.
      */
     cursorBlink: boolean;
@@ -352,6 +358,7 @@ export namespace Terminal {
     fontFamily: 'courier-new, courier, monospace',
     fontSize: 13,
     lineHeight: 1.0,
+    scrollback: 1000,
     cursorBlink: true,
     initialCommand: ''
   };
