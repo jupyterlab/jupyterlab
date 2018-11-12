@@ -350,7 +350,7 @@ export class FileBrowserModel implements IDisposable {
     const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready])
-      .then(([{ value }]) => {
+      .then(([value]) => {
         if (!value) {
           this._restored.resolve(undefined);
           return;

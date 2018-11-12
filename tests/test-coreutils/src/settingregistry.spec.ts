@@ -5,7 +5,6 @@ import { expect } from 'chai';
 
 import {
   DefaultSchemaValidator,
-  IDataConnector,
   ISettingRegistry,
   SettingRegistry,
   Settings,
@@ -16,18 +15,17 @@ import { signalToPromise } from '@jupyterlab/testutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-export class TestConnector
-  implements IDataConnector<ISettingRegistry.IPlugin, string> {
+export class TestConnector extends StateDB {
   schemas: { [key: string]: ISettingRegistry.ISchema } = {};
 
-  clear(silent = false): Promise<void> {
-    return this._db.clear(silent);
+  constructor() {
+    super({ namespace: 'setting-registry-tests' });
   }
 
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    const data = await this._db.fetch(id);
-    if (!data.value && !this.schemas[id]) {
-      return null;
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
+    const fetched = await super.fetch(id);
+    if (!fetched && !this.schemas[id]) {
+      return undefined;
     }
 
     const schema: ISettingRegistry.ISchema = this.schemas[id] || {
@@ -35,26 +33,18 @@ export class TestConnector
     };
     const composite = {};
     const user = {};
-    const raw = (data.value as string) || '{ }';
+    const raw = (fetched as string) || '{ }';
     const version = 'test';
     return { id, data: { composite, user }, raw, schema, version };
   }
 
-  async list(filter: string): Promise<ISettingRegistry.IPlugin[]> {
-    const list = await this._db.list(filter);
+  async list(
+    filter: string
+  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
+    const { ids, values } = await super.list(filter);
 
-    return list.map(item => item.value as ISettingRegistry.IPlugin);
+    return { ids, values: values as ISettingRegistry.IPlugin[] };
   }
-
-  remove(id: string): Promise<void> {
-    return this._db.remove(id);
-  }
-
-  save(id: string, raw: string): Promise<void> {
-    return this._db.save(id, raw);
-  }
-
-  private _db = new StateDB({ namespace: 'setting-registry-tests' });
 }
 
 describe('@jupyterlab/coreutils', () => {

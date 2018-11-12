@@ -21,7 +21,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector,
   ISettingRegistry,
   IStateDB,
   PageConfig,
@@ -31,8 +30,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ServiceManager } from '@jupyterlab/services';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -89,53 +86,6 @@ namespace Patterns {
 }
 
 /**
- * A data connector to access plugin settings.
- */
-class SettingsConnector extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
-> {
-  /**
-   * Create a new settings connector.
-   */
-  constructor(manager: ServiceManager) {
-    super();
-    this._manager = manager;
-  }
-
-  /**
-   * Retrieve a plugin from the data connector.
-   */
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    const data = await this._manager.settings.fetch(id);
-
-    // If ID exists, replace server ID with the original requested ID.
-    // This only applies to non-empty plugin requests and ignores list requests.
-    if (data.id) {
-      data.id = id;
-    }
-
-    return data;
-  }
-
-  /**
-   * Retrieve all available plugins from the data connector.
-   */
-  list(): Promise<ISettingRegistry.IPlugin[]> {
-    return this._manager.settings.list();
-  }
-
-  /**
-   * Save the user setting data in the data connector.
-   */
-  save(id: string, raw: string): Promise<void> {
-    return this._manager.settings.save(id, raw);
-  }
-
-  private _manager: ServiceManager;
-}
-
-/**
  * The default command palette extension.
  */
 const palette: JupyterLabPlugin<ICommandPalette> = {
@@ -167,8 +117,8 @@ const paletteRestorer: JupyterLabPlugin<void> = {
 const settings: JupyterLabPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: async (app: JupyterLab): Promise<ISettingRegistry> => {
-    const connector = new SettingsConnector(app.serviceManager);
-    const plugins = await connector.list();
+    const connector = app.serviceManager.settings;
+    const plugins = (await connector.list()).values;
 
     return new SettingRegistry({ connector, plugins });
   },

@@ -331,11 +331,11 @@ export class InstanceTracker<T extends Widget>
 
     return Promise.all(promises).then(([saved]) => {
       return Promise.all(
-        saved.map(item => {
-          const { id, value } = item;
+        saved.ids.map((id, index) => {
+          const value = saved.values[index];
           const args = value && (value as any).data;
           if (args === undefined) {
-            return state.remove(item.id);
+            return state.remove(id);
           }
 
           // Execute the command and if it fails, delete the state restore data.

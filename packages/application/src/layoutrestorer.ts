@@ -206,7 +206,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     let layout = this._state.fetch(KEY);
 
     return Promise.all([layout, this.restored])
-      .then(([{ value }]) => {
+      .then(([value]) => {
         if (!value) {
           return blank;
         }

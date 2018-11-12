@@ -31,7 +31,7 @@ export abstract class DataConnector<T, U = T, V = string>
    *
    * @param id - The identifier used to retrieve an item.
    *
-   * @returns A promise that bears a data payload if available.
+   * @returns A promise that resolves with a data payload if available.
    *
    * #### Notes
    * The promise returned by this method may be rejected if an error occurs in
@@ -44,13 +44,12 @@ export abstract class DataConnector<T, U = T, V = string>
    *
    * @param filter - The optional filter to apply to the connector request.
    *
-   * @returns A promise that bears a list of data results. List may be empty.
+   * @returns A promise that always rejects with an error.
    *
    * #### Notes
-   * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Nonexistence of data will succeed with an empty list.
+   * Subclasses should reimplement if they support a back-end that can list.
    */
-  list(filter?: V): Promise<T[]> {
+  list(filter?: V): Promise<{ ids: V[]; values: T[] }> {
     return Promise.reject(new Error('list method has not been implemented.'));
   }
 
@@ -59,13 +58,12 @@ export abstract class DataConnector<T, U = T, V = string>
    *
    * @param id - The identifier for the data being removed.
    *
-   * @returns A promise that is rejected if remove fails and succeeds otherwise.
+   * @returns A promise that always rejects with an error.
    *
    * #### Notes
-   * This method will always reject; subclasses should reimplement it if they
-   * support a back-end that can remove resources.
+   * Subclasses should reimplement if they support a back-end that can remove.
    */
-  remove(id: V): Promise<void> {
+  remove(id: V): Promise<any> {
     return Promise.reject(new Error('remove method has not been implemented.'));
   }
 
@@ -76,13 +74,12 @@ export abstract class DataConnector<T, U = T, V = string>
    *
    * @param value - The data being saved.
    *
-   * @returns A promise that is rejected if saving fails and succeeds otherwise.
+   * @returns A promise that always rejects with an error.
    *
    * #### Notes
-   * This method will always reject; subclasses should reimplement it if they
-   * support a back-end that can save resources.
+   * Subclasses should reimplement if they support a back-end that can save.
    */
-  save(id: V, value: U): Promise<void> {
+  save(id: V, value: U): Promise<any> {
     return Promise.reject(new Error('save method has not been implemented.'));
   }
 }

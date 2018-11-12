@@ -423,7 +423,7 @@ function activateCellTools(
   MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.
-  Promise.all([state.fetch(id), app.restored]).then(([{ value }]) => {
+  Promise.all([state.fetch(id), app.restored]).then(([value]) => {
     const open = !!(
       value && ((value as ReadonlyJSONObject)['open'] as boolean)
     );

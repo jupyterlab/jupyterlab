@@ -35,11 +35,11 @@ describe('StateDB', () => {
 
       // By sharing a namespace, the two databases will share data.
       await prepopulate.save(key, incorrect);
-      let saved = await prepopulate.fetch(key);
-      expect(saved.value).to.equal(incorrect);
+      let value = await prepopulate.fetch(key);
+      expect(value).to.equal(incorrect);
       await transform.resolve(transformation);
-      saved = await db.fetch(key);
-      expect(saved.value).to.equal(correct);
+      value = await db.fetch(key);
+      expect(value).to.equal(correct);
       await db.clear();
     });
 
@@ -54,9 +54,9 @@ describe('StateDB', () => {
       await prepopulate.save('foo', 'bar');
       transform.resolve({ type: 'merge', contents: { [key]: value } });
       let saved = await db.fetch('foo');
-      expect(saved.value).to.equal('bar');
+      expect(saved).to.equal('bar');
       saved = await db.fetch(key);
-      expect(saved.value).to.equal(value);
+      expect(saved).to.equal(value);
       await db.clear();
     });
   });
@@ -154,7 +154,7 @@ describe('StateDB', () => {
       await db.save(key, value);
       expect(localStorage).to.have.length(1);
       const fetched = await db.fetch(key);
-      expect(fetched.value).to.deep.equal(value);
+      expect(fetched).to.deep.equal(value);
       await db.clear();
     });
 
@@ -166,7 +166,7 @@ describe('StateDB', () => {
 
       expect(localStorage.length).to.equal(0);
       const fetched = await db.fetch(key);
-      expect(fetched.value).to.be.undefined;
+      expect(fetched).to.be.undefined;
     });
   });
 
@@ -189,21 +189,23 @@ describe('StateDB', () => {
       await Promise.all(promises);
       expect(localStorage).to.have.length(keys.length);
       let fetched = await db.list('foo');
-      expect(fetched.length).to.equal(3);
+      expect(fetched.ids.length).to.equal(3);
+      expect(fetched.values.length).to.equal(3);
 
-      let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
-      expect(sorted[0].id).to.equal(keys[0]);
-      expect(sorted[1].id).to.equal(keys[1]);
-      expect(sorted[2].id).to.equal(keys[2]);
+      let sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
+      expect(sorted[0]).to.equal(keys[0]);
+      expect(sorted[1]).to.equal(keys[1]);
+      expect(sorted[2]).to.equal(keys[2]);
 
       fetched = await db.list('abc');
-      expect(fetched.length).to.equal(3);
+      expect(fetched.ids.length).to.equal(3);
+      expect(fetched.values.length).to.equal(3);
 
-      sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
+      sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
 
-      expect(sorted[0].id).to.equal(keys[3]);
-      expect(sorted[1].id).to.equal(keys[4]);
-      expect(sorted[2].id).to.equal(keys[5]);
+      expect(sorted[0]).to.equal(keys[3]);
+      expect(sorted[1]).to.equal(keys[4]);
+      expect(sorted[2]).to.equal(keys[5]);
 
       await db.clear();
     });
@@ -236,7 +238,7 @@ describe('StateDB', () => {
       expect(localStorage.length).to.equal(0);
       await db.save(key, value);
       const fetched = await db.fetch(key);
-      expect(fetched.value).to.deep.equal(value);
+      expect(fetched).to.deep.equal(value);
       await db.remove(key);
       expect(localStorage.length).to.equal(0);
     });

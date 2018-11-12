@@ -63,7 +63,7 @@ export class SettingManager extends DataConnector<
    *
    * @returns A promise that resolves if successful.
    */
-  async list(): Promise<ISettingRegistry.IPlugin[]> {
+  async list(): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
     const { serverSettings } = this;
     const { baseUrl, pageUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
@@ -76,9 +76,10 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
+    const values: ISettingRegistry.IPlugin[] = (json || {})['settings'] || [];
+    const ids = values.map(value => value.id);
 
-    // Assert what type the server response is returning.
-    return ((json || {})['settings'] || []) as ISettingRegistry.IPlugin[];
+    return { ids, values };
   }
 
   /**

@@ -36,8 +36,8 @@ export interface IStateItem {
 /**
  * The description of a state database.
  */
-export interface IStateDB
-  extends IDataConnector<IStateItem, ReadonlyJSONValue> {
+export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
+  extends IDataConnector<T> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -64,7 +64,8 @@ export interface IStateDB
 /**
  * The default concrete implementation of a state database.
  */
-export class StateDB implements IStateDB {
+export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
+  implements IStateDB<T> {
   /**
    * Create a new state database.
    *
@@ -156,10 +157,10 @@ export class StateDB implements IStateDB {
    * retrieving the data. Non-existence of an `id` will succeed with the `value`
    * `undefined`.
    */
-  async fetch(id: string): Promise<IStateItem> {
+  async fetch(id: string): Promise<T> {
     const value = await this._ready.then(() => this._fetch(id));
 
-    return { id, value };
+    return value as T;
   }
 
   /**
@@ -178,12 +179,12 @@ export class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  list(filter: string): Promise<IStateItem[]> {
+  list(namespace: string): Promise<{ ids: string[]; values: T[] }> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace(`${prefix}${filter}:`, mask);
+      return StateDB.fetchNamespace<T>(`${prefix}${namespace}:`, mask);
     });
   }
 
@@ -217,7 +218,7 @@ export class StateDB implements IStateDB {
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
    * using the `list(filter: string)` method.
    */
-  save(id: string, value: ReadonlyJSONValue): Promise<void> {
+  save(id: string, value: T): Promise<void> {
     return this._ready.then(() => {
       this._save(id, value);
       this._changed.emit({ id, type: 'save' });
@@ -409,13 +410,16 @@ export namespace StateDB {
    * If there are any errors in retrieving the data, they will be logged to the
    * console in order to optimistically return any extant data without failing.
    */
-  export function fetchNamespace(
+  export function fetchNamespace<
+    T extends ReadonlyJSONValue = ReadonlyJSONValue
+  >(
     namespace: string,
     mask: (key: string) => string = key => key
-  ): IStateItem[] {
+  ): { ids: string[]; values: T[] } {
     const { localStorage } = window;
 
-    let items: IStateItem[] = [];
+    let ids: string[] = [];
+    let values: T[] = [];
     let i = localStorage.length;
 
     while (i) {
@@ -426,11 +430,9 @@ export namespace StateDB {
 
         try {
           let envelope = JSON.parse(value) as Private.Envelope;
+          let id = mask(key);
 
-          items.push({
-            id: mask(key),
-            value: envelope ? envelope.v : undefined
-          });
+          values[ids.push(id) - 1] = envelope ? (envelope.v as T) : undefined;
         } catch (error) {
           console.warn(error);
           localStorage.removeItem(key);
@@ -438,7 +440,7 @@ export namespace StateDB {
       }
     }
 
-    return items;
+    return { ids, values };
   }
 
   /**
@@ -450,13 +452,15 @@ export namespace StateDB {
     namespace: string,
     mask: (key: string) => string = key => key
   ): ReadonlyJSONObject {
-    return fetchNamespace(namespace, mask).reduce(
-      (acc, val) => {
-        acc[val.id] = val.value;
-        return acc;
+    const { ids, values } = fetchNamespace(namespace, mask);
+
+    return values.reduce(
+      (accumulator: Partial<ReadonlyJSONObject>, value, index) => {
+        accumulator[ids[index]] = value;
+        return accumulator as ReadonlyJSONObject;
       },
       {} as Partial<ReadonlyJSONObject>
-    );
+    ) as ReadonlyJSONObject;
   }
 }
 
