@@ -271,13 +271,21 @@ namespace Private {
     selection: string,
     node: HTMLElement
   ): void {
-    const plugins = sortPlugins(registry.plugins);
+    const plugins = sortPlugins(registry.plugins).filter(plugin => {
+      const { schema } = plugin;
+      const editable = Object.keys(schema.properties || {}).length > 0;
+      const extensible = schema.additionalProperties !== false;
+
+      // Only render schemas that can be edited or extended.
+      return editable || extensible;
+    });
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
+
       return (
         <li
           className={id === selection ? 'jp-mod-selected' : ''}
