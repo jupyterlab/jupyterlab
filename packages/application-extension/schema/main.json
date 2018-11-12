@@ -1,7 +1,6 @@
 {
   "title": "Application ",
   "description": "Main JupyterLab application settings.",
-  "jupyter.lab.setting-icon-class": "jp-JupyterIcon",
   "jupyter.lab.setting-icon-label": "Application",
   "jupyter.lab.keyboard-shortcuts": [
     {

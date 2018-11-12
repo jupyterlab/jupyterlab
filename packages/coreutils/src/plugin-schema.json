@@ -8,7 +8,7 @@
   "properties": {
     "jupyter.lab.setting-icon-class": {
       "type": "string",
-      "default": "jp-FileIcon"
+      "default": "jp-SettingsIcon"
     },
     "jupyter.lab.setting-icon-label": {
       "type": "string",
