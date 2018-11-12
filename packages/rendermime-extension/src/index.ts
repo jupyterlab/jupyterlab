@@ -73,11 +73,12 @@ function activate(
             // Look for the an element with the hash id in the document.
             // This id is set automatically for headers tags when
             // we render markdown.
-            const element = widget.node.querySelector(id);
-            if (element) {
-              element.scrollIntoView();
-            }
-            return;
+            widget.context.session.ready.then(() => {
+              const element = widget.node.querySelector(id);
+              if (element) {
+                element.scrollIntoView();
+              }
+            });
           });
         });
     }
