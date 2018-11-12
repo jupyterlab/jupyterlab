@@ -43,7 +43,7 @@ export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    *
    * @returns A promise that bears the database contents as JSON.
    */
-  toJSON(): Promise<ReadonlyJSONObject>;
+  toJSON(): Promise<{ [id: string]: T }>;
 }
 
 /**
@@ -215,12 +215,12 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    *
    * @returns A promise that bears the database contents as JSON.
    */
-  toJSON(): Promise<ReadonlyJSONObject> {
+  toJSON(): Promise<{ [id: string]: T }> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.toJSON(prefix, mask);
+      return StateDB.toJSON<T>(prefix, mask);
     });
   }
 
@@ -433,19 +433,19 @@ export namespace StateDB {
    *
    * @returns The namespace contents as JSON.
    */
-  export function toJSON(
+  export function toJSON<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     namespace: string,
     mask: (key: string) => string = key => key
-  ): ReadonlyJSONObject {
-    const { ids, values } = fetchNamespace(namespace, mask);
+  ): { [id: string]: T } {
+    const { ids, values } = fetchNamespace<T>(namespace, mask);
 
     return values.reduce(
-      (accumulator: Partial<ReadonlyJSONObject>, value, index) => {
-        accumulator[ids[index]] = value;
-        return accumulator as ReadonlyJSONObject;
+      (acc, val, idx) => {
+        acc[ids[idx]] = val;
+        return acc;
       },
-      {} as Partial<ReadonlyJSONObject>
-    ) as ReadonlyJSONObject;
+      {} as { [id: string]: T }
+    );
   }
 }
 

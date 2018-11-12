@@ -24,7 +24,7 @@ export interface IChangedArgs<T> {
 /**
  * The description of a general purpose data connector.
  *
- * #### Notes *
+ * #### Notes
  * The generic type arguments <T, U = T, V = string> semantics are:
  *
  * T - is the basic entity response type a particular service's connector.
