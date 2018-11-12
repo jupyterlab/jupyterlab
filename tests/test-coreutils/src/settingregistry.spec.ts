@@ -15,7 +15,7 @@ import { signalToPromise } from '@jupyterlab/testutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-export class TestConnector extends StateDB {
+class TestConnector extends StateDB {
   schemas: { [key: string]: ISettingRegistry.ISchema } = {};
 
   constructor() {
@@ -38,12 +38,8 @@ export class TestConnector extends StateDB {
     return { id, data: { composite, user }, raw, schema, version };
   }
 
-  async list(
-    filter: string
-  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
-    const { ids, values } = await super.list(filter);
-
-    return { ids, values: values as ISettingRegistry.IPlugin[] };
+  async list(): Promise<any> {
+    return Promise.reject('list method not implemented');
   }
 }
 

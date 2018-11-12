@@ -19,21 +19,6 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /* tslint:enable */
 
 /**
- * An object which holds an id/value pair.
- */
-export interface IStateItem {
-  /**
-   * The identifier key for a state item.
-   */
-  id: string;
-
-  /**
-   * The data value for a state item.
-   */
-  value: ReadonlyJSONValue;
-}
-
-/**
  * The description of a state database.
  */
 export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
