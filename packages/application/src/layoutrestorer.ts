@@ -203,15 +203,15 @@ export class LayoutRestorer implements ILayoutRestorer {
       leftArea: null,
       rightArea: null
     };
-    let layout = this._state.fetch(KEY);
+    const layout = this._state.fetch(KEY);
 
     return Promise.all([layout, this.restored])
-      .then(([value]) => {
-        if (!value) {
+      .then(([data]) => {
+        if (!data) {
           return blank;
         }
 
-        const { main, left, right } = value as Private.ILayout;
+        const { main, left, right } = data as Private.ILayout;
 
         // If any data exists, then this is not a fresh session.
         const fresh = false;
