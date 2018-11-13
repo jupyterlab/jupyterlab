@@ -76,11 +76,20 @@ namespace Private {
       return kernel;
     }
 
-    // They both have matches, so merge them, with a preference for the
-    // kernel result.
+    // They both have matches, merge them with a preference for the kernel
+    // result. Both lists are known to contain unique, non-repeating items,
+    // so return a non-repeating superset by filtering out duplicates from
+    // the context list that appear in the kernel list.
     let matches = kernel.matches.slice();
+    let memo = matches.reduce(
+      (acc, val) => {
+        acc[val] = val;
+        return acc;
+      },
+      {} as { [key: string]: string }
+    );
     context.matches.forEach(match => {
-      if (matches.indexOf(match) === -1) {
+      if (!(match in memo)) {
         matches.push(match);
       }
     });
