@@ -32,7 +32,7 @@ export class SettingManager extends DataConnector<
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Fetch a plugin's settings or list of all setting bundles.
+   * Fetch a plugin's settings.
    *
    * @param id - The plugin's ID.
    *
@@ -59,7 +59,7 @@ export class SettingManager extends DataConnector<
   }
 
   /**
-   * Fetch the list of all setting bundles.
+   * Fetch the list of all plugin setting bundles.
    *
    * @returns A promise that resolves if successful.
    */
