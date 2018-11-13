@@ -169,7 +169,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace<T>(`${prefix}${namespace}:`, mask);
+      return Private.fetchNamespace<T>(`${prefix}${namespace}:`, mask);
     });
   }
 
@@ -220,7 +220,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.toJSON<T>(prefix, mask);
+      return Private.toJSON<T>(prefix, mask);
     });
   }
 
@@ -381,6 +381,16 @@ export namespace StateDB {
      */
     windowName?: string;
   }
+}
+
+/*
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * An envelope around a JSON value stored in the state database.
+   */
+  export type Envelope = { readonly v: ReadonlyJSONValue };
 
   /**
    * Retrieve all the saved bundles for a given namespace in local storage.
@@ -414,7 +424,7 @@ export namespace StateDB {
         let value = localStorage.getItem(key);
 
         try {
-          let envelope = JSON.parse(value) as Private.Envelope;
+          let envelope = JSON.parse(value) as Envelope;
           let id = mask(key);
 
           values[ids.push(id) - 1] = envelope ? (envelope.v as T) : undefined;
@@ -447,14 +457,4 @@ export namespace StateDB {
       {} as { [id: string]: T }
     );
   }
-}
-
-/*
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * An envelope around a JSON value stored in the state database.
-   */
-  export type Envelope = { readonly v: ReadonlyJSONValue };
 }
