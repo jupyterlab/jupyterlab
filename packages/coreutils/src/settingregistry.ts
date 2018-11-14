@@ -12,6 +12,7 @@ import {
   JSONObject,
   JSONValue,
   ReadonlyJSONObject,
+  ReadonlyJSONValue,
   Token
 } from '@phosphor/coreutils';
 
@@ -225,7 +226,7 @@ export namespace ISettingRegistry {
     /**
      * The composite of user settings and extension defaults.
      */
-    readonly composite: JSONObject;
+    readonly composite: ReadonlyJSONObject;
 
     /*
      * The plugin name.
@@ -245,7 +246,7 @@ export namespace ISettingRegistry {
     /**
      * The user settings.
      */
-    readonly user: JSONObject;
+    readonly user: ReadonlyJSONObject;
 
     /**
      * The published version of the NPM package containing these settings.
@@ -273,7 +274,7 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(key: string): { composite: JSONValue; user: JSONValue };
+    get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue };
 
     /**
      * Remove a single setting.
@@ -817,7 +818,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The composite of user settings and extension defaults.
    */
-  get composite(): JSONObject {
+  get composite(): ReadonlyJSONObject {
     return this._composite;
   }
 
@@ -845,7 +846,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The user settings.
    */
-  get user(): JSONObject {
+  get user(): ReadonlyJSONObject {
     return this._user;
   }
 
@@ -855,7 +856,7 @@ export class Settings implements ISettingRegistry.ISettings {
   readonly plugin: string;
 
   /**
-   * The system registry instance used by the settings manager.
+   * The setting registry instance used as a back-end for these settings.
    */
   readonly registry: SettingRegistry;
 
@@ -905,7 +906,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(key: string): { composite: JSONValue; user: JSONValue } {
+  get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue } {
     const { composite, user } = this;
 
     return {

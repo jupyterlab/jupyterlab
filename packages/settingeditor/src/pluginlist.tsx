@@ -271,7 +271,7 @@ namespace Private {
     selection: string,
     node: HTMLElement
   ): void {
-    const plugins = sortPlugins(registry.plugins).filter(plugin => {
+    const plugins = sortPlugins(registry.plugins.slice()).filter(plugin => {
       const { schema } = plugin;
       const editable = Object.keys(schema.properties || {}).length > 0;
       const extensible = schema.additionalProperties !== false;

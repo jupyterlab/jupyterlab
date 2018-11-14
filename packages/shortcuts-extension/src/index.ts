@@ -7,7 +7,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { DisposableSet, IDisposable } from '@phosphor/disposable';
 
@@ -80,7 +80,7 @@ namespace Private {
    */
   export function loadShortcuts(
     commands: CommandRegistry,
-    composite: JSONObject
+    composite: ReadonlyJSONObject
   ): void {
     if (disposables) {
       disposables.dispose();
@@ -100,7 +100,7 @@ namespace Private {
    * Normalize potential keyboard shortcut options.
    */
   function normalizeOptions(
-    value: JSONValue | Partial<CommandRegistry.IKeyBindingOptions>
+    value: ReadonlyJSONValue | Partial<CommandRegistry.IKeyBindingOptions>
   ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;
