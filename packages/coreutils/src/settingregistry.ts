@@ -500,30 +500,11 @@ export class SettingRegistry {
     this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
 
-    // Preload any available plugins.
-    if (options.plugins) {
-      options.plugins.forEach(data => {
-        const plugin = data.id;
-
-        // Validate and preload the data.
-        try {
-          this._validate(data);
-        } catch (errors) {
-          const output = [`Preloading ${plugin} failed:`];
-
-          (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-            const { dataPath, schemaPath, keyword, message } = error;
-
-            output.push(
-              `${index} - schema @ ${schemaPath}, data @ ${dataPath}`
-            );
-            output.push(`\t${keyword} ${message}`);
-          });
-
-          // Warn about preload failures and continue instantiating registry.
-          console.warn(output.join('\n'));
-        }
-      });
+    // Preload with any available data at instantiation-time.
+    try {
+      this._load(options.plugins);
+    } catch (errors) {
+      /* Ignore preload errors. */
     }
   }
 
@@ -625,24 +606,7 @@ export class SettingRegistry {
 
     // If the plugin needs to be loaded from the connector, fetch.
     return this.connector.fetch(plugin).then(data => {
-      // Validate the response from the connector; populate `composite` field.
-      try {
-        this._validate(data);
-      } catch (errors) {
-        const output = [`Validating ${plugin} failed:`];
-
-        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-          const { dataPath, schemaPath, keyword, message } = error;
-
-          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
-          output.push(`\t${keyword} ${message}`);
-        });
-        console.error(output.join('\n'));
-
-        throw new Error(`Failed validating ${plugin}`);
-      }
-
-      // Emit that a plugin has changed.
+      this._load(data);
       this._pluginChanged.emit(plugin);
 
       return new Settings({ plugin: plugins[plugin], registry });
@@ -724,6 +688,40 @@ export class SettingRegistry {
     plugins[plugin].raw = raw;
 
     return this._save(plugin);
+  }
+
+  /**
+   * Load any available plugins into the registry.
+   */
+  private _load(
+    data?: ISettingRegistry.IPlugin | ISettingRegistry.IPlugin[]
+  ): void {
+    const plugins = Array.isArray(data) ? data : data ? [data] : [];
+
+    if (!plugins.length) {
+      return;
+    }
+
+    plugins.forEach(item => {
+      const plugin = item.id;
+
+      // Validate and preload the item.
+      try {
+        this._validate(item);
+      } catch (errors) {
+        const output = [`Validating ${plugin} failed:`];
+
+        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+          const { dataPath, schemaPath, keyword, message } = error;
+
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+          output.push(`\t${keyword} ${message}`);
+        });
+        console.warn(output.join('\n'));
+
+        throw errors;
+      }
+    });
   }
 
   /**
