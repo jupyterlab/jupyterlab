@@ -146,7 +146,6 @@ export class Popup extends Widget {
   }
 
   private _setGeometry(): void {
-    this._setGeometry();
     let aligned = 0;
     const anchorRect = this._anchor.node.getBoundingClientRect();
     const bodyRect = this._body.node.getBoundingClientRect();
