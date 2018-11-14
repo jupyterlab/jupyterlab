@@ -1,7 +1,7 @@
 {
   "title": "File Editor Completer",
   "description": "File editor completer settings.",
-  "jupyter.lab.keyboard-shortcuts": [
+  "jupyter.lab.shortcuts": [
     {
       "command": "completer:invoke-file",
       "keys": ["Tab"],

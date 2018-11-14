@@ -14,7 +14,7 @@
       "type": "string",
       "default": "Plugin"
     },
-    "jupyter.lab.keyboard-shortcuts": {
+    "jupyter.lab.shortcuts": {
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
       "default": []

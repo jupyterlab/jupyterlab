@@ -1,7 +1,7 @@
 {
   "title": "Notebook Completer",
   "description": "Notebook completer settings.",
-  "jupyter.lab.keyboard-shortcuts": [
+  "jupyter.lab.shortcuts": [
     {
       "command": "completer:invoke-notebook",
       "keys": ["Tab"],

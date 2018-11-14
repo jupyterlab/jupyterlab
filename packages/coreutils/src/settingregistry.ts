@@ -533,11 +533,22 @@ export class SettingRegistry {
   /**
    * Returns a list of plugin settings held in the registry.
    */
-  get plugins(): ISettingRegistry.IPlugin[] {
+  get plugins(): ReadonlyArray<ISettingRegistry.IPlugin> {
     const plugins = this._plugins;
 
-    return Object.keys(plugins).map(
-      p => copy(plugins[p]) as ISettingRegistry.IPlugin
+    return Object.keys(plugins).map(plugin => plugins[plugin]);
+  }
+
+  /**
+   * Returns a list of keyboard shortcuts held in the registry.
+   */
+  get shortcuts(): ReadonlyArray<ISettingRegistry.IShortcut> {
+    const plugins = this._plugins;
+    const shortcuts = 'jupyter.lab.shortcuts';
+
+    return Object.keys(plugins).reduce(
+      (acc, val) => acc.concat(plugins[val].schema[shortcuts] || []),
+      []
     );
   }
 

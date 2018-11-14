@@ -2,7 +2,7 @@
   "title": "Application ",
   "description": "Main JupyterLab application settings.",
   "jupyter.lab.setting-icon-label": "Application",
-  "jupyter.lab.keyboard-shortcuts": [
+  "jupyter.lab.shortcuts": [
     {
       "command": "application:activate-next-tab",
       "keys": ["Ctrl Shift ]"],

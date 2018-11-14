@@ -1,7 +1,7 @@
 {
   "title": "Setting Editor",
   "description": "Setting editor settings.",
-  "jupyter.lab.keyboard-shortcuts": [
+  "jupyter.lab.shortcuts": [
     {
       "command": "settingeditor:debug",
       "keys": ["Accel I"],
