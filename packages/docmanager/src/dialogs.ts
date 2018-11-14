@@ -182,7 +182,18 @@ export function getOpenPath(contentsManager: any): Promise<string | undefined> {
     focusNodeSelector: 'input'
   }).then((result: any) => {
     if (result.button.label === 'OPEN') {
-      return result.value;
+      var str = result.value;
+      let value = str.replace(/\\/g, '/');
+
+      /* USED FOR TESTING *
+      showDialog({
+        title: 'RESULT',
+        body: new OpenDirectWidget(),
+        buttons: [Dialog.cancelButton({ label: (value) }), Dialog.okButton({ label: (value) })]
+      });
+      /**/
+
+      return value;
     }
     return;
   });
