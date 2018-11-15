@@ -35,6 +35,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this._notebookConfig =
+      options.notebookConfig || StaticNotebook.defaultNotebookConfig;
   }
 
   /*
@@ -63,6 +65,16 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   }
 
   /**
+   * A configuration object for notebook settings.
+   */
+  get notebookConfig(): StaticNotebook.INotebookConfig {
+    return this._notebookConfig;
+  }
+  set notebookConfig(value: StaticNotebook.INotebookConfig) {
+    this._notebookConfig = value;
+  }
+
+  /**
    * Create a new widget.
    *
    * #### Notes
@@ -77,7 +89,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       rendermime,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
-      editorConfig: this._editorConfig
+      editorConfig: this._editorConfig,
+      notebookConfig: this._notebookConfig
     };
     let content = this.contentFactory.createNotebook(nbOptions);
 
@@ -94,6 +107,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   }
 
   private _editorConfig: StaticNotebook.IEditorConfig;
+  private _notebookConfig: StaticNotebook.INotebookConfig;
 }
 
 /**
@@ -124,5 +138,10 @@ export namespace NotebookWidgetFactory {
      * The notebook cell editor configuration.
      */
     editorConfig?: StaticNotebook.IEditorConfig;
+
+    /**
+     * The notebook configuration.
+     */
+    notebookConfig?: StaticNotebook.INotebookConfig;
   }
 }
