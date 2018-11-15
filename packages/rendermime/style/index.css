@@ -126,10 +126,10 @@
 }
 
 .jp-RenderedText pre .ansi-default-inverse-fg {
-  color: #ffffff;
+  color: var(--jp-ui-inverse-font-color0);
 }
 .jp-RenderedText pre .ansi-default-inverse-bg {
-  background-color: #000000;
+  background-color: var(--jp-inverse-layout-color0);
 }
 
 .jp-RenderedText pre .ansi-bold {
