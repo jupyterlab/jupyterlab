@@ -1003,6 +1003,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.trust, {
+    label: () => 'Trust Notebook',
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        const { context, content } = current;
+        return NotebookActions.trust(content).then(() => context.save());
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
       const formatLabel = args['label'] as string;
