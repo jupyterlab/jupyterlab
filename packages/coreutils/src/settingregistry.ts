@@ -111,6 +111,19 @@ export namespace ISettingRegistry {
     | 'string';
 
   /**
+   * A function that transforms a settings object before returning it from a
+   * setting registry.
+   *
+   * #### Notes
+   * The initial use-case for this functionality was to allow the setting
+   * registry to return a settings object with non-standard
+   * `annotatedDefaults()`, and other uses may arise.
+   */
+  export type SettingTransform = (
+    settings: ISettings
+  ) => ISettings | Promise<ISettings>;
+
+  /**
    * The settings for a specific plugin.
    */
   export interface IPlugin extends JSONObject {
@@ -184,6 +197,20 @@ export namespace ISettingRegistry {
      * The JupyterLab icon label hint.
      */
     'jupyter.lab.setting-icon-label'?: string;
+
+    /**
+     * A flag that indicates settings should be transformed before being
+     * returned from the setting registry.
+     *
+     * #### Notes
+     * If this value is set to `true`, the setting registry will wait until a
+     * `SettingTransform` function has been registered (by calling the
+     * `transform()` method of the registry) for the plugin ID before
+     * returning a settings object. This means that if the attribute is set to
+     * `true` but no transform function is available, calls to `load()` a plugin
+     * will eventually time out and reject.
+     */
+    'jupyter.lab-setting-transform'?: boolean;
 
     /**
      * The JupyterLab shortcuts that are creaed by a plugin's schema.
@@ -592,12 +619,11 @@ export class SettingRegistry {
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
     const registry = this;
+    const transform = this._transform;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const settings = new Settings({ plugin: plugins[plugin], registry });
-
-      return Promise.resolve(settings);
+      return transform(new Settings({ plugin: plugins[plugin], registry }));
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -615,13 +641,14 @@ export class SettingRegistry {
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
     const registry = this;
+    const transform = this._transform;
 
     // If the plugin needs to be loaded from the connector, fetch.
     return this.connector.fetch(plugin).then(data => {
       this._load(data);
       this._pluginChanged.emit(plugin);
 
-      return new Settings({ plugin: plugins[plugin], registry });
+      return transform(new Settings({ plugin: plugins[plugin], registry }));
     });
   }
 
@@ -760,6 +787,13 @@ export class SettingRegistry {
     return this.connector.save(plugin, plugins[plugin].raw).then(() => {
       this._pluginChanged.emit(plugin);
     });
+  }
+
+  /**
+   * Apply transformation to settings if necessary.
+   */
+  private _transform(settings: Settings): Promise<Settings> {
+    return Promise.resolve(settings);
   }
 
   /**
