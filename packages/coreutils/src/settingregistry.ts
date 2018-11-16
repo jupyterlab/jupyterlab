@@ -618,12 +618,11 @@ export class SettingRegistry {
    */
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
-    const registry = this;
     const transform = this._transform;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      return transform(new Settings({ plugin: plugins[plugin], registry }));
+      return transform(plugins[plugin]);
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -640,7 +639,6 @@ export class SettingRegistry {
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
-    const registry = this;
     const transform = this._transform;
 
     // If the plugin needs to be loaded from the connector, fetch.
@@ -648,7 +646,7 @@ export class SettingRegistry {
       this._load(data);
       this._pluginChanged.emit(plugin);
 
-      return transform(new Settings({ plugin: plugins[plugin], registry }));
+      return transform(plugins[plugin]);
     });
   }
 
@@ -705,6 +703,23 @@ export class SettingRegistry {
     });
 
     return this._save(plugin);
+  }
+
+  /**
+   * Register a setting transform function to act on a specific plugin.
+   *
+   * @param plugin - The name of the plugin whose settings are transformed.
+   *
+   * @param fn - The transform function applied to the settings.
+   */
+  transform(plugin: string, fn: ISettingRegistry.SettingTransform): void {
+    const transformers = this._transformers;
+
+    if (plugin in transformers) {
+      throw new Error(`${plugin} aleady has a transformer.`);
+    }
+
+    transformers[plugin] = fn;
   }
 
   /**
@@ -792,8 +807,24 @@ export class SettingRegistry {
   /**
    * Apply transformation to settings if necessary.
    */
-  private _transform(settings: Settings): Promise<Settings> {
-    return Promise.resolve(settings);
+  private _transform(
+    plugin: ISettingRegistry.IPlugin
+  ): Promise<ISettingRegistry.ISettings> {
+    const registry = this;
+    const settings = new Settings({ plugin, registry });
+    const transform = !!plugin.schema['jupyter.lab.setting-transform'];
+    const transformers = this._transformers;
+
+    if (!transform) {
+      return Promise.resolve(settings);
+    }
+
+    if (plugin.id in transformers) {
+      return Promise.resolve(transformers[plugin.id].apply(null, settings));
+    }
+
+    // TODO: Implement timeout logic.
+    throw new Error('SettingRegistry#_transform timeout logic not implemented');
   }
 
   /**
@@ -814,6 +845,9 @@ export class SettingRegistry {
   private _pluginChanged = new Signal<this, string>(this);
   private _plugins: {
     [name: string]: ISettingRegistry.IPlugin;
+  } = Object.create(null);
+  private _transformers: {
+    [plugin: string]: ISettingRegistry.SettingTransform;
   } = Object.create(null);
 }
 
