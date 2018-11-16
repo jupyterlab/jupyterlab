@@ -334,7 +334,7 @@ export class RawEditor extends SplitPanel {
   private _inspector: Widget;
   private _onSaveError: (reason: any) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
-  private _toolbar: Toolbar<Widget> = new Toolbar();
+  private _toolbar = new Toolbar<Widget>();
   private _user: CodeEditorWrapper;
 }
 
