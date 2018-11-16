@@ -16,7 +16,7 @@ import {
   Token
 } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -115,9 +115,10 @@ export namespace ISettingRegistry {
    * setting registry.
    *
    * #### Notes
-   * The initial use-case for this functionality was to allow the setting
-   * registry to return a settings object with non-standard
-   * `annotatedDefaults()`, and other uses may arise.
+   * The initial use-case for this functionality is to allow the setting
+   * registry to return a settings object whose schema defaults are generated
+   * at run-time instead of using what is stored on the server, but other uses
+   * may arise.
    */
   export type SettingTransform = (
     settings: ISettings
@@ -711,8 +712,13 @@ export class SettingRegistry {
    * @param plugin - The name of the plugin whose settings are transformed.
    *
    * @param fn - The transform function applied to the settings.
+   *
+   * @returns A disposable that removes the setting transform from the registry.
    */
-  transform(plugin: string, fn: ISettingRegistry.SettingTransform): void {
+  transform(
+    plugin: string,
+    fn: ISettingRegistry.SettingTransform
+  ): IDisposable {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
@@ -720,6 +726,10 @@ export class SettingRegistry {
     }
 
     transformers[plugin] = fn;
+
+    return new DisposableDelegate(() => {
+      delete transformers[plugin];
+    });
   }
 
   /**
