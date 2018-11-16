@@ -1866,7 +1866,6 @@ function populateMenus(
         }
       });
       const fileGroup = [
-        { command: CommandIDs.trust },
         { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
       ];
       mainMenu.fileMenu.addGroup(fileGroup, 10);
