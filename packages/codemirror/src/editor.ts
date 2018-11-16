@@ -1167,9 +1167,9 @@ export namespace CodeMirrorEditor {
     scrollbarStyle: 'native',
     lineWiseCopyCut: true,
     scrollPastEnd: false,
-    styleActiveLine: true,
-    styleSelectedText: true,
-    selectionPointer: true
+    styleActiveLine: false,
+    styleSelectedText: false,
+    selectionPointer: false
   };
 
   /**
