@@ -183,7 +183,12 @@ export function getOpenPath(contentsManager: any): Promise<string | undefined> {
   }).then((result: any) => {
     if (result.button.label === 'OPEN') {
       let str = result.value;
-      let value = str.replace(/\\/g, '/');
+      var value = str;
+
+      if (navigator.appVersion.indexOf('Win') != -1) {
+        value = str.replace(/\\/g, '/');
+      }
+
       return value;
     }
     return;
