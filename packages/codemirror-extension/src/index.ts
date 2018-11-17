@@ -318,7 +318,7 @@ function activateEditorCommands(
 
   [
     'jupyter',
-    'default',
+    'codemirror',
     'abcdef',
     'base16-dark',
     'base16-light',
@@ -332,12 +332,15 @@ function activateEditorCommands(
     'the-matrix',
     'xq-light',
     'zenburn'
-  ].forEach(name =>
+  ].forEach(name => {
+    if (name === 'codemirror') {
+      name = 'default';
+    }
     themeMenu.addItem({
       command: CommandIDs.changeTheme,
       args: { theme: name }
-    })
-  );
+    });
+  });
 
   ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
     keyMapMenu.addItem({
