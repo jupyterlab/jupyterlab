@@ -184,11 +184,12 @@ export function getOpenPath(contentsManager: any): Promise<string | undefined> {
     if (result.button.label === 'OPEN') {
       let str = result.value;
       var value = str;
-
+      /**
+       * Replace '\' with '/' on Windows paths
+       */
       if (navigator.appVersion.indexOf('Win') != -1) {
         value = str.replace(/\\/g, '/');
       }
-
       return value;
     }
     return;
