@@ -261,6 +261,12 @@ Documentation is written in Markdown and reStructuredText. In particular, the do
 conda env create -f docs/environment.yml
 ```
 
+Alternatively, a Conda update to an existing environment would allow for both coding and documentation using the following command:
+
+```cmd
+conda env update -n <ENVIRONMENT> -f docs\environment.yml
+```
+
 The Developer Documentation includes a [guide](http://jupyterlab.readthedocs.io/en/latest/developer/documentation.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
 
 To test the docs run:
