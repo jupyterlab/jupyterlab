@@ -746,7 +746,8 @@ function addCommands(
     selector: '[data-type="document-title"]',
     rank: 5
   });
-  // .jp-mod-current added to open console from a right click on a tab for the selected (blue line) txt file or notebook
+  // .jp-mod-current added so that the console-creation command is only shown on the current document.
+  // Otherwise it will delegate to the wrong widget.
   app.contextMenu.addItem({
     command: 'filemenu:create-console',
     selector: '[data-type="document-title"].jp-mod-current',
