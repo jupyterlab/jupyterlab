@@ -205,7 +205,13 @@ function activateEditorCommands(
   modeMenu.title.label = 'Text Editor Syntax Highlighting';
 
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args => args['theme'] as string,
+    label: args => {
+      if (args['theme'] === 'default') {
+        return 'codemirror';
+      } else {
+        return args['theme'] as string;
+      }
+    },
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) || theme);
@@ -318,7 +324,7 @@ function activateEditorCommands(
 
   [
     'jupyter',
-    'codemirror',
+    'default',
     'abcdef',
     'base16-dark',
     'base16-light',
@@ -332,15 +338,12 @@ function activateEditorCommands(
     'the-matrix',
     'xq-light',
     'zenburn'
-  ].forEach(name => {
-    if (name === 'codemirror') {
-      name = 'default';
-    }
+  ].forEach(name =>
     themeMenu.addItem({
       command: CommandIDs.changeTheme,
       args: { theme: name }
-    });
-  });
+    })
+  );
 
   ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
     keyMapMenu.addItem({
