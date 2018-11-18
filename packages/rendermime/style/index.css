@@ -328,6 +328,7 @@
   font-size: inherit;
   line-height: var(--jp-code-line-height);
   padding: 0;
+  white-space: pre-wrap;
 }
 
 .jp-RenderedHTMLCommon code {
