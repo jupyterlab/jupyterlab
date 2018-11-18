@@ -498,9 +498,21 @@ function activate(
         return;
       }
 
+      let code = '';
       let editor = widget.editor;
-      let code = editor.model.value.text;
+      let text = editor.model.value.text;
       let path = widget.context.path;
+      let extension = PathExt.extname(path);
+
+      if (MarkdownCodeBlocks.isMarkdown(extension)) {
+        // For Markdown files, run only code blocks.
+        const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
+        for (let block of blocks) {
+          code += block.code;
+        }
+      } else {
+        code = text;
+      }
 
       const activate = false;
       if (code) {
