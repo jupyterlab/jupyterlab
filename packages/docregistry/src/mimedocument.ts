@@ -165,7 +165,7 @@ export class MimeContent extends Widget {
     }
     let data = options.data[this.mimeType];
     if (typeof data === 'string') {
-      if (data === this._context.model.toString()) {
+      if (data !== this._context.model.toString()) {
         this._context.model.fromString(data);
       }
     } else {
