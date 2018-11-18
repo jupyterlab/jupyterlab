@@ -261,9 +261,9 @@ Documentation is written in Markdown and reStructuredText. In particular, the do
 conda env create -f docs/environment.yml
 ```
 
-Alternatively, a Conda update to an existing environment would allow for both coding and documentation using the following command:
+Alternatively, you can install the documentation dependencies in an existing environment using the following command:
 
-```cmd
+```bash
 conda env update -n <ENVIRONMENT> -f docs\environment.yml
 ```
 
