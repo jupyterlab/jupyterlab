@@ -205,7 +205,13 @@ function activateEditorCommands(
   modeMenu.title.label = 'Text Editor Syntax Highlighting';
 
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args => args['theme'] as string,
+    label: args => {
+      if (args['theme'] === 'default') {
+        return 'codemirror';
+      } else {
+        return args['theme'] as string;
+      }
+    },
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) || theme);
