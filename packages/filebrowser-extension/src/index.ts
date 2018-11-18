@@ -783,7 +783,7 @@ function addCommands(
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyDownloadLink,
-    selector: selectorItem,
+    selector: selectorNotDir,
     rank: 13
   });
 }
