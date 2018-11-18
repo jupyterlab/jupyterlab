@@ -746,6 +746,12 @@ function addCommands(
     selector: '[data-type="document-title"]',
     rank: 5
   });
+  // .jp-mod-current added to open console from a right click on a tab for the selected (blue line) txt file or notebook
+  app.contextMenu.addItem({
+    command: 'filemenu:create-console',
+    selector: '[data-type="document-title"].jp-mod-current',
+    rank: 6
+  });
 
   [
     CommandIDs.openDirect,
