@@ -98,7 +98,7 @@ export class DocumentManager implements IDisposable {
   get autosave(): boolean {
     return this._autosave;
   }
-  
+
   set autosave(value: boolean) {
     this._autosave = value;
 
