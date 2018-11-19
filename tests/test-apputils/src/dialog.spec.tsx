@@ -453,6 +453,38 @@ describe('@jupyterlab/apputils', () => {
         });
       });
     });
+
+    describe('.FAIL', () => {
+      expect(true).to.equal(false);
+    });
+  });
+
+  describe('Dialog with Callback', () => {
+    class TestDialogWithCallback extends TestDialog {
+      constructor(callback: any) {
+        super({ persistCallback: callback });
+      }
+    }
+
+    let dialog: TestDialogWithCallback;
+    let hasBeenCalled: boolean;
+
+    function callback(button: Dialog.IButton, value: any) {
+      hasBeenCalled = true;
+    }
+
+    beforeEach(() => {
+      hasBeenCalled = false;
+      dialog = new TestDialogWithCallback(callback);
+    });
+
+    it('should call the persist callback if provided', async () => {
+      dialog = new TestDialogWithCallback(callback);
+      const prompt = dialog.launch();
+      await prompt;
+      expect(hasBeenCalled).to.equal(true);
+      expect(true).to.equal(false);
+    });
   });
 
   describe('showDialog()', () => {

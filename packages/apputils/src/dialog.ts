@@ -95,6 +95,7 @@ export class Dialog<T> extends Widget {
 
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
+    this._persistCallback = options.persistCallback || null;
   }
 
   /**
@@ -325,6 +326,9 @@ export class Dialog<T> extends Widget {
       value = body.getValue();
     }
     this.dispose();
+    if (this._persistCallback) {
+      this._persistCallback(button, value);
+    }
     promise.resolve({ button, value });
   }
 
@@ -338,6 +342,7 @@ export class Dialog<T> extends Widget {
   private _host: HTMLElement;
   private _body: Dialog.BodyType<T>;
   private _focusNodeSelector = '';
+  private _persistCallback: (button: Dialog.IButton, value: T) => void;
 }
 
 /**
@@ -394,6 +399,12 @@ export namespace Dialog {
      * default renderer.
      */
     renderer: IRenderer;
+
+    /**
+     * An optional callback to persist the user-selected result of
+     * the dialog.
+     */
+    persistCallback(button: Dialog.IButton, value: T): void;
   }
 
   /**
@@ -820,7 +831,8 @@ namespace Private {
       buttons,
       defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || ''
+      focusNodeSelector: options.focusNodeSelector || '',
+      persistCallback: options.persistCallback
     };
   }
 
