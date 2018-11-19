@@ -142,6 +142,11 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
       docManager.autosave =
         autosave === true || autosave === false ? autosave : true;
       app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
+
+      const autosaveInterval = settings.get('autosaveInterval').composite as number | null;
+      docManager.autosaveInterval =
+        autosaveInterval || 120;
+
     };
 
     // Fetch the initial state of the settings.
