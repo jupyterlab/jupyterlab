@@ -1,25 +1,9 @@
 {
   "jupyter.lab.setting-icon-class": "jp-LauncherIcon",
   "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
+  "jupyter.lab.setting-transform": true,
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "properties": {},
-  "oneOf": [{ "$ref": "#/definitions/shortcut" }],
-  "type": "object",
-  "definitions": {
-    "shortcut": {
-      "properties": {
-        "command": { "type": "string" },
-        "keys": {
-          "items": { "type": "string" },
-          "minItems": 1,
-          "type": "array"
-        },
-        "selector": { "type": "string" },
-        "title": { "type": "string" },
-        "category": { "type": "string" }
-      },
-      "type": "object"
-    }
-  }
+  "type": "object"
 }

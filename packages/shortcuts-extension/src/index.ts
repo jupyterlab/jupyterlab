@@ -138,6 +138,10 @@ namespace Private {
     return settings => {
       const plugin = registry.plugins.filter(p => p.id === settings.plugin)[0];
 
+      if (!plugin) {
+        return settings;
+      }
+
       return new ShortcutSettings({ plugin, registry });
     };
   }

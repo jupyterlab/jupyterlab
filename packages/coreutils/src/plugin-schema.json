@@ -14,6 +14,10 @@
       "type": "string",
       "default": "Plugin"
     },
+    "jupyter.lab.setting-transform": {
+      "type": "boolean",
+      "default": false
+    },
     "jupyter.lab.shortcuts": {
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",

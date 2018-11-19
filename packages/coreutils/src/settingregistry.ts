@@ -828,7 +828,7 @@ export class SettingRegistry {
     }
 
     if (plugin.id in transformers) {
-      return Promise.resolve(transformers[plugin.id].apply(null, settings));
+      return Promise.resolve(transformers[plugin.id].call(null, settings));
     }
 
     // TODO: Implement timeout logic.
