@@ -98,7 +98,6 @@ export class ConsoleHistory implements IConsoleHistory {
     return this._editor;
   }
   set editor(value: CodeEditor.IEditor | null) {
-    console.log('console/history:ConsoleHistory.set editor() called');
     if (this._editor === value) {
       return;
     }
