@@ -554,6 +554,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return false;
     }
 
+    if (line === 0 && event.keyCode === UP_ARROW) {
+      if (!event.shiftKey) {
+        this.edgeRequested.emit('topLine');
+      }
+      return false;
+    }
+
     let lastLine = this.lineCount - 1;
     let lastCh = this.getLine(lastLine)!.length;
     if (
