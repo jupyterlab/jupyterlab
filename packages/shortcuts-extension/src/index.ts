@@ -43,20 +43,24 @@ import { DisposableSet, IDisposable } from '@phosphor/disposable';
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry): void => {
+  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
     const { commands } = app;
 
-    settingRegistry
-      .load(plugin.id)
-      .then(settings => {
+    // Transform the settings object to return different annotated defaults
+    // calculated from all the keyboard shortcuts in the registry instead of
+    // using the default values from this plugin's schema.
+    registry.transform(plugin.id, Private.transform(commands, registry));
+
+    try {
+      const settings = await registry.load(plugin.id);
+
+      Private.loadShortcuts(commands, settings.composite);
+      settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
-        settings.changed.connect(() => {
-          Private.loadShortcuts(commands, settings.composite);
-        });
-      })
-      .catch((reason: Error) => {
-        console.error('Loading shortcut settings failed.', reason.message);
       });
+    } catch (error) {
+      console.error('Loading shortcut settings failed.', error.message);
+    }
   },
   autoStart: true
 };
@@ -114,5 +118,18 @@ namespace Private {
       isArray((value as Partial<CommandRegistry.IKeyBindingOptions>).keys);
 
     return valid ? (value as CommandRegistry.IKeyBindingOptions) : undefined;
+  }
+
+  /**
+   * Return a transformer that return a settings object annotated defaults.
+   */
+  export function transform(
+    commands: CommandRegistry,
+    registry: ISettingRegistry
+  ): ISettingRegistry.SettingTransform {
+    // Transform the settings object to return different annotated defaults
+    // calculated from all the keyboard shortcuts in the registry instead of
+    // using the default values from this plugin's schema.
+    return settings => settings;
   }
 }
