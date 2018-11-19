@@ -619,11 +619,10 @@ export class SettingRegistry {
    */
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
-    const transform = this._transform;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      return transform(plugins[plugin]);
+      return this._transform(plugins[plugin]);
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -640,14 +639,13 @@ export class SettingRegistry {
    */
   reload(plugin: string): Promise<ISettingRegistry.ISettings> {
     const plugins = this._plugins;
-    const transform = this._transform;
 
     // If the plugin needs to be loaded from the connector, fetch.
     return this.connector.fetch(plugin).then(data => {
       this._load(data);
       this._pluginChanged.emit(plugin);
 
-      return transform(plugins[plugin]);
+      return this._transform(plugins[plugin]);
     });
   }
 

@@ -3,7 +3,7 @@
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, Settings } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -53,7 +53,6 @@ const plugin: JupyterLabPlugin<void> = {
 
     try {
       const settings = await registry.load(plugin.id);
-
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
@@ -130,6 +129,16 @@ namespace Private {
     // Transform the settings object to return different annotated defaults
     // calculated from all the keyboard shortcuts in the registry instead of
     // using the default values from this plugin's schema.
-    return settings => settings;
+    class ShortcutSettings extends Settings {
+      annotatedDefaults(): string {
+        return 'These are the annotated defaults.';
+      }
+    }
+
+    return settings => {
+      const plugin = registry.plugins.filter(p => p.id === settings.plugin)[0];
+
+      return new ShortcutSettings({ plugin, registry });
+    };
   }
 }
