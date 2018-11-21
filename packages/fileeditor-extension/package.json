@@ -41,6 +41,7 @@
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/launcher": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
+    "@jupyterlab/statusbar": "^0.7.1",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.6.0"
   },

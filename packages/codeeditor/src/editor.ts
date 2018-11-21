@@ -375,7 +375,7 @@ export namespace CodeEditor {
   /**
    * The location of requested edges.
    */
-  export type EdgeLocation = 'top' | 'bottom';
+  export type EdgeLocation = 'top' | 'topLine' | 'bottom';
 
   /**
    * A widget that provides a code editor.

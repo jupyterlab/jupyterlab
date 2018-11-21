@@ -297,6 +297,42 @@ describe('docregistry/context', () => {
         expect(model.content).to.equal('foo');
         await dismissDialog();
       });
+
+      it('should should preserve LF line endings upon save', async () => {
+        await context.initialize(true);
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo\nbar'
+        });
+        await context.revert();
+        await context.save();
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        const model = await manager.contents.get(context.path, opts);
+        expect(model.content).to.equal('foo\nbar');
+      });
+
+      it('should should preserve CRLF line endings upon save', async () => {
+        await context.initialize(true);
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo\r\nbar'
+        });
+        await context.revert();
+        await context.save();
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        const model = await manager.contents.get(context.path, opts);
+        expect(model.content).to.equal('foo\r\nbar');
+      });
     });
 
     describe('#saveAs()', () => {
@@ -385,6 +421,17 @@ describe('docregistry/context', () => {
         context.model.fromString('bar');
         await context.revert();
         expect(context.model.toString()).to.equal('foo');
+      });
+
+      it('should normalize CRLF line endings to LF', async () => {
+        await context.initialize(true);
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo\r\nbar'
+        });
+        await context.revert();
+        expect(context.model.toString()).to.equal('foo\nbar');
       });
     });
 

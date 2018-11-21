@@ -1,0 +1,30 @@
+{
+  "name": "@jupyterlab/test-statusbar",
+  "version": "0.5.1",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf build && rimraf coverage",
+    "coverage": "python run.py --coverage",
+    "test": "python run.py",
+    "watch": "python run.py --debug",
+    "watch:all": "python run.py --debug --watchAll",
+    "watch:src": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/statusbar": "^0.7.1",
+    "@jupyterlab/testutils": "^0.3.1",
+    "@phosphor/signaling": "^1.2.2",
+    "@phosphor/widgets": "^1.6.0",
+    "chai": "~4.1.2",
+    "jest": "^23.5.0",
+    "ts-jest": "^23.1.4"
+  },
+  "devDependencies": {
+    "@types/chai": "~4.0.10",
+    "@types/jest": "^23.3.1",
+    "puppeteer": "^1.5.0",
+    "rimraf": "~2.6.2",
+    "typescript": "~3.1.1"
+  }
+}

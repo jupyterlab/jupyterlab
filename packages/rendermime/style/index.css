@@ -10,7 +10,6 @@
 .jp-RenderedText {
   text-align: left;
   padding-left: var(--jp-code-padding);
-  font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   font-family: var(--jp-code-font-family);
 }
@@ -19,6 +18,7 @@
 .jp-RenderedJavaScript pre,
 .jp-RenderedHTMLCommon pre {
   color: var(--jp-content-font-color1);
+  font-size: var(--jp-code-font-size);
   border: none;
   margin: 0px;
   padding: 0px;
@@ -126,10 +126,10 @@
 }
 
 .jp-RenderedText pre .ansi-default-inverse-fg {
-  color: #ffffff;
+  color: var(--jp-ui-inverse-font-color0);
 }
 .jp-RenderedText pre .ansi-default-inverse-bg {
-  background-color: #000000;
+  background-color: var(--jp-inverse-layout-color0);
 }
 
 .jp-RenderedText pre .ansi-bold {
@@ -156,6 +156,7 @@
 
 /* Left-justify outputs.*/
 .jp-OutputArea-output.jp-RenderedLatex {
+  padding: var(--jp-code-padding);
   text-align: left;
 }
 
@@ -327,9 +328,10 @@
   font-size: inherit;
   line-height: var(--jp-code-line-height);
   padding: 0;
+  white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon p > code {
+.jp-RenderedHTMLCommon code {
   background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
@@ -444,7 +446,62 @@
 }
 
 .jp-RenderedHTMLCommon .alert {
+  padding: var(--jp-notebook-padding);
+  border: var(--jp-border-width) solid transparent;
+  border-radius: var(--jp-border-radius);
   margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon .alert-info {
+  color: var(--jp-info-color0);
+  background-color: var(--jp-info-color3);
+  border-color: var(--jp-info-color2);
+}
+.jp-RenderedHTMLCommon .alert-info hr {
+  border-color: var(--jp-info-color3);
+}
+.jp-RenderedHTMLCommon .alert-info > p:last-child,
+.jp-RenderedHTMLCommon .alert-info > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-warning {
+  color: var(--jp-warn-color0);
+  background-color: var(--jp-warn-color3);
+  border-color: var(--jp-warn-color2);
+}
+.jp-RenderedHTMLCommon .alert-warning hr {
+  border-color: var(--jp-warn-color3);
+}
+.jp-RenderedHTMLCommon .alert-warning > p:last-child,
+.jp-RenderedHTMLCommon .alert-warning > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-success {
+  color: var(--jp-success-color0);
+  background-color: var(--jp-success-color3);
+  border-color: var(--jp-success-color2);
+}
+.jp-RenderedHTMLCommon .alert-success hr {
+  border-color: var(--jp-success-color3);
+}
+.jp-RenderedHTMLCommon .alert-success > p:last-child,
+.jp-RenderedHTMLCommon .alert-success > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-danger {
+  color: var(--jp-error-color0);
+  background-color: var(--jp-error-color3);
+  border-color: var(--jp-error-color2);
+}
+.jp-RenderedHTMLCommon .alert-danger hr {
+  border-color: var(--jp-error-color3);
+}
+.jp-RenderedHTMLCommon .alert-danger > p:last-child,
+.jp-RenderedHTMLCommon .alert-danger > ul:last-child {
+  margin-bottom: 0;
 }
 
 .jp-RenderedHTMLCommon blockquote {

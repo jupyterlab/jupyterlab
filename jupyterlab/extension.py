@@ -59,9 +59,10 @@ def load_config(nbapp):
     config.workspaces_dir = workspaces_dir
 
     if getattr(nbapp, 'override_static_url', ''):
-        config.public_url = nbapp.override_static_url
+        public_url = nbapp.override_static_url
     if getattr(nbapp, 'override_theme_url', ''):
         config.themes_url = nbapp.override_theme_url
+        config.themes_dir = ''
 
     if public_url:
         config.public_url = public_url
@@ -134,6 +135,13 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['token'] = nbapp.token
     page_config['devMode'] = dev_mode
+
+    # Handle bundle url
+    bundle_url = config.public_url
+    if bundle_url.startswith(config.page_url):
+        bundle_url = ujoin(nbapp.base_url, bundle_url)
+    page_config['bundleUrl'] = bundle_url
+
     # Export the version info tuple to a JSON array. This gets printed
     # inside double quote marks, so we render it to a JSON string of the
     # JSON data (so that we can call JSON.parse on the frontend on it).

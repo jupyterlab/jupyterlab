@@ -41,7 +41,7 @@
   background: var(--jp-layout-color0);
 }
 
-.jp-Notebook::after {
+.jp-Notebook.jp-mod-scrollPastEnd::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);

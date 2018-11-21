@@ -17,6 +17,9 @@
     },
     {
       "path": "../docregistry"
+    },
+    {
+      "path": "../mainmenu"
     }
   ]
 }

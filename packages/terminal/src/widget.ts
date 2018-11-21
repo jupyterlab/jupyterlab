@@ -7,7 +7,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { Terminal as Xterm, ITerminalOptions as IXtermOptions } from 'xterm';
+import { Terminal as Xterm } from 'xterm';
 
 import { fit } from 'xterm/lib/addons/fit';
 
@@ -32,16 +32,23 @@ export class Terminal extends Widget {
    */
   constructor(options: Partial<Terminal.IOptions> = {}) {
     super();
-    this.addClass(TERMINAL_CLASS);
-
-    // Create the xterm.
-    this._term = new Xterm(Private.getConfig(options));
-    this._initializeTerm();
 
     // Initialize settings.
-    let defaults = Terminal.defaultOptions;
-    this._initialCommand = options.initialCommand || defaults.initialCommand;
-    this.theme = options.theme || defaults.theme;
+    this._options = { ...Terminal.defaultOptions, ...options };
+
+    const { initialCommand, theme, ...other } = this._options;
+    const { lightTheme, darkTheme } = Private;
+    const xtermTheme = theme === 'light' ? lightTheme : darkTheme;
+    const xtermOptions = { theme: xtermTheme, ...other };
+
+    this.addClass(TERMINAL_CLASS);
+    if (theme === 'light') {
+      this.addClass('jp-mod-light');
+    }
+
+    // Create the xterm.
+    this._term = new Xterm(xtermOptions);
+    this._initializeTerm();
 
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
@@ -71,53 +78,54 @@ export class Terminal extends Widget {
       );
       this.title.label = `Terminal ${value.name}`;
       this._setSessionSize();
-      if (this._initialCommand) {
+      if (this._options.initialCommand) {
         this._session.send({
           type: 'stdin',
-          content: [this._initialCommand + '\r']
+          content: [this._options.initialCommand + '\r']
         });
       }
     });
   }
 
   /**
-   * Get the font size of the terminal in pixels.
+   * Set a config option for the terminal.
    */
-  get fontSize(): number {
-    return this._term.getOption('fontSize');
+  getOption<K extends keyof Terminal.IOptions>(
+    option: K
+  ): Terminal.IOptions[K] {
+    return this._options[option];
   }
 
   /**
-   * Set the font size of the terminal in pixels.
+   * Set a config option for the terminal.
    */
-  set fontSize(size: number) {
-    if (this.fontSize === size) {
+  setOption<K extends keyof Terminal.IOptions>(
+    option: K,
+    value: Terminal.IOptions[K]
+  ): void {
+    if (this._options[option] === value) {
       return;
     }
-    this._term.setOption('fontSize', size);
-    this._needsResize = true;
-    this.update();
-  }
 
-  /**
-   * Get the current theme, either light or dark.
-   */
-  get theme(): Terminal.Theme {
-    return this._theme;
-  }
+    this._options[option] = value;
 
-  /**
-   * Set the current theme, either light or dark.
-   */
-  set theme(value: Terminal.Theme) {
-    this._theme = value;
-    if (value === 'light') {
-      this.addClass('jp-mod-light');
-      this._term.setOption('theme', Private.lightTheme);
-    } else {
-      this.removeClass('jp-mod-light');
-      this._term.setOption('theme', Private.darkTheme);
+    if (option === 'initialCommand') {
+      return;
     }
+
+    if (option === 'theme') {
+      if (value === 'light') {
+        this.addClass('jp-mod-light');
+        this._term.setOption('theme', Private.lightTheme);
+      } else {
+        this.removeClass('jp-mod-light');
+        this._term.setOption('theme', Private.darkTheme);
+      }
+    } else {
+      this._term.setOption(option, value);
+      this._needsResize = true;
+    }
+
     this.update();
   }
 
@@ -290,12 +298,11 @@ export class Terminal extends Widget {
 
   private _term: Xterm;
   private _needsResize = true;
-  private _theme: Terminal.Theme = 'dark';
   private _session: TerminalSession.ISession | null = null;
-  private _initialCommand: string;
   private _termOpened = false;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
+  private _options: Terminal.IOptions;
 }
 
 /**
@@ -307,14 +314,30 @@ export namespace Terminal {
    */
   export interface IOptions {
     /**
+     * The font family used to render text.
+     */
+    fontFamily: string | null;
+
+    /**
      * The font size of the terminal in pixels.
      */
     fontSize: number;
 
     /**
+     * The line height used to render text.
+     */
+    lineHeight: number | null;
+
+    /**
      * The theme of the terminal.
      */
     theme: Theme;
+
+    /**
+     * The amount of buffer scrollback to be used
+     * with the terminal
+     */
+    scrollback: number | null;
 
     /**
      * Whether to blink the cursor.  Can only be set at startup.
@@ -332,7 +355,10 @@ export namespace Terminal {
    */
   export const defaultOptions: IOptions = {
     theme: 'dark',
+    fontFamily: 'courier-new, courier, monospace',
     fontSize: 13,
+    lineHeight: 1.0,
+    scrollback: 1000,
     cursorBlink: true,
     initialCommand: ''
   };
@@ -347,26 +373,6 @@ export namespace Terminal {
  * A namespace for private data.
  */
 namespace Private {
-  /**
-   * Get term.js options from ITerminalOptions.
-   */
-  export function getConfig(
-    options: Partial<Terminal.IOptions>
-  ): IXtermOptions {
-    let config: IXtermOptions = {};
-    if (options.cursorBlink !== void 0) {
-      config.cursorBlink = options.cursorBlink;
-    } else {
-      config.cursorBlink = Terminal.defaultOptions.cursorBlink;
-    }
-    if (options.fontSize !== void 0) {
-      config.fontSize = options.fontSize;
-    } else {
-      config.fontSize = Terminal.defaultOptions.fontSize;
-    }
-    return config;
-  }
-
   /**
    * An incrementing counter for ids.
    */

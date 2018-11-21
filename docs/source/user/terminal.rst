@@ -1,7 +1,8 @@
 .. _terminal:
 
+==========
 Terminals
----------
+==========
 
 JupyterLab terminals provide full support for system shells (bash, tsch,
 etc.) on Mac/Linux and PowerShell on Windows. You can run anything in
@@ -36,3 +37,30 @@ re-open it using the Running tab in the left sidebar:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/gDM5lwU6Dmo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+
+.. _Copy/Paste:
+
+
+
+~~~~~~~~~~~~
+Copy/Paste
+~~~~~~~~~~~~
+
+For both Windows and Mac users, press ``shift`` + ``right-click`` to get to the right-click menu from inside Jupyterlab terminal. Or by using shortcut keys as follows:
+
+* **For Mac users:**
+
+	**Copy** : ``Cmd`` + ``c`` 
+
+	**Paste**: ``Cmd`` + ``v``
+
+
+* **For Windows users (Power shell):**
+
+	**Copy** : ``Ctrl`` + ``Insert``
+
+	**Paste** : ``Shift`` + ``Insert``
+
+
+

@@ -1,60 +1,82 @@
-import React from 'react';
-import { TextItem } from '@jupyterlab/statusbar';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+//
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
-
-import {
-  IUploadModel,
-  FileBrowserModel,
-  IFileBrowserFactory,
-  FileBrowser
-} from '@jupyterlab/filebrowser';
+import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { ISignal } from '@phosphor/signaling';
-import { IDisposable } from '@phosphor/disposable';
 
-import { ProgressBar } from '@jupyterlab/statusbar';
-import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
+import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
+
 import { ArrayExt } from '@phosphor/algorithm';
-import { IStatusBar, GroupItem } from '@jupyterlab/statusbar';
 
+import { IUploadModel, FileBrowserModel, FileBrowser } from '.';
+
+import React from 'react';
+
+/**
+ * Half-spacing between items in the overall status item.
+ */
 const HALF_SPACING = 4;
 
-// tslint:disable-next-line:variable-name
-const FileUploadComponent = (
+/**
+ * A pure function component for a FileUpload status item.
+ *
+ * @param props: the props for the component.
+ *
+ * @returns a tsx component for the file upload status.
+ */
+function FileUploadComponent(
   props: FileUploadComponent.IProps
-): React.ReactElement<FileUploadComponent.IProps> => {
+): React.ReactElement<FileUploadComponent.IProps> {
   return (
     <GroupItem spacing={HALF_SPACING}>
-      <TextItem source={'Uploading'} />
+      <TextItem source={'Uploading…'} />
       <ProgressBar percentage={props.upload} />
     </GroupItem>
   );
-};
+}
 
+/**
+ * A namespace for FileUploadComponent statics.
+ */
 namespace FileUploadComponent {
+  /**
+   * The props for the FileUploadComponent.
+   */
   export interface IProps {
+    /**
+     * The current upload percentage, from 0 to 100.
+     */
     upload: number;
   }
 }
 
+/**
+ * The time for which to show the "Complete!" message after uploading.
+ */
 const UPLOAD_COMPLETE_MESSAGE_MILLIS: number = 2000;
 
 /**
  * Status bar item to display file upload progress.
  */
-class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
-  constructor(opts: FileUpload.IOptions) {
+export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
+  /**
+   * Construct a new FileUpload status item.
+   */
+  constructor(opts: FileUploadStatus.IOptions) {
     super();
     this._tracker = opts.tracker;
     this._tracker.currentChanged.connect(this._onBrowserChange);
 
-    this.model = new FileUpload.Model(
+    this.model = new FileUploadStatus.Model(
       this._tracker.currentWidget && this._tracker.currentWidget.model
     );
   }
 
+  /**
+   * Render the FileUpload status.
+   */
   render() {
     const uploadPaths = this.model!.items;
     if (uploadPaths.length > 0) {
@@ -72,7 +94,6 @@ class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
 
   dispose() {
     super.dispose();
-
     this._tracker.currentChanged.disconnect(this._onBrowserChange);
   }
 
@@ -90,22 +111,35 @@ class FileUpload extends VDomRenderer<FileUpload.Model> implements IFileUpload {
   private _tracker: InstanceTracker<FileBrowser>;
 }
 
-namespace FileUpload {
-  export class Model extends VDomModel implements IFileUpload.IModel {
+/**
+ * A namespace for FileUpload class statics.
+ */
+export namespace FileUploadStatus {
+  /**
+   * The VDomModel for the FileUpload renderer.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Construct a new model.
+     */
     constructor(browserModel: FileBrowserModel | null) {
       super();
-
       this.browserModel = browserModel;
     }
 
+    /**
+     * The currently uploading items.
+     */
     get items() {
       return this._items;
     }
 
-    get browserModel() {
+    /**
+     * The current file browser model.
+     */
+    get browserModel(): FileBrowserModel | null {
       return this._browserModel;
     }
-
     set browserModel(browserModel: FileBrowserModel | null) {
       const oldBrowserModel = this._browserModel;
       if (oldBrowserModel) {
@@ -122,6 +156,9 @@ namespace FileUpload {
       this.stateChanged.emit(void 0);
     }
 
+    /**
+     * Handle an uploadChanged event in the filebrowser model.
+     */
     private _uploadChanged = (
       browse: FileBrowserModel,
       uploads: IChangedArgs<IUploadModel>
@@ -163,52 +200,38 @@ namespace FileUpload {
       this.stateChanged.emit(void 0);
     };
 
-    private _items: Array<IFileUpload.IItem> = [];
+    private _items: Array<IFileUploadItem> = [];
     private _browserModel: FileBrowserModel | null = null;
   }
 
+  /**
+   * Options for creating the upload status item.
+   */
   export interface IOptions {
+    /**
+     * The application file browser tracker.
+     */
     readonly tracker: InstanceTracker<FileBrowser>;
   }
 }
 
-export interface IFileUpload extends IDisposable {
-  readonly model: IFileUpload.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
+/**
+ * The interface for an item that is being uploaded to
+ * the file system.
+ */
+interface IFileUploadItem {
+  /**
+   * The path on the filesystem that is being uploaded to.
+   */
+  path: string;
+
+  /**
+   * The upload progress fraction.
+   */
+  progress: number;
+
+  /**
+   * Whether the upload is complete.
+   */
+  complete: boolean;
 }
-
-export namespace IFileUpload {
-  export interface IModel {
-    readonly items: Array<IFileUpload.IItem>;
-    readonly browserModel: FileBrowserModel | null;
-  }
-
-  export interface IItem {
-    path: string;
-    progress: number;
-    complete: boolean;
-  }
-}
-
-export const fileUploadStatus: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/filebrowser-extension:file-upload-item',
-  autoStart: true,
-  requires: [IStatusBar, IFileBrowserFactory],
-  activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    browser: IFileBrowserFactory
-  ) => {
-    const item = new FileUpload({
-      tracker: browser.tracker
-    });
-
-    statusBar.registerStatusItem('file-upload-item', item, {
-      align: 'middle',
-      isActive: () => {
-        return !!item.model && item.model.items.length > 0;
-      },
-      stateChanged: item.model!.stateChanged
-    });
-  }
-};

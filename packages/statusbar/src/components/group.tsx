@@ -1,16 +1,20 @@
-/**
- * @ignore
- */
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import * as React from 'react';
+
 import { style, classes } from 'typestyle/lib';
+
 import { centeredFlex, leftToRight } from '../style/layout';
 
 const groupItemLayout = style(centeredFlex, leftToRight);
 
-// tslint:disable-next-line:variable-name
-export const GroupItem = (
+/**
+ * A tsx component for a set of items logically grouped together.
+ */
+export function GroupItem(
   props: GroupItem.IProps & React.HTMLAttributes<HTMLDivElement>
-): React.ReactElement<GroupItem.IProps> => {
+): React.ReactElement<GroupItem.IProps> {
   const { spacing, children, className, ...rest } = props;
   const numChildren = React.Children.count(children);
 
@@ -27,11 +31,24 @@ export const GroupItem = (
       })}
     </div>
   );
-};
+}
 
+/**
+ * A namespace for GroupItem statics.
+ */
 export namespace GroupItem {
+  /**
+   * Props for the GroupItem.
+   */
   export interface IProps {
+    /**
+     * The spacing, in px, between the items in the goup.
+     */
     spacing: number;
+
+    /**
+     * The items to arrange in a group.
+     */
     children: JSX.Element[];
   }
 }

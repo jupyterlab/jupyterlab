@@ -1,15 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ApplicationShell } from '@jupyterlab/application';
-
 import { ArrayExt } from '@phosphor/algorithm';
 
 import { ISignal } from '@phosphor/signaling';
 
 import { Token } from '@phosphor/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import {
+  DisposableDelegate,
+  DisposableSet,
+  IDisposable
+} from '@phosphor/disposable';
 
 import { Message } from '@phosphor/messaging';
 
@@ -37,17 +39,11 @@ export interface IStatusBar {
    *
    * @param id - a unique id for the status item.
    *
-   * @param widget - The item to add to the status bar.
-   *
    * @param options - The options for how to add the status item.
    *
    * @returns an `IDisposable` that can be disposed to remove the item.
    */
-  registerStatusItem(
-    id: string,
-    widget: Widget,
-    options: IStatusBar.IItemOptions
-  ): IDisposable;
+  registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable;
 }
 
 /**
@@ -59,41 +55,42 @@ export namespace IStatusBar {
   /**
    * Options for status bar items.
    */
-  export interface IItemOptions {
+  export interface IItem {
     /**
-     * Which side to place widget. Permanent widgets are intended for the right and left side, with more transient widgets in the middle.
+     * The item to add to the status bar.
+     */
+    item: Widget;
+
+    /**
+     * Which side to place item.
+     * Permanent items are intended for the right and left side,
+     * with more transient items in the middle.
      */
     align?: Alignment;
+
     /**
      *  Ordering of Items -- higher rank items are closer to the middle.
      */
     rank?: number;
+
     /**
-     * Whether the widget is shown or hidden.
+     * Whether the item is shown or hidden.
      */
     isActive?: () => boolean;
+
     /**
-     * Determine when the widget updates.
+     * A signal that is fired when the item active state changes.
      */
-    stateChanged?: ISignal<any, void>;
+    activeStateChanged?: ISignal<any, void>;
   }
 }
 
 /**
- * The DOM id for the status bar.
- */
-const STATUS_BAR_ID = 'jp-main-status-bar';
-
-/**
- * Main status bar object which contains all widgets.
+ * Main status bar object which contains all items.
  */
 export class StatusBar extends Widget implements IStatusBar {
-  constructor(options: StatusBar.IOptions) {
+  constructor() {
     super();
-
-    this._host = options.host;
-
-    this.id = STATUS_BAR_ID;
     this.addClass(barStyle);
 
     let rootLayout = (this.layout = new PanelLayout());
@@ -113,16 +110,6 @@ export class StatusBar extends Widget implements IStatusBar {
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
     rootLayout.addWidget(rightPanel);
-
-    this._host.addToBottomArea(this);
-    this._host.currentChanged.connect(this._onAppShellCurrentChanged);
-    this._host.restored
-      .then(() => {
-        this.update();
-      })
-      .catch(() => {
-        console.error(`Failed to refresh statusbar items`);
-      });
   }
 
   /**
@@ -130,109 +117,80 @@ export class StatusBar extends Widget implements IStatusBar {
    *
    * @param id - a unique id for the status item.
    *
-   * @param widget - The item to add to the status bar.
-   *
-   * @param options - The options for how to add the status item.
+   * @param statusItem - The item to add to the status bar.
    */
-  registerStatusItem(
-    id: string,
-    widget: Widget,
-    options: IStatusBar.IItemOptions = {}
-  ): IDisposable {
+  registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    let align = options.align || 'left';
-    let rank = options.rank || 0;
-    let isActive = options.isActive || (() => true);
-    let stateChanged = options.stateChanged || null;
-    let changeCallback =
-      options.stateChanged !== undefined
-        ? () => {
-            this._onIndividualStateChange(id);
-          }
-        : null;
+    // Populate defaults for the optional properties of the status item.
+    statusItem = { ...Private.statusItemDefaults, ...statusItem };
+    const { align, item, rank } = statusItem;
 
-    let wrapper = {
-      widget,
-      align,
-      rank,
-      isActive,
-      stateChanged,
-      changeCallback
+    // Connect the activeStateChanged signal to refreshing the status item,
+    // if the signal was provided.
+    const onActiveStateChanged = () => {
+      this._refreshItem(id);
     };
-
-    let rankItem = {
-      id,
-      rank
-    };
-
-    widget.addClass(itemStyle);
-
-    this._statusItems[id] = wrapper;
-    this._statusIds.push(id);
-
-    if (stateChanged) {
-      stateChanged.connect(changeCallback!);
+    if (statusItem.activeStateChanged) {
+      statusItem.activeStateChanged.connect(onActiveStateChanged);
     }
+
+    let rankItem = { id, rank };
+
+    statusItem.item.addClass(itemStyle);
+    this._statusItems[id] = statusItem;
 
     if (align === 'left') {
       let insertIndex = this._findInsertIndex(this._leftRankItems, rankItem);
       if (insertIndex === -1) {
-        this._leftSide.addWidget(widget);
+        this._leftSide.addWidget(item);
         this._leftRankItems.push(rankItem);
       } else {
         ArrayExt.insert(this._leftRankItems, insertIndex, rankItem);
-        this._leftSide.insertWidget(insertIndex, widget);
+        this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
       let insertIndex = this._findInsertIndex(this._rightRankItems, rankItem);
       if (insertIndex === -1) {
-        this._rightSide.addWidget(widget);
+        this._rightSide.addWidget(item);
         this._rightRankItems.push(rankItem);
       } else {
         ArrayExt.insert(this._rightRankItems, insertIndex, rankItem);
-        this._rightSide.insertWidget(insertIndex, widget);
+        this._rightSide.insertWidget(insertIndex, item);
       }
     } else {
-      this._middlePanel.addWidget(widget);
+      this._middlePanel.addWidget(item);
     }
+    this._refreshItem(id); // Initially refresh the status item.
 
-    return new DisposableDelegate(() => {
+    const disposable = new DisposableDelegate(() => {
       delete this._statusItems[id];
-      ArrayExt.removeFirstOf(this._statusIds, id);
-      widget.parent = null;
-      widget.dispose();
+      if (statusItem.activeStateChanged) {
+        statusItem.activeStateChanged.disconnect(onActiveStateChanged);
+      }
+      item.parent = null;
+      item.dispose();
     });
+    this._disposables.add(disposable);
+    return disposable;
   }
 
   /**
    * Dispose of the status bar.
    */
   dispose() {
+    this._leftRankItems.length = 0;
+    this._rightRankItems.length = 0;
+    this._disposables.dispose();
     super.dispose();
-
-    this._host.currentChanged.disconnect(this._onAppShellCurrentChanged);
-    this._statusIds.forEach(id => {
-      const { stateChanged, changeCallback, widget } = this._statusItems[id];
-
-      if (stateChanged) {
-        stateChanged.disconnect(changeCallback!);
-      }
-
-      widget.dispose();
-    });
   }
 
   /**
    * Handle an 'update-request' message to the status bar.
    */
   protected onUpdateRequest(msg: Message) {
-    this._statusIds.forEach(statusId => {
-      this._statusItems[statusId].widget.update();
-    });
-
     this._refreshAll();
     super.onUpdateRequest(msg);
   }
@@ -244,65 +202,46 @@ export class StatusBar extends Widget implements IStatusBar {
     return ArrayExt.findFirstIndex(side, item => item.rank > newItem.rank);
   }
 
-  private _refreshItem({ isActive, widget }: StatusBar.IItem) {
-    if (isActive()) {
-      widget.show();
+  private _refreshItem(id: string) {
+    const statusItem = this._statusItems[id];
+    if (statusItem.isActive()) {
+      statusItem.item.show();
+      statusItem.item.update();
     } else {
-      widget.hide();
+      statusItem.item.hide();
     }
   }
 
   private _refreshAll(): void {
-    this._statusIds.forEach(statusId => {
-      this._refreshItem(this._statusItems[statusId]);
+    Object.keys(this._statusItems).forEach(id => {
+      this._refreshItem(id);
     });
   }
 
-  private _onAppShellCurrentChanged = () => {
-    this._refreshAll();
-  };
-
-  private _onIndividualStateChange = (statusId: string) => {
-    this._refreshItem(this._statusItems[statusId]);
-  };
-
   private _leftRankItems: Private.IRankItem[] = [];
   private _rightRankItems: Private.IRankItem[] = [];
-  private _statusItems: { [id: string]: StatusBar.IItem } = Object.create(null);
-  private _statusIds: Array<string> = [];
-
-  private _host: ApplicationShell;
-
+  private _statusItems: { [id: string]: IStatusBar.IItem } = {};
+  private _disposables = new DisposableSet();
   private _leftSide: Panel;
   private _middlePanel: Panel;
   private _rightSide: Panel;
-}
-
-export namespace StatusBar {
-  /**
-   * Options for creating a new StatusBar instance
-   */
-  export interface IOptions {
-    host: ApplicationShell;
-  }
-
-  /**
-   * The interface for a status bar item.
-   */
-  export interface IItem {
-    align: IStatusBar.Alignment;
-    rank: number;
-    widget: Widget;
-    isActive: () => boolean;
-    stateChanged: ISignal<any, void> | null;
-    changeCallback: (() => void) | null;
-  }
 }
 
 /**
  * A namespace for private functionality.
  */
 namespace Private {
+  type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+  /**
+   * Default options for a status item, less the item itself.
+   */
+  export const statusItemDefaults: Omit<IStatusBar.IItem, 'item'> = {
+    align: 'left',
+    rank: 0,
+    isActive: () => true,
+    activeStateChanged: undefined
+  };
+
   /**
    * An interface for storing the rank of a status item.
    */

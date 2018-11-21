@@ -35,7 +35,7 @@
 }
 
 .p-MenuBar-item.p-mod-active {
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color2);
 }
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {

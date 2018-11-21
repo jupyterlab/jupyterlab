@@ -7,13 +7,16 @@
   "include": ["src/**/*"],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {
+      "path": "../codeeditor"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../services"
     }
   ]
 }

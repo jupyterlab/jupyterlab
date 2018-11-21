@@ -101,6 +101,12 @@
         "tabSize": 4,
         "wordWrapColumn": 80
       }
+    },
+    "scrollPastEnd": {
+      "title": "Scroll past last cell",
+      "description": "Whether to be able to scroll so the last cell is at the top of the panel",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

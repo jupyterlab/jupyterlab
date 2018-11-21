@@ -1,92 +1,118 @@
-/**
- * Default item to display the memory usage of the current process.
- */
-/**
- * Part of Jupyterlab status bar defaults.
- */
-import React from 'react';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+import React from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '..';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { ISignal } from '@phosphor/signaling';
-
-class MemoryUsage extends VDomRenderer<MemoryUsage.Model>
-  implements IMemoryUsage {
+/**
+ * A VDomRenderer for showing memory usage by a kernel.
+ */
+export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
+  /**
+   * Construct a new memory usage status item.
+   */
   constructor() {
     super();
-
     this.model = new MemoryUsage.Model({
       refreshRate: 5000
     });
   }
 
+  /**
+   * Render the memory usage status item.
+   */
   render() {
-    if (this.model === null) {
+    if (!this.model) {
       return null;
-    } else {
-      let text: string;
-      if (this.model.memoryLimit === null) {
-        text = `Mem: ${this.model.currentMemory.toFixed(
-          Private.DECIMAL_PLACES
-        )} ${this.model.units}`;
-      } else {
-        text = `Mem: ${this.model.currentMemory.toFixed(
-          Private.DECIMAL_PLACES
-        )} / ${this.model.memoryLimit.toFixed(Private.DECIMAL_PLACES)} ${
-          this.model.units
-        }`;
-      }
-      return <TextItem title="Current memory usage" source={text} />;
     }
+    let text: string;
+    if (this.model.memoryLimit === null) {
+      text = `Mem: ${this.model.currentMemory.toFixed(
+        Private.DECIMAL_PLACES
+      )} ${this.model.units}`;
+    } else {
+      text = `Mem: ${this.model.currentMemory.toFixed(
+        Private.DECIMAL_PLACES
+      )} / ${this.model.memoryLimit.toFixed(Private.DECIMAL_PLACES)} ${
+        this.model.units
+      }`;
+    }
+    return <TextItem title="Current memory usage" source={text} />;
   }
 }
 
-namespace MemoryUsage {
-  export class Model extends VDomModel implements IMemoryUsage.IModel {
-    constructor({ refreshRate }: { refreshRate: number }) {
+/**
+ * A namespace for MemoryUsage statics.
+ */
+export namespace MemoryUsage {
+  /**
+   * A VDomModel for the memory usage status item.
+   */
+  export class Model extends VDomModel {
+    /**
+     * Construct a new memory usage model.
+     *
+     * @param options: the options for creating the model.
+     */
+    constructor(options: Model.IOptions) {
       super();
 
-      this._refreshRate = refreshRate;
+      this._refreshRate = options.refreshRate;
 
-      this._intervalId = setInterval(this._makeMetricRequest, refreshRate);
+      this._intervalId = setInterval(
+        () => this._makeMetricRequest(),
+        this._refreshRate
+      );
     }
 
-    get metricsAvailable() {
+    /**
+     * Whether the metrics server extension is available.
+     */
+    get metricsAvailable(): boolean {
       return this._metricsAvailable;
     }
 
-    get currentMemory() {
+    /**
+     * The current memory usage/
+     */
+    get currentMemory(): number {
       return this._currentMemory;
     }
 
-    get memoryLimit() {
+    /**
+     * The current memory limit, or null if not specified.
+     */
+    get memoryLimit(): number | null {
       return this._memoryLimit;
     }
 
-    get units() {
+    /**
+     * The units for memory usages and limits.
+     */
+    get units(): MemoryUnit {
       return this._units;
     }
 
-    dispose() {
+    /**
+     * Dispose of the memory usage model.
+     */
+    dispose(): void {
       super.dispose();
-
       clearInterval(this._intervalId);
     }
 
-    private _makeMetricRequest = () => {
-      const requestResult = Private.makeMetricsRequest();
-
-      requestResult
+    /**
+     * Make a request to the metrics backend and update the model.
+     */
+    private _makeMetricRequest(): Promise<void> {
+      return Private.makeMetricsRequest()
         .then(response => {
           if (response.ok) {
             try {
@@ -98,7 +124,7 @@ namespace MemoryUsage {
             return null;
           }
         })
-        .then(this._updateMetricsValues)
+        .then(data => this._updateMetricsValues(data))
         .catch(err => {
           const oldMetricsAvailable = this._metricsAvailable;
           this._metricsAvailable = false;
@@ -111,11 +137,15 @@ namespace MemoryUsage {
             this.stateChanged.emit(void 0);
           }
         });
-    };
+    }
 
-    private _updateMetricsValues = (
-      value: Private.MetricRequestResult | null
-    ) => {
+    /**
+     * Given the results of the metrics request, update
+     * model values.
+     */
+    private _updateMetricsValues(
+      value: Private.IMetricRequestResult | null
+    ): void {
       const oldMetricsAvailable = this._metricsAvailable;
       const oldCurrentMemory = this._currentMemory;
       const oldMemoryLimit = this._memoryLimit;
@@ -144,7 +174,7 @@ namespace MemoryUsage {
 
         if (!oldMetricsAvailable) {
           this._intervalId = setInterval(
-            this._makeMetricRequest,
+            () => this._makeMetricRequest(),
             this._refreshRate
           );
         }
@@ -158,7 +188,7 @@ namespace MemoryUsage {
       ) {
         this.stateChanged.emit(void 0);
       }
-    };
+    }
 
     private _metricsAvailable: boolean = false;
     private _currentMemory: number = 0;
@@ -168,30 +198,43 @@ namespace MemoryUsage {
     private _refreshRate: number;
   }
 
+  /**
+   * A namespace for Model statics.
+   */
+  export namespace Model {
+    /**
+     * Options for creating a MemoryUsage model.
+     */
+    export interface IOptions {
+      /**
+       * The refresh rate (in ms) for querying the server.
+       */
+      refreshRate: number;
+    }
+  }
+
+  /**
+   * The type of unit used for reporting memory usage.
+   */
   export type MemoryUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB' | 'PB';
 }
 
-export interface IMemoryUsage extends IDisposable {
-  readonly model: IMemoryUsage.IModel | null;
-  readonly modelChanged: ISignal<this, void>;
-}
-
-export namespace IMemoryUsage {
-  export interface IModel {
-    readonly metricsAvailable: boolean;
-    readonly currentMemory: number;
-    readonly memoryLimit: number | null;
-    readonly units: string;
-  }
-}
-
+/**
+ * A namespace for module private statics.
+ */
 namespace Private {
+  /**
+   * The number of decimal places to use when rendering memory usage.
+   */
   export const DECIMAL_PLACES = 2;
 
+  /**
+   * The number of bytes in each memory unit.
+   */
   export const MEMORY_UNIT_LIMITS: {
     readonly [U in MemoryUsage.MemoryUnit]: number
   } = {
-    B: 0,
+    B: 1,
     KB: 1024,
     MB: 1048576,
     GB: 1073741824,
@@ -199,6 +242,10 @@ namespace Private {
     PB: 1125899906842624
   };
 
+  /**
+   * Given a number of bytes, convert to the most human-readable
+   * format, (GB, TB, etc).
+   */
   export function convertToLargestUnit(
     numBytes: number
   ): [number, MemoryUsage.MemoryUnit] {
@@ -229,10 +276,20 @@ namespace Private {
     }
   }
 
+  /**
+   * Settings for making requests to the server.
+   */
   const SERVER_CONNECTION_SETTINGS = ServerConnection.makeSettings();
+
+  /**
+   * The url endpoint for making requests to the server.
+   */
   const METRIC_URL = URLExt.join(SERVER_CONNECTION_SETTINGS.baseUrl, 'metrics');
 
-  export type MetricRequestResult = {
+  /**
+   * The shape of a response from the metrics server extension.
+   */
+  export interface IMetricRequestResult {
     rss: number;
     limits: {
       memory?: {
@@ -240,8 +297,11 @@ namespace Private {
         warn?: number;
       };
     };
-  };
+  }
 
+  /**
+   * Make a request to the backend.
+   */
   export function makeMetricsRequest(): Promise<Response> {
     const request = ServerConnection.makeRequest(
       METRIC_URL,
@@ -252,19 +312,3 @@ namespace Private {
     return request;
   }
 }
-
-export const memoryUsageItem: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/statusbar:memory-usage-item',
-  autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
-    let item = new MemoryUsage();
-
-    statusBar.registerStatusItem('memory-usage-item', item, {
-      align: 'left',
-      rank: 2,
-      isActive: () => item.model!.metricsAvailable,
-      stateChanged: item.model!.stateChanged
-    });
-  }
-};

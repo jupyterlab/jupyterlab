@@ -26,7 +26,8 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorFactory,
-  IEditorTracker
+  IEditorTracker,
+  TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -38,6 +39,8 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -82,6 +85,8 @@ namespace CommandIDs {
 
   export const runCode = 'fileeditor:run-code';
 
+  export const runAllCode = 'fileeditor:run-all';
+
   export const markdownPreview = 'fileeditor:markdown-preview';
 }
 
@@ -104,9 +109,82 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 };
 
 /**
+ * A plugin that provides a status item allowing the user to
+ * switch tabs vs spaces and tab widths for text editors.
+ */
+export const tabSpaceStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/fileeditor-extension:tab-space-status',
+  autoStart: true,
+  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    editorTracker: IEditorTracker,
+    settingRegistry: ISettingRegistry
+  ) => {
+    // Create a menu for switching tabs vs spaces.
+    const menu = new Menu({ commands: app.commands });
+    const command = 'fileeditor:change-tabs';
+    const args: JSONObject = {
+      insertSpaces: false,
+      size: 4,
+      name: 'Indent with Tab'
+    };
+    menu.addItem({ command, args });
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true,
+        size,
+        name: `Spaces: ${size} `
+      };
+      menu.addItem({ command, args });
+    }
+
+    // Create the status item.
+    const item = new TabSpaceStatus({ menu });
+
+    // Keep a reference to the code editor config from the settings system.
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const cached = settings.get('editorConfig').composite as Partial<
+        CodeEditor.IConfig
+      >;
+      const config: CodeEditor.IConfig = {
+        ...CodeEditor.defaultConfig,
+        ...cached
+      };
+      item.model!.config = config;
+    };
+    Promise.all([
+      settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
+      app.restored
+    ]).then(([settings]) => {
+      updateSettings(settings);
+      settings.changed.connect(updateSettings);
+    });
+
+    // Add the status item.
+    statusBar.registerStatusItem(
+      '@jupyterlab/fileeditor-extension:tab-space-status',
+      {
+        item,
+        align: 'right',
+        rank: 1,
+        isActive: () => {
+          return (
+            app.shell.currentWidget &&
+            editorTracker.has(app.shell.currentWidget)
+          );
+        }
+      }
+    );
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [plugin, tabSpaceStatus];
+export default plugins;
 
 /**
  * Activate the editor tracker plugin.
@@ -241,7 +319,6 @@ function activate(
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
     },
-    isEnabled,
     label: args => args['name'] as string
   });
 
@@ -290,7 +367,6 @@ function activate(
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
     },
-    isEnabled,
     isToggled: args => {
       const insertSpaces = !!args['insertSpaces'];
       const size = (args['size'] as number) || 4;
@@ -322,7 +398,6 @@ function activate(
         });
     },
     label: 'Auto Close Brackets for Text Editor',
-    isEnabled,
     isToggled: () => config.autoClosingBrackets
   });
 
@@ -413,6 +488,41 @@ function activate(
     },
     isEnabled,
     label: 'Run Code'
+  });
+
+  commands.addCommand(CommandIDs.runAllCode, {
+    execute: () => {
+      let widget = tracker.currentWidget.content;
+
+      if (!widget) {
+        return;
+      }
+
+      let code = '';
+      let editor = widget.editor;
+      let text = editor.model.value.text;
+      let path = widget.context.path;
+      let extension = PathExt.extname(path);
+
+      if (MarkdownCodeBlocks.isMarkdown(extension)) {
+        // For Markdown files, run only code blocks.
+        const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
+        for (let block of blocks) {
+          code += block.code;
+        }
+      } else {
+        code = text;
+      }
+
+      const activate = false;
+      if (code) {
+        return commands.execute('console:inject', { activate, code, path });
+      } else {
+        return Promise.resolve(void 0);
+      }
+    },
+    isEnabled,
+    label: 'Run All Code'
   });
 
   commands.addCommand(CommandIDs.markdownPreview, {
@@ -635,7 +745,16 @@ function activate(
         });
         return found;
       },
-      run: () => commands.execute(CommandIDs.runCode)
+      run: () => commands.execute(CommandIDs.runCode),
+      runAll: () => commands.execute(CommandIDs.runAllCode),
+      restartAndRunAll: current => {
+        return current.context.session.restart().then(restarted => {
+          if (restarted) {
+            commands.execute(CommandIDs.runAllCode);
+          }
+          return restarted;
+        });
+      }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }
 

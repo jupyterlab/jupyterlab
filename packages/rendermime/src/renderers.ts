@@ -628,15 +628,21 @@ namespace Private {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
-      let path = anchors[i].href || '';
+      const el = anchors[i];
+      // skip when processing a elements inside svg
+      // which are of type SVGAnimatedString
+      if (!(el instanceof HTMLAnchorElement)) {
+        continue;
+      }
+      let path = el.href;
       const isLocal =
         resolver && resolver.isLocal
           ? resolver.isLocal(path)
           : URLExt.isLocal(path);
       if (isLocal) {
-        anchors[i].target = '_self';
+        el.target = '_self';
       } else {
-        anchors[i].target = '_blank';
+        el.target = '_blank';
       }
     }
 

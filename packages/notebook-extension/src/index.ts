@@ -50,22 +50,22 @@ import {
   NotebookPanel,
   NotebookTracker,
   NotebookWidgetFactory,
-  StaticNotebook
+  StaticNotebook,
+  CommandEditStatus,
+  NotebookTrustStatus
 } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
+import { IStatusBar } from '@jupyterlab/statusbar';
+
 import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
-
-import { commandEditItem } from './modestatus';
-
-import { notebookTrustItem } from './truststatus';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -286,6 +286,73 @@ const tools: JupyterLabPlugin<ICellTools> = {
 };
 
 /**
+ * A plugin providing a CommandEdit status item.
+ */
+export const commandEditItem: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:mode-status',
+  autoStart: true,
+  requires: [IStatusBar, INotebookTracker],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    tracker: INotebookTracker
+  ) => {
+    const item = new CommandEditStatus();
+
+    // Keep the status item up-to-date with the current notebook.
+    tracker.currentChanged.connect(() => {
+      const current = tracker.currentWidget;
+      item.model.notebook = current && current.content;
+    });
+
+    statusBar.registerStatusItem('@jupyterlab/notebook-extension:mode-status', {
+      item,
+      align: 'right',
+      rank: 4,
+      isActive: () =>
+        app.shell.currentWidget &&
+        tracker.currentWidget &&
+        app.shell.currentWidget === tracker.currentWidget
+    });
+  }
+};
+
+/**
+ * A plugin that adds a notebook trust status item to the status bar.
+ */
+export const notebookTrustItem: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:trust-status',
+  autoStart: true,
+  requires: [IStatusBar, INotebookTracker],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    tracker: INotebookTracker
+  ) => {
+    const item = new NotebookTrustStatus();
+
+    // Keep the status item up-to-date with the current notebook.
+    tracker.currentChanged.connect(() => {
+      const current = tracker.currentWidget;
+      item.model.notebook = current && current.content;
+    });
+
+    statusBar.registerStatusItem(
+      '@jupyterlab/notebook-extension:trust-status',
+      {
+        item,
+        align: 'right',
+        rank: 3,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
@@ -403,6 +470,7 @@ function activateNotebookHandler(
   const services = app.serviceManager;
   // An object for tracking the current notebook settings.
   let editorConfig = StaticNotebook.defaultEditorConfig;
+  let notebookConfig = StaticNotebook.defaultNotebookConfig;
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -413,6 +481,7 @@ function activateNotebookHandler(
     rendermime: rendermime,
     contentFactory,
     editorConfig,
+    notebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
   const { commands, restored } = app;
@@ -482,6 +551,9 @@ function activateNotebookHandler(
           : cached[key];
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
+    factory.notebookConfig = notebookConfig = {
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+    };
   }
 
   /**
@@ -490,6 +562,7 @@ function activateNotebookHandler(
   function updateTracker(): void {
     tracker.forEach(widget => {
       widget.content.editorConfig = editorConfig;
+      widget.content.notebookConfig = notebookConfig;
     });
   }
 
@@ -934,10 +1007,8 @@ function addCommands(
     label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
-
       if (current) {
         const { context, content } = current;
-
         return NotebookActions.trust(content).then(() => context.save());
       }
     },
@@ -1793,7 +1864,6 @@ function populateMenus(
         }
       });
       const fileGroup = [
-        { command: CommandIDs.trust },
         { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
       ];
       mainMenu.fileMenu.addGroup(fileGroup, 10);

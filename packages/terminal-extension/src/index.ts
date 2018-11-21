@@ -21,6 +21,8 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { ITerminalTracker, Terminal } from '@jupyterlab/terminal';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
 /**
  * The command IDs used by the terminal plugin.
  */
@@ -50,7 +52,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
+  requires: [IMainMenu, ICommandPalette, ILayoutRestorer, ISettingRegistry],
   optional: [ILauncher],
   autoStart: true
 };
@@ -68,6 +70,7 @@ function activate(
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
+  settingRegistry: ISettingRegistry,
   launcher: ILauncher | null
 ): ITerminalTracker {
   const { serviceManager } = app;
@@ -90,7 +93,55 @@ function activate(
     name: widget => widget.content.session && widget.content.session.name
   });
 
-  addCommands(app, serviceManager, tracker);
+  // The terminal options from the setting editor.
+  let options: Partial<Terminal.IOptions>;
+
+  /**
+   * Update the option values.
+   */
+  function updateOptions(settings: ISettingRegistry.ISettings): void {
+    options = settings.composite as Partial<Terminal.IOptions>;
+    Object.keys(options).forEach((key: keyof Terminal.IOptions) => {
+      Terminal.defaultOptions[key] = options[key];
+    });
+  }
+
+  /**
+   * Update terminal
+   */
+  function updateTerminal(widget: MainAreaWidget<Terminal>): void {
+    const terminal = widget.content;
+    if (!terminal) {
+      return;
+    }
+    Object.keys(options).forEach((key: keyof Terminal.IOptions) => {
+      terminal.setOption(key, options[key]);
+    });
+  }
+
+  /**
+   * Update the settings of the current tracker instances.
+   */
+  function updateTracker(): void {
+    tracker.forEach(widget => updateTerminal(widget));
+  }
+
+  // Fetch the initial state of the settings.
+  settingRegistry
+    .load(plugin.id)
+    .then(settings => {
+      updateOptions(settings);
+      updateTracker();
+      settings.changed.connect(() => {
+        updateOptions(settings);
+        updateTracker();
+      });
+    })
+    .catch((reason: Error) => {
+      console.error(reason.message);
+    });
+
+  addCommands(app, serviceManager, tracker, settingRegistry);
 
   // Add some commands to the application view menu.
   const viewGroup = [
@@ -100,7 +151,7 @@ function activate(
   ].map(command => {
     return { command };
   });
-  mainMenu.viewMenu.addGroup(viewGroup, 30);
+  mainMenu.settingsMenu.addGroup(viewGroup, 40);
 
   // Add command palette items.
   [
@@ -140,19 +191,10 @@ function activate(
 export function addCommands(
   app: JupyterLab,
   services: ServiceManager,
-  tracker: InstanceTracker<MainAreaWidget<Terminal>>
+  tracker: InstanceTracker<MainAreaWidget<Terminal>>,
+  settingRegistry: ISettingRegistry
 ) {
   let { commands, shell } = app;
-
-  /**
-   * Whether there is an active terminal.
-   */
-  function isEnabled(): boolean {
-    return (
-      tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
-    );
-  }
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
@@ -222,50 +264,45 @@ export function addCommands(
     isEnabled: () => tracker.currentWidget !== null
   });
 
+  function showErrorMessage(error: Error): void {
+    console.error(`Failed to set ${plugin.id}: ${error.message}`);
+  }
+
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: () => {
-      let options = Terminal.defaultOptions;
-      if (options.fontSize < 72) {
-        options.fontSize++;
-        tracker.forEach(widget => {
-          widget.content.fontSize = options.fontSize;
-        });
+      let { fontSize } = Terminal.defaultOptions;
+      if (fontSize < 72) {
+        return settingRegistry
+          .set(plugin.id, 'fontSize', fontSize + 1)
+          .catch(showErrorMessage);
       }
-    },
-    isEnabled
+    }
   });
 
   commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: () => {
-      let options = Terminal.defaultOptions;
-      if (options.fontSize > 9) {
-        options.fontSize--;
-        tracker.forEach(widget => {
-          widget.content.fontSize = options.fontSize;
-        });
+      let { fontSize } = Terminal.defaultOptions;
+      if (fontSize > 9) {
+        return settingRegistry
+          .set(plugin.id, 'fontSize', fontSize - 1)
+          .catch(showErrorMessage);
       }
-    },
-    isEnabled
+    }
   });
 
-  let terminalTheme: Terminal.Theme = 'dark';
   commands.addCommand(CommandIDs.toggleTheme, {
     label: 'Use Dark Terminal Theme',
     caption: 'Whether to use the dark terminal theme',
-    isToggled: () => terminalTheme === 'dark',
+    isToggled: () => Terminal.defaultOptions.theme === 'dark',
     execute: () => {
-      terminalTheme = terminalTheme === 'dark' ? 'light' : 'dark';
-      let options = Terminal.defaultOptions;
-      options.theme = terminalTheme;
-      tracker.forEach(widget => {
-        if (widget.content.theme !== terminalTheme) {
-          widget.content.theme = terminalTheme;
-        }
-      });
-      commands.notifyCommandChanged(CommandIDs.toggleTheme);
-    },
-    isEnabled
+      let { theme } = Terminal.defaultOptions;
+      theme = theme === 'dark' ? 'light' : 'dark';
+      return settingRegistry
+        .set(plugin.id, 'theme', theme)
+        .then(() => commands.notifyCommandChanged(CommandIDs.toggleTheme))
+        .catch(showErrorMessage);
+    }
   });
 }

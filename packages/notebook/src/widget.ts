@@ -169,6 +169,8 @@ export class StaticNotebook extends Widget {
       options.contentFactory || StaticNotebook.defaultContentFactory;
     this.editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this.notebookConfig =
+      options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -259,6 +261,17 @@ export class StaticNotebook extends Widget {
   set editorConfig(value: StaticNotebook.IEditorConfig) {
     this._editorConfig = value;
     this._updateEditorConfig();
+  }
+
+  /**
+   * A configuration object for notebook settings.
+   */
+  get notebookConfig(): StaticNotebook.INotebookConfig {
+    return this._notebookConfig;
+  }
+  set notebookConfig(value: StaticNotebook.INotebookConfig) {
+    this._notebookConfig = value;
+    this._updateNotebookConfig();
   }
 
   /**
@@ -558,7 +571,18 @@ export class StaticNotebook extends Widget {
     }
   }
 
+  /**
+   * Update editor settings for notebook.
+   */
+  private _updateNotebookConfig() {
+    this.toggleClass(
+      'jp-mod-scrollPastEnd',
+      this._notebookConfig.scrollPastEnd
+    );
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
+  private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -593,6 +617,11 @@ export namespace StaticNotebook {
      * A configuration object for the cell editor settings.
      */
     editorConfig?: IEditorConfig;
+
+    /**
+     * A configuration object for notebook settings.
+     */
+    notebookConfig?: INotebookConfig;
 
     /**
      * The service used to look up mime types.
@@ -671,6 +700,22 @@ export namespace StaticNotebook {
       matchBrackets: false,
       autoClosingBrackets: false
     }
+  };
+
+  /**
+   * A config object for the notebook widget
+   */
+  export interface INotebookConfig {
+    /**
+     * Enable scrolling past the last cell
+     */
+    scrollPastEnd: boolean;
+  }
+  /**
+   * Default configuration options for notebooks.
+   */
+  export const defaultNotebookConfig: INotebookConfig = {
+    scrollPastEnd: true
   };
 
   /**
@@ -1195,10 +1240,13 @@ export class Notebook extends StaticNotebook {
     node.addEventListener('dblclick', this);
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    // Capture drag events for the notebook widget
+    // in order to preempt the drag/drop handlers in the
+    // code editor widgets, which can take text data.
+    node.addEventListener('p-dragenter', this, true);
+    node.addEventListener('p-dragleave', this, true);
+    node.addEventListener('p-dragover', this, true);
+    node.addEventListener('p-drop', this, true);
   }
 
   /**
@@ -1213,10 +1261,10 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('p-dragenter', this, true);
+    node.removeEventListener('p-dragleave', this, true);
+    node.removeEventListener('p-dragover', this, true);
+    node.removeEventListener('p-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -1852,6 +1900,10 @@ export class Notebook extends StaticNotebook {
     // case where the target is in the same notebook and we
     // can just move the cells.
     this._drag.mimeData.setData('internal:cells', toMove);
+    // Add mimeData for the text content of the selected cells,
+    // allowing for drag/drop into plain text fields.
+    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);

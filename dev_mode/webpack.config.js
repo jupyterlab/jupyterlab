@@ -49,6 +49,7 @@ Object.keys(jlab.linkedPackages).forEach(function(name) {
   var localPath = require.resolve(path.join(name, 'package.json'));
   localLinked[name] = path.dirname(localPath);
 });
+var ignorePatterns = [/^\.\#/]; // eslint-disable-line
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
@@ -75,7 +76,8 @@ function maybeSync(localPath, name, rest) {
 }
 
 /**
- * A WebPack Plugin that copies the assets to the static directory.
+ * A WebPack Plugin that copies the assets to the static directory and
+ * fixes the output of the HTMLWebpackPlugin
  */
 function JupyterLabPlugin() {}
 
@@ -83,6 +85,15 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
     'JupyterLabPlugin',
     function() {
+      // Fix the template output.
+      var indexPath = path.join(buildDir, 'index.html');
+      var indexData = fs.readFileSync(indexPath, 'utf8');
+      indexData = indexData
+        .split('{{page_config.bundleUrl}}/')
+        .join('{{page_config.bundleUrl}}');
+      fs.writeFileSync(indexPath, indexData, 'utf8');
+
+      // Copy the static assets.
       var staticDir = jlab.staticDir;
       if (!staticDir) {
         return;
@@ -107,7 +118,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(buildDir),
-      publicPath: jlab.publicUrl || '{{base_url}}lab/static/',
+      publicPath: '{{page_config.bundleUrl}}',
       filename: '[name].[chunkhash].js'
     },
     optimization: {
@@ -161,6 +172,17 @@ module.exports = [
         if (localPath in ignoreCache) {
           return ignoreCache[localPath];
         }
+
+        // Ignore files with certain patterns
+        var baseName = localPath.replace(/^.*[\\\/]/, ''); // eslint-disable-line
+        if (
+          ignorePatterns.some(function(rexp) {
+            return baseName.match(rexp);
+          })
+        ) {
+          return true;
+        }
+
         // Limit the watched files to those in our local linked package dirs.
         var ignore = true;
         Object.keys(localLinked).some(function(name) {
