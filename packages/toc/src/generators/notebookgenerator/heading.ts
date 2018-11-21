@@ -11,6 +11,6 @@ import { INumberedHeading } from '../shared';
 export interface INotebookHeading extends INumberedHeading {
   type: 'header' | 'markdown' | 'code';
   prompt?: string;
-  cellRef?: Cell;
+  cellRef: Cell;
   hasChild?: boolean;
 }
