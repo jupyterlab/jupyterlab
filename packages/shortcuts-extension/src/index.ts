@@ -12,6 +12,29 @@ import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 import { DisposableSet, IDisposable } from '@phosphor/disposable';
 
 /**
+ * This plugin and its schema are deprecated and will be removed in a future
+ * version of JupyterLab. This plugin will load old keyboard shortcuts and add
+ * them to the new keyboard shortcuts plugin below before removing the old
+ * shortcuts.
+ */
+const plugin: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/shortcuts-extension:plugin',
+  requires: [ISettingRegistry],
+  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
+    try {
+      const settings = await registry.load(plugin.id);
+
+      // TODO
+      // Handle old-style shortcuts by loading them into the new plugin.
+      console.log(`${plugin.id}`, settings.user);
+    } catch (error) {
+      console.error(`Loading ${plugin.id} failed.`, error);
+    }
+  },
+  autoStart: true
+};
+
+/**
  * The default shortcuts extension.
  *
  * #### Notes
@@ -40,8 +63,8 @@ import { DisposableSet, IDisposable } from '@phosphor/disposable';
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
-const plugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/shortcuts-extension:plugin',
+const shortcuts: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
   activate: async (app: JupyterLab, registry: ISettingRegistry) => {
     const { commands } = app;
@@ -49,25 +72,27 @@ const plugin: JupyterLabPlugin<void> = {
     // Transform the settings object to return different annotated defaults
     // calculated from all the keyboard shortcuts in the registry instead of
     // using the default values from this plugin's schema.
-    registry.transform(plugin.id, Private.transform(commands, registry));
+    registry.transform(shortcuts.id, Private.transform(commands, registry));
 
     try {
-      const settings = await registry.load(plugin.id);
+      const settings = await registry.load(shortcuts.id);
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
       });
     } catch (error) {
-      console.error('Loading shortcut settings failed.', error.message);
+      console.error(`Loading ${shortcuts.id} failed.`, error);
     }
   },
   autoStart: true
 };
 
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterLabPlugin<any>[] = [plugin, shortcuts];
+
+export default plugins;
 
 /**
  * A namespace for private module data.
@@ -131,7 +156,15 @@ namespace Private {
     // using the default values from this plugin's schema.
     class ShortcutSettings extends Settings {
       annotatedDefaults(): string {
-        return 'These are the annotated defaults.';
+        const plugins = registry.plugins.slice().sort((a, b) => {
+          return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+        });
+        const shortcuts = plugins.reduce(
+          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
+          []
+        );
+
+        return JSON.stringify({ shortcuts }, null, 2);
       }
     }
 
