@@ -93,7 +93,13 @@ function activateEditorCommands(
   settingRegistry: ISettingRegistry
 ): void {
   const { commands, restored } = app;
-  let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
+  let {
+    theme,
+    keyMap,
+    styleActiveLine,
+    styleSelectedText,
+    selectionPointer
+  } = CodeMirrorEditor.defaultConfig;
 
   /**
    * Update the setting values.
@@ -101,6 +107,15 @@ function activateEditorCommands(
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
     theme = (settings.get('theme').composite as string | null) || theme;
+    styleActiveLine =
+      (settings.get('styleActiveLine').composite as boolean | object) ||
+      styleActiveLine;
+    styleSelectedText =
+      (settings.get('styleSelectedText').composite as boolean) ||
+      styleSelectedText;
+    selectionPointer =
+      (settings.get('selectionPointer').composite as boolean | string) ||
+      selectionPointer;
   }
 
   /**
@@ -112,6 +127,9 @@ function activateEditorCommands(
         let cm = widget.content.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
+        cm.setOption('styleActiveLine', styleActiveLine);
+        cm.setOption('styleSelectedText', styleSelectedText);
+        cm.setOption('selectionPointer', selectionPointer);
       }
     });
   }
@@ -139,6 +157,9 @@ function activateEditorCommands(
       let cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
+      cm.setOption('styleActiveLine', styleActiveLine);
+      cm.setOption('styleSelectedText', styleSelectedText);
+      cm.setOption('selectionPointer', selectionPointer);
     }
   });
 

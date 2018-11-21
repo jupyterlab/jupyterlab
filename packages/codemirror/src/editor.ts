@@ -1130,7 +1130,7 @@ export namespace CodeMirrorEditor {
      * CodeMirror-activeline-background, and adds the class
      * CodeMirror-activeline-gutter to the line's gutter space is enabled.
      */
-    styleActiveLine: boolean | { nonEmpty: boolean };
+    styleActiveLine: boolean | object;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
