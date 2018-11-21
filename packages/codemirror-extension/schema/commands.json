@@ -16,6 +16,12 @@
       "description": "CSS file defining the corresponding\n.cm-s-[name] styles is loaded",
       "default": "default"
     },
+    "scrollPastEnd": {
+      "type": "boolean",
+      "title": "Scroll behavior",
+      "description": "Whether to scroll past the end of text document",
+      "default": true
+    },
     "styleActiveLine": {
       "type": ["boolean", "object"],
       "title": "Style Active Line",

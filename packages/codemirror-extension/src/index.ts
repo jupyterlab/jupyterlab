@@ -96,6 +96,7 @@ function activateEditorCommands(
   let {
     theme,
     keyMap,
+    scrollPastEnd,
     styleActiveLine,
     styleSelectedText,
     selectionPointer
@@ -107,6 +108,7 @@ function activateEditorCommands(
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
     theme = (settings.get('theme').composite as string | null) || theme;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
     styleActiveLine =
       (settings.get('styleActiveLine').composite as boolean | object) ||
       styleActiveLine;
@@ -127,6 +129,7 @@ function activateEditorCommands(
         let cm = widget.content.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
+        cm.setOption('scrollPastEnd', scrollPastEnd);
         cm.setOption('styleActiveLine', styleActiveLine);
         cm.setOption('styleSelectedText', styleSelectedText);
         cm.setOption('selectionPointer', selectionPointer);
@@ -157,6 +160,7 @@ function activateEditorCommands(
       let cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
+      cm.setOption('scrollPastEnd', scrollPastEnd);
       cm.setOption('styleActiveLine', styleActiveLine);
       cm.setOption('styleSelectedText', styleSelectedText);
       cm.setOption('selectionPointer', selectionPointer);
