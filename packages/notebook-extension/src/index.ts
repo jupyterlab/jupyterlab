@@ -1009,10 +1009,8 @@ function addCommands(
     label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
-
       if (current) {
         const { context, content } = current;
-
         return NotebookActions.trust(content).then(() => context.save());
       }
     },
@@ -1868,7 +1866,6 @@ function populateMenus(
         }
       });
       const fileGroup = [
-        { command: CommandIDs.trust },
         { type: 'submenu', submenu: exportTo } as Menu.IItemOptions
       ];
       mainMenu.fileMenu.addGroup(fileGroup, 10);

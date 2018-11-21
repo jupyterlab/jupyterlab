@@ -192,28 +192,33 @@ JupyterLab Settings Editor.
 settings
 ''''''''
 
-The ``settings`` directory contains ``page_config.json`` and
-``build_config.json`` files.
+The ``settings`` directory may contain the ``page_config.json`` and/or
+``build_config.json`` files, depending on which configurations are
+set on your system.
 
 .. _page_configjson:
 
 page_config.json
 
 
-The ``page_config.json`` data is used to provide config data to the
+The ``page_config.json`` data is used to provide configuration data to the
 application environment.
 
-Two important fields in the ``page_config.json`` file enable control of
-which plugins load:
+The following configurations may be present in this file:
 
-1. ``disabledExtensions`` for extensions that should not load at all.
-2. ``deferredExtensions`` for extensions that do not load until they are
-   required by something, irrespective of whether they set ``autostart``
-   to ``true``.
+1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
+   on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
+   via the Launcher. (This configuration was predominantly required for 
+   Windows prior to PowerShell access being enabled in Jupyter Lab.) The
+   value for this field is a Boolean: ``true`` or ``false``.
+2. ``disabledExtensions`` controls which extensions should not load at all.
+3. ``deferredExtensions`` controls which extensions should not load until 
+   they are required by something, irrespective of whether they set 
+   ``autostart`` to ``true``.
 
-The value for each field is an array of strings. The following sequence
-of checks are performed against the patterns in ``disabledExtensions``
-and ``deferredExtensions``.
+The value for the ``disabledExtensions`` and ``deferredExtensions`` fields
+are an array of strings. The following sequence of checks are performed 
+against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
 
 -  If an identical string match occurs between a config value and a
    package name (e.g., ``"@jupyterlab/apputils-extension"``), then the
@@ -230,6 +235,17 @@ and ``deferredExtensions``.
    positive against an individual plugin ID within a package (e.g.,
    ``"disabledExtensions": ["^@jupyterlab/apputils-extension:set.*$"]``),
    then that specific plugin is disabled (or deferred).
+
+An example of a ``page_config.json`` file is:
+
+.. code:: json
+
+    {
+        "disabledExtensions": [
+            "@jupyterlab/toc"
+        ],
+        "terminalsAvailable": false
+    }
 
 .. _build_configjson:
 

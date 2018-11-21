@@ -134,7 +134,7 @@ function activateEditorCommands(
   settingRegistry: ISettingRegistry
 ): void {
   const { commands, restored } = app;
-  let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
+  let { theme, keyMap, scrollPastEnd } = CodeMirrorEditor.defaultConfig;
 
   /**
    * Update the setting values.
@@ -142,6 +142,7 @@ function activateEditorCommands(
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
     theme = (settings.get('theme').composite as string | null) || theme;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
   }
 
   /**
@@ -153,6 +154,7 @@ function activateEditorCommands(
         let cm = widget.content.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
+        cm.setOption('scrollPastEnd', scrollPastEnd);
       }
     });
   }
@@ -180,6 +182,7 @@ function activateEditorCommands(
       let cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
+      cm.setOption('scrollPastEnd', scrollPastEnd);
     }
   });
 
@@ -205,7 +208,13 @@ function activateEditorCommands(
   modeMenu.title.label = 'Text Editor Syntax Highlighting';
 
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args => args['theme'] as string,
+    label: args => {
+      if (args['theme'] === 'default') {
+        return 'codemirror';
+      } else {
+        return args['theme'] as string;
+      }
+    },
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) || theme);

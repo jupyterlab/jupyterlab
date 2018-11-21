@@ -11,7 +11,7 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONObject, PromiseDelegate, JSONExt } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -165,9 +165,13 @@ export class MimeContent extends Widget {
     }
     let data = options.data[this.mimeType];
     if (typeof data === 'string') {
-      this._context.model.fromString(data);
+      if (data !== this._context.model.toString()) {
+        this._context.model.fromString(data);
+      }
     } else {
-      this._context.model.fromJSON(data);
+      if (!JSONExt.deepEqual(data, this._context.model.toJSON())) {
+        this._context.model.fromJSON(data);
+      }
     }
   };
 

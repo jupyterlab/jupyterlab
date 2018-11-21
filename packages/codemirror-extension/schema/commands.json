@@ -15,6 +15,12 @@
       "description": "The CodeMirror theme.",
       "title": "Theme",
       "type": "string"
+    },
+    "scrollPastEnd": {
+      "type": "boolean",
+      "title": "Scroll behavior",
+      "description": "Whether to scroll past the end of text document",
+      "default": true
     }
   },
   "type": "object"

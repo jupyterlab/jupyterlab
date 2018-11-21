@@ -85,6 +85,8 @@ namespace CommandIDs {
 
   export const runCode = 'fileeditor:run-code';
 
+  export const runAllCode = 'fileeditor:run-all';
+
   export const markdownPreview = 'fileeditor:markdown-preview';
 }
 
@@ -488,6 +490,41 @@ function activate(
     label: 'Run Code'
   });
 
+  commands.addCommand(CommandIDs.runAllCode, {
+    execute: () => {
+      let widget = tracker.currentWidget.content;
+
+      if (!widget) {
+        return;
+      }
+
+      let code = '';
+      let editor = widget.editor;
+      let text = editor.model.value.text;
+      let path = widget.context.path;
+      let extension = PathExt.extname(path);
+
+      if (MarkdownCodeBlocks.isMarkdown(extension)) {
+        // For Markdown files, run only code blocks.
+        const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
+        for (let block of blocks) {
+          code += block.code;
+        }
+      } else {
+        code = text;
+      }
+
+      const activate = false;
+      if (code) {
+        return commands.execute('console:inject', { activate, code, path });
+      } else {
+        return Promise.resolve(void 0);
+      }
+    },
+    isEnabled,
+    label: 'Run All Code'
+  });
+
   commands.addCommand(CommandIDs.markdownPreview, {
     execute: () => {
       let widget = tracker.currentWidget;
@@ -708,7 +745,16 @@ function activate(
         });
         return found;
       },
-      run: () => commands.execute(CommandIDs.runCode)
+      run: () => commands.execute(CommandIDs.runCode),
+      runAll: () => commands.execute(CommandIDs.runAllCode),
+      restartAndRunAll: current => {
+        return current.context.session.restart().then(restarted => {
+          if (restarted) {
+            commands.execute(CommandIDs.runAllCode);
+          }
+          return restarted;
+        });
+      }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }
 
