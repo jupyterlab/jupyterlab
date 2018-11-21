@@ -738,7 +738,8 @@ namespace Private {
     let testB = isJupyterOrg(b.name);
 
     if (testA === testB) {
-      return a.name.localeCompare(b.name);
+      // Retain sort-order from API
+      return 0;
     } else if (testA && !testB) {
       return -1;
     } else {
