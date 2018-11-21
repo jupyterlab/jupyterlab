@@ -273,11 +273,11 @@ namespace Private {
   ): void {
     const plugins = sortPlugins(registry.plugins.slice()).filter(plugin => {
       const { schema } = plugin;
+      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
       const editable = Object.keys(schema.properties || {}).length > 0;
       const extensible = schema.additionalProperties !== false;
 
-      // Only render schemas that can be edited or extended.
-      return editable || extensible;
+      return !deprecated && (editable || extensible);
     });
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
@@ -317,7 +317,7 @@ namespace Private {
   }
 
   /**
-   * Sort a list of plugins by ID.
+   * Sort a list of plugins by title and ID.
    */
   function sortPlugins(
     plugins: ISettingRegistry.IPlugin[]

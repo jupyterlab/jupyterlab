@@ -342,8 +342,8 @@ export class SettingEditor extends Widget {
         list.selection = container.plugin;
         this._setLayout();
       })
-      .catch((reason: Error) => {
-        console.error(`Loading settings failed: ${reason.message}`);
+      .catch(reason => {
+        console.error(`Loading ${container.plugin} settings failed.`, reason);
         list.selection = this._state.container.plugin = '';
         editor.settings = null;
         this._setLayout();
