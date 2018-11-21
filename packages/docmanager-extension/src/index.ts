@@ -473,7 +473,7 @@ function addCommands(
       }
 
       return docManager.services.contents.getDownloadUrl(path).then(url => {
-        window.open(url, '_blank');
+        window.open(url, '_blank', 'noopener');
       });
     },
     icon: args => (args['icon'] as string) || '',

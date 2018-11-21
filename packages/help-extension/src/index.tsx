@@ -292,10 +292,20 @@ function activate(
         'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
       let externalLinks = (
         <span className="jp-About-externalLinks">
-          <a href={contributorsURL} target="_blank" className="jp-Button-flat">
+          <a
+            href={contributorsURL}
+            target="_blank"
+            rel="noopener"
+            className="jp-Button-flat"
+          >
             CONTRIBUTOR LIST
           </a>
-          <a href={jupyterURL} target="_blank" className="jp-Button-flat">
+          <a
+            href={jupyterURL}
+            target="_blank"
+            rel="noopener"
+            className="jp-Button-flat"
+          >
             ABOUT PROJECT JUPYTER
           </a>
         </span>

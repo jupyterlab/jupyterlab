@@ -643,6 +643,7 @@ namespace Private {
         el.target = '_self';
       } else {
         el.target = '_blank';
+        el.rel = 'noopener';
       }
     }
 
