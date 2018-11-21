@@ -389,8 +389,8 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    this._composer.addSchema(SCHEMA, 'main');
-    this._validator.addSchema(SCHEMA, 'main');
+    this._composer.addSchema(SCHEMA, 'jupyterlab-plugin-schema');
+    this._validator.addSchema(SCHEMA, 'jupyterlab-plugin-schema');
   }
 
   /**
@@ -414,13 +414,17 @@ export class DefaultSchemaValidator implements ISchemaValidator {
 
     // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
-      const errors = this._addSchema(plugin.id, plugin.schema);
+      if (plugin.schema.type !== 'object') {
+        const message =
+          `Setting registry schemas' root-level type must be ` +
+          `'object', rejecting type: ${plugin.schema.type}`;
 
-      if (errors) {
-        return errors;
+        return [{ dataPath: 'type', keyword: '', schemaPath: '', message }];
       }
 
-      return this.validateData(plugin);
+      const errors = this._addSchema(plugin.id, plugin.schema);
+
+      return errors || this.validateData(plugin);
     }
 
     // Parse the raw commented JSON into a user map.
@@ -491,7 +495,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
   ): ISchemaValidator.IError[] | null {
     const composer = this._composer;
     const validator = this._validator;
-    const validate = validator.getSchema('main');
+    const validate = validator.getSchema('jupyterlab-plugin-schema');
 
     // Validate against the main schema.
     if (!(validate(schema) as boolean)) {
@@ -566,19 +570,6 @@ export class SettingRegistry {
     const plugins = this._plugins;
 
     return Object.keys(plugins).map(plugin => plugins[plugin]);
-  }
-
-  /**
-   * Returns a list of keyboard shortcuts held in the registry.
-   */
-  get shortcuts(): ReadonlyArray<ISettingRegistry.IShortcut> {
-    const plugins = this._plugins;
-    const shortcuts = 'jupyter.lab.shortcuts';
-
-    return Object.keys(plugins).reduce(
-      (acc, val) => acc.concat(plugins[val].schema[shortcuts] || []),
-      []
-    );
   }
 
   /**
@@ -874,7 +865,7 @@ export class Settings implements ISettingRegistry.ISettings {
     this.version = plugin.version;
 
     this._composite = plugin.data.composite || {};
-    this._raw = plugin.raw || '{ }';
+    this._raw = plugin.raw || '{}';
     this._schema = plugin.schema || { type: 'object' };
     this._user = plugin.data.user || {};
 
