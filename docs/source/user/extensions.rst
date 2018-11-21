@@ -142,6 +142,26 @@ section. These can then be uninstalled or disabled. Disabling an extension will
 prevent it from being activated, but without rebuilding the application.
 
 
+Companion packages
+^^^^^^^^^^^^^^^^^^
+
+During installation of an extension, JupyterLab will inspect the package
+metadata for any
+:ref:`instructions on companion packages<ext-author-companion-packages>`.
+Companion packages can be:
+
+   - Notebook server extensions (or any other packages that need to be
+     installed on the Notebook server).
+   - Kernel packages. An example of companion packages for the
+     kernel are Jupyter Widget packages, like the `ipywidgets`_
+     Python package for the
+     `@jupyter-widgets/jupyterlab-manager package`_.
+
+If JupyterLab finds instructions for companion packages, it will present
+a dialog to notify you about these. These are informational only, and it
+will be up to you to take these into account or not.
+
+
 
 Using the Terminal
 ~~~~~~~~~~~~~~~~~~~~~
