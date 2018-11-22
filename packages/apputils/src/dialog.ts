@@ -643,6 +643,7 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLElement {
+      // TODO: PUT DIALOG TO PROMPT HERE
       const e = document.createElement('button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
