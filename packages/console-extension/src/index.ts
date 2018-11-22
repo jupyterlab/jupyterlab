@@ -79,7 +79,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterLabPlugin<IConsoleTracker> = {
+const trackerPlugin: JupyterLabPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -100,7 +100,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+const factoryPlugin: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
@@ -114,7 +114,7 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker];
+const plugins: JupyterLabPlugin<any>[] = [factoryPlugin, trackerPlugin];
 export default plugins;
 
 /**
