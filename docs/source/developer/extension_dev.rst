@@ -74,6 +74,15 @@ The default plugins in the JupyterLab application include:
 A dependency graph for the core JupyterLab plugins (along with links to
 their source) is shown here: |dependencies|
 
+.. danger::
+
+    Installing an extension allows for arbitrary code execution on the
+    server, kernel, and in the client's browser. You should therefore
+    take steps to protect against malicious changes to your extension's
+    code. This includes ensuring strong authentication for your npm
+    account.
+
+
 Application Object
 ~~~~~~~~~~~~~~~~~~
 
@@ -126,6 +135,9 @@ meets the following criteria:
    ``"extension"`` metadata. The value can be ``true`` to use the main
    module of the package, or a string path to a specific module (e.g.
    ``"lib/foo"``).
+-  It is also recommended to include the keyword `jupyterlab-extension`
+   in the package.json, to aid with discovery (e.g. by the extension
+   manager).
 
 While authoring the extension, you can use the command:
 
@@ -477,3 +489,90 @@ This would look something like the following in a ``Widget`` subclass:
       event.stopPropagation();
 
 .. |dependencies| image:: dependency-graph.svg
+
+
+
+.. _ext-author-companion-packages:
+
+Companion Packages
+^^^^^^^^^^^^^^^^^^
+
+If your extensions depends on the presence of one or more packages in the
+kernel, or on a notebook server extension, you can add metadata to indicate
+this to the extension manager by adding metadata to your package.json file.
+The full options available are::
+
+    "jupyterlab": {
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "<regexp for matching kernel language>",
+              "display_name": "<regexp for matching kernel display name>"   // optional
+            },
+            "base": {
+              "name": "<the name of the kernel package>"
+            },
+            "overrides": {   // optional
+              "<manager name, e.g. 'pip'>": {
+                "name": "<name of kernel package on pip, if it differs from base name>"
+              }
+            },
+            "managers": [   // list of package managers that have your kernel package
+                "pip",
+                "conda"
+            ]
+          }
+        ],
+        "server": {
+          "base": {
+            "name": "<the name of the server extension package>"
+          },
+          "overrides": {   // optional
+            "<manager name, e.g. 'pip'>": {
+              "name": "<name of server extension package on pip, if it differs from base name>"
+            }
+          },
+          "managers": [   // list of package managers that have your server extension package
+              "pip",
+              "conda"
+          ]
+        }
+      }
+    }
+
+
+A typical setup for e.g. a jupyter-widget based package will then be::
+
+    "keywords": [
+        "jupyterlab-extension",
+        "jupyter",
+        "widgets",
+        "jupyterlab"
+    ],
+    "jupyterlab": {
+      "extension": true,
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "^python",
+            },
+            "base": {
+              "name": "myipywidgetspackage"
+            },
+            "managers": [
+                "pip",
+                "conda"
+            ]
+          }
+        ]
+      }
+    }
+
+
+Currently supported package managers are:
+
+- pip
+- conda
+
