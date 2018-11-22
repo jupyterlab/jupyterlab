@@ -134,7 +134,7 @@ export namespace ISettingRegistry {
     id: string;
 
     /**
-     * The collection of values for a specified setting.
+     * The collection of values for a specified plugin.
      */
     data: ISettingBundle;
 
@@ -155,7 +155,7 @@ export namespace ISettingRegistry {
   }
 
   /**
-   * A minimal subset of the formal JSON Schema.
+   * A minimal subset of the formal JSON Schema that describes a property.
    */
   export interface IProperty extends JSONObject {
     /**
@@ -189,6 +189,16 @@ export namespace ISettingRegistry {
    * optional JupyterLab rendering hints.
    */
   export interface ISchema extends IProperty {
+    /**
+     * Whether the schema is deprecated.
+     *
+     * #### Notes
+     * This flag can be used by functionality that loads this plugin's settings
+     * from the registry. For example, the setting editor does not display a
+     * plugin's settings if it is set to `true`.
+     */
+    'jupyter.lab.setting-deprecated'?: boolean;
+
     /**
      * The JupyterLab icon class hint.
      */

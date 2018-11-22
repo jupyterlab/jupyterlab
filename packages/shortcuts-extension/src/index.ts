@@ -7,7 +7,11 @@ import { ISettingRegistry, Settings } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+import {
+  JSONValue,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@phosphor/coreutils';
 
 import { DisposableSet, IDisposable } from '@phosphor/disposable';
 
@@ -155,17 +159,27 @@ namespace Private {
     // calculated from all the keyboard shortcuts in the registry instead of
     // using the default values from this plugin's schema.
     class ShortcutSettings extends Settings {
-      annotatedDefaults(): string {
-        const plugins = registry.plugins.slice().sort((a, b) => {
-          return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-        });
-        const shortcuts = plugins.reduce(
-          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
-          []
-        );
-
-        return JSON.stringify({ shortcuts }, null, 2);
+      constructor(options: Settings.IOptions) {
+        super(options);
+        this._shortcuts = registry.plugins
+          .slice()
+          .sort((a, b) => {
+            return (a.schema.title || a.id).localeCompare(
+              b.schema.title || b.id
+            );
+          })
+          .reduce(
+            (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
+            []
+          );
       }
+      annotatedDefaults(): string {
+        return JSON.stringify({ shortcuts: this._shortcuts }, null, 2);
+      }
+      default(key: string): JSONValue {
+        return key === 'shortcuts' ? this._shortcuts : undefined;
+      }
+      private _shortcuts: ISettingRegistry.IShortcut[];
     }
 
     return settings => {
