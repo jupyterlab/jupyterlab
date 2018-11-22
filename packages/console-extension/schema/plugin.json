@@ -1,0 +1,21 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-ConsoleIcon",
+  "jupyter.lab.setting-icon-label": "Console",
+  "title": "Console",
+  "description": "Console settings.",
+  "definitions": {
+    "confirmKernelRestart": {
+      "type": "boolean"
+    }
+  },
+  "properties": {
+    "confirmKernelRestart": {
+      "title": "Confirm Kernel Restart",
+      "description": "Whether to prompt the user to confirm kernel restarts.",
+      "$ref": "#/definitions/confirmKernelRestart",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

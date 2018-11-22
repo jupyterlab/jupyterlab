@@ -243,6 +243,19 @@ function activateConsole(
     );
   }
 
+  function confirmKernelRestartCallback(
+    button: Dialog.IButton,
+    value: boolean
+  ): void {
+    settingRegistry
+      .set(trackerPlugin.id, 'confirmKernelRestart', value)
+      .catch(showErrorMessage);
+  }
+
+  function showErrorMessage(error: Error): void {
+    console.error(`Failed to set ${trackerPlugin.id}: ${error.message}`);
+  }
+
   /**
    * The options used to open a console.
    */
@@ -382,7 +395,14 @@ function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.restart();
+      let confirmRestart = settingRegistry.get(
+        trackerPlugin.id,
+        'confirmKernelRestart'
+      );
+      return current.console.session.restart(
+        confirmRestart, // TODO: this needs to await resolution of the setting value
+        confirmKernelRestartCallback
+      );
     },
     isEnabled
   });
@@ -612,14 +632,17 @@ function activateConsole(
       return Promise.resolve(void 0);
     },
     noun: 'Console',
-    restartKernel: current => current.console.session.restart(),
+    restartKernel: current =>
+      current.console.session.restart(confirmKernelRestartCallback), // TODO: not sure how to alter this
     restartKernelAndClear: current => {
-      return current.console.session.restart().then(restarted => {
-        if (restarted) {
-          current.console.clear();
-        }
-        return restarted;
-      });
+      return current.console.session
+        .restart(confirmKernelRestartCallback) // TODO: not sure how to alter this
+        .then(restarted => {
+          if (restarted) {
+            current.console.clear();
+          }
+          return restarted;
+        });
     },
     changeKernel: current => current.console.session.selectKernel(),
     shutdownKernel: current => current.console.session.shutdown()

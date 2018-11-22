@@ -140,7 +140,10 @@ export interface IClientSession extends IDisposable {
    * kernel name and resolves with `true`. If no kernel has been started,
    * this is a no-op, and resolves with `false`.
    */
-  restart(): Promise<boolean>;
+  restart(
+    persisted?: boolean,
+    confirmPersistCallback?: (button: Dialog.IButton, value: boolean) => void
+  ): Promise<boolean>;
 
   /**
    * Change the session path.
@@ -421,7 +424,10 @@ export class ClientSession implements IClientSession {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  restart(): Promise<boolean> {
+  restart(
+    persisted?: boolean,
+    confirmPersistCallback?: (button: Dialog.IButton, value: boolean) => void
+  ): Promise<boolean> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
         return Promise.reject('session already disposed');
@@ -882,14 +888,20 @@ export namespace ClientSession {
    * Returns a promise resolving with whether the kernel was restarted.
    */
   export function restartKernel(
-    kernel: Kernel.IKernelConnection
+    kernel: Kernel.IKernelConnection,
+    defaultValue?: boolean,
+    confirmPersistCallback?: (button: Dialog.IButton, value: boolean) => void
   ): Promise<boolean> {
     let restartBtn = Dialog.warnButton({ label: 'RESTART ' });
+    if (defaultValue !== undefined) {
+      return Promise.resolve(defaultValue);
+    }
     return showDialog({
       title: 'Restart Kernel?',
       body:
         'Do you want to restart the current kernel? All variables will be lost.',
-      buttons: [Dialog.cancelButton(), restartBtn]
+      buttons: [Dialog.cancelButton(), restartBtn],
+      persistCallback: this.persistRestartKernel
     }).then(result => {
       if (kernel.isDisposed) {
         return Promise.resolve(false);
