@@ -44,7 +44,7 @@ const DEFAULT_TITLE = 'System Defaults';
 /**
  * The banner text for the user settings editor.
  */
-const USER_TITLE = 'User Overrides';
+const USER_TITLE = 'User Preferences';
 
 /**
  * A raw JSON settings editor.

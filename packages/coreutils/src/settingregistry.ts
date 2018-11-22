@@ -695,6 +695,7 @@ export class SettingRegistry {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
+    // Parse the raw JSON string removing all comments and return an object.
     const raw = json.parse(plugins[plugin].raw, null, true);
 
     plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {

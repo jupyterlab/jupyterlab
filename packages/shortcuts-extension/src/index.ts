@@ -80,6 +80,8 @@ const shortcuts: JupyterLabPlugin<void> = {
 
     try {
       const settings = await registry.load(shortcuts.id);
+
+      (window as any).temp = settings;
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
@@ -106,6 +108,42 @@ namespace Private {
    * The internal collection of currently loaded shortcuts.
    */
   let disposables: IDisposable;
+
+  /**
+   * A wrapper for this plugin's settings object to override what the setting
+   * registry returns to client that load this plugin.
+   */
+  class ShortcutSettings extends Settings {
+    constructor(options: Settings.IOptions) {
+      super(options);
+      this._populate();
+      this.changed.connect(() => {
+        this._populate();
+      });
+    }
+
+    annotatedDefaults(): string {
+      return JSON.stringify({ shortcuts: this._shortcuts }, null, 2);
+    }
+
+    default(key: string): JSONValue {
+      return key === 'shortcuts' ? this._shortcuts : undefined;
+    }
+
+    private _populate() {
+      this._shortcuts = this.registry.plugins
+        .slice()
+        .sort((a, b) => {
+          return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+        })
+        .reduce(
+          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
+          []
+        );
+    }
+
+    private _shortcuts: ISettingRegistry.IShortcut[];
+  }
 
   /**
    * Load the keyboard shortcuts from settings.
@@ -150,46 +188,20 @@ namespace Private {
 
   /**
    * Return a transformer that return a settings object annotated defaults.
+   *
+   * #### Notes
+   * This function will transform the settings object to return different
+   * (annotated) defaults calculated from all the keyboard shortcuts in the
+   * registry instead of using the default values from this plugin's schema.
    */
   export function transform(
     commands: CommandRegistry,
     registry: ISettingRegistry
   ): ISettingRegistry.SettingTransform {
-    // Transform the settings object to return different annotated defaults
-    // calculated from all the keyboard shortcuts in the registry instead of
-    // using the default values from this plugin's schema.
-    class ShortcutSettings extends Settings {
-      constructor(options: Settings.IOptions) {
-        super(options);
-        this._shortcuts = registry.plugins
-          .slice()
-          .sort((a, b) => {
-            return (a.schema.title || a.id).localeCompare(
-              b.schema.title || b.id
-            );
-          })
-          .reduce(
-            (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
-            []
-          );
-      }
-      annotatedDefaults(): string {
-        return JSON.stringify({ shortcuts: this._shortcuts }, null, 2);
-      }
-      default(key: string): JSONValue {
-        return key === 'shortcuts' ? this._shortcuts : undefined;
-      }
-      private _shortcuts: ISettingRegistry.IShortcut[];
-    }
-
     return settings => {
       const plugin = registry.plugins.filter(p => p.id === settings.plugin)[0];
 
-      if (!plugin) {
-        return settings;
-      }
-
-      return new ShortcutSettings({ plugin, registry });
+      return plugin ? new ShortcutSettings({ plugin, registry }) : settings;
     };
   }
 }
