@@ -76,12 +76,20 @@ const shortcuts: JupyterLabPlugin<void> = {
     // Transform the settings object to return different annotated defaults
     // calculated from all the keyboard shortcuts in the registry instead of
     // using the default values from this plugin's schema.
-    registry.transform(shortcuts.id, Private.transform(commands, registry));
+    registry.transform(shortcuts.id, {
+      plugin: plugin => {
+        console.log('Transforming plugin', plugin);
+        return plugin;
+      },
+      settings: (plugin, settings) => {
+        console.log('Transforming settings', plugin, settings);
+        return new Private.ShortcutSettings({ plugin, registry });
+      }
+    });
 
     try {
       const settings = await registry.load(shortcuts.id);
 
-      (window as any).temp = settings;
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
@@ -113,7 +121,7 @@ namespace Private {
    * A wrapper for this plugin's settings object to override what the setting
    * registry returns to client that load this plugin.
    */
-  class ShortcutSettings extends Settings {
+  export class ShortcutSettings extends Settings {
     constructor(options: Settings.IOptions) {
       super(options);
       this._populate();
@@ -131,7 +139,8 @@ namespace Private {
     }
 
     private _populate() {
-      this._shortcuts = this.registry.plugins
+      this._shortcuts = Object.keys(this.registry.plugins)
+        .map(plugin => this.registry.plugins[plugin])
         .slice()
         .sort((a, b) => {
           return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
@@ -184,24 +193,5 @@ namespace Private {
       isArray((value as Partial<CommandRegistry.IKeyBindingOptions>).keys);
 
     return valid ? (value as CommandRegistry.IKeyBindingOptions) : undefined;
-  }
-
-  /**
-   * Return a transformer that return a settings object annotated defaults.
-   *
-   * #### Notes
-   * This function will transform the settings object to return different
-   * (annotated) defaults calculated from all the keyboard shortcuts in the
-   * registry instead of using the default values from this plugin's schema.
-   */
-  export function transform(
-    commands: CommandRegistry,
-    registry: ISettingRegistry
-  ): ISettingRegistry.SettingTransform {
-    return settings => {
-      const plugin = registry.plugins.filter(p => p.id === settings.plugin)[0];
-
-      return plugin ? new ShortcutSettings({ plugin, registry }) : settings;
-    };
   }
 }

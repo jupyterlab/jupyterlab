@@ -271,7 +271,7 @@ namespace Private {
     selection: string,
     node: HTMLElement
   ): void {
-    const plugins = sortPlugins(registry.plugins.slice()).filter(plugin => {
+    const plugins = sortPlugins(registry).filter(plugin => {
       const { schema } = plugin;
       const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
       const editable = Object.keys(schema.properties || {}).length > 0;
@@ -319,11 +319,11 @@ namespace Private {
   /**
    * Sort a list of plugins by title and ID.
    */
-  function sortPlugins(
-    plugins: ISettingRegistry.IPlugin[]
-  ): ISettingRegistry.IPlugin[] {
-    return plugins.sort((a, b) => {
-      return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-    });
+  function sortPlugins(registry: ISettingRegistry): ISettingRegistry.IPlugin[] {
+    return Object.keys(registry.plugins)
+      .map(plugin => registry.plugins[plugin])
+      .sort((a, b) => {
+        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+      });
   }
 }

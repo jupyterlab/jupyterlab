@@ -5,8 +5,6 @@ import Ajv from 'ajv';
 
 import * as json from 'comment-json';
 
-import { find } from '@phosphor/algorithm';
-
 import {
   JSONExt,
   JSONObject,
@@ -111,20 +109,6 @@ export namespace ISettingRegistry {
     | 'string';
 
   /**
-   * A function that transforms a settings object before returning it from a
-   * setting registry.
-   *
-   * #### Notes
-   * The initial use-case for this functionality is to allow the setting
-   * registry to return a settings object whose schema defaults are generated
-   * at run-time instead of using what is stored on the server, but other uses
-   * may arise.
-   */
-  export type SettingTransform = (
-    settings: ISettings
-  ) => ISettings | Promise<ISettings>;
-
-  /**
    * The settings for a specific plugin.
    */
   export interface IPlugin extends JSONObject {
@@ -152,6 +136,17 @@ export namespace ISettingRegistry {
      * The published version of the NPM package containing the plugin.
      */
     version: string;
+  }
+
+  /**
+   * A namespace for plugin functionality.
+   */
+  export namespace IPlugin {
+    /**
+     * A function that transforms a plugin object before it is loaded into a
+     * setting registry.
+     */
+    export type Transform = (plugin: IPlugin) => IPlugin | Promise<IPlugin>;
   }
 
   /**
@@ -210,18 +205,18 @@ export namespace ISettingRegistry {
     'jupyter.lab.setting-icon-label'?: string;
 
     /**
-     * A flag that indicates settings should be transformed before being
-     * returned from the setting registry.
+     * A flag that indicates plugin should be transformed before being used by
+     * the setting registry.
      *
      * #### Notes
      * If this value is set to `true`, the setting registry will wait until a
-     * `SettingTransform` function has been registered (by calling the
-     * `transform()` method of the registry) for the plugin ID before
-     * returning a settings object. This means that if the attribute is set to
-     * `true` but no transform function is available, calls to `load()` a plugin
-     * will eventually time out and reject.
+     * transformation has been registered (by calling the `transform()` method
+     * of the registry) for the plugin ID before resolving `load()` promises.
+     * This means that if the attribute is set to `true` but no transformation
+     * is registered in time, calls to `load()` a plugin will eventually time
+     * out and reject.
      */
-    'jupyter.lab-setting-transform'?: boolean;
+    'jupyter.lab.transform'?: boolean;
 
     /**
      * The JupyterLab shortcuts that are creaed by a plugin's schema.
@@ -266,10 +261,15 @@ export namespace ISettingRegistry {
      */
     readonly composite: ReadonlyJSONObject;
 
-    /*
-     * The plugin name.
+    /**
+     * The plugin's ID.
      */
-    readonly plugin: string;
+    readonly id: string;
+
+    /*
+     * The underlying plugin.
+     */
+    readonly plugin: ISettingRegistry.IPlugin;
 
     /**
      * The plugin settings raw text value.
@@ -353,6 +353,20 @@ export namespace ISettingRegistry {
      * @returns A list of errors or `null` if valid.
      */
     validate(raw: string): ISchemaValidator.IError[] | null;
+  }
+
+  /**
+   * A namespace for setting object functionality.
+   */
+  export namespace ISettings {
+    /**
+     * A function that transforms a settings object before returning it from a
+     * setting registry.
+     */
+    export type Transform = (
+      plugin: IPlugin,
+      settings: ISettings
+    ) => ISettings | Promise<ISettings>;
   }
 
   /**
@@ -544,11 +558,7 @@ export class SettingRegistry {
     this.validator = options.validator || new DefaultSchemaValidator();
 
     // Preload with any available data at instantiation-time.
-    try {
-      this._load(options.plugins);
-    } catch (errors) {
-      /* Ignore preload errors. */
-    }
+    this._preload(options.plugins);
   }
 
   /**
@@ -574,13 +584,11 @@ export class SettingRegistry {
   }
 
   /**
-   * Returns a list of plugin settings held in the registry.
+   * The collection of setting registry plugins.
    */
-  get plugins(): ReadonlyArray<ISettingRegistry.IPlugin> {
-    const plugins = this._plugins;
-
-    return Object.keys(plugins).map(plugin => plugins[plugin]);
-  }
+  readonly plugins: {
+    [name: string]: ISettingRegistry.IPlugin;
+  } = Object.create(null);
 
   /**
    * Get an individual setting.
@@ -595,7 +603,7 @@ export class SettingRegistry {
     plugin: string,
     key: string
   ): Promise<{ composite: JSONValue; user: JSONValue }> {
-    const plugins = this._plugins;
+    const plugins = this.plugins;
 
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
@@ -619,11 +627,11 @@ export class SettingRegistry {
    * if the plugin is not found.
    */
   load(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const plugins = this._plugins;
+    const plugins = this.plugins;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      return this._transform(plugins[plugin]);
+      return this._transformSettings(plugins[plugin]);
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -638,16 +646,14 @@ export class SettingRegistry {
    * @returns A promise that resolves with a plugin settings object or rejects
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
-  reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const plugins = this._plugins;
+  async reload(plugin: string): Promise<ISettingRegistry.ISettings> {
+    const plugins = this.plugins;
 
-    // If the plugin needs to be loaded from the connector, fetch.
-    return this.connector.fetch(plugin).then(data => {
-      this._load(data);
-      this._pluginChanged.emit(plugin);
+    // Fetch and load the data from the connector and transform it if necessary.
+    this._load(await this._transformPlugin(await this.connector.fetch(plugin)));
+    this._pluginChanged.emit(plugin);
 
-      return this._transform(plugins[plugin]);
-    });
+    return this._transformSettings(plugins[plugin]);
   }
 
   /**
@@ -660,7 +666,7 @@ export class SettingRegistry {
    * @returns A promise that resolves when the setting is removed.
    */
   remove(plugin: string, key: string): Promise<void> {
-    const plugins = this._plugins;
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
       return Promise.resolve(undefined);
@@ -689,7 +695,7 @@ export class SettingRegistry {
    *
    */
   set(plugin: string, key: string, value: JSONValue): Promise<void> {
-    const plugins = this._plugins;
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.set(plugin, key, value));
@@ -707,17 +713,20 @@ export class SettingRegistry {
   }
 
   /**
-   * Register a setting transform function to act on a specific plugin.
+   * Register a plugin transform function to act on a specific plugin.
    *
    * @param plugin - The name of the plugin whose settings are transformed.
    *
-   * @param fn - The transform function applied to the settings.
+   * @param transforms - The transform functions applied to the plugin.
    *
    * @returns A disposable that removes the setting transform from the registry.
    */
   transform(
     plugin: string,
-    fn: ISettingRegistry.SettingTransform
+    transforms: {
+      plugin: ISettingRegistry.IPlugin.Transform;
+      settings: ISettingRegistry.ISettings.Transform;
+    }
   ): IDisposable {
     const transformers = this._transformers;
 
@@ -725,7 +734,7 @@ export class SettingRegistry {
       throw new Error(`${plugin} aleady has a transformer.`);
     }
 
-    transformers[plugin] = fn;
+    transformers[plugin] = transforms;
 
     return new DisposableDelegate(() => {
       delete transformers[plugin];
@@ -742,7 +751,7 @@ export class SettingRegistry {
    * @returns A promise that resolves when the settings have been saved.
    */
   upload(plugin: string, raw: string): Promise<void> {
-    const plugins = this._plugins;
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.upload(plugin, raw));
@@ -755,35 +764,42 @@ export class SettingRegistry {
   }
 
   /**
-   * Load any available plugins into the registry.
+   * Load a plugin into the registry.
+   *
+   * #### Notes
+   * A
    */
-  private _load(
-    data?: ISettingRegistry.IPlugin | ISettingRegistry.IPlugin[]
-  ): void {
-    const plugins = Array.isArray(data) ? data : data ? [data] : [];
+  private _load(data: ISettingRegistry.IPlugin): void {
+    const plugin = data.id;
 
-    if (!plugins.length) {
-      return;
+    // Validate and preload the item.
+    try {
+      this._validate(data);
+    } catch (errors) {
+      const output = [`Validating ${plugin} failed:`];
+
+      (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+        const { dataPath, schemaPath, keyword, message } = error;
+
+        output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+        output.push(`\t${keyword} ${message}`);
+      });
+      console.warn(output.join('\n'));
+
+      throw errors;
     }
+  }
 
-    plugins.forEach(item => {
-      const plugin = item.id;
-
-      // Validate and preload the item.
+  /**
+   * Preload a list of plugins and fail gracefully.
+   */
+  private async _preload(plugins: ISettingRegistry.IPlugin[]): Promise<void> {
+    plugins.forEach(async plugin => {
       try {
-        this._validate(item);
+        this._load(await this._transformPlugin(plugin));
       } catch (errors) {
-        const output = [`Validating ${plugin} failed:`];
-
-        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-          const { dataPath, schemaPath, keyword, message } = error;
-
-          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
-          output.push(`\t${keyword} ${message}`);
-        });
-        console.warn(output.join('\n'));
-
-        throw errors;
+        /* Ignore preload errors. */
+        console.log('Ignored setting registry preload errors.', errors);
       }
     });
   }
@@ -791,50 +807,72 @@ export class SettingRegistry {
   /**
    * Save a plugin in the registry.
    */
-  private _save(plugin: string): Promise<void> {
-    const plugins = this._plugins;
+  private async _save(plugin: string): Promise<void> {
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
-      const message = `${plugin} does not exist in setting registry.`;
-
-      return Promise.reject(new Error(message));
+      throw new Error(`${plugin} does not exist in setting registry.`);
     }
 
     try {
       this._validate(plugins[plugin]);
     } catch (errors) {
-      const message = `${plugin} failed to validate; check console for errors.`;
-
       console.warn(`${plugin} validation errors:`, errors);
-      return Promise.reject(new Error(message));
+      throw new Error(`${plugin} failed to validate; check console.`);
     }
 
-    return this.connector.save(plugin, plugins[plugin].raw).then(() => {
-      this._pluginChanged.emit(plugin);
-    });
+    // Apply any transformation to the plugin if necessary and reload it.
+    this._load(await this._transformPlugin(plugins[plugin]));
+    await this.connector.save(plugin, plugins[plugin].raw);
+    this._pluginChanged.emit(plugin);
   }
 
   /**
-   * Apply transformation to settings if necessary.
+   * Resolve to a plugin object after applying any necessary transformations.
    */
-  private _transform(
+  private async _transformPlugin(
+    plugin: ISettingRegistry.IPlugin
+  ): Promise<ISettingRegistry.IPlugin> {
+    const transformers = this._transformers;
+
+    if (!plugin.schema['jupyter.lab.setting-transform']) {
+      return plugin;
+    }
+
+    if (plugin.id in transformers) {
+      return transformers[plugin.id].plugin.call(null, plugin);
+    }
+
+    // TODO: Implement timeout logic.
+    throw new Error(`#_transformPlugin(${plugin.id}) timed out`);
+  }
+  /**
+   * Resolve to a settings object after applying any necessary transformations.
+   */
+  private async _transformSettings(
     plugin: ISettingRegistry.IPlugin
   ): Promise<ISettingRegistry.ISettings> {
     const registry = this;
     const settings = new Settings({ plugin, registry });
-    const transform = !!plugin.schema['jupyter.lab.setting-transform'];
     const transformers = this._transformers;
 
-    if (!transform) {
-      return Promise.resolve(settings);
+    if (!plugin.schema['jupyter.lab.setting-transform']) {
+      return settings;
     }
 
     if (plugin.id in transformers) {
-      return Promise.resolve(transformers[plugin.id].call(null, settings));
+      const transform = transformers[plugin.id].settings;
+      const transformed = transform.call(null, plugin, settings);
+      const promise = await Promise.resolve(transformed);
+
+      // Dispose the original settings object as it is dereferenced.
+      settings.dispose();
+
+      return promise;
     }
 
     // TODO: Implement timeout logic.
-    throw new Error('SettingRegistry#_transform timeout logic not implemented');
+    throw new Error(`#_transformSettings(${plugin.id}) timed out`);
   }
 
   /**
@@ -849,15 +887,15 @@ export class SettingRegistry {
     }
 
     // Set the local copy.
-    this._plugins[plugin.id] = plugin;
+    this.plugins[plugin.id] = plugin;
   }
 
   private _pluginChanged = new Signal<this, string>(this);
-  private _plugins: {
-    [name: string]: ISettingRegistry.IPlugin;
-  } = Object.create(null);
   private _transformers: {
-    [plugin: string]: ISettingRegistry.SettingTransform;
+    [plugin: string]: {
+      plugin: ISettingRegistry.IPlugin.Transform;
+      settings: ISettingRegistry.ISettings.Transform;
+    };
   } = Object.create(null);
 }
 
@@ -869,22 +907,22 @@ export class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    const { plugin, registry } = options;
+    const { registry } = options;
 
-    this.plugin = plugin.id;
+    this.id = options.plugin.id;
     this.registry = registry;
-    this.version = plugin.version;
-
-    this._composite = plugin.data.composite || {};
-    this._raw = plugin.raw || '{}';
-    this._schema = plugin.schema || { type: 'object' };
-    this._user = plugin.data.user || {};
+    this.version = this.plugin.version;
 
     registry.pluginChanged.connect(
       this._onPluginChanged,
       this
     );
   }
+
+  /**
+   * The plugin name.
+   */
+  readonly id: string;
 
   /**
    * A signal that emits when the plugin's settings have changed.
@@ -897,7 +935,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * The composite of user settings and extension defaults.
    */
   get composite(): ReadonlyJSONObject {
-    return this._composite;
+    return this.plugin.data.composite;
   }
 
   /**
@@ -907,31 +945,30 @@ export class Settings implements ISettingRegistry.ISettings {
     return this._isDisposed;
   }
 
+  get plugin(): ISettingRegistry.IPlugin {
+    return this.registry.plugins[this.id];
+  }
+
   /**
    * The plugin's schema.
    */
   get schema(): ISettingRegistry.ISchema {
-    return this._schema;
+    return this.plugin.schema;
   }
 
   /**
    * The plugin settings raw text value.
    */
   get raw(): string {
-    return this._raw;
+    return this.plugin.raw;
   }
 
   /**
    * The user settings.
    */
   get user(): ReadonlyJSONObject {
-    return this._user;
+    return this.plugin.data.user;
   }
-
-  /*
-   * The plugin name.
-   */
-  readonly plugin: string;
 
   /**
    * The setting registry instance used as a back-end for these settings.
@@ -947,7 +984,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * Return the defaults in a commented JSON format.
    */
   annotatedDefaults(): string {
-    return Private.annotatedDefaults(this._schema, this.plugin);
+    return Private.annotatedDefaults(this.schema, this.id);
   }
 
   /**
@@ -1004,14 +1041,14 @@ export class Settings implements ISettingRegistry.ISettings {
    * This function is asynchronous because it writes to the setting registry.
    */
   remove(key: string): Promise<void> {
-    return this.registry.remove(this.plugin, key);
+    return this.registry.remove(this.plugin.id, key);
   }
 
   /**
    * Save all of the plugin's user settings at once.
    */
   save(raw: string): Promise<void> {
-    return this.registry.upload(this.plugin, raw);
+    return this.registry.upload(this.plugin.id, raw);
   }
 
   /**
@@ -1027,7 +1064,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This function is asynchronous because it writes to the setting registry.
    */
   set(key: string, value: JSONValue): Promise<void> {
-    return this.registry.set(this.plugin, key, value);
+    return this.registry.set(this.plugin.id, key, value);
   }
 
   /**
@@ -1039,8 +1076,7 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   validate(raw: string): ISchemaValidator.IError[] | null {
     const data = { composite: {}, user: {} };
-    const id = this.plugin;
-    const schema = this._schema;
+    const { id, schema } = this.plugin;
     const validator = this.registry.validator;
     const version = this.version;
 
@@ -1051,30 +1087,13 @@ export class Settings implements ISettingRegistry.ISettings {
    * Handle plugin changes in the setting registry.
    */
   private _onPluginChanged(sender: any, plugin: string): void {
-    if (plugin === this.plugin) {
-      const found = find(this.registry.plugins, p => p.id === plugin);
-
-      if (!found) {
-        return;
-      }
-
-      const { composite, user } = found.data;
-      const { raw, schema } = found;
-
-      this._composite = composite || {};
-      this._raw = raw;
-      this._schema = schema || { type: 'object' };
-      this._user = user || {};
+    if (plugin === this.plugin.id) {
       this._changed.emit(undefined);
     }
   }
 
   private _changed = new Signal<this, void>(this);
-  private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
-  private _raw = '{ }';
-  private _schema: ISettingRegistry.ISchema = Object.create(null);
-  private _user: JSONObject = Object.create(null);
 }
 
 /**

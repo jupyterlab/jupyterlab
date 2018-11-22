@@ -321,7 +321,7 @@ export class SettingEditor extends Widget {
       return;
     }
 
-    if (editor.settings && editor.settings.plugin === container.plugin) {
+    if (editor.settings && editor.settings.id === container.plugin) {
       this._setLayout();
       return;
     }
