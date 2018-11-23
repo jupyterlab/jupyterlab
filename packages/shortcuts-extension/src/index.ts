@@ -3,7 +3,7 @@
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import { ISettingRegistry, Settings } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -78,12 +78,10 @@ const shortcuts: JupyterLabPlugin<void> = {
     // using the default values from this plugin's schema.
     registry.transform(shortcuts.id, {
       plugin: plugin => {
-        console.log('Transforming ... returning plugin', plugin);
-        return new Private.ShortcutsPlugin({ plugin, registry });
-      },
-      settings: plugin => {
-        console.log('Transforming ... returning settings', plugin);
-        return new Settings({ plugin, registry });
+        const transformed = new Private.ShortcutsPlugin({ plugin, registry });
+
+        console.log('Transforming ... returning plugin:', transformed);
+        return transformed;
       }
     });
 
@@ -148,12 +146,10 @@ namespace Private {
           []
         );
 
-      console.log('shortcuts', shortcuts);
+      schema.properties['shortcuts'].default = shortcuts;
     }
 
-    [name: string]: JSONValue;
-
-    readonly id: string;
+    id: string;
 
     data: ISettingRegistry.ISettingBundle;
 
@@ -162,6 +158,8 @@ namespace Private {
     schema: ISettingRegistry.ISchema;
 
     version: string;
+
+    [name: string]: JSONValue;
   }
 
   /**

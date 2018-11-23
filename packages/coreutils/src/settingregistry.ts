@@ -745,17 +745,22 @@ export class SettingRegistry {
   transform(
     plugin: string,
     transforms: {
-      plugin: ISettingRegistry.IPlugin.Transform;
-      settings: ISettingRegistry.ISettings.Transform;
+      plugin?: ISettingRegistry.IPlugin.Transform;
+      settings?: ISettingRegistry.ISettings.Transform;
     }
   ): IDisposable {
+    const registry = this;
     const transformers = this._transformers;
 
     if (plugin in transformers) {
       throw new Error(`${plugin} aleady has a transformer.`);
     }
 
-    transformers[plugin] = transforms;
+    transformers[plugin] = {
+      plugin: transforms.plugin || (plugin => plugin),
+      settings:
+        transforms.settings || (plugin => new Settings({ plugin, registry }))
+    };
 
     return new DisposableDelegate(() => {
       delete transformers[plugin];
