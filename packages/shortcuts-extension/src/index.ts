@@ -81,8 +81,8 @@ const shortcuts: JupyterLabPlugin<void> = {
         console.log('Transforming plugin', plugin);
         return plugin;
       },
-      settings: (plugin, settings) => {
-        console.log('Transforming settings', plugin, settings);
+      settings: plugin => {
+        console.log('Transforming settings', plugin);
         return new Private.ShortcutSettings({ plugin, registry });
       }
     });

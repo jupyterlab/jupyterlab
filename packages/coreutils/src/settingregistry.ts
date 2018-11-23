@@ -28,6 +28,13 @@ import SCHEMA from './plugin-schema.json';
 const copy = JSONExt.deepCopy;
 
 /**
+ * The number of milliseconds before a `load()` call to the registry will wait
+ * before timing out if it requires a transformation that has not been
+ * registered.
+ */
+const TRANSFORM_TIMEOUT = 7000;
+
+/**
  * An implementation of a schema validator.
  */
 export interface ISchemaValidator {
@@ -363,10 +370,7 @@ export namespace ISettingRegistry {
      * A function that transforms a settings object before returning it from a
      * setting registry.
      */
-    export type Transform = (
-      plugin: IPlugin,
-      settings: ISettings
-    ) => ISettings | Promise<ISettings>;
+    export type Transform = (plugin: IPlugin) => ISettings | Promise<ISettings>;
   }
 
   /**
@@ -558,7 +562,7 @@ export class SettingRegistry {
     this.validator = options.validator || new DefaultSchemaValidator();
 
     // Preload with any available data at instantiation-time.
-    this._preload(options.plugins);
+    this._ready = this._preload(options.plugins);
   }
 
   /**
@@ -599,20 +603,22 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(
+  async get(
     plugin: string,
     key: string
   ): Promise<{ composite: JSONValue; user: JSONValue }> {
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
+
     const plugins = this.plugins;
 
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
-      const result = {
+
+      return {
         composite: key in composite ? copy(composite[key]) : undefined,
         user: key in user ? copy(user[key]) : undefined
       };
-
-      return Promise.resolve(result);
     }
 
     return this.load(plugin).then(() => this.get(plugin, key));
@@ -626,12 +632,16 @@ export class SettingRegistry {
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  load(plugin: string): Promise<ISettingRegistry.ISettings> {
+  async load(plugin: string): Promise<ISettingRegistry.ISettings> {
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
+
     const plugins = this.plugins;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      return this._transformSettings(plugins[plugin]);
+      const settings = await this._transform('settings', plugins[plugin]);
+      return settings as ISettingRegistry.ISettings;
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -647,13 +657,18 @@ export class SettingRegistry {
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   async reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const plugins = this.plugins;
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
 
-    // Fetch and load the data from the connector and transform it if necessary.
-    this._load(await this._transformPlugin(await this.connector.fetch(plugin)));
+    const plugins = this.plugins;
+    const fetched = await this.connector.fetch(plugin);
+    const transformed = await this._transform('plugin', fetched);
+
+    this._load(transformed as ISettingRegistry.IPlugin);
     this._pluginChanged.emit(plugin);
 
-    return this._transformSettings(plugins[plugin]);
+    const settings = await this._transform('settings', plugins[plugin]);
+    return settings as ISettingRegistry.ISettings;
   }
 
   /**
@@ -665,11 +680,14 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(plugin: string, key: string): Promise<void> {
+  async remove(plugin: string, key: string): Promise<void> {
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
+
     const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.resolve(undefined);
+      return;
     }
 
     const raw = json.parse(plugins[plugin].raw, null, true);
@@ -694,7 +712,10 @@ export class SettingRegistry {
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(plugin: string, key: string, value: JSONValue): Promise<void> {
+  async set(plugin: string, key: string, value: JSONValue): Promise<void> {
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
+
     const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
@@ -750,7 +771,10 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the settings have been saved.
    */
-  upload(plugin: string, raw: string): Promise<void> {
+  async upload(plugin: string, raw: string): Promise<void> {
+    // Wait for data preload before normal allowing normal operation.
+    await this._ready;
+
     const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
@@ -796,7 +820,10 @@ export class SettingRegistry {
   private async _preload(plugins: ISettingRegistry.IPlugin[]): Promise<void> {
     plugins.forEach(async plugin => {
       try {
-        this._load(await this._transformPlugin(plugin));
+        // Apply a transformation to the plugin if necessary.
+        const transformed = await this._transform('plugin', plugin);
+
+        this._load(transformed as ISettingRegistry.IPlugin);
       } catch (errors) {
         /* Ignore preload errors. */
         console.log('Ignored setting registry preload errors.', errors);
@@ -821,57 +848,46 @@ export class SettingRegistry {
       throw new Error(`${plugin} failed to validate; check console.`);
     }
 
-    // Apply any transformation to the plugin if necessary and reload it.
-    this._load(await this._transformPlugin(plugins[plugin]));
+    // Apply a transformation to the plugin if necessary.
+    const transformed = await this._transform('plugin', plugins[plugin]);
+
+    this._load(transformed as ISettingRegistry.IPlugin);
     await this.connector.save(plugin, plugins[plugin].raw);
     this._pluginChanged.emit(plugin);
   }
 
   /**
-   * Resolve to a plugin object after applying any necessary transformations.
+   * Transform the plugin or settings if necessary.
    */
-  private async _transformPlugin(
-    plugin: ISettingRegistry.IPlugin
-  ): Promise<ISettingRegistry.IPlugin> {
-    const transformers = this._transformers;
-
-    if (!plugin.schema['jupyter.lab.setting-transform']) {
-      return plugin;
-    }
-
-    if (plugin.id in transformers) {
-      return transformers[plugin.id].plugin.call(null, plugin);
-    }
-
-    // TODO: Implement timeout logic.
-    throw new Error(`#_transformPlugin(${plugin.id}) timed out`);
-  }
-  /**
-   * Resolve to a settings object after applying any necessary transformations.
-   */
-  private async _transformSettings(
-    plugin: ISettingRegistry.IPlugin
-  ): Promise<ISettingRegistry.ISettings> {
+  private async _transform(
+    transformation: 'plugin' | 'settings',
+    plugin: ISettingRegistry.IPlugin,
+    started = new Date().getTime()
+  ): Promise<ISettingRegistry.IPlugin | ISettingRegistry.ISettings> {
+    const elapsed = new Date().getTime() - started;
     const registry = this;
-    const settings = new Settings({ plugin, registry });
     const transformers = this._transformers;
 
     if (!plugin.schema['jupyter.lab.setting-transform']) {
-      return settings;
+      return transformation === 'settings'
+        ? new Settings({ plugin, registry })
+        : plugin;
     }
 
     if (plugin.id in transformers) {
-      const transform = transformers[plugin.id].settings;
-      const transformed = transform.call(null, plugin, settings);
-      const promise = await Promise.resolve(transformed);
-
-      // Dispose the original settings object as it is dereferenced.
-      settings.dispose();
-
-      return promise;
+      return transformers[plugin.id][transformation].call(null, plugin);
     }
 
-    // TODO: Implement timeout logic.
+    // If the timeout has not been exceeded, stall and try again.
+    if (elapsed < TRANSFORM_TIMEOUT) {
+      await new Promise(resolve => {
+        window.setTimeout(() => {
+          resolve();
+        }, TRANSFORM_TIMEOUT / 20);
+      });
+      return this._transform(transformation, plugin, started);
+    }
+
     throw new Error(`#_transformSettings(${plugin.id}) timed out`);
   }
 
@@ -891,6 +907,7 @@ export class SettingRegistry {
   }
 
   private _pluginChanged = new Signal<this, string>(this);
+  private _ready: Promise<void>;
   private _transformers: {
     [plugin: string]: {
       plugin: ISettingRegistry.IPlugin.Transform;
