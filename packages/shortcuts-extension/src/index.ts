@@ -78,12 +78,12 @@ const shortcuts: JupyterLabPlugin<void> = {
     // using the default values from this plugin's schema.
     registry.transform(shortcuts.id, {
       plugin: plugin => {
-        console.log('Transforming plugin', plugin);
-        return plugin;
+        console.log('Transforming ... returning plugin', plugin);
+        return new Private.ShortcutsPlugin({ plugin, registry });
       },
       settings: plugin => {
-        console.log('Transforming settings', plugin);
-        return new Private.ShortcutSettings({ plugin, registry });
+        console.log('Transforming ... returning settings', plugin);
+        return new Settings({ plugin, registry });
       }
     });
 
@@ -121,26 +121,24 @@ namespace Private {
    * A wrapper for this plugin's settings object to override what the setting
    * registry returns to client that load this plugin.
    */
-  export class ShortcutSettings extends Settings {
-    constructor(options: Settings.IOptions) {
-      super(options);
-      this._populate();
-      this.changed.connect(() => {
-        this._populate();
-      });
-    }
+  export class ShortcutsPlugin implements ISettingRegistry.IPlugin {
+    constructor({
+      plugin,
+      registry
+    }: {
+      plugin: ISettingRegistry.IPlugin;
+      registry: ISettingRegistry;
+    }) {
+      const { id, data, raw, schema, version } = plugin;
 
-    annotatedDefaults(): string {
-      return JSON.stringify({ shortcuts: this._shortcuts }, null, 2);
-    }
+      this.id = id;
+      this.data = data;
+      this.raw = raw;
+      this.schema = schema;
+      this.version = version;
 
-    default(key: string): JSONValue {
-      return key === 'shortcuts' ? this._shortcuts : undefined;
-    }
-
-    private _populate() {
-      this._shortcuts = Object.keys(this.registry.plugins)
-        .map(plugin => this.registry.plugins[plugin])
+      const shortcuts = Object.keys(registry.plugins)
+        .map(plugin => registry.plugins[plugin])
         .slice()
         .sort((a, b) => {
           return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
@@ -149,9 +147,21 @@ namespace Private {
           (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
           []
         );
+
+      console.log('shortcuts', shortcuts);
     }
 
-    private _shortcuts: ISettingRegistry.IShortcut[];
+    [name: string]: JSONValue;
+
+    readonly id: string;
+
+    data: ISettingRegistry.ISettingBundle;
+
+    raw: string;
+
+    schema: ISettingRegistry.ISchema;
+
+    version: string;
   }
 
   /**
