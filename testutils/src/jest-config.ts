@@ -19,7 +19,7 @@ module.exports = function(name: string, baseDir: string) {
       `packages/${name}/src/**.{ts,tsx}`,
       `!packages/${name}/src/*.d.ts`
     ],
-    coverageReporters: ['json', 'lcov', 'text', 'html', 'cobertura'],
+    coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
     testRegex: `tests\/test-${name}\/src\/.*\.spec\.ts$`,
     globals: {
