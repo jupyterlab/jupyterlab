@@ -38,6 +38,8 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   constructor(options: IRenderMime.IRendererOptions) {
     super();
     this.addClass(CSS_CLASS);
+    this.addClass('jp-RenderedHTML');
+    this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
   }
 
