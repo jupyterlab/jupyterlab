@@ -385,8 +385,8 @@ might want to use them in your extensions.
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For a concrete example of a standard extension, see `How to Extend the Notebook
-Plugin <https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#how-to-extend-the-notebook-plugin>`__. Notice that the mime renderer and themes extensions above use a limited,
+For a concrete example of a standard extension, see :ref:`How to extend the Notebook plugin <extend-notebook-plugin>`.
+Notice that the mime renderer and themes extensions above use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.

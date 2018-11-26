@@ -139,6 +139,8 @@ The ipywidgets widget manager is an example of an extension that adds a
 notebook-specific renderer, since rendering a widget depends on
 notebook-specific widget state.
 
+.. _extend-notebook-plugin:
+
 How to extend the Notebook plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
