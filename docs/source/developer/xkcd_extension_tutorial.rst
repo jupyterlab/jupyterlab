@@ -856,8 +856,8 @@ learning, here are some suggestions about what to try next:
 -  Make the image a link to the comic on https://xkcd.com.
 -  Push your extension git repository to GitHub.
 -  Give users the ability to pin comics in separate, permanent panels.
--  Learn how to write `other kinds of
-   extensions <./extension_dev.html>`__.
+-  Learn how to write :ref:`other kinds of
+   extensions <developer_extensions>`.
 
 .. |Completed xkcd extension screenshot| image:: xkcd_tutorial_complete.png
 .. |Empty xkcd extension panel| image:: xkcd_tutorial_empty.png

@@ -29,7 +29,7 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 
 -  The ``index.ts`` file should have the core logic for the plugin. In
    this case, it should create a widget and widget factory for rendering
-   geojson files (see `Documents <documents.html>`__).
+   geojson files (see :ref:`documents`).
 
 -  The ``plugin.ts`` file should create the extension and add the
    content to the application. In this case registering the widget

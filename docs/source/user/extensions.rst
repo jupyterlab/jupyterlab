@@ -15,7 +15,7 @@ or privileged than any custom extension.
 JupyterLab extensions are `npm <https://www.npmjs.com/>`__ packages (the
 standard package format in Javascript development). You can search for the
 keyword `jupyterlab-extension
-<https://www.npmjs.com/search?q=keywords%3Ajupyterlab-extension`__ on the
+<https://www.npmjs.com/search?q=keywords%3Ajupyterlab-extension>`__ on the
 npm registry to find extensions. For information about developing extensions,
 see the :ref:`developer documentation <developer_extensions>`.
 
@@ -147,15 +147,15 @@ Companion packages
 
 During installation of an extension, JupyterLab will inspect the package
 metadata for any
-:ref:`instructions on companion packages<ext-author-companion-packages>`.
+:ref:`instructions on companion packages <ext-author-companion-packages>`.
 Companion packages can be:
 
    - Notebook server extensions (or any other packages that need to be
      installed on the Notebook server).
    - Kernel packages. An example of companion packages for the
-     kernel are Jupyter Widget packages, like the `ipywidgets`_
+     kernel are Jupyter Widget packages, like the `ipywidgets <https://ipywidgets.readthedocs.io/en/stable>`__
      Python package for the
-     `@jupyter-widgets/jupyterlab-manager package`_.
+     `@jupyter-widgets/jupyterlab-manager package <https://www.npmjs.com/package/@jupyter-widgets/jupyterlab-manager>`__.
 
 If JupyterLab finds instructions for companion packages, it will present
 a dialog to notify you about these. These are informational only, and it
