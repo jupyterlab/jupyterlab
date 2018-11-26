@@ -1,9 +1,7 @@
-# https://aka.ms/yaml
-
 jobs:
   - job: 'Travis'
     pool:
-      vmImage: 'ubuntu-16.04' # other options: 'macOS-10.13', 'vs2017-win2016'
+      vmImage: 'ubuntu-16.04'
     variables:
       python.version: '3.6'
       gh.ref: github.com/jupyterlab/jupyterlab.git
@@ -11,10 +9,12 @@ jobs:
       matrix:
         JS:
           group: 'js'
+          testResultsFiles: 'tests/**/junit.xml'
         Integrity:
           group: 'integrity'
         Python:
           group: 'python'
+          testResultsFiles: 'junit.xml'
         CLI:
           group: 'cli'
           python.version: '3.5'
@@ -40,9 +40,9 @@ jobs:
           filePath: ./scripts/travis_script.sh
       - task: PublishTestResults@2
         displayName: 'publish test results'
-        condition: always()
+        condition: variables['testResultsFiles']
         inputs:
-          testResultsFiles: '**/junit.xml'
+          testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Linux - $(group)'
           mergeTestResults: true
       - task: Bash@3
@@ -60,6 +60,7 @@ jobs:
       matrix:
         JS:
           name: 'javascript'
+          testResultsFiles: 'tests/**/junit.xml'
           python.version: '3.5'
         Python:
           name: 'python'
@@ -87,8 +88,8 @@ jobs:
         displayName: 'run tests'
       - task: PublishTestResults@2
         displayName: 'publish results'
-        condition: always()
+        condition: variables['testResultsFiles']
         inputs:
-          testResultsFiles: '**/junit.xml'
+          testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Windows - $(name)'
           mergeTestResults: true
