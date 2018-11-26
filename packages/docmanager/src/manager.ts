@@ -473,7 +473,10 @@ export class DocumentManager implements IDisposable {
       modelDBFactory,
       setBusy: this._setBusy
     });
-    let handler = new SaveHandler({ context });
+    let handler = new SaveHandler({
+      context,
+      saveInterval: this.autosaveInterval
+    });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
       if (this.autosave) {
