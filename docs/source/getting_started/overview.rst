@@ -44,7 +44,7 @@ of JupyterLab, including new themes, file editors, and custom components.
 
 JupyterLab is served from the same `server
 <https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
-`notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ as the
+`notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ as the
 classic Jupyter Notebook.
 
 .. _releases:
