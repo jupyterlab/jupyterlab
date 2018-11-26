@@ -43,8 +43,7 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          buildPlatform: 'Linux'
-          testRunTitle: '$(group)'
+          testRunTitle: 'Linux - $(group)'
           mergeTestResults: true
       - task: Bash@3
         displayName: 'after_success'
@@ -87,9 +86,9 @@ jobs:
       - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
         displayName: 'run tests'
       - task: PublishTestResults@2
-        displayName: 'publis results'
+        displayName: 'publish results'
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          buildPlatform: 'Windows'
+          testRunTitle: 'Windows'
           mergeTestResults: true
