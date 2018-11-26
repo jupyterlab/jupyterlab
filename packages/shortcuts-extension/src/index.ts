@@ -8,7 +8,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { CommandRegistry } from '@phosphor/commands';
 
 import {
-  JSONValue,
+  JSONExt,
   ReadonlyJSONObject,
   ReadonlyJSONValue
 } from '@phosphor/coreutils';
@@ -72,21 +72,75 @@ const shortcuts: JupyterLabPlugin<void> = {
   requires: [ISettingRegistry],
   activate: async (app: JupyterLab, registry: ISettingRegistry) => {
     const { commands } = app;
+    let canonical: ISettingRegistry.ISchema;
 
-    // Transform the settings object to return different annotated defaults
-    // calculated from all the keyboard shortcuts in the registry instead of
-    // using the default values from this plugin's schema.
+    let loaded: { [name: string]: null } = {};
+    function populate(schema: ISettingRegistry.ISchema) {
+      console.log('populating...');
+      loaded = {};
+      schema.properties.shortcuts.default = Object.keys(registry.plugins)
+        .map(plugin => {
+          loaded[plugin] = null;
+          return registry.plugins[plugin];
+        })
+        .reduce(
+          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
+          []
+        )
+        .sort((a, b) => a.command.localeCompare(b.command));
+    }
+
+    registry.pluginChanged.connect((sender, plugin) => {
+      if (!(plugin in loaded)) {
+        populate(canonical);
+      }
+    });
+
+    // Transform the plugin object to return different schema than the default.
     registry.transform(shortcuts.id, {
-      plugin: plugin => {
-        const transformed = new Private.ShortcutsPlugin({ plugin, registry });
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
 
-        console.log('Transforming ... returning plugin:', transformed);
-        return transformed;
+        const defaults = canonical.properties.shortcuts.default;
+        const user = {
+          shortcuts: ((plugin.data && plugin.data.user) || {}).shortcuts || []
+        };
+        const composite = {
+          shortcuts: Private.merge(
+            defaults,
+            user.shortcuts as ISettingRegistry.IShortcut[]
+          )
+        };
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
       }
     });
 
     try {
       const settings = await registry.load(shortcuts.id);
+
+      console.log('settings.composite', settings.composite);
 
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
@@ -116,53 +170,6 @@ namespace Private {
   let disposables: IDisposable;
 
   /**
-   * A wrapper for this plugin's settings object to override what the setting
-   * registry returns to client that load this plugin.
-   */
-  export class ShortcutsPlugin implements ISettingRegistry.IPlugin {
-    constructor({
-      plugin,
-      registry
-    }: {
-      plugin: ISettingRegistry.IPlugin;
-      registry: ISettingRegistry;
-    }) {
-      const { id, data, raw, schema, version } = plugin;
-
-      this.id = id;
-      this.data = data;
-      this.raw = raw;
-      this.schema = schema;
-      this.version = version;
-
-      const shortcuts = Object.keys(registry.plugins)
-        .map(plugin => registry.plugins[plugin])
-        .slice()
-        .sort((a, b) => {
-          return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-        })
-        .reduce(
-          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
-          []
-        );
-
-      schema.properties['shortcuts'].default = shortcuts;
-    }
-
-    id: string;
-
-    data: ISettingRegistry.ISettingBundle;
-
-    raw: string;
-
-    schema: ISettingRegistry.ISchema;
-
-    version: string;
-
-    [name: string]: JSONValue;
-  }
-
-  /**
    * Load the keyboard shortcuts from settings.
    */
   export function loadShortcuts(
@@ -181,6 +188,13 @@ namespace Private {
 
       return acc;
     }, new DisposableSet());
+  }
+
+  export function merge(
+    defaults: ISettingRegistry.IShortcut[],
+    user: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    return [];
   }
 
   /**

@@ -150,10 +150,15 @@ export namespace ISettingRegistry {
    */
   export namespace IPlugin {
     /**
-     * A function that transforms a plugin object before it is loaded into a
+     * A function that transforms a plugin object before it is consumed by the
      * setting registry.
      */
-    export type Transform = (plugin: IPlugin) => IPlugin | Promise<IPlugin>;
+    export type Transform = (plugin: IPlugin) => IPlugin;
+
+    /**
+     * The phases during which a transformation may be applied to a plugin.
+     */
+    export type Phase = 'compose' | 'fetch';
   }
 
   /**
@@ -363,20 +368,14 @@ export namespace ISettingRegistry {
   }
 
   /**
-   * A namespace for setting object functionality.
-   */
-  export namespace ISettings {
-    /**
-     * A function that transforms a settings object before returning it from a
-     * setting registry.
-     */
-    export type Transform = (plugin: IPlugin) => ISettings | Promise<ISettings>;
-  }
-
-  /**
    * An interface describing a JupyterLab keyboard shortcut.
    */
   export interface IShortcut extends JSONObject {
+    /**
+     * The optional arguments passed into the shortcut's command.
+     */
+    args?: JSONObject;
+
     /**
      * The shortcut category for rendering and organization of shortcuts.
      */
@@ -637,11 +636,11 @@ export class SettingRegistry {
     await this._ready;
 
     const plugins = this.plugins;
+    const registry = this;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const settings = await this._transform('settings', plugins[plugin]);
-      return settings as ISettingRegistry.ISettings;
+      return new Settings({ plugin: plugins[plugin], registry });
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -660,15 +659,14 @@ export class SettingRegistry {
     // Wait for data preload before normal allowing normal operation.
     await this._ready;
 
-    const plugins = this.plugins;
     const fetched = await this.connector.fetch(plugin);
-    const transformed = await this._transform('plugin', fetched);
+    const plugins = this.plugins;
+    const registry = this;
 
-    this._load(transformed as ISettingRegistry.IPlugin);
+    await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
 
-    const settings = await this._transform('settings', plugins[plugin]);
-    return settings as ISettingRegistry.ISettings;
+    return new Settings({ plugin: plugins[plugin], registry });
   }
 
   /**
@@ -741,25 +739,34 @@ export class SettingRegistry {
    * @param transforms - The transform functions applied to the plugin.
    *
    * @returns A disposable that removes the setting transform from the registry.
+   *
+   * #### Notes
+   * - `compose` transformations: The registry automatically overwrites a
+   * plugin's default values with user overrides, but a plugin may instead wish
+   * to merge values. This behavior can be accomplished in a `compose`
+   * transformation.
+   * - `plugin` transformations: The registry uses the plugin data that is
+   * fetched from its connector. If a plugin wants to override, e.g. to update
+   * its schema with dynamic defaults, a `plugin` transformation can be applied.
+   * - `settings` transformations: The registry creates a settings object to
+   * return to clients loading a plugin. If a custom settings object is
+   * necessary, a `settings` transformation can be applied.
    */
   transform(
     plugin: string,
     transforms: {
-      plugin?: ISettingRegistry.IPlugin.Transform;
-      settings?: ISettingRegistry.ISettings.Transform;
+      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform
     }
   ): IDisposable {
-    const registry = this;
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      throw new Error(`${plugin} aleady has a transformer.`);
+      throw new Error(`${plugin} already has a transformer.`);
     }
 
     transformers[plugin] = {
-      plugin: transforms.plugin || (plugin => plugin),
-      settings:
-        transforms.settings || (plugin => new Settings({ plugin, registry }))
+      fetch: transforms.fetch || (plugin => plugin),
+      compose: transforms.compose || (plugin => plugin)
     };
 
     return new DisposableDelegate(() => {
@@ -794,16 +801,13 @@ export class SettingRegistry {
 
   /**
    * Load a plugin into the registry.
-   *
-   * #### Notes
-   * A
    */
-  private _load(data: ISettingRegistry.IPlugin): void {
+  private async _load(data: ISettingRegistry.IPlugin): Promise<void> {
     const plugin = data.id;
 
     // Validate and preload the item.
     try {
-      this._validate(data);
+      await this._validate(data);
     } catch (errors) {
       const output = [`Validating ${plugin} failed:`];
 
@@ -826,9 +830,7 @@ export class SettingRegistry {
     plugins.forEach(async plugin => {
       try {
         // Apply a transformation to the plugin if necessary.
-        const transformed = await this._transform('plugin', plugin);
-
-        this._load(transformed as ISettingRegistry.IPlugin);
+        await this._load(await this._transform('fetch', plugin));
       } catch (errors) {
         /* Ignore preload errors. */
         console.log('Ignored setting registry preload errors.', errors);
@@ -847,16 +849,13 @@ export class SettingRegistry {
     }
 
     try {
-      this._validate(plugins[plugin]);
+      await this._validate(plugins[plugin]);
     } catch (errors) {
       console.warn(`${plugin} validation errors:`, errors);
       throw new Error(`${plugin} failed to validate; check console.`);
     }
 
-    // Apply a transformation to the plugin if necessary.
-    const transformed = await this._transform('plugin', plugins[plugin]);
-
-    this._load(transformed as ISettingRegistry.IPlugin);
+    await this._load(plugins[plugin]);
     await this.connector.save(plugin, plugins[plugin].raw);
     this._pluginChanged.emit(plugin);
   }
@@ -865,22 +864,19 @@ export class SettingRegistry {
    * Transform the plugin or settings if necessary.
    */
   private async _transform(
-    transformation: 'plugin' | 'settings',
+    phase: ISettingRegistry.IPlugin.Phase,
     plugin: ISettingRegistry.IPlugin,
     started = new Date().getTime()
-  ): Promise<ISettingRegistry.IPlugin | ISettingRegistry.ISettings> {
+  ): Promise<ISettingRegistry.IPlugin> {
     const elapsed = new Date().getTime() - started;
-    const registry = this;
     const transformers = this._transformers;
 
     if (!plugin.schema['jupyter.lab.setting-transform']) {
-      return transformation === 'settings'
-        ? new Settings({ plugin, registry })
-        : plugin;
+      return plugin;
     }
 
     if (plugin.id in transformers) {
-      return transformers[plugin.id][transformation].call(null, plugin);
+      return transformers[plugin.id][phase].call(null, plugin);
     }
 
     // If the timeout has not been exceeded, stall and try again.
@@ -890,16 +886,16 @@ export class SettingRegistry {
           resolve();
         }, TRANSFORM_TIMEOUT / 20);
       });
-      return this._transform(transformation, plugin, started);
+      return this._transform(phase, plugin, started);
     }
 
-    throw new Error(`#_transformSettings(${plugin.id}) timed out`);
+    throw new Error(`Transforming ${plugin.id} timed out.`);
   }
 
   /**
    * Validate and preload a plugin, compose the `composite` data.
    */
-  private _validate(plugin: ISettingRegistry.IPlugin): void {
+  private async _validate(plugin: ISettingRegistry.IPlugin): Promise<void> {
     // Validate the user data and create the composite data.
     const errors = this.validator.validateData(plugin);
 
@@ -907,16 +903,15 @@ export class SettingRegistry {
       throw errors;
     }
 
-    // Set the local copy.
-    this.plugins[plugin.id] = plugin;
+    // Apply a transformation if necessary and set the local copy.
+    this.plugins[plugin.id] = await this._transform('compose', plugin);
   }
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready: Promise<void>;
   private _transformers: {
     [plugin: string]: {
-      plugin: ISettingRegistry.IPlugin.Transform;
-      settings: ISettingRegistry.ISettings.Transform;
+      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform
     };
   } = Object.create(null);
 }
