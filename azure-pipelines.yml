@@ -64,7 +64,7 @@ jobs:
         Python:
           name: 'python'
         Integrity:
-          group: 'integrity'
+          name: 'integrity'
 
     steps:
       - task: UsePythonVersion@0
@@ -90,5 +90,5 @@ jobs:
         condition: always()
         inputs:
           testResultsFiles: '**/junit.xml'
-          testRunTitle: 'Windows'
+          testRunTitle: 'Windows - $(name)'
           mergeTestResults: true
