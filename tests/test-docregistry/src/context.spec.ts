@@ -179,7 +179,7 @@ describe('docregistry/context', () => {
       });
 
       it('should resolve when the file is reverted for the first time', async () => {
-        manager.contents.save(context.path, {
+        await manager.contents.save(context.path, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
