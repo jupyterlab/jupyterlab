@@ -45,12 +45,6 @@ jobs:
           buildPlatform: 'Linux'
           testRunTitle: '$(group)'
           mergeTestResults: true
-      - task: PublishCodeCoverageResults@1
-        condition: always()
-        inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
       - task: Bash@3
         displayName: 'after_success'
         inputs:
@@ -90,9 +84,3 @@ jobs:
           testResultsFiles: '**/junit.xml'
           buildPlatform: 'Windows'
           mergeTestResults: true
-      - task: PublishCodeCoverageResults@1
-        condition: always()
-        inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-          reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
