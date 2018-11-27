@@ -15,7 +15,7 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 
 -  If there are no typings, we must create our own. An example typings
    file that exports functions is
-   `path-posix <https://github.com/jupyterlab/jupyterlab/blob/master/packages/coreutils/typings/path-posix/path-posix.d.ts>`__.
+   `codemirror <https://github.com/jupyterlab/jupyterlab/blob/master/packages/codemirror/typings/codemirror/codemirror.d.ts>`__.
    An example with a class is
    `xterm <https://github.com/jupyterlab/jupyterlab/blob/master/packages/terminal/src/xterm.d.ts>`__.
 
@@ -29,7 +29,7 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 
 -  The ``index.ts`` file should have the core logic for the plugin. In
    this case, it should create a widget and widget factory for rendering
-   geojson files (see `Documents <documents.html>`__).
+   geojson files (see :ref:`documents`).
 
 -  The ``plugin.ts`` file should create the extension and add the
    content to the application. In this case registering the widget

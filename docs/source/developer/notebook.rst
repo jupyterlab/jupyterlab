@@ -19,9 +19,9 @@ The most complicated plugin included in the **JupyterLab application**
 is the **Notebook plugin**.
 
 The
-`NotebookWidgetFactory <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_widgetfactory_.notebookwidgetfactory.html>`__
+`NotebookWidgetFactory <https://jupyterlab.github.io/jupyterlab/notebook/classes/notebookwidgetfactory.html>`__
 constructs a new
-`NotebookPanel <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_panel_.notebookpanel.html>`__
+`NotebookPanel <https://jupyterlab.github.io/jupyterlab/notebook/classes/notebookpanel.html>`__
 from a model and populates the toolbar with default widgets.
 
 Structure of the Notebook plugin
@@ -34,11 +34,11 @@ Model
 ^^^^^
 
 The
-`NotebookModel <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_model_.notebookmodel.html>`__
+`NotebookModel <https://jupyterlab.github.io/jupyterlab/notebook/classes/notebookmodel.html>`__
 contains an observable list of cells.
 
 A `cell
-model <http://jupyterlab.github.io/jupyterlab/modules/_cells_src_model_.html>`__
+model <https://jupyterlab.github.io/jupyterlab/cells/classes/cellmodel.html>`__
 can be:
 
 -  a code cell
@@ -65,7 +65,7 @@ Metadata
 
 The notebook model and the cell model (i.e. notebook cells) support
 getting and setting metadata through an
-`IObservableJSON <http://jupyterlab.github.io/jupyterlab/modules/_observables_src_observablejson_.iobservablejson.html>`__
+`IObservableJSON <https://jupyterlab.github.io/jupyterlab/observables/modules/iobservablejson.html>`__
 object. You can use this to get and set notebook/cell metadata,
 as well as subscribe to changes to it.
 
@@ -77,9 +77,9 @@ a new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
 -  a
-   `Toolbar <http://jupyterlab.github.io/jupyterlab/modules/_apputils_src_toolbar_.html>`__
+   `Toolbar <https://jupyterlab.github.io/jupyterlab/apputils/classes/toolbar.html>`__
 -  a `Notebook
-   widget <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_widget_.notebook.html>`__.
+   widget <https://jupyterlab.github.io/jupyterlab/notebook/classes/notebook.html>`__.
 
 The NotebookPanel also adds completion logic.
 
@@ -96,7 +96,7 @@ Higher level actions using NotebookActions
 ''''''''''''''''''''''''''''''''''''''''''
 
 Higher-level actions are contained in the
-`NotebookActions <http://jupyterlab.github.io/jupyterlab/classes/_notebook_src_actions_.notebookactions.html>`__
+`NotebookActions <https://jupyterlab.github.io/jupyterlab/notebook/classes/notebookactions.html>`__
 namespace, which has functions, when given a notebook widget, to run a
 cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.
@@ -105,25 +105,25 @@ Widget hierarchy
 ''''''''''''''''
 
 A Notebook widget contains a list of `cell
-widgets <http://jupyterlab.github.io/jupyterlab/modules/_cells_src_widget_.html>`__,
+widgets <https://jupyterlab.github.io/jupyterlab/cells/classes/cell.html>`__,
 corresponding to the cell models in its cell list.
 
 -  Each cell widget contains an
-   `InputArea <http://jupyterlab.github.io/jupyterlab/classes/_cells_src_inputarea_.inputarea.html>`__,
+   `InputArea <https://jupyterlab.github.io/jupyterlab/cells/classes/inputarea.html>`__,
 
    -  which contains n
-      `CodeEditorWrapper <http://jupyterlab.github.io/jupyterlab/classes/_codeeditor_src_widget_.codeeditorwrapper.html>`__,
+      `CodeEditorWrapper <https://jupyterlab.github.io/jupyterlab/codeeditor/classes/codeeditorwrapper.html>`__,
 
       -  which contains a JavaScript CodeMirror instance.
 
 A
-`CodeCell <http://jupyterlab.github.io/jupyterlab/classes/_cells_src_widget_.codecell.html>`__
+`CodeCell <https://jupyterlab.github.io/jupyterlab/cells/classes/codecell.html>`__
 also contains an
-`OutputArea <http://jupyterlab.github.io/jupyterlab/classes/_outputarea_src_widget_.outputarea.html>`__.
+`OutputArea <https://jupyterlab.github.io/jupyterlab/outputarea/classes/outputarea.html>`__.
 An OutputArea is responsible for rendering the outputs in the
-`OutputAreaModel <http://jupyterlab.github.io/jupyterlab/classes/_outputarea_src_model_.outputareamodel.html>`__
+`OutputAreaModel <https://jupyterlab.github.io/jupyterlab/outputarea/classes/outputareamodel.html>`__
 list. An OutputArea uses a notebook-specific
-`RenderMimeRegistry <http://jupyterlab.github.io/jupyterlab/classes/_rendermime_src_registry_.rendermimeregistry.html>`__
+`RenderMimeRegistry <https://jupyterlab.github.io/jupyterlab/rendermime/classes/rendermimeregistry.html>`__
 object to render ``display_data`` output messages.
 
 Rendering output messages
@@ -138,6 +138,8 @@ Rendermime singleton so that notebook-specific renderers can be added.
 The ipywidgets widget manager is an example of an extension that adds a
 notebook-specific renderer, since rendering a widget depends on
 notebook-specific widget state.
+
+.. _extend-notebook-plugin:
 
 How to extend the Notebook plugin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -260,9 +262,9 @@ intrinsic relation between *phosphor widgets* and *ipython widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook *widget*
 extension using the `Document
-Registry <http://jupyterlab.github.io/jupyterlab/classes/_docregistry_src_registry_.documentregistry.html>`__.
+Registry <https://jupyterlab.github.io/jupyterlab/docregistry/classes/documentregistry.html>`__.
 The ``createNew()`` function is called with a NotebookPanel and
-`DocumentContext <http://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_registry_.documentregistry.icontext.html>`__.
+`DocumentContext <https://jupyterlab.github.io/jupyterlab/docregistry/interfaces/documentregistry.icontext.html>`__.
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then
 registers an ipywidget renderer with the notebook instance's rendermime
