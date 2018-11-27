@@ -194,8 +194,7 @@ function activateFactory(
     });
     const widget = new FileBrowser({
       id,
-      model,
-      commands: options.commands || commands
+      model
     });
 
     // Add a launcher toolbar item.
