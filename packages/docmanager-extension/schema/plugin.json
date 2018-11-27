@@ -9,6 +9,12 @@
       "title": "Autosave Documents",
       "description": "Whether to autosave documents",
       "default": true
+    },
+    "autosaveInterval": {
+      "type": "number",
+      "title": "Autosave Interval",
+      "description": "Length of save interval in seconds",
+      "default": 120
     }
   },
   "additionalProperties": false,
