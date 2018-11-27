@@ -24,7 +24,6 @@
       "properties": {
         "args": { "type": "object" },
         "command": { "type": "string" },
-        "disabled": { "type": "boolean", "default": false },
         "keys": {
           "items": { "type": "string" },
           "minItems": 1,

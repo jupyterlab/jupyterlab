@@ -231,7 +231,7 @@ namespace Private {
     // out too.
     // If a default shortcut collides with another default, warn and filter.
     defaults = defaults.filter(shortcut => {
-      const { disabled } = shortcut;
+      const disabled = shortcut.keys.length === 1 && shortcut.keys[0] === '';
 
       if (disabled) {
         return false;
@@ -256,7 +256,10 @@ namespace Private {
       return false;
     });
 
-    return user.concat(defaults);
+    // Filter out disabled user shortcuts and concat defaults before returning.
+    return user
+      .filter(shortcut => shortcut.keys.length > 1 || shortcut.keys[0] !== '')
+      .concat(defaults);
   }
 
   /**
