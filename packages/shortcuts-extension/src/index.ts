@@ -73,8 +73,11 @@ const shortcuts: JupyterLabPlugin<void> = {
   activate: async (app: JupyterLab, registry: ISettingRegistry) => {
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema;
-
     let loaded: { [name: string]: null } = {};
+
+    /**
+     * Populate the plugin's schema defaults.
+     */
     function populate(schema: ISettingRegistry.ISchema) {
       console.log('populating...');
       loaded = {};
@@ -190,11 +193,70 @@ namespace Private {
     }, new DisposableSet());
   }
 
+  /**
+   * Reconcile the default shortcuts and user shortcuts.
+   */
   export function merge(
     defaults: ISettingRegistry.IShortcut[],
     user: ISettingRegistry.IShortcut[]
   ): ISettingRegistry.IShortcut[] {
-    return [];
+    const memo: {
+      [keys: string]: {
+        [selector: string]: boolean; // If `true`, this is a default shortcut.
+      };
+    } = {};
+    const warning = 'Shortcut skipped due to collision.';
+
+    // If a user shortcut collides with another user shortcut warn and filter.
+    // Keep `disabled` shortcuts in order to filter out their default
+    // counterparts.
+    user = user.filter(shortcut => {
+      const keys = shortcut.keys.join('\n');
+      const { selector } = shortcut;
+
+      if (!(keys in memo)) {
+        memo[keys] = {};
+      }
+      if (!(selector in memo[keys])) {
+        memo[keys][selector] = false; // User shortcuts are `false`.
+        return true;
+      }
+
+      console.warn(warning, shortcut);
+      return false;
+    });
+
+    // Filter out all disabled defaults. (None should exist.)
+    // If a shortcut has already been added by the user preferences, filter it
+    // out too.
+    // If a default shortcut collides with another default, warn and filter.
+    defaults = defaults.filter(shortcut => {
+      const { disabled } = shortcut;
+
+      if (disabled) {
+        return false;
+      }
+
+      const keys = shortcut.keys.join('\n');
+      const { selector } = shortcut;
+
+      if (!(keys in memo)) {
+        memo[keys] = {};
+      }
+      if (!(selector in memo[keys])) {
+        memo[keys][selector] = true; // Default shortcuts are `true`.
+        return true;
+      }
+
+      // Only warn if a default shortcut collides with another default shortcut.
+      if (memo[keys][selector]) {
+        console.warn(warning, shortcut);
+      }
+
+      return false;
+    });
+
+    return user.concat(defaults);
   }
 
   /**

@@ -6,22 +6,13 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "jupyter.lab.setting-deprecated": {
-      "type": "boolean",
-      "default": false
-    },
+    "jupyter.lab.setting-deprecated": { "type": "boolean", "default": false },
     "jupyter.lab.setting-icon-class": {
       "type": "string",
       "default": "jp-SettingsIcon"
     },
-    "jupyter.lab.setting-icon-label": {
-      "type": "string",
-      "default": "Plugin"
-    },
-    "jupyter.lab.setting-transform": {
-      "type": "boolean",
-      "default": false
-    },
+    "jupyter.lab.setting-icon-label": { "type": "string", "default": "Plugin" },
+    "jupyter.lab.setting-transform": { "type": "boolean", "default": false },
     "jupyter.lab.shortcuts": {
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
@@ -33,6 +24,7 @@
       "properties": {
         "args": { "type": "object" },
         "command": { "type": "string" },
+        "disabled": { "type": "boolean", "default": false },
         "keys": {
           "items": { "type": "string" },
           "minItems": 1,
