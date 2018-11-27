@@ -364,6 +364,28 @@ const plugins: JupyterLabPlugin<any>[] = [
 ];
 export default plugins;
 
+// Note: this as external function, instead of defined inline, so that we don't capture
+// unneccesary references
+function createHook(
+  state: IStateDB,
+  id: string
+): (sender: any, message: Message) => boolean {
+  return (sender: any, message: Message): boolean => {
+    switch (message.type) {
+      case 'activate-request':
+        state.save(id, { open: true });
+        break;
+      case 'after-hide':
+      case 'close-request':
+        state.remove(id);
+        break;
+      default:
+        break;
+    }
+    return true;
+  };
+}
+
 /**
  * Activate the cell tools extension.
  */
@@ -382,20 +404,8 @@ function activateCellTools(
   const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
-  const hook = (sender: any, message: Message): boolean => {
-    switch (message.type) {
-      case 'activate-request':
-        state.save(id, { open: true });
-        break;
-      case 'after-hide':
-      case 'close-request':
-        state.remove(id);
-        break;
-      default:
-        break;
-    }
-    return true;
-  };
+  const hook = createHook(state, id);
+
   let optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = '-';
   services.nbconvert.getExportFormats().then(response => {
