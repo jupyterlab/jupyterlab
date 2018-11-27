@@ -387,6 +387,11 @@ export namespace ISettingRegistry {
     command: string;
 
     /**
+     * Whether a keyboard shortcut is disabled. `False` by default.
+     */
+    disabled?: boolean;
+
+    /**
      * The key combination of the shortcut.
      */
     keys: string[];

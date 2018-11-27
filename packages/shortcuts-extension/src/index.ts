@@ -79,7 +79,6 @@ const shortcuts: JupyterLabPlugin<void> = {
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
-      console.log('populating...');
       loaded = {};
       schema.properties.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
@@ -143,8 +142,6 @@ const shortcuts: JupyterLabPlugin<void> = {
     try {
       const settings = await registry.load(shortcuts.id);
 
-      console.log('settings.composite', settings.composite);
-
       Private.loadShortcuts(commands, settings.composite);
       settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
@@ -179,11 +176,13 @@ namespace Private {
     commands: CommandRegistry,
     composite: ReadonlyJSONObject
   ): void {
+    const shortcuts = composite.shortcuts as ISettingRegistry.IShortcut[];
+
     if (disposables) {
       disposables.dispose();
     }
-    disposables = Object.keys(composite).reduce((acc, val): DisposableSet => {
-      const options = normalizeOptions(composite[val]);
+    disposables = shortcuts.reduce((acc, val): DisposableSet => {
+      const options = normalizeOptions(val);
 
       if (options) {
         acc.add(commands.addKeyBinding(options));
@@ -208,8 +207,6 @@ namespace Private {
     const warning = 'Shortcut skipped due to collision.';
 
     // If a user shortcut collides with another user shortcut warn and filter.
-    // Keep `disabled` shortcuts in order to filter out their default
-    // counterparts.
     user = user.filter(shortcut => {
       const keys = shortcut.keys.join('\n');
       const { selector } = shortcut;
@@ -226,23 +223,27 @@ namespace Private {
       return false;
     });
 
-    // Filter out all disabled defaults. (None should exist.)
+    // If a default shortcut collides with another default, warn and filter.
     // If a shortcut has already been added by the user preferences, filter it
     // out too.
-    // If a default shortcut collides with another default, warn and filter.
     defaults = defaults.filter(shortcut => {
-      const disabled = shortcut.keys.length === 1 && shortcut.keys[0] === '';
+      const { disabled } = shortcut;
 
       if (disabled) {
         return false;
       }
 
       const keys = shortcut.keys.join('\n');
-      const { selector } = shortcut;
 
+      if (keys === '') {
+        return false;
+      }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
+
+      const { selector } = shortcut;
+
       if (!(selector in memo[keys])) {
         memo[keys][selector] = true; // Default shortcuts are `true`.
         return true;
@@ -257,9 +258,7 @@ namespace Private {
     });
 
     // Filter out disabled user shortcuts and concat defaults before returning.
-    return user
-      .filter(shortcut => shortcut.keys.length > 1 || shortcut.keys[0] !== '')
-      .concat(defaults);
+    return user.filter(shortcut => !shortcut.disabled).concat(defaults);
   }
 
   /**
