@@ -3,7 +3,7 @@
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -112,7 +112,7 @@ const shortcuts: JupyterLabPlugin<void> = {
           shortcuts: ((plugin.data && plugin.data.user) || {}).shortcuts || []
         };
         const composite = {
-          shortcuts: Private.merge(
+          shortcuts: SettingRegistry.reconcileShortcuts(
             defaults,
             user.shortcuts as ISettingRegistry.IShortcut[]
           )
@@ -190,75 +190,6 @@ namespace Private {
 
       return acc;
     }, new DisposableSet());
-  }
-
-  /**
-   * Reconcile the default shortcuts and user shortcuts.
-   */
-  export function merge(
-    defaults: ISettingRegistry.IShortcut[],
-    user: ISettingRegistry.IShortcut[]
-  ): ISettingRegistry.IShortcut[] {
-    const memo: {
-      [keys: string]: {
-        [selector: string]: boolean; // If `true`, this is a default shortcut.
-      };
-    } = {};
-    const warning = 'Shortcut skipped due to collision.';
-
-    // If a user shortcut collides with another user shortcut warn and filter.
-    user = user.filter(shortcut => {
-      const keys = shortcut.keys.join('\n');
-      const { selector } = shortcut;
-
-      if (!(keys in memo)) {
-        memo[keys] = {};
-      }
-      if (!(selector in memo[keys])) {
-        memo[keys][selector] = false; // User shortcuts are `false`.
-        return true;
-      }
-
-      console.warn(warning, shortcut);
-      return false;
-    });
-
-    // If a default shortcut collides with another default, warn and filter.
-    // If a shortcut has already been added by the user preferences, filter it
-    // out too.
-    defaults = defaults.filter(shortcut => {
-      const { disabled } = shortcut;
-
-      if (disabled) {
-        return false;
-      }
-
-      const keys = shortcut.keys.join('\n');
-
-      if (keys === '') {
-        return false;
-      }
-      if (!(keys in memo)) {
-        memo[keys] = {};
-      }
-
-      const { selector } = shortcut;
-
-      if (!(selector in memo[keys])) {
-        memo[keys][selector] = true; // Default shortcuts are `true`.
-        return true;
-      }
-
-      // Only warn if a default shortcut collides with another default shortcut.
-      if (memo[keys][selector]) {
-        console.warn(warning, shortcut);
-      }
-
-      return false;
-    });
-
-    // Filter out disabled user shortcuts and concat defaults before returning.
-    return user.filter(shortcut => !shortcut.disabled).concat(defaults);
   }
 
   /**
