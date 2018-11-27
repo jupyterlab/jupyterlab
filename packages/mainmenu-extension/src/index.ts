@@ -641,13 +641,14 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const createMenuItem = (widget: Widget): Menu.IItemOptions => {
     const commandID = `tabmenu:activate-${widget.id}`;
     if (!commands.hasCommand(commandID)) {
-      commands.addCommand(commandID, {
+      const disposeCommand = commands.addCommand(commandID, {
         label: () => widget.title.label,
         isVisible: () => !widget.isDisposed,
         isEnabled: () => !widget.isDisposed,
         isToggled: () => app.shell.currentWidget === widget,
         execute: () => app.shell.activateById(widget.id)
       });
+      widget.disposed.connect(() => disposeCommand.dispose());
     }
     return { command: commandID };
   };
