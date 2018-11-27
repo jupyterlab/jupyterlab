@@ -1,0 +1,95 @@
+jobs:
+  - job: 'Travis'
+    pool:
+      vmImage: 'ubuntu-16.04'
+    variables:
+      python.version: '3.6'
+      gh.ref: github.com/jupyterlab/jupyterlab.git
+    strategy:
+      matrix:
+        JS:
+          group: 'js'
+          testResultsFiles: 'tests/**/junit.xml'
+        Integrity:
+          group: 'integrity'
+        Python:
+          group: 'python'
+          testResultsFiles: 'junit.xml'
+        CLI:
+          group: 'cli'
+          python.version: '3.5'
+        Docs:
+          group: 'docs'
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - task: Bash@3
+        displayName: 'install'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_install.sh
+      - script: python -m pip install virtualenv
+      - task: Bash@3
+        displayName: 'script'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_script.sh
+      - task: PublishTestResults@2
+        displayName: 'publish test results'
+        condition: variables['testResultsFiles']
+        inputs:
+          testResultsFiles: '$(testResultsFiles)'
+          testRunTitle: 'Linux - $(group)'
+          mergeTestResults: true
+      - task: Bash@3
+        displayName: 'after_success'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/travis_after_success.sh
+
+  - job: 'Appveyor'
+    pool:
+      vmImage: 'vs2017-win2016'
+    variables:
+      python.version: '3.6'
+    strategy:
+      matrix:
+        JS:
+          name: 'javascript'
+          testResultsFiles: 'tests/**/junit.xml'
+          python.version: '3.5'
+        Python:
+          name: 'python'
+        Integrity:
+          name: 'integrity'
+
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'install python'
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: 'python -m pip install -U pip'
+        displayName: 'upgrade pip'
+      - script: 'pip install --upgrade -e ".[test]"'
+        displayName: 'install pip deps'
+      - script: 'jupyter kernelspec list'
+        displayName: 'list kernels'
+      - script: 'jlpm versions'
+        displayName: 'list jlpm versions'
+      - script: 'jlpm config current'
+        displayName: 'list jlpm config'
+      - script: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
+        displayName: 'run tests'
+      - task: PublishTestResults@2
+        displayName: 'publish results'
+        condition: variables['testResultsFiles']
+        inputs:
+          testResultsFiles: '$(testResultsFiles)'
+          testRunTitle: 'Windows - $(name)'
+          mergeTestResults: true

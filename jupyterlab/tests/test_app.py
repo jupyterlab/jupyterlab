@@ -237,7 +237,7 @@ class JestApp(ProcessTestApp):
         if self.coverage:
             cmd += [jest, '--coverage']
         elif debug:
-            cmd += ['--inspect-brk', jest,  '--no-cache']
+            cmd += ['--inspect-brk', jest, '--no-cache']
             if self.watchAll:
                 cmd += ['--watchAll']
             else:

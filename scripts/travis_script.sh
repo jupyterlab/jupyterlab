@@ -11,7 +11,7 @@ python -c "from jupyterlab.commands import build_check; build_check()"
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
-    py.test -v
+    py.test -v --junitxml=junit.xml
 fi
 
 
