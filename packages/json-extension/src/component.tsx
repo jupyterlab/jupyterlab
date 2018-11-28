@@ -9,6 +9,8 @@ import Highlight from 'react-highlighter';
 
 import JSONTree from 'react-json-tree';
 
+import { InputGroup } from '@jupyterlab/ui-components';
+
 import { JSONArray, JSONObject, JSONValue } from '@phosphor/coreutils';
 
 /**
@@ -25,14 +27,14 @@ export interface IProps {
  */
 export interface IState {
   filter?: string;
+  value: string;
 }
 
 /**
  * A component that renders JSON data as a collapsible tree.
  */
 export class Component extends React.Component<IProps, IState> {
-  state = { filter: '' };
-  input: Element = null;
+  state = { filter: '', value: '' };
   timer: number = 0;
 
   componentDidMount() {
@@ -65,31 +67,14 @@ export class Component extends React.Component<IProps, IState> {
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div style={{ position: 'relative', width: '100%' }}>
-        <input
-          ref={ref => (this.input = ref)}
-          onChange={event => {
-            if (this.timer) {
-              window.clearTimeout(this.timer);
-            }
-            const filter = event.target.value;
-            this.timer = window.setTimeout(() => {
-              this.setState({ filter } as IState);
-              this.timer = 0;
-            }, 300);
-          }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '33%',
-            maxWidth: 150,
-            zIndex: 10,
-            fontSize: 13,
-            padding: '4px 2px'
-          }}
+      <div className="container">
+        <InputGroup
+          className="filter"
           type="text"
           placeholder="Filter..."
+          onChange={this.handleChange}
+          value={this.state.value}
+          rightIcon="search"
         />
         <JSONTree
           data={data}
