@@ -29,6 +29,7 @@ import {
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '../style/index.css';
+import { combineClassNames } from './utils';
 
 export { Intent } from '@blueprintjs/core/lib/esm/common/intent';
 
@@ -42,8 +43,12 @@ interface IInputGroupProps extends IBPInputGroupProps {
 
 export const Button = (props: IButtonProps) => (
   <BPButton
-    className={props.minimal ? 'jp-Button minimal' : 'jp-Button'}
     {...props}
+    className={combineClassNames(
+      props.className,
+      props.minimal && 'minimal',
+      'jp-Button'
+    )}
   />
 );
 
@@ -51,29 +56,43 @@ export const InputGroup = (props: IInputGroupProps) => {
   if (props.rightIcon) {
     return (
       <BPInputGroup
-        className="jp-InputGroup"
+        {...props}
+        className={combineClassNames(props.className, 'jp-InputGroup')}
         rightElement={
-          <div className="jp-InputGroupAction right">
+          <div className="jp-InputGroupAction">
             <Icon className="jp-Icon" icon={props.rightIcon} />
           </div>
         }
-        {...props}
       />
     );
   }
-  return <BPInputGroup className="jp-InputGroup" {...props} />;
+  return (
+    <BPInputGroup
+      {...props}
+      className={combineClassNames(props.className, 'jp-InputGroup')}
+    />
+  );
 };
 
 export const Icon = (props: IIconProps) => (
-  <BPIcon className="jp-Icon" {...props} />
+  <BPIcon
+    {...props}
+    className={combineClassNames(props.className, 'jp-Icon')}
+  />
 );
 
 export const Collapse = (props: ICollapseProps) => <BPCollapse {...props} />;
 
 export const HTMLSelect = (props: IHTMLSelectProps) => (
-  <BPHTMLSelect className="jp-HTMLSelect" {...props} />
+  <BPHTMLSelect
+    {...props}
+    className={combineClassNames(props.className, 'jp-HTMLSelect')}
+  />
 );
 
 export const Select = (props: ISelectProps<any>) => (
-  <BPSelect className="jp-Select" {...props} />
+  <BPSelect
+    {...props}
+    className={combineClassNames(props.className, 'jp-Select')}
+  />
 );
