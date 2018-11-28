@@ -368,40 +368,48 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('.restartKernel()', () => {
-      it('should restart if the user accepts the dialog', async () => {
-        let called = false;
+    describe('#restartKernel()', () => {
+      it(
+        'should restart if the user accepts the dialog',
+        async () => {
+          let called = false;
 
-        session.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
-        await session.initialize();
+          session.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
+          await session.initialize();
 
-        const restart = ClientSession.restartKernel(session.kernel);
+          const restart = ClientSession.restartKernel(session.kernel);
 
-        await acceptDialog();
-        await restart;
-        expect(called).to.equal(true);
-      });
+          await acceptDialog();
+          await restart;
+          expect(called).to.equal(true);
+        },
+        30000
+      ); // Allow for slower CI
 
-      it('should not restart if the user rejects the dialog', async () => {
-        let called = false;
+      it(
+        'should not restart if the user rejects the dialog',
+        async () => {
+          let called = false;
 
-        await session.initialize();
-        session.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
+          await session.initialize();
+          session.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
 
-        const restart = ClientSession.restartKernel(session.kernel);
+          const restart = ClientSession.restartKernel(session.kernel);
 
-        await dismissDialog();
-        await restart;
-        expect(called).to.equal(false);
-      });
+          await dismissDialog();
+          await restart;
+          expect(called).to.equal(false);
+        },
+        30000
+      ); // Allow for slower CI
     });
 
     describe('.getDefaultKernel()', () => {
