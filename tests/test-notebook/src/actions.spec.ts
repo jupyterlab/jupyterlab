@@ -566,7 +566,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
-      });
+      }).timeout(30000); // Allow for slower CI
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
