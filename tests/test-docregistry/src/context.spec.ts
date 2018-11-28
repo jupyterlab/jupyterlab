@@ -195,7 +195,6 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         await context.ready;
         expect(context.model.cells.canUndo).to.equal(false);
-        await dismissDialog();
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
@@ -295,7 +294,6 @@ describe('docregistry/context', () => {
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).to.equal('foo');
-        await dismissDialog();
       });
 
       it('should should preserve LF line endings upon save', async () => {
