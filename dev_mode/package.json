@@ -91,7 +91,7 @@
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.6.0",
     "ajv": "~5.1.6",
-    "codemirror": "~5.39.0",
+    "codemirror": "~5.42.0",
     "comment-json": "^1.1.3",
     "es6-promise": "~4.1.1",
     "marked": "0.5.1",
