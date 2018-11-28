@@ -129,7 +129,6 @@ class LabWorkspaceExportApp(JupyterApp):
     If a workspace name is passed in, this command will export that workspace.
     If no workspace is found, this command will export an empty workspace.
     """
-
     def start(self):
         app = LabApp(config=self.config)
         base_url = app.base_url
@@ -164,6 +163,17 @@ class LabWorkspaceImportApp(JupyterApp):
     This command will import a workspace from a JSON file. The format of the
         file must be the same as what the export functionality emits.
     """
+    workspace_name = Unicode(
+        config=True, 
+        help="""
+        Workspace name. If given, the workspace ID in the imported 
+        file will be replaced with a new ID pointing to this 
+        workspace name.
+        """
+    )
+    aliases = {
+        'name': 'LabWorkspaceImportApp.workspace_name'
+    }
 
     def start(self):
         app = LabApp(config=self.config)
@@ -214,16 +224,19 @@ class LabWorkspaceImportApp(JupyterApp):
         if 'data' not in workspace:
             raise Exception('The `data` field is missing.')
 
-        if 'metadata' not in workspace:
-            raise Exception('The `metadata` field is missing.')
+        # See if workspace name is given, inject into workspace.
+        if self.workspace_name != '':
+            workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
+            workspace['metadata'] = {'id': workspace_id}
 
-        if 'id' not in workspace['metadata']:
+        elif 'id' not in workspace['metadata']:
             raise Exception('The `id` field is missing in `metadata`.')
 
-        id = workspace['metadata']['id']
-        if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-            error = '%s does not match page_url or start with workspaces_url.'
-            raise Exception(error % id)
+        else:
+            id = workspace['metadata']['id']
+            if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
+                error = '%s does not match page_url or start with workspaces_url.'
+                raise Exception(error % id)
 
         return workspace
 
@@ -236,7 +249,6 @@ class LabWorkspaceApp(JupyterApp):
     There are two sub-commands for export or import of workspaces. This app
         should not otherwise do any work.
     """
-
     subcommands = dict()
     subcommands['export'] = (
         LabWorkspaceExportApp,
