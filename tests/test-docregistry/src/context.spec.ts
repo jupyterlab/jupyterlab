@@ -365,16 +365,16 @@ describe('docregistry/context', () => {
           await acceptDialog(); // Accept rename dialog
           await acceptDialog(); // Accept conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(newPath);
         await promise;
+        expect(context.path).to.equal(newPath);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -388,16 +388,16 @@ describe('docregistry/context', () => {
           await acceptDialog(); // Accept rename dialog
           await dismissDialog(); // Reject conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(oldPath);
         await promise;
+        expect(context.path).to.equal(oldPath);
       });
 
       it('should just save if the file name does not change', async () => {
