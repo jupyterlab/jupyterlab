@@ -285,6 +285,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this.value.text = '';
       Signal.clearData(this);
     }
 
