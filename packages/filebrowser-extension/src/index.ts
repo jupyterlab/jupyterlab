@@ -275,23 +275,30 @@ function activateBrowser(
       maybeCreate();
     });
 
+    let navigateToCurrentDirectory: boolean = false;
+
+    settingRegistry
+      .load('@jupyterlab/filebrowser-extension:browser')
+      .then(settings => {
+        settings.changed.connect(settings => {
+          navigateToCurrentDirectory = settings.get(
+            'navigateToCurrentDirectory'
+          ).composite as boolean;
+        });
+        navigateToCurrentDirectory = settings.get('navigateToCurrentDirectory')
+          .composite as boolean;
+      });
+
     // Whether to automatically navigate to a document's current directory
     shell.currentChanged.connect((shell, change) => {
-      settingRegistry
-        .load('@jupyterlab/filebrowser-extension:browser')
-        .then(settings => {
-          const navigateToCurrentDirectory = settings.get(
-            'navigateToCurrentDirectory'
-          ).composite as boolean | null;
-          if (navigateToCurrentDirectory) {
-            const { newValue } = change;
-            const context = docManager.contextForWidget(newValue);
-            if (context) {
-              commands.execute('filebrowser:activate', { path: context.path });
-              commands.execute('filebrowser:navigate', { path: context.path });
-            }
-          }
-        });
+      if (navigateToCurrentDirectory) {
+        const { newValue } = change;
+        const context = docManager.contextForWidget(newValue);
+        if (context) {
+          commands.execute('filebrowser:activate', { path: context.path });
+          commands.execute('filebrowser:navigate', { path: context.path });
+        }
+      }
     });
 
     maybeCreate();
