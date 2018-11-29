@@ -1035,9 +1035,10 @@ function addCommands(
           args['format'] as string,
           notebookPath
         ) + '?download=true';
-      const child = window.open('', '_blank');
+      const child = window.open('', '_blank', 'noopener');
       const { context } = current;
 
+      child.opener = null;
       if (context.model.dirty && !context.model.readOnly) {
         return context.save().then(() => {
           child.location.assign(url);
