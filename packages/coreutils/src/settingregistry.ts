@@ -35,6 +35,11 @@ const copy = JSONExt.deepCopy;
 const TRANSFORM_TIMEOUT = 7000;
 
 /**
+ * The ASCII record separator character.
+ */
+const RECORD_SEPARATOR = String.fromCharCode(30);
+
+/**
  * An implementation of a schema validator.
  */
 export interface ISchemaValidator {
@@ -743,19 +748,16 @@ export class SettingRegistry {
    *
    * @param transforms - The transform functions applied to the plugin.
    *
-   * @returns A disposable that removes the setting transform from the registry.
+   * @returns A disposable that removes the transforms from the registry.
    *
    * #### Notes
    * - `compose` transformations: The registry automatically overwrites a
    * plugin's default values with user overrides, but a plugin may instead wish
    * to merge values. This behavior can be accomplished in a `compose`
    * transformation.
-   * - `plugin` transformations: The registry uses the plugin data that is
+   * - `fetch` transformations: The registry uses the plugin data that is
    * fetched from its connector. If a plugin wants to override, e.g. to update
-   * its schema with dynamic defaults, a `plugin` transformation can be applied.
-   * - `settings` transformations: The registry creates a settings object to
-   * return to clients loading a plugin. If a custom settings object is
-   * necessary, a `settings` transformation can be applied.
+   * its schema with dynamic defaults, a `fetch` transformation can be applied.
    */
   transform(
     plugin: string,
@@ -866,7 +868,7 @@ export class SettingRegistry {
   }
 
   /**
-   * Transform the plugin or settings if necessary.
+   * Transform the plugin if necessary.
    */
   private async _transform(
     phase: ISettingRegistry.IPlugin.Phase,
@@ -887,7 +889,7 @@ export class SettingRegistry {
     // If the timeout has not been exceeded, stall and try again.
     if (elapsed < TRANSFORM_TIMEOUT) {
       await new Promise(resolve => {
-        window.setTimeout(() => {
+        setTimeout(() => {
           resolve();
         }, TRANSFORM_TIMEOUT / 20);
       });
@@ -1149,7 +1151,7 @@ export namespace SettingRegistry {
    *
    * @param user - The list of user shortcut overrides and additions.
    *
-   * @returns A merged list without disabled and overriden shortcuts.
+   * @returns A loadable list of shortcuts (omitting disabled and overridden).
    */
   export function reconcileShortcuts(
     defaults: ISettingRegistry.IShortcut[],
@@ -1164,7 +1166,7 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = shortcut.keys.join('\n');
+      const keys = shortcut.keys.join(RECORD_SEPARATOR);
       const { selector } = shortcut;
 
       if (!(keys in memo)) {
@@ -1181,7 +1183,7 @@ export namespace SettingRegistry {
 
     // If a default shortcut collides with another default, warn and filter.
     // If a shortcut has already been added by the user preferences, filter it
-    // out too.
+    // out too (this includes shortcuts that are disabled by user preferences).
     defaults = defaults.filter(shortcut => {
       const { disabled } = shortcut;
 
@@ -1189,11 +1191,8 @@ export namespace SettingRegistry {
         return false;
       }
 
-      const keys = shortcut.keys.join('\n');
+      const keys = shortcut.keys.join(RECORD_SEPARATOR);
 
-      if (keys === '') {
-        return false;
-      }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
