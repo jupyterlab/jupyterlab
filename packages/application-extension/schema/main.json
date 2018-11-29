@@ -6,44 +6,32 @@
     {
       "command": "application:activate-next-tab",
       "keys": ["Ctrl Shift ]"],
-      "selector": "body",
-      "title": "Activate Next Tab",
-      "category": "Main Area"
+      "selector": "body"
     },
     {
       "command": "application:activate-previous-tab",
       "keys": ["Ctrl Shift ["],
-      "selector": "body",
-      "title": "Activate Previous Tab",
-      "category": "Main Area"
+      "selector": "body"
     },
     {
       "command": "application:toggle-mode",
       "keys": ["Accel Shift D"],
-      "selector": "body",
-      "title": "Toggle Single-Document Mode",
-      "category": "Main Area"
+      "selector": "body"
     },
     {
       "command": "application:toggle-left-area",
       "keys": ["Accel B"],
-      "selector": "body",
-      "title": "Toggle Left Area",
-      "category": "Main Area"
+      "selector": "body"
     },
     {
       "command": "application:toggle-right-area",
       "keys": [""],
-      "selector": "body",
-      "title": "Toggle Right Area",
-      "category": "Main Area"
+      "selector": "body"
     },
     {
       "command": "application:toggle-presentation-mode",
       "keys": [""],
-      "selector": "body",
-      "title": "Toggle Presentation Mode",
-      "category": "Main Area"
+      "selector": "body"
     }
   ],
   "properties": {},

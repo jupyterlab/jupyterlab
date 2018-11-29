@@ -5,16 +5,12 @@
     {
       "command": "console:linebreak",
       "keys": ["Enter"],
-      "selector": ".jp-CodeConsole-promptCell",
-      "title": "Insert Line Break",
-      "category": "Console"
+      "selector": ".jp-CodeConsole-promptCell"
     },
     {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],
-      "selector": ".jp-CodeConsole-promptCell",
-      "title": "Run Cell (forced)",
-      "category": "Console"
+      "selector": ".jp-CodeConsole-promptCell"
     }
   ],
   "properties": {},

@@ -5,23 +5,17 @@
     {
       "command": "settingeditor:debug",
       "keys": ["Accel I"],
-      "selector": ".jp-SettingEditor",
-      "title": "Open Debugger",
-      "category": "Settings Editor"
+      "selector": ".jp-SettingEditor"
     },
     {
       "command": "settingeditor:open",
       "keys": ["Accel ,"],
-      "selector": "body",
-      "title": "Open Settings Editor",
-      "category": "Settings Editor"
+      "selector": "body"
     },
     {
       "command": "settingeditor:save",
       "keys": ["Accel S"],
-      "selector": ".jp-SettingEditor",
-      "title": "Save Settings",
-      "category": "Settings Editor"
+      "selector": ".jp-SettingEditor"
     }
   ],
   "properties": {},

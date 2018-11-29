@@ -5,9 +5,7 @@
     {
       "command": "help:toggle",
       "keys": ["Ctrl Shift H"],
-      "selector": "body",
-      "title": "Toggle Help",
-      "category": "Help"
+      "selector": "body"
     }
   ],
   "properties": {},

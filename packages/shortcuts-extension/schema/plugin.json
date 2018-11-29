@@ -16,9 +16,7 @@
           "minItems": 1,
           "type": "array"
         },
-        "selector": { "type": "string" },
-        "title": { "type": "string" },
-        "category": { "type": "string" }
+        "selector": { "type": "string" }
       },
       "type": "object"
     }

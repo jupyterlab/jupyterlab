@@ -5,9 +5,7 @@
     {
       "command": "apputils:activate-command-palette",
       "keys": ["Accel Shift C"],
-      "selector": "body",
-      "title": "Activate Command Palette",
-      "category": "Main Area"
+      "selector": "body"
     }
   ],
   "additionalProperties": false,

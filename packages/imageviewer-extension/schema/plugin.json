@@ -5,58 +5,42 @@
     {
       "command": "imageviewer:flip-horizontal",
       "keys": ["H"],
-      "selector": ".jp-ImageViewer",
-      "title": "Flip Image Horizontally",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:flip-vertical",
       "keys": ["V"],
-      "selector": ".jp-ImageViewer",
-      "title": "Flip Image Vertically",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:invert-colors",
       "keys": ["I"],
-      "selector": ".jp-ImageViewer",
-      "title": "Invert Colors",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:reset-image",
       "keys": ["0"],
-      "selector": ".jp-ImageViewer",
-      "title": "Reset Image",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:rotate-clockwise",
       "keys": ["]"],
-      "selector": ".jp-ImageViewer",
-      "title": "Rotate Clockwise",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:rotate-counterclockwise",
       "keys": ["["],
-      "selector": ".jp-ImageViewer",
-      "title": "Rotate Counterclockwise",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:zoom-in",
       "keys": ["="],
-      "selector": ".jp-ImageViewer",
-      "title": "Zoom In",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     },
     {
       "command": "imageviewer:zoom-out",
       "keys": ["-"],
-      "selector": ".jp-ImageViewer",
-      "title": "Zoom Out",
-      "category": "Image Viewer"
+      "selector": ".jp-ImageViewer"
     }
   ],
   "properties": {},

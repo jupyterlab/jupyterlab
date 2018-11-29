@@ -382,11 +382,6 @@ export namespace ISettingRegistry {
     args?: JSONObject;
 
     /**
-     * The shortcut category for rendering and organization of shortcuts.
-     */
-    category: string;
-
-    /**
      * The command invoked by the shortcut.
      */
     command: string;
@@ -405,11 +400,6 @@ export namespace ISettingRegistry {
      * The CSS selector applicable to the shortcut.
      */
     selector: string;
-
-    /**
-     * The title of the shortcut.
-     */
-    title: string;
   }
 }
 

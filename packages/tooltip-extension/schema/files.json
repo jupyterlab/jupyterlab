@@ -5,9 +5,7 @@
     {
       "command": "tooltip:launch-file",
       "keys": ["Shift Tab"],
-      "selector": ".jp-FileEditor",
-      "title": "Launch Tooltip",
-      "category": "Tooltips"
+      "selector": ".jp-FileEditor"
     }
   ],
   "properties": {},

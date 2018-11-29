@@ -5,9 +5,7 @@
     {
       "command": "inspector:open",
       "keys": ["Accel I"],
-      "selector": "body",
-      "title": "Open Inspector",
-      "category": "Inspector"
+      "selector": "body"
     }
   ],
   "properties": {},

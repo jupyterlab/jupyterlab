@@ -5,107 +5,77 @@
     {
       "command": "editmenu:clear-all",
       "keys": [""],
-      "selector": "[data-jp-undoer]",
-      "title": "Clear All",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:clear-current",
       "keys": [""],
-      "selector": "[data-jp-undoer]",
-      "title": "Clear",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find",
       "keys": [""],
-      "selector": "[data-jp-undoer]",
-      "title": "Find",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:find-and-replace",
       "keys": [""],
-      "selector": "[data-jp-undoer]",
-      "title": "Find and Replace",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:redo",
       "keys": ["Ctrl Shift Z"],
-      "selector": "[data-jp-undoer]",
-      "title": "Redo",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:undo",
       "keys": ["Ctrl Z"],
-      "selector": "[data-jp-undoer]",
-      "title": "Undo",
-      "category": "Editing"
+      "selector": "[data-jp-undoer]"
     },
     {
       "command": "filemenu:close-and-cleanup",
       "keys": ["Ctrl Shift Q"],
-      "selector": ".jp-Activity",
-      "title": "Close and cleanup file",
-      "category": "File Operations"
+      "selector": ".jp-Activity"
     },
     {
       "command": "kernelmenu:interrupt",
       "keys": ["I", "I"],
-      "selector": "[data-jp-kernel-user]:focus",
-      "title": "Interrupt Kernel",
-      "category": "Kernel Operations"
+      "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart",
       "keys": ["0", "0"],
-      "selector": "[data-jp-kernel-user]:focus",
-      "title": "Restart Kernel",
-      "category": "Kernel Operations"
+      "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:restart-and-clear",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus",
-      "title": "Restart Kernel and Clear",
-      "category": "Kernel Operations"
+      "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "kernelmenu:shutdown",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus",
-      "title": "Shutdown Kernel",
-      "category": "Kernel Operations"
+      "selector": "[data-jp-kernel-user]:focus"
     },
     {
       "command": "runmenu:restart-and-run-all",
       "keys": [""],
-      "selector": "[data-jp-code-runner]",
-      "title": "Restart Kernel and Run All",
-      "category": "Run Menu"
+      "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run",
       "keys": ["Shift Enter"],
-      "selector": "[data-jp-code-runner]",
-      "title": "Run",
-      "category": "Run Menu"
+      "selector": "[data-jp-code-runner]"
     },
     {
       "command": "runmenu:run-all",
       "keys": [""],
-      "selector": "[data-jp-code-runner]",
-      "title": "Run All",
-      "category": "Run Menu"
+      "selector": "[data-jp-code-runner]"
     },
     {
       "command": "tabmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
-      "selector": "body",
-      "title": "Activate Previously Used Tab",
-      "category": "Main Area"
+      "selector": "body"
     }
   ],
   "properties": {},

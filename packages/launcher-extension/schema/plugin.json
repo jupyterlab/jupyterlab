@@ -5,9 +5,7 @@
     {
       "command": "launcher:create",
       "keys": [""],
-      "selector": "body",
-      "title": "New Launcher",
-      "category": "Main Area"
+      "selector": "body"
     }
   ],
   "properties": {},

@@ -30,11 +30,9 @@
           "minItems": 1,
           "type": "array"
         },
-        "selector": { "type": "string" },
-        "title": { "type": "string" },
-        "category": { "type": "string" }
+        "selector": { "type": "string" }
       },
-      "required": ["command", "keys", "selector", "title", "category"],
+      "required": ["command", "keys", "selector"],
       "type": "object"
     }
   }

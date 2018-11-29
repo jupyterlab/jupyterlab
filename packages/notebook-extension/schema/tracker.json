@@ -5,289 +5,207 @@
     {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Code Cell Type",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-1",
       "keys": ["1"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 1",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-2",
       "keys": ["2"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 2",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-3",
       "keys": ["3"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 3",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-4",
       "keys": ["4"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 4",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-5",
       "keys": ["5"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 5",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-heading-6",
       "keys": ["6"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Heading 6",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-markdown",
       "keys": ["M"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Markdown Cell Type",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:change-cell-to-raw",
       "keys": ["R"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Change to Raw Cell Type",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:copy-cell",
       "keys": ["C"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Copy Cell(s)",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:cut-cell",
       "keys": ["X"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Cut Cell(s)",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:delete-cell",
       "keys": ["D", "D"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Delete Cell(s)",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:enter-command-mode",
       "keys": ["Escape"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Enter Command Mode",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:enter-command-mode",
       "keys": ["Ctrl M"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Enter Command Mode",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:enter-edit-mode",
       "keys": ["Enter"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Enter Edit Mode",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
       "keys": ["Shift ArrowUp"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Extend Selection Above",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
       "keys": ["Shift K"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Extend Selection Above",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
       "keys": ["Shift ArrowDown"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Extend Selection Below",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
       "keys": ["Shift J"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Extend Selection Below",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:insert-cell-above",
       "keys": ["A"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Insert Cell Above",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:insert-cell-below",
       "keys": ["B"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Insert Cell Below",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:merge-cells",
       "keys": ["Shift M"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Merge Selected Cells",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-down",
       "keys": ["ArrowDown"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Move Cursor Down",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-down",
       "keys": ["J"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Move Cursor Down",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["ArrowUp"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Move Cursor Up",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["K"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Move Cursor Up",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Paste Cell(s) Below",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:redo-cell-action",
       "keys": ["Shift Z"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Redo Cell Operation",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
       "keys": ["Ctrl Enter"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Run Cell(s)",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell",
       "keys": ["Ctrl Enter"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Run Cell(s)",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-cell-and-insert-below",
       "keys": ["Alt Enter"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Run Cell(s) and Insert Below",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:run-cell-and-insert-below",
       "keys": ["Alt Enter"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Run Cell and Insert Below",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-in-console",
       "keys": [""],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Run In Console",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:run-cell-and-select-next",
       "keys": ["Shift Enter"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Run Cell and Select Next",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "viewmenu:line-numbering",
       "keys": [""],
-      "selector": ".jp-Notebook.jp-mod-commandMode",
-      "title": "Show Line Numbers",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "viewmenu:match-brackets",
       "keys": [""],
-      "selector": ".jp-Notebook.jp-mod-commandMode",
-      "title": "Match Brackets",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:select-all",
       "keys": ["Accel A"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Select All Cells",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:split-cell-at-cursor",
       "keys": ["Ctrl Shift -"],
-      "selector": ".jp-Notebook.jp-mod-editMode",
-      "title": "Split Cell at Cursor",
-      "category": "Notebook Operations"
+      "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:toggle-all-cell-line-numbers",
       "keys": ["Shift L"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Toggle All Cell Line Numbers",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:toggle-cell-line-numbers",
       "keys": ["L"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Toggle Cell Line Numbers",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
-      "selector": ".jp-Notebook:focus",
-      "title": "Undo Cell Operation",
-      "category": "Notebook Cell Operations"
+      "selector": ".jp-Notebook:focus"
     }
   ],
   "title": "Notebook",

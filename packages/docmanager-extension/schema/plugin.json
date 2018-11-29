@@ -7,23 +7,17 @@
     {
       "command": "docmanager:close",
       "keys": ["Ctrl Q"],
-      "selector": ".jp-Activity",
-      "title": "Close Activity",
-      "category": "File Operations"
+      "selector": ".jp-Activity"
     },
     {
       "command": "docmanager:save",
       "keys": ["Accel S"],
-      "selector": "body",
-      "title": "Save",
-      "category": "File Operations"
+      "selector": "body"
     },
     {
       "command": "docmanager:save-as",
       "keys": ["Accel Shift S"],
-      "selector": "body",
-      "title": "Save As",
-      "category": "File Operations"
+      "selector": "body"
     }
   ],
   "properties": {
