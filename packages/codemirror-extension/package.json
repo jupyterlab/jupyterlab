@@ -40,7 +40,7 @@
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/statusbar": "^0.7.1",
     "@phosphor/widgets": "^1.6.0",
-    "codemirror": "~5.39.0"
+    "codemirror": "~5.42.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
