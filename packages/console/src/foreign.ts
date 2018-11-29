@@ -86,7 +86,7 @@ export class ForeignHandler implements IDisposable {
 
     // Only process messages if foreign cell injection is enabled,
     // or if it is a "transient_display_data" message.
-    if (!this._enabled && msgType != 'transient_display_data') {
+    if (!this._enabled && msgType !== 'transient_display_data') {
       return false;
     }
     let kernel = this.session.kernel;
@@ -113,15 +113,16 @@ export class ForeignHandler implements IDisposable {
         model.trusted = true;
         parent.update();
         return true;
-      case 'execute_result':
       case 'transient_display_data':
         // the message is just a regular display_data message
         msgType = 'display_data';
         if (!this._cells.has(parentMsgId)) {
           // if "Show All Kernel Activity" is disabled and the trnasient messages
           // are passed without execute_input, create a cell without input.
-          cell = this._newCell(parentMsgId, true);;
+          cell = this._newCell(parentMsgId, true);
         }
+      /* falls through */
+      case 'execute_result':
       case 'display_data':
       case 'stream':
       case 'error':
@@ -164,7 +165,7 @@ export class ForeignHandler implements IDisposable {
   private _cells = new Map<string, CodeCell>();
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
-  private _factory: (transient:boolean) => CodeCell;
+  private _factory: (transient: boolean) => CodeCell;
   private _isDisposed = false;
 }
 

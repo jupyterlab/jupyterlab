@@ -67,7 +67,6 @@ const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
  */
 const TRANSIENT_CELL_CLASS = 'jp-CodeConsole-transientCell';
 
-
 /**
  * The class name of the active prompt cell.
  */
@@ -131,7 +130,8 @@ export class CodeConsole extends Widget {
     this._foreignHandler = new ForeignHandler({
       session: this.session,
       parent: this,
-      cellFactory: (transient: boolean = false) => this._createCodeCell(transient)
+      cellFactory: (transient: boolean = false) =>
+        this._createCodeCell(transient)
     });
 
     this._history = new ConsoleHistory({

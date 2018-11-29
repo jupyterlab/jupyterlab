@@ -168,7 +168,7 @@ export namespace KernelMessage {
   /**
    * Test whether a kernel message is an `'transient_display_data'` message.
    */
-  export function isTransientDisplayDataMsg (
+  export function isTransientDisplayDataMsg(
     msg: IMessage
   ): msg is ITransientDisplayDataMsg {
     return msg.header.msg_type === 'transient_display_data';
