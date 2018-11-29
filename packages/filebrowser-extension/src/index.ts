@@ -94,7 +94,7 @@ namespace CommandIDs {
 const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
-  requires: [IFileBrowserFactory, ILayoutRestorer],
+  requires: [IFileBrowserFactory, ILayoutRestorer, IDocumentManager],
   autoStart: true
 };
 
@@ -223,7 +223,8 @@ function activateFactory(
 function activateBrowser(
   app: JupyterLab,
   factory: IFileBrowserFactory,
-  restorer: ILayoutRestorer
+  restorer: ILayoutRestorer,
+  docManager: IDocumentManager
 ): void {
   const browser = factory.defaultBrowser;
   const { commands, shell } = app;
@@ -261,6 +262,17 @@ function activateBrowser(
     shell.layoutModified.connect(() => {
       maybeCreate();
     });
+
+    // Keep the session object on the status item up-to-date.
+    shell.currentChanged.connect((shell, change) => {
+      const { newValue } = change;
+      const context = docManager.contextForWidget(newValue);
+      // const path = `/${PathExt.dirname(context.path)}`;
+      // browser.model.cd(path);
+      commands.execute('filebrowser:activate', { path: context.path });
+      commands.execute('filebrowser:navigate', { path: context.path });
+    });
+
     maybeCreate();
   });
 }
