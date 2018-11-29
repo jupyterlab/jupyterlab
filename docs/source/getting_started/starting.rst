@@ -13,7 +13,7 @@ JupyterLab will open automatically in your browser.
 
 You may access JupyterLab by entering the notebook server's :ref:`URL <urls>`
 into the browser. JupyterLab sessions always reside in a
-:ref:`workspace <url-workspaces>`. The default workspace is the main ``/lab`` URL:
+:ref:`workspace <url-workspaces-ui>`. The default workspace is the main ``/lab`` URL:
 
 .. code-block:: none
 
@@ -27,7 +27,7 @@ Like the classic notebook,
 JupyterLab provides a way for users to copy URLs that
 :ref:`open a specific notebook or file <url-tree>`. Additionally,
 JupyterLab URLs are an advanced part of the user interface that allows for
-managing :ref:`workspaces <url-workspaces>`. To learn more about URLs in
+managing :ref:`workspaces <url-workspaces-ui>`. To learn more about URLs in
 Jupyterlab, visit :ref:`urls`.
 
 To open the classic Notebook from JupyterLab, select "Launch Classic Notebook"

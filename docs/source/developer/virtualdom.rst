@@ -1,7 +1,7 @@
 Virtual DOM and React
 ---------------------
 
-JupyterLab is based on `PhosphorJS <http://phosphorjs.github.io/>`__,
+JupyterLab is based on `PhosphorJS <https://phosphorjs.github.io/>`__,
 which provides a flexible ``Widget`` class that handles the following:
 
 -  Resize events that propagate down the Widget hierarchy.

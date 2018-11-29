@@ -248,8 +248,8 @@ Workspaces
 ^^^^^^^^^^
 
 We added new workspace support, which enables you to have multiple saved
-layouts, including in different browser windows. See the `workspace
-documentation <https://jupyterlab.readthedocs.io/en/stable/user/urls.html>`__
+layouts, including in different browser windows. See the
+:ref:`workspace documentation <url-workspaces-ui>`
 for more details.
 (`#4502 <https://github.com/jupyterlab/jupyterlab/issues/4502>`__,
 `#4708 <https://github.com/jupyterlab/jupyterlab/pull/4708>`__,

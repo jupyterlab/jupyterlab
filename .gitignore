@@ -42,3 +42,5 @@ examples/app/themes
 examples/app/schemas
 
 lerna-debug.log
+
+junit.xml

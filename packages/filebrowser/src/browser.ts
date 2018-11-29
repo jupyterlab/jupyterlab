@@ -9,8 +9,6 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 
 import { IIterator } from '@phosphor/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { BreadCrumbs } from './crumbs';
@@ -285,11 +283,6 @@ export namespace FileBrowser {
    * An options object for initializing a file browser widget.
    */
   export interface IOptions {
-    /**
-     * The command registry for use with the file browser.
-     */
-    commands: CommandRegistry;
-
     /**
      * The widget/DOM id of the file browser.
      */

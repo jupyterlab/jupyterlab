@@ -11,7 +11,7 @@ python -c "from jupyterlab.commands import build_check; build_check()"
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
-    py.test -v
+    py.test -v --junitxml=junit.xml
 fi
 
 
@@ -41,7 +41,8 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install "sphinx<1.8" sphinx_rtd_theme recommonmark
+    pip install sphinx sphinx_rtd_theme recommonmark
+    make linkcheck
     make html
     popd
 fi

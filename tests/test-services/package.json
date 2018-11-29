@@ -20,6 +20,7 @@
     "@phosphor/signaling": "^1.2.2",
     "chai": "~4.1.2",
     "jest": "^23.5.0",
+    "jest-junit": "^5.2.0",
     "node-fetch": "~2.2.0",
     "text-encoding": "~0.5.5",
     "ts-jest": "^23.1.4",

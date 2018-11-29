@@ -1460,6 +1460,7 @@ export class DirListing extends Widget {
       return;
     }
 
+    let name = newValue.name;
     if (args.type !== 'new' || !name) {
       return;
     }

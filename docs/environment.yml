@@ -3,6 +3,6 @@ channels:
   - conda-forge
 dependencies:
 - python=3.5
-- sphinx
+- sphinx>=1.8
 - sphinx_rtd_theme
 - recommonmark
