@@ -15,7 +15,13 @@ import {
   ToolbarButton
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import {
+  IStateDB,
+  PageConfig,
+  PathExt,
+  URLExt,
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -94,7 +100,12 @@ namespace CommandIDs {
 const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
-  requires: [IFileBrowserFactory, ILayoutRestorer, IDocumentManager],
+  requires: [
+    IFileBrowserFactory,
+    ILayoutRestorer,
+    IDocumentManager,
+    ISettingRegistry
+  ],
   autoStart: true
 };
 
@@ -224,7 +235,8 @@ function activateBrowser(
   app: JupyterLab,
   factory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
-  docManager: IDocumentManager
+  docManager: IDocumentManager,
+  settingRegistry: ISettingRegistry
 ): void {
   const browser = factory.defaultBrowser;
   const { commands, shell } = app;
@@ -263,14 +275,23 @@ function activateBrowser(
       maybeCreate();
     });
 
-    // Keep the session object on the status item up-to-date.
+    // Whether to automatically navigate to a document's current directory
     shell.currentChanged.connect((shell, change) => {
-      const { newValue } = change;
-      const context = docManager.contextForWidget(newValue);
-      // const path = `/${PathExt.dirname(context.path)}`;
-      // browser.model.cd(path);
-      commands.execute('filebrowser:activate', { path: context.path });
-      commands.execute('filebrowser:navigate', { path: context.path });
+      settingRegistry
+        .load('@jupyterlab/filebrowser-extension:browser')
+        .then(settings => {
+          const navigateToCurrentDirectory = settings.get(
+            'navigateToCurrentDirectory'
+          ).composite as boolean | null;
+          if (navigateToCurrentDirectory) {
+            const { newValue } = change;
+            const context = docManager.contextForWidget(newValue);
+            if (context) {
+              commands.execute('filebrowser:activate', { path: context.path });
+              commands.execute('filebrowser:navigate', { path: context.path });
+            }
+          }
+        });
     });
 
     maybeCreate();

@@ -1,6 +1,8 @@
 {
+  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-label": "File Browser",
   "title": "File Browser",
-  "description": "File browser settings.",
+  "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
     {
       "command": "filebrowser:create-main-launcher",
@@ -13,7 +15,14 @@
       "selector": "body"
     }
   ],
-  "properties": {},
+  "properties": {
+    "navigateToCurrentDirectory": {
+      "type": "boolean",
+      "title": "Navigate to document's current directory",
+      "description": "Whether to automatically navigate to a document's current directory",
+      "default": false
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }
