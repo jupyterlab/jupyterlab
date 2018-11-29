@@ -362,8 +362,8 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await acceptDialog();
+          await acceptDialog(); // Accept rename dialog
+          await acceptDialog(); // Accept conflict dialog
         };
         const promise = func();
         await manager.contents.save(newPath, {
@@ -385,8 +385,8 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await dismissDialog();
+          await acceptDialog(); // Accept rename dialog
+          await dismissDialog(); // Reject conflict dialog
         };
         const promise = func();
         await manager.contents.save(newPath, {
@@ -398,7 +398,6 @@ describe('docregistry/context', () => {
         await context.saveAs();
         expect(context.path).to.equal(oldPath);
         await promise;
-        await dismissDialog();
       });
 
       it('should just save if the file name does not change', async () => {
