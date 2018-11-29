@@ -1,38 +1,39 @@
-function List<M>(props) {
-  const [models, setModels] = useState(() => toArray(props.manager.running()));
+import * as React from 'react';
 
-  function handleRunningChanged(_, models) {
-    setModels(models.filter(props.filterRunning));
-  }
+import { ISignal } from '@phosphor/signaling';
 
-  useEffect(() => {
-    props.manager.runningChanged.connect(handleRunningChanged);
-    return function cleanup() {
-      props.manager.runningChanged.disconnect(handleRunningChanged);
-    };
-  });
-
-  return (
-    <ul>
-      {models.map((m, i) => (
-        <Item key={i} model={m} {...this.props} />
-      ))}
-    </ul>
-  );
+interface IUseSignalProps<SENDER, ARGS> {
+  signal: ISignal<SENDER, ARGS>;
+  initial: [SENDER, ARGS];
+  slot: (sender: SENDER, args: ARGS) => JSX.Element;
 }
 
-function List<M>(props) {
-  const [models, setModels] = useSignal(
-    () => toArray(props.manager.running()),
-    props.manager.runningChanged,
-    (sender, args) => args.filter(props.filterRunning)
-  );
+interface IUseSignalState<SENDER, ARGS> {
+  value: [SENDER, ARGS];
+}
 
-  return (
-    <ul>
-      {models.map((m, i) => (
-        <Item key={i} model={m} {...this.props} />
-      ))}
-    </ul>
-  );
+export class UseSignal<SENDER, ARGS> extends React.Component<
+  IUseSignalProps<SENDER, ARGS>,
+  IUseSignalState<SENDER, ARGS>
+> {
+  constructor(props: IUseSignalProps<SENDER, ARGS>) {
+    super(props);
+    this.state = { value: this.props.initial };
+  }
+
+  componentDidMount() {
+    this.props.signal.connect(this.slot);
+  }
+
+  componentWillUnmount() {
+    this.props.signal.disconnect(this.slot);
+  }
+
+  private slot = (sender: SENDER, args: ARGS) => {
+    this.setState({ value: [sender, args] });
+  };
+
+  render() {
+    return this.props.slot(...this.state.value);
+  }
 }

@@ -23,6 +23,8 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
 
+import { UseSignal } from './utils';
+
 import '../style/index.css';
 
 /**
@@ -147,29 +149,24 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
   );
 }
 
-class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
-  constructor(props: SessionProps<M>) {
-    super(props);
-    this.state = { models: toArray(props.manager.running()) };
-  }
-  render() {
+function List<M>(props: SessionProps<M>) {
+  function slot(_: any, models: M[]) {
     return (
       <ul className={LIST_CLASS}>
-        {this.state.models.map((m, i) => (
-          <Item key={i} model={m} {...this.props} />
+        {models.map((m, i) => (
+          <Item key={i} model={m} {...props} />
         ))}
       </ul>
     );
   }
-  componentDidMount() {
-    if (this.props.available) {
-      this.props.manager.runningChanged.connect((_, models) =>
-        this.setState({
-          models: models.filter(this.props.filterRunning || (_ => true))
-        })
-      );
-    }
-  }
+
+  return (
+    <UseSignal
+      signal={props.manager.runningChanged}
+      initial={[null, toArray(props.manager.running())]}
+      slot={slot}
+    />
+  );
 }
 
 /**
