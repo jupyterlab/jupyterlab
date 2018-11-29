@@ -162,13 +162,13 @@ describe('@jupyterlab/coreutils', () => {
         const one = 'foo';
         const two = 'bar';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[one] = { type: 'object' };
         connector.schemas[two] = { type: 'object' };
         await registry.load(one);
-        expect(registry.plugins).to.have.length(1);
+        expect(Object.keys(registry.plugins)).to.have.length(1);
         await registry.load(two);
-        expect(registry.plugins).to.have.length(2);
+        expect(Object.keys(registry.plugins)).to.have.length(2);
       });
     });
 
@@ -263,10 +263,10 @@ describe('@jupyterlab/coreutils', () => {
       it(`should resolve a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object' };
         const settings = (await registry.load(id)) as Settings;
-        expect(settings.plugin).to.equal(id);
+        expect(settings.id).to.equal(id);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -284,10 +284,10 @@ describe('@jupyterlab/coreutils', () => {
       it(`should load a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object' };
         const settings = await registry.reload(id);
-        expect(settings.plugin).to.equal(id);
+        expect(settings.id).to.equal(id);
       });
 
       it(`should replace a registered plugin's settings`, async () => {
@@ -295,7 +295,7 @@ describe('@jupyterlab/coreutils', () => {
         const first = 'Foo';
         const second = 'Bar';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object', title: first };
         let settings = await registry.reload(id);
         expect(settings.schema.title).to.equal(first);
@@ -403,6 +403,20 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
+    describe('#id', () => {
+      it('should expose the plugin ID', () => {
+        const id = 'alpha';
+        const data = { composite: {}, user: {} };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
+        const raw = '{ }';
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.id).to.equal(id);
+      });
+    });
+
     describe('#isDisposed', () => {
       it('should test whether the settings object is disposed', () => {
         const id = 'alpha';
@@ -420,15 +434,12 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#schema', () => {
-      it('should expose the plugin schema', () => {
+      it('should expose the plugin schema', async () => {
         const id = 'alpha';
-        const data = { composite: {}, user: {} };
         const schema: ISettingRegistry.ISchema = { type: 'object' };
-        const raw = '{ }';
-        const version = 'test';
-        const plugin = { id, data, raw, schema, version };
 
-        settings = new Settings({ plugin, registry });
+        connector.schemas[id] = schema;
+        settings = (await registry.load(id)) as Settings;
         expect(settings.schema).to.deep.equal(schema);
       });
     });
@@ -452,20 +463,6 @@ describe('@jupyterlab/coreutils', () => {
         settings = (await registry.load(id)) as Settings;
         await settings.set(key, value);
         expect(settings.user[key]).to.equal(value);
-      });
-    });
-
-    describe('#plugin', () => {
-      it('should expose the plugin ID', () => {
-        const id = 'alpha';
-        const data = { composite: {}, user: {} };
-        const schema: ISettingRegistry.ISchema = { type: 'object' };
-        const raw = '{ }';
-        const version = 'test';
-        const plugin = { id, data, raw, schema, version };
-
-        settings = new Settings({ plugin, registry });
-        expect(settings.plugin).to.equal(id);
       });
     });
 

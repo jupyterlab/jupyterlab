@@ -561,7 +561,9 @@ export class SettingRegistry {
     this.validator = options.validator || new DefaultSchemaValidator();
 
     // Preload with any available data at instantiation-time.
-    this._ready = this._preload(options.plugins);
+    if (options.plugins) {
+      this._ready = this._preload(options.plugins);
+    }
   }
 
   /**
@@ -873,7 +875,13 @@ export class SettingRegistry {
     }
 
     if (plugin.id in transformers) {
-      return transformers[plugin.id][phase].call(null, plugin);
+      const transformed = transformers[plugin.id][phase].call(null, plugin);
+
+      if (transformed.id !== plugin.id) {
+        throw new Error('Plugin transformations cannot change plugin IDs.');
+      }
+
+      return transformed;
     }
 
     // If the timeout has not been exceeded, stall and try again.
@@ -921,13 +929,9 @@ export class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    const { registry } = options;
-
     this.id = options.plugin.id;
-    this.registry = registry;
-    this.version = this.plugin.version;
-
-    registry.pluginChanged.connect(
+    this.registry = options.registry;
+    this.registry.pluginChanged.connect(
       this._onPluginChanged,
       this
     );
@@ -937,6 +941,11 @@ export class Settings implements ISettingRegistry.ISettings {
    * The plugin name.
    */
   readonly id: string;
+
+  /**
+   * The setting registry instance used as a back-end for these settings.
+   */
+  readonly registry: SettingRegistry;
 
   /**
    * A signal that emits when the plugin's settings have changed.
@@ -985,14 +994,11 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * The setting registry instance used as a back-end for these settings.
-   */
-  readonly registry: SettingRegistry;
-
-  /**
    * The published version of the NPM package containing these settings.
    */
-  readonly version: string;
+  get version(): string {
+    return this.plugin.version;
+  }
 
   /**
    * Return the defaults in a commented JSON format.
