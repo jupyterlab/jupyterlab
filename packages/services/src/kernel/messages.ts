@@ -166,6 +166,22 @@ export namespace KernelMessage {
   }
 
   /**
+   * Test whether a kernel message is an `'transient_display_data'` message.
+   */
+  export function isTransientDisplayDataMsg (
+    msg: IMessage
+  ): msg is ITransientDisplayDataMsg {
+    return msg.header.msg_type === 'transient_display_data';
+  }
+
+  /**
+   * A `'transient_display_data'` message on the `'iopub'` channel.
+   */
+  export interface ITransientDisplayDataMsg extends IDisplayDataMsg {
+    content: IDisplayDataMsg['content'];
+  }
+
+  /**
    * An `'execute_input'` message on the `'iopub'` channel.
    *
    * See [Code inputs](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-inputs).

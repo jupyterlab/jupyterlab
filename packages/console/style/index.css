@@ -58,6 +58,14 @@
 .jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
 }
 
+/* hide input of transient cells without input */
+.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-transientCell
+.jp-Cell-inputWrapper,
+.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-transientCell
+.jp-OutputPrompt {
+  display: none;
+}
+
 .jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
   background: transparent;
   border: 1px solid transparent;

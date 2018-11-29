@@ -82,8 +82,11 @@ export class ForeignHandler implements IDisposable {
     sender: IClientSession,
     msg: KernelMessage.IIOPubMessage
   ): boolean {
-    // Only process messages if foreign cell injection is enabled.
-    if (!this._enabled) {
+    let msgType = msg.header.msg_type;
+
+    // Only process messages if foreign cell injection is enabled,
+    // or if it is a "transient_display_data" message.
+    if (!this._enabled && msgType != 'transient_display_data') {
       return false;
     }
     let kernel = this.session.kernel;
@@ -97,7 +100,6 @@ export class ForeignHandler implements IDisposable {
     if (session === kernel.clientId) {
       return false;
     }
-    let msgType = msg.header.msg_type;
     let parentHeader = msg.parent_header as KernelMessage.IHeader;
     let parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
@@ -112,6 +114,14 @@ export class ForeignHandler implements IDisposable {
         parent.update();
         return true;
       case 'execute_result':
+      case 'transient_display_data':
+        // the message is just a regular display_data message
+        msgType = 'display_data';
+        if (!this._cells.has(parentMsgId)) {
+          // if "Show All Kernel Activity" is disabled and the trnasient messages
+          // are passed without execute_input, create a cell without input.
+          cell = this._newCell(parentMsgId, true);;
+        }
       case 'display_data':
       case 'stream':
       case 'error':
@@ -144,8 +154,8 @@ export class ForeignHandler implements IDisposable {
   /**
    * Create a new code cell for an input originated from a foreign session.
    */
-  private _newCell(parentMsgId: string): CodeCell {
-    let cell = this._factory();
+  private _newCell(parentMsgId: string, transient: boolean = false): CodeCell {
+    let cell = this._factory(transient);
     this._cells.set(parentMsgId, cell);
     this._parent.addCell(cell);
     return cell;
@@ -154,7 +164,7 @@ export class ForeignHandler implements IDisposable {
   private _cells = new Map<string, CodeCell>();
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
-  private _factory: () => CodeCell;
+  private _factory: (transient:boolean) => CodeCell;
   private _isDisposed = false;
 }
 

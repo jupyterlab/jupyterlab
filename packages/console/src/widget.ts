@@ -63,6 +63,12 @@ const BANNER_CLASS = 'jp-CodeConsole-banner';
 const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
+ * The class name of a cell with output from transient_display_message.
+ */
+const TRANSIENT_CELL_CLASS = 'jp-CodeConsole-transientCell';
+
+
+/**
  * The class name of the active prompt cell.
  */
 const PROMPT_CLASS = 'jp-CodeConsole-promptCell';
@@ -125,7 +131,7 @@ export class CodeConsole extends Widget {
     this._foreignHandler = new ForeignHandler({
       session: this.session,
       parent: this,
-      cellFactory: () => this._createCodeCell()
+      cellFactory: (transient: boolean = false) => this._createCodeCell(transient)
     });
 
     this._history = new ConsoleHistory({
@@ -560,13 +566,13 @@ export class CodeConsole extends Widget {
   /**
    * Create a new foreign cell.
    */
-  private _createCodeCell(): CodeCell {
+  private _createCodeCell(transient: boolean = false): CodeCell {
     let factory = this.contentFactory;
     let options = this._createCodeCellOptions();
     let cell = factory.createCodeCell(options);
     cell.readOnly = true;
     cell.model.mimeType = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
+    cell.addClass(transient ? TRANSIENT_CELL_CLASS : FOREIGN_CELL_CLASS);
     return cell;
   }
 
