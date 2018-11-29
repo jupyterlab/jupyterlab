@@ -177,7 +177,11 @@ export class Cell extends Widget {
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
     let inputCollapser = new InputCollapser();
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
-    let input = (this._input = new InputArea({ model, contentFactory }));
+    let input = (this._input = new InputArea({
+      model,
+      contentFactory,
+      updateOnShow: options.updateEditorOnShow
+    }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
@@ -404,6 +408,11 @@ export namespace Cell {
      * The configuration options for the text editor widget.
      */
     editorConfig?: Partial<CodeEditor.IConfig>;
+
+    /**
+     * Whether to send an update request to the editor when it is shown.
+     */
+    updateEditorOnShow?: boolean;
   }
 
   /**
