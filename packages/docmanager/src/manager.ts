@@ -98,6 +98,7 @@ export class DocumentManager implements IDisposable {
   get autosave(): boolean {
     return this._autosave;
   }
+
   set autosave(value: boolean) {
     this._autosave = value;
 
@@ -109,6 +110,23 @@ export class DocumentManager implements IDisposable {
       } else if (value === false && handler.isActive) {
         handler.stop();
       }
+    });
+  }
+
+  /**
+   * Determines the time interval for autosave in seconds.
+   */
+  get autosaveInterval(): number {
+    return this._autosaveInterval;
+  }
+
+  set autosaveInterval(value: number) {
+    this._autosaveInterval = value;
+
+    // For each existing context, set the save interval as needed.
+    this._contexts.forEach(context => {
+      const handler = Private.saveHandlerProperty.get(context);
+      handler.saveInterval = value || 120;
     });
   }
 
@@ -455,7 +473,10 @@ export class DocumentManager implements IDisposable {
       modelDBFactory,
       setBusy: this._setBusy
     });
-    let handler = new SaveHandler({ context });
+    let handler = new SaveHandler({
+      context,
+      saveInterval: this.autosaveInterval
+    });
     Private.saveHandlerProperty.set(context, handler);
     context.ready.then(() => {
       if (this.autosave) {
@@ -573,6 +594,7 @@ export class DocumentManager implements IDisposable {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
+  private _autosaveInterval = 120;
   private _when: Promise<void>;
   private _setBusy: () => IDisposable;
 }
