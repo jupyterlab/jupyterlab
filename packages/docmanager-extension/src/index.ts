@@ -473,7 +473,7 @@ function addCommands(
       }
 
       return docManager.services.contents.getDownloadUrl(path).then(url => {
-        const opened = window.open('', '_blank', 'noopener');
+        const opened = window.open();
         opened.opener = null;
         opened.location.href = url;
       });
