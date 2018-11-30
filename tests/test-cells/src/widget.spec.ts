@@ -502,40 +502,6 @@ describe('cells/widget', () => {
         expect(widget.node.classList.contains(RENDERED_CLASS)).to.equal(false);
         widget.dispose();
       });
-
-      it('should ignore being set to the same value', async () => {
-        const widget = new LogMarkdownCell({
-          model,
-          rendermime,
-          contentFactory
-        });
-        widget.rendered = false;
-        Widget.attach(widget, document.body);
-
-        // Count how many update requests were processed.
-        await framePromise();
-        const original = widget.methods.filter(method => {
-          return method === 'onUpdateRequest';
-        }).length;
-
-        widget.rendered = false;
-        widget.rendered = false;
-        widget.rendered = false;
-        widget.rendered = false;
-
-        // Count how many update requests were processed
-        await framePromise();
-        const delta =
-          widget.methods.filter(method => {
-            return method === 'onUpdateRequest';
-          }).length - original;
-
-        // Make sure every single `rendered` toggle did not trigger an update.
-        expect(delta)
-          .to.be.gte(0)
-          .and.lte(1);
-        widget.dispose();
-      });
     });
 
     describe('#dispose()', () => {

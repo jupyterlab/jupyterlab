@@ -195,7 +195,6 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         await context.ready;
         expect(context.model.cells.canUndo).to.equal(false);
-        await dismissDialog();
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
@@ -295,7 +294,6 @@ describe('docregistry/context', () => {
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).to.equal('foo');
-        await dismissDialog();
       });
 
       it('should should preserve LF line endings upon save', async () => {
@@ -364,19 +362,19 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await acceptDialog();
+          await acceptDialog(); // Accept rename dialog
+          await acceptDialog(); // Accept conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(newPath);
         await promise;
+        expect(context.path).to.equal(newPath);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -387,20 +385,19 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await dismissDialog();
+          await acceptDialog(); // Accept rename dialog
+          await dismissDialog(); // Reject conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(oldPath);
         await promise;
-        await dismissDialog();
+        expect(context.path).to.equal(oldPath);
       });
 
       it('should just save if the file name does not change', async () => {
@@ -448,7 +445,7 @@ describe('docregistry/context', () => {
       it('should delete the given checkpoint', async () => {
         await context.initialize(true);
         const model = await context.createCheckpoint();
-        context.deleteCheckpoint(model.id);
+        await context.deleteCheckpoint(model.id);
         const models = await context.listCheckpoints();
         expect(models.length).to.equal(0);
       });
