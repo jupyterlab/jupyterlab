@@ -200,7 +200,7 @@ package.
 
 The following file types are also supported (both in JavaScript and
 CSS): ``json``, ``html``, ``jpg``, ``png``, ``gif``, ``svg``,
-``js.map``, ``woff2``, ``ttf``, eot.
+``js.map``, ``woff2``, ``ttf``, ``eot``.
 
 If your package uses any other file type it must be converted to one of
 the above types or `include a loader in the import statement <https://webpack.js.org/concepts/loaders/#inline>`__.
@@ -209,9 +209,9 @@ it is not already installed by JupyterLab, you must add it as a dependency
 of your extension.
 
 If your JavaScript is written in any other dialect than
-EMCAScript 5 it must be converted using an appropriate tool.
+EMCAScript 6 (2015) it should be converted using an appropriate tool.
 You can use Webpack to pre-build your extension to use any of it's features
-not enabled in our build config. To build a compatible package sett
+not enabled in our build config. To build a compatible package set
 ``output.libraryTarget`` to ``"commonjs2"`` in your Webpack config.
 (see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
