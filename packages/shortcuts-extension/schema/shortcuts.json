@@ -1,7 +1,7 @@
 {
   "jupyter.lab.setting-icon-class": "jp-LauncherIcon",
   "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
-  "jupyter.lab.setting-transform": true,
+  "jupyter.lab.transform": true,
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",
   "type": "object",

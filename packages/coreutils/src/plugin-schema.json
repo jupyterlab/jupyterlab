@@ -12,12 +12,12 @@
       "default": "jp-SettingsIcon"
     },
     "jupyter.lab.setting-icon-label": { "type": "string", "default": "Plugin" },
-    "jupyter.lab.setting-transform": { "type": "boolean", "default": false },
     "jupyter.lab.shortcuts": {
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
       "default": []
-    }
+    },
+    "jupyter.lab.transform": { "type": "boolean", "default": false }
   },
   "definitions": {
     "shortcut": {

@@ -28,11 +28,11 @@ import SCHEMA from './plugin-schema.json';
 const copy = JSONExt.deepCopy;
 
 /**
- * The number of milliseconds before a `load()` call to the registry will wait
- * before timing out if it requires a transformation that has not been
+ * The default number of milliseconds before a `load()` call to the registry
+ * will wait before timing out if it requires a transformation that has not been
  * registered.
  */
-const TRANSFORM_TIMEOUT = 7000;
+const DEFAULT_TRANSFORM_TIMEOUT = 7000;
 
 /**
  * The ASCII record separator character.
@@ -559,6 +559,7 @@ export class SettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
+    this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
     // Preload with any available data at instantiation-time.
     if (options.plugins) {
@@ -869,8 +870,9 @@ export class SettingRegistry {
   ): Promise<ISettingRegistry.IPlugin> {
     const elapsed = new Date().getTime() - started;
     const transformers = this._transformers;
+    const timeout = this._timeout;
 
-    if (!plugin.schema['jupyter.lab.setting-transform']) {
+    if (!plugin.schema['jupyter.lab.transform']) {
       return plugin;
     }
 
@@ -884,12 +886,12 @@ export class SettingRegistry {
       return transformed;
     }
 
-    // If the timeout has not been exceeded, stall and try again.
-    if (elapsed < TRANSFORM_TIMEOUT) {
+    // If the timeout has not been exceeded, stall and try again in 250ms.
+    if (elapsed < timeout) {
       await new Promise(resolve => {
         setTimeout(() => {
           resolve();
-        }, TRANSFORM_TIMEOUT / 20);
+        }, 250);
       });
       return this._transform(phase, plugin, started);
     }
@@ -914,6 +916,7 @@ export class SettingRegistry {
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready: Promise<void>;
+  private _timeout: number;
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform
@@ -1133,6 +1136,16 @@ export namespace SettingRegistry {
      * Preloaded plugin data to populate the setting registry.
      */
     plugins?: ISettingRegistry.IPlugin[];
+
+    /**
+     * The number of milliseconds before a `load()` call to the registry waits
+     * before timing out if it requires a transformation that has not been
+     * registered.
+     *
+     * #### Notes
+     * The default value is 7000.
+     */
+    timeout?: number;
 
     /**
      * The validator used to enforce the settings JSON schema.
