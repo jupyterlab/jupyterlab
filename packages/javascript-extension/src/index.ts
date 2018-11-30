@@ -23,13 +23,6 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
       try {
         const data = model.data[this.mimeType] as string;
         evalInContext(data, this.node, document, window);
-        // If output is empty after evaluating, render the plain text value
-        if (this.node.innerHTML === '') {
-          const text = model.data['text/plain'] as string;
-          const output = document.createElement('pre');
-          output.textContent = text;
-          this.node.appendChild(output);
-        }
         return Promise.resolve();
       } catch (error) {
         return Promise.reject(error);
