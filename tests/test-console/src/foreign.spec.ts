@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
@@ -191,17 +191,21 @@ describe('@jupyterlab/console', () => {
     describe('#onIOPubMessage()', () => {
       it('should be called when messages come through', async () => {
         const code = 'print("onIOPubMessage:disabled")';
+        const promise = new PromiseDelegate<void>();
         handler.enabled = false;
         let called = false;
         handler.received.connect(() => {
           called = true;
+          promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await promise;
         expect(called).to.equal(true);
       });
 
       it('should inject relevant cells into the parent', async () => {
         const code = 'print("#onIOPubMessage:enabled")';
+        const promise = new PromiseDelegate<void>();
         handler.enabled = true;
         const parent = handler.parent as TestParent;
         expect(parent.widgets.length).to.equal(0);
@@ -209,28 +213,29 @@ describe('@jupyterlab/console', () => {
         handler.injected.connect(() => {
           expect(parent.widgets.length).to.be.greaterThan(0);
           called = true;
+          promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await promise;
         expect(called).to.equal(true);
       });
 
       it('should not reject relevant iopub messages', async () => {
         const code = 'print("#onIOPubMessage:relevant")';
+        const promise = new PromiseDelegate<void>();
         let called = false;
         handler.enabled = true;
-        let errored = false;
         handler.rejected.connect(() => {
-          errored = true;
+          promise.reject('rejected relevant iopub message');
         });
         handler.injected.connect((sender, msg) => {
           if (KernelMessage.isStreamMsg(msg)) {
             called = true;
+            promise.resolve(void 0);
           }
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
-        if (errored) {
-          throw new Error('rejected relevant iopub message');
-        }
+        await promise;
         expect(called).to.equal(true);
       });
     });
