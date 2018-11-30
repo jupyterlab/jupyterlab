@@ -203,8 +203,17 @@ CSS): ``json``, ``html``, ``jpg``, ``png``, ``gif``, ``svg``,
 ``js.map``, ``woff2``, ``ttf``, eot.
 
 If your package uses any other file type it must be converted to one of
-the above types. If your JavaScript is written in any other dialect than
+the above types or `include a loader in the import statement <https://webpack.js.org/concepts/loaders/#inline>`__.
+If you include a loader, the loader must be importable at build time, so if
+it is not already installed by JupyterLab, you must add it as a dependency
+of your extension.
+
+If your JavaScript is written in any other dialect than
 EMCAScript 5 it must be converted using an appropriate tool.
+You can use Webpack to pre-build your extension to use any of it's features
+not enabled in our build config. To build a compatible package sett
+``output.libraryTarget`` to ``"commonjs2"`` in your Webpack config.
+(see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
