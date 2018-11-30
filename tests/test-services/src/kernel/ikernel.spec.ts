@@ -24,6 +24,7 @@ describe('Kernel.IKernel', () => {
   let specs: Kernel.ISpecModels;
 
   beforeAll(async () => {
+    jest.setTimeout(5000);
     specs = await Kernel.getSpecs();
   });
 
