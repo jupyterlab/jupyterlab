@@ -29,7 +29,6 @@ export class ForeignHandler implements IDisposable {
       this.onIOPubMessage,
       this
     );
-    // this._factory = options.cellFactory;
     this._parent = options.parent;
   }
 
