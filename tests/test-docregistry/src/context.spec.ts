@@ -445,7 +445,7 @@ describe('docregistry/context', () => {
       it('should delete the given checkpoint', async () => {
         await context.initialize(true);
         const model = await context.createCheckpoint();
-        context.deleteCheckpoint(model.id);
+        await context.deleteCheckpoint(model.id);
         const models = await context.listCheckpoints();
         expect(models.length).to.equal(0);
       });
