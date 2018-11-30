@@ -442,11 +442,12 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
       if (plugin.schema.type !== 'object') {
+        const keyword = 'schema';
         const message =
           `Setting registry schemas' root-level type must be ` +
           `'object', rejecting type: ${plugin.schema.type}`;
 
-        return [{ dataPath: 'type', keyword: '', schemaPath: '', message }];
+        return [{ dataPath: 'type', keyword, schemaPath: '', message }];
       }
 
       const errors = this._addSchema(plugin.id, plugin.schema);
@@ -755,7 +756,7 @@ export class SettingRegistry {
   transform(
     plugin: string,
     transforms: {
-      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform
+      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform
     }
   ): IDisposable {
     const transformers = this._transformers;
@@ -814,8 +815,10 @@ export class SettingRegistry {
       (errors as ISchemaValidator.IError[]).forEach((error, index) => {
         const { dataPath, schemaPath, keyword, message } = error;
 
-        output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
-        output.push(`\t${keyword} ${message}`);
+        if (dataPath || schemaPath) {
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+        }
+        output.push(`{${keyword}} ${message}`);
       });
       console.warn(output.join('\n'));
 
@@ -869,6 +872,7 @@ export class SettingRegistry {
     started = new Date().getTime()
   ): Promise<ISettingRegistry.IPlugin> {
     const elapsed = new Date().getTime() - started;
+    const id = plugin.id;
     const transformers = this._transformers;
     const timeout = this._timeout;
 
@@ -876,11 +880,18 @@ export class SettingRegistry {
       return plugin;
     }
 
-    if (plugin.id in transformers) {
-      const transformed = transformers[plugin.id][phase].call(null, plugin);
+    if (id in transformers) {
+      const transformed = transformers[id][phase].call(null, plugin);
 
-      if (transformed.id !== plugin.id) {
-        throw new Error('Plugin transformations cannot change plugin IDs.');
+      if (transformed.id !== id) {
+        throw [
+          {
+            dataPath: '',
+            keyword: 'id',
+            message: 'Plugin transformations cannot change plugin IDs.',
+            schemaPath: ''
+          } as ISchemaValidator.IError
+        ];
       }
 
       return transformed;
@@ -896,7 +907,14 @@ export class SettingRegistry {
       return this._transform(phase, plugin, started);
     }
 
-    throw new Error(`Transforming ${plugin.id} timed out.`);
+    throw [
+      {
+        dataPath: '',
+        keyword: 'timeout',
+        message: `Transforming ${plugin.id} timed out.`,
+        schemaPath: ''
+      } as ISchemaValidator.IError
+    ];
   }
 
   /**
@@ -915,7 +933,7 @@ export class SettingRegistry {
   }
 
   private _pluginChanged = new Signal<this, string>(this);
-  private _ready: Promise<void>;
+  private _ready = Promise.resolve();
   private _timeout: number;
   private _transformers: {
     [plugin: string]: {

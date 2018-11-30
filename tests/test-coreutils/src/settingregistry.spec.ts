@@ -255,8 +255,8 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object' };
 
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 
@@ -317,7 +317,7 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object', title: first };
         let settings = await registry.reload(id);
         expect(settings.schema.title).to.equal(first);
-        await Promise.resolve(void 0);
+        await Promise.resolve(undefined);
         connector.schemas[id].title = second;
         settings = await registry.reload(id);
         expect(settings.schema.title).to.equal(second);
@@ -327,6 +327,67 @@ describe('@jupyterlab/coreutils', () => {
         let failed = false;
         try {
           await registry.reload('foo');
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
+      });
+    });
+
+    describe('#transform()', () => {
+      it(`should transform a plugin during the fetch phase`, async () => {
+        const id = 'foo';
+        const version = 'transform-test';
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          fetch: plugin => {
+            plugin.version = version;
+            return plugin;
+          }
+        });
+        expect((await registry.load(id)).version).to.equal(version);
+      });
+
+      it(`should transform a plugin during the compose phase`, async () => {
+        const id = 'foo';
+        const composite = { a: 1 };
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          compose: plugin => {
+            plugin.data = { user: plugin.data.user, composite };
+            return plugin;
+          }
+        });
+        expect((await registry.load(id)).composite).to.eql(composite);
+      });
+
+      it(`should disallow a transform that changes the plugin ID`, async () => {
+        const id = 'foo';
+        let failed = false;
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          compose: plugin => {
+            plugin.id = 'bar';
+            return plugin;
+          }
+        });
+        try {
+          await registry.load(id);
         } catch (e) {
           failed = true;
         }
@@ -635,8 +696,8 @@ describe('@jupyterlab/coreutils', () => {
 
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 
@@ -653,8 +714,8 @@ describe('@jupyterlab/coreutils', () => {
         expect(saved.user).to.equal(value);
         await settings.remove(key);
         saved = settings.get(key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 
