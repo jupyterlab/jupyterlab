@@ -928,9 +928,13 @@ namespace Private {
 
         // Adjust the iframe height automatically
         iframe.style.height = body.scrollHeight + 'px';
-        iframe.contentWindow.addEventListener('resize', () => {
+        iframe.heightChangeObserver = MutationObserver(() => {
           iframe.style.height = body.scrollHeight + 'px';
-        })
+        });
+        iframe.heightChangeObserver.observe(body, {
+          attributes: true,
+          attributeFilter: ['scrollHeight'],
+        });
       });
     }
 
