@@ -42,6 +42,8 @@ import { JSONExt, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { DockLayout, Menu } from '@phosphor/widgets';
 
+import foreign from './foreign';
+
 /**
  * The command IDs used by the console plugin.
  */
@@ -67,9 +69,6 @@ namespace CommandIDs {
   export const inject = 'console:inject';
 
   export const changeKernel = 'console:change-kernel';
-
-  export const toggleShowAllActivity =
-    'console:toggle-show-all-kernel-activity';
 
   export const enterToExecute = 'console:enter-to-execute';
 
@@ -114,7 +113,7 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker];
+const plugins: JupyterLabPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**
@@ -440,22 +439,6 @@ function activateConsole(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.toggleShowAllActivity, {
-    label: args => 'Show All Kernel Activity',
-    execute: args => {
-      let current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      current.console.showAllActivity = !current.console.showAllActivity;
-    },
-    isToggled: () =>
-      tracker.currentWidget
-        ? tracker.currentWidget.console.showAllActivity
-        : false,
-    isEnabled
-  });
-
   // Constants for setting the shortcuts for executing console cells.
   const shortcutPlugin = '@jupyterlab/shortcuts-extension:plugin';
   const selector = '.jp-CodeConsole-promptCell';
@@ -570,8 +553,7 @@ function activateConsole(
     CommandIDs.restart,
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
-    CommandIDs.closeAndShutdown,
-    CommandIDs.toggleShowAllActivity
+    CommandIDs.closeAndShutdown
   ].forEach(command => {
     palette.addItem({ command, category, args: { isPalette: true } });
   });
@@ -669,10 +651,6 @@ function activateConsole(
   });
   app.contextMenu.addItem({
     command: CommandIDs.restart,
-    selector: '.jp-CodeConsole'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.toggleShowAllActivity,
     selector: '.jp-CodeConsole'
   });
 

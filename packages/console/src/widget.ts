@@ -33,8 +33,6 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import { ForeignHandler } from './foreign';
-
 import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**
@@ -56,11 +54,6 @@ const CONSOLE_CLASS = 'jp-CodeConsole';
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-CodeConsole-banner';
-
-/**
- * The class name of a cell whose input originated from a foreign session.
- */
-const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
  * The class name of the active prompt cell.
@@ -120,13 +113,6 @@ export class CodeConsole extends Widget {
     // Insert the content and input panes into the widget.
     layout.addWidget(this._content);
     layout.addWidget(this._input);
-
-    // Set up the foreign iopub handler.
-    this._foreignHandler = new ForeignHandler({
-      session: this.session,
-      parent: this,
-      cellFactory: () => this._createCodeCell()
-    });
 
     this._history = new ConsoleHistory({
       session: this.session
@@ -216,6 +202,9 @@ export class CodeConsole extends Widget {
     this.update();
   }
 
+  /**
+   * Add a banner cell.
+   */
   addBanner() {
     if (this._banner) {
       // An old banner just becomes a normal cell now.
@@ -250,6 +239,18 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Create a new cell with the built-in factory.
+   */
+  createCodeCell(): CodeCell {
+    let factory = this.contentFactory;
+    let options = this._createCodeCellOptions();
+    let cell = factory.createCodeCell(options);
+    cell.readOnly = true;
+    cell.model.mimeType = this._mimetype;
+    return cell;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -259,20 +260,8 @@ export class CodeConsole extends Widget {
     }
     this._cells.clear();
     this._history.dispose();
-    this._foreignHandler.dispose();
 
     super.dispose();
-  }
-
-  /**
-   * Set whether the foreignHandler is able to inject foreign cells into a
-   * console.
-   */
-  get showAllActivity(): boolean {
-    return this._foreignHandler.enabled;
-  }
-  set showAllActivity(value: boolean) {
-    this._foreignHandler.enabled = value;
   }
 
   /**
@@ -327,7 +316,7 @@ export class CodeConsole extends Widget {
    * @returns A promise that indicates when the injected cell's execution ends.
    */
   inject(code: string): Promise<void> {
-    let cell = this._createCodeCell();
+    let cell = this.createCodeCell();
     cell.model.value.text = code;
     this.addCell(cell);
     return this._execute(cell);
@@ -558,19 +547,6 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Create a new foreign cell.
-   */
-  private _createCodeCell(): CodeCell {
-    let factory = this.contentFactory;
-    let options = this._createCodeCellOptions();
-    let cell = factory.createCodeCell(options);
-    cell.readOnly = true;
-    cell.model.mimeType = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
-    return cell;
-  }
-
-  /**
    * Create the options used to initialize a code cell widget.
    */
   private _createCodeCellOptions(): CodeCell.IOptions {
@@ -678,7 +654,6 @@ export class CodeConsole extends Widget {
   private _cells: IObservableList<Cell>;
   private _content: Panel;
   private _executed = new Signal<this, Date>(this);
-  private _foreignHandler: ForeignHandler;
   private _history: IConsoleHistory;
   private _input: Panel;
   private _mimetype = 'text/x-ipython';

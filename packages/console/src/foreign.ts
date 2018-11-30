@@ -13,6 +13,8 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
+const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
+
 /**
  * A handler for capturing API messages from other sessions that should be
  * rendered in a given parent.
@@ -27,7 +29,7 @@ export class ForeignHandler implements IDisposable {
       this.onIOPubMessage,
       this
     );
-    this._factory = options.cellFactory;
+    // this._factory = options.cellFactory;
     this._parent = options.parent;
   }
 
@@ -145,7 +147,8 @@ export class ForeignHandler implements IDisposable {
    * Create a new code cell for an input originated from a foreign session.
    */
   private _newCell(parentMsgId: string): CodeCell {
-    let cell = this._factory();
+    let cell = this.parent.createCodeCell();
+    cell.addClass(FOREIGN_CELL_CLASS);
     this._cells.set(parentMsgId, cell);
     this._parent.addCell(cell);
     return cell;
@@ -154,7 +157,6 @@ export class ForeignHandler implements IDisposable {
   private _cells = new Map<string, CodeCell>();
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
-  private _factory: () => CodeCell;
   private _isDisposed = false;
 }
 
@@ -175,11 +177,6 @@ export namespace ForeignHandler {
      * The parent into which the handler will inject code cells.
      */
     parent: IReceiver;
-
-    /**
-     * The cell factory for foreign handlers.
-     */
-    cellFactory: () => CodeCell;
   }
 
   /**
@@ -187,7 +184,12 @@ export namespace ForeignHandler {
    */
   export interface IReceiver {
     /**
-     * Add a newly created foreign cell.
+     * Create a cell.
+     */
+    createCodeCell(): CodeCell;
+
+    /**
+     * Add a newly created cell.
      */
     addCell(cell: Cell): void;
 
