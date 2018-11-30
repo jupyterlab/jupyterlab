@@ -48,7 +48,7 @@ class TestHandler extends ForeignHandler {
       this.injected.emit(msg);
     } else {
       // If the message was not injected but otherwise would have been, emit
-      // a rejected signal. This should only happen if `enabled` is `false`.
+      // a rejected signal. This should only happen if `showAllActivity` is `false`.
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
@@ -119,14 +119,14 @@ describe('@jupyterlab/console', () => {
       });
     });
 
-    describe('#enabled', () => {
+    describe('#showAllActivity', () => {
       it('should default to `false`', () => {
-        expect(handler.enabled).to.equal(false);
+        expect(handler.showAllActivity).to.equal(false);
       });
 
       it('should allow foreign cells to be injected if `true`', async () => {
-        const code = 'print("#enabled:true")';
-        handler.enabled = true;
+        const code = 'print("#showAllActivity:true")';
+        handler.showAllActivity = true;
         let called = false;
         handler.injected.connect(() => {
           called = true;
@@ -136,8 +136,8 @@ describe('@jupyterlab/console', () => {
       });
 
       it('should reject foreign cells if `false`', async () => {
-        const code = 'print("#enabled:false")';
-        handler.enabled = false;
+        const code = 'print("#showAllActivity:false")';
+        handler.showAllActivity = false;
         let called = false;
         handler.rejected.connect(() => {
           called = true;
@@ -191,7 +191,7 @@ describe('@jupyterlab/console', () => {
     describe('#onIOPubMessage()', () => {
       it('should be called when messages come through', async () => {
         const code = 'print("onIOPubMessage:disabled")';
-        handler.enabled = false;
+        handler.showAllActivity = false;
         let called = false;
         handler.received.connect(() => {
           called = true;
@@ -201,8 +201,8 @@ describe('@jupyterlab/console', () => {
       });
 
       it('should inject relevant cells into the parent', async () => {
-        const code = 'print("#onIOPubMessage:enabled")';
-        handler.enabled = true;
+        const code = 'print("#onIOPubMessage:showAllActivity")';
+        handler.showAllActivity = true;
         const parent = handler.parent as TestParent;
         expect(parent.widgets.length).to.equal(0);
         let called = false;
@@ -217,7 +217,7 @@ describe('@jupyterlab/console', () => {
       it('should not reject relevant iopub messages', async () => {
         const code = 'print("#onIOPubMessage:relevant")';
         let called = false;
-        handler.enabled = true;
+        handler.showAllActivity = true;
         let errored = false;
         handler.rejected.connect(() => {
           errored = true;
