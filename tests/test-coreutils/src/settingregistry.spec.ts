@@ -122,6 +122,7 @@ describe('@jupyterlab/coreutils', () => {
 
   describe('SettingRegistry', () => {
     const connector = new TestConnector();
+    const timeout = 500;
     let registry: SettingRegistry;
 
     afterEach(() => {
@@ -130,7 +131,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     beforeEach(() => {
-      registry = new SettingRegistry({ connector });
+      registry = new SettingRegistry({ connector, timeout });
     });
 
     describe('#constructor()', () => {
@@ -267,6 +268,23 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object' };
         const settings = (await registry.load(id)) as Settings;
         expect(settings.id).to.equal(id);
+      });
+
+      it(`should reject if a plugin transformation times out`, async () => {
+        const id = 'foo';
+        let failed = false;
+
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+
+        try {
+          await registry.load(id);
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
       });
 
       it('should reject if a plugin does not exist', async () => {
