@@ -302,22 +302,26 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restart()', () => {
-      it('should restart if the user accepts the dialog', async () => {
-        let called = false;
+      it(
+        'should restart if the user accepts the dialog',
+        async () => {
+          let called = false;
 
-        await session.initialize();
-        session.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
+          await session.initialize();
+          session.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
 
-        const restart = session.restart();
+          const restart = session.restart();
 
-        await acceptDialog();
-        expect(await restart).to.equal(true);
-        expect(called).to.equal(true);
-      });
+          await acceptDialog();
+          expect(await restart).to.equal(true);
+          expect(called).to.equal(true);
+        },
+        30000
+      );
 
       it('should not restart if the user rejects the dialog', async () => {
         let called = false;
