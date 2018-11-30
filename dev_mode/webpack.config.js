@@ -208,6 +208,7 @@ module.exports = [
     },
     bail: true,
     devtool: 'source-map',
+    externals: ['node-fetch', 'ws'],
     plugins: [
       new DuplicatePackageCheckerPlugin({
         verbose: true,
