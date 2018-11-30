@@ -42,14 +42,14 @@ export abstract class DataConnector<T, U = T, V = string>
   /**
    * Retrieve the list of items available from the data connector.
    *
-   * @param filter - The optional filter to apply to the connector request.
+   * @param query - The optional query filter to apply to the connector request.
    *
    * @returns A promise that always rejects with an error.
    *
    * #### Notes
    * Subclasses should reimplement if they support a back-end that can list.
    */
-  list(filter?: V): Promise<{ ids: V[]; values: T[] }> {
+  list(query?: any): Promise<{ ids: V[]; values: T[] }> {
     return Promise.reject(new Error('list method has not been implemented.'));
   }
 

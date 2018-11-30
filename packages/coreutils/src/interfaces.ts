@@ -54,7 +54,7 @@ export interface IDataConnector<T, U = T, V = string> {
   /**
    * Retrieve the list of items available from the data connector.
    *
-   * @param filter - The optional filter to apply to the connector request.
+   * @param query - The optional query filter to apply to the connector request.
    *
    * @returns A promise that bears a list of `values` and an associated list of
    * fetch `ids`.
@@ -64,7 +64,7 @@ export interface IDataConnector<T, U = T, V = string> {
    * retrieving the data. The two lists will always be the same size. If there
    * is no data, this method will succeed with empty `ids` and `values`.
    */
-  list(filter?: V): Promise<{ ids: V[]; values: T[] }>;
+  list(query?: any): Promise<{ ids: V[]; values: T[] }>;
 
   /**
    * Remove a value using the data connector.
