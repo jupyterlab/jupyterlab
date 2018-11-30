@@ -1189,13 +1189,16 @@ export namespace SettingRegistry {
         [selector: string]: boolean; // If `true`, this is a default shortcut.
       };
     } = {};
-    const warning = 'Shortcut skipped due to collision.';
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
       const keys = shortcut.keys.join(RECORD_SEPARATOR);
       const { selector } = shortcut;
 
+      if (!keys) {
+        console.warn('Shortcut skipped because `keys` are [""].', shortcut);
+        return false;
+      }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
@@ -1204,7 +1207,7 @@ export namespace SettingRegistry {
         return true;
       }
 
-      console.warn(warning, shortcut);
+      console.warn('Shortcut skipped due to collision.', shortcut);
       return false;
     });
 
@@ -1213,13 +1216,11 @@ export namespace SettingRegistry {
     // out too (this includes shortcuts that are disabled by user preferences).
     defaults = defaults.filter(shortcut => {
       const { disabled } = shortcut;
-
-      if (disabled) {
-        return false;
-      }
-
       const keys = shortcut.keys.join(RECORD_SEPARATOR);
 
+      if (disabled || !keys) {
+        return false;
+      }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
@@ -1233,7 +1234,7 @@ export namespace SettingRegistry {
 
       // Only warn if a default shortcut collides with another default shortcut.
       if (memo[keys][selector]) {
-        console.warn(warning, shortcut);
+        console.warn('Shortcut skipped due to collision.', shortcut);
       }
 
       return false;
