@@ -136,7 +136,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `list(filter: string)` method.
+   * using the `list(namespace: string)` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
    * retrieving the data. Non-existence of an `id` will succeed with the `value`
@@ -201,7 +201,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `list(filter: string)` method.
+   * using the `list(namespace: string)` method.
    */
   save(id: string, value: T): Promise<void> {
     return this._ready.then(() => {
