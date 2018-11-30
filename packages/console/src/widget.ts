@@ -275,10 +275,21 @@ export class CodeConsole extends Widget {
    * console.
    */
   get showAllActivity(): boolean {
-    return this._foreignHandler.enabled;
+    return this._foreignHandler.showAllActivity;
   }
   set showAllActivity(value: boolean) {
-    this._foreignHandler.enabled = value;
+    this._foreignHandler.showAllActivity = value;
+  }
+
+  /**
+   * Set whether the foreignHandler is able to inject transient messages into a
+   * console.
+   */
+  get showTransientMessage(): boolean {
+    return this._foreignHandler.showTransientMessage;
+  }
+  set showTransientMessage(value: boolean) {
+    this._foreignHandler.showTransientMessage = value;
   }
 
   /**

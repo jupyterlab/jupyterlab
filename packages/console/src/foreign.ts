@@ -34,11 +34,21 @@ export class ForeignHandler implements IDisposable {
   /**
    * Set whether the handler is able to inject foreign cells into a console.
    */
-  get enabled(): boolean {
-    return this._enabled;
+  get showAllActivity(): boolean {
+    return this._showAllActivity;
   }
-  set enabled(value: boolean) {
-    this._enabled = value;
+  set showAllActivity(value: boolean) {
+    this._showAllActivity = value;
+  }
+
+  /**
+   * Set whether the handler is able to inject transient messages into a console.
+   */
+  get showTransientMessage(): boolean {
+    return this._showTransientMessage;
+  }
+  set showTransientMessage(value: boolean) {
+    this._showTransientMessage = value;
   }
 
   /**
@@ -84,10 +94,15 @@ export class ForeignHandler implements IDisposable {
   ): boolean {
     let msgType = msg.header.msg_type;
 
-    // Only process messages if foreign cell injection is enabled,
-    // or if it is a "transient_display_data" message.
-    if (!this._enabled && msgType !== 'transient_display_data') {
-      return false;
+    // there are four cases _showAllActivity x _showTransientMessage
+    if (this._showAllActivity) {
+      if (!this._showTransientMessage && msgType === 'transient_display_data') {
+        return false;
+      }
+    } else {
+      if (!this._showTransientMessage || msgType !== 'transient_display_data') {
+        return false;
+      }
     }
     let kernel = this.session.kernel;
     if (!kernel) {
@@ -163,7 +178,8 @@ export class ForeignHandler implements IDisposable {
   }
 
   private _cells = new Map<string, CodeCell>();
-  private _enabled = false;
+  private _showAllActivity = false;
+  private _showTransientMessage = true;
   private _parent: ForeignHandler.IReceiver;
   private _factory: (transient: boolean) => CodeCell;
   private _isDisposed = false;

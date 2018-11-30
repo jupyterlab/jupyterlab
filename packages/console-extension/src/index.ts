@@ -71,6 +71,9 @@ namespace CommandIDs {
   export const toggleShowAllActivity =
     'console:toggle-show-all-kernel-activity';
 
+  export const toggleShowTransientMessage =
+    'console:toggle-show-transient-message';
+
   export const enterToExecute = 'console:enter-to-execute';
 
   export const shiftEnterToExecute = 'console:shift-enter-to-execute';
@@ -456,6 +459,23 @@ function activateConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.toggleShowTransientMessage, {
+    label: args => 'Show Transient Message',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      current.console.showTransientMessage = !current.console
+        .showTransientMessage;
+    },
+    isToggled: () =>
+      tracker.currentWidget
+        ? tracker.currentWidget.console.showTransientMessage
+        : false,
+    isEnabled
+  });
+
   // Constants for setting the shortcuts for executing console cells.
   const shortcutPlugin = '@jupyterlab/shortcuts-extension:plugin';
   const selector = '.jp-CodeConsole-promptCell';
@@ -571,7 +591,8 @@ function activateConsole(
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
     CommandIDs.closeAndShutdown,
-    CommandIDs.toggleShowAllActivity
+    CommandIDs.toggleShowAllActivity,
+    CommandIDs.toggleShowTransientMessage
   ].forEach(command => {
     palette.addItem({ command, category, args: { isPalette: true } });
   });
@@ -673,6 +694,10 @@ function activateConsole(
   });
   app.contextMenu.addItem({
     command: CommandIDs.toggleShowAllActivity,
+    selector: '.jp-CodeConsole'
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.toggleShowTransientMessage,
     selector: '.jp-CodeConsole'
   });
 
