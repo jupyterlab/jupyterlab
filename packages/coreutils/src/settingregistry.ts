@@ -610,7 +610,7 @@ export class SettingRegistry {
     plugin: string,
     key: string
   ): Promise<{ composite: JSONValue; user: JSONValue }> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const plugins = this.plugins;
@@ -636,7 +636,7 @@ export class SettingRegistry {
    * if the plugin is not found.
    */
   async load(plugin: string): Promise<ISettingRegistry.ISettings> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const plugins = this.plugins;
@@ -660,7 +660,7 @@ export class SettingRegistry {
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
   async reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const fetched = await this.connector.fetch(plugin);
@@ -683,7 +683,7 @@ export class SettingRegistry {
    * @returns A promise that resolves when the setting is removed.
    */
   async remove(plugin: string, key: string): Promise<void> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const plugins = this.plugins;
@@ -715,7 +715,7 @@ export class SettingRegistry {
    *
    */
   async set(plugin: string, key: string, value: JSONValue): Promise<void> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const plugins = this.plugins;
@@ -785,7 +785,7 @@ export class SettingRegistry {
    * @returns A promise that resolves when the settings have been saved.
    */
   async upload(plugin: string, raw: string): Promise<void> {
-    // Wait for data preload before normal allowing normal operation.
+    // Wait for data preload before allowing normal operation.
     await this._ready;
 
     const plugins = this.plugins;
@@ -857,9 +857,11 @@ export class SettingRegistry {
       console.warn(`${plugin} validation errors:`, errors);
       throw new Error(`${plugin} failed to validate; check console.`);
     }
-
-    await this._load(plugins[plugin]);
     await this.connector.save(plugin, plugins[plugin].raw);
+
+    // Fetch and reload the data to guarantee server and client are in sync.
+    const fetched = await this.connector.fetch(plugin);
+    await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
   }
 
