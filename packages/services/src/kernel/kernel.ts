@@ -64,31 +64,17 @@ export namespace Kernel {
     readonly status: Kernel.Status;
 
     /**
+     * The current connection status of the kernel.
+     */
+    readonly connectionStatus: Kernel.ConnectionStatus;
+
+    /**
      * The cached kernel info.
      *
      * #### Notes
      * This value will be null until the kernel is ready.
      */
     readonly info: KernelMessage.IInfoReply | null;
-
-    /**
-     * Test whether the kernel is ready.
-     *
-     * #### Notes
-     * A kernel is ready when the communication channel is active and we have
-     * cached the kernel info.
-     */
-    readonly isReady: boolean;
-
-    /**
-     * A promise that resolves when the kernel is initially ready after a start
-     * or restart.
-     *
-     * #### Notes
-     * A kernel is ready when the communication channel is active and we have
-     * cached the kernel info.
-     */
-    readonly ready: Promise<void>;
 
     /**
      * Get the kernel spec.
@@ -419,6 +405,11 @@ export namespace Kernel {
      * A signal emitted when the kernel status changes.
      */
     statusChanged: ISignal<this, Kernel.Status>;
+
+    /**
+     * A signal emitted when the kernel connection status changes.
+     */
+    connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
     /**
      * A signal emitted after an iopub kernel message is handled.
@@ -921,16 +912,45 @@ export namespace Kernel {
 
   /**
    * The valid Kernel status states.
+   *
+   * #### Notes
+   * The status states are:
+   * * `unknown`: The kernel status is unkown, often because the connection is
+   *   disconnected or connecting. This state is determined by the kernel
+   *   connection status.
+   * * `starting`: The kernel is starting
+   * * `idle`: The kernel has finished processing messages.
+   * * `busy`: The kernel is currently processing messages.
+   * * `restarting`: The kernel is restarting. This state is sent by the Jupyter
+   *   server.
+   * * `dead`: The kernel is dead and will not be restarted. This state is set
+   *   by the Jupyter server and is a final state.
    */
   export type Status =
     | 'unknown'
     | 'starting'
-    | 'reconnecting'
     | 'idle'
     | 'busy'
     | 'restarting'
-    | 'dead'
-    | 'connected';
+    | 'dead';
+
+  /**
+   * The valid kernel connection states.
+   *
+   * #### Notes
+   * The status states are:
+   * * `connected`: The kernel connection is live.
+   * * `connecting`: The kernel connection is not live, but we are attempting to
+   *   reconnect to the kernel.
+   * * `disconnected`: The kernel connection is dead and we are not trying to
+   *   connect to the kernel.
+   *
+   * When a kernel connection is `connected`, the kernel status should be valid.
+   * When a kernel connection is either `connecting` or `disconnected`, the
+   * kernel status will be `unknown` unless the kernel status was `dead`, in
+   * which case it stays `dead`.
+   */
+  export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
   /**
    * The kernel model provided by the server.

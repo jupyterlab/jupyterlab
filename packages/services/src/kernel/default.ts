@@ -83,6 +83,13 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * A signal emitted when the kernel status changes.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
+  }
+
+  /**
    * A signal emitted for iopub kernel messages.
    *
    * #### Notes
@@ -160,6 +167,13 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * The current status of the kernel.
+   */
+  get connectionStatus(): Kernel.ConnectionStatus {
+    return this._connectionStatus;
+  }
+
+  /**
    * Test whether the kernel has been disposed.
    */
   get isDisposed(): boolean {
@@ -174,20 +188,6 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   get info(): KernelMessage.IInfoReply | null {
     return this._info;
-  }
-
-  /**
-   * Test whether the kernel is ready.
-   */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that is fulfilled when the kernel is ready.
-   */
-  get ready(): Promise<void> {
-    return this._connectionPromise.promise;
   }
 
   /**
@@ -263,10 +263,10 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    if (!this._isReady || !this._ws) {
-      this._pendingMessages.push(msg);
-    } else {
+    if (this.connectionStatus === 'connected') {
       this._ws.send(serialize.serialize(msg));
+    } else {
+      this._pendingMessages.push(msg);
     }
     this._anyMessage.emit({ msg, direction: 'send' });
     let future = new KernelFutureHandler(
@@ -357,8 +357,8 @@ export class DefaultKernel implements Kernel.IKernel {
    * Used when the websocket connection to the kernel is lost.
    */
   reconnect(): Promise<void> {
+    this._updateConnectionStatus('connecting');
     this._clearSocket();
-    this._updateStatus('reconnecting');
     this._createSocket();
     return this._connectionPromise.promise;
   }
@@ -594,10 +594,10 @@ export class DefaultKernel implements Kernel.IKernel {
       session: this._clientId
     };
     let msg = KernelMessage.createMessage(options, content);
-    if (!this._isReady || !this._ws) {
-      this._pendingMessages.push(msg);
-    } else {
+    if (this.connectionStatus === 'connected') {
       this._ws.send(serialize.serialize(msg));
+    } else {
+      this._pendingMessages.push(msg);
     }
     this._anyMessage.emit({ msg, direction: 'send' });
   }
@@ -789,7 +789,6 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _clearSocket(): void {
     this._wsStopped = true;
-    this._isReady = false;
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
       this._ws.onopen = this._noOp;
@@ -805,32 +804,42 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle status iopub messages from the kernel.
    */
   private _updateStatus(status: Kernel.Status): void {
-    switch (status) {
-      case 'starting':
-      case 'idle':
-      case 'busy':
-      case 'connected':
-        this._isReady = true;
-        break;
-      case 'restarting':
-      case 'reconnecting':
-      case 'dead':
-        this._isReady = false;
-        break;
-      default:
-        console.error('invalid kernel status:', status);
-        return;
+    if (status === this._status) {
+      return;
     }
-    if (status !== this._status) {
-      this._status = status;
-      Private.logKernelStatus(this);
-      this._statusChanged.emit(status);
-      if (status === 'dead') {
-        this.dispose();
-      }
+    this._status = status;
+    this._statusChanged.emit(status);
+    Private.logKernelStatus(this);
+    if (status === 'dead') {
+      this.dispose();
     }
-    if (this._isReady) {
+  }
+
+  /**
+   * Handle connection status changes.
+   */
+  private _updateConnectionStatus(
+    connectionStatus: Kernel.ConnectionStatus
+  ): void {
+    if (connectionStatus === this._connectionStatus) {
+      return;
+    }
+
+    this._connectionStatus = connectionStatus;
+    this._connectionStatusChanged.emit(connectionStatus);
+
+    // If the kernel is dead, early return since that is a terminal state.
+    if (this.status === 'dead') {
+      return;
+    }
+
+    if (connectionStatus === 'connected') {
+      // The connection just came up, so send any pending messages.
       this._sendPending();
+    } else {
+      // If the connection is down, then we don't know what is happening with
+      // the kernel, so set the status to unknown.
+      this._updateStatus('unknown');
     }
   }
 
@@ -852,7 +861,6 @@ export class DefaultKernel implements Kernel.IKernel {
    * Clear the internal state.
    */
   private _clearState(): void {
-    this._isReady = false;
     this._pendingMessages = [];
     this._futures.forEach(future => {
       future.dispose();
@@ -1015,10 +1023,10 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _onWSOpen = (evt: Event) => {
     this._reconnectAttempt = 0;
-    // Allow the message to get through.
-    this._isReady = true;
-    // Update our status to connected.
-    this._updateStatus('connected');
+
+    // Update our status to connected. TODO: *don't* update state to connected until *after* the kernel info.
+    this._updateConnectionStatus('connected');
+
     // Get the kernel info, signaling that the kernel is ready.
     // TODO: requestKernelInfo shouldn't make a request, but should return cached info?
     this.requestKernelInfo()
@@ -1028,7 +1036,6 @@ export class DefaultKernel implements Kernel.IKernel {
       .catch(err => {
         this._connectionPromise.reject(err);
       });
-    this._isReady = false;
   };
 
   /**
@@ -1166,6 +1173,7 @@ export class DefaultKernel implements Kernel.IKernel {
   private _id = '';
   private _name = '';
   private _status: Kernel.Status = 'unknown';
+  private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
   private _clientId = '';
   private _isDisposed = false;
@@ -1174,7 +1182,6 @@ export class DefaultKernel implements Kernel.IKernel {
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
-  private _isReady = false;
   private _futures: Map<string, KernelFutureHandler>;
   private _comms: Map<string, Kernel.IComm>;
   private _targetRegistry: {
@@ -1188,6 +1195,9 @@ export class DefaultKernel implements Kernel.IKernel {
   private _connectionPromise: PromiseDelegate<void>;
   private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
+    this
+  );
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
