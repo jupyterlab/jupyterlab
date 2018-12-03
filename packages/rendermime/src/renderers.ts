@@ -312,93 +312,36 @@ export namespace renderLatex {
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderMarkdown(
+export async function renderMarkdown(
   options: renderMarkdown.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  let {
-    host,
-    source,
-    trusted,
-    sanitizer,
-    resolver,
-    linkHandler,
-    latexTypesetter,
-    shouldTypeset
-  } = options;
+  let { host, source, ...others } = options;
 
   // Clear the content if there is no source.
   if (!source) {
     host.textContent = '';
-    return Promise.resolve(undefined);
+    return;
   }
 
   // Separate math from normal markdown text.
   let parts = removeMath(source);
 
-  // Render the markdown and handle sanitization.
-  return Private.renderMarked(parts['text'])
-    .then(content => {
-      // Restore the math content in the rendered markdown.
-      content = replaceMath(content, parts['math']);
+  // Convert the markdown to HTML.
+  let html = await Private.renderMarked(parts['text']);
 
-      let originalContent = content;
+  // Replace math.
+  html = replaceMath(html, parts['math']);
 
-      // Sanitize the content it is not trusted.
-      if (!trusted) {
-        originalContent = `${content}`;
-        content = sanitizer.sanitize(content);
-      }
+  // Render HTML.
+  await renderHTML({
+    host,
+    source: html,
+    ...others
+  });
 
-      // Set the inner HTML of the host.
-      host.innerHTML = content;
-
-      if (host.getElementsByTagName('script').length > 0) {
-        // If output it trusted, eval any script tags contained in the HTML.
-        // This is not done automatically by the browser when script tags are
-        // created by setting `innerHTML`.
-        if (trusted) {
-          Private.evalInnerHTMLScriptTags(host);
-        } else {
-          const container = document.createElement('div');
-          const warning = document.createElement('pre');
-          warning.textContent =
-            'This HTML output contains inline scripts. Are you sure that you want to run arbitrary Javascript within your JupyterLab session?';
-          const runButton = document.createElement('button');
-          runButton.textContent = 'Run';
-          runButton.onclick = event => {
-            host.innerHTML = originalContent;
-            Private.evalInnerHTMLScriptTags(host);
-            host.removeChild(host.firstChild);
-          };
-          container.appendChild(warning);
-          container.appendChild(runButton);
-          host.insertBefore(container, host.firstChild);
-        }
-      }
-
-      // Handle default behavior of nodes.
-      Private.handleDefaults(host, resolver);
-
-      // Apply ids to the header nodes.
-      Private.headerAnchors(host);
-
-      // Patch the urls if a resolver is available.
-      let promise: Promise<void>;
-      if (resolver) {
-        promise = Private.handleUrls(host, resolver, linkHandler);
-      } else {
-        promise = Promise.resolve(undefined);
-      }
-
-      // Return the rendered promise.
-      return promise;
-    })
-    .then(() => {
-      if (shouldTypeset && latexTypesetter) {
-        latexTypesetter.typeset(host);
-      }
-    });
+  // Apply ids to the header nodes.
+  Private.headerAnchors(host);
 }
 
 /**
