@@ -31,7 +31,8 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^1.2.1",
-    "@nteract/transform-vdom": "^1.1.1",
+    "@jupyterlab/services": "^3.2.1",
+    "@nteract/transform-vdom": ">=3.0.0-alpha.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "react": "~16.4.2",
