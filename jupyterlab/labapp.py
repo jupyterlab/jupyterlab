@@ -164,13 +164,16 @@ class LabWorkspaceImportApp(JupyterApp):
         file must be the same as what the export functionality emits.
     """
     workspace_name = Unicode(
-        config=True, 
+        None,
+        config=True,
+        allow_none=True,
         help="""
-        Workspace name. If given, the workspace ID in the imported 
-        file will be replaced with a new ID pointing to this 
+        Workspace name. If given, the workspace ID in the imported
+        file will be replaced with a new ID pointing to this
         workspace name.
         """
     )
+
     aliases = {
         'name': 'LabWorkspaceImportApp.workspace_name'
     }
@@ -225,7 +228,7 @@ class LabWorkspaceImportApp(JupyterApp):
             raise Exception('The `data` field is missing.')
 
         # See if workspace name is given, inject into workspace.
-        if self.workspace_name != '':
+        if self.workspace_name is not None:
             workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
             workspace['metadata'] = {'id': workspace_id}
 
