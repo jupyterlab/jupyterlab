@@ -61,7 +61,7 @@ VDOM({
 Using the [vdom Python library](https://github.com/nteract/vdom):
 
 ```python
-from vdom.helpers import h1, p, img, div, b
+from vdom import h1, p, img, div, b
 
 div(
     h1('Our Incredibly Declarative Example'),
