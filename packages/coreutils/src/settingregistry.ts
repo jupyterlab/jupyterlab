@@ -830,15 +830,17 @@ export class SettingRegistry {
    * Preload a list of plugins and fail gracefully.
    */
   private async _preload(plugins: ISettingRegistry.IPlugin[]): Promise<void> {
-    plugins.forEach(async plugin => {
-      try {
-        // Apply a transformation to the plugin if necessary.
-        await this._load(await this._transform('fetch', plugin));
-      } catch (errors) {
-        /* Ignore preload errors. */
-        console.log('Ignored setting registry preload errors.', errors);
-      }
-    });
+    await Promise.all(
+      plugins.map(async plugin => {
+        try {
+          // Apply a transformation to the plugin if necessary.
+          return this._load(await this._transform('fetch', plugin));
+        } catch (errors) {
+          /* Ignore preload errors. */
+          console.log('Ignored setting registry preload errors.', errors);
+        }
+      })
+    );
   }
 
   /**
@@ -1355,10 +1357,11 @@ export namespace Private {
     const description = (props && props['description']) || nondescript;
     const title = (props && props['title']) || untitled;
     const reified = reifyDefault(schema, key);
+    const spaces = indent.length;
     const defaults =
       reified === undefined
         ? prefix(`"${key}": ${undefaulted}`)
-        : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, indent);
+        : prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent);
 
     return [
       prefix(`${title || untitled}`),
@@ -1378,8 +1381,9 @@ export namespace Private {
     const props = schema.properties && schema.properties[key];
     const description = (props && props['description']) || nondescript;
     const title = (props && props['title']) || untitled;
+    const spaces = indent.length;
     const attribute = prefix(
-      `"${key}": ${JSON.stringify(value, null, 2)}`,
+      `"${key}": ${JSON.stringify(value, null, spaces)}`,
       indent
     );
 
