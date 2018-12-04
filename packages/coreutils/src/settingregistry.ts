@@ -834,7 +834,7 @@ export class SettingRegistry {
       plugins.map(async plugin => {
         try {
           // Apply a transformation to the plugin if necessary.
-          return this._load(await this._transform('fetch', plugin));
+          await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
           /* Ignore preload errors. */
           console.log('Ignored setting registry preload errors.', errors);
