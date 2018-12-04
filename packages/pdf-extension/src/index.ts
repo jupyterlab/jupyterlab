@@ -37,6 +37,9 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
 
     let oldUrl = this._objectUrl;
     this._objectUrl = URL.createObjectURL(blob);
+    if (model.metadata.fragment) {
+      this._objectUrl += model.metadata.fragment;
+    }
     this.node.querySelector('embed').setAttribute('src', this._objectUrl);
 
     // Release reference to any previous object url.

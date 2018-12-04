@@ -864,6 +864,7 @@ export class MarkdownCell extends Cell {
     this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
+    this.renderInput(this._renderer);
 
     super.initializeState();
   }
