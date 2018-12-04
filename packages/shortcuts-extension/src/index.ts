@@ -211,6 +211,10 @@ const shortcuts: JupyterLabPlugin<void> = {
     });
 
     try {
+      // Repopulate the canonical variable after the setting registry has
+      // preloaded all initial plugins.
+      canonical = null;
+
       const settings = await registry.load(shortcuts.id);
 
       Private.loadShortcuts(commands, settings.composite);
