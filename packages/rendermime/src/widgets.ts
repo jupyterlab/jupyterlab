@@ -64,14 +64,20 @@ export abstract class RenderedCommon extends Widget
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     // TODO compare model against old model for early bail?
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
 
     // Render the actual content.
-    return this.render(model);
+    await this.render(model);
+
+    // Handle the fragment identifier if given.
+    const { fragment } = model.metadata;
+    if (fragment) {
+      this.setFragment(fragment as string);
+    }
   }
 
   /**
@@ -82,6 +88,15 @@ export abstract class RenderedCommon extends Widget
    * @returns A promise which resolves when rendering is complete.
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+
+  /**
+   * Set the URI fragment identifier.
+   *
+   * @param fragment - The URI fragment identifier.
+   */
+  protected setFragment(fragment: string) {
+    /* no-op */
+  }
 }
 
 /**
@@ -96,6 +111,18 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedHTMLCommon');
+  }
+
+  setFragment(fragment: string) {
+    let el;
+    try {
+      el = this.node.querySelector(fragment);
+    } catch (error) {
+      console.warn('Unable to set URI fragment identifier.', error);
+    }
+    if (el) {
+      el.scrollIntoView();
+    }
   }
 }
 

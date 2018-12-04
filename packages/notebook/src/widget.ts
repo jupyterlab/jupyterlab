@@ -1161,6 +1161,17 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string): void {
+    // Wait all cells are rendered then set fragment and update.
+    Promise.all(this.widgets.map(widget => widget.ready)).then(() => {
+      this._fragment = fragment;
+      this.update();
+    });
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -1309,6 +1320,18 @@ export class Notebook extends StaticNotebook {
     });
     if (count > 1) {
       activeCell.addClass(OTHER_SELECTED_CLASS);
+    }
+    if (this._fragment) {
+      let el;
+      try {
+        el = this.node.querySelector(this._fragment);
+      } catch (error) {
+        console.warn('Unable to set URI fragment identifier', error);
+      }
+      if (el) {
+        el.scrollIntoView();
+      }
+      this._fragment = '';
     }
   }
 
@@ -2029,6 +2052,7 @@ export class Notebook extends StaticNotebook {
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
+  private _fragment = '';
   private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
