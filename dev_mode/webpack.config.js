@@ -9,6 +9,7 @@ var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
+var Visualizer = require('webpack-visualizer-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -221,7 +222,11 @@ module.exports = [
         title: jlab.name || 'JupyterLab'
       }),
       new webpack.HashedModuleIdsPlugin(),
-      new JupyterLabPlugin({})
-    ]
+      new JupyterLabPlugin({}),
+      new Visualizer()
+    ],
+    stats: {
+      chunkModules: true
+    }
   }
 ].concat(extraConfig);
