@@ -161,8 +161,11 @@ const shortcuts: JupyterLabPlugin<void> = {
     }
 
     registry.pluginChanged.connect((sender, plugin) => {
-      if (!(plugin in loaded)) {
-        populate(canonical);
+      // If some other plugin changed, clear the shortcut cache and reload
+      // myself (repopulating the keyboard shortcuts)
+      if (plugin !== shortcuts.id) {
+        canonical = null;
+        registry.reload(shortcuts.id);
       }
     });
 
