@@ -369,6 +369,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._clearHover();
   }
 
+  // todo: docs, maybe define overlay options as a type?
+  addOverlay(mode: string | object, options?: object): void {
+    this._editor.addOverlay(mode, options);
+  }
+
+  removeOverlay(mode: string | object): void {
+    this._editor.removeOverlay(mode);
+  }
+
+  getSearchCursor(
+    query: string | RegExp,
+    start?: CodeMirror.Position,
+    caseFold?: boolean
+  ): CodeMirror.SearchCursor {
+    return this._editor.getSearchCursor(query, start, caseFold);
+  }
+
+  get state(): any {
+    return this._editor.state;
+  }
+
   /**
    * Add a keydown handler to the editor.
    *
