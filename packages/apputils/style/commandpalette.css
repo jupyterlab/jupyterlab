@@ -36,9 +36,10 @@
 
 .p-CommandPalette-wrapper {
   overflow: overlay;
-  padding: 0px 8px;
+  padding: 0px 9px;
   background-color: var(--jp-input-active-background);
   height: 30px;
+  box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-border-color);
 }
 
 .p-CommandPalette.p-mod-focused .p-CommandPalette-wrapper {
