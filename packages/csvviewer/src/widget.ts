@@ -353,27 +353,26 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
    * Set URI fragment identifier for rows
    */
   setFragment(fragment: string): void {
-    let parse_fragments = fragment.split('=');
+    let parseFragments = fragment.split('=');
 
     // TODO: expand to allow columns and cells to be selected
     // reference: https://tools.ietf.org/html/rfc7111#section-3
-    if (parse_fragments[0] !== '#row') {
+    if (parseFragments[0] !== '#row') {
       return;
     }
 
     // multiple rows, separated by semi-colons can be provided, we will just
     // go to the top one
-    let top_row = parse_fragments[1].split(';')[0];
+    let topRow = parseFragments[1].split(';')[0];
 
     // a range of rows can be provided, we will take the first value
-    top_row = top_row.split('-')[0];
-    console.log(top_row);
+    topRow = topRow.split('-')[0];
 
     // go to that row
     this._context.ready.then(() => {
-      this.content.goToLine(Number(top_row));
-      // this.update();
+      this.content.goToLine(Number(topRow));
     });
+    this.update();
   }
 }
 
