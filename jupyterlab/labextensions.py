@@ -26,10 +26,6 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
-flags['dev-build'] = (
-    {'BaseExtensionApp': {'dev_build': True}},
-    "Build in Development mode"
-)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
@@ -49,6 +45,7 @@ update_flags['all'] = (
 
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
+aliases['dev-build'] = 'BaseExtensionApp.dev_build'
 
 VERSION = get_app_version()
 

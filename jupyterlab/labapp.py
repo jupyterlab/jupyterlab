@@ -26,12 +26,9 @@ build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
+build_aliases['dev'] = 'LabBuildApp.dev_build'
 
 build_flags = dict(flags)
-build_flags['dev'] = (
-    {'LabBuildApp': {'dev_build': True}},
-    "Build in Development mode"
-)
 
 version = __version__
 app_version = get_app_version()
