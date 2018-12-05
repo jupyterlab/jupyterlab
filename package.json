@@ -3,6 +3,9 @@
   "scripts": {
     "pre-publish": "jlpm && cd buildutils && npm run build && cd .. && node buildutils/lib/prepublish.js",
     "add:sibling": "node buildutils/lib/add-sibling.js",
+    "analyze": "jlpm run analyze:dev",
+    "analyze:dev": "cd dev_mode && jlpm run build && open static/stats.html",
+    "analyze:prod": "cd dev_mode && jlpm run build:prod && open static/stats.html",
     "build": "jlpm run build:dev",
     "build:core": "cd jupyterlab/staging && jlpm && jlpm run build",
     "build:dev": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build",
