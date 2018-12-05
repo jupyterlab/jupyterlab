@@ -348,6 +348,29 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
       }
     );
   }
+
+  /**
+   * Set URI fragment identifier for rows
+   */
+  setFragment(fragment: string): void {
+    // console.log('In setFragment');
+    console.log(fragment);
+    // // TODO: expand to allow columns and cells to be selected
+    // // reference: https://tools.ietf.org/html/rfc7111#section-3
+    // let parse_fragments = fragment.split('=');
+    // console.log(parse_fragments);
+    // if (parse_fragments[0] !== 'row') {
+    //   return;
+    // }
+    // // multiple rows, separated by semi-colons can be provided, we will just
+    // // go to the top one
+    // let top_row = ((parse_fragments[0].split(';'))[0]);
+    // // a range of rows can be provided, we will take the first value
+    // top_row = ((top_row.split('-'))[0]);
+    // // go to that row
+    // (this.content as CSVViewer).goToLine(Number(top_row));
+    // this.update();
+  }
 }
 
 export namespace CSVDocumentWidget {
