@@ -76,8 +76,13 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
-    const values: ISettingRegistry.IPlugin[] = (json || {})['settings'] || [];
-    const ids = values.map(value => value.id);
+    const values = ((json || {})['settings'] || []).map(
+      (plugin: ISettingRegistry.IPlugin) => {
+        plugin.data = { composite: {}, user: {} };
+        return plugin;
+      }
+    ) as ISettingRegistry.IPlugin[];
+    const ids = values.map(plugin => plugin.id);
 
     return { ids, values };
   }
