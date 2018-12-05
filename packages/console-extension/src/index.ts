@@ -578,7 +578,7 @@ async function activateConsole(
   const executeMenu = new Menu({ commands });
   executeMenu.title.label = 'Console Run Keystroke';
 
-  ['notebook', 'terminal', 'none'].forEach(name =>
+  ['notebook', 'terminal'].forEach(name =>
     executeMenu.addItem({
       command: CommandIDs.interactionMode,
       args: { interactionMode: name }

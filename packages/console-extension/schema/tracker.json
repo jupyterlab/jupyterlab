@@ -33,7 +33,7 @@
       "title": "Interaction mode",
       "description": "Whether the console interaction mimics the notebook or terminal keyboard shortcuts.",
       "type": "string",
-      "enum": ["notebook", "terminal", "none"],
+      "enum": ["notebook", "terminal"],
       "default": "notebook"
     }
   },
