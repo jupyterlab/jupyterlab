@@ -369,7 +369,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     topRow = topRow.split('-')[0];
 
     // go to that row
-    this._context.ready.then(() => {
+    this.context.ready.then(() => {
       this.content.goToLine(Number(topRow));
     });
     this.update();
