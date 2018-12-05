@@ -180,8 +180,13 @@ export class InstanceTracker<T extends Widget>
    * @param widget - The widget being added.
    */
   add(widget: T): Promise<void> {
+    if (widget.isDisposed) {
+      const warning = `${widget.id} is disposed and cannot be tracked.`;
+      console.warn(warning);
+      return Promise.reject(warning);
+    }
     if (this._tracker.has(widget)) {
-      let warning = `${widget.id} already exists in the tracker.`;
+      const warning = `${widget.id} already exists in the tracker.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
