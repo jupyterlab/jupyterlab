@@ -22,13 +22,14 @@ describe('@jupyterlab/mainmenu', () => {
     let commands: CommandRegistry;
     let menu: KernelMenu;
     let tracker: InstanceTracker<Wodget>;
-    const wodget = new Wodget();
+    let wodget: Wodget;
 
     beforeAll(() => {
       commands = new CommandRegistry();
     });
 
     beforeEach(() => {
+      wodget = new Wodget();
       menu = new KernelMenu({ commands });
       tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
       tracker.add(wodget);
