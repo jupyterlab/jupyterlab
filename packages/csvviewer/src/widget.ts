@@ -358,7 +358,6 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     // TODO: expand to allow columns and cells to be selected
     // reference: https://tools.ietf.org/html/rfc7111#section-3
     if (parse_fragments[0] !== '#row') {
-      console.log('not row');
       return;
     }
 
@@ -372,6 +371,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
 
     // go to that row
     this.content.goToLine(Number(top_row));
+    this.update();
   }
 }
 
