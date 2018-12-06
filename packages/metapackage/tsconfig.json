@@ -55,6 +55,9 @@
       "path": "../csvviewer-extension"
     },
     {
+      "path": "../databus"
+    },
+    {
       "path": "../docmanager"
     },
     {
