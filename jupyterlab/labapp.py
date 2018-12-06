@@ -227,19 +227,23 @@ class LabWorkspaceImportApp(JupyterApp):
         if 'data' not in workspace:
             raise Exception('The `data` field is missing.')
 
-        # See if workspace name is given, inject into workspace.
+        # If workspace_name is set in config, inject the
+        # name into the workspace metadata.
         if self.workspace_name is not None:
-            workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
+            if self.workspace_name == "":
+                workspace_id = ujoin(base_url, 'lab')
+            else:
+                workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
             workspace['metadata'] = {'id': workspace_id}
-
-        elif 'id' not in workspace['metadata']:
-            raise Exception('The `id` field is missing in `metadata`.')
-
+        # else check that the workspace_id is valid.
         else:
-            id = workspace['metadata']['id']
-            if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-                error = '%s does not match page_url or start with workspaces_url.'
-                raise Exception(error % id)
+            if 'id' not in workspace['metadata']:
+                raise Exception('The `id` field is missing in `metadata`.')
+            else:
+                id = workspace['metadata']['id']
+                if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
+                    error = '%s does not match page_url or start with workspaces_url.'
+                    raise Exception(error % id)
 
         return workspace
 
