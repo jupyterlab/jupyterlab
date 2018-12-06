@@ -141,7 +141,7 @@ const shortcuts: JupyterLabPlugin<void> = {
   activate: async (app: JupyterLab, registry: ISettingRegistry) => {
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema;
-    let loaded: { [name: string]: null } = {};
+    let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     /**
      * Populate the plugin's schema defaults.
@@ -150,22 +150,28 @@ const shortcuts: JupyterLabPlugin<void> = {
       loaded = {};
       schema.properties.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
-          loaded[plugin] = null;
-          return registry.plugins[plugin];
+          let shortcuts =
+            registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+          loaded[plugin] = shortcuts;
+          return shortcuts;
         })
-        .reduce(
-          (acc, val) => acc.concat(val.schema['jupyter.lab.shortcuts'] || []),
-          []
-        )
+        .reduce((acc, val) => acc.concat(val), [])
         .sort((a, b) => a.command.localeCompare(b.command));
     }
 
-    registry.pluginChanged.connect((sender, plugin) => {
-      // If some other plugin changed, clear the shortcut cache and reload
-      // myself (repopulating the keyboard shortcuts)
+    registry.pluginChanged.connect(async (sender, plugin) => {
       if (plugin !== shortcuts.id) {
-        canonical = null;
-        registry.reload(shortcuts.id);
+        // If the plugin changed its shortcuts, reload everything.
+        let oldShortcuts = loaded[plugin];
+        let newShortcuts =
+          registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+        if (
+          oldShortcuts === undefined ||
+          !JSONExt.deepEqual(oldShortcuts, newShortcuts)
+        ) {
+          canonical = null;
+          await registry.reload(shortcuts.id);
+        }
       }
     });
 
