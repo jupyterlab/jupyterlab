@@ -63,9 +63,9 @@ export class DataBus {
    * @throws An error if the given dataset is already published.
    */
   publish(dataset: IDataset): IDisposable {
-    // if (this._datasets.includes(dataset)) {
-    //   throw new Error(`Dataset already published`);
-    // }
+    if (this._datasets.find(i => i === dataset) === undefined) {
+      throw new Error(`Dataset already published`);
+    }
 
     var index = this._datasets.push(dataset) - 1;
 
