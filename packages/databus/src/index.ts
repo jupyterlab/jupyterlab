@@ -67,12 +67,12 @@ export class DataBus {
       throw new Error(`Dataset already published`);
     }
 
-    var index = this._datasets.push(dataset) - 1;
+    this._datasets.push(dataset);
 
     this._datasetsChanged.emit({ dataset, type: 'added' });
 
     return new DisposableDelegate(() => {
-      ArrayExt.removeAt(this._datasets, index);
+      ArrayExt.removeFirstOf(this._datasets, dataset);
       this._datasetsChanged.emit({ dataset, type: 'removed' });
     });
   }
