@@ -12,12 +12,14 @@ import { ISignal, Signal } from '@phosphor/signaling';
 /**
  * An interface for an abstract dataset, with a mimetype, data, and metadata.
  *
+ * This is templated over the type of data `T` and the type of metadata `U`.
+ *
  * #### Notes
  * This interface is similar conceptually to that of nbformat.IMimeBundle,
  * but with only a single mimetype and different structure. We expect there
  * to be utilities to convert between this formats.
  */
-export interface IDataset {
+export interface IDataset<T, U> {
   /**
    * The string mimetype for the dataset.
    */
@@ -31,7 +33,7 @@ export interface IDataset {
    * any. Publishers and consumers of a given mimetype will need to agree
    * what the actual data is and cast it appropriately before use.
    */
-  data: any;
+  data: T;
 
   /**
    * The metadata associate with the dataset.
@@ -41,7 +43,7 @@ export interface IDataset {
    * We are currently exploring different metadata schemes, so this may change
    * in the future.
    */
-  metadata: any;
+  metadata: U;
 }
 
 /**
@@ -62,7 +64,7 @@ export class DataBus {
    *
    * @throws An error if the given dataset is already published.
    */
-  publish(dataset: IDataset): IDisposable {
+  publish(dataset: IDataset<any, any>): IDisposable {
     if (this._datasets.find(i => i === dataset) === undefined) {
       throw new Error(`Dataset already published`);
     }
@@ -84,9 +86,9 @@ export class DataBus {
    *
    * @returns An array of matching `IDataset` objects.
    */
-  filter(mimeType: string): Array<IDataset> {
+  filter(mimeType: string): Array<IDataset<any, any>> {
     return this._datasets.filter(dataset => {
-      if ((dataset as IDataset).mimeType === mimeType) {
+      if ((dataset as IDataset<any, any>).mimeType === mimeType) {
         return dataset;
       }
     });
@@ -95,7 +97,7 @@ export class DataBus {
   /**
    * Return a list of all published datasets.
    */
-  get datasets(): Array<IDataset> {
+  get datasets(): Array<IDataset<any, any>> {
     return this._datasets;
   }
 
