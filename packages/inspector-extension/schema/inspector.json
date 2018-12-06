@@ -1,0 +1,14 @@
+{
+  "title": "Inspector",
+  "description": "Inspector settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "inspector:open",
+      "keys": ["Accel I"],
+      "selector": "body"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

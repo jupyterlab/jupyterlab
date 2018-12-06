@@ -170,7 +170,7 @@ describe('StateDB', () => {
     });
   });
 
-  describe('#fetchNamespace()', () => {
+  describe('#list()', () => {
     it('should fetch a stored namespace', async () => {
       const { localStorage } = window;
 
@@ -188,22 +188,24 @@ describe('StateDB', () => {
       const promises = keys.map(key => db.save(key, { value: key }));
       await Promise.all(promises);
       expect(localStorage).to.have.length(keys.length);
-      let fetched = await db.fetchNamespace('foo');
-      expect(fetched.length).to.equal(3);
+      let fetched = await db.list('foo');
+      expect(fetched.ids.length).to.equal(3);
+      expect(fetched.values.length).to.equal(3);
 
-      let sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
-      expect(sorted[0].id).to.equal(keys[0]);
-      expect(sorted[1].id).to.equal(keys[1]);
-      expect(sorted[2].id).to.equal(keys[2]);
+      let sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
+      expect(sorted[0]).to.equal(keys[0]);
+      expect(sorted[1]).to.equal(keys[1]);
+      expect(sorted[2]).to.equal(keys[2]);
 
-      fetched = await db.fetchNamespace('abc');
-      expect(fetched.length).to.equal(3);
+      fetched = await db.list('abc');
+      expect(fetched.ids.length).to.equal(3);
+      expect(fetched.values.length).to.equal(3);
 
-      sorted = fetched.sort((a, b) => a.id.localeCompare(b.id));
+      sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
 
-      expect(sorted[0].id).to.equal(keys[3]);
-      expect(sorted[1].id).to.equal(keys[4]);
-      expect(sorted[2].id).to.equal(keys[5]);
+      expect(sorted[0]).to.equal(keys[3]);
+      expect(sorted[1]).to.equal(keys[4]);
+      expect(sorted[2]).to.equal(keys[5]);
 
       await db.clear();
     });

@@ -91,7 +91,7 @@ export namespace CommandIDs {
 /**
  * A service providing an interface to the main menu.
  */
-const menuPlugin: JupyterLabPlugin<IMainMenu> = {
+const plugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
   provides: IMainMenu,
@@ -561,6 +561,9 @@ export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   );
 }
 
+/**
+ * Create the basic `Run` menu.
+ */
 export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
@@ -616,10 +619,16 @@ export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
+/**
+ * Create the basic `Settings` menu.
+ */
 export function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
+/**
+ * Create the basic `Tabs` menu.
+ */
 export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
@@ -701,7 +710,7 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   });
 }
 
-export default menuPlugin;
+export default plugin;
 
 /**
  * A namespace for Private data.

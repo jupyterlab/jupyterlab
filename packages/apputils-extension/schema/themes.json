@@ -1,5 +1,6 @@
 {
   "title": "Theme",
+  "jupyter.lab.setting-icon-label": "Theme Manager",
   "description": "Theme manager settings.",
   "additionalProperties": false,
   "properties": {

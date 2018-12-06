@@ -423,8 +423,10 @@ function activateCellTools(
   MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.
-  Promise.all([state.fetch(id), app.restored]).then(([args]) => {
-    const open = !!(args && ((args as ReadonlyJSONObject)['open'] as boolean));
+  Promise.all([state.fetch(id), app.restored]).then(([value]) => {
+    const open = !!(
+      value && ((value as ReadonlyJSONObject)['open'] as boolean)
+    );
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
