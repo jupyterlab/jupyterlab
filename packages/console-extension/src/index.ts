@@ -19,7 +19,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig, Text } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -559,9 +559,19 @@ async function activateConsole(
     }
   } as IEditMenu.IClearer<ConsolePanel>);
 
+  // For backwards compatibility and clarity, we explicitly label the run
+  // keystroke with the actual effected change, rather than the generic
+  // "notebook" or "terminal" interaction mode. When this interaction mode
+  // affects more than just the run keystroke, we can make this menu title more
+  // generic.
+  const runShortcutTitles: { [index: string]: string } = {
+    notebook: 'Execute with Shift+Enter',
+    terminal: 'Execute with Enter'
+  };
+
   // Add the execute keystroke setting submenu.
   commands.addCommand(CommandIDs.interactionMode, {
-    label: args => Text.titleCase(args['interactionMode'] as string),
+    label: args => runShortcutTitles[args['interactionMode'] as string] || '',
     execute: async args => {
       const key = 'keyMap';
       try {
@@ -578,7 +588,7 @@ async function activateConsole(
   const executeMenu = new Menu({ commands });
   executeMenu.title.label = 'Console Run Keystroke';
 
-  ['notebook', 'terminal'].forEach(name =>
+  ['terminal', 'notebook'].forEach(name =>
     executeMenu.addItem({
       command: CommandIDs.interactionMode,
       args: { interactionMode: name }
