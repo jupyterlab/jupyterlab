@@ -167,7 +167,7 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * The current status of the kernel.
+   * The current connection status of the kernel connection.
    */
   get connectionStatus(): Kernel.ConnectionStatus {
     return this._connectionStatus;
@@ -228,7 +228,7 @@ export class DefaultKernel implements Kernel.IKernel {
     }
     this._isDisposed = true;
     this._terminated.emit(void 0);
-    this._status = 'dead';
+    this._updateStatus('dead');
     this._clearState();
     this._clearSocket();
     this._kernelSession = '';
@@ -263,6 +263,11 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
+
+    if (this.connectionStatus === 'disconnected') {
+      throw new Error('Kernel connection is disconnected');
+    }
+
     if (this.connectionStatus === 'connected') {
       this._ws.send(serialize.serialize(msg));
     } else {
@@ -789,6 +794,7 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _clearSocket(): void {
     this._wsStopped = true;
+    this._updateConnectionStatus('disconnected');
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
       this._ws.onopen = this._noOp;
@@ -804,7 +810,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle status iopub messages from the kernel.
    */
   private _updateStatus(status: Kernel.Status): void {
-    if (status === this._status) {
+    if (this._status === status || this._status === 'dead') {
       return;
     }
     this._status = status;
@@ -821,7 +827,10 @@ export class DefaultKernel implements Kernel.IKernel {
   private _updateConnectionStatus(
     connectionStatus: Kernel.ConnectionStatus
   ): void {
-    if (connectionStatus === this._connectionStatus) {
+    if (
+      this._connectionStatus === connectionStatus ||
+      this._connectionStatus === 'disconnected'
+    ) {
       return;
     }
 
@@ -1155,7 +1164,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._clearSocket();
 
     if (this._reconnectAttempt < this._reconnectLimit) {
-      this._updateStatus('reconnecting');
+      this._updateConnectionStatus('connecting');
       let timeout = Math.pow(2, this._reconnectAttempt);
       console.error(
         'Connection lost, reconnecting in ' + timeout + ' seconds.'
@@ -1163,7 +1172,8 @@ export class DefaultKernel implements Kernel.IKernel {
       setTimeout(this._createSocket, 1e3 * timeout);
       this._reconnectAttempt += 1;
     } else {
-      this._updateStatus('dead');
+      this._updateConnectionStatus('disconnected');
+      this._updateStatus('unknown');
       this._connectionPromise.reject(
         new Error('Could not establish connection')
       );
