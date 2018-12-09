@@ -53,7 +53,7 @@ export class ConsolePanel extends Panel {
     let loadFile = true;
     if (!path) {
       let count = Private.count++;
-      path = `${basePath || ''}/.console-${count}-${UUID.uuid4()}`;
+      path = `${basePath || ''}/console-${count}-${UUID.uuid4()}.jpc`;
       loadFile = false;
       this.id = `console-${count}`;
       name = `Console ${count}`;
