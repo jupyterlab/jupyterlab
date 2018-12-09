@@ -6,7 +6,7 @@
     "build": "tsc -b",
     "clean": "rimraf build && rimraf coverage",
     "coverage": "python run.py --coverage",
-    "test": "/home/dror/soft/jlpython/bin/python run.py",
+    "test": "python run.py",
     "watch": "python run.py --debug",
     "watch:all": "python run.py --debug --watchAll",
     "watch:src": "tsc -b --watch"
