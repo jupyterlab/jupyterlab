@@ -37,8 +37,10 @@
       "default": "notebook"
     },
     "fileBacking": {
-      "type": "boolean", "title": "Back consoles by files", "default": false
-  }
+      "type": "boolean",
+      "title": "Back consoles by files",
+      "default": false
+    }
   },
   "additionalProperties": false,
   "type": "object",
