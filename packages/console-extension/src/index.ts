@@ -18,20 +18,18 @@ import {
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import {
-  ConsolePanel, IConsoleTracker, CodeConsole
+  ConsolePanel,
+  IConsoleTracker,
+  CodeConsole
 } from '@jupyterlab/console';
 
-import {
-  PageConfig, ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { PageConfig, ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-import {
-  find, each
-} from '@phosphor/algorithm';
+import { find, each } from '@phosphor/algorithm';
 
 import {
   IEditMenu,
@@ -43,8 +41,6 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { find } from '@phosphor/algorithm';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
@@ -147,16 +143,11 @@ async function activateConsole(
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
-  const id = plugins[1].id;
-  let command: string;
-  let menu = new Menu({ commands });
 
   // Create an instance tracker for all console panels.
   const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
 
-  let {
-    fileBacking
-  } = CodeConsole.defaultConfig;
+  let { fileBacking } = CodeConsole.defaultConfig;
 
   // Handle state restoration.
   restorer.restore(tracker, {
@@ -169,36 +160,12 @@ async function activateConsole(
     when: manager.ready
   });
 
-  /**
-   * Update the setting values.
-   */
-  function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('fileBacking').composite as boolean | null;
-    fileBacking = cached === null ? fileBacking : !!cached;
-    CodeConsole.setOption('fileBacking', fileBacking);
-  }
-
-  // Fetch the initial state of the settings.
-  Promise.all([settingRegistry.load(id), shell]).then(([settings]) => {
-    updateSettings(settings);
-    settings.changed.connect(() => {
-      updateSettings(settings);
-    });
-  }).catch((reason: Error) => {
-    console.error(reason.message);
-  });
-
   // Update the command registry when the console state changes.
   tracker.currentChanged.connect(() => {
     if (tracker.size <= 1) {
       commands.notifyCommandChanged(CommandIDs.interrupt);
     }
   });
-
-  // The launcher callback.
-  let callback = (cwd: string, name: string) => {
-    return createConsole({ basePath: cwd, kernelPreference: { name } });
-  };
 
   // Update console count to reflect number of running consoles.
   manager.ready.then(() => {
@@ -300,6 +267,10 @@ async function activateConsole(
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
   async function updateSettings() {
+    let cached = (await settingRegistry.get(pluginId, 'fileBacking'))
+      .composite as boolean | null;
+    fileBacking = cached === null ? fileBacking : !!cached;
+    CodeConsole.setOption('fileBacking', fileBacking);
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     tracker.forEach(panel => {
@@ -541,6 +512,51 @@ async function activateConsole(
     isEnabled
   });
 
+  let _exportNotebook = (current: ConsolePanel) => {
+    if (!current) {
+      return;
+    }
+    let dir = current.session.path.substring(
+      0,
+      current.session.path.lastIndexOf('/')
+    );
+    return current.console.manager.contents
+      .newUntitled({ type: 'notebook', path: dir })
+      .then(data => {
+        if (!data) {
+          return;
+        }
+        return current.console.save(data.path).then(() => {
+          return commands.execute('docmanager:open', {
+            path: data.path,
+            factory: 'Notebook',
+            kernel: { name }
+          });
+        });
+      });
+  };
+
+  let exportNotebook = (args: ReadonlyJSONObject) => {
+    const current = getCurrent(args);
+    return _exportNotebook(current);
+  };
+
+  commands.addCommand(CommandIDs.exportNotebook, {
+    label: 'Export Console to Notebook',
+    execute: exportNotebook,
+    isEnabled
+  });
+
+  mainMenu.fileMenu.addGroup(
+    [
+      {
+        type: 'command',
+        command: CommandIDs.exportNotebook
+      } as Menu.IItemOptions
+    ],
+    11
+  );
+
   // Add command palette items
   [
     CommandIDs.create,
@@ -552,7 +568,8 @@ async function activateConsole(
     CommandIDs.interrupt,
     CommandIDs.changeKernel,
     CommandIDs.closeAndShutdown,
-    CommandIDs.toggleShowAllActivity
+    CommandIDs.toggleShowAllActivity,
+    CommandIDs.exportNotebook
   ].forEach(command => {
     palette.addItem({ command, category, args: { isPalette: true } });
   });
@@ -689,49 +706,14 @@ async function activateConsole(
   });
   palette.addItem({ command, category });
 
-  command = CommandIDs.exportNotebook;
-  commands.addCommand(command, {
-    label: 'Export to Notebook',
-    execute: args => {
-      const current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      let dir = current.session.path.substring(0, current.session.path.lastIndexOf('/'));
-      return current.console.manager.contents.newUntitled({type: 'notebook', path: dir}).then(data => {
-        if (!data) {
-          return;
-        }
-        return current.console.save(data.path).then(() => {
-          return commands.execute('docmanager:open', {
-            path: data.path, factory: 'Notebook',
-            kernel: { name }
-          });
-        });
-      });
-    },
-    isEnabled: hasWidget
+  app.contextMenu.addItem({
+    command: CommandIDs.clear,
+    selector: '.jp-CodeConsole'
   });
-  palette.addItem({ command, category });
-
-  menu.addItem({ command: CommandIDs.run });
-  menu.addItem({ command: CommandIDs.runForced });
-  menu.addItem({ command: CommandIDs.linebreak });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.clear });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.interrupt });
-  menu.addItem({ command: CommandIDs.restart });
-  menu.addItem({ command: CommandIDs.changeKernel });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.closeAndShutdown });
-  menu.addItem({ type: 'separator' });
-  menu.addItem({ command: CommandIDs.exportNotebook });
-
-  mainMenu.addMenu(menu, {rank: 50});
-
-  app.contextMenu.addItem({command: CommandIDs.clear, selector: '.jp-CodeConsole'});
-  app.contextMenu.addItem({command: CommandIDs.restart, selector: '.jp-CodeConsole'});
+  app.contextMenu.addItem({
+    command: CommandIDs.restart,
+    selector: '.jp-CodeConsole'
+  });
 
   return tracker;
 }

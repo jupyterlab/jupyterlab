@@ -1,30 +1,39 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
 import {
-  Cell, CellModel, CodeCell, CodeCellModel, ICodeCellModel, isCodeCellModel, IRawCellModel,
-  RawCell, RawCellModel, ICellModel
+  Cell,
+  CellModel,
+  CodeCell,
+  CodeCellModel,
+  ICodeCellModel,
+  IRawCellModel,
+  RawCell,
+  RawCellModel,
+  ICellModel
 } from '@jupyterlab/cells';
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import {
-  nbformat, IObservableList, ObservableList, IObservableJSON, ObservableJSON
-} from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import {
+  IObservableList,
+  ObservableList,
+  ObservableJSON,
+  IObservableJSON
+} from '@jupyterlab/observables';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import {
-  KernelMessage, ServiceManager, Contents, Kernel
+  KernelMessage,
+  ServiceManager,
+  Contents,
+  Kernel
 } from '@jupyterlab/services';
-
-import { KernelMessage } from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
 
@@ -217,8 +226,14 @@ export class CodeConsole extends Widget {
   addCell(cell: Cell) {
     this._content.addWidget(cell);
     this._cells.push(cell);
-    cell.disposed.connect(this._onCellDisposed, this);
-    cell.model.contentChanged.connect(this._onCellChanged, this);
+    cell.disposed.connect(
+      this._onCellDisposed,
+      this
+    );
+    cell.model.contentChanged.connect(
+      this._onCellChanged,
+      this
+    );
     this.update();
   }
 
@@ -249,7 +264,7 @@ export class CodeConsole extends Widget {
    */
   private _onCellChanged(sender: ICellModel, args: void): void {
     if (Private.fileBacking) {
-     this.save();
+      this.save();
     }
   }
 
@@ -367,13 +382,10 @@ export class CodeConsole extends Widget {
    * This only serializes the code cells and the prompt cell if it exists, and
    * skips any old banner cells.
    */
-  serialize(): nbformat.ICodeCell[] {
-    const cells: nbformat.ICodeCell[] = [];
+  serialize(): nbformat.ICell[] {
+    const cells: nbformat.ICell[] = [];
     each(this._cells, cell => {
-      let model = cell.model;
-      if (isCodeCellModel(model)) {
-        cells.push(model.toJSON());
-      }
+      cells.push(cell.model.toJSON());
     });
 
     if (this.promptCell) {
@@ -564,105 +576,106 @@ export class CodeConsole extends Widget {
   /**
    * Make sure we have the required metadata fields.
    */
-   private _ensureMetadata(): void {
-     let metadata = this._metadata;
-     if (!metadata.has('language_info')) {
-       metadata.set('language_info', { name: '' });
-     }
-     if (!metadata.has('kernelspec')) {
-       metadata.set('kernelspec', { name: '', display_name: '' });
-     }
-   }
+  private _ensureMetadata(): void {
+    let metadata = this._metadata;
+    if (!metadata.has('language_info')) {
+      metadata.set('language_info', { name: '' });
+    }
+    if (!metadata.has('kernelspec')) {
+      metadata.set('kernelspec', { name: '', display_name: '' });
+    }
+  }
 
-   /**
-    * Serialize the model to JSON.
-    */
-   toJSON(): nbformat.INotebookContent {
-     let cells: nbformat.ICell[] = [];
-     for (let i = 0; i < this.cells.length; i++) {
-       let cell = this.cells.get(i);
-       cells.push(cell.model.toJSON());
-     }
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.INotebookContent {
+    let cells: nbformat.ICell[] = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      let cell = this.cells.get(i);
+      cells.push(cell.model.toJSON());
+    }
 
-     this._ensureMetadata();
-     let metadata = Object.create(null) as nbformat.INotebookMetadata;
-     for (let key of this._metadata.keys()) {
-       metadata[key] = JSON.parse(JSON.stringify(this._metadata.get(key)));
-     }
+    this._ensureMetadata();
+    let metadata = Object.create(null) as nbformat.INotebookMetadata;
+    for (let key of this._metadata.keys()) {
+      metadata[key] = JSON.parse(JSON.stringify(this._metadata.get(key)));
+    }
 
-     return {
-       metadata,
-       nbformat_minor: nbformat.MINOR_VERSION,
-       nbformat: nbformat.MAJOR_VERSION,
-       cells
-     };
-   }
+    return {
+      metadata,
+      nbformat_minor: nbformat.MINOR_VERSION,
+      nbformat: nbformat.MAJOR_VERSION,
+      cells
+    };
+  }
 
-   /**
-    * Save console document to specified path or generated path.
-    */
-   save(path: string=null): Promise<void> {
-     let options = {
-       type: 'file' as Contents.ContentType,
-       format: 'text' as Contents.FileFormat,
-       content: JSON.stringify(this.toJSON())
-     };
-     path = path || this.session.path;
-     return this.manager.ready.then(() => {
-       this.manager.contents.save(path, options);
-     });
-   }
+  /**
+   * Save console document to specified path or generated path.
+   */
+  save(path: string = null): Promise<void> {
+    let options = {
+      type: 'file' as Contents.ContentType,
+      format: 'text' as Contents.FileFormat,
+      content: JSON.stringify(this.toJSON())
+    };
+    path = path || this.session.path;
+    return this.manager.ready.then(() => {
+      this.manager.contents.save(path, options);
+    });
+  }
 
-   /**
-    * Load console document from store.
-    */
-   fromStore(): Promise<void> {
-     let opts: Contents.IFetchOptions = {
-       format: 'text' as Contents.FileFormat,
-       type: 'file' as Contents.ContentType,
-       content: true
-     };
-     let path = this.session.path;
-     return this.manager.ready.then(() => {
-       return this.manager.contents.get(path, opts);
-     }).then(contents => {
-       if (this.isDisposed) {
-         return;
-       }
-       let dirty = false;
-       let content = contents.content;
-       // Convert line endings if necessary, marking the file
-       // as dirty.
-       if (content.indexOf('\r') !== -1) {
-         dirty = true;
-         content = content.replace(/\r\n|\r/g, '\n');
-       }
-       this.fromJSON(JSON.parse(content));
-       this._loadedFromFile = true;
-     }).catch(err => {
-       this._loadedFromFile = false;
-     });
-   }
+  /**
+   * Load console document from store.
+   */
+  fromStore(): Promise<void> {
+    let opts: Contents.IFetchOptions = {
+      format: 'text' as Contents.FileFormat,
+      type: 'file' as Contents.ContentType,
+      content: true
+    };
+    let path = this.session.path;
+    return this.manager.ready
+      .then(() => {
+        return this.manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
+        }
+        let content = contents.content;
+        // Convert line endings if necessary, marking the file
+        // as dirty.
+        if (content.indexOf('\r') !== -1) {
+          content = content.replace(/\r\n|\r/g, '\n');
+        }
+        this.fromJSON(JSON.parse(content));
+        this._loadedFromFile = true;
+      })
+      .catch(err => {
+        this._loadedFromFile = false;
+      });
+  }
 
-   /**
-    * Deserialize the model from JSON.
-    */
-   fromJSON(value: nbformat.INotebookContent): void {
-     let i = 1;
-     for (let cell of value.cells) {
-       let codeCell: nbformat.ICodeCell = cell as nbformat.ICodeCell;
-       let newCell: CodeCell = this._createCodeCell();
-       let source = newCell.model.value.text = cell.source.toString();
-       newCell.model.outputs.fromJSON(codeCell.outputs);
+  /**
+   * Deserialize the model from JSON.
+   */
+  fromJSON(value: nbformat.INotebookContent): void {
+    let i = 1;
+    for (let cell of value.cells) {
+      let codeCell: nbformat.ICodeCell = cell as nbformat.ICodeCell;
+      let newCell: CodeCell = this._createCodeCell();
+      let source = (newCell.model.value.text = cell.source.toString());
+      newCell.model.outputs.fromJSON(codeCell.outputs);
 
-       if (source && source.length) {
-         newCell.setPrompt(i.toString());
-         i++;
-       }
+      if (source && source.length) {
+        newCell.setPrompt(i.toString());
+        i++;
+      }
 
-       this.addCell(newCell);
-     }
-   }
+      this.addCell(newCell);
+    }
+  }
 
   /**
    * Update the console based on the kernel info.
@@ -1035,14 +1048,12 @@ export namespace CodeConsole {
   /**
    * The default `ModelFactory` instance.
    */
-  export
-  const defaultModelFactory = new ModelFactory({});
+  export const defaultModelFactory = new ModelFactory({});
 
   /**
    * The configuration options for a console.
    */
-  export
-  interface IConfig {
+  export interface IConfig {
     /**
      * Whether line numbers should be displayed.
      */
@@ -1052,16 +1063,16 @@ export namespace CodeConsole {
   /**
    * The default configuration options for a console.
    */
-  export
-  let defaultConfig: IConfig = {
+  export let defaultConfig: IConfig = {
     fileBacking: false
   };
 
   /**
    * Get a config option for all consoles.
    */
-  export
-  function getOption<K extends keyof CodeConsole.IConfig>(option: K): CodeConsole.IConfig[K] {
+  export function getOption<K extends keyof CodeConsole.IConfig>(
+    option: K
+  ): CodeConsole.IConfig[K] {
     switch (option) {
       case 'fileBacking':
       default:
@@ -1072,8 +1083,10 @@ export namespace CodeConsole {
   /**
    * Set a config option for all consoles.
    */
-  export
-  function setOption<K extends keyof CodeConsole.IConfig>(option: K, value: CodeConsole.IConfig[K]): void {
+  export function setOption<K extends keyof CodeConsole.IConfig>(
+    option: K,
+    value: CodeConsole.IConfig[K]
+  ): void {
     switch (option) {
       case 'fileBacking':
       default:
@@ -1098,6 +1111,5 @@ namespace Private {
   /**
    * Flag for file-backing consoles.
    */
-  export
-  let fileBacking = false;
+  export let fileBacking = false;
 }

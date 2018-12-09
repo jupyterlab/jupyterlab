@@ -48,9 +48,8 @@ export class ConsolePanel extends Panel {
       manager,
       modelFactory
     } = options;
-    let contentFactory = this.contentFactory = (
-      options.contentFactory || ConsolePanel.defaultContentFactory
-    );
+    let contentFactory = (this.contentFactory =
+      options.contentFactory || ConsolePanel.defaultContentFactory);
     let loadFile = true;
     if (!path) {
       let count = Private.count++;
@@ -65,7 +64,7 @@ export class ConsolePanel extends Panel {
 
     this.title.label = name;
 
-    let session = this._session = new ClientSession({
+    let session = (this._session = new ClientSession({
       manager: manager.sessions,
       path,
       name: name,
@@ -85,11 +84,10 @@ export class ConsolePanel extends Panel {
       session,
       mimeTypeService,
       contentFactory,
-      modelFactory
+      modelFactory,
+      manager
     });
     this.addWidget(this.console);
-
-    this._manager = manager;
 
     session.initialize().then(() => {
       this._connected = new Date();
@@ -300,8 +298,7 @@ export namespace ConsolePanel {
    * Set consoles count. This is useful when restoring the app.
    * @param count Number of consoles already running.
    */
-  export
-  function setConsoleCount(count: number) {
+  export function setConsoleCount(count: number) {
     Private.count = count;
   }
 }
@@ -327,7 +324,7 @@ namespace Private {
     // Since this function is often called when `session.name` is empty,
     // we want to make sure we still show a title.
     let newName = session.name || panel.title.label;
-    let caption = (
+    let caption =
       `Name: ${newName}\n` +
       `Directory: ${PathExt.dirname(session.path)}\n` +
       `Kernel: ${session.kernelDisplayName}`;
