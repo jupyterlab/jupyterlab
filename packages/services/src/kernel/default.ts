@@ -228,7 +228,7 @@ export class DefaultKernel implements Kernel.IKernel {
     }
     this._isDisposed = true;
     this._terminated.emit(void 0);
-    this._updateStatus('dead');
+    this._updateConnectionStatus('disconnected');
     this._clearState();
     this._clearSocket();
     this._kernelSession = '';
@@ -345,21 +345,28 @@ export class DefaultKernel implements Kernel.IKernel {
     return Private.restartKernel(this, this.serverSettings);
   }
 
-  /**
-   * Handle a restart on the kernel.  This is not part of the `IKernel`
-   * interface.
-   */
-  handleRestart(): void {
-    this._clearState();
-    this._updateStatus('restarting');
-    this._clearSocket();
-  }
+  // /**
+  //  * Handle a restart on the kernel.
+  //  *
+  //  * #### Notes
+  //  * This is not part of the `IKernel` interface.
+  //  */
+  // handleRestart(): void {
+  //   this._clearState();
+  //   // this._updateStatus('restarting');
+  //   // TODO: don't clear the websocket
+  //   this._clearSocket();
+  // }
 
   /**
    * Reconnect to a disconnected kernel.
    *
    * #### Notes
    * Used when the websocket connection to the kernel is lost.
+   *
+   * TODO: should we remove this method? It doesn't play well with
+   * 'disconnected' being a terminal state. We already have the automatic
+   * reconnection.
    */
   reconnect(): Promise<void> {
     this._updateConnectionStatus('connecting');
@@ -379,19 +386,16 @@ export class DefaultKernel implements Kernel.IKernel {
    * On a valid response, closes the websocket and disposes of the kernel
    * object, and fulfills the promise.
    *
-   * The promise will be rejected if the kernel status is `Dead` or if the
+   * The promise will be rejected if the kernel status is `dead` or if the
    * request fails or the response is invalid.
    */
-  shutdown(): Promise<void> {
-    if (this.status === 'dead') {
-      this._clearSocket();
-      this._clearState();
-      return;
+  async shutdown(): Promise<void> {
+    // TODO: says will be rejected if the kernel is dead. Nominally that's not true here.
+    if (this.status !== 'dead') {
+      await Private.shutdownKernel(this.id, this.serverSettings);
     }
-    return Private.shutdownKernel(this.id, this.serverSettings).then(() => {
-      this._clearState();
-      this._clearSocket();
-    });
+    this._clearState();
+    this._clearSocket();
   }
 
   /**
@@ -794,7 +798,6 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _clearSocket(): void {
     this._wsStopped = true;
-    this._updateConnectionStatus('disconnected');
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
       this._ws.onopen = this._noOp;
@@ -813,6 +816,11 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this._status === status || this._status === 'dead') {
       return;
     }
+    // If we are restarting, clear the state
+    if (status === 'restarting') {
+      this._clearState();
+    }
+
     this._status = status;
     this._statusChanged.emit(status);
     Private.logKernelStatus(this);
@@ -823,6 +831,9 @@ export class DefaultKernel implements Kernel.IKernel {
 
   /**
    * Handle connection status changes.
+   *
+   * #### Notes
+   * The 'disconnected' state is considered a terminal state.
    */
   private _updateConnectionStatus(
     connectionStatus: Kernel.ConnectionStatus
@@ -1002,7 +1013,7 @@ export class DefaultKernel implements Kernel.IKernel {
     // Strip any authentication from the display string.
     // TODO - Audit tests for extra websockets started
     let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
-    console.log('Starting WebSocket:', display);
+    console.log(`Starting WebSocket: ${display}`);
 
     let url = URLExt.join(
       partialUrl,
@@ -1025,26 +1036,24 @@ export class DefaultKernel implements Kernel.IKernel {
     this._ws.onopen = this._onWSOpen;
     this._ws.onclose = this._onWSClose;
     this._ws.onerror = this._onWSClose;
+    this._updateConnectionStatus('connecting');
   };
 
   /**
    * Handle a websocket open event.
    */
-  private _onWSOpen = (evt: Event) => {
+  private _onWSOpen = async (evt: Event) => {
     this._reconnectAttempt = 0;
 
-    // Update our status to connected. TODO: *don't* update state to connected until *after* the kernel info.
-    this._updateConnectionStatus('connected');
-
     // Get the kernel info, signaling that the kernel is ready.
-    // TODO: requestKernelInfo shouldn't make a request, but should return cached info?
-    this.requestKernelInfo()
-      .then(() => {
-        this._connectionPromise.resolve(void 0);
-      })
-      .catch(err => {
-        this._connectionPromise.reject(err);
-      });
+    try {
+      await this.requestKernelInfo();
+      this._connectionPromise.resolve(void 0);
+      this._updateConnectionStatus('connected');
+    } catch (err) {
+      this._connectionPromise.reject(err);
+      // TODO: what to do about kernel status?
+    }
   };
 
   /**
@@ -1160,11 +1169,10 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this._wsStopped || !this._ws) {
       return;
     }
-    // Clear the websocket event handlers and the socket itself.
-    this._clearSocket();
 
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateConnectionStatus('connecting');
+      this._clearSocket();
       let timeout = Math.pow(2, this._reconnectAttempt);
       console.error(
         'Connection lost, reconnecting in ' + timeout + ' seconds.'
@@ -1173,6 +1181,7 @@ export class DefaultKernel implements Kernel.IKernel {
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
+      this._clearSocket();
       this._updateStatus('unknown');
       this._connectionPromise.reject(
         new Error('Could not establish connection')
@@ -1187,7 +1196,13 @@ export class DefaultKernel implements Kernel.IKernel {
   private _kernelSession = '';
   private _clientId = '';
   private _isDisposed = false;
+  /**
+   * Websocket is in process of being closed.
+   */
   private _wsStopped = false;
+  /**
+   * Websocket to communicate with kernel.
+   */
   private _ws: WebSocket | null = null;
   private _username = '';
   private _reconnectLimit = 7;
@@ -1547,11 +1562,11 @@ namespace Private {
     // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
-    each(runningKernels, k => {
-      if (k.id === kernel.id) {
-        k.handleRestart();
-      }
-    });
+    // each(runningKernels, k => {
+    //   if (k.id === kernel.id) {
+    //     k.handleRestart();
+    //   }
+    // });
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status !== 200) {
       throw new ServerConnection.ResponseError(response);
@@ -1559,12 +1574,14 @@ namespace Private {
     let data = await response.json();
     validate.validateModel(data);
     // Reconnect the other kernels asynchronously, but don't wait for them.
-    each(runningKernels, k => {
-      if (k !== kernel && k.id === kernel.id) {
-        k.reconnect();
-      }
-    });
-    await kernel.reconnect();
+    // each(runningKernels, k => {
+    //   if (k !== kernel && k.id === kernel.id) {
+    //     k.reconnect();
+    //   }
+    // });
+    // await kernel.reconnect();
+
+    // TODO: put a status message handler listener promise, and return that.
   }
 
   /**
