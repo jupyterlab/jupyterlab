@@ -556,7 +556,7 @@ function addCommands(
           return;
         }
         return showDialog({
-          title: 'Revert notebook to checkpoint',
+          title: `Revert ${fileType()} to checkpoint`,
           body: new RevertConfirmWidget(lastCheckpoint),
           buttons: [
             Dialog.cancelButton(),
