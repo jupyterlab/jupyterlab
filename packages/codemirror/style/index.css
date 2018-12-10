@@ -122,6 +122,10 @@
   white-space: nowrap;
 }
 
+.jp-CodeMirror-ruler {
+  border-left: 1px dashed var(--jp-border-color2);
+}
+
 /**
  * Here is our jupyter theme for CodeMirror syntax highlighting
  * This is used in our marked.js syntax highlighting and CodeMirror itself

@@ -1132,8 +1132,6 @@ export namespace CodeMirrorEditor {
      */
     scrollPastEnd?: boolean;
 
-    rulers?: Array<any>;
-
     /**
      * Whether to give the wrapper of the line that contains the cursor the class
      * CodeMirror-activeline, adds a background with the class
@@ -1180,12 +1178,7 @@ export namespace CodeMirrorEditor {
     styleActiveLine: false,
     styleSelectedText: false,
     selectionPointer: false,
-    rulers: [{
-      column: 79,
-      color: 'red',
-      lineStyle: 'dashed',
-      width: 5
-    }]
+    rulers: [88]
   };
 
   /**
@@ -1326,8 +1319,6 @@ namespace Private {
   }
 
   /**
-    case 'rulers':
-      return editor.getOption('rulers');
    * Set a config option for the editor.
    */
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
@@ -1365,9 +1356,18 @@ namespace Private {
         break;
       case 'autoClosingBrackets':
         editor.setOption('autoCloseBrackets', value);
-      break;
-    case 'rulers':
-      editor.setOption('rulers', value);
+        break;
+      case 'rulers':
+        let rulers = value as Array<number>;
+        editor.setOption(
+          'rulers',
+          rulers.map(column => {
+            return {
+              column,
+              className: 'jp-CodeMirror-ruler'
+            };
+          })
+        );
         break;
       case 'readOnly':
         el.classList.toggle(READ_ONLY_CLASS, value);
