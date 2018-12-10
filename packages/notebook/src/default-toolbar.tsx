@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as React from 'react';
+
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Message } from '@phosphor/messaging';
@@ -15,7 +17,9 @@ import {
   Styling,
   Toolbar,
   ToolbarButton,
-  DynamicToolbarButton
+  ToolbarButtonComponent,
+  UseSignal,
+  BaseToolbarButton
 } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -71,8 +75,8 @@ export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export function createSaveButton(panel: NotebookPanel): DynamicToolbarButton {
-    let onClick = () => {
+  export function createSaveButton(panel: NotebookPanel): ToolbarButton {
+    function onClick() {
       if (panel.context.model.readOnly) {
         return showDialog({
           title: 'Cannot Save',
@@ -85,25 +89,28 @@ export namespace ToolbarItems {
           return panel.context.createCheckpoint();
         }
       });
-    };
-    let propFactory = () => {
-      return {
-        iconClassName: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
-        onClick,
-        tooltip: 'Save the notebook contents and create checkpoint',
-        enabled: !!(
-          panel &&
-          panel.context &&
-          panel.context.contentsModel &&
-          panel.context.contentsModel.writable
-        )
-      };
-    };
-    let button = new DynamicToolbarButton(propFactory);
-    panel.context.fileChanged.connect(() => {
-      button.update();
-    });
-    return button;
+    }
+    return new BaseToolbarButton(
+      (
+        <UseSignal signal={panel.context.fileChanged}>
+          {() => (
+            <ToolbarButtonComponent
+              iconClassName={TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16'}
+              onClick={onClick}
+              tooltip="Save the notebook contents and create checkpoint"
+              enabled={
+                !!(
+                  panel &&
+                  panel.context &&
+                  panel.context.contentsModel &&
+                  panel.context.contentsModel.writable
+                )
+              }
+            />
+          )}
+        </UseSignal>
+      )
+    );
   }
 
   /**

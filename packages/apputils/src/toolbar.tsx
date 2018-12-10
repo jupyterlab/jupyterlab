@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget } from './vdom';
+import { ReactWidget, UseSignal, ReactElementWidget } from './vdom';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
@@ -402,55 +402,26 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   );
 }
 
-/**
- * Phosphor Widget version of static ToolbarButtonComponent.
- *
- * #### Notes
- * Use this for buttons where the props will not ever change.
- */
-export class ToolbarButton extends ReactWidget {
+export class BaseToolbarButton extends ReactElementWidget {
   /**
-   * Create a ToolbarButton.
-   *
-   * @param props - Props for ToolbarButtonComponent.
+   * Adds toolbar button class to node
    */
-  constructor(props: ToolbarButtonComponent.IProps = {}) {
-    super();
-    this._component = <ToolbarButtonComponent {...props} />;
+  protected onInit() {
     this.addClass('jp-ToolbarButton');
   }
-
-  render() {
-    return this._component;
-  }
-
-  private _component: React.ReactElement<any>;
 }
 
 /**
- * Phosphor Widget version of ToolbarButtonComponent.
- *
- * #### Notes
- * Use this when the props for the button could change, and should be generated
- * each time the button is updated.
+ * Phosphor Widget version of static ToolbarButtonComponent.
  */
-export class DynamicToolbarButton extends ReactWidget {
+export class ToolbarButton extends BaseToolbarButton {
   /**
-   * Create a ToolbarButton.
-   *
-   * @param props - a factor for props for ToolbarButtonComponent.
+   * Creates a toolbar button
+   * @param props props for underlying `ToolbarButton` componenent
    */
-  constructor(propFactory: () => ToolbarButtonComponent.IProps) {
-    super();
-    this._propFactory = propFactory;
-    this.addClass('jp-ToolbarButton');
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
+    super(<ToolbarButtonComponent {...props} />);
   }
-
-  render() {
-    return <ToolbarButtonComponent {...this._propFactory()} />;
-  }
-
-  private _propFactory: () => ToolbarButtonComponent.IProps;
 }
 
 /**
@@ -472,59 +443,39 @@ export namespace CommandToolbarButtonComponent {
  * This wraps the ToolbarButtonComponent and watches the command registry
  * for changes to the command.
  */
-export class CommandToolbarButtonComponent extends React.Component<
-  CommandToolbarButtonComponent.IProps
-> {
-  constructor(props: CommandToolbarButtonComponent.IProps) {
-    super(props);
-    props.commands.commandChanged.connect(
-      this._onChange,
-      this
-    );
-    this._childProps = Private.propsFromCommand(this.props);
-  }
-
-  public render() {
-    return <ToolbarButtonComponent {...this._childProps} />;
-  }
-
-  private _onChange(
-    sender: CommandRegistry,
-    args: CommandRegistry.ICommandChangedArgs
-  ) {
-    if (args.id !== this.props.id) {
-      return; // Not our command
-    }
-
-    if (args.type !== 'changed') {
-      return; // Not a change
-    }
-
-    this._childProps = Private.propsFromCommand(this.props);
-    this.forceUpdate();
-  }
-
-  private _childProps: ToolbarButtonComponent.IProps;
+export function CommandToolbarButtonComponent(
+  props: CommandToolbarButtonComponent.IProps
+) {
+  return (
+    <UseSignal
+      signal={props.commands.commandChanged}
+      initial={[null, null]}
+      shouldUpdate={(sender, args) =>
+        args.id == props.id && args.type == 'changed'
+      }
+    >
+      {() => <ToolbarButtonComponent {...Private.propsFromCommand(props)} />}
+    </UseSignal>
+  );
 }
 
 /**
  * Phosphor Widget version of CommandToolbarButtonComponent.
- *
- * #### Notes
- * Use this for command buttons where the props will not ever change.
  */
-export class CommandToolbarButton extends ReactWidget {
+export class CommandToolbarButton extends ReactElementWidget {
+  /**
+   * Creates a command toolbar button
+   * @param props props for underlying `CommandToolbarButtonComponent` componenent
+   */
   constructor(props: CommandToolbarButtonComponent.IProps) {
-    super();
-    this._component = <CommandToolbarButtonComponent {...props} />;
+    super(<CommandToolbarButtonComponent {...props} />);
+  }
+  /**
+   * Adds command toolbar button class to node
+   */
+  protected onInit() {
     this.addClass('jp-CommandToolbarButton');
   }
-
-  render() {
-    return this._component;
-  }
-
-  private _component: React.ReactElement<any>;
 }
 
 /**
@@ -600,38 +551,23 @@ namespace Private {
    * This wraps the ToolbarButtonComponent and watches the kernel
    * session for changes.
    */
-  export class KernelNameComponent extends React.Component<
-    KernelNameComponent.IProps
-  > {
-    constructor(props: KernelNameComponent.IProps) {
-      super(props);
-      props.session.kernelChanged.connect(
-        this._onKernelChanged,
-        this
-      );
-      this._childProps = {
-        className: TOOLBAR_KERNEL_NAME_CLASS,
-        onClick: () => {
-          this.props.session.selectKernel();
-        },
-        tooltip: 'Switch kernel',
-        label: props.session.kernelDisplayName
-      };
-    }
 
-    public render() {
-      return <ToolbarButtonComponent {...this._childProps} />;
-    }
-
-    /**
-     * Update the text of the kernel name item.
-     */
-    private _onKernelChanged(session: IClientSession): void {
-      this._childProps.label = session.kernelDisplayName;
-      this.forceUpdate();
-    }
-
-    private _childProps: ToolbarButtonComponent.IProps;
+  export function KernelNameComponent(props: KernelNameComponent.IProps) {
+    return (
+      <UseSignal
+        signal={props.session.kernelChanged}
+        initial={[props.session, null]}
+      >
+        {session => (
+          <ToolbarButtonComponent
+            className={TOOLBAR_KERNEL_NAME_CLASS}
+            onClick={props.session.selectKernel.bind(props.session)}
+            tooltip={'Switch kernel'}
+            label={session.kernelDisplayName}
+          />
+        )}
+      </UseSignal>
+    );
   }
 
   /**

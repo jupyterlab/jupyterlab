@@ -7,7 +7,7 @@ import { IIterator, toArray } from '@phosphor/algorithm';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
 import {
   Dialog,
@@ -143,29 +143,34 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
   );
 }
 
-class List<M> extends React.Component<SessionProps<M>, { models: M[] }> {
-  constructor(props: SessionProps<M>) {
-    super(props);
-    this.state = { models: toArray(props.manager.running()) };
+function ListView<M>(props: { models: M[] } & SessionProps<M>) {
+  const { models, ...rest } = props;
+  return (
+    <ul className={LIST_CLASS}>
+      {models.map((m, i) => (
+        <Item key={i} model={m} {...rest} />
+      ))}
+    </ul>
+  );
+}
+
+function List<M>(props: SessionProps<M>) {
+  const initialModels = toArray(props.manager.running());
+  const filterRunning = props.filterRunning || (_ => true);
+  function render(models: Array<M>) {
+    return <ListView models={models.filter(filterRunning)} {...props} />;
   }
-  render() {
-    return (
-      <ul className={LIST_CLASS}>
-        {this.state.models.map((m, i) => (
-          <Item key={i} model={m} {...this.props} />
-        ))}
-      </ul>
-    );
+  if (!props.available) {
+    return render(initialModels);
   }
-  componentDidMount() {
-    if (this.props.available) {
-      this.props.manager.runningChanged.connect((_, models) =>
-        this.setState({
-          models: models.filter(this.props.filterRunning || (_ => true))
-        })
-      );
-    }
-  }
+  return (
+    <UseSignal
+      signal={props.manager.runningChanged}
+      initial={[null, initialModels]}
+    >
+      {(_, models) => render(models)}
+    </UseSignal>
+  );
 }
 
 /**

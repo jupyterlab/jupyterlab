@@ -27,8 +27,7 @@ export abstract class ReactWidget extends Widget {
    */
   protected abstract render():
     | Array<React.ReactElement<any>>
-    | React.ReactElement<any>
-    | null;
+    | React.ReactElement<any>;
 
   /**
    * Called to update the state of the widget.
@@ -61,7 +60,7 @@ export abstract class ReactWidget extends Widget {
    *
    * @returns a promise that resolves when the rendering is done.
    */
-  protected async renderDOM(): Promise<void> {
+  protected renderDOM(): Promise<void> {
     return new Promise<void>(resolve => {
       let vnode = this.render();
       // Split up the array/element cases so type inference chooses the right
@@ -143,6 +142,12 @@ export class ReactElementWidget extends ReactWidget {
   ) {
     super();
     this._es = es;
+    this.onInit();
+  }
+
+  // Override this to add functionality to the constructor
+  protected onInit(): void {
+    return;
   }
 
   render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null {
@@ -150,6 +155,95 @@ export class ReactElementWidget extends ReactWidget {
   }
 
   private _es: Array<React.ReactElement<any>> | React.ReactElement<any> | null;
+}
+
+/**
+ * Props for the UseSignal component
+ */
+export interface IUseSignalProps<SENDER, ARGS> {
+  // Phosphor signal to connect to
+  signal: ISignal<SENDER, ARGS>;
+  // Initial values to use for the sender and args, before the signal emits a value.
+  // If not provided, will defaul to [null, null]
+  initial?: [SENDER, ARGS];
+  // Function mapping the last signal value to a react element to render
+  children: (sender: SENDER, args: ARGS) => JSX.Element;
+  // Given the last signal value, should return whether to update the state or not.
+  // The default unconditionally returns `true`, so you only have to override if you want
+  // to skip some updates.
+  shouldUpdate?: (sender: SENDER, args: ARGS) => boolean;
+}
+
+/**
+ * State for the UseSignal component
+ */
+export interface IUseSignalState<SENDER, ARGS> {
+  value: [SENDER, ARGS];
+}
+
+/**
+ * UseSignal provides a way to hook up a Phosphor signal to a React element,
+ * so that the element is re-rendered every time the signal fires.
+ *
+ * It is implemented through the "render props" technique, using the `children`
+ * prop as a function to render, so that it can be used either as a prop or as a child
+ * of this element
+ * https://reactjs.org/docs/render-props.html
+ *
+ *
+ * Example as child:
+ *
+ * ```
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
+ *  return (
+ *    <UseSignal signal={isActiveSignal} initial={[None, True]}>
+ *     {(_, isActive) => <Button isActive={isActive}>}
+ *    </UseSignal>
+ *  )
+ * }
+ * ```
+ *
+ * Example as prop:
+ *
+ * ```
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
+ *  return (
+ *    <UseSignal
+ *      signal={isActiveSignal}
+ *      initial={[None, True]}
+ *      children={(_, isActive) => <Button isActive={isActive}>}
+ *    />
+ *  )
+ * }
+ */
+export class UseSignal<SENDER, ARGS> extends React.Component<
+  IUseSignalProps<SENDER, ARGS>,
+  IUseSignalState<SENDER, ARGS>
+> {
+  constructor(props: IUseSignalProps<SENDER, ARGS>) {
+    super(props);
+    this.state = { value: this.props.initial || [null, null] };
+  }
+
+  componentDidMount() {
+    this.props.signal.connect(this.slot);
+  }
+
+  componentWillUnmount() {
+    this.props.signal.disconnect(this.slot);
+  }
+
+  private slot = (sender: SENDER, args: ARGS) => {
+    // skip setting new state if we have a shouldUpdate function and it returns false
+    if (this.props.shouldUpdate && !this.props.shouldUpdate(sender, args)) {
+      return;
+    }
+    this.setState({ value: [sender, args] });
+  };
+
+  render() {
+    return this.props.children(...this.state.value);
+  }
 }
 
 /**
