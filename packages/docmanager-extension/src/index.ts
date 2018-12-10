@@ -524,10 +524,11 @@ function addCommands(
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget);
+      const type = fileType();
       return showDialog({
-        title: 'Reload Notebook from Disk',
+        title: `Reload ${type} from Disk`,
         body: `Are you sure you want to reload
-          the notebook from the disk?`,
+          the ${type} from the disk?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
       }).then(result => {
         if (result.button.accept && !context.isDisposed) {
