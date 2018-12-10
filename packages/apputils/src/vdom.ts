@@ -36,7 +36,7 @@ export abstract class ReactWidget extends Widget {
    * VDOM based rendering by calling the this.render() method.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.renderDOM();
+    this.renderPromise = this.renderDOM();
   }
 
   /**
@@ -60,7 +60,7 @@ export abstract class ReactWidget extends Widget {
    *
    * @returns a promise that resolves when the rendering is done.
    */
-  protected renderDOM(): Promise<void> {
+  private renderDOM(): Promise<void> {
     return new Promise<void>(resolve => {
       let vnode = this.render();
       // Split up the array/element cases so type inference chooses the right
@@ -72,6 +72,9 @@ export abstract class ReactWidget extends Widget {
       }
     });
   }
+
+  // Set whenever a new render is triggered and resolved when it is finished.
+  renderPromise?: Promise<void>;
 }
 
 /**

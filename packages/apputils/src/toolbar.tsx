@@ -378,7 +378,6 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     event.preventDefault();
     props.onClick();
   };
-
   return (
     <button
       className={
@@ -451,7 +450,8 @@ export function CommandToolbarButtonComponent(
       signal={props.commands.commandChanged}
       initial={[null, null]}
       shouldUpdate={(sender, args) =>
-        args.id == props.id && args.type == 'changed'
+        (args.id == props.id && args.type == 'changed') ||
+        args.type == 'many-changed'
       }
     >
       {() => <ToolbarButtonComponent {...Private.propsFromCommand(props)} />}
@@ -502,7 +502,7 @@ namespace Private {
       commands.execute(id);
     };
     const enabled = commands.isEnabled(id);
-    return { className, iconClassName, tooltip, onClick, enabled };
+    return { className, iconClassName, tooltip, onClick, enabled, label };
   }
 
   /**
