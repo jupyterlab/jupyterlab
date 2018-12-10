@@ -185,16 +185,23 @@ export class CodeConsole extends Widget {
   /**
    * Add a new cell to the content panel.
    *
-   * @param cell - The cell widget being added to the content panel.
+   * @param cell - The code cell widget being added to the content panel.
+   *
+   * @param msgId - The optional execution message id for the cell.
    *
    * #### Notes
-   * This method is meant for use by outside classes that want to inject content
-   * into a console. It is distinct from the `inject` method in that it requires
-   * rendered code cell widgets and does not execute them.
+   * This method is meant for use by outside classes that want to add cells to a
+   * console. It is distinct from the `inject` method in that it requires
+   * rendered code cell widgets and does not execute them (though it can store
+   * the execution message id).
    */
-  addCell(cell: Cell) {
+  addCell(cell: CodeCell, msgId?: string) {
     this._content.addWidget(cell);
     this._cells.push(cell);
+    if (msgId) {
+      this._msgIds.set(msgId, cell);
+      this._msgIdCells.set(cell, msgId);
+    }
     cell.disposed.connect(
       this._onCellDisposed,
       this
@@ -259,6 +266,8 @@ export class CodeConsole extends Widget {
       return;
     }
     this._cells.clear();
+    this._msgIdCells = null;
+    this._msgIds = null;
     this._history.dispose();
 
     super.dispose();
@@ -306,6 +315,15 @@ export class CodeConsole extends Widget {
         promptCell.editor.newIndentedLine();
       }
     });
+  }
+
+  /**
+   * Get a cell given a message id.
+   *
+   * @param msgId - The message id.
+   */
+  getCell(msgId: string): CodeCell | undefined {
+    return this._msgIds.get(msgId);
   }
 
   /**
@@ -563,6 +581,11 @@ export class CodeConsole extends Widget {
   private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
       this._cells.removeValue(sender);
+      const msgId = this._msgIdCells.get(sender as CodeCell);
+      if (msgId) {
+        this._msgIdCells.delete(sender as CodeCell);
+        this._msgIds.delete(msgId);
+      }
     }
   }
 
@@ -658,6 +681,8 @@ export class CodeConsole extends Widget {
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
+  private _msgIds = new Map<string, CodeCell>();
+  private _msgIdCells = new Map<CodeCell, string>();
   private _promptCellCreated = new Signal<this, CodeCell>(this);
 }
 
