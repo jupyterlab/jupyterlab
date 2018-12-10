@@ -247,8 +247,11 @@ class RevertConfirmWidget extends Widget {
   /**
    * Construct a new revert confirmation widget.
    */
-  constructor(checkpoint: Contents.ICheckpointModel) {
-    super({ node: Private.createRevertConfirmNode(checkpoint) });
+  constructor(
+    checkpoint: Contents.ICheckpointModel,
+    fileType: string = 'notebook'
+  ) {
+    super({ node: Private.createRevertConfirmNode(checkpoint, fileType) });
   }
 }
 
@@ -555,9 +558,10 @@ function addCommands(
         if (!lastCheckpoint) {
           return;
         }
+        const type = fileType();
         return showDialog({
-          title: `Revert ${fileType()} to checkpoint`,
-          body: new RevertConfirmWidget(lastCheckpoint),
+          title: `Revert ${type} to checkpoint`,
+          body: new RevertConfirmWidget(lastCheckpoint, type),
           buttons: [
             Dialog.cancelButton(),
             Dialog.warnButton({ label: 'Revert' })
@@ -822,12 +826,13 @@ namespace Private {
   export let id = 0;
 
   export function createRevertConfirmNode(
-    checkpoint: Contents.ICheckpointModel
+    checkpoint: Contents.ICheckpointModel,
+    fileType: string
   ): HTMLElement {
     let body = document.createElement('div');
     let confirmMessage = document.createElement('p');
     let confirmText = document.createTextNode(`Are you sure you want to revert
-      the notebook to the latest checkpoint? `);
+      the ${fileType} to the latest checkpoint? `);
     let cannotUndoText = document.createElement('strong');
     cannotUndoText.textContent = 'This cannot be undone.';
 
