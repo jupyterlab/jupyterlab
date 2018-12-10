@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { DataConnector, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -13,11 +13,15 @@ const SERVICE_SETTINGS_URL = 'api/settings';
 /**
  * The settings API service manager.
  */
-export class SettingManager {
+export class SettingManager extends DataConnector<
+  ISettingRegistry.IPlugin,
+  string
+> {
   /**
    * Create a new setting manager.
    */
   constructor(options: SettingManager.IOptions = {}) {
+    super();
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
   }
@@ -42,11 +46,45 @@ export class SettingManager {
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
 
+    if (!id) {
+      throw new Error('Plugin `id` parameter is required for settings fetch.');
+    }
+
     if (response.status !== 200) {
       throw new ResponseError(response);
     }
 
-    return response.json();
+    // Assert what type the server response is returning.
+    return response.json() as Promise<ISettingRegistry.IPlugin>;
+  }
+
+  /**
+   * Fetch the list of all plugin setting bundles.
+   *
+   * @returns A promise that resolves if successful.
+   */
+  async list(): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
+    const { serverSettings } = this;
+    const { baseUrl, pageUrl } = serverSettings;
+    const { makeRequest, ResponseError } = ServerConnection;
+    const base = baseUrl + pageUrl;
+    const url = Private.url(base, '');
+    const response = await makeRequest(url, {}, serverSettings);
+
+    if (response.status !== 200) {
+      throw new ResponseError(response);
+    }
+
+    const json = await response.json();
+    const values = ((json || {})['settings'] || []).map(
+      (plugin: ISettingRegistry.IPlugin) => {
+        plugin.data = { composite: {}, user: {} };
+        return plugin;
+      }
+    ) as ISettingRegistry.IPlugin[];
+    const ids = values.map(plugin => plugin.id);
+
+    return { ids, values };
   }
 
   /**

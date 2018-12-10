@@ -51,6 +51,10 @@ describe('outputarea/widget', () => {
   let widget: LogOutputArea;
   let model: OutputAreaModel;
 
+  beforeAll(async () => {
+    jest.setTimeout(60000);
+  });
+
   beforeEach(() => {
     model = new OutputAreaModel({
       values: NBTestUtils.DEFAULT_OUTPUTS,

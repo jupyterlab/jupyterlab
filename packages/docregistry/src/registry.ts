@@ -1303,6 +1303,11 @@ export interface IDocumentWidget<
    * The toolbar for the widget.
    */
   readonly toolbar: Toolbar<Widget>;
+
+  /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string): void;
 }
 
 /**

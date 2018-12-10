@@ -203,7 +203,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       leftArea: null,
       rightArea: null
     };
-    let layout = this._state.fetch(KEY);
+    const layout = this._state.fetch(KEY);
 
     return Promise.all([layout, this.restored])
       .then(([data]) => {

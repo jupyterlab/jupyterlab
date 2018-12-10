@@ -464,6 +464,13 @@ export class DocumentWidget<
   }
 
   /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string): void {
+    /* no-op */
+  }
+
+  /**
    * Handle a path change.
    */
   private _onPathChanged(

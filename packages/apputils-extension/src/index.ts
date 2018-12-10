@@ -21,7 +21,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector,
   ISettingRegistry,
   IStateDB,
   PageConfig,
@@ -31,8 +30,6 @@ import {
 } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ServiceManager } from '@jupyterlab/services';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -89,43 +86,6 @@ namespace Patterns {
 }
 
 /**
- * A data connector to access plugin settings.
- */
-class SettingsConnector extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
-> {
-  /**
-   * Create a new settings connector.
-   */
-  constructor(manager: ServiceManager) {
-    super();
-    this._manager = manager;
-  }
-
-  /**
-   * Retrieve a saved bundle from the data connector.
-   */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    return this._manager.settings.fetch(id).then(data => {
-      // Replace the server ID with the original unmodified version.
-      data.id = id;
-
-      return data;
-    });
-  }
-
-  /**
-   * Save the user setting data in the data connector.
-   */
-  save(id: string, raw: string): Promise<void> {
-    return this._manager.settings.save(id, raw);
-  }
-
-  private _manager: ServiceManager;
-}
-
-/**
  * The default command palette extension.
  */
 const palette: JupyterLabPlugin<ICommandPalette> = {
@@ -156,10 +116,11 @@ const paletteRestorer: JupyterLabPlugin<void> = {
  */
 const settings: JupyterLabPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: (app: JupyterLab): ISettingRegistry => {
-    const connector = new SettingsConnector(app.serviceManager);
+  activate: async (app: JupyterLab): Promise<ISettingRegistry> => {
+    const connector = app.serviceManager.settings;
+    const plugins = (await connector.list()).values;
 
-    return new SettingRegistry({ connector });
+    return new SettingRegistry({ connector, plugins });
   },
   autoStart: true,
   provides: ISettingRegistry
@@ -475,7 +436,6 @@ const state: JupyterLabPlugin<IStateDB> = {
 
           // After the state has been cloned, navigate to the URL.
           cloned.then(() => {
-            console.log(`HERE: ${url}`);
             router.navigate(url, { silent: true });
           });
 
@@ -490,7 +450,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     router.register({
       command: CommandIDs.loadState,
       pattern: /.?/,
-      rank: 20 // Very high priority: 20/100.
+      rank: 20 // Very high priority: 20:100.
     });
 
     commands.addCommand(CommandIDs.reset, {
@@ -559,7 +519,7 @@ const state: JupyterLabPlugin<IStateDB> = {
     router.register({
       command: CommandIDs.resetOnLoad,
       pattern: Patterns.resetOnLoad,
-      rank: 10 // Set reset rank at a higher priority than the default 100.
+      rank: 10 // Very high priority: 10:100.
     });
 
     // Clean up state database when the window unloads.
@@ -717,7 +677,11 @@ namespace Private {
    *
    * @param ready - A promise that must be resolved before splash disappears.
    *
+   * @param commands - The application's command registry.
+   *
    * @param recovery - A command that recovers from a hanging splash.
+   *
+   * @param light - A flag indicating whether the theme is light or dark.
    */
   export function showSplash(
     ready: Promise<any>,

@@ -106,7 +106,7 @@ export class PluginEditor extends Widget {
    */
   get state(): SettingEditor.IPluginLayout {
     const editor = this._editor;
-    const plugin = this._settings ? this._settings.plugin : '';
+    const plugin = this._settings ? this._settings.id : '';
     const { sizes } = this._rawEditor;
 
     return { editor, plugin, sizes };

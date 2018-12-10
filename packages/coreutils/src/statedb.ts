@@ -19,24 +19,10 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /* tslint:enable */
 
 /**
- * An object which holds an id/value pair.
- */
-export interface IStateItem {
-  /**
-   * The identifier key for a state item.
-   */
-  id: string;
-
-  /**
-   * The data value for a state item.
-   */
-  value: ReadonlyJSONValue;
-}
-
-/**
  * The description of a state database.
  */
-export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
+export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
+  extends IDataConnector<T> {
   /**
    * The maximum allowed length of the data after it has been serialized.
    */
@@ -53,35 +39,18 @@ export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
   readonly namespace: string;
 
   /**
-   * Retrieve all the saved bundles for a namespace.
-   *
-   * @param namespace - The namespace to retrieve.
-   *
-   * @returns A promise that bears a collection data payloads for a namespace.
-   *
-   * #### Notes
-   * Namespaces are entirely conventional entities. The `id` values of stored
-   * items in the state database are formatted: `'namespace:identifier'`, which
-   * is the same convention that command identifiers in JupyterLab use as well.
-   *
-   * If there are any errors in retrieving the data, they will be logged to the
-   * console in order to optimistically return any extant data without failing.
-   * This promise will always succeed.
-   */
-  fetchNamespace(namespace: string): Promise<IStateItem[]>;
-
-  /**
    * Return a serialized copy of the state database's entire contents.
    *
    * @returns A promise that bears the database contents as JSON.
    */
-  toJSON(): Promise<ReadonlyJSONObject>;
+  toJSON(): Promise<{ [id: string]: T }>;
 }
 
 /**
  * The default concrete implementation of a state database.
  */
-export class StateDB implements IStateDB {
+export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
+  implements IStateDB<T> {
   /**
    * Create a new state database.
    *
@@ -167,19 +136,22 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(namespace: string)` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed with `null`.
+   * retrieving the data. Non-existence of an `id` will succeed with the `value`
+   * `undefined`.
    */
-  fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    return this._ready.then(() => this._fetch(id));
+  async fetch(id: string): Promise<T> {
+    const value = await this._ready.then(() => this._fetch(id));
+
+    return value as T;
   }
 
   /**
    * Retrieve all the saved bundles for a namespace.
    *
-   * @param namespace - The namespace to retrieve.
+   * @param filter - The namespace prefix to retrieve.
    *
    * @returns A promise that bears a collection of payloads for a namespace.
    *
@@ -192,12 +164,12 @@ export class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateItem[]> {
+  list(namespace: string): Promise<{ ids: string[]; values: T[] }> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.fetchNamespace(`${prefix}${namespace}:`, mask);
+      return Private.fetchNamespace<T>(`${prefix}${namespace}:`, mask);
     });
   }
 
@@ -229,9 +201,9 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(namespace: string)` method.
    */
-  save(id: string, value: ReadonlyJSONValue): Promise<void> {
+  save(id: string, value: T): Promise<void> {
     return this._ready.then(() => {
       this._save(id, value);
       this._changed.emit({ id, type: 'save' });
@@ -243,12 +215,12 @@ export class StateDB implements IStateDB {
    *
    * @returns A promise that bears the database contents as JSON.
    */
-  toJSON(): Promise<ReadonlyJSONObject> {
+  toJSON(): Promise<{ [id: string]: T }> {
     return this._ready.then(() => {
       const prefix = `${this._window}:${this.namespace}:`;
       const mask = (key: string) => key.replace(prefix, '');
 
-      return StateDB.toJSON(prefix, mask);
+      return Private.toJSON<T>(prefix, mask);
     });
   }
 
@@ -409,6 +381,16 @@ export namespace StateDB {
      */
     windowName?: string;
   }
+}
+
+/*
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * An envelope around a JSON value stored in the state database.
+   */
+  export type Envelope = { readonly v: ReadonlyJSONValue };
 
   /**
    * Retrieve all the saved bundles for a given namespace in local storage.
@@ -423,13 +405,16 @@ export namespace StateDB {
    * If there are any errors in retrieving the data, they will be logged to the
    * console in order to optimistically return any extant data without failing.
    */
-  export function fetchNamespace(
+  export function fetchNamespace<
+    T extends ReadonlyJSONValue = ReadonlyJSONValue
+  >(
     namespace: string,
     mask: (key: string) => string = key => key
-  ): IStateItem[] {
+  ): { ids: string[]; values: T[] } {
     const { localStorage } = window;
 
-    let items: IStateItem[] = [];
+    let ids: string[] = [];
+    let values: T[] = [];
     let i = localStorage.length;
 
     while (i) {
@@ -439,12 +424,10 @@ export namespace StateDB {
         let value = localStorage.getItem(key);
 
         try {
-          let envelope = JSON.parse(value) as Private.Envelope;
+          let envelope = JSON.parse(value) as Envelope;
+          let id = mask(key);
 
-          items.push({
-            id: mask(key),
-            value: envelope ? envelope.v : undefined
-          });
+          values[ids.push(id) - 1] = envelope ? (envelope.v as T) : undefined;
         } catch (error) {
           console.warn(error);
           localStorage.removeItem(key);
@@ -452,7 +435,7 @@ export namespace StateDB {
       }
     }
 
-    return items;
+    return { ids, values };
   }
 
   /**
@@ -460,26 +443,18 @@ export namespace StateDB {
    *
    * @returns The namespace contents as JSON.
    */
-  export function toJSON(
+  export function toJSON<T extends ReadonlyJSONValue = ReadonlyJSONValue>(
     namespace: string,
     mask: (key: string) => string = key => key
-  ): ReadonlyJSONObject {
-    return fetchNamespace(namespace, mask).reduce(
-      (acc, val) => {
-        acc[val.id] = val.value;
+  ): { [id: string]: T } {
+    const { ids, values } = fetchNamespace<T>(namespace, mask);
+
+    return values.reduce(
+      (acc, val, idx) => {
+        acc[ids[idx]] = val;
         return acc;
       },
-      {} as Partial<ReadonlyJSONObject>
+      {} as { [id: string]: T }
     );
   }
-}
-
-/*
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * An envelope around a JSON value stored in the state database.
-   */
-  export type Envelope = { readonly v: ReadonlyJSONValue };
 }
