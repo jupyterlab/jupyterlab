@@ -128,9 +128,6 @@ module.exports = [
     },
     module: {
       rules: [
-        { test: /^JUPYTERLAB_RAW_LOADER_/, use: 'raw-loader' },
-        { test: /^JUPYTERLAB_URL_LOADER_/, use: 'url-loader?limit=10000' },
-        { test: /^JUPYTERLAB_FILE_LOADER_/, use: 'file-loader' },
         { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.md$/, use: 'raw-loader' },
         { test: /\.txt$/, use: 'raw-loader' },
