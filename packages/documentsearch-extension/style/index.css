@@ -1,0 +1,27 @@
+.jp-DocumentSearch {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DocumentSearch-searchbox {
+  padding: 8px;
+}
+
+.jp-DocumentSearch-wrapper {
+  padding: 4px 6px;
+  background: white;
+  border: 1px solid #e0e0e0;
+}
+
+.jp-DocumentSearch-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}

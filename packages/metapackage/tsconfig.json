@@ -64,6 +64,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch-extension"
+    },
+    {
       "path": "../extensionmanager"
     },
     {

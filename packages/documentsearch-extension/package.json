@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/codemirror",
-  "version": "0.19.1",
-  "description": "JupyterLab - CodeMirror Editor Provider",
+  "name": "@jupyterlab/documentsearch-extension",
+  "version": "0.7.1",
+  "description": "Search document types",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -9,10 +9,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "style/*.css"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -24,35 +22,30 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc",
     "clean": "rimraf lib",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -b --watch"
+    "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
+    "@jupyterlab/application": "^0.19.1",
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/codeeditor": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/observables": "^2.1.1",
-    "@jupyterlab/statusbar": "^0.7.1",
-    "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/commands": "^1.6.1",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/disposable": "^1.1.2",
+    "@jupyterlab/codemirror": "^0.19.1",
+    "@jupyterlab/notebook": "^0.19.2",
+    "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
-    "@types/codemirror": "~0.0.70",
-    "codemirror": "~5.42.0",
-    "react": "~16.4.2"
+    "codemirror": "~5.42.0"
   },
   "devDependencies": {
-    "@types/codemirror": "~0.0.70",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
     "typescript": "~3.1.1"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true
   }
 }

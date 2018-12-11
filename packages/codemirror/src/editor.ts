@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/// <reference types="codemirror"/>
+/// <reference types="codemirror/searchcursor"/>
 
 import CodeMirror from 'codemirror';
 
@@ -383,11 +385,42 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     start?: CodeMirror.Position,
     caseFold?: boolean
   ): CodeMirror.SearchCursor {
-    return this._editor.getSearchCursor(query, start, caseFold);
+    return this._editor.getDoc().getSearchCursor(query, start, caseFold);
+  }
+
+  getCursor(start?: string): CodeMirror.Position {
+    return this._editor.getDoc().getCursor(start);
   }
 
   get state(): any {
     return this._editor.state;
+  }
+
+  operation<T>(fn: () => T): T {
+    return this._editor.operation(fn);
+  }
+
+  firstLine(): number {
+    return this._editor.getDoc().firstLine();
+  }
+
+  lastLine(): number {
+    return this._editor.getDoc().lastLine();
+  }
+
+  scrollIntoView(
+    pos: { from: CodeMirror.Position; to: CodeMirror.Position },
+    margin: number
+  ): void {
+    this._editor.scrollIntoView(pos, margin);
+  }
+
+  getRange(
+    from: CodeMirror.Position,
+    to: CodeMirror.Position,
+    seperator?: string
+  ): string {
+    return this._editor.getDoc().getRange(from, to, seperator);
   }
 
   /**
@@ -781,8 +814,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
     return {
-      from: this._toCodeMirrorPosition(range.start),
-      to: this._toCodeMirrorPosition(range.end)
+      anchor: this._toCodeMirrorPosition(range.start),
+      head: this._toCodeMirrorPosition(range.end),
+      from: this._toCodeMirrorPosition.bind(this, range.start),
+      to: this._toCodeMirrorPosition.bind(this, range.end)
     };
   }
 

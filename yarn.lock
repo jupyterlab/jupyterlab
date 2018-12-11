@@ -662,9 +662,9 @@
   version "4.0.10"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.0.10.tgz#0eb222c7353adde8e0980bea04165d4d3b6afef3"
 
-"@types/codemirror@~0.0.46":
-  version "0.0.60"
-  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.60.tgz#178f69f2b87253aedb03518b99c20298420a3aa3"
+"@types/codemirror@~0.0.70":
+  version "0.0.70"
+  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.70.tgz#2d9c850d6afbc93162c1434a827f86ad5ee90e35"
 
 "@types/comment-json@^1.1.0":
   version "1.1.1"

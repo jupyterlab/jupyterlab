@@ -49,6 +49,7 @@
     "@jupyterlab/docmanager": "^0.19.1",
     "@jupyterlab/docmanager-extension": "^0.19.1",
     "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/documentsearch-extension": "^0.7.1",
     "@jupyterlab/extensionmanager": "^0.19.1",
     "@jupyterlab/extensionmanager-extension": "^0.19.1",
     "@jupyterlab/faq-extension": "^0.19.1",
