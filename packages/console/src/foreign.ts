@@ -3,7 +3,7 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import { CodeCell } from '@jupyterlab/cells';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
@@ -12,6 +12,8 @@ import { KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
+
+const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
  * A handler for capturing API messages from other sessions that should be
@@ -27,7 +29,6 @@ export class ForeignHandler implements IDisposable {
       this.onIOPubMessage,
       this
     );
-    this._factory = options.cellFactory;
     this._parent = options.parent;
   }
 
@@ -68,7 +69,6 @@ export class ForeignHandler implements IDisposable {
       return;
     }
     this._isDisposed = true;
-    this._cells.clear();
     Signal.clearData(this);
   }
 
@@ -115,23 +115,18 @@ export class ForeignHandler implements IDisposable {
       case 'display_data':
       case 'stream':
       case 'error':
-        if (!this._cells.has(parentMsgId)) {
-          // This is an output from an input that was broadcast before our
-          // session started listening. We will ignore it.
-          console.warn('Ignoring output with no associated input cell.');
+        cell = this._parent.getCell(parentMsgId);
+        if (!cell) {
           return false;
         }
         let output = msg.content as nbformat.IOutput;
-        cell = this._cells.get(parentMsgId);
-        if (cell) {
-          output.output_type = msgType as nbformat.OutputType;
-          cell.model.outputs.add(output);
-        }
+        output.output_type = msgType as nbformat.OutputType;
+        cell.model.outputs.add(output);
         parent.update();
         return true;
       case 'clear_output':
         let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        cell = this._cells.get(parentMsgId);
+        cell = this._parent.getCell(parentMsgId);
         if (cell) {
           cell.model.outputs.clear(wait);
         }
@@ -145,16 +140,14 @@ export class ForeignHandler implements IDisposable {
    * Create a new code cell for an input originated from a foreign session.
    */
   private _newCell(parentMsgId: string): CodeCell {
-    let cell = this._factory();
-    this._cells.set(parentMsgId, cell);
-    this._parent.addCell(cell);
+    let cell = this.parent.createCodeCell();
+    cell.addClass(FOREIGN_CELL_CLASS);
+    this._parent.addCell(cell, parentMsgId);
     return cell;
   }
 
-  private _cells = new Map<string, CodeCell>();
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
-  private _factory: () => CodeCell;
   private _isDisposed = false;
 }
 
@@ -175,11 +168,6 @@ export namespace ForeignHandler {
      * The parent into which the handler will inject code cells.
      */
     parent: IReceiver;
-
-    /**
-     * The cell factory for foreign handlers.
-     */
-    cellFactory: () => CodeCell;
   }
 
   /**
@@ -187,13 +175,23 @@ export namespace ForeignHandler {
    */
   export interface IReceiver {
     /**
-     * Add a newly created foreign cell.
+     * Create a cell.
      */
-    addCell(cell: Cell): void;
+    createCodeCell(): CodeCell;
+
+    /**
+     * Add a newly created cell.
+     */
+    addCell(cell: CodeCell, msgId: string): void;
 
     /**
      * Trigger a rendering update on the receiver.
      */
     update(): void;
+
+    /**
+     * Get a cell associated with a message id.
+     */
+    getCell(msgId: string): CodeCell;
   }
 }
