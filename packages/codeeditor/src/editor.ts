@@ -643,6 +643,11 @@ export namespace CodeEditor {
      * Column index at which rulers should be added.
      */
     rulers: Array<number>;
+
+    /**
+     * Wheter to allow code folding
+     */
+    codeFolding: boolean;
   }
 
   /**
@@ -661,6 +666,7 @@ export namespace CodeEditor {
     matchBrackets: true,
     autoClosingBrackets: true,
     rulers: []
+    codeFolding: true
   };
 
   /**
