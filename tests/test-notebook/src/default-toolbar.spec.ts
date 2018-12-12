@@ -54,7 +54,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         let promise = signalToPromise(context.fileChanged);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         await promise;
         button.dispose();
       });
@@ -63,11 +63,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createSaveButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-SaveIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-SaveIcon')).to.exist;
       });
     });
 
@@ -76,7 +72,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         expect(panel.content.activeCellIndex).to.equal(1);
         expect(panel.content.activeCell).to.be.an.instanceof(CodeCell);
         button.dispose();
@@ -86,11 +82,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-AddIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-AddIcon')).to.exist;
       });
     });
 
@@ -100,7 +92,7 @@ describe('@jupyterlab/notebook', () => {
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         expect(panel.content.widgets.length).to.equal(count - 1);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
@@ -110,11 +102,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createCutButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-CutIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-CutIcon')).to.exist;
       });
     });
 
@@ -124,7 +112,7 @@ describe('@jupyterlab/notebook', () => {
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         expect(panel.content.widgets.length).to.equal(count);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
@@ -134,11 +122,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createCopyButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-CopyIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-CopyIcon')).to.exist;
       });
     });
 
@@ -149,7 +133,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         await framePromise();
         NotebookActions.copy(panel.content);
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         await sleep();
         expect(panel.content.widgets.length).to.equal(count + 1);
         button.dispose();
@@ -159,11 +143,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createPasteButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-PasteIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-PasteIcon')).to.exist;
       });
     });
 
@@ -195,7 +175,7 @@ describe('@jupyterlab/notebook', () => {
           }
         });
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        simulate(button.node.firstChild as HTMLElement, 'click');
         await p.promise;
       }).timeout(30000); // Allow for slower CI
 
@@ -203,22 +183,20 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createRunButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-RunIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-RunIcon')).to.exist;
       });
     });
 
     describe('#createCellTypeItem()', () => {
-      it('should track the cell type of the current cell', () => {
+      it('should track the cell type of the current cell', async () => {
         const item = ToolbarItems.createCellTypeItem(panel);
         const node = item.node.getElementsByTagName(
           'select'
         )[0] as HTMLSelectElement;
+        await framePromise();
         expect(node.value).to.equal('code');
         panel.content.activeCellIndex++;
+        await framePromise();
         expect(node.value).to.equal('markdown');
       });
 
