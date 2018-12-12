@@ -450,8 +450,8 @@ export function CommandToolbarButtonComponent(
       signal={props.commands.commandChanged}
       initial={[null, null]}
       shouldUpdate={(sender, args) =>
-        (args.id == props.id && args.type == 'changed') ||
-        args.type == 'many-changed'
+        (args.id === props.id && args.type === 'changed') ||
+        args.type === 'many-changed'
       }
     >
       {() => <ToolbarButtonComponent {...Private.propsFromCommand(props)} />}
