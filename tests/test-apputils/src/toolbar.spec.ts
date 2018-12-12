@@ -250,11 +250,7 @@ describe('@jupyterlab/apputils', () => {
         const button = Toolbar.createInterruptButton(session);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-StopIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-StopIcon')).to.exist;
       });
     });
 
@@ -263,11 +259,7 @@ describe('@jupyterlab/apputils', () => {
         const button = Toolbar.createRestartButton(session);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-RefreshIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-RefreshIcon')).to.exist;
       });
     });
 
@@ -358,9 +350,7 @@ describe('@jupyterlab/apputils', () => {
         await framePromise();
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).to.equal(true);
-        expect(
-          (button.firstChild as HTMLElement).classList.contains('iconFoo')
-        ).to.equal(true);
+        expect(button.querySelector('.iconFoo')).to.exist;
         expect(button.title).to.equal('bar');
       });
     });
@@ -391,7 +381,7 @@ describe('@jupyterlab/apputils', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           expect(called).to.equal(true);
           button.dispose();
         });
