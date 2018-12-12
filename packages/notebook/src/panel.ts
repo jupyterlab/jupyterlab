@@ -112,6 +112,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string) {
+    this.context.ready.then(() => {
+      this.content.setFragment(fragment);
+    });
+  }
+
+  /**
    * Dispose of the resources used by the widget.
    */
   dispose(): void {

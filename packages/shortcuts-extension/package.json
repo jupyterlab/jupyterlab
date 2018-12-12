@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcuts-extension",
-  "version": "0.19.1",
+  "version": "0.19.3",
   "description": "JupyterLab - Shortcuts Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {

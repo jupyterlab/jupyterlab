@@ -23,7 +23,7 @@ import { INotebookModel, NotebookModel } from '@jupyterlab/notebook';
 
 import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 
-import { sleep, NBTestUtils } from '@jupyterlab/testutils';
+import { NBTestUtils, framePromise } from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookFactory();
 const editorConfig = NBTestUtils.defaultEditorConfig;
@@ -278,7 +278,7 @@ describe('@jupyter/notebook', () => {
         it('should handle changes to the model cell list', async () => {
           widget = createWidget();
           widget.model.cells.clear();
-          await sleep();
+          await framePromise();
           expect(widget.widgets.length).to.equal(1);
         });
 
@@ -626,7 +626,7 @@ describe('@jupyter/notebook', () => {
       it('should post an update request', async () => {
         const widget = createActiveWidget();
         widget.mode = 'edit';
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -634,7 +634,7 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        await sleep();
+        await framePromise();
         widget.extendContiguousSelectionTo(widget.widgets.length - 1);
         const selectedRange = Array.from(Array(widget.widgets.length).keys());
         expect(selected(widget)).to.deep.equal(selectedRange);
@@ -708,7 +708,7 @@ describe('@jupyter/notebook', () => {
       it('should post an update request', async () => {
         const widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.activeCellIndex = 1;
       });
@@ -1081,7 +1081,7 @@ describe('@jupyter/notebook', () => {
         widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        await sleep();
+        await framePromise();
       });
 
       afterEach(() => {
@@ -1261,7 +1261,7 @@ describe('@jupyter/notebook', () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         const child = widget.widgets[0];
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onAfterAttach');
         simulate(widget.node, 'mousedown');
         expect(widget.events).to.contain('mousedown');
@@ -1276,9 +1276,9 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onAfterAttach');
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
         widget.dispose();
       });
@@ -1290,7 +1290,7 @@ describe('@jupyter/notebook', () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         const child = widget.widgets[0];
-        await sleep();
+        await framePromise();
         Widget.detach(widget);
         expect(widget.methods).to.contain('onBeforeDetach');
         widget.events = [];
@@ -1310,7 +1310,7 @@ describe('@jupyter/notebook', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        await sleep();
+        await framePromise();
         expect(document.activeElement).to.equal(widget.node);
         widget.dispose();
       });
@@ -1323,7 +1323,7 @@ describe('@jupyter/notebook', () => {
         widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
-        await sleep();
+        await framePromise();
       });
 
       afterEach(() => {
@@ -1337,7 +1337,7 @@ describe('@jupyter/notebook', () => {
 
       it('should apply the edit class if in edit mode', async () => {
         widget.mode = 'edit';
-        await sleep();
+        await framePromise();
         expect(widget.hasClass('jp-mod-editMode')).to.equal(true);
       });
 
@@ -1348,7 +1348,7 @@ describe('@jupyter/notebook', () => {
 
       it('should set the selected class on the selected widgets', async () => {
         widget.select(widget.widgets[1]);
-        await sleep();
+        await framePromise();
         for (let i = 0; i < 2; i++) {
           const cell = widget.widgets[i];
           expect(cell.hasClass('jp-mod-selected')).to.equal(true);
@@ -1358,7 +1358,7 @@ describe('@jupyter/notebook', () => {
       it('should add the multi select class if there is more than one widget', async () => {
         widget.select(widget.widgets[1]);
         expect(widget.hasClass('jp-mod-multSelected')).to.equal(false);
-        await sleep();
+        await framePromise();
         expect(widget.hasClass('jp-mod-multSelected')).to.equal(false);
       });
     });
@@ -1368,7 +1368,7 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(widget.methods).to.contain('onCellInserted');
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 
@@ -1442,7 +1442,7 @@ describe('@jupyter/notebook', () => {
         const cell = widget.model.cells.get(0);
         widget.model.cells.removeValue(cell);
         expect(widget.methods).to.contain('onCellRemoved');
-        await sleep();
+        await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
       });
 

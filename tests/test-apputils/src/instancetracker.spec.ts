@@ -197,18 +197,47 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#add()', () => {
-      it('should add a widget to the tracker', () => {
+      it('should add a widget to the tracker', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         expect(tracker.has(widget)).to.equal(false);
-        tracker.add(widget);
+        await tracker.add(widget);
         expect(tracker.has(widget)).to.equal(true);
       });
 
-      it('should remove an added widget if it is disposed', () => {
+      it('should reject a widget that already exists', async () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
-        tracker.add(widget);
+        let failed = false;
+        expect(tracker.has(widget)).to.equal(false);
+        await tracker.add(widget);
+        expect(tracker.has(widget)).to.equal(true);
+        try {
+          await tracker.add(widget);
+        } catch (error) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
+      });
+
+      it('should reject a widget that is disposed', async () => {
+        const tracker = new InstanceTracker<Widget>({ namespace });
+        const widget = new Widget();
+        let failed = false;
+        expect(tracker.has(widget)).to.equal(false);
+        widget.dispose();
+        try {
+          await tracker.add(widget);
+        } catch (error) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
+      });
+
+      it('should remove an added widget if it is disposed', async () => {
+        const tracker = new InstanceTracker<Widget>({ namespace });
+        const widget = new Widget();
+        await tracker.add(widget);
         expect(tracker.has(widget)).to.equal(true);
         widget.dispose();
         expect(tracker.has(widget)).to.equal(false);

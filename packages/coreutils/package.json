@@ -11,7 +11,8 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "lib/*.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,16 +26,15 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src src/plugin-schema.json",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
-    "ajv": "~5.1.6",
+    "ajv": "^6.5.5",
     "comment-json": "^1.1.3",
     "minimist": "~1.2.0",
     "moment": "~2.21.0",

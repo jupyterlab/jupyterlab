@@ -45,6 +45,7 @@
     "@phosphor/signaling": "^1.2.2"
   },
   "devDependencies": {
+    "@types/node": "~8.0.47",
     "@types/text-encoding": "0.0.33",
     "rimraf": "~2.6.2",
     "text-encoding": "~0.5.5",

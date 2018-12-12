@@ -100,14 +100,6 @@ def ensure_dev(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
-    theme_packages = ['theme-light-extension', 'theme-dark-extension']
-    for theme in theme_packages:
-        base_path = pjoin(parent, 'packages', theme)
-        if not osp.exists(pjoin(base_path, 'static')):
-            yarn_proc = Process(['node', YARN_PATH, 'build:webpack'],
-                                cwd=base_path, logger=logger)
-            yarn_proc.wait()
-
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
                             logger=logger)

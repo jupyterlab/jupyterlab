@@ -14,6 +14,7 @@ module.exports = function(name: string, baseDir: string) {
     testPathIgnorePatterns: ['/dev_mode/', '/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     rootDir: path.resolve(path.join(baseDir, '..', '..')),
+    reporters: ['default', 'jest-junit'],
     collectCoverageFrom: [
       `packages/${name}/src/**.{ts,tsx}`,
       `!packages/${name}/src/*.d.ts`

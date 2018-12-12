@@ -12,7 +12,7 @@ visualizations and other rich output:
    :class: jp-screenshot
 
 **Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
-`notebook document format <http://nbformat.readthedocs.io/en/latest/>`__ used in
+`notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ used in
 JupyterLab is the same as in the classic Jupyter Notebook. Your existing notebooks
 should open correctly in JupyterLab. If they don’t, please open an issue on our
 `GitHub issues <https://github.com/jupyterlab/jupyterlab/issues>`__ page.
@@ -120,7 +120,7 @@ information about the types of the matched items:
 
 Note: IPython 6.3.1 has temporarily disabled type annotations.
 To re-enable them, add ``c.Completer.use_jedi = True`` to an
-`ipython_config.py <http://ipython.readthedocs.io/en/stable/development/config.html>`__ file. 
+`ipython_config.py <https://ipython.readthedocs.io/en/stable/development/config.html>`__ file. 
 
 .. _tooltip:
 

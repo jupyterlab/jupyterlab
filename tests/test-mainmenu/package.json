@@ -20,6 +20,7 @@
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2",
     "jest": "^23.5.0",
+    "jest-junit": "^5.2.0",
     "ts-jest": "^23.1.4"
   },
   "devDependencies": {

@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto'; // polyfill Promise on IE
-import '@jupyterlab/theme-light-extension/static/embed.css';
+import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
 import { ClientSession, Toolbar } from '@jupyterlab/apputils';

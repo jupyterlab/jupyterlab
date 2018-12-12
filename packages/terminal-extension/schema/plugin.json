@@ -1,0 +1,60 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-TerminalIcon",
+  "jupyter.lab.setting-icon-label": "Terminal",
+  "title": "Terminal",
+  "description": "Terminal settings.",
+  "definitions": {
+    "fontFamily": {
+      "type": "string"
+    },
+    "fontSize": {
+      "type": "integer",
+      "minimum": 9,
+      "maximum": 72
+    },
+    "lineHeight": {
+      "type": "number",
+      "minimum": 1.0
+    },
+    "theme": {
+      "enum": ["dark", "light"]
+    },
+    "scrollback": {
+      "type": "number"
+    }
+  },
+  "properties": {
+    "fontFamily": {
+      "title": "Font family",
+      "description": "The font family used to render text.",
+      "$ref": "#/definitions/fontFamily",
+      "default": "monospace"
+    },
+    "fontSize": {
+      "title": "Font size",
+      "description": "The font size used to render text.",
+      "$ref": "#/definitions/fontSize",
+      "default": 13
+    },
+    "lineHeight": {
+      "title": "Line height",
+      "description": "The line height used to render text.",
+      "$ref": "#/definitions/lineHeight",
+      "default": 1.0
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "The theme for the terminal.",
+      "$ref": "#/definitions/theme",
+      "default": "dark"
+    },
+    "scrollback": {
+      "title": "Scrollback Buffer",
+      "description": "The amount of scrollback beyond initial viewport",
+      "$ref": "#/definitions/lineHeight",
+      "default": 1000
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

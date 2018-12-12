@@ -169,6 +169,12 @@
       "path": "../shortcuts-extension"
     },
     {
+      "path": "../statusbar"
+    },
+    {
+      "path": "../statusbar-extension"
+    },
+    {
       "path": "../tabmanager-extension"
     },
     {

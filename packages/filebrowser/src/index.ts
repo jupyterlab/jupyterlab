@@ -9,3 +9,4 @@ export * from './factory';
 export * from './listing';
 export * from './model';
 export * from './upload';
+export * from './uploadstatus';

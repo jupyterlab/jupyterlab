@@ -35,6 +35,7 @@ if (fs.existsSync(packagePath)) {
   // Copy the package directory contents to the sibling package.
   let newPackagePath = path.join(basePath, 'packages', packageDirName);
   fs.copySync(packagePath, newPackagePath);
+  packagePath = newPackagePath;
 } else {
   // Otherwise treat it as a git reposotory and try to add it.
   packageDirName = target
@@ -48,6 +49,14 @@ if (fs.existsSync(packagePath)) {
 // Remove any existing node_modules in the extension.
 if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
   fs.removeSync(path.join(packagePath, 'node_modules'));
+}
+
+// Make sure composite is set to true in the new package.
+let packageTsconfigPath = path.join(packagePath, 'tsconfig.json');
+if (fs.existsSync(packageTsconfigPath)) {
+  let packageTsconfig = utils.readJSONFile(packageTsconfigPath);
+  packageTsconfig.compilerOptions.composite = true;
+  utils.writeJSONFile(packageTsconfigPath, packageTsconfig);
 }
 
 // Get the package.json of the extension.

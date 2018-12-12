@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@phosphor/coreutils';
-
 import { Message } from '@phosphor/messaging';
 
 import { BoxLayout, Widget } from '@phosphor/widgets';
@@ -10,6 +8,8 @@ import { BoxLayout, Widget } from '@phosphor/widgets';
 import { Spinner } from './spinner';
 
 import { Toolbar } from './toolbar';
+
+import { DOMUtils } from './domutils';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -29,7 +29,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
   constructor(options: MainAreaWidget.IOptions<T>) {
     super(options);
     this.addClass('jp-MainAreaWidget');
-    this.id = UUID.uuid4();
+    this.id = DOMUtils.createDomID();
 
     const content = (this._content = options.content);
     const toolbar = (this._toolbar = options.toolbar || new Toolbar());
@@ -43,7 +43,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     layout.addWidget(content);
 
     if (!content.id) {
-      content.id = UUID.uuid4();
+      content.id = DOMUtils.createDomID();
     }
     content.node.tabIndex = -1;
 

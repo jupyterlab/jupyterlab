@@ -26,6 +26,9 @@
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

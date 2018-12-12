@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import '~font-awesome/css/font-awesome.min.css';
-@import '~@jupyterlab/application/style/index.css';
-@import './index.css';
+export * from './statusbar';
+export * from './style/statusbar';
+export * from './components';
+export * from './defaults';

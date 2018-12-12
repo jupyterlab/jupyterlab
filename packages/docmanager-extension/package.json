@@ -38,6 +38,7 @@
     "@jupyterlab/docregistry": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/services": "^3.2.1",
+    "@jupyterlab/statusbar": "^0.7.1",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/widgets": "^1.6.0"

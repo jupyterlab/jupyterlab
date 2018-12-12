@@ -471,6 +471,9 @@ export class Context<T extends DocumentRegistry.IModel>
       content = model.toJSON();
     } else {
       content = model.toString();
+      if (this._useCRLF) {
+        content = content.replace(/\n/g, '\r\n');
+      }
     }
 
     let options = {
@@ -560,8 +563,10 @@ export class Context<T extends DocumentRegistry.IModel>
           // Convert line endings if necessary, marking the file
           // as dirty.
           if (content.indexOf('\r') !== -1) {
-            dirty = true;
-            content = content.replace(/\r\n|\r/g, '\n');
+            this._useCRLF = true;
+            content = content.replace(/\r\n/g, '\n');
+          } else {
+            this._useCRLF = false;
           }
           model.fromString(content);
           if (initializeModel) {
@@ -765,6 +770,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _model: T;
   private _modelDB: IModelDB;
   private _path = '';
+  private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;

@@ -169,6 +169,8 @@ export class StaticNotebook extends Widget {
       options.contentFactory || StaticNotebook.defaultContentFactory;
     this.editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
+    this.notebookConfig =
+      options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
   }
 
@@ -259,6 +261,17 @@ export class StaticNotebook extends Widget {
   set editorConfig(value: StaticNotebook.IEditorConfig) {
     this._editorConfig = value;
     this._updateEditorConfig();
+  }
+
+  /**
+   * A configuration object for notebook settings.
+   */
+  get notebookConfig(): StaticNotebook.INotebookConfig {
+    return this._notebookConfig;
+  }
+  set notebookConfig(value: StaticNotebook.INotebookConfig) {
+    this._notebookConfig = value;
+    this._updateNotebookConfig();
   }
 
   /**
@@ -455,7 +468,13 @@ export class StaticNotebook extends Widget {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.code;
-    let options = { editorConfig, model, rendermime, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createCodeCell(options, this);
   }
 
@@ -466,7 +485,13 @@ export class StaticNotebook extends Widget {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.markdown;
-    let options = { editorConfig, model, rendermime, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createMarkdownCell(options, this);
   }
 
@@ -476,7 +501,12 @@ export class StaticNotebook extends Widget {
   private _createRawCell(model: IRawCellModel): RawCell {
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.raw;
-    let options = { editorConfig, model, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createRawCell(options, this);
   }
 
@@ -555,10 +585,22 @@ export class StaticNotebook extends Widget {
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
         cell.editor.setOption(key, config[key]);
       });
+      cell.editor.refresh();
     }
   }
 
+  /**
+   * Update editor settings for notebook.
+   */
+  private _updateNotebookConfig() {
+    this.toggleClass(
+      'jp-mod-scrollPastEnd',
+      this._notebookConfig.scrollPastEnd
+    );
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
+  private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -593,6 +635,11 @@ export namespace StaticNotebook {
      * A configuration object for the cell editor settings.
      */
     editorConfig?: IEditorConfig;
+
+    /**
+     * A configuration object for notebook settings.
+     */
+    notebookConfig?: INotebookConfig;
 
     /**
      * The service used to look up mime types.
@@ -671,6 +718,22 @@ export namespace StaticNotebook {
       matchBrackets: false,
       autoClosingBrackets: false
     }
+  };
+
+  /**
+   * A config object for the notebook widget
+   */
+  export interface INotebookConfig {
+    /**
+     * Enable scrolling past the last cell
+     */
+    scrollPastEnd: boolean;
+  }
+  /**
+   * Default configuration options for notebooks.
+   */
+  export const defaultNotebookConfig: INotebookConfig = {
+    scrollPastEnd: true
   };
 
   /**
@@ -1116,6 +1179,17 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string): void {
+    // Wait all cells are rendered then set fragment and update.
+    Promise.all(this.widgets.map(widget => widget.ready)).then(() => {
+      this._fragment = fragment;
+      this.update();
+    });
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -1195,10 +1269,13 @@ export class Notebook extends StaticNotebook {
     node.addEventListener('dblclick', this);
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    // Capture drag events for the notebook widget
+    // in order to preempt the drag/drop handlers in the
+    // code editor widgets, which can take text data.
+    node.addEventListener('p-dragenter', this, true);
+    node.addEventListener('p-dragleave', this, true);
+    node.addEventListener('p-dragover', this, true);
+    node.addEventListener('p-drop', this, true);
   }
 
   /**
@@ -1213,12 +1290,55 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('p-dragenter', this, true);
+    node.removeEventListener('p-dragleave', this, true);
+    node.removeEventListener('p-dragover', this, true);
+    node.removeEventListener('p-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    this._checkCacheOnNextResize = true;
+  }
+
+  /**
+   * A message handler invoked on a `'resize'` message.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    if (!this._checkCacheOnNextResize) {
+      return super.onResize(msg);
+    }
+    this._checkCacheOnNextResize = false;
+    const cache = this._cellLayoutStateCache;
+    const width = parseInt(this.node.style.width, 10);
+    if (cache) {
+      if (width === cache.width) {
+        // Cache identical, do nothing
+        return;
+      }
+    }
+    // Update cache
+    this._cellLayoutStateCache = { width };
+
+    // Fallback:
+    for (let w of this.widgets) {
+      if (w instanceof Cell) {
+        w.editorWidget.update();
+      }
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'before-hide'` message.
+   */
+  protected onBeforeHide(msg: Message): void {
+    // Update cache
+    const width = parseInt(this.node.style.width, 10);
+    this._cellLayoutStateCache = { width };
   }
 
   /**
@@ -1261,6 +1381,18 @@ export class Notebook extends StaticNotebook {
     });
     if (count > 1) {
       activeCell.addClass(OTHER_SELECTED_CLASS);
+    }
+    if (this._fragment) {
+      let el;
+      try {
+        el = this.node.querySelector(this._fragment);
+      } catch (error) {
+        console.warn('Unable to set URI fragment identifier', error);
+      }
+      if (el) {
+        el.scrollIntoView();
+      }
+      this._fragment = '';
     }
   }
 
@@ -1852,6 +1984,10 @@ export class Notebook extends StaticNotebook {
     // case where the target is in the same notebook and we
     // can just move the cells.
     this._drag.mimeData.setData('internal:cells', toMove);
+    // Add mimeData for the text content of the selected cells,
+    // allowing for drag/drop into plain text fields.
+    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
     document.removeEventListener('mousemove', this, true);
@@ -1977,11 +2113,16 @@ export class Notebook extends StaticNotebook {
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag = null;
+  private _fragment = '';
   private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
+
+  // Attributes for optimized cell refresh:
+  private _cellLayoutStateCache?: { width: number };
+  private _checkCacheOnNextResize = false;
 }
 
 /**

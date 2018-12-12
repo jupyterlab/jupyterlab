@@ -5,7 +5,6 @@ import { expect } from 'chai';
 
 import {
   DefaultSchemaValidator,
-  IDataConnector,
   ISettingRegistry,
   SettingRegistry,
   Settings,
@@ -16,25 +15,31 @@ import { signalToPromise } from '@jupyterlab/testutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-export class TestConnector extends StateDB
-  implements IDataConnector<ISettingRegistry.IPlugin, string> {
-  constructor(
-    public schemas: { [key: string]: ISettingRegistry.ISchema } = {}
-  ) {
+class TestConnector extends StateDB {
+  schemas: { [key: string]: ISettingRegistry.ISchema } = {};
+
+  constructor() {
     super({ namespace: 'setting-registry-tests' });
   }
 
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin | null> {
-    const data = await super.fetch(id);
-    if (!data && !this.schemas[id]) {
-      return null;
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
+    const fetched = await super.fetch(id);
+    if (!fetched && !this.schemas[id]) {
+      return undefined;
     }
 
-    const schema = this.schemas[id] || { type: 'object' };
+    const schema: ISettingRegistry.ISchema = this.schemas[id] || {
+      type: 'object'
+    };
     const composite = {};
     const user = {};
-    const raw = (data as string) || '{ }';
-    return { id, data: { composite, user }, raw, schema };
+    const raw = (fetched as string) || '{ }';
+    const version = 'test';
+    return { id, data: { composite, user }, raw, schema, version };
+  }
+
+  async list(): Promise<any> {
+    return Promise.reject('list method not implemented');
   }
 }
 
@@ -52,7 +57,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should validate data against a schema', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string' }
@@ -62,7 +67,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {};
         const user = {};
         const raw = '{ "bar": "baz" }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.equal(null);
@@ -71,7 +77,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should return errors if the data fails to validate', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string' }
@@ -81,7 +87,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {};
         const user = {};
         const raw = '{ "baz": "qux" }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.not.equal(null);
@@ -90,7 +97,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should populate the composite data', () => {
         const id = 'foo';
         const validator = new DefaultSchemaValidator();
-        const schema = {
+        const schema: ISettingRegistry.ISchema = {
           additionalProperties: false,
           properties: {
             bar: { type: 'string', default: 'baz' }
@@ -100,7 +107,8 @@ describe('@jupyterlab/coreutils', () => {
         const composite = {} as JSONObject;
         const user = {} as JSONObject;
         const raw = '{ }';
-        const plugin = { id, data: { composite, user }, raw, schema };
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
         expect(errors).to.equal(null);
@@ -114,6 +122,7 @@ describe('@jupyterlab/coreutils', () => {
 
   describe('SettingRegistry', () => {
     const connector = new TestConnector();
+    const timeout = 500;
     let registry: SettingRegistry;
 
     afterEach(() => {
@@ -122,7 +131,7 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     beforeEach(() => {
-      registry = new SettingRegistry({ connector });
+      registry = new SettingRegistry({ connector, timeout });
     });
 
     describe('#constructor()', () => {
@@ -154,13 +163,13 @@ describe('@jupyterlab/coreutils', () => {
         const one = 'foo';
         const two = 'bar';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[one] = { type: 'object' };
         connector.schemas[two] = { type: 'object' };
         await registry.load(one);
-        expect(registry.plugins).to.have.length(1);
+        expect(Object.keys(registry.plugins)).to.have.length(1);
         await registry.load(two);
-        expect(registry.plugins).to.have.length(2);
+        expect(Object.keys(registry.plugins)).to.have.length(2);
       });
     });
 
@@ -192,10 +201,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -208,10 +220,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -240,8 +255,8 @@ describe('@jupyterlab/coreutils', () => {
         connector.schemas[id] = { type: 'object' };
 
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 
@@ -249,10 +264,27 @@ describe('@jupyterlab/coreutils', () => {
       it(`should resolve a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object' };
         const settings = (await registry.load(id)) as Settings;
-        expect(settings.plugin).to.equal(id);
+        expect(settings.id).to.equal(id);
+      });
+
+      it(`should reject if a plugin transformation times out`, async () => {
+        const id = 'foo';
+        let failed = false;
+
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+
+        try {
+          await registry.load(id);
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -270,10 +302,10 @@ describe('@jupyterlab/coreutils', () => {
       it(`should load a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object' };
         const settings = await registry.reload(id);
-        expect(settings.plugin).to.equal(id);
+        expect(settings.id).to.equal(id);
       });
 
       it(`should replace a registered plugin's settings`, async () => {
@@ -281,11 +313,11 @@ describe('@jupyterlab/coreutils', () => {
         const first = 'Foo';
         const second = 'Bar';
 
-        expect(registry.plugins.length).to.equal(0);
+        expect(Object.keys(registry.plugins)).to.be.empty;
         connector.schemas[id] = { type: 'object', title: first };
         let settings = await registry.reload(id);
         expect(settings.schema.title).to.equal(first);
-        await Promise.resolve(void 0);
+        await Promise.resolve(undefined);
         connector.schemas[id].title = second;
         settings = await registry.reload(id);
         expect(settings.schema.title).to.equal(second);
@@ -295,6 +327,67 @@ describe('@jupyterlab/coreutils', () => {
         let failed = false;
         try {
           await registry.reload('foo');
+        } catch (e) {
+          failed = true;
+        }
+        expect(failed).to.equal(true);
+      });
+    });
+
+    describe('#transform()', () => {
+      it(`should transform a plugin during the fetch phase`, async () => {
+        const id = 'foo';
+        const version = 'transform-test';
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          fetch: plugin => {
+            plugin.version = version;
+            return plugin;
+          }
+        });
+        expect((await registry.load(id)).version).to.equal(version);
+      });
+
+      it(`should transform a plugin during the compose phase`, async () => {
+        const id = 'foo';
+        const composite = { a: 1 };
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          compose: plugin => {
+            plugin.data = { user: plugin.data.user, composite };
+            return plugin;
+          }
+        });
+        expect((await registry.load(id)).composite).to.eql(composite);
+      });
+
+      it(`should disallow a transform that changes the plugin ID`, async () => {
+        const id = 'foo';
+        let failed = false;
+
+        expect(Object.keys(registry.plugins)).to.be.empty;
+        connector.schemas[id] = {
+          'jupyter.lab.transform': true,
+          type: 'object'
+        };
+        registry.transform(id, {
+          compose: plugin => {
+            plugin.id = 'bar';
+            return plugin;
+          }
+        });
+        try {
+          await registry.load(id);
         } catch (e) {
           failed = true;
         }
@@ -325,9 +418,10 @@ describe('@jupyterlab/coreutils', () => {
       it('should create a new settings object for a plugin', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings).to.be.an.instanceof(Settings);
@@ -337,7 +431,7 @@ describe('@jupyterlab/coreutils', () => {
     describe('#changed', () => {
       it('should emit when a plugin changes', async () => {
         const id = 'alpha';
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
@@ -352,10 +446,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -368,10 +465,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -382,13 +482,28 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
+    describe('#id', () => {
+      it('should expose the plugin ID', () => {
+        const id = 'alpha';
+        const data = { composite: {}, user: {} };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
+        const raw = '{ }';
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
+
+        settings = new Settings({ plugin, registry });
+        expect(settings.id).to.equal(id);
+      });
+    });
+
     describe('#isDisposed', () => {
       it('should test whether the settings object is disposed', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.equal(false);
@@ -398,14 +513,12 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#schema', () => {
-      it('should expose the plugin schema', () => {
+      it('should expose the plugin schema', async () => {
         const id = 'alpha';
-        const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
-        const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
 
-        settings = new Settings({ plugin, registry });
+        connector.schemas[id] = schema;
+        settings = (await registry.load(id)) as Settings;
         expect(settings.schema).to.deep.equal(schema);
       });
     });
@@ -415,10 +528,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -429,26 +545,14 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
-    describe('#plugin', () => {
-      it('should expose the plugin ID', () => {
-        const id = 'alpha';
-        const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
-        const raw = '{ }';
-        const plugin = { id, data, raw, schema };
-
-        settings = new Settings({ plugin, registry });
-        expect(settings.plugin).to.equal(id);
-      });
-    });
-
     describe('#registry', () => {
       it('should expose the setting registry', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.registry).to.equal(registry);
@@ -459,9 +563,10 @@ describe('@jupyterlab/coreutils', () => {
       it('should dispose the settings object', () => {
         const id = 'alpha';
         const data = { composite: {}, user: {} };
-        const schema = { type: 'object' };
+        const schema: ISettingRegistry.ISchema = { type: 'object' };
         const raw = '{ }';
-        const plugin = { id, data, raw, schema };
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
         expect(settings.isDisposed).to.equal(false);
@@ -543,10 +648,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: value }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: value
+            }
           }
         });
 
@@ -561,10 +669,13 @@ describe('@jupyterlab/coreutils', () => {
         const id = 'alpha';
         const key = 'beta';
         const value = 'gamma';
-        const schema = (connector.schemas[id] = {
+        const schema: ISettingRegistry.ISchema = (connector.schemas[id] = {
           type: 'object',
           properties: {
-            [key]: { type: typeof value, default: 'delta' }
+            [key]: {
+              type: typeof value as ISettingRegistry.Primitive,
+              default: 'delta'
+            }
           }
         });
 
@@ -585,8 +696,8 @@ describe('@jupyterlab/coreutils', () => {
 
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 
@@ -603,8 +714,8 @@ describe('@jupyterlab/coreutils', () => {
         expect(saved.user).to.equal(value);
         await settings.remove(key);
         saved = settings.get(key);
-        expect(saved.composite).to.equal(void 0);
-        expect(saved.user).to.equal(void 0);
+        expect(saved.composite).to.equal(undefined);
+        expect(saved.user).to.equal(undefined);
       });
     });
 

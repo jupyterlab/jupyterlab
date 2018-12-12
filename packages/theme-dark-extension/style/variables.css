@@ -277,9 +277,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Notebook specific styles */
 
   --jp-notebook-padding: 10px;
-  --jp-notebook-scroll-padding: 100px;
   --jp-notebook-select-background: var(--jp-layout-color1);
   --jp-notebook-multiselected-color: rgba(33, 150, 243, 0.24);
+
+  /* The scroll padding is calculated to fill enough space at the bottom of the
+  notebook to show one single-line cell (with appropriate padding) at the top
+  when the notebook is scrolled all the way to the bottom. We also subtract one
+  pixel so that no scrollbar appears if we have just one single-line cell in the
+  notebook. This padding is to enable a 'scroll past end' feature in a notebook.
+  */
+  --jp-notebook-scroll-padding: calc(
+    100% - var(--jp-code-font-size) * var(--jp-code-line-height) -
+      var(--jp-code-padding) - var(--jp-cell-padding) - 1px
+  );
 
   /* Rendermime styles */
 

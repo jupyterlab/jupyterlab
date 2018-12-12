@@ -180,8 +180,13 @@ export class InstanceTracker<T extends Widget>
    * @param widget - The widget being added.
    */
   add(widget: T): Promise<void> {
+    if (widget.isDisposed) {
+      const warning = `${widget.id} is disposed and cannot be tracked.`;
+      console.warn(warning);
+      return Promise.reject(warning);
+    }
     if (this._tracker.has(widget)) {
-      let warning = `${widget.id} already exists in the tracker.`;
+      const warning = `${widget.id} already exists in the tracker.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
@@ -324,18 +329,18 @@ export class InstanceTracker<T extends Widget>
     const { command, registry, state, when } = options;
     const namespace = this.namespace;
     const promises = when
-      ? [state.fetchNamespace(namespace)].concat(when)
-      : [state.fetchNamespace(namespace)];
+      ? [state.list(namespace)].concat(when)
+      : [state.list(namespace)];
 
     this._restore = options;
 
     return Promise.all(promises).then(([saved]) => {
       return Promise.all(
-        saved.map(item => {
-          const { id, value } = item;
+        saved.ids.map((id, index) => {
+          const value = saved.values[index];
           const args = value && (value as any).data;
           if (args === undefined) {
-            return state.remove(item.id);
+            return state.remove(id);
           }
 
           // Execute the command and if it fails, delete the state restore data.

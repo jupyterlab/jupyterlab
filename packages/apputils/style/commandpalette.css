@@ -93,8 +93,13 @@
 | Results
 |----------------------------------------------------------------------------*/
 
+.p-CommandPalette-header:first-child {
+  margin-top: 0px;
+}
+
 .p-CommandPalette-header {
-  padding: 8px 0 8px 22px;
+  margin-top: 8px;
+  padding: 8px 0 8px 12px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
@@ -150,7 +155,7 @@
 }
 
 .p-CommandPalette-item.p-mod-disabled mark {
-  color: rgba(0, 0, 0, 0.4);
+  color: var(--jp-ui-font-color3);
 }
 
 .p-CommandPalette-item.p-mod-toggled .p-CommandPalette-itemIcon {

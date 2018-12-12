@@ -9,8 +9,6 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 
 import { IIterator } from '@phosphor/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { BreadCrumbs } from './crumbs';
@@ -70,26 +68,11 @@ export class FileBrowser extends Widget {
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
 
-    let directoryPending = false;
+    this._directoryPending = false;
     let newFolder = new ToolbarButton({
       iconClassName: 'jp-NewFolderIcon jp-Icon jp-Icon-16',
       onClick: () => {
-        if (directoryPending === true) {
-          return;
-        }
-        directoryPending = true;
-        this._manager
-          .newUntitled({
-            path: model.path,
-            type: 'directory'
-          })
-          .then(model => {
-            this._listing.selectItemByName(model.name);
-            directoryPending = false;
-          })
-          .catch(err => {
-            directoryPending = false;
-          });
+        this.createNewDirectory();
       },
       tooltip: 'New Folder'
     });
@@ -172,6 +155,28 @@ export class FileBrowser extends Widget {
    */
   paste(): Promise<void> {
     return this._listing.paste();
+  }
+
+  /**
+   * Create a new directory
+   */
+  createNewDirectory(): void {
+    if (this._directoryPending === true) {
+      return;
+    }
+    this._directoryPending = true;
+    this._manager
+      .newUntitled({
+        path: this.model.path,
+        type: 'directory'
+      })
+      .then(model => {
+        this._listing.selectItemByName(model.name);
+        this._directoryPending = false;
+      })
+      .catch(err => {
+        this._directoryPending = false;
+      });
   }
 
   /**
@@ -267,6 +272,7 @@ export class FileBrowser extends Widget {
   private _listing: DirListing;
   private _manager: DocumentManager;
   private _showingError = false;
+  private _directoryPending: boolean;
 }
 
 /**
@@ -277,11 +283,6 @@ export namespace FileBrowser {
    * An options object for initializing a file browser widget.
    */
   export interface IOptions {
-    /**
-     * The command registry for use with the file browser.
-     */
-    commands: CommandRegistry;
-
     /**
      * The widget/DOM id of the file browser.
      */

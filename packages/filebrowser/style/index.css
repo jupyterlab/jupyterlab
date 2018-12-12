@@ -40,8 +40,14 @@
 }
 
 .jp-BreadCrumbs-item {
-  margin: 0px 4px;
+  margin: 0px 2px;
+  padding: 0px 2px;
+  border-radius: var(--jp-border-radius);
   cursor: pointer;
+}
+
+.jp-BreadCrumbs-item:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-BreadCrumbs-item:first-child {
@@ -156,6 +162,7 @@
 .jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
   outline: 5px dashed rgba(128, 128, 128, 0.5);
   outline-offset: -10px;
+  cursor: copy;
 }
 
 .jp-DirListing-item {

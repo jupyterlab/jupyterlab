@@ -75,3 +75,8 @@
   border: 1px solid var(--jp-input-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
 }
+
+.jp-Editor.jp-mod-dropTarget {
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}

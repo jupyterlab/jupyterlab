@@ -108,6 +108,36 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   margin-right: 0;
 }
 
+/* description lists */
+
+.jp-OutputArea-output dl,
+.jp-OutputArea-output dt,
+.jp-OutputArea-output dd {
+  display: block;
+}
+
+.jp-OutputArea-output dl {
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dt {
+  font-weight: bold;
+  float: left;
+  width: 20%;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dd {
+  float: left;
+  width: 80%;
+  padding: 0;
+  margin: 0;
+}
+
 /* Hide the gutter in case of
  *  - nested output areas (e.g. in the case of output widgets)
  *  - mirrored output areas
@@ -152,7 +182,8 @@ body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   font-size: inherit;
   color: inherit;
   background-color: inherit;
-  width: auto;
+  width: 42%;
+  min-width: 200px;
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
   /* padding + margin = 0.5em between prompt and cursor */

@@ -41,7 +41,7 @@
   background: var(--jp-layout-color0);
 }
 
-.jp-Notebook::after {
+.jp-Notebook.jp-mod-scrollPastEnd::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);
@@ -194,14 +194,14 @@
 |----------------------------------------------------------------------------*/
 
 .jp-CellTools {
-  display: flex;
-  flex-direction: column;
+  display: block;
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
+  overflow: auto;
 }
 
 .jp-ActiveCellTool {

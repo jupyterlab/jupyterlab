@@ -264,7 +264,7 @@ export class ConsoleHistory implements IConsoleHistory {
     let model = editor.model;
     let source = model.value.text;
 
-    if (location === 'top') {
+    if (location === 'top' || location === 'topLine') {
       this.back(source).then(value => {
         if (this.isDisposed || !value) {
           return;
@@ -274,7 +274,12 @@ export class ConsoleHistory implements IConsoleHistory {
         }
         this._setByHistory = true;
         model.value.text = value;
-        editor.setCursorPosition({ line: 0, column: 0 });
+        let columnPos = 0;
+        columnPos = value.indexOf('\n');
+        if (columnPos < 0) {
+          columnPos = value.length;
+        }
+        editor.setCursorPosition({ line: 0, column: columnPos });
       });
     } else {
       this.forward(source).then(value => {

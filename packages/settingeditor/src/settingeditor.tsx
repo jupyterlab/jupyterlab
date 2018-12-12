@@ -240,14 +240,14 @@ export class SettingEditor extends Widget {
     const { key, state } = this;
     const promises = [state.fetch(key), this._when];
 
-    return (this._fetching = Promise.all(promises).then(([saved]) => {
+    return (this._fetching = Promise.all(promises).then(([value]) => {
       this._fetching = null;
 
       if (this._saving) {
         return;
       }
 
-      this._state = Private.normalizeState(saved, this._state);
+      this._state = Private.normalizeState(value, this._state);
     }));
   }
 
@@ -321,7 +321,7 @@ export class SettingEditor extends Widget {
       return;
     }
 
-    if (editor.settings && editor.settings.plugin === container.plugin) {
+    if (editor.settings && editor.settings.id === container.plugin) {
       this._setLayout();
       return;
     }
@@ -342,8 +342,8 @@ export class SettingEditor extends Widget {
         list.selection = container.plugin;
         this._setLayout();
       })
-      .catch((reason: Error) => {
-        console.error(`Loading settings failed: ${reason.message}`);
+      .catch(reason => {
+        console.error(`Loading ${container.plugin} settings failed.`, reason);
         list.selection = this._state.container.plugin = '';
         editor.settings = null;
         this._setLayout();

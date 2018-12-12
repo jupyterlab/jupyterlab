@@ -11,13 +11,20 @@ import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { editorServices, CodeMirrorEditor, Mode } from '@jupyterlab/codemirror';
+import {
+  editorServices,
+  EditorSyntaxStatus,
+  CodeMirrorEditor,
+  Mode
+} from '@jupyterlab/codemirror';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -56,9 +63,49 @@ const commands: JupyterLabPlugin<void> = {
 };
 
 /**
+ * The JupyterLab plugin for the EditorSyntax status item.
+ */
+export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/codemirror-extension:editor-syntax-status',
+  autoStart: true,
+  requires: [IStatusBar, IEditorTracker],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    tracker: IEditorTracker
+  ) => {
+    let item = new EditorSyntaxStatus({ commands: app.commands });
+    app.shell.currentChanged.connect(() => {
+      const current = app.shell.currentWidget;
+      if (current && tracker.has(current)) {
+        item.model.editor = (current as IDocumentWidget<
+          FileEditor
+        >).content.editor;
+      }
+    });
+    statusBar.registerStatusItem(
+      '@jupyterlab/codemirror-extension:editor-syntax-status',
+      {
+        item,
+        align: 'left',
+        rank: 0,
+        isActive: () =>
+          app.shell.currentWidget &&
+          tracker.currentWidget &&
+          app.shell.currentWidget === tracker.currentWidget
+      }
+    );
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [commands, services];
+const plugins: JupyterLabPlugin<any>[] = [
+  commands,
+  services,
+  editorSyntaxStatus
+];
 export default plugins;
 
 /**
@@ -87,7 +134,14 @@ function activateEditorCommands(
   settingRegistry: ISettingRegistry
 ): void {
   const { commands, restored } = app;
-  let { theme, keyMap } = CodeMirrorEditor.defaultConfig;
+  let {
+    theme,
+    keyMap,
+    scrollPastEnd,
+    styleActiveLine,
+    styleSelectedText,
+    selectionPointer
+  } = CodeMirrorEditor.defaultConfig;
 
   /**
    * Update the setting values.
@@ -95,6 +149,16 @@ function activateEditorCommands(
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
     theme = (settings.get('theme').composite as string | null) || theme;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
+    styleActiveLine =
+      (settings.get('styleActiveLine').composite as boolean | object) ||
+      styleActiveLine;
+    styleSelectedText =
+      (settings.get('styleSelectedText').composite as boolean) ||
+      styleSelectedText;
+    selectionPointer =
+      (settings.get('selectionPointer').composite as boolean | string) ||
+      selectionPointer;
   }
 
   /**
@@ -106,6 +170,10 @@ function activateEditorCommands(
         let cm = widget.content.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
+        cm.setOption('scrollPastEnd', scrollPastEnd);
+        cm.setOption('styleActiveLine', styleActiveLine);
+        cm.setOption('styleSelectedText', styleSelectedText);
+        cm.setOption('selectionPointer', selectionPointer);
       }
     });
   }
@@ -133,6 +201,10 @@ function activateEditorCommands(
       let cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
+      cm.setOption('scrollPastEnd', scrollPastEnd);
+      cm.setOption('styleActiveLine', styleActiveLine);
+      cm.setOption('styleSelectedText', styleSelectedText);
+      cm.setOption('selectionPointer', selectionPointer);
     }
   });
 
@@ -158,7 +230,13 @@ function activateEditorCommands(
   modeMenu.title.label = 'Text Editor Syntax Highlighting';
 
   commands.addCommand(CommandIDs.changeTheme, {
-    label: args => args['theme'] as string,
+    label: args => {
+      if (args['theme'] === 'default') {
+        return 'codemirror';
+      } else {
+        return args['theme'] as string;
+      }
+    },
     execute: args => {
       const key = 'theme';
       const value = (theme = (args['theme'] as string) || theme);
@@ -327,10 +405,6 @@ function activateEditorCommands(
   // Add go to line capabilities to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
-    find: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('jumpToLine');
-    },
     goToLine: (widget: IDocumentWidget<FileEditor>) => {
       let editor = widget.content.editor as CodeMirrorEditor;
       editor.execCommand('jumpToLine');

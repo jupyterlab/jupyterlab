@@ -22,9 +22,8 @@ let MISSING: { [key: string]: string[] } = {
 
 let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/apputils': ['@types/react'],
+  '@jupyterlab/application': ['font-awesome'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/theme-dark-extension': ['font-awesome'],
-  '@jupyterlab/theme-light-extension': ['font-awesome'],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each } from '@phosphor/algorithm';
+import { each, find } from '@phosphor/algorithm';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -32,9 +32,6 @@ import { ServerConnection } from '@jupyterlab/services';
  * A namespace for command IDs of semantic extension points.
  */
 export namespace CommandIDs {
-  export const activatePreviouslyUsedTab =
-    'tabmenu:activate-previously-used-tab';
-
   export const undo = 'editmenu:undo';
 
   export const redo = 'editmenu:redo';
@@ -84,12 +81,17 @@ export namespace CommandIDs {
   export const runAbove = 'runmenu:run-above';
 
   export const runBelow = 'runmenu:run-below';
+
+  export const activateById = 'tabmenu:activate-by-id';
+
+  export const activatePreviouslyUsedTab =
+    'tabmenu:activate-previously-used-tab';
 }
 
 /**
  * A service providing an interface to the main menu.
  */
-const menuPlugin: JupyterLabPlugin<IMainMenu> = {
+const plugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
   provides: IMainMenu,
@@ -559,6 +561,9 @@ export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
   );
 }
 
+/**
+ * Create the basic `Run` menu.
+ */
 export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
@@ -614,10 +619,16 @@ export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
   menu.addGroup(runAllGroup, 999);
 }
 
+/**
+ * Create the basic `Settings` menu.
+ */
 export function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
+/**
+ * Create the basic `Tabs` menu.
+ */
 export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   const commands = app.commands;
 
@@ -636,31 +647,27 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   // A disposable for getting rid of the out-of-date tabs list.
   let disposable: IDisposable;
 
-  // Utility function to create a command to activate
-  // a given tab, or get it if it already exists.
-  const createMenuItem = (widget: Widget): Menu.IItemOptions => {
-    const commandID = `tabmenu:activate-${widget.id}`;
-    if (!commands.hasCommand(commandID)) {
-      commands.addCommand(commandID, {
-        label: () => widget.title.label,
-        isVisible: () => !widget.isDisposed,
-        isEnabled: () => !widget.isDisposed,
-        isToggled: () => app.shell.currentWidget === widget,
-        execute: () => app.shell.activateById(widget.id)
-      });
-    }
-    return { command: commandID };
-  };
+  // Command to activate a widget by id.
+  commands.addCommand(CommandIDs.activateById, {
+    label: args => {
+      const id = args['id'] || '';
+      const widget = find(app.shell.widgets('main'), w => w.id === id);
+      return (widget && widget.title.label) || '';
+    },
+    isToggled: args => {
+      const id = args['id'] || '';
+      return app.shell.currentWidget && app.shell.currentWidget.id === id;
+    },
+    execute: args => app.shell.activateById((args['id'] as string) || '')
+  });
 
   let previousId = '';
-
   // Command to toggle between the current
   // tab and the last modified tab.
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
     label: 'Activate Previously Used Tab',
     isEnabled: () => !!previousId,
-    execute: () =>
-      previousId && app.commands.execute(`tabmenu:activate-${previousId}`)
+    execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 
   app.restored.then(() => {
@@ -679,7 +686,10 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
         if (widget.id === previousId) {
           isPreviouslyUsedTabAttached = true;
         }
-        tabGroup.push(createMenuItem(widget));
+        tabGroup.push({
+          command: CommandIDs.activateById,
+          args: { id: widget.id }
+        });
       });
       disposable = menu.addGroup(tabGroup, 1);
       previousId = isPreviouslyUsedTabAttached ? previousId : '';
@@ -700,7 +710,7 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
   });
 }
 
-export default menuPlugin;
+export default plugin;
 
 /**
  * A namespace for Private data.

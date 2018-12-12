@@ -33,8 +33,6 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import { ForeignHandler } from './foreign';
-
 import { ConsoleHistory, IConsoleHistory } from './history';
 
 /**
@@ -56,11 +54,6 @@ const CONSOLE_CLASS = 'jp-CodeConsole';
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-CodeConsole-banner';
-
-/**
- * The class name of a cell whose input originated from a foreign session.
- */
-const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 
 /**
  * The class name of the active prompt cell.
@@ -120,13 +113,6 @@ export class CodeConsole extends Widget {
     // Insert the content and input panes into the widget.
     layout.addWidget(this._content);
     layout.addWidget(this._input);
-
-    // Set up the foreign iopub handler.
-    this._foreignHandler = new ForeignHandler({
-      session: this.session,
-      parent: this,
-      cellFactory: () => this._createCodeCell()
-    });
 
     this._history = new ConsoleHistory({
       session: this.session
@@ -199,16 +185,23 @@ export class CodeConsole extends Widget {
   /**
    * Add a new cell to the content panel.
    *
-   * @param cell - The cell widget being added to the content panel.
+   * @param cell - The code cell widget being added to the content panel.
+   *
+   * @param msgId - The optional execution message id for the cell.
    *
    * #### Notes
-   * This method is meant for use by outside classes that want to inject content
-   * into a console. It is distinct from the `inject` method in that it requires
-   * rendered code cell widgets and does not execute them.
+   * This method is meant for use by outside classes that want to add cells to a
+   * console. It is distinct from the `inject` method in that it requires
+   * rendered code cell widgets and does not execute them (though it can store
+   * the execution message id).
    */
-  addCell(cell: Cell) {
+  addCell(cell: CodeCell, msgId?: string) {
     this._content.addWidget(cell);
     this._cells.push(cell);
+    if (msgId) {
+      this._msgIds.set(msgId, cell);
+      this._msgIdCells.set(cell, msgId);
+    }
     cell.disposed.connect(
       this._onCellDisposed,
       this
@@ -216,6 +209,9 @@ export class CodeConsole extends Widget {
     this.update();
   }
 
+  /**
+   * Add a banner cell.
+   */
   addBanner() {
     if (this._banner) {
       // An old banner just becomes a normal cell now.
@@ -250,6 +246,18 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Create a new cell with the built-in factory.
+   */
+  createCodeCell(): CodeCell {
+    let factory = this.contentFactory;
+    let options = this._createCodeCellOptions();
+    let cell = factory.createCodeCell(options);
+    cell.readOnly = true;
+    cell.model.mimeType = this._mimetype;
+    return cell;
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose() {
@@ -258,21 +266,11 @@ export class CodeConsole extends Widget {
       return;
     }
     this._cells.clear();
+    this._msgIdCells = null;
+    this._msgIds = null;
     this._history.dispose();
-    this._foreignHandler.dispose();
 
     super.dispose();
-  }
-
-  /**
-   * Set whether the foreignHandler is able to inject foreign cells into a
-   * console.
-   */
-  get showAllActivity(): boolean {
-    return this._foreignHandler.enabled;
-  }
-  set showAllActivity(value: boolean) {
-    this._foreignHandler.enabled = value;
   }
 
   /**
@@ -320,6 +318,15 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Get a cell given a message id.
+   *
+   * @param msgId - The message id.
+   */
+  getCell(msgId: string): CodeCell | undefined {
+    return this._msgIds.get(msgId);
+  }
+
+  /**
    * Inject arbitrary code for the console to execute immediately.
    *
    * @param code - The code contents of the cell being injected.
@@ -327,7 +334,7 @@ export class CodeConsole extends Widget {
    * @returns A promise that indicates when the injected cell's execution ends.
    */
   inject(code: string): Promise<void> {
-    let cell = this._createCodeCell();
+    let cell = this.createCodeCell();
     cell.model.value.text = code;
     this.addCell(cell);
     return this._execute(cell);
@@ -524,6 +531,12 @@ export class CodeConsole extends Widget {
             cell.model.value.text = text;
           }
         }
+      } else if (value && value.content.status === 'error') {
+        each(this._cells, (cell: CodeCell) => {
+          if (cell.model.executionCount === null) {
+            cell.setPrompt('');
+          }
+        });
       }
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
@@ -552,19 +565,6 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Create a new foreign cell.
-   */
-  private _createCodeCell(): CodeCell {
-    let factory = this.contentFactory;
-    let options = this._createCodeCellOptions();
-    let cell = factory.createCodeCell(options);
-    cell.readOnly = true;
-    cell.model.mimeType = this._mimetype;
-    cell.addClass(FOREIGN_CELL_CLASS);
-    return cell;
-  }
-
-  /**
    * Create the options used to initialize a code cell widget.
    */
   private _createCodeCellOptions(): CodeCell.IOptions {
@@ -581,6 +581,11 @@ export class CodeConsole extends Widget {
   private _onCellDisposed(sender: Cell, args: void): void {
     if (!this.isDisposed) {
       this._cells.removeValue(sender);
+      const msgId = this._msgIdCells.get(sender as CodeCell);
+      if (msgId) {
+        this._msgIdCells.delete(sender as CodeCell);
+        this._msgIds.delete(msgId);
+      }
     }
   }
 
@@ -672,11 +677,12 @@ export class CodeConsole extends Widget {
   private _cells: IObservableList<Cell>;
   private _content: Panel;
   private _executed = new Signal<this, Date>(this);
-  private _foreignHandler: ForeignHandler;
   private _history: IConsoleHistory;
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
+  private _msgIds = new Map<string, CodeCell>();
+  private _msgIdCells = new Map<CodeCell, string>();
   private _promptCellCreated = new Signal<this, CodeCell>(this);
 }
 

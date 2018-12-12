@@ -36,9 +36,12 @@ tests/**/coverage
 tests/**/.cache-loader
 docs/_build
 docs/api
+docs/source/_build
 packages/services/examples/node/config.json
 examples/app/build
 examples/app/themes
 examples/app/schemas
 
 lerna-debug.log
+
+junit.xml

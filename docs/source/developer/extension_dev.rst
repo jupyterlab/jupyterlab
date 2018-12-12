@@ -23,10 +23,6 @@ JupyterLab can be extended in four ways via:
 
 See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
 
-To understand how to wrap an **Angular** application as a JupyterLab extension,
-see the `"Create your own Angular JupyerLab extension" <https://github.com/SimonBiggs/scriptedforms/blob/master/scriptedforms/docs/create-your-own-angular-jupyterlab-extension.md#create-your-own-angular-jupyerlab-extension>`_ guide provided by
-`Scripted Forms <https://github.com/SimonBiggs/scriptedforms>`_.
-
 A JupyterLab application is comprised of:
 
 -  A core Application object
@@ -43,7 +39,7 @@ A plugin adds a core functionality to the application:
 -  Plugins require and provide ``Token`` objects, which are used to
    provide a typed value to the plugin's ``activate()`` method.
 -  The module providing plugin(s) must meet the
-   `JupyterLab.IPluginModule <http://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterlab.ipluginmodule.html>`__
+   `JupyterLab.IPluginModule <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterlab.ipluginmodule.html>`__
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
@@ -74,6 +70,15 @@ The default plugins in the JupyterLab application include:
 A dependency graph for the core JupyterLab plugins (along with links to
 their source) is shown here: |dependencies|
 
+.. danger::
+
+    Installing an extension allows for arbitrary code execution on the
+    server, kernel, and in the client's browser. You should therefore
+    take steps to protect against malicious changes to your extension's
+    code. This includes ensuring strong authentication for your npm
+    account.
+
+
 Application Object
 ~~~~~~~~~~~~~~~~~~
 
@@ -88,7 +93,7 @@ JupyterLab Shell
 ~~~~~~~~~~~~~~~~
 
 The JupyterLab
-`shell <http://jupyterlab.github.io/jupyterlab/classes/_application_src_shell_.applicationshell.html>`__
+`shell <https://jupyterlab.github.io/jupyterlab/application/classes/applicationshell.html>`__
 is used to add and interact with content in the application. The
 application consists of:
 
@@ -126,6 +131,9 @@ meets the following criteria:
    ``"extension"`` metadata. The value can be ``true`` to use the main
    module of the package, or a string path to a specific module (e.g.
    ``"lib/foo"``).
+-  It is also recommended to include the keyword ``jupyterlab-extension``
+   in the ``package.json``, to aid with discovery (e.g. by the extension
+   manager).
 
 While authoring the extension, you can use the command:
 
@@ -151,11 +159,11 @@ When using local extensions and linked packages, you can run the command
 
 This will cause the application to incrementally rebuild when one of the
 linked packages changes. Note that only compiled JavaScript files (and
-the CSS files) are watched by the WebPack process. This means that if 
-your extension is in TypeScript you'll have to run a `jlpm run build`
+the CSS files) are watched by the WebPack process. This means that if
+your extension is in TypeScript you'll have to run a ``jlpm run build``
 before the changes will be reflected in JupyterLab. To avoid this step
 you can also watch the TypeScript sources in your extension which is
-usually assigned to the `tsc -w` shortcut.
+usually assigned to the ``tsc -w`` shortcut.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. If your extension depends on JupyterLab
@@ -191,13 +199,23 @@ also import CSS from other packages using the syntax
 package.
 
 The following file types are also supported (both in JavaScript and
-CSS): json, html, jpg, png, gif, svg, js.map, woff2, ttf, eot.
+CSS): ``json``, ``html``, ``jpg``, ``png``, ``gif``, ``svg``,
+``js.map``, ``woff2``, ``ttf``, ``eot``.
 
 If your package uses any other file type it must be converted to one of
-the above types. If your JavaScript is written in any other dialect than
-EMCAScript 5 it must be converted using an appropriate tool.
+the above types or `include a loader in the import statement <https://webpack.js.org/concepts/loaders/#inline>`__.
+If you include a loader, the loader must be importable at build time, so if
+it is not already installed by JupyterLab, you must add it as a dependency
+of your extension.
 
-If you publish your extension on npm.org, users will be able to install
+If your JavaScript is written in any other dialect than
+EMCAScript 6 (2015) it should be converted using an appropriate tool.
+You can use Webpack to pre-build your extension to use any of it's features
+not enabled in our build config. To build a compatible package set
+``output.libraryTarget`` to ``"commonjs2"`` in your Webpack config.
+(see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
+
+If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
 the name of the published npm package. You can alternatively provide a
 script that runs ``jupyter labextension install`` against a local folder
@@ -206,10 +224,12 @@ path on the user's machine or a provided tarball. Any valid
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
 
-There are a number of helper functions in `testutils` in this repo (which is a public npm package called `@jupyterlab/testutils`) that can be used when writing
-tests for an extension.  See `tests/test-application` for an example of the infrastructure needed to run tests.  There is a `karma` config file that points
-to the parent directory's `karma` config, and a test runner, `run-test.py` that
-starts a Jupyter server.
+There are a number of helper functions in ``testutils`` in this repo (which
+is a public npm package called ``@jupyterlab/testutils``) that can be used when
+writing tests for an extension.  See ``tests/test-application`` for an example
+of the infrastructure needed to run tests.  There is a ``karma`` config file
+that points to the parent directory's ``karma`` config, and a test runner,
+``run-test.py`` that starts a Jupyter server.
 
 
 Mime Renderer Extensions
@@ -225,7 +245,7 @@ Mime renderer extensions are more declarative than standard extensions.
 The extension is treated the same from the command line perspective
 (``jupyter labextension install`` ), but it does not directly create
 JupyterLab plugins. Instead it exports an interface given in the
-`rendermime-interfaces <http://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html>`__
+`rendermime-interfaces <https://jupyterlab.github.io/jupyterlab/rendermime-interfaces/interfaces/irendermime.iextension.html>`__
 package.
 
 The JupyterLab repo has an example mime renderer extension for
@@ -257,22 +277,20 @@ Themes
 A theme is a JupyterLab extension that uses a ``ThemeManager`` and can
 be loaded and unloaded dynamically. The package must include all static
 assets that are referenced by ``url()`` in its CSS files. Local URLs can
-be used to reference files relative to the location of the referring CSS
-file in the theme directory. For example ``url('images/foo.png')`` or
+be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or
 ``url('../foo/bar.css')``\ can be used to refer local files in the
 theme. Absolute URLs (starting with a ``/``) or external URLs (e.g.
 ``https:``) can be used to refer to external assets. The path to the
-theme assets is specified ``package.json`` under the ``"jupyterlab"``
-key as ``"themeDir"``. See the `JupyterLab Light
+theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
+key as ``"themePath"``. See the `JupyterLab Light
 Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
 for an example. Ensure that the theme files are included in the
-``"files"`` metadata in package.json. A theme can optionally specify an
-``embed.css`` file that can be consumed outside of a JupyterLab
-application.
+``"files"`` metadata in package.json.  Note that if you want to use SCSS, SASS, or LESS files,
+you must compile them to CSS and point JupyterLab to the CSS files.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
 the instructions in the `contributing
-guide <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md#setting-up-a-development-environment>`__ and
+guide <https://github.com/jupyterlab/jupyterlab/blob/d9bbf0822be5309d063249da6776e640dba7984c/CONTRIBUTING.md#setting-up-a-development-environment>`__ and
 then run ``jlpm run create:theme`` from the repository root directory.
 Once you select a name, title and a description, a new theme folder will
 be created in the current directory. You can move that new folder to a
@@ -375,9 +393,8 @@ might want to use them in your extensions.
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For a concrete example of a standard extension, see `How to Extend the Notebook
-Plugin <./notebook.html#how-to-extend-the-notebook-plugin>`__. Notice
-that the mime renderer and themes extensions above use a limited,
+For a concrete example of a standard extension, see :ref:`How to extend the Notebook plugin <extend-notebook-plugin>`.
+Notice that the mime renderer and themes extensions above use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
@@ -419,6 +436,22 @@ See the
 `fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
+Note: You can override default values of the extension settings by 
+defining new default values in an ``overrides.json`` file in the 
+application settings directory. So for example, if you would like
+to set the dark theme by default instead of the light one, an
+``overrides.json`` file containing the following lines needs to be 
+added in the application settings directory (by default this is the
+``share/jupyter/lab/settings`` folder).
+
+.. code:: json
+
+  {
+    "@jupyterlab/apputils-extension:themes": {
+      "theme": "JupyterLab Dark"
+    }
+  }
+  
 State Database
 ``````````````
 
@@ -460,13 +493,13 @@ Context Menus
 
 JupyterLab has an application-wide context menu available as
 ``app.contextMenu``. See the Phosphor
-`docs <http://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
+`docs <https://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options. If you wish to preempt the
 application context menu, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the
 ``document``). At this point you could show your own Phosphor
-`contextMenu <http://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html>`__,
+`contextMenu <https://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html>`__,
 or simply stop propagation and let the system context menu be shown.
 This would look something like the following in a ``Widget`` subclass:
 
@@ -480,3 +513,90 @@ This would look something like the following in a ``Widget`` subclass:
       event.stopPropagation();
 
 .. |dependencies| image:: dependency-graph.svg
+
+
+
+.. _ext-author-companion-packages:
+
+Companion Packages
+^^^^^^^^^^^^^^^^^^
+
+If your extensions depends on the presence of one or more packages in the
+kernel, or on a notebook server extension, you can add metadata to indicate
+this to the extension manager by adding metadata to your package.json file.
+The full options available are::
+
+    "jupyterlab": {
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "<regexp for matching kernel language>",
+              "display_name": "<regexp for matching kernel display name>"   // optional
+            },
+            "base": {
+              "name": "<the name of the kernel package>"
+            },
+            "overrides": {   // optional
+              "<manager name, e.g. 'pip'>": {
+                "name": "<name of kernel package on pip, if it differs from base name>"
+              }
+            },
+            "managers": [   // list of package managers that have your kernel package
+                "pip",
+                "conda"
+            ]
+          }
+        ],
+        "server": {
+          "base": {
+            "name": "<the name of the server extension package>"
+          },
+          "overrides": {   // optional
+            "<manager name, e.g. 'pip'>": {
+              "name": "<name of server extension package on pip, if it differs from base name>"
+            }
+          },
+          "managers": [   // list of package managers that have your server extension package
+              "pip",
+              "conda"
+          ]
+        }
+      }
+    }
+
+
+A typical setup for e.g. a jupyter-widget based package will then be::
+
+    "keywords": [
+        "jupyterlab-extension",
+        "jupyter",
+        "widgets",
+        "jupyterlab"
+    ],
+    "jupyterlab": {
+      "extension": true,
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "^python",
+            },
+            "base": {
+              "name": "myipywidgetspackage"
+            },
+            "managers": [
+                "pip",
+                "conda"
+            ]
+          }
+        ]
+      }
+    }
+
+
+Currently supported package managers are:
+
+- ``pip``
+- ``conda``
+

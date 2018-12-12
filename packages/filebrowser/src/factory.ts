@@ -5,8 +5,6 @@ import { InstanceTracker } from '@jupyterlab/apputils';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { Token } from '@phosphor/coreutils';
 
 import { FileBrowser } from './browser';
@@ -73,14 +71,6 @@ export namespace IFileBrowserFactory {
    * state database.
    */
   export interface IOptions {
-    /**
-     * The command registry used by the file browser.
-     *
-     * #### Notes
-     * If no command registry is provided, the application default will be used.
-     */
-    commands?: CommandRegistry;
-
     /**
      * An optional `Contents.IDrive` name for the model.
      * If given, the model will prepend `driveName:` to

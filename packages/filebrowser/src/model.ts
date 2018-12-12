@@ -350,13 +350,13 @@ export class FileBrowserModel implements IDisposable {
     const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready])
-      .then(([cwd]) => {
-        if (!cwd) {
-          this._restored.resolve(void 0);
+      .then(([value]) => {
+        if (!value) {
+          this._restored.resolve(undefined);
           return;
         }
 
-        const path = (cwd as ReadonlyJSONObject)['path'] as string;
+        const path = (value as ReadonlyJSONObject)['path'] as string;
         const localPath = manager.services.contents.localPath(path);
         return manager.services.contents
           .get(path)
@@ -366,7 +366,7 @@ export class FileBrowserModel implements IDisposable {
       .catch(() => state.remove(key))
       .then(() => {
         this._key = key;
-        this._restored.resolve(void 0);
+        this._restored.resolve(undefined);
       }); // Set key after restoration is done.
   }
 

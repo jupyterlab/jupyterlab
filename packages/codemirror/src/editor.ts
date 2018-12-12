@@ -32,6 +32,9 @@ import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
 import 'codemirror/addon/search/jump-to-line';
+import 'codemirror/addon/selection/active-line';
+import 'codemirror/addon/selection/mark-selection';
+import 'codemirror/addon/selection/selection-pointer';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 import 'codemirror/keymap/vim.js';
@@ -550,6 +553,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (line === 0 && column === 0 && event.keyCode === UP_ARROW) {
       if (!event.shiftKey) {
         this.edgeRequested.emit('top');
+      }
+      return false;
+    }
+
+    if (line === 0 && event.keyCode === UP_ARROW) {
+      if (!event.shiftKey) {
+        this.edgeRequested.emit('topLine');
       }
       return false;
     }
@@ -1120,6 +1130,28 @@ export namespace CodeMirrorEditor {
      * Whether to scroll past the end of the buffer.
      */
     scrollPastEnd?: boolean;
+
+    /**
+     * Whether to give the wrapper of the line that contains the cursor the class
+     * CodeMirror-activeline, adds a background with the class
+     * CodeMirror-activeline-background, and adds the class
+     * CodeMirror-activeline-gutter to the line's gutter space is enabled.
+     */
+    styleActiveLine: boolean | object;
+
+    /**
+     * Whether to causes the selected text to be marked with the CSS class
+     * CodeMirror-selectedtext. Useful to change the colour of the selection
+     * (in addition to the background).
+     */
+    styleSelectedText: boolean;
+
+    /**
+     * Defines the mouse cursor appearance when hovering over the selection.
+     * It can be set to a string, like "pointer", or to true,
+     * in which case the "default" (arrow) cursor will be used.
+     */
+    selectionPointer: boolean | string;
   }
 
   /**
@@ -1141,7 +1173,10 @@ export namespace CodeMirrorEditor {
     lineSeparator: null,
     scrollbarStyle: 'native',
     lineWiseCopyCut: true,
-    scrollPastEnd: false
+    scrollPastEnd: false,
+    styleActiveLine: false,
+    styleSelectedText: false,
+    selectionPointer: false
   };
 
   /**

@@ -22,12 +22,15 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   FileBrowserModel,
   FileBrowser,
+  FileUploadStatus,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
 
 import { Contents } from '@jupyterlab/services';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
@@ -67,6 +70,8 @@ namespace CommandIDs {
 
   export const paste = 'filebrowser:paste';
 
+  export const createNewDirectory = 'filebrowser:create-new-directory';
+
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
@@ -104,6 +109,54 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
 };
 
 /**
+ * The default file browser share-file plugin
+ *
+ * This extension adds a "Copy Shareable Link" command that generates a copy-
+ * pastable URL. This url can be used to open a particular file in JupyterLab,
+ * handy for emailing links or bookmarking for reference.
+ *
+ * If you need to change how this link is generated (for instance, to copy a
+ * /user-redirect URL for JupyterHub), disable this plugin and replace it
+ * with another implementation.
+ */
+const shareFile: JupyterLabPlugin<void> = {
+  activate: activateShareFile,
+  id: '@jupyterlab/filebrowser-extension:share-file',
+  requires: [IFileBrowserFactory],
+  autoStart: true
+};
+
+/**
+ * A plugin providing file upload status.
+ */
+export const fileUploadStatus: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:file-upload-status',
+  autoStart: true,
+  requires: [IStatusBar, IFileBrowserFactory],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    browser: IFileBrowserFactory
+  ) => {
+    const item = new FileUploadStatus({
+      tracker: browser.tracker
+    });
+
+    statusBar.registerStatusItem(
+      '@jupyterlab/filebrowser-extension:file-upload-status',
+      {
+        item,
+        align: 'middle',
+        isActive: () => {
+          return !!item.model && item.model.items.length > 0;
+        },
+        activeStateChanged: item.model.stateChanged
+      }
+    );
+  }
+};
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -111,7 +164,12 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, browser];
+const plugins: JupyterLabPlugin<any>[] = [
+  factory,
+  browser,
+  shareFile,
+  fileUploadStatus
+];
 export default plugins;
 
 /**
@@ -136,8 +194,7 @@ function activateFactory(
     });
     const widget = new FileBrowser({
       id,
-      model,
-      commands: options.commands || commands
+      model
     });
 
     // Add a launcher toolbar item.
@@ -205,6 +262,32 @@ function activateBrowser(
       maybeCreate();
     });
     maybeCreate();
+  });
+}
+
+function activateShareFile(
+  app: JupyterLab,
+  factory: IFileBrowserFactory
+): void {
+  const { commands } = app;
+  const { tracker } = factory;
+
+  commands.addCommand(CommandIDs.share, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const path = encodeURI(widget.selectedItems().next().path);
+      const tree = PageConfig.getTreeUrl({ workspace: true });
+
+      Clipboard.copyToSystem(URLExt.join(tree, path));
+    },
+    isVisible: () =>
+      tracker.currentWidget &&
+      toArray(tracker.currentWidget.selectedItems()).length === 1,
+    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    label: 'Copy Shareable Link'
   });
 }
 
@@ -437,6 +520,18 @@ function addCommands(
     mnemonic: 0
   });
 
+  commands.addCommand(CommandIDs.createNewDirectory, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewDirectory();
+      }
+    },
+    iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
+    label: 'New Folder'
+  });
+
   commands.addCommand(CommandIDs.rename, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -448,24 +543,6 @@ function addCommands(
     iconClass: 'jp-MaterialIcon jp-EditIcon',
     label: 'Rename',
     mnemonic: 0
-  });
-
-  commands.addCommand(CommandIDs.share, {
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      const path = encodeURI(widget.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: true });
-
-      Clipboard.copyToSystem(URLExt.join(tree, path));
-    },
-    isVisible: () =>
-      tracker.currentWidget &&
-      toArray(tracker.currentWidget.selectedItems()).length === 1,
-    iconClass: 'jp-MaterialIcon jp-LinkIcon',
-    label: 'Copy Shareable Link'
   });
 
   commands.addCommand(CommandIDs.copyPath, {
@@ -620,12 +697,18 @@ function addCommands(
   // matches only non-directory items
   const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
-  // If the user did not click on any file, we still want to show paste,
+  // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
+  app.contextMenu.addItem({
+    command: CommandIDs.createNewDirectory,
+    selector: selectorContent,
+    rank: 1
+  });
+
   app.contextMenu.addItem({
     command: CommandIDs.paste,
     selector: selectorContent,
-    rank: 1
+    rank: 2
   });
 
   app.contextMenu.addItem({
@@ -674,33 +757,33 @@ function addCommands(
   app.contextMenu.addItem({
     command: CommandIDs.duplicate,
     selector: selectorNotDir,
-    rank: 9
+    rank: 8
   });
   app.contextMenu.addItem({
     command: CommandIDs.download,
     selector: selectorNotDir,
-    rank: 10
+    rank: 9
   });
   app.contextMenu.addItem({
     command: CommandIDs.shutdown,
     selector: selectorNotDir,
-    rank: 11
+    rank: 10
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.share,
     selector: selectorItem,
-    rank: 12
+    rank: 11
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyPath,
     selector: selectorItem,
-    rank: 13
+    rank: 12
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyDownloadLink,
-    selector: selectorItem,
-    rank: 14
+    selector: selectorNotDir,
+    rank: 13
   });
 }
 

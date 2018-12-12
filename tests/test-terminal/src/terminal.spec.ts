@@ -87,25 +87,31 @@ describe('terminal/index', () => {
 
     describe('#fontSize', () => {
       it('should be 13 by default', () => {
-        expect(widget.fontSize).to.equal(13);
+        expect(widget.getOption('fontSize')).to.equal(13);
       });
 
       it('should trigger an update request', async () => {
-        widget.fontSize = 14;
-        expect(widget.fontSize).to.equal(14);
+        widget.setOption('fontSize', 14);
+        expect(widget.getOption('fontSize')).to.equal(14);
         await framePromise();
         expect(widget.methods).to.contain('onUpdateRequest');
       });
     });
 
+    describe('#scrollback', () => {
+      it('should be 1000 by default', () => {
+        expect(widget.getOption('scrollback')).to.equal(1000);
+      });
+    });
+
     describe('#theme', () => {
       it('should be dark by default', () => {
-        expect(widget.theme).to.equal('dark');
+        expect(widget.getOption('theme')).to.equal('dark');
       });
 
       it('should be light if we change it', () => {
-        widget.theme = 'light';
-        expect(widget.theme).to.equal('light');
+        widget.setOption('theme', 'light');
+        expect(widget.getOption('theme')).to.equal('light');
       });
     });
 

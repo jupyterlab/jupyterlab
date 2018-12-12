@@ -55,6 +55,7 @@ import '@jupyterlab/services';
 import '@jupyterlab/settingeditor';
 import '@jupyterlab/settingeditor-extension';
 import '@jupyterlab/shortcuts-extension';
+import '@jupyterlab/statusbar-extension';
 import '@jupyterlab/tabmanager-extension';
 import '@jupyterlab/terminal';
 import '@jupyterlab/terminal-extension';

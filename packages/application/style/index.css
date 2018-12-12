@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import url('~font-awesome/css/font-awesome.min.css');
 @import url('~@phosphor/widgets/style/index.css');
 
 .p-Widget.p-mod-hidden {

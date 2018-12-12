@@ -20,7 +20,9 @@ import {
   renameDialog,
   getOpenPath,
   DocumentManager,
-  IDocumentManager
+  IDocumentManager,
+  PathStatus,
+  SavingStatus
 } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -28,6 +30,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Contents, Kernel } from '@jupyterlab/services';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -84,7 +88,7 @@ const pluginId = '@jupyterlab/docmanager-extension:plugin';
 /**
  * The default document manager provider.
  */
-const plugin: JupyterLabPlugin<IDocumentManager> = {
+const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
   requires: [ICommandPalette, IMainMenu, ISettingRegistry],
@@ -138,6 +142,11 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
       docManager.autosave =
         autosave === true || autosave === false ? autosave : true;
       app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
+
+      const autosaveInterval = settings.get('autosaveInterval').composite as
+        | number
+        | null;
+      docManager.autosaveInterval = autosaveInterval || 120;
     };
 
     // Fetch the initial state of the settings.
@@ -156,17 +165,93 @@ const plugin: JupyterLabPlugin<IDocumentManager> = {
 };
 
 /**
- * Export the plugin as default.
+ * A plugin for adding a saving status item to the status bar.
  */
-export default plugin;
+export const savingStatusPlugin: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:saving-status',
+  autoStart: true,
+  requires: [IStatusBar, IDocumentManager],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    docManager: IDocumentManager
+  ) => {
+    let item = new SavingStatus({ docManager });
+
+    // Keep the currently active widget synchronized.
+    item.model!.widget = app.shell.currentWidget;
+    app.shell.currentChanged.connect(
+      () => (item.model!.widget = app.shell.currentWidget)
+    );
+
+    statusBar.registerStatusItem(
+      '@jupyterlab.docmanager-extension:saving-status',
+      {
+        item,
+        align: 'middle',
+        isActive: () => {
+          return true;
+        },
+        activeStateChanged: item.model!.stateChanged
+      }
+    );
+  }
+};
+
+/**
+ * A plugin providing a file path widget to the status bar.
+ */
+export const pathStatusPlugin: JupyterLabPlugin<void> = {
+  id: '@jupyterlab/docmanager-extension:path-status',
+  autoStart: true,
+  requires: [IStatusBar, IDocumentManager],
+  activate: (
+    app: JupyterLab,
+    statusBar: IStatusBar,
+    docManager: IDocumentManager
+  ) => {
+    let item = new PathStatus({ docManager });
+
+    // Keep the file path widget up-to-date with the application active widget.
+    item.model!.widget = app.shell.currentWidget;
+    app.shell.currentChanged.connect(() => {
+      item.model!.widget = app.shell.currentWidget;
+    });
+
+    statusBar.registerStatusItem(
+      '@jupyterlab/docmanager-extension:path-status',
+      {
+        item,
+        align: 'right',
+        rank: 0,
+        isActive: () => {
+          return true;
+        }
+      }
+    );
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterLabPlugin<any>[] = [
+  docManagerPlugin,
+  pathStatusPlugin,
+  savingStatusPlugin
+];
+export default plugins;
 
 /* Widget to display the revert to checkpoint confirmation. */
 class RevertConfirmWidget extends Widget {
   /**
    * Construct a new revert confirmation widget.
    */
-  constructor(checkpoint: Contents.ICheckpointModel) {
-    super({ node: Private.createRevertConfirmNode(checkpoint) });
+  constructor(
+    checkpoint: Contents.ICheckpointModel,
+    fileType: string = 'notebook'
+  ) {
+    super({ node: Private.createRevertConfirmNode(checkpoint, fileType) });
   }
 }
 
@@ -396,7 +481,9 @@ function addCommands(
       }
 
       return docManager.services.contents.getDownloadUrl(path).then(url => {
-        window.open(url, '_blank');
+        const opened = window.open();
+        opened.opener = null;
+        opened.location.href = url;
       });
     },
     icon: args => (args['icon'] as string) || '',
@@ -440,10 +527,11 @@ function addCommands(
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget);
+      const type = fileType();
       return showDialog({
-        title: 'Reload Notebook from Disk',
+        title: `Reload ${type} from Disk`,
         body: `Are you sure you want to reload
-          the notebook from the disk?`,
+          the ${type} from the disk?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
       }).then(result => {
         if (result.button.accept && !context.isDisposed) {
@@ -470,9 +558,10 @@ function addCommands(
         if (!lastCheckpoint) {
           return;
         }
+        const type = fileType();
         return showDialog({
-          title: 'Revert notebook to checkpoint',
-          body: new RevertConfirmWidget(lastCheckpoint),
+          title: `Revert ${type} to checkpoint`,
+          body: new RevertConfirmWidget(lastCheckpoint, type),
           buttons: [
             Dialog.cancelButton(),
             Dialog.warnButton({ label: 'Revert' })
@@ -669,6 +758,13 @@ function addCommands(
     selector: '[data-type="document-title"]',
     rank: 5
   });
+  // .jp-mod-current added so that the console-creation command is only shown on the current document.
+  // Otherwise it will delegate to the wrong widget.
+  app.contextMenu.addItem({
+    command: 'filemenu:create-console',
+    selector: '[data-type="document-title"].jp-mod-current',
+    rank: 6
+  });
 
   [
     CommandIDs.openDirect,
@@ -730,12 +826,13 @@ namespace Private {
   export let id = 0;
 
   export function createRevertConfirmNode(
-    checkpoint: Contents.ICheckpointModel
+    checkpoint: Contents.ICheckpointModel,
+    fileType: string
   ): HTMLElement {
     let body = document.createElement('div');
     let confirmMessage = document.createElement('p');
     let confirmText = document.createTextNode(`Are you sure you want to revert
-      the notebook to the latest checkpoint? `);
+      the ${fileType} to the latest checkpoint? `);
     let cannotUndoText = document.createElement('strong');
     cannotUndoText.textContent = 'This cannot be undone.';
 

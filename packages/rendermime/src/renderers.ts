@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { default as AnsiUp } from 'ansi_up';
-
 import marked from 'marked';
 
 import { ISanitizer } from '@jupyterlab/apputils';
@@ -16,6 +14,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { toArray } from '@phosphor/algorithm';
+
+import escape = require('lodash.escape');
 
 import { removeMath, replaceMath } from './latex';
 
@@ -312,93 +312,36 @@ export namespace renderLatex {
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderMarkdown(
+export async function renderMarkdown(
   options: renderMarkdown.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  let {
-    host,
-    source,
-    trusted,
-    sanitizer,
-    resolver,
-    linkHandler,
-    latexTypesetter,
-    shouldTypeset
-  } = options;
+  let { host, source, ...others } = options;
 
   // Clear the content if there is no source.
   if (!source) {
     host.textContent = '';
-    return Promise.resolve(undefined);
+    return;
   }
 
   // Separate math from normal markdown text.
   let parts = removeMath(source);
 
-  // Render the markdown and handle sanitization.
-  return Private.renderMarked(parts['text'])
-    .then(content => {
-      // Restore the math content in the rendered markdown.
-      content = replaceMath(content, parts['math']);
+  // Convert the markdown to HTML.
+  let html = await Private.renderMarked(parts['text']);
 
-      let originalContent = content;
+  // Replace math.
+  html = replaceMath(html, parts['math']);
 
-      // Sanitize the content it is not trusted.
-      if (!trusted) {
-        originalContent = `${content}`;
-        content = sanitizer.sanitize(content);
-      }
+  // Render HTML.
+  await renderHTML({
+    host,
+    source: html,
+    ...others
+  });
 
-      // Set the inner HTML of the host.
-      host.innerHTML = content;
-
-      if (host.getElementsByTagName('script').length > 0) {
-        // If output it trusted, eval any script tags contained in the HTML.
-        // This is not done automatically by the browser when script tags are
-        // created by setting `innerHTML`.
-        if (trusted) {
-          Private.evalInnerHTMLScriptTags(host);
-        } else {
-          const container = document.createElement('div');
-          const warning = document.createElement('pre');
-          warning.textContent =
-            'This HTML output contains inline scripts. Are you sure that you want to run arbitrary Javascript within your JupyterLab session?';
-          const runButton = document.createElement('button');
-          runButton.textContent = 'Run';
-          runButton.onclick = event => {
-            host.innerHTML = originalContent;
-            Private.evalInnerHTMLScriptTags(host);
-            host.removeChild(host.firstChild);
-          };
-          container.appendChild(warning);
-          container.appendChild(runButton);
-          host.insertBefore(container, host.firstChild);
-        }
-      }
-
-      // Handle default behavior of nodes.
-      Private.handleDefaults(host, resolver);
-
-      // Apply ids to the header nodes.
-      Private.headerAnchors(host);
-
-      // Patch the urls if a resolver is available.
-      let promise: Promise<void>;
-      if (resolver) {
-        promise = Private.handleUrls(host, resolver, linkHandler);
-      } else {
-        promise = Promise.resolve(undefined);
-      }
-
-      // Return the rendered promise.
-      return promise;
-    })
-    .then(() => {
-      if (shouldTypeset && latexTypesetter) {
-        latexTypesetter.typeset(host);
-      }
-    });
+  // Apply ids to the header nodes.
+  Private.headerAnchors(host);
 }
 
 /**
@@ -527,12 +470,8 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
   let { host, source } = options;
 
-  const ansiUp = new AnsiUp();
-  ansiUp.escape_for_html = true;
-  ansiUp.use_classes = true;
-
   // Create the HTML content.
-  let content = ansiUp.ansi_to_html(source);
+  let content = Private.ansiSpan(source);
 
   // Set the inner HTML for the host node.
   host.innerHTML = `<pre>${content}</pre>`;
@@ -632,15 +571,22 @@ namespace Private {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
-      let path = anchors[i].href || '';
+      const el = anchors[i];
+      // skip when processing a elements inside svg
+      // which are of type SVGAnimatedString
+      if (!(el instanceof HTMLAnchorElement)) {
+        continue;
+      }
+      let path = el.href;
       const isLocal =
         resolver && resolver.isLocal
           ? resolver.isLocal(path)
           : URLExt.isLocal(path);
       if (isLocal) {
-        anchors[i].target = '_self';
+        el.target = '_self';
       } else {
-        anchors[i].target = '_blank';
+        el.target = '_blank';
+        el.rel = 'noopener';
       }
     }
 
@@ -854,5 +800,275 @@ namespace Private {
         return code;
       }
     });
+  }
+
+  let ANSI_COLORS = [
+    'ansi-black',
+    'ansi-red',
+    'ansi-green',
+    'ansi-yellow',
+    'ansi-blue',
+    'ansi-magenta',
+    'ansi-cyan',
+    'ansi-white',
+    'ansi-black-intense',
+    'ansi-red-intense',
+    'ansi-green-intense',
+    'ansi-yellow-intense',
+    'ansi-blue-intense',
+    'ansi-magenta-intense',
+    'ansi-cyan-intense',
+    'ansi-white-intense'
+  ];
+
+  /**
+   * Create HTML tags for a string with given foreground, background etc. and
+   * add them to the `out` array.
+   */
+  function pushColoredChunk(
+    chunk: string,
+    fg: number | Array<number>,
+    bg: number | Array<number>,
+    bold: boolean,
+    underline: boolean,
+    inverse: boolean,
+    out: Array<string>
+  ): void {
+    if (chunk) {
+      let classes = [];
+      let styles = [];
+
+      if (bold && typeof fg === 'number' && 0 <= fg && fg < 8) {
+        fg += 8; // Bold text uses "intense" colors
+      }
+      if (inverse) {
+        [fg, bg] = [bg, fg];
+      }
+
+      if (typeof fg === 'number') {
+        classes.push(ANSI_COLORS[fg] + '-fg');
+      } else if (fg.length) {
+        styles.push(`color: rgb(${fg})`);
+      } else if (inverse) {
+        classes.push('ansi-default-inverse-fg');
+      }
+
+      if (typeof bg === 'number') {
+        classes.push(ANSI_COLORS[bg] + '-bg');
+      } else if (bg.length) {
+        styles.push(`background-color: rgb(${bg})`);
+      } else if (inverse) {
+        classes.push('ansi-default-inverse-bg');
+      }
+
+      if (bold) {
+        classes.push('ansi-bold');
+      }
+
+      if (underline) {
+        classes.push('ansi-underline');
+      }
+
+      if (classes.length || styles.length) {
+        out.push('<span');
+        if (classes.length) {
+          out.push(` class="${classes.join(' ')}"`);
+        }
+        if (styles.length) {
+          out.push(` style="${styles.join('; ')}"`);
+        }
+        out.push('>');
+        out.push(chunk);
+        out.push('</span>');
+      } else {
+        out.push(chunk);
+      }
+    }
+  }
+
+  /**
+   * Convert ANSI extended colors to R/G/B triple.
+   */
+  function getExtendedColors(numbers: Array<number>): number | Array<number> {
+    let r;
+    let g;
+    let b;
+    let n = numbers.shift();
+    if (n === 2 && numbers.length >= 3) {
+      // 24-bit RGB
+      r = numbers.shift();
+      g = numbers.shift();
+      b = numbers.shift();
+      if ([r, g, b].some(c => c < 0 || 255 < c)) {
+        throw new RangeError('Invalid range for RGB colors');
+      }
+    } else if (n === 5 && numbers.length >= 1) {
+      // 256 colors
+      let idx = numbers.shift();
+      if (idx < 0) {
+        throw new RangeError('Color index must be >= 0');
+      } else if (idx < 16) {
+        // 16 default terminal colors
+        return idx;
+      } else if (idx < 232) {
+        // 6x6x6 color cube, see https://stackoverflow.com/a/27165165/500098
+        r = Math.floor((idx - 16) / 36);
+        r = r > 0 ? 55 + r * 40 : 0;
+        g = Math.floor(((idx - 16) % 36) / 6);
+        g = g > 0 ? 55 + g * 40 : 0;
+        b = (idx - 16) % 6;
+        b = b > 0 ? 55 + b * 40 : 0;
+      } else if (idx < 256) {
+        // grayscale, see https://stackoverflow.com/a/27165165/500098
+        r = g = b = (idx - 232) * 10 + 8;
+      } else {
+        throw new RangeError('Color index must be < 256');
+      }
+    } else {
+      throw new RangeError('Invalid extended color specification');
+    }
+    return [r, g, b];
+  }
+
+  /**
+   * Transform ANSI color escape codes into HTML <span> tags with CSS
+   * classes such as "ansi-green-intense-fg".
+   * The actual colors used are set in the CSS file.
+   * This also removes non-color escape sequences.
+   * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
+   */
+  export function ansiSpan(str: string): string {
+    let ansiRe = /\x1b\[(.*?)([@-~])/g;
+    let fg: number | Array<number> = [];
+    let bg: number | Array<number> = [];
+    let bold = false;
+    let underline = false;
+    let inverse = false;
+    let match;
+    let out: Array<string> = [];
+    let numbers = [];
+    let start = 0;
+
+    str = escape(str);
+
+    str += '\x1b[m'; // Ensure markup for trailing text
+    // tslint:disable-next-line
+    while ((match = ansiRe.exec(str))) {
+      if (match[2] === 'm') {
+        let items = match[1].split(';');
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          if (item === '') {
+            numbers.push(0);
+          } else if (item.search(/^\d+$/) !== -1) {
+            numbers.push(parseInt(item, 10));
+          } else {
+            // Ignored: Invalid color specification
+            numbers.length = 0;
+            break;
+          }
+        }
+      } else {
+        // Ignored: Not a color code
+      }
+      let chunk = str.substring(start, match.index);
+      pushColoredChunk(chunk, fg, bg, bold, underline, inverse, out);
+      start = ansiRe.lastIndex;
+
+      while (numbers.length) {
+        let n = numbers.shift();
+        switch (n) {
+          case 0:
+            fg = bg = [];
+            bold = false;
+            underline = false;
+            inverse = false;
+            break;
+          case 1:
+          case 5:
+            bold = true;
+            break;
+          case 4:
+            underline = true;
+            break;
+          case 7:
+            inverse = true;
+            break;
+          case 21:
+          case 22:
+            bold = false;
+            break;
+          case 24:
+            underline = false;
+            break;
+          case 27:
+            inverse = false;
+            break;
+          case 30:
+          case 31:
+          case 32:
+          case 33:
+          case 34:
+          case 35:
+          case 36:
+          case 37:
+            fg = n - 30;
+            break;
+          case 38:
+            try {
+              fg = getExtendedColors(numbers);
+            } catch (e) {
+              numbers.length = 0;
+            }
+            break;
+          case 39:
+            fg = [];
+            break;
+          case 40:
+          case 41:
+          case 42:
+          case 43:
+          case 44:
+          case 45:
+          case 46:
+          case 47:
+            bg = n - 40;
+            break;
+          case 48:
+            try {
+              bg = getExtendedColors(numbers);
+            } catch (e) {
+              numbers.length = 0;
+            }
+            break;
+          case 49:
+            bg = [];
+            break;
+          case 90:
+          case 91:
+          case 92:
+          case 93:
+          case 94:
+          case 95:
+          case 96:
+          case 97:
+            fg = n - 90 + 8;
+            break;
+          case 100:
+          case 101:
+          case 102:
+          case 103:
+          case 104:
+          case 105:
+          case 106:
+          case 107:
+            bg = n - 100 + 8;
+            break;
+          default:
+          // Unknown codes are ignored
+        }
+      }
+    }
+    return out.join('');
   }
 }

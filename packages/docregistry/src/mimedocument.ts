@@ -11,7 +11,7 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONObject, PromiseDelegate, JSONExt } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -86,6 +86,14 @@ export class MimeContent extends Widget {
   }
 
   /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string) {
+    this._fragment = fragment;
+    this.update();
+  }
+
+  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
@@ -105,6 +113,7 @@ export class MimeContent extends Widget {
   protected onUpdateRequest(msg: Message): void {
     if (this._context.isReady) {
       this._render();
+      this._fragment = '';
     }
   }
 
@@ -133,7 +142,11 @@ export class MimeContent extends Widget {
     } else {
       data[this.mimeType] = model.toJSON();
     }
-    let mimeModel = new MimeModel({ data, callback: this._changeCallback });
+    let mimeModel = new MimeModel({
+      data,
+      callback: this._changeCallback,
+      metadata: { fragment: this._fragment }
+    });
 
     try {
       // Do the rendering asynchronously.
@@ -165,15 +178,20 @@ export class MimeContent extends Widget {
     }
     let data = options.data[this.mimeType];
     if (typeof data === 'string') {
-      this._context.model.fromString(data);
+      if (data !== this._context.model.toString()) {
+        this._context.model.fromString(data);
+      }
     } else {
-      this._context.model.fromJSON(data);
+      if (!JSONExt.deepEqual(data, this._context.model.toJSON())) {
+        this._context.model.fromJSON(data);
+      }
     }
   };
 
   readonly renderer: IRenderMime.IRenderer;
 
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  private _fragment = '';
   private _monitor: ActivityMonitor<any, any> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
@@ -219,7 +237,11 @@ export namespace MimeContent {
 /**
  * A document widget for mime content.
  */
-export class MimeDocument extends DocumentWidget<MimeContent> {}
+export class MimeDocument extends DocumentWidget<MimeContent> {
+  setFragment(fragment: string): void {
+    this.content.setFragment(fragment);
+  }
+}
 
 /**
  * An implementation of a widget factory for a rendered mimetype document.

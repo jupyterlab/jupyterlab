@@ -3,11 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  ICON_CLASS_KEY,
-  ICON_LABEL_KEY,
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -218,6 +214,16 @@ export namespace PluginList {
  */
 namespace Private {
   /**
+   * The JupyterLab plugin schema key for the setting editor icon of a plugin.
+   */
+  const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
+
+  /**
+   * The JupyterLab plugin schema key for the setting editor label of a plugin.
+   */
+  const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
+
+  /**
    * Check the plugin for a rendering hint's value.
    *
    * #### Notes
@@ -265,21 +271,30 @@ namespace Private {
     selection: string,
     node: HTMLElement
   ): void {
-    const plugins = sortPlugins(registry.plugins);
+    const plugins = sortPlugins(registry).filter(plugin => {
+      const { schema } = plugin;
+      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+      const editable = Object.keys(schema.properties || {}).length > 0;
+      const extensible = schema.additionalProperties !== false;
+
+      return !deprecated && (editable || extensible);
+    });
     const items = plugins.map(plugin => {
-      const itemTitle = `(${plugin.id}) ${plugin.schema.description}`;
+      const { id, schema, version } = plugin;
+      const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
+
       return (
         <li
-          className={plugin.id === selection ? 'jp-mod-selected' : ''}
-          data-id={plugin.id}
-          key={plugin.id}
+          className={id === selection ? 'jp-mod-selected' : ''}
+          data-id={id}
+          key={id}
           title={itemTitle}
         >
           <span className={iconClass} title={iconTitle} />
-          <span>{plugin.schema.title || plugin.id}</span>
+          <span>{schema.title || id}</span>
         </li>
       );
     });
@@ -302,13 +317,13 @@ namespace Private {
   }
 
   /**
-   * Sort a list of plugins by ID.
+   * Sort a list of plugins by title and ID.
    */
-  function sortPlugins(
-    plugins: ISettingRegistry.IPlugin[]
-  ): ISettingRegistry.IPlugin[] {
-    return plugins.sort((a, b) => {
-      return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
-    });
+  function sortPlugins(registry: ISettingRegistry): ISettingRegistry.IPlugin[] {
+    return Object.keys(registry.plugins)
+      .map(plugin => registry.plugins[plugin])
+      .sort((a, b) => {
+        return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+      });
   }
 }

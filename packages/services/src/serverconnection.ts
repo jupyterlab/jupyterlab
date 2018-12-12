@@ -17,11 +17,11 @@ if (typeof window === 'undefined') {
   // Mangle the require statements so it does not get picked up in the
   // browser assets.
   /* tslint:disable */
-  let fetchMod = eval('require')('node-fetch');
+  let fetchMod = require('node-fetch');
   FETCH = global.fetch || fetchMod;
   REQUEST = global.Request || fetchMod.Request;
   HEADERS = global.Headers || fetchMod.Headers;
-  WEBSOCKET = global.WebSocket || eval('require')('ws');
+  WEBSOCKET = global.WebSocket || require('ws');
   /* tslint:enable */
 } else {
   FETCH = fetch;

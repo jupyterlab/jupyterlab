@@ -4,8 +4,42 @@
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
-    "keyMap": { "type": "string", "title": "Key Map", "default": "default" },
-    "theme": { "type": "string", "title": "Theme", "default": "default" }
+    "keyMap": {
+      "type": "string",
+      "title": "Key Map",
+      "description": "Configures the keymap to use",
+      "default": "default"
+    },
+    "theme": {
+      "type": "string",
+      "title": "Theme",
+      "description": "CSS file defining the corresponding\n.cm-s-[name] styles is loaded",
+      "default": "default"
+    },
+    "scrollPastEnd": {
+      "type": "boolean",
+      "title": "Scroll behavior",
+      "description": "Whether to scroll past the end of text document",
+      "default": true
+    },
+    "styleActiveLine": {
+      "type": ["boolean", "object"],
+      "title": "Style Active Line",
+      "description": "Value is boolean, or { nonEmpty: boolean }",
+      "default": false
+    },
+    "styleSelectedText": {
+      "type": "boolean",
+      "title": "Style Selected Text",
+      "description": "Value is boolean",
+      "default": false
+    },
+    "selectionPointer": {
+      "type": ["boolean", "string"],
+      "title": "Selection Pointer",
+      "description": "Value is boolean or string, e.g. 'pointer'",
+      "default": false
+    }
   },
   "type": "object"
 }

@@ -1,0 +1,14 @@
+{
+  "title": "Launcher",
+  "description": "Launcher settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "launcher:create",
+      "keys": [""],
+      "selector": "body"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

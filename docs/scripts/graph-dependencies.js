@@ -38,6 +38,11 @@ packages.forEach(function(packagePath) {
     return;
   }
 
+  // Don't include the metapackage.
+  if (data.name === '@jupyterlab/metapackage') {
+    return;
+  }
+
   // Construct a URL to the package on GitHub.
   var Url = url.resolve(baseUrl, 'packages/' + path.basename(packagePath));
 
