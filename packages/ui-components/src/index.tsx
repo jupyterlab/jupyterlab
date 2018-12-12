@@ -5,33 +5,33 @@ import * as React from 'react';
 import {
   Button as BPButton,
   IButtonProps as IBPButtonProps
-} from '@blueprintjs/core/lib/esm/components/button/buttons';
+} from '@blueprintjs/core/lib/cjs/components/button/buttons';
 import {
   Icon as BPIcon,
   IIconProps
-} from '@blueprintjs/core/lib/esm/components/icon/icon';
+} from '@blueprintjs/core/lib/cjs/components/icon/icon';
 import {
   Collapse as BPCollapse,
   ICollapseProps
-} from '@blueprintjs/core/lib/esm/components/collapse/collapse';
+} from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
 import {
   InputGroup as BPInputGroup,
   IInputGroupProps as IBPInputGroupProps
-} from '@blueprintjs/core/lib/esm/components/forms/inputGroup';
+} from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
 import {
   HTMLSelect as BPHTMLSelect,
   IHTMLSelectProps
-} from '@blueprintjs/core/lib/esm/components/html-select/htmlSelect';
+} from '@blueprintjs/core/lib/cjs/components/html-select/htmlSelect';
 import {
   Select as BPSelect,
   ISelectProps
-} from '@blueprintjs/select/lib/esm/components/select/select';
+} from '@blueprintjs/select/lib/cjs/components/select/select';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '../style/index.css';
 import { combineClassNames } from './utils';
 
-export { Intent } from '@blueprintjs/core/lib/esm/common/intent';
+export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 interface IButtonProps extends IBPButtonProps {
   title?: string;
