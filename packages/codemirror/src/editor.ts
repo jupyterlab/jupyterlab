@@ -1093,6 +1093,11 @@ export namespace CodeMirrorEditor {
     fixedGutter?: boolean;
 
     /**
+     * Whether the folding gutter should be drawn
+     */
+    foldGutter?: boolean;
+
+    /**
      * Whether the cursor should be drawn when a selection is active.
      */
     showCursorWhenSelecting?: boolean;
@@ -1173,7 +1178,7 @@ export namespace CodeMirrorEditor {
     electricChars: true,
     keyMap: 'default',
     extraKeys: null,
-    gutters: [],
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
     fixedGutter: true,
     showCursorWhenSelecting: false,
     coverGutterNextToScrollbar: false,
@@ -1185,7 +1190,8 @@ export namespace CodeMirrorEditor {
     styleActiveLine: false,
     styleSelectedText: false,
     selectionPointer: false,
-    rulers: []
+    rulers: [],
+    foldGutter: true
   };
 
   /**
@@ -1388,6 +1394,9 @@ namespace Private {
         break;
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
+        break;
+      case 'codeFolding':
+        editor.setOption('foldGutter', value);
         break;
       default:
         editor.setOption(option, value);
