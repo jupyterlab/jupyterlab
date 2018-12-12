@@ -9,10 +9,12 @@ const DOCUMENT_SEARCH_CLASS = 'jp-DocumentSearch';
 const SEARCHBOX_CLASS = 'jp-DocumentSearch-searchbox';
 const WRAPPER_CLASS = 'jp-DocumentSearch-wrapper';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
-
+const globalBtns: any = {};
 export class SearchBox extends Widget {
   constructor() {
-    super({ node: Private.createNode() });
+    super({ node: Private.createNode(globalBtns) });
+    this._nextBtn = globalBtns.next;
+    this._prevBtn = globalBtns.prev;
     this.id = 'search-box';
     this.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
     this.title.caption = 'Search document';
@@ -40,14 +42,20 @@ export class SearchBox extends Widget {
   }
 
   handleEvent(event: Event): void {
+    console.log('event: ', event);
     if (event.type === 'keydown') {
       this._handleKeyDown(event as KeyboardEvent);
+    }
+    if (event.type === 'click') {
+      this._handleClick(event as MouseEvent);
     }
   }
 
   protected onBeforeAttach(msg: Message): void {
     // Add event listeners
     this.node.addEventListener('keydown', this.handleEvent.bind(this));
+    this._nextBtn.addEventListener('click', this.handleEvent.bind(this));
+    this._prevBtn.addEventListener('click', this.handleEvent.bind(this));
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -82,6 +90,16 @@ export class SearchBox extends Widget {
     }
   }
 
+  private _handleClick(event: MouseEvent) {
+    console.log('click event!');
+    if (event.target === this._nextBtn) {
+      console.log('it was the next');
+      this._highlightNext.emit(undefined);
+    } else if (event.target === this._prevBtn) {
+      this._highlightPrevious.emit(undefined);
+    }
+  }
+
   private optionsEqual(a: ISearchOptions, b: ISearchOptions) {
     return (
       !!a &&
@@ -97,19 +115,29 @@ export class SearchBox extends Widget {
   private _highlightNext = new Signal<this, void>(this);
   private _highlightPrevious = new Signal<this, void>(this);
   private _lastOptions: ISearchOptions;
+
+  public _nextBtn: Element;
+  public _prevBtn: Element;
 }
 
 namespace Private {
-  export function createNode() {
+  export function createNode(context: any) {
     const node = document.createElement('div');
     const search = document.createElement('div');
     const wrapper = document.createElement('div');
     const input = document.createElement('input');
+    const next = document.createElement('button');
+    const prev = document.createElement('button');
     const results = document.createElement('div');
     const dummyText = document.createElement('p');
 
     input.placeholder = 'SEARCH';
     dummyText.innerHTML = 'Dummy result';
+    next.textContent = '>';
+    prev.textContent = '<';
+
+    context.next = next;
+    context.prev = prev;
 
     search.className = SEARCHBOX_CLASS;
     wrapper.className = WRAPPER_CLASS;
@@ -117,6 +145,8 @@ namespace Private {
 
     search.appendChild(wrapper);
     wrapper.appendChild(input);
+    wrapper.appendChild(prev);
+    wrapper.appendChild(next);
     results.appendChild(dummyText);
     node.appendChild(search);
     node.appendChild(results);

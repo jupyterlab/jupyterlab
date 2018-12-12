@@ -50,17 +50,24 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
   highlightNext(): Promise<ISearchMatch> {
     console.log('codemirror search provider: highlightNext');
-    const { from } = Private.findNext(this._cm, false);
-    const match = this._matchState[from.line][from.ch];
+    console.log('cursor position: ', this._cm.getCursorPosition());
+    const cursorMatch = Private.findNext(this._cm, false);
+    if (!cursorMatch) {
+      return Promise.resolve(null);
+    }
+    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     console.log('next match: ', match);
     return Promise.resolve(match);
   }
 
   highlightPrevious(): Promise<ISearchMatch> {
     console.log('codemirror search provider: highlightPrevious');
-    const { from } = Private.findNext(this._cm, true);
-    const match = this._matchState[from.line][from.ch];
-    console.log('prev match: ', match);
+    const cursorMatch = Private.findNext(this._cm, true);
+    if (!cursorMatch) {
+      return Promise.resolve(null);
+    }
+    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
+    console.log('next match: ', match);
     return Promise.resolve(match);
   }
 
@@ -107,21 +114,16 @@ namespace Private {
   ): ICodeMirrorMatch {
     return cm.operation(() => {
       const state = getSearchState(cm);
-      let cursor: CodeMirror.SearchCursor = cm.getSearchCursor(
+      const position = reverse ? state.posFrom : state.posTo;
+      const cursor: CodeMirror.SearchCursor = cm.getSearchCursor(
         state.query,
-        reverse ? state.posFrom : state.posTo
+        position
       );
+      console.log('filter: creating cursor from position: ', position);
       if (!cursor.find(reverse)) {
-        cursor = cm.getSearchCursor(
-          state.query,
-          reverse
-            ? CodeMirror.Pos(cm.lastLine())
-            : CodeMirror.Pos(cm.firstLine(), 0)
-        );
+        console.log('------ nothing found');
+        return null;
       }
-      console.log('cursor: ', cursor);
-      console.log('fromPos: ', cursor.from());
-      console.log('toPos: ', cursor.to());
       const fromPos: CodeMirror.Position = cursor.from();
       const toPos: CodeMirror.Position = cursor.to();
       const selRange: CodeEditor.IRange = {
@@ -223,7 +225,6 @@ namespace Private {
           // no matches, consume the rest of the stream
           stream.skipToEnd();
         }
-        console.log('matchState post token: ', matchState);
       }
     };
   }

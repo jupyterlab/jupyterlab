@@ -415,6 +415,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._editor.scrollIntoView(pos, margin);
   }
 
+  cursorCoords(
+    where: boolean,
+    mode?: 'window' | 'page' | 'local'
+  ): { left: number; top: number; bottom: number } {
+    return this._editor.cursorCoords(where, mode);
+  }
+
   getRange(
     from: CodeMirror.Position,
     to: CodeMirror.Position,
