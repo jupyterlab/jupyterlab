@@ -1395,8 +1395,29 @@ namespace Private {
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
         break;
+      case 'lineNumbers':
+        let currentGutters = editor.getOption('gutters').slice() as Array<
+          string
+        >;
+        const lineNoIndex = currentGutters.indexOf('CodeMirror-linenumbers');
+        if (lineNoIndex < 0 && value) {
+          currentGutters.unshift('CodeMirror-linenumbers');
+        } else if (lineNoIndex === 0 && !value) {
+          currentGutters.shift();
+        }
+        editor.setOption(option, value);
+        editor.setOption('gutters', currentGutters);
+        break;
       case 'codeFolding':
+        let gutters = editor.getOption('gutters').slice() as Array<string>;
+        let foldIndex = gutters.indexOf('CodeMirror-foldgutter');
+        if (foldIndex < 0 && value) {
+          gutters.push('CodeMirror-foldgutter');
+        } else if (foldIndex === gutters.length - 1 && !value) {
+          gutters.pop();
+        }
         editor.setOption('foldGutter', value);
+        editor.setOption('gutters', gutters);
         break;
       default:
         editor.setOption(option, value);
