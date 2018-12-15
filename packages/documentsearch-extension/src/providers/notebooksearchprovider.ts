@@ -1,13 +1,16 @@
 // import * as CodeMirror from 'codemirror';
 
-import { ISearchProvider, ISearchOptions, ISearchMatch } from '../index';
+import { ISearchProvider, ISearchMatch } from '../index';
 
-import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
+import {
+  CodeMirrorSearchProvider,
+  SearchState
+} from './codemirrorsearchprovider';
 
 import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { Cell } from '@jupyterlab/cells';
+import { Cell, MarkdownCell } from '@jupyterlab/cells';
 import CodeMirror from 'codemirror';
 
 interface ICellSearchPair {
@@ -15,38 +18,49 @@ interface ICellSearchPair {
   provider: ISearchProvider;
 }
 
+// TODO: re-examine indexing of cells
+
 export class NotebookSearchProvider implements ISearchProvider {
   startSearch(
-    options: ISearchOptions,
+    query: RegExp,
     searchTarget: NotebookPanel
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
     console.log(
-      'notebook provider: startSearch on options, target: ',
-      options,
+      'notebook provider: startSearch on query, target: ',
+      query,
       ', ',
       this._searchTarget
     );
-    const cells = this._searchTarget.content.widgets;
+    const cells = this._searchTarget.content.widgets.filter(cell =>
+      Private.isSearchableCell(cell)
+    );
+    console.log('widgets length: ', this._searchTarget.content.widgets.length);
+    console.log('filtered cells length: ', cells.length);
     const activeCell = this._searchTarget.content.activeCell;
     const matchPromises: Promise<ISearchMatch[]>[] = [];
     let indexTotal = 0;
+    // For each cell, create a search provider and collect the matches
     cells.forEach((cell: Cell) => {
       const cmEditor = cell.editor as CodeMirrorEditor;
       const cmSearchProvider = new CodeMirrorSearchProvider();
       matchPromises.push(
         cmSearchProvider
-          .startSearch(options, cmEditor)
+          .startSearch(query, cmEditor)
           .then((matchesFromCell: ISearchMatch[]) => {
+            // update the match indices to reflec the whole document index values
             matchesFromCell.forEach(match => {
               match.index = match.index + indexTotal;
             });
+            indexTotal += matchesFromCell.length;
 
+            // In the active cell, select the next match after the cursor
             if (activeCell === cell) {
-              cmSearchProvider
+              return cmSearchProvider
                 .highlightNext()
-                .then((selectedMatch: ISearchMatch) => {
-                  // this._highlightedIndex = selectedMatch.index + indexTotal;
+                .then((match: ISearchMatch) => {
+                  this._currentMatch = match;
+                  return matchesFromCell;
                 });
             }
 
@@ -60,8 +74,9 @@ export class NotebookSearchProvider implements ISearchProvider {
         provider: cmSearchProvider
       });
     });
+
+    // Flatten matches into one array
     return Promise.all(matchPromises).then(matchesFromCells => {
-      // this._matchesFromCells = matchesFromCells;
       let result: ISearchMatch[] = [];
       matchesFromCells.forEach((cellMatches: ISearchMatch[]) => {
         result.concat(cellMatches);
@@ -81,50 +96,31 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   highlightNext(): Promise<ISearchMatch> {
+    console.log('nbsp highlightNext');
+    const steps = 0;
     return Private.stepNext(
       this._searchTarget.content,
       this._cmSearchProviders,
+      steps,
       false
-    );
-    // const activeCell: Cell = this._searchTarget.content.activeCell;
-    // const cellIndex = this._searchTarget.content.widgets.indexOf(activeCell);
-    // const numCells = this._searchTarget.content.widgets.length;
-    // console.log(
-    //   'notebook provider: highlightNext, cellIndex: ',
-    //   cellIndex,
-    //   ' numCells: ',
-    //   numCells
-    // );
-    // const { provider }: { provider: ISearchProvider } = this._cmSearchProviders[
-    //   cellIndex
-    // ];
-
-    // return provider.highlightNext().then((match: ISearchMatch) => {
-    //   console.log('new match before index set: ', match);
-    //   if (!match) {
-    //     console.log('no more matches in cell, check next cell');
-    //     this._searchTarget.content.activeCellIndex = (cellIndex + 1) % numCells;
-    //     const editor = this._searchTarget.content.activeCell
-    //       .editor as CodeMirrorEditor;
-    //     editor.setCursorPosition({ line: 0, column: 0 });
-    //     return this.highlightNext();
-    //   }
-    //   const allMatches = Private.getMatchesFromCells(this._cmSearchProviders);
-    //   match.index = allMatches[cellIndex].find(
-    //     (matchTest: ISearchMatch) => match.column === matchTest.column
-    //   ).index;
-    //   console.log('matches in same cell: ', allMatches[cellIndex]);
-    //   console.log('new match after index set: ', match);
-    //   return match;
-    // });
+    ).then((match: ISearchMatch) => {
+      this._currentMatch = match;
+      return match;
+    });
   }
 
   highlightPrevious(): Promise<ISearchMatch> {
+    console.log('nbsp highlightPrevious');
+    const steps = 0;
     return Private.stepNext(
       this._searchTarget.content,
       this._cmSearchProviders,
+      steps,
       true
-    );
+    ).then((match: ISearchMatch) => {
+      this._currentMatch = match;
+      return match;
+    });
   }
 
   canSearchOn(domain: any): boolean {
@@ -137,15 +133,16 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   get currentMatchIndex(): number {
-    console.log('notebook provider: currentMatchIndex');
-    return 0;
+    if (!this._currentMatch) {
+      return 0;
+    }
+    return this._currentMatch.index;
   }
 
   private _searchTarget: NotebookPanel;
   private _cmSearchProviders: ICellSearchPair[] = [];
-  // private _matchesFromCells: ISearchMatch[][];
   // private _highlightedIndex: number = 0;
-  // private _currentMatch: ISearchMatch;
+  private _currentMatch: ISearchMatch;
 }
 
 namespace Private {
@@ -168,17 +165,16 @@ namespace Private {
   export function stepNext(
     notebook: Notebook,
     cmSearchProviders: ICellSearchPair[],
+    steps: number,
     reverse: boolean
   ): Promise<ISearchMatch> {
     const activeCell: Cell = notebook.activeCell;
     const cellIndex = notebook.widgets.indexOf(activeCell);
     const numCells = notebook.widgets.length;
-    console.log(
-      'notebook provider: highlightNext, cellIndex: ',
-      cellIndex,
-      ' numCells: ',
-      numCells
-    );
+    if (steps === numCells) {
+      // searched all cells, found no matches
+      return null;
+    }
     const { provider }: { provider: ISearchProvider } = cmSearchProviders[
       cellIndex
     ];
@@ -188,24 +184,21 @@ namespace Private {
     return nextPromise.then((match: ISearchMatch) => {
       if (!match) {
         console.log('no more matches in cell, check next cell');
-        let nextCellIndex;
-        if (reverse) {
-          nextCellIndex = cellIndex - 1;
-          if (nextCellIndex < 0) {
-            nextCellIndex = numCells - 1;
-          }
-        } else {
-          nextCellIndex = (cellIndex + 1) % numCells;
-        }
+        let nextCellIndex = getNextCellIndex(
+          notebook.widgets,
+          cellIndex,
+          reverse
+        );
         notebook.activeCellIndex = nextCellIndex;
         const editor = notebook.activeCell.editor as CodeMirrorEditor;
         // move the cursor of the next cell to the start/end of the cell so it can search
+        const state: any = getSearchState(editor);
         if (reverse) {
-          editor.state.search.posFrom = CodeMirror.Pos(editor.lastLine());
+          state.posFrom = CodeMirror.Pos(editor.lastLine());
         } else {
-          editor.state.search.posTo = CodeMirror.Pos(editor.firstLine(), 0);
+          state.posTo = CodeMirror.Pos(editor.firstLine(), 0);
         }
-        return stepNext(notebook, cmSearchProviders, reverse);
+        return stepNext(notebook, cmSearchProviders, steps + 1, reverse);
       }
       const allMatches = Private.getMatchesFromCells(cmSearchProviders);
       match.index = allMatches[cellIndex].find(
@@ -213,5 +206,50 @@ namespace Private {
       ).index;
       return match;
     });
+  }
+
+  function getNextCellIndex(
+    cells: ReadonlyArray<Cell>,
+    currentIndex: number,
+    reverse: boolean
+  ): number {
+    let nextCellIndex = currentIndex;
+    const numCells = cells.length;
+    let invalidCell = true;
+    do {
+      console.log('curr index: ', nextCellIndex);
+      nextCellIndex = reverse ? nextCellIndex - 1 : nextCellIndex + 1;
+      if (nextCellIndex < 0) {
+        nextCellIndex = numCells - 1;
+      }
+      if (nextCellIndex > numCells - 1) {
+        nextCellIndex = 0;
+      }
+      console.log('nextCellIndex: ', nextCellIndex);
+      const nextCell = cells[nextCellIndex];
+      console.log('instanceof: ', nextCell instanceof MarkdownCell);
+      console.log(
+        'instanceof and rendered: ',
+        nextCell instanceof MarkdownCell && (nextCell as MarkdownCell).rendered
+      );
+      console.log('inputhidden: ', nextCell.inputHidden);
+      invalidCell = isSearchableCell(nextCell);
+      console.log('invalid? ', invalidCell);
+    } while (invalidCell);
+    return nextCellIndex;
+  }
+
+  export function isSearchableCell(cell: Cell) {
+    return !(
+      (cell instanceof MarkdownCell && (cell as MarkdownCell).rendered) ||
+      cell.inputHidden
+    );
+  }
+
+  function getSearchState(cm: CodeMirrorEditor) {
+    if (!cm.state.search) {
+      cm.state.search = new SearchState();
+    }
+    return cm.state.search;
   }
 }

@@ -1,6 +1,6 @@
 import * as CodeMirror from 'codemirror';
 
-import { ISearchProvider, ISearchOptions, ISearchMatch } from '../index';
+import { ISearchProvider, ISearchMatch } from '../index';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -9,37 +9,26 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements ISearchProvider {
   startSearch(
-    options: ISearchOptions,
+    query: RegExp,
     searchTarget: CodeMirrorEditor
   ): Promise<ISearchMatch[]> {
+    this._query = query;
     this._cm = searchTarget;
-    console.log(
-      'CodeMirror provider: startSearch on options, target: ',
-      options,
-      ', ',
-      this._cm
-    );
+
     Private.clearSearch(this._cm);
 
     const state = Private.getSearchState(this._cm);
     this._cm.operation(() => {
-      state.queryText = options.query;
-      state.query = Private.parseQuery(options.query);
-      // clear search first?
+      state.query = query;
+      // clear search first
       this._cm.removeOverlay(state.overlay);
-      state.overlay = Private.searchOverlay(
-        state.query,
-        Private.queryCaseInsensitive(state.query),
-        this._matchState
-      );
+      state.overlay = Private.searchOverlay(state.query, this._matchState);
       this._cm.addOverlay(state.overlay);
       // skips show matches on scroll bar here
-      // state.posFrom = state.posTo = this._cm.getCursor();
+      state.posFrom = state.posTo = this._cm.getCursor();
       // Private.findNext(this._cm, false);
     });
-    console.log('matchState: ', this._matchState);
     const matches = Private.parseMatchesFromState(this._matchState);
-    console.log('matches: ', matches);
     return Promise.resolve(matches);
   }
 
@@ -49,25 +38,29 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   highlightNext(): Promise<ISearchMatch> {
-    console.log('codemirror search provider: highlightNext');
-    console.log('cursor position: ', this._cm.getCursorPosition());
-    const cursorMatch = Private.findNext(this._cm, false);
+    const cursorMatch = Private.findNext(
+      this._cm,
+      false,
+      this._query.ignoreCase
+    );
     if (!cursorMatch) {
       return Promise.resolve(null);
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    console.log('next match: ', match);
     return Promise.resolve(match);
   }
 
   highlightPrevious(): Promise<ISearchMatch> {
     console.log('codemirror search provider: highlightPrevious');
-    const cursorMatch = Private.findNext(this._cm, true);
+    const cursorMatch = Private.findNext(
+      this._cm,
+      true,
+      this._query.ignoreCase
+    );
     if (!cursorMatch) {
       return Promise.resolve(null);
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    console.log('next match: ', match);
     return Promise.resolve(match);
   }
 
@@ -77,12 +70,10 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   get matches(): ISearchMatch[] {
-    console.log('codemirror search provider: matches');
     return Private.parseMatchesFromState(this._matchState);
   }
 
   get currentMatchIndex(): number {
-    console.log('codemirror search provider: currentMatchIndex');
     return this._matchIndex;
   }
 
@@ -90,12 +81,13 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return null;
   }
 
+  private _query: RegExp;
   private _cm: CodeMirrorEditor;
   private _matchIndex: number;
   private _matchState: MatchMap = {};
 }
 
-class SearchState {
+export class SearchState {
   public posFrom: number;
   public posTo: number;
   public lastQuery: string;
@@ -110,18 +102,21 @@ namespace Private {
 
   export function findNext(
     cm: CodeMirrorEditor,
-    reverse: boolean
+    reverse: boolean,
+    caseSensitive: boolean
   ): ICodeMirrorMatch {
     return cm.operation(() => {
       const state = getSearchState(cm);
       const position = reverse ? state.posFrom : state.posTo;
+      console.log('search cursor query: ', state.query);
       const cursor: CodeMirror.SearchCursor = cm.getSearchCursor(
         state.query,
-        position
+        position,
+        !caseSensitive // replace with case sensitive flag (true = insensitive here)
       );
-      console.log('filter: creating cursor from position: ', position);
       if (!cursor.find(reverse)) {
-        console.log('------ nothing found');
+        console.log('no match found, setting cursor position to: ', position);
+        cm.setCursorPosition(position);
         return null;
       }
       const fromPos: CodeMirror.Position = cursor.from();
@@ -161,37 +156,26 @@ namespace Private {
     return cm.state.search;
   }
 
-  export function searchOverlay(
-    queryIn: string | RegExp,
-    caseInsensitive: boolean,
-    matchState: MatchMap
-  ) {
-    let query: RegExp;
-    if (typeof queryIn === 'string') {
-      query = new RegExp(
-        (queryIn as string).replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&'),
-        caseInsensitive ? 'gi' : 'g'
-      );
-    } else {
-      let queryInReg: RegExp = queryIn as RegExp;
-      if (!queryInReg.global) {
-        query = new RegExp(
-          queryInReg.source,
-          queryInReg.ignoreCase ? 'gi' : 'g'
-        );
-      }
-      query = queryInReg;
-    }
-
+  export function searchOverlay(query: RegExp, matchState: MatchMap) {
     return {
+      /**
+       * Token function is called when a line needs to be processed -
+       * when the overlay is intially created, it's called on all lines;
+       * when a line is modified and needs to be re-evaluated, it's called
+       * on just that line.
+       *
+       * This implementation of the token function both constructs/maintains
+       * the overlay and keeps track of the match state as the document is
+       * updated while a search is active.
+       */
       token: (stream: CodeMirror.StringStream) => {
-        // console.log('stream: ', stream);
         const currentPos = stream.pos;
         query.lastIndex = currentPos;
         const lineText = stream.string;
         const match = query.exec(lineText);
         const line = (stream as any).lineOracle.line;
-        // if starting at position 0, blow away everything on this line in the state
+        // If starting at position 0, the tokenization of this line has just started.
+        // Blow away everything on this line in the state so it can be updated.
         if (
           stream.start === currentPos &&
           currentPos === 0 &&
@@ -243,53 +227,21 @@ namespace Private {
     }
   }
 
-  export function parseString(str: string) {
-    return str.replace(/\\(.)/g, (_, ch) => {
-      if (ch === 'n') {
-        return '\n';
-      }
-      if (ch === 'r') {
-        return '\r';
-      }
-      return ch;
-    });
-  }
-
-  export function parseQuery(query: string | RegExp) {
-    const isRE = (query as string).match(/^\/(.*)\/([a-z]*)$/);
-    let ret: string | RegExp;
-    if (isRE) {
-      try {
-        ret = new RegExp(isRE[1], isRE[2].indexOf('i') === -1 ? '' : 'i');
-        // tslint:disable-next-line:no-empty
-      } catch (e) {} // Not a regular expression after all, do a string search
-    } else {
-      ret = parseString(query as string);
-    }
-    if (typeof query === 'string' ? query === '' : query.test('')) {
-      ret = /x^/;
-    }
-    return ret;
-  }
-
-  export function queryCaseInsensitive(query: string | RegExp) {
-    return typeof query === 'string' && query === query.toLowerCase();
-  }
-
   export function parseMatchesFromState(state: MatchMap): ISearchMatch[] {
     let index = 0;
+    // Flatten state map and update the index of each match
     const matches: ISearchMatch[] = Object.keys(state).reduce(
-      (acc: ISearchMatch[], lineNumber: string) => {
-        const lineKey: number = parseInt(lineNumber, 10); // ugh
+      (result: ISearchMatch[], lineNumber: string) => {
+        const lineKey = parseInt(lineNumber, 10);
         const lineMatches: { [key: number]: ISearchMatch } = state[lineKey];
         Object.keys(lineMatches).forEach((pos: string) => {
-          const posKey: number = parseInt(pos, 10);
+          const posKey = parseInt(pos, 10);
           const match: ISearchMatch = lineMatches[posKey];
           match.index = index;
           index += 1;
-          acc.push(match);
+          result.push(match);
         });
-        return acc;
+        return result;
       },
       []
     );

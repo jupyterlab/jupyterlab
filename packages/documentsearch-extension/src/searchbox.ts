@@ -3,7 +3,6 @@ import { Widget } from '@phosphor/widgets';
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-import { ISearchOptions } from '.';
 
 const DOCUMENT_SEARCH_CLASS = 'jp-DocumentSearch';
 const SEARCHBOX_CLASS = 'jp-DocumentSearch-searchbox';
@@ -15,6 +14,10 @@ export class SearchBox extends Widget {
     super({ node: Private.createNode(globalBtns) });
     this._nextBtn = globalBtns.next;
     this._prevBtn = globalBtns.prev;
+    this._trackerLabel = globalBtns.trackerLabel;
+    this._caseSensitive = globalBtns.caseSensitive;
+    this._regex = globalBtns.regex;
+
     this.id = 'search-box';
     this.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
     this.title.caption = 'Search document';
@@ -25,7 +28,7 @@ export class SearchBox extends Widget {
     return this.node.getElementsByClassName(INPUT_CLASS)[0] as HTMLInputElement;
   }
 
-  get startSearch(): ISignal<this, ISearchOptions> {
+  get startSearch(): ISignal<this, RegExp> {
     return this._startSearch;
   }
 
@@ -41,8 +44,17 @@ export class SearchBox extends Widget {
     return this._highlightPrevious;
   }
 
+  set totalMatches(num: number) {
+    this._totalMatches = num;
+    this.updateTracker();
+  }
+
+  set currentIndex(num: number) {
+    this._currentIndex = num;
+    this.updateTracker();
+  }
+
   handleEvent(event: Event): void {
-    console.log('event: ', event);
     if (event.type === 'keydown') {
       this._handleKeyDown(event as KeyboardEvent);
     }
@@ -63,61 +75,86 @@ export class SearchBox extends Widget {
     this.node.removeEventListener('keydown', this);
   }
 
+  private updateTracker(): void {
+    if (this._currentIndex === 0 && this._totalMatches === 0) {
+      this._trackerLabel.innerHTML = 'No results';
+      return;
+    }
+    this._trackerLabel.innerHTML = `${this._currentIndex + 1}/${
+      this._totalMatches
+    }`;
+  }
+
   private _handleKeyDown(event: KeyboardEvent): void {
     if (event.keyCode === 13) {
       // execute search!
-      const searchTerm = this.inputNode.value;
-      if (searchTerm.length === 0) {
+      const query: RegExp = this.getCurrentQuery();
+      if (query.source.length === 0) {
         return;
       }
-      console.log(
-        'received enter keydown, execute search on searchTerm: ',
-        searchTerm
-      );
-      const options: ISearchOptions = {
-        query: searchTerm,
-        caseSensitive: false,
-        regex: false
-      };
+      console.log('received enter keydown, execute search on query: ', query);
 
-      if (this.optionsEqual(this._lastOptions, options)) {
+      if (this.regexEqual(this._lastQuery, query)) {
         this._highlightNext.emit(undefined);
         return;
       }
 
-      this._lastOptions = options;
-      this._startSearch.emit(options);
+      this._lastQuery = query;
+      this._startSearch.emit(query);
     }
   }
 
   private _handleClick(event: MouseEvent) {
     console.log('click event!');
+    const query = this.getCurrentQuery();
+    if (!this.regexEqual(this._lastQuery, query)) {
+      if (query.source.length === 0) {
+        return;
+      }
+      this._lastQuery = query;
+      this._startSearch.emit(query);
+      return;
+    }
     if (event.target === this._nextBtn) {
-      console.log('it was the next');
       this._highlightNext.emit(undefined);
     } else if (event.target === this._prevBtn) {
       this._highlightPrevious.emit(undefined);
     }
   }
 
-  private optionsEqual(a: ISearchOptions, b: ISearchOptions) {
-    return (
-      !!a &&
-      !!b &&
-      a.query === b.query &&
-      a.caseSensitive === b.caseSensitive &&
-      a.regex === b.regex
+  private getCurrentQuery(): RegExp {
+    return Private.parseQuery(
+      this.inputNode.value,
+      this._caseSensitive.checked,
+      this._regex.checked
     );
   }
 
-  private _startSearch = new Signal<this, ISearchOptions>(this);
+  private regexEqual(a: RegExp, b: RegExp) {
+    if (!a || !b) {
+      return false;
+    }
+    return (
+      a.source === b.source &&
+      a.global === b.global &&
+      a.ignoreCase === b.ignoreCase &&
+      a.multiline === b.multiline
+    );
+  }
+
+  private _startSearch = new Signal<this, RegExp>(this);
   private _endSearch = new Signal<this, void>(this);
   private _highlightNext = new Signal<this, void>(this);
   private _highlightPrevious = new Signal<this, void>(this);
-  private _lastOptions: ISearchOptions;
+  private _lastQuery: RegExp;
+  private _totalMatches: number = 0;
+  private _currentIndex: number = 0;
 
-  public _nextBtn: Element;
-  public _prevBtn: Element;
+  private _nextBtn: Element;
+  private _prevBtn: Element;
+  private _trackerLabel: Element;
+  private _caseSensitive: any;
+  private _regex: any;
 }
 
 namespace Private {
@@ -128,6 +165,11 @@ namespace Private {
     const input = document.createElement('input');
     const next = document.createElement('button');
     const prev = document.createElement('button');
+    const caseSensitive = document.createElement('input');
+    const caseLabel = document.createElement('label');
+    const regex = document.createElement('input');
+    const regexLabel = document.createElement('label');
+    const trackerLabel = document.createElement('p');
     const results = document.createElement('div');
     const dummyText = document.createElement('p');
 
@@ -136,8 +178,16 @@ namespace Private {
     next.textContent = '>';
     prev.textContent = '<';
 
+    caseSensitive.setAttribute('type', 'checkbox');
+    regex.setAttribute('type', 'checkbox');
+    caseLabel.innerHTML = 'case sensitive';
+    regexLabel.innerHTML = 'regex';
+
     context.next = next;
     context.prev = prev;
+    context.trackerLabel = trackerLabel;
+    context.caseSensitive = caseSensitive;
+    context.regex = regex;
 
     search.className = SEARCHBOX_CLASS;
     wrapper.className = WRAPPER_CLASS;
@@ -147,10 +197,50 @@ namespace Private {
     wrapper.appendChild(input);
     wrapper.appendChild(prev);
     wrapper.appendChild(next);
+    wrapper.appendChild(caseSensitive);
+    wrapper.appendChild(caseLabel);
+    wrapper.appendChild(regex);
+    wrapper.appendChild(regexLabel);
+    wrapper.appendChild(trackerLabel);
     results.appendChild(dummyText);
     node.appendChild(search);
     node.appendChild(results);
 
     return node;
+  }
+
+  export function parseString(str: string) {
+    return str.replace(/\\(.)/g, (_, ch) => {
+      if (ch === 'n') {
+        return '\n';
+      }
+      if (ch === 'r') {
+        return '\r';
+      }
+      return ch;
+    });
+  }
+
+  export function parseQuery(
+    queryString: string,
+    caseSensitive: boolean,
+    regex: boolean
+  ) {
+    const flag = caseSensitive ? 'g' : 'gi';
+    const queryText = regex
+      ? queryString
+      : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+    console.log('queryText: ', queryText);
+    let ret;
+    try {
+      ret = new RegExp(queryText, flag);
+    } catch (e) {
+      console.error('invalid regex: ', e);
+    }
+    if (ret.test('')) {
+      ret = /x^/;
+    }
+    console.log('regex produced: ', ret);
+    return ret;
   }
 }

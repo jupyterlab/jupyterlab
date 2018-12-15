@@ -43,22 +43,6 @@ export interface ISearchMatch {
    */
   index: number;
 }
-export interface ISearchOptions {
-  /**
-   * Actual search query entered by user
-   */
-  query: string;
-
-  /**
-   * Should the search be performed in a case-sensitive manner?
-   */
-  caseSensitive: boolean;
-
-  /**
-   * Is the search term to be treated as a regular expression?
-   */
-  regex: boolean;
-}
 
 export interface ISearchProvider {
   /**
@@ -69,10 +53,7 @@ export interface ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startSearch(
-    options: ISearchOptions,
-    searchTarget: any
-  ): Promise<ISearchMatch[]>;
+  startSearch(query: RegExp, searchTarget: any): Promise<ISearchMatch[]>;
 
   /**
    * Resets UI state, removes all matches.
@@ -132,12 +113,31 @@ const extension: JupyterLabPlugin<void> = {
 
     // Default to just searching on the current widget, could eventually
     // read a flag provided by the search box widget if we want to search something else
-    widget.startSearch.connect((_, searchOptions) =>
-      executor.startSearch(searchOptions)
-    );
-    widget.endSearch.connect(_ => executor.endSearch());
-    widget.highlightNext.connect(_ => executor.highlightNext());
-    widget.highlightPrevious.connect(_ => executor.highlightPrevious());
+    widget.startSearch.connect((_, searchOptions) => {
+      executor.startSearch(searchOptions).then((matches: ISearchMatch[]) => {
+        console.log('matches from executor: ', matches);
+        widget.totalMatches = executor.matches.length;
+        widget.currentIndex = executor.currentMatchIndex;
+      });
+    });
+    widget.endSearch.connect(_ => {
+      executor.endSearch().then(() => {
+        widget.totalMatches = 0;
+        widget.currentIndex = 0;
+      });
+    });
+    widget.highlightNext.connect(_ => {
+      executor.highlightNext().then(() => {
+        widget.totalMatches = executor.matches.length;
+        widget.currentIndex = executor.currentMatchIndex;
+      });
+    });
+    widget.highlightPrevious.connect(_ => {
+      executor.highlightPrevious().then(() => {
+        widget.totalMatches = executor.matches.length;
+        widget.currentIndex = executor.currentMatchIndex;
+      });
+    });
 
     const command: string = 'document:search';
     app.commands.addCommand(command, {

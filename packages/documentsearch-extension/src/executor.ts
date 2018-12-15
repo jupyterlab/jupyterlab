@@ -1,6 +1,6 @@
 import { SearchProviderRegistry } from './searchproviderregistry';
 
-import { ISearchOptions, ISearchMatch, ISearchProvider } from './index';
+import { ISearchMatch, ISearchProvider } from './index';
 import { Widget } from '@phosphor/widgets';
 import { ApplicationShell } from '@jupyterlab/application';
 
@@ -9,7 +9,7 @@ export class Executor {
     this._registry = registry;
     this._shell = shell;
   }
-  startSearch(options: ISearchOptions): Promise<ISearchMatch[]> {
+  startSearch(options: RegExp): Promise<ISearchMatch[]> {
     // TODO: figure out where to check if the options have changed
     // to know how to respond to an 'enter' keypress (new search or next search)
     let cleanupPromise = Promise.resolve();
@@ -52,6 +52,14 @@ export class Executor {
 
   highlightPrevious(): Promise<ISearchMatch> {
     return this._activeProvider.highlightPrevious();
+  }
+
+  get currentMatchIndex(): number {
+    return this._activeProvider.currentMatchIndex;
+  }
+
+  get matches(): ISearchMatch[] {
+    return this._activeProvider.matches;
   }
 
   private _registry: SearchProviderRegistry;

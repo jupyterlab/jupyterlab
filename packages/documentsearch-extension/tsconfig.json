@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
     },
     {
@@ -20,9 +23,6 @@
     },
     {
       "path": "../notebook"
-    },
-    {
-      "path": "../cells"
     }
   ]
 }
