@@ -378,6 +378,12 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     event.preventDefault();
     props.onClick();
   };
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const { key } = event;
+    if (key === 'Enter' || key === ' ') {
+      props.onClick();
+    }
+  };
 
   return (
     <button
@@ -388,6 +394,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       }
       disabled={props.enabled === false}
       onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
     >
       {props.iconClassName && (
