@@ -649,7 +649,7 @@ namespace Private {
       let headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         let header = headers[i];
-        header.id = encodeURIComponent(header.innerHTML.replace(/ /g, '-'));
+        header.id = header.textContent.replace(/ /g, '-');
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
