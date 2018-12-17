@@ -3,8 +3,6 @@
 
 import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
 
-import { IDisposable } from '@phosphor/disposable';
-
 /**
  * A class that manages inspector widget instances and offers persistent
  * `IInspector` instance that other plugins can communicate with.
@@ -54,20 +52,6 @@ export class InspectorManager implements IInspector {
         this
       );
     }
-  }
-
-  /**
-   * Create an inspector child item and return a disposable to remove it.
-   *
-   * @param item - The inspector child item being added to the inspector.
-   *
-   * @returns A disposable that removes the child item from the inspector.
-   */
-  add(item: IInspector.IInspectorItem): IDisposable {
-    if (!this._inspector) {
-      throw new Error('Cannot add child item before creating an inspector.');
-    }
-    return this._inspector.add(item);
   }
 
   /**

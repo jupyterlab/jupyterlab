@@ -74,11 +74,6 @@ const inspector: JupyterLabPlugin<IInspector> = {
       let widget = new MainAreaWidget({ content: inspector });
       tracker.add(widget);
 
-      // Add the default inspector child items.
-      Private.defaultInspectorItems.forEach(item => {
-        inspector.add(item);
-      });
-
       return inspector;
     }
 
@@ -233,20 +228,3 @@ const notebooks: JupyterLabPlugin<void> = {
  */
 const plugins: JupyterLabPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * The default set of inspector items added to the inspector panel.
-   */
-  export const defaultInspectorItems: IInspector.IInspectorItem[] = [
-    {
-      className: 'jp-HintsInspectorItem',
-      name: 'Hints',
-      rank: 20,
-      type: 'hints'
-    }
-  ];
-}

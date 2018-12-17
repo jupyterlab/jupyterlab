@@ -24,7 +24,7 @@ class TestInspectorPanel extends InspectorPanel {
 class TestInspectable implements IInspector.IInspectable {
   disposed = new Signal<this, void>(this);
 
-  ephemeralCleared = new Signal<this, void>(this);
+  cleared = new Signal<this, void>(this);
 
   inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
 

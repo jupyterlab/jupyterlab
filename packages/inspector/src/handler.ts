@@ -28,17 +28,17 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   }
 
   /**
+   * A signal emitted when the inspector should clear all items.
+   */
+  get cleared(): ISignal<InspectionHandler, void> {
+    return this.cleared;
+  }
+
+  /**
    * A signal emitted when the handler is disposed.
    */
   get disposed(): ISignal<InspectionHandler, void> {
     return this._disposed;
-  }
-
-  /**
-   * A signal emitted when inspector should clear all items with no history.
-   */
-  get ephemeralCleared(): ISignal<InspectionHandler, void> {
-    return this._ephemeralCleared;
   }
 
   /**
@@ -64,8 +64,8 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
     let editor = (this._editor = newValue);
     if (editor) {
-      // Clear ephemeral inspectors in preparation for a new editor.
-      this._ephemeralCleared.emit(void 0);
+      // Clear the inspector in preparation for a new editor.
+      this._cleared.emit(void 0);
       editor.model.value.changed.connect(
         this.onTextChanged,
         this
@@ -165,6 +165,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       });
   }
 
+  private _cleared = new Signal<InspectionHandler, void>(this);
   private _connector: IDataConnector<
     InspectionHandler.IReply,
     void,
@@ -172,7 +173,6 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   >;
   private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor | null = null;
-  private _ephemeralCleared = new Signal<InspectionHandler, void>(this);
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _isDisposed = false;
   private _pending = 0;
