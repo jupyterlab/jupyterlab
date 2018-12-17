@@ -1,0 +1,49 @@
+{
+  "name": "@jupyterlab/markedparser",
+  "version": "2.0.0-alpha.1",
+  "description": "A Marked based Markdown parser provider for JupyterLab",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/*.css"
+  ],
+  "sideEffects": [
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/codemirror": "^2.0.0-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.1",
+    "marked": "0.6.2"
+  },
+  "devDependencies": {
+    "@types/marked": "^0.6.5",
+    "rimraf": "~2.6.2",
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

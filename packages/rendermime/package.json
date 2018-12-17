@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
-    "@jupyterlab/codemirror": "^2.0.0-alpha.4",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
+    "@jupyterlab/markedparser": "^2.0.0-alpha.1",
     "@jupyterlab/observables": "^3.0.0-alpha.4",
     "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
@@ -51,7 +51,6 @@
   },
   "devDependencies": {
     "@types/lodash.escape": "^4.0.6",
-    "@types/marked": "^0.6.5",
     "rimraf": "~2.6.2",
     "typedoc": "^0.15.2",
     "typescript": "~3.7.2"
