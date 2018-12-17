@@ -164,11 +164,8 @@ function List<M>(props: SessionProps<M>) {
     return render(initialModels);
   }
   return (
-    <UseSignal
-      signal={props.manager.runningChanged}
-      initial={[null, initialModels]}
-    >
-      {(_, models) => render(models)}
+    <UseSignal signal={props.manager.runningChanged} args={initialModels}>
+      {(sender: any, args: Array<M>) => render(args)}
     </UseSignal>
   );
 }

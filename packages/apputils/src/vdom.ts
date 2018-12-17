@@ -164,16 +164,33 @@ export class ReactElementWidget extends ReactWidget {
  * Props for the UseSignal component
  */
 export interface IUseSignalProps<SENDER, ARGS> {
-  // Phosphor signal to connect to
+  /**
+   * Phosphor signal to connect to.
+   */
+
   signal: ISignal<SENDER, ARGS>;
-  // Initial values to use for the sender and args, before the signal emits a value.
-  // If not provided, will defaul to [null, null]
-  initial?: [SENDER, ARGS];
-  // Function mapping the last signal value to a react element to render
-  children: (sender: SENDER, args: ARGS) => JSX.Element;
-  // Given the last signal value, should return whether to update the state or not.
-  // The default unconditionally returns `true`, so you only have to override if you want
-  // to skip some updates.
+  /**
+   * Initial value to use for the sender, used before the signal emits a value.
+   * If not provided, initial sender will be undefined
+   */
+  sender?: SENDER;
+  /**
+   * Initial value to use for the args, used before the signal emits a value.
+   * If not provided, initial args will be undefined.
+   */
+  args?: ARGS;
+  /**
+   * Function mapping the last signal value or inital values to an element to render.
+   */
+
+  children: (sender?: SENDER, args?: ARGS) => JSX.Element;
+  /**
+   * Given the last signal value, should return whether to update the state or not.
+   *
+   * The default unconditionally returns `true`, so you only have to override if you want
+   * to skip some updates.
+   */
+
   shouldUpdate?: (sender: SENDER, args: ARGS) => boolean;
 }
 
@@ -199,7 +216,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  * ```
  * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
  *  return (
- *    <UseSignal signal={isActiveSignal} initial={[None, True]}>
+ *    <UseSignal signal={isActiveSignal} initialArgs={True}>
  *     {(_, isActive) => <Button isActive={isActive}>}
  *    </UseSignal>
  *  )
@@ -213,7 +230,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  *  return (
  *    <UseSignal
  *      signal={isActiveSignal}
- *      initial={[None, True]}
+ *      initialArgs={True}
  *      children={(_, isActive) => <Button isActive={isActive}>}
  *    />
  *  )
@@ -225,7 +242,7 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
 > {
   constructor(props: IUseSignalProps<SENDER, ARGS>) {
     super(props);
-    this.state = { value: this.props.initial || [null, null] };
+    this.state = { value: [this.props.sender, this.props.args] };
   }
 
   componentDidMount() {

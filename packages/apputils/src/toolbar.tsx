@@ -448,7 +448,6 @@ export function CommandToolbarButtonComponent(
   return (
     <UseSignal
       signal={props.commands.commandChanged}
-      initial={[null, null]}
       shouldUpdate={(sender, args) =>
         (args.id === props.id && args.type === 'changed') ||
         args.type === 'many-changed'
@@ -554,10 +553,7 @@ namespace Private {
 
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
     return (
-      <UseSignal
-        signal={props.session.kernelChanged}
-        initial={[props.session, null]}
-      >
+      <UseSignal signal={props.session.kernelChanged} sender={props.session}>
         {session => (
           <ToolbarButtonComponent
             className={TOOLBAR_KERNEL_NAME_CLASS}
