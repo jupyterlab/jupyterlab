@@ -52,11 +52,27 @@ const inspector: JupyterLabPlugin<IInspector> = {
     const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
-    const widget = new MainAreaWidget({ content: new InspectorPanel() });
 
-    widget.id = 'jp-inspector';
-    widget.title.label = 'Inspector';
-    tracker.add(widget);
+    let source: IInspector.IInspectable | null = null;
+    let inspector: MainAreaWidget<InspectorPanel>;
+    function createInspector(): MainAreaWidget<InspectorPanel> {
+      if (!inspector || inspector.isDisposed) {
+        inspector = new MainAreaWidget({ content: new InspectorPanel() });
+        inspector.content.source = source;
+        inspector.id = 'jp-inspector';
+        inspector.title.label = 'Inspector';
+        tracker.add(inspector);
+      }
+      if (!inspector.isAttached) {
+        shell.addToMainArea(inspector, { activate: false });
+      }
+      shell.activateById(inspector.id);
+      return inspector;
+    }
+
+    // Add command to registry and palette.
+    commands.addCommand(command, { label, execute: () => createInspector() });
+    palette.addItem({ command, category });
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -65,19 +81,17 @@ const inspector: JupyterLabPlugin<IInspector> = {
       name: () => 'inspector'
     });
 
-    // Add command to registry and palette.
-    commands.addCommand(command, {
-      label,
-      execute: () => {
-        if (!widget.isAttached) {
-          shell.addToMainArea(widget, { activate: false });
+    // Make `source` accessible via a getter to proxy the current inspector.
+    return Object.defineProperty({}, 'source', {
+      get: () =>
+        !inspector || inspector.isDisposed ? null : inspector.content.source,
+      set: src => {
+        source = src;
+        if (!inspector.isDisposed) {
+          inspector.content.source = source;
         }
-        shell.activateById(widget.id);
       }
     });
-    palette.addItem({ command, category });
-
-    return widget.content;
   }
 };
 
