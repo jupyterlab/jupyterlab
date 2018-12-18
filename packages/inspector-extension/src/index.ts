@@ -24,8 +24,6 @@ import {
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { InspectorManager } from './manager';
-
 /**
  * The command IDs used by the inspector plugin.
  */
@@ -47,7 +45,6 @@ const inspector: JupyterLabPlugin<IInspector> = {
     restorer: ILayoutRestorer
   ): IInspector => {
     const { commands, shell } = app;
-    const manager = new InspectorManager();
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
@@ -55,27 +52,11 @@ const inspector: JupyterLabPlugin<IInspector> = {
     const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
+    const widget = new MainAreaWidget({ content: new InspectorPanel() });
 
-    /**
-     * Create and track a new inspector.
-     */
-    function newInspectorPanel(): InspectorPanel {
-      const inspector = new InspectorPanel();
-
-      inspector.id = 'jp-inspector';
-      inspector.title.label = 'Inspector';
-      inspector.disposed.connect(() => {
-        if (manager.inspector === inspector) {
-          manager.inspector = null;
-        }
-      });
-
-      // Track the inspector.
-      let widget = new MainAreaWidget({ content: inspector });
-      tracker.add(widget);
-
-      return inspector;
-    }
+    widget.id = 'jp-inspector';
+    widget.title.label = 'Inspector';
+    tracker.add(widget);
 
     // Handle state restoration.
     restorer.restore(tracker, {
@@ -88,18 +69,15 @@ const inspector: JupyterLabPlugin<IInspector> = {
     commands.addCommand(command, {
       label,
       execute: () => {
-        if (!manager.inspector || manager.inspector.isDisposed) {
-          manager.inspector = newInspectorPanel();
+        if (!widget.isAttached) {
+          shell.addToMainArea(widget, { activate: false });
         }
-        if (!manager.inspector.isAttached) {
-          shell.addToMainArea(manager.inspector.parent, { activate: false });
-        }
-        shell.activateById(manager.inspector.parent.id);
+        shell.activateById(widget.id);
       }
     });
     palette.addItem({ command, category });
 
-    return manager;
+    return widget.content;
   }
 };
 
