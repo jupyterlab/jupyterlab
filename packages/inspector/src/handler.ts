@@ -31,7 +31,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * A signal emitted when the inspector should clear all items.
    */
   get cleared(): ISignal<InspectionHandler, void> {
-    return this.cleared;
+    return this._cleared;
   }
 
   /**

@@ -34,12 +34,7 @@ export function createInspector(
       })
   });
 
-  inspector.add({
-    className: 'jp-SettingsDebug',
-    name: 'Debug',
-    rank: 0,
-    type: 'hints'
-  });
+  inspector.addClass('jp-SettingsDebug');
   inspector.source = handler;
   handler.editor = editor.source;
 
