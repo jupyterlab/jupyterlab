@@ -55,7 +55,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
 
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function createInspector(): MainAreaWidget<InspectorPanel> {
+    function createInspector(): void {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.content.source = source;
@@ -67,11 +67,15 @@ const inspector: JupyterLabPlugin<IInspector> = {
         shell.addToMainArea(inspector, { activate: false });
       }
       shell.activateById(inspector.id);
-      return inspector;
     }
 
     // Add command to registry and palette.
-    commands.addCommand(command, { label, execute: () => createInspector() });
+    commands.addCommand(command, {
+      label,
+      execute: () => {
+        createInspector();
+      }
+    });
     palette.addItem({ command, category });
 
     // Handle state restoration.
