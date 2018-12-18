@@ -45,19 +45,24 @@ export namespace IInspector {
    */
   export interface IInspectable {
     /**
-     * A signal emitted when the handler is disposed.
-     */
-    disposed: ISignal<any, void>;
-
-    /**
      * A signal emitted when the inspector should clear all items.
      */
     cleared: ISignal<any, void>;
 
     /**
+     * A signal emitted when the inspectable is disposed.
+     */
+    disposed: ISignal<any, void>;
+
+    /**
      * A signal emitted when an inspector value is generated.
      */
     inspected: ISignal<any, IInspectorUpdate>;
+
+    /**
+     * Test whether the inspectable has been disposed.
+     */
+    isDisposed: boolean;
 
     /**
      * Indicates whether the inspectable source emits signals.
@@ -113,6 +118,11 @@ export class InspectorPanel extends Panel implements IInspector {
       this._source.standby = true;
       this._source.inspected.disconnect(this.onInspectorUpdate, this);
       this._source.disposed.disconnect(this.onSourceDisposed, this);
+    }
+
+    // Reject a source that is already disposed.
+    if (source && source.isDisposed) {
+      source = null;
     }
 
     // Update source.

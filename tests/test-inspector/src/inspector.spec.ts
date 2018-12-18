@@ -28,6 +28,8 @@ class TestInspectable implements IInspector.IInspectable {
 
   inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
 
+  isDisposed = false;
+
   standby = false;
 }
 

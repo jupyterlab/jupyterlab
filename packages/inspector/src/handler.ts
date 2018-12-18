@@ -5,13 +5,13 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
+import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
+
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IInspector } from './inspector';
 
