@@ -43,21 +43,6 @@ describe('inspector/index', () => {
         const widget = new InspectorPanel();
         expect(widget.hasClass('jp-Inspector')).to.equal(true);
       });
-
-      it('should hide its tab bar if there are less than two items', () => {
-        const widget = new InspectorPanel();
-        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
-        expect(widget).to.be.an.instanceof(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.equal(true);
-      });
-
-      it('should show its tab bar if there is more than one item', () => {
-        const widget = new InspectorPanel();
-        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
-        widget.add({ name: 'Boo', rank: 30, type: 'bar' });
-        expect(widget).to.be.an.instanceof(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.equal(false);
-      });
     });
 
     describe('#source', () => {
@@ -76,28 +61,6 @@ describe('inspector/index', () => {
         expect(widget.source).to.be.null;
         widget.source = new TestInspectable();
         expect(widget.source).to.be.an.instanceof(TestInspectable);
-      });
-    });
-
-    describe('#add()', () => {
-      it('should add inspector child items', () => {
-        const panel = new InspectorPanel();
-        const original = panel.widgets.length;
-
-        panel.add({ name: 'Foo', rank: 20, type: 'foo' });
-        panel.add({ name: 'Boo', rank: 30, type: 'bar' });
-
-        expect(panel.widgets.length).to.equal(original + 2);
-      });
-
-      it('should return disposables to remove child items', () => {
-        const panel = new InspectorPanel();
-        const original = panel.widgets.length;
-        const disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
-
-        expect(panel.widgets.length).to.equal(original + 1);
-        disposable.dispose();
-        expect(panel.widgets.length).to.equal(original);
       });
     });
 
