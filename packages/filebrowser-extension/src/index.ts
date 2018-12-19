@@ -15,7 +15,13 @@ import {
   ToolbarButton
 } from '@jupyterlab/apputils';
 
-import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import {
+  IStateDB,
+  PageConfig,
+  PathExt,
+  URLExt,
+  ISettingRegistry
+} from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -94,7 +100,12 @@ namespace CommandIDs {
 const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
-  requires: [IFileBrowserFactory, ILayoutRestorer],
+  requires: [
+    IFileBrowserFactory,
+    ILayoutRestorer,
+    IDocumentManager,
+    ISettingRegistry
+  ],
   autoStart: true
 };
 
@@ -223,7 +234,9 @@ function activateFactory(
 function activateBrowser(
   app: JupyterLab,
   factory: IFileBrowserFactory,
-  restorer: ILayoutRestorer
+  restorer: ILayoutRestorer,
+  docManager: IDocumentManager,
+  settingRegistry: ISettingRegistry
 ): void {
   const browser = factory.defaultBrowser;
   const { commands, shell } = app;
@@ -261,6 +274,33 @@ function activateBrowser(
     shell.layoutModified.connect(() => {
       maybeCreate();
     });
+
+    let navigateToCurrentDirectory: boolean = false;
+
+    settingRegistry
+      .load('@jupyterlab/filebrowser-extension:browser')
+      .then(settings => {
+        settings.changed.connect(settings => {
+          navigateToCurrentDirectory = settings.get(
+            'navigateToCurrentDirectory'
+          ).composite as boolean;
+        });
+        navigateToCurrentDirectory = settings.get('navigateToCurrentDirectory')
+          .composite as boolean;
+      });
+
+    // Whether to automatically navigate to a document's current directory
+    shell.currentChanged.connect((shell, change) => {
+      if (navigateToCurrentDirectory) {
+        const { newValue } = change;
+        const context = docManager.contextForWidget(newValue);
+        if (context) {
+          commands.execute('filebrowser:activate', { path: context.path });
+          commands.execute('filebrowser:navigate', { path: context.path });
+        }
+      }
+    });
+
     maybeCreate();
   });
 }
