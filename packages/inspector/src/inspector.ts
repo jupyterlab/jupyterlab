@@ -82,11 +82,6 @@ export namespace IInspector {
      * The content being sent to the inspector for display.
      */
     content: Widget | null;
-
-    /**
-     * The type of the inspector being updated.
-     */
-    type: string;
   }
 }
 

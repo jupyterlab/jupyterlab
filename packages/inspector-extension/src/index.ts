@@ -91,7 +91,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
         !inspector || inspector.isDisposed ? null : inspector.content.source,
       set: src => {
         source = src;
-        if (!inspector.isDisposed) {
+        if (inspector && !inspector.isDisposed) {
           inspector.content.source = source;
         }
       }

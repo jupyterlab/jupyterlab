@@ -88,10 +88,7 @@ describe('inspector/index', () => {
         const widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
         expect(widget.methods).to.not.contain('onInspectorUpdate');
-        (widget.source.inspected as any).emit({
-          content: new Widget(),
-          type: 'hints'
-        });
+        (widget.source.inspected as any).emit({ content: new Widget() });
         expect(widget.methods).to.contain('onInspectorUpdate');
       });
     });

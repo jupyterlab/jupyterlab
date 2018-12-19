@@ -130,10 +130,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     const text = editor.model.value.text;
     const position = editor.getCursorPosition();
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
-    const update: IInspector.IInspectorUpdate = {
-      content: null,
-      type: 'hints'
-    };
+    const update: IInspector.IInspectorUpdate = { content: null };
 
     const pending = ++this._pending;
 
