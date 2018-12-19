@@ -111,6 +111,28 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
 
 JupyterLabPlugin.prototype._first = true;
 
+const plugins = [
+  new DuplicatePackageCheckerPlugin({
+    verbose: true,
+    exclude(instance) {
+      // ignore known duplicates
+      return ['domelementtype', 'hash-base', 'inherits'].includes(
+        instance.name
+      );
+    }
+  }),
+  new HtmlWebpackPlugin({
+    template: path.join('templates', 'template.html'),
+    title: jlab.name || 'JupyterLab'
+  }),
+  new webpack.HashedModuleIdsPlugin(),
+  new JupyterLabPlugin({})
+];
+
+if (process.argv.includes('--analyze')) {
+  plugins.push(new Visualizer());
+}
+
 module.exports = [
   {
     mode: 'development',
@@ -207,24 +229,7 @@ module.exports = [
     bail: true,
     devtool: 'source-map',
     externals: ['node-fetch', 'ws'],
-    plugins: [
-      new DuplicatePackageCheckerPlugin({
-        verbose: true,
-        exclude(instance) {
-          // ignore known duplicates
-          return ['domelementtype', 'hash-base', 'inherits'].includes(
-            instance.name
-          );
-        }
-      }),
-      new HtmlWebpackPlugin({
-        template: path.join('templates', 'template.html'),
-        title: jlab.name || 'JupyterLab'
-      }),
-      new webpack.HashedModuleIdsPlugin(),
-      new JupyterLabPlugin({}),
-      new Visualizer()
-    ],
+    plugins,
     stats: {
       chunkModules: true
     }
