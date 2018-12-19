@@ -69,7 +69,7 @@ export namespace IInspector {
      *
      * #### Notes
      * The use case for this attribute is to limit the API traffic when no
-     * inspector is visible.
+     * inspector is visible. It can be modified by the consumer of the source.
      */
     standby: boolean;
   }
