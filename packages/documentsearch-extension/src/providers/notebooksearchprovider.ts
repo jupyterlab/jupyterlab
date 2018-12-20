@@ -2,10 +2,7 @@
 
 import { ISearchProvider, ISearchMatch } from '../index';
 
-import {
-  CodeMirrorSearchProvider,
-  SearchState
-} from './codemirrorsearchprovider';
+import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
 
 import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
 
@@ -26,17 +23,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     searchTarget: NotebookPanel
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
-    console.log(
-      'notebook provider: startSearch on query, target: ',
-      query,
-      ', ',
-      this._searchTarget
-    );
-    const cells = this._searchTarget.content.widgets.filter(cell =>
-      Private.isSearchableCell(cell)
-    );
-    console.log('widgets length: ', this._searchTarget.content.widgets.length);
-    console.log('filtered cells length: ', cells.length);
+    const cells = this._searchTarget.content.widgets;
     const activeCell = this._searchTarget.content.activeCell;
     const matchPromises: Promise<ISearchMatch[]>[] = [];
     let indexTotal = 0;
@@ -44,11 +31,32 @@ export class NotebookSearchProvider implements ISearchProvider {
     cells.forEach((cell: Cell) => {
       const cmEditor = cell.editor as CodeMirrorEditor;
       const cmSearchProvider = new CodeMirrorSearchProvider();
+      cmSearchProvider.shouldLoop = false;
+      let reRenderPlease = false;
+      if (cell instanceof MarkdownCell && cell.rendered) {
+        console.log('un-rendering markdown cell temporarily');
+        cell.rendered = false;
+        reRenderPlease = true;
+      }
       matchPromises.push(
         cmSearchProvider
           .startSearch(query, cmEditor)
           .then((matchesFromCell: ISearchMatch[]) => {
             // update the match indices to reflec the whole document index values
+            if (cell instanceof MarkdownCell) {
+              if (matchesFromCell.length !== 0) {
+                console.log(
+                  'found unrendered markdown cell with matches!: ',
+                  cell
+                );
+                console.log('matches from the cell: ', matchesFromCell);
+                // un-render markdown cells with matches
+                this._unRenderedMarkdownCells.push(cell);
+              } else if (reRenderPlease) {
+                console.log('re-rendering markdown cell without matches');
+                cell.rendered = true;
+              }
+            }
             matchesFromCell.forEach(match => {
               match.index = match.index + indexTotal;
             });
@@ -77,6 +85,7 @@ export class NotebookSearchProvider implements ISearchProvider {
 
     // Flatten matches into one array
     return Promise.all(matchPromises).then(matchesFromCells => {
+      console.log('matches from cells: ', matchesFromCells);
       let result: ISearchMatch[] = [];
       matchesFromCells.forEach((cellMatches: ISearchMatch[]) => {
         result.concat(cellMatches);
@@ -86,17 +95,19 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   endSearch(): Promise<void> {
-    console.log('notebook provider: endSearch');
     this._cmSearchProviders.forEach(({ provider }) => {
       provider.endSearch();
     });
     this._cmSearchProviders = [];
+    this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
+      cell.rendered = true;
+    });
+    this._unRenderedMarkdownCells = [];
     this._searchTarget = null;
     return Promise.resolve();
   }
 
   highlightNext(): Promise<ISearchMatch> {
-    console.log('nbsp highlightNext');
     const steps = 0;
     return Private.stepNext(
       this._searchTarget.content,
@@ -110,7 +121,6 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   highlightPrevious(): Promise<ISearchMatch> {
-    console.log('nbsp highlightPrevious');
     const steps = 0;
     return Private.stepNext(
       this._searchTarget.content,
@@ -125,7 +135,7 @@ export class NotebookSearchProvider implements ISearchProvider {
 
   canSearchOn(domain: any): boolean {
     console.log('notebook provider: canSearchOn');
-    return true;
+    return domain instanceof NotebookPanel;
   }
 
   get matches(): ISearchMatch[] {
@@ -141,8 +151,8 @@ export class NotebookSearchProvider implements ISearchProvider {
 
   private _searchTarget: NotebookPanel;
   private _cmSearchProviders: ICellSearchPair[] = [];
-  // private _highlightedIndex: number = 0;
   private _currentMatch: ISearchMatch;
+  private _unRenderedMarkdownCells: MarkdownCell[] = [];
 }
 
 namespace Private {
@@ -183,7 +193,6 @@ namespace Private {
       : provider.highlightNext();
     return nextPromise.then((match: ISearchMatch) => {
       if (!match) {
-        console.log('no more matches in cell, check next cell');
         let nextCellIndex = getNextCellIndex(
           notebook.widgets,
           cellIndex,
@@ -192,14 +201,17 @@ namespace Private {
         notebook.activeCellIndex = nextCellIndex;
         const editor = notebook.activeCell.editor as CodeMirrorEditor;
         // move the cursor of the next cell to the start/end of the cell so it can search
-        const state: any = getSearchState(editor);
-        if (reverse) {
-          state.posFrom = CodeMirror.Pos(editor.lastLine());
-        } else {
-          state.posTo = CodeMirror.Pos(editor.firstLine(), 0);
-        }
+        const newPosCM = reverse
+          ? CodeMirror.Pos(editor.lastLine())
+          : CodeMirror.Pos(editor.firstLine(), 0);
+        const newPos = {
+          line: newPosCM.line,
+          column: newPosCM.ch
+        };
+        editor.setCursorPosition(newPos);
         return stepNext(notebook, cmSearchProviders, steps + 1, reverse);
       }
+
       const allMatches = Private.getMatchesFromCells(cmSearchProviders);
       match.index = allMatches[cellIndex].find(
         (matchTest: ISearchMatch) => match.column === matchTest.column
@@ -215,41 +227,13 @@ namespace Private {
   ): number {
     let nextCellIndex = currentIndex;
     const numCells = cells.length;
-    let invalidCell = true;
-    do {
-      console.log('curr index: ', nextCellIndex);
-      nextCellIndex = reverse ? nextCellIndex - 1 : nextCellIndex + 1;
-      if (nextCellIndex < 0) {
-        nextCellIndex = numCells - 1;
-      }
-      if (nextCellIndex > numCells - 1) {
-        nextCellIndex = 0;
-      }
-      console.log('nextCellIndex: ', nextCellIndex);
-      const nextCell = cells[nextCellIndex];
-      console.log('instanceof: ', nextCell instanceof MarkdownCell);
-      console.log(
-        'instanceof and rendered: ',
-        nextCell instanceof MarkdownCell && (nextCell as MarkdownCell).rendered
-      );
-      console.log('inputhidden: ', nextCell.inputHidden);
-      invalidCell = isSearchableCell(nextCell);
-      console.log('invalid? ', invalidCell);
-    } while (invalidCell);
-    return nextCellIndex;
-  }
-
-  export function isSearchableCell(cell: Cell) {
-    return !(
-      (cell instanceof MarkdownCell && (cell as MarkdownCell).rendered) ||
-      cell.inputHidden
-    );
-  }
-
-  function getSearchState(cm: CodeMirrorEditor) {
-    if (!cm.state.search) {
-      cm.state.search = new SearchState();
+    nextCellIndex = reverse ? nextCellIndex - 1 : nextCellIndex + 1;
+    if (nextCellIndex < 0) {
+      nextCellIndex = numCells - 1;
     }
-    return cm.state.search;
+    if (nextCellIndex > numCells - 1) {
+      nextCellIndex = 0;
+    }
+    return nextCellIndex;
   }
 }

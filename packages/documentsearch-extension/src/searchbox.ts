@@ -92,7 +92,6 @@ export class SearchBox extends Widget {
       if (query.source.length === 0) {
         return;
       }
-      console.log('received enter keydown, execute search on query: ', query);
 
       if (this.regexEqual(this._lastQuery, query)) {
         this._highlightNext.emit(undefined);
@@ -105,7 +104,6 @@ export class SearchBox extends Widget {
   }
 
   private _handleClick(event: MouseEvent) {
-    console.log('click event!');
     const query = this.getCurrentQuery();
     if (!this.regexEqual(this._lastQuery, query)) {
       if (query.source.length === 0) {
@@ -230,7 +228,6 @@ namespace Private {
     const queryText = regex
       ? queryString
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-    console.log('queryText: ', queryText);
     let ret;
     try {
       ret = new RegExp(queryText, flag);
@@ -240,7 +237,6 @@ namespace Private {
     if (ret.test('')) {
       ret = /x^/;
     }
-    console.log('regex produced: ', ret);
     return ret;
   }
 }

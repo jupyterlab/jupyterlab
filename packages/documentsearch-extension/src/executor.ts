@@ -18,7 +18,7 @@ export class Executor {
       cleanupPromise = this._activeProvider.endSearch();
     }
     this._currentWidget = this._shell.currentWidget;
-
+    // I want widget.content.editor for cmsp
     const compatibleProviders = this._registry.providers.filter(p =>
       p.canSearchOn(this._currentWidget)
     );
