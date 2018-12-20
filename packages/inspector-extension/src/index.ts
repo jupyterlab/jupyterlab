@@ -58,10 +58,11 @@ const inspector: JupyterLabPlugin<IInspector> = {
     function createInspector(): void {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
-        inspector.content.source = source;
         inspector.id = 'jp-inspector';
         inspector.title.label = 'Inspector';
         tracker.add(inspector);
+        source = source && !source.isDisposed ? source : null;
+        inspector.content.source = source;
       }
       if (!inspector.isAttached) {
         shell.addToMainArea(inspector, { activate: false });
@@ -85,17 +86,19 @@ const inspector: JupyterLabPlugin<IInspector> = {
       name: () => 'inspector'
     });
 
-    // Make `source` accessible via a getter to proxy the current inspector.
-    return Object.defineProperty({}, 'source', {
-      get: () =>
+    // Create a proxy to pass the `source` to the current inspector.
+    const proxy: IInspector = Object.defineProperty({}, 'source', {
+      get: (): IInspector.IInspectable | null =>
         !inspector || inspector.isDisposed ? null : inspector.content.source,
-      set: src => {
-        source = src;
+      set: (src: IInspector.IInspectable | null) => {
+        source = src && !src.isDisposed ? src : null;
         if (inspector && !inspector.isDisposed) {
           inspector.content.source = source;
         }
       }
     });
+
+    return proxy;
   }
 };
 
