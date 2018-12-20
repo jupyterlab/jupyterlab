@@ -1037,7 +1037,7 @@ function addCommands(
           args['format'] as string,
           notebookPath
         ) + '?download=true';
-      const child = window.open('', '_blank', 'noopener');
+      const child = window.open('', '_blank');
       const { context } = current;
 
       child.opener = null;
