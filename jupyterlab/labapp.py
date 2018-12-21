@@ -231,7 +231,7 @@ class LabWorkspaceImportApp(JupyterApp):
         # name into the workspace metadata.
         if self.workspace_name is not None:
             if self.workspace_name == "":
-                workspace_id = ujoin(base_url, 'lab')
+                workspace_id = ujoin(base_url, page_url)
             else:
                 workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
             workspace['metadata'] = {'id': workspace_id}
