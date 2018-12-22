@@ -34,26 +34,22 @@ export class NotebookSearchProvider implements ISearchProvider {
       cmSearchProvider.shouldLoop = false;
       let reRenderPlease = false;
       if (cell instanceof MarkdownCell && cell.rendered) {
-        console.log('un-rendering markdown cell temporarily');
         cell.rendered = false;
         reRenderPlease = true;
+      }
+      if (cell.inputHidden) {
+        cell.inputHidden = false;
       }
       matchPromises.push(
         cmSearchProvider
           .startSearch(query, cmEditor)
           .then((matchesFromCell: ISearchMatch[]) => {
-            // update the match indices to reflec the whole document index values
+            // update the match indices to reflect the whole document index values
             if (cell instanceof MarkdownCell) {
               if (matchesFromCell.length !== 0) {
-                console.log(
-                  'found unrendered markdown cell with matches!: ',
-                  cell
-                );
-                console.log('matches from the cell: ', matchesFromCell);
                 // un-render markdown cells with matches
                 this._unRenderedMarkdownCells.push(cell);
               } else if (reRenderPlease) {
-                console.log('re-rendering markdown cell without matches');
                 cell.rendered = true;
               }
             }
@@ -85,7 +81,6 @@ export class NotebookSearchProvider implements ISearchProvider {
 
     // Flatten matches into one array
     return Promise.all(matchPromises).then(matchesFromCells => {
-      console.log('matches from cells: ', matchesFromCells);
       let result: ISearchMatch[] = [];
       matchesFromCells.forEach((cellMatches: ISearchMatch[]) => {
         result.concat(cellMatches);
@@ -134,7 +129,6 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   canSearchOn(domain: any): boolean {
-    console.log('notebook provider: canSearchOn');
     return domain instanceof NotebookPanel;
   }
 

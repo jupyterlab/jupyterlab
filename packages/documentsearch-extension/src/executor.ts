@@ -14,7 +14,6 @@ export class Executor {
     // to know how to respond to an 'enter' keypress (new search or next search)
     let cleanupPromise = Promise.resolve();
     if (this._activeProvider) {
-      console.log('we have an active provider already, cleaning up with end');
       cleanupPromise = this._activeProvider.endSearch();
     }
     this._currentWidget = this._shell.currentWidget;

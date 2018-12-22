@@ -92,18 +92,14 @@ export interface ISearchProvider {
   readonly currentMatchIndex: number;
 }
 
-console.log('documentsearch-extension loaded');
-
 /**
  * Initialization data for the document-search extension.
  */
 const extension: JupyterLabPlugin<void> = {
-  id: 'document-search',
+  id: '@jupyterlab/documentsearch:plugin',
   autoStart: true,
   requires: [ICommandPalette],
   activate: (app: JupyterLab, palette: ICommandPalette) => {
-    console.log('JupyterLab extension document-search is activated!');
-
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
     const executor: Executor = new Executor(registry, app.shell);
@@ -111,36 +107,45 @@ const extension: JupyterLabPlugin<void> = {
     // Create widget, attach to signals
     const widget: SearchBox = new SearchBox();
 
-    // Default to just searching on the current widget, could eventually
-    // read a flag provided by the search box widget if we want to search something else
-    widget.startSearch.connect((_, searchOptions) => {
+    const startSearchFn = (_: any, searchOptions: any) => {
       executor.startSearch(searchOptions).then((matches: ISearchMatch[]) => {
-        console.log('matches from executor: ', matches);
         widget.totalMatches = executor.matches.length;
         widget.currentIndex = executor.currentMatchIndex;
       });
-    });
-    widget.endSearch.connect(_ => {
+    };
+
+    const endSearchFn = () => {
       executor.endSearch().then(() => {
         widget.totalMatches = 0;
         widget.currentIndex = 0;
       });
-    });
-    widget.highlightNext.connect(_ => {
+    };
+
+    const highlightNextFn = () => {
       executor.highlightNext().then(() => {
         widget.totalMatches = executor.matches.length;
         widget.currentIndex = executor.currentMatchIndex;
       });
-    });
-    widget.highlightPrevious.connect(_ => {
+    };
+
+    const highlightPreviousFn = () => {
       executor.highlightPrevious().then(() => {
         widget.totalMatches = executor.matches.length;
         widget.currentIndex = executor.currentMatchIndex;
       });
-    });
+    };
 
-    const command: string = 'document:search';
-    app.commands.addCommand(command, {
+    // Default to just searching on the current widget, could eventually
+    // read a flag provided by the search box widget if we want to search something else
+    widget.startSearch.connect(startSearchFn);
+    widget.endSearch.connect(endSearchFn);
+    widget.highlightNext.connect(highlightNextFn);
+    widget.highlightPrevious.connect(highlightPreviousFn);
+
+    const startCommand: string = 'documentsearch:start';
+    const nextCommand: string = 'documentsearch:highlightNext';
+    const prevCommand: string = 'documentsearch:highlightPrevious';
+    app.commands.addCommand(startCommand, {
       label: 'Search the open document',
       execute: () => {
         if (!widget.isAttached) {
@@ -151,8 +156,18 @@ const extension: JupyterLabPlugin<void> = {
       }
     });
 
+    app.commands.addCommand(nextCommand, {
+      label: 'Search the open document',
+      execute: highlightNextFn
+    });
+
+    app.commands.addCommand(prevCommand, {
+      label: 'Search the open document',
+      execute: highlightPreviousFn
+    });
+
     // Add the command to the palette.
-    palette.addItem({ command, category: 'Tutorial' });
+    palette.addItem({ command: startCommand, category: 'Tutorial' });
   }
 };
 

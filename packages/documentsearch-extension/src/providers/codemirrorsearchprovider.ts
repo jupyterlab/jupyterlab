@@ -16,7 +16,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     } else {
       this._cm = domain.content.editor;
     }
-    console.log('this._cm: ', this._cm);
     Private.clearSearch(this._cm);
 
     const state = Private.getSearchState(this._cm);
@@ -65,7 +64,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._matchIndex = match.index;
-    console.log('match: ', match);
     return Promise.resolve(match);
   }
 
@@ -85,10 +83,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   canSearchOn(domain: any): boolean {
-    console.log('codemirror search provider: canSearchOn');
-    console.log('domain: ', domain);
-    console.log('domain.content: ', domain.content);
-    console.log('domain.content.editor: ', domain.content.editor);
     return domain.content && domain.content.editor instanceof CodeMirrorEditor;
   }
 
