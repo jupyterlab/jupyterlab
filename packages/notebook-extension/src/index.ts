@@ -1149,7 +1149,6 @@ function addCommands(
         ) + '?download=true';
       const settings: ServerConnection.ISettings = ServerConnection.makeSettings();
       const { context } = current;
-      console.log(context.path);
 
       try {
         if (context.model.dirty && !context.model.readOnly) {
