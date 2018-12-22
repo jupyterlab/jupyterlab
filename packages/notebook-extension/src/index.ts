@@ -24,6 +24,7 @@ import {
   ISettingRegistry,
   IStateDB,
   PageConfig,
+  PathExt,
   URLExt
 } from '@jupyterlab/coreutils';
 
@@ -65,7 +66,7 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, ServerConnection } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
@@ -1130,7 +1131,7 @@ function addCommands(
 
       return (args['isPalette'] ? 'Export Notebook to ' : '') + formatLabel;
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(args);
 
       if (!current) {
@@ -1138,6 +1139,7 @@ function addCommands(
       }
 
       const notebookPath = URLExt.encodeParts(current.context.path);
+
       const url =
         URLExt.join(
           services.serverSettings.baseUrl,
@@ -1145,18 +1147,45 @@ function addCommands(
           args['format'] as string,
           notebookPath
         ) + '?download=true';
-      const child = window.open('', '_blank');
+      const settings: ServerConnection.ISettings = ServerConnection.makeSettings();
       const { context } = current;
+      console.log(context.path);
 
-      child.opener = null;
-      if (context.model.dirty && !context.model.readOnly) {
-        return context.save().then(() => {
-          child.location.assign(url);
+      try {
+        if (context.model.dirty && !context.model.readOnly) {
+          await context.save();
+        }
+        const response = await ServerConnection.makeRequest(
+          url,
+          { method: 'GET' },
+          settings
+        );
+        const attachmentNameRegex = /attachment; filename\*=utf-8\'\'(.*)/;
+        const filename = attachmentNameRegex.exec(
+          response.headers.get('Content-Disposition')
+        )[1];
+        const fileContent = await response.text();
+        const model = await services.contents.newUntitled({
+          path: PathExt.dirname(context.path),
+          ext: PathExt.extname(filename),
+          type: 'file'
         });
+        await services.contents.save(model.path, {
+          content: fileContent,
+          format: 'text',
+          mimetype: 'text/plain',
+          type: 'file'
+        });
+        // Fails if an exported file with that name already exists
+        await services.contents.rename(
+          model.path,
+          PathExt.join(PathExt.dirname(model.path), filename)
+        );
+      } catch (e) {
+        console.error(`Failed to export file. Error: ${e.message}`);
       }
 
       return new Promise<void>(resolve => {
-        child.location.assign(url);
         resolve(undefined);
       });
     },
