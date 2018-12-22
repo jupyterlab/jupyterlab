@@ -97,7 +97,7 @@ export namespace PageConfig {
           .join('"');
       }
     }
-    return configData![name] || '';
+    return configData![name] || Private.getBodyData(name);
   }
 
   /**
