@@ -145,9 +145,19 @@ export namespace URLExt {
    * `data:`, `file:`, and `//` protocol URLs.
    */
   export function isLocal(url: string): boolean {
-    const { protocol } = parse(url);
-
-    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
+    try {
+      const absoluteUrl = new URL(url);
+      // Chrome violates the HTML whatwg spec by allowing new URL("#")
+      if (absoluteUrl.protocol === 'about:' && url[0] === '#') {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      if (url[0] === '/') {
+        return false;
+      }
+      return true;
+    }
   }
 
   /**
