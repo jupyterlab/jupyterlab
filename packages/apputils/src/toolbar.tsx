@@ -475,7 +475,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 
 /**
  * Phosphor Widget version of CommandToolbarButtonComponent.
- **/
+ */
 export class CommandToolbarButton extends ReactWidget {
   /**
    * Creates a command toolbar button
