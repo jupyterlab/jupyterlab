@@ -33,7 +33,7 @@ export abstract class ReactWidget extends Widget {
    * Called to update the state of the widget.
    *
    * The default implementation of this method triggers
-   * VDOM based rendering by calling the this.render() method.
+   * VDOM based rendering by calling the `renderDOM` method.
    */
   protected onUpdateRequest(msg: Message): void {
     this.renderPromise = this.renderDOM();
@@ -145,12 +145,6 @@ export class ReactElementWidget extends ReactWidget {
   ) {
     super();
     this._es = es;
-    this.onInit();
-  }
-
-  // Override this to add functionality to the constructor
-  protected onInit(): void {
-    return;
   }
 
   render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null {
