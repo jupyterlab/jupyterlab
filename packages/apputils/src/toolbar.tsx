@@ -403,9 +403,10 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
 
 export class BaseToolbarButton extends ReactElementWidget {
   /**
-   * Adds toolbar button class to node
+   * Creates the toolbar button and adds toolbar button class to node
    */
-  protected onInit() {
+  constructor(el: JSX.Element) {
+    super(el);
     this.addClass('jp-ToolbarButton');
   }
 }
@@ -468,11 +469,6 @@ export class CommandToolbarButton extends ReactElementWidget {
    */
   constructor(props: CommandToolbarButtonComponent.IProps) {
     super(<CommandToolbarButtonComponent {...props} />);
-  }
-  /**
-   * Adds command toolbar button class to node
-   */
-  protected onInit() {
     this.addClass('jp-CommandToolbarButton');
   }
 }
@@ -569,18 +565,11 @@ namespace Private {
   /**
    * Phosphor widget version of KernelNameComponent.
    */
-  export class KernelName extends ReactWidget {
+  export class KernelName extends ReactElementWidget {
     constructor(props: KernelNameComponent.IProps) {
-      super();
-      this._component = <KernelNameComponent {...props} />;
+      super(<KernelNameComponent {...props} />);
       this.addClass('jp-KernelName');
     }
-
-    render() {
-      return this._component;
-    }
-
-    private _component: React.ReactElement<any>;
   }
 
   /**
