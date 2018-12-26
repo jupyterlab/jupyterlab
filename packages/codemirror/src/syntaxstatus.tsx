@@ -1,6 +1,12 @@
 import React from 'react';
 
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import {
+  VDomRenderer,
+  VDomModel,
+  ReactWidget,
+  UseSignal,
+  mapSignal
+} from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -20,6 +26,8 @@ import { CommandRegistry } from '@phosphor/commands';
 import { JSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
+
+import { ISignal } from '@phosphor/signaling';
 
 /**
  * A namespace for `EditorSyntaxComponentStatics`.
@@ -59,14 +67,23 @@ function EditorSyntaxComponent(
 /**
  * StatusBar item to change the language syntax highlighting of the file editor.
  */
-export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
+export class EditorSyntaxStatus extends ReactWidget {
   /**
    * Construct a new VDomRenderer for the status item.
    */
   constructor(opts: EditorSyntaxStatus.IOptions) {
     super();
-    this.model = new EditorSyntaxStatus.Model();
     this._commands = opts.commands;
+    const mimetypeSignal: ISignal<any, string> = mapSignal(
+      opts.editorSignal,
+      (_, { model }) => {
+        model.mimeTypeChanged;
+      }
+    );
+    this._modeSignal = mapSignal(mimetypeSignal, (_, mimeType) => {
+      const spec = Mode.findByMIME(mimeType);
+      return spec.name || spec.mode;
+    });
     this.addClass(interactiveItem);
     this.title.caption = 'Change text editor syntax highlighting';
   }
@@ -75,14 +92,12 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
    * Render the status item.
    */
   render() {
-    if (!this.model) {
-      return null;
-    }
     return (
-      <EditorSyntaxComponent
-        mode={this.model.mode}
-        handleClick={this._handleClick}
-      />
+      <UseSignal signal={this._modeSignal}>
+        {(_, mode) => (
+          <EditorSyntaxComponent mode={mode} handleClick={this._handleClick} />
+        )}
+      </UseSignal>
     );
   }
 
@@ -124,6 +139,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   };
 
   private _commands: CommandRegistry;
+  private _modeSignal: ISignal<any, string>;
   private _popup: Popup | null = null;
 }
 
@@ -203,5 +219,10 @@ export namespace EditorSyntaxStatus {
      * The application command registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * A signal of the active editors.
+     */
+    editorSignal: ISignal<any, CodeEditor.IEditor>;
   }
 }
