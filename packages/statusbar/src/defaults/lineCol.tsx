@@ -3,11 +3,7 @@
 
 import React from 'react';
 
-import {
-  VDomRenderer,
-  VDomModel,
-  ReactElementWidget
-} from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -252,14 +248,12 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
     if (this._popup) {
       this._popup.dispose();
     }
-    const body = new ReactElementWidget(
-      (
-        <LineFormComponent
-          handleSubmit={val => this._handleSubmit(val)}
-          currentLine={this.model!.line}
-          maxLine={this.model!.editor!.lineCount}
-        />
-      )
+    const body = ReactWidget.create(
+      <LineFormComponent
+        handleSubmit={val => this._handleSubmit(val)}
+        currentLine={this.model!.line}
+        maxLine={this.model!.editor!.lineCount}
+      />
     );
 
     this._popup = showPopup({

@@ -16,10 +16,11 @@ import {
   Dialog,
   Styling,
   Toolbar,
-  ToolbarButton,
   ToolbarButtonComponent,
   UseSignal,
-  BaseToolbarButton
+  addToolbarButtonClass,
+  ReactWidget,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -75,7 +76,7 @@ export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export function createSaveButton(panel: NotebookPanel): ToolbarButton {
+  export function createSaveButton(panel: NotebookPanel): Widget {
     function onClick() {
       if (panel.context.model.readOnly) {
         return showDialog({
@@ -90,8 +91,8 @@ export namespace ToolbarItems {
         }
       });
     }
-    return new BaseToolbarButton(
-      (
+    return addToolbarButtonClass(
+      ReactWidget.create(
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
@@ -116,7 +117,7 @@ export namespace ToolbarItems {
   /**
    * Create an insert toolbar item.
    */
-  export function createInsertButton(panel: NotebookPanel): ToolbarButton {
+  export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_INSERT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -129,7 +130,7 @@ export namespace ToolbarItems {
   /**
    * Create a cut toolbar item.
    */
-  export function createCutButton(panel: NotebookPanel): ToolbarButton {
+  export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_CUT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -142,7 +143,7 @@ export namespace ToolbarItems {
   /**
    * Create a copy toolbar item.
    */
-  export function createCopyButton(panel: NotebookPanel): ToolbarButton {
+  export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_COPY_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -155,7 +156,7 @@ export namespace ToolbarItems {
   /**
    * Create a paste toolbar item.
    */
-  export function createPasteButton(panel: NotebookPanel): ToolbarButton {
+  export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_PASTE_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -168,7 +169,7 @@ export namespace ToolbarItems {
   /**
    * Create a run toolbar item.
    */
-  export function createRunButton(panel: NotebookPanel): ToolbarButton {
+  export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_RUN_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {

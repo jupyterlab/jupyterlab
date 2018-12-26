@@ -13,10 +13,26 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+type ReactRenderElement =
+  | Array<React.ReactElement<any>>
+  | React.ReactElement<any>;
+
 /**
  * An abstract class for a Phosphor widget which renders a React component.
  */
 export abstract class ReactWidget extends Widget {
+  /**
+   * Creates a new `ReactWidget` that renders a constant element.
+   * @param element React element to render.
+   */
+  static create(element: ReactRenderElement): ReactWidget {
+    return new class extends ReactWidget {
+      render() {
+        return element;
+      }
+    }();
+  }
+
   /**
    * Render the content of this widget using the virtual DOM.
    *
@@ -25,9 +41,7 @@ export abstract class ReactWidget extends Widget {
    *
    * Subclasses should define this method and return the root React nodes here.
    */
-  protected abstract render():
-    | Array<React.ReactElement<any>>
-    | React.ReactElement<any>;
+  protected abstract render(): ReactRenderElement;
 
   /**
    * Called to update the state of the widget.
@@ -129,29 +143,6 @@ export abstract class VDomRenderer<
 
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
-}
-
-/**
- * Phosphor widget that renders React Element(s).
- *
- * All messages will re-render the element.
- */
-export class ReactElementWidget extends ReactWidget {
-  /**
-   * Creates a Phosphor widget that renders the element(s) `es`.
-   */
-  constructor(
-    es: Array<React.ReactElement<any>> | React.ReactElement<any> | null
-  ) {
-    super();
-    this._es = es;
-  }
-
-  render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null {
-    return this._es;
-  }
-
-  private _es: Array<React.ReactElement<any>> | React.ReactElement<any> | null;
 }
 
 /**

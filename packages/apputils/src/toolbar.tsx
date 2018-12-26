@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UseSignal, ReactElementWidget } from './vdom';
+import { UseSignal, ReactWidget } from './vdom';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
@@ -286,9 +286,7 @@ export namespace Toolbar {
   /**
    * Create an interrupt toolbar item.
    */
-  export function createInterruptButton(
-    session: IClientSession
-  ): ToolbarButton {
+  export function createInterruptButton(session: IClientSession): Widget {
     return new ToolbarButton({
       iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
       onClick: () => {
@@ -303,7 +301,7 @@ export namespace Toolbar {
   /**
    * Create a restart toolbar item.
    */
-  export function createRestartButton(session: IClientSession): ToolbarButton {
+  export function createRestartButton(session: IClientSession): Widget {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
       onClick: () => {
@@ -333,7 +331,11 @@ export namespace Toolbar {
    * It can handle a change in context or kernel.
    */
   export function createKernelNameItem(session: IClientSession): Widget {
-    return new Private.KernelName({ session });
+    const el = ReactWidget.create(
+      <Private.KernelNameComponent session={session} />
+    );
+    el.addClass('jp-KernelName');
+    return el;
   }
 
   /**
@@ -401,26 +403,29 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   );
 }
 
-export class BaseToolbarButton extends ReactElementWidget {
-  /**
-   * Creates the toolbar button and adds toolbar button class to node
-   */
-  constructor(el: JSX.Element) {
-    super(el);
-    this.addClass('jp-ToolbarButton');
-  }
+/**
+ * Adds the toolbar button class to the toolbar widget.
+ * @param w Toolbar button widget.
+ */
+export function addToolbarButtonClass(w: Widget): Widget {
+  w.addClass('jp-ToolbarButton');
+  return w;
 }
 
 /**
  * Phosphor Widget version of static ToolbarButtonComponent.
  */
-export class ToolbarButton extends BaseToolbarButton {
+export class ToolbarButton extends ReactWidget {
   /**
    * Creates a toolbar button
    * @param props props for underlying `ToolbarButton` componenent
    */
-  constructor(props: ToolbarButtonComponent.IProps = {}) {
-    super(<ToolbarButtonComponent {...props} />);
+  constructor(private props: ToolbarButtonComponent.IProps = {}) {
+    super();
+    addToolbarButtonClass(this);
+  }
+  render() {
+    return <ToolbarButtonComponent {...this.props} />;
   }
 }
 
@@ -459,17 +464,29 @@ export function CommandToolbarButtonComponent(
   );
 }
 
+/*
+  * Adds the command toolbar button class to the command toolbar widget.
+  * @param w Command toolbar button widget.
+  */
+export function addCommandToolbarButtonClass(w: Widget): Widget {
+  w.addClass('jp-CommandToolbarButton');
+  return w;
+}
+
 /**
  * Phosphor Widget version of CommandToolbarButtonComponent.
- */
-export class CommandToolbarButton extends ReactElementWidget {
+ **/
+export class CommandToolbarButton extends ReactWidget {
   /**
    * Creates a command toolbar button
    * @param props props for underlying `CommandToolbarButtonComponent` componenent
    */
-  constructor(props: CommandToolbarButtonComponent.IProps) {
-    super(<CommandToolbarButtonComponent {...props} />);
-    this.addClass('jp-CommandToolbarButton');
+  constructor(private props: CommandToolbarButtonComponent.IProps) {
+    super();
+    addCommandToolbarButtonClass(this);
+  }
+  render() {
+    return <CommandToolbarButtonComponent {...this.props} />;
   }
 }
 
@@ -560,16 +577,6 @@ namespace Private {
         )}
       </UseSignal>
     );
-  }
-
-  /**
-   * Phosphor widget version of KernelNameComponent.
-   */
-  export class KernelName extends ReactElementWidget {
-    constructor(props: KernelNameComponent.IProps) {
-      super(<KernelNameComponent {...props} />);
-      this.addClass('jp-KernelName');
-    }
   }
 
   /**
