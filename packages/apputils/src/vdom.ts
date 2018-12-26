@@ -175,9 +175,12 @@ export interface IUseSignalProps<SENDER, ARGS> {
   args?: ARGS;
   /**
    * Function mapping the last signal value or inital values to an element to render.
+   *
+   * Note: returns `React.ReactNode` as per
+   * https://github.com/sw-yx/react-typescript-cheatsheet#higher-order-componentsrender-props
    */
 
-  children: (sender?: SENDER, args?: ARGS) => JSX.Element;
+  children: (sender?: SENDER, args?: ARGS) => React.ReactNode;
   /**
    * Given the last signal value, should return whether to update the state or not.
    *
