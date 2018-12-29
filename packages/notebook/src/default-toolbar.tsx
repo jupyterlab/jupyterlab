@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as React from 'react';
+
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Message } from '@phosphor/messaging';
@@ -14,6 +16,10 @@ import {
   Dialog,
   Styling,
   Toolbar,
+  ToolbarButtonComponent,
+  UseSignal,
+  addToolbarButtonClass,
+  ReactWidget,
   ToolbarButton
 } from '@jupyterlab/apputils';
 
@@ -70,31 +76,48 @@ export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export function createSaveButton(panel: NotebookPanel): ToolbarButton {
-    return new ToolbarButton({
-      iconClassName: TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16',
-      onClick: () => {
-        if (panel.context.model.readOnly) {
-          return showDialog({
-            title: 'Cannot Save',
-            body: 'Document is read-only',
-            buttons: [Dialog.okButton()]
-          });
-        }
-        panel.context.save().then(() => {
-          if (!panel.isDisposed) {
-            return panel.context.createCheckpoint();
-          }
+  export function createSaveButton(panel: NotebookPanel): Widget {
+    function onClick() {
+      if (panel.context.model.readOnly) {
+        return showDialog({
+          title: 'Cannot Save',
+          body: 'Document is read-only',
+          buttons: [Dialog.okButton()]
         });
-      },
-      tooltip: 'Save the notebook contents and create checkpoint'
-    });
+      }
+      panel.context.save().then(() => {
+        if (!panel.isDisposed) {
+          return panel.context.createCheckpoint();
+        }
+      });
+    }
+    return addToolbarButtonClass(
+      ReactWidget.create(
+        <UseSignal signal={panel.context.fileChanged}>
+          {() => (
+            <ToolbarButtonComponent
+              iconClassName={TOOLBAR_SAVE_CLASS + ' jp-Icon jp-Icon-16'}
+              onClick={onClick}
+              tooltip="Save the notebook contents and create checkpoint"
+              enabled={
+                !!(
+                  panel &&
+                  panel.context &&
+                  panel.context.contentsModel &&
+                  panel.context.contentsModel.writable
+                )
+              }
+            />
+          )}
+        </UseSignal>
+      )
+    );
   }
 
   /**
    * Create an insert toolbar item.
    */
-  export function createInsertButton(panel: NotebookPanel): ToolbarButton {
+  export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_INSERT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -107,7 +130,7 @@ export namespace ToolbarItems {
   /**
    * Create a cut toolbar item.
    */
-  export function createCutButton(panel: NotebookPanel): ToolbarButton {
+  export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_CUT_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -120,7 +143,7 @@ export namespace ToolbarItems {
   /**
    * Create a copy toolbar item.
    */
-  export function createCopyButton(panel: NotebookPanel): ToolbarButton {
+  export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_COPY_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -133,7 +156,7 @@ export namespace ToolbarItems {
   /**
    * Create a paste toolbar item.
    */
-  export function createPasteButton(panel: NotebookPanel): ToolbarButton {
+  export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_PASTE_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {
@@ -146,7 +169,7 @@ export namespace ToolbarItems {
   /**
    * Create a run toolbar item.
    */
-  export function createRunButton(panel: NotebookPanel): ToolbarButton {
+  export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
       iconClassName: TOOLBAR_RUN_CLASS + ' jp-Icon jp-Icon-16',
       onClick: () => {

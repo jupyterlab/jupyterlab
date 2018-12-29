@@ -9,10 +9,6 @@ import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import * as React from 'react';
-
-import * as ReactDOM from 'react-dom';
-
 import { CodeEditor } from './editor';
 
 /**
@@ -76,9 +72,39 @@ export class JSONEditor extends Widget {
     super();
 
     this.addClass(JSONEDITOR_CLASS);
-    ReactDOM.render(Private.createEditorContent(options), this.node);
 
-    let host = this.editorHostNode;
+    this.headerNode = document.createElement('div');
+    this.headerNode.className = HEADER_CLASS;
+
+    this.titleNode = document.createElement('span');
+    this.titleNode.className = TITLE_CLASS;
+    this.titleNode.textContent = options.title || '';
+
+    this.collapserNode = document.createElement('span');
+    this.collapserNode.className = COLLAPSER_CLASS;
+    if (options.collapsible) {
+      this.collapserNode.classList.add(COLLAPSE_ENABLED_CLASS);
+    }
+
+    this.revertButtonNode = document.createElement('span');
+    this.revertButtonNode.className = REVERT_CLASS;
+    this.revertButtonNode.title = 'Revert changes to data';
+
+    this.commitButtonNode = document.createElement('span');
+    this.commitButtonNode.className = COMMIT_CLASS;
+    this.commitButtonNode.title = 'Commit changes to data';
+
+    this.editorHostNode = document.createElement('div');
+    this.editorHostNode.className = HOST_CLASS;
+
+    this.headerNode.appendChild(this.titleNode);
+    this.headerNode.appendChild(this.collapserNode);
+    this.headerNode.appendChild(this.revertButtonNode);
+    this.headerNode.appendChild(this.commitButtonNode);
+
+    this.node.appendChild(this.headerNode);
+    this.node.appendChild(this.editorHostNode);
+
     let model = new CodeEditor.Model();
 
     model.value.text = 'No data!';
@@ -88,7 +114,7 @@ export class JSONEditor extends Widget {
       this
     );
     this.model = model;
-    this.editor = options.editorFactory({ host, model });
+    this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
     this.collapsible = !!options.collapsible;
   }
@@ -109,6 +135,36 @@ export class JSONEditor extends Widget {
   readonly collapsible: boolean;
 
   /**
+   * The editor host node used by the JSON editor.
+   */
+  readonly headerNode: HTMLDivElement;
+
+  /**
+   * The editor host node used by the JSON editor.
+   */
+  readonly editorHostNode: HTMLDivElement;
+
+  /**
+   * The title node used by the JSON editor.
+   */
+  readonly titleNode: HTMLSpanElement;
+
+  /**
+   * Get the collapser node used by the JSON editor.
+   */
+  readonly collapserNode: HTMLSpanElement;
+
+  /**
+   * The revert button used by the JSON editor.
+   */
+  readonly revertButtonNode: HTMLSpanElement;
+
+  /**
+   * The commit button used by the JSON editor.
+   */
+  readonly commitButtonNode: HTMLSpanElement;
+
+  /**
    * The title of the editor.
    */
   get editorTitle(): string {
@@ -116,48 +172,6 @@ export class JSONEditor extends Widget {
   }
   set editorTitle(value: string) {
     this.titleNode.textContent = value;
-  }
-
-  /**
-   * Get the editor host node used by the JSON editor.
-   */
-  get editorHostNode(): HTMLElement {
-    return this.node.getElementsByClassName(HOST_CLASS)[0] as HTMLElement;
-  }
-
-  /**
-   * Get the header node used by the JSON editor.
-   */
-  get headerNode(): HTMLElement {
-    return this.node.getElementsByClassName(HEADER_CLASS)[0] as HTMLElement;
-  }
-
-  /**
-   * Get the title node used by the JSON editor.
-   */
-  get titleNode(): HTMLElement {
-    return this.node.getElementsByClassName(TITLE_CLASS)[0] as HTMLElement;
-  }
-
-  /**
-   * Get the collapser node used by the JSON editor.
-   */
-  get collapserNode(): HTMLElement {
-    return this.node.getElementsByClassName(COLLAPSER_CLASS)[0] as HTMLElement;
-  }
-
-  /**
-   * Get the revert button used by the JSON editor.
-   */
-  get revertButtonNode(): HTMLElement {
-    return this.node.getElementsByClassName(REVERT_CLASS)[0] as HTMLElement;
-  }
-
-  /**
-   * Get the commit button used by the JSON editor.
-   */
-  get commitButtonNode(): HTMLElement {
-    return this.node.getElementsByClassName(COMMIT_CLASS)[0] as HTMLElement;
   }
 
   /**
@@ -428,36 +442,5 @@ export namespace JSONEditor {
      * Whether the title should be collapsible. Defaults to `false`.
      */
     collapsible?: boolean;
-  }
-}
-
-/**
- * The namespace for module private data.
- */
-namespace Private {
-  /**
-   * Create the JSON Editor node's content.
-   */
-  export function createEditorContent(
-    options: JSONEditor.IOptions
-  ): React.ReactElement<any> {
-    const revertTitle = 'Revert changes to data';
-    const confirmTitle = 'Commit changes to data';
-    const title = options.title || '';
-    const collapseClass = options.collapsible
-      ? `${COLLAPSER_CLASS} ${COLLAPSE_ENABLED_CLASS}`
-      : COLLAPSER_CLASS;
-
-    return (
-      <React.Fragment>
-        <div className={HEADER_CLASS}>
-          <span className={TITLE_CLASS}>{title}</span>
-          <span className={collapseClass} />
-          <span className={REVERT_CLASS} title={revertTitle} />
-          <span className={COMMIT_CLASS} title={confirmTitle} />
-        </div>
-        <div className={HOST_CLASS} />
-      </React.Fragment>
-    );
   }
 }
