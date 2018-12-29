@@ -9,7 +9,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { mapSignal, filterSignal } from './signals';
+import { mapSignal, filterSignal } from '@jupyterlab/coreutils/src/signals';
 
 import * as React from 'react';
 
