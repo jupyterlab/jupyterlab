@@ -96,7 +96,7 @@ export namespace ToolbarItems {
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
-              iconClassName={TOOLBAR_SAVE_CLASS + ' foo jp-Icon jp-Icon-16'}
+              iconClassName={TOOLBAR_SAVE_CLASS + ' jp-Icon jp-Icon-16'}
               onClick={onClick}
               tooltip="Save the notebook contents and create checkpoint"
               enabled={
