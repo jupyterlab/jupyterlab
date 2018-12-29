@@ -566,7 +566,10 @@ namespace Private {
 
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
     return (
-      <UseSignal signal={props.session.kernelChanged} sender={props.session}>
+      <UseSignal
+        signal={props.session.kernelChanged}
+        initialSender={props.session}
+      >
         {session => (
           <ToolbarButtonComponent
             className={TOOLBAR_KERNEL_NAME_CLASS}

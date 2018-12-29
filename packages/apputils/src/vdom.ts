@@ -158,12 +158,12 @@ export interface IUseSignalProps<SENDER, ARGS> {
    * Initial value to use for the sender, used before the signal emits a value.
    * If not provided, initial sender will be undefined
    */
-  sender?: SENDER;
+  initialSender?: SENDER;
   /**
    * Initial value to use for the args, used before the signal emits a value.
    * If not provided, initial args will be undefined.
    */
-  args?: ARGS;
+  initialArgs?: ARGS;
   /**
    * Function mapping the last signal value or inital values to an element to render.
    *
@@ -186,7 +186,7 @@ export interface IUseSignalProps<SENDER, ARGS> {
  * State for the UseSignal component
  */
 export interface IUseSignalState<SENDER, ARGS> {
-  value: [SENDER, ARGS];
+  value: [SENDER?, ARGS?];
 }
 
 /**
@@ -230,7 +230,7 @@ export class UseSignal<SENDER, ARGS> extends React.Component<
 > {
   constructor(props: IUseSignalProps<SENDER, ARGS>) {
     super(props);
-    this.state = { value: [this.props.sender, this.props.args] };
+    this.state = { value: [this.props.initialSender, this.props.initialArgs] };
   }
 
   componentDidMount() {
