@@ -1284,11 +1284,6 @@ export namespace Private {
   const nondescript = '[missing schema description]';
 
   /**
-   * Replacement text for schema properties missing a `default` field.
-   */
-  const undefaulted = '[missing schema default]';
-
-  /**
    * Replacement text for schema properties missing a `title` field.
    */
   const untitled = '[missing schema title]';
@@ -1359,15 +1354,17 @@ export namespace Private {
     const reified = reifyDefault(schema, key);
     const spaces = indent.length;
     const defaults =
-      reified === undefined
-        ? prefix(`"${key}": ${undefaulted}`)
-        : prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent);
+      reified !== undefined
+        ? prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent)
+        : '';
 
     return [
       prefix(`${title || untitled}`),
       prefix(description || nondescript),
       defaults
-    ].join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
   }
 
   /**
