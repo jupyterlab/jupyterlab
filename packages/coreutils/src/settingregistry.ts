@@ -1363,7 +1363,7 @@ export namespace Private {
       prefix(description || nondescript),
       defaults
     ]
-      .filter(Boolean)
+      .filter(str => str.length)
       .join('\n');
   }
 
