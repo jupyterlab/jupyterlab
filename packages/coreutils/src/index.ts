@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './activitymonitor';
+export * from './asynciterables';
 export * from './dataconnector';
 export * from './interfaces';
 export * from './markdowncodeblocks';
