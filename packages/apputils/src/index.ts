@@ -14,7 +14,7 @@ export * from './iframe';
 export * from './instancetracker';
 export * from './mainareawidget';
 export * from './sanitizer';
-export * from '@jupyterlab/coreutils/src/signals';
+export * from './signals';
 export * from './spinner';
 export * from './splash';
 export * from './styling';
