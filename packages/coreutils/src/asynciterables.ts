@@ -10,35 +10,62 @@ export class AsyncIteratorSignal<T, V> implements AsyncIterator<[T, V]> {
 
   slot(sender: T, args: V) {
     const resolveNext = this.resolveNexts.shift();
+    if (this.isDone) {
+      // if we have finished, see if we have fulfilled the last value we need.
+      this.tryDisconnecting();
+    }
+    const value: IteratorResult<[T, V]> = {
+      done: false,
+      value: [sender, args]
+    };
     if (resolveNext === undefined) {
-      this.values.push([sender, args]);
+      this.values.push(value);
     } else {
-      resolveNext(sender, args);
+      resolveNext(value);
     }
   }
 
   next(): Promise<IteratorResult<[T, V]>> {
+    if (this.isDone) {
+      return AsyncIteratorSignal.doneValue;
+    }
+    const value = this.values.shift();
+    if (value !== undefined) {
+      return Promise.resolve(value);
+    }
+
     return new Promise((resolve, reject) => {
-      const value = this.values.shift();
-      function resolve_(sender: T, args: V) {
-        resolve({ value: [sender, args], done: false });
-      }
-      if (value === undefined) {
-        this.resolveNexts.push(resolve_);
-      } else {
-        resolve_(...value);
-      }
+      this.resolveNexts.push(resolve);
     });
   }
+
   return(): Promise<IteratorResult<[T, V]>> {
-    // http://raganwald.com/2017/07/22/closing-iterables-is-a-leaky-abstraction.html
-    this.signal.disconnect(this.slot, this);
-    const value: [T, V] = [null, null];
-    return Promise.resolve({ done: true, value });
+    // cleanup data
+    this.values = [];
+    this.tryDisconnecting();
+
+    // set done so `next()` returns done
+    this.isDone = true;
+
+    return AsyncIteratorSignal.doneValue;
   }
 
-  values: Array<[T, V]> = [];
-  resolveNexts: Array<(sender: T, args: V) => void> = [];
+  /**
+   * If we have no more values to resolve, disconnect the signal.
+   */
+  private tryDisconnecting() {
+    if (this.resolveNexts.length === 0) {
+      this.signal.disconnect(this.slot, this);
+    }
+  }
+
+  private isDone = false;
+  private static doneValue: Promise<IteratorResult<any>> = Promise.resolve({
+    done: true,
+    value: undefined
+  });
+  private values: Array<IteratorResult<[T, V]>> = [];
+  private resolveNexts: Array<(res: IteratorResult<[T, V]>) => void> = [];
 }
 
 /**
