@@ -9,9 +9,7 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
-import { IEditorServices, CodeEditor } from '@jupyterlab/codeeditor';
-
-import { WatchableSignal } from '@jupyterlab/apputils';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import {
   editorServices,
@@ -27,7 +25,6 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ISignal } from '@phosphor/signaling';
 
 /**
  * The command IDs used by the codemirror plugin.
@@ -77,17 +74,15 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
     statusBar: IStatusBar,
     tracker: IEditorTracker
   ) => {
-    const editorSignal: ISignal<
-      null,
-      CodeEditor.IEditor
-    > = WatchableSignal.fromSignal(app.shell.currentChanged, emit => () => {
+    let item = new EditorSyntaxStatus({ commands: app.commands });
+    app.shell.currentChanged.connect(() => {
       const current = app.shell.currentWidget;
       if (current && tracker.has(current)) {
-        emit((current as IDocumentWidget<FileEditor>).content.editor);
+        item.model.editor = (current as IDocumentWidget<
+          FileEditor
+        >).content.editor;
       }
     });
-    let item = new EditorSyntaxStatus({ commands: app.commands, editorSignal });
-
     statusBar.registerStatusItem(
       '@jupyterlab/codemirror-extension:editor-syntax-status',
       {

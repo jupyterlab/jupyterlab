@@ -14,7 +14,6 @@ export * from './iframe';
 export * from './instancetracker';
 export * from './mainareawidget';
 export * from './sanitizer';
-export * from './signals';
 export * from './spinner';
 export * from './splash';
 export * from './styling';

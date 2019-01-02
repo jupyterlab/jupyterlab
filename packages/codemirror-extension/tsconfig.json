@@ -29,9 +29,6 @@
     },
     {
       "path": "../statusbar"
-    },
-    {
-      "path": "../apputils"
     }
   ]
 }
