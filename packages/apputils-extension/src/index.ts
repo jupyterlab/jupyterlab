@@ -642,7 +642,6 @@ namespace Private {
       focusNodeSelector: 'input',
       buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
     });
-
     const result = await dialog.launch();
 
     dialog.dispose();
@@ -651,8 +650,13 @@ namespace Private {
     }
 
     // Navigate to a new workspace URL and abandon this session altogether.
+    const page = PageConfig.getOption('pageUrl');
     const workspaces = PageConfig.getOption('workspacesUrl');
-    const url = URLExt.join(workspaces, result.value);
+    const match = router.current.path.match(Patterns.workspace);
+    const workspace = (match && decodeURIComponent(match[1])) || '';
+    const prefix = (workspace ? workspaces : page).length + workspace.length;
+    const rest = router.current.request.substring(prefix);
+    const url = URLExt.join(workspaces, result.value, rest);
 
     router.navigate(url, { hard: true, silent: true });
 
