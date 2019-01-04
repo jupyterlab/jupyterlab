@@ -11,6 +11,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { CommandPalette, SplitPanel, Widget } from '@phosphor/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
   NotebookPanel,
@@ -85,7 +86,13 @@ function createApp(manager: ServiceManager.IManager): void {
     useCapture
   );
 
-  let rendermime = new RenderMimeRegistry({ initialFactories });
+  let rendermime = new RenderMimeRegistry({
+    initialFactories: initialFactories,
+    latexTypesetter: new MathJaxTypesetter({
+      url: PageConfig.getOption('mathjaxUrl'),
+      config: PageConfig.getOption('mathjaxConfig')
+    })
+  });
 
   let opener = {
     open: (widget: Widget) => {

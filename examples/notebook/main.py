@@ -33,7 +33,10 @@ class NotebookHandler(IPythonHandler):
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'notebookPath': notebook_path,
-            'bundleUrl': ujoin(self.base_url, 'build/')
+            'bundleUrl': ujoin(self.base_url, 'build/'),
+            # FIXME: Don't use a CDN here
+            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
+            'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
         }
         return self.write(
             self.render_template(
