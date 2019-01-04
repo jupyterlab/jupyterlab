@@ -32,7 +32,8 @@ class NotebookHandler(IPythonHandler):
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'notebookPath': notebook_path
+            'notebookPath': notebook_path,
+            'bundleUrl': ujoin(self.base_url, 'build/')
         }
         return self.write(
             self.render_template(
