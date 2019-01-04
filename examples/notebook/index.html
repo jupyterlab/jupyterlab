@@ -5,10 +5,9 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full,Safe&amp;delayStartupUntil=configured"></script>
   </head>
   <body>
-    <script id='jupyter-config-data' type="application/json">{ 
-    "baseUrl": "{{base_url}}",
-    "token": "{{token}}"
-    }</script>
+    <script id='jupyter-config-data' type="application/json">
+      {{ config_data|tojson }}
+    </script>
     <script src="example/bundle.js"></script>
 
     <script type="text/javascript">

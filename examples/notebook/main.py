@@ -24,10 +24,14 @@ class ExampleHandler(IPythonHandler):
 
     def get(self):
         """Get the main page for the application's interface."""
+        # Options set here can be read with PageConfig.getOption
+        config_data = {
+            'base_url': self.base_url,
+            'token': self.settings['token']
+        }
         return self.write(self.render_template('index.html',
                                                static=self.static_url,
-                                               base_url=self.base_url,
-                                               token=self.settings['token']))
+                                               config_data=config_data))
 
     def get_template(self, name):
         loader = FileSystemLoader(HERE)
