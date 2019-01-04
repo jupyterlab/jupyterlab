@@ -446,7 +446,7 @@ function to apply the CSS classes and add the attribution badge markup.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 9,13,16-22
+      :emphasize-lines: 9,13,16-23
 
       activate: (app: JupyterLab, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
