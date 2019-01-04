@@ -19,19 +19,27 @@ from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
-class ExampleHandler(IPythonHandler):
-    """Handle requests between the main app page and notebook server."""
+class NotebookHandler(IPythonHandler):
+    """
+    Serve a notebook file from the filesystem in the notebook interface
+    """
 
-    def get(self):
+    def get(self, notebook_path):
         """Get the main page for the application's interface."""
         # Options set here can be read with PageConfig.getOption
         config_data = {
             'base_url': self.base_url,
-            'token': self.settings['token']
+            'token': self.settings['token'],
+            'notebook_path': notebook_path
         }
-        return self.write(self.render_template('index.html',
-                                               static=self.static_url,
-                                               config_data=config_data))
+        return self.write(
+            self.render_template(
+                'index.html',
+                static=self.static_url,
+                base_url=self.base_url,
+                config_data=config_data
+            )
+        )
 
     def get_template(self, name):
         loader = FileSystemLoader(HERE)
@@ -40,15 +48,15 @@ class ExampleHandler(IPythonHandler):
 
 class ExampleApp(NotebookApp):
 
-    default_url = Unicode('/example')
+    default_url = Unicode('/notebook/test.ipynb')
 
     def init_webapp(self):
         """initialize tornado webapp and httpserver.
         """
         super(ExampleApp, self).init_webapp()
         default_handlers = [
-            (r'/example/?', ExampleHandler),
-            (r"/example/(.*)", FileFindHandler,
+            (r'/notebook/(.*)?', NotebookHandler),
+            (r"/build/(.*)", FileFindHandler,
                 {'path': os.path.join(HERE, 'build')})
         ]
         self.web_app.add_handlers('.*$', default_handlers)

@@ -36,8 +36,7 @@ import {
   RenderMimeRegistry,
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
-
-let NOTEBOOK = 'test.ipynb';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The map of command ids used by the notebook.
@@ -118,7 +117,8 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
-  let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
+  let notebookPath = PageConfig.getOption('notebook_path');
+  let nbWidget = docManager.open(notebookPath) as NotebookPanel;
   let palette = new CommandPalette({ commands });
 
   const editor =
