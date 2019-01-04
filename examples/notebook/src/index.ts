@@ -289,7 +289,7 @@ function createApp(manager: ServiceManager.IManager): void {
       command: cmdIds.invokeNotebook
     },
     {
-      selector: `.jp-mod-completer-enabled`,
+      selector: `.jp-mod-completer-active`,
       keys: ['Enter'],
       command: cmdIds.selectNotebook
     },
