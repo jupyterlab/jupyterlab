@@ -117,7 +117,7 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
-  let notebookPath = PageConfig.getOption('notebook_path');
+  let notebookPath = PageConfig.getOption('notebookPath');
   let nbWidget = docManager.open(notebookPath) as NotebookPanel;
   let palette = new CommandPalette({ commands });
 

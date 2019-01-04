@@ -29,9 +29,10 @@ class NotebookHandler(IPythonHandler):
         """Get the main page for the application's interface."""
         # Options set here can be read with PageConfig.getOption
         config_data = {
-            'base_url': self.base_url,
+            # Use camelCase here, since that's what the lab components expect
+            'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'notebook_path': notebook_path
+            'notebookPath': notebook_path
         }
         return self.write(
             self.render_template(
