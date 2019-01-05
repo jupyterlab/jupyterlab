@@ -389,7 +389,7 @@ export class CodeConsole extends Widget {
     return cells;
   }
 
-/**
+  /**
    * Handle `mousedown` events for the widget.
    */
   private _evtMouseDown(event: MouseEvent): void {
@@ -520,6 +520,7 @@ export class CodeConsole extends Widget {
         break;
       case 'mouseup':
         this._evtMouseUp(event as MouseEvent);
+        break;
       default:
         break;
     }

@@ -15,9 +15,8 @@ import { Cell } from './widget';
 import { h, VirtualDOM } from '@phosphor/virtualdom';
 import { nbformat } from '../../coreutils/lib';
 
-
 /**
- * Constants for drag 
+ * Constants for drag
  */
 
 /**
@@ -50,7 +49,6 @@ const CELL_DRAG_PROMPT_CLASS = 'jp-dragImage-prompt';
 const CELL_DRAG_MULTIPLE_BACK = 'jp-dragImage-multipleBack';
 
 export namespace CellDragUtils {
-
   export type ICellTargetArea = 'input' | 'prompt' | 'cell' | 'unknown';
 
   /**
@@ -86,8 +84,8 @@ export namespace CellDragUtils {
 
   /**
    * Detect which part of the cell triggered the MouseEvent
-   *  
-   * @param cell - The cell which contains the MouseEvent's target 
+   *
+   * @param cell - The cell which contains the MouseEvent's target
    * @param target - The DOM node which triggered the MouseEvent
    */
   export function detectTargetArea(
@@ -112,7 +110,7 @@ export namespace CellDragUtils {
   /**
    * Detect if a drag event should be started. This is down if the
    * mouse is moved beyond a certain distance (DRAG_THRESHOLD).
-   * 
+   *
    * @param prevX - X Coordinate of the mouse pointer during the mousedown event
    * @param prevY - Y Coordinate of the mouse pointer during the mousedown event
    * @param nextX - Current X Coordinate of the mouse pointer
@@ -131,9 +129,9 @@ export namespace CellDragUtils {
 
   /**
    * Create an image for the cell(s) to be dragged
-   * 
+   *
    * @param activeCell - The cell from where the drag event is triggered
-   * @param selectedCells - The cells to be dragged 
+   * @param selectedCells - The cells to be dragged
    */
   export function createCellDragImage(
     activeCell: Cell,
