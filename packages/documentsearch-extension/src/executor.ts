@@ -1,8 +1,10 @@
 import { SearchProviderRegistry } from './searchproviderregistry';
-
 import { ISearchMatch, ISearchProvider } from './index';
-import { Widget } from '@phosphor/widgets';
+
 import { ApplicationShell } from '@jupyterlab/application';
+
+import { ISignal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
 export class Executor {
   constructor(registry: SearchProviderRegistry, shell: ApplicationShell) {
@@ -17,12 +19,8 @@ export class Executor {
       cleanupPromise = this._activeProvider.endSearch();
     }
     this._currentWidget = this._shell.currentWidget;
-    // I want widget.content.editor for cmsp
-    const compatibleProviders = this._registry.providers.filter(p =>
-      p.canSearchOn(this._currentWidget)
-    );
-    // If multiple providers match, just use the first one.
-    const provider = compatibleProviders[0];
+
+    const provider = this._registry.getProviderForWidget(this._currentWidget);
     if (!provider) {
       console.warn(
         'Unable to search on current widget, no compatible search provider'
@@ -59,6 +57,10 @@ export class Executor {
 
   get matches(): ISearchMatch[] {
     return this._activeProvider.matches;
+  }
+
+  get changed(): ISignal<ISearchProvider, void> {
+    return this._activeProvider.changed;
   }
 
   private _registry: SearchProviderRegistry;

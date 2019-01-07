@@ -5,6 +5,8 @@ import { ISearchProvider, ISearchMatch } from '../index';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { ISignal, Signal } from '@phosphor/signaling';
+
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements ISearchProvider {
@@ -23,7 +25,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       state.query = query;
       // clear search first
       this._cm.removeOverlay(state.overlay);
-      state.overlay = Private.searchOverlay(state.query, this._matchState);
+      state.overlay = Private.searchOverlay(
+        state.query,
+        this._matchState,
+        this._changed
+      );
       this._cm.addOverlay(state.overlay);
       // skips show matches on scroll bar here
       state.posFrom = state.posTo = this._cm.getCursor();
@@ -48,6 +54,8 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   endSearch(): Promise<void> {
+    this._matchState = {};
+    this._matchIndex = 0;
     Private.clearSearch(this._cm);
     return Promise.resolve();
   }
@@ -90,6 +98,10 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return Private.parseMatchesFromState(this._matchState);
   }
 
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
   get currentMatchIndex(): number {
     return this._matchIndex;
   }
@@ -107,6 +119,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   private _matchIndex: number;
   private _matchState: MatchMap = {};
   private _shouldLoop: boolean = true;
+  private _changed = new Signal<this, void>(this);
 }
 
 export class SearchState {
@@ -164,7 +177,17 @@ namespace Private {
         }
       };
 
+      // const localCursor = cm.cursorCoords(true, 'local');
+      // const pageCursor = cm.cursorCoords(true, 'page');
+      // const windowCursor = cm.cursorCoords(true, 'window');
+      // console.log('localCursor: ', localCursor);
+      // console.log('pageCursor: ', pageCursor);
+      // console.log('windowCursor: ', windowCursor);
+      // console.log('scroller element: ', cm.getScrollerElement());
       cm.setSelection(selRange);
+      // const scrollY = reverse ? pageCursor.top : pageCursor.bottom;
+      // console.log('------- scrolling to x, y: ', pageCursor.left, ', ', scrollY);
+      // cm.scrollTo(pageCursor.left, scrollY);
       cm.scrollIntoView(
         {
           from: fromPos,
@@ -188,7 +211,11 @@ namespace Private {
     return cm.state.search;
   }
 
-  export function searchOverlay(query: RegExp, matchState: MatchMap) {
+  export function searchOverlay(
+    query: RegExp,
+    matchState: MatchMap,
+    changed: Signal<ISearchProvider, void>
+  ) {
     return {
       /**
        * Token function is called when a line needs to be processed -
@@ -230,7 +257,6 @@ namespace Private {
             matchState[line] = {};
           }
           matchState[line][currentPos] = matchObj;
-
           // move the stream along and return searching style for the token
           stream.pos += matchLength || 1;
           return 'searching';
@@ -239,6 +265,7 @@ namespace Private {
           stream.pos = match.index;
         } else {
           // no matches, consume the rest of the stream
+          changed.emit(undefined);
           stream.skipToEnd();
         }
       }

@@ -2,20 +2,16 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-
-import { ICommandPalette } from '@jupyterlab/apputils';
-
-// import { Widget } from '@phosphor/widgets';
+import '../style/index.css';
 
 import { SearchBox } from './searchbox';
-
 import { Executor } from './executor';
-
 import { SearchProviderRegistry } from './searchproviderregistry';
 
-import '../style/index.css';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { ICommandPalette } from '@jupyterlab/apputils';
+
+import { ISignal } from '@phosphor/signaling';
 
 export interface ISearchMatch {
   /**
@@ -87,6 +83,11 @@ export interface ISearchProvider {
   readonly matches: ISearchMatch[];
 
   /**
+   * Signal indicating that something in the search has changed, so the UI should update
+   */
+  readonly changed: ISignal<ISearchProvider, void>;
+
+  /**
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number;
@@ -107,10 +108,15 @@ const extension: JupyterLabPlugin<void> = {
     // Create widget, attach to signals
     const widget: SearchBox = new SearchBox();
 
+    const updateWidget = () => {
+      widget.totalMatches = executor.matches.length;
+      widget.currentIndex = executor.currentMatchIndex;
+    };
+
     const startSearchFn = (_: any, searchOptions: any) => {
-      executor.startSearch(searchOptions).then((matches: ISearchMatch[]) => {
-        widget.totalMatches = executor.matches.length;
-        widget.currentIndex = executor.currentMatchIndex;
+      executor.startSearch(searchOptions).then(() => {
+        updateWidget();
+        executor.changed.connect(updateWidget);
       });
     };
 
@@ -118,21 +124,16 @@ const extension: JupyterLabPlugin<void> = {
       executor.endSearch().then(() => {
         widget.totalMatches = 0;
         widget.currentIndex = 0;
+        executor.changed.disconnect(updateWidget);
       });
     };
 
     const highlightNextFn = () => {
-      executor.highlightNext().then(() => {
-        widget.totalMatches = executor.matches.length;
-        widget.currentIndex = executor.currentMatchIndex;
-      });
+      executor.highlightNext().then(updateWidget);
     };
 
     const highlightPreviousFn = () => {
-      executor.highlightPrevious().then(() => {
-        widget.totalMatches = executor.matches.length;
-        widget.currentIndex = executor.currentMatchIndex;
-      });
+      executor.highlightPrevious().then(updateWidget);
     };
 
     // Default to just searching on the current widget, could eventually

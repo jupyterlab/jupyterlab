@@ -1,5 +1,4 @@
 import { ISearchProvider } from './index';
-
 import {
   CodeMirrorSearchProvider,
   NotebookSearchProvider
@@ -10,33 +9,58 @@ const DEFAULT_CODEMIRROR_SEARCH_PROVIDER = 'jl-defaultCodeMirrorSearchProvider';
 
 export class SearchProviderRegistry {
   constructor() {
-    this.registerProvider(
+    this.registerDefaultProviders(
       DEFAULT_NOTEBOOK_SEARCH_PROVIDER,
       new NotebookSearchProvider()
     );
-    this.registerProvider(
+    this.registerDefaultProviders(
       DEFAULT_CODEMIRROR_SEARCH_PROVIDER,
       new CodeMirrorSearchProvider()
     );
   }
 
   registerProvider(key: string, provider: ISearchProvider): void {
-    this._providers[key] = provider;
+    this._customProviders[key] = provider;
   }
 
   deregisterProvider(key: string): boolean {
-    if (!this._providers[key]) {
+    if (!this._customProviders[key]) {
       return false;
     }
-    this._providers[key] = undefined;
+    this._customProviders[key] = undefined;
     return true;
   }
 
-  get providers(): ISearchProvider[] {
-    return Object.keys(this._providers).map(k => this._providers[k]);
+  getProviderForWidget(widget: any): ISearchProvider {
+    return (
+      this.findMatchingProvider(this._customProviders, widget) ||
+      this.findMatchingProvider(this._defaultProviders, widget)
+    );
   }
 
-  private _providers: Private.ProviderMap = {};
+  private registerDefaultProviders(
+    key: string,
+    provider: ISearchProvider
+  ): void {
+    this._defaultProviders[key] = provider;
+  }
+
+  private findMatchingProvider(
+    providerMap: Private.ProviderMap,
+    widget: any
+  ): ISearchProvider {
+    const compatibleProvders = Object.keys(providerMap)
+      .map(k => providerMap[k])
+      .filter((p: ISearchProvider) => p.canSearchOn(widget));
+
+    if (compatibleProvders.length !== 0) {
+      return compatibleProvders[0];
+    }
+    return null;
+  }
+
+  private _defaultProviders: Private.ProviderMap = {};
+  private _customProviders: Private.ProviderMap = {};
 }
 
 namespace Private {

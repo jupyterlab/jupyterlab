@@ -1,21 +1,18 @@
-// import * as CodeMirror from 'codemirror';
-
 import { ISearchProvider, ISearchMatch } from '../index';
-
 import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
 
 import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
-
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
+
+import { Signal, ISignal } from '@phosphor/signaling';
+
 import CodeMirror from 'codemirror';
 
 interface ICellSearchPair {
   cell: Cell;
   provider: ISearchProvider;
 }
-
-// TODO: re-examine indexing of cells
 
 export class NotebookSearchProvider implements ISearchProvider {
   startSearch(
@@ -24,9 +21,18 @@ export class NotebookSearchProvider implements ISearchProvider {
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
+
+    const cellModel = this._searchTarget.model.cells;
+    Signal.disconnectBetween(cellModel, this);
+    cellModel.changed.connect(
+      this._restartSearch.bind(this, query, searchTarget),
+      this
+    );
+
     const activeCell = this._searchTarget.content.activeCell;
-    const matchPromises: Promise<ISearchMatch[]>[] = [];
     let indexTotal = 0;
+    let matchPromise = Promise.resolve([]);
+    const allMatches: ISearchMatch[] = [];
     // For each cell, create a search provider and collect the matches
     cells.forEach((cell: Cell) => {
       const cmEditor = cell.editor as CodeMirrorEditor;
@@ -40,7 +46,8 @@ export class NotebookSearchProvider implements ISearchProvider {
       if (cell.inputHidden) {
         cell.inputHidden = false;
       }
-      matchPromises.push(
+      // chain promises to ensure indexing is sequential
+      matchPromise = matchPromise.then(() =>
         cmSearchProvider
           .startSearch(query, cmEditor)
           .then((matchesFromCell: ISearchMatch[]) => {
@@ -58,6 +65,12 @@ export class NotebookSearchProvider implements ISearchProvider {
             });
             indexTotal += matchesFromCell.length;
 
+            // search has been initialized, connect the changed signal
+            cmSearchProvider.changed.connect(
+              this._onCmSearchProviderChanged,
+              this
+            );
+
             // In the active cell, select the next match after the cursor
             if (activeCell === cell) {
               return cmSearchProvider
@@ -69,7 +82,7 @@ export class NotebookSearchProvider implements ISearchProvider {
             }
 
             indexTotal += matchesFromCell.length;
-            return matchesFromCell;
+            allMatches.concat(matchesFromCell);
           })
       );
 
@@ -79,19 +92,14 @@ export class NotebookSearchProvider implements ISearchProvider {
       });
     });
 
-    // Flatten matches into one array
-    return Promise.all(matchPromises).then(matchesFromCells => {
-      let result: ISearchMatch[] = [];
-      matchesFromCells.forEach((cellMatches: ISearchMatch[]) => {
-        result.concat(cellMatches);
-      });
-      return result;
-    });
+    // Execute cell searches sequentially to ensure indexes are correct
+    return matchPromise.then(() => allMatches);
   }
 
   endSearch(): Promise<void> {
     this._cmSearchProviders.forEach(({ provider }) => {
       provider.endSearch();
+      provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
@@ -136,6 +144,10 @@ export class NotebookSearchProvider implements ISearchProvider {
     return [].concat(...Private.getMatchesFromCells(this._cmSearchProviders));
   }
 
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
   get currentMatchIndex(): number {
     if (!this._currentMatch) {
       return 0;
@@ -143,10 +155,23 @@ export class NotebookSearchProvider implements ISearchProvider {
     return this._currentMatch.index;
   }
 
+  private _restartSearch(query: RegExp, searchTarget: NotebookPanel) {
+    console.log('restarting search!');
+    this.endSearch();
+    this.startSearch(query, searchTarget).then(() =>
+      this._changed.emit(undefined)
+    );
+  }
+
+  private _onCmSearchProviderChanged() {
+    this._changed.emit(undefined);
+  }
+
   private _searchTarget: NotebookPanel;
   private _cmSearchProviders: ICellSearchPair[] = [];
   private _currentMatch: ISearchMatch;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
+  private _changed = new Signal<this, void>(this);
 }
 
 namespace Private {
