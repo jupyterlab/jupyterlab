@@ -302,6 +302,34 @@ export namespace NotebookActions {
   }
 
   /**
+   * Insert a new markdown cell below the active cell.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * #### Notes
+   * The widget mode will be preserved.
+   * This action can be undone.
+   * The existing selection will be cleared.
+   * The new cell will be the active cell.
+   */
+  export function insertMarkdownBelow(notebook: Notebook): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+    const model = notebook.model;
+    const cell = model.contentFactory.createMarkdownCell({});
+
+    model.cells.insert(notebook.activeCellIndex + 1, cell);
+
+    // Make the newly inserted cell active.
+    notebook.activeCellIndex++;
+    notebook.deselectAll();
+    Private.handleState(notebook, state, true);
+  }
+
+  /**
    * Move the selected cell(s) down.
    *
    * @param notebook = The target notebook widget.

@@ -40,6 +40,11 @@ const TOOLBAR_SAVE_CLASS = 'jp-SaveIcon';
 const TOOLBAR_INSERT_CLASS = 'jp-AddIcon';
 
 /**
+ * The class name added to toolbar insert button.
+ */
+const TOOLBAR_INSERT_MARKDOWN_CLASS = 'jp-AddMarkdownIcon';
+
+/**
  * The class name added to toolbar cut button.
  */
 const TOOLBAR_CUT_CLASS = 'jp-CutIcon';
@@ -128,6 +133,19 @@ export namespace ToolbarItems {
   }
 
   /**
+   * Create an insert toolbar item.
+   */
+  export function createInsertMarkdownButton(panel: NotebookPanel): Widget {
+    return new ToolbarButton({
+      iconClassName: TOOLBAR_INSERT_MARKDOWN_CLASS + ' jp-Icon jp-Icon-16',
+      onClick: () => {
+        NotebookActions.insertMarkdownBelow(panel.content);
+      },
+      tooltip: 'Insert a markdown cell below'
+    });
+  }
+
+  /**
    * Create a cut toolbar item.
    */
   export function createCutButton(panel: NotebookPanel): Widget {
@@ -203,6 +221,7 @@ export namespace ToolbarItems {
     return [
       { name: 'save', widget: createSaveButton(panel) },
       { name: 'insert', widget: createInsertButton(panel) },
+      { name: 'insertMarkdown', widget: createInsertMarkdownButton(panel) },
       { name: 'cut', widget: createCutButton(panel) },
       { name: 'copy', widget: createCopyButton(panel) },
       { name: 'paste', widget: createPasteButton(panel) },

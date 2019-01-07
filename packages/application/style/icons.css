@@ -43,6 +43,10 @@
   background-image: var(--jp-icon-add);
 }
 
+.jp-AddMarkdownIcon {
+  background-image: var(--jp-icon-add-markdown);
+}
+
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
 }

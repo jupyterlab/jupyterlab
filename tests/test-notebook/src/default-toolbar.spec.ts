@@ -94,6 +94,29 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#createInsertMarkdownButton()', () => {
+      it('should insert markdown below when clicked', async () => {
+        const button = ToolbarItems.createInsertMarkdownButton(panel);
+        Widget.attach(button, document.body);
+        await framePromise();
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
+        expect(panel.content.activeCellIndex).to.equal(1);
+        expect(panel.content.activeCell).to.be.an.instanceof(MarkdownCell);
+        button.dispose();
+      });
+
+      it("should have the `'jp-AddMarkdownIcon'` class", async () => {
+        const button = ToolbarItems.createInsertMarkdownButton(panel);
+        Widget.attach(button, document.body);
+        await framePromise();
+        expect(
+          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
+            'jp-AddMarkdownIcon'
+          )
+        ).to.equal(true);
+      });
+    });
+
     describe('#createCutButton()', () => {
       it('should cut when clicked', async () => {
         const button = ToolbarItems.createCutButton(panel);
