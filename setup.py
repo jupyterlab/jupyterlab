@@ -137,7 +137,11 @@ setup_args['install_requires'] = [
 ]
 
 setup_args['extras_require'] = {
-    'test': ['pytest', 'requests', 'pytest-check-links'],
+    'test': [
+        'pytest==4.0',
+        'requests',
+        'pytest-check-links'
+    ],
     'docs': [
         'sphinx',
         'recommonmark',
