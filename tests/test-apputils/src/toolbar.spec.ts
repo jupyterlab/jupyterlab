@@ -396,6 +396,38 @@ describe('@jupyterlab/apputils', () => {
           button.dispose();
         });
       });
+      describe('keydown', () => {
+        it('Enter should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: 'Enter'
+          });
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+        it('Space should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: ' '
+          });
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+      });
     });
 
     //   describe('#onAfterAttach()', () => {
