@@ -152,12 +152,12 @@ function createApp(manager: ServiceManager.IManager): void {
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
   SplitPanel.setStretch(nbWidget, 1);
-  panel.addWidget(completer);
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
+  Widget.attach(completer, document.body);
 
   // Handle resize events.
   window.addEventListener('resize', () => {

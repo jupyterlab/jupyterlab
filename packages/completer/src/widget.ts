@@ -52,6 +52,12 @@ const N_COLORS = 10;
 
 /**
  * A widget that enables text completion.
+ *
+ * #### Notes
+ * The completer is intended to be absolutely positioned on the
+ * page and hover over any other content, so it should be attached directly
+ * to `document.body`, or a node that is the full size of `document.body`.
+ * Attaching it to other nodes may incorrectly locate the completer.
  */
 export class Completer extends Widget {
   /**
