@@ -18,15 +18,82 @@ import { Application, IPlugin } from '@phosphor/application';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
+import { Widget } from '@phosphor/widgets';
+
 import { createRendermimePlugins } from './mimerenderers';
 
 import { ApplicationShell } from './shell';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
+
 export { IMimeDocumentTracker } from './mimerenderers';
+
 export { IRouter, Router } from './router';
+
 export { ApplicationShell } from './shell';
+
+/**
+ * The base Jupyter client application class.
+ *
+ * #### Notes
+ * This type is useful as a generic application against which front-end plugins
+ * can be authored. It inherits from the phosphor `Application`.
+ */
+export class JupyterClient<T extends Widget = Widget> extends Application<T> {
+  /**
+   * Construct a new JupyterClient object.
+   */
+  constructor(options: JupyterClient.IOptions<T>) {
+    super(options);
+    this.serviceManager = options.serviceManager || new ServiceManager();
+    this.commandLinker =
+      options.commandLinker || new CommandLinker({ commands: this.commands });
+    this.docRegistry = options.docRegistry || new DocumentRegistry();
+  }
+
+  /**
+   * The document registry instance used by the application.
+   */
+  readonly docRegistry: DocumentRegistry;
+
+  /**
+   * The command linker used by the application.
+   */
+  readonly commandLinker: CommandLinker;
+
+  /**
+   * The service manager used by the application.
+   */
+  readonly serviceManager: ServiceManager;
+}
+
+/**
+ * The namespace for `JupyterClient` class statics.
+ */
+export namespace JupyterClient {
+  /**
+   * The options used to initialize a JupyterLab object.
+   */
+  export interface IOptions<T extends Widget = Widget>
+    extends Application.IOptions<T> {
+    /**
+     * The document registry instance used by the application.
+     */
+    docRegistry?: DocumentRegistry;
+
+    /**
+     * The command linker used by the application.
+     */
+    commandLinker?: CommandLinker;
+
+    /**
+     * The service manager used by the application.
+     */
+    serviceManager?: ServiceManager;
+  }
+}
 
 /**
  * The type for all JupyterLab plugins.
@@ -36,12 +103,14 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterLab, T>;
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends Application<ApplicationShell> {
+export class JupyterLab extends JupyterClient<ApplicationShell> {
   /**
    * Construct a new JupyterLab object.
    */
-  constructor(options: JupyterLab.IOptions = {}) {
-    super({ shell: new ApplicationShell() });
+  constructor(
+    options: JupyterLab.IOptions = { shell: new ApplicationShell() }
+  ) {
+    super({ shell: options.shell || new ApplicationShell() });
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
 
@@ -54,21 +123,21 @@ export class JupyterLab extends Application<ApplicationShell> {
     // Set default workspace in page config.
     PageConfig.setOption('defaultWorkspace', defaultWorkspace);
 
-    // Instantiate public resources.
-    this.serviceManager = options.serviceManager || new ServiceManager();
-    this.commandLinker =
-      options.commandLinker || new CommandLinker({ commands: this.commands });
-    this.docRegistry = options.docRegistry || new DocumentRegistry();
-
-    // Remove extra resources (non-IInfo) from options object.
-    delete options.serviceManager;
-    delete options.commandLinker;
-    delete options.docRegistry;
+    // Create an IInfo dictionary from the options to override the defaults.
+    const info = Object.keys(JupyterLab.defaultInfo).reduce(
+      (acc, val) => {
+        if (val in options) {
+          (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
+        }
+        return acc;
+      },
+      {} as Partial<JupyterLab.IInfo>
+    );
 
     // Populate application info.
     this._info = {
       ...JupyterLab.defaultInfo,
-      ...(options as Partial<JupyterLab.IInfo>),
+      ...info,
       ...{ defaultWorkspace }
     };
 
@@ -90,21 +159,6 @@ export class JupyterLab extends Application<ApplicationShell> {
       }
     }
   }
-
-  /**
-   * The document registry instance used by the application.
-   */
-  readonly docRegistry: DocumentRegistry;
-
-  /**
-   * The command linker used by the application.
-   */
-  readonly commandLinker: CommandLinker;
-
-  /**
-   * The service manager used by the application.
-   */
-  readonly serviceManager: ServiceManager;
 
   /**
    * A list of all errors encountered when registering plugins.
@@ -315,22 +369,9 @@ export namespace JupyterLab {
   /**
    * The options used to initialize a JupyterLab object.
    */
-  export interface IOptions extends Partial<IInfo> {
-    /**
-     * The document registry instance used by the application.
-     */
-    docRegistry?: DocumentRegistry;
-
-    /**
-     * The command linker used by the application.
-     */
-    commandLinker?: CommandLinker;
-
-    /**
-     * The service manager used by the application.
-     */
-    serviceManager?: ServiceManager;
-  }
+  export interface IOptions
+    extends JupyterClient.IOptions<ApplicationShell>,
+      Partial<IInfo> {}
 
   /**
    * The information about a JupyterLab application.
