@@ -1284,11 +1284,6 @@ export namespace Private {
   const nondescript = '[missing schema description]';
 
   /**
-   * Replacement text for schema properties missing a `default` field.
-   */
-  const undefaulted = '[missing schema default]';
-
-  /**
    * Replacement text for schema properties missing a `title` field.
    */
   const untitled = '[missing schema title]';
@@ -1311,7 +1306,7 @@ export namespace Private {
       prefix(description || nondescript),
       prefix(line(length)),
       '',
-      keys.map(key => defaultDocumentedValue(schema, key)).join(',\n\n'),
+      join(keys.map(key => defaultDocumentedValue(schema, key))),
       '}'
     ].join('\n');
   }
@@ -1338,9 +1333,7 @@ export namespace Private {
       prefix(description || nondescript),
       prefix(line(length)),
       '',
-      keys
-        .map(key => documentedValue(plugin.schema, key, data[key]))
-        .join(',\n\n'),
+      join(keys.map(key => documentedValue(plugin.schema, key, data[key]))),
       '}'
     ].join('\n');
   }
@@ -1353,21 +1346,20 @@ export namespace Private {
     schema: ISettingRegistry.ISchema,
     key: string
   ): string {
-    const props = schema.properties && schema.properties[key];
-    const description = (props && props['description']) || nondescript;
-    const title = (props && props['title']) || untitled;
+    const props = (schema.properties && schema.properties[key]) || {};
+    const type = props['type'];
+    const description = props['description'] || nondescript;
+    const title = props['title'] || '';
     const reified = reifyDefault(schema, key);
     const spaces = indent.length;
     const defaults =
-      reified === undefined
-        ? prefix(`"${key}": ${undefaulted}`)
-        : prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent);
+      reified !== undefined
+        ? prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent)
+        : prefix(`"${key}": ${type}`);
 
-    return [
-      prefix(`${title || untitled}`),
-      prefix(description || nondescript),
-      defaults
-    ].join('\n');
+    return [prefix(title), prefix(description), defaults]
+      .filter(str => str.length)
+      .join('\n');
   }
 
   /**
@@ -1389,6 +1381,22 @@ export namespace Private {
 
     return [prefix(title), prefix(description), attribute].join('\n');
   }
+
+  /**
+   * Returns a joined string with line breaks and commas where appropriate.
+   */
+  function join(body: string[]): string {
+    return body.reduce((acc, val, idx) => {
+      const rows = val.split('\n');
+      const last = rows[rows.length - 1];
+      const comment = last.trim().indexOf('//') === 0;
+      const comma = comment || idx === body.length - 1 ? '' : ',';
+      const separator = idx === body.length - 1 ? '' : '\n\n';
+
+      return acc + val + comma + separator;
+    }, '');
+  }
+
   /**
    * Returns a line of a specified length.
    */
@@ -1399,7 +1407,7 @@ export namespace Private {
   /**
    * Returns a documentation string with a comment prefix added on every line.
    */
-  function prefix(source: string, pre = `${indent}\/\/ `): string {
+  function prefix(source: string, pre = `${indent}// `): string {
     return pre + source.split('\n').join(`\n${pre}`);
   }
 

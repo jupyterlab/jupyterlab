@@ -31,7 +31,7 @@
   "properties": {
     "interactionMode": {
       "title": "Interaction mode",
-      "description": "Whether the console interaction mimics the notebook or terminal keyboard shortcuts.",
+      "description": "Whether the console interaction mimics the notebook\nor terminal keyboard shortcuts.",
       "type": "string",
       "enum": ["notebook", "terminal"],
       "default": "notebook"

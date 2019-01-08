@@ -151,11 +151,19 @@
   max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
+#setting-editor
+  .jp-SettingsRawEditor
+  .jp-Toolbar
+  .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
   margin-top: 2px;
 }
 
-#setting-editor
+.jp-ToolbarButtonComponent-label
+  #setting-editor
   .jp-SettingsRawEditor.jp-mod-error
   .jp-Toolbar-item.jp-BugIcon::after {
   color: red;
