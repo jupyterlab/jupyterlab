@@ -28,7 +28,7 @@
       "title": "Font family",
       "description": "The font family used to render text.",
       "$ref": "#/definitions/fontFamily",
-      "default": "courier-new, courier, monospace"
+      "default": "monospace"
     },
     "fontSize": {
       "title": "Font size",

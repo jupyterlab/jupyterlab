@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Message } from '@phosphor/messaging';
+
 import { Widget } from '@phosphor/widgets';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -48,12 +50,17 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as any;
-    // const metadata = model.metadata[this._mimeType] as any || {};
-    return new Promise<void>((resolve, reject) => {
-      ReactDOM.render(<VDOM data={data} />, this.node, () => {
-        resolve(undefined);
-      });
+    return new Promise<void>(resolve => {
+      ReactDOM.render(<VDOM data={data} />, this.node, resolve);
     });
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down.
+    ReactDOM.unmountComponentAtNode(this.node);
   }
 
   private _mimeType: string;

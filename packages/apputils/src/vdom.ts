@@ -13,12 +13,90 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+type ReactRenderElement =
+  | Array<React.ReactElement<any>>
+  | React.ReactElement<any>;
+
 /**
- * Phosphor widget that encodes best practices for VDOM based rendering.
+ * An abstract class for a Phosphor widget which renders a React component.
+ */
+export abstract class ReactWidget extends Widget {
+  /**
+   * Creates a new `ReactWidget` that renders a constant element.
+   * @param element React element to render.
+   */
+  static create(element: ReactRenderElement): ReactWidget {
+    return new class extends ReactWidget {
+      render() {
+        return element;
+      }
+    }();
+  }
+
+  /**
+   * Render the content of this widget using the virtual DOM.
+   *
+   * This method will be called anytime the widget needs to be rendered, which
+   * includes layout triggered rendering.
+   *
+   * Subclasses should define this method and return the root React nodes here.
+   */
+  protected abstract render(): ReactRenderElement;
+
+  /**
+   * Called to update the state of the widget.
+   *
+   * The default implementation of this method triggers
+   * VDOM based rendering by calling the `renderDOM` method.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this.renderPromise = this.renderDOM();
+  }
+
+  /**
+   * Called after the widget is attached to the DOM
+   */
+  protected onAfterAttach(msg: Message): void {
+    // Make *sure* the widget is rendered.
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down.
+    ReactDOM.unmountComponentAtNode(this.node);
+  }
+
+  /**
+   * Render the React nodes to the DOM.
+   *
+   * @returns a promise that resolves when the rendering is done.
+   */
+  private renderDOM(): Promise<void> {
+    return new Promise<void>(resolve => {
+      let vnode = this.render();
+      // Split up the array/element cases so type inference chooses the right
+      // signature.
+      if (Array.isArray(vnode)) {
+        ReactDOM.render(vnode, this.node, resolve);
+      } else {
+        ReactDOM.render(vnode, this.node, resolve);
+      }
+    });
+  }
+
+  // Set whenever a new render is triggered and resolved when it is finished.
+  renderPromise?: Promise<void>;
+}
+
+/**
+ * An abstract ReactWidget with a model.
  */
 export abstract class VDomRenderer<
   T extends VDomRenderer.IModel | null
-> extends Widget {
+> extends ReactWidget {
   /**
    * A signal emitted when the model changes.
    */
@@ -63,68 +141,117 @@ export abstract class VDomRenderer<
     super.dispose();
   }
 
-  /**
-   * Called to update the state of the widget.
-   *
-   * The default implementation of this method triggers
-   * VDOM based rendering by calling the this.render() method.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    let vnode = this.render();
-    if (Array.isArray(vnode)) {
-      ReactDOM.render(vnode, this.node);
-    } else {
-      ReactDOM.render<any>(vnode, this.node);
-    }
-  }
-
-  /* Called after the widget is attached to the DOM
-   *
-   * Make sure the widget is rendered, even if the model has not changed.
-   */
-  protected onAfterAttach(msg: Message): void {
-    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-  }
-
-  /**
-   * Render the content of this widget using the virtual DOM.
-   *
-   * This method will be called anytime the widget needs to be rendered,
-   * which includes layout triggered rendering and all model changes.
-   *
-   * Subclasses should define this method and use the current model state
-   * to create a virtual node or nodes to render.
-   */
-  protected abstract render():
-    | Array<React.ReactElement<any>>
-    | React.ReactElement<any>
-    | null;
-
   private _model: T | null;
   private _modelChanged = new Signal<this, void>(this);
 }
 
 /**
- * Phosphor widget that renders React Element(s).
- *
- * All messages will re-render the element.
+ * Props for the UseSignal component
  */
-export class ReactElementWidget extends VDomRenderer<any> {
+export interface IUseSignalProps<SENDER, ARGS> {
   /**
-   * Creates a Phosphor widget that renders the element(s) `es`.
+   * Phosphor signal to connect to.
    */
-  constructor(
-    es: Array<React.ReactElement<any>> | React.ReactElement<any> | null
-  ) {
-    super();
-    this._es = es;
+
+  signal: ISignal<SENDER, ARGS>;
+  /**
+   * Initial value to use for the sender, used before the signal emits a value.
+   * If not provided, initial sender will be undefined
+   */
+  initialSender?: SENDER;
+  /**
+   * Initial value to use for the args, used before the signal emits a value.
+   * If not provided, initial args will be undefined.
+   */
+  initialArgs?: ARGS;
+  /**
+   * Function mapping the last signal value or inital values to an element to render.
+   *
+   * Note: returns `React.ReactNode` as per
+   * https://github.com/sw-yx/react-typescript-cheatsheet#higher-order-componentsrender-props
+   */
+
+  children: (sender?: SENDER, args?: ARGS) => React.ReactNode;
+  /**
+   * Given the last signal value, should return whether to update the state or not.
+   *
+   * The default unconditionally returns `true`, so you only have to override if you want
+   * to skip some updates.
+   */
+
+  shouldUpdate?: (sender: SENDER, args: ARGS) => boolean;
+}
+
+/**
+ * State for the UseSignal component
+ */
+export interface IUseSignalState<SENDER, ARGS> {
+  value: [SENDER?, ARGS?];
+}
+
+/**
+ * UseSignal provides a way to hook up a Phosphor signal to a React element,
+ * so that the element is re-rendered every time the signal fires.
+ *
+ * It is implemented through the "render props" technique, using the `children`
+ * prop as a function to render, so that it can be used either as a prop or as a child
+ * of this element
+ * https://reactjs.org/docs/render-props.html
+ *
+ *
+ * Example as child:
+ *
+ * ```
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
+ *  return (
+ *    <UseSignal signal={isActiveSignal} initialArgs={True}>
+ *     {(_, isActive) => <Button isActive={isActive}>}
+ *    </UseSignal>
+ *  )
+ * }
+ * ```
+ *
+ * Example as prop:
+ *
+ * ```
+ * function LiveButton(isActiveSignal: ISignal<any, boolean>) {
+ *  return (
+ *    <UseSignal
+ *      signal={isActiveSignal}
+ *      initialArgs={True}
+ *      children={(_, isActive) => <Button isActive={isActive}>}
+ *    />
+ *  )
+ * }
+ */
+export class UseSignal<SENDER, ARGS> extends React.Component<
+  IUseSignalProps<SENDER, ARGS>,
+  IUseSignalState<SENDER, ARGS>
+> {
+  constructor(props: IUseSignalProps<SENDER, ARGS>) {
+    super(props);
+    this.state = { value: [this.props.initialSender, this.props.initialArgs] };
   }
 
-  render(): Array<React.ReactElement<any>> | React.ReactElement<any> | null {
-    return this._es;
+  componentDidMount() {
+    this.props.signal.connect(this.slot);
   }
 
-  private _es: Array<React.ReactElement<any>> | React.ReactElement<any> | null;
+  componentWillUnmount() {
+    this.props.signal.disconnect(this.slot);
+  }
+
+  private slot = (sender: SENDER, args: ARGS) => {
+    // skip setting new state if we have a shouldUpdate function and it returns false
+    if (this.props.shouldUpdate && !this.props.shouldUpdate(sender, args)) {
+      return;
+    }
+    this.setState({ value: [sender, args] });
+  };
+
+  render() {
+    return this.props.children(...this.state.value);
+  }
 }
 
 /**

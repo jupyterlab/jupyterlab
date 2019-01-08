@@ -11,7 +11,7 @@ import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { ReactElementWidget } from './vdom';
+import { ReactWidget } from './vdom';
 
 import { Styling } from './styling';
 
@@ -575,7 +575,7 @@ export namespace Dialog {
         header = new Widget({ node: document.createElement('span') });
         header.node.textContent = title;
       } else {
-        header = new ReactElementWidget(title);
+        header = ReactWidget.create(title);
       }
       header.addClass('jp-Dialog-header');
       Styling.styleNode(header.node);
@@ -597,7 +597,7 @@ export namespace Dialog {
       } else if (value instanceof Widget) {
         body = value;
       } else {
-        body = new ReactElementWidget(value);
+        body = ReactWidget.create(value);
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);

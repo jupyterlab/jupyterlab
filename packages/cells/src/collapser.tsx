@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
@@ -42,7 +42,7 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
  * input/output that a user can click on to collapse the
  * input/output.
  */
-export abstract class Collapser extends VDomRenderer<null> {
+export abstract class Collapser extends ReactWidget {
   /**
    * Construct a new collapser.
    */

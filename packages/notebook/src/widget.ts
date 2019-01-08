@@ -468,7 +468,13 @@ export class StaticNotebook extends Widget {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.code;
-    let options = { editorConfig, model, rendermime, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createCodeCell(options, this);
   }
 
@@ -479,7 +485,13 @@ export class StaticNotebook extends Widget {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.markdown;
-    let options = { editorConfig, model, rendermime, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      rendermime,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createMarkdownCell(options, this);
   }
 
@@ -489,7 +501,12 @@ export class StaticNotebook extends Widget {
   private _createRawCell(model: IRawCellModel): RawCell {
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.raw;
-    let options = { editorConfig, model, contentFactory };
+    let options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false
+    };
     return this.contentFactory.createRawCell(options, this);
   }
 
@@ -568,6 +585,7 @@ export class StaticNotebook extends Widget {
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
         cell.editor.setOption(key, config[key]);
       });
+      cell.editor.refresh();
     }
   }
 
@@ -1278,6 +1296,49 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('p-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    this._checkCacheOnNextResize = true;
+  }
+
+  /**
+   * A message handler invoked on a `'resize'` message.
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    if (!this._checkCacheOnNextResize) {
+      return super.onResize(msg);
+    }
+    this._checkCacheOnNextResize = false;
+    const cache = this._cellLayoutStateCache;
+    const width = parseInt(this.node.style.width, 10);
+    if (cache) {
+      if (width === cache.width) {
+        // Cache identical, do nothing
+        return;
+      }
+    }
+    // Update cache
+    this._cellLayoutStateCache = { width };
+
+    // Fallback:
+    for (let w of this.widgets) {
+      if (w instanceof Cell) {
+        w.editorWidget.update();
+      }
+    }
+  }
+
+  /**
+   * A message handler invoked on an `'before-hide'` message.
+   */
+  protected onBeforeHide(msg: Message): void {
+    // Update cache
+    const width = parseInt(this.node.style.width, 10);
+    this._cellLayoutStateCache = { width };
   }
 
   /**
@@ -2058,6 +2119,10 @@ export class Notebook extends StaticNotebook {
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
+
+  // Attributes for optimized cell refresh:
+  private _cellLayoutStateCache?: { width: number };
+  private _checkCacheOnNextResize = false;
 }
 
 /**

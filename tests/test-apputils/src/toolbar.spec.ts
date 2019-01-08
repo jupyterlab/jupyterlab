@@ -6,14 +6,13 @@ import { expect } from 'chai';
 import {
   ClientSession,
   Toolbar,
-  ToolbarButton
-  // CommandToolbarButton,
-  // ToolbarButtonComponent
+  ToolbarButton,
+  CommandToolbarButton
 } from '@jupyterlab/apputils/src';
 
 import { toArray } from '@phosphor/algorithm';
 
-// import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
 // import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
@@ -24,6 +23,7 @@ import { Widget } from '@phosphor/widgets';
 import { simulate } from 'simulate-event';
 
 import { createClientSession, framePromise } from '@jupyterlab/testutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
@@ -97,139 +97,153 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    // describe('.createFromCommand', () => {
-    //   const commands = new CommandRegistry();
-    //   const testLogCommandId = 'test:toolbar-log';
-    //   const logArgs: ReadonlyJSONObject[] = [];
-    //   let enabled = false;
-    //   let toggled = true;
-    //   let visible = false;
-    //   commands.addCommand(testLogCommandId, {
-    //     execute: args => {
-    //       logArgs.push(args);
-    //     },
-    //     label: 'Test log command label',
-    //     caption: 'Test log command caption',
-    //     usage: 'Test log command usage',
-    //     iconClass: 'test-icon-class',
-    //     iconLabel: 'Test log icon label',
-    //     className: 'test-log-class',
-    //     isEnabled: () => enabled,
-    //     isToggled: () => toggled,
-    //     isVisible: () => visible
-    //   });
+    describe('.createFromCommand', () => {
+      const commands = new CommandRegistry();
+      const testLogCommandId = 'test:toolbar-log';
+      const logArgs: ReadonlyJSONObject[] = [];
+      let enabled = false;
+      let toggled = true;
+      let visible = false;
+      commands.addCommand(testLogCommandId, {
+        execute: args => {
+          logArgs.push(args);
+        },
+        label: 'Test log command label',
+        caption: 'Test log command caption',
+        usage: 'Test log command usage',
+        iconClass: 'test-icon-class',
+        className: 'test-log-class',
+        isEnabled: () => enabled,
+        isToggled: () => toggled,
+        isVisible: () => visible
+      });
 
-    //   it('should create a button', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button).to.be.an.instanceof(CommandToolbarButton);
-    //     button.dispose();
-    //   });
+      async function render(button: CommandToolbarButton) {
+        button.update();
+        await framePromise();
+        expect(button.renderPromise).to.exist;
+        await button.renderPromise;
+      }
 
-    //   it('should add main class', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(
-    //       (button.node as HTMLElement).classList.contains('test-log-class')
-    //     ).to.equal(true);
-    //     button.dispose();
-    //   });
+      it('should create a button', () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        expect(button).to.be.an.instanceof(CommandToolbarButton);
+        button.dispose();
+      });
 
-    //   it('should add an icon with icon class and label', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     const iconNode = button.node.firstChild as HTMLElement;
-    //     expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
-    //     expect(iconNode.title).to.equal('Test log icon label');
-    //     button.dispose();
-    //   });
+      it('should add main class', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.classList.contains('test-log-class')).to.equal(true);
+        button.dispose();
+      });
 
-    //   it('should apply state classes', () => {
-    //     enabled = false;
-    //     toggled = true;
-    //     visible = false;
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(true);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(true);
-    //     button.dispose();
-    //   });
+      it('should add an icon with icon class and label', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.title).to.equal('Test log command caption');
+        const iconNode = buttonNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
+        button.dispose();
+      });
 
-    //   it('should update state classes', () => {
-    //     enabled = false;
-    //     toggled = true;
-    //     visible = false;
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(true);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(true);
-    //     enabled = true;
-    //     visible = true;
-    //     commands.notifyCommandChanged(testLogCommandId);
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(false);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(false);
-    //     enabled = false;
-    //     visible = false;
-    //     button.dispose();
-    //   });
+      it('should apply state classes', async () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.disabled).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        button.dispose();
+      });
 
-    //   it('should add use the command label if no icon class/label', () => {
-    //     const id = 'to-be-removed';
-    //     const cmd = commands.addCommand(id, {
-    //       execute: () => {
-    //         return;
-    //       },
-    //       label: 'Label-only button'
-    //     });
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button.node.childElementCount).to.equal(0);
-    //     expect(button.node.innerText).to.equal('Label-only button');
-    //     cmd.dispose();
-    //   });
+      it('should update state classes', async () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.disabled).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        enabled = true;
+        visible = true;
+        commands.notifyCommandChanged(testLogCommandId);
+        expect(buttonNode.disabled).to.equal(false);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(false);
+        enabled = false;
+        visible = false;
+        button.dispose();
+      });
 
-    //   it('should update the node content on command change event', () => {
-    //     const id = 'to-be-removed';
-    //     let iconClassValue: string | null = null;
-    //     const cmd = commands.addCommand(id, {
-    //       execute: () => {
-    //         /* no op */
-    //       },
-    //       label: 'Label-only button',
-    //       iconClass: () => iconClassValue
-    //     });
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button.node.childElementCount).to.equal(0);
-    //     expect(button.node.innerText).to.equal('Label-only button');
+      it('should use the command label if no icon class/label', async () => {
+        const id = 'to-be-removed';
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            return;
+          },
+          label: 'Label-only button'
+        });
+        const button = new CommandToolbarButton({
+          commands,
+          id
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.textContent).to.equal('Label-only button');
+        cmd.dispose();
+      });
 
-    //     iconClassValue = 'updated-icon-class';
-    //     commands.notifyCommandChanged(id);
+      it('should update the node content on command change event', async () => {
+        const id = 'to-be-removed';
+        let iconClassValue: string | null = null;
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            /* no op */
+          },
+          label: 'Label-only button',
+          iconClass: () => iconClassValue
+        });
+        const button = new CommandToolbarButton({
+          commands,
+          id
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.textContent).to.equal('Label-only button');
+        expect(buttonNode.classList.contains(iconClassValue)).to.equal(false);
 
-    //     expect(button.node.innerText).to.equal('');
-    //     const iconNode = button.node as HTMLElement;
-    //     expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
+        iconClassValue = 'updated-icon-class';
+        commands.notifyCommandChanged(id);
+        await render(button);
+        const iconNode = buttonNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
 
-    //     cmd.dispose();
-    //   });
-    // });
+        cmd.dispose();
+      });
+    });
 
     describe('.createInterruptButton()', () => {
       it("should have the `'jp-StopIcon'` class", async () => {
@@ -416,28 +430,28 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    // describe('#onAfterAttach()', () => {
-    //   it('should add event listeners to the node', () => {
-    //     const button = new LogToolbarButton();
-    //     Widget.attach(button, document.body);
-    //     expect(button.methods).to.contain('onAfterAttach');
-    //     simulate(button.node, 'click');
-    //     expect(button.events).to.contain('click');
-    //     button.dispose();
+    //   describe('#onAfterAttach()', () => {
+    //     it('should add event listeners to the node', () => {
+    //       const button = new LogToolbarButton();
+    //       Widget.attach(button, document.body);
+    //       expect(button.methods).to.contain('onAfterAttach');
+    //       simulate(button.node, 'click');
+    //       expect(button.events).to.contain('click');
+    //       button.dispose();
+    //     });
     //   });
-    // });
 
-    // describe('#onBeforeDetach()', () => {
-    //   it('should remove event listeners from the node', async () => {
-    //     const button = new LogToolbarButton();
-    //     Widget.attach(button, document.body);
-    //     await framePromise();
-    //     Widget.detach(button);
-    //     expect(button.methods).to.contain('onBeforeDetach');
-    //     simulate(button.node, 'click');
-    //     expect(button.events).to.not.contain('click');
-    //     button.dispose();
+    //   describe('#onBeforeDetach()', () => {
+    //     it('should remove event listeners from the node', async () => {
+    //       const button = new LogToolbarButton();
+    //       Widget.attach(button, document.body);
+    //       await framePromise();
+    //       Widget.detach(button);
+    //       expect(button.methods).to.contain('onBeforeDetach');
+    //       simulate(button.node, 'click');
+    //       expect(button.events).to.not.contain('click');
+    //       button.dispose();
+    //     });
     //   });
-    // });
   });
 });

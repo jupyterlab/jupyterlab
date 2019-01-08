@@ -24,9 +24,25 @@ import {
 } from '@jupyterlab/testutils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
-  addCell(cell: CodeCell): void {
+  addCell(cell: CodeCell, msgId?: string): void {
     this.addWidget(cell);
+    if (msgId) {
+      this._cells.set(msgId, cell);
+    }
   }
+
+  createCodeCell(): CodeCell {
+    const contentFactory = NBTestUtils.createCodeCellFactory();
+    const model = new CodeCellModel({});
+    const cell = new CodeCell({ model, rendermime, contentFactory });
+    return cell;
+  }
+
+  getCell(msgId: string) {
+    return this._cells.get(msgId);
+  }
+
+  private _cells = new Map<string, CodeCell>();
 }
 
 class TestHandler extends ForeignHandler {
@@ -64,12 +80,6 @@ class TestHandler extends ForeignHandler {
 
 const rendermime = defaultRenderMime();
 
-function cellFactory(): CodeCell {
-  const contentFactory = NBTestUtils.createCodeCellFactory();
-  const model = new CodeCellModel({});
-  const cell = new CodeCell({ model, rendermime, contentFactory });
-  return cell;
-}
 const relevantTypes = [
   'execute_input',
   'execute_result',
@@ -99,7 +109,7 @@ describe('@jupyterlab/console', () => {
 
     beforeEach(() => {
       const parent = new TestParent();
-      handler = new TestHandler({ session, parent, cellFactory });
+      handler = new TestHandler({ session, parent });
     });
 
     afterEach(() => {
@@ -166,8 +176,7 @@ describe('@jupyterlab/console', () => {
         const parent = new TestParent();
         handler = new TestHandler({
           session: handler.session,
-          parent,
-          cellFactory
+          parent
         });
         expect(handler.parent).to.equal(parent);
       });
