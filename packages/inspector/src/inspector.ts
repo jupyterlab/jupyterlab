@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { printSymbol, printd } from '@jupyterlab/apputils';
+
 import { Token } from '@phosphor/coreutils';
 
 import { ISignal } from '@phosphor/signaling';
@@ -95,6 +97,13 @@ export class InspectorPanel extends Panel implements IInspector {
   constructor() {
     super();
     this.addClass(PANEL_CLASS);
+  }
+
+  /**
+   * Print in iframe
+   */
+  [printSymbol]() {
+    printd.bind(this)('.p-mod-hidden {display: none;}');
   }
 
   /**

@@ -3,6 +3,8 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { printSymbol, printd } from '@jupyterlab/apputils';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -39,6 +41,8 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
     this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
   }
+
+  [printSymbol] = printd;
 
   /**
    * Render JSON into this widget's node.

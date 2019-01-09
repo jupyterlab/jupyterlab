@@ -11,7 +11,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { MainAreaWidget, printSymbol, printd } from '@jupyterlab/apputils';
+import { MainAreaWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -444,8 +444,6 @@ export class DocumentWidget<
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
 
-    this[printSymbol] = printd;
-
     this.context = options.context;
 
     // Handle context path changes
@@ -464,8 +462,6 @@ export class DocumentWidget<
       this._handleDirtyState();
     });
   }
-
-  [printSymbol]: () => void;
 
   /**
    * Set URI fragment identifier.

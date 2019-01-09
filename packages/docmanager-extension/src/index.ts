@@ -789,7 +789,7 @@ function addLabCommands(
     label: 'Print...',
     isEnabled: () => {
       const { currentWidget } = shell;
-      return currentWidget && isPrintable(currentWidget);
+      return isPrintable(currentWidget);
     },
     execute: () => {
 

@@ -11,6 +11,8 @@ import { Toolbar } from './toolbar';
 
 import { DOMUtils } from './domutils';
 
+import { printSymbol, deferPrinting } from './printing';
+
 /**
  * A widget meant to be contained in the JupyterLab main area.
  *
@@ -41,6 +43,8 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     BoxLayout.setStretch(content, 1);
     layout.addWidget(toolbar);
     layout.addWidget(content);
+
+    deferPrinting(this, content);
 
     if (!content.id) {
       content.id = DOMUtils.createDomID();
@@ -101,6 +105,11 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
       this._revealed = Promise.resolve(undefined);
     }
   }
+
+  /**
+   * Print method. Defered to content.
+   */
+  [printSymbol]: () => void;
 
   /**
    * The content hosted by the widget.

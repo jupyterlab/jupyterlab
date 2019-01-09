@@ -1,4 +1,4 @@
-import { Printd } from 'printd';
+import { Printd, PrintdCallback } from 'printd';
 import { Widget } from '@phosphor/widgets';
 
 /**
@@ -17,8 +17,13 @@ export interface IPrintable {
 /**
  * Returns whether an object implements a print method.
  */
-export function isPrintable(a: object): a is IPrintable {
-  return printSymbol in a;
+export function isPrintable(a: any): a is IPrintable {
+  try {
+    return printSymbol in a;
+  } catch {
+    // `in` raises a type error on non objects.
+    return false;
+  }
 }
 
 /**
@@ -26,6 +31,16 @@ export function isPrintable(a: object): a is IPrintable {
  */
 export function print(a: IPrintable) {
   a[printSymbol]();
+}
+
+/**
+ * Sets the print method on the parent to that of the child, if it
+ * exists on the child.
+ */
+export function deferPrinting(parent: IPrintable, child: object) {
+  if (isPrintable(child)) {
+    parent[printSymbol] = child[printSymbol].bind(child);
+  }
 }
 
 /**
@@ -38,6 +53,10 @@ const _PRINTD = new Printd();
  * use the `printd` library to print the node, by
  * creating an iframe and copying the DOM into it.
  */
-export function printd(this: Widget) {
-  _PRINTD.print(this.node);
+export function printd(
+  this: Widget,
+  cssText?: string,
+  callback?: PrintdCallback
+) {
+  _PRINTD.print(this.node, cssText, callback);
 }

@@ -3,6 +3,8 @@
 
 import { PathExt } from '@jupyterlab/coreutils';
 
+import { printSymbol, printd } from '@jupyterlab/apputils';
+
 import {
   ABCWidgetFactory,
   DocumentRegistry,
@@ -62,6 +64,11 @@ export class ImageViewer extends Widget {
       this._ready.resolve(void 0);
     });
   }
+
+  /**
+   * Print in iframe.
+   */
+  [printSymbol] = printd;
 
   /**
    * The image widget's context.

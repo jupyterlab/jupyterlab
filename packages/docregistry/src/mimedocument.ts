@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import {
+  showErrorMessage,
+  deferPrinting,
+  printSymbol
+} from '@jupyterlab/apputils';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
@@ -38,6 +42,8 @@ export class MimeContent extends Widget {
 
     const layout = (this.layout = new StackedLayout());
     layout.addWidget(this.renderer);
+
+    deferPrinting(this, options.renderer);
 
     this._context.ready
       .then(() => {
@@ -77,6 +83,11 @@ export class MimeContent extends Widget {
    * The mimetype for this rendered content.
    */
   readonly mimeType: string;
+
+  /**
+   * Print method. Defered to the renderer.
+   */
+  [printSymbol]: () => void;
 
   /**
    * A promise that resolves when the widget is ready.
