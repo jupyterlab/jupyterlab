@@ -292,16 +292,35 @@ export class Completer extends Widget {
    * `down` cycles will remain on the last index. When the user cycles `up` to
    * the first item, subsequent `up` cycles will remain on the first cycle.
    */
-  private _cycle(direction: 'up' | 'down'): void {
+  private _cycle(direction: Private.scrollType): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     let index = this._activeIndex;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
+
     if (direction === 'up') {
       this._activeIndex = index === 0 ? index : index - 1;
-    } else {
+    } else if (direction === 'down') {
       this._activeIndex = index < items.length - 1 ? index + 1 : index;
+    } else {
+      // Measure the number of items on a page.
+      const boxHeight = this.node.getBoundingClientRect().height;
+      const itemHeight = active.getBoundingClientRect().height;
+      const pageLength = Math.floor(boxHeight / itemHeight);
+
+      // Update the index
+      if (direction === 'pageUp') {
+        this._activeIndex = index - pageLength;
+      } else {
+        this._activeIndex = index + pageLength;
+      }
+      // Clamp to the length of the list.
+      this._activeIndex = Math.min(
+        Math.max(0, this._activeIndex),
+        items.length - 1
+      );
     }
+
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
     ElementExt.scrollIntoViewIfNeeded(this.node, active);
@@ -341,12 +360,15 @@ export class Completer extends Widget {
         event.stopImmediatePropagation();
         this.reset();
         return;
+      case 33: // PageUp
+      case 34: // PageDown
       case 38: // Up arrow key
       case 40: // Down arrow key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this._cycle(event.keyCode === 38 ? 'up' : 'down');
+        const cycle = Private.keyCodeMap[event.keyCode];
+        this._cycle(cycle);
         return;
       default:
         return;
@@ -740,6 +762,21 @@ export namespace Completer {
  * A namespace for completer widget private data.
  */
 namespace Private {
+  /**
+   * Types of scrolling through the completer.
+   */
+  export type scrollType = 'up' | 'down' | 'pageUp' | 'pageDown';
+
+  /**
+   * Mapping from keyCodes to scrollTypes.
+   */
+  export const keyCodeMap: { [n: number]: scrollType } = {
+    38: 'up',
+    40: 'down',
+    33: 'pageUp',
+    34: 'pageDown'
+  };
+
   /**
    * Returns the common subset string that a list of strings shares.
    */
