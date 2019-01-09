@@ -792,9 +792,10 @@ function addLabCommands(
       return isPrintable(currentWidget);
     },
     execute: () => {
-
-      // We know widget has to be printable because is only enabled on printable widgets.
-      print((widget as unknown) as IPrintable);
+      const widget = contextMenuWidget();
+      if (isPrintable(widget)) {
+        print(widget);
+      }
     }
   });
 
