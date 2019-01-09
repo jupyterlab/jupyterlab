@@ -604,9 +604,11 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.2.tgz#54c5a964462be3d4d78af631363c18d6fa91ac26"
 
-"@nteract/transform-vdom@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@nteract/transform-vdom/-/transform-vdom-1.1.1.tgz#49258c58a3704c89b20cc42b5be463d7802406fa"
+"@nteract/transform-vdom@>=3.0.4-alpha.0":
+  version "3.0.4-alpha.0"
+  resolved "https://registry.yarnpkg.com/@nteract/transform-vdom/-/transform-vdom-3.0.4-alpha.0.tgz#fbea0020630471e37ba058a0596d03a274ad99c6"
+  dependencies:
+    lodash "^4.17.4"
 
 "@phosphor/algorithm@^1.1.2":
   version "1.1.2"
