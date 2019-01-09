@@ -112,6 +112,7 @@ export function createNotebookGenerator(
             ) {
               for (let j = headings.length - 1; j >= 0; j--) {
                 if (headings[j] === prevHeading) {
+                  console.log('point A: ' + headings[j].text);
                   headings[j].hasChild = true;
                 }
               }
@@ -181,6 +182,7 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
+                    console.log('point B: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -196,11 +198,12 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                prevHeading.level <= renderedHeading.level &&
+                prevHeading.level < renderedHeading.level &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
+                    console.log('point C: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -313,6 +316,7 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
+                    console.log('point D: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -332,11 +336,12 @@ export function createNotebookGenerator(
                 prevHeading &&
                 prevHeading.type === 'header' &&
                 (renderedHeading &&
-                  prevHeading.level <= renderedHeading.level) &&
+                  prevHeading.level < renderedHeading.level) &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
+                    console.log('point E: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -423,12 +428,13 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                prevHeading.level <= renderedHeading.level &&
+                prevHeading.level < renderedHeading.level &&
                 options.showMarkdown &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] == prevHeading) {
+                    console.log('point F: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -445,11 +451,12 @@ export function createNotebookGenerator(
               if (
                 prevHeading &&
                 prevHeading.type === 'header' &&
-                prevHeading.level <= renderedHeading.level &&
+                prevHeading.level < renderedHeading.level &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] == prevHeading) {
+                    console.log('point G: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }

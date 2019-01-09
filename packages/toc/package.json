@@ -71,5 +71,8 @@
   },
   "resolutions": {
     "@types/react": "~16.4.13"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
