@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Printd } from 'printd';
+
 import { toArray, iter } from '@phosphor/algorithm';
 
 import { Widget, DockLayout } from '@phosphor/widgets';
@@ -39,6 +41,8 @@ import { Contents, Kernel } from '@jupyterlab/services';
 import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { IDisposable } from '@phosphor/disposable';
+
+const _PRINTD = new Printd();
 
 /**
  * The command IDs used by the document manager plugin.
@@ -79,6 +83,8 @@ namespace CommandIDs {
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
+
+  export const print = 'docmanager:print';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -775,6 +781,18 @@ function addLabCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       commands.execute('filebrowser:activate', { path: context.path });
       commands.execute('filebrowser:navigate', { path: context.path });
+    }
+  });
+
+  commands.addCommand(CommandIDs.print, {
+    label: 'Print...',
+    execute: () => {
+
+      function callback(win: any, doc: any, node: any, launchPrint: any) {
+        console.log(win, doc, node, launchPrint);
+        setTimeout(() => launchPrint(win), 800);
+      }
+      _PRINTD.print(widget.node, '', callback);
     }
   });
 
