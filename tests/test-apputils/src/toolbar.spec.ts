@@ -153,7 +153,8 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.title).to.equal('Test log command caption');
-        const iconNode = buttonNode.firstChild as HTMLElement;
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
         button.dispose();
       });
@@ -238,7 +239,8 @@ describe('@jupyterlab/apputils', () => {
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
-        const iconNode = buttonNode.firstChild as HTMLElement;
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
 
         cmd.dispose();
