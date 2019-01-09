@@ -76,3 +76,35 @@ export function printd(
 ) {
   _PRINTD.print(this.node, cssText, callback);
 }
+
+/**
+ * Prints a URL by loading it into an iframe.
+ *
+ * NOTE: When https://github.com/joseluisq/printd/issues/20 is fixed this can be removed.
+ * @param url URL to load into an iframe.
+ */
+export function printURL(url: string) {
+  const iframe = _PRINTD.getIFrame();
+
+  // print iframe after it loads new page
+  iframe.addEventListener(
+    'load',
+    () => {
+      // copies logic from
+      // https://github.com/joseluisq/printd/blob/c7f05196da62d2f2be68386521c0af5908097253/src/index.ts#L62-L69
+      const result: boolean = iframe.contentWindow.document.execCommand(
+        'print',
+        false,
+        null
+      );
+
+      if (!result) {
+        iframe.contentWindow.print();
+      }
+    },
+    { once: true }
+  );
+
+  // load new page in iframe
+  iframe.src = url;
+}

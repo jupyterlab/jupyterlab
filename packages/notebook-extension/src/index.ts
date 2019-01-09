@@ -20,12 +20,7 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry,
-  IStateDB,
-  PageConfig,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { ISettingRegistry, IStateDB, PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -500,12 +495,14 @@ function activateNotebookHandler(
   // An object for tracking the current notebook settings.
   let editorConfig = StaticNotebook.defaultEditorConfig;
   let notebookConfig = StaticNotebook.defaultNotebookConfig;
+  // Pass URL in here.
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
     modelName: 'notebook',
     defaultFor: ['notebook'],
     preferKernel: true,
+    baseUrl: services.serverSettings.baseUrl,
     canStartKernel: true,
     rendermime: rendermime,
     contentFactory,
@@ -1097,14 +1094,7 @@ function addCommands(
         return;
       }
 
-      const notebookPath = URLExt.encodeParts(current.context.path);
-      const url =
-        URLExt.join(
-          services.serverSettings.baseUrl,
-          'nbconvert',
-          args['format'] as string,
-          notebookPath
-        ) + '?download=true';
+      const url = current.getNBConvertURL(args['format'] as string);
       const child = window.open('', '_blank');
       const { context } = current;
 

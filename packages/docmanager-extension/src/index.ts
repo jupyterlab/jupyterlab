@@ -18,8 +18,7 @@ import {
   Dialog,
   ICommandPalette,
   isPrintable,
-  print,
-  IPrintable
+  print
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
