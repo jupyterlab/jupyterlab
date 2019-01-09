@@ -1,3 +1,19 @@
+/**
+ * Any object is printable if it implements the `IPrintable` interface.
+ *
+ * If you have a custom widget and would like to make it printable, then you
+ * should fulfil that interface on that widget by adding a `[printSymbol]` method.
+ *
+ * One way of printing is to use the `printd` function, which creates a hidden iframe
+ * and copies the DOM nodes from your widget to that iframe and printing just that iframe.
+ *
+ * To use this method in your widget, set the `[printSymbol]` method to `printd`.
+ * You can also provide custom args to that function, including CSS text to apply
+ * when printing.
+ *
+ * See https://github.com/joseluisq/printd#print
+ */
+
 import { Printd, PrintdCallback } from 'printd';
 import { Widget } from '@phosphor/widgets';
 
