@@ -77,7 +77,6 @@ export function notebookItemRenderer(
             </div>
           );
         }
-
         // Render the header item
         jsx = (
           <div className="toc-entry-holder">
