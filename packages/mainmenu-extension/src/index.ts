@@ -452,6 +452,7 @@ export function createFileMenu(
   // Add the quit group.
   const quitGroup = [{ command: 'filemenu:quit' }];
   const printGroup = [{ command: 'docmanager:print' }];
+
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
   menu.addGroup(closeGroup, 2);
