@@ -41,7 +41,9 @@ interface IInputGroupProps extends IBPInputGroupProps {
   rightIcon?: IIconProps['icon'];
 }
 
-export const Button = (props: IButtonProps) => (
+type CommonProps<T> = React.DOMAttributes<T>;
+
+export const Button = (props: IButtonProps & CommonProps<any>) => (
   <BPButton
     {...props}
     className={combineClassNames(
@@ -52,7 +54,7 @@ export const Button = (props: IButtonProps) => (
   />
 );
 
-export const InputGroup = (props: IInputGroupProps) => {
+export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
   if (props.rightIcon) {
     return (
       <BPInputGroup
@@ -81,16 +83,18 @@ export const Icon = (props: IIconProps) => (
   />
 );
 
-export const Collapse = (props: ICollapseProps) => <BPCollapse {...props} />;
+export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
+  <BPCollapse {...props} />
+);
 
-export const HTMLSelect = (props: IHTMLSelectProps) => (
+export const HTMLSelect = (props: IHTMLSelectProps & CommonProps<any>) => (
   <BPHTMLSelect
     {...props}
     className={combineClassNames(props.className, 'jp-HTMLSelect')}
   />
 );
 
-export const Select = (props: ISelectProps<any>) => (
+export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
   <BPSelect
     {...props}
     className={combineClassNames(props.className, 'jp-Select')}
