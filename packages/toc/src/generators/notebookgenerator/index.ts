@@ -112,7 +112,6 @@ export function createNotebookGenerator(
             ) {
               for (let j = headings.length - 1; j >= 0; j--) {
                 if (headings[j] === prevHeading) {
-                  console.log('point A: ' + headings[j].text);
                   headings[j].hasChild = true;
                 }
               }
@@ -182,7 +181,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
-                    console.log('point B: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -203,7 +201,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
-                    console.log('point C: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -316,7 +313,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
-                    console.log('point D: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -341,7 +337,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] === prevHeading) {
-                    console.log('point E: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -434,7 +429,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] == prevHeading) {
-                    console.log('point F: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
@@ -456,7 +450,6 @@ export function createNotebookGenerator(
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
                   if (headings[j] == prevHeading) {
-                    console.log('point G: ' + headings[j].text);
                     headings[j].hasChild = true;
                   }
                 }
