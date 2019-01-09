@@ -3,7 +3,7 @@
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { printSymbol, printd } from '@jupyterlab/apputils';
+import { printSymbol, printWidget } from '@jupyterlab/apputils';
 
 import {
   ABCWidgetFactory,
@@ -68,7 +68,7 @@ export class ImageViewer extends Widget {
   /**
    * Print in iframe.
    */
-  [printSymbol] = printd;
+  [printSymbol] = printWidget;
 
   /**
    * The image widget's context.

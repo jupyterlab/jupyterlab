@@ -4,14 +4,16 @@
  * If you have a custom widget and would like to make it printable, then you
  * should fulfil that interface on that widget by adding a `[printSymbol]` method.
  *
- * One way of printing is to use the `printd` function, which creates a hidden iframe
+ * One way of printing is to use the `printWidget` function, which creates a hidden iframe
  * and copies the DOM nodes from your widget to that iframe and printing just that iframe.
  *
- * To use this method in your widget, set the `[printSymbol]` method to `printd`.
+ * To use this method in your widget, set the `[printSymbol]` method to `printWidget`.
  * You can also provide custom args to that function, including CSS text to apply
  * when printing.
  *
  * See https://github.com/joseluisq/printd#print
+ *
+ * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
  */
 
 import { Printd, PrintdCallback } from 'printd';
@@ -69,7 +71,7 @@ const _PRINTD = new Printd();
  * use the `printd` library to print the node, by
  * creating an iframe and copying the DOM into it.
  */
-export function printd(
+export function printWidget(
   this: Widget,
   cssText?: string,
   callback?: PrintdCallback

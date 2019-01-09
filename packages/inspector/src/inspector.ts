@@ -103,7 +103,7 @@ export class InspectorPanel extends Panel implements IInspector {
    * Print in iframe
    */
   [printSymbol]() {
-    printd.bind(this)('.p-mod-hidden {display: none;}');
+    printWidget.bind(this)('.p-mod-hidden {display: none;}');
   }
 
   /**
