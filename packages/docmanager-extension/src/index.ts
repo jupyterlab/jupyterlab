@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Printd } from 'printd';
-
 import { toArray, iter } from '@phosphor/algorithm';
 
 import { Widget, DockLayout } from '@phosphor/widgets';
@@ -18,7 +16,10 @@ import {
   showDialog,
   showErrorMessage,
   Dialog,
-  ICommandPalette
+  ICommandPalette,
+  isPrintable,
+  print,
+  IPrintable
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
@@ -786,13 +787,14 @@ function addLabCommands(
 
   commands.addCommand(CommandIDs.print, {
     label: 'Print...',
+    isEnabled: () => {
+      const { currentWidget } = shell;
+      return currentWidget && isPrintable(currentWidget);
+    },
     execute: () => {
 
-      function callback(win: any, doc: any, node: any, launchPrint: any) {
-        console.log(win, doc, node, launchPrint);
-        setTimeout(() => launchPrint(win), 800);
-      }
-      _PRINTD.print(widget.node, '', callback);
+      // We know widget has to be printable because is only enabled on printable widgets.
+      print((widget as unknown) as IPrintable);
     }
   });
 

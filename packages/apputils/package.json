@@ -45,6 +45,7 @@
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.6.0",
     "@types/react": "~16.4.13",
+    "printd": "1.0.1",
     "react": "~16.4.2",
     "react-dom": "~16.4.2",
     "sanitize-html": "~1.18.2"

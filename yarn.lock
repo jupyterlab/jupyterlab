@@ -8061,6 +8061,10 @@ pretty-format@^23.6.0:
     ansi-regex "^3.0.0"
     ansi-styles "^3.2.0"
 
+printd@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/printd/-/printd-1.0.1.tgz#fddfb374b14130d8aa31f02734e3a0f103f6ad98"
+
 private@^0.1.6, private@^0.1.8, private@~0.1.5:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"

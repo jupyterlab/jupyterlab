@@ -13,6 +13,7 @@ export * from './hoverbox';
 export * from './iframe';
 export * from './instancetracker';
 export * from './mainareawidget';
+export * from './printing';
 export * from './sanitizer';
 export * from './spinner';
 export * from './splash';
