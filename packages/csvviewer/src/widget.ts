@@ -372,7 +372,6 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     this.context.ready.then(() => {
       this.content.goToLine(Number(topRow));
     });
-    this.update();
   }
 }
 
