@@ -236,10 +236,25 @@ export namespace KernelMessage {
   }
 
   /**
+   * The possible states in a status message from the server.
+   */
+  const statusStates = new Set([
+    'starting',
+    'idle',
+    'busy',
+    'restarting',
+    'dead'
+  ]);
+
+  /**
    * Test whether a kernel message is a `'status'` message.
    */
   export function isStatusMsg(msg: IMessage): msg is IStatusMsg {
-    return msg.header.msg_type === 'status';
+    return (
+      msg.header.msg_type === 'status' &&
+      (msg as IStatusMsg).content &&
+      statusStates.has((msg as IStatusMsg).content.execution_state)
+    );
   }
 
   /**
