@@ -71,8 +71,12 @@
   justify-content: space-evenly;
 }
 
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+  flex: 1;
+}
+
 .jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
-  padding: 0px 16px;
+  width: 100%;
 }
 
 /*-----------------------------------------------------------------------------

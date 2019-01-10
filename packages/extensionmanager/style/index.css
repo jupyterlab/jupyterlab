@@ -13,6 +13,7 @@
 
 .jp-extensionmanager-content {
   overflow: auto;
+  overflow-x: hidden;
 }
 
 /*
@@ -22,7 +23,7 @@
 .jp-extensionmanager-listview-wrapper {
   margin: 0;
   padding: 0;
-  padding-bottom: 5px;
+  padding-bottom: 8px;
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
@@ -44,7 +45,7 @@
   justify-content: space-between;
   flex: 0 0 auto;
   margin: 0px;
-  padding: 8px 12px;
+  padding-bottom: 8px;
   font-weight: 600;
   text-transform: uppercase;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -52,6 +53,7 @@
   font-size: var(--jp-ui-font-size0);
   line-height: 24px;
   height: 24px;
+  padding: 4px;
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
@@ -60,7 +62,7 @@
 
 .jp-extensionmanager-view header .jp-extensionmanager-headerText {
   flex: 1 0 auto;
-  margin: 0px 2px;
+  margin: 0px 4px;
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
@@ -70,7 +72,7 @@
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
-  border: 1px solid var(--jp-brand-color1);
+  /* border: 1px solid var(--jp-brand-color1); */
 }
 
 /*
@@ -85,50 +87,21 @@
 */
 
 .jp-extensionmanager-search-bar {
-  padding: 8px 8px 0px 8px;
-  background-color: var(--jp-layout-color1);
-  z-index: 2;
-  flex: 0 0 auto;
+  padding: 4px;
 }
 
-.jp-extensionmanager-input {
+.jp-extensionmanager-search-wrapper input {
   background: transparent;
-  width: calc(100% - 18px);
-  float: left;
-  border: none;
-  outline: none;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
   line-height: var(--jp-private-commandpalette-search-height);
+  box-sizing: border-box;
+  border-radius: 0;
 }
 
-.jp-extensionmanager-search-wrapper {
-  overflow: overlay;
-  padding: 0px 8px;
-  border: 1px solid var(--jp-border-color0);
-  background-color: var(--jp-input-active-background);
-  height: 30px;
-}
-
-.jp-extensionmanager-search-wrapper::after {
-  content: ' ';
-  color: var(--jp-ui-inverse-font-color1);
-  background-color: var(--jp-brand-color1);
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  height: 32px;
-  width: 12px;
-  padding: 0px 12px;
-  background-image: var(--jp-icon-search-white);
-  background-size: 20px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.jp-extensionmanager-view.p-mod-focused .jp-extensionmanager-search-wrapper {
-  border: var(--jp-border-width) solid var(--jp-brand-color1);
-  box-shadow: inset 0 0 4px var(--jp-brand-color2);
+.jp-extensionmanager-search-wrapper input:focus {
+  box-shadow: inset 0 0 0 1px rgba(19, 124, 189, 0.3),
+    inset 0 0 0 3px rgba(19, 124, 189, 0.3);
 }
 
 /*
@@ -153,46 +126,12 @@
   display: flex;
   justify-content: center;
 }
-
-/*
-  Entry buttons visibility
-*/
-
-.jp-extensionmanager-entry .jp-extensionmanager-install,
-.jp-extensionmanager-entry.jp-extensionmanager-entry-update
-  .jp-extensionmanager-update,
-.jp-extensionmanager-entry.jp-extensionmanager-entry-installed
-  .jp-extensionmanager-uninstall {
-  display: inline-block;
-}
-
-.jp-extensionmanager-entry .jp-extensionmanager-update,
-.jp-extensionmanager-entry .jp-extensionmanager-uninstall,
-.jp-extensionmanager-entry.jp-extensionmanager-entry-installed
-  .jp-extensionmanager-install {
-  display: none;
-}
-
-.jp-extensionmanager-entry .jp-extensionmanager-enable,
-.jp-extensionmanager-entry .jp-extensionmanager-disable,
-.jp-extensionmanager-entry.jp-extensionmanager-entry-installed.jp-extensionmanager-entry-enabled
-  .jp-extensionmanager-enable {
-  display: none;
-}
-
-.jp-extensionmanager-entry.jp-extensionmanager-entry-installed
-  .jp-extensionmanager-enable,
-.jp-extensionmanager-entry.jp-extensionmanager-entry-installed.jp-extensionmanager-entry-enabled
-  .jp-extensionmanager-disable {
-  display: inline-block;
-}
-
 /*
   Entry layout and styling
 */
 
 .jp-extensionmanager-entry {
-  padding: 4px 12px;
+  padding: 8px;
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
@@ -270,7 +209,7 @@
 
 .jp-extensionmanager-entry-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
 }
 
@@ -294,7 +233,7 @@
   left: -200px;
   width: 200px;
   height: 4px;
-  border-radius: 5px;
+  border-radius: 4px;
   background-color: var(--jp-brand-color1);
   animation: loading 2s linear infinite;
 }
@@ -327,38 +266,8 @@
 
 .jp-extensionmanager-entry-buttons {
   display: flex;
-  flex-direction: column;
-}
-
-.jp-extensionmanager-entry button {
-  border: solid var(--jp-border-width) var(--jp-border-color2);
-  font-size: var(--jp-ui-font-size0);
-  margin-top: 1px;
-  margin-bottom: 1px;
-  margin-right: 0px;
-  margin-left: 3px;
-  color: var(--jp-ui-font-color1);
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-extensionmanager-entry button.jp-extensionmanager-uninstall:hover {
-  background-color: var(--jp-error-color2);
-}
-
-.jp-extensionmanager-entry button.jp-extensionmanager-disable:hover {
-  background-color: var(--jp-error-color3);
-}
-
-.jp-extensionmanager-entry button.jp-extensionmanager-install:hover {
-  background-color: var(--jp-success-color2);
-}
-
-.jp-extensionmanager-entry button.jp-extensionmanager-enable:hover {
-  background-color: var(--jp-success-color3);
-}
-
-.jp-extensionmanager-entry button.jp-extensionmanager-update:hover {
-  background-color: var(--jp-brand-color3);
+  flex-direction: row;
+  padding-top: 4px;
 }
 
 /*
@@ -380,7 +289,7 @@
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   float: right;
-  margin: 3px;
+  margin: 4px;
 }
 
 /*

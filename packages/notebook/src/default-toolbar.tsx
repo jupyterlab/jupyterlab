@@ -5,8 +5,6 @@ import * as React from 'react';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { Message } from '@phosphor/messaging';
-
 import { Widget } from '@phosphor/widgets';
 
 import { NotebookActions } from './actions';
@@ -14,7 +12,6 @@ import { NotebookActions } from './actions';
 import {
   showDialog,
   Dialog,
-  Styling,
   Toolbar,
   ToolbarButtonComponent,
   UseSignal,
@@ -24,6 +21,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
+
+import { HTMLSelect } from '@jupyterlab/ui-components';
 
 import { NotebookPanel } from './panel';
 
@@ -232,151 +231,76 @@ export namespace ToolbarItems {
 /**
  * A toolbar widget that switches cell types.
  */
-class CellTypeSwitcher extends Widget {
+export class CellTypeSwitcher extends ReactWidget {
   /**
    * Construct a new cell type switcher.
    */
   constructor(widget: Notebook) {
-    super({ node: createCellTypeSwitcherNode() });
+    super();
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
-
-    this._select = this.node.firstChild as HTMLSelectElement;
-    Styling.wrapSelect(this._select);
-    this._wildCard = document.createElement('option');
-    this._wildCard.value = '-';
-    this._wildCard.textContent = '-';
     this._notebook = widget;
-
-    // Set the initial value.
     if (widget.model) {
-      this._updateValue();
+      this.update();
     }
-
-    // Follow the type of the active cell.
     widget.activeCellChanged.connect(
-      this._updateValue,
+      this.update,
       this
     );
-
     // Follow a change in the selection.
     widget.selectionChanged.connect(
-      this._updateValue,
+      this.update,
       this
     );
   }
 
   /**
-   * Handle the DOM events for the widget.
-   *
-   * @param event - The DOM event sent to the widget.
-   *
-   * #### Notes
-   * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the dock panel's node. It should
-   * not be called directly by user code.
+   * Handle `change` events for the HTMLSelect component.
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-      case 'change':
-        this._evtChange(event);
-        break;
-      case 'keydown':
-        this._evtKeyDown(event as KeyboardEvent);
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the widget.
-   */
-  protected onAfterAttach(msg: Message): void {
-    this._select.addEventListener('change', this);
-    this._select.addEventListener('keydown', this);
-  }
-
-  /**
-   * Handle `before-detach` messages for the widget.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    this._select.removeEventListener('change', this);
-    this._select.removeEventListener('keydown', this);
-  }
-
-  /**
-   * Handle `changed` events for the widget.
-   */
-  private _evtChange(event: Event): void {
-    let select = this._select;
-    let widget = this._notebook;
-    if (select.value === '-') {
-      return;
-    }
-    if (!this._changeGuard) {
-      let value = select.value as nbformat.CellType;
-      NotebookActions.changeCellType(widget, value);
-      widget.activate();
-    }
-  }
-
-  /**
-   * Handle `keydown` events for the widget.
-   */
-  private _evtKeyDown(event: KeyboardEvent): void {
-    if (event.keyCode === 13) {
-      // Enter
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    if (event.target.value !== '-') {
+      NotebookActions.changeCellType(this._notebook, event.target
+        .value as nbformat.CellType);
       this._notebook.activate();
     }
-  }
+  };
 
   /**
-   * Update the value of the dropdown from the widget state.
+   * Handle `keydown` events for the HTMLSelect component.
    */
-  private _updateValue(): void {
-    let widget = this._notebook;
-    let select = this._select;
-    if (!widget.activeCell) {
-      return;
+  handleKeyDown = (event: React.KeyboardEvent): void => {
+    if (event.keyCode === 13) {
+      this._notebook.activate();
     }
-    let mType: string = widget.activeCell.model.type;
-    for (let i = 0; i < widget.widgets.length; i++) {
-      let child = widget.widgets[i];
-      if (widget.isSelectedOrActive(child)) {
-        if (child.model.type !== mType) {
-          mType = '-';
-          select.appendChild(this._wildCard);
+  };
+
+  render() {
+    let value = '-';
+    if (this._notebook.activeCell) {
+      value = this._notebook.activeCell.model.type;
+    }
+    for (let widget of this._notebook.widgets) {
+      if (this._notebook.isSelectedOrActive(widget)) {
+        if (widget.model.type !== value) {
+          value = '-';
           break;
         }
       }
     }
-    if (mType !== '-') {
-      select.remove(3);
-    }
-    this._changeGuard = true;
-    select.value = mType;
-    this._changeGuard = false;
+    return (
+      <HTMLSelect
+        className={TOOLBAR_CELLTYPE_DROPDOWN_CLASS}
+        onChange={this.handleChange}
+        onKeyDown={this.handleKeyDown}
+        value={value}
+        minimal
+      >
+        <option value="-">-</option>
+        <option value="code">Code</option>
+        <option value="markdown">Markdown</option>
+        <option value="raw">Raw</option>
+      </HTMLSelect>
+    );
   }
 
-  private _changeGuard = false;
-  private _wildCard: HTMLOptionElement = null;
-  private _select: HTMLSelectElement = null;
   private _notebook: Notebook = null;
-}
-
-/**
- * Create the node for the cell type switcher.
- */
-function createCellTypeSwitcherNode(): HTMLElement {
-  let div = document.createElement('div');
-  let select = document.createElement('select');
-  for (let t of ['Code', 'Markdown', 'Raw']) {
-    let option = document.createElement('option');
-    option.value = t.toLowerCase();
-    option.textContent = t;
-    select.appendChild(option);
-  }
-  select.className = TOOLBAR_CELLTYPE_DROPDOWN_CLASS;
-  div.appendChild(select);
-  return div;
 }

@@ -93,6 +93,7 @@
     "@jupyterlab/theme-light-extension": "^0.19.1",
     "@jupyterlab/tooltip": "^0.19.1",
     "@jupyterlab/tooltip-extension": "^0.19.1",
+    "@jupyterlab/ui-components": "^0.0.1",
     "@jupyterlab/vdom-extension": "^0.18.1",
     "@jupyterlab/vega4-extension": "^0.18.1"
   },

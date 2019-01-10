@@ -98,7 +98,8 @@
       true,
       "check-format",
       "allow-leading-underscore",
-      "ban-keywords"
+      "ban-keywords",
+      "allow-pascal-case"
     ],
     "whitespace": [
       true,
@@ -109,6 +110,11 @@
     ]
   },
   "linterOptions": {
-    "exclude": ["node_modules/**/*.ts", "**/*.d.ts", "jupyterlab/**/*.ts"]
+    "exclude": [
+      "node_modules/**/*.ts",
+      "node_modules/**/*.tsx",
+      "**/*.d.ts",
+      "jupyterlab/**/*.ts"
+    ]
   }
 }

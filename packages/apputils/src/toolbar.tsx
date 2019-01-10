@@ -3,6 +3,8 @@
 
 import { UseSignal, ReactWidget } from './vdom';
 
+import { Button } from '@jupyterlab/ui-components';
+
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -376,7 +378,7 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
-  const handleMouseDown = (event: React.MouseEvent) => {
+  const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     props.onClick();
   };
@@ -389,16 +391,17 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   };
 
   return (
-    <button
+    <Button
       className={
         props.className
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
       disabled={props.enabled === false}
-      onMouseDown={handleMouseDown}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
+      minimal
     >
       {props.iconClassName && (
         <span
@@ -408,7 +411,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}
-    </button>
+    </Button>
   );
 }
 
