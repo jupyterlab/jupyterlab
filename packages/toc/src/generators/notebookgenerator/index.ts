@@ -270,7 +270,6 @@ export function createNotebookGenerator(
           // If the cell is rendered, generate the ToC items from
           // the HTML. If it is not rendered, generate them from
           // the text of the cell.
-
           if (
             (cell as MarkdownCell).rendered &&
             !(cell as MarkdownCell).inputHidden
@@ -281,6 +280,7 @@ export function createNotebookGenerator(
                   panel.content.activeCellIndex = i;
                   el.scrollIntoView();
                 } else {
+                  panel.content.mode = 'command';
                   cell.node.scrollIntoView();
                   panel.content.activeCellIndex = i;
                 }
@@ -428,7 +428,7 @@ export function createNotebookGenerator(
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] == prevHeading) {
+                  if (headings[j] === prevHeading) {
                     headings[j].hasChild = true;
                   }
                 }
@@ -449,7 +449,7 @@ export function createNotebookGenerator(
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] == prevHeading) {
+                  if (headings[j] === prevHeading) {
                     headings[j].hasChild = true;
                   }
                 }
