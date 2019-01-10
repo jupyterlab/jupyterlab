@@ -11,6 +11,7 @@ import { CommandRegistry } from '@phosphor/commands';
 import { CommandPalette, SplitPanel, Widget } from '@phosphor/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
   NotebookPanel,
@@ -36,8 +37,7 @@ import {
   RenderMimeRegistry,
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
-
-let NOTEBOOK = 'test.ipynb';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The map of command ids used by the notebook.
@@ -86,7 +86,13 @@ function createApp(manager: ServiceManager.IManager): void {
     useCapture
   );
 
-  let rendermime = new RenderMimeRegistry({ initialFactories });
+  let rendermime = new RenderMimeRegistry({
+    initialFactories: initialFactories,
+    latexTypesetter: new MathJaxTypesetter({
+      url: PageConfig.getOption('mathjaxUrl'),
+      config: PageConfig.getOption('mathjaxConfig')
+    })
+  });
 
   let opener = {
     open: (widget: Widget) => {
@@ -118,7 +124,8 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
-  let nbWidget = docManager.open(NOTEBOOK) as NotebookPanel;
+  let notebookPath = PageConfig.getOption('notebookPath');
+  let nbWidget = docManager.open(notebookPath) as NotebookPanel;
   let palette = new CommandPalette({ commands });
 
   const editor =
@@ -145,12 +152,12 @@ function createApp(manager: ServiceManager.IManager): void {
   panel.spacing = 0;
   SplitPanel.setStretch(palette, 0);
   SplitPanel.setStretch(nbWidget, 1);
-  panel.addWidget(completer);
   panel.addWidget(palette);
   panel.addWidget(nbWidget);
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
+  Widget.attach(completer, document.body);
 
   // Handle resize events.
   window.addEventListener('resize', () => {
@@ -282,7 +289,7 @@ function createApp(manager: ServiceManager.IManager): void {
       command: cmdIds.invokeNotebook
     },
     {
-      selector: `.jp-mod-completer-enabled`,
+      selector: `.jp-mod-completer-active`,
       keys: ['Enter'],
       command: cmdIds.selectNotebook
     },
