@@ -651,7 +651,8 @@ export class CodeConsole extends Widget {
    * Handle a change to the kernel status.
    */
   private _onKernelStatusChanged(): void {
-    if (this.session.status === 'connected') {
+    // TODO: Fix this - does session need a connection status too?
+    if (this.session.status === 'starting') {
       // we just had a kernel restart or reconnect - reset banner
       let kernel = this.session.kernel;
       if (!kernel) {

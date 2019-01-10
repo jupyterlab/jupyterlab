@@ -149,11 +149,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       return;
     }
     let { newValue } = args;
-    newValue.ready.then(() => {
-      if (this.model) {
-        this._updateLanguage(newValue.info.language_info);
-      }
-    });
+    // TODO: fix this with the new logic
+    // newValue.ready.then(() => {
+    if (this.model) {
+      this._updateLanguage(newValue.info.language_info);
+    }
+    // });
     this._updateSpec(newValue);
   }
 
