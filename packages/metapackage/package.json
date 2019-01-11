@@ -57,6 +57,7 @@
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/fileeditor-extension": "^0.19.1",
     "@jupyterlab/help-extension": "^0.19.1",
+    "@jupyterlab/htmlviewer-extension": "^0.1.4",
     "@jupyterlab/imageviewer": "^0.19.1",
     "@jupyterlab/imageviewer-extension": "^0.19.1",
     "@jupyterlab/inspector": "^0.19.1",

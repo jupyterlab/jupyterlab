@@ -11,5 +11,13 @@
     "lib": ["ES5", "ES2015.Promise", "DOM"],
     "types": []
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    }
+  ]
 }

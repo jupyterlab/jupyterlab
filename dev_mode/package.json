@@ -39,6 +39,7 @@
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/fileeditor-extension": "^0.19.1",
     "@jupyterlab/help-extension": "^0.19.1",
+    "@jupyterlab/htmlviewer-extension": "^0.1.4",
     "@jupyterlab/imageviewer": "^0.19.1",
     "@jupyterlab/imageviewer-extension": "^0.19.1",
     "@jupyterlab/inspector": "^0.19.1",
@@ -166,6 +167,7 @@
       "@jupyterlab/tooltip-extension": ""
     },
     "mimeExtensions": {
+      "@jupyterlab/htmlviewer-extension": "",
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
       "@jupyterlab/markdownviewer-extension": "",
@@ -254,6 +256,7 @@
       "@jupyterlab/fileeditor": "../packages/fileeditor",
       "@jupyterlab/fileeditor-extension": "../packages/fileeditor-extension",
       "@jupyterlab/help-extension": "../packages/help-extension",
+      "@jupyterlab/htmlviewer-extension": "../packages/htmlviewer-extension",
       "@jupyterlab/imageviewer": "../packages/imageviewer",
       "@jupyterlab/imageviewer-extension": "../packages/imageviewer-extension",
       "@jupyterlab/inspector": "../packages/inspector",
