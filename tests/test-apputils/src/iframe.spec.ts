@@ -36,5 +36,39 @@ describe('@jupyterlab/apputils', () => {
         expect(iframe.url).to.equal('foo');
       });
     });
+
+    describe('#sandbox', () => {
+      it('should set whether the iframe has the sandbox attribute.', () => {
+        let iframe = new IFrame({
+          sandbox: true,
+          exceptions: ['allow-scripts', 'allow-same-origin']
+        });
+        let node = iframe.node.querySelector('iframe')!;
+        expect(iframe.sandbox).to.equal(true);
+        expect(node.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-same-origin'
+        );
+        iframe.sandbox = false;
+        expect(iframe.sandbox).to.equal(false);
+        expect(node.getAttribute('sandbox')).to.equal(null);
+      });
+    });
+
+    describe('#exceptions', () => {
+      it('should set the exceptions for the sandbox attribute.', () => {
+        let iframe = new IFrame({
+          sandbox: true,
+          exceptions: ['allow-scripts', 'allow-same-origin']
+        });
+        let node = iframe.node.querySelector('iframe')!;
+        expect(iframe.exceptions).to.deep.equal([
+          'allow-scripts',
+          'allow-same-origin'
+        ]);
+        iframe.exceptions = ['allow-pointer-lock'];
+        expect(iframe.exceptions).to.deep.equal(['allow-pointer-lock']);
+        expect(node.getAttribute('sandbox')).to.equal('allow-pointer-lock');
+      });
+    });
   });
 });

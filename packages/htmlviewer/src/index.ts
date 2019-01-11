@@ -47,10 +47,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
   constructor(options: DocumentWidget.IOptionsOptionalContent) {
     super({
       ...options,
-      content: new IFrame({
-        sandbox: true,
-        exceptions: ['allow-same-origin']
-      })
+      content: new IFrame({ sandbox: true, exceptions: ['allow-same-origin'] })
     });
     this.content.addClass(CSS_CLASS);
 

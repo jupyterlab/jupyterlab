@@ -9,7 +9,7 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, IFrame, InstanceTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -23,19 +23,30 @@ const CSS_ICON_CLASS = 'jp-MaterialIcon jp-HTMLIcon';
 import '../style/index.css';
 
 /**
+ * Command IDs used by the plugin.
+ */
+namespace CommandIDs {
+  export const trustHTML = 'htmlviewer:trust-html';
+}
+
+/**
  * The HTML file handler extension.
  */
 const htmlPlugin: JupyterLabPlugin<void> = {
   activate: activateHTMLViewer,
   id: '@jupyterlab/htmlviewer-extension:plugin',
-  requires: [ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
 /**
  * Activate the HTMLViewer extension.
  */
-function activateHTMLViewer(app: JupyterLab, restorer: ILayoutRestorer): void {
+function activateHTMLViewer(
+  app: JupyterLab,
+  palette: ICommandPalette,
+  restorer: ILayoutRestorer
+): void {
   // Add an HTML file type to the docregistry.
   const ft: DocumentRegistry.IFileType = {
     name: 'html',
@@ -80,8 +91,69 @@ function activateHTMLViewer(app: JupyterLab, restorer: ILayoutRestorer): void {
     widget.title.iconClass = ft.iconClass;
     widget.title.iconLabel = ft.iconLabel;
   });
+
+  // Add a command to trust the active HTML document,
+  // allowing script executions in its context.
+  app.commands.addCommand(CommandIDs.trustHTML, {
+    label: 'Trust HTML File',
+    isEnabled: () => !!tracker.currentWidget,
+    isToggled: () => {
+      const current = tracker.currentWidget;
+      if (!current) {
+        return false;
+      }
+      const exceptions = current.content.exceptions;
+      return (
+        !current.content.sandbox || exceptions.indexOf('allow-scripts') !== -1
+      );
+    },
+    execute: () => {
+      const current = tracker.currentWidget;
+      if (!current) {
+        return false;
+      }
+      const sandbox = current.content.sandbox;
+      const exceptions = current.content.exceptions;
+      if (!sandbox) {
+        current.content.sandbox = true;
+        current.content.exceptions = Private.untrusted;
+        current.content.url = current.content.url; // Force a refresh.
+        return;
+      } else {
+        if (exceptions.indexOf('allow-scripts') !== -1) {
+          current.content.exceptions = Private.untrusted;
+          current.content.url = current.content.url; // Force a refresh.
+        } else {
+          current.content.exceptions = Private.trusted;
+          current.content.url = current.content.url; // Force a refresh.
+        }
+      }
+    }
+  });
+  palette.addItem({
+    command: CommandIDs.trustHTML,
+    category: 'File Operations'
+  });
 }
 /**
  * Export the plugins as default.
  */
 export default htmlPlugin;
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Sandbox exceptions for untrusted HTML.
+   */
+  export const untrusted: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+
+  /**
+   * Sandbox exceptions for trusted HTML.
+   */
+  export const trusted: IFrame.SandboxExceptions[] = [
+    'allow-same-origin',
+    'allow-scripts'
+  ];
+}

@@ -13,13 +13,51 @@ export class IFrame extends Widget {
   constructor(options: IFrame.IOptions = {}) {
     super({ node: Private.createNode() });
     this.addClass('jp-IFrame');
-    if (options.sandbox === true) {
-      const node = this.node.querySelector('iframe')!;
-      const exceptions =
-        options.exceptions && options.exceptions.length
-          ? options.exceptions.join(' ')
-          : '';
-      node.setAttribute('sandbox', exceptions);
+    this._exceptions = options.exceptions || [];
+    this.sandbox = !!options.sandbox;
+  }
+
+  /**
+   * Whether the iframe is sandboxed.
+   */
+  get sandbox(): boolean {
+    const iframe = this.node.querySelector('iframe')!;
+    const attr = iframe.getAttribute('sandbox');
+    return attr !== null && attr !== undefined; // An empty string is sandboxed.
+  }
+  set sandbox(value: boolean) {
+    const iframe = this.node.querySelector('iframe')!;
+    const old = this.sandbox;
+    if (old === value) {
+      return;
+    }
+    if (value) {
+      const exceptions = this._exceptions.length
+        ? this._exceptions.join(' ')
+        : '';
+      iframe.setAttribute('sandbox', exceptions);
+    } else {
+      iframe.removeAttribute('sandbox');
+    }
+  }
+
+  /**
+   * Exceptions to the sandboxing.
+   *
+   * #### Notes.
+   * If sandboxing is off, these are ignored.
+   */
+  get exceptions(): IFrame.SandboxExceptions[] {
+    return this._exceptions.slice();
+  }
+  set exceptions(values: IFrame.SandboxExceptions[]) {
+    this._exceptions = values.slice();
+    const iframe = this.node.querySelector('iframe')!;
+    if (this.sandbox) {
+      const exceptions = this._exceptions.length
+        ? this._exceptions.join(' ')
+        : '';
+      iframe.setAttribute('sandbox', exceptions);
     }
   }
 
@@ -32,6 +70,8 @@ export class IFrame extends Widget {
   set url(url: string) {
     this.node.querySelector('iframe')!.setAttribute('src', url);
   }
+
+  private _exceptions: IFrame.SandboxExceptions[] = [];
 }
 
 /**
