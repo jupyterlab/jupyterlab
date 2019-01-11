@@ -1178,7 +1178,7 @@ export namespace CodeMirrorEditor {
     electricChars: true,
     keyMap: 'default',
     extraKeys: null,
-    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    gutters: [],
     fixedGutter: true,
     showCursorWhenSelecting: false,
     coverGutterNextToScrollbar: false,
@@ -1332,6 +1332,23 @@ namespace Private {
   }
 
   /**
+   * Get the list of active gutters
+   *
+   * @param config Editor configuration
+   */
+  function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
+    // The order of the classes will be the gutters order
+    let classToSwitch = {
+      'CodeMirror-linenumbers': 'lineNumbers',
+      'CodeMirror-foldgutter': 'codeFolding'
+    };
+    return Object.keys(classToSwitch).filter(
+      // @ts-ignore
+      gutter => config[classToSwitch[gutter]]
+    );
+  }
+
+  /**
    * Set a config option for the editor.
    */
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
@@ -1395,29 +1412,16 @@ namespace Private {
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
         break;
+      case 'gutters':
+        editor.setOption(option, getActiveGutters(config));
+        break;
       case 'lineNumbers':
-        let currentGutters = editor.getOption('gutters').slice() as Array<
-          string
-        >;
-        const lineNoIndex = currentGutters.indexOf('CodeMirror-linenumbers');
-        if (lineNoIndex < 0 && value) {
-          currentGutters.unshift('CodeMirror-linenumbers');
-        } else if (lineNoIndex === 0 && !value) {
-          currentGutters.shift();
-        }
         editor.setOption(option, value);
-        editor.setOption('gutters', currentGutters);
+        editor.setOption('gutters', getActiveGutters(config));
         break;
       case 'codeFolding':
-        let gutters = editor.getOption('gutters').slice() as Array<string>;
-        let foldIndex = gutters.indexOf('CodeMirror-foldgutter');
-        if (foldIndex < 0 && value) {
-          gutters.push('CodeMirror-foldgutter');
-        } else if (foldIndex === gutters.length - 1 && !value) {
-          gutters.pop();
-        }
         editor.setOption('foldGutter', value);
-        editor.setOption('gutters', gutters);
+        editor.setOption('gutters', getActiveGutters(config));
         break;
       default:
         editor.setOption(option, value);
