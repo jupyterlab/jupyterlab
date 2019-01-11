@@ -51,6 +51,11 @@ export class JupyterClient<T extends Widget = Widget> extends Application<T> {
     this.commandLinker =
       options.commandLinker || new CommandLinker({ commands: this.commands });
     this.docRegistry = options.docRegistry || new DocumentRegistry();
+    // If a sub-class has defined `restored` it cannot be overwritten because
+    // it is readonly.
+    if (!this.restored) {
+      this.restored = Promise.resolve();
+    }
   }
 
   /**
@@ -64,6 +69,12 @@ export class JupyterClient<T extends Widget = Widget> extends Application<T> {
   readonly commandLinker: CommandLinker;
 
   /**
+   * Promise that resolves when state is first restored, returning layout
+   * description.
+   */
+  readonly restored: Promise<any>;
+
+  /**
    * The service manager used by the application.
    */
   readonly serviceManager: ServiceManager;
@@ -74,7 +85,7 @@ export class JupyterClient<T extends Widget = Widget> extends Application<T> {
  */
 export namespace JupyterClient {
   /**
-   * The options used to initialize a JupyterLab object.
+   * The options used to initialize a JupyterClient.
    */
   export interface IOptions<T extends Widget = Widget>
     extends Application.IOptions<T> {
@@ -98,7 +109,7 @@ export namespace JupyterClient {
 /**
  * The type for all JupyterLab plugins.
  */
-export type JupyterLabPlugin<T> = IPlugin<JupyterLab, T>;
+export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
@@ -226,10 +237,8 @@ export class JupyterLab extends JupyterClient<ApplicationShell> {
   }
 
   /**
-   * Promise that resolves when state is first restored, returning layout description.
-   *
-   * #### Notes
-   * This is just a reference to `shell.restored`.
+   * Promise that resolves when state is first restored, returning layout
+   * description.
    */
   get restored(): Promise<ApplicationShell.ILayout> {
     return this.shell.restored;

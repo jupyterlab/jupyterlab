@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  JupyterClient,
   JupyterLab,
   JupyterLabPlugin,
   ILayoutRestorer,
@@ -203,7 +204,7 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
  */
 const router: JupyterLabPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: (app: JupyterLab) => {
+  activate: (app: JupyterClient) => {
     const { commands } = app;
     const base = PageConfig.getOption('baseUrl');
     const router = new Router({ base, commands });
