@@ -1178,7 +1178,7 @@ export namespace CodeMirrorEditor {
     styleActiveLine: false,
     styleSelectedText: false,
     selectionPointer: false,
-    rulers: [88]
+    rulers: []
   };
 
   /**

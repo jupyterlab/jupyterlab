@@ -660,7 +660,7 @@ export namespace CodeEditor {
     insertSpaces: true,
     matchBrackets: true,
     autoClosingBrackets: true,
-    rulers: [88]
+    rulers: []
   };
 
   /**
