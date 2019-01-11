@@ -1191,7 +1191,7 @@ export namespace CodeMirrorEditor {
     styleSelectedText: false,
     selectionPointer: false,
     rulers: [],
-    foldGutter: true
+    foldGutter: false
   };
 
   /**

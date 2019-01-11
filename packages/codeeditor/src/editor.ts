@@ -665,8 +665,8 @@ export namespace CodeEditor {
     insertSpaces: true,
     matchBrackets: true,
     autoClosingBrackets: true,
-    rulers: []
-    codeFolding: true
+    rulers: [],
+    codeFolding: false
   };
 
   /**

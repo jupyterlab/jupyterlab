@@ -74,7 +74,7 @@
         "tabSize": 4,
         "wordWrapColumn": 80,
         "rulers": [],
-        "codeFolding": true
+        "codeFolding": false
       }
     }
   },
