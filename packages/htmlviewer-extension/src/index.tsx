@@ -9,7 +9,7 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, IFrame, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -87,6 +87,11 @@ function activateHTMLViewer(
     widget.context.pathChanged.connect(() => {
       tracker.save(widget);
     });
+    // Notify the application when the trust state changes so it
+    // can update any renderings of the trust command.
+    widget.trustedChanged.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+    });
 
     widget.title.iconClass = ft.iconClass;
     widget.title.iconLabel = ft.iconLabel;
@@ -112,22 +117,7 @@ function activateHTMLViewer(
       if (!current) {
         return false;
       }
-      const sandbox = current.content.sandbox;
-      const exceptions = current.content.exceptions;
-      if (!sandbox) {
-        current.content.sandbox = true;
-        current.content.exceptions = Private.untrusted;
-        current.content.url = current.content.url; // Force a refresh.
-        return;
-      } else {
-        if (exceptions.indexOf('allow-scripts') !== -1) {
-          current.content.exceptions = Private.untrusted;
-          current.content.url = current.content.url; // Force a refresh.
-        } else {
-          current.content.exceptions = Private.trusted;
-          current.content.url = current.content.url; // Force a refresh.
-        }
-      }
+      current.trusted = !current.trusted;
     }
   });
   palette.addItem({
@@ -139,21 +129,3 @@ function activateHTMLViewer(
  * Export the plugins as default.
  */
 export default htmlPlugin;
-
-/**
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * Sandbox exceptions for untrusted HTML.
-   */
-  export const untrusted: IFrame.SandboxExceptions[] = ['allow-same-origin'];
-
-  /**
-   * Sandbox exceptions for trusted HTML.
-   */
-  export const trusted: IFrame.SandboxExceptions[] = [
-    'allow-same-origin',
-    'allow-scripts'
-  ];
-}

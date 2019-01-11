@@ -3,7 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IFrame } from '@jupyterlab/apputils';
+import {
+  IFrame,
+  ReactWidget,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
+} from '@jupyterlab/apputils';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
@@ -13,6 +19,10 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import * as React from 'react';
 
 import '../style/index.css';
 
@@ -63,6 +73,54 @@ export class HTMLViewer extends DocumentWidget<IFrame>
         this
       );
     });
+
+    // Make a refresh button for the toolbar.
+    this.toolbar.addItem(
+      'refresh',
+      new ToolbarButton({
+        iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+        onClick: () => {
+          this.content.url = this.content.url;
+        },
+        tooltip: 'Rerender HTML Document'
+      })
+    );
+    // Make a trust button for the toolbar.
+    this.toolbar.addItem(
+      'trust',
+      ReactWidget.create(<Private.TrustButtonComponent htmlDocument={this} />)
+    );
+  }
+
+  /**
+   * Whether the HTML document is trusted. If trusted,
+   * it can execute Javascript in the iframe sandbox.
+   */
+  get trusted(): boolean {
+    return (
+      !this.content.sandbox ||
+      this.content.exceptions.indexOf('allow-scripts') !== -1
+    );
+  }
+  set trusted(value: boolean) {
+    if (this.trusted === value) {
+      return;
+    }
+    this.content.sandbox = true;
+    if (value) {
+      this.content.exceptions = Private.trusted;
+    } else {
+      this.content.exceptions = Private.untrusted;
+    }
+    this.content.url = this.content.url; // Force a refresh.
+    this._trustedChanged.emit(value);
+  }
+
+  /**
+   * Emitted when the trust state of the document changes.
+   */
+  get trustedChanged(): ISignal<this, boolean> {
+    return this._trustedChanged;
   }
 
   /**
@@ -128,6 +186,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
   private _parser = new DOMParser();
   private _monitor: ActivityMonitor<any, any> | null = null;
   private _objectUrl: string = '';
+  private _trustedChanged = new Signal<this, boolean>(this);
 }
 
 /**
@@ -139,5 +198,63 @@ export class HTMLViewerFactory extends ABCWidgetFactory<HTMLViewer> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): HTMLViewer {
     return new HTMLViewer({ context });
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Sandbox exceptions for untrusted HTML.
+   */
+  export const untrusted: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+
+  /**
+   * Sandbox exceptions for trusted HTML.
+   */
+  export const trusted: IFrame.SandboxExceptions[] = [
+    'allow-same-origin',
+    'allow-scripts'
+  ];
+
+  /**
+   * Namespace for TrustedButton.
+   */
+  export namespace TrustButtonComponent {
+    /**
+     * Interface for TrustedButton props.
+     */
+    export interface IProps {
+      htmlDocument: HTMLViewer;
+    }
+  }
+
+  /**
+   * React component for a trusted button.
+   *
+   * This wraps the ToolbarButtonComponent and watches for trust chagnes.
+   */
+  export function TrustButtonComponent(props: TrustButtonComponent.IProps) {
+    return (
+      <UseSignal
+        signal={props.htmlDocument.trustedChanged}
+        initialSender={props.htmlDocument}
+      >
+        {session => (
+          <ToolbarButtonComponent
+            className=""
+            onClick={() =>
+              (props.htmlDocument.trusted = !props.htmlDocument.trusted)
+            }
+            tooltip={`Whether the HTML file is trusted.
+Trusting the file allows scripts to run in it,
+which may result in security risks.
+Only only enable for files you trust.`}
+            label={props.htmlDocument.trusted ? 'Trusted' : 'Untrusted'}
+          />
+        )}
+      </UseSignal>
+    );
   }
 }
