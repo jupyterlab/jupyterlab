@@ -26,6 +26,7 @@ import {
 import { Mode } from './mode';
 
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
@@ -1176,7 +1177,8 @@ export namespace CodeMirrorEditor {
     scrollPastEnd: false,
     styleActiveLine: false,
     styleSelectedText: false,
-    selectionPointer: false
+    selectionPointer: false,
+    rulers: []
   };
 
   /**
@@ -1354,6 +1356,18 @@ namespace Private {
         break;
       case 'autoClosingBrackets':
         editor.setOption('autoCloseBrackets', value);
+        break;
+      case 'rulers':
+        let rulers = value as Array<number>;
+        editor.setOption(
+          'rulers',
+          rulers.map(column => {
+            return {
+              column,
+              className: 'jp-CodeMirror-ruler'
+            };
+          })
+        );
         break;
       case 'readOnly':
         el.classList.toggle(READ_ONLY_CLASS, value);
