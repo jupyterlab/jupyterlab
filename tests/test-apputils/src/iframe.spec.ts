@@ -15,6 +15,17 @@ describe('@jupyterlab/apputils', () => {
         // tslint:disable-next-line
         expect(iframe.node.querySelector('iframe')).to.be.ok;
       });
+
+      it('should allow sandboxing if specified in the options', () => {
+        let iframe = new IFrame({
+          sandbox: true,
+          exceptions: ['allow-scripts', 'allow-same-origin']
+        });
+        let node = iframe.node.querySelector('iframe')!;
+        expect(node.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-same-origin'
+        );
+      });
     });
 
     describe('#url', () => {

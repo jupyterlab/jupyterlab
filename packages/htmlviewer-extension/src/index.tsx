@@ -20,6 +20,8 @@ import { HTMLViewer, HTMLViewerFactory } from '@jupyterlab/htmlviewer';
  */
 const CSS_ICON_CLASS = 'jp-MaterialIcon jp-HTMLIcon';
 
+import '../style/index.css';
+
 /**
  * The HTML file handler extension.
  */

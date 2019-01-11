@@ -28,6 +28,16 @@ const CSS_CLASS = 'jp-HTMLViewer';
 
 /**
  * A viewer widget for HTML documents.
+ *
+ * #### Notes
+ * The iframed HTML document can pose a potential security risk,
+ * since it can execute Javascript, and make same-origin requests
+ * to the server, thereby executing arbitrary Javascript.
+ *
+ * Here, we sandbox the iframe so that it can't execute Javsacript
+ * or launch any popups. We allow one exception: 'allow-same-origin'
+ * requests, so that local HTML documents can access CSS, images,
+ * etc from the files system.
  */
 export class HTMLViewer extends DocumentWidget<IFrame>
   implements IDocumentWidget<IFrame> {
@@ -35,7 +45,13 @@ export class HTMLViewer extends DocumentWidget<IFrame>
    * Create a new widget for rendering HTML.
    */
   constructor(options: DocumentWidget.IOptionsOptionalContent) {
-    super({ ...options, content: new IFrame() });
+    super({
+      ...options,
+      content: new IFrame({
+        sandbox: true,
+        exceptions: ['allow-same-origin']
+      })
+    });
     this.content.addClass(CSS_CLASS);
 
     this.context.ready.then(() => {
@@ -107,7 +123,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     // as the document can dereference relative links to resources
     // (e.g. CSS and scripts).
     base.href = baseUrl;
-    base.target = '_blank';
+    base.target = '_self';
     return doc.documentElement.innerHTML;
   }
 

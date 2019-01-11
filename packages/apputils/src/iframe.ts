@@ -10,9 +10,17 @@ export class IFrame extends Widget {
   /**
    * Create a new IFrame widget.
    */
-  constructor() {
+  constructor(options: IFrame.IOptions = {}) {
     super({ node: Private.createNode() });
     this.addClass('jp-IFrame');
+    if (options.sandbox === true) {
+      const node = this.node.querySelector('iframe')!;
+      const exceptions =
+        options.exceptions && options.exceptions.length
+          ? options.exceptions.join(' ')
+          : '';
+      node.setAttribute('sandbox', exceptions);
+    }
   }
 
   /**
@@ -23,6 +31,40 @@ export class IFrame extends Widget {
   }
   set url(url: string) {
     this.node.querySelector('iframe')!.setAttribute('src', url);
+  }
+}
+
+/**
+ * A namespace for IFrame widget statics.
+ */
+export namespace IFrame {
+  export type SandboxExceptions =
+    | 'allow-forms'
+    | 'allow-modals'
+    | 'allow-orientation-lock'
+    | 'allow-pointer-lock'
+    | 'allow-popups'
+    | 'popups-to-escape-sandbox'
+    | 'allow-presentation'
+    | 'allow-same-origin'
+    | 'allow-scripts'
+    | 'allow-storage-access-by-user-activation'
+    | 'allow-top-navigation'
+    | 'allow-top-navigation-by-user-activation';
+
+  /**
+   * Options for creating a new IFrame widget.
+   */
+  export interface IOptions {
+    /**
+     * Whether to sandbox the iframe.
+     */
+    sandbox?: boolean;
+
+    /**
+     * Exceptions to the sandbox, if on.
+     */
+    exceptions?: SandboxExceptions[];
   }
 }
 
