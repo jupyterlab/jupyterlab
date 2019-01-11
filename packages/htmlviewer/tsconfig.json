@@ -7,16 +7,13 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {
-      "path": "../docregistry"
+      "path": "../coreutils"
     },
     {
-      "path": "../htmlviewer"
+      "path": "../docregistry"
     }
   ]
 }
