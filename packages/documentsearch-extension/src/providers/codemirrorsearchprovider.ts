@@ -177,17 +177,7 @@ namespace Private {
         }
       };
 
-      // const localCursor = cm.cursorCoords(true, 'local');
-      // const pageCursor = cm.cursorCoords(true, 'page');
-      // const windowCursor = cm.cursorCoords(true, 'window');
-      // console.log('localCursor: ', localCursor);
-      // console.log('pageCursor: ', pageCursor);
-      // console.log('windowCursor: ', windowCursor);
-      // console.log('scroller element: ', cm.getScrollerElement());
       cm.setSelection(selRange);
-      // const scrollY = reverse ? pageCursor.top : pageCursor.bottom;
-      // console.log('------- scrolling to x, y: ', pageCursor.left, ', ', scrollY);
-      // cm.scrollTo(pageCursor.left, scrollY);
       cm.scrollIntoView(
         {
           from: fromPos,

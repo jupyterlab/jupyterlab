@@ -156,7 +156,6 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   private _restartSearch(query: RegExp, searchTarget: NotebookPanel) {
-    console.log('restarting search!');
     this.endSearch();
     this.startSearch(query, searchTarget).then(() =>
       this._changed.emit(undefined)

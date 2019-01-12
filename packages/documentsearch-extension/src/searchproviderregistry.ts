@@ -7,19 +7,23 @@ import {
 const DEFAULT_NOTEBOOK_SEARCH_PROVIDER = 'jl-defaultNotebookSearchProvider';
 const DEFAULT_CODEMIRROR_SEARCH_PROVIDER = 'jl-defaultCodeMirrorSearchProvider';
 
+interface ISearchProviderConstructor {
+  new (): ISearchProvider;
+}
+
 export class SearchProviderRegistry {
   constructor() {
     this.registerDefaultProviders(
       DEFAULT_NOTEBOOK_SEARCH_PROVIDER,
-      new NotebookSearchProvider()
+      NotebookSearchProvider
     );
     this.registerDefaultProviders(
       DEFAULT_CODEMIRROR_SEARCH_PROVIDER,
-      new CodeMirrorSearchProvider()
+      CodeMirrorSearchProvider
     );
   }
 
-  registerProvider(key: string, provider: ISearchProvider): void {
+  registerProvider(key: string, provider: ISearchProviderConstructor): void {
     this._customProviders[key] = provider;
   }
 
@@ -40,7 +44,7 @@ export class SearchProviderRegistry {
 
   private registerDefaultProviders(
     key: string,
-    provider: ISearchProvider
+    provider: ISearchProviderConstructor
   ): void {
     this._defaultProviders[key] = provider;
   }
@@ -49,14 +53,17 @@ export class SearchProviderRegistry {
     providerMap: Private.ProviderMap,
     widget: any
   ): ISearchProvider {
-    const compatibleProvders = Object.keys(providerMap)
+    let providerInstance;
+    Object.keys(providerMap)
       .map(k => providerMap[k])
-      .filter((p: ISearchProvider) => p.canSearchOn(widget));
+      .forEach((providerConstructor: ISearchProviderConstructor) => {
+        const testInstance = new providerConstructor();
+        if (testInstance.canSearchOn(widget)) {
+          providerInstance = testInstance;
+        }
+      });
 
-    if (compatibleProvders.length !== 0) {
-      return compatibleProvders[0];
-    }
-    return null;
+    return providerInstance;
   }
 
   private _defaultProviders: Private.ProviderMap = {};
@@ -64,5 +71,5 @@ export class SearchProviderRegistry {
 }
 
 namespace Private {
-  export type ProviderMap = { [key: string]: ISearchProvider };
+  export type ProviderMap = { [key: string]: ISearchProviderConstructor };
 }
