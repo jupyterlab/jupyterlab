@@ -5,6 +5,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import {
   Cell,
+  CellDragUtils,
   CellModel,
   CodeCell,
   CodeCellModel,
@@ -26,6 +27,10 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { KernelMessage } from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
+
+import { MimeData } from '@phosphor/coreutils';
+
+import { Drag } from '@phosphor/dragdrop';
 
 import { Message } from '@phosphor/messaging';
 
@@ -51,6 +56,11 @@ const CODE_RUNNER = 'jpCodeRunner';
 const CONSOLE_CLASS = 'jp-CodeConsole';
 
 /**
+ * The class added to console cells
+ */
+const CONSOLE_CELL_CLASS = 'jp-Console-cell';
+
+/**
  * The class name added to the console banner.
  */
 const BANNER_CLASS = 'jp-CodeConsole-banner';
@@ -74,6 +84,11 @@ const INPUT_CLASS = 'jp-CodeConsole-input';
  * The timeout in ms for execution requests to the kernel.
  */
 const EXECUTION_TIMEOUT = 250;
+
+/**
+ * The mimetype used for Jupyter cell data.
+ */
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
  * A widget containing a Jupyter console.
@@ -196,6 +211,7 @@ export class CodeConsole extends Widget {
    * the execution message id).
    */
   addCell(cell: CodeCell, msgId?: string) {
+    cell.addClass(CONSOLE_CELL_CLASS);
     this._content.addWidget(cell);
     this._cells.push(cell);
     if (msgId) {
@@ -374,9 +390,121 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Handle `mousedown` events for the widget.
+   */
+  private _evtMouseDown(event: MouseEvent): void {
+    const { button, shiftKey } = event;
+
+    // We only handle main or secondary button actions.
+    if (
+      !(button === 0 || button === 2) ||
+      // Shift right-click gives the browser default behavior.
+      (shiftKey && button === 2)
+    ) {
+      return;
+    }
+
+    let target = event.target as HTMLElement;
+    let cellFilter = (node: HTMLElement) =>
+      node.classList.contains(CONSOLE_CELL_CLASS);
+    let cellIndex = CellDragUtils.findCell(target, this._cells, cellFilter);
+
+    if (cellIndex === -1) {
+      // `event.target` sometimes gives an orphaned node in
+      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
+      // to find a cell using `event.target`, try again using a target
+      // reconstructed from the position of the click event.
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
+      cellIndex = CellDragUtils.findCell(target, this._cells, cellFilter);
+    }
+
+    if (cellIndex === -1) {
+      return;
+    }
+
+    const cell = this._cells.get(cellIndex);
+
+    let targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
+      cell,
+      event.target as HTMLElement
+    );
+
+    if (targetArea === 'prompt') {
+      this._dragData = {
+        pressX: event.clientX,
+        pressY: event.clientY,
+        index: cellIndex
+      };
+
+      this._focusedCell = cell;
+
+      document.addEventListener('mouseup', this, true);
+      document.addEventListener('mousemove', this, true);
+      event.preventDefault();
+    }
+  }
+
+  /**
+   * Handle `mousemove` event of widget
+   */
+  private _evtMouseMove(event: MouseEvent) {
+    const data = this._dragData;
+    if (
+      CellDragUtils.shouldStartDrag(
+        data.pressX,
+        data.pressY,
+        event.clientX,
+        event.clientY
+      )
+    ) {
+      this._startDrag(data.index, event.clientX, event.clientY);
+    }
+  }
+
+  /**
+   * Start a drag event
+   */
+  private _startDrag(index: number, clientX: number, clientY: number) {
+    const cellModel = this._focusedCell.model as ICodeCellModel;
+    let selected: nbformat.ICell[] = [cellModel.toJSON()];
+
+    const dragImage = CellDragUtils.createCellDragImage(
+      this._focusedCell,
+      selected
+    );
+
+    this._drag = new Drag({
+      mimeData: new MimeData(),
+      dragImage,
+      proposedAction: 'copy',
+      supportedActions: 'copy',
+      source: this
+    });
+
+    this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
+    const textContent = cellModel.value.text;
+    this._drag.mimeData.setData('text/plain', textContent);
+
+    this._focusedCell = null;
+
+    document.removeEventListener('mousemove', this, true);
+    document.removeEventListener('mouseup', this, true);
+    this._drag.start(clientX, clientY).then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._drag = null;
+      this._dragData = null;
+    });
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
-   * @param event - The DOM event sent to the widget.
+   * @param event -The DOM event sent to the widget.
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
@@ -388,8 +516,14 @@ export class CodeConsole extends Widget {
       case 'keydown':
         this._evtKeyDown(event as KeyboardEvent);
         break;
-      case 'click':
-        this._evtClick(event as MouseEvent);
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
+      case 'mousemove':
+        this._evtMouseMove(event as MouseEvent);
+        break;
+      case 'mouseup':
+        this._evtMouseUp(event as MouseEvent);
         break;
       default:
         break;
@@ -403,6 +537,7 @@ export class CodeConsole extends Widget {
     let node = this.node;
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
+    node.addEventListener('mousedown', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -487,9 +622,9 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Handle the `'click'` event for the widget.
+   * Handle the `'mouseup'` event for the widget.
    */
-  private _evtClick(event: MouseEvent): void {
+  private _evtMouseUp(event: MouseEvent): void {
     if (
       this.promptCell &&
       this.promptCell.node.contains(event.target as HTMLElement)
@@ -684,6 +819,9 @@ export class CodeConsole extends Widget {
   private _msgIds = new Map<string, CodeCell>();
   private _msgIdCells = new Map<CodeCell, string>();
   private _promptCellCreated = new Signal<this, CodeCell>(this);
+  private _dragData: { pressX: number; pressY: number; index: number } = null;
+  private _drag: Drag = null;
+  private _focusedCell: Cell = null;
 }
 
 /**

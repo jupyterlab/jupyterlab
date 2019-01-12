@@ -47,6 +47,7 @@
 .jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
   color: var(--jp-cell-inprompt-font-color);
+  cursor: move;
 }
 
 .jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
