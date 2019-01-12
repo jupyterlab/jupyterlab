@@ -421,6 +421,10 @@ export class CodeConsole extends Widget {
       cellIndex = CellDragUtils.findCell(target, this._cells, cellFilter);
     }
 
+    if (cellIndex === -1) {
+      return;
+    }
+
     const cell = this._cells.get(cellIndex);
 
     let targetArea: CellDragUtils.ICellTargetArea = CellDragUtils.detectTargetArea(
@@ -435,7 +439,7 @@ export class CodeConsole extends Widget {
         index: cellIndex
       };
 
-      this._focussedCell = cell;
+      this._focusedCell = cell;
 
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
@@ -464,11 +468,11 @@ export class CodeConsole extends Widget {
    * Start a drag event
    */
   private _startDrag(index: number, clientX: number, clientY: number) {
-    const cellModel = this._focussedCell.model as ICodeCellModel;
+    const cellModel = this._focusedCell.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
     const dragImage = CellDragUtils.createCellDragImage(
-      this._focussedCell,
+      this._focusedCell,
       selected
     );
 
@@ -484,7 +488,7 @@ export class CodeConsole extends Widget {
     const textContent = cellModel.value.text;
     this._drag.mimeData.setData('text/plain', textContent);
 
-    this._focussedCell = null;
+    this._focusedCell = null;
 
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
@@ -817,7 +821,7 @@ export class CodeConsole extends Widget {
   private _promptCellCreated = new Signal<this, CodeCell>(this);
   private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _drag: Drag = null;
-  private _focussedCell: Cell = null;
+  private _focusedCell: Cell = null;
 }
 
 /**

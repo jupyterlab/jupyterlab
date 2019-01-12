@@ -13,7 +13,7 @@ import { each, IterableOrArrayLike } from '@phosphor/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
 import { h, VirtualDOM } from '@phosphor/virtualdom';
-import { nbformat } from '../../coreutils/lib';
+import { nbformat } from '@jupyterlab/coreutils';
 
 /**
  * Constants for drag
@@ -60,6 +60,9 @@ export namespace CellDragUtils {
    * @param cells - an iterable of Cells
    * @param isCellNode - a function that takes in a node and checks if
    * it is a cell node.
+   *
+   * @returns index of the cell we're looking for. Returns -1 if
+   * the cell is not founds
    */
   export function findCell(
     node: HTMLElement,
