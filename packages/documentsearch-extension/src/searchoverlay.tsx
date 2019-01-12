@@ -209,41 +209,6 @@ export function createSearchOverlay(
   onStartSearch: Function,
   onEndSearch: Function
 ): Widget {
-  // const onKeydown = (event: KeyboardEvent) => {
-  //   if (event.keyCode === 13) {
-  //     // execute search!
-  //     const query: RegExp = Private.parseQuery(
-  //       overlayState.inputText,
-  //       overlayState.caseSensitive,
-  //       overlayState.useRegex
-  //     );
-  //     if (!query) {
-  //       // display error!
-  //     }
-  //     if (query.source.length === 0) {
-  //       return;
-  //     }
-
-  //     if (Private.regexEqual(overlayState.lastQuery, query)) {
-  //       if (event.shiftKey) {
-  //         onHighlightPrevious();
-  //       } else {
-  //         onHightlightNext();
-  //       }
-  //       return;
-  //     }
-
-  //     onStartSearch(query);
-  //   }
-  // };
-  // const onChange = (event: React.ChangeEvent) => {
-  //   overlayState.inputText = (event.target as HTMLInputElement).value;
-  //   wigdetChanged.emit(overlayState);
-  // };
-  // const onClose = () => {
-  //   // clean up and close widget
-  //   onEndSearch();
-  // };
   const widget = ReactWidget.create(
     <UseSignal signal={wigdetChanged} initialArgs={overlayState}>
       {(sender, args) => {
@@ -264,28 +229,7 @@ export function createSearchOverlay(
   widget.addClass(OVERLAY_CLASS);
   return widget;
 }
-/*
-<div>
-          <SearchEntry
-            useRegex={args.useRegex}
-            caseSensitive={args.caseSensitive}
-            onCaseSensitiveToggled={onCaseSensitiveToggled}
-            onRegexToggled={onRegexToggled}
-            onKeydown={onKeydown}
-            onChange={onChange}
-            inputText={args.inputText}
-          />
-          <SearchIndices
-            currentIndex={args.currentIndex}
-            totalMatches={args.totalMatches}
-          />
-          <UpDownButtons
-            onHighlightPrevious={onHighlightPrevious}
-            onHightlightNext={onHightlightNext}
-          />
-          <div className={CLOSE_BUTTON_CLASS} onClick={onClose} />
-        </div>
-*/
+
 namespace Private {
   export function parseQuery(
     queryString: string,
