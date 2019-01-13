@@ -261,6 +261,12 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
+    // If we are currently performing a subset match,
+    // return without resetting the completer.
+    if (model.subsetMatch) {
+      return;
+    }
+
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
     if (!line) {

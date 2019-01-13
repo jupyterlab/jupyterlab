@@ -233,7 +233,6 @@ export class CompleterModel implements Completer.IModel {
       this._options = values;
       this._typeMap = types;
       this._orderedTypes = Private.findOrderedTypes(types);
-      this._subsetMatch = true;
     } else {
       this._options = [];
       this._typeMap = {};
@@ -358,7 +357,6 @@ export class CompleterModel implements Completer.IModel {
     if (!hard && this._subsetMatch) {
       return;
     }
-    this._subsetMatch = false;
     this._reset();
     this._stateChanged.emit(undefined);
   }

@@ -265,10 +265,8 @@ export class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (model.subsetMatch) {
+    if (!model.query) {
       const populated = this._populateSubset();
-
-      model.subsetMatch = false;
       if (populated) {
         this.update();
         return;
@@ -346,13 +344,18 @@ export class Completer extends Widget {
         if (!model) {
           return;
         }
-        model.subsetMatch = true;
         let populated = this._populateSubset();
-        model.subsetMatch = false;
-        if (populated) {
-          return;
+        // If there is a common subset in the options,
+        // then emit a completion signal with that subset.
+        if (model.query) {
+          model.subsetMatch = true;
+          this._selected.emit(model.query);
+          model.subsetMatch = false;
         }
-        this.selectActive();
+        // If the query changed, update rendering of the options.
+        if (populated) {
+          this.update();
+        }
         return;
       case 27: // Esc key
         event.preventDefault();
