@@ -118,6 +118,9 @@
       "path": "../mainmenu-extension"
     },
     {
+      "path": "../markdownviewer"
+    },
+    {
       "path": "../markdownviewer-extension"
     },
     {

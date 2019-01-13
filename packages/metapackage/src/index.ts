@@ -38,6 +38,7 @@ import '@jupyterlab/launcher';
 import '@jupyterlab/launcher-extension';
 import '@jupyterlab/mainmenu';
 import '@jupyterlab/mainmenu-extension';
+import '@jupyterlab/markdownviewer';
 import '@jupyterlab/markdownviewer-extension';
 import '@jupyterlab/mathjax2';
 import '@jupyterlab/mathjax2-extension';

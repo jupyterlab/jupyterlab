@@ -67,6 +67,7 @@
     "@jupyterlab/launcher-extension": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/mainmenu-extension": "^0.8.1",
+    "@jupyterlab/markdownviewer": "^0.19.1",
     "@jupyterlab/markdownviewer-extension": "^0.19.1",
     "@jupyterlab/mathjax2": "^0.7.1",
     "@jupyterlab/mathjax2-extension": "^0.7.1",
