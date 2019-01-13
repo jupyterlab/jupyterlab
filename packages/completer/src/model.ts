@@ -251,7 +251,7 @@ export class CompleterModel implements Completer.IModel {
     }
 
     const { column, line } = change;
-    const { original } = this;
+    const { current, original } = this;
 
     if (!original) {
       return;
@@ -265,13 +265,13 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If a cursor change results in the cursor being set to a position that
-    // precedes the original request, cancel.
-    if (column < original.column) {
+    // precedes the original column, or is after the current column, cancel.
+    if (column < original.column || column > current.column) {
       this.reset(true);
       return;
     }
 
-    const { cursor, current } = this;
+    const { cursor } = this;
 
     if (!cursor || !current) {
       return;
