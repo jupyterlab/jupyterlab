@@ -93,6 +93,7 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
+      editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.value.changed.disconnect(this.onTextChanged, this);
     }
