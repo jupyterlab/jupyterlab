@@ -2,11 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
+  ILayoutRestorer,
+  IRouter,
   JupyterClient,
   JupyterLab,
   JupyterLabPlugin,
-  ILayoutRestorer,
-  IRouter,
   LayoutRestorer,
   Router
 } from '@jupyterlab/application';
@@ -522,6 +523,16 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 }
 
 /**
+ * The default JupyterLab application shell.
+ */
+const shell: JupyterLabPlugin<IApplicationShell> = {
+  id: '@jupyterlab/application-extension:shell',
+  activate: (app: JupyterLab) => app.shell,
+  autoStart: true,
+  provides: IApplicationShell
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
@@ -531,7 +542,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   tree,
   notfound,
   busy,
-  sidebar
+  sidebar,
+  shell
 ];
 
 export default plugins;

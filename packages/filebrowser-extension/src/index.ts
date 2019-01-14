@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ApplicationShell,
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -101,6 +101,7 @@ const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
+    IApplicationShell,
     IFileBrowserFactory,
     ILayoutRestorer,
     IDocumentManager,
@@ -145,7 +146,7 @@ export const fileUploadStatus: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [IStatusBar, IFileBrowserFactory],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
     browser: IFileBrowserFactory
   ) => {
@@ -187,7 +188,7 @@ export default plugins;
  * Activate the file browser factory provider.
  */
 function activateFactory(
-  app: JupyterLab,
+  app: JupyterClient,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -232,14 +233,15 @@ function activateFactory(
  * Activate the default file browser in the sidebar.
  */
 function activateBrowser(
-  app: JupyterLab,
+  app: JupyterClient,
+  shell: IApplicationShell,
   factory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
   docManager: IDocumentManager,
   settingRegistry: ISettingRegistry
 ): void {
   const browser = factory.defaultBrowser;
-  const { commands, shell } = app;
+  const { commands } = app;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -265,7 +267,7 @@ function activateBrowser(
   Promise.all([app.restored, browser.model.restored]).then(() => {
     function maybeCreate() {
       // Create a launcher if there are no open items.
-      if (app.shell.isEmpty('main')) {
+      if (shell.isEmpty('main')) {
         createLauncher(commands, browser);
       }
     }
@@ -290,7 +292,7 @@ function activateBrowser(
       });
 
     // Whether to automatically navigate to a document's current directory
-    shell.currentChanged.connect((shell, change) => {
+    shell.currentChanged.connect((_, change) => {
       if (navigateToCurrentDirectory) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
@@ -306,7 +308,7 @@ function activateBrowser(
 }
 
 function activateShareFile(
-  app: JupyterLab,
+  app: JupyterClient,
   factory: IFileBrowserFactory
 ): void {
   const { commands } = app;
@@ -335,9 +337,10 @@ function activateShareFile(
  * Add the main file browser commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterLab,
+  app: JupyterClient,
   tracker: InstanceTracker<FileBrowser>,
-  browser: FileBrowser
+  browser: FileBrowser,
+  shell?: IApplicationShell
 ): void {
   const registry = app.docRegistry;
 
@@ -428,8 +431,8 @@ function addCommands(
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (widget && !widget.isHidden) {
-        app.shell.collapseLeft();
+      if (shell && widget && !widget.isHidden) {
+        shell.collapseLeft();
       }
     }
   });
@@ -615,17 +618,17 @@ function addCommands(
         return;
       }
       // Shortcut if we are using the main file browser
-      if (browser === browserForPath) {
-        app.shell.activateById(browser.id);
+      if (shell && browser === browserForPath) {
+        shell.activateById(browser.id);
         return;
       } else {
-        const areas: ApplicationShell.Area[] = ['left', 'right'];
+        const areas: IApplicationShell.Area[] = ['left', 'right'];
         for (let area of areas) {
-          const it = app.shell.widgets(area);
+          const it = shell.widgets(area);
           let widget = it.next();
           while (widget) {
             if (widget.contains(browserForPath)) {
-              app.shell.activateById(widget.id);
+              shell.activateById(widget.id);
               return;
             }
             widget = it.next();

@@ -22,7 +22,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { createRendermimePlugins } from './mimerenderers';
 
-import { ApplicationShell } from './shell';
+import { ApplicationShell, IApplicationShell } from './shell';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -32,7 +32,7 @@ export { IMimeDocumentTracker } from './mimerenderers';
 
 export { IRouter, Router } from './router';
 
-export { ApplicationShell } from './shell';
+export { ApplicationShell, IApplicationShell } from './shell';
 
 /**
  * The base Jupyter client application class.
@@ -121,7 +121,7 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
  */
 export class JupyterLab extends JupyterClient<
   ApplicationShell,
-  ApplicationShell.ILayout
+  IApplicationShell.ILayout
 > {
   /**
    * Construct a new JupyterLab object.
@@ -189,7 +189,7 @@ export class JupyterLab extends JupyterClient<
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
-  readonly restored: Promise<ApplicationShell.ILayout> = this.shell.restored;
+  readonly restored: Promise<IApplicationShell.ILayout> = this.shell.restored;
 
   /**
    * A method invoked on a document `'contextmenu'` event.
