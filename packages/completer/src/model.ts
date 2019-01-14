@@ -265,8 +265,8 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If a cursor change results in the cursor being set to a position that
-    // precedes the original column, or is after the current column, cancel.
-    if (column < original.column || column > current.column) {
+    // precedes the original column, cancel.
+    if (column < original.column) {
       this.reset(true);
       return;
     }

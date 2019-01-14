@@ -235,13 +235,6 @@ export class Completer extends Widget {
       return;
     }
 
-    // If there is only one item, signal and bail.
-    if (items.length === 1) {
-      this._selected.emit(items[0].raw);
-      this.reset();
-      return;
-    }
-
     // Clear the node.
     let node = this.node;
     node.textContent = '';
