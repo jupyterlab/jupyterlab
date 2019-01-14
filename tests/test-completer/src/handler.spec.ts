@@ -186,7 +186,7 @@ describe('@jupyterlab/completer', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
-        (editor.model.value.changed as any).emit(void 0);
+        (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' });
         expect(model.methods).to.contain('handleTextChange');
       });
     });
