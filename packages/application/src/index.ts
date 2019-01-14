@@ -41,27 +41,21 @@ export { ApplicationShell } from './shell';
  * This type is useful as a generic application against which front-end plugins
  * can be authored. It inherits from the phosphor `Application`.
  */
-export class JupyterClient<T extends Widget = Widget> extends Application<T> {
+export class JupyterClient<
+  T extends Widget = Widget,
+  U = any
+> extends Application<T> {
   /**
    * Construct a new JupyterClient object.
    */
-  constructor(options: JupyterClient.IOptions<T>) {
+  constructor(options: JupyterClient.IOptions<T, U>) {
     super(options);
-    this.serviceManager = options.serviceManager || new ServiceManager();
     this.commandLinker =
       options.commandLinker || new CommandLinker({ commands: this.commands });
     this.docRegistry = options.docRegistry || new DocumentRegistry();
-    // If a sub-class has defined `restored` it cannot be overwritten because
-    // it is readonly.
-    if (!this.restored) {
-      this.restored = Promise.resolve();
-    }
+    this.restored = options.restored || Promise.resolve(undefined);
+    this.serviceManager = options.serviceManager || new ServiceManager();
   }
-
-  /**
-   * The document registry instance used by the application.
-   */
-  readonly docRegistry: DocumentRegistry;
 
   /**
    * The command linker used by the application.
@@ -69,10 +63,15 @@ export class JupyterClient<T extends Widget = Widget> extends Application<T> {
   readonly commandLinker: CommandLinker;
 
   /**
+   * The document registry instance used by the application.
+   */
+  readonly docRegistry: DocumentRegistry;
+
+  /**
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
-  readonly restored: Promise<any>;
+  readonly restored: Promise<U>;
 
   /**
    * The service manager used by the application.
@@ -87,7 +86,7 @@ export namespace JupyterClient {
   /**
    * The options used to initialize a JupyterClient.
    */
-  export interface IOptions<T extends Widget = Widget>
+  export interface IOptions<T extends Widget = Widget, U = any>
     extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
@@ -103,6 +102,12 @@ export namespace JupyterClient {
      * The service manager used by the application.
      */
     serviceManager?: ServiceManager;
+
+    /**
+     * Promise that resolves when state is first restored, returning layout
+     * description.
+     */
+    restored?: Promise<U>;
   }
 }
 
@@ -114,7 +119,10 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterClient<ApplicationShell> {
+export class JupyterLab extends JupyterClient<
+  ApplicationShell,
+  ApplicationShell.ILayout
+> {
   /**
    * Construct a new JupyterLab object.
    */
@@ -122,6 +130,7 @@ export class JupyterLab extends JupyterClient<ApplicationShell> {
     options: JupyterLab.IOptions = { shell: new ApplicationShell() }
   ) {
     super({ shell: options.shell || new ApplicationShell() });
+    this.restored = this.shell.restored;
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
 
@@ -152,14 +161,14 @@ export class JupyterLab extends JupyterClient<ApplicationShell> {
       ...{ defaultWorkspace }
     };
 
-    if (this._info.devMode) {
-      this.shell.addClass('jp-mod-devMode');
-    }
-
     // Make workspace accessible via a getter because it is set at runtime.
     Object.defineProperty(this._info, 'workspace', {
       get: () => PageConfig.getOption('workspace') || ''
     });
+
+    if (this._info.devMode) {
+      this.shell.addClass('jp-mod-devMode');
+    }
 
     // Add initial model factory.
     this.docRegistry.addModelFactory(new Base64ModelFactory());
@@ -175,6 +184,12 @@ export class JupyterLab extends JupyterClient<ApplicationShell> {
    * A list of all errors encountered when registering plugins.
    */
   readonly registerPluginErrors: Array<Error> = [];
+
+  /**
+   * Promise that resolves when state is first restored, returning layout
+   * description.
+   */
+  readonly restored: Promise<ApplicationShell.ILayout> = this.shell.restored;
 
   /**
    * A method invoked on a document `'contextmenu'` event.
@@ -234,14 +249,6 @@ export class JupyterLab extends JupyterClient<ApplicationShell> {
    */
   get info(): JupyterLab.IInfo {
     return this._info;
-  }
-
-  /**
-   * Promise that resolves when state is first restored, returning layout
-   * description.
-   */
-  get restored(): Promise<ApplicationShell.ILayout> {
-    return this.shell.restored;
   }
 
   /**
