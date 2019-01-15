@@ -3,9 +3,9 @@
 
 import {
   ILayoutRestorer,
-  IRouter,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterClient,
+  JupyterLabPlugin,
+  IApplicationShell
 } from '@jupyterlab/application';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
@@ -33,17 +33,17 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ISettingRegistry, ILayoutRestorer, IRouter],
+  requires: [ISettingRegistry, ILayoutRestorer, IApplicationShell],
   activate: async (
-    app: JupyterLab,
+    app: JupyterClient,
     registry: ISettingRegistry,
     restorer: ILayoutRestorer,
-    router: IRouter
+    shell: IApplicationShell
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { shell, serviceManager } = app;
+    const { serviceManager } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -79,27 +79,31 @@ const plugin: JupyterLabPlugin<void> = {
       });
     });
 
-    addCommands(app, view);
+    addCommands(app, shell, view);
   }
 };
 
 /**
  * Add the main file view commands to the application's command registry.
  */
-function addCommands(app: JupyterLab, view: ExtensionView): void {
+function addCommands(
+  app: JupyterClient,
+  shell: IApplicationShell,
+  view: ExtensionView
+): void {
   const { commands } = app;
 
   commands.addCommand(CommandIDs.show, {
     label: 'Show Extension Manager',
     execute: () => {
-      app.shell.activateById(view.id);
+      shell.activateById(view.id);
     }
   });
 
   commands.addCommand(CommandIDs.hide, {
     execute: () => {
       if (!view.isHidden) {
-        app.shell.collapseLeft();
+        shell.collapseLeft();
       }
     }
   });

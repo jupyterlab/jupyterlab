@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -45,7 +45,7 @@ const manager: JupyterLabPlugin<ITooltipManager> = {
   id: '@jupyterlab/tooltip-extension:manager',
   autoStart: true,
   provides: ITooltipManager,
-  activate: (app: JupyterLab): ITooltipManager => {
+  activate: (app: JupyterClient): ITooltipManager => {
     let tooltip: Tooltip | null = null;
 
     // Add tooltip dismiss command.
@@ -89,7 +89,7 @@ const consoles: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ITooltipManager,
     consoles: IConsoleTracker
   ): void => {
@@ -124,7 +124,7 @@ const notebooks: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ITooltipManager,
     notebooks: INotebookTracker
   ): void => {
@@ -159,7 +159,7 @@ const files: JupyterLabPlugin<void> = {
   autoStart: true,
   requires: [ITooltipManager, IEditorTracker, IRenderMimeRegistry],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ITooltipManager,
     editorTracker: IEditorTracker,
     rendermime: IRenderMimeRegistry

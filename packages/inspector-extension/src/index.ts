@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -42,12 +43,14 @@ const inspector: JupyterLabPlugin<IInspector> = {
   provides: IInspector,
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     palette: ICommandPalette | null,
     launcher: ILauncher | null,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    shell: IApplicationShell
   ): IInspector => {
-    const { commands, shell } = app;
+    const { commands } = app;
+    const manager = new InspectorManager();
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
@@ -128,12 +131,13 @@ const inspector: JupyterLabPlugin<IInspector> = {
  */
 const consoles: JupyterLabPlugin<void> = {
   id: '@jupyterlab/inspector-extension:consoles',
-  requires: [IInspector, IConsoleTracker],
+  requires: [IInspector, IConsoleTracker, IApplicationShell],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: IInspector,
-    consoles: IConsoleTracker
+    consoles: IConsoleTracker,
+    shell: IApplicationShell
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -165,7 +169,7 @@ const consoles: JupyterLabPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    app.shell.currentChanged.connect((sender, args) => {
+    shell.currentChanged.connect((sender, args) => {
       let widget = args.newValue;
       if (!widget || !consoles.has(widget)) {
         return;
@@ -188,12 +192,13 @@ const consoles: JupyterLabPlugin<void> = {
  */
 const notebooks: JupyterLabPlugin<void> = {
   id: '@jupyterlab/inspector-extension:notebooks',
-  requires: [IInspector, INotebookTracker],
+  requires: [IInspector, INotebookTracker, IApplicationShell],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: IInspector,
-    notebooks: INotebookTracker
+    notebooks: INotebookTracker,
+    shell: IApplicationShell
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -225,7 +230,7 @@ const notebooks: JupyterLabPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    app.shell.currentChanged.connect((sender, args) => {
+    shell.currentChanged.connect((sender, args) => {
       let widget = args.newValue;
       if (!widget || !notebooks.has(widget)) {
         return;

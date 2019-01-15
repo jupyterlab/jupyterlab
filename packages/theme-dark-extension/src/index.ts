@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { IThemeManager } from '@jupyterlab/apputils';
 
@@ -11,7 +11,7 @@ import { IThemeManager } from '@jupyterlab/apputils';
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
-  activate: (app: JupyterLab, manager: IThemeManager) => {
+  activate: (app: JupyterClient, manager: IThemeManager) => {
     const style = '@jupyterlab/theme-dark-extension/index.css';
 
     manager.register({

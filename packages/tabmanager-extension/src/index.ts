@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -18,8 +19,11 @@ import '../style/index.css';
  */
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/tabmanager-extension:plugin',
-  activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
-    const { shell } = app;
+  activate: (
+    app: JupyterClient,
+    restorer: ILayoutRestorer,
+    shell: IApplicationShell
+  ): void => {
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
@@ -55,7 +59,7 @@ const plugin: JupyterLabPlugin<void> = {
     });
   },
   autoStart: true,
-  requires: [ILayoutRestorer]
+  requires: [ILayoutRestorer, IApplicationShell]
 };
 
 /**

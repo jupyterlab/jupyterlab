@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  JupyterClient,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -21,7 +25,7 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
  */
 export const foreign: JupyterLabPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker, ICommandPalette],
+  requires: [IConsoleTracker, ICommandPalette, IApplicationShell],
   activate: activateForeign,
   autoStart: true
 };
@@ -29,9 +33,10 @@ export const foreign: JupyterLabPlugin<void> = {
 export default foreign;
 
 function activateForeign(
-  app: JupyterLab,
+  app: JupyterClient,
   tracker: IConsoleTracker,
-  palette: ICommandPalette
+  palette: ICommandPalette,
+  shell: IApplicationShell
 ) {
   tracker.widgetAdded.connect((sender, panel) => {
     const console = panel.console;
@@ -46,7 +51,7 @@ function activateForeign(
     });
   });
 
-  const { commands, shell } = app;
+  const { commands } = app;
   const category = 'Console';
   const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 
@@ -75,7 +80,7 @@ function activateForeign(
       Private.foreignHandlerProperty.get(tracker.currentWidget.console).enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
   });
 
   palette.addItem({

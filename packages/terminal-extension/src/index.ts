@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -52,7 +53,13 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer, ISettingRegistry],
+  requires: [
+    IMainMenu,
+    ICommandPalette,
+    ILayoutRestorer,
+    ISettingRegistry,
+    IApplicationShell
+  ],
   optional: [ILauncher],
   autoStart: true
 };
@@ -66,11 +73,12 @@ export default plugin;
  * Activate the terminal plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
+  shell: IApplicationShell,
   launcher: ILauncher | null
 ): ITerminalTracker {
   const { serviceManager } = app;
@@ -141,7 +149,7 @@ function activate(
       console.error(reason.message);
     });
 
-  addCommands(app, serviceManager, tracker, settingRegistry);
+  addCommands(app, serviceManager, tracker, settingRegistry, shell);
 
   // Add some commands to the application view menu.
   const viewGroup = [
@@ -189,12 +197,13 @@ function activate(
  * Add the commands for the terminal.
  */
 export function addCommands(
-  app: JupyterLab,
+  app: JupyterClient,
   services: ServiceManager,
   tracker: InstanceTracker<MainAreaWidget<Terminal>>,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  shell: IApplicationShell
 ) {
-  let { commands, shell } = app;
+  const { commands } = app;
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {

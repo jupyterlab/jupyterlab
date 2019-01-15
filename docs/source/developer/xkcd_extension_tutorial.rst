@@ -239,7 +239,7 @@ definition so that it reads like so:
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterClient, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
         console.log('ICommandPalette:', palette);
       }
@@ -300,7 +300,7 @@ code:
 
 .. code-block:: typescript
 
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterClient, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -448,7 +448,7 @@ The beginning of the function should read like the following:
 .. code-block:: typescript
       :emphasize-lines: 9,13,16-23
 
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterClient, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -590,7 +590,7 @@ these changes:
     /**
      * Activate the xckd widget extension.
      */
-    function activate(app: JupyterLab, palette: ICommandPalette) {
+    function activate(app: JupyterClient, palette: ICommandPalette) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Create a single widget
@@ -713,7 +713,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 .. code-block:: typescript
 
-    function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterClient, palette: ICommandPalette, restorer: ILayoutRestorer) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Declare a widget variable

@@ -3,13 +3,15 @@
 
 import {
   IApplicationShell,
+  IApplicationStatus,
   ILayoutRestorer,
   IRouter,
   JupyterClient,
   JupyterLab,
   JupyterLabPlugin,
   LayoutRestorer,
-  Router
+  Router,
+  ApplicationShell
 } from '@jupyterlab/application';
 
 import {
@@ -77,11 +79,15 @@ const main: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette, IRouter, IWindowResolver],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver
   ) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${main.id} must be activated in JupyterLab.`);
+    }
+
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
@@ -181,16 +187,16 @@ const main: JupyterLabPlugin<void> = {
  */
 const layout: JupyterLabPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
+  requires: [IApplicationShell, IStateDB],
+  activate: (app: JupyterClient, shell: IApplicationShell, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
 
     restorer.fetch().then(saved => {
-      app.shell.restoreLayout(saved);
-      app.shell.layoutModified.connect(() => {
-        restorer.save(app.shell.saveLayout());
+      shell.restoreLayout(saved);
+      shell.layoutModified.connect(() => {
+        restorer.save(shell.saveLayout());
       });
     });
 
@@ -233,7 +239,11 @@ const tree: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
   requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  activate: (app: JupyterClient, router: IRouter) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${tree.id} must be activated in JupyterLab.`);
+    }
+
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
@@ -273,7 +283,7 @@ const tree: JupyterLabPlugin<void> = {
  */
 const notfound: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterLab, router: IRouter) => {
+  activate: (app: JupyterClient, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
     const base = router.base;
     const message = `
@@ -299,7 +309,11 @@ const notfound: JupyterLabPlugin<void> = {
  */
 const busy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterLab) => {
+  activate: async (app: JupyterClient) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${busy.id} must be activated in JupyterLab.`);
+    }
+
     app.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
@@ -335,7 +349,11 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
  */
 const sidebar: JupyterLabPlugin<void> = {
   id: SIDEBAR_ID,
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+  activate: (app: JupyterClient, settingRegistry: ISettingRegistry) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${sidebar.id} must be activated in JupyterLab.`);
+    }
+
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
@@ -527,9 +545,29 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
  */
 const shell: JupyterLabPlugin<IApplicationShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterLab) => app.shell,
+  activate: (app: JupyterClient) => {
+    if (app.shell instanceof ApplicationShell) {
+      return app.shell;
+    }
+    throw new Error(`${shell.id} did not find an ApplicationShell instance.`);
+  },
   autoStart: true,
   provides: IApplicationShell
+};
+
+/**
+ * The default JupyterLab application status provider.
+ */
+const status: JupyterLabPlugin<IApplicationStatus> = {
+  id: '@jupyterlab/application-extension:status',
+  activate: (app: JupyterClient) => {
+    if (app instanceof JupyterLab) {
+      return app;
+    }
+    throw new Error(`${status.id} must be activated in JupyterLab.`);
+  },
+  autoStart: true,
+  provides: IApplicationStatus
 };
 
 /**
@@ -543,7 +581,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   notfound,
   busy,
   sidebar,
-  shell
+  shell,
+  status
 ];
 
 export default plugins;

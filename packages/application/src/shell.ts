@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
 import { PromiseDelegate, Token } from '@phosphor/coreutils';
@@ -22,8 +24,6 @@ import {
   Title,
   Widget
 } from '@phosphor/widgets';
-
-import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 /**
  * The class name added to AppShell instances.

@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -101,7 +102,8 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
     IEditorServices,
     IFileBrowserFactory,
     ILayoutRestorer,
-    ISettingRegistry
+    ISettingRegistry,
+    IApplicationShell
   ],
   optional: [ICommandPalette, ILauncher, IMainMenu],
   provides: IEditorTracker,
@@ -115,12 +117,13 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
+  requires: [IStatusBar, IEditorTracker, ISettingRegistry, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry,
+    shell: IApplicationShell
   ) => {
     // Create a menu for switching tabs vs spaces.
     const menu = new Menu({ commands: app.commands });
@@ -170,10 +173,7 @@ export const tabSpaceStatus: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 1,
         isActive: () => {
-          return (
-            app.shell.currentWidget &&
-            editorTracker.has(app.shell.currentWidget)
-          );
+          return shell.currentWidget && editorTracker.has(shell.currentWidget);
         }
       }
     );
@@ -190,13 +190,14 @@ export default plugins;
  * Activate the editor tracker plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   consoleTracker: IConsoleTracker,
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  palette: ICommandPalette,
+  shell: IApplicationShell,
+  palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null
 ): IEditorTracker {
@@ -216,7 +217,7 @@ function activate(
   });
   const isEnabled = () =>
     tracker.currentWidget !== null &&
-    tracker.currentWidget === app.shell.currentWidget;
+    tracker.currentWidget === shell.currentWidget;
 
   let config = { ...CodeEditor.defaultConfig };
 

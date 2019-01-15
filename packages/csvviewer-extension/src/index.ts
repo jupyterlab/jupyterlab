@@ -3,7 +3,7 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -87,7 +87,7 @@ function addMenuEntries(
  * Activate cssviewer extension for CSV files
  */
 function activateCsv(
-  app: JupyterLab,
+  app: JupyterClient,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   mainMenu: IMainMenu
@@ -153,7 +153,7 @@ function activateCsv(
  * Activate cssviewer extension for TSV files
  */
 function activateTsv(
-  app: JupyterLab,
+  app: JupyterClient,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   mainMenu: IMainMenu

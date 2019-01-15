@@ -5,7 +5,13 @@ import { toArray, iter } from '@phosphor/algorithm';
 
 import { Widget, DockLayout } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  IApplicationStatus,
+  JupyterClient,
+  JupyterLab,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import {
   showDialog,
@@ -84,18 +90,28 @@ const pluginId = '@jupyterlab/docmanager-extension:plugin';
 const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
-  requires: [ICommandPalette, IMainMenu, ISettingRegistry],
+  requires: [
+    ICommandPalette,
+    IMainMenu,
+    ISettingRegistry,
+    IApplicationShell,
+    IApplicationStatus
+  ],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     palette: ICommandPalette,
     menu: IMainMenu,
     settingRegistry: ISettingRegistry
   ): IDocumentManager => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${pluginId} must be activated in JupyterLab.`);
+    }
+
+    const { shell } = app;
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
       open: (widget, options) => {
-        const shell = app.shell;
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
@@ -104,7 +120,7 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          app.shell.addToMainArea(widget, options || {});
+          shell.addToMainArea(widget, options || {});
         }
         shell.activateById(widget.id);
 
@@ -163,18 +179,19 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
 export const savingStatusPlugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:saving-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
-    docManager: IDocumentManager
+    docManager: IDocumentManager,
+    shell: IApplicationShell
   ) => {
     let item = new SavingStatus({ docManager });
 
     // Keep the currently active widget synchronized.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(
-      () => (item.model!.widget = app.shell.currentWidget)
+    item.model!.widget = shell.currentWidget;
+    shell.currentChanged.connect(
+      () => (item.model!.widget = shell.currentWidget)
     );
 
     statusBar.registerStatusItem(
@@ -197,18 +214,19 @@ export const savingStatusPlugin: JupyterLabPlugin<void> = {
 export const pathStatusPlugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:path-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
-    docManager: IDocumentManager
+    docManager: IDocumentManager,
+    shell: IApplicationShell
   ) => {
     let item = new PathStatus({ docManager });
 
     // Keep the file path widget up-to-date with the application active widget.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(() => {
-      item.model!.widget = app.shell.currentWidget;
+    item.model!.widget = shell.currentWidget;
+    shell.currentChanged.connect(() => {
+      item.model!.widget = shell.currentWidget;
     });
 
     statusBar.registerStatusItem(
@@ -287,7 +305,7 @@ function addCommands(
 
     if (!node) {
       // fall back to active doc widget if path cannot be obtained from event
-      return app.shell.currentWidget;
+      return shell.currentWidget;
     }
     const pathMatch = node['title'].match(pathRe);
     return docManager.findWidget(pathMatch[1], null);

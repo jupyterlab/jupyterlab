@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -255,7 +256,8 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     IEditorServices,
     ILayoutRestorer,
     IRenderMimeRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    IApplicationShell
   ],
   optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
@@ -270,7 +272,7 @@ const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterClient, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
@@ -284,7 +286,7 @@ const tools: JupyterLabPlugin<ICellTools> = {
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB]
+  requires: [INotebookTracker, IEditorServices, IStateDB, IApplicationShell]
 };
 
 /**
@@ -293,11 +295,12 @@ const tools: JupyterLabPlugin<ICellTools> = {
 export const commandEditItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    shell: IApplicationShell
   ) => {
     const item = new CommandEditStatus();
 
@@ -312,9 +315,9 @@ export const commandEditItem: JupyterLabPlugin<void> = {
       align: 'right',
       rank: 4,
       isActive: () =>
-        app.shell.currentWidget &&
+        shell.currentWidget &&
         tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
+        shell.currentWidget === tracker.currentWidget
     });
   }
 };
@@ -325,11 +328,12 @@ export const commandEditItem: JupyterLabPlugin<void> = {
 export const notebookTrustItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    shell: IApplicationShell
   ) => {
     const item = new NotebookTrustStatus();
 
@@ -346,9 +350,9 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 3,
         isActive: () =>
-          app.shell.currentWidget &&
+          shell.currentWidget &&
           tracker.currentWidget &&
-          app.shell.currentWidget === tracker.currentWidget
+          shell.currentWidget === tracker.currentWidget
       }
     );
   }
@@ -370,10 +374,11 @@ export default plugins;
  * Activate the cell tools extension.
  */
 function activateCellTools(
-  app: JupyterLab,
+  app: JupyterClient,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
-  state: IStateDB
+  state: IStateDB,
+  shell: IApplicationShell
 ): Promise<ICellTools> {
   const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
@@ -432,19 +437,19 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+      shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
       if (open) {
-        app.shell.activateById(celltools.id);
+        shell.activateById(celltools.id);
       }
     }
 
     // For all subsequent widget changes, check if the cell tools should render.
-    app.shell.currentChanged.connect((sender, args) => {
+    shell.currentChanged.connect((sender, args) => {
       // If there are any open notebooks, add cell tools to the side panel if
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+          shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
         }
         return;
       }
@@ -460,7 +465,7 @@ function activateCellTools(
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(
-  app: JupyterLab,
+  app: JupyterClient,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: NotebookPanel.IContentFactory,
@@ -468,6 +473,7 @@ function activateNotebookHandler(
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
+  shell: IApplicationShell,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null
 ): INotebookTracker {
@@ -503,7 +509,7 @@ function activateNotebookHandler(
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
-  addCommands(app, services, tracker);
+  addCommands(app, services, tracker, shell);
   populatePalette(palette, services);
 
   let id = 0; // The ID counter for notebook panels.
@@ -786,11 +792,12 @@ function activateNotebookHandler(
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterLab,
+  app: JupyterClient,
   services: ServiceManager,
-  tracker: NotebookTracker
+  tracker: NotebookTracker,
+  shell: IApplicationShell
 ): void {
-  const { commands, shell } = app;
+  const { commands } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
@@ -810,7 +817,7 @@ function addCommands(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 
@@ -1791,7 +1798,7 @@ function populatePalette(
  * Populates the application menus for the notebook.
  */
 function populateMenus(
-  app: JupyterLab,
+  app: JupyterClient,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,

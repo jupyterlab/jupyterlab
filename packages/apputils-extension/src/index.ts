@@ -6,8 +6,10 @@
 import {
   ILayoutRestorer,
   IRouter,
+  JupyterClient,
   JupyterLab,
-  JupyterLabPlugin
+  JupyterLabPlugin,
+  IApplicationShell
 } from '@jupyterlab/application';
 
 import {
@@ -92,6 +94,7 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
+  requires: [IApplicationShell],
   autoStart: true
 };
 
@@ -116,7 +119,7 @@ const paletteRestorer: JupyterLabPlugin<void> = {
  */
 const settings: JupyterLabPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterLab): Promise<ISettingRegistry> => {
+  activate: async (app: JupyterClient): Promise<ISettingRegistry> => {
     const connector = app.serviceManager.settings;
     const plugins = (await connector.list()).values;
 
@@ -134,12 +137,16 @@ const themes: JupyterLabPlugin<IThemeManager> = {
   requires: [ISettingRegistry, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     settings: ISettingRegistry,
     splash: ISplashScreen,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null
   ): IThemeManager => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${themes.id} must be activated in JupyterLab.`);
+    }
+
     const host = app.shell;
     const commands = app.commands;
     const url = URLExt.join(app.info.urls.base, app.info.urls.themes);
@@ -225,8 +232,12 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   autoStart: true,
   provides: IWindowResolver,
   requires: [IRouter],
-  activate: async (app: JupyterLab, router: IRouter) => {
-    const resolver = new WindowResolver();
+  activate: async (app: JupyterClient, router: IRouter) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${resolver.id} must be activated in JupyterLab.`);
+    }
+
+    const solver = new WindowResolver();
     const match = router.current.path.match(Patterns.workspace);
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = workspace
@@ -238,7 +249,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
       : app.info.defaultWorkspace;
 
     try {
-      await resolver.resolve(candidate);
+      await solver.resolve(candidate);
     } catch (error) {
       console.warn('Window resolution failed:', error);
 
@@ -248,9 +259,9 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
       });
     }
 
-    PageConfig.setOption('workspace', resolver.name);
+    PageConfig.setOption('workspace', solver.name);
 
-    return resolver;
+    return solver;
   }
 };
 
@@ -281,18 +292,22 @@ const state: JupyterLabPlugin<IStateDB> = {
   provides: IStateDB,
   requires: [IRouter, IWindowResolver, ISplashScreen],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     router: IRouter,
     resolver: IWindowResolver,
     splash: ISplashScreen
   ) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${state.id} must be activated in JupyterLab.`);
+    }
+
     let debouncer: number;
     let resolved = false;
 
     const { commands, info, serviceManager } = app;
     const { workspaces } = serviceManager;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
-    const state = new StateDB({
+    const db = new StateDB({
       namespace: info.namespace,
       transform: transform.promise,
       windowName: resolver.name
@@ -305,7 +320,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Clear the state silently so that the state changed signal listener
         // will not be triggered as it causes a save state.
-        await state.clear(silent);
+        await db.clear(silent);
 
         // If the user explictly chooses to recover state, all of local storage
         // should be cleared.
@@ -353,7 +368,7 @@ const state: JupyterLabPlugin<IStateDB> = {
             return;
           }
 
-          const data = await state.toJSON();
+          const data = await db.toJSON();
 
           try {
             await workspaces.save(id, { data, metadata });
@@ -417,9 +432,9 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Any time the local state database changes, save the workspace.
         if (workspace) {
-          state.changed.connect(
+          db.changed.connect(
             listener,
-            state
+            db
           );
         }
 
@@ -526,12 +541,12 @@ const state: JupyterLabPlugin<IStateDB> = {
     window.addEventListener('beforeunload', () => {
       const silent = true;
 
-      state.clear(silent).catch(() => {
+      db.clear(silent).catch(() => {
         /* no-op */
       });
     });
 
-    return state;
+    return db;
   }
 };
 

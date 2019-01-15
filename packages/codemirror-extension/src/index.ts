@@ -5,7 +5,11 @@ import CodeMirror from 'codemirror';
 
 import { Menu } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  JupyterClient,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
@@ -18,7 +22,7 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -57,7 +61,7 @@ const services: JupyterLabPlugin<IEditorServices> = {
  */
 const commands: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, IMainMenu, IStateDB, ISettingRegistry],
+  requires: [IEditorTracker, IMainMenu, ISettingRegistry, IApplicationShell],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -68,15 +72,16 @@ const commands: JupyterLabPlugin<void> = {
 export const editorSyntaxStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker],
+  requires: [IStatusBar, IEditorTracker, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
-    tracker: IEditorTracker
+    tracker: IEditorTracker,
+    shell: IApplicationShell
   ) => {
     let item = new EditorSyntaxStatus({ commands: app.commands });
-    app.shell.currentChanged.connect(() => {
-      const current = app.shell.currentWidget;
+    shell.currentChanged.connect(() => {
+      const current = shell.currentWidget;
       if (current && tracker.has(current)) {
         item.model.editor = (current as IDocumentWidget<
           FileEditor
@@ -90,9 +95,9 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          app.shell.currentWidget &&
+          shell.currentWidget &&
           tracker.currentWidget &&
-          app.shell.currentWidget === tracker.currentWidget
+          shell.currentWidget === tracker.currentWidget
       }
     );
   }
@@ -116,7 +121,7 @@ const id = commands.id;
 /**
  * Set up the editor services.
  */
-function activateEditorServices(app: JupyterLab): IEditorServices {
+function activateEditorServices(app: JupyterClient): IEditorServices {
   CodeMirror.prototype.save = () => {
     app.commands.execute('docmanager:save');
   };
@@ -127,11 +132,11 @@ function activateEditorServices(app: JupyterLab): IEditorServices {
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(
-  app: JupyterLab,
+  app: JupyterClient,
   tracker: IEditorTracker,
   mainMenu: IMainMenu,
-  state: IStateDB,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  shell: IApplicationShell
 ): void {
   const { commands, restored } = app;
   let {
@@ -214,7 +219,7 @@ function activateEditorCommands(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

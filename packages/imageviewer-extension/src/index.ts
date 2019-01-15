@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -55,7 +56,7 @@ const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
-  requires: [ICommandPalette, ILayoutRestorer],
+  requires: [ICommandPalette, ILayoutRestorer, IApplicationShell],
   autoStart: true
 };
 
@@ -68,9 +69,10 @@ export default plugin;
  * Activate the image widget extension.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   palette: ICommandPalette,
-  restorer: ILayoutRestorer
+  restorer: ILayoutRestorer,
+  shell: IApplicationShell
 ): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
@@ -108,7 +110,7 @@ function activate(
     }
   });
 
-  addCommands(app, tracker);
+  addCommands(app, tracker, shell);
 
   const category = 'Image Viewer';
 
@@ -131,7 +133,11 @@ function activate(
 /**
  * Add the commands for the image widget.
  */
-export function addCommands(app: JupyterLab, tracker: IImageTracker) {
+export function addCommands(
+  app: JupyterClient,
+  tracker: IImageTracker,
+  shell: IApplicationShell
+) {
   const { commands } = app;
 
   /**
@@ -140,7 +146,7 @@ export function addCommands(app: JupyterLab, tracker: IImageTracker) {
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

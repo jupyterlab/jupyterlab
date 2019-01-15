@@ -2,9 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationStatus,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterClient,
+  JupyterLabPlugin,
+  IApplicationShell
 } from '@jupyterlab/application';
 
 import {
@@ -93,9 +95,10 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    IApplicationShell
   ],
-  optional: [ILauncher],
+  optional: [ILauncher, IApplicationStatus],
   activate: activateConsole,
   autoStart: true
 };
@@ -108,7 +111,7 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterClient, editorServices: IEditorServices) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
@@ -124,7 +127,7 @@ export default plugins;
  * Activate the console extension.
  */
 async function activateConsole(
-  app: JupyterLab,
+  app: JupyterClient,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
@@ -133,10 +136,12 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  launcher: ILauncher | null
+  shell: IApplicationShell,
+  launcher: ILauncher | null,
+  status: IApplicationStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
-  const { commands, shell } = app;
+  const { commands } = app;
   const category = 'Console';
 
   // Create an instance tracker for all console panels.
@@ -227,7 +232,7 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: app.setBusy.bind(app),
+      setBusy: status ? status.setBusy.bind(status) : undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
@@ -273,7 +278,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

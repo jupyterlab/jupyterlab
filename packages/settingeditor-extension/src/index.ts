@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -50,7 +51,8 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     IEditorServices,
     IStateDB,
     IRenderMimeRegistry,
-    ICommandPalette
+    ICommandPalette,
+    IApplicationShell
   ],
   autoStart: true,
   provides: ISettingEditorTracker,
@@ -61,15 +63,16 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
  * Activate the setting editor extension.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   restorer: ILayoutRestorer,
   registry: ISettingRegistry,
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette
+  palette: ICommandPalette,
+  shell: IApplicationShell
 ): ISettingEditorTracker {
-  const { commands, shell } = app;
+  const { commands } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;

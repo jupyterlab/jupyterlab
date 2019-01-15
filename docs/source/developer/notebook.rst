@@ -231,7 +231,7 @@ Copy the following to ``src/index.ts``:
     /**
      * Activate the extension.
      */
-    function activate(app: JupyterLab) {
+    function activate(app: JupyterClient) {
       app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
     };
 

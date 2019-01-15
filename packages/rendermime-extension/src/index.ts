@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -39,7 +39,7 @@ export default plugin;
  * Activate the rendermine plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   docManager: IDocumentManager,
   latexTypesetter: ILatexTypesetter | null
 ) {

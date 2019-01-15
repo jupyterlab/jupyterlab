@@ -3,6 +3,7 @@
 
 import {
   ILayoutRestorer,
+  JupyterClient,
   JupyterLab,
   JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -107,11 +108,15 @@ export default plugin;
  * returns A promise that resolves when the extension is activated.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   restorer: ILayoutRestorer
 ): void {
+  if (!(app instanceof JupyterLab)) {
+    throw new Error(`${plugin.id} must be activated in JupyterLab.`);
+  }
+
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';

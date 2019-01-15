@@ -10,7 +10,11 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { CommandPalette } from '@phosphor/widgets';
 
-import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  ILayoutRestorer,
+  JupyterClient
+} from '@jupyterlab/application';
 
 import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
 
@@ -73,8 +77,11 @@ class Palette implements ICommandPalette {
 /**
  * Activate the command palette.
  */
-export function activatePalette(app: JupyterLab): ICommandPalette {
-  const { commands, shell } = app;
+export function activatePalette(
+  app: JupyterClient,
+  shell: IApplicationShell
+): ICommandPalette {
+  const { commands } = app;
   const palette = Private.createPalette(app);
 
   // Show the current palette shortcut in its title.
@@ -113,7 +120,7 @@ export function activatePalette(app: JupyterLab): ICommandPalette {
  * Restore the command palette.
  */
 export function restorePalette(
-  app: JupyterLab,
+  app: JupyterClient,
   restorer: ILayoutRestorer
 ): void {
   const palette = Private.createPalette(app);
@@ -136,7 +143,7 @@ namespace Private {
   /**
    * Create the application-wide command palette.
    */
-  export function createPalette(app: JupyterLab): CommandPalette {
+  export function createPalette(app: JupyterClient): CommandPalette {
     if (!palette) {
       palette = new CommandPalette({ commands: app.commands });
       palette.id = 'command-palette';

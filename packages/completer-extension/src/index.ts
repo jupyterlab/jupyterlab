@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import {
   CompleterModel,
@@ -52,7 +52,7 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
   id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
-  activate: (app: JupyterLab): ICompletionManager => {
+  activate: (app: JupyterClient): ICompletionManager => {
     const handlers: { [id: string]: CompletionHandler } = {};
 
     app.commands.addCommand(CommandIDs.invoke, {
@@ -127,7 +127,7 @@ const consoles: JupyterLabPlugin<void> = {
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ICompletionManager,
     consoles: IConsoleTracker
   ): void => {
@@ -188,7 +188,7 @@ const notebooks: JupyterLabPlugin<void> = {
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ICompletionManager,
     notebooks: INotebookTracker
   ): void => {
@@ -247,7 +247,7 @@ const files: JupyterLabPlugin<void> = {
   requires: [ICompletionManager, IEditorTracker],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     manager: ICompletionManager,
     editorTracker: IEditorTracker
   ): void => {

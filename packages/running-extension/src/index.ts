@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -15,7 +16,7 @@ import { RunningSessions } from '@jupyterlab/running';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
-  requires: [ILayoutRestorer],
+  requires: [ILayoutRestorer, IApplicationShell],
   autoStart: true
 };
 
@@ -27,7 +28,11 @@ export default plugin;
 /**
  * Activate the running plugin.
  */
-function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
+function activate(
+  app: JupyterClient,
+  restorer: ILayoutRestorer,
+  shell: IApplicationShell
+): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
   running.title.iconClass = 'jp-DirectionsRunIcon jp-SideBar-tabIcon';
@@ -53,5 +58,5 @@ function activate(app: JupyterLab, restorer: ILayoutRestorer): void {
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
-  app.shell.addToLeftArea(running, { rank: 200 });
+  shell.addToLeftArea(running, { rank: 200 });
 }

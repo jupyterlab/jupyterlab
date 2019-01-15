@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  JupyterClient,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -28,7 +32,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, IApplicationShell],
   provides: ILauncher,
   autoStart: true
 };
@@ -41,8 +45,12 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
-  const { commands, shell } = app;
+function activate(
+  app: JupyterClient,
+  palette: ICommandPalette,
+  shell: IApplicationShell
+): ILauncher {
+  const { commands } = app;
   const model = new LauncherModel();
 
   commands.addCommand(CommandIDs.create, {

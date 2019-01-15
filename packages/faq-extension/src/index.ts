@@ -2,8 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IApplicationShell,
   ILayoutRestorer,
-  JupyterLab,
+  JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -52,14 +53,15 @@ const SOURCE = require('../faq.md');
  * Activate the FAQ plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterClient,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
-  rendermime: IRenderMimeRegistry
+  rendermime: IRenderMimeRegistry,
+  shell: IApplicationShell
 ): void {
   const category = 'Help';
   const command = CommandIDs.open;
-  const { commands, shell } = app;
+  const { commands } = app;
   const tracker = new InstanceTracker<MainAreaWidget>({ namespace: 'faq' });
 
   // Handle state restoration.

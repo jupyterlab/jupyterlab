@@ -17,7 +17,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
-import { JupyterLab, JupyterLabPlugin } from './index';
+import { JupyterClient, JupyterLabPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
 
@@ -68,7 +68,7 @@ export function createRendermimePlugins(
     requires: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
-    activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
+    activate: (app: JupyterClient, restorer: ILayoutRestorer) => {
       restorer.restore(tracker, {
         command: 'docmanager:open',
         args: widget => ({
@@ -97,7 +97,7 @@ export function createRendermimePlugin(
     requires: [ILayoutRestorer, IRenderMimeRegistry],
     autoStart: true,
     activate: (
-      app: JupyterLab,
+      app: JupyterClient,
       restorer: ILayoutRestorer,
       rendermime: IRenderMimeRegistry
     ) => {

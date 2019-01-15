@@ -42,7 +42,7 @@ import {
 const plugin: JupyterLabPlugin<void> = {
   id: '{{name}}:plugin',
   requires: [IThemeManager],
-  activate: function(app: JupyterLab, manager: IThemeManager) {
+  activate: function(app: JupyterClient, manager: IThemeManager) {
     manager.register({
       name: '{{title}}',
       isLight: true,

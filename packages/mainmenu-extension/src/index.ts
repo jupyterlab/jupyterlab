@@ -7,7 +7,11 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Menu, Widget } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterClient,
+  JupyterLab,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
@@ -117,7 +121,7 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
   optional: [IInspector],
   provides: IMainMenu,
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     palette: ICommandPalette,
     inspector: IInspector | null
   ): IMainMenu => {

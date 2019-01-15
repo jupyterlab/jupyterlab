@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
@@ -29,7 +29,7 @@ const RECORD_SEPARATOR = String.fromCharCode(30);
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
-  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
+  activate: async (app: JupyterClient, registry: ISettingRegistry) => {
     try {
       const old = await registry.load(plugin.id);
       const settings = await registry.load(shortcuts.id);
@@ -138,7 +138,7 @@ const plugin: JupyterLabPlugin<void> = {
 const shortcuts: JupyterLabPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
-  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
+  activate: async (app: JupyterClient, registry: ISettingRegistry) => {
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};

@@ -16,15 +16,17 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { Application, IPlugin } from '@phosphor/application';
 
+import { Token } from '@phosphor/coreutils';
+
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
 import { createRendermimePlugins } from './mimerenderers';
 
 import { ApplicationShell, IApplicationShell } from './shell';
-
-import { ISignal, Signal } from '@phosphor/signaling';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
@@ -33,6 +35,54 @@ export { IMimeDocumentTracker } from './mimerenderers';
 export { IRouter, Router } from './router';
 
 export { ApplicationShell, IApplicationShell } from './shell';
+
+/* tslint:disable */
+/**
+ * The application status token.
+ */
+export const IApplicationStatus = new Token<IApplicationStatus>(
+  '@jupyterlab/application:IApplicationStatus'
+);
+/* tslint:enable */
+
+/**
+ * An interface for application status functionality.
+ */
+export interface IApplicationStatus {
+  /**
+   * A signal for when application changes its busy status.
+   */
+  readonly busySignal: ISignal<JupyterClient, boolean>;
+
+  /**
+   *  signal for when application changes its dirty status.
+   */
+  readonly dirtySignal: ISignal<JupyterClient, boolean>;
+
+  /**
+   * Whether the application is busy.
+   */
+  readonly isBusy: boolean;
+
+  /**
+   * Whether the application is dirty.
+   */
+  readonly isDirty: boolean;
+
+  /**
+   * Set the application state to busy.
+   *
+   * @returns A disposable used to clear the busy state for the caller.
+   */
+  setBusy(): IDisposable;
+
+  /**
+   * Set the application state to dirty.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setDirty(): IDisposable;
+}
 
 /**
  * The base Jupyter client application class.
@@ -119,10 +169,9 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterClient<
-  ApplicationShell,
-  IApplicationShell.ILayout
-> {
+export class JupyterLab
+  extends JupyterClient<ApplicationShell, IApplicationShell.ILayout>
+  implements IApplicationStatus {
   /**
    * Construct a new JupyterLab object.
    */

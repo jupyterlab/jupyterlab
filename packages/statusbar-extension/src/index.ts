@@ -4,7 +4,11 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  IApplicationShell,
+  JupyterClient,
+  JupyterLabPlugin
+} from '@jupyterlab/application';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
@@ -46,17 +50,18 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterLab) => {
+  activate: (app: JupyterClient, shell: IApplicationShell) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
-    app.shell.addToBottomArea(statusBar);
+    shell.addToBottomArea(statusBar);
     // Trigger a refresh of active status items if
     // the application layout is modified.
-    app.shell.layoutModified.connect(() => {
+    shell.layoutModified.connect(() => {
       statusBar.update();
     });
     return statusBar;
-  }
+  },
+  requires: [IApplicationShell]
 };
 
 /**
@@ -65,12 +70,13 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 export const kernelStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IConsoleTracker],
+  requires: [IStatusBar, INotebookTracker, IConsoleTracker, IApplicationShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    shell: IApplicationShell
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
@@ -94,7 +100,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
     };
 
     // Keep the session object on the status item up-to-date.
-    app.shell.currentChanged.connect((shell, change) => {
+    shell.currentChanged.connect((shell, change) => {
       const { oldValue, newValue } = change;
 
       // Clean up after the old value if it exists,
@@ -124,7 +130,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
         align: 'left',
         rank: 1,
         isActive: () => {
-          const current = app.shell.currentWidget;
+          const current = shell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) || consoleTracker.has(current))
@@ -141,13 +147,20 @@ export const kernelStatus: JupyterLabPlugin<void> = {
 export const lineColItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:line-col-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
+  requires: [
+    IStatusBar,
+    INotebookTracker,
+    IEditorTracker,
+    IConsoleTracker,
+    IApplicationShell
+  ],
   activate: (
-    app: JupyterLab,
+    app: JupyterClient,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    shell: IApplicationShell
   ) => {
     const item = new LineCol();
 
@@ -159,7 +172,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
       item.model!.editor = prompt && prompt.editor;
     };
 
-    app.shell.currentChanged.connect((shell, change) => {
+    shell.currentChanged.connect((shell, change) => {
       const { oldValue, newValue } = change;
 
       // Check if we need to disconnect the console listener
@@ -204,7 +217,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 2,
         isActive: () => {
-          const current = app.shell.currentWidget;
+          const current = shell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) ||
@@ -228,7 +241,7 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
   requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
+  activate: (app: JupyterClient, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
     statusBar.registerStatusItem(
@@ -251,10 +264,14 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
 export const runningSessionsItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
+  requires: [IStatusBar, IApplicationShell],
+  activate: (
+    app: JupyterClient,
+    statusBar: IStatusBar,
+    shell: IApplicationShell
+  ) => {
     const item = new RunningSessions({
-      onClick: () => app.shell.activateById('jp-running-sessions'),
+      onClick: () => shell.activateById('jp-running-sessions'),
       serviceManager: app.serviceManager
     });
 
