@@ -49,11 +49,6 @@ export interface IDataset<T> {
  */
 export class DataRegistry {
   /**
-   * Construct a new data registry.
-   */
-  constructor() {}
-
-  /**
    * Publish a dataset to the data registry.
    *
    * @param dataset - the `IDataset` to publish to the data registry.
@@ -84,10 +79,12 @@ export class DataRegistry {
    *
    * @returns An set of matching `IDataset` objects.
    */
-  filter<T>(func: (value: IDataset<T>) => boolean): Set<IDataset<T>> {
-    let result: Set<IDataset<T>> = new Set();
-    this._datasets.forEach((value: IDataset<T>) => {
-      if (func(value as IDataset<T>)) {
+  filter<T extends IDataset<any>>(
+    func: (value: IDataset<any>) => value is T
+  ): Set<T> {
+    let result: Set<T> = new Set();
+    this._datasets.forEach((value: T) => {
+      if (func(value)) {
         result.add(value);
       }
     });

@@ -5,8 +5,6 @@
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import { ArrayExt } from '@phosphor/algorithm';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDataset } from './dataregistry';
@@ -14,7 +12,7 @@ import { IDataset } from './dataregistry';
 /**
  * An interface for a converter between data of two mime types.
  */
-export interface IConverter<A, B> {
+export interface IConverter<A extends IDataset<any>, B extends IDataset<any>> {
   /**
    * The input mime type of the data of type `A` to be converted.
    */
@@ -29,10 +27,10 @@ export interface IConverter<A, B> {
    * The conversion function.
    *
    * #### Notes
-   * This takes an input `IDataset<A>` and converts it to a promose to
-   * an `IDataset<B>`.
+   * This takes an input `A` and converts it to a promise of
+   * an `B`.
    */
-  converter: (input: IDataset<A>) => Promise<IDataset<B>>;
+  converter: (input: A) => Promise<B>;
 }
 
 /**
@@ -46,11 +44,6 @@ export interface IConverter<A, B> {
  */
 export class ConverterRegistry {
   /**
-   * Construct a new converter registry.
-   */
-  constructor() {}
-
-  /**
    * Register a dataset converter
    *
    * @param converter - the `IConverter` to register.
@@ -58,19 +51,22 @@ export class ConverterRegistry {
    * @returns A disposable which will remove the converter from the registry.
    *
    * @throws An error if the converter is already registered.
-   * */
+   */
   register(converter: IConverter<any, any>): IDisposable {
     let source = converter.sourceMimeType;
-
-    if (this._converters[source] === undefined) {
-      this._converters[source] = [];
+    let converters: Set<IConverter<any, any>>;
+    if (this._converters.has(source)) {
+      converters = this._converters.get(source);
+    } else {
+      converters = new Set();
+      this._converters.set(source, converters);
     }
-    this._converters[source].push(converter);
+    converters.add(converter);
 
     this._convertersChanged.emit({ converter, type: 'added' });
 
     return new DisposableDelegate(() => {
-      ArrayExt.removeFirstOf(this._converters[source], converter);
+      converters.delete(converter);
       this._convertersChanged.emit({ converter, type: 'removed' });
     });
   }
@@ -95,10 +91,10 @@ export class ConverterRegistry {
    * @returns A promise that resolves to the converted dataset with the target mime
    *          type and type `IDataset<B>`.
    */
-  convert<A, B>(
-    sourceDataset: IDataset<A>,
+  convert<A extends IDataset<any>, B extends IDataset<any>>(
+    sourceDataset: A,
     targetMimeType: string
-  ): Promise<IDataset<B>> {
+  ): Promise<B> {
     let converter: IConverter<A, B> = this._resolveConverter(
       sourceDataset.mimeType,
       targetMimeType
@@ -111,18 +107,16 @@ export class ConverterRegistry {
    *
    * @param sourceMimeType - the input mime type.
    *
-   * @returns An `Array<string>` of the available target mime types.
+   * @returns An `Set<string>` of the available target mime types.
    */
-  listTargetMimeTypes(sourceMimeType: string): Array<string> {
-    let converters: Array<IConverter<any, any>> = this._converters[
+  listTargetMimeTypes(sourceMimeType: string): Set<string> {
+    let converters: Set<IConverter<any, any>> = this._converters.get(
       sourceMimeType
-    ];
+    );
     if (converters === undefined) {
-      return [];
+      return new Set();
     }
-    return converters.map(value => {
-      return (value as IConverter<any, any>).targetMimeType;
-    });
+    return new Set([...converters].map(value => value.targetMimeType));
   }
 
   /**
@@ -138,22 +132,24 @@ export class ConverterRegistry {
    * This does not currently traverse the directed graph of converters to identify chains of
    * converters that match.
    */
-  private _resolveConverter<A, B>(
+  private _resolveConverter<A extends IDataset<any>, B extends IDataset<any>>(
     sourceMimeType: string,
     targetMimeType: string
   ): IConverter<A, B> {
-    let converters: Array<IConverter<any, any>> = this._converters[
+    let converters: Set<IConverter<any, any>> = this._converters.get(
       sourceMimeType
-    ];
+    );
     if (converters === undefined) {
       return undefined;
     }
-    ArrayExt.findFirstValue(converters, value => {
-      return value.targetMimeType === targetMimeType;
-    });
+    for (const converter of converters) {
+      if (converter.targetMimeType === targetMimeType) {
+        return converter;
+      }
+    }
   }
 
-  private _converters: { [key: string]: Array<IConverter<any, any>> } = {};
+  private _converters: Map<string, Set<IConverter<any, any>>> = new Map();
   private _convertersChanged = new Signal<
     this,
     ConverterRegistry.IConvertersChangedArgs
