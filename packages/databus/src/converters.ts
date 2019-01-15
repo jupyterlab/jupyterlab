@@ -14,14 +14,10 @@ import { IDataset } from './dataregistry';
  */
 export interface IConverter<A extends IDataset<any>, B extends IDataset<any>> {
   /**
-   * The input mime type of the data of type `A` to be converted.
+   * Computes the target mime type, given some source mimetype. If the convert is unable to
+   * convert this mimetype, it should return `null`.
    */
-  sourceMimeType: string;
-
-  /**
-   * The output mime type of the converted data of type `B`.
-   */
-  targetMimeType: string;
+  computeTargetMimeType: (sourceMimeType: string) => string | null;
 
   /**
    * The conversion function.
@@ -31,6 +27,41 @@ export interface IConverter<A extends IDataset<any>, B extends IDataset<any>> {
    * an `B`.
    */
   converter: (input: A) => Promise<B>;
+}
+
+/**
+ * An abstract class that provides conversion between two static mimetypes.
+ */
+export abstract class StaticConverter<
+  A extends IDataset<any>,
+  B extends IDataset<any>
+> implements IConverter<A, B> {
+  /**
+   * The input mime type of the data of type `A` to be converted.
+   */
+  abstract sourceMimeType: string;
+
+  /**
+   * The output mime type of the converted data of type `B`.
+   */
+  abstract targetMimeType: string;
+
+  /**
+   * Only returns the output mimetype if the source mimetype is correct.
+   */
+  computeTargetMimeType(sourceMimeType: string): string | null {
+    if (sourceMimeType === this.sourceMimeType) {
+      return this.sourceMimeType;
+    }
+  }
+  /**
+   * The conversion function.
+   *
+   * #### Notes
+   * This takes an input `A` and converts it to a promise of
+   * an `B`.
+   */
+  abstract converter: (input: A) => Promise<B>;
 }
 
 /**
@@ -53,20 +84,12 @@ export class ConverterRegistry {
    * @throws An error if the converter is already registered.
    */
   register(converter: IConverter<any, any>): IDisposable {
-    let source = converter.sourceMimeType;
-    let converters: Set<IConverter<any, any>>;
-    if (this._converters.has(source)) {
-      converters = this._converters.get(source);
-    } else {
-      converters = new Set();
-      this._converters.set(source, converters);
-    }
-    converters.add(converter);
+    this._converters.add(converter);
 
     this._convertersChanged.emit({ converter, type: 'added' });
 
     return new DisposableDelegate(() => {
-      converters.delete(converter);
+      this._converters.delete(converter);
       this._convertersChanged.emit({ converter, type: 'removed' });
     });
   }
@@ -110,13 +133,14 @@ export class ConverterRegistry {
    * @returns An `Set<string>` of the available target mime types.
    */
   listTargetMimeTypes(sourceMimeType: string): Set<string> {
-    let converters: Set<IConverter<any, any>> = this._converters.get(
-      sourceMimeType
-    );
-    if (converters === undefined) {
-      return new Set();
+    const targetMimeTypes = new Set();
+    for (const converter of this._converters) {
+      const targetMimeType = converter.computeTargetMimeType(sourceMimeType);
+      if (targetMimeType !== null) {
+        targetMimeTypes.add(targetMimeType);
+      }
     }
-    return new Set([...converters].map(value => value.targetMimeType));
+    return targetMimeTypes;
   }
 
   /**
@@ -136,20 +160,14 @@ export class ConverterRegistry {
     sourceMimeType: string,
     targetMimeType: string
   ): IConverter<A, B> {
-    let converters: Set<IConverter<any, any>> = this._converters.get(
-      sourceMimeType
-    );
-    if (converters === undefined) {
-      return undefined;
-    }
-    for (const converter of converters) {
-      if (converter.targetMimeType === targetMimeType) {
+    for (const converter of this._converters) {
+      if (converter.computeTargetMimeType(sourceMimeType) === targetMimeType) {
         return converter;
       }
     }
   }
 
-  private _converters: Map<string, Set<IConverter<any, any>>> = new Map();
+  private _converters: Set<IConverter<any, any>> = new Set();
   private _convertersChanged = new Signal<
     this,
     ConverterRegistry.IConvertersChangedArgs
