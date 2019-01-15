@@ -196,6 +196,183 @@ directly. You can also use `jlpm test --namePattern=<regex>` to specify specific
 suite names, and `jlpm test --pathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
 in Chrome by browsing to `chrome://inspect/` and launching the remote session.
 
+## Performance Testing
+
+Let's say that you make some change to how JupyterLab builds, or add a large dependency and want to see
+what effect that has on the performance of loading the JupyterLab application. You could look at the
+size of bundle produced, but this on only gives you a partial picture of the full effect on a user loading JupyterLab.
+
+Instead, you can use the [Lighthouse](https://github.com/GoogleChrome/lighthouse) tool to run a number of analysis
+against JupyterLab and compare your results.
+
+First, build JupyterLab in dev mode:
+
+```bash
+jlpm run build:dev
+```
+
+Then, startup JupyterLab using this dev build:
+
+```bash
+jupyter lab --dev
+```
+
+Now you can tell Lighthouse to run against your local server and show your results:
+
+```bash
+jlpm run lighthouse --view
+```
+
+![](./docs/source/images/lighthouse-screenshot.png)
+
+### Using throttling
+
+Lighthouse reccomends using the system level [`comcast`](https://github.com/tylertreat/comcast) tool to throttle your network connection
+and emulate different scenarios. First, install that tool:
+
+```bash
+go get github.com/tylertreat/comcast
+```
+
+Then, before you run Lighthouse, enable the throttling (this requires sudo):
+
+```bash
+jlpm run lighthouse:throttling:start
+```
+
+This enables the "WIFI (good)" preset of comcast, which should emulate
+loading JupyterLab over a local network.
+
+Then run the lighthouse tests:
+
+```bash
+jlpm run lighthouse [...]
+```
+
+Then you can disable the throttling after you are done:
+
+```bash
+jlpm run lighthouse:throttling:stop
+```
+
+### Comparing results
+
+Let's say we want to compare the results of the production build of JupyterLab with the normal build. The production build minifies all the JavaScript, so should load a bit faster.
+
+First, we build JupyterLab normally, start it up, profile it and save the results:
+
+```bash
+jupyter lab build:dev
+jupyter lab --dev
+
+# in new window
+yarn run lighthouse --output json --output-path normal.json
+```
+
+Then rebuild with the production build and retest:
+
+```bash
+jupyter lab build:dev:prod
+jupyter lab --dev
+
+# in new window
+yarn run lighthouse --output json --output-path prod.json
+```
+
+Now we can use compare the two outputs:
+
+```bash
+jlpm run lighthouse:compare normal.json prod.json
+```
+
+This gives us a report of the relative differences between the audits in the two reports:
+
+> `normal.json` -> `prod.json`
+>
+> **First Contentful Paint**
+>
+> - -47% Δ
+> - 5.7 s -> 3.0 s
+> - First Contentful Paint marks the time at which the first text or image is painted. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint).
+>
+> **First Meaningful Paint**
+>
+> - -47% Δ
+> - 5.7 s -> 3.0 s
+> - First Meaningful Paint measures when the primary content of a page is visible. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint).
+>
+> **Speed Index**
+>
+> - -45% Δ
+> - 6.2 s -> 3.4 s
+> - Speed Index shows how quickly the contents of a page are visibly populated. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/speed-index).
+>
+> **Estimated Input Latency**
+>
+> - 0% Δ
+> - 20 ms -> 20 ms
+> - The score above is an estimate of how long your app takes to respond to user input, in milliseconds, during the busiest 5s window of page load. If your latency is higher than 50 ms, users may perceive your app as laggy. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency).
+>
+> **First CPU Idle**
+>
+> - -46% Δ
+> - 5.9 s -> 3.1 s
+> - First CPU Idle marks the first time at which the page's main thread is quiet enough to handle input. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-interactive).
+>
+> **Time to Interactive**
+>
+> - -46% Δ
+> - 5.9 s -> 3.1 s
+> - Interactive marks the time at which the page is fully interactive. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive).
+>
+> **Avoid multiple page redirects**
+>
+> - -1% Δ
+> - Potential savings of 340 ms -> Potential savings of 340 ms
+> - Redirects introduce additional delays before the page can be loaded. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/redirects).
+>
+> **Minimizes main-thread work**
+>
+> - -16% Δ
+> - 1.1 s -> 0.9 s
+> - Consider reducing the time spent parsing, compiling and executing JS. You may find delivering smaller JS payloads helps with this.
+>
+> **JavaScript execution time**
+>
+> - -2% Δ
+> - 0.5 s -> 0.5 s
+> - Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/bootup).
+>
+> **Preload key requests**
+>
+> - -50% Δ
+> - Potential savings of 2,170 ms -> Potential savings of 1,080 ms
+> - Consider using <link rel=preload> to prioritize fetching resources that are currently requested later in page load. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/preload).
+>
+> **Uses efficient cache policy on static assets**
+>
+> - 0% Δ
+> - 2 resources found -> 2 resources found
+> - A long cache lifetime can speed up repeat visits to your page. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/cache-policy).
+>
+> **Avoid enormous network payloads**
+>
+> - -59% Δ
+> - Total size was 10,468 KB -> Total size was 4,320 KB
+> - Large network payloads cost users real money and are highly correlated with long load times. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/network-payloads).
+>
+> **Minify CSS**
+>
+> - -88% Δ
+> - Potential savings of 31 KB -> Potential savings of 31 KB
+> - Minifying CSS files can reduce network payload sizes. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/minify-css).
+>
+> **Avoid an excessive DOM size**
+>
+> - 0% Δ
+> - 1,136 nodes -> 1,136 nodes
+> - Browser engineers recommend pages contain fewer than ~1,500 DOM nodes. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer [style calculations](https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations), and produce costly [layout reflows](https://developers.google.com/speed/articles/reflow). [Learn more](https://developers.google.com/web/tools/lighthouse/audits/dom-size).
+
 ### Build and run the stand-alone examples
 
 To install and build the examples in the `examples` directory:
