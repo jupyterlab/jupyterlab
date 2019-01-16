@@ -73,6 +73,7 @@ export class ApplicationShell extends Widget {
     let topPanel = (this._topPanel = new Panel());
     let hboxPanel = new BoxPanel();
     let dockPanel = (this._dockPanel = new DockPanel());
+    let headerPanel = (this._headerPanel = new Panel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();
@@ -87,6 +88,7 @@ export class ApplicationShell extends Widget {
     hboxPanel.id = 'jp-main-content-panel';
     dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
+    headerPanel.id = 'jp-header-panel';
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
@@ -126,16 +128,19 @@ export class ApplicationShell extends Widget {
     // This will still respect the min-size of children widget in the stacked panel.
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
+    BoxLayout.setStretch(headerPanel, 0);
     BoxLayout.setStretch(topPanel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
+    rootLayout.addWidget(headerPanel);
     rootLayout.addWidget(topPanel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
-    // initially hiding bottom panel when no elements inside
+    // initially hiding header and bottom panel when no elements inside
     this._bottomPanel.hide();
+    this._headerPanel.hide();
 
     this.layout = rootLayout;
 
@@ -481,46 +486,56 @@ export class ApplicationShell extends Widget {
   }
 
   /**
-   * Add a widget to the top content area.
+   * Add a widget to a content area.
    *
    * #### Notes
    * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  _addToArea(
+    widget: Widget,
+    area: Panel
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    area.addWidget(widget);
+    this._onLayoutModified();
+
+    if (area.isHidden) {
+      area.show();
+    }
+  }
+
+  /**
+   * Add a widget to the header content area.
+   */
+  addToHeader(
+    widget: Widget,
+    options: ApplicationShell.ISideAreaOptions = {}
+  ): void {
+    this._addToArea(widget, this._headerPanel);
+  }
+
+  /**
+   * Add a widget to the top content area.
    */
   addToTopArea(
     widget: Widget,
     options: ApplicationShell.ISideAreaOptions = {}
   ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._topPanel.addWidget(widget);
-    this._onLayoutModified();
+    this._addToArea(widget, this._topPanel);
   }
 
   /**
    * Add a widget to the bottom content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
    */
-
   addToBottomArea(
     widget: Widget,
     options: ApplicationShell.ISideAreaOptions = {}
   ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._bottomPanel.addWidget(widget);
-    this._onLayoutModified();
-
-    if (this._bottomPanel.isHidden) {
-      this._bottomPanel.show();
-    }
+    this._addToArea(widget, this._bottomPanel);
   }
 
   /**
@@ -582,6 +597,8 @@ export class ApplicationShell extends Widget {
         return this._leftHandler.stackedPanel.widgets.length === 0;
       case 'main':
         return this._dockPanel.isEmpty;
+      case 'header':
+        return this._headerPanel.widgets.length === 0;
       case 'top':
         return this._topPanel.widgets.length === 0;
       case 'bottom':
@@ -664,6 +681,8 @@ export class ApplicationShell extends Widget {
         return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
       case 'right':
         return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'header':
+        return this._headerPanel.children();
       case 'top':
         return this._topPanel.children();
       case 'bottom':
@@ -810,6 +829,7 @@ export class ApplicationShell extends Widget {
   private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
+  private _headerPanel: Panel;
   private _topPanel: Panel;
   private _bottomPanel: Panel;
   private _debouncer = 0;
@@ -830,7 +850,7 @@ export namespace ApplicationShell {
   /**
    * The areas of the application shell where widgets can reside.
    */
-  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
+  export type Area = 'main' | 'header' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
