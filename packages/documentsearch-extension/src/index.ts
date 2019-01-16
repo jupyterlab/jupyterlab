@@ -105,7 +105,6 @@ export interface IDisplayUpdate {
   useRegex: boolean;
   inputText: string;
   query: RegExp;
-  lastQuery: RegExp;
   errorMessage: string;
   forceFocus: boolean;
 }
@@ -158,7 +157,7 @@ const extension: JupyterLabPlugin<void> = {
     });
 
     // Add the command to the palette.
-    palette.addItem({ command: startCommand, category: 'Tutorial' });
+    palette.addItem({ command: startCommand, category: 'Main Area' });
   }
 };
 
@@ -205,7 +204,6 @@ class SearchInstance {
   }
   private startSearch(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
-    this._displayState.lastQuery = this._displayState.query || query;
     this._displayState.query = query;
     let cleanupPromise = Promise.resolve();
     if (this._activeProvider) {
@@ -255,7 +253,6 @@ class SearchInstance {
       useRegex: false,
       inputText: '',
       query: null,
-      lastQuery: null,
       errorMessage: '',
       forceFocus: true
     };

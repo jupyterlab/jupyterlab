@@ -163,11 +163,8 @@ class SearchOverlay extends React.Component<
       this.setState({ errorMessage: e.message });
       return;
     }
-    if (query.source.length === 0) {
-      return;
-    }
 
-    if (Private.regexEqual(this.props.overlayState.lastQuery, query)) {
+    if (Private.regexEqual(this.props.overlayState.query, query)) {
       if (event.shiftKey) {
         this.props.onHighlightPrevious();
       } else {
