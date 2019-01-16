@@ -13,7 +13,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
+import VDOM, { EventPayload } from '@nteract/transform-vdom';
 
 import '../style/index.css';
 
@@ -33,6 +33,11 @@ const CSS_ICON_CLASS = 'jp-MaterialIcon jp-VDOMIcon';
 export const MIME_TYPE = 'application/vdom.v1+json';
 
 /**
+ * The comm target name for communication with vdom.
+ */
+export const TARGET_NAME = 'vdom';
+
+/**
  * A renderer for declarative virtual DOM content.
  */
 export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
@@ -46,11 +51,14 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
     // Get current kernel session (hack for mimerender extension)
-    this._session = Session.listRunning().then(sessionModels => {
-      const session = sessionModels.find(
-        session => session.path === (options.resolver as any)._session.path
+    this._comm = Session.listRunning().then(sessionModels => {
+      const model = sessionModels.find(
+        session => session.path === (options.resolver as any)._session.path // Hack
       );
-      return Session.connectTo(session);
+      const session = Session.connectTo(model);
+      const comm = session.kernel.connectToComm(TARGET_NAME);
+      comm.open();
+      return comm;
     });
   }
 
@@ -58,78 +66,56 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
    * Dispose of the widget.
    */
   dispose(): void {
-    // Dispose of React element
-    ReactDOM.unmountComponentAtNode(this.node);
-    // Dispose of open comms
-    for (let targetName in this._comms) {
-      this._comms[targetName].dispose();
-    }
-    // Dispose of open kernel session
-    this._session.then(session => {
-      session.dispose();
+    // Dispose of comm disposable
+    this._comm.then(comm => {
+      comm.dispose();
     });
     super.dispose();
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Dispose of React component(s).
+    ReactDOM.unmountComponentAtNode(this.node);
   }
 
   /**
    * Render VDOM into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    return this._session.then(session => {
+    return this._comm.then(() => {
       const data = model.data[this._mimeType] as any;
       // const metadata = model.metadata[this._mimeType] as any || {};
-      this.initVDOMEventHandlers(data, session);
       ReactDOM.render(
         <VDOM data={data} onVDOMEvent={this.handleVDOMEvent} />,
         this.node
       );
     });
   }
-  /**
-   * Initialize event handlers for VDOM elements.
-   */
-  initVDOMEventHandlers = (vdomEl: any, session: Session.ISession): void => {
-    if (vdomEl.eventHandlers) {
-      // For each event handler, connect to its comm by target name and open it
-      for (let eventType in vdomEl.eventHandlers) {
-        const targetName = vdomEl.eventHandlers[eventType];
-        if (!this._comms[targetName]) {
-          this._comms[targetName] = session.kernel.connectToComm(targetName);
-          this._comms[targetName].open();
-        }
-      }
-    }
-    if (vdomEl.children) {
-      if (Array.isArray(vdomEl.children)) {
-        vdomEl.children.forEach((child: any) => {
-          this.initVDOMEventHandlers(child, session);
-        });
-      }
-      this.initVDOMEventHandlers(vdomEl.children, session);
-    }
-  };
 
   /**
    * Handle events for VDOM element.
    */
-  handleVDOMEvent = (targetName: string, event: SerializedEvent<any>): void => {
+  handleVDOMEvent = (event: EventPayload): void => {
     // When a VDOM element's event handler is called, send a serialized
     // representation of the event to the registered comm channel for the
     // kernel to handle
-    this._comms[targetName].send(JSON.stringify(event));
+    this._comm.then(comm => {
+      // Debounce comm messages
+      if (this._timer) {
+        window.clearTimeout(this._timer);
+      }
+      this._timer = window.setTimeout(() => {
+        comm.send(JSON.stringify(event));
+      }, 16);
+    });
   };
 
-  /**
-   * Called before the widget is detached from the DOM.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    // Unmount the component so it can tear down.
-    ReactDOM.unmountComponentAtNode(this.node);
-  }
-
   private _mimeType: string;
-  private _session: Promise<Session.ISession>;
-  private _comms: { [key: string]: Kernel.IComm } = {};
+  private _comm: Promise<Kernel.IComm>;
+  private _timer: number;
 }
 
 /**
