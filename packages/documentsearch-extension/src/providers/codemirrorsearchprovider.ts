@@ -12,7 +12,6 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 export class CodeMirrorSearchProvider implements ISearchProvider {
   startSearch(query: RegExp, domain: any): Promise<ISearchMatch[]> {
     this._query = query;
-    // TODO: clean up types here...
     if (domain instanceof CodeMirrorEditor) {
       this._cm = domain;
     } else {
@@ -21,15 +20,15 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     Private.clearSearch(this._cm);
 
     CodeMirror.on(this._cm.doc, 'change', (instance: any, changeObj: any) => {
-      // If we get newlines added/removed, the match state all goes out of whack
-      // so here we want to blow away the match state and re-do the search overlay
-      // to build a correct state for the codemirror instance.
-
+      // If we get newlines added/removed, the line numbers across the
+      // match state are all shifted, so here we need to recalcualte it
       if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
-        this._refreshOverlay(query);
+        this._setInitialMatches(this._query);
       }
     });
     this._refreshOverlay(query);
+    this._setInitialMatches(query);
+
     const matches = Private.parseMatchesFromState(this._matchState);
     if (matches.length === 0) {
       return Promise.resolve([]);
@@ -113,24 +112,117 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   private _refreshOverlay(query: RegExp) {
-    this._matchState = {};
     // multiple lines added
     const state = Private.getSearchState(this._cm);
     this._cm.operation(() => {
       state.query = query;
       // clear search first
       this._cm.removeOverlay(state.overlay);
-      state.overlay = Private.searchOverlay(
-        state.query,
-        this._matchState,
-        this._changed
-      );
+      state.overlay = this.getSearchOverlay();
       this._cm.addOverlay(state.overlay);
       // skips show matches on scroll bar here
       state.posFrom = state.posTo = this._cm.getCursor();
       this._changed.emit(null);
     });
   }
+
+  /**
+   * This manually constructs the initial match state across the whole
+   * document. This must be done manually because the codemirror overlay
+   * is lazy-loaded, so it will only tokenize lines that are in or near
+   * the viewport.  This is sufficient for efficiently maintaining the
+   * state when changes are made to the document, as changes occur in or
+   * near the viewport, but to scan the whole document, a manual search
+   * across the entire content is required.
+   * @param query The search term
+   */
+  private _setInitialMatches(query: RegExp) {
+    this._matchState = {};
+
+    const start = CodeMirror.Pos(this._cm.doc.firstLine(), 0);
+    const end = CodeMirror.Pos(this._cm.doc.lastLine());
+    const content = this._cm.doc.getRange(start, end);
+    const lines = content.split('\n');
+    let totalMatchIndex = 0;
+    lines.forEach((line, lineNumber) => {
+      query.lastIndex = 0;
+      let match = query.exec(line);
+      while (match) {
+        const col = match.index;
+        const matchObj: ISearchMatch = {
+          text: match[0],
+          line: lineNumber,
+          column: col,
+          fragment: line,
+          index: totalMatchIndex
+        };
+        if (!this._matchState[lineNumber]) {
+          this._matchState[lineNumber] = {};
+        }
+        this._matchState[lineNumber][col] = matchObj;
+        match = query.exec(line);
+      }
+    });
+  }
+
+  private getSearchOverlay() {
+    return {
+      /**
+       * Token function is called when a line needs to be processed -
+       * when the overlay is intially created, it's called on all lines;
+       * when a line is modified and needs to be re-evaluated, it's called
+       * on just that line.
+       *
+       * This implementation of the token function both constructs/maintains
+       * the overlay and keeps track of the match state as the document is
+       * updated while a search is active.
+       */
+      token: (stream: CodeMirror.StringStream) => {
+        const currentPos = stream.pos;
+        this._query.lastIndex = currentPos;
+        const lineText = stream.string;
+        const match = this._query.exec(lineText);
+        const line = (stream as any).lineOracle.line;
+
+        // If starting at position 0, the tokenization of this line has just started.
+        // Blow away everything on this line in the state so it can be updated.
+        if (
+          stream.start === currentPos &&
+          currentPos === 0 &&
+          !!this._matchState[line] &&
+          Object.keys(this._matchState[line]).length !== 0
+        ) {
+          this._matchState[line] = {};
+        }
+        if (match && match.index === currentPos) {
+          // found match, add it to state
+          const matchLength = match[0].length;
+          const matchObj: ISearchMatch = {
+            text: lineText.substr(currentPos, matchLength),
+            line: line,
+            column: currentPos,
+            fragment: lineText,
+            index: 0 // fill in index when flattening, later
+          };
+          if (!this._matchState[line]) {
+            this._matchState[line] = {};
+          }
+          this._matchState[line][currentPos] = matchObj;
+          // move the stream along and return searching style for the token
+          stream.pos += matchLength || 1;
+          return 'searching';
+        } else if (match) {
+          // there's a match in the stream, advance the stream to its position
+          stream.pos = match.index;
+        } else {
+          // no matches, consume the rest of the stream
+          this._changed.emit(undefined);
+          stream.skipToEnd();
+        }
+      }
+    };
+  }
+
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
   private _matchIndex: number;
@@ -216,72 +308,6 @@ namespace Private {
       cm.state.search = new SearchState();
     }
     return cm.state.search;
-  }
-
-  export function searchOverlay(
-    query: RegExp,
-    matchState: MatchMap,
-    changed: Signal<ISearchProvider, void>
-  ) {
-    let blankLineLast = false;
-    return {
-      /**
-       * Token function is called when a line needs to be processed -
-       * when the overlay is intially created, it's called on all lines;
-       * when a line is modified and needs to be re-evaluated, it's called
-       * on just that line.
-       *
-       * This implementation of the token function both constructs/maintains
-       * the overlay and keeps track of the match state as the document is
-       * updated while a search is active.
-       */
-      token: (stream: CodeMirror.StringStream) => {
-        const currentPos = stream.pos;
-        query.lastIndex = currentPos;
-        const lineText = stream.string;
-        const match = query.exec(lineText);
-        const line = (stream as any).lineOracle.line;
-        // If starting at position 0, the tokenization of this line has just started.
-        // Blow away everything on this line in the state so it can be updated.
-        if (
-          stream.start === currentPos &&
-          currentPos === 0 &&
-          !!matchState[line] &&
-          Object.keys(matchState[line]).length !== 0
-        ) {
-          if (blankLineLast) {
-            matchState[line - 1] = {};
-            blankLineLast = false;
-          }
-          matchState[line] = {};
-        }
-        if (match && match.index === currentPos) {
-          // found match, add it to state
-          const matchLength = match[0].length;
-          const matchObj: ISearchMatch = {
-            text: lineText.substr(currentPos, matchLength),
-            line: line,
-            column: currentPos,
-            fragment: lineText,
-            index: 0 // fill in index when flattening, later
-          };
-          if (!matchState[line]) {
-            matchState[line] = {};
-          }
-          matchState[line][currentPos] = matchObj;
-          // move the stream along and return searching style for the token
-          stream.pos += matchLength || 1;
-          return 'searching';
-        } else if (match) {
-          // there's a match in the stream, advance the stream to its position
-          stream.pos = match.index;
-        } else {
-          // no matches, consume the rest of the stream
-          changed.emit(undefined);
-          stream.skipToEnd();
-        }
-      }
-    };
   }
 
   export function clearSearch(cm: CodeMirrorEditor) {
