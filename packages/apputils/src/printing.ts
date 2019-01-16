@@ -76,6 +76,10 @@ export function printWidget(
   cssText?: string,
   callback?: PrintdCallback
 ) {
+  // reset URL if it's set.
+  const iframe = _PRINTD.getIFrame();
+  iframe.src = 'about://blank';
+
   _PRINTD.print(this.node, cssText, callback);
 }
 
