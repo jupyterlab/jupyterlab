@@ -140,6 +140,28 @@ describe('ApplicationShell', () => {
     });
   });
 
+  describe('#addToHeader()', () => {
+    it('should add a widget to the header', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.addToHeader(widget);
+      expect(shell.isEmpty('header')).to.equal(false);
+    });
+
+    it('should be a no-op if the widget has no id', () => {
+      const widget = new Widget();
+      shell.addToHeader(widget);
+      expect(shell.isEmpty('header')).to.equal(true);
+    });
+
+    it('should accept options', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.addToHeader(widget, { rank: 10 });
+      expect(shell.isEmpty('header')).to.equal(false);
+    });
+  });
+
   describe('#addToLeftArea()', () => {
     it('should add a widget to the left area', () => {
       const widget = new Widget();
