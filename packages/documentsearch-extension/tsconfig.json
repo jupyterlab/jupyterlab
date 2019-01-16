@@ -22,10 +22,10 @@
       "path": "../codemirror"
     },
     {
-      "path": "../notebook"
+      "path": "../docregistry"
     },
     {
-      "path": "../docregistry"
+      "path": "../notebook"
     }
   ]
 }

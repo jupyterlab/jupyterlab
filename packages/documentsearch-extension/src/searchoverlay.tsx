@@ -256,6 +256,7 @@ namespace Private {
     regex: boolean
   ) {
     const flag = caseSensitive ? 'g' : 'gi';
+    // escape regex characters in query if its a string search
     const queryText = regex
       ? queryString
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
