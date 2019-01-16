@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 import '../style/index.css';
 
-import { Executor } from './executor';
 import { SearchProviderRegistry } from './searchproviderregistry';
 
 import {
@@ -17,6 +16,7 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { createSearchOverlay } from './searchoverlay';
 import { Widget } from '@phosphor/widgets';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 
 export interface ISearchMatch {
   /**
@@ -106,6 +106,8 @@ export interface IDisplayUpdate {
   inputText: string;
   query: RegExp;
   lastQuery: RegExp;
+  errorMessage: string;
+  forceFocus: boolean;
 }
 
 /**
@@ -161,65 +163,89 @@ const extension: JupyterLabPlugin<void> = {
 };
 
 class SearchInstance {
-  constructor(currentWidget: Widget, registry: SearchProviderRegistry) {
-    this._widget = currentWidget;
-    this.initializeSearchAssets(registry);
+  constructor(shell: ApplicationShell, registry: SearchProviderRegistry) {
+    this._widget = shell.currentWidget;
+    const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
+      .clientHeight;
+    this.initializeSearchAssets(registry, toolbarHeight);
+    // check the full content of the cm editor on start search, see if full content
+    // is there or lazy loaded...  is it a codemirror setting?  can i force full load?
+    // I don't think it's a lazy load issue, i think the changed event may not be getting fired?
+    // need to evaluate if the search overlay is the one not being evaluated or if the changed event
+    // isn't getting fired after the final update
   }
 
   get searchWidget() {
     return this._searchWidget;
   }
 
-  get executor() {
-    return this._executor;
+  get provider() {
+    return this._activeProvider;
+  }
+
+  focus(): void {
+    this._displayState.forceFocus = true;
+    this._displayUpdateSignal.emit(this._displayState);
   }
 
   updateIndices(): void {
-    this._displayState.totalMatches = this._executor.matches.length;
-    this._displayState.currentIndex = this._executor.currentMatchIndex;
+    this._displayState.totalMatches = this._activeProvider.matches.length;
+    this._displayState.currentIndex = this._activeProvider.currentMatchIndex;
     this.updateDisplay();
   }
 
   private _widget: Widget;
   private _displayState: IDisplayUpdate;
-  private _displayUpdateSignal: Signal<Executor, IDisplayUpdate>;
-  private _executor: Executor;
+  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayUpdate>;
+  private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;
   private updateDisplay() {
+    this._displayState.forceFocus = false;
     this._displayUpdateSignal.emit(this._displayState);
   }
   private startSearch(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
     this._displayState.lastQuery = this._displayState.query || query;
     this._displayState.query = query;
-    this._executor.startSearch(query).then(() => {
-      this.updateIndices();
-      // this signal should get injected when the widget is
-      // created and hooked up to react!
-      this._executor.changed.connect(
-        this.updateIndices,
-        this
-      );
-    });
+    let cleanupPromise = Promise.resolve();
+    if (this._activeProvider) {
+      cleanupPromise = this._activeProvider.endSearch();
+    }
+    cleanupPromise.then(() =>
+      this._activeProvider.startSearch(query, this._widget).then(() => {
+        this.updateIndices();
+        // this signal should get injected when the widget is
+        // created and hooked up to react!
+        this._activeProvider.changed.connect(
+          this.updateIndices,
+          this
+        );
+      })
+    );
   }
   private endSearch() {
-    this._executor.endSearch().then(() => {
+    this._activeProvider.endSearch().then(() => {
       // more cleanup probably
       Signal.disconnectAll(this);
       this._searchWidget.dispose();
-      this._executor.changed.disconnect(this.updateIndices, this);
+      this._activeProvider.changed.disconnect(this.updateIndices, this);
     });
   }
   private highlightNext() {
-    this._executor.highlightNext().then(this.updateIndices.bind(this));
+    this._activeProvider.highlightNext().then(this.updateIndices.bind(this));
   }
   private highlightPrevious() {
-    this._executor.highlightPrevious().then(this.updateIndices.bind(this));
+    this._activeProvider
+      .highlightPrevious()
+      .then(this.updateIndices.bind(this));
   }
-  private initializeSearchAssets(registry: SearchProviderRegistry) {
-    this._executor = new Executor(registry, this._widget);
-    this._displayUpdateSignal = new Signal<Executor, IDisplayUpdate>(
-      this._executor
+  private initializeSearchAssets(
+    registry: SearchProviderRegistry,
+    toolbarHeight: number
+  ) {
+    this._activeProvider = registry.getProviderForWidget(this._widget);
+    this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayUpdate>(
+      this._activeProvider
     );
 
     this._displayState = {
@@ -229,7 +255,9 @@ class SearchInstance {
       useRegex: false,
       inputText: '',
       query: null,
-      lastQuery: null
+      lastQuery: null,
+      errorMessage: '',
+      forceFocus: true
     };
 
     const onCaseSensitiveToggled = () => {
@@ -250,7 +278,8 @@ class SearchInstance {
       this.highlightNext.bind(this),
       this.highlightPrevious.bind(this),
       this.startSearch.bind(this),
-      this.endSearch.bind(this)
+      this.endSearch.bind(this),
+      toolbarHeight
     );
   }
 }
@@ -283,12 +312,10 @@ namespace Private {
     const currentWidget = shell.currentWidget;
     const widgetId = currentWidget.id;
     if (activeSearches[widgetId]) {
-      const searchWidget = activeSearches[widgetId].searchWidget;
-      // searchWidget.focusInput(); // focus WAS TODO
-      searchWidget;
+      activeSearches[widgetId].focus();
       return;
     }
-    const searchInstance = new SearchInstance(currentWidget, registry);
+    const searchInstance = new SearchInstance(shell, registry);
     activeSearches[widgetId] = searchInstance;
 
     searchInstance.searchWidget.disposed.connect(() => {
@@ -298,11 +325,11 @@ namespace Private {
   }
 
   export function onNextCommand(instance: SearchInstance) {
-    instance.executor.highlightNext().then(() => instance.updateIndices());
+    instance.provider.highlightNext().then(() => instance.updateIndices());
   }
 
   export function onPrevCommand(instance: SearchInstance) {
-    instance.executor.highlightPrevious().then(() => instance.updateIndices());
+    instance.provider.highlightPrevious().then(() => instance.updateIndices());
   }
 }
 

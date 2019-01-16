@@ -20,20 +20,16 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     }
     Private.clearSearch(this._cm);
 
-    const state = Private.getSearchState(this._cm);
-    this._cm.operation(() => {
-      state.query = query;
-      // clear search first
-      this._cm.removeOverlay(state.overlay);
-      state.overlay = Private.searchOverlay(
-        state.query,
-        this._matchState,
-        this._changed
-      );
-      this._cm.addOverlay(state.overlay);
-      // skips show matches on scroll bar here
-      state.posFrom = state.posTo = this._cm.getCursor();
+    CodeMirror.on(this._cm.doc, 'change', (instance: any, changeObj: any) => {
+      // If we get newlines added/removed, the match state all goes out of whack
+      // so here we want to blow away the match state and re-do the search overlay
+      // to build a correct state for the codemirror instance.
+
+      if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
+        this._refreshOverlay(query);
+      }
     });
+    this._refreshOverlay(query);
     const matches = Private.parseMatchesFromState(this._matchState);
     if (matches.length === 0) {
       return Promise.resolve([]);
@@ -56,7 +52,9 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   endSearch(): Promise<void> {
     this._matchState = {};
     this._matchIndex = 0;
-    Private.clearSearch(this._cm);
+    if (this._cm) {
+      Private.clearSearch(this._cm);
+    }
     return Promise.resolve();
   }
 
@@ -114,6 +112,25 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return null;
   }
 
+  private _refreshOverlay(query: RegExp) {
+    this._matchState = {};
+    // multiple lines added
+    const state = Private.getSearchState(this._cm);
+    this._cm.operation(() => {
+      state.query = query;
+      // clear search first
+      this._cm.removeOverlay(state.overlay);
+      state.overlay = Private.searchOverlay(
+        state.query,
+        this._matchState,
+        this._changed
+      );
+      this._cm.addOverlay(state.overlay);
+      // skips show matches on scroll bar here
+      state.posFrom = state.posTo = this._cm.getCursor();
+      this._changed.emit(null);
+    });
+  }
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
   private _matchIndex: number;
@@ -206,6 +223,7 @@ namespace Private {
     matchState: MatchMap,
     changed: Signal<ISearchProvider, void>
   ) {
+    let blankLineLast = false;
     return {
       /**
        * Token function is called when a line needs to be processed -
@@ -231,6 +249,10 @@ namespace Private {
           !!matchState[line] &&
           Object.keys(matchState[line]).length !== 0
         ) {
+          if (blankLineLast) {
+            matchState[line - 1] = {};
+            blankLineLast = false;
+          }
           matchState[line] = {};
         }
         if (match && match.index === currentPos) {

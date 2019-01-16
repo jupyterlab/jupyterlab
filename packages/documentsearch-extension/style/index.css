@@ -1,19 +1,22 @@
 .jp-DocumentSearch-input {
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-DocumentSearch-overlay {
   position: absolute;
-  background-color: var(--jp-layout-color2);
-  border: var(--jp-border-width) solid var(--jp-border-color0);
-  border-radius: var(--jp-border-radius);
+  background-color: var(--jp-layout-color0);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  border-left: var(--jp-border-width) solid var(--jp-border-color0);
+  border-bottom-right-radius: var(--jp-border-radius);
+  border-bottom-left-radius: var(--jp-border-radius);
   top: 0;
   right: 0;
   z-index: 5;
-  min-width: 340px;
+  min-width: 300px;
   padding: 3px;
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-DocumentSearch-overlay * {
@@ -85,4 +88,8 @@
 .jp-DocumentSearch-close-button:hover {
   background-size: 16px;
   background-image: var(--jp-icon-close-circle);
+}
+
+.jp-DocumentSearch-regex-error {
+  color: var(--jp-error-color0);
 }
