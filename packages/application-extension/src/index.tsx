@@ -9,9 +9,9 @@ import {
   JupyterClient,
   JupyterLab,
   JupyterLabPlugin,
+  LabShell,
   LayoutRestorer,
-  Router,
-  ApplicationShell
+  Router
 } from '@jupyterlab/application';
 
 import {
@@ -546,10 +546,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 const shell: JupyterLabPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
   activate: (app: JupyterClient) => {
-    if (app.shell instanceof ApplicationShell) {
+    if (app.shell instanceof LabShell) {
       return app.shell;
     }
-    throw new Error(`${shell.id} did not find an ApplicationShell instance.`);
+    throw new Error(`${shell.id} did not find an LabShell instance.`);
   },
   autoStart: true,
   provides: ILabShell

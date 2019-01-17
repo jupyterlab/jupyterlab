@@ -468,7 +468,7 @@ namespace Private {
    * #### Notes
    * This format is JSON serializable and saved in the state database.
    * It is meant to be a data structure can translate into an
-   * `ApplicationShell.ILayout` data structure for consumption by
+   * `LabShell.ILayout` data structure for consumption by
    * the application shell.
    */
   export interface ILayout extends JSONObject {

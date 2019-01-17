@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { ApplicationShell } from '@jupyterlab/application/src';
+import { LabShell } from '@jupyterlab/application/src';
 
 class ContentWidget extends Widget {
   activated = false;
@@ -21,11 +21,11 @@ class ContentWidget extends Widget {
   }
 }
 
-describe('ApplicationShell', () => {
-  let shell: ApplicationShell;
+describe('LabShell', () => {
+  let shell: LabShell;
 
   beforeEach(() => {
-    shell = new ApplicationShell();
+    shell = new LabShell();
     Widget.attach(shell, document.body);
   });
 
@@ -34,8 +34,8 @@ describe('ApplicationShell', () => {
   });
 
   describe('#constructor()', () => {
-    it('should create an ApplicationShell instance', () => {
-      expect(shell).to.be.an.instanceof(ApplicationShell);
+    it('should create an LabShell instance', () => {
+      expect(shell).to.be.an.instanceof(LabShell);
     });
   });
 

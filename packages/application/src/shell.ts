@@ -29,7 +29,7 @@ import { JupyterClient } from '.';
 /**
  * The class name added to AppShell instances.
  */
-const APPLICATION_SHELL_CLASS = 'jp-ApplicationShell';
+const APPLICATION_SHELL_CLASS = 'jp-LabShell';
 
 /**
  * The class name added to side bar instances.
@@ -70,7 +70,7 @@ export const ILabShell = new Token<ILabShell>(
 /**
  * The JupyterLab application shell.
  */
-export interface ILabShell extends ApplicationShell {}
+export interface ILabShell extends LabShell {}
 
 /**
  * The namespace for `ILabShell` type information.
@@ -166,7 +166,7 @@ export namespace ILabShell {
 /**
  * The application shell for JupyterLab.
  */
-export class ApplicationShell extends Widget implements JupyterClient.Shell {
+export class LabShell extends Widget implements JupyterClient.Shell {
   /**
    * Construct a new application shell.
    */

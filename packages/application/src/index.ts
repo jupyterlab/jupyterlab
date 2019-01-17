@@ -28,7 +28,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { createRendermimePlugins } from './mimerenderers';
 
-import { ApplicationShell, ILabShell } from './shell';
+import { ILabShell, LabShell } from './shell';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
@@ -36,7 +36,7 @@ export { IMimeDocumentTracker } from './mimerenderers';
 
 export { IRouter, Router } from './router';
 
-export { ApplicationShell, ILabShell } from './shell';
+export { ILabShell, LabShell } from './shell';
 
 /* tslint:disable */
 /**
@@ -237,16 +237,13 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab
-  extends JupyterClient<ApplicationShell, ILabShell.ILayout>
+export class JupyterLab extends JupyterClient<LabShell, ILabShell.ILayout>
   implements ILabStatus {
   /**
    * Construct a new JupyterLab object.
    */
-  constructor(
-    options: JupyterLab.IOptions = { shell: new ApplicationShell() }
-  ) {
-    super({ shell: options.shell || new ApplicationShell() });
+  constructor(options: JupyterLab.IOptions = { shell: new LabShell() }) {
+    super({ shell: options.shell || new LabShell() });
     this.restored = this.shell.restored;
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
@@ -432,7 +429,7 @@ export namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
-    extends JupyterClient.IOptions<ApplicationShell>,
+    extends JupyterClient.IOptions<LabShell>,
       Partial<IInfo> {}
 
   /**
