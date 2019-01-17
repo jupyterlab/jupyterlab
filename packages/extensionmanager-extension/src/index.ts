@@ -5,7 +5,7 @@ import {
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin,
-  IApplicationShell
+  ILabShell
 } from '@jupyterlab/application';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
@@ -33,12 +33,12 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ISettingRegistry, ILayoutRestorer, IApplicationShell],
+  requires: [ISettingRegistry, ILayoutRestorer, ILabShell],
   activate: async (
     app: JupyterClient,
     registry: ISettingRegistry,
     restorer: ILayoutRestorer,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
@@ -88,7 +88,7 @@ const plugin: JupyterLabPlugin<void> = {
  */
 function addCommands(
   app: JupyterClient,
-  shell: IApplicationShell,
+  shell: ILabShell,
   view: ExtensionView
 ): void {
   const { commands } = app;

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -47,7 +47,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
     palette: ICommandPalette | null,
     launcher: ILauncher | null,
     restorer: ILayoutRestorer | null,
-    shell: IApplicationShell
+    shell: ILabShell
   ): IInspector => {
     const { commands } = app;
     const manager = new InspectorManager();
@@ -131,13 +131,13 @@ const inspector: JupyterLabPlugin<IInspector> = {
  */
 const consoles: JupyterLabPlugin<void> = {
   id: '@jupyterlab/inspector-extension:consoles',
-  requires: [IInspector, IConsoleTracker, IApplicationShell],
+  requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
   activate: (
     app: JupyterClient,
     manager: IInspector,
     consoles: IConsoleTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -192,13 +192,13 @@ const consoles: JupyterLabPlugin<void> = {
  */
 const notebooks: JupyterLabPlugin<void> = {
   id: '@jupyterlab/inspector-extension:notebooks',
-  requires: [IInspector, INotebookTracker, IApplicationShell],
+  requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
   activate: (
     app: JupyterClient,
     manager: IInspector,
     notebooks: INotebookTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};

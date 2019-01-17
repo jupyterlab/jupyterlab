@@ -11,7 +11,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 import { CommandPalette } from '@phosphor/widgets';
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient
 } from '@jupyterlab/application';
@@ -79,7 +79,7 @@ class Palette implements ICommandPalette {
  */
 export function activatePalette(
   app: JupyterClient,
-  shell: IApplicationShell
+  shell: ILabShell
 ): ICommandPalette {
   const { commands } = app;
   const palette = Private.createPalette(app);

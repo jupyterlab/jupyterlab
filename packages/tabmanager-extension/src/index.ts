@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -22,7 +22,7 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (
     app: JupyterClient,
     restorer: ILayoutRestorer,
-    shell: IApplicationShell
+    shell: ILabShell
   ): void => {
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
@@ -59,7 +59,7 @@ const plugin: JupyterLabPlugin<void> = {
     });
   },
   autoStart: true,
-  requires: [ILayoutRestorer, IApplicationShell]
+  requires: [ILayoutRestorer, ILabShell]
 };
 
 /**

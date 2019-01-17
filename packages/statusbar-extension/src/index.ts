@@ -5,7 +5,7 @@
 import '../style/index.css';
 
 import {
-  IApplicationShell,
+  ILabShell,
   JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -50,7 +50,7 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterClient, shell: IApplicationShell) => {
+  activate: (app: JupyterClient, shell: ILabShell) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
     shell.addToBottomArea(statusBar);
@@ -61,7 +61,7 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
     });
     return statusBar;
   },
-  requires: [IApplicationShell]
+  requires: [ILabShell]
 };
 
 /**
@@ -70,13 +70,13 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 export const kernelStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IConsoleTracker, IApplicationShell],
+  requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
   activate: (
     app: JupyterClient,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
@@ -152,7 +152,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
     INotebookTracker,
     IEditorTracker,
     IConsoleTracker,
-    IApplicationShell
+    ILabShell
   ],
   activate: (
     app: JupyterClient,
@@ -160,7 +160,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     const item = new LineCol();
 
@@ -264,12 +264,8 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
 export const runningSessionsItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
-  requires: [IStatusBar, IApplicationShell],
-  activate: (
-    app: JupyterClient,
-    statusBar: IStatusBar,
-    shell: IApplicationShell
-  ) => {
+  requires: [IStatusBar, ILabShell],
+  activate: (app: JupyterClient, statusBar: IStatusBar, shell: ILabShell) => {
     const item = new RunningSessions({
       onClick: () => shell.activateById('jp-running-sessions'),
       serviceManager: app.serviceManager

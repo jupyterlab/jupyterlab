@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -103,7 +103,7 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
     IFileBrowserFactory,
     ILayoutRestorer,
     ISettingRegistry,
-    IApplicationShell
+    ILabShell
   ],
   optional: [ICommandPalette, ILauncher, IMainMenu],
   provides: IEditorTracker,
@@ -117,13 +117,13 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker, ISettingRegistry, IApplicationShell],
+  requires: [IStatusBar, IEditorTracker, ISettingRegistry, ILabShell],
   activate: (
     app: JupyterClient,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
     settingRegistry: ISettingRegistry,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     // Create a menu for switching tabs vs spaces.
     const menu = new Menu({ commands: app.commands });
@@ -196,7 +196,7 @@ function activate(
   browserFactory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  shell: IApplicationShell,
+  shell: ILabShell,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null

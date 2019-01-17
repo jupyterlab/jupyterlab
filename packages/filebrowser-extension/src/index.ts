@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -101,7 +101,7 @@ const browser: JupyterLabPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
-    IApplicationShell,
+    ILabShell,
     IFileBrowserFactory,
     ILayoutRestorer,
     IDocumentManager,
@@ -234,7 +234,7 @@ function activateFactory(
  */
 function activateBrowser(
   app: JupyterClient,
-  shell: IApplicationShell,
+  shell: ILabShell,
   factory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
   docManager: IDocumentManager,
@@ -340,7 +340,7 @@ function addCommands(
   app: JupyterClient,
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser,
-  shell?: IApplicationShell
+  shell?: ILabShell
 ): void {
   const registry = app.docRegistry;
 
@@ -622,7 +622,7 @@ function addCommands(
         shell.activateById(browser.id);
         return;
       } else {
-        const areas: IApplicationShell.Area[] = ['left', 'right'];
+        const areas: ILabShell.Area[] = ['left', 'right'];
         for (let area of areas) {
           const it = shell.widgets(area);
           let widget = it.next();

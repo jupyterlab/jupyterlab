@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -56,7 +56,7 @@ const plugin: JupyterLabPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
-  requires: [ICommandPalette, ILayoutRestorer, IApplicationShell],
+  requires: [ICommandPalette, ILayoutRestorer, ILabShell],
   autoStart: true
 };
 
@@ -72,7 +72,7 @@ function activate(
   app: JupyterClient,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
-  shell: IApplicationShell
+  shell: ILabShell
 ): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
@@ -136,7 +136,7 @@ function activate(
 export function addCommands(
   app: JupyterClient,
   tracker: IImageTracker,
-  shell: IApplicationShell
+  shell: ILabShell
 ) {
   const { commands } = app;
 

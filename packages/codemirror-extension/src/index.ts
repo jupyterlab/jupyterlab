@@ -6,7 +6,7 @@ import CodeMirror from 'codemirror';
 import { Menu } from '@phosphor/widgets';
 
 import {
-  IApplicationShell,
+  ILabShell,
   JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -61,7 +61,7 @@ const services: JupyterLabPlugin<IEditorServices> = {
  */
 const commands: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, IMainMenu, ISettingRegistry, IApplicationShell],
+  requires: [IEditorTracker, IMainMenu, ISettingRegistry, ILabShell],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -72,12 +72,12 @@ const commands: JupyterLabPlugin<void> = {
 export const editorSyntaxStatus: JupyterLabPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker, IApplicationShell],
+  requires: [IStatusBar, IEditorTracker, ILabShell],
   activate: (
     app: JupyterClient,
     statusBar: IStatusBar,
     tracker: IEditorTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     let item = new EditorSyntaxStatus({ commands: app.commands });
     shell.currentChanged.connect(() => {
@@ -136,7 +136,7 @@ function activateEditorCommands(
   tracker: IEditorTracker,
   mainMenu: IMainMenu,
   settingRegistry: ISettingRegistry,
-  shell: IApplicationShell
+  shell: ILabShell
 ): void {
   const { commands, restored } = app;
   let {

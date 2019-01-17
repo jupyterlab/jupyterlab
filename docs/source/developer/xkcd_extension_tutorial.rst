@@ -316,7 +316,7 @@ code:
           execute: () => {
             if (!widget.isAttached) {
               // Attach the widget to the main work area if it's not there
-              app.shell.addToMainArea(widget);
+              app.shell.add(widget, 'main');
             }
             // Activate the widget
             app.shell.activateById(widget.id);
@@ -603,7 +603,7 @@ these changes:
         execute: () => {
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
-            app.shell.addToMainArea(widget);
+            app.shell.add(widget, 'main');
           }
           // Refresh the comic in the widget
           widget.update();
@@ -735,7 +735,7 @@ Finally, rewrite the ``activate`` function so that it:
           }
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
-            app.shell.addToMainArea(widget);
+            app.shell.add(widget, 'main');
           } else {
             // Refresh the comic in the widget
             widget.update();

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -16,7 +16,7 @@ import { RunningSessions } from '@jupyterlab/running';
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
-  requires: [ILayoutRestorer, IApplicationShell],
+  requires: [ILayoutRestorer, ILabShell],
   autoStart: true
 };
 
@@ -31,7 +31,7 @@ export default plugin;
 function activate(
   app: JupyterClient,
   restorer: ILayoutRestorer,
-  shell: IApplicationShell
+  shell: ILabShell
 ): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';

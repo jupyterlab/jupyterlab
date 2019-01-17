@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -53,13 +52,7 @@ const plugin: JupyterLabPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
-  requires: [
-    IMainMenu,
-    ICommandPalette,
-    ILayoutRestorer,
-    ISettingRegistry,
-    IApplicationShell
-  ],
+  requires: [IMainMenu, ICommandPalette, ILayoutRestorer, ISettingRegistry],
   optional: [ILauncher],
   autoStart: true
 };
@@ -78,7 +71,6 @@ function activate(
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  shell: IApplicationShell,
   launcher: ILauncher | null
 ): ITerminalTracker {
   const { serviceManager } = app;
@@ -149,7 +141,7 @@ function activate(
       console.error(reason.message);
     });
 
-  addCommands(app, serviceManager, tracker, settingRegistry, shell);
+  addCommands(app, serviceManager, tracker, settingRegistry);
 
   // Add some commands to the application view menu.
   const viewGroup = [
@@ -200,8 +192,7 @@ export function addCommands(
   app: JupyterClient,
   services: ServiceManager,
   tracker: InstanceTracker<MainAreaWidget<Terminal>>,
-  settingRegistry: ISettingRegistry,
-  shell: IApplicationShell
+  settingRegistry: ISettingRegistry
 ) {
   const { commands } = app;
 
@@ -221,13 +212,13 @@ export function addCommands(
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
       let main = new MainAreaWidget({ content: term });
-      shell.addToMainArea(main);
+      app.shell.add(main);
 
       return promise
         .then(session => {
           term.session = session;
           tracker.add(main);
-          shell.activateById(main.id);
+          app.shell.activateById(main.id);
 
           return main;
         })
@@ -246,7 +237,7 @@ export function addCommands(
         return (content.session && content.session.name === name) || false;
       });
       if (widget) {
-        shell.activateById(widget.id);
+        app.shell.activateById(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -262,7 +253,7 @@ export function addCommands(
       if (!current) {
         return;
       }
-      shell.activateById(current.id);
+      app.shell.activateById(current.id);
 
       return current.content.refresh().then(() => {
         if (current) {

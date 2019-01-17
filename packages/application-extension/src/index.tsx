@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   IApplicationStatus,
   ILayoutRestorer,
   IRouter,
@@ -187,8 +187,8 @@ const main: JupyterLabPlugin<void> = {
  */
 const layout: JupyterLabPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IApplicationShell, IStateDB],
-  activate: (app: JupyterClient, shell: IApplicationShell, state: IStateDB) => {
+  requires: [ILabShell, IStateDB],
+  activate: (app: JupyterClient, shell: ILabShell, state: IStateDB) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
@@ -543,7 +543,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * The default JupyterLab application shell.
  */
-const shell: JupyterLabPlugin<IApplicationShell> = {
+const shell: JupyterLabPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
   activate: (app: JupyterClient) => {
     if (app.shell instanceof ApplicationShell) {
@@ -552,7 +552,7 @@ const shell: JupyterLabPlugin<IApplicationShell> = {
     throw new Error(`${shell.id} did not find an ApplicationShell instance.`);
   },
   autoStart: true,
-  provides: IApplicationShell
+  provides: ILabShell
 };
 
 /**

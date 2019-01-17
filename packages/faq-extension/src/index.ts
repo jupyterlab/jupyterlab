@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -57,7 +57,7 @@ function activate(
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
-  shell: IApplicationShell
+  shell: ILabShell
 ): void {
   const category = 'Help';
   const command = CommandIDs.open;

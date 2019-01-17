@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -32,7 +32,7 @@ namespace CommandIDs {
 const plugin: JupyterLabPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette, IApplicationShell],
+  requires: [ICommandPalette, ILabShell],
   provides: ILauncher,
   autoStart: true
 };
@@ -48,7 +48,7 @@ export default plugin;
 function activate(
   app: JupyterClient,
   palette: ICommandPalette,
-  shell: IApplicationShell
+  shell: ILabShell
 ): ILauncher {
   const { commands } = app;
   const model = new LauncherModel();
@@ -59,7 +59,7 @@ function activate(
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        shell.addToMainArea(item, { ref: id });
+        shell.add(item, 'main', { ref: id });
       };
       const launcher = new Launcher({ cwd, callback, commands });
 
@@ -73,7 +73,7 @@ function activate(
       main.title.closable = !!toArray(shell.widgets('main')).length;
       main.id = id;
 
-      shell.addToMainArea(main, { activate: args['activate'] as boolean });
+      shell.add(main, 'main', { activate: args['activate'] as boolean });
 
       shell.layoutModified.connect(
         () => {

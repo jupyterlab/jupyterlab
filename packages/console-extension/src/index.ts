@@ -6,7 +6,7 @@ import {
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin,
-  IApplicationShell
+  ILabShell
 } from '@jupyterlab/application';
 
 import {
@@ -96,7 +96,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     IFileBrowserFactory,
     IRenderMimeRegistry,
     ISettingRegistry,
-    IApplicationShell
+    ILabShell
   ],
   optional: [ILauncher, IApplicationStatus],
   activate: activateConsole,
@@ -136,7 +136,7 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  shell: IApplicationShell,
+  shell: ILabShell,
   launcher: ILauncher | null,
   status: IApplicationStatus | null
 ): Promise<IConsoleTracker> {
@@ -225,9 +225,9 @@ async function activateConsole(
    * Create a console for a given path.
    */
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
-    let panel: ConsolePanel;
     await manager.ready;
-    panel = new ConsolePanel({
+
+    const panel = new ConsolePanel({
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
@@ -248,7 +248,7 @@ async function activateConsole(
     tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
-    shell.addToMainArea(panel, {
+    shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
       activate: options.activate

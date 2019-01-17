@@ -14,6 +14,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { ServiceManager } from '@jupyterlab/services';
 
+import { IIterator } from '@phosphor/algorithm';
+
 import { Application, IPlugin } from '@phosphor/application';
 
 import { Token } from '@phosphor/coreutils';
@@ -26,7 +28,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { createRendermimePlugins } from './mimerenderers';
 
-import { ApplicationShell, IApplicationShell } from './shell';
+import { ApplicationShell, ILabShell } from './shell';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
@@ -34,7 +36,7 @@ export { IMimeDocumentTracker } from './mimerenderers';
 
 export { IRouter, Router } from './router';
 
-export { ApplicationShell, IApplicationShell } from './shell';
+export { ApplicationShell, ILabShell } from './shell';
 
 /* tslint:disable */
 /**
@@ -92,7 +94,7 @@ export interface IApplicationStatus {
  * can be authored. It inherits from the phosphor `Application`.
  */
 export class JupyterClient<
-  T extends Widget = Widget,
+  T extends JupyterClient.Shell = JupyterClient.Shell,
   U = any
 > extends Application<T> {
   /**
@@ -127,6 +129,61 @@ export class JupyterClient<
    * The service manager used by the application.
    */
   readonly serviceManager: ServiceManager;
+
+  /**
+   * Walks up the DOM hierarchy of the target of the active `contextmenu`
+   * event, testing the nodes for a user-supplied funcion. This can
+   * be used to find a node on which to operate, given a context menu click.
+   *
+   * @param test - a function that takes an `HTMLElement` and returns a
+   *   boolean for whether it is the element the requester is seeking.
+   *
+   * @returns an HTMLElement or undefined, if none is found.
+   */
+  contextMenuFirst(
+    test: (node: HTMLElement) => boolean
+  ): HTMLElement | undefined {
+    for (let node of this._getContextMenuNodes()) {
+      if (test(node)) {
+        return node;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * A method invoked on a document `'contextmenu'` event.
+   */
+  protected evtContextMenu(event: MouseEvent): void {
+    this._contextMenuEvent = event;
+    super.evtContextMenu(event);
+  }
+
+  /**
+   * Gets the hierarchy of html nodes that was under the cursor
+   * when the most recent contextmenu event was issued
+   */
+  private _getContextMenuNodes(): HTMLElement[] {
+    if (!this._contextMenuEvent) {
+      return [];
+    }
+
+    // this one-liner doesn't work, but should at some point
+    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+    // return this._contextMenuEvent.composedPath() as HTMLElement[];
+
+    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    while (
+      'parentNode' in nodes[nodes.length - 1] &&
+      nodes[nodes.length - 1].parentNode &&
+      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
+    ) {
+      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
+    }
+    return nodes;
+  }
+
+  private _contextMenuEvent: MouseEvent;
 }
 
 /**
@@ -136,7 +193,7 @@ export namespace JupyterClient {
   /**
    * The options used to initialize a JupyterClient.
    */
-  export interface IOptions<T extends Widget = Widget, U = any>
+  export interface IOptions<T extends Shell = Shell, U = any>
     extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
@@ -159,6 +216,17 @@ export namespace JupyterClient {
      */
     restored?: Promise<U>;
   }
+
+  export type Shell = Widget & {
+    activateById(id: string): void;
+    add(
+      widget: Widget,
+      area?: string,
+      options?: DocumentRegistry.IOpenOptions
+    ): void;
+    readonly currentWidget: Widget;
+    widgets(area?: string): IIterator<Widget>;
+  };
 }
 
 /**
@@ -170,7 +238,7 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
 export class JupyterLab
-  extends JupyterClient<ApplicationShell, IApplicationShell.ILayout>
+  extends JupyterClient<ApplicationShell, ILabShell.ILayout>
   implements IApplicationStatus {
   /**
    * Construct a new JupyterLab object.
@@ -238,32 +306,7 @@ export class JupyterLab
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
-  readonly restored: Promise<IApplicationShell.ILayout> = this.shell.restored;
-
-  /**
-   * A method invoked on a document `'contextmenu'` event.
-   *
-   * #### Notes
-   * The default implementation of this method opens the application
-   * `contextMenu` at the current mouse position.
-   *
-   * If the application context menu has no matching content *or* if
-   * the shift key is pressed, the default browser context menu will
-   * be opened instead.
-   *
-   * A subclass may reimplement this method as needed.
-   */
-  protected evtContextMenu(event: MouseEvent): void {
-    if (event.shiftKey) {
-      return;
-    }
-
-    this._contextMenuEvent = event;
-    if (this.contextMenu.open(event)) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
+  readonly restored: Promise<ILabShell.ILayout> = this.shell.restored;
 
   /**
    * Whether the application is dirty.
@@ -298,27 +341,6 @@ export class JupyterLab
    */
   get info(): JupyterLab.IInfo {
     return this._info;
-  }
-
-  /**
-   * Walks up the DOM hierarchy of the target of the active `contextmenu`
-   * event, testing the nodes for a user-supplied funcion. This can
-   * be used to find a node on which to operate, given a context menu click.
-   *
-   * @param test - a function that takes an `HTMLElement` and returns a
-   *   boolean for whether it is the element the requester is seeking.
-   *
-   * @returns an HTMLElement or undefined, if none is found.
-   */
-  contextMenuFirst(
-    test: (node: HTMLElement) => boolean
-  ): HTMLElement | undefined {
-    for (let node of this._getContextMenuNodes()) {
-      if (test(node)) {
-        return node;
-      }
-    }
-    return undefined;
   }
 
   /**
@@ -395,31 +417,6 @@ export class JupyterLab
     });
   }
 
-  /**
-   * Gets the hierarchy of html nodes that was under the cursor
-   * when the most recent contextmenu event was issued
-   */
-  private _getContextMenuNodes(): HTMLElement[] {
-    if (!this._contextMenuEvent) {
-      return [];
-    }
-
-    // this one-liner doesn't work, but should at some point
-    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
-    // return this._contextMenuEvent.composedPath() as HTMLElement[];
-
-    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
-    while (
-      'parentNode' in nodes[nodes.length - 1] &&
-      nodes[nodes.length - 1].parentNode &&
-      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
-    ) {
-      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
-    }
-    return nodes;
-  }
-
-  private _contextMenuEvent: MouseEvent;
   private _info: JupyterLab.IInfo;
   private _dirtyCount = 0;
   private _busyCount = 0;

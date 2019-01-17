@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   JupyterClient,
   JupyterLabPlugin
 } from '@jupyterlab/application';
@@ -25,7 +25,7 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
  */
 export const foreign: JupyterLabPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker, ICommandPalette, IApplicationShell],
+  requires: [IConsoleTracker, ICommandPalette, ILabShell],
   activate: activateForeign,
   autoStart: true
 };
@@ -36,7 +36,7 @@ function activateForeign(
   app: JupyterClient,
   tracker: IConsoleTracker,
   palette: ICommandPalette,
-  shell: IApplicationShell
+  shell: ILabShell
 ) {
   tracker.widgetAdded.connect((sender, panel) => {
     const console = panel.console;

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -257,7 +257,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
     ILayoutRestorer,
     IRenderMimeRegistry,
     ISettingRegistry,
-    IApplicationShell
+    ILabShell
   ],
   optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
@@ -286,7 +286,7 @@ const tools: JupyterLabPlugin<ICellTools> = {
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB, IApplicationShell]
+  requires: [INotebookTracker, IEditorServices, IStateDB, ILabShell]
 };
 
 /**
@@ -295,12 +295,12 @@ const tools: JupyterLabPlugin<ICellTools> = {
 export const commandEditItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IApplicationShell],
+  requires: [IStatusBar, INotebookTracker, ILabShell],
   activate: (
     app: JupyterClient,
     statusBar: IStatusBar,
     tracker: INotebookTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     const item = new CommandEditStatus();
 
@@ -328,12 +328,12 @@ export const commandEditItem: JupyterLabPlugin<void> = {
 export const notebookTrustItem: JupyterLabPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IApplicationShell],
+  requires: [IStatusBar, INotebookTracker, ILabShell],
   activate: (
     app: JupyterClient,
     statusBar: IStatusBar,
     tracker: INotebookTracker,
-    shell: IApplicationShell
+    shell: ILabShell
   ) => {
     const item = new NotebookTrustStatus();
 
@@ -378,7 +378,7 @@ function activateCellTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  shell: IApplicationShell
+  shell: ILabShell
 ): Promise<ICellTools> {
   const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
@@ -473,7 +473,7 @@ function activateNotebookHandler(
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  shell: IApplicationShell,
+  shell: ILabShell,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null
 ): INotebookTracker {
@@ -795,7 +795,7 @@ function addCommands(
   app: JupyterClient,
   services: ServiceManager,
   tracker: NotebookTracker,
-  shell: IApplicationShell
+  shell: ILabShell
 ): void {
   const { commands } = app;
 

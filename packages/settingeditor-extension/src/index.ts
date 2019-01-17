@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  IApplicationShell,
+  ILabShell,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin
@@ -52,7 +52,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
     IStateDB,
     IRenderMimeRegistry,
     ICommandPalette,
-    IApplicationShell
+    ILabShell
   ],
   autoStart: true,
   provides: ISettingEditorTracker,
@@ -69,10 +69,9 @@ function activate(
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette,
-  shell: IApplicationShell
+  palette: ICommandPalette
 ): ISettingEditorTracker {
-  const { commands } = app;
+  const { commands, shell } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
@@ -137,7 +136,7 @@ function activate(
 
       let main = new MainAreaWidget({ content: editor });
       tracker.add(main);
-      shell.addToMainArea(main);
+      shell.add(main);
     },
     label: 'Advanced Settings Editor'
   });
