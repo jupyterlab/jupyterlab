@@ -27,7 +27,6 @@ const plugin: JupyterLabPlugin<void> = {
     const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
-    let debouncer: number;
 
     restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
@@ -39,13 +38,10 @@ const plugin: JupyterLabPlugin<void> = {
 
     app.restored.then(() => {
       const populate = () => {
-        window.clearTimeout(debouncer);
-        debouncer = window.setTimeout(() => {
-          tabs.clearTabs();
-          each(shell.widgets('main'), widget => {
-            tabs.addTab(widget.title);
-          });
-        }, 0);
+        tabs.clearTabs();
+        each(shell.widgets('main'), widget => {
+          tabs.addTab(widget.title);
+        });
       };
 
       // Connect signal handlers.

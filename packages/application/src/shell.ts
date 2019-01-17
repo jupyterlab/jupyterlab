@@ -518,7 +518,7 @@ export class LabShell extends Widget implements JupyterClient.Shell {
       case 'top':
         return this.addToTopArea(widget, options);
       case 'bottom':
-        return this.addToTopArea(widget, options);
+        return this.addToBottomArea(widget, options);
       default:
         throw new Error(`Invalid area: ${area}`);
     }

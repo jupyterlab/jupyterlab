@@ -50,18 +50,21 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterClient, shell: ILabShell) => {
+  activate: (app: JupyterClient, labShell: ILabShell | null) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
-    shell.addToBottomArea(statusBar);
-    // Trigger a refresh of active status items if
-    // the application layout is modified.
-    shell.layoutModified.connect(() => {
-      statusBar.update();
-    });
+    app.shell.add(statusBar, 'bottom');
+
+    // If available, connect to the shell's layout modified signal.
+    if (labShell) {
+      labShell.layoutModified.connect(() => {
+        statusBar.update();
+      });
+    }
+
     return statusBar;
   },
-  requires: [ILabShell]
+  optional: [ILabShell]
 };
 
 /**
