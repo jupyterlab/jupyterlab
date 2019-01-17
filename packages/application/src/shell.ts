@@ -506,7 +506,7 @@ export class LabShell extends Widget implements JupyterClient.Shell {
   add(
     widget: Widget,
     area: ILabShell.Area = 'main',
-    options: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions
   ): void {
     switch (area || 'main') {
       case 'main':

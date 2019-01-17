@@ -309,12 +309,8 @@ const notfound: JupyterLabPlugin<void> = {
  */
 const busy: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterClient) => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${busy.id} must be activated in JupyterLab.`);
-    }
-
-    app.busySignal.connect((_, isBusy) => {
+  activate: async (app: JupyterClient, status: ILabStatus) => {
+    status.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
@@ -338,7 +334,7 @@ const busy: JupyterLabPlugin<void> = {
       }
     });
   },
-  requires: [],
+  requires: [ILabStatus],
   autoStart: true
 };
 
@@ -349,26 +345,26 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
  */
 const sidebar: JupyterLabPlugin<void> = {
   id: SIDEBAR_ID,
-  activate: (app: JupyterClient, settingRegistry: ISettingRegistry) => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${sidebar.id} must be activated in JupyterLab.`);
-    }
-
+  activate: (
+    app: JupyterClient,
+    settingRegistry: ISettingRegistry,
+    shell: ILabShell
+  ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
-      each(app.shell.widgets('left'), widget => {
+      each(shell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          app.shell.addToRightArea(widget);
+          shell.add(widget, 'right');
         }
       });
-      each(app.shell.widgets('right'), widget => {
+      each(shell.widgets('right'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          app.shell.addToLeftArea(widget);
+          shell.add(widget, 'left');
         }
       });
     };
-    app.shell.layoutModified.connect(handleLayoutOverrides);
+    shell.layoutModified.connect(handleLayoutOverrides);
     // Fetch overrides from the settings system.
     Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
       ([settings]) => {
