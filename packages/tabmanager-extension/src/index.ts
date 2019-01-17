@@ -22,10 +22,12 @@ const plugin: JupyterLabPlugin<void> = {
   activate: (
     app: JupyterClient,
     restorer: ILayoutRestorer,
-    shell: ILabShell
+    labShell: ILabShell | null
   ): void => {
+    const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
+    let debouncer: number;
 
     restorer.add(tabs, 'tab-manager');
     tabs.id = 'tab-manager';
@@ -33,33 +35,42 @@ const plugin: JupyterLabPlugin<void> = {
     tabs.title.caption = 'Open Tabs';
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
-    shell.addToLeftArea(tabs, { rank: 600 });
+    shell.add(tabs, 'left', { rank: 600 });
 
     app.restored.then(() => {
       const populate = () => {
-        tabs.clearTabs();
-        each(shell.widgets('main'), widget => {
-          tabs.addTab(widget.title);
-        });
+        window.clearTimeout(debouncer);
+        debouncer = window.setTimeout(() => {
+          tabs.clearTabs();
+          each(shell.widgets('main'), widget => {
+            tabs.addTab(widget.title);
+          });
+        }, 0);
       };
 
       // Connect signal handlers.
-      shell.layoutModified.connect(() => {
-        populate();
-      });
       tabs.tabActivateRequested.connect((sender, tab) => {
         shell.activateById(tab.title.owner.id);
       });
       tabs.tabCloseRequested.connect((sender, tab) => {
         tab.title.owner.close();
+        populate();
       });
+
+      // If available, connect to the shell's layout modified signal.
+      if (labShell) {
+        labShell.layoutModified.connect(() => {
+          populate();
+        });
+      }
 
       // Populate the tab manager.
       populate();
     });
   },
   autoStart: true,
-  requires: [ILayoutRestorer, ILabShell]
+  requires: [ILayoutRestorer],
+  optional: [ILabShell]
 };
 
 /**

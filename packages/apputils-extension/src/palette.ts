@@ -10,11 +10,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { CommandPalette } from '@phosphor/widgets';
 
-import {
-  ILabShell,
-  ILayoutRestorer,
-  JupyterClient
-} from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterClient } from '@jupyterlab/application';
 
 import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
 
@@ -77,11 +73,8 @@ class Palette implements ICommandPalette {
 /**
  * Activate the command palette.
  */
-export function activatePalette(
-  app: JupyterClient,
-  shell: ILabShell
-): ICommandPalette {
-  const { commands } = app;
+export function activatePalette(app: JupyterClient): ICommandPalette {
+  const { commands, shell } = app;
   const palette = Private.createPalette(app);
 
   // Show the current palette shortcut in its title.
@@ -111,7 +104,7 @@ export function activatePalette(
 
   palette.inputNode.placeholder = 'SEARCH';
 
-  shell.addToLeftArea(palette, { rank: 300 });
+  shell.add(palette, 'left', { rank: 300 });
 
   return new Palette(palette);
 }

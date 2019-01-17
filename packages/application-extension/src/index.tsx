@@ -187,8 +187,8 @@ const main: JupyterLabPlugin<void> = {
  */
 const layout: JupyterLabPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [ILabShell, IStateDB],
-  activate: (app: JupyterClient, shell: ILabShell, state: IStateDB) => {
+  requires: [IStateDB, ILabShell],
+  activate: (app: JupyterClient, state: IStateDB, shell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
@@ -546,10 +546,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 const shell: JupyterLabPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
   activate: (app: JupyterClient) => {
-    if (app.shell instanceof LabShell) {
-      return app.shell;
+    if (!(app.shell instanceof LabShell)) {
+      throw new Error(`${shell.id} did not find an LabShell instance.`);
     }
-    throw new Error(`${shell.id} did not find an LabShell instance.`);
+    return app.shell;
   },
   autoStart: true,
   provides: ILabShell
@@ -561,10 +561,10 @@ const shell: JupyterLabPlugin<ILabShell> = {
 const status: JupyterLabPlugin<ILabStatus> = {
   id: '@jupyterlab/application-extension:status',
   activate: (app: JupyterClient) => {
-    if (app instanceof JupyterLab) {
-      return app;
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${status.id} must be activated in JupyterLab.`);
     }
-    throw new Error(`${status.id} must be activated in JupyterLab.`);
+    return app;
   },
   autoStart: true,
   provides: ILabStatus

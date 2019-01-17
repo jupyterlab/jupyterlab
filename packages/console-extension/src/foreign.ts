@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ILabShell,
-  JupyterClient,
-  JupyterLabPlugin
-} from '@jupyterlab/application';
+import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -25,7 +21,8 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
  */
 export const foreign: JupyterLabPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker, ICommandPalette, ILabShell],
+  requires: [IConsoleTracker],
+  optional: [ICommandPalette],
   activate: activateForeign,
   autoStart: true
 };
@@ -35,9 +32,9 @@ export default foreign;
 function activateForeign(
   app: JupyterClient,
   tracker: IConsoleTracker,
-  palette: ICommandPalette,
-  shell: ILabShell
+  palette: ICommandPalette | null
 ) {
+  const { shell } = app;
   tracker.widgetAdded.connect((sender, panel) => {
     const console = panel.console;
 
@@ -83,11 +80,13 @@ function activateForeign(
       tracker.currentWidget === shell.currentWidget
   });
 
-  palette.addItem({
-    command: toggleShowAllActivity,
-    category,
-    args: { isPalette: true }
-  });
+  if (palette) {
+    palette.addItem({
+      command: toggleShowAllActivity,
+      category,
+      args: { isPalette: true }
+    });
+  }
 
   app.contextMenu.addItem({
     command: toggleShowAllActivity,
