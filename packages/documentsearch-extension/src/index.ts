@@ -98,14 +98,45 @@ export interface ISearchProvider {
   readonly currentMatchIndex: number;
 }
 
-export interface IDisplayUpdate {
+export interface IDisplayState {
+  /**
+   * The index of the currently selected match
+   */
   currentIndex: number;
+
+  /**
+   * The total number of matches found in the document
+   */
   totalMatches: number;
+
+  /**
+   * Should the search be case sensitive?
+   */
   caseSensitive: boolean;
+
+  /**
+   * Should the search string be treated as a RegExp?
+   */
   useRegex: boolean;
+
+  /**
+   * The text in the entry
+   */
   inputText: string;
+
+  /**
+   * The query constructed from the text and the case/regex flags
+   */
   query: RegExp;
+
+  /**
+   * An error message (used for bad regex syntax)
+   */
   errorMessage: string;
+
+  /**
+   * Should the focus forced into the input on the next render?
+   */
   forceFocus: boolean;
 }
 
@@ -167,11 +198,6 @@ class SearchInstance {
     const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
       .clientHeight;
     this.initializeSearchAssets(registry, toolbarHeight);
-    // check the full content of the cm editor on start search, see if full content
-    // is there or lazy loaded...  is it a codemirror setting?  can i force full load?
-    // I don't think it's a lazy load issue, i think the changed event may not be getting fired?
-    // need to evaluate if the search overlay is the one not being evaluated or if the changed event
-    // isn't getting fired after the final update
   }
 
   get searchWidget() {
@@ -194,8 +220,8 @@ class SearchInstance {
   }
 
   private _widget: Widget;
-  private _displayState: IDisplayUpdate;
-  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayUpdate>;
+  private _displayState: IDisplayState;
+  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayState>;
   private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;
   private updateDisplay() {
@@ -223,7 +249,6 @@ class SearchInstance {
   }
   private endSearch() {
     this._activeProvider.endSearch().then(() => {
-      // more cleanup probably
       Signal.disconnectAll(this);
       this._searchWidget.dispose();
       this._activeProvider.changed.disconnect(this.updateIndices, this);
@@ -242,7 +267,7 @@ class SearchInstance {
     toolbarHeight: number
   ) {
     this._activeProvider = registry.getProviderForWidget(this._widget);
-    this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayUpdate>(
+    this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayState>(
       this._activeProvider
     );
 

@@ -22,6 +22,8 @@ export class NotebookSearchProvider implements ISearchProvider {
     this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
 
+    // Listen for cell model change to redo the search in case of
+    // new/pasted/deleted cells
     const cellModel = this._searchTarget.model.cells;
     Signal.disconnectBetween(cellModel, this);
     cellModel.changed.connect(
@@ -38,10 +40,14 @@ export class NotebookSearchProvider implements ISearchProvider {
       const cmEditor = cell.editor as CodeMirrorEditor;
       const cmSearchProvider = new CodeMirrorSearchProvider();
       cmSearchProvider.shouldLoop = false;
-      let reRenderPlease = false;
+
+      // If a rendered MarkdownCell contains a match, unrender it so that
+      // CodeMirror can show the match(es).  Keep track so that the cell
+      // can be rerendered when the search is ended.
+      let cellShouldReRender = false;
       if (cell instanceof MarkdownCell && cell.rendered) {
         cell.rendered = false;
-        reRenderPlease = true;
+        cellShouldReRender = true;
       }
       if (cell.inputHidden) {
         cell.inputHidden = false;
@@ -51,15 +57,16 @@ export class NotebookSearchProvider implements ISearchProvider {
         cmSearchProvider
           .startSearch(query, cmEditor)
           .then((matchesFromCell: ISearchMatch[]) => {
-            // update the match indices to reflect the whole document index values
             if (cell instanceof MarkdownCell) {
               if (matchesFromCell.length !== 0) {
                 // un-render markdown cells with matches
                 this._unRenderedMarkdownCells.push(cell);
-              } else if (reRenderPlease) {
+              } else if (cellShouldReRender) {
                 cell.rendered = true;
               }
             }
+
+            // update the match indices to reflect the whole document index values
             matchesFromCell.forEach(match => {
               match.index = match.index + indexTotal;
             });
@@ -210,6 +217,7 @@ namespace Private {
       ? provider.highlightPrevious()
       : provider.highlightNext();
     return nextPromise.then((match: ISearchMatch) => {
+      // If there was no match in this cell, try the next cell
       if (!match) {
         let nextCellIndex = getNextCellIndex(
           notebook.widgets,
@@ -218,7 +226,8 @@ namespace Private {
         );
         notebook.activeCellIndex = nextCellIndex;
         const editor = notebook.activeCell.editor as CodeMirrorEditor;
-        // move the cursor of the next cell to the start/end of the cell so it can search
+        // move the cursor of the next cell to the start/end of the cell so it can
+        // search the whole thing
         const newPosCM = reverse
           ? CodeMirror.Pos(editor.lastLine())
           : CodeMirror.Pos(editor.firstLine(), 0);

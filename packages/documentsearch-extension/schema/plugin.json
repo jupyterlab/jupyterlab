@@ -5,17 +5,17 @@
     {
       "command": "documentsearch:start",
       "keys": ["Accel F"],
-      "selector": ".jp-Document"
+      "selector": "body"
     },
     {
       "command": "documentsearch:highlightNext",
       "keys": ["Accel G"],
-      "selector": ".jp-Document"
+      "selector": "body"
     },
     {
       "command": "documentsearch:highlightPrevious",
       "keys": ["Accel Shift G"],
-      "selector": ".jp-Document"
+      "selector": "body"
     }
   ],
   "properties": {},

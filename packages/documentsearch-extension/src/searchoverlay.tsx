@@ -4,7 +4,7 @@ import '../style/index.css';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import { IDisplayUpdate, ISearchProvider } from '.';
+import { IDisplayState, ISearchProvider } from '.';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
@@ -124,7 +124,7 @@ function SearchIndices(props: ISearchIndexProps) {
 }
 
 interface ISearchOverlayProps {
-  overlayState: IDisplayUpdate;
+  overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
   onRegexToggled: Function;
   onHightlightNext: Function;
@@ -135,7 +135,7 @@ interface ISearchOverlayProps {
 
 class SearchOverlay extends React.Component<
   ISearchOverlayProps,
-  IDisplayUpdate
+  IDisplayState
 > {
   constructor(props: ISearchOverlayProps) {
     super(props);
@@ -217,8 +217,8 @@ class SearchOverlay extends React.Component<
 }
 
 export function createSearchOverlay(
-  wigdetChanged: Signal<ISearchProvider, IDisplayUpdate>,
-  overlayState: IDisplayUpdate,
+  wigdetChanged: Signal<ISearchProvider, IDisplayState>,
+  overlayState: IDisplayState,
   onCaseSensitiveToggled: Function,
   onRegexToggled: Function,
   onHightlightNext: Function,

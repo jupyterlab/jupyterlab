@@ -112,7 +112,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   private _refreshOverlay(query: RegExp) {
-    // multiple lines added
     const state = Private.getSearchState(this._cm);
     this._cm.operation(() => {
       state.query = query;
@@ -261,10 +260,13 @@ namespace Private {
         !caseSensitive
       );
       if (!cursor.find(reverse)) {
+        // if we don't want to loop, no more matches found, reset the cursor and exit
         if (!shouldLoop) {
           cm.setCursorPosition(position);
           return null;
         }
+
+        // if we do want to loop, try searching from the bottom/top
         const startOrEnd = reverse
           ? CodeMirror.Pos(cm.lastLine())
           : CodeMirror.Pos(cm.firstLine(), 0);

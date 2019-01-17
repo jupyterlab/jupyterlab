@@ -5,6 +5,10 @@
 
 import * as CodeMirror from 'codemirror';
 
+/**
+ * Define extra codemirror types that do not exist in the DefinitelyTyped
+ * type resources
+ */
 declare module 'codemirror' {
   /**
    * id will be the id for the defined mode. Typically, you should use this second argument to defineMode as your module scope function
