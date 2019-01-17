@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  IApplicationStatus,
+  ILabStatus,
   ILayoutRestorer,
   JupyterClient,
   JupyterLabPlugin,
@@ -98,7 +98,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     ISettingRegistry,
     ILabShell
   ],
-  optional: [ILauncher, IApplicationStatus],
+  optional: [ILauncher, ILabStatus],
   activate: activateConsole,
   autoStart: true
 };
@@ -138,7 +138,7 @@ async function activateConsole(
   settingRegistry: ISettingRegistry,
   shell: ILabShell,
   launcher: ILauncher | null,
-  status: IApplicationStatus | null
+  status: ILabStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands } = app;

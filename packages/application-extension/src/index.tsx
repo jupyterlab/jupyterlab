@@ -3,7 +3,7 @@
 
 import {
   ILabShell,
-  IApplicationStatus,
+  ILabStatus,
   ILayoutRestorer,
   IRouter,
   JupyterClient,
@@ -558,7 +558,7 @@ const shell: JupyterLabPlugin<ILabShell> = {
 /**
  * The default JupyterLab application status provider.
  */
-const status: JupyterLabPlugin<IApplicationStatus> = {
+const status: JupyterLabPlugin<ILabStatus> = {
   id: '@jupyterlab/application-extension:status',
   activate: (app: JupyterClient) => {
     if (app instanceof JupyterLab) {
@@ -567,7 +567,7 @@ const status: JupyterLabPlugin<IApplicationStatus> = {
     throw new Error(`${status.id} must be activated in JupyterLab.`);
   },
   autoStart: true,
-  provides: IApplicationStatus
+  provides: ILabStatus
 };
 
 /**

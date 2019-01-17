@@ -42,15 +42,15 @@ export { ApplicationShell, ILabShell } from './shell';
 /**
  * The application status token.
  */
-export const IApplicationStatus = new Token<IApplicationStatus>(
-  '@jupyterlab/application:IApplicationStatus'
+export const ILabStatus = new Token<ILabStatus>(
+  '@jupyterlab/application:ILabStatus'
 );
 /* tslint:enable */
 
 /**
- * An interface for application status functionality.
+ * An interface for JupyterLab-like application status functionality.
  */
-export interface IApplicationStatus {
+export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
@@ -239,7 +239,7 @@ export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
  */
 export class JupyterLab
   extends JupyterClient<ApplicationShell, ILabShell.ILayout>
-  implements IApplicationStatus {
+  implements ILabStatus {
   /**
    * Construct a new JupyterLab object.
    */
