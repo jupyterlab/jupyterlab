@@ -268,10 +268,13 @@ export class DefaultKernel implements Kernel.IKernel {
       throw new Error('Kernel connection is disconnected');
     }
 
-    if (this.connectionStatus === 'connected') {
+    // Send if the ws allows it, otherwise buffer the message.
+    if (this._ws && this._ws.readyState === this._ws.OPEN) {
       this._ws.send(serialize.serialize(msg));
+      // console.log(`SENT WS message to ${this.id}`, msg);
     } else {
       this._pendingMessages.push(msg);
+      // console.log(`PENDING WS message to ${this.id}`, msg);
     }
     this._anyMessage.emit({ msg, direction: 'send' });
     let future = new KernelFutureHandler(
@@ -327,14 +330,18 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Restart a kernel.
+   * Request a kernel restart.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels)
+   * and validates the response model.
    *
-   * Any existing Future or Comm objects are cleared.
+   * Any existing Future or Comm objects are cleared once the kernel has
+   * actually be restarted.
    *
-   * The promise is fulfilled on a valid response and rejected otherwise.
+   * The promise is fulfilled on a valid server response and rejected otherwise.
+   * Note that this does not mean the kernel has been restarted, only that a
+   * restart has been requested.
    *
    * It is assumed that the API call does not mutate the kernel id or name.
    *
@@ -342,6 +349,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * invalid.
    */
   restart(): Promise<void> {
+    Private.restarting.add(this.id);
     return Private.restartKernel(this, this.serverSettings);
   }
 
@@ -352,10 +360,9 @@ export class DefaultKernel implements Kernel.IKernel {
   //  * This is not part of the `IKernel` interface.
   //  */
   // handleRestart(): void {
+  //   // If we don't know about this restart, tell people about it
+  //   Private.restarting.delete(this.id);
   //   this._clearState();
-  //   // this._updateStatus('restarting');
-  //   // TODO: don't clear the websocket
-  //   this._clearSocket();
   // }
 
   /**
@@ -816,8 +823,20 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this._status === status || this._status === 'dead') {
       return;
     }
-    // If we are restarting, clear the state
-    if (status === 'restarting') {
+
+    // TODO: if this is a 'starting' status, do a kernel_request_info.
+    // status 'restarting' messages come from the notebook server, not the kernel. They indicate an auto-restart.
+    // TODO: handleRestart should be called when starting too?
+    console.log(status);
+    if (status === 'starting') {
+      if (Private.restarting.has(this.id)) {
+        this._updateStatus('restarting');
+        // We don't delete the 'restarting' status here, since we may have
+        // multiple kernel objects connected to the kernel, and we want all of
+        // them to realize that we initiated the restart.
+
+        // TODO: when do we clean up the Private.restarting dict, then?
+      }
       this._clearState();
     }
 
@@ -873,6 +892,10 @@ export class DefaultKernel implements Kernel.IKernel {
     while (this._ws && this._pendingMessages.length > 0) {
       let msg = serialize.serialize(this._pendingMessages[0]);
       this._ws.send(msg);
+      // console.log(
+      //   `SENT pending message to ${this.id}`,
+      //   this._pendingMessages[0]
+      // );
       this._pendingMessages.shift();
     }
   }
@@ -881,6 +904,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * Clear the internal state.
    */
   private _clearState(): void {
+    console.log('clearing state');
     this._pendingMessages = [];
     this._futures.forEach(future => {
       future.dispose();
@@ -1043,10 +1067,12 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle a websocket open event.
    */
   private _onWSOpen = async (evt: Event) => {
+    // console.log('ws open!');
     this._reconnectAttempt = 0;
 
     // Get the kernel info, signaling that the kernel is ready.
     try {
+      // console.log('requesting kernel info from new ws');
       await this.requestKernelInfo();
       this._connectionPromise.resolve(void 0);
       this._updateConnectionStatus('connected');
@@ -1077,7 +1103,26 @@ export class DefaultKernel implements Kernel.IKernel {
     }
 
     // Update the current kernel session id
-    this._kernelSession = msg.header.session;
+    if (msg.header.session !== this._kernelSession) {
+      // If the message is a notebook 'restarting' or 'dead' status message, the session
+      // id is not the kernel session id, so don't set the kernel session id.
+      if (
+        KernelMessage.isStatusMsg(msg) &&
+        (msg.content.execution_state === 'restarting' ||
+          msg.content.execution_state === 'dead')
+      ) {
+        /* no-op */
+      } else {
+        // This indicates the kernel has been restarted. Update the kernel
+        // status to starting.
+
+        // TODO: check to see if this is an expected restart. If it is not
+        // expected, first cycle through something like an 'auto restart'
+        // status.
+        this._updateStatus('starting');
+        this._kernelSession = msg.header.session;
+      }
+    }
 
     // Handle the message asynchronously, in the order received.
     this._msgChain = this._msgChain
@@ -1099,8 +1144,26 @@ export class DefaultKernel implements Kernel.IKernel {
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
 
+    // LOG THE MESSAGE
+    let msg_type = msg.header.msg_type;
+    if (msg_type === 'status') {
+      msg_type += ` ${
+        (msg as KernelMessage.IStatusMsg).content.execution_state
+      }`;
+    }
+    console.log(
+      `BROWSER RECEIVED: ${msg_type} id:${msg.header.msg_id.slice(
+        0,
+        6
+      )} parent:${msg.parent_header &&
+        (msg.parent_header as KernelMessage.IHeader).msg_id.slice(0, 6)}`
+    );
+    // console.log('Received message from kernel', msg);
+
     // Check to see if we have a display_id we need to reroute.
     if (msg.parent_header && msg.channel === 'iopub') {
+      // TODO: rewrite without a switch statement, just adding the conditionals
+      // to the if statement.
       switch (msg.header.msg_type) {
         case 'display_data':
         case 'update_display_data':
@@ -1136,10 +1199,11 @@ export class DefaultKernel implements Kernel.IKernel {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status':
-          // Updating the status is synchronous, and we call no async user code
-          this._updateStatus(
-            (msg as KernelMessage.IStatusMsg).content.execution_state
-          );
+          // Check to make sure the message has a valid status
+          if (KernelMessage.isStatusMsg(msg)) {
+            // Updating the status is synchronous, and we call no async user code
+            this._updateStatus(msg.content.execution_state);
+          }
           break;
         case 'comm_open':
           await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
@@ -1163,14 +1227,19 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * TODO: when the ws is closed, we need to try to reconnect. The connection status needs to be 'connecting' to buffer messages. At some point in the future, we'll create a new websocket. When we do, we'll redundantly set the connection status to 'connecting'. When that ws is opened, we'll request the kernel info (*before* the status is set to connected). So sending a kernel message needs to not block
+   */
+
+  /**
    * Handle a websocket close event.
    */
   private _onWSClose = (evt: Event) => {
+    console.log('kernel onwsclose');
     if (this._wsStopped || !this._ws) {
       return;
     }
-
     if (this._reconnectAttempt < this._reconnectLimit) {
+      // if it is connecting
       this._updateConnectionStatus('connecting');
       this._clearSocket();
       let timeout = Math.pow(2, this._reconnectAttempt);
@@ -1537,6 +1606,8 @@ namespace Private {
     return new DefaultKernel({ name: model.name, serverSettings }, model.id);
   }
 
+  export const restarting = new Set<string>();
+
   /**
    * Restart a kernel.
    */
@@ -1567,6 +1638,7 @@ namespace Private {
     //     k.handleRestart();
     //   }
     // });
+    restarting.add(kernel.id);
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status !== 200) {
       throw new ServerConnection.ResponseError(response);
@@ -1580,7 +1652,6 @@ namespace Private {
     //   }
     // });
     // await kernel.reconnect();
-
     // TODO: put a status message handler listener promise, and return that.
   }
 
