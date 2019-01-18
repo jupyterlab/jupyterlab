@@ -1338,12 +1338,11 @@ namespace Private {
    */
   function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
     // The order of the classes will be the gutters order
-    let classToSwitch = {
+    let classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
       'CodeMirror-linenumbers': 'lineNumbers',
       'CodeMirror-foldgutter': 'codeFolding'
     };
     return Object.keys(classToSwitch).filter(
-      // @ts-ignore
       gutter => config[classToSwitch[gutter]]
     );
   }
