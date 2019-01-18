@@ -399,12 +399,7 @@ export namespace Kernel {
       msgId: string,
       hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
     ): void;
-  }
 
-  /**
-   * The full interface of a kernel.
-   */
-  export interface IKernel extends IKernelConnection {
     /**
      * A signal emitted when the kernel is shut down.
      */
@@ -439,7 +434,12 @@ export namespace Kernel {
      * message should be treated as read-only.
      */
     anyMessage: ISignal<this, IAnyMessageArgs>;
+  }
 
+  /**
+   * The full interface of a kernel.
+   */
+  export interface IKernel extends IKernelConnection {
     /**
      * The server settings for the kernel.
      */

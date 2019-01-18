@@ -173,7 +173,13 @@ function activate(
       return;
     }
     const session = serviceManager.sessions.connectTo(sessionModel);
-    session.kernel.ready.then(() => {
+    // wait until the session kernel's status is ready (meaning the info is retreived)
+    session.kernel.connectionStatusChanged.connect((sender, status) => {
+      if (status === 'connected') {
+        updateInfo();
+      }
+    });
+    let updateInfo = () => {
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
       if (kernelInfoCache.has(sessionModel.kernel.name)) {
@@ -261,7 +267,7 @@ function activate(
 
       // Dispose of the session object since we no longer need it.
       session.dispose();
-    });
+    };
   });
 
   commands.addCommand(CommandIDs.about, {

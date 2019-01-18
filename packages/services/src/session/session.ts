@@ -9,7 +9,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
-import { Kernel, KernelMessage } from '../kernel';
+import { Kernel } from '../kernel';
 
 import { ServerConnection } from '..';
 
@@ -34,37 +34,9 @@ export namespace Session {
     kernelChanged: ISignal<this, IKernelChangedArgs>;
 
     /**
-     * A signal emitted when the session status changes.
-     */
-    statusChanged: ISignal<this, Kernel.Status>;
-
-    /**
-     * A signal emitted when the session connection status changes.
-     */
-    connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
-
-    /**
      * A signal emitted when a session property changes.
      */
     readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
-
-    /**
-     * A signal emitted for iopub kernel messages.
-     */
-    iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
-
-    /**
-     * A signal emitted for unhandled kernel message.
-     */
-    unhandledMessage: ISignal<this, KernelMessage.IMessage>;
-
-    /**
-     * A signal emitted for any kernel message.
-     *
-     * Note: The behavior is undefined if the message is modified
-     * during message handling. As such, it should be treated as read-only.
-     */
-    anyMessage: ISignal<this, Kernel.IAnyMessageArgs>;
 
     /**
      * Unique id of the session.
@@ -103,22 +75,6 @@ export namespace Session {
      * This is a read-only property, and can be altered by [changeKernel].
      */
     readonly kernel: Kernel.IKernelConnection;
-
-    /**
-     * The current status of the session.
-     *
-     * #### Notes
-     * This is a delegate to the kernel status.
-     */
-    readonly status: Kernel.Status;
-
-    /**
-     * The current status of the session.
-     *
-     * #### Notes
-     * This is a delegate to the kernel status.
-     */
-    readonly connectionStatus: Kernel.ConnectionStatus;
 
     /**
      * Change the session path.

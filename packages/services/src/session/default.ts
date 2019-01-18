@@ -7,7 +7,7 @@ import { ArrayExt, each, find } from '@phosphor/algorithm';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Kernel, KernelMessage } from '../kernel';
+import { Kernel } from '../kernel';
 
 import { ServerConnection } from '..';
 
@@ -37,7 +37,6 @@ export class DefaultSession implements Session.ISession {
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     Private.addRunning(this);
-    this.setupKernel(kernel);
   }
 
   /**
@@ -52,44 +51,6 @@ export class DefaultSession implements Session.ISession {
    */
   get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
     return this._kernelChanged;
-  }
-
-  /**
-   * A signal emitted when the kernel status changes.
-   */
-  get statusChanged(): ISignal<this, Kernel.Status> {
-    return this._statusChanged;
-  }
-
-  /**
-   * A signal emitted when the kernel connection status changes.
-   */
-  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
-    return this._connectionStatusChanged;
-  }
-
-  /**
-   * A signal emitted for a kernel messages.
-   */
-  get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
-    return this._iopubMessage;
-  }
-
-  /**
-   * A signal emitted for an unhandled kernel message.
-   */
-  get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
-    return this._unhandledMessage;
-  }
-
-  /**
-   * A signal emitted for any kernel message.
-   *
-   * Note: The behavior is undefined if the message is modified
-   * during message handling. As such, it should be treated as read-only.
-   */
-  get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
-    return this._anyMessage;
   }
 
   /**
@@ -156,26 +117,6 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * The current status of the session.
-   *
-   * #### Notes
-   * This is a delegate to the kernel status.
-   */
-  get status(): Kernel.Status {
-    return this._kernel ? this._kernel.status : 'dead';
-  }
-
-  /**
-   * The current connection status of the session.
-   *
-   * #### Notes
-   * This is a delegate to the kernel connection status.
-   */
-  get connectionStatus(): Kernel.ConnectionStatus {
-    return this._kernel ? this._kernel.connectionStatus : 'disconnected';
-  }
-
-  /**
    * The server settings of the session.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -220,7 +161,6 @@ export class DefaultSession implements Session.ISession {
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
       let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
       let oldValue = this._kernel;
-      this.setupKernel(newValue, oldValue);
       this._kernelChanged.emit({ oldValue, newValue });
       this._handleModelChange(oldModel);
       return;
@@ -238,8 +178,6 @@ export class DefaultSession implements Session.ISession {
     }
     this._isDisposed = true;
     this._kernel.dispose();
-    this._statusChanged.emit('dead');
-    this._connectionStatusChanged.emit('disconnected');
     this._terminated.emit(void 0);
     Private.removeRunning(this);
     Signal.clearData(this);
@@ -309,8 +247,7 @@ export class DefaultSession implements Session.ISession {
     }
     let data = JSON.stringify({ kernel: options });
     this._kernel.dispose();
-    // TODO: figure out what the right values here are.
-    this._connectionStatusChanged.emit('connecting');
+    // TODO: set kernel to null?
     return this._patch(data).then(() => this.kernel);
   }
 
@@ -328,102 +265,6 @@ export class DefaultSession implements Session.ISession {
       return Promise.reject(new Error('Session is disposed'));
     }
     return Private.shutdownSession(this.id, this.serverSettings);
-  }
-
-  /**
-   * Handle connections to a kernel.  This method is not meant to be subclassed.
-   *
-   * #### Notes
-   * This method is essentially doing what the user normally would have to do if
-   * we just exposed an IKernel instead of an IKernelConnection. Should we just
-   * move the signals into IKernelConnection, or just expose an IKernel (and do
-   * something that makes sense in case of the user calling a shutdown)? Perhaps
-   * we can have a convenience method that does this for a set of user-defined
-   * connections? The cost we pay now is that we essentially have to duplicate
-   * all of the kernel signals, and somehow the user has to understand the
-   * difference, plus we have our own special signals for sessions for when
-   * kernels are being switched. Confusing!
-   */
-  protected setupKernel(
-    kernel: Kernel.IKernel,
-    oldKernel?: Kernel.IKernel
-  ): void {
-    this._kernel = kernel;
-    if (oldKernel) {
-      oldKernel.statusChanged.disconnect(this.onKernelStatus, this);
-      oldKernel.connectionStatusChanged.disconnect(
-        this.onKernelConnectionStatus,
-        this
-      );
-      oldKernel.unhandledMessage.disconnect(this.onUnhandledMessage, this);
-      oldKernel.iopubMessage.disconnect(this.onIOPubMessage, this);
-      oldKernel.anyMessage.disconnect(this.onAnyMessage, this);
-    }
-
-    kernel.statusChanged.connect(
-      this.onKernelStatus,
-      this
-    );
-    kernel.connectionStatusChanged.connect(
-      this.onKernelConnectionStatus,
-      this
-    );
-    kernel.unhandledMessage.connect(
-      this.onUnhandledMessage,
-      this
-    );
-    kernel.iopubMessage.connect(
-      this.onIOPubMessage,
-      this
-    );
-    kernel.anyMessage.connect(
-      this.onAnyMessage,
-      this
-    );
-  }
-
-  /**
-   * Handle to changes in the Kernel status.
-   */
-  protected onKernelStatus(sender: Kernel.IKernel, state: Kernel.Status) {
-    this._statusChanged.emit(state);
-  }
-
-  /**
-   * Handle to changes in the Kernel status.
-   */
-  protected onKernelConnectionStatus(
-    sender: Kernel.IKernel,
-    state: Kernel.ConnectionStatus
-  ) {
-    this._connectionStatusChanged.emit(state);
-  }
-
-  /**
-   * Handle iopub kernel messages.
-   */
-  protected onIOPubMessage(
-    sender: Kernel.IKernel,
-    msg: KernelMessage.IIOPubMessage
-  ) {
-    this._iopubMessage.emit(msg);
-  }
-
-  /**
-   * Handle unhandled kernel messages.
-   */
-  protected onUnhandledMessage(
-    sender: Kernel.IKernel,
-    msg: KernelMessage.IMessage
-  ) {
-    this._unhandledMessage.emit(msg);
-  }
-
-  /**
-   * Handle any kernel messages.
-   */
-  protected onAnyMessage(sender: Kernel.IKernel, args: Kernel.IAnyMessageArgs) {
-    this._anyMessage.emit(args);
   }
 
   /**
@@ -473,13 +314,6 @@ export class DefaultSession implements Session.ISession {
   private _isDisposed = false;
   private _updating = false;
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
-  private _statusChanged = new Signal<this, Kernel.Status>(this);
-  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
-    this
-  );
-  private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
-  private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
-  private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _terminated = new Signal<this, void>(this);
 }
@@ -853,6 +687,7 @@ namespace Private {
   ): Session.IModel[] {
     let running = runningSessions.get(baseUrl) || [];
     each(running.slice(), session => {
+      // find and update the corresponding session
       let updated = find(sessions, sId => {
         if (session.id === sId.id) {
           session.update(sId);
@@ -860,8 +695,11 @@ namespace Private {
         }
         return false;
       });
-      // If session is no longer running on disk, emit dead signal.
-      if (!updated && session.status !== 'dead') {
+      // If session kernel is no longer running, dispose the session.
+
+      // TODO: should we do this? Can a session kill a kernel, then switch the
+      // kernel, so that it should be still considered 'alive'?
+      if (!updated && session.kernel && session.kernel.status !== 'dead') {
         session.dispose();
       }
     });

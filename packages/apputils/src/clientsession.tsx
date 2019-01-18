@@ -29,10 +29,12 @@ import { showDialog, Dialog } from './dialog';
 /**
  * The interface of client session object.
  *
- * The client session represents the link between
- * a path and its kernel for the duration of the lifetime
- * of the session object.  The session can have no current
- * kernel, and can start a new kernel at any time.
+ * The client session represents the link between a path and its kernel for the
+ * duration of the lifetime of the session object.  The session can have no
+ * current kernel, and can start a new kernel at any time.
+ *
+ * TODO: what is the difference between this and the services Session? It seems
+ * there is a lot of duplicated code here.
  */
 export interface IClientSession extends IDisposable {
   /**
@@ -317,7 +319,7 @@ export class ClientSession implements IClientSession {
     if (!this.isReady) {
       return 'starting';
     }
-    return this._session ? this._session.status : 'dead';
+    return this._session ? this._session.kernel.status : 'dead';
   }
 
   /**
@@ -572,7 +574,7 @@ export class ClientSession implements IClientSession {
       return Promise.reject('Disposed');
     }
     let session = this._session;
-    if (session && session.status !== 'dead') {
+    if (session && session.kernel.status !== 'dead') {
       return session.changeKernel(options);
     } else {
       return this._startSession(options);
@@ -683,15 +685,15 @@ export class ClientSession implements IClientSession {
       this._onKernelChanged,
       this
     );
-    session.statusChanged.connect(
+    session.kernel.statusChanged.connect(
       this._onStatusChanged,
       this
     );
-    session.iopubMessage.connect(
+    session.kernel.iopubMessage.connect(
       this._onIopubMessage,
       this
     );
-    session.unhandledMessage.connect(
+    session.kernel.unhandledMessage.connect(
       this._onUnhandledMessage,
       this
     );
@@ -803,7 +805,7 @@ export class ClientSession implements IClientSession {
    * Handle an iopub message.
    */
   private _onIopubMessage(
-    sender: Session.ISession,
+    sender: Kernel.IKernelConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
     this._iopubMessage.emit(message);
@@ -813,7 +815,7 @@ export class ClientSession implements IClientSession {
    * Handle an unhandled message.
    */
   private _onUnhandledMessage(
-    sender: Session.ISession,
+    sender: Kernel.IKernelConnection,
     message: KernelMessage.IMessage
   ): void {
     this._unhandledMessage.emit(message);
