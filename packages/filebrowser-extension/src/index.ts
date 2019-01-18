@@ -252,7 +252,7 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, browser, labShell);
+  addCommands(app, factory.tracker, browser, labShell, docManager);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
@@ -342,7 +342,8 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser,
-  labShell: ILabShell
+  labShell: ILabShell,
+  docManager: IDocumentManager
 ): void {
   const registry = app.docRegistry;
 
@@ -461,7 +462,9 @@ function addCommands(
 
           return restored
             .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
-            .then(() => commands.execute('docmanager:open', { path: path }));
+            .then(() => {
+              docManager.findWidget(path).activate();
+            });
         })
         .catch(failure);
     }
