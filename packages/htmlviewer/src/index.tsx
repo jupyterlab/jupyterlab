@@ -57,7 +57,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
   constructor(options: DocumentWidget.IOptionsOptionalContent) {
     super({
       ...options,
-      content: new IFrame({ sandbox: true, exceptions: ['allow-same-origin'] })
+      content: new IFrame({ sandbox: ['allow-same-origin'] })
     });
     this.content.addClass(CSS_CLASS);
 
@@ -99,18 +99,17 @@ export class HTMLViewer extends DocumentWidget<IFrame>
   get trusted(): boolean {
     return (
       !this.content.sandbox ||
-      this.content.exceptions.indexOf('allow-scripts') !== -1
+      this.content.sandbox.indexOf('allow-scripts') !== -1
     );
   }
   set trusted(value: boolean) {
     if (this.trusted === value) {
       return;
     }
-    this.content.sandbox = true;
     if (value) {
-      this.content.exceptions = Private.trusted;
+      this.content.sandbox = Private.trusted;
     } else {
-      this.content.exceptions = Private.untrusted;
+      this.content.sandbox = Private.untrusted;
     }
     this.content.url = this.content.url; // Force a refresh.
     this._trustedChanged.emit(value);

@@ -12,14 +12,18 @@ describe('@jupyterlab/apputils', () => {
         let iframe = new IFrame();
         expect(iframe).to.be.an.instanceof(IFrame);
         expect(iframe.hasClass('jp-IFrame')).to.equal(true);
-        // tslint:disable-next-line
         expect(iframe.node.querySelector('iframe')).to.be.ok;
       });
 
-      it('should allow sandboxing if specified in the options', () => {
+      it('should be sandboxed by default', () => {
+        let iframe = new IFrame();
+        let node = iframe.node.querySelector('iframe')!;
+        expect(node.getAttribute('sandbox') !== null).to.equal(true);
+      });
+
+      it('should allow sandboxing exceptions to be specified in the options', () => {
         let iframe = new IFrame({
-          sandbox: true,
-          exceptions: ['allow-scripts', 'allow-same-origin']
+          sandbox: ['allow-scripts', 'allow-same-origin']
         });
         let node = iframe.node.querySelector('iframe')!;
         expect(node.getAttribute('sandbox')).to.equal(
@@ -38,35 +42,17 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#sandbox', () => {
-      it('should set whether the iframe has the sandbox attribute.', () => {
-        let iframe = new IFrame({
-          sandbox: true,
-          exceptions: ['allow-scripts', 'allow-same-origin']
-        });
-        let node = iframe.node.querySelector('iframe')!;
-        expect(iframe.sandbox).to.equal(true);
-        expect(node.getAttribute('sandbox')).to.equal(
-          'allow-scripts allow-same-origin'
-        );
-        iframe.sandbox = false;
-        expect(iframe.sandbox).to.equal(false);
-        expect(node.getAttribute('sandbox')).to.equal(null);
-      });
-    });
-
-    describe('#exceptions', () => {
       it('should set the exceptions for the sandbox attribute.', () => {
         let iframe = new IFrame({
-          sandbox: true,
-          exceptions: ['allow-scripts', 'allow-same-origin']
+          sandbox: ['allow-scripts', 'allow-same-origin']
         });
         let node = iframe.node.querySelector('iframe')!;
-        expect(iframe.exceptions).to.deep.equal([
+        expect(iframe.sandbox).to.deep.equal([
           'allow-scripts',
           'allow-same-origin'
         ]);
-        iframe.exceptions = ['allow-pointer-lock'];
-        expect(iframe.exceptions).to.deep.equal(['allow-pointer-lock']);
+        iframe.sandbox = ['allow-pointer-lock'];
+        expect(iframe.sandbox).to.deep.equal(['allow-pointer-lock']);
         expect(node.getAttribute('sandbox')).to.equal('allow-pointer-lock');
       });
     });

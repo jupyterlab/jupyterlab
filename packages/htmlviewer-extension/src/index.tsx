@@ -107,10 +107,8 @@ function activateHTMLViewer(
       if (!current) {
         return false;
       }
-      const exceptions = current.content.exceptions;
-      return (
-        !current.content.sandbox || exceptions.indexOf('allow-scripts') !== -1
-      );
+      const sandbox = current.content.sandbox;
+      return sandbox.indexOf('allow-scripts') !== -1;
     },
     execute: () => {
       const current = tracker.currentWidget;
