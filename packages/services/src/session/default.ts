@@ -331,8 +331,18 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Handle connections to a kernel.  This method is not meant to be
-   * subclassed.
+   * Handle connections to a kernel.  This method is not meant to be subclassed.
+   *
+   * #### Notes
+   * This method is essentially doing what the user normally would have to do if
+   * we just exposed an IKernel instead of an IKernelConnection. Should we just
+   * move the signals into IKernelConnection, or just expose an IKernel (and do
+   * something that makes sense in case of the user calling a shutdown)? Perhaps
+   * we can have a convenience method that does this for a set of user-defined
+   * connections? The cost we pay now is that we essentially have to duplicate
+   * all of the kernel signals, and somehow the user has to understand the
+   * difference, plus we have our own special signals for sessions for when
+   * kernels are being switched. Confusing!
    */
   protected setupKernel(
     kernel: Kernel.IKernel,

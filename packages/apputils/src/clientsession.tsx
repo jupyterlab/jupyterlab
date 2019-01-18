@@ -67,6 +67,9 @@ export interface IClientSession extends IDisposable {
 
   /**
    * The current kernel associated with the document.
+   *
+   * #### Notes
+   * TODO: explain why we use IKernelConnection rather than IKernel.
    */
   readonly kernel: Kernel.IKernelConnection | null;
 
