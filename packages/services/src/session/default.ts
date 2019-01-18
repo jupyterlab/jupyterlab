@@ -62,6 +62,13 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
+   * A signal emitted when the kernel connection status changes.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
+  }
+
+  /**
    * A signal emitted for a kernel messages.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
@@ -104,6 +111,11 @@ export class DefaultSession implements Session.ISession {
    *
    * #### Notes
    * This is a read-only property, and can be altered by [changeKernel].
+   *
+   * We provide an IKernelConnection (instead of an IKernel), and proxy the
+   * IKernel signals, so that a kernel can change, and the user doesn't have to
+   * disconnect and reconnect their signals - we will automatically reconnect
+   * the session signals as appropriate as the kernel changes.
    */
   get kernel(): Kernel.IKernelConnection {
     return this._kernel;
@@ -154,6 +166,16 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
+   * The current connection status of the session.
+   *
+   * #### Notes
+   * This is a delegate to the kernel connection status.
+   */
+  get connectionStatus(): Kernel.ConnectionStatus {
+    return this._kernel ? this._kernel.connectionStatus : 'disconnected';
+  }
+
+  /**
    * The server settings of the session.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -198,7 +220,7 @@ export class DefaultSession implements Session.ISession {
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
       let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
       let oldValue = this._kernel;
-      this.setupKernel(newValue);
+      this.setupKernel(newValue, oldValue);
       this._kernelChanged.emit({ oldValue, newValue });
       this._handleModelChange(oldModel);
       return;
@@ -217,6 +239,7 @@ export class DefaultSession implements Session.ISession {
     this._isDisposed = true;
     this._kernel.dispose();
     this._statusChanged.emit('dead');
+    this._connectionStatusChanged.emit('disconnected');
     this._terminated.emit(void 0);
     Private.removeRunning(this);
     Signal.clearData(this);
@@ -286,7 +309,8 @@ export class DefaultSession implements Session.ISession {
     }
     let data = JSON.stringify({ kernel: options });
     this._kernel.dispose();
-    this._statusChanged.emit('restarting');
+    // TODO: figure out what the right values here are.
+    this._connectionStatusChanged.emit('connecting');
     return this._patch(data).then(() => this.kernel);
   }
 
@@ -310,10 +334,28 @@ export class DefaultSession implements Session.ISession {
    * Handle connections to a kernel.  This method is not meant to be
    * subclassed.
    */
-  protected setupKernel(kernel: Kernel.IKernel): void {
+  protected setupKernel(
+    kernel: Kernel.IKernel,
+    oldKernel?: Kernel.IKernel
+  ): void {
     this._kernel = kernel;
+    if (oldKernel) {
+      oldKernel.statusChanged.disconnect(this.onKernelStatus, this);
+      oldKernel.connectionStatusChanged.disconnect(
+        this.onKernelConnectionStatus,
+        this
+      );
+      oldKernel.unhandledMessage.disconnect(this.onUnhandledMessage, this);
+      oldKernel.iopubMessage.disconnect(this.onIOPubMessage, this);
+      oldKernel.anyMessage.disconnect(this.onAnyMessage, this);
+    }
+
     kernel.statusChanged.connect(
       this.onKernelStatus,
+      this
+    );
+    kernel.connectionStatusChanged.connect(
+      this.onKernelConnectionStatus,
       this
     );
     kernel.unhandledMessage.connect(
@@ -335,6 +377,16 @@ export class DefaultSession implements Session.ISession {
    */
   protected onKernelStatus(sender: Kernel.IKernel, state: Kernel.Status) {
     this._statusChanged.emit(state);
+  }
+
+  /**
+   * Handle to changes in the Kernel status.
+   */
+  protected onKernelConnectionStatus(
+    sender: Kernel.IKernel,
+    state: Kernel.ConnectionStatus
+  ) {
+    this._connectionStatusChanged.emit(state);
   }
 
   /**
@@ -412,6 +464,9 @@ export class DefaultSession implements Session.ISession {
   private _updating = false;
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
+    this
+  );
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
