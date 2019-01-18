@@ -31,7 +31,6 @@ describe('session/manager', () => {
 
   beforeAll(async () => {
     session = await Session.startNew({ path: UUID.uuid4() });
-    await session.kernel.ready;
   });
 
   beforeEach(() => {

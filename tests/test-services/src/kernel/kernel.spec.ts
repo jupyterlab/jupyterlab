@@ -23,29 +23,39 @@ PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel', () => {
-  let defaultKernel: Kernel.IKernel;
   let tester: KernelTester;
 
-  beforeAll(async () => {
-    defaultKernel = await Kernel.startNew();
-    // Start another kernel.
-    await Kernel.startNew();
-  });
+  // Tests should clean up after themselves, in that they should shut down
+  // resources they created. We check that a test cleans up its resources (and
+  // fail if it doesn't), and then we clean up the resources to make sure that
+  // one test not cleaning up doesn't affect succeeding tests. Since afterEach
+  // handlers are run in reverse order, you see below the final cleanup first,
+  // then the cleanup check.
 
-  afterEach(() => {
-    if (tester) {
+  afterEach(async () => {
+    if (tester && !tester.isDisposed) {
       tester.dispose();
     }
+    await Kernel.shutdownAll();
   });
 
-  afterEach(() => {
-    return Kernel.shutdownAll();
+  afterEach(async () => {
+    if (tester) {
+      // Failure indicates the test did not dispose the kernel tester it
+      // created.
+      expect(tester.isDisposed).to.be.true;
+    }
+    let running = await Kernel.listRunning();
+    // Failure indicates the test did not shut down kernels it started.
+    expect(running.length).to.equal(0);
   });
 
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
+      const kernel = await Kernel.startNew();
       const response = await Kernel.listRunning();
       expect(toArray(response).length).to.be.greaterThan(0);
+      await kernel.shutdown();
     });
 
     it('should accept server settings', async () => {
@@ -139,18 +149,37 @@ describe('kernel', () => {
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.ready;
+      expect(kernel.connectionStatus).to.equal('connected');
 
-      const emission = testEmission(kernel.statusChanged, {
-        find: (k, status) => status === 'reconnecting'
+      const emission = testEmission(kernel.connectionStatusChanged, {
+        find: (k, status) => status === 'connecting'
       });
+      // Closing will close the websocket.
       tester.close();
+      // wait for the kernel to indicate it is reconnecting.
       await emission;
+      tester.dispose();
     });
   });
 
   describe('Kernel.connectTo()', () => {
-    it('should connect to an existing kernel', () => {
+    let defaultKernel: Kernel.IKernel;
+    beforeEach(async () => {
+      defaultKernel = await Kernel.startNew();
+      // Wait until the kernel says it is connected
+      await testEmission(defaultKernel.connectionStatusChanged, {
+        find: (k, status) => status === 'connected'
+      });
+    });
+
+    afterEach(async () => {
+      if (defaultKernel.status !== 'dead') {
+        await defaultKernel.shutdown();
+      }
+      defaultKernel.dispose();
+    });
+
+    it('should connect to an existing kernel', async () => {
       const id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.equal(id);
@@ -178,6 +207,9 @@ describe('kernel', () => {
   });
 
   describe('Kernel.getSpecs()', () => {
+    // These tests cause lots of test app logging messages like:
+    // * "Removing errant kernel spec: R" and
+    // * "Default kernel not found, using 'python'"
     it('should load the kernelspecs', async () => {
       const specs = await Kernel.getSpecs();
       expect(specs.default).to.be.ok;

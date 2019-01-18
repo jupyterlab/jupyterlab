@@ -90,11 +90,14 @@ def _install_kernels():
     }
     paths = jupyter_core.paths
     kernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', 'echo')
+    print(f'kernel_dir {kernel_dir}')
     os.makedirs(kernel_dir)
     with open(pjoin(kernel_dir, 'kernel.json'), 'w') as f:
         f.write(json.dumps(kernel_json))
 
     ipykernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', 'ipython')
+    print(f'ipykernel_dir {ipykernel_dir}')
+
     write_kernel_spec(ipykernel_dir)
 
 
@@ -220,6 +223,9 @@ class JestApp(ProcessTestApp):
         """Get the command to run"""
         terminalsAvailable = self.web_app.settings['terminals_available']
         debug = self.log.level == logging.DEBUG
+        self.log_level = logging.DEBUG
+        print(self.log_level)
+        print(self.log)
 
         # find jest
         target = osp.join('node_modules', 'jest', 'bin', 'jest.js')
