@@ -367,7 +367,7 @@ export class DefaultSession implements Session.ISession {
   /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
-  private _patch(body: string): Promise<Session.IModel> {
+  private async _patch(body: string): Promise<Session.IModel> {
     this._updating = true;
     let settings = this.serverSettings;
     let url = Private.getSessionUrl(settings.baseUrl, this._id);
@@ -375,24 +375,17 @@ export class DefaultSession implements Session.ISession {
       method: 'PATCH',
       body
     };
-    return ServerConnection.makeRequest(url, init, settings)
-      .then(response => {
-        this._updating = false;
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(
-        data => {
-          let model = validate.validateModel(data);
-          return Private.updateFromServer(model, settings.baseUrl);
-        },
-        error => {
-          this._updating = false;
-          throw error;
-        }
-      );
+    try {
+      const response = await ServerConnection.makeRequest(url, init, settings);
+      if (response.status !== 200) {
+        throw new ServerConnection.ResponseError(response);
+      }
+      const data = await response.json();
+      const model = validate.validateModel(data);
+      return Private.updateFromServer(model, settings.baseUrl);
+    } finally {
+      this._updating = false;
+    }
   }
 
   /**
