@@ -39,6 +39,11 @@ export namespace Session {
     statusChanged: ISignal<this, Kernel.Status>;
 
     /**
+     * A signal emitted when the session connection status changes.
+     */
+    connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
+
+    /**
      * A signal emitted when a session property changes.
      */
     readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
@@ -106,6 +111,14 @@ export namespace Session {
      * This is a delegate to the kernel status.
      */
     readonly status: Kernel.Status;
+
+    /**
+     * The current status of the session.
+     *
+     * #### Notes
+     * This is a delegate to the kernel status.
+     */
+    readonly connectionStatus: Kernel.ConnectionStatus;
 
     /**
      * Change the session path.
