@@ -1,0 +1,1 @@
+jupyter-server-proxy==1.0beta7
