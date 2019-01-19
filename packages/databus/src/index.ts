@@ -5,3 +5,4 @@
 
 export * from './dataregistry';
 export * from './converters';
+export * from './explorer';

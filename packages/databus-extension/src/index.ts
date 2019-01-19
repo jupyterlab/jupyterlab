@@ -3,46 +3,16 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import {
-  IDataRegistry,
-  IConverterRegistry,
-  DataRegistry,
-  ConverterRegistry
-} from '@jupyterlab/databus';
+import { JupyterLabPlugin } from '@jupyterlab/application';
 
-/**
- * The data registry extension.
- */
-const dataRegistryPlugin: JupyterLabPlugin<IDataRegistry> = {
-  activate: activateDataRegistry,
-  id: '@jupyterlab/databus-extension:data-registry',
-  requires: [],
-  provides: IDataRegistry,
-  autoStart: true
-};
+import dataRegistryPlugin from './dataregistry';
+import converterRegistryPlugin from './converters';
+import docRegistryPlugin from './docregistry';
+import dataExplorerPlugin from './explorer';
 
-/**
- * The converter registry extension.
- */
-const converterRegistryPlugin: JupyterLabPlugin<IConverterRegistry> = {
-  activate: activateConverterRegistry,
-  id: '@jupyterlab/databus-extension:converter-registry',
-  requires: [],
-  provides: IConverterRegistry,
-  autoStart: true
-};
-
-const plugins: JupyterLabPlugin<any>[] = [
+export default [
   dataRegistryPlugin,
-  converterRegistryPlugin
-];
-export default plugins;
-
-function activateDataRegistry(app: JupyterLab): IDataRegistry {
-  return new DataRegistry();
-}
-
-function activateConverterRegistry(app: JupyterLab): IConverterRegistry {
-  return new ConverterRegistry();
-}
+  converterRegistryPlugin,
+  docRegistryPlugin,
+  dataExplorerPlugin
+] as JupyterLabPlugin<any>[];
