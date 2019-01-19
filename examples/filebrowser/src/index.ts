@@ -4,7 +4,7 @@
 import 'es6-promise/auto'; // polyfill Promise on IE
 import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/theme-light-extension/style/index.css';
+import '@jupyterlab/theme-light-extension/static/index.css';
 import '../index.css';
 
 import { each } from '@phosphor/algorithm';
