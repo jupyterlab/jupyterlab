@@ -9,12 +9,10 @@ import {
   IDataExplorer,
   IDataRegistry
 } from '@jupyterlab/databus';
-import {
-  DocumentRegistry,
-  DocumentWidget,
-  IDocumentWidget
-} from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Signal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
+import { Toolbar } from '@jupyterlab/apputils';
 
 /**
  * Integrates the databus into the doc registry.
@@ -85,10 +83,7 @@ function activateDocRegistry(
     createNew(context: DocumentRegistry.IContext<any>): IDocumentWidget {
       const url = context.urlResolver.getDownloadUrl(context.path);
       console.log('Download URL', url);
-      return new DocumentWidget({
-        content: widget,
-        context: context
-      });
+      return new MinimalDocumentWidget(context, widget);
     },
 
     isDisposed: false,
@@ -96,4 +91,21 @@ function activateDocRegistry(
       return;
     }
   });
+}
+
+class MinimalDocumentWidget extends Widget implements IDocumentWidget {
+  constructor(
+    public context: DocumentRegistry.IContext<any>,
+    public content: Widget
+  ) {
+    super();
+  }
+  /**
+   * The toolbar for the widget.
+   */
+  toolbar = new Toolbar();
+  /**
+   * A promise resolving after the content widget is revealed.
+   */
+  revealed = Promise.resolve();
 }
