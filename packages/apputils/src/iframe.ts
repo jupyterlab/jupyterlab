@@ -14,6 +14,28 @@ export class IFrame extends Widget {
     super({ node: Private.createNode() });
     this.addClass('jp-IFrame');
     this.sandbox = options.sandbox || [];
+    this.referrerPolicy = options.referrerPolicy || 'no-referrer';
+  }
+
+  /**
+   * Referrer policy for the iframe.
+   *
+   * #### Notes
+   * By default, `no-referrer` is chosen.
+   *
+   * For more information, see
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy
+   */
+  get referrerPolicy(): IFrame.ReferrerPolicy {
+    return this._referrerPolicy;
+  }
+  set referrerPolicy(value: IFrame.ReferrerPolicy) {
+    if (this._referrerPolicy === value) {
+      return;
+    }
+    this._referrerPolicy = value;
+    const iframe = this.node.querySelector('iframe')!;
+    iframe.setAttribute('referrerpolicy', value);
   }
 
   /**
@@ -50,6 +72,7 @@ export class IFrame extends Widget {
   }
 
   private _sandbox: IFrame.SandboxExceptions[] = [];
+  private _referrerPolicy: IFrame.ReferrerPolicy;
 }
 
 /**
@@ -57,9 +80,28 @@ export class IFrame extends Widget {
  */
 export namespace IFrame {
   /**
+   * Referrer policy for the iframe.
+   *
+   * User documentation for the policies can be found here:
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy
+   */
+  export type ReferrerPolicy =
+    | 'no-referrer'
+    | 'no-referrer-when-downgrade'
+    | 'origin'
+    | 'origin-when-cross-origin'
+    | 'same-origin'
+    | 'strict-origin'
+    | 'strict-origin-when-cross-origin'
+    | 'unsafe-url';
+
+  /**
    * Exceptions to the iframe sandboxing policies.
    * These are specified here:
-   * https://www.w3schools.com/tags/att_iframe_sandbox.asp
+   * https://www.w3.org/TR/2011/WD-html5-20110525/the-iframe-element.html#attr-iframe-sandbox
+   *
+   * More user-friendly documentation can be found here:
+   * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
    */
   export type SandboxExceptions =
     | 'allow-forms'
@@ -83,6 +125,11 @@ export namespace IFrame {
      * Exceptions for the iframe sandbox.
      */
     sandbox?: SandboxExceptions[];
+
+    /**
+     * Referrer policy for the iframe.
+     */
+    referrerPolicy?: ReferrerPolicy;
   }
 }
 
