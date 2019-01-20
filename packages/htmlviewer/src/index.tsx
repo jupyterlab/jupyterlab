@@ -123,6 +123,20 @@ export class HTMLViewer extends DocumentWidget<IFrame>
   }
 
   /**
+   * Dispose of resources held by the html viewer.
+   */
+  dispose(): void {
+    if (this._objectUrl) {
+      try {
+        URL.revokeObjectURL(this._objectUrl);
+      } catch (error) {
+        /* no-op */
+      }
+    }
+    super.dispose();
+  }
+
+  /**
    * Handle and update request.
    */
   protected onUpdateRequest(): void {
