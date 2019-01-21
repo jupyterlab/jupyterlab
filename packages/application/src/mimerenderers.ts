@@ -65,19 +65,21 @@ export function createRendermimePlugins(
   // and exposing the mime document instance tracker.
   plugins.push({
     id: '@jupyterlab/application:mimedocument',
-    requires: [ILayoutRestorer],
+    optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
-    activate: (app: JupyterClient, restorer: ILayoutRestorer) => {
-      restorer.restore(tracker, {
-        command: 'docmanager:open',
-        args: widget => ({
-          path: widget.context.path,
-          factory: Private.factoryNameProperty.get(widget)
-        }),
-        name: widget =>
-          `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
-      });
+    activate: (app: JupyterClient, restorer: ILayoutRestorer | null) => {
+      if (restorer) {
+        restorer.restore(tracker, {
+          command: 'docmanager:open',
+          args: widget => ({
+            path: widget.context.path,
+            factory: Private.factoryNameProperty.get(widget)
+          }),
+          name: widget =>
+            `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
+        });
+      }
       return tracker;
     }
   });
@@ -94,13 +96,9 @@ export function createRendermimePlugin(
 ): JupyterLabPlugin<void> {
   return {
     id: item.id,
-    requires: [ILayoutRestorer, IRenderMimeRegistry],
+    requires: [IRenderMimeRegistry],
     autoStart: true,
-    activate: (
-      app: JupyterClient,
-      restorer: ILayoutRestorer,
-      rendermime: IRenderMimeRegistry
-    ) => {
+    activate: (app: JupyterClient, rendermime: IRenderMimeRegistry) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
         rendermime.addFactory(item.rendererFactory, item.rank);
