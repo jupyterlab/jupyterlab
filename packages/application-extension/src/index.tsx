@@ -421,7 +421,7 @@ const sidebar: JupyterLabPlugin<void> = {
       rank: 500
     });
   },
-  requires: [ISettingRegistry],
+  requires: [ISettingRegistry, ILabShell],
   autoStart: true
 };
 
