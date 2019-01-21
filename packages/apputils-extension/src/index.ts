@@ -8,8 +8,7 @@ import {
   IRouter,
   JupyterClient,
   JupyterLab,
-  JupyterLabPlugin,
-  ILabShell
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -94,7 +93,6 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
   activate: activatePalette,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
-  requires: [ILabShell],
   autoStart: true
 };
 
