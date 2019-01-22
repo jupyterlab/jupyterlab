@@ -32,10 +32,20 @@ export class JupyterClient<
    */
   constructor(options: JupyterClient.IOptions<T, U>) {
     super(options);
+
+    // The default restored promise if one does not exist in the options.
+    const restored = new Promise<U>(resolve => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+
     this.commandLinker =
       options.commandLinker || new CommandLinker({ commands: this.commands });
     this.docRegistry = options.docRegistry || new DocumentRegistry();
-    this.restored = options.restored || Promise.resolve(undefined);
+    this.restored =
+      options.restored ||
+      this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
   }
 
