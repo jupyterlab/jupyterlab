@@ -227,7 +227,7 @@ jlpm run lighthouse --view
 
 ### Using throttling
 
-Lighthouse reccomends using the system level [`comcast`](https://github.com/tylertreat/comcast) tool to throttle your network connection
+Lighthouse recommends using the system level [`comcast`](https://github.com/tylertreat/comcast) tool to throttle your network connection
 and emulate different scenarios. First, install that tool:
 
 ```bash
