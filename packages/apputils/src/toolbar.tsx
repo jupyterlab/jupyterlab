@@ -245,6 +245,66 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 1, name, widget);
+  }
+
+  /**
+   * Insert an item into the toolbar at the before a target item.
+   *
+   * @param at - The target item to insert before.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertBefore(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 0, name, widget);
+  }
+
+  private _insertRelative(
+    at: string,
+    offset: number,
+    name: string,
+    widget: T
+  ): boolean {
+    let nameWithIndex = map(this.names(), (name, i) => {
+      return { name: name, index: i };
+    });
+    let target = find(nameWithIndex, x => x.name === at);
+    if (target) {
+      return this.insertItem(target.index + offset, name, widget);
+    }
+    return false;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
