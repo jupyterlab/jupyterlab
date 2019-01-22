@@ -132,22 +132,19 @@ const settings: JupyterLabPlugin<ISettingRegistry> = {
  */
 const themes: JupyterLabPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, ISplashScreen],
+  requires: [ISettingRegistry, JupyterLab.IInfo, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
   activate: (
     app: JupyterClient,
     settings: ISettingRegistry,
-    splash: ISplashScreen,
+    info: JupyterLab.IInfo,
+    splash: ISplashScreen | null,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null
   ): IThemeManager => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${themes.id} must be activated in JupyterLab.`);
-    }
-
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(app.info.urls.base, app.info.urls.themes);
+    const url = URLExt.join(info.urls.base, info.urls.themes);
     const key = themes.id;
     const manager = new ThemeManager({ key, host, settings, splash, url });
 
@@ -229,12 +226,12 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [IRouter],
-  activate: async (app: JupyterClient, router: IRouter) => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${resolver.id} must be activated in JupyterLab.`);
-    }
-
+  requires: [IRouter, JupyterLab.IInfo],
+  activate: async (
+    app: JupyterClient,
+    router: IRouter,
+    info: JupyterLab.IInfo
+  ) => {
     const solver = new WindowResolver();
     const match = router.current.path.match(Patterns.workspace);
     const workspace = (match && decodeURIComponent(match[1])) || '';
@@ -244,7 +241,7 @@ const resolver: JupyterLabPlugin<IWindowResolver> = {
           PageConfig.getOption('workspacesUrl'),
           workspace
         )
-      : app.info.defaultWorkspace;
+      : info.defaultWorkspace;
 
     try {
       await solver.resolve(candidate);
@@ -288,21 +285,19 @@ const state: JupyterLabPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter, IWindowResolver, ISplashScreen],
+  requires: [IRouter, IWindowResolver, JupyterLab.IInfo],
+  optional: [ISplashScreen],
   activate: (
     app: JupyterClient,
     router: IRouter,
     resolver: IWindowResolver,
-    splash: ISplashScreen
+    info: JupyterLab.IInfo,
+    splash: ISplashScreen | null
   ) => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${state.id} must be activated in JupyterLab.`);
-    }
-
     let debouncer: number;
     let resolved = false;
 
-    const { commands, info, serviceManager } = app;
+    const { commands, serviceManager } = app;
     const { workspaces } = serviceManager;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const db = new StateDB({
@@ -344,9 +339,9 @@ const state: JupyterLabPlugin<IStateDB> = {
     let conflated: PromiseDelegate<void> | null = null;
 
     commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${app.info.workspace})`,
+      label: () => `Save Workspace (${info.workspace})`,
       execute: ({ immediate }) => {
-        const { workspace } = app.info;
+        const { workspace } = info;
         const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
@@ -394,7 +389,7 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { defaultWorkspace, workspace } = app.info;
+        const { defaultWorkspace, workspace } = info;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
@@ -491,7 +486,10 @@ const state: JupyterLabPlugin<IStateDB> = {
           return;
         }
 
-        const loading = splash.show();
+        // If a splash provider exists, launch the splash screen.
+        const loading = splash
+          ? splash.show()
+          : new DisposableDelegate(() => undefined);
 
         // If the state database has already been resolved, resetting is
         // impossible without reloading.

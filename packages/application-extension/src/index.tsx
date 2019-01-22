@@ -238,12 +238,8 @@ const router: JupyterLabPlugin<IRouter> = {
 const tree: JupyterLabPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
-  requires: [IRouter],
-  activate: (app: JupyterClient, router: IRouter) => {
-    if (!(app instanceof JupyterLab)) {
-      throw new Error(`${tree.id} must be activated in JupyterLab.`);
-    }
-
+  requires: [JupyterLab.IInfo, IRouter],
+  activate: (app: JupyterClient, info: JupyterLab.IInfo, router: IRouter) => {
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
@@ -252,8 +248,8 @@ const tree: JupyterLabPlugin<void> = {
         const workspaceMatch = args.path.match(Patterns.workspace);
         const match = treeMatch || workspaceMatch;
         const path = decodeURI(match[1]);
-        const { page, workspaces } = app.info.urls;
-        const workspace = PathExt.basename(app.info.workspace);
+        const { page, workspaces } = info.urls;
+        const workspace = PathExt.basename(info.workspace);
         const url =
           (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
           args.search +
@@ -567,6 +563,21 @@ const status: JupyterLabPlugin<ILabStatus> = {
 };
 
 /**
+ * The default JupyterLab application information provider.
+ */
+const info: JupyterLabPlugin<JupyterLab.IInfo> = {
+  id: '@jupyterlab/application-extension:info',
+  activate: (app: JupyterClient) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${info.id} must be activated in JupyterLab.`);
+    }
+    return app.info;
+  },
+  autoStart: true,
+  provides: JupyterLab.IInfo
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterLabPlugin<any>[] = [
@@ -578,7 +589,8 @@ const plugins: JupyterLabPlugin<any>[] = [
   busy,
   sidebar,
   shell,
-  status
+  status,
+  info
 ];
 
 export default plugins;
