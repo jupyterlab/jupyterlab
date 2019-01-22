@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -21,7 +21,7 @@ namespace CommandIDs {
 /**
  * A plugin providing a rendermime registry.
  */
-const plugin: JupyterLabPlugin<RenderMimeRegistry> = {
+const plugin: JupyterClientPlugin<RenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
   requires: [IDocumentManager],
   optional: [ILatexTypesetter],

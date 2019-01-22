@@ -7,7 +7,7 @@ import '../style/index.css';
 import {
   ILabShell,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { IClientSession } from '@jupyterlab/apputils';
@@ -46,7 +46,7 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 /**
  * Initialization data for the statusbar extension.
  */
-const statusBar: JupyterLabPlugin<IStatusBar> = {
+const statusBar: JupyterClientPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
@@ -70,7 +70,7 @@ const statusBar: JupyterLabPlugin<IStatusBar> = {
 /**
  * A plugin that provides a kernel status item to the status bar.
  */
-export const kernelStatus: JupyterLabPlugin<void> = {
+export const kernelStatus: JupyterClientPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
@@ -147,7 +147,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
 /**
  * A plugin providing a line/column status item to the application.
  */
-export const lineColItem: JupyterLabPlugin<void> = {
+export const lineColItem: JupyterClientPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:line-col-status',
   autoStart: true,
   requires: [
@@ -240,7 +240,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
  * This plugin will not work unless the memory usage server extension
  * is installed.
  */
-export const memoryUsageItem: JupyterLabPlugin<void> = {
+export const memoryUsageItem: JupyterClientPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
   requires: [IStatusBar],
@@ -264,7 +264,7 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
  * A plugin providing running terminals and sessions information
  * to the status bar.
  */
-export const runningSessionsItem: JupyterLabPlugin<void> = {
+export const runningSessionsItem: JupyterClientPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
   requires: [IStatusBar, ILabShell],
@@ -285,7 +285,7 @@ export const runningSessionsItem: JupyterLabPlugin<void> = {
   }
 };
 
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterClientPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,

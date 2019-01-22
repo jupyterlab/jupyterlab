@@ -12,9 +12,14 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { IIterator } from '@phosphor/algorithm';
 
-import { Application } from '@phosphor/application';
+import { Application, IPlugin } from '@phosphor/application';
 
 import { Widget } from '@phosphor/widgets';
+
+/**
+ * The type for all JupyterClient application plugins.
+ */
+export type JupyterClientPlugin<T> = IPlugin<JupyterClient, T>;
 
 /**
  * The base Jupyter client application class.

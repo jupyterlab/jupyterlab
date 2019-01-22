@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import { IThemeManager } from '@jupyterlab/apputils';
 
 /**
  * A plugin for the Jupyter Dark Theme.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
   activate: (app: JupyterClient, manager: IThemeManager) => {

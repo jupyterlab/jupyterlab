@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { each } from '@phosphor/algorithm';
@@ -17,18 +17,21 @@ import '../style/index.css';
 /**
  * The default tab manager extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   id: '@jupyterlab/tabmanager-extension:plugin',
   activate: (
     app: JupyterClient,
-    restorer: ILayoutRestorer,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    restorer: ILayoutRestorer | null
   ): void => {
     const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
-    restorer.add(tabs, 'tab-manager');
+    if (restorer) {
+      restorer.add(tabs, 'tab-manager');
+    }
+
     tabs.id = 'tab-manager';
     tabs.title.iconClass = 'jp-TabIcon jp-SideBar-tabIcon';
     tabs.title.caption = 'Open Tabs';
@@ -65,8 +68,7 @@ const plugin: JupyterLabPlugin<void> = {
     });
   },
   autoStart: true,
-  requires: [ILayoutRestorer],
-  optional: [ILabShell]
+  optional: [ILabShell, ILayoutRestorer]
 };
 
 /**

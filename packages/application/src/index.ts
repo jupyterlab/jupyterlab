@@ -4,9 +4,9 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-export { JupyterClient } from './client';
+export { JupyterClient, JupyterClientPlugin } from './client';
 
-export { ILabStatus, JupyterLab, JupyterLabPlugin } from './lab';
+export { ILabStatus, JupyterLab } from './lab';
 
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 

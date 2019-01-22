@@ -7,7 +7,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -43,7 +43,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
+const plugin: JupyterClientPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,

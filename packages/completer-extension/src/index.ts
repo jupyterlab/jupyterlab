@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import {
   CompleterModel,
@@ -48,7 +48,7 @@ namespace CommandIDs {
 /**
  * A plugin providing code completion for editors.
  */
-const manager: JupyterLabPlugin<ICompletionManager> = {
+const manager: JupyterClientPlugin<ICompletionManager> = {
   id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
@@ -122,7 +122,7 @@ const manager: JupyterLabPlugin<ICompletionManager> = {
 /**
  * An extension that registers consoles for code completion.
  */
-const consoles: JupyterLabPlugin<void> = {
+const consoles: JupyterClientPlugin<void> = {
   id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
@@ -183,7 +183,7 @@ const consoles: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for code completion.
  */
-const notebooks: JupyterLabPlugin<void> = {
+const notebooks: JupyterClientPlugin<void> = {
   id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
@@ -242,7 +242,7 @@ const notebooks: JupyterLabPlugin<void> = {
 /**
  * An extension that registers file editors for completion.
  */
-const files: JupyterLabPlugin<void> = {
+const files: JupyterClientPlugin<void> = {
   id: '@jupyterlab/completer-extension:files',
   requires: [ICompletionManager, IEditorTracker],
   autoStart: true,
@@ -360,5 +360,10 @@ const files: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks, files];
+const plugins: JupyterClientPlugin<any>[] = [
+  manager,
+  consoles,
+  notebooks,
+  files
+];
 export default plugins;

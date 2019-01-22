@@ -10,15 +10,13 @@ import { Base64ModelFactory } from '@jupyterlab/docregistry';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { IPlugin } from '@phosphor/application';
-
 import { Token } from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { JupyterClient } from './client';
+import { JupyterClient, JupyterClientPlugin } from './client';
 
 import { createRendermimePlugins } from './mimerenderers';
 
@@ -71,11 +69,6 @@ export interface ILabStatus {
    */
   setDirty(): IDisposable;
 }
-
-/**
- * The type for all JupyterLab plugins.
- */
-export type JupyterLabPlugin<T> = IPlugin<JupyterClient, T>;
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
@@ -407,6 +400,6 @@ export namespace JupyterLab {
     /**
      * The default export.
      */
-    default: JupyterLabPlugin<any> | JupyterLabPlugin<any>[];
+    default: JupyterClientPlugin<any> | JupyterClientPlugin<any>[];
   }
 }

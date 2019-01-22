@@ -8,7 +8,7 @@ import { Menu } from '@phosphor/widgets';
 import {
   ILabShell,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
@@ -50,7 +50,7 @@ namespace CommandIDs {
 /**
  * The editor services.
  */
-const services: JupyterLabPlugin<IEditorServices> = {
+const services: JupyterClientPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   provides: IEditorServices,
   activate: activateEditorServices
@@ -59,7 +59,7 @@ const services: JupyterLabPlugin<IEditorServices> = {
 /**
  * The editor commands.
  */
-const commands: JupyterLabPlugin<void> = {
+const commands: JupyterClientPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
   requires: [IEditorTracker, IMainMenu, ISettingRegistry, ILabShell],
   activate: activateEditorCommands,
@@ -69,7 +69,7 @@ const commands: JupyterLabPlugin<void> = {
 /**
  * The JupyterLab plugin for the EditorSyntax status item.
  */
-export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+export const editorSyntaxStatus: JupyterClientPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
   requires: [IStatusBar, IEditorTracker, ILabShell],
@@ -106,7 +106,7 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterClientPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus

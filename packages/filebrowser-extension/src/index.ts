@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -97,7 +97,7 @@ namespace CommandIDs {
 /**
  * The default file browser extension.
  */
-const browser: JupyterLabPlugin<void> = {
+const browser: JupyterClientPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
@@ -113,7 +113,7 @@ const browser: JupyterLabPlugin<void> = {
 /**
  * The default file browser factory provider.
  */
-const factory: JupyterLabPlugin<IFileBrowserFactory> = {
+const factory: JupyterClientPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
@@ -131,7 +131,7 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
  * /user-redirect URL for JupyterHub), disable this plugin and replace it
  * with another implementation.
  */
-const shareFile: JupyterLabPlugin<void> = {
+const shareFile: JupyterClientPlugin<void> = {
   activate: activateShareFile,
   id: '@jupyterlab/filebrowser-extension:share-file',
   requires: [IFileBrowserFactory],
@@ -141,7 +141,7 @@ const shareFile: JupyterLabPlugin<void> = {
 /**
  * A plugin providing file upload status.
  */
-export const fileUploadStatus: JupyterLabPlugin<void> = {
+export const fileUploadStatus: JupyterClientPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
   requires: [IStatusBar, IFileBrowserFactory],
@@ -176,7 +176,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterClientPlugin<any>[] = [
   factory,
   browser,
   shareFile,

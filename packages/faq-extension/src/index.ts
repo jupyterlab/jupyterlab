@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -30,7 +30,7 @@ namespace CommandIDs {
 /**
  * The FAQ page extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   activate,
   id: '@jupyterlab/faq-extension:plugin',
   requires: [ICommandPalette, ILayoutRestorer, IRenderMimeRegistry],

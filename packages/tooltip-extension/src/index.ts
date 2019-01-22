@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -41,7 +41,7 @@ namespace CommandIDs {
 /**
  * The main tooltip manager plugin.
  */
-const manager: JupyterLabPlugin<ITooltipManager> = {
+const manager: JupyterClientPlugin<ITooltipManager> = {
   id: '@jupyterlab/tooltip-extension:manager',
   autoStart: true,
   provides: ITooltipManager,
@@ -84,7 +84,7 @@ const manager: JupyterLabPlugin<ITooltipManager> = {
 /**
  * The console tooltip plugin.
  */
-const consoles: JupyterLabPlugin<void> = {
+const consoles: JupyterClientPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:consoles',
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
@@ -119,7 +119,7 @@ const consoles: JupyterLabPlugin<void> = {
 /**
  * The notebook tooltip plugin.
  */
-const notebooks: JupyterLabPlugin<void> = {
+const notebooks: JupyterClientPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:notebooks',
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
@@ -154,7 +154,7 @@ const notebooks: JupyterLabPlugin<void> = {
 /**
  * The file editor tooltip plugin.
  */
-const files: JupyterLabPlugin<void> = {
+const files: JupyterClientPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:files',
   autoStart: true,
   requires: [ITooltipManager, IEditorTracker, IRenderMimeRegistry],
@@ -246,7 +246,12 @@ const files: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [manager, consoles, notebooks, files];
+const plugins: JupyterClientPlugin<any>[] = [
+  manager,
+  consoles,
+  notebooks,
+  files
+];
 export default plugins;
 
 /**

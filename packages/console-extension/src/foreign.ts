@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -19,7 +19,7 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
 /**
  * The console widget tracker provider.
  */
-export const foreign: JupyterLabPlugin<void> = {
+export const foreign: JupyterClientPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
   requires: [IConsoleTracker],
   optional: [ICommandPalette],

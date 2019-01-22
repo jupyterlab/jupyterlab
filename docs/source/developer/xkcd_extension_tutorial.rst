@@ -227,7 +227,7 @@ repository root folder install the dependency and save it to your
 
     jlpm add @jupyterlab/apputils
 
-Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
+Locate the ``extension`` object of type ``JupyterClientPlugin``. Change the
 definition so that it reads like so:
 
 .. code:: typescript
@@ -235,7 +235,7 @@ definition so that it reads like so:
     /**
      * Initialization data for the jupyterlab_xkcd extension.
      */
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterClientPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
@@ -617,12 +617,12 @@ these changes:
     };
 
 Remove the ``activate`` function definition from the
-``JupyterLabPlugin`` object and refer instead to the top-level function
+``JupyterClientPlugin`` object and refer instead to the top-level function
 like so:
 
 .. code-block:: typescript
 
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterClientPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
@@ -662,7 +662,7 @@ entire list of import statements looks like the following:
     :emphasize-lines: 2,6,9-11
 
     import {
-      JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
+      JupyterLab, JupyterClientPlugin, ILayoutRestorer // new
     } from '@jupyterlab/application';
 
     import {
@@ -690,13 +690,13 @@ Install this dependency:
 
     jlpm add @phosphor/coreutils
 
-Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
+Then, add the ``ILayoutRestorer`` interface to the ``JupyterClientPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
 third parameter of the ``activate``.
 
 .. code:: typescript
 
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterClientPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette, ILayoutRestorer],

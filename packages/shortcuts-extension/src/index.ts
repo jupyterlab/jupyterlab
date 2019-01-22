@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
 
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
@@ -26,7 +26,7 @@ const RECORD_SEPARATOR = String.fromCharCode(30);
  * them to the new keyboard shortcuts plugin below before removing the old
  * shortcuts.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
   activate: async (app: JupyterClient, registry: ISettingRegistry) => {
@@ -135,7 +135,7 @@ const plugin: JupyterLabPlugin<void> = {
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
-const shortcuts: JupyterLabPlugin<void> = {
+const shortcuts: JupyterClientPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
   activate: async (app: JupyterClient, registry: ISettingRegistry) => {
@@ -244,7 +244,7 @@ List of Keyboard Shortcuts`;
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [plugin, shortcuts];
+const plugins: JupyterClientPlugin<any>[] = [plugin, shortcuts];
 
 export default plugins;
 

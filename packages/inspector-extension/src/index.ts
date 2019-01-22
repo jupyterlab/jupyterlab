@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -37,7 +37,7 @@ namespace CommandIDs {
 /**
  * A service providing code introspection.
  */
-const inspector: JupyterLabPlugin<IInspector> = {
+const inspector: JupyterClientPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
   optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
@@ -129,7 +129,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
 /**
  * An extension that registers consoles for inspection.
  */
-const consoles: JupyterLabPlugin<void> = {
+const consoles: JupyterClientPlugin<void> = {
   id: '@jupyterlab/inspector-extension:consoles',
   requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
@@ -190,7 +190,7 @@ const consoles: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for inspection.
  */
-const notebooks: JupyterLabPlugin<void> = {
+const notebooks: JupyterClientPlugin<void> = {
   id: '@jupyterlab/inspector-extension:notebooks',
   requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
@@ -251,5 +251,5 @@ const notebooks: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [inspector, consoles, notebooks];
+const plugins: JupyterClientPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;

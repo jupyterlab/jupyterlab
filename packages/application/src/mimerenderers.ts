@@ -17,7 +17,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
-import { JupyterClient, JupyterLabPlugin } from './index';
+import { JupyterClient, JupyterClientPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
 
@@ -40,8 +40,8 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
-  const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
+): JupyterClientPlugin<void | IMimeDocumentTracker>[] {
+  const plugins: JupyterClientPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
   const tracker = new InstanceTracker<MimeDocument>({ namespace });
@@ -93,7 +93,7 @@ export function createRendermimePlugins(
 export function createRendermimePlugin(
   tracker: InstanceTracker<MimeDocument>,
   item: IRenderMime.IExtension
-): JupyterLabPlugin<void> {
+): JupyterClientPlugin<void> {
   return {
     id: item.id,
     requires: [IRenderMimeRegistry],

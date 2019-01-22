@@ -5,7 +5,7 @@ import {
   ILayoutRestorer,
   JupyterClient,
   JupyterLab,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -88,7 +88,7 @@ RESOURCES.sort((a: any, b: any) => {
 /**
  * The help handler extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
   requires: [JupyterLab.IInfo, IMainMenu],

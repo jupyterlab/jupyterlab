@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterClientPlugin } from '@jupyterlab/application';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -14,7 +14,7 @@ import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 /**
  * The MathJax latexTypesetter plugin.
  */
-const plugin: JupyterLabPlugin<ILatexTypesetter> = {
+const plugin: JupyterClientPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax2-extension:plugin',
   autoStart: true,
   provides: ILatexTypesetter,

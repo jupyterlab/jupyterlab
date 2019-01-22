@@ -469,7 +469,7 @@ a plugin:
 
     class Foo implements IFoo {}
 
-    const plugin: JupyterLabPlugin<IFoo> = {
+    const plugin: JupyterClientPlugin<IFoo> = {
       id,
       requires: [IStateDB],
       provides: IFoo,

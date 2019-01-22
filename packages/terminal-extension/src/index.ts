@@ -4,7 +4,7 @@
 import {
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -46,7 +46,7 @@ const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 /**
  * The default terminal extension.
  */
-const plugin: JupyterLabPlugin<ITerminalTracker> = {
+const plugin: JupyterClientPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,

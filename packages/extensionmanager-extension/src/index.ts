@@ -4,7 +4,7 @@
 import {
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin,
+  JupyterClientPlugin,
   ILabShell
 } from '@jupyterlab/application';
 
@@ -30,7 +30,7 @@ namespace CommandIDs {
 /**
  * The extension manager plugin.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
   requires: [ISettingRegistry, ILayoutRestorer, ILabShell],

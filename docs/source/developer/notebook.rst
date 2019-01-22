@@ -176,7 +176,7 @@ Copy the following to ``src/index.ts``:
     } from '@phosphor/disposable';
 
     import {
-      JupyterLab, JupyterLabPlugin
+      JupyterLab, JupyterClientPlugin
     } from '@jupyterlab/application';
 
     import {
@@ -195,7 +195,7 @@ Copy the following to ``src/index.ts``:
     /**
      * The plugin registration information.
      */
-    const plugin: JupyterLabPlugin<void> = {
+    const plugin: JupyterClientPlugin<void> = {
       activate,
       id: 'my-extension-name:buttonPlugin',
       autoStart: true

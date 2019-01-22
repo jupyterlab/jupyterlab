@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -246,7 +246,7 @@ const FORMAT_LABEL: { [k: string]: string } = {
 /**
  * The notebook widget tracker provider.
  */
-const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
+const trackerPlugin: JupyterClientPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
@@ -267,7 +267,7 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
 /**
  * The notebook cell factory provider.
  */
-const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
+const factory: JupyterClientPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
@@ -281,7 +281,7 @@ const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const tools: JupyterLabPlugin<ICellTools> = {
+const tools: JupyterClientPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
@@ -292,7 +292,7 @@ const tools: JupyterLabPlugin<ICellTools> = {
 /**
  * A plugin providing a CommandEdit status item.
  */
-export const commandEditItem: JupyterLabPlugin<void> = {
+export const commandEditItem: JupyterClientPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, ILabShell],
@@ -325,7 +325,7 @@ export const commandEditItem: JupyterLabPlugin<void> = {
 /**
  * A plugin that adds a notebook trust status item to the status bar.
  */
-export const notebookTrustItem: JupyterLabPlugin<void> = {
+export const notebookTrustItem: JupyterClientPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, ILabShell],
@@ -361,7 +361,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterClientPlugin<any>[] = [
   factory,
   trackerPlugin,
   tools,

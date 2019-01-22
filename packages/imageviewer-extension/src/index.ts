@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -52,7 +52,7 @@ const FACTORY = 'Image';
 /**
  * The image file handler extension.
  */
-const plugin: JupyterLabPlugin<IImageTracker> = {
+const plugin: JupyterClientPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,

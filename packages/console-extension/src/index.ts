@@ -5,7 +5,7 @@ import {
   ILabStatus,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin,
+  JupyterClientPlugin,
   ILabShell
 } from '@jupyterlab/application';
 
@@ -84,7 +84,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterLabPlugin<IConsoleTracker> = {
+const tracker: JupyterClientPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -106,7 +106,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+const factory: JupyterClientPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
@@ -120,7 +120,7 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterClientPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**

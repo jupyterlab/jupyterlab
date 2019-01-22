@@ -10,7 +10,7 @@ import { Menu, Widget } from '@phosphor/widgets';
 import {
   ILabShell,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
@@ -115,7 +115,7 @@ export namespace CommandIDs {
 /**
  * A service providing an interface to the main menu.
  */
-const plugin: JupyterLabPlugin<IMainMenu> = {
+const plugin: JupyterClientPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
   optional: [IInspector, ILabShell],

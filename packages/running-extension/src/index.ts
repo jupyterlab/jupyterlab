@@ -5,7 +5,7 @@ import {
   ILabShell,
   ILayoutRestorer,
   JupyterClient,
-  JupyterLabPlugin
+  JupyterClientPlugin
 } from '@jupyterlab/application';
 
 import { RunningSessions } from '@jupyterlab/running';
@@ -13,7 +13,7 @@ import { RunningSessions } from '@jupyterlab/running';
 /**
  * The default running sessions extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterClientPlugin<void> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
   requires: [ILayoutRestorer, ILabShell],
