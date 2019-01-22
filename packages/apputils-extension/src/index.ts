@@ -40,7 +40,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Menu } from '@phosphor/widgets';
 
-import { activatePalette, restorePalette } from './palette';
+import { Palette } from './palette';
 
 import { createRedirectForm } from './redirect';
 
@@ -90,7 +90,7 @@ namespace Patterns {
  * The default command palette extension.
  */
 const palette: JupyterClientPlugin<ICommandPalette> = {
-  activate: activatePalette,
+  activate: Palette.activate,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
   autoStart: true
@@ -106,7 +106,7 @@ const palette: JupyterClientPlugin<ICommandPalette> = {
  * in the application load cycle.
  */
 const paletteRestorer: JupyterClientPlugin<void> = {
-  activate: restorePalette,
+  activate: Palette.restore,
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true

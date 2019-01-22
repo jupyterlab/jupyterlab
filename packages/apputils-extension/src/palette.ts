@@ -25,7 +25,7 @@ namespace CommandIDs {
  * A thin wrapper around the `CommandPalette` class to conform with the
  * JupyterLab interface for the application-wide command palette.
  */
-class Palette implements ICommandPalette {
+export class Palette implements ICommandPalette {
   /**
    * Create a palette instance.
    */
@@ -71,57 +71,59 @@ class Palette implements ICommandPalette {
 }
 
 /**
- * Activate the command palette.
+ * A namespace for `Palette` statics.
  */
-export function activatePalette(app: JupyterClient): ICommandPalette {
-  const { commands, shell } = app;
-  const palette = Private.createPalette(app);
+export namespace Palette {
+  /**
+   * Activate the command palette.
+   */
+  export function activate(app: JupyterClient): ICommandPalette {
+    const { commands, shell } = app;
+    const palette = Private.createPalette(app);
 
-  // Show the current palette shortcut in its title.
-  const updatePaletteTitle = () => {
-    const binding = find(
-      app.commands.keyBindings,
-      b => b.command === CommandIDs.activate
-    );
-    if (binding) {
-      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
-      palette.title.caption = `Commands (${ks})`;
-    } else {
-      palette.title.caption = 'Commands';
-    }
-  };
-  updatePaletteTitle();
-  app.commands.keyBindingChanged.connect(() => {
+    // Show the current palette shortcut in its title.
+    const updatePaletteTitle = () => {
+      const binding = find(
+        app.commands.keyBindings,
+        b => b.command === CommandIDs.activate
+      );
+      if (binding) {
+        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        palette.title.caption = `Commands (${ks})`;
+      } else {
+        palette.title.caption = 'Commands';
+      }
+    };
     updatePaletteTitle();
-  });
+    app.commands.keyBindingChanged.connect(() => {
+      updatePaletteTitle();
+    });
 
-  commands.addCommand(CommandIDs.activate, {
-    execute: () => {
-      shell.activateById(palette.id);
-    },
-    label: 'Activate Command Palette'
-  });
+    commands.addCommand(CommandIDs.activate, {
+      execute: () => {
+        shell.activateById(palette.id);
+      },
+      label: 'Activate Command Palette'
+    });
 
-  palette.inputNode.placeholder = 'SEARCH';
+    palette.inputNode.placeholder = 'SEARCH';
 
-  shell.add(palette, 'left', { rank: 300 });
+    shell.add(palette, 'left', { rank: 300 });
 
-  return new Palette(palette);
-}
+    return new Palette(palette);
+  }
 
-/**
- * Restore the command palette.
- */
-export function restorePalette(
-  app: JupyterClient,
-  restorer: ILayoutRestorer
-): void {
-  const palette = Private.createPalette(app);
+  /**
+   * Restore the command palette.
+   */
+  export function restore(app: JupyterClient, restorer: ILayoutRestorer): void {
+    const palette = Private.createPalette(app);
 
-  // Let the application restorer track the command palette for restoration of
-  // application state (e.g. setting the command palette as the current side bar
-  // widget).
-  restorer.add(palette, 'command-palette');
+    // Let the application restorer track the command palette for restoration of
+    // application state (e.g. setting the command palette as the current side bar
+    // widget).
+    restorer.add(palette, 'command-palette');
+  }
 }
 
 /**
