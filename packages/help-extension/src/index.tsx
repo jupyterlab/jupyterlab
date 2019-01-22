@@ -91,7 +91,8 @@ RESOURCES.sort((a: any, b: any) => {
 const plugin: JupyterLabPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
+  requires: [JupyterLab.IInfo, IMainMenu],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -109,30 +110,29 @@ export default plugin;
  */
 function activate(
   app: JupyterClient,
+  info: JupyterLab.IInfo,
   mainMenu: IMainMenu,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): void {
-  if (!(app instanceof JupyterLab)) {
-    throw new Error(`${plugin.id} must be activated in JupyterLab.`);
-  }
-
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
-  const { commands, shell, info, serviceManager } = app;
+  const { commands, shell, serviceManager } = app;
   const tracker = new InstanceTracker<MainAreaWidget>({ namespace });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: widget => ({
-      url: widget.content.url,
-      text: widget.content.title.label
-    }),
-    name: widget => widget.content.url
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: CommandIDs.open,
+      args: widget => ({
+        url: widget.content.url,
+        text: widget.content.title.label
+      }),
+      name: widget => widget.content.url
+    });
+  }
 
   /**
    * Create a new HelpWidget widget.
@@ -161,9 +161,7 @@ function activate(
     CommandIDs.about,
     'faq-jupyterlab:open',
     CommandIDs.launchClassic
-  ].map(command => {
-    return { command };
-  });
+  ].map(command => ({ command }));
   helpMenu.addGroup(labGroup, 0);
   const resourcesGroup = RESOURCES.map(args => ({
     args,
@@ -364,7 +362,7 @@ function activate(
 
       let widget = newHelpWidget(url, text);
       tracker.add(widget);
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
     }
   });
 
@@ -375,9 +373,11 @@ function activate(
     }
   });
 
-  RESOURCES.forEach(args => {
-    palette.addItem({ args, command: CommandIDs.open, category });
-  });
-  palette.addItem({ command: 'apputils:reset', category });
-  palette.addItem({ command: CommandIDs.launchClassic, category });
+  if (palette) {
+    RESOURCES.forEach(args => {
+      palette.addItem({ args, command: CommandIDs.open, category });
+    });
+    palette.addItem({ command: 'apputils:reset', category });
+    palette.addItem({ command: CommandIDs.launchClassic, category });
+  }
 }
