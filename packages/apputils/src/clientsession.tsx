@@ -35,6 +35,12 @@ import { showDialog, Dialog } from './dialog';
  *
  * TODO: what is the difference between this and the services Session? It seems
  * there is a lot of duplicated code here.
+ *
+ * A client session maintains a separate path/name/type state, and can connect
+ * to or start new service Sessions. Many things are proxied through the service
+ * session. It looks like one of the main usecases for a ClientSession is to be able to have a single object with logic to start a new session if needed.
+ *
+ * This is messy if, for example, the session terminates, I think you can restart a session.
  */
 export interface IClientSession extends IDisposable {
   /**
@@ -229,6 +235,8 @@ export class ClientSession implements IClientSession {
 
   /**
    * A signal emitted when the session is shut down.
+
+FROM SESSION
    */
   get terminated(): ISignal<this, void> {
     return this._terminated;
@@ -236,34 +244,17 @@ export class ClientSession implements IClientSession {
 
   /**
    * A signal emitted when the kernel changes.
+
+FROM SESSION
    */
   get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
     return this._kernelChanged;
   }
 
   /**
-   * A signal emitted when the status changes.
-   */
-  get statusChanged(): ISignal<this, Kernel.Status> {
-    return this._statusChanged;
-  }
-
-  /**
-   * A signal emitted for iopub kernel messages.
-   */
-  get iopubMessage(): ISignal<this, KernelMessage.IMessage> {
-    return this._iopubMessage;
-  }
-
-  /**
-   * A signal emitted for an unhandled kernel message.
-   */
-  get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
-    return this._unhandledMessage;
-  }
-
-  /**
    * A signal emitted when a session property changes.
+
+FROM SESSION (perhaps also duplicated here?)
    */
   get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
     return this._propertyChanged;
@@ -271,6 +262,16 @@ export class ClientSession implements IClientSession {
 
   /**
    * The current kernel of the session.
+   *
+   * #### Notes
+   * This is a read-only property, and can be altered by [changeKernel].
+   *
+   * We provide an IKernelConnection (instead of an IKernel), and proxy the
+   * IKernel signals, so that a kernel can change, and the user doesn't have to
+   * disconnect and reconnect their signals - we will automatically reconnect
+   * the session signals as appropriate as the kernel changes.
+
+FROM SESSION
    */
   get kernel(): Kernel.IKernelConnection | null {
     return this._session ? this._session.kernel : null;
@@ -278,23 +279,29 @@ export class ClientSession implements IClientSession {
 
   /**
    * The current path of the session.
+
+MAYBE FROM SESSION
    */
   get path(): string {
-    return this._path;
-  }
-
-  /**
-   * The current name of the session.
-   */
-  get name(): string {
-    return this._name;
+    return this._session.path;
   }
 
   /**
    * The type of the client session.
+
+MAYBE FROM SESSION
    */
   get type(): string {
-    return this._type;
+    return this._session.type;
+  }
+
+  /**
+   * The current name of the session.
+
+MAYBE FROM SESSION
+   */
+  get name(): string {
+    return this._session.name;
   }
 
   /**
@@ -309,35 +316,15 @@ export class ClientSession implements IClientSession {
 
   /**
    * The session manager used by the session.
+
+     TODO: find what uses this manager - pull out?
    */
   readonly manager: Session.IManager;
 
   /**
-   * The current status of the session.
-   */
-  get status(): Kernel.Status {
-    if (!this.isReady) {
-      return 'starting';
-    }
-    return this._session ? this._session.kernel.status : 'dead';
-  }
-
-  /**
-   * Whether the session is ready.
-   */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that is fulfilled when the session is ready.
-   */
-  get ready(): Promise<void> {
-    return this._ready.promise;
-  }
-
-  /**
    * The display name of the current kernel.
+
+     TODO: Could be a static function somewhere, or a function on the manager.
    */
   get kernelDisplayName(): string {
     let kernel = this.kernel;
@@ -353,14 +340,14 @@ export class ClientSession implements IClientSession {
   }
 
   /**
-   * Test whether the context is disposed.
+   * Test whether the session is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * Dispose of the resources held by the context.
+   * Dispose of the resources held by the session.
    */
   dispose(): void {
     if (this._isDisposed) {
@@ -368,81 +355,14 @@ export class ClientSession implements IClientSession {
     }
     this._isDisposed = true;
     if (this._session) {
+      // TODO: dispose the session?
       this._session = null;
     }
+    // TODO: What to do about a dialog?
     if (this._dialog) {
       this._dialog.dispose();
     }
     Signal.clearData(this);
-  }
-
-  /**
-   * Change the current kernel associated with the document.
-   */
-  changeKernel(
-    options: Partial<Kernel.IModel>
-  ): Promise<Kernel.IKernelConnection> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        return Promise.reject('Disposed');
-      }
-      return this._changeKernel(options);
-    });
-  }
-
-  /**
-   * Select a kernel for the session.
-   */
-  selectKernel(): Promise<void> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        return Promise.reject('Disposed');
-      }
-      return this._selectKernel(true);
-    });
-  }
-
-  /**
-   * Kill the kernel and shutdown the session.
-   *
-   * @returns A promise that resolves when the session is shut down.
-   */
-  shutdown(): Promise<void> {
-    const session = this._session;
-    if (this.isDisposed || !session) {
-      return Promise.resolve();
-    }
-    this._session = null;
-    return session.shutdown();
-  }
-
-  /**
-   * Restart the session.
-   *
-   * @returns A promise that resolves with whether the kernel has restarted.
-   *
-   * #### Notes
-   * If there is a running kernel, present a dialog.
-   * If there is no kernel, we start a kernel with the last run
-   * kernel name and resolves with `true`.
-   */
-  restart(): Promise<boolean> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        return Promise.reject('session already disposed');
-      }
-      let kernel = this.kernel;
-      if (!kernel) {
-        if (this._prevKernelName) {
-          return this.changeKernel({ name: this._prevKernelName }).then(
-            () => true
-          );
-        }
-        // Bail if there is no previous kernel to start.
-        return Promise.reject('No kernel to restart');
-      }
-      return ClientSession.restartKernel(kernel);
-    });
   }
 
   /**
@@ -455,47 +375,143 @@ export class ClientSession implements IClientSession {
    * #### Notes
    * This uses the Jupyter REST API, and the response is validated.
    * The promise is fulfilled on a valid response and rejected otherwise.
+
+MAYBE FROM SESSION
    */
-  setPath(path: string): Promise<void> {
-    if (this.isDisposed || this._path === path) {
-      return Promise.resolve();
+  async setPath(path: string): Promise<void> {
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    if (this._path === path) {
+      return;
+    }
+    if (this._session) {
+      // Session sets this._path and emits the change signal
+      await this._session.setPath(path);
+      return;
     }
     this._path = path;
-    if (this._session) {
-      return this._session.setPath(path);
-    }
     this._propertyChanged.emit('path');
-    return Promise.resolve();
   }
 
   /**
    * Change the session name.
+
+MAYBE FROM SESSION
    */
-  setName(name: string): Promise<void> {
-    if (this.isDisposed || this._name === name) {
-      return Promise.resolve();
+  async setName(name: string): Promise<void> {
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    if (this._name === name) {
+      return;
+    }
+    if (this._session) {
+      await this._session.setName(name);
+      return;
     }
     this._name = name;
-    if (this._session) {
-      return this._session.setName(name);
-    }
     this._propertyChanged.emit('name');
-    return Promise.resolve();
   }
 
   /**
    * Change the session type.
+
+MAYBE FROM SESSION
    */
-  setType(type: string): Promise<void> {
-    if (this.isDisposed || this._type === type) {
-      return Promise.resolve();
+  async setType(type: string): Promise<void> {
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    if (this._type === type) {
+      return;
+    }
+    if (this._session) {
+      await this._session.setType(type);
+      return;
     }
     this._type = type;
-    if (this._session) {
-      return this._session.setType(name);
-    }
     this._propertyChanged.emit('type');
-    return Promise.resolve();
+  }
+
+  /**
+   * Change the current kernel associated with the document.
+   *
+   * @params options - The name or id of the new kernel.
+   *
+   * #### Notes
+   * This shuts down the existing kernel and creates a new kernel,
+   * keeping the existing session ID and session path.
+
+FROM SESSION
+   */
+  async changeKernel(
+    options: Partial<Kernel.IModel>
+  ): Promise<Kernel.IKernelConnection> {
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    return this._changeKernel(options);
+  }
+
+  /**
+   * Select a kernel for the session.
+   */
+  async selectKernel(): Promise<void> {
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    return this._selectKernel(true);
+  }
+
+  /**
+   * Kill the kernel and shutdown the session.
+   *
+   * @returns - The promise fulfilled on a valid response from the server.
+
+FROM SESSION  - a session terminate signal should probably set _session to null
+   */
+  async shutdown(): Promise<void> {
+    if (this.isDisposed) {
+      throw new Error('Session is disposed');
+    }
+    if (this._session) {
+      this._session = null;
+      await session.shutdown();
+    }
+  }
+
+  /**
+   * Restart the kernel.
+   *
+   * @returns A promise that resolves with whether the kernel has restarted.
+   *
+   * #### Notes
+   * If there is a running kernel, present a dialog.
+   * If there is no kernel, we start a kernel with the last run
+   * kernel name and resolves with `true`.
+
+TODO: There is a lot of client logic here. Probably rename at least to indicate a dialog
+is presented? It would be nice if at least some cases could be offloaded to .session.kernel.restart?
+
+   */
+  async restart(): Promise<boolean> {
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('session already disposed');
+    }
+    const kernel = this.kernel;
+    if (!kernel) {
+      if (this._prevKernelName) {
+        await this.changeKernel({ name: this._prevKernelName });
+        return true;
+      }
+      // Bail if there is no previous kernel to start.
+      throw new Error('No kernel to restart');
+    }
+    return ClientSession.restartKernel(kernel);
   }
 
   /**
@@ -566,6 +582,8 @@ export class ClientSession implements IClientSession {
 
   /**
    * Change the kernel.
+
+TODO: this has logic to either restart a kernel, or start a new session...
    */
   private _changeKernel(
     options: Partial<Kernel.IModel>
@@ -685,18 +703,6 @@ export class ClientSession implements IClientSession {
       this._onKernelChanged,
       this
     );
-    session.kernel.statusChanged.connect(
-      this._onStatusChanged,
-      this
-    );
-    session.kernel.iopubMessage.connect(
-      this._onIopubMessage,
-      this
-    );
-    session.kernel.unhandledMessage.connect(
-      this._onUnhandledMessage,
-      this
-    );
     this._prevKernelName = session.kernel.name;
 
     // The session kernel was disposed above when the session was disposed, so
@@ -734,6 +740,8 @@ export class ClientSession implements IClientSession {
 
   /**
    * Handle a session termination.
+
+FROM SESSION. Perhaps the session should emit the kernel changed signal on termination?
    */
   private _onTerminated(): void {
     let kernel = this.kernel;
@@ -749,6 +757,8 @@ export class ClientSession implements IClientSession {
 
   /**
    * Handle a change to a session property.
+
+FROM SESSION? Who uses these outside of the case where a session exists?
    */
   private _onPropertyChanged(
     sender: Session.ISession,
@@ -770,6 +780,8 @@ export class ClientSession implements IClientSession {
 
   /**
    * Handle a change to the kernel.
+
+FROM SESSION
    */
   private _onKernelChanged(
     sender: Session.ISession,
@@ -801,26 +813,6 @@ export class ClientSession implements IClientSession {
     this._statusChanged.emit(this.status);
   }
 
-  /**
-   * Handle an iopub message.
-   */
-  private _onIopubMessage(
-    sender: Kernel.IKernelConnection,
-    message: KernelMessage.IIOPubMessage
-  ): void {
-    this._iopubMessage.emit(message);
-  }
-
-  /**
-   * Handle an unhandled message.
-   */
-  private _onUnhandledMessage(
-    sender: Kernel.IKernelConnection,
-    message: KernelMessage.IMessage
-  ): void {
-    this._unhandledMessage.emit(message);
-  }
-
   private _path = '';
   private _name = '';
   private _type = '';
@@ -833,9 +825,6 @@ export class ClientSession implements IClientSession {
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
-  private _statusChanged = new Signal<this, Kernel.Status>(this);
-  private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
-  private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
   private _setBusy: () => IDisposable | undefined;

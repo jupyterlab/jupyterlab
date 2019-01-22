@@ -68,7 +68,7 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Get the session kernel object.
+   * The current kernel of the session.
    *
    * #### Notes
    * This is a read-only property, and can be altered by [changeKernel].
@@ -78,26 +78,26 @@ export class DefaultSession implements Session.ISession {
    * disconnect and reconnect their signals - we will automatically reconnect
    * the session signals as appropriate as the kernel changes.
    */
-  get kernel(): Kernel.IKernelConnection {
+  get kernel(): Kernel.IKernelConnection | null {
     return this._kernel;
   }
 
   /**
-   * Get the session path.
+   * The current path of the session.
    */
   get path(): string {
     return this._path;
   }
 
   /**
-   * Get the session type.
+   * The type of the client session.
    */
   get type(): string {
     return this._type;
   }
 
   /**
-   * Get the session name.
+   * The current name of the session.
    */
   get name(): string {
     return this._name;
@@ -120,13 +120,6 @@ export class DefaultSession implements Session.ISession {
    * The server settings of the session.
    */
   readonly serverSettings: ServerConnection.ISettings;
-
-  /**
-   * Test whether the session has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed === true;
-  }
 
   /**
    * Clone the current session with a new clientId.
@@ -170,10 +163,17 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
+   * Test whether the session is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Dispose of the resources held by the session.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
@@ -194,44 +194,47 @@ export class DefaultSession implements Session.ISession {
    * This uses the Jupyter REST API, and the response is validated.
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  setPath(path: string): Promise<void> {
+  async setPath(path: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ path });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    if (this._path === path) {
+      return;
+    }
+    const data = JSON.stringify({ path });
+    await this._patch(data);
   }
 
   /**
    * Change the session name.
    */
-  setName(name: string): Promise<void> {
+  async setName(name: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ name });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    if (this._name === name) {
+      return;
+    }
+    const data = JSON.stringify({ name });
+    await this._patch(data);
   }
 
   /**
    * Change the session type.
    */
-  setType(type: string): Promise<void> {
+  async setType(type: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ type });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    if (this._type === type) {
+      return;
+    }
+    const data = JSON.stringify({ type });
+    await this._patch(data);
   }
 
   /**
-   * Change the kernel.
+   * Change the current kernel associated with the document.
    *
    * @params options - The name or id of the new kernel.
    *
@@ -239,16 +242,17 @@ export class DefaultSession implements Session.ISession {
    * This shuts down the existing kernel and creates a new kernel,
    * keeping the existing session ID and session path.
    */
-  changeKernel(
+  async changeKernel(
     options: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ kernel: options });
     this._kernel.dispose();
+    const data = JSON.stringify({ kernel: options });
     // TODO: set kernel to null?
-    return this._patch(data).then(() => this.kernel);
+    await this._patch(data);
+    return this.kernel;
   }
 
   /**
@@ -260,11 +264,11 @@ export class DefaultSession implements Session.ISession {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions), and validates the response.
    * Disposes of the session and emits a [sessionDied] signal on success.
    */
-  shutdown(): Promise<void> {
+  async shutdown(): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    return Private.shutdownSession(this.id, this.serverSettings);
+    await Private.shutdownSession(this.id, this.serverSettings);
   }
 
   /**
