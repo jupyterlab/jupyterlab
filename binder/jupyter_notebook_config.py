@@ -13,3 +13,6 @@ c.ServerProxy.servers = {
 }
 
 c.NotebookApp.default_url = '/lab-dev'
+
+import logging
+c.NotebookApp.log_level = logging.DEBUG
