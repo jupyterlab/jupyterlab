@@ -41,3 +41,8 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+.jp-InspectorIcon {
+  background-image: var(--jp-icon-inspector);
+  transform: scaleX(-1);
+}

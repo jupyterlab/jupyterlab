@@ -51,6 +51,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
+    const title = 'Inspector';
     const namespace = 'inspector';
     const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
       namespace
@@ -62,7 +63,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
-        inspector.title.label = 'Inspector';
+        inspector.title.label = title;
         tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;
@@ -75,9 +76,14 @@ const inspector: JupyterLabPlugin<IInspector> = {
 
     // Add command to registry.
     commands.addCommand(command, {
+      caption: 'Live updating code documentation from the active kernel',
       isEnabled: () =>
-        !inspector || inspector.isDisposed || !inspector.isAttached,
-      label,
+        !inspector ||
+        inspector.isDisposed ||
+        !inspector.isAttached ||
+        !inspector.isVisible,
+      label: args => (args.isLauncher ? title : label),
+      iconClass: 'jp-MaterialIcon jp-InspectorIcon',
       execute: () => {
         openInspector();
       }
@@ -88,7 +94,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
       palette.addItem({ command, category });
     }
     if (launcher) {
-      launcher.add({ command });
+      launcher.add({ command, args: { isLauncher: true } });
     }
 
     // Handle state restoration.
