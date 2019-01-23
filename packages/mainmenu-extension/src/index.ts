@@ -141,7 +141,7 @@ const plugin: JupyterClientPlugin<IMainMenu> = {
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu);
+    createFileMenu(app, menu.fileMenu, inspector);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createSettingsMenu(app, menu.settingsMenu);
@@ -303,7 +303,11 @@ export function createEditMenu(app: JupyterClient, menu: EditMenu): void {
 /**
  * Create the basic `File` menu.
  */
-export function createFileMenu(app: JupyterClient, menu: FileMenu): void {
+export function createFileMenu(
+  app: JupyterClient,
+  menu: FileMenu,
+  inspector: IInspector | null
+): void {
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
@@ -417,9 +421,9 @@ export function createFileMenu(app: JupyterClient, menu: FileMenu): void {
   const newViewGroup = [
     { command: 'docmanager:clone' },
     { command: CommandIDs.createConsole },
-    { command: 'inspector:open' },
+    inspector ? { command: 'inspector:open' } : null,
     { command: 'docmanager:open-direct' }
-  ];
+  ].filter(item => !!item);
 
   // Add the close group
   const closeGroup = [

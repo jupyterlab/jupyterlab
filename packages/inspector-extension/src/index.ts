@@ -46,11 +46,9 @@ const inspector: JupyterClientPlugin<IInspector> = {
     app: JupyterClient,
     palette: ICommandPalette | null,
     launcher: ILauncher | null,
-    restorer: ILayoutRestorer | null,
-    shell: ILabShell
+    restorer: ILayoutRestorer | null
   ): IInspector => {
-    const { commands } = app;
-    const manager = new InspectorManager();
+    const { commands, shell } = app;
     const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
@@ -72,7 +70,7 @@ const inspector: JupyterClientPlugin<IInspector> = {
         inspector.content.source = source;
       }
       if (!inspector.isAttached) {
-        shell.addToMainArea(inspector, { activate: false });
+        shell.add(inspector, 'main', { activate: false });
       }
       shell.activateById(inspector.id);
     }
