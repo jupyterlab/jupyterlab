@@ -81,7 +81,7 @@ export namespace Session {
     /**
      * Change the session model properties (path, name, type).
      *
-     * @param model - The new session properties.
+     * @param props - The new session properties.
      *
      * @returns A promise that resolves when the session has been updated.
      *

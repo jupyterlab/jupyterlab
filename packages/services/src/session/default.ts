@@ -62,7 +62,7 @@ export class DefaultSession implements Session.ISession {
   /**
    * A signal emitted when a session property changes.
    */
-  get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
+  get propertyChanged(): ISignal<this, Session.IProperty> {
     return this._propertyChanged;
   }
 
@@ -155,18 +155,26 @@ export class DefaultSession implements Session.ISession {
     if (this._updating) {
       return;
     }
-    let oldModel = this.model;
+    const oldModel = this.model;
     this._path = model.path;
     this._name = model.name;
     this._type = model.type;
 
-    if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
-      let oldValue = this._kernel;
-      this._kernelChanged.emit({ oldValue, newValue });
+    if (oldModel.name !== this._name) {
+      this._propertyChanged.emit('name');
+    }
+    if (oldModel.type !== this._type) {
+      this._propertyChanged.emit('type');
+    }
+    if (oldModel.path !== this._path) {
+      this._propertyChanged.emit('path');
     }
 
-    this._handleModelChange(oldModel);
+    if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
+      const oldValue = this._kernel;
+      this._kernel = Kernel.connectTo(model.kernel, this.serverSettings);
+      this._kernelChanged.emit({ oldValue, newValue: this._kernel });
+    }
   }
 
   /**
@@ -177,7 +185,7 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Dispose of the resources held by the session.
+   * Dispose of the resources held by the session and terminate the kernel.
    */
   dispose(): void {
     if (this._isDisposed) {
@@ -191,13 +199,21 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Change data attributes (path, name, type)
+   * Change the session model properties (path, name, type).
+   *
+   * @param props - The new session properties.
+   *
+   * @returns A promise that resolves when the session has been updated.
+   *
+   * #### Notes
+   * This uses the Jupyter REST API, and the response is validated.
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async setProperties({
     path,
     name,
     type
-  }: Partial<Record<Session.IProperty, string>>) {
+  }: Partial<Record<Session.IProperty, string>>): Promise<void> {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
@@ -273,21 +289,6 @@ export class DefaultSession implements Session.ISession {
       return Private.updateFromServer(model, settings.baseUrl);
     } finally {
       this._updating = false;
-    }
-  }
-
-  /**
-   * Handle a change to the model.
-   */
-  private _handleModelChange(oldModel: Session.IModel): void {
-    if (oldModel.name !== this._name) {
-      this._propertyChanged.emit('name');
-    }
-    if (oldModel.type !== this._type) {
-      this._propertyChanged.emit('type');
-    }
-    if (oldModel.path !== this._path) {
-      this._propertyChanged.emit('path');
     }
   }
 
