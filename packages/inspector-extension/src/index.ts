@@ -60,7 +60,7 @@ const inspector: JupyterClientPlugin<IInspector> = {
 
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function openInspector(): void {
+    function openInspector(): MainAreaWidget<InspectorPanel> {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
@@ -73,6 +73,7 @@ const inspector: JupyterClientPlugin<IInspector> = {
         shell.add(inspector, 'main', { activate: false });
       }
       shell.activateById(inspector.id);
+      return inspector;
     }
 
     // Add command to registry.
@@ -86,9 +87,7 @@ const inspector: JupyterClientPlugin<IInspector> = {
       label: args => (args.isLauncher ? title : label),
       iconClass: args =>
         args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
-      execute: () => {
-        openInspector();
-      }
+      execute: () => openInspector()
     });
 
     // Add command to UI where possible.
