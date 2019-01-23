@@ -117,6 +117,8 @@ export class MarkdownViewer extends Widget {
       case 'renderTimeout':
         this._monitor.timeout = value as number;
         break;
+      default:
+        break;
     }
   }
 

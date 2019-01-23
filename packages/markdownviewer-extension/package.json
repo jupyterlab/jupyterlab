@@ -33,7 +33,6 @@
     "@jupyterlab/application": "^0.19.1",
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/docregistry": "^0.19.1",
     "@jupyterlab/markdownviewer": "^0.19.1",
     "@jupyterlab/rendermime": "^0.19.1"
   },
