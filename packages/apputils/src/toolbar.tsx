@@ -249,8 +249,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    * @param at - The target item to insert after.
    *
-   * @param index - The index at which to insert the item.
-   *
    * @param name - The name of the item.
    *
    * @param widget - The widget to add.
@@ -270,8 +268,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Insert an item into the toolbar at the before a target item.
    *
    * @param at - The target item to insert before.
-   *
-   * @param index - The index at which to insert the item.
    *
    * @param name - The name of the item.
    *
