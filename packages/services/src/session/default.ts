@@ -41,6 +41,12 @@ export class DefaultSession implements Session.ISession {
 
   /**
    * A signal emitted when the session is shut down.
+   *
+   * TODO: this is *actually* emitted when a session is disposed. I think there
+   * should be a difference between being disposed (i.e., the browser-side
+   * object is no longer usable) and terminated (i.e., the server-side session
+   * is gone). Termination should lead to disposal, but not necessarily the
+   * other way around?
    */
   get terminated(): ISignal<this, void> {
     return this._terminated;
@@ -703,6 +709,7 @@ namespace Private {
 
       // TODO: should we do this? Can a session kill a kernel, then switch the
       // kernel, so that it should be still considered 'alive'?
+      // TODO: should that !== really be a ===?
       if (!updated && session.kernel && session.kernel.status !== 'dead') {
         session.dispose();
       }

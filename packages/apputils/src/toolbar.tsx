@@ -16,6 +16,7 @@ import { PanelLayout, Widget } from '@phosphor/widgets';
 import { IClientSession } from './clientsession';
 
 import * as React from 'react';
+import { Session, Kernel } from '../../services/lib';
 
 /**
  * The class name added to toolbars.
@@ -290,8 +291,8 @@ export namespace Toolbar {
     return new ToolbarButton({
       iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
       onClick: () => {
-        if (session.kernel) {
-          session.kernel.interrupt();
+        if (session.session && session.session.kernel) {
+          session.session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -567,16 +568,23 @@ namespace Private {
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
     return (
       <UseSignal
-        signal={props.session.kernelChanged}
+        signal={props.session.sessionChanged}
         initialSender={props.session}
       >
-        {session => (
-          <ToolbarButtonComponent
-            className={TOOLBAR_KERNEL_NAME_CLASS}
-            onClick={props.session.selectKernel.bind(props.session)}
-            tooltip={'Switch kernel'}
-            label={session.kernelDisplayName}
-          />
+        {clientSession => (
+          <UseSignal
+            signal={props.session.session.kernelChanged}
+            initialSender={props.session.session}
+          >
+            {session => (
+              <ToolbarButtonComponent
+                className={TOOLBAR_KERNEL_NAME_CLASS}
+                onClick={props.session.selectKernel.bind(props.session)}
+                tooltip={'Switch kernel'}
+                label={clientSession.kernelDisplayName}
+              />
+            )}
+          </UseSignal>
         )}
       </UseSignal>
     );
@@ -592,21 +600,63 @@ namespace Private {
     constructor(session: IClientSession) {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
-      this._onStatusChanged(session);
-      session.statusChanged.connect(
-        this._onStatusChanged,
+      this._onSessionChanged(session, {
+        oldValue: null,
+        newValue: session.session
+      });
+      session.sessionChanged.connect(
+        this._onSessionChanged,
         this
       );
+    }
+
+    private _onSessionChanged(
+      session: IClientSession,
+      { oldValue, newValue }: IClientSession.ISessionChangedArgs
+    ) {
+      if (oldValue) {
+        oldValue.kernelChanged.disconnect(this._onKernelChanged, this);
+      }
+      if (newValue) {
+        newValue.kernelChanged.connect(
+          this._onKernelChanged,
+          this
+        );
+        if (newValue.kernel) {
+          this._onKernelChanged(newValue, {
+            oldValue: (oldValue && oldValue.kernel) || null,
+            newValue: newValue.kernel
+          });
+        }
+      }
+    }
+
+    private _onKernelChanged(
+      session: Session.ISession,
+      { oldValue, newValue }: Session.IKernelChangedArgs
+    ) {
+      if (oldValue) {
+        oldValue.statusChanged.disconnect(this._onStatusChanged, this);
+      }
+      if (newValue) {
+        newValue.statusChanged.connect(
+          this._onStatusChanged,
+          this
+        );
+        this._onStatusChanged(newValue, newValue.status);
+      }
     }
 
     /**
      * Handle a status on a kernel.
      */
-    private _onStatusChanged(session: IClientSession) {
+    private _onStatusChanged(
+      kernel: Kernel.IKernelConnection,
+      status: Kernel.Status
+    ) {
       if (this.isDisposed) {
         return;
       }
-      let status = session.status;
       this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
       this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);

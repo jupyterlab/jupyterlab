@@ -65,6 +65,14 @@ export class DefaultKernel implements Kernel.IKernel {
 
   /**
    * A signal emitted when the kernel is shut down.
+   *
+   * TODO: this is *actually* emitted when a session is disposed. I think there
+   * should be a difference between being disposed (i.e., the browser-side
+   * object is no longer usable) and terminated (i.e., the server-side session
+   * is gone). Termination should lead to disposal, but not necessarily the
+   * other way around? Perhaps this should be changed to a disposed signal, and
+   * rely on the kernel status (i.e., 'dead') for the "termination"? Perhaps
+   * also it's too late to make major breaking changes like changing the name?
    */
   get terminated(): ISignal<this, void> {
     return this._terminated;
