@@ -7,7 +7,7 @@ c.ServerProxy.servers = {
             '--dev-mode',
             '--port={port}',
             '--NotebookApp.token=""',
-            '--NotebookApp.base_url={base_url}/lab-dev'
+            '--NotebookApp.base_url={base_url}lab-dev'
         ]
     }
 }
