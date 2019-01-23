@@ -22,6 +22,8 @@ import {
   KernelConnector
 } from '@jupyterlab/inspector';
 
+import { ILauncher } from '@jupyterlab/launcher';
+
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
@@ -36,13 +38,14 @@ namespace CommandIDs {
  */
 const inspector: JupyterLabPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
-  requires: [ICommandPalette, ILayoutRestorer],
+  optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
   activate: (
     app: JupyterLab,
-    palette: ICommandPalette,
-    restorer: ILayoutRestorer
+    palette: ICommandPalette | null,
+    launcher: ILauncher | null,
+    restorer: ILayoutRestorer | null
   ): IInspector => {
     const { commands, shell } = app;
     const category = 'Inspector';
@@ -55,7 +58,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
 
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function createInspector(): void {
+    function openInspector(): void {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
@@ -70,21 +73,32 @@ const inspector: JupyterLabPlugin<IInspector> = {
       shell.activateById(inspector.id);
     }
 
-    // Add command to registry and palette.
+    // Add command to registry.
     commands.addCommand(command, {
+      isEnabled: () =>
+        !inspector || inspector.isDisposed || !inspector.isAttached,
       label,
       execute: () => {
-        createInspector();
+        openInspector();
       }
     });
-    palette.addItem({ command, category });
+
+    // Add command to UI where possible.
+    if (palette) {
+      palette.addItem({ command, category });
+    }
+    if (launcher) {
+      launcher.add({ command });
+    }
 
     // Handle state restoration.
-    restorer.restore(tracker, {
-      command,
-      args: () => null,
-      name: () => 'inspector'
-    });
+    if (restorer) {
+      restorer.restore(tracker, {
+        command,
+        args: () => null,
+        name: () => 'inspector'
+      });
+    }
 
     // Create a proxy to pass the `source` to the current inspector.
     const proxy: IInspector = Object.defineProperty({}, 'source', {
