@@ -672,20 +672,21 @@ namespace Private {
     baseUrl: string
   ): Session.IModel[] {
     let running = runningSessions.get(baseUrl) || [];
+    // Iterate through our existing session models
     each(running.slice(), session => {
-      // find and update the corresponding session
-      let updated = find(sessions, sId => {
-        if (session.id === sId.id) {
-          session.update(sId);
-          return true;
-        }
-        return false;
-      });
-      // If session kernel is no longer running, dispose the session.
+      // find a corresponding updated model from the server.
+      let updated = find(sessions, s => session.id === s.id);
 
-      // TODO: should we do this? Can a session kill a kernel, then switch the
-      // kernel, so that it should be still considered 'alive'?
-      // TODO: should that !== really be a ===?
+      // If we find an updated model, update our model.
+      if (updated) {
+        session.update(updated);
+      }
+
+      // If we don't find a corresponding server model, and the kernel status
+      // isn't 'dead', dispose the model to keep consistent with the server.
+
+      // TODO: should we also dispose if the kernel status *is* 'dead'? This
+      // seems like it would keep the sessions with dead kernels around.
       if (!updated && session.kernel && session.kernel.status !== 'dead') {
         session.dispose();
       }

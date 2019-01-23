@@ -1557,9 +1557,8 @@ namespace Private {
     kernels: Kernel.IModel[]
   ): Kernel.IModel[] {
     each(runningKernels.slice(), kernel => {
-      let updated = find(kernels, model => {
-        return kernel.id === model.id;
-      });
+      let updated = find(kernels, model => kernel.id === model.id);
+
       // If kernel is no longer running on disk, emit dead signal.
       if (!updated && kernel.status !== 'dead') {
         kernel.dispose();
