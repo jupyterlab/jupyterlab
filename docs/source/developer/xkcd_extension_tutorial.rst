@@ -41,7 +41,7 @@ Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Start by installing miniconda, following
-`Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
+`Conda's installation documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__.
 
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 

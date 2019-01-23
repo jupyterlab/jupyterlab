@@ -13,6 +13,8 @@ import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
+import { IInspector } from '@jupyterlab/inspector';
+
 import {
   IMainMenu,
   IMenuExtender,
@@ -94,8 +96,13 @@ export namespace CommandIDs {
 const plugin: JupyterLabPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
+  optional: [IInspector],
   provides: IMainMenu,
-  activate: (app: JupyterLab, palette: ICommandPalette): IMainMenu => {
+  activate: (
+    app: JupyterLab,
+    palette: ICommandPalette,
+    inspector: IInspector | null
+  ): IMainMenu => {
     let menu = new MainMenu(app.commands);
     menu.id = 'jp-MainMenu';
 
@@ -334,6 +341,7 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const newViewGroup = [
     { command: 'docmanager:clone' },
     { command: CommandIDs.createConsole },
+    { command: 'inspector:open' },
     { command: 'docmanager:open-direct' }
   ];
 

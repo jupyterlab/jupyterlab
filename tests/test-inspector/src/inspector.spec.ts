@@ -24,9 +24,11 @@ class TestInspectorPanel extends InspectorPanel {
 class TestInspectable implements IInspector.IInspectable {
   disposed = new Signal<this, void>(this);
 
-  ephemeralCleared = new Signal<this, void>(this);
+  cleared = new Signal<this, void>(this);
 
   inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
+
+  isDisposed = false;
 
   standby = false;
 }
@@ -42,21 +44,6 @@ describe('inspector/index', () => {
       it('should add the `jp-Inspector` class', () => {
         const widget = new InspectorPanel();
         expect(widget.hasClass('jp-Inspector')).to.equal(true);
-      });
-
-      it('should hide its tab bar if there are less than two items', () => {
-        const widget = new InspectorPanel();
-        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
-        expect(widget).to.be.an.instanceof(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.equal(true);
-      });
-
-      it('should show its tab bar if there is more than one item', () => {
-        const widget = new InspectorPanel();
-        widget.add({ name: 'Foo', rank: 20, type: 'foo' });
-        widget.add({ name: 'Boo', rank: 30, type: 'bar' });
-        expect(widget).to.be.an.instanceof(InspectorPanel);
-        expect(widget.tabBar.isHidden).to.equal(false);
       });
     });
 
@@ -76,28 +63,6 @@ describe('inspector/index', () => {
         expect(widget.source).to.be.null;
         widget.source = new TestInspectable();
         expect(widget.source).to.be.an.instanceof(TestInspectable);
-      });
-    });
-
-    describe('#add()', () => {
-      it('should add inspector child items', () => {
-        const panel = new InspectorPanel();
-        const original = panel.widgets.length;
-
-        panel.add({ name: 'Foo', rank: 20, type: 'foo' });
-        panel.add({ name: 'Boo', rank: 30, type: 'bar' });
-
-        expect(panel.widgets.length).to.equal(original + 2);
-      });
-
-      it('should return disposables to remove child items', () => {
-        const panel = new InspectorPanel();
-        const original = panel.widgets.length;
-        const disposable = panel.add({ name: 'Boo', rank: 30, type: 'bar' });
-
-        expect(panel.widgets.length).to.equal(original + 1);
-        disposable.dispose();
-        expect(panel.widgets.length).to.equal(original);
       });
     });
 
@@ -123,10 +88,7 @@ describe('inspector/index', () => {
         const widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
         expect(widget.methods).to.not.contain('onInspectorUpdate');
-        (widget.source.inspected as any).emit({
-          content: new Widget(),
-          type: 'hints'
-        });
+        (widget.source.inspected as any).emit({ content: new Widget() });
         expect(widget.methods).to.contain('onInspectorUpdate');
       });
     });
