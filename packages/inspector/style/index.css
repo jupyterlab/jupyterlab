@@ -29,14 +29,15 @@
 }
 
 .jp-Inspector-content {
-  overflow: auto;
   padding: 8px;
   width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 
 .jp-Inspector-content pre {
-  white-space: pre-wrap;
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   margin: 0;
+  white-space: pre-wrap;
 }
