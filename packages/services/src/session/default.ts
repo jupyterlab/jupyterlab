@@ -79,10 +79,13 @@ export class DefaultSession implements Session.ISession {
    * #### Notes
    * This is a read-only property, and can be altered by [changeKernel].
    *
-   * We provide an IKernelConnection (instead of an IKernel), and proxy the
-   * IKernel signals, so that a kernel can change, and the user doesn't have to
-   * disconnect and reconnect their signals - we will automatically reconnect
-   * the session signals as appropriate as the kernel changes.
+   * We provide an IKernelConnection (instead of an IKernel) so that the user
+   * goes through us to shut down the kernel.
+   *
+   * TODO: delete: We used to proxy the IKernel signals, so that a kernel can
+   * change, and the user doesn't have to disconnect and reconnect their signals
+   * - we will automatically reconnect the session signals as appropriate as the
+   * kernel changes.
    */
   get kernel(): Kernel.IKernelConnection | null {
     return this._kernel;
@@ -161,8 +164,6 @@ export class DefaultSession implements Session.ISession {
       let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
       let oldValue = this._kernel;
       this._kernelChanged.emit({ oldValue, newValue });
-      this._handleModelChange(oldModel);
-      return;
     }
 
     this._handleModelChange(oldModel);
@@ -190,52 +191,26 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Change the session path.
-   *
-   * @param path - The new session path.
-   *
-   * @returns A promise that resolves when the session has renamed.
-   *
-   * #### Notes
-   * This uses the Jupyter REST API, and the response is validated.
-   * The promise is fulfilled on a valid response and rejected otherwise.
+   * Change data attributes (path, name, type)
    */
-  async setPath(path: string): Promise<void> {
+  async setProperties({
+    path,
+    name,
+    type
+  }: Partial<Record<Session.IProperty, string>>) {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
     if (this._path === path) {
-      return;
-    }
-    const data = JSON.stringify({ path });
-    await this._patch(data);
-  }
-
-  /**
-   * Change the session name.
-   */
-  async setName(name: string): Promise<void> {
-    if (this.isDisposed) {
-      throw new Error('Session is disposed');
+      path = undefined;
     }
     if (this._name === name) {
-      return;
-    }
-    const data = JSON.stringify({ name });
-    await this._patch(data);
-  }
-
-  /**
-   * Change the session type.
-   */
-  async setType(type: string): Promise<void> {
-    if (this.isDisposed) {
-      throw new Error('Session is disposed');
+      name = undefined;
     }
     if (this._type === type) {
-      return;
+      type = undefined;
     }
-    const data = JSON.stringify({ type });
+    const data = JSON.stringify({ path, name, type });
     await this._patch(data);
   }
 

@@ -420,8 +420,10 @@ function activate(
         })
         .then(console => {
           widget.context.pathChanged.connect((sender, value) => {
-            console.session.setPath(value);
-            console.session.setName(widget.context.contentsModel.name);
+            console.session.setProperties({
+              path: value,
+              name: widget.context.contentsModel.name
+            });
           });
         });
     },

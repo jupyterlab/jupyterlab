@@ -19,6 +19,8 @@ import { DefaultSession } from './default';
  * A namespace for session interfaces and factory functions.
  */
 export namespace Session {
+  export type IProperty = 'path' | 'name' | 'type';
+
   /**
    * Interface of a session object.
    */
@@ -36,7 +38,7 @@ export namespace Session {
     /**
      * A signal emitted when a session property changes.
      */
-    readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
+    readonly propertyChanged: ISignal<this, IProperty>;
 
     /**
      * Unique id of the session.
@@ -77,27 +79,17 @@ export namespace Session {
     readonly kernel: Kernel.IKernelConnection;
 
     /**
-     * Change the session path.
+     * Change the session model properties (path, name, type).
      *
-     * @param path - The new session path.
+     * @param model - The new session properties.
      *
-     * @returns A promise that resolves when the session has renamed.
+     * @returns A promise that resolves when the session has been updated.
      *
      * #### Notes
      * This uses the Jupyter REST API, and the response is validated.
      * The promise is fulfilled on a valid response and rejected otherwise.
      */
-    setPath(path: string): Promise<void>;
-
-    /**
-     * Change the session name.
-     */
-    setName(name: string): Promise<void>;
-
-    /**
-     * Change the session type.
-     */
-    setType(type: string): Promise<void>;
+    setProperties(props: Partial<Record<IProperty, string>>): Promise<void>;
 
     /**
      * Change the kernel.

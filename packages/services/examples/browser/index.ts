@@ -29,7 +29,7 @@ function main() {
       log('Session started');
       session = s;
       // Rename the session.
-      return session.setPath('bar.ipynb');
+      return session.setProperties({ path: 'bar.ipynb' });
     })
     .then(() => {
       log(`Session renamed to ${session.path}`);
