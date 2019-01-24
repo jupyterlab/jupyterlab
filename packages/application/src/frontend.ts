@@ -23,7 +23,7 @@ import { Widget } from '@phosphor/widgets';
  * The generic `T` argument indicates the type that the plugin `provides` upon
  * being activated.
  */
-export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
+export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd<any, any>, T>;
 
 /**
  * The base Jupyter front-end application class.

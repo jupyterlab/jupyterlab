@@ -38,12 +38,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
 
   /**
-   *  signal for when application changes its dirty status.
+   * A signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
 
   /**
    * Whether the application is busy.
