@@ -176,14 +176,48 @@ export namespace JupyterFrontEnd {
     restored?: Promise<U>;
   }
 
+  /**
+   * A minimal shell type for Jupyter front-end applications.
+   */
   export type Shell = Widget & {
+    /**
+     * Activates a widget inside the application shell.
+     *
+     * @param id - The ID of the widget being activated.
+     */
     activateById(id: string): void;
+
+    /**
+     * Add a widget to the application shell.
+     *
+     * @param widget - The widget being added.
+     *
+     * @param area - Optional region in the shell into which the widget should
+     * be added.
+     *
+     * @param options - Optional flags the shell might use when opening the
+     * widget, as defined in the `DocumentRegistry`.
+     */
     add(
       widget: Widget,
       area?: string,
       options?: DocumentRegistry.IOpenOptions
     ): void;
+
+    /**
+     * The focused widget in the application shell.
+     *
+     * #### Notes
+     * Different shell implementations have latitude to decide what "current"
+     * or "focused" mean, depending on their user interface characteristics.
+     */
     readonly currentWidget: Widget;
+
+    /**
+     * Returns an iterator for the widgets inside the application shell.
+     *
+     * @param area - Optional regions in the shell whose widgets are iterated.
+     */
     widgets(area?: string): IIterator<Widget>;
   };
 }
