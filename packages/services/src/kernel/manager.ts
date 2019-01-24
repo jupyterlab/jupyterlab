@@ -152,12 +152,11 @@ export class KernelManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+  async startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
     let newOptions = { ...options, serverSettings: this.serverSettings };
-    return Kernel.startNew(newOptions).then(kernel => {
-      this._onStarted(kernel);
-      return kernel;
-    });
+    const kernel = await Kernel.startNew(newOptions);
+    this._onStarted(kernel);
+    return kernel;
   }
 
   /**
@@ -176,7 +175,7 @@ export class KernelManager implements Kernel.IManager {
    *
    * @param model - The model of the target kernel.
    *
-   * @returns A promise that resolves with the new kernel instance.
+   * @returns The new kernel instance.
    */
   connectTo(model: Kernel.IModel): Kernel.IKernel {
     let kernel = Kernel.connectTo(model, this.serverSettings);
