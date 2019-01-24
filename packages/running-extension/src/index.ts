@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -16,7 +15,7 @@ import { RunningSessions } from '@jupyterlab/running';
 const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
-  requires: [ILayoutRestorer, ILabShell],
+  optional: [ILayoutRestorer],
   autoStart: true
 };
 
@@ -30,8 +29,7 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
-  shell: ILabShell
+  restorer: ILayoutRestorer | null
 ): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
@@ -41,7 +39,9 @@ function activate(
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar
   // widget).
-  restorer.add(running, 'running-sessions');
+  if (restorer) {
+    restorer.add(running, 'running-sessions');
+  }
 
   running.sessionOpenRequested.connect((sender, model) => {
     let path = model.path;
@@ -58,5 +58,5 @@ function activate(
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
-  shell.addToLeftArea(running, { rank: 200 });
+  app.shell.add(running, 'left', { rank: 200 });
 }

@@ -378,7 +378,7 @@ function activateCellTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  shell: ILabShell
+  labShell: ILabShell
 ): Promise<ICellTools> {
   const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
@@ -437,19 +437,19 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+      labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
       if (open) {
-        shell.activateById(celltools.id);
+        labShell.activateById(celltools.id);
       }
     }
 
     // For all subsequent widget changes, check if the cell tools should render.
-    shell.currentChanged.connect((sender, args) => {
+    labShell.currentChanged.connect((sender, args) => {
       // If there are any open notebooks, add cell tools to the side panel if
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+          labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
         }
         return;
       }

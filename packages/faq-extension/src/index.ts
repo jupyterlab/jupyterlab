@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -56,12 +55,11 @@ function activate(
   app: JupyterFrontEnd,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
-  rendermime: IRenderMimeRegistry,
-  shell: ILabShell
+  rendermime: IRenderMimeRegistry
 ): void {
   const category = 'Help';
   const command = CommandIDs.open;
-  const { commands } = app;
+  const { commands, shell } = app;
   const tracker = new InstanceTracker<MainAreaWidget>({ namespace: 'faq' });
 
   // Handle state restoration.
@@ -94,7 +92,7 @@ function activate(
       }
       if (!tracker.has(widget)) {
         tracker.add(widget);
-        shell.addToMainArea(widget, { activate: false });
+        shell.add(widget, 'main', { activate: false });
       }
       shell.activateById(widget.id);
     }

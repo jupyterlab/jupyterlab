@@ -389,7 +389,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.Shell {
     // then take that into account.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget, {
+        this._addToMainArea(widget, {
           ...this._mainOptionsCache.get(widget),
           activate: false
         });
@@ -511,139 +511,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.Shell {
   ): void {
     switch (area || 'main') {
       case 'main':
-        return this.addToMainArea(widget, options);
+        return this._addToMainArea(widget, options);
       case 'left':
-        return this.addToLeftArea(widget, options);
+        return this._addToLeftArea(widget, options);
       case 'right':
-        return this.addToRightArea(widget, options);
+        return this._addToRightArea(widget, options);
       case 'top':
-        return this.addToTopArea(widget, options);
+        return this._addToTopArea(widget, options);
       case 'bottom':
-        return this.addToBottomArea(widget, options);
+        return this._addToBottomArea(widget, options);
       default:
         throw new Error(`Invalid area: ${area}`);
-    }
-  }
-
-  /**
-   * Add a widget to the left content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToLeftArea(widget: Widget, options?: DocumentRegistry.IOpenOptions): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-    this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._leftHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the main content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   * All widgets added to the main area should be disposed after removal
-   * (disposal before removal will remove the widget automatically).
-   *
-   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
-   * and `activate` defaults to `true`.
-   */
-  addToMainArea(widget: Widget, options?: DocumentRegistry.IOpenOptions): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-
-    options = options || {};
-
-    const dock = this._dockPanel;
-    const mode = options.mode || 'tab-after';
-    let ref: Widget | null = null;
-
-    if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
-    }
-    dock.addWidget(widget, { mode, ref });
-
-    // The dock panel doesn't account for placement information while
-    // in single document mode, so upon rehydrating any widgets that were
-    // added will not be in the correct place. Cache the placement information
-    // here so that we can later rehydrate correctly.
-    if (dock.mode === 'single-document') {
-      this._mainOptionsCache.set(widget, options);
-    }
-
-    if (options.activate !== false) {
-      dock.activateWidget(widget);
-    }
-  }
-
-  /**
-   * Add a widget to the right content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToRightArea(
-    widget: Widget,
-    options?: DocumentRegistry.IOpenOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-
-    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-
-    this._sideOptionsCache.set(widget, options);
-    this._rightHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the top content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToTopArea(widget: Widget, options?: DocumentRegistry.IOpenOptions): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._topPanel.addWidget(widget);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the bottom content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-
-  addToBottomArea(
-    widget: Widget,
-    options?: DocumentRegistry.IOpenOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._bottomPanel.addWidget(widget);
-    this._onLayoutModified();
-
-    if (this._bottomPanel.isHidden) {
-      this._bottomPanel.show();
     }
   }
 
@@ -802,6 +680,136 @@ export class LabShell extends Widget implements JupyterFrontEnd.Shell {
    */
   protected onAfterAttach(msg: Message): void {
     document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
+  }
+
+  /**
+   * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToLeftArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    this._leftHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   * All widgets added to the main area should be disposed after removal
+   * (disposal before removal will remove the widget automatically).
+   *
+   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
+   * and `activate` defaults to `true`.
+   */
+  private _addToMainArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+
+    options = options || {};
+
+    const dock = this._dockPanel;
+    const mode = options.mode || 'tab-after';
+    let ref: Widget | null = null;
+
+    if (options.ref) {
+      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
+    }
+    dock.addWidget(widget, { mode, ref });
+
+    // The dock panel doesn't account for placement information while
+    // in single document mode, so upon rehydrating any widgets that were
+    // added will not be in the correct place. Cache the placement information
+    // here so that we can later rehydrate correctly.
+    if (dock.mode === 'single-document') {
+      this._mainOptionsCache.set(widget, options);
+    }
+
+    if (options.activate !== false) {
+      dock.activateWidget(widget);
+    }
+  }
+
+  /**
+   * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToRightArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+
+    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+
+    this._sideOptionsCache.set(widget, options);
+    this._rightHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToTopArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._topPanel.addWidget(widget);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the bottom content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToBottomArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._bottomPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._bottomPanel.isHidden) {
+      this._bottomPanel.show();
+    }
   }
 
   /*
