@@ -169,20 +169,18 @@ export namespace Session {
    *
    * @param settings - The server settings.
    *
-   * @returns A promise that resolves with the session model.
+   * @returns A promise that resolves with the session model, or undefined if not found.
    *
    * #### Notes
    * If the session was already started via `startNew`, the existing
    * Session object's information is used in the fulfillment value.
    *
-   * Otherwise, we attempt to find to the existing session.
-   * The promise is fulfilled when the session is found,
-   * otherwise the promise is rejected.
+   * Otherwise, we attempt to find the existing session.
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     return DefaultSession.findById(id, settings);
   }
 
@@ -193,7 +191,7 @@ export namespace Session {
    *
    * @param settings: The server settings.
    *
-   * @returns A promise that resolves with the session model.
+   * @returns A promise that resolves with the session model, or undefined if not found.
    *
    * #### Notes
    * If the session was already started via `startNewSession`, the existing
@@ -201,16 +199,11 @@ export namespace Session {
    *
    * Otherwise, we attempt to find to the existing
    * session using [listRunningSessions].
-   * The promise is fulfilled when the session is found,
-   * otherwise the promise is rejected.
-   *
-   * If the session was not already started and no `options` are given,
-   * the promise is rejected.
    */
   export function findByPath(
     path: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     return DefaultSession.findByPath(path, settings);
   }
 
@@ -388,18 +381,18 @@ export namespace Session {
      *
      * @param id - The id of the target session.
      *
-     * @returns A promise that resolves with the session's model.
+     * @returns A promise that resolves with the session's model, or undefined if not found.
      */
-    findById(id: string): Promise<IModel>;
+    findById(id: string): Promise<IModel | undefined>;
 
     /**
      * Find a session by path.
      *
      * @param path - The path of the target session.
      *
-     * @returns A promise that resolves with the session's model.
+     * @returns A promise that resolves with the session's model, or undefined if not found.
      */
-    findByPath(path: string): Promise<IModel>;
+    findByPath(path: string): Promise<IModel | undefined>;
 
     /**
      * Connect to a running session.

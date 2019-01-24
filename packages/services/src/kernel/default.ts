@@ -1323,20 +1323,19 @@ export namespace DefaultKernel {
    *
    * @param settings - The optional server settings.
    *
-   * @returns A promise that resolves with the model for the kernel.
+   * @returns A promise that resolves with the model for the kernel, or undefined if not found.
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
    * Otherwise, we attempt to find an existing kernel by connecting to the
-   * server. The promise is fulfilled when the kernel is found, otherwise the
-   * promise is rejected.
+   * server.
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel> {
+  ): Promise<Kernel.IModel | undefined> {
     return Private.findById(id, settings);
   }
 
@@ -1464,20 +1463,29 @@ namespace Private {
    * Find a kernel by id.
    *
    * Will reach out to the server if needed to find the kernel.
+   *
+   * Returns undefined if the kernel is not found.
    */
-  export function findById(
+  export async function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel> {
-    let kernel = find(runningKernels, value => {
-      return value.id === id;
-    });
+  ): Promise<Kernel.IModel | undefined> {
+    let kernel = find(runningKernels, value => value.id === id);
     if (kernel) {
-      return Promise.resolve(kernel.model);
+      return kernel.model;
     }
-    return getKernelModel(id, settings).catch(() => {
-      throw new Error(`No running kernel with id: ${id}`);
-    });
+    try {
+      return getKernelModel(id, settings);
+    } catch (e) {
+      // If the error is a 404, the session wasn't found.
+      if (
+        e instanceof ServerConnection.ResponseError &&
+        e.response.status === 404
+      ) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   /**

@@ -165,9 +165,9 @@ export class KernelManager implements Kernel.IManager {
    *
    * @param id - The id of the target kernel.
    *
-   * @returns A promise that resolves with the kernel's model.
+   * @returns A promise that resolves with the kernel's model, or undefined if not found.
    */
-  findById(id: string): Promise<Kernel.IModel> {
+  findById(id: string): Promise<Kernel.IModel | undefined> {
     return Kernel.findById(id, this.serverSettings);
   }
 

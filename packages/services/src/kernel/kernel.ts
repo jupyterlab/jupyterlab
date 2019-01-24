@@ -470,18 +470,16 @@ export namespace Kernel {
    *
    * @param settings - The optional server settings.
    *
-   * @returns A promise that resolves with the model for the kernel.
+   * @returns A promise that resolves with the model for the kernel, or undefined if not found.
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
-   * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel. The
-   * promise is fulfilled when the kernel is found, otherwise the promise is
-   * rejected.
+   * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel.
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<IModel> {
+  ): Promise<IModel | undefined> {
     return DefaultKernel.findById(id, settings);
   }
 
@@ -698,9 +696,9 @@ export namespace Kernel {
      *
      * @param id - The id of the target kernel.
      *
-     * @returns A promise that resolves with the kernel's model.
+     * @returns A promise that resolves with the kernel's model, or undefined if not found.
      */
-    findById(id: string): Promise<IModel>;
+    findById(id: string): Promise<IModel | undefined>;
 
     /**
      * Connect to an existing kernel.

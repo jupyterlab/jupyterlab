@@ -183,14 +183,14 @@ export class SessionManager implements Session.IManager {
   /**
    * Find a session by id.
    */
-  findById(id: string): Promise<Session.IModel> {
+  findById(id: string): Promise<Session.IModel | undefined> {
     return Session.findById(id, this.serverSettings);
   }
 
   /**
    * Find a session by path.
    */
-  findByPath(path: string): Promise<Session.IModel> {
+  findByPath(path: string): Promise<Session.IModel | undefined> {
     return Session.findByPath(path, this.serverSettings);
   }
 

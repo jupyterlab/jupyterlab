@@ -332,7 +332,7 @@ export namespace DefaultSession {
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     return Private.findById(id, settings);
   }
 
@@ -342,7 +342,7 @@ export namespace DefaultSession {
   export function findByPath(
     path: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     return Private.findByPath(path, settings);
   }
 
@@ -451,45 +451,45 @@ namespace Private {
   /**
    * Find a session by id.
    */
-  export function findById(
+  export async function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     settings = settings || ServerConnection.makeSettings();
     let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.id === id);
     if (session) {
-      return Promise.resolve(session.model);
+      return session.model;
     }
-
-    return getSessionModel(id, settings).catch(() => {
-      throw new Error(`No running session for id: ${id}`);
-    });
+    try {
+      return getSessionModel(id, settings);
+    } catch (e) {
+      // If the error is a 404, the session wasn't found.
+      if (
+        e instanceof ServerConnection.ResponseError &&
+        e.response.status === 404
+      ) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   /**
    * Find a session by path.
    */
-  export function findByPath(
+  export async function findByPath(
     path: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
+  ): Promise<Session.IModel | undefined> {
     settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(running, value => value.path === path);
+    const running = runningSessions.get(settings.baseUrl) || [];
+    const session = find(running, value => value.path === path);
     if (session) {
-      return Promise.resolve(session.model);
+      return session.model;
     }
-
-    return listRunning(settings).then(models => {
-      let model = find(models, value => {
-        return value.path === path;
-      });
-      if (model) {
-        return model;
-      }
-      throw new Error(`No running session for path: ${path}`);
-    });
+    const models = await listRunning(settings);
+    return find(models, value => value.path === path);
   }
 
   /**
