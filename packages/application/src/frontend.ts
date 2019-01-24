@@ -131,7 +131,7 @@ export class JupyterFrontEnd<
     // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
     // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
 
-    let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    const nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
     while (
       'parentNode' in nodes[nodes.length - 1] &&
       nodes[nodes.length - 1].parentNode &&

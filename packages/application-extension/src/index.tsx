@@ -7,8 +7,8 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterLab,
   JupyterFrontEndPlugin,
+  JupyterLab,
   LabShell,
   LayoutRestorer,
   Router

@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILabStatus,
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {

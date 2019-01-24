@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
@@ -33,17 +33,18 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
-  requires: [ISettingRegistry, ILayoutRestorer, ILabShell],
+  requires: [ISettingRegistry],
+  optional: [ILabShell, ILayoutRestorer],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    restorer: ILayoutRestorer,
-    shell: ILabShell
+    labShell: ILabShell | null,
+    restorer: ILayoutRestorer | null
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { serviceManager } = app;
+    const { serviceManager, shell } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -51,13 +52,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
       v.id = 'extensionmanager.main-view';
       v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
       v.title.caption = 'Extension Manager';
-      restorer.add(v, v.id);
+      if (restorer) {
+        restorer.add(v, v.id);
+      }
       return v;
     };
 
     if (enabled) {
       view = createView();
-      shell.addToLeftArea(view, { rank: 1000 });
+      shell.add(view, 'left', { rank: 1000 });
     }
 
     // If the extension is enabled or disabled,
@@ -72,14 +75,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
             return;
           }
           view = view || createView();
-          shell.addToLeftArea(view);
+          shell.add(view, 'left');
         } else if (!enabled && view && view.isAttached) {
           view.close();
         }
       });
     });
 
-    addCommands(app, shell, view);
+    addCommands(app, view, labShell);
   }
 };
 
@@ -88,10 +91,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
  */
 function addCommands(
   app: JupyterFrontEnd,
-  shell: ILabShell,
-  view: ExtensionView
+  view: ExtensionView,
+  labShell: ILabShell | null
 ): void {
-  const { commands } = app;
+  const { commands, shell } = app;
 
   commands.addCommand(CommandIDs.show, {
     label: 'Show Extension Manager',
@@ -102,8 +105,8 @@ function addCommands(
 
   commands.addCommand(CommandIDs.hide, {
     execute: () => {
-      if (!view.isHidden) {
-        shell.collapseLeft();
+      if (labShell && !view.isHidden) {
+        labShell.collapseLeft();
       }
     }
   });
@@ -118,7 +121,7 @@ function addCommands(
     }
   });
 
-  // TODO: Also add to command palette
+  // TODO: Also add to command palette.
 }
 
 /**
