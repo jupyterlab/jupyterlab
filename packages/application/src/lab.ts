@@ -38,12 +38,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * A signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * Whether the application is busy.
@@ -73,14 +73,16 @@ export interface ILabStatus {
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterFrontEnd<LabShell, ILabShell.ILayout>
+export class JupyterLab extends JupyterFrontEnd<ILabShell>
   implements ILabStatus {
   /**
    * Construct a new JupyterLab object.
    */
   constructor(options: JupyterLab.IOptions = { shell: new LabShell() }) {
     super({ shell: options.shell || new LabShell() });
-    this.restored = this.shell.restored;
+    this.restored = this.shell.restored
+      .then(() => undefined)
+      .catch(() => undefined);
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
 
@@ -139,7 +141,7 @@ export class JupyterLab extends JupyterFrontEnd<LabShell, ILabShell.ILayout>
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
-  readonly restored: Promise<ILabShell.ILayout> = this.shell.restored;
+  readonly restored: Promise<void>;
 
   /**
    * Whether the application is dirty.

@@ -23,7 +23,7 @@ import { Widget } from '@phosphor/widgets';
  * The generic `T` argument indicates the type that the plugin `provides` upon
  * being activated.
  */
-export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd<any, any>, T>;
+export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
 
 /**
  * The base Jupyter front-end application class.
@@ -36,28 +36,20 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd<any, any>, T>;
  *
  * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
  * `shell` attribute of a `JupyterFrontEnd`.
- *
- * `U = void` - the type that the front-end application's `restored` promise
- * will resolve with. If a `restored` promise is not defined by a subclass, it
- * will default to a promise that waits until the underlying phosphor
- * `Application` has `started` and subsequently resolves with `undefined`. One
- * possible candidate for this type is the restored layout description of the
- * shell; but subclasses can resolve with any type upon restoration.
  */
 export class JupyterFrontEnd<
-  T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell,
-  U = void
+  T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
    */
-  constructor(options: JupyterFrontEnd.IOptions<T, U>) {
+  constructor(options: JupyterFrontEnd.IOptions<T>) {
     super(options);
 
     // The default restored promise if one does not exist in the options.
-    const restored = new Promise<U>(resolve => {
+    const restored = new Promise(resolve => {
       requestAnimationFrame(() => {
-        resolve(undefined);
+        resolve();
       });
     });
 
@@ -81,10 +73,9 @@ export class JupyterFrontEnd<
   readonly docRegistry: DocumentRegistry;
 
   /**
-   * Promise that resolves when state is first restored, returning layout
-   * description.
+   * Promise that resolves when state is first restored.
    */
-  readonly restored: Promise<U>;
+  readonly restored: Promise<void>;
 
   /**
    * The service manager used by the application.

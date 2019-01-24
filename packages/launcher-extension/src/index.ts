@@ -48,7 +48,7 @@ export default plugin;
 function activate(
   app: JupyterFrontEnd,
   palette: ICommandPalette,
-  shell: ILabShell
+  labShell: ILabShell
 ): ILauncher {
   const { commands } = app;
   const model = new LauncherModel();
@@ -59,7 +59,7 @@ function activate(
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        shell.add(item, 'main', { ref: id });
+        labShell.add(item, 'main', { ref: id });
       };
       const launcher = new Launcher({ cwd, callback, commands });
 
@@ -70,15 +70,15 @@ function activate(
       let main = new MainAreaWidget({ content: launcher });
 
       // If there are any other widgets open, remove the launcher close icon.
-      main.title.closable = !!toArray(shell.widgets('main')).length;
+      main.title.closable = !!toArray(labShell.widgets('main')).length;
       main.id = id;
 
-      shell.add(main, 'main', { activate: args['activate'] as boolean });
+      labShell.add(main, 'main', { activate: args['activate'] as boolean });
 
-      shell.layoutModified.connect(
+      labShell.layoutModified.connect(
         () => {
           // If there is only a launcher open, remove the close icon.
-          main.title.closable = toArray(shell.widgets('main')).length > 1;
+          main.title.closable = toArray(labShell.widgets('main')).length > 1;
         },
         main
       );

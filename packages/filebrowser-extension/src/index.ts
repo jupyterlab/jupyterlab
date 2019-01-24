@@ -101,10 +101,10 @@ const browser: JupyterFrontEndPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
-    ILabShell,
     IFileBrowserFactory,
-    ILayoutRestorer,
     IDocumentManager,
+    ILabShell,
+    ILayoutRestorer,
     ISettingRegistry
   ],
   autoStart: true
@@ -234,10 +234,10 @@ function activateFactory(
  */
 function activateBrowser(
   app: JupyterFrontEnd,
-  shell: ILabShell,
   factory: IFileBrowserFactory,
-  restorer: ILayoutRestorer,
   docManager: IDocumentManager,
+  labShell: ILabShell,
+  restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry
 ): void {
   const browser = factory.defaultBrowser;
@@ -251,14 +251,14 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, browser);
+  addCommands(app, factory.tracker, browser, labShell);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
-  shell.addToLeftArea(browser, { rank: 100 });
+  labShell.add(browser, 'left', { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
-  app.restored.then(layout => {
+  labShell.restored.then(layout => {
     if (layout.fresh) {
       commands.execute(CommandIDs.showBrowser, void 0);
     }
@@ -267,13 +267,13 @@ function activateBrowser(
   Promise.all([app.restored, browser.model.restored]).then(() => {
     function maybeCreate() {
       // Create a launcher if there are no open items.
-      if (shell.isEmpty('main')) {
+      if (labShell.isEmpty('main')) {
         createLauncher(commands, browser);
       }
     }
 
     // When layout is modified, create a launcher if there are no open items.
-    shell.layoutModified.connect(() => {
+    labShell.layoutModified.connect(() => {
       maybeCreate();
     });
 
@@ -292,7 +292,7 @@ function activateBrowser(
       });
 
     // Whether to automatically navigate to a document's current directory
-    shell.currentChanged.connect((_, change) => {
+    labShell.currentChanged.connect((_, change) => {
       if (navigateToCurrentDirectory) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
@@ -340,7 +340,7 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser,
-  shell?: ILabShell
+  labShell: ILabShell
 ): void {
   const registry = app.docRegistry;
 
@@ -431,8 +431,8 @@ function addCommands(
   commands.addCommand(CommandIDs.hideBrowser, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (shell && widget && !widget.isHidden) {
-        shell.collapseLeft();
+      if (widget && !widget.isHidden) {
+        labShell.collapseLeft();
       }
     }
   });
@@ -618,17 +618,17 @@ function addCommands(
         return;
       }
       // Shortcut if we are using the main file browser
-      if (shell && browser === browserForPath) {
-        shell.activateById(browser.id);
+      if (browser === browserForPath) {
+        labShell.activateById(browser.id);
         return;
       } else {
         const areas: ILabShell.Area[] = ['left', 'right'];
         for (let area of areas) {
-          const it = shell.widgets(area);
+          const it = labShell.widgets(area);
           let widget = it.next();
           while (widget) {
             if (widget.contains(browserForPath)) {
-              shell.activateById(widget.id);
+              labShell.activateById(widget.id);
               return;
             }
             widget = it.next();
