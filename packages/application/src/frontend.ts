@@ -18,15 +18,29 @@ import { Widget } from '@phosphor/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
+ *
+ * #### Notes
+ * The generic `T` argument indicates the type that the plugin `provides` upon
+ * being activated.
  */
 export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
 
 /**
- * The base Jupyter client application class.
+ * The base Jupyter front-end application class.
  *
  * #### Notes
  * This type is useful as a generic application against which front-end plugins
  * can be authored. It inherits from the phosphor `Application`.
+ *
+ * The generic type argument semantics are as follows.
+ *
+ * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
+ * `shell` attribute of a `JupyterFrontEnd`.
+ *
+ * `U = any` - the type that the front-end application's `restored` promise
+ * will resolve with. If a `restored` promise is not defined by a subclass, it
+ * will default to a promise that waits until the underlying phosphor
+ * `Application` has `started` and subsequently resolves with `undefined`.
  */
 export class JupyterFrontEnd<
   T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell,
@@ -41,7 +55,7 @@ export class JupyterFrontEnd<
     // The default restored promise if one does not exist in the options.
     const restored = new Promise<U>(resolve => {
       requestAnimationFrame(() => {
-        resolve();
+        resolve(undefined);
       });
     });
 
@@ -113,9 +127,9 @@ export class JupyterFrontEnd<
       return [];
     }
 
-    // this one-liner doesn't work, but should at some point
-    // in the future (https://developer.mozilla.org/en-US/docs/Web/API/Event)
-    // return this._contextMenuEvent.composedPath() as HTMLElement[];
+    // This one-liner doesn't work, but should at some point in the future
+    // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
+    // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
 
     let nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
     while (
