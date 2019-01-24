@@ -3,8 +3,8 @@
 
 import {
   ILabShell,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
@@ -29,7 +29,7 @@ namespace CommandIDs {
 /**
  * A service providing an interface to the the launcher.
  */
-const plugin: JupyterClientPlugin<ILauncher> = {
+const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
   requires: [ICommandPalette, ILabShell],
@@ -46,7 +46,7 @@ export default plugin;
  * Activate the launcher.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   palette: ICommandPalette,
   shell: ILabShell
 ): ILauncher {

@@ -6,8 +6,8 @@ import '../style/index.css';
 
 import {
   ILabShell,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { IClientSession } from '@jupyterlab/apputils';
@@ -46,11 +46,11 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 /**
  * Initialization data for the statusbar extension.
  */
-const statusBar: JupyterClientPlugin<IStatusBar> = {
+const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterClient, labShell: ILabShell | null) => {
+  activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
     app.shell.add(statusBar, 'bottom');
@@ -70,12 +70,12 @@ const statusBar: JupyterClientPlugin<IStatusBar> = {
 /**
  * A plugin that provides a kernel status item to the status bar.
  */
-export const kernelStatus: JupyterClientPlugin<void> = {
+export const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
@@ -147,7 +147,7 @@ export const kernelStatus: JupyterClientPlugin<void> = {
 /**
  * A plugin providing a line/column status item to the application.
  */
-export const lineColItem: JupyterClientPlugin<void> = {
+export const lineColItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:line-col-status',
   autoStart: true,
   requires: [
@@ -158,7 +158,7 @@ export const lineColItem: JupyterClientPlugin<void> = {
     ILabShell
   ],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
@@ -240,11 +240,11 @@ export const lineColItem: JupyterClientPlugin<void> = {
  * This plugin will not work unless the memory usage server extension
  * is installed.
  */
-export const memoryUsageItem: JupyterClientPlugin<void> = {
+export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
   requires: [IStatusBar],
-  activate: (app: JupyterClient, statusBar: IStatusBar) => {
+  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
     statusBar.registerStatusItem(
@@ -264,11 +264,11 @@ export const memoryUsageItem: JupyterClientPlugin<void> = {
  * A plugin providing running terminals and sessions information
  * to the status bar.
  */
-export const runningSessionsItem: JupyterClientPlugin<void> = {
+export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
   requires: [IStatusBar, ILabShell],
-  activate: (app: JupyterClient, statusBar: IStatusBar, shell: ILabShell) => {
+  activate: (app: JupyterFrontEnd, statusBar: IStatusBar, shell: ILabShell) => {
     const item = new RunningSessions({
       onClick: () => shell.activateById('jp-running-sessions'),
       serviceManager: app.serviceManager
@@ -285,7 +285,7 @@ export const runningSessionsItem: JupyterClientPlugin<void> = {
   }
 };
 
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,

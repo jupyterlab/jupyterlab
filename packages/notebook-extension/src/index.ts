@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -246,7 +246,7 @@ const FORMAT_LABEL: { [k: string]: string } = {
 /**
  * The notebook widget tracker provider.
  */
-const trackerPlugin: JupyterClientPlugin<INotebookTracker> = {
+const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
@@ -267,12 +267,12 @@ const trackerPlugin: JupyterClientPlugin<INotebookTracker> = {
 /**
  * The notebook cell factory provider.
  */
-const factory: JupyterClientPlugin<NotebookPanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterClient, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
@@ -281,7 +281,7 @@ const factory: JupyterClientPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const tools: JupyterClientPlugin<ICellTools> = {
+const tools: JupyterFrontEndPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
@@ -292,12 +292,12 @@ const tools: JupyterClientPlugin<ICellTools> = {
 /**
  * A plugin providing a CommandEdit status item.
  */
-export const commandEditItem: JupyterClientPlugin<void> = {
+export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, ILabShell],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: INotebookTracker,
     shell: ILabShell
@@ -325,12 +325,12 @@ export const commandEditItem: JupyterClientPlugin<void> = {
 /**
  * A plugin that adds a notebook trust status item to the status bar.
  */
-export const notebookTrustItem: JupyterClientPlugin<void> = {
+export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, ILabShell],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: INotebookTracker,
     shell: ILabShell
@@ -361,7 +361,7 @@ export const notebookTrustItem: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
   tools,
@@ -374,7 +374,7 @@ export default plugins;
  * Activate the cell tools extension.
  */
 function activateCellTools(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
@@ -465,7 +465,7 @@ function activateCellTools(
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: NotebookPanel.IContentFactory,
@@ -792,7 +792,7 @@ function activateNotebookHandler(
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   services: ServiceManager,
   tracker: NotebookTracker,
   shell: ILabShell
@@ -1798,7 +1798,7 @@ function populatePalette(
  * Populates the application menus for the notebook.
  */
 function populateMenus(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,

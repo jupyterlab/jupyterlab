@@ -80,11 +80,11 @@ function maybeSync(localPath, name, rest) {
  * A WebPack Plugin that copies the assets to the static directory and
  * fixes the output of the HTMLWebpackPlugin
  */
-function JupyterClientPlugin() {}
+function JupyterFrontEndPlugin() {}
 
-JupyterClientPlugin.prototype.apply = function(compiler) {
+JupyterFrontEndPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
-    'JupyterClientPlugin',
+    'JupyterFrontEndPlugin',
     function() {
       // Fix the template output.
       var indexPath = path.join(buildDir, 'index.html');
@@ -109,7 +109,7 @@ JupyterClientPlugin.prototype.apply = function(compiler) {
   );
 };
 
-JupyterClientPlugin.prototype._first = true;
+JupyterFrontEndPlugin.prototype._first = true;
 
 const plugins = [
   new DuplicatePackageCheckerPlugin({
@@ -126,7 +126,7 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-  new JupyterClientPlugin({})
+  new JupyterFrontEndPlugin({})
 ];
 
 if (process.argv.includes('--analyze')) {

@@ -6,9 +6,9 @@ import {
   ILabStatus,
   ILayoutRestorer,
   IRouter,
-  JupyterClient,
+  JupyterFrontEnd,
   JupyterLab,
-  JupyterClientPlugin,
+  JupyterFrontEndPlugin,
   LabShell,
   LayoutRestorer,
   Router
@@ -75,11 +75,11 @@ namespace Patterns {
 /**
  * The main extension.
  */
-const main: JupyterClientPlugin<void> = {
+const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette, IRouter, IWindowResolver],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver
@@ -185,10 +185,10 @@ const main: JupyterClientPlugin<void> = {
 /**
  * The default layout restorer provider.
  */
-const layout: JupyterClientPlugin<ILayoutRestorer> = {
+const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
   requires: [IStateDB, ILabShell],
-  activate: (app: JupyterClient, state: IStateDB, shell: ILabShell) => {
+  activate: (app: JupyterFrontEnd, state: IStateDB, shell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
@@ -209,9 +209,9 @@ const layout: JupyterClientPlugin<ILayoutRestorer> = {
 /**
  * The default URL router provider.
  */
-const router: JupyterClientPlugin<IRouter> = {
+const router: JupyterFrontEndPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: (app: JupyterClient) => {
+  activate: (app: JupyterFrontEnd) => {
     const { commands } = app;
     const base = PageConfig.getOption('baseUrl');
     const router = new Router({ base, commands });
@@ -235,11 +235,11 @@ const router: JupyterClientPlugin<IRouter> = {
 /**
  * The tree route handler provider.
  */
-const tree: JupyterClientPlugin<void> = {
+const tree: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
   requires: [JupyterLab.IInfo, IRouter],
-  activate: (app: JupyterClient, info: JupyterLab.IInfo, router: IRouter) => {
+  activate: (app: JupyterFrontEnd, info: JupyterLab.IInfo, router: IRouter) => {
     const { commands } = app;
 
     commands.addCommand(CommandIDs.tree, {
@@ -277,9 +277,9 @@ const tree: JupyterClientPlugin<void> = {
 /**
  * The default URL not found extension.
  */
-const notfound: JupyterClientPlugin<void> = {
+const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterClient, router: IRouter) => {
+  activate: (app: JupyterFrontEnd, router: IRouter) => {
     const bad = PageConfig.getOption('notFoundUrl');
     const base = router.base;
     const message = `
@@ -303,9 +303,9 @@ const notfound: JupyterClientPlugin<void> = {
 /**
  * Change the favicon changing based on the busy status;
  */
-const busy: JupyterClientPlugin<void> = {
+const busy: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterClient, status: ILabStatus) => {
+  activate: async (app: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
@@ -339,10 +339,10 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
 /**
  * Keep user settings for where to show the side panels.
  */
-const sidebar: JupyterClientPlugin<void> = {
+const sidebar: JupyterFrontEndPlugin<void> = {
   id: SIDEBAR_ID,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     shell: ILabShell
   ) => {
@@ -535,9 +535,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 /**
  * The default JupyterLab application shell.
  */
-const shell: JupyterClientPlugin<ILabShell> = {
+const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
-  activate: (app: JupyterClient) => {
+  activate: (app: JupyterFrontEnd) => {
     if (!(app.shell instanceof LabShell)) {
       throw new Error(`${shell.id} did not find an LabShell instance.`);
     }
@@ -550,9 +550,9 @@ const shell: JupyterClientPlugin<ILabShell> = {
 /**
  * The default JupyterLab application status provider.
  */
-const status: JupyterClientPlugin<ILabStatus> = {
+const status: JupyterFrontEndPlugin<ILabStatus> = {
   id: '@jupyterlab/application-extension:status',
-  activate: (app: JupyterClient) => {
+  activate: (app: JupyterFrontEnd) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${status.id} must be activated in JupyterLab.`);
     }
@@ -565,9 +565,9 @@ const status: JupyterClientPlugin<ILabStatus> = {
 /**
  * The default JupyterLab application information provider.
  */
-const info: JupyterClientPlugin<JupyterLab.IInfo> = {
+const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
   id: '@jupyterlab/application-extension:info',
-  activate: (app: JupyterClient) => {
+  activate: (app: JupyterFrontEnd) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${info.id} must be activated in JupyterLab.`);
     }
@@ -580,7 +580,7 @@ const info: JupyterClientPlugin<JupyterLab.IInfo> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   layout,
   router,

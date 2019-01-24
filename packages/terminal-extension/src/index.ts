@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -46,7 +46,7 @@ const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 /**
  * The default terminal extension.
  */
-const plugin: JupyterClientPlugin<ITerminalTracker> = {
+const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
@@ -64,7 +64,7 @@ export default plugin;
  * Activate the terminal plugin.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -193,7 +193,7 @@ function activate(
  * Add the commands for the terminal.
  */
 export function addCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: InstanceTracker<MainAreaWidget<Terminal>>,
   settingRegistry: ISettingRegistry
 ) {

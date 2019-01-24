@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -52,7 +52,7 @@ const FACTORY = 'Image';
 /**
  * The image file handler extension.
  */
-const plugin: JupyterClientPlugin<IImageTracker> = {
+const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
@@ -69,7 +69,7 @@ export default plugin;
  * Activate the image widget extension.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
   shell: ILabShell
@@ -134,7 +134,7 @@ function activate(
  * Add the commands for the image widget.
  */
 export function addCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: IImageTracker,
   shell: ILabShell
 ) {

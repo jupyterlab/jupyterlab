@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -37,13 +37,13 @@ namespace CommandIDs {
 /**
  * A service providing code introspection.
  */
-const inspector: JupyterClientPlugin<IInspector> = {
+const inspector: JupyterFrontEndPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
   optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     palette: ICommandPalette | null,
     launcher: ILauncher | null,
     restorer: ILayoutRestorer | null
@@ -126,12 +126,12 @@ const inspector: JupyterClientPlugin<IInspector> = {
 /**
  * An extension that registers consoles for inspection.
  */
-const consoles: JupyterClientPlugin<void> = {
+const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/inspector-extension:consoles',
   requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: IInspector,
     consoles: IConsoleTracker,
     shell: ILabShell
@@ -187,12 +187,12 @@ const consoles: JupyterClientPlugin<void> = {
 /**
  * An extension that registers notebooks for inspection.
  */
-const notebooks: JupyterClientPlugin<void> = {
+const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/inspector-extension:notebooks',
   requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: IInspector,
     notebooks: INotebookTracker,
     shell: ILabShell
@@ -248,5 +248,5 @@ const notebooks: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [inspector, consoles, notebooks];
+const plugins: JupyterFrontEndPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;

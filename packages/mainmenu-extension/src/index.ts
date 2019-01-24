@@ -9,8 +9,8 @@ import { Menu, Widget } from '@phosphor/widgets';
 
 import {
   ILabShell,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
@@ -115,13 +115,13 @@ export namespace CommandIDs {
 /**
  * A service providing an interface to the main menu.
  */
-const plugin: JupyterClientPlugin<IMainMenu> = {
+const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
   optional: [IInspector, ILabShell],
   provides: IMainMenu,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     palette: ICommandPalette,
     inspector: IInspector | null,
     labShell: ILabShell | null
@@ -226,7 +226,7 @@ const plugin: JupyterClientPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-export function createEditMenu(app: JupyterClient, menu: EditMenu): void {
+export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
   // Add the undo/redo commands the the Edit menu.
@@ -304,7 +304,7 @@ export function createEditMenu(app: JupyterClient, menu: EditMenu): void {
  * Create the basic `File` menu.
  */
 export function createFileMenu(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   menu: FileMenu,
   inspector: IInspector | null
 ): void {
@@ -469,7 +469,7 @@ export function createFileMenu(
 /**
  * Create the basic `Kernel` menu.
  */
-export function createKernelMenu(app: JupyterClient, menu: KernelMenu): void {
+export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
@@ -566,7 +566,7 @@ export function createKernelMenu(app: JupyterClient, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
-export function createViewMenu(app: JupyterClient, menu: ViewMenu): void {
+export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
@@ -652,7 +652,7 @@ export function createViewMenu(app: JupyterClient, menu: ViewMenu): void {
 /**
  * Create the basic `Run` menu.
  */
-export function createRunMenu(app: JupyterClient, menu: RunMenu): void {
+export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.run, {
@@ -710,7 +710,10 @@ export function createRunMenu(app: JupyterClient, menu: RunMenu): void {
 /**
  * Create the basic `Settings` menu.
  */
-export function createSettingsMenu(_: JupyterClient, menu: SettingsMenu): void {
+export function createSettingsMenu(
+  _: JupyterFrontEnd,
+  menu: SettingsMenu
+): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
@@ -718,7 +721,7 @@ export function createSettingsMenu(_: JupyterClient, menu: SettingsMenu): void {
  * Create the basic `Tabs` menu.
  */
 export function createTabsMenu(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   menu: TabsMenu,
   shell: ILabShell
 ): void {
@@ -828,7 +831,7 @@ namespace Private {
    * A utility function that delegates a portion of a label to an IMenuExtender.
    */
   export function delegateLabel<E extends IMenuExtender<Widget>>(
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     s: Set<E>,
     label: keyof E
   ): string {
@@ -848,7 +851,7 @@ namespace Private {
    * to an IMenuExtender.
    */
   export function delegateExecute<E extends IMenuExtender<Widget>>(
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     s: Set<E>,
     executor: keyof E
   ): () => Promise<any> {
@@ -871,7 +874,7 @@ namespace Private {
    * to an IMenuExtender.
    */
   export function delegateEnabled<E extends IMenuExtender<Widget>>(
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     s: Set<E>,
     executor: keyof E
   ): () => boolean {
@@ -891,7 +894,7 @@ namespace Private {
    * for an IMenuExtender.
    */
   export function delegateToggled<E extends IMenuExtender<Widget>>(
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     s: Set<E>,
     toggled: keyof E
   ): () => boolean {

@@ -17,9 +17,9 @@ import { Application, IPlugin } from '@phosphor/application';
 import { Widget } from '@phosphor/widgets';
 
 /**
- * The type for all JupyterClient application plugins.
+ * The type for all JupyterFrontEnd application plugins.
  */
-export type JupyterClientPlugin<T> = IPlugin<JupyterClient, T>;
+export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
 
 /**
  * The base Jupyter client application class.
@@ -28,14 +28,14 @@ export type JupyterClientPlugin<T> = IPlugin<JupyterClient, T>;
  * This type is useful as a generic application against which front-end plugins
  * can be authored. It inherits from the phosphor `Application`.
  */
-export class JupyterClient<
-  T extends JupyterClient.Shell = JupyterClient.Shell,
+export class JupyterFrontEnd<
+  T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell,
   U = any
 > extends Application<T> {
   /**
-   * Construct a new JupyterClient object.
+   * Construct a new JupyterFrontEnd object.
    */
-  constructor(options: JupyterClient.IOptions<T, U>) {
+  constructor(options: JupyterFrontEnd.IOptions<T, U>) {
     super(options);
 
     // The default restored promise if one does not exist in the options.
@@ -132,11 +132,11 @@ export class JupyterClient<
 }
 
 /**
- * The namespace for `JupyterClient` class statics.
+ * The namespace for `JupyterFrontEnd` class statics.
  */
-export namespace JupyterClient {
+export namespace JupyterFrontEnd {
   /**
-   * The options used to initialize a JupyterClient.
+   * The options used to initialize a JupyterFrontEnd.
    */
   export interface IOptions<T extends Shell = Shell, U = any>
     extends Application.IOptions<T> {

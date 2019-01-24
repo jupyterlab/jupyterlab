@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -30,7 +30,7 @@ namespace CommandIDs {
 /**
  * The FAQ page extension.
  */
-const plugin: JupyterClientPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/faq-extension:plugin',
   requires: [ICommandPalette, ILayoutRestorer, IRenderMimeRegistry],
@@ -53,7 +53,7 @@ const SOURCE = require('../faq.md');
  * Activate the FAQ plugin.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   palette: ICommandPalette,
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,

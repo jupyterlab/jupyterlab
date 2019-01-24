@@ -6,9 +6,9 @@
 import {
   ILayoutRestorer,
   IRouter,
-  JupyterClient,
+  JupyterFrontEnd,
   JupyterLab,
-  JupyterClientPlugin
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -89,7 +89,7 @@ namespace Patterns {
 /**
  * The default command palette extension.
  */
-const palette: JupyterClientPlugin<ICommandPalette> = {
+const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   activate: Palette.activate,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
@@ -105,7 +105,7 @@ const palette: JupyterClientPlugin<ICommandPalette> = {
  * causes the command palette to be unavailable to other extensions earlier
  * in the application load cycle.
  */
-const paletteRestorer: JupyterClientPlugin<void> = {
+const paletteRestorer: JupyterFrontEndPlugin<void> = {
   activate: Palette.restore,
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
@@ -115,9 +115,9 @@ const paletteRestorer: JupyterClientPlugin<void> = {
 /**
  * The default setting registry provider.
  */
-const settings: JupyterClientPlugin<ISettingRegistry> = {
+const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterClient): Promise<ISettingRegistry> => {
+  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
     const connector = app.serviceManager.settings;
     const plugins = (await connector.list()).values;
 
@@ -130,12 +130,12 @@ const settings: JupyterClientPlugin<ISettingRegistry> = {
 /**
  * The default theme manager provider.
  */
-const themes: JupyterClientPlugin<IThemeManager> = {
+const themes: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
   requires: [ISettingRegistry, JupyterLab.IInfo, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     settings: ISettingRegistry,
     info: JupyterLab.IInfo,
     splash: ISplashScreen | null,
@@ -222,13 +222,13 @@ const themes: JupyterClientPlugin<IThemeManager> = {
 /**
  * The default window name resolver provider.
  */
-const resolver: JupyterClientPlugin<IWindowResolver> = {
+const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
   requires: [IRouter, JupyterLab.IInfo],
   activate: async (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     router: IRouter,
     info: JupyterLab.IInfo
   ) => {
@@ -263,7 +263,7 @@ const resolver: JupyterClientPlugin<IWindowResolver> = {
 /**
  * The default splash screen provider.
  */
-const splash: JupyterClientPlugin<ISplashScreen> = {
+const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
@@ -281,14 +281,14 @@ const splash: JupyterClientPlugin<ISplashScreen> = {
 /**
  * The default state database for storing application state.
  */
-const state: JupyterClientPlugin<IStateDB> = {
+const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
   requires: [IRouter, IWindowResolver, JupyterLab.IInfo],
   optional: [ISplashScreen],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     router: IRouter,
     resolver: IWindowResolver,
     info: JupyterLab.IInfo,
@@ -549,7 +549,7 @@ const state: JupyterClientPlugin<IStateDB> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
   resolver,

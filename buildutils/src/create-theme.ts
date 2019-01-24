@@ -28,7 +28,7 @@ let questions = [
 
 const template = `
 import {
-  JupyterLab, JupyterClientPlugin
+  JupyterLab, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -39,10 +39,10 @@ import {
 /**
  * A plugin for the {{title}}
  */
-const plugin: JupyterClientPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '{{name}}:plugin',
   requires: [IThemeManager],
-  activate: function(app: JupyterClient, manager: IThemeManager) {
+  activate: function(app: JupyterFrontEnd, manager: IThemeManager) {
     manager.register({
       name: '{{title}}',
       isLight: true,

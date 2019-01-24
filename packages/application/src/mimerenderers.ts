@@ -17,7 +17,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
-import { JupyterClient, JupyterClientPlugin } from './index';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
 
@@ -40,8 +40,8 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterClientPlugin<void | IMimeDocumentTracker>[] {
-  const plugins: JupyterClientPlugin<void | IMimeDocumentTracker>[] = [];
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
+  const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
   const tracker = new InstanceTracker<MimeDocument>({ namespace });
@@ -68,7 +68,7 @@ export function createRendermimePlugins(
     optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
-    activate: (app: JupyterClient, restorer: ILayoutRestorer | null) => {
+    activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
       if (restorer) {
         restorer.restore(tracker, {
           command: 'docmanager:open',
@@ -93,12 +93,12 @@ export function createRendermimePlugins(
 export function createRendermimePlugin(
   tracker: InstanceTracker<MimeDocument>,
   item: IRenderMime.IExtension
-): JupyterClientPlugin<void> {
+): JupyterFrontEndPlugin<void> {
   return {
     id: item.id,
     requires: [IRenderMimeRegistry],
     autoStart: true,
-    activate: (app: JupyterClient, rendermime: IRenderMimeRegistry) => {
+    activate: (app: JupyterFrontEnd, rendermime: IRenderMimeRegistry) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
         rendermime.addFactory(item.rendererFactory, item.rank);

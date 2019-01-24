@@ -11,7 +11,10 @@ import { Widget } from '@phosphor/widgets';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -41,11 +44,11 @@ namespace CommandIDs {
 /**
  * The main tooltip manager plugin.
  */
-const manager: JupyterClientPlugin<ITooltipManager> = {
+const manager: JupyterFrontEndPlugin<ITooltipManager> = {
   id: '@jupyterlab/tooltip-extension:manager',
   autoStart: true,
   provides: ITooltipManager,
-  activate: (app: JupyterClient): ITooltipManager => {
+  activate: (app: JupyterFrontEnd): ITooltipManager => {
     let tooltip: Tooltip | null = null;
 
     // Add tooltip dismiss command.
@@ -84,12 +87,12 @@ const manager: JupyterClientPlugin<ITooltipManager> = {
 /**
  * The console tooltip plugin.
  */
-const consoles: JupyterClientPlugin<void> = {
+const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:consoles',
   autoStart: true,
   requires: [ITooltipManager, IConsoleTracker],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ITooltipManager,
     consoles: IConsoleTracker
   ): void => {
@@ -119,12 +122,12 @@ const consoles: JupyterClientPlugin<void> = {
 /**
  * The notebook tooltip plugin.
  */
-const notebooks: JupyterClientPlugin<void> = {
+const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:notebooks',
   autoStart: true,
   requires: [ITooltipManager, INotebookTracker],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ITooltipManager,
     notebooks: INotebookTracker
   ): void => {
@@ -154,12 +157,12 @@ const notebooks: JupyterClientPlugin<void> = {
 /**
  * The file editor tooltip plugin.
  */
-const files: JupyterClientPlugin<void> = {
+const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tooltip-extension:files',
   autoStart: true,
   requires: [ITooltipManager, IEditorTracker, IRenderMimeRegistry],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ITooltipManager,
     editorTracker: IEditorTracker,
     rendermime: IRenderMimeRegistry
@@ -246,7 +249,7 @@ const files: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   manager,
   consoles,
   notebooks,

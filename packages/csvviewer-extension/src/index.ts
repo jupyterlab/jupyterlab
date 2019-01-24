@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
@@ -31,7 +31,7 @@ const FACTORY_TSV = 'TSVTable';
 /**
  * The CSV file handler extension.
  */
-const csv: JupyterClientPlugin<void> = {
+const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
   requires: [ILayoutRestorer, IThemeManager, IMainMenu],
@@ -41,7 +41,7 @@ const csv: JupyterClientPlugin<void> = {
 /**
  * The TSV file handler extension.
  */
-const tsv: JupyterClientPlugin<void> = {
+const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
   requires: [ILayoutRestorer, IThemeManager, IMainMenu],
@@ -87,7 +87,7 @@ function addMenuEntries(
  * Activate cssviewer extension for CSV files
  */
 function activateCsv(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   mainMenu: IMainMenu
@@ -153,7 +153,7 @@ function activateCsv(
  * Activate cssviewer extension for TSV files
  */
 function activateTsv(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   mainMenu: IMainMenu
@@ -218,7 +218,7 @@ function activateTsv(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [csv, tsv];
+const plugins: JupyterFrontEndPlugin<any>[] = [csv, tsv];
 export default plugins;
 
 /**

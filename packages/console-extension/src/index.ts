@@ -4,8 +4,8 @@
 import {
   ILabStatus,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
   ILabShell
 } from '@jupyterlab/application';
 
@@ -84,7 +84,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterClientPlugin<IConsoleTracker> = {
+const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -106,12 +106,12 @@ const tracker: JupyterClientPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterClientPlugin<ConsolePanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterClient, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
@@ -120,14 +120,14 @@ const factory: JupyterClientPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterClientPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**
  * Activate the console extension.
  */
 async function activateConsole(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,

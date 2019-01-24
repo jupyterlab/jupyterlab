@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { each } from '@phosphor/algorithm';
@@ -17,10 +17,10 @@ import '../style/index.css';
 /**
  * The default tab manager extension.
  */
-const plugin: JupyterClientPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tabmanager-extension:plugin',
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null
   ): void => {

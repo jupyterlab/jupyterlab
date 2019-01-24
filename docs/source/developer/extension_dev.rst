@@ -469,11 +469,11 @@ a plugin:
 
     class Foo implements IFoo {}
 
-    const plugin: JupyterClientPlugin<IFoo> = {
+    const plugin: JupyterFrontEndPlugin<IFoo> = {
       id,
       requires: [IStateDB],
       provides: IFoo,
-      activate: (app: JupyterClient, state: IStateDB): IFoo => {
+      activate: (app: JupyterFrontEnd, state: IStateDB): IFoo => {
         const foo = new Foo();
         const key = `${id}:some-attribute`;
 

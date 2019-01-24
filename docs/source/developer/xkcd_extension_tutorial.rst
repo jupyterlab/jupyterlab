@@ -227,7 +227,7 @@ repository root folder install the dependency and save it to your
 
     jlpm add @jupyterlab/apputils
 
-Locate the ``extension`` object of type ``JupyterClientPlugin``. Change the
+Locate the ``extension`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
 .. code:: typescript
@@ -235,11 +235,11 @@ definition so that it reads like so:
     /**
      * Initialization data for the jupyterlab_xkcd extension.
      */
-    const extension: JupyterClientPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
-      activate: (app: JupyterClient, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
         console.log('ICommandPalette:', palette);
       }
@@ -300,7 +300,7 @@ code:
 
 .. code-block:: typescript
 
-      activate: (app: JupyterClient, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -448,7 +448,7 @@ The beginning of the function should read like the following:
 .. code-block:: typescript
       :emphasize-lines: 9,13,16-23
 
-      activate: (app: JupyterClient, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -590,7 +590,7 @@ these changes:
     /**
      * Activate the xckd widget extension.
      */
-    function activate(app: JupyterClient, palette: ICommandPalette) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Create a single widget
@@ -617,12 +617,12 @@ these changes:
     };
 
 Remove the ``activate`` function definition from the
-``JupyterClientPlugin`` object and refer instead to the top-level function
+``JupyterFrontEndPlugin`` object and refer instead to the top-level function
 like so:
 
 .. code-block:: typescript
 
-    const extension: JupyterClientPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
@@ -662,7 +662,7 @@ entire list of import statements looks like the following:
     :emphasize-lines: 2,6,9-11
 
     import {
-      JupyterLab, JupyterClientPlugin, ILayoutRestorer // new
+      JupyterLab, JupyterFrontEndPlugin, ILayoutRestorer // new
     } from '@jupyterlab/application';
 
     import {
@@ -690,13 +690,13 @@ Install this dependency:
 
     jlpm add @phosphor/coreutils
 
-Then, add the ``ILayoutRestorer`` interface to the ``JupyterClientPlugin``
+Then, add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
 third parameter of the ``activate``.
 
 .. code:: typescript
 
-    const extension: JupyterClientPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette, ILayoutRestorer],
@@ -713,7 +713,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 .. code-block:: typescript
 
-    function activate(app: JupyterClient, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Declare a widget variable

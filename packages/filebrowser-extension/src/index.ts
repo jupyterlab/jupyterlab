@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -97,7 +97,7 @@ namespace CommandIDs {
 /**
  * The default file browser extension.
  */
-const browser: JupyterClientPlugin<void> = {
+const browser: JupyterFrontEndPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
@@ -113,7 +113,7 @@ const browser: JupyterClientPlugin<void> = {
 /**
  * The default file browser factory provider.
  */
-const factory: JupyterClientPlugin<IFileBrowserFactory> = {
+const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
@@ -131,7 +131,7 @@ const factory: JupyterClientPlugin<IFileBrowserFactory> = {
  * /user-redirect URL for JupyterHub), disable this plugin and replace it
  * with another implementation.
  */
-const shareFile: JupyterClientPlugin<void> = {
+const shareFile: JupyterFrontEndPlugin<void> = {
   activate: activateShareFile,
   id: '@jupyterlab/filebrowser-extension:share-file',
   requires: [IFileBrowserFactory],
@@ -141,12 +141,12 @@ const shareFile: JupyterClientPlugin<void> = {
 /**
  * A plugin providing file upload status.
  */
-export const fileUploadStatus: JupyterClientPlugin<void> = {
+export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
   requires: [IStatusBar, IFileBrowserFactory],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     browser: IFileBrowserFactory
   ) => {
@@ -176,7 +176,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   browser,
   shareFile,
@@ -188,7 +188,7 @@ export default plugins;
  * Activate the file browser factory provider.
  */
 function activateFactory(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -233,7 +233,7 @@ function activateFactory(
  * Activate the default file browser in the sidebar.
  */
 function activateBrowser(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   shell: ILabShell,
   factory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
@@ -308,7 +308,7 @@ function activateBrowser(
 }
 
 function activateShareFile(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   factory: IFileBrowserFactory
 ): void {
   const { commands } = app;
@@ -337,7 +337,7 @@ function activateShareFile(
  * Add the main file browser commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: InstanceTracker<FileBrowser>,
   browser: FileBrowser,
   shell?: ILabShell

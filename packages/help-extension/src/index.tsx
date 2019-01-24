@@ -3,9 +3,9 @@
 
 import {
   ILayoutRestorer,
-  JupyterClient,
+  JupyterFrontEnd,
   JupyterLab,
-  JupyterClientPlugin
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -88,7 +88,7 @@ RESOURCES.sort((a: any, b: any) => {
 /**
  * The help handler extension.
  */
-const plugin: JupyterClientPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
   requires: [JupyterLab.IInfo, IMainMenu],
@@ -109,7 +109,7 @@ export default plugin;
  * returns A promise that resolves when the extension is activated.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   info: JupyterLab.IInfo,
   mainMenu: IMainMenu,
   palette: ICommandPalette | null,

@@ -4,8 +4,8 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -94,7 +94,7 @@ namespace CommandIDs {
 /**
  * The editor tracker extension.
  */
-const plugin: JupyterClientPlugin<IEditorTracker> = {
+const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [
@@ -114,12 +114,12 @@ const plugin: JupyterClientPlugin<IEditorTracker> = {
  * A plugin that provides a status item allowing the user to
  * switch tabs vs spaces and tab widths for text editors.
  */
-export const tabSpaceStatus: JupyterClientPlugin<void> = {
+export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
   requires: [IStatusBar, IEditorTracker, ISettingRegistry, ILabShell],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
     settingRegistry: ISettingRegistry,
@@ -183,14 +183,14 @@ export const tabSpaceStatus: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
 export default plugins;
 
 /**
  * Activate the editor tracker plugin.
  */
 function activate(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   consoleTracker: IConsoleTracker,
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,

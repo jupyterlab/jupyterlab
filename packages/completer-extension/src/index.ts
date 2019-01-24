@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import {
   CompleterModel,
@@ -48,11 +51,11 @@ namespace CommandIDs {
 /**
  * A plugin providing code completion for editors.
  */
-const manager: JupyterClientPlugin<ICompletionManager> = {
+const manager: JupyterFrontEndPlugin<ICompletionManager> = {
   id: '@jupyterlab/completer-extension:manager',
   autoStart: true,
   provides: ICompletionManager,
-  activate: (app: JupyterClient): ICompletionManager => {
+  activate: (app: JupyterFrontEnd): ICompletionManager => {
     const handlers: { [id: string]: CompletionHandler } = {};
 
     app.commands.addCommand(CommandIDs.invoke, {
@@ -122,12 +125,12 @@ const manager: JupyterClientPlugin<ICompletionManager> = {
 /**
  * An extension that registers consoles for code completion.
  */
-const consoles: JupyterClientPlugin<void> = {
+const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:consoles',
   requires: [ICompletionManager, IConsoleTracker],
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ICompletionManager,
     consoles: IConsoleTracker
   ): void => {
@@ -183,12 +186,12 @@ const consoles: JupyterClientPlugin<void> = {
 /**
  * An extension that registers notebooks for code completion.
  */
-const notebooks: JupyterClientPlugin<void> = {
+const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:notebooks',
   requires: [ICompletionManager, INotebookTracker],
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ICompletionManager,
     notebooks: INotebookTracker
   ): void => {
@@ -242,12 +245,12 @@ const notebooks: JupyterClientPlugin<void> = {
 /**
  * An extension that registers file editors for completion.
  */
-const files: JupyterClientPlugin<void> = {
+const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:files',
   requires: [ICompletionManager, IEditorTracker],
   autoStart: true,
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     manager: ICompletionManager,
     editorTracker: IEditorTracker
   ): void => {
@@ -360,7 +363,7 @@ const files: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   manager,
   consoles,
   notebooks,

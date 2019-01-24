@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterClient,
-  JupyterClientPlugin,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
   ILabShell
 } from '@jupyterlab/application';
 
@@ -30,12 +30,12 @@ namespace CommandIDs {
 /**
  * The extension manager plugin.
  */
-const plugin: JupyterClientPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
   requires: [ISettingRegistry, ILayoutRestorer, ILabShell],
   activate: async (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     registry: ISettingRegistry,
     restorer: ILayoutRestorer,
     shell: ILabShell
@@ -87,7 +87,7 @@ const plugin: JupyterClientPlugin<void> = {
  * Add the main file view commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   shell: ILabShell,
   view: ExtensionView
 ): void {

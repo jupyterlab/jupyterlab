@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterClient, JupyterClientPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -19,7 +22,7 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
 /**
  * The console widget tracker provider.
  */
-export const foreign: JupyterClientPlugin<void> = {
+export const foreign: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
   requires: [IConsoleTracker],
   optional: [ICommandPalette],
@@ -30,7 +33,7 @@ export const foreign: JupyterClientPlugin<void> = {
 export default foreign;
 
 function activateForeign(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: IConsoleTracker,
   palette: ICommandPalette | null
 ) {

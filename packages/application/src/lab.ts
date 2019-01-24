@@ -16,7 +16,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { JupyterClient, JupyterClientPlugin } from './client';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
 import { createRendermimePlugins } from './mimerenderers';
 
@@ -38,12 +38,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterClient, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    *  signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterClient, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * Whether the application is busy.
@@ -73,7 +73,7 @@ export interface ILabStatus {
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterClient<LabShell, ILabShell.ILayout>
+export class JupyterLab extends JupyterFrontEnd<LabShell, ILabShell.ILayout>
   implements ILabStatus {
   /**
    * Construct a new JupyterLab object.
@@ -265,7 +265,7 @@ export namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
-    extends JupyterClient.IOptions<LabShell>,
+    extends JupyterFrontEnd.IOptions<LabShell>,
       Partial<IInfo> {}
 
   /* tslint:disable */
@@ -400,6 +400,6 @@ export namespace JupyterLab {
     /**
      * The default export.
      */
-    default: JupyterClientPlugin<any> | JupyterClientPlugin<any>[];
+    default: JupyterFrontEndPlugin<any> | JupyterFrontEndPlugin<any>[];
   }
 }

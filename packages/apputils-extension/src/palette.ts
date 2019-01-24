@@ -10,7 +10,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { CommandPalette } from '@phosphor/widgets';
 
-import { ILayoutRestorer, JupyterClient } from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
 
@@ -77,7 +77,7 @@ export namespace Palette {
   /**
    * Activate the command palette.
    */
-  export function activate(app: JupyterClient): ICommandPalette {
+  export function activate(app: JupyterFrontEnd): ICommandPalette {
     const { commands, shell } = app;
     const palette = Private.createPalette(app);
 
@@ -116,7 +116,10 @@ export namespace Palette {
   /**
    * Restore the command palette.
    */
-  export function restore(app: JupyterClient, restorer: ILayoutRestorer): void {
+  export function restore(
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer
+  ): void {
     const palette = Private.createPalette(app);
 
     // Let the application restorer track the command palette for restoration of
@@ -138,7 +141,7 @@ namespace Private {
   /**
    * Create the application-wide command palette.
    */
-  export function createPalette(app: JupyterClient): CommandPalette {
+  export function createPalette(app: JupyterFrontEnd): CommandPalette {
     if (!palette) {
       palette = new CommandPalette({ commands: app.commands });
       palette.id = 'command-palette';

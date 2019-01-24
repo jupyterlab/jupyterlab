@@ -7,8 +7,8 @@ import { Menu } from '@phosphor/widgets';
 
 import {
   ILabShell,
-  JupyterClient,
-  JupyterClientPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
@@ -50,7 +50,7 @@ namespace CommandIDs {
 /**
  * The editor services.
  */
-const services: JupyterClientPlugin<IEditorServices> = {
+const services: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   provides: IEditorServices,
   activate: activateEditorServices
@@ -59,7 +59,7 @@ const services: JupyterClientPlugin<IEditorServices> = {
 /**
  * The editor commands.
  */
-const commands: JupyterClientPlugin<void> = {
+const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
   requires: [IEditorTracker, IMainMenu, ISettingRegistry, ILabShell],
   activate: activateEditorCommands,
@@ -69,12 +69,12 @@ const commands: JupyterClientPlugin<void> = {
 /**
  * The JupyterLab plugin for the EditorSyntax status item.
  */
-export const editorSyntaxStatus: JupyterClientPlugin<void> = {
+export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
   requires: [IStatusBar, IEditorTracker, ILabShell],
   activate: (
-    app: JupyterClient,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: IEditorTracker,
     shell: ILabShell
@@ -106,7 +106,7 @@ export const editorSyntaxStatus: JupyterClientPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterClientPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus
@@ -121,7 +121,7 @@ const id = commands.id;
 /**
  * Set up the editor services.
  */
-function activateEditorServices(app: JupyterClient): IEditorServices {
+function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
   CodeMirror.prototype.save = () => {
     app.commands.execute('docmanager:save');
   };
@@ -132,7 +132,7 @@ function activateEditorServices(app: JupyterClient): IEditorServices {
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(
-  app: JupyterClient,
+  app: JupyterFrontEnd,
   tracker: IEditorTracker,
   mainMenu: IMainMenu,
   settingRegistry: ISettingRegistry,

@@ -24,7 +24,8 @@ import {
   Title,
   Widget
 } from '@phosphor/widgets';
-import { JupyterClient } from '.';
+
+import { JupyterFrontEnd } from './frontend';
 
 /**
  * The class name added to AppShell instances.
@@ -166,7 +167,7 @@ export namespace ILabShell {
 /**
  * The application shell for JupyterLab.
  */
-export class LabShell extends Widget implements JupyterClient.Shell {
+export class LabShell extends Widget implements JupyterFrontEnd.Shell {
   /**
    * Construct a new application shell.
    */
