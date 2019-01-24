@@ -37,14 +37,16 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
  * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
  * `shell` attribute of a `JupyterFrontEnd`.
  *
- * `U = any` - the type that the front-end application's `restored` promise
+ * `U = void` - the type that the front-end application's `restored` promise
  * will resolve with. If a `restored` promise is not defined by a subclass, it
  * will default to a promise that waits until the underlying phosphor
- * `Application` has `started` and subsequently resolves with `undefined`.
+ * `Application` has `started` and subsequently resolves with `undefined`. One
+ * possible candidate for this type is the restored layout description of the
+ * shell; but subclasses can resolve with any type upon restoration.
  */
 export class JupyterFrontEnd<
   T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell,
-  U = any
+  U = void
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
