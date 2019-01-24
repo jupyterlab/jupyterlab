@@ -28,7 +28,7 @@ let questions = [
 
 const template = `
 import {
-  JupyterLab, JupyterFrontEndPlugin
+  JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -42,16 +42,12 @@ import {
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '{{name}}:plugin',
   requires: [IThemeManager],
-  activate: function(app: JupyterFrontEnd, manager: IThemeManager) {
+  activate: (app: JupyterFrontEnd, manager: IThemeManager) => {
     manager.register({
       name: '{{title}}',
       isLight: true,
-      load: function() {
-        return manager.loadCSS('{{name}}/index.css');
-      },
-      unload: function() {
-        return Promise.resolve(void 0);
-      }
+      load: () => manager.loadCSS('{{name}}/index.css'),
+      unload: () => Promise.resolve(undefined)
     });
   },
   autoStart: true
