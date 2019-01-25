@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -101,11 +100,9 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IConsoleTracker,
     IEditorServices,
     IFileBrowserFactory,
-    ILayoutRestorer,
-    ISettingRegistry,
-    ILabShell
+    ISettingRegistry
   ],
-  optional: [ICommandPalette, ILauncher, IMainMenu],
+  optional: [ICommandPalette, ILauncher, IMainMenu, ILayoutRestorer],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -117,17 +114,17 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker, ISettingRegistry, ILabShell],
+  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
-    settingRegistry: ISettingRegistry,
-    shell: ILabShell
+    settingRegistry: ISettingRegistry
   ) => {
     // Create a menu for switching tabs vs spaces.
     const menu = new Menu({ commands: app.commands });
     const command = 'fileeditor:change-tabs';
+    const { shell } = app;
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
@@ -194,12 +191,11 @@ function activate(
   consoleTracker: IConsoleTracker,
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,
-  restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  shell: ILabShell,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
-  menu: IMainMenu | null
+  menu: IMainMenu | null,
+  restorer: ILayoutRestorer | null
 ): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
@@ -211,7 +207,7 @@ function activate(
       defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
     }
   });
-  const { commands, restored } = app;
+  const { commands, restored, shell } = app;
   const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
     namespace
   });
@@ -222,11 +218,13 @@ function activate(
   let config = { ...CodeEditor.defaultConfig };
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
+    });
+  }
 
   /**
    * Update the setting values.
