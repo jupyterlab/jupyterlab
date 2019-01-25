@@ -117,6 +117,18 @@ export class KernelResource {
     return this._kernel;
   }
 
+  set kernel(newValue: Kernel.IKernel | null) {
+    let oldValue = this._kernel;
+    this._kernel = newValue;
+    this._kernelChanged.emit({ oldValue, newValue });
+    oldValue.shutdown(); // Asynchronous...
+
+    // Reset the default kernel preference so that it is easy to restart a dead
+    // kernel.
+    this.kernelPreference.name = newValue.name;
+    delete this.kernelPreference.id;
+  }
+
   /**
    * A signal emitted when the kernel changes.
    *
@@ -192,7 +204,7 @@ export class KernelResource {
     if (id) {
       const model = await this._kernelManager.findById(id);
       if (model) {
-        await this._replaceKernel(this._kernelManager.connectTo(model));
+        this.kernel = this._kernelManager.connectTo(model);
         return true;
       }
     }
@@ -203,7 +215,7 @@ export class KernelResource {
     if (specName) {
       try {
         const kernel = await this._kernelManager.startNew({ name });
-        await this._replaceKernel(kernel);
+        this.kernel = kernel;
         return true;
       } catch (e) {
         // no-op
@@ -214,6 +226,8 @@ export class KernelResource {
 
   /**
    * Get the default kernel name given preference, or undefined if no suitable kernel name is found.
+   *
+   * TODO: move this to the kernel manager, as a way to deal with multiple kernel specs?
    */
   private _getDefaultKernelName(options: IKernelSearch): string | null {
     const { specs, preference } = options;
@@ -271,18 +285,6 @@ export class KernelResource {
       );
     }
     return defaultName;
-  }
-
-  private async _replaceKernel(newValue: Kernel.IKernel): Promise<void> {
-    let oldValue = this._kernel;
-    this._kernel = newValue;
-    this._kernelChanged.emit({ oldValue, newValue });
-    await oldValue.shutdown();
-
-    // Reset the default kernel preference so that it is easy to restart a dead
-    // kernel.
-    this.kernelPreference.name = newValue.name;
-    delete this.kernelPreference.id;
   }
 
   /**
