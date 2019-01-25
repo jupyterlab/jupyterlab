@@ -32,7 +32,8 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/faq-extension:plugin',
-  requires: [ICommandPalette, ILayoutRestorer, IRenderMimeRegistry],
+  requires: [IRenderMimeRegistry],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -53,9 +54,9 @@ const SOURCE = require('../faq.md');
  */
 function activate(
   app: JupyterFrontEnd,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer,
-  rendermime: IRenderMimeRegistry
+  rendermime: IRenderMimeRegistry,
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): void {
   const category = 'Help';
   const command = CommandIDs.open;
@@ -63,11 +64,13 @@ function activate(
   const tracker = new InstanceTracker<MainAreaWidget>({ namespace: 'faq' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command,
-    args: () => JSONExt.emptyObject,
-    name: () => 'faq'
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command,
+      args: () => JSONExt.emptyObject,
+      name: () => 'faq'
+    });
+  }
 
   let createWidget = () => {
     let content = rendermime.createRenderer('text/markdown');
@@ -98,5 +101,7 @@ function activate(
     }
   });
 
-  palette.addItem({ command, category });
+  if (palette) {
+    palette.addItem({ command, category });
+  }
 }
