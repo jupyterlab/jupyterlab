@@ -86,7 +86,7 @@ export class DocumentWidgetManager implements IDisposable {
   ): IDocumentWidget {
     let widget = factory.createNew(context);
     Private.factoryProperty.set(widget, factory);
-
+    debugger;
     // Handle widget extensions.
     let disposables = new DisposableSet();
     each(this._registry.widgetExtensions(factory.name), extender => {

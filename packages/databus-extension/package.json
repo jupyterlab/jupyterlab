@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/databus": "^0.7.1"
+    "@jupyterlab/databus": "^0.7.1",
+    "@jupyterlab/filebrowser": "^0.19.3"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

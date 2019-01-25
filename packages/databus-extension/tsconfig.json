@@ -11,6 +11,9 @@
     },
     {
       "path": "../databus"
+    },
+    {
+      "path": "../filebrowser"
     }
   ]
 }

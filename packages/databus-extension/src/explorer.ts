@@ -11,18 +11,19 @@ import {
   IDataRegistry
 } from '@jupyterlab/databus';
 
+const id = '@jupyterlab/databus-extension:data-explorer';
 /**
  * Adds a visual data explorer to the sidebar.
  */
 export default {
-  activate: activateDataExplorer,
-  id: '@jupyterlab/databus-extension:data-explorer',
+  activate,
+  id,
   requires: [IDataRegistry, IConverterRegistry],
   provides: IDataExplorer,
   autoStart: true
 } as JupyterLabPlugin<IDataExplorer>;
 
-function activateDataExplorer(
+function activate(
   app: JupyterLab,
   dataRegistry: IDataRegistry,
   converterRegistry: IConverterRegistry

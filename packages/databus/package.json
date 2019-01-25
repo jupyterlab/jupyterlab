@@ -31,7 +31,8 @@
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
-    "@phosphor/signaling": "^1.2.2"
+    "@phosphor/signaling": "^1.2.2",
+    "@phosphor/widgets": "^1.6.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

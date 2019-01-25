@@ -10,13 +10,13 @@ import { ConverterRegistry, IConverterRegistry } from '@jupyterlab/databus';
  * The converter registry extension.
  */
 export default {
-  activate: activateConverterRegistry,
+  activate,
   id: '@jupyterlab/databus-extension:converter-registry',
   requires: [],
   provides: IConverterRegistry,
   autoStart: true
 } as JupyterLabPlugin<IConverterRegistry>;
 
-function activateConverterRegistry(app: JupyterLab): IConverterRegistry {
+function activate(app: JupyterLab): IConverterRegistry {
   return new ConverterRegistry();
 }
