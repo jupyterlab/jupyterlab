@@ -252,15 +252,15 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [
     NotebookPanel.IContentFactory,
     IEditorServices,
-    IRenderMimeRegistry,
-    ISettingRegistry
+    IRenderMimeRegistry
   ],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
     ILauncher,
     ILayoutRestorer,
-    IMainMenu
+    IMainMenu,
+    ISettingRegistry
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -482,12 +482,12 @@ function activateNotebookHandler(
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry,
   palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null
+  mainMenu: IMainMenu | null,
+  settingRegistry: ISettingRegistry | null
 ): INotebookTracker {
   const services = app.serviceManager;
   // An object for tracking the current notebook settings.
@@ -592,8 +592,11 @@ function activateNotebookHandler(
     });
   }
 
-  // Fetch the initial state of the settings.
-  Promise.all([settingRegistry.load(trackerPlugin.id), restored])
+  // Fetch the initial state of the settings if possible.
+  const settings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject('Notebook tracker does not have a setting registry.');
+  Promise.all([settings, restored])
     .then(([settings]) => {
       updateConfig(settings);
       updateTracker();
