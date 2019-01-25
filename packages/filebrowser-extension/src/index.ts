@@ -13,7 +13,8 @@ import {
   InstanceTracker,
   IWindowResolver,
   MainAreaWidget,
-  ToolbarButton
+  ToolbarButton,
+  IInstanceTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -297,9 +298,41 @@ function activateBrowser(
       if (navigateToCurrentDirectory) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
+        const { path } = context;
         if (context) {
-          commands.execute('filebrowser:activate', { path: context.path });
-          commands.execute('filebrowser:navigate', { path: context.path });
+          commands.execute('filebrowser:activate', { path: path });
+          const browserForPath = getBrowserForPath(
+            path,
+            app,
+            browser,
+            factory.tracker
+          );
+          const services = app.serviceManager;
+          const localPath = services.contents.localPath(path);
+          const failure = (reason: any) => {
+            console.warn(
+              `${CommandIDs.navigate} failed to open: ${path}`,
+              reason
+            );
+          };
+
+          return services.ready
+            .then(() => services.contents.get(path))
+            .then(value => {
+              const { model } = browserForPath;
+              const { restored } = model;
+
+              if (value.type === 'directory') {
+                return restored.then(() => model.cd(`/${localPath}`));
+              }
+
+              return restored
+                .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
+                .then(() => {
+                  docManager.findWidget(path).activate();
+                });
+            })
+            .catch(failure);
         }
       }
     });
@@ -346,27 +379,6 @@ function addCommands(
   docManager: IDocumentManager
 ): void {
   const registry = app.docRegistry;
-
-  const getBrowserForPath = (path: string): FileBrowser => {
-    const driveName = app.serviceManager.contents.driveName(path);
-
-    if (driveName) {
-      let browserForPath = tracker.find(fb => fb.model.driveName === driveName);
-
-      if (!browserForPath) {
-        // warn that no filebrowser could be found for this driveName
-        console.warn(
-          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
-        );
-        return;
-      }
-
-      return browserForPath;
-    }
-
-    // if driveName is empty, assume the main filebrowser
-    return browser;
-  };
   const { commands } = app;
 
   commands.addCommand(CommandIDs.del, {
@@ -443,7 +455,7 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
-      const browserForPath = getBrowserForPath(path);
+      const browserForPath = getBrowserForPath(path, app, browser, tracker);
       const services = app.serviceManager;
       const localPath = services.contents.localPath(path);
       const failure = (reason: any) => {
@@ -462,9 +474,7 @@ function addCommands(
 
           return restored
             .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
-            .then(() => {
-              docManager.findWidget(path).activate();
-            });
+            .then(() => commands.execute('docmanager:open', { path: path }));
         })
         .catch(failure);
     }
@@ -616,7 +626,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showBrowser, {
     execute: args => {
       const path = (args.path as string) || '';
-      const browserForPath = getBrowserForPath(path);
+      const browserForPath = getBrowserForPath(path, app, browser, tracker);
 
       // Check for browser not found
       if (!browserForPath) {
@@ -855,4 +865,35 @@ function createLauncher(
       );
       return launcher;
     });
+}
+
+/**
+ * Get browser object given file path.
+ */
+function getBrowserForPath(
+  path: string,
+  app: JupyterLab,
+  browser: FileBrowser,
+  tracker: IInstanceTracker<FileBrowser>
+): FileBrowser {
+  const driveName = app.serviceManager.contents.driveName(path);
+
+  if (driveName) {
+    let browserForPath = tracker.find(
+      _path => _path.model.driveName === driveName
+    );
+
+    if (!browserForPath) {
+      // warn that no filebrowser could be found for this driveName
+      console.warn(
+        `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+      );
+      return;
+    }
+
+    return browserForPath;
+  }
+
+  // if driveName is empty, assume the main filebrowser
+  return browser;
 }
