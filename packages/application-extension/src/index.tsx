@@ -188,15 +188,15 @@ const main: JupyterFrontEndPlugin<void> = {
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
   requires: [IStateDB, ILabShell],
-  activate: (app: JupyterFrontEnd, state: IStateDB, shell: ILabShell) => {
+  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
 
     restorer.fetch().then(saved => {
-      shell.restoreLayout(saved);
-      shell.layoutModified.connect(() => {
-        restorer.save(shell.saveLayout());
+      labShell.restoreLayout(saved);
+      labShell.layoutModified.connect(() => {
+        restorer.save(labShell.saveLayout());
       });
     });
 
@@ -344,23 +344,23 @@ const sidebar: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    shell: ILabShell
+    labShell: ILabShell
   ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
-      each(shell.widgets('left'), widget => {
+      each(labShell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          shell.add(widget, 'right');
+          labShell.add(widget, 'right');
         }
       });
-      each(shell.widgets('right'), widget => {
+      each(labShell.widgets('right'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          shell.add(widget, 'left');
+          labShell.add(widget, 'left');
         }
       });
     };
-    shell.layoutModified.connect(handleLayoutOverrides);
+    labShell.layoutModified.connect(handleLayoutOverrides);
     // Fetch overrides from the settings system.
     Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
       ([settings]) => {
