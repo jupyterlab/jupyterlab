@@ -61,7 +61,8 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, IMainMenu, ISettingRegistry, ILabShell],
+  requires: [IEditorTracker, ISettingRegistry],
+  optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -77,11 +78,11 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: IEditorTracker,
-    shell: ILabShell
+    labShell: ILabShell
   ) => {
     let item = new EditorSyntaxStatus({ commands: app.commands });
-    shell.currentChanged.connect(() => {
-      const current = shell.currentWidget;
+    labShell.currentChanged.connect(() => {
+      const current = labShell.currentWidget;
       if (current && tracker.has(current)) {
         item.model.editor = (current as IDocumentWidget<
           FileEditor
@@ -95,9 +96,9 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          shell.currentWidget &&
+          labShell.currentWidget &&
           tracker.currentWidget &&
-          shell.currentWidget === tracker.currentWidget
+          labShell.currentWidget === tracker.currentWidget
       }
     );
   }
@@ -134,9 +135,8 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
 function activateEditorCommands(
   app: JupyterFrontEnd,
   tracker: IEditorTracker,
-  mainMenu: IMainMenu,
   settingRegistry: ISettingRegistry,
-  shell: ILabShell
+  mainMenu: IMainMenu | null
 ): void {
   const { commands, restored } = app;
   let {
@@ -219,7 +219,7 @@ function activateEditorCommands(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      tracker.currentWidget === app.shell.currentWidget
     );
   }
 
@@ -382,37 +382,39 @@ function activateEditorCommands(
     });
   });
 
-  // Add some of the editor settings to the settings menu.
-  mainMenu.settingsMenu.addGroup(
-    [
-      { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
-      { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
-    ],
-    10
-  );
+  if (mainMenu) {
+    // Add some of the editor settings to the settings menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
+        { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
+      ],
+      10
+    );
 
-  // Add the syntax highlighting submenu to the `View` menu.
-  mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
+    // Add the syntax highlighting submenu to the `View` menu.
+    mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
 
-  // Add find-replace capabilities to the edit menu.
-  mainMenu.editMenu.findReplacers.add({
-    tracker,
-    find: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('find');
-    },
-    findAndReplace: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('replace');
-    }
-  } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
+    // Add find-replace capabilities to the edit menu.
+    mainMenu.editMenu.findReplacers.add({
+      tracker,
+      find: (widget: IDocumentWidget<FileEditor>) => {
+        let editor = widget.content.editor as CodeMirrorEditor;
+        editor.execCommand('find');
+      },
+      findAndReplace: (widget: IDocumentWidget<FileEditor>) => {
+        let editor = widget.content.editor as CodeMirrorEditor;
+        editor.execCommand('replace');
+      }
+    } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
 
-  // Add go to line capabilities to the edit menu.
-  mainMenu.editMenu.goToLiners.add({
-    tracker,
-    goToLine: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('jumpToLine');
-    }
-  } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
+    // Add go to line capabilities to the edit menu.
+    mainMenu.editMenu.goToLiners.add({
+      tracker,
+      goToLine: (widget: IDocumentWidget<FileEditor>) => {
+        let editor = widget.content.editor as CodeMirrorEditor;
+        editor.execCommand('jumpToLine');
+      }
+    } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
+  }
 }
