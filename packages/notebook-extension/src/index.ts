@@ -286,7 +286,8 @@ const tools: JupyterFrontEndPlugin<ICellTools> = {
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB, ILabShell]
+  requires: [INotebookTracker, IEditorServices, IStateDB],
+  optional: [ILabShell]
 };
 
 /**
@@ -295,13 +296,13 @@ const tools: JupyterFrontEndPlugin<ICellTools> = {
 export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, ILabShell],
+  requires: [IStatusBar, INotebookTracker],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    tracker: INotebookTracker,
-    shell: ILabShell
+    tracker: INotebookTracker
   ) => {
+    const { shell } = app;
     const item = new CommandEditStatus();
 
     // Keep the status item up-to-date with the current notebook.
@@ -332,9 +333,9 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    tracker: INotebookTracker,
-    shell: ILabShell
+    tracker: INotebookTracker
   ) => {
+    const { shell } = app;
     const item = new NotebookTrustStatus();
 
     // Keep the status item up-to-date with the current notebook.
@@ -378,8 +379,8 @@ function activateCellTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  labShell: ILabShell
-): Promise<ICellTools> {
+  labShell: ILabShell | null
+): ICellTools {
   const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
@@ -437,14 +438,13 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
+      app.shell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
       if (open) {
-        labShell.activateById(celltools.id);
+        app.shell.activateById(celltools.id);
       }
     }
 
-    // For all subsequent widget changes, check if the cell tools should render.
-    labShell.currentChanged.connect((sender, args) => {
+    const updateTools = () => {
       // If there are any open notebooks, add cell tools to the side panel if
       // it is not already there.
       if (tracker.size) {
@@ -455,10 +455,21 @@ function activateCellTools(
       }
       // If there are no notebooks, close cell tools.
       celltools.close();
-    });
+    };
+
+    // For all subsequent widget changes, check if the cell tools should render.
+    if (labShell) {
+      labShell.currentChanged.connect((sender, args) => {
+        updateTools();
+      });
+    } else {
+      tracker.currentChanged.connect((sender, args) => {
+        updateTools();
+      });
+    }
   });
 
-  return Promise.resolve(celltools);
+  return celltools;
 }
 
 /**
@@ -473,7 +484,7 @@ function activateNotebookHandler(
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  shell: ILabShell,
+  labShell: ILabShell,
   browserFactory: IFileBrowserFactory | null,
   launcher: ILauncher | null
 ): INotebookTracker {
@@ -509,7 +520,7 @@ function activateNotebookHandler(
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
-  addCommands(app, services, tracker, shell);
+  addCommands(app, services, tracker);
   populatePalette(palette, services);
 
   let id = 0; // The ID counter for notebook panels.
@@ -794,10 +805,9 @@ function activateNotebookHandler(
 function addCommands(
   app: JupyterFrontEnd,
   services: ServiceManager,
-  tracker: NotebookTracker,
-  shell: ILabShell
+  tracker: NotebookTracker
 ): void {
-  const { commands } = app;
+  const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
