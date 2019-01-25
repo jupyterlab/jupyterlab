@@ -301,38 +301,16 @@ function activateBrowser(
         const { path } = context;
         if (context) {
           commands.execute('filebrowser:activate', { path: path });
-          const browserForPath = getBrowserForPath(
-            path,
-            app,
-            browser,
-            factory.tracker
-          );
-          const services = app.serviceManager;
-          const localPath = services.contents.localPath(path);
-          const failure = (reason: any) => {
-            console.warn(
-              `${CommandIDs.navigate} failed to open: ${path}`,
-              reason
-            );
-          };
-
-          return services.ready
-            .then(() => services.contents.get(path))
-            .then(value => {
-              const { model } = browserForPath;
-              const { restored } = model;
-
-              if (value.type === 'directory') {
-                return restored.then(() => model.cd(`/${localPath}`));
-              }
-
-              return restored
-                .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
-                .then(() => {
-                  docManager.findWidget(path).activate();
-                });
+          navigateToPath(path, app, browser, factory.tracker)
+            .then(() => {
+              docManager.findWidget(path).activate();
             })
-            .catch(failure);
+            .catch((reason: any) => {
+              console.warn(
+                `${CommandIDs.navigate} failed to open: ${path}`,
+                reason
+              );
+            });
         }
       }
     });
@@ -455,28 +433,16 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
-      const browserForPath = getBrowserForPath(path, app, browser, tracker);
-      const services = app.serviceManager;
-      const localPath = services.contents.localPath(path);
-      const failure = (reason: any) => {
-        console.warn(`${CommandIDs.navigate} failed to open: ${path}`, reason);
-      };
-
-      return services.ready
-        .then(() => services.contents.get(path))
-        .then(value => {
-          const { model } = browserForPath;
-          const { restored } = model;
-
-          if (value.type === 'directory') {
-            return restored.then(() => model.cd(`/${localPath}`));
-          }
-
-          return restored
-            .then(() => model.cd(`/${PathExt.dirname(localPath)}`))
-            .then(() => commands.execute('docmanager:open', { path: path }));
+      navigateToPath(path, app, browser, tracker)
+        .then(() => {
+          docManager.findWidget(path).activate();
         })
-        .catch(failure);
+        .catch((reason: any) => {
+          console.warn(
+            `${CommandIDs.navigate} failed to open: ${path}`,
+            reason
+          );
+        });
     }
   });
 
@@ -896,4 +862,29 @@ function getBrowserForPath(
 
   // if driveName is empty, assume the main filebrowser
   return browser;
+}
+
+/**
+ * Navigate to a path.
+ */
+function navigateToPath(
+  path: string,
+  app: JupyterLab,
+  browser: FileBrowser,
+  tracker: IInstanceTracker<FileBrowser>
+): Promise<any> {
+  const browserForPath = getBrowserForPath(path, app, browser, tracker);
+  const services = app.serviceManager;
+  const localPath = services.contents.localPath(path);
+
+  return services.ready.then(() => services.contents.get(path)).then(value => {
+    const { model } = browserForPath;
+    const { restored } = model;
+
+    if (value.type === 'directory') {
+      return restored.then(() => model.cd(`/${localPath}`));
+    }
+
+    return restored.then(() => model.cd(`/${PathExt.dirname(localPath)}`));
+  });
 }
