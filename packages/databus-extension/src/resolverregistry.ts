@@ -28,16 +28,12 @@ function activate(
   state: IStateDB,
   registry: IDataRegistry
 ): IResolverRegistry {
-  const resolvers = new ResolverRegistry();
+  const resolvers = new ResolverRegistry(registry);
   (async () => {
     for (const uri of ((await state.fetch(id)) || []) as Array<string>) {
-      const dataset = await resolvers.resolve(uri);
-      if (dataset !== null) {
-        registry.publish(dataset);
-      }
+      resolvers.resolveAndPublish(uri);
     }
     registry.datasetsChanged.connect(async () => {
-      console.log('SAVING');
       await state.save(
         id,
         [...registry.datasets].map(d => d.uri).filter(uri => uri)

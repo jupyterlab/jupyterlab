@@ -9,7 +9,7 @@ import {
   IDataExplorer,
   IDataRegistry,
   IResolverRegistry,
-  CSVFileResolver
+  FileResolver
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -43,13 +43,11 @@ function activate(
   factory: IFileBrowserFactory,
   resolverRegistry: IResolverRegistry
 ): void {
-  resolverRegistry.register(
-    new CSVFileResolver((path: string) =>
-      factory.defaultBrowser.model.manager.services.contents.getDownloadUrl(
-        path
-      )
-    )
+  const fileResolver = new FileResolver((path: string) =>
+    factory.defaultBrowser.model.manager.services.contents.getDownloadUrl(path)
   );
+  fileResolver.register('.csv', 'text/csv');
+  resolverRegistry.register(fileResolver);
   app.contextMenu.addItem({
     command: open,
     selector: selectorNotDir,
@@ -72,10 +70,12 @@ function activate(
       dataExplorer.reveal(dataset);
     },
     isEnabled: () => {
-      // TODO: Add is enabled that synchronously checks if dataset can be rendered.
-      // To do this, seperate file matching logic into it's own registry based on extension
-      // and match syncronously.
-      return true;
+      const widget = factory.tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      const path = widget.selectedItems().next().path;
+      return fileResolver.whichMimeType(path) !== null;
     },
     label: 'Open as Dataset',
     iconClass: 'jp-MaterialIcon jp-??'

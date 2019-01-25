@@ -91,6 +91,8 @@ export class DataRegistry {
     return result;
   }
 
+  // TODO: Add clear all method
+
   /**
    * Return a set of all published datasets.
    */

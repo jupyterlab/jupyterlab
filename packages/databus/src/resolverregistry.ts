@@ -1,4 +1,4 @@
-import { IDataset } from './dataregistry';
+import { IDataset, IDataRegistry } from './dataregistry';
 import { Token } from '@phosphor/coreutils';
 
 export interface IResolver<T extends IDataset<any>> {
@@ -6,6 +6,7 @@ export interface IResolver<T extends IDataset<any>> {
 }
 
 export class ResolverRegistry implements IResolver<any> {
+  constructor(public dataRegistry: IDataRegistry) {}
   async resolve(uri: string): Promise<IDataset<any> | null> {
     for (const r of this._resolvers) {
       const res = await r.resolve(uri);
@@ -14,6 +15,13 @@ export class ResolverRegistry implements IResolver<any> {
       }
     }
     return null;
+  }
+  async resolveAndPublish(uri: string): Promise<boolean> {
+    const dataset = await this.resolve(uri);
+    if (dataset === null) {
+      return false;
+    }
+    this.dataRegistry.publish(dataset);
   }
 
   register(resolver: IResolver<any>) {
