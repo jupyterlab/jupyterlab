@@ -29,17 +29,17 @@ export interface IKernelPreference {
   /**
    * The id of an existing kernel.
    */
-  readonly id?: string;
+  id?: string;
 
   /**
    * The preferred kernel language.
    */
-  readonly language?: string;
+  language?: string;
 
   /**
    * The name of the kernel.
    */
-  readonly name?: string;
+  name?: string;
 
   /*
    * Use server default as a last resort.
@@ -105,6 +105,7 @@ export interface IKernelSearch {
  * TODO:
  * [ ] Create "running" side panel for kernel resources
  * [ ] Create some way of persisting state, so that a refresh can reconstitute the state
+ * [ ] Figure out better name. Engine?
  */
 export class KernelResource {
   constructor(manager: KernelManager, id?: string) {
@@ -277,6 +278,11 @@ export class KernelResource {
     this._kernel = newValue;
     this._kernelChanged.emit({ oldValue, newValue });
     await oldValue.shutdown();
+
+    // Reset the default kernel preference so that it is easy to restart a dead
+    // kernel.
+    this.kernelPreference.name = newValue.name;
+    delete this.kernelPreference.id;
   }
 
   /**
