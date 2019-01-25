@@ -73,7 +73,7 @@
       "selector": "[data-jp-code-runner]"
     },
     {
-      "command": "tabmenu:activate-previously-used-tab",
+      "command": "tabsmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
       "selector": "body"
     }
