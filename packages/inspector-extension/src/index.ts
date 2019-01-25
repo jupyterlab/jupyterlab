@@ -195,7 +195,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     manager: IInspector,
     notebooks: INotebookTracker,
-    shell: ILabShell
+    labShell: ILabShell
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -227,7 +227,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    shell.currentChanged.connect((sender, args) => {
+    labShell.currentChanged.connect((sender, args) => {
       let widget = args.newValue;
       if (!widget || !notebooks.has(widget)) {
         return;

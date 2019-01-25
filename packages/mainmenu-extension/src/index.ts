@@ -723,7 +723,7 @@ export function createSettingsMenu(
 export function createTabsMenu(
   app: JupyterFrontEnd,
   menu: TabsMenu,
-  shell: ILabShell
+  labShell: ILabShell | null
 ): void {
   const commands = app.commands;
 
@@ -765,44 +765,45 @@ export function createTabsMenu(
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 
-  app.restored.then(() => {
-    // Iterate over the current widgets in the
-    // main area, and add them to the tab group
-    // of the menu.
-    const populateTabs = () => {
-      // remove the previous tab list
-      if (disposable && !disposable.isDisposed) {
-        disposable.dispose();
-      }
-      tabGroup.length = 0;
-
-      let isPreviouslyUsedTabAttached = false;
-      each(app.shell.widgets('main'), widget => {
-        if (widget.id === previousId) {
-          isPreviouslyUsedTabAttached = true;
+  if (labShell) {
+    app.restored.then(() => {
+      // Iterate over the current widgets in the
+      // main area, and add them to the tab group
+      // of the menu.
+      const populateTabs = () => {
+        // remove the previous tab list
+        if (disposable && !disposable.isDisposed) {
+          disposable.dispose();
         }
-        tabGroup.push({
-          command: CommandIDs.activateById,
-          args: { id: widget.id }
+        tabGroup.length = 0;
+
+        let isPreviouslyUsedTabAttached = false;
+        each(app.shell.widgets('main'), widget => {
+          if (widget.id === previousId) {
+            isPreviouslyUsedTabAttached = true;
+          }
+          tabGroup.push({
+            command: CommandIDs.activateById,
+            args: { id: widget.id }
+          });
         });
-      });
-      disposable = menu.addGroup(tabGroup, 1);
-      previousId = isPreviouslyUsedTabAttached ? previousId : '';
-    };
-    populateTabs();
-    shell.layoutModified.connect(() => {
+        disposable = menu.addGroup(tabGroup, 1);
+        previousId = isPreviouslyUsedTabAttached ? previousId : '';
+      };
       populateTabs();
+      labShell.layoutModified.connect(() => {
+        populateTabs();
+      });
+      // Update the ID of the previous active tab if a new tab is selected.
+      labShell.currentChanged.connect((_, args) => {
+        let widget = args.oldValue;
+        if (!widget) {
+          return;
+        }
+        previousId = widget.id;
+      });
     });
-    // Update the id of the previous active tab if
-    // a new tab is selected.
-    shell.currentChanged.connect((sender, args) => {
-      let widget = args.oldValue;
-      if (!widget) {
-        return;
-      }
-      previousId = widget.id;
-    });
-  });
+  }
 }
 
 export default plugin;

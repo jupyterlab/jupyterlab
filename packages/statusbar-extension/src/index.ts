@@ -79,7 +79,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
-    shell: ILabShell
+    labShell: ILabShell
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
@@ -103,7 +103,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
     };
 
     // Keep the session object on the status item up-to-date.
-    shell.currentChanged.connect((shell, change) => {
+    labShell.currentChanged.connect((_, change) => {
       const { oldValue, newValue } = change;
 
       // Clean up after the old value if it exists,
@@ -133,7 +133,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
         align: 'left',
         rank: 1,
         isActive: () => {
-          const current = shell.currentWidget;
+          const current = labShell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) || consoleTracker.has(current))
@@ -163,7 +163,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker,
-    shell: ILabShell
+    labShell: ILabShell
   ) => {
     const item = new LineCol();
 
@@ -175,7 +175,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
       item.model!.editor = prompt && prompt.editor;
     };
 
-    shell.currentChanged.connect((shell, change) => {
+    labShell.currentChanged.connect((_, change) => {
       const { oldValue, newValue } = change;
 
       // Check if we need to disconnect the console listener
@@ -220,7 +220,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
         align: 'right',
         rank: 2,
         isActive: () => {
-          const current = shell.currentWidget;
+          const current = labShell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) ||
@@ -267,10 +267,10 @@ export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
 export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
-  requires: [IStatusBar, ILabShell],
-  activate: (app: JupyterFrontEnd, statusBar: IStatusBar, shell: ILabShell) => {
+  requires: [IStatusBar],
+  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
     const item = new RunningSessions({
-      onClick: () => shell.activateById('jp-running-sessions'),
+      onClick: () => app.shell.activateById('jp-running-sessions'),
       serviceManager: app.serviceManager
     });
 
