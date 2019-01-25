@@ -7,6 +7,8 @@ import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
+//import { IOutputModel } from '@jupyterlab/rendermime';
+
 import { notebookItemRenderer } from './itemrenderer';
 
 import { notebookGeneratorToolbar } from './toolbargenerator';
@@ -57,42 +59,34 @@ export function createNotebookGenerator(
       let headings: INotebookHeading[] = [];
       let numberingDict: { [level: number]: number } = {};
       let currentCollapseLevel = -1;
-
-      // Keep track of the previous heading that is shown in TOC, used for
-      // determine whether one header has child
+      // Keep track of the previous heading, so it can be
+      // marked as having a child if one is discovered
       let prevHeading: INotebookHeading | null = null;
+      // Iterate through the cells in the notebook, generating their headings
       for (let i = 0; i < panel.content.widgets.length; i++) {
         let cell: Cell = panel.content.widgets[i];
-        let collapsed = false;
-        collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
+        let collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
         collapsed = collapsed !== undefined ? collapsed : false;
         let model = cell.model;
         if (model.type === 'code') {
-          // Get the execution count prompt for code cells
-          let executionCountNumber = (cell as CodeCell).model.executionCount as
-            | number
-            | null;
-          let executionCount =
-            executionCountNumber !== null
-              ? '[' + executionCountNumber + ']: '
-              : '[ ]: ';
-          // Iterate over the outputs, and parse them if they
-          // are rendered markdown or HTML.
-          let showCode = true;
-          if (widget) {
-            showCode = options.showCode;
-          }
-          if (showCode) {
+          // Code is shown by default, overridden by previously saved settings
+          if (!widget || (widget && options.showCode)) {
+            // Generate the heading and add to headings if appropriate
+            let executionCountNumber = (cell as CodeCell).model
+              .executionCount as number | null;
+            let executionCount =
+              executionCountNumber !== null
+                ? '[' + executionCountNumber + ']: '
+                : '[ ]: ';
             let text = (model as CodeCellModel).value.text;
             const onClickFactory = (line: number) => {
-              // Activate the corresponding cell if user click on the TOC entry
               return () => {
                 panel.content.activeCellIndex = i;
                 cell.node.scrollIntoView();
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeadings = Private.getCodeCells(
+            let renderedHeading = Private.getCodeCells(
               text,
               onClickFactory,
               numberingDict,
@@ -100,53 +94,23 @@ export function createNotebookGenerator(
               lastLevel,
               cell
             );
-            if (
-              !Private.headingIsFilteredOut(
-                renderedHeadings[0],
-                options.filtered
-              ) &&
-              prevHeading &&
-              prevHeading.type === 'header' &&
-              text &&
-              options.showCode
-            ) {
-              for (let j = headings.length - 1; j >= 0; j--) {
-                if (headings[j] === prevHeading) {
-                  headings[j].hasChild = true;
-                }
-              }
-            }
-            // Do not render the code cell in TOC if it is filtered out by tags
-            if (
-              currentCollapseLevel < 0 &&
-              !Private.headingIsFilteredOut(
-                renderedHeadings[0],
-                options.filtered
-              )
-            ) {
-              headings = headings.concat(renderedHeadings);
-            }
-
-            // Keep a copy of the TOC entry in prevHeadings
-            if (
-              !Private.headingIsFilteredOut(
-                renderedHeadings[0],
-                options.filtered
-              )
-            ) {
-              prevHeading = renderedHeadings[0];
-            }
+            [headings, prevHeading] = Private.addMDOrCode(
+              headings,
+              renderedHeading,
+              prevHeading,
+              currentCollapseLevel,
+              options.filtered
+            );
           }
+          // Iterate over the code cell outputs to check for MD/HTML
           for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
-            // Filter out the outputs that are not rendered HTML
-            // (that is, markdown, vdom, or text/html)
             const outputModel = (model as CodeCellModel).outputs.get(j);
             const dataTypes = Object.keys(outputModel.data);
             const htmlData = dataTypes.filter(t => isMarkdown(t) || isDOM(t));
             if (!htmlData.length) {
               continue;
             }
-            // If the output has rendered HTML, parse it for headers.
+            // Generate the heading
             const outputWidget = (cell as CodeCell).outputArea.widgets[j];
             const onClickFactory = (el: Element) => {
               return () => {
@@ -166,31 +130,112 @@ export function createNotebookGenerator(
               numbering,
               cell
             );
-            if (renderedHeading && renderedHeading.type === 'markdown') {
-              // Do not put the item in TOC if its filtered out by tags
-              if (
-                !Private.headingIsFilteredOut(
-                  renderedHeading,
-                  options.filtered
-                ) &&
-                prevHeading &&
-                prevHeading.type === 'header' &&
-                renderedHeading.text &&
-                options.showMarkdown &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] === prevHeading) {
-                    headings[j].hasChild = true;
-                  }
+            // If the heading is MD and it's appropriate, add to headings
+            if (
+              renderedHeading &&
+              renderedHeading.type === 'markdown' &&
+              options.showMarkdown
+            ) {
+              [headings, prevHeading] = Private.addMDOrCode(
+                headings,
+                renderedHeading,
+                prevHeading,
+                currentCollapseLevel,
+                options.filtered
+              );
+            } else if (renderedHeading && renderedHeading.type === 'header') {
+              [headings, prevHeading, currentCollapseLevel] = Private.addHeader(
+                headings,
+                renderedHeading,
+                prevHeading,
+                currentCollapseLevel,
+                options.filtered,
+                collapsed
+              );
+            }
+          }
+        } else if (model.type === 'markdown') {
+          // If the cell is rendered, generate the ToC items from
+          // the HTML. If it is not rendered, generate them from
+          // the text of the cell.
+          let mdCell = cell as MarkdownCell;
+          if (mdCell.rendered && !mdCell.inputHidden) {
+            const onClickFactory = (el: Element) => {
+              return () => {
+                if (!mdCell.rendered) {
+                  panel.content.activeCellIndex = i;
+                  el.scrollIntoView();
+                } else {
+                  panel.content.mode = 'command';
+                  cell.node.scrollIntoView();
+                  panel.content.activeCellIndex = i;
                 }
-              }
-              if (
-                currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                headings.push(renderedHeading);
-              }
+              };
+            };
+            let numbering = options.numbering;
+            let lastLevel = Private.getLastLevel(headings);
+            let renderedHeading: INotebookHeading | undefined;
+            renderedHeading = Private.getRenderedHTMLHeading(
+              cell.node,
+              onClickFactory,
+              sanitizer,
+              numberingDict,
+              lastLevel,
+              numbering,
+              cell
+            );
+            if (
+              renderedHeading &&
+              renderedHeading.type === 'markdown' &&
+              options.showMarkdown
+            ) {
+              [headings, prevHeading] = Private.addMDOrCode(
+                headings,
+                renderedHeading,
+                prevHeading,
+                currentCollapseLevel,
+                options.filtered
+              );
+            } else if (renderedHeading && renderedHeading.type === 'header') {
+              [headings, prevHeading, currentCollapseLevel] = Private.addHeader(
+                headings,
+                renderedHeading,
+                prevHeading,
+                currentCollapseLevel,
+                options.filtered,
+                collapsed
+              );
+            }
+          } else {
+            const onClickFactory = (line: number) => {
+              return () => {
+                panel.content.activeCellIndex = i;
+                cell.node.scrollIntoView();
+              };
+            };
+            let lastLevel = Private.getLastLevel(headings);
+            let renderedHeading: INotebookHeading | null = null;
+            if (cell) {
+              renderedHeading = Private.getMarkdownHeading(
+                model!.value.text,
+                onClickFactory,
+                numberingDict,
+                lastLevel,
+                cell
+              );
+            }
+            if (
+              renderedHeading &&
+              renderedHeading.type === 'markdown' &&
+              options.showMarkdown
+            ) {
+              [headings, prevHeading] = Private.addMDOrCode(
+                headings,
+                renderedHeading,
+                prevHeading,
+                currentCollapseLevel,
+                options.filtered
+              );
             } else if (renderedHeading && renderedHeading.type === 'header') {
               // Determine whether the heading has children
               if (
@@ -218,145 +263,7 @@ export function createNotebookGenerator(
                 } else {
                   currentCollapseLevel = -1;
                 }
-              } else {
-                if (
-                  Private.headingIsFilteredOut(
-                    renderedHeading,
-                    options.filtered
-                  ) &&
-                  prevHeading &&
-                  renderedHeading.level <= prevHeading.level
-                ) {
-                  let k = headings.length - 1;
-                  let parentHeading = false;
-                  while (k >= 0 && parentHeading === false) {
-                    if (headings[k].level < renderedHeading.level) {
-                      prevHeading = headings[k];
-                      parentHeading = true;
-                    }
-                    k--;
-                  }
-                  if (!parentHeading) {
-                    prevHeading = null;
-                    currentCollapseLevel = -1;
-                  } else {
-                    let parentCollapsed = headings[
-                      k + 1
-                    ].cellRef.model.metadata.get('toc-hr-collapsed') as boolean;
-                    parentCollapsed =
-                      parentCollapsed !== undefined ? parentCollapsed : false;
-                    if (parentCollapsed) {
-                      currentCollapseLevel = headings[k + 1].level;
-                    } else {
-                      currentCollapseLevel = -1;
-                    }
-                  }
-                }
-              }
-            }
-            if (
-              renderedHeading &&
-              !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-            ) {
-              if (
-                !(renderedHeading.type === 'markdown') ||
-                options.showMarkdown
-              ) {
-                prevHeading = renderedHeading;
-              }
-            }
-          }
-        } else if (model.type === 'markdown') {
-          // If the cell is rendered, generate the ToC items from
-          // the HTML. If it is not rendered, generate them from
-          // the text of the cell.
-          if (
-            (cell as MarkdownCell).rendered &&
-            !(cell as MarkdownCell).inputHidden
-          ) {
-            const onClickFactory = (el: Element) => {
-              return () => {
-                if (!(cell as MarkdownCell).rendered) {
-                  panel.content.activeCellIndex = i;
-                  el.scrollIntoView();
-                } else {
-                  panel.content.mode = 'command';
-                  cell.node.scrollIntoView();
-                  panel.content.activeCellIndex = i;
-                }
-              };
-            };
-            let numbering = options.numbering;
-            let lastLevel = Private.getLastLevel(headings);
-            let renderedHeading: INotebookHeading | undefined;
-            renderedHeading = Private.getRenderedHTMLHeading(
-              cell.node,
-              onClickFactory,
-              sanitizer,
-              numberingDict,
-              lastLevel,
-              numbering,
-              cell
-            );
-            if (renderedHeading && renderedHeading.type === 'markdown') {
-              // Do not put the item in TOC if it's filtered out by tags
-              if (
-                !Private.headingIsFilteredOut(
-                  renderedHeading,
-                  options.filtered
-                ) &&
-                prevHeading &&
-                prevHeading.type === 'header' &&
-                renderedHeading.text &&
-                options.showMarkdown &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] === prevHeading) {
-                    headings[j].hasChild = true;
-                  }
-                }
-              }
-              if (
-                currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                headings.push(renderedHeading);
-              }
-            } else if (
-              (renderedHeading && renderedHeading.type === 'header') ||
-              !renderedHeading
-            ) {
-              // Determine whether the heading has children
-              if (
-                prevHeading &&
-                prevHeading.type === 'header' &&
-                (renderedHeading &&
-                  prevHeading.level < renderedHeading.level) &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] === prevHeading) {
-                    headings[j].hasChild = true;
-                  }
-                }
-              }
-              // Do not put the item in TOC if its header is collapsed
-              // or filtered out by tags
-              if (
-                renderedHeading &&
-                (currentCollapseLevel >= renderedHeading.level ||
-                  currentCollapseLevel < 0) &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                headings.push(renderedHeading);
-                if (collapsed) {
-                  currentCollapseLevel = renderedHeading.level;
-                } else {
-                  currentCollapseLevel = -1;
-                }
               } else if (
-                renderedHeading &&
                 Private.headingIsFilteredOut(
                   renderedHeading,
                   options.filtered
@@ -389,123 +296,7 @@ export function createNotebookGenerator(
                   }
                 }
               }
-            }
-            if (
-              renderedHeading &&
-              !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-            ) {
               if (
-                (renderedHeading && !(renderedHeading.type === 'markdown')) ||
-                options.showMarkdown
-              ) {
-                prevHeading = renderedHeading;
-              }
-            }
-          } else {
-            const onClickFactory = (line: number) => {
-              return () => {
-                panel.content.activeCellIndex = i;
-                cell.node.scrollIntoView();
-              };
-            };
-            let lastLevel = Private.getLastLevel(headings);
-            let renderedHeading: INotebookHeading | null = null;
-            if (cell) {
-              renderedHeading = Private.getMarkdownHeading(
-                model!.value.text,
-                onClickFactory,
-                numberingDict,
-                lastLevel,
-                cell
-              );
-            }
-            if (renderedHeading && renderedHeading.type === 'markdown') {
-              if (
-                prevHeading &&
-                prevHeading.type === 'header' &&
-                prevHeading.level < renderedHeading.level &&
-                options.showMarkdown &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] === prevHeading) {
-                    headings[j].hasChild = true;
-                  }
-                }
-              }
-              if (
-                renderedHeading &&
-                currentCollapseLevel < 0 &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                headings.push(renderedHeading);
-              }
-            } else if (renderedHeading && renderedHeading.type === 'header') {
-              // Determine whether the heading has children
-              if (
-                prevHeading &&
-                prevHeading.type === 'header' &&
-                prevHeading.level < renderedHeading.level &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                for (let j = headings.length - 1; j >= 0; j--) {
-                  if (headings[j] === prevHeading) {
-                    headings[j].hasChild = true;
-                  }
-                }
-              }
-              // Do not put the item in TOC if its header is collapsed
-              // or filtered out by tags
-              if (
-                renderedHeading &&
-                (currentCollapseLevel >= renderedHeading.level ||
-                  currentCollapseLevel < 0) &&
-                !Private.headingIsFilteredOut(renderedHeading, options.filtered)
-              ) {
-                headings.push(renderedHeading);
-                if (collapsed) {
-                  currentCollapseLevel = renderedHeading.level;
-                } else {
-                  currentCollapseLevel = -1;
-                }
-              } else {
-                if (
-                  renderedHeading &&
-                  Private.headingIsFilteredOut(
-                    renderedHeading,
-                    options.filtered
-                  ) &&
-                  prevHeading &&
-                  renderedHeading.level <= prevHeading.level
-                ) {
-                  let k = headings.length - 1;
-                  let parentHeading = false;
-                  while (k >= 0 && parentHeading === false) {
-                    if (headings[k].level < renderedHeading.level) {
-                      prevHeading = headings[k];
-                      parentHeading = true;
-                    }
-                    k--;
-                  }
-                  if (!parentHeading) {
-                    prevHeading = null;
-                    currentCollapseLevel = -1;
-                  } else {
-                    let parentCollapsed = headings[
-                      k + 1
-                    ].cellRef.model.metadata.get('toc-hr-collapsed') as boolean;
-                    parentCollapsed =
-                      parentCollapsed !== undefined ? parentCollapsed : false;
-                    if (parentCollapsed) {
-                      currentCollapseLevel = headings[k + 1].level;
-                    } else {
-                      currentCollapseLevel = -1;
-                    }
-                  }
-                }
-              }
-              if (
-                renderedHeading &&
                 !Private.headingIsFilteredOut(renderedHeading, options.filtered)
               ) {
                 prevHeading = renderedHeading;
@@ -566,6 +357,102 @@ namespace Private {
     return 0;
   }
 
+  export function addMDOrCode(
+    headings: INotebookHeading[],
+    renderedHeading: INotebookHeading,
+    prevHeading: INotebookHeading | null,
+    currentCollapseLevel: number,
+    filtered: string[]
+  ): [INotebookHeading[], INotebookHeading | null] {
+    if (
+      !Private.headingIsFilteredOut(renderedHeading, filtered) &&
+      renderedHeading &&
+      renderedHeading.text
+    ) {
+      // If there is a previous header, find it and mark hasChild true
+      if (prevHeading && prevHeading.type === 'header') {
+        for (let j = headings.length - 1; j >= 0; j--) {
+          if (headings[j] === prevHeading) {
+            headings[j].hasChild = true;
+          }
+        }
+      }
+      if (currentCollapseLevel < 0) {
+        headings.push(renderedHeading);
+      }
+      prevHeading = renderedHeading;
+    }
+    return [headings, prevHeading];
+  }
+
+  export function addHeader(
+    headings: INotebookHeading[],
+    renderedHeading: INotebookHeading,
+    prevHeading: INotebookHeading | null,
+    currentCollapseLevel: number,
+    filtered: string[],
+    collapsed: boolean
+  ): [INotebookHeading[], INotebookHeading | null, number] {
+    let filter = Private.headingIsFilteredOut(renderedHeading, filtered);
+    if (
+      prevHeading &&
+      prevHeading.type === 'header' &&
+      prevHeading.level < renderedHeading.level &&
+      !filter
+    ) {
+      for (let j = headings.length - 1; j >= 0; j--) {
+        if (headings[j] === prevHeading) {
+          headings[j].hasChild = true;
+        }
+      }
+    }
+    if (
+      (currentCollapseLevel >= renderedHeading.level ||
+        currentCollapseLevel < 0) &&
+      !filter
+    ) {
+      headings.push(renderedHeading);
+      if (collapsed) {
+        currentCollapseLevel = renderedHeading.level;
+      } else {
+        currentCollapseLevel = -1;
+      }
+    } else if (
+      filter &&
+      prevHeading &&
+      renderedHeading.level <= prevHeading.level
+    ) {
+      let k = headings.length - 1;
+      let parentHeading = false;
+      while (k >= 0 && parentHeading === false) {
+        if (headings[k].level < renderedHeading.level) {
+          prevHeading = headings[k];
+          parentHeading = true;
+        }
+        k--;
+      }
+      if (!parentHeading) {
+        prevHeading = null;
+        currentCollapseLevel = -1;
+      } else {
+        let parentCollapsed = headings[k + 1].cellRef.model.metadata.get(
+          'toc-hr-collapsed'
+        ) as boolean;
+        parentCollapsed =
+          parentCollapsed !== undefined ? parentCollapsed : false;
+        if (parentCollapsed) {
+          currentCollapseLevel = headings[k + 1].level;
+        } else {
+          currentCollapseLevel = -1;
+        }
+      }
+    }
+    if (!filter) {
+      prevHeading = renderedHeading;
+    }
+    return [headings, prevHeading, currentCollapseLevel];
+  }
+
   /**
    * Given a string of code, get the code entry.
    */
@@ -576,13 +463,11 @@ namespace Private {
     executionCount: string,
     lastLevel: number,
     cellRef: Cell
-  ): INotebookHeading[] {
+  ): INotebookHeading {
     let headings: INotebookHeading[] = [];
     if (text) {
       const lines = text.split('\n');
       let headingText = '';
-
-      // Take at most first 3 lines
       let numLines = Math.min(lines.length, 3);
       for (let i = 0; i < numLines - 1; i++) {
         headingText = headingText + lines[i] + '\n';
@@ -600,12 +485,11 @@ namespace Private {
         hasChild: false
       });
     }
-    return headings;
+    return headings[0];
   }
 
   /**
-   * Given a string of markdown, get the markdown headings
-   * in that string.
+   * Given a string of markdown, get the markdown headings in that string.
    */
   export function getMarkdownHeading(
     text: string,
@@ -614,15 +498,10 @@ namespace Private {
     lastLevel: number,
     cellRef: Cell
   ): INotebookHeading {
-    // Split the text into lines.
     const lines = text.split('\n');
-
-    // Get the first line an check if it is a header.
     const line = lines[0];
     const line2 = lines.length > 1 ? lines[1] : undefined;
-    // Make an onClick handler for this line.
     const onClick = onClickFactory(0);
-
     // First test for '#'-style headers.
     let match = line.match(/^([#]{1,6}) (.*)/);
     let match2 = line2 && line2.match(/^([=]{2,}|[-]{2,})/);
