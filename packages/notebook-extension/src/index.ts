@@ -250,16 +250,18 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
-    IMainMenu,
-    ICommandPalette,
     NotebookPanel.IContentFactory,
     IEditorServices,
-    ILayoutRestorer,
     IRenderMimeRegistry,
-    ISettingRegistry,
-    ILabShell
+    ISettingRegistry
   ],
-  optional: [IFileBrowserFactory, ILauncher],
+  optional: [
+    ICommandPalette,
+    IFileBrowserFactory,
+    ILauncher,
+    ILayoutRestorer,
+    IMainMenu
+  ],
   activate: activateNotebookHandler,
   autoStart: true
 };
@@ -477,16 +479,15 @@ function activateCellTools(
  */
 function activateNotebookHandler(
   app: JupyterFrontEnd,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
-  restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  labShell: ILabShell,
+  palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
-  launcher: ILauncher | null
+  launcher: ILauncher | null,
+  restorer: ILayoutRestorer | null,
+  mainMenu: IMainMenu | null
 ): INotebookTracker {
   const services = app.serviceManager;
   // An object for tracking the current notebook settings.
@@ -509,19 +510,23 @@ function activateNotebookHandler(
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: panel => ({ path: panel.context.path, factory: FACTORY }),
-    name: panel => panel.context.path,
-    when: services.ready
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: panel => ({ path: panel.context.path, factory: FACTORY }),
+      name: panel => panel.context.path,
+      when: services.ready
+    });
+  }
 
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
   addCommands(app, services, tracker);
-  populatePalette(palette, services);
+  if (palette) {
+    populatePalette(palette, services);
+  }
 
   let id = 0; // The ID counter for notebook panels.
 
@@ -603,7 +608,9 @@ function activateNotebookHandler(
     });
 
   // Add main menu notebook menu.
-  populateMenus(app, mainMenu, tracker, services, palette);
+  if (mainMenu) {
+    populateMenus(app, mainMenu, tracker, services, palette);
+  }
 
   // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
@@ -1812,7 +1819,7 @@ function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette
+  palette: ICommandPalette | null
 ): void {
   let { commands } = app;
 
@@ -1880,7 +1887,7 @@ function populateMenus(
   exportTo.title.label = 'Export Notebook As…';
   services.nbconvert.getExportFormats().then(response => {
     if (response) {
-      // convert exportList to palette and menu items
+      // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       const category = 'Notebook Operations';
       formatList.forEach(function(key) {
@@ -1896,11 +1903,13 @@ function populateMenus(
             command: CommandIDs.exportToFormat,
             args: args
           });
-          palette.addItem({
-            command: CommandIDs.exportToFormat,
-            category,
-            args
-          });
+          if (palette) {
+            palette.addItem({
+              command: CommandIDs.exportToFormat,
+              category,
+              args
+            });
+          }
         }
       });
       const fileGroup = [
