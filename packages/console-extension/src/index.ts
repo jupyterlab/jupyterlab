@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILabStatus,
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -95,8 +94,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILayoutRestorer,
     IFileBrowserFactory,
     IRenderMimeRegistry,
-    ISettingRegistry,
-    ILabShell
+    ISettingRegistry
   ],
   optional: [ILauncher, ILabStatus],
   activate: activateConsole,
@@ -136,12 +134,11 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  shell: ILabShell,
   launcher: ILauncher | null,
   status: ILabStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
-  const { commands } = app;
+  const { commands, shell } = app;
   const category = 'Console';
 
   // Create an instance tracker for all console panels.
