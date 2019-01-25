@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text } from '@jupyterlab/coreutils';
+import { IDataConnector, Text, ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -60,21 +60,31 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     if (this._editor && !this._editor.isDisposed) {
-      this._editor.model.selections.changed.disconnect(
+      this._selectionsMonitor.activityStopped.disconnect(
         this.onEditorChange,
         this
       );
-      this._editor.model.value.changed.disconnect(this.onEditorChange, this);
+      this._valueMonitor.activityStopped.disconnect(this.onEditorChange, this);
     }
     let editor = (this._editor = newValue);
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
-      editor.model.selections.changed.connect(
+
+      this._selectionsMonitor = new ActivityMonitor({
+        signal: editor.model.selections.changed,
+        timeout: 1000
+      });
+      this._selectionsMonitor.activityStopped.connect(
         this.onEditorChange,
         this
       );
-      editor.model.value.changed.connect(
+
+      this._valueMonitor = new ActivityMonitor({
+        signal: editor.model.value.changed,
+        timeout: 1000
+      });
+      this._valueMonitor.activityStopped.connect(
         this.onEditorChange,
         this
       );
@@ -183,6 +193,8 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _pending = 0;
   private _rendermime: RenderMimeRegistry;
   private _standby = true;
+  private _selectionsMonitor: ActivityMonitor<any, any>;
+  private _valueMonitor: ActivityMonitor<any, any>;
 }
 
 /**
