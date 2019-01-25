@@ -49,7 +49,6 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     restorer: ILayoutRestorer | null
   ): IInspector => {
     const { commands, shell } = app;
-    const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
     const title = 'Inspector';
@@ -92,7 +91,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Add command to UI where possible.
     if (palette) {
-      palette.addItem({ command, category });
+      palette.addItem({ command, category: title });
     }
     if (launcher) {
       launcher.add({ command, args: { isLauncher: true } });
@@ -134,7 +133,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     manager: IInspector,
     consoles: IConsoleTracker,
-    shell: ILabShell
+    labShell: ILabShell
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -166,7 +165,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    shell.currentChanged.connect((sender, args) => {
+    labShell.currentChanged.connect((_, args) => {
       let widget = args.newValue;
       if (!widget || !consoles.has(widget)) {
         return;

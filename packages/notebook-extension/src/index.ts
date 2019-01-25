@@ -506,7 +506,7 @@ function activateNotebookHandler(
     notebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
-  const { commands, restored } = app;
+  const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
@@ -592,12 +592,13 @@ function activateNotebookHandler(
     });
   }
 
-  // Fetch the initial state of the settings if possible.
-  const settings = settingRegistry
+  // Fetch settings if possible.
+  const fetchSettings = settingRegistry
     ? settingRegistry.load(trackerPlugin.id)
-    : Promise.reject('Notebook tracker does not have a setting registry.');
-  Promise.all([settings, restored])
-    .then(([settings]) => {
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+  app.restored
+    .then(() => fetchSettings)
+    .then(settings => {
       updateConfig(settings);
       updateTracker();
       settings.changed.connect(() => {
@@ -606,7 +607,7 @@ function activateNotebookHandler(
       });
     })
     .catch((reason: Error) => {
-      console.error(reason.message);
+      console.warn(reason.message);
       updateTracker();
     });
 
@@ -1892,7 +1893,6 @@ function populateMenus(
     if (response) {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
-      const category = 'Notebook Operations';
       formatList.forEach(function(key) {
         let capCaseKey = key[0].toUpperCase() + key.substr(1);
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
@@ -1907,6 +1907,7 @@ function populateMenus(
             args: args
           });
           if (palette) {
+            const category = 'Notebook Operations';
             palette.addItem({
               command: CommandIDs.exportToFormat,
               category,

@@ -158,7 +158,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
     ILabShell
   ],
   activate: (
-    app: JupyterFrontEnd,
+    _: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,

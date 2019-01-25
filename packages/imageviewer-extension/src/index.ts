@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -56,7 +55,7 @@ const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
-  requires: [ICommandPalette, ILayoutRestorer, ILabShell],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -70,9 +69,8 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer,
-  shell: ILabShell
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
@@ -86,12 +84,14 @@ function activate(
     namespace
   });
 
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
 
@@ -110,22 +110,23 @@ function activate(
     }
   });
 
-  addCommands(app, tracker, shell);
+  addCommands(app, tracker);
 
-  const category = 'Image Viewer';
-
-  [
-    CommandIDs.zoomIn,
-    CommandIDs.zoomOut,
-    CommandIDs.resetImage,
-    CommandIDs.rotateClockwise,
-    CommandIDs.rotateCounterclockwise,
-    CommandIDs.flipHorizontal,
-    CommandIDs.flipVertical,
-    CommandIDs.invertColors
-  ].forEach(command => {
-    palette.addItem({ command, category });
-  });
+  if (palette) {
+    const category = 'Image Viewer';
+    [
+      CommandIDs.zoomIn,
+      CommandIDs.zoomOut,
+      CommandIDs.resetImage,
+      CommandIDs.rotateClockwise,
+      CommandIDs.rotateCounterclockwise,
+      CommandIDs.flipHorizontal,
+      CommandIDs.flipVertical,
+      CommandIDs.invertColors
+    ].forEach(command => {
+      palette.addItem({ command, category });
+    });
+  }
 
   return tracker;
 }
@@ -133,12 +134,8 @@ function activate(
 /**
  * Add the commands for the image widget.
  */
-export function addCommands(
-  app: JupyterFrontEnd,
-  tracker: IImageTracker,
-  shell: ILabShell
-) {
-  const { commands } = app;
+export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
+  const { commands, shell } = app;
 
   /**
    * Whether there is an active image viewer.
