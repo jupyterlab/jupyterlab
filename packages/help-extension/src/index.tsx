@@ -207,6 +207,9 @@ function activate(
       // Add the kernel banner to the Help Menu.
       const bannerCommand = `help-menu-${name}:banner`;
       const spec = serviceManager.specs.kernelspecs[name];
+      if (!spec) {
+        return;
+      }
       const kernelName = spec.display_name;
       let kernelIconUrl = spec.resources['logo-64x64'];
       if (kernelIconUrl) {
