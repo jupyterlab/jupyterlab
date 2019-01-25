@@ -60,12 +60,20 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     if (this._editor && !this._editor.isDisposed) {
+      this._editor.model.selections.changed.disconnect(
+        this.onEditorChange,
+        this
+      );
       this._editor.model.value.changed.disconnect(this.onEditorChange, this);
     }
     let editor = (this._editor = newValue);
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
+      editor.model.selections.changed.connect(
+        this.onEditorChange,
+        this
+      );
       editor.model.value.changed.connect(
         this.onEditorChange,
         this
