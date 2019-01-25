@@ -76,13 +76,6 @@ export interface ILauncher {
  */
 export class LauncherModel extends VDomModel implements ILauncher {
   /**
-   * Create a new launcher model.
-   */
-  constructor() {
-    super();
-  }
-
-  /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
    *
