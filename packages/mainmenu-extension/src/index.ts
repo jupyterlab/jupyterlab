@@ -104,6 +104,8 @@ export namespace CommandIDs {
   export const openSettings = 'settingsmenu:open';
 
   export const openHelp = 'helpmenu:open';
+
+  export const openFirst = 'mainmenu:open-first';
 }
 
 /**
@@ -178,6 +180,13 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
     commands.addCommand(CommandIDs.openHelp, {
       label: 'Open Help Menu',
       execute: () => activateMenu(menu.helpMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openFirst, {
+      label: 'Open First Menu',
+      execute: () => {
+        menu.activeIndex = 0;
+        menu.openActiveMenu();
+      }
     });
 
     // Add some of the commands defined here to the command palette.
