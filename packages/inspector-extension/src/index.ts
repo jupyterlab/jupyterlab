@@ -83,7 +83,8 @@ const inspector: JupyterLabPlugin<IInspector> = {
         !inspector.isAttached ||
         !inspector.isVisible,
       label: args => (args.isLauncher ? title : label),
-      iconClass: 'jp-MaterialIcon jp-InspectorIcon',
+      iconClass: args =>
+        args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
       execute: () => {
         openInspector();
       }

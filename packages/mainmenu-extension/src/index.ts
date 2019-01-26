@@ -34,6 +34,8 @@ import { ServerConnection } from '@jupyterlab/services';
  * A namespace for command IDs of semantic extension points.
  */
 export namespace CommandIDs {
+  export const openEdit = 'editmenu:open';
+
   export const undo = 'editmenu:undo';
 
   export const redo = 'editmenu:redo';
@@ -48,6 +50,8 @@ export namespace CommandIDs {
 
   export const goToLine = 'editmenu:go-to-line';
 
+  export const openFile = 'filemenu:open';
+
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
   export const persistAndSave = 'filemenu:persist-and-save';
@@ -55,6 +59,8 @@ export namespace CommandIDs {
   export const createConsole = 'filemenu:create-console';
 
   export const quit = 'filemenu:quit';
+
+  export const openKernel = 'kernelmenu:open';
 
   export const interruptKernel = 'kernelmenu:interrupt';
 
@@ -68,11 +74,15 @@ export namespace CommandIDs {
 
   export const shutdownAllKernels = 'kernelmenu:shutdownAll';
 
+  export const openView = 'viewmenu:open';
+
   export const wordWrap = 'viewmenu:word-wrap';
 
   export const lineNumbering = 'viewmenu:line-numbering';
 
   export const matchBrackets = 'viewmenu:match-brackets';
+
+  export const openRun = 'runmenu:open';
 
   export const run = 'runmenu:run';
 
@@ -84,10 +94,18 @@ export namespace CommandIDs {
 
   export const runBelow = 'runmenu:run-below';
 
-  export const activateById = 'tabmenu:activate-by-id';
+  export const openTabs = 'tabsmenu:open';
+
+  export const activateById = 'tabsmenu:activate-by-id';
 
   export const activatePreviouslyUsedTab =
-    'tabmenu:activate-previously-used-tab';
+    'tabsmenu:activate-previously-used-tab';
+
+  export const openSettings = 'settingsmenu:open';
+
+  export const openHelp = 'helpmenu:open';
+
+  export const openFirst = 'mainmenu:open-first';
 }
 
 /**
@@ -103,7 +121,9 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
     palette: ICommandPalette,
     inspector: IInspector | null
   ): IMainMenu => {
-    let menu = new MainMenu(app.commands);
+    const { commands } = app;
+
+    let menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();
@@ -123,6 +143,53 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
     createViewMenu(app, menu.viewMenu);
     createTabsMenu(app, menu.tabsMenu);
 
+    // Create commands to open the main application menus.
+    const activateMenu = (item: Menu) => {
+      menu.activeMenu = item;
+      menu.openActiveMenu();
+    };
+
+    commands.addCommand(CommandIDs.openEdit, {
+      label: 'Open Edit Menu',
+      execute: () => activateMenu(menu.editMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openFile, {
+      label: 'Open File Menu',
+      execute: () => activateMenu(menu.fileMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openKernel, {
+      label: 'Open Kernel Menu',
+      execute: () => activateMenu(menu.kernelMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openRun, {
+      label: 'Open Run Menu',
+      execute: () => activateMenu(menu.runMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openView, {
+      label: 'Open View Menu',
+      execute: () => activateMenu(menu.viewMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openSettings, {
+      label: 'Open Settings Menu',
+      execute: () => activateMenu(menu.settingsMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openTabs, {
+      label: 'Open Tabs Menu',
+      execute: () => activateMenu(menu.tabsMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openHelp, {
+      label: 'Open Help Menu',
+      execute: () => activateMenu(menu.helpMenu.menu)
+    });
+    commands.addCommand(CommandIDs.openFirst, {
+      label: 'Open First Menu',
+      execute: () => {
+        menu.activeIndex = 0;
+        menu.openActiveMenu();
+      }
+    });
+
+    // Add some of the commands defined here to the command palette.
     if (menu.fileMenu.quitEntry) {
       palette.addItem({
         command: CommandIDs.quit,
