@@ -662,7 +662,7 @@ entire list of import statements looks like the following:
     :emphasize-lines: 2,6,9-11
 
     import {
-      JupyterFrontEnd, JupyterFrontEndPlugin,, ILayoutRestorer // new
+      JupyterFrontEnd, JupyterFrontEndPlugin, ILayoutRestorer // new
     } from '@jupyterlab/application';
 
     import {
