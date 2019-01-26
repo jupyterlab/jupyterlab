@@ -88,6 +88,12 @@
       "path": "../help-extension"
     },
     {
+      "path": "../htmlviewer"
+    },
+    {
+      "path": "../htmlviewer-extension"
+    },
+    {
       "path": "../imageviewer"
     },
     {

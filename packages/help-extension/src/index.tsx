@@ -133,7 +133,14 @@ function activate(
    * Create a new HelpWidget widget.
    */
   function newHelpWidget(url: string, text: string): MainAreaWidget {
-    let content = new IFrame();
+    // Allow scripts and forms so that things like
+    // readthedocs can use their search functionality.
+    // We *don't* allow same origin requests, which
+    // can prevent some content from being loaded onto the
+    // help pages.
+    let content = new IFrame({
+      sandbox: ['allow-scripts', 'allow-forms']
+    });
     content.url = url;
     content.addClass(HELP_CLASS);
     content.title.label = text;
