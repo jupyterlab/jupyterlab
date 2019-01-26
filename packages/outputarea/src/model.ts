@@ -394,20 +394,14 @@ export class OutputAreaModel implements IOutputAreaModel {
    * carriage return characters.
    */
   private _fixCarriageReturn(txt: string): string {
-    let tmp = txt;
-    // Handle multiple carriage returns before a newline
-    tmp = tmp.replace(/\r\r+\n/gm, '\r\n');
-    // Remove chunks that should be overridden by carriage returns
-    do {
-      // Remove any chunks preceding a carriage return unless carriage
-      // return followed by a newline
-      tmp = tmp.replace(/^[^\n]*(?:\r(?!\n))+/gm, '');
-    } while (tmp.search(/\r(?!\n)/) > -1);
-    do {
-      // Replace remaining \r\n characters with a newline
-      tmp = tmp.replace(/\r\n/gm, '\n');
-    } while (tmp.indexOf('\r\n') > -1);
-    return tmp;
+    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
+    while (txt.search(/\r[^$]/g) > -1) {
+      const base = txt.match(/^(.*)\r+/m)[1];
+      let insert = txt.match(/\r+(.*)$/m)[1];
+      insert = insert + base.slice(insert.length, base.length);
+      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
+    }
+    return txt;
   }
 
   /*
