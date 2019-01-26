@@ -267,7 +267,8 @@ function RunningSessionsComponent({
         labelTitle={m => {
           let kernelName = m.kernel.name;
           if (manager.specs) {
-            kernelName = manager.specs.kernelspecs[kernelName].display_name;
+            const spec = manager.specs.kernelspecs[kernelName];
+            kernelName = spec ? spec.display_name : 'unknown';
           }
           return `Path: ${m.path}\nKernel: ${kernelName}`;
         }}

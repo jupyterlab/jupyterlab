@@ -40,6 +40,8 @@ import { find } from '@phosphor/algorithm';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
+import { DisposableSet } from '@phosphor/disposable';
+
 import { DockLayout, Menu } from '@phosphor/widgets';
 
 import foreign from './foreign';
@@ -154,26 +156,38 @@ async function activateConsole(
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
-      const specs = manager.specs;
-      if (!specs) {
-        return;
-      }
-      let baseUrl = PageConfig.getBaseUrl();
-      for (let name in specs.kernelspecs) {
-        let rank = name === specs.default ? 0 : Infinity;
-        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
-        if (kernelIconUrl) {
-          let index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+      let disposables: DisposableSet | null = null;
+      const onSpecsChanged = () => {
+        if (disposables) {
+          disposables.dispose();
+          disposables = null;
         }
-        launcher.add({
-          command: CommandIDs.create,
-          args: { isLauncher: true, kernelPreference: { name } },
-          category: 'Console',
-          rank,
-          kernelIconUrl
-        });
-      }
+        const specs = manager.specs;
+        if (!specs) {
+          return;
+        }
+        disposables = new DisposableSet();
+        let baseUrl = PageConfig.getBaseUrl();
+        for (let name in specs.kernelspecs) {
+          let rank = name === specs.default ? 0 : Infinity;
+          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          if (kernelIconUrl) {
+            let index = kernelIconUrl.indexOf('kernelspecs');
+            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+          }
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.create,
+              args: { isLauncher: true, kernelPreference: { name } },
+              category: 'Console',
+              rank,
+              kernelIconUrl
+            })
+          );
+        }
+      };
+      onSpecsChanged();
+      manager.specsChanged.connect(onSpecsChanged);
     });
   }
 

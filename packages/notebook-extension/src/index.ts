@@ -27,6 +27,8 @@ import {
 
 import { UUID } from '@phosphor/coreutils';
 
+import { DisposableSet } from '@phosphor/disposable';
+
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -625,24 +627,39 @@ function activateNotebookHandler(
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
-      const specs = services.specs;
-      const baseUrl = PageConfig.getBaseUrl();
-
-      for (let name in specs.kernelspecs) {
-        let rank = name === specs.default ? 0 : Infinity;
-        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
-        if (kernelIconUrl) {
-          let index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+      let disposables: DisposableSet | null = null;
+      const onSpecsChanged = () => {
+        if (disposables) {
+          disposables.dispose();
+          disposables = null;
         }
-        launcher.add({
-          command: CommandIDs.createNew,
-          args: { isLauncher: true, kernelName: name },
-          category: 'Notebook',
-          rank,
-          kernelIconUrl
-        });
-      }
+        const specs = services.specs;
+        if (!specs) {
+          return;
+        }
+        disposables = new DisposableSet();
+        const baseUrl = PageConfig.getBaseUrl();
+
+        for (let name in specs.kernelspecs) {
+          let rank = name === specs.default ? 0 : Infinity;
+          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          if (kernelIconUrl) {
+            let index = kernelIconUrl.indexOf('kernelspecs');
+            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+          }
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.createNew,
+              args: { isLauncher: true, kernelName: name },
+              category: 'Notebook',
+              rank,
+              kernelIconUrl
+            })
+          );
+        }
+      };
+      onSpecsChanged();
+      services.specsChanged.connect(onSpecsChanged);
     });
   }
 
