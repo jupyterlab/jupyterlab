@@ -287,11 +287,17 @@ export class DocumentManager implements IDisposable {
    */
   findWidget(
     path: string,
-    widgetName = 'default'
+    widgetName: string | null = 'default'
   ): IDocumentWidget | undefined {
     let newPath = PathExt.normalize(path);
     let widgetNames = [widgetName];
     if (widgetName === 'default') {
+      let factory = this.registry.defaultWidgetFactory(newPath);
+      if (!factory) {
+        return undefined;
+      }
+      widgetNames = [factory.name];
+    } else if (widgetName === null) {
       widgetNames = this.registry
         .preferredWidgetFactories(newPath)
         .map(f => f.name);
