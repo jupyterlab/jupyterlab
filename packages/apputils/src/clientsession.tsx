@@ -6,6 +6,20 @@
 // lets you see at a glance what is hooked up to what. A kernel can be "named"
 // whatever the first session path was, if there is one.
 
+// TODO: This nesting of the .session and then the kernel is kind of a bit much.
+// Can we subclass the session object instead? The key difference is if the
+// session can survive having a dead kernel, i.e., if a session has a dead
+// kernel, can we restart the kernel or replace the kernel with another one?
+// Currently, the services deletes sessions with dead kernels. Is that
+// absolutely necessary? What happens on the server with sessions that have dead
+// kernels?
+
+// TODO: When are kernels and sessions disposed? When the kernel status goes to 'dead'? Should the object be listening for this and setting the kernel/session to null in this case?
+
+// TODO: rename clientsession to jlabsession or JLabSessionContainer something? "ClientSession" I think is too close to "session", which is misleading about what it is.
+
+// TODO: perhaps we don't need sessions at all. What do they do? They provide a way to maintain a mapping between path and kernel for persistence. Perhaps we just roll that synchronization into kernel management.
+
 import { PathExt } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';

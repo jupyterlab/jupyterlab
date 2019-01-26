@@ -108,6 +108,12 @@ export interface IKernelSearch {
  * [ ] Figure out better name. Engine?
  */
 export class KernelResource {
+  /**
+   * TODO: it would be nice if we didn't pass the kernel manager to the
+   * resource. In a situation where you might have more than one kernel manager
+   * (perhaps you have some remote kernels, some local kernels), it would be
+   * nice to not tie the resource to a single manager.
+   */
   constructor(manager: KernelManager, id?: string) {
     this._kernelManager = manager;
     this.id = id || UUID.uuid4();
@@ -318,4 +324,5 @@ export class KernelResource {
   private _kernelManager: KernelManager;
   private _kernel: Kernel.IKernel | null;
   private _kernelChanged = new Signal<this, IKernelChangedArgs>(this);
+  private _kernelName: string | null = null;
 }
