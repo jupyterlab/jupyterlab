@@ -147,6 +147,8 @@ const shortcuts: JupyterLabPlugin<void> = {
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
+      const commands = app.commands.listCommands().join('\n');
+
       loaded = {};
       schema.properties.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
@@ -157,6 +159,11 @@ const shortcuts: JupyterLabPlugin<void> = {
         })
         .reduce((acc, val) => acc.concat(val), [])
         .sort((a, b) => a.command.localeCompare(b.command));
+      schema.properties.shortcuts.title =
+        'List of Commands (followed by shortcuts)';
+      schema.properties.shortcuts.description = `${commands}
+
+List of Keyboard Shortcuts`;
     }
 
     registry.pluginChanged.connect(async (sender, plugin) => {
