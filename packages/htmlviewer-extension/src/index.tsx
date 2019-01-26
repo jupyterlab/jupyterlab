@@ -5,8 +5,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -32,7 +32,7 @@ namespace CommandIDs {
 /**
  * The HTML file handler extension.
  */
-const htmlPlugin: JupyterLabPlugin<void> = {
+const htmlPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateHTMLViewer,
   id: '@jupyterlab/htmlviewer-extension:plugin',
   requires: [ICommandPalette, ILayoutRestorer],
@@ -43,7 +43,7 @@ const htmlPlugin: JupyterLabPlugin<void> = {
  * Activate the HTMLViewer extension.
  */
 function activateHTMLViewer(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   palette: ICommandPalette,
   restorer: ILayoutRestorer
 ): void {
