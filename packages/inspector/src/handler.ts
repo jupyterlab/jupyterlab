@@ -60,34 +60,26 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     if (this._editor && !this._editor.isDisposed) {
-      this._selectionsMonitor.activityStopped.disconnect(
-        this.onEditorChange,
-        this
-      );
-      this._valueMonitor.activityStopped.disconnect(this.onEditorChange, this);
+      this._monitors.forEach(monitor => {
+        monitor.activityStopped.disconnect(this.onEditorChange, this);
+      });
     }
     let editor = (this._editor = newValue);
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
-
-      this._selectionsMonitor = new ActivityMonitor({
-        signal: editor.model.selections.changed,
-        timeout: 250
+      let signals: ISignal<any, any>[] = [
+        editor.model.selections.changed,
+        editor.model.value.changed
+      ];
+      this._monitors = signals.map(s => {
+        let m = new ActivityMonitor({ signal: s, timeout: 250 });
+        m.activityStopped.connect(
+          this.onEditorChange,
+          this
+        );
+        return m;
       });
-      this._selectionsMonitor.activityStopped.connect(
-        this.onEditorChange,
-        this
-      );
-
-      this._valueMonitor = new ActivityMonitor({
-        signal: editor.model.value.changed,
-        timeout: 250
-      });
-      this._valueMonitor.activityStopped.connect(
-        this.onEditorChange,
-        this
-      );
     }
   }
 
@@ -193,8 +185,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _pending = 0;
   private _rendermime: RenderMimeRegistry;
   private _standby = true;
-  private _selectionsMonitor: ActivityMonitor<any, any>;
-  private _valueMonitor: ActivityMonitor<any, any>;
+  private _monitors: ActivityMonitor<any, any>[];
 }
 
 /**
