@@ -97,10 +97,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
    * it can execute Javascript in the iframe sandbox.
    */
   get trusted(): boolean {
-    return (
-      !this.content.sandbox ||
-      this.content.sandbox.indexOf('allow-scripts') !== -1
-    );
+    return this.content.sandbox.indexOf('allow-scripts') !== -1;
   }
   set trusted(value: boolean) {
     if (this.trusted === value) {
@@ -221,15 +218,12 @@ namespace Private {
   /**
    * Sandbox exceptions for untrusted HTML.
    */
-  export const untrusted: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+  export const untrusted: IFrame.SandboxExceptions[] = [];
 
   /**
    * Sandbox exceptions for trusted HTML.
    */
-  export const trusted: IFrame.SandboxExceptions[] = [
-    'allow-same-origin',
-    'allow-scripts'
-  ];
+  export const trusted: IFrame.SandboxExceptions[] = ['allow-scripts'];
 
   /**
    * Namespace for TrustedButton.
@@ -263,8 +257,8 @@ namespace Private {
             tooltip={`Whether the HTML file is trusted.
 Trusting the file allows scripts to run in it,
 which may result in security risks.
-Only only enable for files you trust.`}
-            label={props.htmlDocument.trusted ? 'Trusted' : 'Untrusted'}
+Only enable for files you trust.`}
+            label={props.htmlDocument.trusted ? 'Distrust HTML' : 'Trust HTML'}
           />
         )}
       </UseSignal>
