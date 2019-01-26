@@ -215,7 +215,7 @@ function activateFactory(
     let launcher = new ToolbarButton({
       iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
       onClick: () => {
-        return createLauncher(commands, widget);
+        return Private.createLauncher(commands, widget);
       },
       tooltip: 'New Launcher'
     });
@@ -270,7 +270,7 @@ function activateBrowser(
     function maybeCreate() {
       // Create a launcher if there are no open items.
       if (labShell.isEmpty('main')) {
-        createLauncher(commands, browser);
+        Private.createLauncher(commands, browser);
       }
     }
 
@@ -301,7 +301,7 @@ function activateBrowser(
         const { path } = context;
         if (context) {
           commands.execute('filebrowser:activate', { path: path });
-          navigateToPath(path, app, browser, factory.tracker)
+          Private.navigateToPath(path, app, browser, factory.tracker)
             .then(() => {
               docManager.findWidget(path).activate();
             })
@@ -433,7 +433,7 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
-      navigateToPath(path, app, browser, tracker)
+      Private.navigateToPath(path, app, browser, tracker)
         .then(() => {
           docManager.findWidget(path).activate();
         })
@@ -592,7 +592,12 @@ function addCommands(
   commands.addCommand(CommandIDs.showBrowser, {
     execute: args => {
       const path = (args.path as string) || '';
-      const browserForPath = getBrowserForPath(path, app, browser, tracker);
+      const browserForPath = Private.getBrowserForPath(
+        path,
+        app,
+        browser,
+        tracker
+      );
 
       // Check for browser not found
       if (!browserForPath) {
@@ -643,7 +648,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.createLauncher, {
     label: 'New Launcher',
-    execute: () => createLauncher(commands, browser)
+    execute: () => Private.createLauncher(commands, browser)
   });
 
   /**
@@ -812,79 +817,91 @@ function addCommands(
 }
 
 /**
- * Create a launcher for a given filebrowser widget.
+ * A namespace for private module data.
  */
-function createLauncher(
-  commands: CommandRegistry,
-  browser: FileBrowser
-): Promise<MainAreaWidget<Launcher>> {
-  const { model } = browser;
+namespace Private {
+  /**
+   * Create a launcher for a given filebrowser widget.
+   */
+  export function createLauncher(
+    commands: CommandRegistry,
+    browser: FileBrowser
+  ): Promise<MainAreaWidget<Launcher>> {
+    const { model } = browser;
 
-  return commands
-    .execute('launcher:create', { cwd: model.path })
-    .then((launcher: MainAreaWidget<Launcher>) => {
-      model.pathChanged.connect(
-        () => {
-          launcher.content.cwd = model.path;
-        },
-        launcher
-      );
-      return launcher;
-    });
-}
-
-/**
- * Get browser object given file path.
- */
-function getBrowserForPath(
-  path: string,
-  app: JupyterLab,
-  browser: FileBrowser,
-  tracker: IInstanceTracker<FileBrowser>
-): FileBrowser {
-  const driveName = app.serviceManager.contents.driveName(path);
-
-  if (driveName) {
-    let browserForPath = tracker.find(
-      _path => _path.model.driveName === driveName
-    );
-
-    if (!browserForPath) {
-      // warn that no filebrowser could be found for this driveName
-      console.warn(
-        `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
-      );
-      return;
-    }
-
-    return browserForPath;
+    return commands
+      .execute('launcher:create', { cwd: model.path })
+      .then((launcher: MainAreaWidget<Launcher>) => {
+        model.pathChanged.connect(
+          () => {
+            launcher.content.cwd = model.path;
+          },
+          launcher
+        );
+        return launcher;
+      });
   }
 
-  // if driveName is empty, assume the main filebrowser
-  return browser;
-}
+  /**
+   * Get browser object given file path.
+   */
+  export function getBrowserForPath(
+    path: string,
+    app: JupyterFrontEnd,
+    browser: FileBrowser,
+    tracker: IInstanceTracker<FileBrowser>
+  ): FileBrowser {
+    const driveName = app.serviceManager.contents.driveName(path);
 
-/**
- * Navigate to a path.
- */
-function navigateToPath(
-  path: string,
-  app: JupyterLab,
-  browser: FileBrowser,
-  tracker: IInstanceTracker<FileBrowser>
-): Promise<any> {
-  const browserForPath = getBrowserForPath(path, app, browser, tracker);
-  const services = app.serviceManager;
-  const localPath = services.contents.localPath(path);
+    if (driveName) {
+      let browserForPath = tracker.find(
+        _path => _path.model.driveName === driveName
+      );
 
-  return services.ready.then(() => services.contents.get(path)).then(value => {
-    const { model } = browserForPath;
-    const { restored } = model;
+      if (!browserForPath) {
+        // warn that no filebrowser could be found for this driveName
+        console.warn(
+          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+        );
+        return;
+      }
 
-    if (value.type === 'directory') {
-      return restored.then(() => model.cd(`/${localPath}`));
+      return browserForPath;
     }
 
-    return restored.then(() => model.cd(`/${PathExt.dirname(localPath)}`));
-  });
+    // if driveName is empty, assume the main filebrowser
+    return browser;
+  }
+
+  /**
+   * Navigate to a path.
+   */
+  export function navigateToPath(
+    path: string,
+    app: JupyterFrontEnd,
+    browser: FileBrowser,
+    tracker: IInstanceTracker<FileBrowser>
+  ): Promise<any> {
+    const browserForPath = Private.getBrowserForPath(
+      path,
+      app,
+      browser,
+      tracker
+    );
+    const services = app.serviceManager;
+    const localPath = services.contents.localPath(path);
+
+    return services.ready
+      .then(() => services.contents.get(path, { content: false }))
+      .then(value => {
+        const { model } = browserForPath;
+        const { restored } = model;
+
+        if (value.type === 'directory') {
+          return restored.then(() => model.cd(`/${localPath}`));
+        }
+
+        return restored.then(() => model.cd(`/${PathExt.dirname(localPath)}`));
+      });
+  }
 }
