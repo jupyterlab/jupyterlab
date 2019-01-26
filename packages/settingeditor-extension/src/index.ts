@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -51,8 +50,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IEditorServices,
     IStateDB,
     IRenderMimeRegistry,
-    ICommandPalette,
-    ILabShell
+    ICommandPalette
   ],
   autoStart: true,
   provides: ISettingEditorTracker,
