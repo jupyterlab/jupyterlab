@@ -539,7 +539,7 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
   activate: (app: JupyterFrontEnd) => {
     if (!(app.shell instanceof LabShell)) {
-      throw new Error(`${shell.id} did not find an LabShell instance.`);
+      throw new Error(`${shell.id} did not find a LabShell instance.`);
     }
     return app.shell;
   },

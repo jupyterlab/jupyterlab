@@ -34,7 +34,7 @@ describe('LabShell', () => {
   });
 
   describe('#constructor()', () => {
-    it('should create an LabShell instance', () => {
+    it('should create a LabShell instance', () => {
       expect(shell).to.be.an.instanceof(LabShell);
     });
   });
