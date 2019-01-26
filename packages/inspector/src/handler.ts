@@ -73,7 +73,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
       this._selectionsMonitor = new ActivityMonitor({
         signal: editor.model.selections.changed,
-        timeout: 1000
+        timeout: 250
       });
       this._selectionsMonitor.activityStopped.connect(
         this.onEditorChange,
@@ -82,7 +82,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
       this._valueMonitor = new ActivityMonitor({
         signal: editor.model.value.changed,
-        timeout: 1000
+        timeout: 250
       });
       this._valueMonitor.activityStopped.connect(
         this.onEditorChange,
