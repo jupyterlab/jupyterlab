@@ -68,6 +68,9 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
+      // Call onEditorChange to cover the case where the user changes
+      // the active cell
+      this.onEditorChange();
       let signals: ISignal<any, any>[] = [
         editor.model.selections.changed,
         editor.model.value.changed
