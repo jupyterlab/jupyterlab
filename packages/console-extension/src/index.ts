@@ -509,29 +509,6 @@ async function activateConsole(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.exportNotebook, {
-    label: 'Export to Notebook',
-    execute: args => {
-      const current = getCurrent(args);
-      if (!current) {
-        return;
-      }
-      let dir = current.session.path.substring(0, current.session.path.lastIndexOf('/'));
-      return current.console.manager.contents.newUntitled({type: 'notebook', path: dir}).then(data => {
-        if (!data) {
-          return;
-        }
-        return current.console.save(data.path).then(() => {
-          return commands.execute('docmanager:open', {
-            path: data.path, factory: 'Notebook',
-            kernel: { name }
-          });
-        });
-      });
-    },
-    isEnabled
-  });
-
   let _exportNotebook = (current: ConsolePanel) => {
     if (!current) {
       return;

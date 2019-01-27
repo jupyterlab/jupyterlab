@@ -10,7 +10,6 @@ import {
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
-  isCodeCellModel,
   IRawCellModel,
   RawCell,
   RawCellModel,
