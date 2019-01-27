@@ -29,6 +29,8 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
+import { find, each } from '@phosphor/algorithm';
+
 import {
   IEditMenu,
   IFileMenu,
@@ -39,8 +41,6 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { find, each } from '@phosphor/algorithm';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 

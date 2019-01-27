@@ -315,7 +315,6 @@ export class CodeConsole extends Widget {
     this._msgIdCells = null;
     this._msgIds = null;
     this._history.dispose();
-    // this._foreignHandler.dispose();
     this._metadata.dispose();
 
     super.dispose();
