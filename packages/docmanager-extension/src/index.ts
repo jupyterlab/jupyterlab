@@ -36,11 +36,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { IDisposable } from '@phosphor/disposable';
 
 /**
- * The name of the factory that creates markdown widgets.
- */
-const MARKDOWN_FACTORY = 'Markdown Preview';
-
-/**
  * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
@@ -79,8 +74,6 @@ namespace CommandIDs {
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
-
-  export const markdownPreview = 'markdownviewer:open';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -715,21 +708,6 @@ function addCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       commands.execute('filebrowser:activate', { path: context.path });
       commands.execute('filebrowser:navigate', { path: context.path });
-    }
-  });
-
-  commands.addCommand(CommandIDs.markdownPreview, {
-    label: 'Markdown Preview',
-    execute: args => {
-      let path = args['path'];
-      if (typeof path !== 'string') {
-        return;
-      }
-      return commands.execute('docmanager:open', {
-        path,
-        factory: MARKDOWN_FACTORY,
-        options: args['options']
-      });
     }
   });
 

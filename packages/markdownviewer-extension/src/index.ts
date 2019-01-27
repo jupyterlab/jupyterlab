@@ -24,6 +24,13 @@ import {
 } from '@jupyterlab/markdownviewer';
 
 /**
+ * The command IDs used by the markdownviewer plugin.
+ */
+namespace CommandIDs {
+  export const markdownPreview = 'markdownviewer:open';
+}
+
+/**
  * The name of the factory that creates markdown viewer widgets.
  */
 const FACTORY = 'Markdown Preview';
@@ -48,7 +55,7 @@ function activate(
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry
 ): IMarkdownViewerTracker {
-  const registry = app.docRegistry;
+  const { commands, docRegistry } = app;
 
   // Add the markdown renderer factory.
   rendermime.addFactory(markdownRendererFactory);
@@ -98,7 +105,7 @@ function activate(
   const factory = new MarkdownViewerFactory({
     rendermime,
     name: FACTORY,
-    primaryFileType: registry.getFileType('markdown'),
+    primaryFileType: docRegistry.getFileType('markdown'),
     fileTypes: ['markdown'],
     defaultRendered: ['markdown']
   });
@@ -111,13 +118,28 @@ function activate(
     updateWidget(widget.content);
     tracker.add(widget);
   });
-  registry.addWidgetFactory(factory);
+  docRegistry.addWidgetFactory(factory);
 
   // Handle state restoration.
   restorer.restore(tracker, {
     command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path
+  });
+
+  commands.addCommand(CommandIDs.markdownPreview, {
+    label: 'Markdown Preview',
+    execute: args => {
+      let path = args['path'];
+      if (typeof path !== 'string') {
+        return;
+      }
+      return commands.execute('docmanager:open', {
+        path,
+        factory: FACTORY,
+        options: args['options']
+      });
+    }
   });
 
   return tracker;
