@@ -297,7 +297,7 @@ function addCommands(
       return app.shell.currentWidget;
     }
     const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1]);
+    return docManager.findWidget(pathMatch[1], null);
   };
 
   // operates on active widget by default
