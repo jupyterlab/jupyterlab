@@ -124,7 +124,8 @@ export class ConsolePanel extends Panel {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this.session.dispose();
+    const session = this.session;
+    session.shutdownIfOnly().then(() => session.dispose());
     this.console.dispose();
     super.dispose();
   }
