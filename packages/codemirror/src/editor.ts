@@ -469,7 +469,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   revealSelection(selection: CodeEditor.IRange): void {
     const range = this._toCodeMirrorRange(selection);
-    this._editor.scrollIntoView(range);
+    this._editor.scrollIntoView(range); // TODO
   }
 
   /**

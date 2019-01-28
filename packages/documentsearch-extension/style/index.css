@@ -15,7 +15,7 @@
   right: 0;
   z-index: 5;
   min-width: 300px;
-  padding: 3px;
+  padding: 2px;
   font-size: var(--jp-ui-font-size1);
 }
 
@@ -36,8 +36,18 @@
 
 .jp-DocumentSearch-input-wrapper button {
   outline: 0;
-  width: 25px;
+  border: none;
+  width: 20px;
   height: 20px;
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-DocumentSearch-regex-button {
+  background-image: var(--jp-icon-search-regex);
+}
+
+.jp-DocumentSearch-case-button {
+  background-image: var(--jp-icon-search-case-sensitive);
 }
 
 .jp-DocumentSearch-input-button:before {
@@ -46,32 +56,44 @@
 }
 
 .jp-DocumentSearch-input-button-off {
-  border: none;
+  opacity: var(--jp-search-toggle-off-opacity);
 }
 
 .jp-DocumentSearch-input-button-off:hover {
-  border: 1px solid var(--jp-inverse-layout-color3);
+  opacity: var(--jp-search-toggle-hover-opacity);
 }
 
 .jp-DocumentSearch-input-button-on {
-  border: 1px solid var(--jp-inverse-layout-color0);
+  opacity: var(--jp-search-toggle-on-opacity);
 }
 
 .jp-DocumentSearch-index-counter {
-  padding-left: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
   user-select: none;
+  min-width: 50px;
+  display: inline-block;
 }
 
 .jp-DocumentSearch-up-down-wrapper {
   display: inline-block;
 }
 
-.jp-DocumentSearch-up-down-button-class {
+.jp-DocumentSearch-up-down-wrapper button {
   outline: 0;
   border: none;
-  width: 25px;
+  width: 20px;
   height: 20px;
-  background: none;
+  padding-bottom: 5px;
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-DocumentSearch-up-button {
+  background-image: var(--jp-icon-search-arrow-up);
+}
+
+.jp-DocumentSearch-down-button {
+  background-image: var(--jp-icon-search-arrow-down);
 }
 
 .jp-DocumentSearch-close-button {

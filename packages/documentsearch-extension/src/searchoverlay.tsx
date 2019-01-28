@@ -9,11 +9,18 @@ import { IDisplayState, ISearchProvider } from '.';
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
-const INPUT_BUTTON_CLASS_OFF = 'jp-DocumentSearch-input-button-off';
-const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
+const REGEX_BUTTON_CLASS_OFF =
+  'jp-DocumentSearch-input-button-off jp-DocumentSearch-regex-button';
+const REGEX_BUTTON_CLASS_ON =
+  'jp-DocumentSearch-input-button-on jp-DocumentSearch-regex-button';
+const CASE_BUTTON_CLASS_OFF =
+  'jp-DocumentSearch-input-button-off jp-DocumentSearch-case-button';
+const CASE_BUTTON_CLASS_ON =
+  'jp-DocumentSearch-input-button-on jp-DocumentSearch-case-button';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
-const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button-class';
+const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
+const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 
@@ -49,11 +56,11 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
 
   render() {
     const caseButtonToggleClass = this.props.caseSensitive
-      ? INPUT_BUTTON_CLASS_ON
-      : INPUT_BUTTON_CLASS_OFF;
+      ? CASE_BUTTON_CLASS_ON
+      : CASE_BUTTON_CLASS_OFF;
     const regexButtonToggleClass = this.props.useRegex
-      ? INPUT_BUTTON_CLASS_ON
-      : INPUT_BUTTON_CLASS_OFF;
+      ? REGEX_BUTTON_CLASS_ON
+      : REGEX_BUTTON_CLASS_OFF;
 
     return (
       <div className={INPUT_WRAPPER_CLASS}>
@@ -68,15 +75,11 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={caseButtonToggleClass}
           onClick={() => this.props.onCaseSensitiveToggled()}
-        >
-          A<sup>a</sup>
-        </button>
+        />
         <button
           className={regexButtonToggleClass}
           onClick={() => this.props.onRegexToggled()}
-        >
-          .*
-        </button>
+        />
       </div>
     );
   }
@@ -91,17 +94,13 @@ function UpDownButtons(props: IUpDownProps) {
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
-        className={UP_DOWN_BUTTON_CLASS}
+        className={UP_BUTTON_CLASS}
         onClick={() => props.onHighlightPrevious()}
-      >
-        ^
-      </button>
+      />
       <button
-        className={UP_DOWN_BUTTON_CLASS}
+        className={DOWN_BUTTON_CLASS}
         onClick={() => props.onHightlightNext()}
-      >
-        v
-      </button>
+      />
     </div>
   );
 }
@@ -114,11 +113,11 @@ interface ISearchIndexProps {
 function SearchIndices(props: ISearchIndexProps) {
   return (
     <>
-      <label className={INDEX_COUNTER_CLASS}>
+      <div className={INDEX_COUNTER_CLASS}>
         {props.totalMatches === 0
           ? '-/-'
           : `${props.currentIndex + 1}/${props.totalMatches}`}
-      </label>
+      </div>
     </>
   );
 }
