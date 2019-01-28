@@ -4,7 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ConverterRegistry, IConverterRegistry } from '@jupyterlab/databus';
+import {
+  ConverterRegistry,
+  IConverterRegistry,
+  FetchURL
+} from '@jupyterlab/databus';
 
 /**
  * The converter registry extension.
@@ -18,5 +22,7 @@ export default {
 } as JupyterLabPlugin<IConverterRegistry>;
 
 function activate(app: JupyterLab): IConverterRegistry {
-  return new ConverterRegistry();
+  const registry = new ConverterRegistry();
+  registry.register(new FetchURL());
+  return registry;
 }
