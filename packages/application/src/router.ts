@@ -7,7 +7,11 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import {
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  Token
+} from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
@@ -268,7 +272,7 @@ export class Router implements IRouter {
    * If a pattern is matched, its command will be invoked with arguments that
    * match the `IRouter.ILocation` interface.
    */
-  route(): void {
+  async route(): Promise<void> {
     const { commands, current, stop } = this;
     const { request } = current;
     const routed = this._routed;
@@ -284,12 +288,14 @@ export class Router implements IRouter {
 
     // Order the matching rules by rank and enqueue them.
     const queue = matches.sort((a, b) => b.rank - a.rank);
+    const done = new PromiseDelegate<void>();
 
     // Process each enqueued command sequentially and short-circuit if a promise
     // resolves with the `stop` token.
     (function next() {
       if (!queue.length) {
         routed.emit(current);
+        done.resolve(void 0);
         return;
       }
 
@@ -309,6 +315,8 @@ export class Router implements IRouter {
           next();
         });
     })();
+
+    return done.promise;
   }
 
   private _routed = new Signal<this, IRouter.ILocation>(this);
