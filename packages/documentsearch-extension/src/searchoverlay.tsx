@@ -150,6 +150,10 @@ class SearchOverlay extends React.Component<
     if (event.keyCode !== 13) {
       return;
     }
+    this.executeSearch(!event.shiftKey);
+  }
+
+  private executeSearch(goForward: boolean) {
     // execute search!
     let query;
     try {
@@ -165,10 +169,10 @@ class SearchOverlay extends React.Component<
     }
 
     if (Private.regexEqual(this.props.overlayState.query, query)) {
-      if (event.shiftKey) {
-        this.props.onHighlightPrevious();
-      } else {
+      if (goForward) {
         this.props.onHightlightNext();
+      } else {
+        this.props.onHighlightPrevious();
       }
       return;
     }
@@ -199,8 +203,8 @@ class SearchOverlay extends React.Component<
           totalMatches={this.props.overlayState.totalMatches}
         />
         <UpDownButtons
-          onHighlightPrevious={() => this.props.onHighlightPrevious()}
-          onHightlightNext={() => this.props.onHightlightNext()}
+          onHighlightPrevious={() => this.executeSearch(false)}
+          onHightlightNext={() => this.executeSearch(true)}
         />
         <div className={CLOSE_BUTTON_CLASS} onClick={() => this.onClose()} />
         <div

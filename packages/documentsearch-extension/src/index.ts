@@ -193,11 +193,10 @@ const extension: JupyterLabPlugin<void> = {
 };
 
 class SearchInstance {
-  constructor(shell: ApplicationShell, registry: SearchProviderRegistry) {
+  constructor(shell: ApplicationShell, searchProvider: ISearchProvider) {
     this._widget = shell.currentWidget;
-    const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
-      .clientHeight;
-    this.initializeSearchAssets(registry, toolbarHeight);
+    this._activeProvider = searchProvider;
+    this.initializeSearchAssets();
   }
 
   get searchWidget() {
@@ -255,18 +254,20 @@ class SearchInstance {
     });
   }
   private highlightNext() {
+    if (!this._displayState.query) {
+      return;
+    }
     this._activeProvider.highlightNext().then(this.updateIndices.bind(this));
   }
   private highlightPrevious() {
+    if (!this._displayState.query) {
+      return;
+    }
     this._activeProvider
       .highlightPrevious()
       .then(this.updateIndices.bind(this));
   }
-  private initializeSearchAssets(
-    registry: SearchProviderRegistry,
-    toolbarHeight: number
-  ) {
-    this._activeProvider = registry.getProviderForWidget(this._widget);
+  private initializeSearchAssets() {
     this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayState>(
       this._activeProvider
     );
@@ -291,6 +292,9 @@ class SearchInstance {
       this._displayState.useRegex = !this._displayState.useRegex;
       this.updateDisplay();
     };
+
+    const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
+      .clientHeight;
 
     this._searchWidget = createSearchOverlay(
       this._displayUpdateSignal,
@@ -337,7 +341,12 @@ namespace Private {
       activeSearches[widgetId].focus();
       return;
     }
-    const searchInstance = new SearchInstance(shell, registry);
+    const searchProvider = registry.getProviderForWidget(shell.currentWidget);
+    if (!searchProvider) {
+      // TODO: Is there a way to pass the invocation of ctrl+f through to the browser?
+      return;
+    }
+    const searchInstance = new SearchInstance(shell, searchProvider);
     activeSearches[widgetId] = searchInstance;
 
     searchInstance.searchWidget.disposed.connect(() => {
