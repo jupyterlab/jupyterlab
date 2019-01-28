@@ -403,8 +403,13 @@ export class DefaultKernel implements Kernel.IKernel {
    * request fails, or the response is invalid.
    */
   isLastConnection(): Promise<boolean> {
-    // TODO
-    return Promise.resolve(true);
+    return Private.getKernelModel(this.id, this.serverSettings).then(model => {
+      if (model.connections) {
+        return Promise.resolve(model.connections === 1);
+      } else {
+        return Promise.resolve(undefined);
+      }
+    });
   }
 
   /**
