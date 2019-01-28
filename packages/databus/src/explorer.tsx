@@ -13,7 +13,7 @@ import * as React from 'react';
 function DatasetCompononent({ dataset }: { dataset: IDataset<any> }) {
   return (
     <div>
-      <h3>{dataset.uri}</h3>
+      <h3>{dataset.url && dataset.url.toString()}</h3>
       <pre>{dataset.mimeType}</pre>
       <pre>{JSON.stringify(dataset.data)}</pre>
     </div>

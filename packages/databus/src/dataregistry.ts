@@ -24,14 +24,17 @@ export interface IDataset<T> {
   mimeType: string;
 
   /**
-   * A persistent URI that points to the dataset.
+   * A persistent URL that points to the dataset.
    *
    * #### Notes
    * This can be used by other extensions and services to maintain
    * persistent pointers to datasets across sessions. This is needed
    * as the datasets themselves are not assumed to be serializable.
+   *
+   * The term "URL" is prefered over "URI" by the WHATWG:
+   * https://url.spec.whatwg.org/#goals
    */
-  uri?: string;
+  url?: URL;
 
   /***
    * The data of the dataset.
@@ -90,8 +93,6 @@ export class DataRegistry {
     });
     return result;
   }
-
-  // TODO: Add clear all method
 
   /**
    * Return a set of all published datasets.

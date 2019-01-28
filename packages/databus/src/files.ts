@@ -1,25 +1,22 @@
-import { IDataset } from './dataregistry';
 import { IResolver } from './resolverregistry';
+import { Token } from '@phosphor/coreutils';
+import { URLDataset } from './urls';
 
 interface IFileDatasetOptions {
-  url: string;
+  url: URL;
   path: string;
   mimeType: string;
 }
-export class FileDataset implements IDataset<string> {
+export class FileDataset extends URLDataset {
   constructor({ url, path, mimeType }: IFileDatasetOptions) {
-    this.uri = `file://${path}`;
-    this.data = url;
-    this.mimeType = `${mimeType}+url`;
+    super(url, mimeType);
+    this.url = new URL('file:');
+    this.url.pathname = path;
   }
-  mimeType = 'text/csv';
-  uri: string;
-  data: string;
+  url: URL;
 }
 
-// TODO: Possibly split this into seperaate ExtensionRegistry that is not resolver.
-export class FileResolver implements IResolver<FileDataset> {
-  constructor(private resolveUrl: (path: string) => Promise<string>) {}
+export class FileExtensionRegistry {
   register(extension: string, mimeType: string) {
     this._extensions.set(extension, mimeType);
   }
@@ -33,22 +30,36 @@ export class FileResolver implements IResolver<FileDataset> {
     return null;
   }
 
-  async resolve(uri: string): Promise<FileDataset | null> {
-    if (!uri.startsWith('file://')) {
+  _extensions = new Map<string, string>();
+}
+export interface IFileExtensionRegistry extends FileExtensionRegistry {}
+
+/* tslint:disable */
+export const IFileExtensionRegistry = new Token<IFileExtensionRegistry>(
+  '@jupyterlab/databus:IFileExtensionRegistry'
+);
+
+export interface IFileResolverOptions {
+  fileExtensionRegistry: FileExtensionRegistry;
+  resolveURL: (path: string) => Promise<URL>;
+}
+
+export class FileResolver implements IResolver<FileDataset> {
+  constructor(private options: IFileResolverOptions) {}
+
+  async resolve(url: URL): Promise<FileDataset | null> {
+    if (url.protocol !== 'file:') {
       return null;
     }
-    const path = uri.substr(7);
-    const mimeType = this.whichMimeType(path);
+    const path = url.pathname;
+    const mimeType = this.options.fileExtensionRegistry.whichMimeType(path);
     if (mimeType === null) {
       return null;
     }
     return new FileDataset({
-      url: await this.resolveUrl(path),
+      url: await this.options.resolveURL(path),
       path,
       mimeType
     });
   }
-  _extensions = new Map<string, string>();
 }
-
-export interface IFileResolver extends FileResolver {}

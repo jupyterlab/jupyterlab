@@ -14,6 +14,9 @@
     },
     {
       "path": "../filebrowser"
+    },
+    {
+      "path": "../coreutils"
     }
   ]
 }

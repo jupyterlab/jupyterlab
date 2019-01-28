@@ -28,18 +28,21 @@ function activate(
   state: IStateDB,
   registry: IDataRegistry
 ): IResolverRegistry {
-  const resolvers = new ResolverRegistry(registry);
-  (async () => {
-    for (const uri of ((await state.fetch(id)) || []) as Array<string>) {
-      resolvers.resolveAndPublish(uri);
-    }
-    registry.datasetsChanged.connect(async () => {
-      await state.save(
-        id,
-        [...registry.datasets].map(d => d.uri).filter(uri => uri)
-      );
-    });
-  })();
+  const resolvers = new ResolverRegistry();
+
+  // Disable persisting state for now, since we will use GraphQL for this.
+
+  // (async () => {
+  //   for (const uri of ((await state.fetch(id)) || []) as Array<string>) {
+  //     resolvers.resolveAndPublish(uri);
+  //   }
+  //   registry.datasetsChanged.connect(async () => {
+  //     await state.save(
+  //       id,
+  //       [...registry.datasets].map(d => d.uri).filter(uri => uri)
+  //     );
+  //   });
+  // })();
 
   return resolvers;
 }
