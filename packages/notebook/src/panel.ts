@@ -125,6 +125,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   dispose(): void {
     this.content.dispose();
+    this.session.shutdownIfOnly();
     super.dispose();
   }
 

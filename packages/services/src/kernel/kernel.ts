@@ -461,6 +461,21 @@ export namespace Kernel {
      * request fails, or the response is invalid.
      */
     shutdown(): Promise<void>;
+
+    /**
+     * Is this the last connection to the kernel?
+     *
+     * @returns A promise that resolves as true if there is no other
+     * connections to the kernel.
+     *
+     * #### Notes
+     * Kernel may not provide with their number of active connections. In
+     * such scenario, the function resolves with undefined.
+     *
+     * The promise will be rejected if the kernel status is `'dead'`, the
+     * request fails, or the response is invalid.
+     */
+    isLastConnection(): Promise<boolean>;
   }
 
   /**
@@ -948,6 +963,11 @@ export namespace Kernel {
      * The name of the kernel.
      */
     readonly name: string;
+
+    /**
+     * The number of active connections to the kernel.
+     */
+    readonly connections?: number;
   }
 
   /**

@@ -155,6 +155,9 @@ export namespace Session {
      * The promise is fulfilled on a valid response and rejected otherwise.
      */
     shutdown(): Promise<void>;
+
+    /** */
+    maybeShutdown(): Promise<boolean>;
   }
 
   /**

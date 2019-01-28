@@ -118,6 +118,14 @@ export interface IClientSession extends IDisposable {
   ): Promise<Kernel.IKernelConnection>;
 
   /**
+   * Kill the kernel and shutdown the session if no other connections
+   * exist with the kernel.
+   *
+   * @returns A promise that resolves when the session is shut down if needed.
+   */
+  shutdownIfOnly(): Promise<void>;
+
+  /**
    * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
@@ -398,6 +406,29 @@ export class ClientSession implements IClientSession {
         return Promise.reject('Disposed');
       }
       return this._selectKernel(true);
+    });
+  }
+
+  /**
+   * Kill the kernel and shutdown the session if no other connections
+   * exist with the kernel.
+   *
+   * @returns A promise that resolves when the session is shut down if needed.
+   */
+  shutdownIfOnly(): Promise<void> {
+    const session = this._session;
+    if (this.isDisposed || !session) {
+      return Promise.resolve();
+    }
+
+    return session.maybeShutdown().then(shutdown => {
+      if (shutdown === undefined || shutdown) {
+        // TODO prompt with a dialog
+        this._session = null;
+        return session.shutdown();
+      } else {
+        return Promise.resolve();
+      }
     });
   }
 

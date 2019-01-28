@@ -390,6 +390,24 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Is this the last connection to the kernel?
+   *
+   * @returns A promise that resolves as true if there is no other
+   * connections to the kernel.
+   *
+   * #### Notes
+   * Kernel may not provide with their number of active connections. In
+   * such scenario, the function resolves with undefined.
+   *
+   * The promise will be rejected if the kernel status is `'dead'`, the
+   * request fails, or the response is invalid.
+   */
+  isLastConnection(): Promise<boolean> {
+    // TODO
+    return Promise.resolve(true);
+  }
+
+  /**
    * Send a `kernel_info_request` message.
    *
    * #### Notes

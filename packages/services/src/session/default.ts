@@ -306,6 +306,10 @@ export class DefaultSession implements Session.ISession {
     return Private.shutdownSession(this.id, this.serverSettings);
   }
 
+  maybeShutdown(): Promise<boolean> {
+    return this._kernel.isLastConnection();
+  }
+
   /**
    * Handle connections to a kernel.  This method is not meant to be
    * subclassed.
