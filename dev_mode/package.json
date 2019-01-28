@@ -51,6 +51,7 @@
     "@jupyterlab/launcher-extension": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/mainmenu-extension": "^0.8.1",
+    "@jupyterlab/markdownviewer": "^0.19.1",
     "@jupyterlab/markdownviewer-extension": "^0.19.1",
     "@jupyterlab/mathjax2": "^0.7.1",
     "@jupyterlab/mathjax2-extension": "^0.7.1",
@@ -156,6 +157,7 @@
       "@jupyterlab/inspector-extension": "",
       "@jupyterlab/launcher-extension": "",
       "@jupyterlab/mainmenu-extension": "",
+      "@jupyterlab/markdownviewer-extension": "",
       "@jupyterlab/mathjax2-extension": "",
       "@jupyterlab/notebook-extension": "",
       "@jupyterlab/rendermime-extension": "",
@@ -172,7 +174,6 @@
     "mimeExtensions": {
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
-      "@jupyterlab/markdownviewer-extension": "",
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vdom-extension": "",
       "@jupyterlab/vega4-extension": ""
@@ -270,6 +271,7 @@
       "@jupyterlab/launcher-extension": "../packages/launcher-extension",
       "@jupyterlab/mainmenu": "../packages/mainmenu",
       "@jupyterlab/mainmenu-extension": "../packages/mainmenu-extension",
+      "@jupyterlab/markdownviewer": "../packages/markdownviewer",
       "@jupyterlab/markdownviewer-extension": "../packages/markdownviewer-extension",
       "@jupyterlab/mathjax2": "../packages/mathjax2",
       "@jupyterlab/mathjax2-extension": "../packages/mathjax2-extension",
