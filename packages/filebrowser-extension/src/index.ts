@@ -13,8 +13,7 @@ import {
   InstanceTracker,
   IWindowResolver,
   MainAreaWidget,
-  ToolbarButton,
-  IInstanceTracker
+  ToolbarButton
 } from '@jupyterlab/apputils';
 
 import {
@@ -253,7 +252,7 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, browser, labShell, docManager);
+  addCommands(app, factory, labShell, docManager);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
@@ -301,7 +300,8 @@ function activateBrowser(
         const { path } = context;
         if (context) {
           commands.execute('filebrowser:activate', { path: path });
-          Private.navigateToPath(path, app, browser, factory.tracker)
+          factory.defaultBrowser;
+          Private.navigateToPath(path, factory)
             .then(() => {
               docManager.findWidget(path).activate();
             })
@@ -351,13 +351,14 @@ function activateShareFile(
  */
 function addCommands(
   app: JupyterFrontEnd,
-  tracker: InstanceTracker<FileBrowser>,
-  browser: FileBrowser,
+  factory: IFileBrowserFactory,
   labShell: ILabShell,
   docManager: IDocumentManager
 ): void {
   const registry = app.docRegistry;
   const { commands } = app;
+  const { defaultBrowser: browser } = factory;
+  const { tracker } = factory;
 
   commands.addCommand(CommandIDs.del, {
     execute: () => {
@@ -433,7 +434,7 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
-      Private.navigateToPath(path, app, browser, tracker)
+      Private.navigateToPath(path, factory)
         .then(() => {
           docManager.findWidget(path).activate();
         })
@@ -592,12 +593,7 @@ function addCommands(
   commands.addCommand(CommandIDs.showBrowser, {
     execute: args => {
       const path = (args.path as string) || '';
-      const browserForPath = Private.getBrowserForPath(
-        path,
-        app,
-        browser,
-        tracker
-      );
+      const browserForPath = Private.getBrowserForPath(path, factory);
 
       // Check for browser not found
       if (!browserForPath) {
@@ -847,11 +843,11 @@ namespace Private {
    */
   export function getBrowserForPath(
     path: string,
-    app: JupyterFrontEnd,
-    browser: FileBrowser,
-    tracker: IInstanceTracker<FileBrowser>
+    factory: IFileBrowserFactory
   ): FileBrowser {
-    const driveName = app.serviceManager.contents.driveName(path);
+    const { defaultBrowser: browser } = factory;
+    const { tracker } = factory;
+    const driveName = browser.model.manager.services.contents.driveName(path);
 
     if (driveName) {
       let browserForPath = tracker.find(
@@ -878,17 +874,10 @@ namespace Private {
    */
   export function navigateToPath(
     path: string,
-    app: JupyterFrontEnd,
-    browser: FileBrowser,
-    tracker: IInstanceTracker<FileBrowser>
+    factory: IFileBrowserFactory
   ): Promise<any> {
-    const browserForPath = Private.getBrowserForPath(
-      path,
-      app,
-      browser,
-      tracker
-    );
-    const services = app.serviceManager;
+    const browserForPath = Private.getBrowserForPath(path, factory);
+    const { services } = factory.defaultBrowser.model.manager;
     const localPath = services.contents.localPath(path);
 
     return services.ready
