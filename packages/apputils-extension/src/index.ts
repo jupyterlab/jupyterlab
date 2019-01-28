@@ -226,22 +226,12 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [IRouter, JupyterLab.IInfo],
-  activate: async (
-    app: JupyterFrontEnd,
-    router: IRouter,
-    info: JupyterLab.IInfo
-  ) => {
+  requires: [IRouter],
+  activate: async (_: JupyterFrontEnd, router: IRouter) => {
     const solver = new WindowResolver();
     const match = router.current.path.match(Patterns.workspace);
     const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = workspace
-      ? URLExt.join(
-          PageConfig.getOption('baseUrl'),
-          PageConfig.getOption('workspacesUrl'),
-          workspace
-        )
-      : info.defaultWorkspace;
+    const candidate = Private.candidate(workspace);
 
     try {
       await solver.resolve(candidate);
@@ -564,6 +554,23 @@ export default plugins;
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * Generate a workspace name candidate.
+   *
+   * @param workspace - A potential workspace name parsed from the URL.
+   *
+   * @returns A workspace name candidate.
+   */
+  export function candidate(workspace = ''): string {
+    return workspace
+      ? URLExt.join(
+          PageConfig.getOption('baseUrl'),
+          PageConfig.getOption('workspacesUrl'),
+          workspace
+        )
+      : PageConfig.getOption('defaultWorkspace');
+  }
+
   /**
    * Create a splash element.
    */

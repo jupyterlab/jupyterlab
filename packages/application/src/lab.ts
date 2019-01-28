@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
 
@@ -83,15 +83,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     this._busySignal = new Signal(this);
     this._dirtySignal = new Signal(this);
 
-    // Construct the default workspace name.
-    const defaultWorkspace = URLExt.join(
-      PageConfig.getOption('baseUrl'),
-      PageConfig.getOption('pageUrl')
-    );
-
-    // Set default workspace in page config.
-    PageConfig.setOption('defaultWorkspace', defaultWorkspace);
-
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce(
       (acc, val) => {
@@ -104,11 +95,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     );
 
     // Populate application info.
-    this._info = {
-      ...JupyterLab.defaultInfo,
-      ...info,
-      ...{ defaultWorkspace }
-    };
+    this._info = { ...JupyterLab.defaultInfo, ...info };
 
     // Make workspace accessible via a getter because it is set at runtime.
     Object.defineProperty(this._info, 'workspace', {
