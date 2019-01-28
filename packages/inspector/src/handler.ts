@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text } from '@jupyterlab/coreutils';
+import { IDataConnector, Text, ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -60,16 +60,29 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     }
 
     if (this._editor && !this._editor.isDisposed) {
-      this._editor.model.value.changed.disconnect(this.onTextChanged, this);
+      this._monitors.forEach(monitor => {
+        monitor.activityStopped.disconnect(this.onEditorChange, this);
+      });
     }
     let editor = (this._editor = newValue);
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
-      editor.model.value.changed.connect(
-        this.onTextChanged,
-        this
-      );
+      // Call onEditorChange to cover the case where the user changes
+      // the active cell
+      this.onEditorChange();
+      let signals: ISignal<any, any>[] = [
+        editor.model.selections.changed,
+        editor.model.value.changed
+      ];
+      this._monitors = signals.map(s => {
+        let m = new ActivityMonitor({ signal: s, timeout: 250 });
+        m.activityStopped.connect(
+          this.onEditorChange,
+          this
+        );
+        return m;
+      });
     }
   }
 
@@ -115,7 +128,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * #### Notes
    * Update the hints inspector based on a text change.
    */
-  protected onTextChanged(): void {
+  protected onEditorChange(): void {
     // If the handler is in standby mode, bail.
     if (this._standby) {
       return;
@@ -175,6 +188,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _pending = 0;
   private _rendermime: RenderMimeRegistry;
   private _standby = true;
+  private _monitors: ActivityMonitor<any, any>[];
 }
 
 /**
