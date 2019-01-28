@@ -423,9 +423,28 @@ export class ClientSession implements IClientSession {
 
     return session.maybeShutdown().then(shutdown => {
       if (shutdown === undefined || shutdown) {
-        // TODO prompt with a dialog
-        this._session = null;
-        return session.shutdown();
+        let dialog = (this._dialog = new Dialog({
+          title: 'Shutdown Kernel',
+          body: 'Do you want to shutdown the associated kernel?',
+          buttons: [
+            Dialog.cancelButton({ label: 'NO' }),
+            Dialog.warnButton({ label: 'YES' })
+          ]
+        }));
+
+        return dialog
+          .launch()
+          .then(result => {
+            if (!result.button.accept) {
+              return Promise.resolve();
+            }
+
+            this._session = null;
+            return session.shutdown();
+          })
+          .then(() => {
+            this._dialog = null;
+          });
       } else {
         return Promise.resolve();
       }
