@@ -209,7 +209,9 @@ export function addCommands(
       const initialCommand = args['initialCommand'] as string;
       const term = new Terminal({ initialCommand });
       const promise = name
-        ? serviceManager.terminals.connectTo(name)
+        ? serviceManager.terminals
+            .connectTo(name)
+            .catch(() => serviceManager.terminals.startNew())
         : serviceManager.terminals.startNew();
 
       term.title.icon = TERMINAL_ICON_CLASS;
