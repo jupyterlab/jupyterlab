@@ -211,7 +211,25 @@ export class SearchInstance {
   constructor(widget: Widget, searchProvider: ISearchProvider) {
     this._widget = widget;
     this._activeProvider = searchProvider;
-    this._initializeSearchAssets();
+
+    this._searchWidget = createSearchOverlay(
+      this._displayUpdateSignal,
+      this._displayState,
+      this._onCaseSensitiveToggled.bind(this),
+      this._onRegexToggled.bind(this),
+      this._highlightNext.bind(this),
+      this._highlightPrevious.bind(this),
+      this._startSearch.bind(this),
+      this._endSearch.bind(this)
+    );
+
+    // TODO: this does not update if the toolbar changes height.
+    if (this._widget instanceof MainAreaWidget) {
+      // Offset the position of the search widget to not cover the toolbar.
+      this._searchWidget.node.style.top = `${
+        this._widget.toolbar.node.clientHeight
+      }px`;
+    }
   }
 
   /**
@@ -308,38 +326,6 @@ export class SearchInstance {
     this._displayState.useRegex = !this._displayState.useRegex;
     this._updateDisplay();
   };
-
-  private _initializeSearchAssets() {
-    const onCaseSensitiveToggled = () => {
-      this._displayState.caseSensitive = !this._displayState.caseSensitive;
-      this._updateDisplay();
-    };
-
-    const onRegexToggled = () => {
-      this._displayState.useRegex = !this._displayState.useRegex;
-      this._updateDisplay();
-    };
-
-    // TODO: circular import
-    this._searchWidget = createSearchOverlay(
-      this._displayUpdateSignal,
-      this._displayState,
-      this._onCaseSensitiveToggled.bind(this),
-      this._onRegexToggled.bind(this),
-      this._highlightNext.bind(this),
-      this._highlightPrevious.bind(this),
-      this._startSearch.bind(this),
-      this._endSearch.bind(this)
-    );
-
-    // TODO: this does not update if the toolbar changes height.
-    if (this._widget instanceof MainAreaWidget) {
-      // Offset the position of the search widget to not cover the toolbar.
-      this._searchWidget.node.style.top = `${
-        this._widget.toolbar.node.clientHeight
-      }px`;
-    }
-  }
 
   private _widget: Widget;
   private _displayState: IDisplayState = {

@@ -230,7 +230,7 @@ export function createSearchOverlay(
   onHightlightNext: Function,
   onHighlightPrevious: Function,
   onStartSearch: Function,
-  onEndSearch: Function,
+  onEndSearch: Function
 ): Widget {
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
