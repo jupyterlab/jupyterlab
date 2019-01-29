@@ -4,17 +4,12 @@ import '../style/index.css';
 
 import { SearchProviderRegistry } from './searchproviderregistry';
 
-import {
-  JupyterLab,
-  JupyterLabPlugin,
-  ApplicationShell
-} from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 import { createSearchOverlay } from './searchoverlay';
 import { Widget } from '@phosphor/widgets';
-import { DocumentWidget } from '@jupyterlab/docregistry';
 
 export interface ISearchMatch {
   /**
@@ -209,7 +204,10 @@ const extension: JupyterLabPlugin<void> = {
   }
 };
 
-class SearchInstance {
+/**
+ * Represents a search on a single widget.
+ */
+export class SearchInstance {
   constructor(widget: Widget, searchProvider: ISearchProvider) {
     this._widget = widget;
     this._activeProvider = searchProvider;
@@ -256,6 +254,7 @@ class SearchInstance {
     // Trigger a rerender
     this._displayUpdateSignal.emit(this._displayState);
   }
+
   private _startSearch(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
     this._displayState.query = query;
@@ -275,6 +274,7 @@ class SearchInstance {
       })
     );
   }
+
   private _endSearch() {
     this._activeProvider.endSearch().then(() => {
       Signal.disconnectAll(this);
@@ -282,12 +282,14 @@ class SearchInstance {
       this._activeProvider.changed.disconnect(this.updateIndices, this);
     });
   }
+
   private _highlightNext() {
     if (!this._displayState.query) {
       return;
     }
     this._activeProvider.highlightNext().then(this.updateIndices.bind(this));
   }
+
   private _highlightPrevious() {
     if (!this._displayState.query) {
       return;
@@ -296,22 +298,18 @@ class SearchInstance {
       .highlightPrevious()
       .then(this.updateIndices.bind(this));
   }
+
+  private _onCaseSensitiveToggled = () => {
+    this._displayState.caseSensitive = !this._displayState.caseSensitive;
+    this._updateDisplay();
+  };
+
+  private _onRegexToggled = () => {
+    this._displayState.useRegex = !this._displayState.useRegex;
+    this._updateDisplay();
+  };
+
   private _initializeSearchAssets() {
-    this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayState>(
-      this._activeProvider
-    );
-
-    this._displayState = {
-      currentIndex: 0,
-      totalMatches: 0,
-      caseSensitive: false,
-      useRegex: false,
-      inputText: '',
-      query: null,
-      errorMessage: '',
-      forceFocus: true
-    };
-
     const onCaseSensitiveToggled = () => {
       this._displayState.caseSensitive = !this._displayState.caseSensitive;
       this._updateDisplay();
@@ -322,25 +320,39 @@ class SearchInstance {
       this._updateDisplay();
     };
 
-    const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
-      .clientHeight;
-
+    // TODO: circular import
     this._searchWidget = createSearchOverlay(
       this._displayUpdateSignal,
       this._displayState,
-      onCaseSensitiveToggled,
-      onRegexToggled,
+      this._onCaseSensitiveToggled.bind(this),
+      this._onRegexToggled.bind(this),
       this._highlightNext.bind(this),
       this._highlightPrevious.bind(this),
       this._startSearch.bind(this),
-      this._endSearch.bind(this),
-      toolbarHeight
+      this._endSearch.bind(this)
     );
+
+    // TODO: this does not update if the toolbar changes height.
+    if (this._widget instanceof MainAreaWidget) {
+      // Offset the position of the search widget to not cover the toolbar.
+      this._searchWidget.node.style.top = `${
+        this._widget.toolbar.node.clientHeight
+      }px`;
+    }
   }
 
   private _widget: Widget;
-  private _displayState: IDisplayState;
-  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayState>;
+  private _displayState: IDisplayState = {
+    currentIndex: 0,
+    totalMatches: 0,
+    caseSensitive: false,
+    useRegex: false,
+    inputText: '',
+    query: null,
+    errorMessage: '',
+    forceFocus: true
+  };
+  private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;
 }

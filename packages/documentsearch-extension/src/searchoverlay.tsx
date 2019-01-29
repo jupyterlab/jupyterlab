@@ -6,7 +6,7 @@ import '../style/index.css';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import { IDisplayState, ISearchProvider } from '.';
+import { IDisplayState, SearchInstance } from '.';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
@@ -223,7 +223,7 @@ class SearchOverlay extends React.Component<
 }
 
 export function createSearchOverlay(
-  wigdetChanged: Signal<ISearchProvider, IDisplayState>,
+  widgetChanged: Signal<SearchInstance, IDisplayState>,
   overlayState: IDisplayState,
   onCaseSensitiveToggled: Function,
   onRegexToggled: Function,
@@ -231,11 +231,10 @@ export function createSearchOverlay(
   onHighlightPrevious: Function,
   onStartSearch: Function,
   onEndSearch: Function,
-  toolbarHeight: number
 ): Widget {
   const widget = ReactWidget.create(
-    <UseSignal signal={wigdetChanged} initialArgs={overlayState}>
-      {(sender, args) => {
+    <UseSignal signal={widgetChanged} initialArgs={overlayState}>
+      {(_, args) => {
         return (
           <SearchOverlay
             onCaseSensitiveToggled={onCaseSensitiveToggled}
@@ -251,7 +250,6 @@ export function createSearchOverlay(
     </UseSignal>
   );
   widget.addClass(OVERLAY_CLASS);
-  widget.node.style.top = toolbarHeight + 'px';
   return widget;
 }
 
