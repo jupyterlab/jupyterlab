@@ -14,7 +14,7 @@
       "type": "string",
       "title": "Theme",
       "description": "CSS file defining the corresponding\n.cm-s-[name] styles is loaded",
-      "default": "default"
+      "default": "jupyter"
     },
     "scrollPastEnd": {
       "type": "boolean",
