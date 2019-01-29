@@ -24,7 +24,6 @@ import {
 import {
   ISettingRegistry,
   IStateDB,
-  PageConfig,
   SettingRegistry,
   StateDB,
   URLExt
@@ -73,17 +72,6 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const saveState = 'apputils:save-statedb';
-}
-
-/**
- * The routing regular expressions used by the apputils plugin.
- */
-namespace Patterns {
-  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}([^?\/]+)`
-  );
 }
 
 /**
@@ -232,10 +220,11 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     paths: JupyterFrontEnd.IPaths,
     router: IRouter
   ) => {
+    const workspacePattern = new RegExp(`^${paths.urls.workspaces}([^?\/]+)`);
     const solver = new WindowResolver();
-    const match = router.current.path.match(Patterns.workspace);
+    const match = router.current.path.match(workspacePattern);
     const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = Private.candidate(paths.urls, workspace);
+    const candidate = Private.candidate(paths, workspace);
 
     try {
       await solver.resolve(candidate);
@@ -244,7 +233,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
 
       // Return a promise that never resolves.
       return new Promise<IWindowResolver>(() => {
-        Private.redirect(router);
+        Private.redirect(router, paths, workspacePattern);
       });
     }
 
@@ -517,7 +506,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     router.register({
       command: CommandIDs.resetOnLoad,
-      pattern: Patterns.resetOnLoad,
+      pattern: /(\?reset|\&reset)($|&)/,
       rank: 10 // Very high priority: 10:100.
     });
 
@@ -560,12 +549,12 @@ namespace Private {
    * @returns A workspace name candidate.
    */
   export function candidate(
-    urls: JupyterFrontEnd.Paths.IURLs,
+    paths: JupyterFrontEnd.IPaths,
     workspace = ''
   ): string {
     return workspace
-      ? URLExt.join(urls.base, urls.workspaces, workspace)
-      : urls.defaultWorkspace;
+      ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
+      : paths.urls.defaultWorkspace;
   }
 
   /**
@@ -649,7 +638,12 @@ namespace Private {
   /**
    * Allows the user to clear state if splash screen takes too long.
    */
-  export async function redirect(router: IRouter, warn = false): Promise<void> {
+  export async function redirect(
+    router: IRouter,
+    paths: JupyterFrontEnd.IPaths,
+    workspacePattern: RegExp,
+    warn = false
+  ): Promise<void> {
     const form = createRedirectForm(warn);
     const dialog = new Dialog({
       title: 'Please use a different workspace.',
@@ -661,13 +655,13 @@ namespace Private {
 
     dialog.dispose();
     if (!result.value) {
-      return redirect(router, true);
+      return redirect(router, paths, workspacePattern, true);
     }
 
     // Navigate to a new workspace URL and abandon this session altogether.
-    const page = PageConfig.getOption('pageUrl');
-    const workspaces = PageConfig.getOption('workspacesUrl');
-    const match = router.current.path.match(Patterns.workspace);
+    const page = paths.urls.page;
+    const workspaces = paths.urls.workspaces;
+    const match = router.current.path.match(workspacePattern);
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const prefix = (workspace ? workspaces : page).length + workspace.length;
     const rest = router.current.request.substring(prefix);
