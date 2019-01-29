@@ -87,7 +87,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return Promise.resolve(match);
   }
 
-  canSearchOn(domain: any): boolean {
+  static canSearchOn(domain: any): boolean {
     return domain.content && domain.content.editor instanceof CodeMirrorEditor;
   }
 

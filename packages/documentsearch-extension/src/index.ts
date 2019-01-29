@@ -45,6 +45,18 @@ export interface ISearchMatch {
   index: number;
 }
 
+/**
+ * This interface is meant to enforce that SearchProviders implement the static
+ * canSearchOn function.
+ */
+export interface ISearchProviderConstructor {
+  new (): ISearchProvider;
+  /**
+   * Report whether or not this provider has the ability to search on the given object
+   */
+  canSearchOn(domain: any): boolean;
+}
+
 export interface ISearchProvider {
   /**
    * Initialize the search using the provided options.  Should update the UI
@@ -77,11 +89,6 @@ export interface ISearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   highlightPrevious(): Promise<ISearchMatch>;
-
-  /**
-   * Report whether or not this provider has the ability to search on the given object
-   */
-  canSearchOn(domain: any): boolean;
 
   /**
    * The same list of matches provided by the startSearch promise resoluton

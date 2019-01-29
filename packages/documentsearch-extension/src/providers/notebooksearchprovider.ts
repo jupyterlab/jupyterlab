@@ -143,7 +143,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     });
   }
 
-  canSearchOn(domain: any): boolean {
+  static canSearchOn(domain: any): boolean {
     return domain instanceof NotebookPanel;
   }
 

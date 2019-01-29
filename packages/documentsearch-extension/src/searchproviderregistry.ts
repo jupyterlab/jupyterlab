@@ -1,4 +1,4 @@
-import { ISearchProvider } from './index';
+import { ISearchProvider, ISearchProviderConstructor } from './index';
 import {
   CodeMirrorSearchProvider,
   NotebookSearchProvider
@@ -6,10 +6,6 @@ import {
 
 const DEFAULT_NOTEBOOK_SEARCH_PROVIDER = 'jl-defaultNotebookSearchProvider';
 const DEFAULT_CODEMIRROR_SEARCH_PROVIDER = 'jl-defaultCodeMirrorSearchProvider';
-
-interface ISearchProviderConstructor {
-  new (): ISearchProvider;
-}
 
 export class SearchProviderRegistry {
   constructor() {
@@ -70,9 +66,9 @@ export class SearchProviderRegistry {
 
     // iterate through all providers and ask each one if it can search on the
     // widget.
-    for (let p of providerMap.values()) {
-      const testInstance = new p();
-      if (testInstance.canSearchOn(widget)) {
+    for (let P of providerMap.values()) {
+      if (P.canSearchOn(widget)) {
+        const testInstance = new P();
         providerInstance = testInstance;
         break;
       }
