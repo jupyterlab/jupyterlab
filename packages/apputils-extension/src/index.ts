@@ -120,19 +120,19 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
  */
 const themes: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, JupyterLab.IInfo, ISplashScreen],
+  requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
-    info: JupyterLab.IInfo,
+    paths: JupyterFrontEnd.IPaths,
     splash: ISplashScreen | null,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null
   ): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(info.urls.base, info.urls.themes);
+    const url = URLExt.join(paths.urls.base, paths.urls.themes);
     const key = themes.id;
     const manager = new ThemeManager({ key, host, settings, splash, url });
 
