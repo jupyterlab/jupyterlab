@@ -11,6 +11,7 @@ import {
 import {
   Clipboard,
   InstanceTracker,
+  IWindowResolver,
   MainAreaWidget,
   ToolbarButton
 } from '@jupyterlab/apputils';
@@ -134,7 +135,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
 const shareFile: JupyterFrontEndPlugin<void> = {
   activate: activateShareFile,
   id: '@jupyterlab/filebrowser-extension:share-file',
-  requires: [IFileBrowserFactory],
+  requires: [IFileBrowserFactory, IWindowResolver],
   autoStart: true
 };
 
@@ -309,7 +310,8 @@ function activateBrowser(
 
 function activateShareFile(
   app: JupyterFrontEnd,
-  factory: IFileBrowserFactory
+  factory: IFileBrowserFactory,
+  resolver: IWindowResolver
 ): void {
   const { commands } = app;
   const { tracker } = factory;
@@ -321,7 +323,7 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(widget.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: true });
+      const tree = PageConfig.getTreeUrl({ workspace: resolver.name });
 
       Clipboard.copyToSystem(URLExt.join(tree, path));
     },
