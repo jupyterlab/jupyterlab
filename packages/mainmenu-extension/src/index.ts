@@ -136,7 +136,8 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
 
-    let quitButton = PageConfig.getOption('quit_button');
+    // Only add quit button if the back-end supports it by checking page config.
+    let quitButton = PageConfig.getOption('quitButton');
     menu.fileMenu.quitEntry = quitButton === 'True';
 
     // Create the application menus.
