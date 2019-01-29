@@ -11,6 +11,8 @@ import { IIterator } from '@phosphor/algorithm';
 
 import { Application, IPlugin } from '@phosphor/application';
 
+import { Token } from '@phosphor/coreutils';
+
 import { Widget } from '@phosphor/widgets';
 
 /**
@@ -35,7 +37,7 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
  * `shell` attribute of a `JupyterFrontEnd`.
  */
 export class JupyterFrontEnd<
-  T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell
+  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
@@ -142,7 +144,7 @@ export namespace JupyterFrontEnd {
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
-  export interface IOptions<T extends Shell = Shell, U = any>
+  export interface IOptions<T extends IShell = IShell, U = any>
     extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
@@ -169,7 +171,7 @@ export namespace JupyterFrontEnd {
   /**
    * A minimal shell type for Jupyter front-end applications.
    */
-  export type Shell = Widget & {
+  export interface IShell extends Widget {
     /**
      * Activates a widget inside the application shell.
      *
@@ -209,5 +211,38 @@ export namespace JupyterFrontEnd {
      * @param area - Optional regions in the shell whose widgets are iterated.
      */
     widgets(area?: string): IIterator<Widget>;
-  };
+  }
+
+  export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
+
+  export interface IPaths {
+    /**
+     * The urls used by the application.
+     */
+    readonly urls: {
+      readonly base: string;
+      readonly defaultWorkspace: string;
+      readonly notFound?: string;
+      readonly page: string;
+      readonly public: string;
+      readonly settings: string;
+      readonly themes: string;
+      readonly tree: string;
+      readonly workspaces: string;
+    };
+
+    /**
+     * The local directories used by the application.
+     */
+    readonly directories: {
+      readonly appSettings: string;
+      readonly schemas: string;
+      readonly static: string;
+      readonly templates: string;
+      readonly themes: string;
+      readonly userSettings: string;
+      readonly serverRoot: string;
+      readonly workspaces: string;
+    };
+  }
 }
