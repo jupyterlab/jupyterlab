@@ -116,20 +116,20 @@ export class SearchInstance implements IDisposable {
     return this._isDisposed;
   }
 
-  private _highlightNext() {
+  private async _highlightNext() {
     if (!this._displayState.query) {
       return;
     }
-    this._activeProvider.highlightNext().then(this.updateIndices.bind(this));
+    await this._activeProvider.highlightNext();
+    this.updateIndices();
   }
 
-  private _highlightPrevious() {
+  private async _highlightPrevious() {
     if (!this._displayState.query) {
       return;
     }
-    this._activeProvider
-      .highlightPrevious()
-      .then(this.updateIndices.bind(this));
+    await this._activeProvider.highlightPrevious();
+    this.updateIndices();
   }
 
   private _onCaseSensitiveToggled = () => {
