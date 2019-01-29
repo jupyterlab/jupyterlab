@@ -299,7 +299,6 @@ function activateBrowser(
         const context = docManager.contextForWidget(newValue);
         const { path } = context;
         if (context) {
-          commands.execute('filebrowser:activate', { path: path });
           factory.defaultBrowser;
           Private.navigateToPath(path, factory)
             .then(() => {
