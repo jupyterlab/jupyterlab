@@ -163,34 +163,33 @@ const extension: JupyterLabPlugin<void> = {
     const prevCommand: string = 'documentsearch:highlightPrevious';
     app.commands.addCommand(startCommand, {
       label: 'Search the open document',
-      execute: Private.onStartCommand.bind(
-        null,
-        app.shell,
-        registry,
-        activeSearches
-      )
+      execute: () => {
+        Private.onStartCommand(app.shell, registry, activeSearches);
+      }
     });
 
     app.commands.addCommand(nextCommand, {
-      label: 'Search the open document',
-      execute: Private.openBoxOrExecute.bind(
-        null,
-        app.shell,
-        registry,
-        activeSearches,
-        Private.onNextCommand
-      )
+      label: 'Next match in open document',
+      execute: () => {
+        Private.openBoxOrExecute(
+          app.shell,
+          registry,
+          activeSearches,
+          Private.onNextCommand
+        );
+      }
     });
 
     app.commands.addCommand(prevCommand, {
-      label: 'Search the open document',
-      execute: Private.openBoxOrExecute.bind(
-        null,
-        app.shell,
-        registry,
-        activeSearches,
-        Private.onPrevCommand
-      )
+      label: 'Previous match in open document',
+      execute: () => {
+        Private.openBoxOrExecute(
+          app.shell,
+          registry,
+          activeSearches,
+          Private.onPrevCommand
+        );
+      }
     });
 
     // Add the command to the palette.
