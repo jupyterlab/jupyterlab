@@ -146,10 +146,16 @@ async function activateConsole(
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: CommandIDs.open,
+    command: CommandIDs.create,
     args: panel => ({
       path: panel.console.session.path,
-      name: panel.console.session.name
+      name: panel.console.session.name,
+      kernelPreference: {
+        name: panel.console.session.kernel && panel.console.session.kernel.name,
+        language:
+          panel.console.session.language &&
+          panel.console.session.kernel.language
+      }
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
