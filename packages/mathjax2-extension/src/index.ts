@@ -19,8 +19,17 @@ const plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   autoStart: true,
   provides: ILatexTypesetter,
   activate: () => {
-    let url = PageConfig.getOption('mathjaxUrl');
-    let config = PageConfig.getOption('mathjaxConfig');
+    const url = PageConfig.getOption('mathjaxUrl');
+    const config = PageConfig.getOption('mathjaxConfig');
+
+    if (!url) {
+      const message =
+        `${plugin.id} uses 'mathJaxUrl' and 'mathjaxConfig' in PageConfig ` +
+        `to operate but 'mathJaxUrl' was not found.`;
+
+      throw new Error(message);
+    }
+
     return new MathJaxTypesetter({ url, config });
   }
 };
