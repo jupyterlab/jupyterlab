@@ -112,13 +112,11 @@ interface ISearchIndexProps {
 
 function SearchIndices(props: ISearchIndexProps) {
   return (
-    <>
-      <div className={INDEX_COUNTER_CLASS}>
-        {props.totalMatches === 0
-          ? '-/-'
-          : `${props.currentIndex + 1}/${props.totalMatches}`}
-      </div>
-    </>
+    <div className={INDEX_COUNTER_CLASS}>
+      {props.totalMatches === 0
+        ? '-/-'
+        : `${props.currentIndex + 1}/${props.totalMatches}`}
+    </div>
   );
 }
 
@@ -141,18 +139,18 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
   }
 
-  private onChange(event: React.ChangeEvent) {
+  private _onChange(event: React.ChangeEvent) {
     this.setState({ inputText: (event.target as HTMLInputElement).value });
   }
 
-  private onKeydown(event: KeyboardEvent) {
+  private _onKeydown(event: KeyboardEvent) {
     if (event.keyCode !== 13) {
       return;
     }
-    this.executeSearch(!event.shiftKey);
+    this._executeSearch(!event.shiftKey);
   }
 
-  private executeSearch(goForward: boolean) {
+  private _executeSearch(goForward: boolean) {
     // execute search!
     let query;
     try {
@@ -192,8 +190,8 @@ class SearchOverlay extends React.Component<
           caseSensitive={this.props.overlayState.caseSensitive}
           onCaseSensitiveToggled={() => this.props.onCaseSensitiveToggled()}
           onRegexToggled={() => this.props.onRegexToggled()}
-          onKeydown={(e: KeyboardEvent) => this.onKeydown(e)}
-          onChange={(e: React.ChangeEvent) => this.onChange(e)}
+          onKeydown={(e: KeyboardEvent) => this._onKeydown(e)}
+          onChange={(e: React.ChangeEvent) => this._onChange(e)}
           inputText={this.state.inputText}
           forceFocus={this.props.overlayState.forceFocus}
         />
@@ -202,8 +200,8 @@ class SearchOverlay extends React.Component<
           totalMatches={this.props.overlayState.totalMatches}
         />
         <UpDownButtons
-          onHighlightPrevious={() => this.executeSearch(false)}
-          onHightlightNext={() => this.executeSearch(true)}
+          onHighlightPrevious={() => this._executeSearch(false)}
+          onHightlightNext={() => this._executeSearch(true)}
         />
         <div className={CLOSE_BUTTON_CLASS} onClick={() => this.onClose()} />
         <div

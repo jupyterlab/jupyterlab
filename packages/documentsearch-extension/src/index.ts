@@ -50,7 +50,8 @@ export interface ISearchProvider {
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
-   * @param options All of the search parameters configured in the search panel
+   * @param query A RegExp to be use to perform the search
+   * @param searchTarget The widget to be searched
    *
    * @returns A promise that resolves with a list of all matches
    */

@@ -13,11 +13,11 @@ interface ISearchProviderConstructor {
 
 export class SearchProviderRegistry {
   constructor() {
-    this.registerDefaultProviders(
+    this._registerDefaultProviders(
       DEFAULT_NOTEBOOK_SEARCH_PROVIDER,
       NotebookSearchProvider
     );
-    this.registerDefaultProviders(
+    this._registerDefaultProviders(
       DEFAULT_CODEMIRROR_SEARCH_PROVIDER,
       CodeMirrorSearchProvider
     );
@@ -37,19 +37,19 @@ export class SearchProviderRegistry {
 
   getProviderForWidget(widget: any): ISearchProvider {
     return (
-      this.findMatchingProvider(this._customProviders, widget) ||
-      this.findMatchingProvider(this._defaultProviders, widget)
+      this._findMatchingProvider(this._customProviders, widget) ||
+      this._findMatchingProvider(this._defaultProviders, widget)
     );
   }
 
-  private registerDefaultProviders(
+  private _registerDefaultProviders(
     key: string,
     provider: ISearchProviderConstructor
   ): void {
     this._defaultProviders[key] = provider;
   }
 
-  private findMatchingProvider(
+  private _findMatchingProvider(
     providerMap: Private.ProviderMap,
     widget: any
   ): ISearchProvider {

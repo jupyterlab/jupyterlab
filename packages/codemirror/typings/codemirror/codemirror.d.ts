@@ -55,7 +55,10 @@ declare module 'codemirror' {
   interface Editor {
     /** Scrolls the given element into view. pos is a { from, to } object, in editor-local coordinates.
      The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
-    scrollIntoView(pos: Range, margin?: number): void;
+    scrollIntoView(
+      pos: { from: CodeMirror.Position; to: CodeMirror.Position },
+      margin?: number
+    ): void;
   }
 
   interface Selection {

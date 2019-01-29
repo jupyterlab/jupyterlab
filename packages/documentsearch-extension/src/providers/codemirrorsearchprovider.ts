@@ -117,7 +117,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       state.query = query;
       // clear search first
       this._cm.removeOverlay(state.overlay);
-      state.overlay = this.getSearchOverlay();
+      state.overlay = this._getSearchOverlay();
       this._cm.addOverlay(state.overlay);
       // skips show matches on scroll bar here
       state.posFrom = state.posTo = this._cm.getCursor();
@@ -164,7 +164,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     });
   }
 
-  private getSearchOverlay() {
+  private _getSearchOverlay() {
     return {
       /**
        * Token function is called when a line needs to be processed -

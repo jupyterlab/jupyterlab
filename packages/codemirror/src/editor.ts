@@ -468,8 +468,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = this._toCodeMirrorRange(selection);
-    this._editor.scrollIntoView(range); // TODO
+    const range = {
+      from: this._toCodeMirrorPosition(selection.start),
+      to: this._toCodeMirrorPosition(selection.end)
+    };
+    this._editor.scrollIntoView(range);
   }
 
   /**
@@ -813,18 +816,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return {
       anchor: this._toCodeMirrorPosition(anchor),
       head: this._toCodeMirrorPosition(head)
-    };
-  }
-
-  /**
-   * Converts an editor selection to a code mirror selection.
-   */
-  private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
-    return {
-      anchor: this._toCodeMirrorPosition(range.start),
-      head: this._toCodeMirrorPosition(range.end),
-      from: this._toCodeMirrorPosition.bind(this, range.start),
-      to: this._toCodeMirrorPosition.bind(this, range.end)
     };
   }
 
