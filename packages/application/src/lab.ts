@@ -97,6 +97,36 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     // Populate application info.
     this._info = { ...JupyterLab.defaultInfo, ...info };
 
+    // Populate application paths override the defaults if necessary.
+    const defaultURLs = JupyterLab.defaultPaths.urls;
+    const defaultDirs = JupyterLab.defaultPaths.directories;
+    const optionURLs = (options.paths && options.paths.urls) || {};
+    const optionDirs = (options.paths && options.paths.directories) || {};
+
+    this._paths = {
+      urls: Object.keys(defaultURLs).reduce((acc, key) => {
+        if (key in optionURLs) {
+          const value = (optionURLs as any)[key];
+          (acc as any)[key] = value;
+        } else {
+          (acc as any)[key] = (defaultURLs as any)[key];
+        }
+        return acc;
+      }, {}),
+      directories: Object.keys(JupyterLab.defaultPaths.directories).reduce(
+        (acc, key) => {
+          if (key in optionDirs) {
+            const value = (optionDirs as any)[key];
+            (acc as any)[key] = value;
+          } else {
+            (acc as any)[key] = (defaultDirs as any)[key];
+          }
+          return acc;
+        },
+        {}
+      )
+    } as JupyterFrontEnd.IPaths;
+
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
@@ -112,6 +142,16 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
   }
 
   /**
+   * The name of the JupyterLab application.
+   */
+  readonly name = PageConfig.getOption('appName') || 'JupyterLab';
+
+  /**
+   * A namespace/prefix plugins may use to denote their provenance.
+   */
+  readonly namespace = PageConfig.getOption('appNamespace') || this.name;
+
+  /**
    * A list of all errors encountered when registering plugins.
    */
   readonly registerPluginErrors: Array<Error> = [];
@@ -123,18 +163,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
   readonly restored: Promise<void>;
 
   /**
-   * Whether the application is dirty.
+   * The version of the JupyterLab application.
    */
-  get isDirty(): boolean {
-    return this._dirtyCount > 0;
-  }
-
-  /**
-   * Whether the application is busy.
-   */
-  get isBusy(): boolean {
-    return this._busyCount > 0;
-  }
+  readonly version = PageConfig.getOption('appVersion') || 'unknown';
 
   /**
    * Returns a signal for when application changes its busy status.
@@ -151,10 +182,31 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
   }
 
   /**
-   * The information about the application.
+   * The JupyterLab application information dictionary.
    */
   get info(): JupyterLab.IInfo {
     return this._info;
+  }
+
+  /**
+   * Whether the application is busy.
+   */
+  get isBusy(): boolean {
+    return this._busyCount > 0;
+  }
+
+  /**
+   * Whether the application is dirty.
+   */
+  get isDirty(): boolean {
+    return this._dirtyCount > 0;
+  }
+
+  /**
+   * The JupyterLab application paths dictionary.
+   */
+  get paths(): JupyterFrontEnd.IPaths {
+    return this._paths;
   }
 
   /**
@@ -231,11 +283,12 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     });
   }
 
-  private _info: JupyterLab.IInfo;
-  private _dirtyCount = 0;
   private _busyCount = 0;
   private _busySignal: Signal<JupyterLab, boolean>;
+  private _dirtyCount = 0;
   private _dirtySignal: Signal<JupyterLab, boolean>;
+  private _info: JupyterLab.IInfo;
+  private _paths: JupyterFrontEnd.IPaths;
 }
 
 /**
@@ -247,7 +300,9 @@ export namespace JupyterLab {
    */
   export interface IOptions
     extends JupyterFrontEnd.IOptions<LabShell>,
-      Partial<IInfo> {}
+      Partial<IInfo> {
+    paths?: Partial<JupyterFrontEnd.IPaths>;
+  }
 
   /* tslint:disable */
   /**
@@ -259,22 +314,7 @@ export namespace JupyterLab {
   /**
    * The information about a JupyterLab application.
    */
-  export interface IInfo extends JupyterFrontEnd.IPaths {
-    /**
-     * The name of the JupyterLab application.
-     */
-    readonly name: string;
-
-    /**
-     * The version of the JupyterLab application.
-     */
-    readonly version: string;
-
-    /**
-     * The namespace/prefix plugins may use to denote their origin.
-     */
-    readonly namespace: string;
-
+  export interface IInfo {
     /**
      * Whether the application is in dev mode.
      */
@@ -302,16 +342,20 @@ export namespace JupyterLab {
   }
 
   /**
-   * The default application info.
+   * The default JupyterLab application info.
    */
   export const defaultInfo: IInfo = {
-    name: PageConfig.getOption('appName') || 'JupyterLab',
-    namespace: PageConfig.getOption('appNamespace'),
-    version: PageConfig.getOption('appVersion') || 'unknown',
     devMode: PageConfig.getOption('devMode').toLowerCase() === 'true',
     deferred: { patterns: [], matches: [] },
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
+  };
+
+  /**
+   * The default JupyterLab application paths.
+   */
+  export const defaultPaths: JupyterFrontEnd.IPaths = {
     urls: {
       base: PageConfig.getOption('baseUrl'),
       defaultWorkspace: PageConfig.getOption('defaultWorkspace'),
@@ -332,8 +376,7 @@ export namespace JupyterLab {
       userSettings: PageConfig.getOption('userSettingsDir'),
       serverRoot: PageConfig.getOption('serverRoot'),
       workspaces: PageConfig.getOption('workspacesDir')
-    },
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
+    }
   };
 
   /**

@@ -7,7 +7,6 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterLab,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
@@ -266,13 +265,13 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter, IWindowResolver, JupyterLab.IInfo],
+  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
   optional: [ISplashScreen],
   activate: (
     app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     resolver: IWindowResolver,
-    info: JupyterLab.IInfo,
     splash: ISplashScreen | null
   ) => {
     let debouncer: number;
@@ -283,7 +282,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const db = new StateDB({
-      namespace: info.namespace,
+      namespace: app.namespace,
       transform: transform.promise,
       windowName: workspace
     });
@@ -370,7 +369,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { urls } = info;
+        const { urls } = paths;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'

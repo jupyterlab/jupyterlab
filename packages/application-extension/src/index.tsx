@@ -568,7 +568,12 @@ const status: JupyterFrontEndPlugin<ILabStatus> = {
 };
 
 /**
- * The default JupyterLab application information provider.
+ * The default JupyterLab application-specific information provider.
+ *
+ * #### Notes
+ * This plugin should only be used by plugins that specifically need to access
+ * JupyterLab application information, e.g., listing extensions that have been
+ * loaded or deferred within JupyterLab.
  */
 const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
   id: '@jupyterlab/application-extension:info',
@@ -582,15 +587,19 @@ const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
   provides: JupyterLab.IInfo
 };
 
+/**
+ * The default JupyterLab paths dictionary provider.
+ */
 const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
   id: '@jupyterlab/apputils-extension:paths',
   activate: (app: JupyterFrontEnd): JupyterFrontEnd.IPaths => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${paths.id} must be activated in JupyterLab.`);
     }
-    return app.info;
+    return app.paths;
   },
-  autoStart: true
+  autoStart: true,
+  provides: JupyterFrontEnd.IPaths
 };
 
 /**

@@ -36,7 +36,7 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
  * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
  * `shell` attribute of a `JupyterFrontEnd`.
  */
-export class JupyterFrontEnd<
+export abstract class JupyterFrontEnd<
   T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
 > extends Application<T> {
   /**
@@ -60,6 +60,21 @@ export class JupyterFrontEnd<
       this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
   }
+
+  /**
+   * The name of this Jupyter front-end application.
+   */
+  abstract readonly name: string;
+
+  /**
+   * A namespace/prefix plugins may use to denote their provenance.
+   */
+  abstract readonly namespace: string;
+
+  /**
+   * The version of this Jupyter front-end application.
+   */
+  abstract readonly version: string;
 
   /**
    * The command linker used by the application.
@@ -213,8 +228,14 @@ export namespace JupyterFrontEnd {
     widgets(area?: string): IIterator<Widget>;
   }
 
+  /**
+   * The application paths dictionary token.
+   */
   export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
 
+  /**
+   * An interface for URL and directory paths used by a Jupyter front-end.
+   */
   export interface IPaths {
     /**
      * The urls used by the application.

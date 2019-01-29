@@ -4,7 +4,6 @@
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterLab,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
@@ -91,7 +90,7 @@ RESOURCES.sort((a: any, b: any) => {
 const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
-  requires: [JupyterLab.IInfo, IMainMenu],
+  requires: [IMainMenu],
   optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
@@ -110,7 +109,6 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  info: JupyterLab.IInfo,
   mainMenu: IMainMenu,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null
@@ -278,12 +276,12 @@ function activate(
   });
 
   commands.addCommand(CommandIDs.about, {
-    label: `About ${info.name}`,
+    label: `About ${app.name}`,
     execute: () => {
       // Create the header of the about dialog
       let headerLogo = <div className="jp-About-header-logo" />;
       let headerWordmark = <div className="jp-About-header-wordmark" />;
-      let versionNumber = `Version ${info.version}`;
+      let versionNumber = `Version ${app.version}`;
       let versionInfo = (
         <span className="jp-About-version-info">
           <span className="jp-About-version">{versionNumber}</span>
