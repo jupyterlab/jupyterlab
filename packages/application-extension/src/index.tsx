@@ -162,7 +162,7 @@ const main: JupyterFrontEndPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      if (app.isDirty) {
+      if (app.status.isDirty) {
         return ((event as any).returnValue = message);
       }
     });
@@ -310,7 +310,8 @@ const notfound: JupyterFrontEndPlugin<void> = {
  */
 const busy: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterFrontEnd, status: ILabStatus) => {
+  requires: [ILabStatus],
+  activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
@@ -335,7 +336,6 @@ const busy: JupyterFrontEndPlugin<void> = {
       }
     });
   },
-  requires: [ILabStatus],
   autoStart: true
 };
 
@@ -561,7 +561,7 @@ const status: JupyterFrontEndPlugin<ILabStatus> = {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${status.id} must be activated in JupyterLab.`);
     }
-    return app;
+    return app.status;
   },
   autoStart: true,
   provides: ILabStatus

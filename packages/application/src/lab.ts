@@ -9,69 +9,18 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Token } from '@phosphor/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
-
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
 import { createRendermimePlugins } from './mimerenderers';
 
 import { ILabShell, LabShell } from './shell';
 
-/* tslint:disable */
-/**
- * The application status token.
- */
-export const ILabStatus = new Token<ILabStatus>(
-  '@jupyterlab/application:ILabStatus'
-);
-/* tslint:enable */
-
-/**
- * An interface for JupyterLab-like application status functionality.
- */
-export interface ILabStatus {
-  /**
-   * A signal for when application changes its busy status.
-   */
-  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
-
-  /**
-   * A signal for when application changes its dirty status.
-   */
-  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
-
-  /**
-   * Whether the application is busy.
-   */
-  readonly isBusy: boolean;
-
-  /**
-   * Whether the application is dirty.
-   */
-  readonly isDirty: boolean;
-
-  /**
-   * Set the application state to busy.
-   *
-   * @returns A disposable used to clear the busy state for the caller.
-   */
-  setBusy(): IDisposable;
-
-  /**
-   * Set the application state to dirty.
-   *
-   * @returns A disposable used to clear the dirty state for the caller.
-   */
-  setDirty(): IDisposable;
-}
+import { LabStatus } from './status';
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterFrontEnd<ILabShell>
-  implements ILabStatus {
+export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   /**
    * Construct a new JupyterLab object.
    */
@@ -80,8 +29,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     this.restored = this.shell.restored
       .then(() => undefined)
       .catch(() => undefined);
-    this._busySignal = new Signal(this);
-    this._dirtySignal = new Signal(this);
 
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce(
@@ -163,23 +110,14 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
   readonly restored: Promise<void>;
 
   /**
+   * The application busy and dirty status signals and flags.
+   */
+  readonly status = new LabStatus(this);
+
+  /**
    * The version of the JupyterLab application.
    */
   readonly version = PageConfig.getOption('appVersion') || 'unknown';
-
-  /**
-   * Returns a signal for when application changes its busy status.
-   */
-  get busySignal(): ISignal<JupyterLab, boolean> {
-    return this._busySignal;
-  }
-
-  /**
-   * Returns a signal for when application changes its dirty status.
-   */
-  get dirtySignal(): ISignal<JupyterLab, boolean> {
-    return this._dirtySignal;
-  }
 
   /**
    * The JupyterLab application information dictionary.
@@ -189,64 +127,10 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
   }
 
   /**
-   * Whether the application is busy.
-   */
-  get isBusy(): boolean {
-    return this._busyCount > 0;
-  }
-
-  /**
-   * Whether the application is dirty.
-   */
-  get isDirty(): boolean {
-    return this._dirtyCount > 0;
-  }
-
-  /**
    * The JupyterLab application paths dictionary.
    */
   get paths(): JupyterFrontEnd.IPaths {
     return this._paths;
-  }
-
-  /**
-   * Set the application state to dirty.
-   *
-   * @returns A disposable used to clear the dirty state for the caller.
-   */
-  setDirty(): IDisposable {
-    const oldDirty = this.isDirty;
-    this._dirtyCount++;
-    if (this.isDirty !== oldDirty) {
-      this._dirtySignal.emit(this.isDirty);
-    }
-    return new DisposableDelegate(() => {
-      const oldDirty = this.isDirty;
-      this._dirtyCount = Math.max(0, this._dirtyCount - 1);
-      if (this.isDirty !== oldDirty) {
-        this._dirtySignal.emit(this.isDirty);
-      }
-    });
-  }
-
-  /**
-   * Set the application state to busy.
-   *
-   * @returns A disposable used to clear the busy state for the caller.
-   */
-  setBusy(): IDisposable {
-    const oldBusy = this.isBusy;
-    this._busyCount++;
-    if (this.isBusy !== oldBusy) {
-      this._busySignal.emit(this.isBusy);
-    }
-    return new DisposableDelegate(() => {
-      const oldBusy = this.isBusy;
-      this._busyCount--;
-      if (this.isBusy !== oldBusy) {
-        this._busySignal.emit(this.isBusy);
-      }
-    });
   }
 
   /**
@@ -283,10 +167,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     });
   }
 
-  private _busyCount = 0;
-  private _busySignal: Signal<JupyterLab, boolean>;
-  private _dirtyCount = 0;
-  private _dirtySignal: Signal<JupyterLab, boolean>;
   private _info: JupyterLab.IInfo;
   private _paths: JupyterFrontEnd.IPaths;
 }
