@@ -343,7 +343,6 @@ class SearchInstance {
   private _displayUpdateSignal: Signal<ISearchProvider, IDisplayState>;
   private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;
-
 }
 
 namespace Private {
