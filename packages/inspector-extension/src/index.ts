@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -36,19 +37,18 @@ namespace CommandIDs {
 /**
  * A service providing code introspection.
  */
-const inspector: JupyterLabPlugin<IInspector> = {
+const inspector: JupyterFrontEndPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
   optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     palette: ICommandPalette | null,
     launcher: ILauncher | null,
     restorer: ILayoutRestorer | null
   ): IInspector => {
     const { commands, shell } = app;
-    const category = 'Inspector';
     const command = CommandIDs.open;
     const label = 'Open Inspector';
     const title = 'Inspector';
@@ -59,7 +59,7 @@ const inspector: JupyterLabPlugin<IInspector> = {
 
     let source: IInspector.IInspectable | null = null;
     let inspector: MainAreaWidget<InspectorPanel>;
-    function openInspector(): void {
+    function openInspector(): MainAreaWidget<InspectorPanel> {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
@@ -69,9 +69,10 @@ const inspector: JupyterLabPlugin<IInspector> = {
         inspector.content.source = source;
       }
       if (!inspector.isAttached) {
-        shell.addToMainArea(inspector, { activate: false });
+        shell.add(inspector, 'main', { activate: false });
       }
       shell.activateById(inspector.id);
+      return inspector;
     }
 
     // Add command to registry.
@@ -85,14 +86,12 @@ const inspector: JupyterLabPlugin<IInspector> = {
       label: args => (args.isLauncher ? title : label),
       iconClass: args =>
         args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
-      execute: () => {
-        openInspector();
-      }
+      execute: () => openInspector()
     });
 
     // Add command to UI where possible.
     if (palette) {
-      palette.addItem({ command, category });
+      palette.addItem({ command, category: title });
     }
     if (launcher) {
       launcher.add({ command, args: { isLauncher: true } });
@@ -126,14 +125,15 @@ const inspector: JupyterLabPlugin<IInspector> = {
 /**
  * An extension that registers consoles for inspection.
  */
-const consoles: JupyterLabPlugin<void> = {
+const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/inspector-extension:consoles',
-  requires: [IInspector, IConsoleTracker],
+  requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     manager: IInspector,
-    consoles: IConsoleTracker
+    consoles: IConsoleTracker,
+    labShell: ILabShell
   ): void => {
     // Maintain association of new consoles with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -165,7 +165,7 @@ const consoles: JupyterLabPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    app.shell.currentChanged.connect((sender, args) => {
+    labShell.currentChanged.connect((_, args) => {
       let widget = args.newValue;
       if (!widget || !consoles.has(widget)) {
         return;
@@ -186,14 +186,15 @@ const consoles: JupyterLabPlugin<void> = {
 /**
  * An extension that registers notebooks for inspection.
  */
-const notebooks: JupyterLabPlugin<void> = {
+const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/inspector-extension:notebooks',
-  requires: [IInspector, INotebookTracker],
+  requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     manager: IInspector,
-    notebooks: INotebookTracker
+    notebooks: INotebookTracker,
+    labShell: ILabShell
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -225,7 +226,7 @@ const notebooks: JupyterLabPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    app.shell.currentChanged.connect((sender, args) => {
+    labShell.currentChanged.connect((sender, args) => {
       let widget = args.newValue;
       if (!widget || !notebooks.has(widget)) {
         return;
@@ -246,5 +247,5 @@ const notebooks: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [inspector, consoles, notebooks];
+const plugins: JupyterFrontEndPlugin<any>[] = [inspector, consoles, notebooks];
 export default plugins;

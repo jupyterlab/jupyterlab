@@ -1,0 +1,269 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { CommandLinker } from '@jupyterlab/apputils';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { ServiceManager } from '@jupyterlab/services';
+
+import { IIterator } from '@phosphor/algorithm';
+
+import { Application, IPlugin } from '@phosphor/application';
+
+import { Token } from '@phosphor/coreutils';
+
+import { Widget } from '@phosphor/widgets';
+
+/**
+ * The type for all JupyterFrontEnd application plugins.
+ *
+ * #### Notes
+ * The generic `T` argument indicates the type that the plugin `provides` upon
+ * being activated.
+ */
+export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
+
+/**
+ * The base Jupyter front-end application class.
+ *
+ * #### Notes
+ * This type is useful as a generic application against which front-end plugins
+ * can be authored. It inherits from the phosphor `Application`.
+ *
+ * The generic type argument semantics are as follows.
+ *
+ * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
+ * `shell` attribute of a `JupyterFrontEnd`.
+ */
+export abstract class JupyterFrontEnd<
+  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
+> extends Application<T> {
+  /**
+   * Construct a new JupyterFrontEnd object.
+   */
+  constructor(options: JupyterFrontEnd.IOptions<T>) {
+    super(options);
+
+    // The default restored promise if one does not exist in the options.
+    const restored = new Promise(resolve => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+
+    this.commandLinker =
+      options.commandLinker || new CommandLinker({ commands: this.commands });
+    this.docRegistry = options.docRegistry || new DocumentRegistry();
+    this.restored =
+      options.restored ||
+      this.started.then(() => restored).catch(() => restored);
+    this.serviceManager = options.serviceManager || new ServiceManager();
+  }
+
+  /**
+   * The name of this Jupyter front-end application.
+   */
+  abstract readonly name: string;
+
+  /**
+   * A namespace/prefix plugins may use to denote their provenance.
+   */
+  abstract readonly namespace: string;
+
+  /**
+   * The version of this Jupyter front-end application.
+   */
+  abstract readonly version: string;
+
+  /**
+   * The command linker used by the application.
+   */
+  readonly commandLinker: CommandLinker;
+
+  /**
+   * The document registry instance used by the application.
+   */
+  readonly docRegistry: DocumentRegistry;
+
+  /**
+   * Promise that resolves when state is first restored.
+   */
+  readonly restored: Promise<void>;
+
+  /**
+   * The service manager used by the application.
+   */
+  readonly serviceManager: ServiceManager;
+
+  /**
+   * Walks up the DOM hierarchy of the target of the active `contextmenu`
+   * event, testing the nodes for a user-supplied funcion. This can
+   * be used to find a node on which to operate, given a context menu click.
+   *
+   * @param test - a function that takes an `HTMLElement` and returns a
+   *   boolean for whether it is the element the requester is seeking.
+   *
+   * @returns an HTMLElement or undefined, if none is found.
+   */
+  contextMenuFirst(
+    test: (node: HTMLElement) => boolean
+  ): HTMLElement | undefined {
+    for (let node of this._getContextMenuNodes()) {
+      if (test(node)) {
+        return node;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * A method invoked on a document `'contextmenu'` event.
+   */
+  protected evtContextMenu(event: MouseEvent): void {
+    this._contextMenuEvent = event;
+    super.evtContextMenu(event);
+  }
+
+  /**
+   * Gets the hierarchy of html nodes that was under the cursor
+   * when the most recent contextmenu event was issued
+   */
+  private _getContextMenuNodes(): HTMLElement[] {
+    if (!this._contextMenuEvent) {
+      return [];
+    }
+
+    // This one-liner doesn't work, but should at some point in the future
+    // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
+    // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+
+    const nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
+    while (
+      'parentNode' in nodes[nodes.length - 1] &&
+      nodes[nodes.length - 1].parentNode &&
+      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
+    ) {
+      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
+    }
+    return nodes;
+  }
+
+  private _contextMenuEvent: MouseEvent;
+}
+
+/**
+ * The namespace for `JupyterFrontEnd` class statics.
+ */
+export namespace JupyterFrontEnd {
+  /**
+   * The options used to initialize a JupyterFrontEnd.
+   */
+  export interface IOptions<T extends IShell = IShell, U = any>
+    extends Application.IOptions<T> {
+    /**
+     * The document registry instance used by the application.
+     */
+    docRegistry?: DocumentRegistry;
+
+    /**
+     * The command linker used by the application.
+     */
+    commandLinker?: CommandLinker;
+
+    /**
+     * The service manager used by the application.
+     */
+    serviceManager?: ServiceManager;
+
+    /**
+     * Promise that resolves when state is first restored, returning layout
+     * description.
+     */
+    restored?: Promise<U>;
+  }
+
+  /**
+   * A minimal shell type for Jupyter front-end applications.
+   */
+  export interface IShell extends Widget {
+    /**
+     * Activates a widget inside the application shell.
+     *
+     * @param id - The ID of the widget being activated.
+     */
+    activateById(id: string): void;
+
+    /**
+     * Add a widget to the application shell.
+     *
+     * @param widget - The widget being added.
+     *
+     * @param area - Optional region in the shell into which the widget should
+     * be added.
+     *
+     * @param options - Optional flags the shell might use when opening the
+     * widget, as defined in the `DocumentRegistry`.
+     */
+    add(
+      widget: Widget,
+      area?: string,
+      options?: DocumentRegistry.IOpenOptions
+    ): void;
+
+    /**
+     * The focused widget in the application shell.
+     *
+     * #### Notes
+     * Different shell implementations have latitude to decide what "current"
+     * or "focused" mean, depending on their user interface characteristics.
+     */
+    readonly currentWidget: Widget;
+
+    /**
+     * Returns an iterator for the widgets inside the application shell.
+     *
+     * @param area - Optional regions in the shell whose widgets are iterated.
+     */
+    widgets(area?: string): IIterator<Widget>;
+  }
+
+  /**
+   * The application paths dictionary token.
+   */
+  export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
+
+  /**
+   * An interface for URL and directory paths used by a Jupyter front-end.
+   */
+  export interface IPaths {
+    /**
+     * The urls used by the application.
+     */
+    readonly urls: {
+      readonly base: string;
+      readonly defaultWorkspace: string;
+      readonly notFound?: string;
+      readonly page: string;
+      readonly public: string;
+      readonly settings: string;
+      readonly themes: string;
+      readonly tree: string;
+      readonly workspaces: string;
+    };
+
+    /**
+     * The local directories used by the application.
+     */
+    readonly directories: {
+      readonly appSettings: string;
+      readonly schemas: string;
+      readonly static: string;
+      readonly templates: string;
+      readonly themes: string;
+      readonly userSettings: string;
+      readonly serverRoot: string;
+      readonly workspaces: string;
+    };
+  }
+}

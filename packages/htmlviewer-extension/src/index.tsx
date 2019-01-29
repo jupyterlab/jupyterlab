@@ -5,8 +5,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -32,10 +32,10 @@ namespace CommandIDs {
 /**
  * The HTML file handler extension.
  */
-const htmlPlugin: JupyterLabPlugin<void> = {
+const htmlPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateHTMLViewer,
   id: '@jupyterlab/htmlviewer-extension:plugin',
-  requires: [ICommandPalette, ILayoutRestorer],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -43,9 +43,9 @@ const htmlPlugin: JupyterLabPlugin<void> = {
  * Activate the HTMLViewer extension.
  */
 function activateHTMLViewer(
-  app: JupyterLab,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer
+  app: JupyterFrontEnd,
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): void {
   // Add an HTML file type to the docregistry.
   const ft: DocumentRegistry.IFileType = {
@@ -73,11 +73,13 @@ function activateHTMLViewer(
   });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: 'HTML Viewer' }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: 'HTML Viewer' }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
   factory.widgetCreated.connect((sender, widget) => {
@@ -118,10 +120,12 @@ function activateHTMLViewer(
       current.trusted = !current.trusted;
     }
   });
-  palette.addItem({
-    command: CommandIDs.trustHTML,
-    category: 'File Operations'
-  });
+  if (palette) {
+    palette.addItem({
+      command: CommandIDs.trustHTML,
+      category: 'File Operations'
+    });
+  }
 }
 /**
  * Export the plugins as default.

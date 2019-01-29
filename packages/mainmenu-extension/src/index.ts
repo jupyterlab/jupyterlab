@@ -7,7 +7,11 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Menu, Widget } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
@@ -111,15 +115,16 @@ export namespace CommandIDs {
 /**
  * A service providing an interface to the main menu.
  */
-const plugin: JupyterLabPlugin<IMainMenu> = {
+const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette],
-  optional: [IInspector],
+  optional: [IInspector, ILabShell],
   provides: IMainMenu,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     palette: ICommandPalette,
-    inspector: IInspector | null
+    inspector: IInspector | null,
+    labShell: ILabShell | null
   ): IMainMenu => {
     const { commands } = app;
 
@@ -131,17 +136,22 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
     logo.addClass('jp-JupyterIcon');
     logo.id = 'jp-MainLogo';
 
-    let quitButton = PageConfig.getOption('quit_button');
+    // Only add quit button if the back-end supports it by checking page config.
+    let quitButton = PageConfig.getOption('quitButton');
     menu.fileMenu.quitEntry = quitButton === 'True';
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu);
+    createFileMenu(app, menu.fileMenu, inspector);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createSettingsMenu(app, menu.settingsMenu);
     createViewMenu(app, menu.viewMenu);
-    createTabsMenu(app, menu.tabsMenu);
+
+    // The tabs menu relies on lab shell functionality.
+    if (labShell) {
+      createTabsMenu(app, menu.tabsMenu, labShell);
+    }
 
     // Create commands to open the main application menus.
     const activateMenu = (item: Menu) => {
@@ -207,8 +217,8 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
       category: 'Main Area'
     });
 
-    app.shell.addToTopArea(logo);
-    app.shell.addToTopArea(menu);
+    app.shell.add(logo, 'top');
+    app.shell.add(menu, 'top');
 
     return menu;
   }
@@ -217,7 +227,7 @@ const plugin: JupyterLabPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
+export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
   const commands = menu.menu.commands;
 
   // Add the undo/redo commands the the Edit menu.
@@ -294,7 +304,11 @@ export function createEditMenu(app: JupyterLab, menu: EditMenu): void {
 /**
  * Create the basic `File` menu.
  */
-export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
+export function createFileMenu(
+  app: JupyterFrontEnd,
+  menu: FileMenu,
+  inspector: IInspector | null
+): void {
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
@@ -408,9 +422,9 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
   const newViewGroup = [
     { command: 'docmanager:clone' },
     { command: CommandIDs.createConsole },
-    { command: 'inspector:open' },
+    inspector ? { command: 'inspector:open' } : null,
     { command: 'docmanager:open-direct' }
-  ];
+  ].filter(item => !!item);
 
   // Add the close group
   const closeGroup = [
@@ -456,7 +470,7 @@ export function createFileMenu(app: JupyterLab, menu: FileMenu): void {
 /**
  * Create the basic `Kernel` menu.
  */
-export function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
+export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.interruptKernel, {
@@ -553,7 +567,7 @@ export function createKernelMenu(app: JupyterLab, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
-export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
+export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.lineNumbering, {
@@ -639,7 +653,7 @@ export function createViewMenu(app: JupyterLab, menu: ViewMenu): void {
 /**
  * Create the basic `Run` menu.
  */
-export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
+export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
   const commands = menu.menu.commands;
 
   commands.addCommand(CommandIDs.run, {
@@ -697,14 +711,21 @@ export function createRunMenu(app: JupyterLab, menu: RunMenu): void {
 /**
  * Create the basic `Settings` menu.
  */
-export function createSettingsMenu(app: JupyterLab, menu: SettingsMenu): void {
+export function createSettingsMenu(
+  _: JupyterFrontEnd,
+  menu: SettingsMenu
+): void {
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
 /**
  * Create the basic `Tabs` menu.
  */
-export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
+export function createTabsMenu(
+  app: JupyterFrontEnd,
+  menu: TabsMenu,
+  labShell: ILabShell | null
+): void {
   const commands = app.commands;
 
   // Add commands for cycling the active tabs.
@@ -745,44 +766,45 @@ export function createTabsMenu(app: JupyterLab, menu: TabsMenu): void {
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 
-  app.restored.then(() => {
-    // Iterate over the current widgets in the
-    // main area, and add them to the tab group
-    // of the menu.
-    const populateTabs = () => {
-      // remove the previous tab list
-      if (disposable && !disposable.isDisposed) {
-        disposable.dispose();
-      }
-      tabGroup.length = 0;
-
-      let isPreviouslyUsedTabAttached = false;
-      each(app.shell.widgets('main'), widget => {
-        if (widget.id === previousId) {
-          isPreviouslyUsedTabAttached = true;
+  if (labShell) {
+    app.restored.then(() => {
+      // Iterate over the current widgets in the
+      // main area, and add them to the tab group
+      // of the menu.
+      const populateTabs = () => {
+        // remove the previous tab list
+        if (disposable && !disposable.isDisposed) {
+          disposable.dispose();
         }
-        tabGroup.push({
-          command: CommandIDs.activateById,
-          args: { id: widget.id }
+        tabGroup.length = 0;
+
+        let isPreviouslyUsedTabAttached = false;
+        each(app.shell.widgets('main'), widget => {
+          if (widget.id === previousId) {
+            isPreviouslyUsedTabAttached = true;
+          }
+          tabGroup.push({
+            command: CommandIDs.activateById,
+            args: { id: widget.id }
+          });
         });
-      });
-      disposable = menu.addGroup(tabGroup, 1);
-      previousId = isPreviouslyUsedTabAttached ? previousId : '';
-    };
-    populateTabs();
-    app.shell.layoutModified.connect(() => {
+        disposable = menu.addGroup(tabGroup, 1);
+        previousId = isPreviouslyUsedTabAttached ? previousId : '';
+      };
       populateTabs();
+      labShell.layoutModified.connect(() => {
+        populateTabs();
+      });
+      // Update the ID of the previous active tab if a new tab is selected.
+      labShell.currentChanged.connect((_, args) => {
+        let widget = args.oldValue;
+        if (!widget) {
+          return;
+        }
+        previousId = widget.id;
+      });
     });
-    // Update the id of the previous active tab if
-    // a new tab is selected.
-    app.shell.currentChanged.connect((sender, args) => {
-      let widget = args.oldValue;
-      if (!widget) {
-        return;
-      }
-      previousId = widget.id;
-    });
-  });
+  }
 }
 
 export default plugin;
@@ -811,7 +833,7 @@ namespace Private {
    * A utility function that delegates a portion of a label to an IMenuExtender.
    */
   export function delegateLabel<E extends IMenuExtender<Widget>>(
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     s: Set<E>,
     label: keyof E
   ): string {
@@ -831,7 +853,7 @@ namespace Private {
    * to an IMenuExtender.
    */
   export function delegateExecute<E extends IMenuExtender<Widget>>(
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     s: Set<E>,
     executor: keyof E
   ): () => Promise<any> {
@@ -854,7 +876,7 @@ namespace Private {
    * to an IMenuExtender.
    */
   export function delegateEnabled<E extends IMenuExtender<Widget>>(
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     s: Set<E>,
     executor: keyof E
   ): () => boolean {
@@ -874,7 +896,7 @@ namespace Private {
    * for an IMenuExtender.
    */
   export function delegateToggled<E extends IMenuExtender<Widget>>(
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     s: Set<E>,
     toggled: keyof E
   ): () => boolean {

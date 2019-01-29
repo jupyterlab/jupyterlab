@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabStatus,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -82,7 +83,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterLabPlugin<IConsoleTracker> = {
+const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -95,7 +96,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher],
+  optional: [ILauncher, ILabStatus],
   activate: activateConsole,
   autoStart: true
 };
@@ -103,12 +104,12 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
@@ -117,14 +118,14 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**
  * Activate the console extension.
  */
 async function activateConsole(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
@@ -133,7 +134,8 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  launcher: ILauncher | null
+  launcher: ILauncher | null,
+  status: ILabStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands, shell } = app;
@@ -220,14 +222,14 @@ async function activateConsole(
    * Create a console for a given path.
    */
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
-    let panel: ConsolePanel;
     await manager.ready;
-    panel = new ConsolePanel({
+
+    const panel = new ConsolePanel({
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: app.setBusy.bind(app),
+      setBusy: status ? status.setBusy.bind(status) : undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
@@ -243,7 +245,7 @@ async function activateConsole(
     tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
-    shell.addToMainArea(panel, {
+    shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
       activate: options.activate
@@ -273,7 +275,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

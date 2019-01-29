@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@phosphor/coreutils';
 
 import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
@@ -23,12 +25,12 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { JupyterFrontEnd } from './frontend';
 
 /**
  * The class name added to AppShell instances.
  */
-const APPLICATION_SHELL_CLASS = 'jp-ApplicationShell';
+const APPLICATION_SHELL_CLASS = 'jp-LabShell';
 
 /**
  * The class name added to side bar instances.
@@ -57,10 +59,115 @@ const MODE_ATTRIBUTE = 'data-shell-mode';
 
 const ACTIVITY_CLASS = 'jp-Activity';
 
+/* tslint:disable */
+/**
+ * The layout restorer token.
+ */
+export const ILabShell = new Token<ILabShell>(
+  '@jupyterlab/application:ILabShell'
+);
+/* tslint:enable */
+
+/**
+ * The JupyterLab application shell.
+ */
+export interface ILabShell extends LabShell {}
+
+/**
+ * The namespace for `ILabShell` type information.
+ */
+export namespace ILabShell {
+  /**
+   * The areas of the application shell where widgets can reside.
+   */
+  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
+
+  /**
+   * The restorable description of an area within the main dock panel.
+   */
+  export type AreaConfig = DockLayout.AreaConfig;
+
+  /**
+   * An arguments object for the changed signals.
+   */
+  export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+
+  /**
+   * A description of the application's user interface layout.
+   */
+  export interface ILayout {
+    /**
+     * Indicates whether fetched session restore data was actually retrieved
+     * from the state database or whether it is a fresh blank slate.
+     *
+     * #### Notes
+     * This attribute is only relevant when the layout data is retrieved via a
+     * `fetch` call. If it is set when being passed into `save`, it will be
+     * ignored.
+     */
+    readonly fresh?: boolean;
+
+    /**
+     * The main area of the user interface.
+     */
+    readonly mainArea: IMainArea | null;
+
+    /**
+     * The left area of the user interface.
+     */
+    readonly leftArea: ISideArea | null;
+
+    /**
+     * The right area of the user interface.
+     */
+    readonly rightArea: ISideArea | null;
+  }
+
+  /**
+   * The restorable description of the main application area.
+   */
+  export interface IMainArea {
+    /**
+     * The current widget that has application focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The contents of the main application dock panel.
+     */
+    readonly dock: DockLayout.ILayoutConfig | null;
+
+    /**
+     * The document mode (i.e., multiple/single) of the main dock panel.
+     */
+    readonly mode: DockPanel.Mode | null;
+  }
+
+  /**
+   * The restorable description of a sidebar in the user interface.
+   */
+  export interface ISideArea {
+    /**
+     * A flag denoting whether the sidebar has been collapsed.
+     */
+    readonly collapsed: boolean;
+
+    /**
+     * The current widget that has side area focus.
+     */
+    readonly currentWidget: Widget | null;
+
+    /**
+     * The collection of widgets held by the sidebar.
+     */
+    readonly widgets: Array<Widget> | null;
+  }
+}
+
 /**
  * The application shell for JupyterLab.
  */
-export class ApplicationShell extends Widget {
+export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Construct a new application shell.
    */
@@ -123,7 +230,8 @@ export class ApplicationShell extends Widget {
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
-    // This will still respect the min-size of children widget in the stacked panel.
+    // This will still respect the min-size of children widget in the stacked
+    // panel.
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(topPanel, 0);
@@ -169,7 +277,7 @@ export class ApplicationShell extends Widget {
   /**
    * A signal emitted when main area's active focus changes.
    */
-  get activeChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+  get activeChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._activeChanged;
   }
 
@@ -183,7 +291,7 @@ export class ApplicationShell extends Widget {
   /**
    * A signal emitted when main area's current focus changes.
    */
-  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
+  get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
   }
 
@@ -216,14 +324,16 @@ export class ApplicationShell extends Widget {
   }
 
   /**
-   * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
+   * Whether JupyterLab is in presentation mode with the
+   * `jp-mod-presentationMode` CSS class.
    */
   get presentationMode(): boolean {
     return this.hasClass('jp-mod-presentationMode');
   }
 
   /**
-   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with a boolean.
+   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with
+   * a boolean.
    */
   set presentationMode(value: boolean) {
     this.toggleClass('jp-mod-presentationMode', value);
@@ -279,13 +389,13 @@ export class ApplicationShell extends Widget {
     // then take that into account.
     widgets.forEach(widget => {
       if (!widget.parent) {
-        this.addToMainArea(widget, {
-          ...this._addOptionsCache.get(widget),
+        this._addToMainArea(widget, {
+          ...this._mainOptionsCache.get(widget),
           activate: false
         });
       }
     });
-    this._addOptionsCache.clear();
+    this._mainOptionsCache.clear();
 
     // In case the active widget in the dock panel is *not* the active widget
     // of the application, defer to the application.
@@ -301,7 +411,7 @@ export class ApplicationShell extends Widget {
    * Promise that resolves when state is first restored, returning layout
    * description.
    */
-  get restored(): Promise<ApplicationShell.ILayout> {
+  get restored(): Promise<ILabShell.ILayout> {
     return this._restored.promise;
   }
 
@@ -394,132 +504,24 @@ export class ApplicationShell extends Widget {
     }
   }
 
-  /**
-   * Add a widget to the left content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToLeftArea(
+  add(
     widget: Widget,
-    options?: ApplicationShell.ISideAreaOptions
+    area: ILabShell.Area = 'main',
+    options?: DocumentRegistry.IOpenOptions
   ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-    this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._leftHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the main content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   * All widgets added to the main area should be disposed after removal
-   * (disposal before removal will remove the widget automatically).
-   *
-   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
-   * and `activate` defaults to `true`.
-   */
-  addToMainArea(
-    widget: Widget,
-    options: ApplicationShell.IMainAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-
-    let dock = this._dockPanel;
-
-    let ref: Widget | null = null;
-    if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
-    }
-
-    let mode = options.mode || 'tab-after';
-
-    dock.addWidget(widget, { mode, ref });
-
-    // The dock panel doesn't account for placement information while
-    // in single document mode, so upon rehydrating any widgets that were
-    // added will not be in the correct place. Cache the placement information
-    // here so that we can later rehydrate correctly.
-    if (dock.mode === 'single-document') {
-      this._addOptionsCache.set(widget, options);
-    }
-
-    if (options.activate !== false) {
-      dock.activateWidget(widget);
-    }
-  }
-
-  /**
-   * Add a widget to the right content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToRightArea(
-    widget: Widget,
-    options?: ApplicationShell.ISideAreaOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-    this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._rightHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the top content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToTopArea(
-    widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._topPanel.addWidget(widget);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the bottom content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-
-  addToBottomArea(
-    widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._bottomPanel.addWidget(widget);
-    this._onLayoutModified();
-
-    if (this._bottomPanel.isHidden) {
-      this._bottomPanel.show();
+    switch (area || 'main') {
+      case 'main':
+        return this._addToMainArea(widget, options);
+      case 'left':
+        return this._addToLeftArea(widget, options);
+      case 'right':
+        return this._addToRightArea(widget, options);
+      case 'top':
+        return this._addToTopArea(widget, options);
+      case 'bottom':
+        return this._addToBottomArea(widget, options);
+      default:
+        throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -576,7 +578,7 @@ export class ApplicationShell extends Widget {
   /**
    * True if the given area is empty.
    */
-  isEmpty(area: ApplicationShell.Area): boolean {
+  isEmpty(area: ILabShell.Area): boolean {
     switch (area) {
       case 'left':
         return this._leftHandler.stackedPanel.widgets.length === 0;
@@ -596,7 +598,7 @@ export class ApplicationShell extends Widget {
   /**
    * Restore the layout state for the application shell.
    */
-  restoreLayout(layout: ApplicationShell.ILayout): void {
+  restoreLayout(layout: ILabShell.ILayout): void {
     const { mainArea, leftArea, rightArea } = layout;
 
     // Rehydrate the main area.
@@ -636,7 +638,7 @@ export class ApplicationShell extends Widget {
   /**
    * Save the dehydrated state of the application shell.
    */
-  saveLayout(): ApplicationShell.ILayout {
+  saveLayout(): ILabShell.ILayout {
     // If the application is in single document mode, use the cached layout if
     // available. Otherwise, default to querying the dock panel for layout.
     return {
@@ -656,8 +658,8 @@ export class ApplicationShell extends Widget {
   /**
    * Returns the widgets for an application area.
    */
-  widgets(area: ApplicationShell.Area): IIterator<Widget> {
-    switch (area) {
+  widgets(area?: ILabShell.Area): IIterator<Widget> {
+    switch (area || 'main') {
       case 'main':
         return this._dockPanel.widgets();
       case 'left':
@@ -669,7 +671,7 @@ export class ApplicationShell extends Widget {
       case 'bottom':
         return this._bottomPanel.children();
       default:
-        throw new Error('Invalid area');
+        throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -678,6 +680,136 @@ export class ApplicationShell extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
+  }
+
+  /**
+   * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToLeftArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    this._leftHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   * All widgets added to the main area should be disposed after removal
+   * (disposal before removal will remove the widget automatically).
+   *
+   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
+   * and `activate` defaults to `true`.
+   */
+  private _addToMainArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+
+    options = options || {};
+
+    const dock = this._dockPanel;
+    const mode = options.mode || 'tab-after';
+    let ref: Widget | null = null;
+
+    if (options.ref) {
+      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
+    }
+    dock.addWidget(widget, { mode, ref });
+
+    // The dock panel doesn't account for placement information while
+    // in single document mode, so upon rehydrating any widgets that were
+    // added will not be in the correct place. Cache the placement information
+    // here so that we can later rehydrate correctly.
+    if (dock.mode === 'single-document') {
+      this._mainOptionsCache.set(widget, options);
+    }
+
+    if (options.activate !== false) {
+      dock.activateWidget(widget);
+    }
+  }
+
+  /**
+   * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToRightArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+
+    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+
+    this._sideOptionsCache.set(widget, options);
+    this._rightHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToTopArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._topPanel.addWidget(widget);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the bottom content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToBottomArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._bottomPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._bottomPanel.isHidden) {
+      this._bottomPanel.show();
+    }
   }
 
   /*
@@ -796,137 +928,21 @@ export class ApplicationShell extends Widget {
     return true;
   };
 
-  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(
-    this
-  );
+  private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
-  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(
-    this
-  );
+  private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _dockPanel: DockPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
   private _leftHandler: Private.SideBarHandler;
-  private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
+  private _restored = new PromiseDelegate<ILabShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
   private _topPanel: Panel;
   private _bottomPanel: Panel;
   private _debouncer = 0;
-  private _addOptionsCache = new Map<
-    Widget,
-    ApplicationShell.IMainAreaOptions
-  >();
-  private _sideOptionsCache = new Map<
-    Widget,
-    ApplicationShell.ISideAreaOptions
-  >();
-}
-
-/**
- * The namespace for `ApplicationShell` class statics.
- */
-export namespace ApplicationShell {
-  /**
-   * The areas of the application shell where widgets can reside.
-   */
-  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
-
-  /**
-   * The restorable description of an area within the main dock panel.
-   */
-  export type AreaConfig = DockLayout.AreaConfig;
-
-  /**
-   * An arguments object for the changed signals.
-   */
-  export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
-
-  /**
-   * A description of the application's user interface layout.
-   */
-  export interface ILayout {
-    /**
-     * Indicates whether fetched session restore data was actually retrieved
-     * from the state database or whether it is a fresh blank slate.
-     *
-     * #### Notes
-     * This attribute is only relevant when the layout data is retrieved via a
-     * `fetch` call. If it is set when being passed into `save`, it will be
-     * ignored.
-     */
-    readonly fresh?: boolean;
-
-    /**
-     * The main area of the user interface.
-     */
-    readonly mainArea: IMainArea | null;
-
-    /**
-     * The left area of the user interface.
-     */
-    readonly leftArea: ISideArea | null;
-
-    /**
-     * The right area of the user interface.
-     */
-    readonly rightArea: ISideArea | null;
-  }
-
-  /**
-   * The restorable description of the main application area.
-   */
-  export interface IMainArea {
-    /**
-     * The current widget that has application focus.
-     */
-    readonly currentWidget: Widget | null;
-
-    /**
-     * The contents of the main application dock panel.
-     */
-    readonly dock: DockLayout.ILayoutConfig | null;
-
-    /**
-     * The document mode (i.e., multiple/single) of the main dock panel.
-     */
-    readonly mode: DockPanel.Mode | null;
-  }
-
-  /**
-   * The restorable description of a sidebar in the user interface.
-   */
-  export interface ISideArea {
-    /**
-     * A flag denoting whether the sidebar has been collapsed.
-     */
-    readonly collapsed: boolean;
-
-    /**
-     * The current widget that has side area focus.
-     */
-    readonly currentWidget: Widget | null;
-
-    /**
-     * The collection of widgets held by the sidebar.
-     */
-    readonly widgets: Array<Widget> | null;
-  }
-
-  /**
-   * The options for adding a widget to a side area of the shell.
-   */
-  export interface ISideAreaOptions {
-    /**
-     * The rank order of the widget among its siblings.
-     */
-    rank?: number;
-  }
-
-  /**
-   * The options for adding a widget to a side area of the shell.
-   */
-  export interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
+  private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
+  private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
 }
 
 namespace Private {
@@ -1083,7 +1099,7 @@ namespace Private {
     /**
      * Dehydrate the side bar data.
      */
-    dehydrate(): ApplicationShell.ISideArea {
+    dehydrate(): ILabShell.ISideArea {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
@@ -1093,7 +1109,7 @@ namespace Private {
     /**
      * Rehydrate the side bar.
      */
-    rehydrate(data: ApplicationShell.ISideArea): void {
+    rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {

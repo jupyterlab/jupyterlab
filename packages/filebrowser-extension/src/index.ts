@@ -2,15 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ApplicationShell,
+  ILabShell,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
   Clipboard,
   InstanceTracker,
+  IWindowResolver,
   MainAreaWidget,
   ToolbarButton
 } from '@jupyterlab/apputils';
@@ -97,13 +98,14 @@ namespace CommandIDs {
 /**
  * The default file browser extension.
  */
-const browser: JupyterLabPlugin<void> = {
+const browser: JupyterFrontEndPlugin<void> = {
   activate: activateBrowser,
   id: '@jupyterlab/filebrowser-extension:browser',
   requires: [
     IFileBrowserFactory,
-    ILayoutRestorer,
     IDocumentManager,
+    ILabShell,
+    ILayoutRestorer,
     ISettingRegistry
   ],
   autoStart: true
@@ -112,7 +114,7 @@ const browser: JupyterLabPlugin<void> = {
 /**
  * The default file browser factory provider.
  */
-const factory: JupyterLabPlugin<IFileBrowserFactory> = {
+const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
@@ -130,22 +132,22 @@ const factory: JupyterLabPlugin<IFileBrowserFactory> = {
  * /user-redirect URL for JupyterHub), disable this plugin and replace it
  * with another implementation.
  */
-const shareFile: JupyterLabPlugin<void> = {
+const shareFile: JupyterFrontEndPlugin<void> = {
   activate: activateShareFile,
   id: '@jupyterlab/filebrowser-extension:share-file',
-  requires: [IFileBrowserFactory],
+  requires: [IFileBrowserFactory, IWindowResolver],
   autoStart: true
 };
 
 /**
  * A plugin providing file upload status.
  */
-export const fileUploadStatus: JupyterLabPlugin<void> = {
+export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
   requires: [IStatusBar, IFileBrowserFactory],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     browser: IFileBrowserFactory
   ) => {
@@ -175,7 +177,7 @@ const namespace = 'filebrowser';
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   browser,
   shareFile,
@@ -187,7 +189,7 @@ export default plugins;
  * Activate the file browser factory provider.
  */
 function activateFactory(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -232,14 +234,15 @@ function activateFactory(
  * Activate the default file browser in the sidebar.
  */
 function activateBrowser(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   factory: IFileBrowserFactory,
-  restorer: ILayoutRestorer,
   docManager: IDocumentManager,
+  labShell: ILabShell,
+  restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry
 ): void {
   const browser = factory.defaultBrowser;
-  const { commands, shell } = app;
+  const { commands } = app;
 
   // Let the application restorer track the primary file browser (that is
   // automatically created) for restoration of application state (e.g. setting
@@ -249,14 +252,14 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory.tracker, browser);
+  addCommands(app, factory.tracker, browser, labShell);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
-  shell.addToLeftArea(browser, { rank: 100 });
+  labShell.add(browser, 'left', { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
-  app.restored.then(layout => {
+  labShell.restored.then(layout => {
     if (layout.fresh) {
       commands.execute(CommandIDs.showBrowser, void 0);
     }
@@ -265,13 +268,13 @@ function activateBrowser(
   Promise.all([app.restored, browser.model.restored]).then(() => {
     function maybeCreate() {
       // Create a launcher if there are no open items.
-      if (app.shell.isEmpty('main')) {
+      if (labShell.isEmpty('main')) {
         createLauncher(commands, browser);
       }
     }
 
     // When layout is modified, create a launcher if there are no open items.
-    shell.layoutModified.connect(() => {
+    labShell.layoutModified.connect(() => {
       maybeCreate();
     });
 
@@ -290,7 +293,7 @@ function activateBrowser(
       });
 
     // Whether to automatically navigate to a document's current directory
-    shell.currentChanged.connect((shell, change) => {
+    labShell.currentChanged.connect((_, change) => {
       if (navigateToCurrentDirectory) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
@@ -306,8 +309,9 @@ function activateBrowser(
 }
 
 function activateShareFile(
-  app: JupyterLab,
-  factory: IFileBrowserFactory
+  app: JupyterFrontEnd,
+  factory: IFileBrowserFactory,
+  resolver: IWindowResolver
 ): void {
   const { commands } = app;
   const { tracker } = factory;
@@ -319,7 +323,7 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(widget.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: true });
+      const tree = PageConfig.getTreeUrl({ workspace: resolver.name });
 
       Clipboard.copyToSystem(URLExt.join(tree, path));
     },
@@ -335,9 +339,10 @@ function activateShareFile(
  * Add the main file browser commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   tracker: InstanceTracker<FileBrowser>,
-  browser: FileBrowser
+  browser: FileBrowser,
+  labShell: ILabShell
 ): void {
   const registry = app.docRegistry;
 
@@ -429,7 +434,7 @@ function addCommands(
     execute: () => {
       const widget = tracker.currentWidget;
       if (widget && !widget.isHidden) {
-        app.shell.collapseLeft();
+        labShell.collapseLeft();
       }
     }
   });
@@ -616,16 +621,16 @@ function addCommands(
       }
       // Shortcut if we are using the main file browser
       if (browser === browserForPath) {
-        app.shell.activateById(browser.id);
+        labShell.activateById(browser.id);
         return;
       } else {
-        const areas: ApplicationShell.Area[] = ['left', 'right'];
+        const areas: ILabShell.Area[] = ['left', 'right'];
         for (let area of areas) {
-          const it = app.shell.widgets(area);
+          const it = labShell.widgets(area);
           let widget = it.next();
           while (widget) {
             if (widget.contains(browserForPath)) {
-              app.shell.activateById(widget.id);
+              labShell.activateById(widget.id);
               return;
             }
             widget = it.next();

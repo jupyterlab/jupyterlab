@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
@@ -38,7 +38,7 @@ const FACTORY = 'Markdown Preview';
 /**
  * The markdown viewer plugin.
  */
-const plugin: JupyterLabPlugin<IMarkdownViewerTracker> = {
+const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
   provides: IMarkdownViewerTracker,
@@ -50,7 +50,7 @@ const plugin: JupyterLabPlugin<IMarkdownViewerTracker> = {
  * Activate the markdown viewer plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry

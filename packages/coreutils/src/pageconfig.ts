@@ -24,9 +24,9 @@ export namespace PageConfig {
    */
   export interface ITreeOptions {
     /**
-     * If `true`, the tree URL will include the current workspace, if any.
+     * If provided, the tree URL will include the current workspace, if any.
      */
-    workspace?: boolean;
+    workspace?: string;
   }
 
   /**
@@ -132,9 +132,9 @@ export namespace PageConfig {
     const tree = getOption('treeUrl');
     const defaultWorkspace = getOption('defaultWorkspace');
     const workspaces = getOption('workspacesUrl');
-    const workspace = getOption('workspace');
+    const workspace = options.workspace || '';
 
-    return !!options.workspace && workspace && workspace !== defaultWorkspace
+    return workspace && workspace !== defaultWorkspace
       ? URLExt.join(base, workspaces, PathExt.basename(workspace), 'tree')
       : URLExt.join(base, tree);
   }
