@@ -6,7 +6,8 @@ import '../style/index.css';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import { IDisplayState, SearchInstance } from '.';
+import { IDisplayState } from '.';
+import { SearchInstance } from './searchinstance';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
