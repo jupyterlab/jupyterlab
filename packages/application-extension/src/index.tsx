@@ -23,7 +23,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig,
   PathExt,
   IStateDB,
   ISettingRegistry,
@@ -59,17 +58,6 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
-}
-
-/**
- * The routing regular expressions used by the application plugin.
- */
-namespace Patterns {
-  export const tree = new RegExp(`^${PageConfig.getOption('treeUrl')}([^?]+)`);
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?]+)`
-  );
 }
 
 /**
@@ -211,9 +199,10 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
  */
 const router: JupyterFrontEndPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: (app: JupyterFrontEnd) => {
+  requires: [JupyterFrontEnd.IPaths],
+  activate: (app: JupyterFrontEnd, paths: JupyterFrontEnd.IPaths) => {
     const { commands } = app;
-    const base = PageConfig.getOption('baseUrl');
+    const base = paths.urls.base;
     const router = new Router({ base, commands });
 
     app.started.then(() => {
@@ -238,20 +227,31 @@ const router: JupyterFrontEndPlugin<IRouter> = {
 const tree: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
-  requires: [JupyterLab.IInfo, IRouter],
-  activate: (app: JupyterFrontEnd, info: JupyterLab.IInfo, router: IRouter) => {
+  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  activate: (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter,
+    resolver: IWindowResolver
+  ) => {
     const { commands } = app;
+    const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
+    const workspacePattern = new RegExp(
+      `^${paths.urls.workspaces}[^?\/]+/tree/([^?]+)`
+    );
 
     commands.addCommand(CommandIDs.tree, {
       execute: async (args: IRouter.ILocation) => {
-        const treeMatch = args.path.match(Patterns.tree);
-        const workspaceMatch = args.path.match(Patterns.workspace);
+        const treeMatch = args.path.match(treePattern);
+        const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
         const path = decodeURI(match[1]);
-        const { page, workspaces } = info.urls;
-        const workspace = PathExt.basename(info.workspace);
+        // const { page, workspaces } = info.urls;
+        const workspace = PathExt.basename(resolver.name);
         const url =
-          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
+          (workspaceMatch
+            ? URLExt.join(paths.urls.workspaces, workspace)
+            : paths.urls.page) +
           args.search +
           args.hash;
         const immediate = true;
@@ -269,8 +269,8 @@ const tree: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
-    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
+    router.register({ command: CommandIDs.tree, pattern: treePattern });
+    router.register({ command: CommandIDs.tree, pattern: workspacePattern });
   }
 };
 
@@ -279,16 +279,22 @@ const tree: JupyterFrontEndPlugin<void> = {
  */
 const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterFrontEnd, router: IRouter) => {
-    const bad = PageConfig.getOption('notFoundUrl');
-    const base = router.base;
-    const message = `
-      The path: ${bad} was not found. JupyterLab redirected to: ${base}
-    `;
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
+    const bad = paths.urls.notFound;
 
     if (!bad) {
       return;
     }
+
+    const base = router.base;
+    const message = `
+      The path: ${bad} was not found. JupyterLab redirected to: ${base}
+    `;
 
     // Change the URL back to the base application URL without adding the
     // URL change to the browser history.
@@ -296,7 +302,6 @@ const notfound: JupyterFrontEndPlugin<void> = {
 
     showErrorMessage('Path Not Found', { message });
   },
-  requires: [IRouter],
   autoStart: true
 };
 
@@ -577,6 +582,17 @@ const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
   provides: JupyterLab.IInfo
 };
 
+const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
+  id: '@jupyterlab/apputils-extension:paths',
+  activate: (app: JupyterFrontEnd): JupyterFrontEnd.IPaths => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${paths.id} must be activated in JupyterLab.`);
+    }
+    return app.info;
+  },
+  autoStart: true
+};
+
 /**
  * Export the plugins as default.
  */
@@ -590,7 +606,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sidebar,
   shell,
   status,
-  info
+  info,
+  paths
 ];
 
 export default plugins;

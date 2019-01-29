@@ -226,12 +226,16 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [IRouter],
-  activate: async (_: JupyterFrontEnd, router: IRouter) => {
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: async (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
     const solver = new WindowResolver();
     const match = router.current.path.match(Patterns.workspace);
     const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = Private.candidate(workspace);
+    const candidate = Private.candidate(paths.urls, workspace);
 
     try {
       await solver.resolve(candidate);
@@ -243,8 +247,6 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         Private.redirect(router);
       });
     }
-
-    PageConfig.setOption('workspace', solver.name);
 
     return solver;
   }
@@ -289,11 +291,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     const { commands, serviceManager } = app;
     const { workspaces } = serviceManager;
+    const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const db = new StateDB({
       namespace: info.namespace,
       transform: transform.promise,
-      windowName: resolver.name
+      windowName: workspace
     });
 
     commands.addCommand(CommandIDs.recoverState, {
@@ -329,9 +332,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     let conflated: PromiseDelegate<void> | null = null;
 
     commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${info.workspace})`,
+      label: () => `Save Workspace (${workspace})`,
       execute: ({ immediate }) => {
-        const { workspace } = info;
         const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
@@ -379,17 +381,13 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { defaultWorkspace, workspace } = info;
+        const { urls } = info;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? defaultWorkspace
-              : URLExt.join(
-                  PageConfig.getOption('baseUrl'),
-                  PageConfig.getOption('workspacesUrl'),
-                  query['clone']
-                )
+              ? urls.defaultWorkspace
+              : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
         const source = clone || workspace;
 
@@ -561,14 +559,13 @@ namespace Private {
    *
    * @returns A workspace name candidate.
    */
-  export function candidate(workspace = ''): string {
+  export function candidate(
+    urls: JupyterFrontEnd.Paths.IURLs,
+    workspace = ''
+  ): string {
     return workspace
-      ? URLExt.join(
-          PageConfig.getOption('baseUrl'),
-          PageConfig.getOption('workspacesUrl'),
-          workspace
-        )
-      : PageConfig.getOption('defaultWorkspace');
+      ? URLExt.join(urls.base, urls.workspaces, workspace)
+      : urls.defaultWorkspace;
   }
 
   /**

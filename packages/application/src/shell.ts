@@ -167,7 +167,7 @@ export namespace ILabShell {
 /**
  * The application shell for JupyterLab.
  */
-export class LabShell extends Widget implements JupyterFrontEnd.Shell {
+export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Construct a new application shell.
    */

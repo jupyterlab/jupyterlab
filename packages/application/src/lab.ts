@@ -97,11 +97,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell>
     // Populate application info.
     this._info = { ...JupyterLab.defaultInfo, ...info };
 
-    // Make workspace accessible via a getter because it is set at runtime.
-    Object.defineProperty(this._info, 'workspace', {
-      get: () => PageConfig.getOption('workspace') || ''
-    });
-
     if (this._info.devMode) {
       this.shell.addClass('jp-mod-devMode');
     }
@@ -264,7 +259,7 @@ export namespace JupyterLab {
   /**
    * The information about a JupyterLab application.
    */
-  export interface IInfo {
+  export interface IInfo extends JupyterFrontEnd.IPaths {
     /**
      * The name of the JupyterLab application.
      */
@@ -301,46 +296,9 @@ export namespace JupyterLab {
     readonly mimeExtensions: IRenderMime.IExtensionModule[];
 
     /**
-     * The urls used by the application.
-     */
-    readonly urls: {
-      readonly base: string;
-      readonly page: string;
-      readonly public: string;
-      readonly settings: string;
-      readonly themes: string;
-      readonly tree: string;
-      readonly workspaces: string;
-    };
-
-    /**
-     * The local directories used by the application.
-     */
-    readonly directories: {
-      readonly appSettings: string;
-      readonly schemas: string;
-      readonly static: string;
-      readonly templates: string;
-      readonly themes: string;
-      readonly userSettings: string;
-      readonly serverRoot: string;
-      readonly workspaces: string;
-    };
-
-    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
-
-    /**
-     * The name of the current workspace.
-     */
-    readonly workspace: string;
-
-    /**
-     * The name of the default workspace.
-     */
-    readonly defaultWorkspace: string;
   }
 
   /**
@@ -356,6 +314,8 @@ export namespace JupyterLab {
     mimeExtensions: [],
     urls: {
       base: PageConfig.getOption('baseUrl'),
+      defaultWorkspace: PageConfig.getOption('defaultWorkspace'),
+      notFound: PageConfig.getOption('notFoundUrl'),
       page: PageConfig.getOption('pageUrl'),
       public: PageConfig.getOption('publicUrl'),
       settings: PageConfig.getOption('settingsUrl'),
@@ -373,9 +333,7 @@ export namespace JupyterLab {
       serverRoot: PageConfig.getOption('serverRoot'),
       workspaces: PageConfig.getOption('workspacesDir')
     },
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
-    workspace: '',
-    defaultWorkspace: ''
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
   };
 
   /**
