@@ -164,15 +164,23 @@ const extension: JupyterLabPlugin<void> = {
     app.commands.addCommand(startCommand, {
       label: 'Search the open document',
       execute: () => {
-        Private.onStartCommand(app.shell, registry, activeSearches);
+        let currentWidget = app.shell.currentWidget;
+        if (!currentWidget) {
+          return;
+        }
+        Private.onStartCommand(currentWidget, registry, activeSearches);
       }
     });
 
     app.commands.addCommand(nextCommand, {
       label: 'Next match in open document',
       execute: () => {
+        let currentWidget = app.shell.currentWidget;
+        if (!currentWidget) {
+          return;
+        }
         Private.openBoxOrExecute(
-          app.shell,
+          currentWidget,
           registry,
           activeSearches,
           Private.onNextCommand
@@ -183,8 +191,12 @@ const extension: JupyterLabPlugin<void> = {
     app.commands.addCommand(prevCommand, {
       label: 'Previous match in open document',
       execute: () => {
+        let currentWidget = app.shell.currentWidget;
+        if (!currentWidget) {
+          return;
+        }
         Private.openBoxOrExecute(
-          app.shell,
+          currentWidget,
           registry,
           activeSearches,
           Private.onPrevCommand
@@ -198,38 +210,50 @@ const extension: JupyterLabPlugin<void> = {
 };
 
 class SearchInstance {
-  constructor(shell: ApplicationShell, searchProvider: ISearchProvider) {
-    this._widget = shell.currentWidget;
+  constructor(widget: Widget, searchProvider: ISearchProvider) {
+    this._widget = widget;
     this._activeProvider = searchProvider;
     this._initializeSearchAssets();
   }
 
+  /**
+   * The search widget.
+   */
   get searchWidget() {
     return this._searchWidget;
   }
 
+  /**
+   * The search provider.
+   */
   get provider() {
     return this._activeProvider;
   }
 
+  /**
+   * Focus the search widget input.
+   */
   focus(): void {
     this._displayState.forceFocus = true;
+
+    // Trigger a rerender without resetting the forceFocus.
     this._displayUpdateSignal.emit(this._displayState);
   }
 
+  /**
+   * Updates the match index and total display in the search widget.
+   */
   updateIndices(): void {
     this._displayState.totalMatches = this._activeProvider.matches.length;
     this._displayState.currentIndex = this._activeProvider.currentMatchIndex;
-    this.updateDisplay();
+    this._updateDisplay();
   }
 
-  private _widget: Widget;
-  private _displayState: IDisplayState;
-  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayState>;
-  private _activeProvider: ISearchProvider;
-  private _searchWidget: Widget;
-  private updateDisplay() {
+  private _updateDisplay() {
+    // Reset the focus attribute to make sure we don't steal focus.
     this._displayState.forceFocus = false;
+
+    // Trigger a rerender
     this._displayUpdateSignal.emit(this._displayState);
   }
   private _startSearch(query: RegExp) {
@@ -290,12 +314,12 @@ class SearchInstance {
 
     const onCaseSensitiveToggled = () => {
       this._displayState.caseSensitive = !this._displayState.caseSensitive;
-      this.updateDisplay();
+      this._updateDisplay();
     };
 
     const onRegexToggled = () => {
       this._displayState.useRegex = !this._displayState.useRegex;
-      this.updateDisplay();
+      this._updateDisplay();
     };
 
     const toolbarHeight = (this._widget as DocumentWidget).toolbar.node
@@ -313,6 +337,13 @@ class SearchInstance {
       toolbarHeight
     );
   }
+
+  private _widget: Widget;
+  private _displayState: IDisplayState;
+  private _displayUpdateSignal: Signal<ISearchProvider, IDisplayState>;
+  private _activeProvider: ISearchProvider;
+  private _searchWidget: Widget;
+
 }
 
 namespace Private {
@@ -321,51 +352,53 @@ namespace Private {
   };
 
   export function openBoxOrExecute(
-    shell: ApplicationShell,
+    currentWidget: Widget,
     registry: SearchProviderRegistry,
     activeSearches: ActiveSearchMap,
-    command: Function
+    command: (instance: SearchInstance) => void
   ): void {
-    const currentWidget = shell.currentWidget;
     const instance = activeSearches[currentWidget.id];
     if (instance) {
       command(instance);
     } else {
-      onStartCommand(shell, registry, activeSearches);
+      onStartCommand(currentWidget, registry, activeSearches);
     }
   }
 
   export function onStartCommand(
-    shell: ApplicationShell,
+    currentWidget: Widget,
     registry: SearchProviderRegistry,
     activeSearches: ActiveSearchMap
   ): void {
-    const currentWidget = shell.currentWidget;
     const widgetId = currentWidget.id;
     if (activeSearches[widgetId]) {
       activeSearches[widgetId].focus();
+      // TODO: focusing when the notebook is in edit mode somehow does not
+      // actually focus. Perhaps something in the notebook is stealing focus?
       return;
     }
-    const searchProvider = registry.getProviderForWidget(shell.currentWidget);
+    const searchProvider = registry.getProviderForWidget(currentWidget);
     if (!searchProvider) {
       // TODO: Is there a way to pass the invocation of ctrl+f through to the browser?
       return;
     }
-    const searchInstance = new SearchInstance(shell, searchProvider);
+    const searchInstance = new SearchInstance(currentWidget, searchProvider);
     activeSearches[widgetId] = searchInstance;
 
     searchInstance.searchWidget.disposed.connect(() => {
-      activeSearches[widgetId] = undefined;
+      delete activeSearches[widgetId];
     });
     Widget.attach(searchInstance.searchWidget, currentWidget.node);
   }
 
-  export function onNextCommand(instance: SearchInstance) {
-    instance.provider.highlightNext().then(() => instance.updateIndices());
+  export async function onNextCommand(instance: SearchInstance) {
+    await instance.provider.highlightNext();
+    instance.updateIndices();
   }
 
-  export function onPrevCommand(instance: SearchInstance) {
-    instance.provider.highlightPrevious().then(() => instance.updateIndices());
+  export async function onPrevCommand(instance: SearchInstance) {
+    await instance.provider.highlightPrevious();
+    instance.updateIndices();
   }
 }
 

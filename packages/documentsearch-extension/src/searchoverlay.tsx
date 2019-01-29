@@ -46,6 +46,9 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     this.focusInput();
   }
 
+  /**
+   * Focus the input.
+   */
   focusInput() {
     (this.refs.searchInputNode as HTMLInputElement).focus();
   }
