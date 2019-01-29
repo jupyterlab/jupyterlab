@@ -202,7 +202,7 @@ class SearchInstance {
   constructor(shell: ApplicationShell, searchProvider: ISearchProvider) {
     this._widget = shell.currentWidget;
     this._activeProvider = searchProvider;
-    this.initializeSearchAssets();
+    this._initializeSearchAssets();
   }
 
   get searchWidget() {
@@ -233,7 +233,7 @@ class SearchInstance {
     this._displayState.forceFocus = false;
     this._displayUpdateSignal.emit(this._displayState);
   }
-  private startSearch(query: RegExp) {
+  private _startSearch(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
     this._displayState.query = query;
     let cleanupPromise = Promise.resolve();
@@ -252,20 +252,20 @@ class SearchInstance {
       })
     );
   }
-  private endSearch() {
+  private _endSearch() {
     this._activeProvider.endSearch().then(() => {
       Signal.disconnectAll(this);
       this._searchWidget.dispose();
       this._activeProvider.changed.disconnect(this.updateIndices, this);
     });
   }
-  private highlightNext() {
+  private _highlightNext() {
     if (!this._displayState.query) {
       return;
     }
     this._activeProvider.highlightNext().then(this.updateIndices.bind(this));
   }
-  private highlightPrevious() {
+  private _highlightPrevious() {
     if (!this._displayState.query) {
       return;
     }
@@ -273,7 +273,7 @@ class SearchInstance {
       .highlightPrevious()
       .then(this.updateIndices.bind(this));
   }
-  private initializeSearchAssets() {
+  private _initializeSearchAssets() {
     this._displayUpdateSignal = new Signal<ISearchProvider, IDisplayState>(
       this._activeProvider
     );
@@ -307,10 +307,10 @@ class SearchInstance {
       this._displayState,
       onCaseSensitiveToggled,
       onRegexToggled,
-      this.highlightNext.bind(this),
-      this.highlightPrevious.bind(this),
-      this.startSearch.bind(this),
-      this.endSearch.bind(this),
+      this._highlightNext.bind(this),
+      this._highlightPrevious.bind(this),
+      this._startSearch.bind(this),
+      this._endSearch.bind(this),
       toolbarHeight
     );
   }
