@@ -23,19 +23,32 @@ export class SearchProviderRegistry {
     );
   }
 
+  /**
+   * Add a provider to the registry.
+   *
+   * @param key - The provider key.
+   */
   registerProvider(key: string, provider: ISearchProviderConstructor): void {
-    this._customProviders[key] = provider;
+    this._customProviders.set(key, provider);
   }
 
+  /**
+   * Remove provider from registry.
+   *
+   * @param key - The provider key.
+   * @returns true if removed, false if key did not exist in map.
+   */
   deregisterProvider(key: string): boolean {
-    if (!this._customProviders[key]) {
-      return false;
-    }
-    this._customProviders[key] = undefined;
-    return true;
+    return this._customProviders.delete(key);
   }
 
-  getProviderForWidget(widget: any): ISearchProvider {
+  /**
+   * Returns a matching provider for the widget.
+   *
+   * @param widget - The widget to search over.
+   * @returns the search provider, or undefined if none exists.
+   */
+  getProviderForWidget(widget: any): ISearchProvider | undefined {
     return (
       this._findMatchingProvider(this._customProviders, widget) ||
       this._findMatchingProvider(this._defaultProviders, widget)
@@ -46,30 +59,37 @@ export class SearchProviderRegistry {
     key: string,
     provider: ISearchProviderConstructor
   ): void {
-    this._defaultProviders[key] = provider;
+    this._defaultProviders.set(key, provider);
   }
 
   private _findMatchingProvider(
     providerMap: Private.ProviderMap,
     widget: any
-  ): ISearchProvider {
+  ): ISearchProvider | undefined {
     let providerInstance;
-    Object.keys(providerMap)
-      .map(k => providerMap[k])
-      .forEach((providerConstructor: ISearchProviderConstructor) => {
-        const testInstance = new providerConstructor();
-        if (testInstance.canSearchOn(widget)) {
-          providerInstance = testInstance;
-        }
-      });
 
+    // iterate through all providers and ask each one if it can search on the
+    // widget.
+    for (let p of providerMap.values()) {
+      const testInstance = new p();
+      if (testInstance.canSearchOn(widget)) {
+        providerInstance = testInstance;
+        break;
+      }
+    }
     return providerInstance;
   }
 
-  private _defaultProviders: Private.ProviderMap = {};
-  private _customProviders: Private.ProviderMap = {};
+  private _defaultProviders: Private.ProviderMap = new Map<
+    string,
+    ISearchProviderConstructor
+  >();
+  private _customProviders: Private.ProviderMap = new Map<
+    string,
+    ISearchProviderConstructor
+  >();
 }
 
 namespace Private {
-  export type ProviderMap = { [key: string]: ISearchProviderConstructor };
+  export type ProviderMap = Map<string, ISearchProviderConstructor>;
 }
