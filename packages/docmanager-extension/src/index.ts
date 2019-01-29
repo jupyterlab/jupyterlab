@@ -571,26 +571,6 @@ function addCommands(
     }
   });
 
-  app.contextMenu.addItem({
-    command: CommandIDs.rename,
-    selector: '[data-type="document-title"]',
-    rank: 1
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.clone,
-    selector: '[data-type="document-title"]',
-    rank: 2
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
-    selector: '[data-type="document-title"]',
-    rank: 3
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.closeOtherTabs,
-    selector: '[data-type="document-title"]',
-    rank: 4
-  });
   // .jp-mod-current added so that the console-creation command is only shown
   // on the current document.
   // Otherwise it will delegate to the wrong widget.
@@ -793,14 +773,32 @@ function addLabCommands(
     selector: '[data-type="document-title"]',
     rank: 5
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.rename,
+    selector: '[data-type="document-title"]',
+    rank: 1
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.clone,
+    selector: '[data-type="document-title"]',
+    rank: 2
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 3
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.closeOtherTabs,
+    selector: '[data-type="document-title"]',
+    rank: 4
+  });
 
   if (palette) {
     [
-      CommandIDs.close,
       CommandIDs.closeAllFiles,
       CommandIDs.closeOtherTabs,
-      CommandIDs.closeRightTabs,
-      CommandIDs.toggleAutosave
+      CommandIDs.closeRightTabs
     ].forEach(command => {
       palette.addItem({ command, category });
     });
