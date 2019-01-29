@@ -64,18 +64,14 @@ export class SearchProviderRegistry {
     providerMap: Private.ProviderMap,
     widget: any
   ): ISearchProvider | undefined {
-    let providerInstance;
-
     // iterate through all providers and ask each one if it can search on the
     // widget.
     for (let P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
-        const testInstance = new P();
-        providerInstance = testInstance;
-        break;
+        return new P();
       }
     }
-    return providerInstance;
+    return undefined;
   }
 
   private _defaultProviders: Private.ProviderMap = new Map<
