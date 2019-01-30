@@ -82,25 +82,26 @@ their source) is shown here: |dependencies|
 Application Object
 ~~~~~~~~~~~~~~~~~~
 
-The JupyterLab Application object is given to each plugin in its
-``activate()`` function. The Application object has a:
+A Jupyter front-end application object is given to each plugin in its
+``activate()`` function. The application object has:
 
 -  commands - used to add and execute commands in the application.
 -  keymap - used to add keyboard shortcuts to the application.
--  shell - a JupyterLab shell instance.
+-  shell - a generic Jupyter front-end shell instance.
 
-JupyterLab Shell
-~~~~~~~~~~~~~~~~
+Jupyter Front-End Shell
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The JupyterLab
-`shell <https://jupyterlab.github.io/jupyterlab/application/classes/applicationshell.html>`__
-is used to add and interact with content in the application. The
-application consists of:
+The Jupyter front-end
+`shell <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterfrontend.ishell.html>`__
+is used to add and interact with content in the application. The ``IShell``
+interface provides an ``add()`` method for adding widgets to the application.
+In JupyterLab, the application shell consists of:
 
--  A top area for things like top level menus and toolbars
--  Left and right side bar areas for collapsible content
--  A main work area for user activity.
--  A bottom area for things like status bars
+-  A ``top`` area for things like top level menus and toolbars
+-  ``left`` and ``right`` side bar areas for collapsible content
+-  A ``main`` work area for user activity.
+-  A ``bottom`` area for things like status bars
 
 Phosphor
 ~~~~~~~~

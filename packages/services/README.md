@@ -17,7 +17,7 @@ can be used to polyfill browsers that do not support the `fetch` API.
 **Prerequisites**
 
 - [node](http://nodejs.org/)
-- [python](https://www.anaconda.com/download)
+- [python](https://www.anaconda.com/distribution/)
 
 ```bash
 npm install --save @jupyterlab/services
@@ -30,7 +30,7 @@ conda install notebook  # notebook 4.3+ required
 
 - [git](http://git-scm.com/)
 - [node 0.12+](http://nodejs.org/)
-- [python](https://www.anaconda.com/download)
+- [python](https://www.anaconda.com/distribution/)
 
 ```bash
 git clone https://github.com/jupyterlab/jupyterlab.git

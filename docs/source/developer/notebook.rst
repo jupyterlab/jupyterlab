@@ -176,7 +176,7 @@ Copy the following to ``src/index.ts``:
     } from '@phosphor/disposable';
 
     import {
-      JupyterLab, JupyterFrontEndPlugin
+      JupyterFrontEnd, JupyterFrontEndPlugin
     } from '@jupyterlab/application';
 
     import {
