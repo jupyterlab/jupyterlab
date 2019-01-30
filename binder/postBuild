@@ -1,4 +1,7 @@
-pip install -e .
+#!/bin/bash
+set -euo pipefail
+
+pip install .
 jlpm build
 
 # This seems to be explicitly needed with `pip install -e .`
