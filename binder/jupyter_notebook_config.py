@@ -3,11 +3,13 @@ c.ServerProxy.servers = {
         'command': [
             'jupyter',
             'lab',
+            '--debug',
             '--no-browser',
             '--port={port}',
             '--NotebookApp.token=""',
-            '--NotebookApp.base_url={base_url}lab-dev'
-        ]
+            '--NotebookApp.base_url={base_url}lab-dev',
+        ],
+        'absolute_url': True
     }
 }
 

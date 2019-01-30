@@ -1,1 +1,1 @@
-jupyter-server-proxy==1.0beta8
+git+https://github.com/manics/jupyter-server-proxy@proxy-base-urls
