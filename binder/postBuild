@@ -2,6 +2,9 @@
 set -euo pipefail
 
 pip install .
+
+jlpm
+
 jlpm build
 
 # This seems to be explicitly needed with `pip install -e .`
