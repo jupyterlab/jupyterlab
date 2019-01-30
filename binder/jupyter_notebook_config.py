@@ -19,6 +19,7 @@ c.ServerProxy.servers = {
             # Redirect all logs to a log file
             f'{lab_command} >jupyterlab-dev.log 2>&1'
         ],
+        'timeout': 10,
         'absolute_url': True
     }
 }
