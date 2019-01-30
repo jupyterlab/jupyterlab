@@ -74,14 +74,14 @@ export interface ISearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightNext(): Promise<ISearchMatch>;
+  highlightNext(): Promise<ISearchMatch | undefined>;
 
   /**
    * Move the current match indicator to the previous match.
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch>;
+  highlightPrevious(): Promise<ISearchMatch | undefined>;
 
   /**
    * The same list of matches provided by the startSearch promise resoluton

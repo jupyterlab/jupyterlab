@@ -59,7 +59,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return Promise.resolve();
   }
 
-  highlightNext(): Promise<ISearchMatch> {
+  highlightNext(): Promise<ISearchMatch | undefined> {
     const cursorMatch = Private.findNext(
       this._cm,
       false,
@@ -67,14 +67,14 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       this._shouldLoop
     );
     if (!cursorMatch) {
-      return Promise.resolve(null);
+      return Promise.resolve(undefined);
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._matchIndex = match.index;
     return Promise.resolve(match);
   }
 
-  highlightPrevious(): Promise<ISearchMatch> {
+  highlightPrevious(): Promise<ISearchMatch | undefined> {
     const cursorMatch = Private.findNext(
       this._cm,
       true,
@@ -82,7 +82,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       this._shouldLoop
     );
     if (!cursorMatch) {
-      return Promise.resolve(null);
+      return Promise.resolve(undefined);
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._matchIndex = match.index;

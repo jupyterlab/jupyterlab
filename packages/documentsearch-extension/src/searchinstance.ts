@@ -80,10 +80,10 @@ export class SearchInstance implements IDisposable {
 
   private async _startSearch(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
-    this._displayState.query = query;
-    if (this._activeProvider) {
+    if (this._activeProvider && this._displayState.query) {
       await this._activeProvider.endSearch();
     }
+    this._displayState.query = query;
     await this._activeProvider.startSearch(query, this._widget);
     this.updateIndices();
 
