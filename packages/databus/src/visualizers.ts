@@ -19,7 +19,7 @@ export interface IVisualizer<A extends IDataset<any>> {
   /**
    * Label for the visualizer, used in the UI.
    */
-  label: string
+  label: string;
 }
 
 export abstract class StaticVisualizer<A extends IDataset<any>>
