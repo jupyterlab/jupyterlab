@@ -1,4 +1,2 @@
 pip install -e .
 jlpm build
-mkdir -p ${NB_PYTHON_PREFIX}/etc/jupyter
-cp binder/jupyter_notebook_config.py ${NB_PYTHON_PREFIX}/etc/jupyter
