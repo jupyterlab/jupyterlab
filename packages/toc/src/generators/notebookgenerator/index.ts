@@ -7,8 +7,6 @@ import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-//import { IOutputModel } from '@jupyterlab/rendermime';
-
 import { notebookItemRenderer } from './itemrenderer';
 
 import { notebookGeneratorToolbar } from './toolbargenerator';
@@ -89,7 +87,6 @@ export function createNotebookGenerator(
             let renderedHeading = Private.getCodeCells(
               text,
               onClickFactory,
-              numberingDict,
               executionCount,
               lastLevel,
               cell
@@ -368,7 +365,6 @@ namespace Private {
   export function getCodeCells(
     text: string,
     onClickFactory: (line: number) => (() => void),
-    numberingDict: { [level: number]: number },
     executionCount: string,
     lastLevel: number,
     cellRef: Cell
