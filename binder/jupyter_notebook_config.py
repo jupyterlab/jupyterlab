@@ -8,6 +8,9 @@ c.ServerProxy.servers = {
             '--port={port}',
             '--NotebookApp.token=""',
             '--NotebookApp.base_url={base_url}lab-dev',
+            # Disable dns rebinding protection here, since our 'Host' header
+            # is not going to be localhost when coming from hub.mybinder.org
+            '--NotebookApp.allow_remote_access=True'
         ],
         'absolute_url': True
     }
