@@ -9,13 +9,24 @@ import { IDataRegistry, IDataset } from './dataregistry';
 import { IConverterRegistry } from './converters';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import * as React from 'react';
+import { IVisualizerRegistry, IVisualizer } from './visualizers';
+
+// TODO: Maybe make converters clone URLs?
+// URL is like UUID. Data with some URLs can is converted between.
+
+function visualizers<V, T extends IDataset<V>>(
+  dataset: T,
+  visualizers: IVisualizerRegistry,
+  converters: IConverterRegistry
+): Iterable<IVisualizer<T>> {
+  converters.listTargetMimeTypes(dataset.mimeType);
+  visualizers.
+}
 
 function DatasetCompononent({ dataset }: { dataset: IDataset<any> }) {
   return (
     <div>
-      <h3>{dataset.url && dataset.url.toString()}</h3>
-      <pre>{dataset.mimeType}</pre>
-      <pre>{JSON.stringify(dataset.data)}</pre>
+      <pre>{JSON.stringify(dataset)}</pre>
     </div>
   );
 }

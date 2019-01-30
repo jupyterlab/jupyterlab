@@ -2,9 +2,12 @@ import { IDataset } from './dataregistry';
 import { IConverter } from './converters';
 
 const MIMETYPE_POSTFIX = '+url';
+/**
+ * Dataset where the data is URL pointing to a file that can be fetched.
+ */
 export class URLDataset implements IDataset<URL> {
-  constructor(url: URL, mimeType: string) {
-    this.data = url;
+  constructor(dataURL: URL, mimeType: string, public url: URL) {
+    this.data = dataURL;
     this.mimeType = `${mimeType}${MIMETYPE_POSTFIX}`;
   }
   mimeType: string;
@@ -21,11 +24,16 @@ export class FetchURL implements IConverter<URLDataset, IDataset<string>> {
     }
     return;
   }
-  async converter(input: URLDataset): Promise<IDataset<string>> {
-    const response = await fetch(input.data.toString());
+  async converter({
+    data,
+    mimeType,
+    url
+  }: URLDataset): Promise<IDataset<string>> {
+    const response = await fetch(data.toString());
     return {
-      mimeType: this.computeTargetMimeType(input.mimeType),
-      data: await response.text()
+      mimeType: this.computeTargetMimeType(mimeType),
+      data: await response.text(),
+      url
     };
   }
 }

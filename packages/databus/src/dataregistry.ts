@@ -34,7 +34,7 @@ export interface IDataset<T> {
    * The term "URL" is prefered over "URI" by the WHATWG:
    * https://url.spec.whatwg.org/#goals
    */
-  url?: URL;
+  url: URL;
 
   /***
    * The data of the dataset.

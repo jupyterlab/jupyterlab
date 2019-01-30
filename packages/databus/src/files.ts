@@ -9,11 +9,9 @@ interface IFileDatasetOptions {
 }
 export class FileDataset extends URLDataset {
   constructor({ url, path, mimeType }: IFileDatasetOptions) {
-    super(url, mimeType);
-    this.url = new URL('file:');
+    super(url, mimeType, new URL('file:'));
     this.url.pathname = path;
   }
-  url: URL;
 }
 
 export class FileExtensionRegistry {

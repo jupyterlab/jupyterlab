@@ -20,26 +20,6 @@ export class ResolverRegistry implements IResolver<any> {
     this._resolvers.push(resolver);
   }
 
-  async hydrate(registry: IDataRegistry, urls: Array<URL>) {
-    for (const dataset of await Promise.all(
-      urls.map(url => this.resolve(url))
-    )) {
-      if (dataset) {
-        registry.publish(dataset);
-      }
-    }
-  }
-
-  dehydrate(registry: IDataRegistry): Array<URL> {
-    const urls: Array<URL> = [];
-    for (const { url } of registry.datasets) {
-      if (url) {
-        urls.push(url);
-      }
-    }
-    return urls;
-  }
-
   private _resolvers: Array<IResolver<any>> = [];
 }
 

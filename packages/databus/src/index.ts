@@ -9,3 +9,4 @@ export * from './explorer';
 export * from './files';
 export * from './resolverregistry';
 export * from './urls';
+export * from './visualizers';
