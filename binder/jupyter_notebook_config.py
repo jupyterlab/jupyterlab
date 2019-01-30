@@ -1,16 +1,22 @@
+lab_command = ' '.join([
+    'jupyter',
+    'lab',
+    '--debug',
+    '--no-browser',
+    '--port={port}',
+    '--NotebookApp.token=""',
+    '--NotebookApp.base_url={base_url}lab-dev',
+    # Disable dns rebinding protection here, since our 'Host' header
+    # is not going to be localhost when coming from hub.mybinder.org
+    '--NotebookApp.allow_remote_access=True'
+])
+
 c.ServerProxy.servers = {
     'lab-dev': {
         'command': [
-            'jupyter',
-            'lab',
-            '--debug',
-            '--no-browser',
-            '--port={port}',
-            '--NotebookApp.token=""',
-            '--NotebookApp.base_url={base_url}lab-dev',
-            # Disable dns rebinding protection here, since our 'Host' header
-            # is not going to be localhost when coming from hub.mybinder.org
-            '--NotebookApp.allow_remote_access=True'
+            '/bin/bash', '-c',
+            # Redirect all logs to a log file
+            f'{lab_command} >jupyterlab-dev.log 2>&1'
         ],
         'absolute_url': True
     }
