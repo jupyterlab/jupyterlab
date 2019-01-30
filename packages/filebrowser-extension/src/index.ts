@@ -294,11 +294,11 @@ function activateBrowser(
 
     // Whether to automatically navigate to a document's current directory
     labShell.currentChanged.connect((_, change) => {
-      if (navigateToCurrentDirectory) {
+      if (navigateToCurrentDirectory && change.newValue) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
-        const { path } = context;
         if (context) {
+          const { path } = context;
           factory.defaultBrowser;
           Private.navigateToPath(path, factory)
             .then(() => {
