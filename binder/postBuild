@@ -1,2 +1,5 @@
 pip install -e .
 jlpm build
+
+# This seems to be explicitly needed with `pip install -e .`
+jupyter serverextension enable jupyterlab --sys-prefix
