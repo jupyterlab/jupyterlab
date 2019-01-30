@@ -3,13 +3,13 @@
 import '../style/index.css';
 
 import { SearchProviderRegistry } from './searchproviderregistry';
+import { SearchInstance } from './searchinstance';
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { ISignal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import { SearchInstance } from './searchinstance';
 
 export interface ISearchMatch {
   /**

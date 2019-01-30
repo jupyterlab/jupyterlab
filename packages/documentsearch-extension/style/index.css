@@ -21,6 +21,8 @@
   min-width: 300px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
+  display: flex;
+  align-items: center;
 }
 
 .jp-DocumentSearch-overlay * {
@@ -30,7 +32,7 @@
 .jp-DocumentSearch-input-wrapper {
   border: var(--jp-border-width) solid var(--jp-border-color0);
   border-radius: var(--jp-border-radius);
-  display: inline-block;
+  display: flex;
   background-color: var(--jp-layout-color0);
 }
 

@@ -1,5 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
+/*
+  Parts of the implementation of the search in this file were derived from
+  CodeMirror's search at:
+  https://github.com/codemirror/CodeMirror/blob/c2676685866c571a1c9c82cb25018cc08b4d42b2/addon/search/search.js
+  which is licensed with the following license:
+
+  MIT License
+
+  Copyright (C) 2017 by Marijn Haverbeke <marijnh@gmail.com> and others
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+*/
+
 import * as CodeMirror from 'codemirror';
 
 import { ISearchProvider, ISearchMatch } from '../index';
@@ -12,81 +42,70 @@ import { ISignal, Signal } from '@phosphor/signaling';
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements ISearchProvider {
-  startSearch(query: RegExp, domain: any): Promise<ISearchMatch[]> {
+  /**
+   * Initialize the search using the provided options.  Should update the UI
+   * to highlight all matches and "select" whatever the first match should be.
+   *
+   * @param query A RegExp to be use to perform the search
+   * @param searchTarget The widget to be searched
+   *
+   * @returns A promise that resolves with a list of all matches
+   */
+  async startSearch(query: RegExp, domain: any): Promise<ISearchMatch[]> {
     this._query = query;
     if (domain instanceof CodeMirrorEditor) {
       this._cm = domain;
-    } else {
+    } else if (domain) {
       this._cm = domain.content.editor;
     }
-    Private.clearSearch(this._cm);
+    this._clearSearch();
 
-    CodeMirror.on(this._cm.doc, 'change', (instance: any, changeObj: any) => {
-      // If we get newlines added/removed, the line numbers across the
-      // match state are all shifted, so here we need to recalcualte it
-      if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
-        this._setInitialMatches(this._query);
-      }
-    });
-    this._refreshOverlay(query);
+    CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
+    this._refreshOverlay();
     this._setInitialMatches(query);
 
-    const matches = Private.parseMatchesFromState(this._matchState);
+    const matches = this._parseMatchesFromState();
     if (matches.length === 0) {
-      return Promise.resolve([]);
+      return [];
     }
-    if (this._shouldLoop) {
-      const cursorMatch = Private.findNext(
-        this._cm,
-        false,
-        this._query.ignoreCase,
-        this._shouldLoop
-      );
+    if (this.shouldLoop) {
+      // TODO: refactor out to the SearchInstance
+      const cursorMatch = this._findNext(false);
       const match = this._matchState[cursorMatch.from.line][
         cursorMatch.from.ch
       ];
       this._matchIndex = match.index;
     }
-    return Promise.resolve(matches);
+    return matches;
   }
 
-  endSearch(): Promise<void> {
+  async endSearch(): Promise<void> {
     this._matchState = {};
     this._matchIndex = 0;
     if (this._cm) {
-      Private.clearSearch(this._cm);
+      this._clearSearch();
     }
-    return Promise.resolve();
+    CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
   }
 
-  highlightNext(): Promise<ISearchMatch | undefined> {
-    const cursorMatch = Private.findNext(
-      this._cm,
-      false,
-      this._query.ignoreCase,
-      this._shouldLoop
-    );
+  async highlightNext(): Promise<ISearchMatch | undefined> {
+    const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
-      return Promise.resolve(undefined);
+      return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._matchIndex = match.index;
-    return Promise.resolve(match);
+    return match;
   }
 
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
-    const cursorMatch = Private.findNext(
-      this._cm,
-      true,
-      this._query.ignoreCase,
-      this._shouldLoop
-    );
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+    const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
-      return Promise.resolve(undefined);
+      return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
     this._matchIndex = match.index;
-    return Promise.resolve(match);
+    return match;
   }
 
   static canSearchOn(domain: any): boolean {
@@ -94,7 +113,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   get matches(): ISearchMatch[] {
-    return Private.parseMatchesFromState(this._matchState);
+    return this._parseMatchesFromState();
   }
 
   get changed(): ISignal<this, void> {
@@ -105,29 +124,41 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return this._matchIndex;
   }
 
-  set shouldLoop(shouldLoop: boolean) {
-    this._shouldLoop = shouldLoop;
-  }
-
   clearSelection(): void {
     return null;
   }
 
-  private _refreshOverlay(query: RegExp) {
-    const state = Private.getSearchState(this._cm);
+  /**
+   * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
+   * or end of the document on invocations of highlightNext or highlightPrevious, respectively
+   */
+  shouldLoop = true;
+
+  private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange) {
+    // If we get newlines added/removed, the line numbers across the
+    // match state are all shifted, so here we need to recalculate it
+    if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
+      this._setInitialMatches(this._query);
+    }
+  }
+
+  private _refreshOverlay() {
     this._cm.operation(() => {
-      state.query = query;
       // clear search first
-      this._cm.removeOverlay(state.overlay);
-      state.overlay = this._getSearchOverlay();
-      this._cm.addOverlay(state.overlay);
-      // skips show matches on scroll bar here
-      state.posFrom = state.posTo = this._cm.getCursor();
+      this._cm.removeOverlay(this._overlay);
+      this._overlay = this._getSearchOverlay();
+      this._cm.addOverlay(this._overlay);
       this._changed.emit(null);
     });
   }
 
+  private _clearSearch() {
+    this._cm.removeOverlay(this._overlay);
+  }
+
   /**
+   * Do a full search on the entire document.
+   *
    * This manually constructs the initial match state across the whole
    * document. This must be done manually because the codemirror overlay
    * is lazy-loaded, so it will only tokenize lines that are in or near
@@ -135,6 +166,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * state when changes are made to the document, as changes occur in or
    * near the viewport, but to scan the whole document, a manual search
    * across the entire content is required.
+   *
    * @param query The search term
    */
   private _setInitialMatches(query: RegExp) {
@@ -190,8 +222,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
         if (
           stream.start === currentPos &&
           currentPos === 0 &&
-          !!this._matchState[line] &&
-          Object.keys(this._matchState[line]).length !== 0
+          !!this._matchState[line]
         ) {
           this._matchState[line] = {};
         }
@@ -224,55 +255,33 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     };
   }
 
-  private _query: RegExp;
-  private _cm: CodeMirrorEditor;
-  private _matchIndex: number;
-  private _matchState: MatchMap = {};
-  private _shouldLoop: boolean = true;
-  private _changed = new Signal<this, void>(this);
-}
-
-export class SearchState {
-  public posFrom: CodeMirror.Position;
-  public posTo: CodeMirror.Position;
-  public lastQuery: string;
-  public query: RegExp;
-}
-
-namespace Private {
-  interface ICodeMirrorMatch {
-    from: CodeMirror.Position;
-    to: CodeMirror.Position;
-  }
-
-  export function findNext(
-    cm: CodeMirrorEditor,
-    reverse: boolean,
-    caseSensitive: boolean,
-    shouldLoop: boolean
-  ): ICodeMirrorMatch {
-    return cm.operation(() => {
-      const state = getSearchState(cm);
+  private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
+    return this._cm.operation(() => {
+      const caseSensitive = this._query.ignoreCase;
       const cursorToGet = reverse ? 'from' : 'to';
-      const lastPosition = cm.getCursor(cursorToGet);
-      const position = toEditorPos(lastPosition);
-      let cursor: CodeMirror.SearchCursor = cm.getSearchCursor(
-        state.query,
+      const lastPosition = this._cm.getCursor(cursorToGet);
+      const position = this._toEditorPos(lastPosition);
+      let cursor: CodeMirror.SearchCursor = this._cm.getSearchCursor(
+        this._query,
         lastPosition,
         !caseSensitive
       );
       if (!cursor.find(reverse)) {
         // if we don't want to loop, no more matches found, reset the cursor and exit
-        if (!shouldLoop) {
-          cm.setCursorPosition(position);
+        if (!this.shouldLoop) {
+          this._cm.setCursorPosition(position);
           return null;
         }
 
         // if we do want to loop, try searching from the bottom/top
         const startOrEnd = reverse
-          ? CodeMirror.Pos(cm.lastLine())
-          : CodeMirror.Pos(cm.firstLine(), 0);
-        cursor = cm.getSearchCursor(state.query, startOrEnd, !caseSensitive);
+          ? CodeMirror.Pos(this._cm.lastLine())
+          : CodeMirror.Pos(this._cm.firstLine(), 0);
+        cursor = this._cm.getSearchCursor(
+          this._query,
+          startOrEnd,
+          !caseSensitive
+        );
         if (!cursor.find(reverse)) {
           return null;
         }
@@ -290,16 +299,14 @@ namespace Private {
         }
       };
 
-      cm.setSelection(selRange);
-      cm.scrollIntoView(
+      this._cm.setSelection(selRange);
+      this._cm.scrollIntoView(
         {
           from: fromPos,
           to: toPos
         },
         100
       );
-      state.posFrom = fromPos;
-      state.posTo = toPos;
       return {
         from: fromPos,
         to: toPos
@@ -307,34 +314,15 @@ namespace Private {
     });
   }
 
-  export function getSearchState(cm: CodeMirrorEditor) {
-    if (!cm.state.search) {
-      cm.state.search = new SearchState();
-    }
-    return cm.state.search;
-  }
-
-  export function clearSearch(cm: CodeMirrorEditor) {
-    const state = getSearchState(cm);
-    state.lastQuery = state.query;
-    if (!state.query) {
-      return;
-    }
-    state.query = state.queryText = null;
-    cm.removeOverlay(state.overlay);
-    if (state.annotate) {
-      state.annotate.clear();
-      state.annotate = null;
-    }
-  }
-
-  export function parseMatchesFromState(state: MatchMap): ISearchMatch[] {
+  private _parseMatchesFromState(): ISearchMatch[] {
     let index = 0;
     // Flatten state map and update the index of each match
-    const matches: ISearchMatch[] = Object.keys(state).reduce(
+    const matches: ISearchMatch[] = Object.keys(this._matchState).reduce(
       (result: ISearchMatch[], lineNumber: string) => {
         const lineKey = parseInt(lineNumber, 10);
-        const lineMatches: { [key: number]: ISearchMatch } = state[lineKey];
+        const lineMatches: { [key: number]: ISearchMatch } = this._matchState[
+          lineKey
+        ];
         Object.keys(lineMatches).forEach((pos: string) => {
           const posKey = parseInt(pos, 10);
           const match: ISearchMatch = lineMatches[posKey];
@@ -349,10 +337,31 @@ namespace Private {
     return matches;
   }
 
-  function toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
+  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
     return {
       line: posIn.line,
       column: posIn.ch
     };
+  }
+
+  private _query: RegExp;
+  private _cm: CodeMirrorEditor;
+  private _matchIndex: number;
+  private _matchState: MatchMap = {};
+  private _changed = new Signal<this, void>(this);
+  private _overlay: any;
+}
+
+export class SearchState {
+  public posFrom: CodeMirror.Position;
+  public posTo: CodeMirror.Position;
+  public lastQuery: string;
+  public query: RegExp;
+}
+
+namespace Private {
+  export interface ICodeMirrorMatch {
+    from: CodeMirror.Position;
+    to: CodeMirror.Position;
   }
 }

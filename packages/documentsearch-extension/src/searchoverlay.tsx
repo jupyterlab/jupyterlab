@@ -189,37 +189,41 @@ class SearchOverlay extends React.Component<
   }
 
   render() {
-    return (
-      <div>
-        <SearchEntry
-          useRegex={this.props.overlayState.useRegex}
-          caseSensitive={this.props.overlayState.caseSensitive}
-          onCaseSensitiveToggled={() => this.props.onCaseSensitiveToggled()}
-          onRegexToggled={() => this.props.onRegexToggled()}
-          onKeydown={(e: KeyboardEvent) => this._onKeydown(e)}
-          onChange={(e: React.ChangeEvent) => this._onChange(e)}
-          inputText={this.state.inputText}
-          forceFocus={this.props.overlayState.forceFocus}
-        />
-        <SearchIndices
-          currentIndex={this.props.overlayState.currentIndex}
-          totalMatches={this.props.overlayState.totalMatches}
-        />
-        <UpDownButtons
-          onHighlightPrevious={() => this._executeSearch(false)}
-          onHightlightNext={() => this._executeSearch(true)}
-        />
-        <div className={CLOSE_BUTTON_CLASS} onClick={() => this.onClose()} />
-        <div
-          className={REGEX_ERROR_CLASS}
-          hidden={
-            this.state.errorMessage && this.state.errorMessage.length === 0
-          }
-        >
-          {this.state.errorMessage}
-        </div>
+    return [
+      <SearchEntry
+        useRegex={this.props.overlayState.useRegex}
+        caseSensitive={this.props.overlayState.caseSensitive}
+        onCaseSensitiveToggled={() => this.props.onCaseSensitiveToggled()}
+        onRegexToggled={() => this.props.onRegexToggled()}
+        onKeydown={(e: KeyboardEvent) => this._onKeydown(e)}
+        onChange={(e: React.ChangeEvent) => this._onChange(e)}
+        inputText={this.state.inputText}
+        forceFocus={this.props.overlayState.forceFocus}
+        key={0}
+      />,
+      <SearchIndices
+        currentIndex={this.props.overlayState.currentIndex}
+        totalMatches={this.props.overlayState.totalMatches}
+        key={1}
+      />,
+      <UpDownButtons
+        onHighlightPrevious={() => this._executeSearch(false)}
+        onHightlightNext={() => this._executeSearch(true)}
+        key={2}
+      />,
+      <div
+        className={CLOSE_BUTTON_CLASS}
+        onClick={() => this.onClose()}
+        key={3}
+      />,
+      <div
+        className={REGEX_ERROR_CLASS}
+        hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
+        key={4}
+      >
+        {this.state.errorMessage}
       </div>
-    );
+    ];
   }
 }
 

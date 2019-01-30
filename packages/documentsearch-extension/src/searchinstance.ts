@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IDisplayState, ISearchProvider } from '.';
+import { createSearchOverlay } from './searchoverlay';
+
 import { MainAreaWidget } from '@jupyterlab/apputils';
+
 import { Widget } from '@phosphor/widgets';
 import { Signal } from '@phosphor/signaling';
-
-import { createSearchOverlay } from './searchoverlay';
-import { IDisplayState, ISearchProvider } from '.';
 import { IDisposable } from '@phosphor/disposable';
 
 /**
