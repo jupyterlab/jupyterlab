@@ -1,6 +1,7 @@
 lab_command = ' '.join([
     'jupyter',
     'lab',
+    '--dev-mode',
     '--debug',
     '--no-browser',
     '--port={port}',
