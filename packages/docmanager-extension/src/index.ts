@@ -135,7 +135,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     });
 
     // Register the file operations commands.
-    addCommands(app, docManager, settingRegistry, labShell, palette, mainMenu);
+    addCommands(
+      app,
+      docManager,
+      opener,
+      settingRegistry,
+      labShell,
+      palette,
+      mainMenu
+    );
 
     // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
@@ -266,6 +274,7 @@ function fileType(widget: Widget, docManager: IDocumentManager): string {
 function addCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
+  opener: DocumentManager.IWidgetOpener,
   settingRegistry: ISettingRegistry,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
@@ -293,7 +302,7 @@ function addCommands(
 
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, palette);
+    addLabCommands(app, docManager, labShell, opener, palette);
   }
 
   commands.addCommand(CommandIDs.close, {
@@ -603,6 +612,7 @@ function addLabCommands(
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
   labShell: ILabShell,
+  opener: DocumentManager.IWidgetOpener,
   palette: ICommandPalette | null
 ): void {
   const { commands } = app;
