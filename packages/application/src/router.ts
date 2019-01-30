@@ -272,7 +272,7 @@ export class Router implements IRouter {
    * If a pattern is matched, its command will be invoked with arguments that
    * match the `IRouter.ILocation` interface.
    */
-  async route(): Promise<void> {
+  route(): Promise<void> {
     const { commands, current, stop } = this;
     const { request } = current;
     const routed = this._routed;
