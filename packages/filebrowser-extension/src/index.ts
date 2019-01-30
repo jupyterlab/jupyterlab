@@ -299,7 +299,6 @@ function activateBrowser(
         const context = docManager.contextForWidget(newValue);
         if (context) {
           const { path } = context;
-          factory.defaultBrowser;
           Private.navigateToPath(path, factory)
             .then(() => {
               docManager.findWidget(path).activate();
@@ -435,7 +434,7 @@ function addCommands(
       const path = (args.path as string) || '';
       Private.navigateToPath(path, factory)
         .then(() => {
-          docManager.findWidget(path).activate();
+          commands.execute('docmanager:open', { path });
         })
         .catch((reason: any) => {
           console.warn(
@@ -844,8 +843,7 @@ namespace Private {
     path: string,
     factory: IFileBrowserFactory
   ): FileBrowser {
-    const { defaultBrowser: browser } = factory;
-    const { tracker } = factory;
+    const { defaultBrowser: browser, tracker } = factory;
     const driveName = browser.model.manager.services.contents.driveName(path);
 
     if (driveName) {
@@ -876,7 +874,7 @@ namespace Private {
     factory: IFileBrowserFactory
   ): Promise<any> {
     const browserForPath = Private.getBrowserForPath(path, factory);
-    const { services } = factory.defaultBrowser.model.manager;
+    const { services } = browserForPath.model.manager;
     const localPath = services.contents.localPath(path);
 
     return services.ready
