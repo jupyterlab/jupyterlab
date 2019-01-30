@@ -1532,13 +1532,13 @@ namespace Private {
     // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
-    await Promise.all([
+    await Promise.all(
       runningKernels.map(async k => {
         if (k.id === kernel.id) {
           await k.handleRestart();
         }
       })
-    ]);
+    );
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status !== 200) {
       throw new ServerConnection.ResponseError(response);
