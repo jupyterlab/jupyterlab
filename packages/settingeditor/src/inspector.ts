@@ -85,6 +85,9 @@ class InspectorConnector extends DataConnector<
 
   private _validate(raw: string): ISchemaValidator.IError[] | null {
     const editor = this._editor;
+    if (!editor.settings) {
+      return null;
+    }
     const { id, schema, version } = editor.settings;
     const data = { composite: {}, user: {} };
     const validator = editor.registry.validator;
