@@ -91,10 +91,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       });
     }
 
-    this._currentMatch = await Private.stepNext(
-      this._searchTarget.content,
-      this._cmSearchProviders
-    );
+    this._currentMatch = await this._stepNext();
 
     return allMatches;
   }
@@ -115,19 +112,12 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await Private.stepNext(
-      this._searchTarget.content,
-      this._cmSearchProviders
-    );
+    this._currentMatch = await this._stepNext();
     return this._currentMatch;
   }
 
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await Private.stepNext(
-      this._searchTarget.content,
-      this._cmSearchProviders,
-      true
-    );
+    this._currentMatch = await this._stepNext(true);
     return this._currentMatch;
   }
 
@@ -138,7 +128,7 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   get matches(): ISearchMatch[] {
-    return [].concat(...Private.getMatchesFromCells(this._cmSearchProviders));
+    return [].concat(...this._getMatchesFromCells());
   }
 
   get changed(): ISignal<this, void> {
@@ -152,50 +142,15 @@ export class NotebookSearchProvider implements ISearchProvider {
     return this._currentMatch.index;
   }
 
-  private async _restartSearch(query: RegExp, searchTarget: NotebookPanel) {
-    await this.endSearch();
-    await this.startSearch(query, searchTarget);
-    this._changed.emit(undefined);
-  }
-
-  private _onCmSearchProviderChanged() {
-    this._changed.emit(undefined);
-  }
-
-  private _searchTarget: NotebookPanel;
-  private _cmSearchProviders: ICellSearchPair[] = [];
-  private _currentMatch: ISearchMatch;
-  private _unRenderedMarkdownCells: MarkdownCell[] = [];
-  private _changed = new Signal<this, void>(this);
-}
-
-namespace Private {
-  export function getMatchesFromCells(
-    cmSearchProviders: ICellSearchPair[]
-  ): ISearchMatch[][] {
-    let indexTotal = 0;
-    const result: ISearchMatch[][] = [];
-    cmSearchProviders.forEach(({ provider }) => {
-      const cellMatches = provider.matches;
-      cellMatches.forEach(match => {
-        match.index = match.index + indexTotal;
-      });
-      indexTotal += cellMatches.length;
-      result.push(cellMatches);
-    });
-    return result;
-  }
-
-  export async function stepNext(
-    notebook: Notebook,
-    cmSearchProviders: ICellSearchPair[],
+  private async _stepNext(
     reverse = false,
     steps = 0
   ): Promise<ISearchMatch | undefined> {
+    const notebook = this._searchTarget.content;
     const activeCell: Cell = notebook.activeCell;
     const cellIndex = notebook.widgets.indexOf(activeCell);
     const numCells = notebook.widgets.length;
-    const { provider } = cmSearchProviders[cellIndex];
+    const { provider } = this._cmSearchProviders[cellIndex];
 
     // highlightNext/Previous will not be able to search rendered MarkdownCells or
     // hidden code cells, but that is okay here because in startSearch, we unrendered
@@ -224,9 +179,39 @@ namespace Private {
         column: newPosCM.ch
       };
       editor.setCursorPosition(newPos);
-      return stepNext(notebook, cmSearchProviders, reverse, steps + 1);
+      return this._stepNext(reverse, steps + 1);
     }
 
     return match;
   }
+
+  private async _restartSearch(query: RegExp, searchTarget: NotebookPanel) {
+    await this.endSearch();
+    await this.startSearch(query, searchTarget);
+    this._changed.emit(undefined);
+  }
+
+  private _getMatchesFromCells(): ISearchMatch[][] {
+    let indexTotal = 0;
+    const result: ISearchMatch[][] = [];
+    this._cmSearchProviders.forEach(({ provider }) => {
+      const cellMatches = provider.matches;
+      cellMatches.forEach(match => {
+        match.index = match.index + indexTotal;
+      });
+      indexTotal += cellMatches.length;
+      result.push(cellMatches);
+    });
+    return result;
+  }
+
+  private _onCmSearchProviderChanged() {
+    this._changed.emit(undefined);
+  }
+
+  private _searchTarget: NotebookPanel;
+  private _cmSearchProviders: ICellSearchPair[] = [];
+  private _currentMatch: ISearchMatch;
+  private _unRenderedMarkdownCells: MarkdownCell[] = [];
+  private _changed = new Signal<this, void>(this);
 }
