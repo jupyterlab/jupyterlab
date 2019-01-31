@@ -230,9 +230,7 @@ namespace Private {
   ): void {
     const widgetId = currentWidget.id;
     if (activeSearches[widgetId]) {
-      activeSearches[widgetId].focus();
-      // TODO: focusing when the notebook is in edit mode somehow does not
-      // actually focus. Perhaps something in the notebook is stealing focus?
+      activeSearches[widgetId].focusInput();
       return;
     }
     const searchProvider = registry.getProviderForWidget(currentWidget);
@@ -247,6 +245,10 @@ namespace Private {
       delete activeSearches[widgetId];
     });
     Widget.attach(searchInstance.searchWidget, currentWidget.node);
+    // Focusing after attach even though we're focusing on componentDidMount
+    // because the notebook steals focus when switching to command mode on blur.
+    // This is a bit of a kludge to be addressed later.
+    searchInstance.focusInput();
   }
 
   export async function onNextCommand(instance: SearchInstance) {

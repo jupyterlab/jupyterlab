@@ -52,12 +52,13 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * @returns A promise that resolves with a list of all matches
    */
   async startSearch(query: RegExp, domain: any): Promise<ISearchMatch[]> {
-    this._query = query;
     if (domain instanceof CodeMirrorEditor) {
       this._cm = domain;
     } else if (domain) {
       this._cm = domain.content.editor;
     }
+
+    this._query = query;
     this._clearSearch();
 
     CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
@@ -79,7 +80,13 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return matches;
   }
 
+  /**
+   * Resets UI state, removes all matches.
+   *
+   * @returns A promise that resolves when all state has been cleaned up.
+   */
   async endSearch(): Promise<void> {
+    this._cm.focus();
     this._matchState = {};
     this._matchIndex = 0;
     if (this._cm) {
@@ -88,6 +95,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
   }
 
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     const cursorMatch = this._findNext(false);
     if (!cursorMatch) {
@@ -98,6 +110,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return match;
   }
 
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     const cursorMatch = this._findNext(true);
     if (!cursorMatch) {
@@ -108,18 +125,30 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return match;
   }
 
+  /**
+   * Report whether or not this provider has the ability to search on the given object
+   */
   static canSearchOn(domain: any): boolean {
     return domain.content && domain.content.editor instanceof CodeMirrorEditor;
   }
 
+  /**
+   * The same list of matches provided by the startSearch promise resoluton
+   */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
   }
 
+  /**
+   * Signal indicating that something in the search has changed, so the UI should update
+   */
   get changed(): ISignal<this, void> {
     return this._changed;
   }
 
+  /**
+   * The current index of the selected match.
+   */
   get currentMatchIndex(): number {
     return this._matchIndex;
   }

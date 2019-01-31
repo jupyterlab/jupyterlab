@@ -150,10 +150,16 @@ class SearchOverlay extends React.Component<
   }
 
   private _onKeydown(event: KeyboardEvent) {
-    if (event.keyCode !== 13) {
-      return;
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._executeSearch(!event.shiftKey);
     }
-    this._executeSearch(!event.shiftKey);
+    if (event.keyCode === 27) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.props.onEndSearch();
+    }
   }
 
   private _executeSearch(goForward: boolean) {

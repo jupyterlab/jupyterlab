@@ -3,7 +3,7 @@
 import { ISearchProvider, ISearchMatch } from '../index';
 import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
 
-import { NotebookPanel, Notebook } from '@jupyterlab/notebook';
+import { NotebookPanel } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
 
@@ -17,18 +17,28 @@ interface ICellSearchPair {
 }
 
 export class NotebookSearchProvider implements ISearchProvider {
+  /**
+   * Initialize the search using the provided options.  Should update the UI
+   * to highlight all matches and "select" whatever the first match should be.
+   *
+   * @param query A RegExp to be use to perform the search
+   * @param searchTarget The widget to be searched
+   *
+   * @returns A promise that resolves with a list of all matches
+   */
   async startSearch(
     query: RegExp,
     searchTarget: NotebookPanel
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
+    console.log('startSearch: ', query, this._searchTarget);
 
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
     const cellList = this._searchTarget.model.cells;
     cellList.changed.connect(
-      this._restartSearch.bind(this, query, searchTarget),
+      this._restartSearch.bind(this, query, this._searchTarget),
       this
     );
 
@@ -96,12 +106,21 @@ export class NotebookSearchProvider implements ISearchProvider {
     return allMatches;
   }
 
+  /**
+   * Resets UI state, removes all matches.
+   *
+   * @returns A promise that resolves when all state has been cleaned up.
+   */
   async endSearch(): Promise<void> {
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
+
+    const index = this._searchTarget.content.activeCellIndex;
     this._cmSearchProviders.forEach(({ provider }) => {
       provider.endSearch();
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
+    this._searchTarget.content.activeCellIndex = index;
+    this._searchTarget.content.mode = 'edit';
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
       cell.rendered = true;
@@ -111,30 +130,52 @@ export class NotebookSearchProvider implements ISearchProvider {
     this._currentMatch = null;
   }
 
+  /**
+   * Move the current match indicator to the next match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext();
     return this._currentMatch;
   }
 
+  /**
+   * Move the current match indicator to the previous match.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext(true);
     return this._currentMatch;
   }
 
+  /**
+   * Report whether or not this provider has the ability to search on the given object
+   */
   static canSearchOn(domain: any): boolean {
     // check to see if the CMSearchProvider can search on the
     // first cell, false indicates another editor is present
     return domain instanceof NotebookPanel;
   }
 
+  /**
+   * The same list of matches provided by the startSearch promise resoluton
+   */
   get matches(): ISearchMatch[] {
     return [].concat(...this._getMatchesFromCells());
   }
 
+  /**
+   * Signal indicating that something in the search has changed, so the UI should update
+   */
   get changed(): ISignal<this, void> {
     return this._changed;
   }
 
+  /**
+   * The current index of the selected match.
+   */
   get currentMatchIndex(): number {
     if (!this._currentMatch) {
       return 0;
@@ -185,9 +226,9 @@ export class NotebookSearchProvider implements ISearchProvider {
     return match;
   }
 
-  private async _restartSearch(query: RegExp, searchTarget: NotebookPanel) {
+  private async _restartSearch(query: RegExp) {
     await this.endSearch();
-    await this.startSearch(query, searchTarget);
+    await this.startSearch(query, this._searchTarget);
     this._changed.emit(undefined);
   }
 

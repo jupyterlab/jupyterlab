@@ -55,7 +55,7 @@ export class SearchInstance implements IDisposable {
   /**
    * Focus the search widget input.
    */
-  focus(): void {
+  focusInput(): void {
     this._displayState.forceFocus = true;
 
     // Trigger a rerender without resetting the forceFocus.
