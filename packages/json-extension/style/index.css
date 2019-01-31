@@ -3,11 +3,6 @@
   Distributed under the terms of the Modified BSD License.
 */
 
-/* Add CSS variables to :root */
-:root {
-  /*--jp-private-json-variable: 16px;*/
-}
-
 /* Base styles */
 .jp-RenderedJSON {
   width: 100%;
@@ -16,20 +11,36 @@
   overflow: hidden;
 }
 
-/* Patch for default ul.CodeMirror styles */
-.jp-RenderedJSON ul.CodeMirror {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
+/* Override react-json-tree inline styles */
+.jp-RenderedJSON *:not(mark) {
+  background-color: transparent !important;
+}
+
+.jp-RenderedJSON ul {
+  margin: 0 !important;
+}
+
+.jp-RenderedJSON .container {
+  position: relative;
+  width: 100%;
+}
+
+.jp-RenderedJSON .filter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 33%;
+  max-width: 150px;
+  z-index: 10;
 }
 
 /* Document styles */
 .jp-MimeDocument .jp-RenderedJSON {
-  padding: 5px;
-  padding-top: 0;
+  padding: 5px 5px 5px 20px;
   overflow-y: auto;
 }
 
 /* Output styles */
-.jp-OutputArea .jp-RenderedJSON {
-}
+/* .jp-OutputArea .jp-RenderedJSON {
+
+} */

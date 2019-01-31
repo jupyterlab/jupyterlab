@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { ApplicationShell } from '@jupyterlab/application/src';
+import { LabShell } from '@jupyterlab/application/src';
 
 class ContentWidget extends Widget {
   activated = false;
@@ -21,11 +21,11 @@ class ContentWidget extends Widget {
   }
 }
 
-describe('ApplicationShell', () => {
-  let shell: ApplicationShell;
+describe('LabShell', () => {
+  let shell: LabShell;
 
   beforeEach(() => {
-    shell = new ApplicationShell();
+    shell = new LabShell();
     Widget.attach(shell, document.body);
   });
 
@@ -34,8 +34,8 @@ describe('ApplicationShell', () => {
   });
 
   describe('#constructor()', () => {
-    it('should create an ApplicationShell instance', () => {
-      expect(shell).to.be.an.instanceof(ApplicationShell);
+    it('should create a LabShell instance', () => {
+      expect(shell).to.be.an.instanceof(LabShell);
     });
   });
 
@@ -43,7 +43,7 @@ describe('ApplicationShell', () => {
     it('should return whether the left area is collapsed', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       expect(shell.leftCollapsed).to.equal(true);
       shell.activateById('foo');
       expect(shell.leftCollapsed).to.equal(false);
@@ -54,7 +54,7 @@ describe('ApplicationShell', () => {
     it('should return whether the right area is collapsed', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       expect(shell.rightCollapsed).to.equal(true);
       shell.activateById('foo');
       expect(shell.rightCollapsed).to.equal(false);
@@ -67,7 +67,7 @@ describe('ApplicationShell', () => {
       const widget = new Widget();
       widget.node.tabIndex = -1;
       widget.id = 'foo';
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
       expect(shell.currentWidget).to.equal(null);
       simulate(widget.node, 'focus');
       expect(shell.currentWidget).to.equal(widget);
@@ -81,7 +81,7 @@ describe('ApplicationShell', () => {
       expect(shell.isEmpty('top')).to.equal(true);
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
       expect(shell.isEmpty('main')).to.equal(false);
     });
 
@@ -89,7 +89,7 @@ describe('ApplicationShell', () => {
       expect(shell.isEmpty('top')).to.equal(true);
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToTopArea(widget);
+      shell.add(widget, 'top');
       expect(shell.isEmpty('top')).to.equal(false);
     });
 
@@ -97,7 +97,7 @@ describe('ApplicationShell', () => {
       expect(shell.isEmpty('left')).to.equal(true);
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       expect(shell.isEmpty('left')).to.equal(false);
     });
 
@@ -105,7 +105,7 @@ describe('ApplicationShell', () => {
       expect(shell.isEmpty('right')).to.equal(true);
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       expect(shell.isEmpty('right')).to.equal(false);
     });
   });
@@ -118,83 +118,83 @@ describe('ApplicationShell', () => {
     });
   });
 
-  describe('#addToTopArea()', () => {
+  describe('#add(widget, "top")', () => {
     it('should add a widget to the top area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToTopArea(widget);
+      shell.add(widget, 'top');
       expect(shell.isEmpty('top')).to.equal(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
-      shell.addToTopArea(widget);
+      shell.add(widget, 'top');
       expect(shell.isEmpty('top')).to.equal(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToTopArea(widget, { rank: 10 });
+      shell.add(widget, 'top', { rank: 10 });
       expect(shell.isEmpty('top')).to.equal(false);
     });
   });
 
-  describe('#addToLeftArea()', () => {
+  describe('#add(widget, "left")', () => {
     it('should add a widget to the left area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       expect(shell.isEmpty('left')).to.equal(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       expect(shell.isEmpty('left')).to.equal(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget, { rank: 10 });
+      shell.add(widget, 'left', { rank: 10 });
       expect(shell.isEmpty('left')).to.equal(false);
     });
   });
 
-  describe('#addToRightArea()', () => {
+  describe('#add(widget, "right")', () => {
     it('should add a widget to the right area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       expect(shell.isEmpty('right')).to.equal(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       expect(shell.isEmpty('right')).to.equal(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget, { rank: 10 });
+      shell.add(widget, 'right', { rank: 10 });
       expect(shell.isEmpty('right')).to.equal(false);
     });
   });
 
-  describe('#addToMainArea()', () => {
+  describe('#add(widget, "main")', () => {
     it('should add a widget to the main area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
       expect(shell.isEmpty('main')).to.equal(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
       expect(shell.isEmpty('main')).to.equal(true);
     });
   });
@@ -203,7 +203,7 @@ describe('ApplicationShell', () => {
     it('should activate a widget in the left area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       expect(widget.isVisible).to.equal(false);
       shell.activateById('foo');
       expect(widget.isVisible).to.equal(true);
@@ -220,7 +220,7 @@ describe('ApplicationShell', () => {
     it('should activate a widget in the right area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       expect(widget.isVisible).to.equal(false);
       shell.activateById('foo');
       expect(widget.isVisible).to.equal(true);
@@ -237,7 +237,7 @@ describe('ApplicationShell', () => {
     it('should activate a widget in the main area', async () => {
       const widget = new ContentWidget();
       widget.id = 'foo';
-      shell.addToMainArea(widget);
+      shell.add(widget, 'main');
       shell.activateById('foo');
       await framePromise();
       expect(widget.activated).to.equal(true);
@@ -256,7 +256,7 @@ describe('ApplicationShell', () => {
     it('should collapse all widgets in the left area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToLeftArea(widget);
+      shell.add(widget, 'left');
       shell.activateById('foo');
       expect(widget.isVisible).to.equal(true);
       shell.collapseLeft();
@@ -268,7 +268,7 @@ describe('ApplicationShell', () => {
     it('should collapse all widgets in the right area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.addToRightArea(widget);
+      shell.add(widget, 'right');
       shell.activateById('foo');
       expect(widget.isVisible).to.equal(true);
       shell.collapseRight();
@@ -282,8 +282,8 @@ describe('ApplicationShell', () => {
       widget.id = 'foo';
       const widget2 = new Widget();
       widget2.id = 'bar';
-      shell.addToLeftArea(widget, { rank: 10 });
-      shell.addToLeftArea(widget2, { rank: 1 });
+      shell.add(widget, 'left', { rank: 10 });
+      shell.add(widget2, 'left', { rank: 1 });
       shell.activateById('foo');
       shell.collapseLeft();
       expect(widget.isVisible).to.equal(false);
@@ -296,8 +296,8 @@ describe('ApplicationShell', () => {
       widget.id = 'foo';
       const widget2 = new Widget();
       widget2.id = 'bar';
-      shell.addToLeftArea(widget, { rank: 10 });
-      shell.addToLeftArea(widget2, { rank: 1 });
+      shell.add(widget, 'left', { rank: 10 });
+      shell.add(widget2, 'left', { rank: 1 });
       expect(widget2.isVisible).to.equal(false);
       shell.expandLeft();
       expect(widget2.isVisible).to.equal(true);
@@ -310,8 +310,8 @@ describe('ApplicationShell', () => {
       widget.id = 'foo';
       const widget2 = new Widget();
       widget2.id = 'bar';
-      shell.addToRightArea(widget, { rank: 10 });
-      shell.addToRightArea(widget2, { rank: 1 });
+      shell.add(widget, 'right', { rank: 10 });
+      shell.add(widget2, 'right', { rank: 1 });
       shell.activateById('foo');
       shell.collapseRight();
       expect(widget.isVisible).to.equal(false);
@@ -324,8 +324,8 @@ describe('ApplicationShell', () => {
       widget.id = 'foo';
       const widget2 = new Widget();
       widget2.id = 'bar';
-      shell.addToRightArea(widget, { rank: 10 });
-      shell.addToRightArea(widget2, { rank: 1 });
+      shell.add(widget, 'right', { rank: 10 });
+      shell.add(widget2, 'right', { rank: 1 });
       expect(widget2.isVisible).to.equal(false);
       shell.expandRight();
       expect(widget2.isVisible).to.equal(true);
@@ -336,10 +336,10 @@ describe('ApplicationShell', () => {
     it('should close all of the widgets in the main area', () => {
       const foo = new Widget();
       foo.id = 'foo';
-      shell.addToMainArea(foo);
+      shell.add(foo, 'main');
       const bar = new Widget();
       bar.id = 'bar';
-      shell.addToMainArea(bar);
+      shell.add(bar, 'main');
       shell.closeAll();
       expect(foo.parent).to.equal(null);
       expect(bar.parent).to.equal(null);
@@ -350,7 +350,7 @@ describe('ApplicationShell', () => {
     it('should save the layout of the shell', () => {
       const foo = new Widget();
       foo.id = 'foo';
-      shell.addToMainArea(foo);
+      shell.add(foo, 'main');
       const state = shell.saveLayout();
       shell.activateById('foo');
       expect(state.mainArea.mode).to.equal('multiple-document');

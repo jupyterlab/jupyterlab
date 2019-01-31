@@ -1,17 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { IThemeManager } from '@jupyterlab/apputils';
 
 /**
  * A plugin for the Jupyter Dark Theme.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
   requires: [IThemeManager],
-  activate: (app: JupyterLab, manager: IThemeManager) => {
+  activate: (app: JupyterFrontEnd, manager: IThemeManager) => {
     const style = '@jupyterlab/theme-dark-extension/index.css';
 
     manager.register({

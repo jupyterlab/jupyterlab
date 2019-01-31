@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { each } from '@phosphor/algorithm';
@@ -16,20 +17,27 @@ import '../style/index.css';
 /**
  * The default tab manager extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tabmanager-extension:plugin',
-  activate: (app: JupyterLab, restorer: ILayoutRestorer): void => {
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell | null,
+    restorer: ILayoutRestorer | null
+  ): void => {
     const { shell } = app;
     const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
-    restorer.add(tabs, 'tab-manager');
+    if (restorer) {
+      restorer.add(tabs, 'tab-manager');
+    }
+
     tabs.id = 'tab-manager';
     tabs.title.iconClass = 'jp-TabIcon jp-SideBar-tabIcon';
     tabs.title.caption = 'Open Tabs';
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
-    shell.addToLeftArea(tabs, { rank: 600 });
+    shell.add(tabs, 'left', { rank: 600 });
 
     app.restored.then(() => {
       const populate = () => {
@@ -40,22 +48,27 @@ const plugin: JupyterLabPlugin<void> = {
       };
 
       // Connect signal handlers.
-      shell.layoutModified.connect(() => {
-        populate();
-      });
       tabs.tabActivateRequested.connect((sender, tab) => {
         shell.activateById(tab.title.owner.id);
       });
       tabs.tabCloseRequested.connect((sender, tab) => {
         tab.title.owner.close();
+        populate();
       });
+
+      // If available, connect to the shell's layout modified signal.
+      if (labShell) {
+        labShell.layoutModified.connect(() => {
+          populate();
+        });
+      }
 
       // Populate the tab manager.
       populate();
     });
   },
   autoStart: true,
-  requires: [ILayoutRestorer]
+  optional: [ILabShell, ILayoutRestorer]
 };
 
 /**

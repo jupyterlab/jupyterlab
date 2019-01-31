@@ -368,6 +368,10 @@ export class ClientSession implements IClientSession {
     if (this._dialog) {
       this._dialog.dispose();
     }
+    if (this._busyDisposable) {
+      this._busyDisposable.dispose();
+      this._busyDisposable = null;
+    }
     Signal.clearData(this);
   }
 

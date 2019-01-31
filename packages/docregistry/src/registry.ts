@@ -960,6 +960,14 @@ export namespace DocumentRegistry {
      * Whether to activate the widget.  Defaults to `true`.
      */
     activate?: boolean;
+
+    /**
+     * The rank order of the widget among its siblings.
+     *
+     * #### Notes
+     * This field may be used or ignored depending on shell implementation.
+     */
+    rank?: number;
   }
 
   /**

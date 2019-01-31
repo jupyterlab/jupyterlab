@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -29,10 +29,11 @@ namespace CommandIDs {
 /**
  * The FAQ page extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/faq-extension:plugin',
-  requires: [ICommandPalette, ILayoutRestorer, IRenderMimeRegistry],
+  requires: [IRenderMimeRegistry],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -52,10 +53,10 @@ const SOURCE = require('../faq.md');
  * Activate the FAQ plugin.
  */
 function activate(
-  app: JupyterLab,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer,
-  rendermime: IRenderMimeRegistry
+  app: JupyterFrontEnd,
+  rendermime: IRenderMimeRegistry,
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): void {
   const category = 'Help';
   const command = CommandIDs.open;
@@ -63,11 +64,13 @@ function activate(
   const tracker = new InstanceTracker<MainAreaWidget>({ namespace: 'faq' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command,
-    args: () => JSONExt.emptyObject,
-    name: () => 'faq'
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command,
+      args: () => JSONExt.emptyObject,
+      name: () => 'faq'
+    });
+  }
 
   let createWidget = () => {
     let content = rendermime.createRenderer('text/markdown');
@@ -92,11 +95,13 @@ function activate(
       }
       if (!tracker.has(widget)) {
         tracker.add(widget);
-        shell.addToMainArea(widget, { activate: false });
+        shell.add(widget, 'main', { activate: false });
       }
       shell.activateById(widget.id);
     }
   });
 
-  palette.addItem({ command, category });
+  if (palette) {
+    palette.addItem({ command, category });
+  }
 }

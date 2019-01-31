@@ -17,7 +17,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
-import { JupyterLab, JupyterLabPlugin } from './index';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
 
@@ -40,8 +40,8 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
-  const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
+  const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
   const tracker = new InstanceTracker<MimeDocument>({ namespace });
@@ -65,19 +65,21 @@ export function createRendermimePlugins(
   // and exposing the mime document instance tracker.
   plugins.push({
     id: '@jupyterlab/application:mimedocument',
-    requires: [ILayoutRestorer],
+    optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
-    activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
-      restorer.restore(tracker, {
-        command: 'docmanager:open',
-        args: widget => ({
-          path: widget.context.path,
-          factory: Private.factoryNameProperty.get(widget)
-        }),
-        name: widget =>
-          `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
-      });
+    activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
+      if (restorer) {
+        restorer.restore(tracker, {
+          command: 'docmanager:open',
+          args: widget => ({
+            path: widget.context.path,
+            factory: Private.factoryNameProperty.get(widget)
+          }),
+          name: widget =>
+            `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
+        });
+      }
       return tracker;
     }
   });
@@ -91,16 +93,12 @@ export function createRendermimePlugins(
 export function createRendermimePlugin(
   tracker: InstanceTracker<MimeDocument>,
   item: IRenderMime.IExtension
-): JupyterLabPlugin<void> {
+): JupyterFrontEndPlugin<void> {
   return {
     id: item.id,
-    requires: [ILayoutRestorer, IRenderMimeRegistry],
+    requires: [IRenderMimeRegistry],
     autoStart: true,
-    activate: (
-      app: JupyterLab,
-      restorer: ILayoutRestorer,
-      rendermime: IRenderMimeRegistry
-    ) => {
+    activate: (app: JupyterFrontEnd, rendermime: IRenderMimeRegistry) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
         rendermime.addFactory(item.rendererFactory, item.rank);

@@ -133,8 +133,9 @@ def load_jupyter_server_extension(nbapp):
     page_config = web_app.settings.setdefault('page_config_data', dict())
     page_config['buildAvailable'] = not core_mode and not dev_mode
     page_config['buildCheck'] = not core_mode and not dev_mode
-    page_config['token'] = nbapp.token
+    page_config['defaultWorkspace'] = ujoin(nbapp.base_url, config.page_url)
     page_config['devMode'] = dev_mode
+    page_config['token'] = nbapp.token
 
     # Handle bundle url
     bundle_url = config.public_url

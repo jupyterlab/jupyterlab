@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -26,6 +27,8 @@ import {
 } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
+
+import { DisposableSet } from '@phosphor/disposable';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -243,19 +246,22 @@ const FORMAT_LABEL: { [k: string]: string } = {
 /**
  * The notebook widget tracker provider.
  */
-const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
+const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
   requires: [
-    IMainMenu,
-    ICommandPalette,
     NotebookPanel.IContentFactory,
     IEditorServices,
+    IRenderMimeRegistry
+  ],
+  optional: [
+    ICommandPalette,
+    IFileBrowserFactory,
+    ILauncher,
     ILayoutRestorer,
-    IRenderMimeRegistry,
+    IMainMenu,
     ISettingRegistry
   ],
-  optional: [IFileBrowserFactory, ILauncher],
   activate: activateNotebookHandler,
   autoStart: true
 };
@@ -263,12 +269,12 @@ const trackerPlugin: JupyterLabPlugin<INotebookTracker> = {
 /**
  * The notebook cell factory provider.
  */
-const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
@@ -277,26 +283,28 @@ const factory: JupyterLabPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const tools: JupyterLabPlugin<ICellTools> = {
+const tools: JupyterFrontEndPlugin<ICellTools> = {
   activate: activateCellTools,
   provides: ICellTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB]
+  requires: [INotebookTracker, IEditorServices, IStateDB],
+  optional: [ILabShell]
 };
 
 /**
  * A plugin providing a CommandEdit status item.
  */
-export const commandEditItem: JupyterLabPlugin<void> = {
+export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
+    const { shell } = app;
     const item = new CommandEditStatus();
 
     // Keep the status item up-to-date with the current notebook.
@@ -310,9 +318,9 @@ export const commandEditItem: JupyterLabPlugin<void> = {
       align: 'right',
       rank: 4,
       isActive: () =>
-        app.shell.currentWidget &&
+        shell.currentWidget &&
         tracker.currentWidget &&
-        app.shell.currentWidget === tracker.currentWidget
+        shell.currentWidget === tracker.currentWidget
     });
   }
 };
@@ -320,15 +328,16 @@ export const commandEditItem: JupyterLabPlugin<void> = {
 /**
  * A plugin that adds a notebook trust status item to the status bar.
  */
-export const notebookTrustItem: JupyterLabPlugin<void> = {
+export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
+  requires: [IStatusBar, INotebookTracker, ILabShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     tracker: INotebookTracker
   ) => {
+    const { shell } = app;
     const item = new NotebookTrustStatus();
 
     // Keep the status item up-to-date with the current notebook.
@@ -344,9 +353,9 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 3,
         isActive: () =>
-          app.shell.currentWidget &&
+          shell.currentWidget &&
           tracker.currentWidget &&
-          app.shell.currentWidget === tracker.currentWidget
+          shell.currentWidget === tracker.currentWidget
       }
     );
   }
@@ -355,7 +364,7 @@ export const notebookTrustItem: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   trackerPlugin,
   tools,
@@ -368,11 +377,12 @@ export default plugins;
  * Activate the cell tools extension.
  */
 function activateCellTools(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
-  state: IStateDB
-): Promise<ICellTools> {
+  state: IStateDB,
+  labShell: ILabShell | null
+): ICellTools {
   const id = 'cell-tools';
   const celltools = new CellTools({ tracker });
   const activeCellTool = new CellTools.ActiveCellTool();
@@ -430,44 +440,54 @@ function activateCellTools(
 
     // After initial restoration, check if the cell tools should render.
     if (tracker.size) {
-      app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+      app.shell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
       if (open) {
         app.shell.activateById(celltools.id);
       }
     }
 
-    // For all subsequent widget changes, check if the cell tools should render.
-    app.shell.currentChanged.connect((sender, args) => {
+    const updateTools = () => {
       // If there are any open notebooks, add cell tools to the side panel if
       // it is not already there.
       if (tracker.size) {
         if (!celltools.isAttached) {
-          app.shell.addToLeftArea(celltools, { rank: CELL_TOOLS_RANK });
+          labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
         }
         return;
       }
       // If there are no notebooks, close cell tools.
       celltools.close();
-    });
+    };
+
+    // For all subsequent widget changes, check if the cell tools should render.
+    if (labShell) {
+      labShell.currentChanged.connect((sender, args) => {
+        updateTools();
+      });
+    } else {
+      tracker.currentChanged.connect((sender, args) => {
+        updateTools();
+      });
+    }
   });
 
-  return Promise.resolve(celltools);
+  return celltools;
 }
 
 /**
  * Activate the notebook handler extension.
  */
 function activateNotebookHandler(
-  app: JupyterLab,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
+  app: JupyterFrontEnd,
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
-  restorer: ILayoutRestorer,
   rendermime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry,
+  palette: ICommandPalette | null,
   browserFactory: IFileBrowserFactory | null,
-  launcher: ILauncher | null
+  launcher: ILauncher | null,
+  restorer: ILayoutRestorer | null,
+  mainMenu: IMainMenu | null,
+  settingRegistry: ISettingRegistry | null
 ): INotebookTracker {
   const services = app.serviceManager;
   // An object for tracking the current notebook settings.
@@ -486,23 +506,27 @@ function activateNotebookHandler(
     notebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
-  const { commands, restored } = app;
+  const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: panel => ({ path: panel.context.path, factory: FACTORY }),
-    name: panel => panel.context.path,
-    when: services.ready
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: panel => ({ path: panel.context.path, factory: FACTORY }),
+      name: panel => panel.context.path,
+      when: services.ready
+    });
+  }
 
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
   addCommands(app, services, tracker);
-  populatePalette(palette, services);
+  if (palette) {
+    populatePalette(palette, services);
+  }
 
   let id = 0; // The ID counter for notebook panels.
 
@@ -568,9 +592,13 @@ function activateNotebookHandler(
     });
   }
 
-  // Fetch the initial state of the settings.
-  Promise.all([settingRegistry.load(trackerPlugin.id), restored])
-    .then(([settings]) => {
+  // Fetch settings if possible.
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+  app.restored
+    .then(() => fetchSettings)
+    .then(settings => {
       updateConfig(settings);
       updateTracker();
       settings.changed.connect(() => {
@@ -579,12 +607,14 @@ function activateNotebookHandler(
       });
     })
     .catch((reason: Error) => {
-      console.error(reason.message);
+      console.warn(reason.message);
       updateTracker();
     });
 
   // Add main menu notebook menu.
-  populateMenus(app, mainMenu, tracker, services, palette);
+  if (mainMenu) {
+    populateMenus(app, mainMenu, tracker, services, palette);
+  }
 
   // Utility function to create a new notebook.
   const createNew = (cwd: string, kernelName?: string) => {
@@ -625,24 +655,39 @@ function activateNotebookHandler(
   // Add a launcher item if the launcher is available.
   if (launcher) {
     services.ready.then(() => {
-      const specs = services.specs;
-      const baseUrl = PageConfig.getBaseUrl();
-
-      for (let name in specs.kernelspecs) {
-        let rank = name === specs.default ? 0 : Infinity;
-        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
-        if (kernelIconUrl) {
-          let index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+      let disposables: DisposableSet | null = null;
+      const onSpecsChanged = () => {
+        if (disposables) {
+          disposables.dispose();
+          disposables = null;
         }
-        launcher.add({
-          command: CommandIDs.createNew,
-          args: { isLauncher: true, kernelName: name },
-          category: 'Notebook',
-          rank,
-          kernelIconUrl
-        });
-      }
+        const specs = services.specs;
+        if (!specs) {
+          return;
+        }
+        disposables = new DisposableSet();
+        const baseUrl = PageConfig.getBaseUrl();
+
+        for (let name in specs.kernelspecs) {
+          let rank = name === specs.default ? 0 : Infinity;
+          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          if (kernelIconUrl) {
+            let index = kernelIconUrl.indexOf('kernelspecs');
+            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+          }
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.createNew,
+              args: { isLauncher: true, kernelName: name },
+              category: 'Notebook',
+              rank,
+              kernelIconUrl
+            })
+          );
+        }
+      };
+      onSpecsChanged();
+      services.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -769,7 +814,7 @@ function activateNotebookHandler(
  * Add the notebook commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   services: ServiceManager,
   tracker: NotebookTracker
 ): void {
@@ -793,7 +838,7 @@ function addCommands(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 
@@ -1462,7 +1507,10 @@ function addCommands(
       });
 
       // Remove the output view if the parent notebook is closed.
-      nb.disposed.connect(widget.dispose);
+      nb.disposed.connect(
+        widget.dispose,
+        widget
+      );
     },
     isEnabled: isEnabledAndSingleSelected
   });
@@ -1771,11 +1819,11 @@ function populatePalette(
  * Populates the application menus for the notebook.
  */
 function populateMenus(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette
+  palette: ICommandPalette | null
 ): void {
   let { commands } = app;
 
@@ -1843,9 +1891,8 @@ function populateMenus(
   exportTo.title.label = 'Export Notebook As…';
   services.nbconvert.getExportFormats().then(response => {
     if (response) {
-      // convert exportList to palette and menu items
+      // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
-      const category = 'Notebook Operations';
       formatList.forEach(function(key) {
         let capCaseKey = key[0].toUpperCase() + key.substr(1);
         let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
@@ -1859,11 +1906,14 @@ function populateMenus(
             command: CommandIDs.exportToFormat,
             args: args
           });
-          palette.addItem({
-            command: CommandIDs.exportToFormat,
-            category,
-            args
-          });
+          if (palette) {
+            const category = 'Notebook Operations';
+            palette.addItem({
+              command: CommandIDs.exportToFormat,
+              category,
+              args
+            });
+          }
         }
       });
       const fileGroup = [

@@ -1,4 +1,7 @@
 import os
+
+from traitlets import default
+
 from .labapp import LabApp
 
 try:
@@ -8,6 +11,11 @@ except ImportError:
     raise ImportError('You must have jupyterhub installed for this to work.')
 else:
     class SingleUserLabApp(SingleUserNotebookApp, LabApp):
+
+        @default("default_url")
+        def _default_url(self):
+            """when using jupyter-labhub, jupyterlab is default ui"""
+            return "/lab"
 
         def init_webapp(self, *args, **kwargs):
             super().init_webapp(*args, **kwargs)

@@ -147,7 +147,7 @@ export namespace URLExt {
   export function isLocal(url: string): boolean {
     const { protocol } = parse(url);
 
-    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('//') !== 0;
+    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('/') !== 0;
   }
 
   /**

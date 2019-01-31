@@ -20,7 +20,7 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { DockPanel, Widget } from '@phosphor/widgets';
 
-import { ApplicationShell } from './shell';
+import { ILabShell } from './shell';
 
 /* tslint:disable */
 /**
@@ -196,8 +196,8 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Fetching the layout relies on all widget restoration to be complete, so
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
-  fetch(): Promise<ApplicationShell.ILayout> {
-    const blank: ApplicationShell.ILayout = {
+  fetch(): Promise<ILabShell.ILayout> {
+    const blank: ILabShell.ILayout = {
       fresh: true,
       mainArea: null,
       leftArea: null,
@@ -302,7 +302,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: ApplicationShell.ILayout): Promise<void> {
+  save(data: ILabShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (!this._promisesDone) {
       let warning = 'save() was called prematurely.';
@@ -328,7 +328,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Dehydrate a main area description into a serializable object.
    */
   private _dehydrateMainArea(
-    area: ApplicationShell.IMainArea | null
+    area: ILabShell.IMainArea | null
   ): Private.IMainArea | null {
     if (!area) {
       return null;
@@ -345,7 +345,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   private _rehydrateMainArea(
     area?: Private.IMainArea | null
-  ): ApplicationShell.IMainArea | null {
+  ): ILabShell.IMainArea | null {
     if (!area) {
       return null;
     }
@@ -356,7 +356,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Dehydrate a side area description into a serializable object.
    */
   private _dehydrateSideArea(
-    area?: ApplicationShell.ISideArea | null
+    area?: ILabShell.ISideArea | null
   ): Private.ISideArea | null {
     if (!area) {
       return null;
@@ -385,7 +385,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   private _rehydrateSideArea(
     area?: Private.ISideArea | null
-  ): ApplicationShell.ISideArea {
+  ): ILabShell.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
@@ -468,7 +468,7 @@ namespace Private {
    * #### Notes
    * This format is JSON serializable and saved in the state database.
    * It is meant to be a data structure can translate into an
-   * `ApplicationShell.ILayout` data structure for consumption by
+   * `LabShell.ILayout` data structure for consumption by
    * the application shell.
    */
   export interface ILayout extends JSONObject {
@@ -585,7 +585,7 @@ namespace Private {
    * Serialize individual areas within the main area.
    */
   function serializeArea(
-    area: ApplicationShell.AreaConfig | null
+    area: ILabShell.AreaConfig | null
   ): ITabArea | ISplitArea | null {
     if (!area || !area.type) {
       return null;
@@ -612,7 +612,7 @@ namespace Private {
   /**
    * Return a dehydrated, serializable version of the main dock panel.
    */
-  export function serializeMain(area: ApplicationShell.IMainArea): IMainArea {
+  export function serializeMain(area: ILabShell.IMainArea): IMainArea {
     let dehydrated: IMainArea = {
       dock: (area && area.dock && serializeArea(area.dock.main)) || null
     };
@@ -641,7 +641,7 @@ namespace Private {
   function deserializeArea(
     area: JSONObject,
     names: Map<string, Widget>
-  ): ApplicationShell.AreaConfig | null {
+  ): ILabShell.AreaConfig | null {
     if (!area) {
       return null;
     }
@@ -656,7 +656,7 @@ namespace Private {
 
     if (type === 'tab-area') {
       const { currentIndex, widgets } = area as ITabArea;
-      let hydrated: ApplicationShell.AreaConfig = {
+      let hydrated: ILabShell.AreaConfig = {
         type: 'tab-area',
         currentIndex: currentIndex || 0,
         widgets:
@@ -676,7 +676,7 @@ namespace Private {
     }
 
     const { orientation, sizes, children } = area as ISplitArea;
-    let hydrated: ApplicationShell.AreaConfig = {
+    let hydrated: ILabShell.AreaConfig = {
       type: 'split-area',
       orientation: orientation,
       sizes: sizes || [],
@@ -684,7 +684,7 @@ namespace Private {
         (children &&
           (children
             .map(child => deserializeArea(child, names))
-            .filter(widget => !!widget) as ApplicationShell.AreaConfig[])) ||
+            .filter(widget => !!widget) as ILabShell.AreaConfig[])) ||
         []
     };
 
@@ -703,7 +703,7 @@ namespace Private {
   export function deserializeMain(
     area: JSONObject,
     names: Map<string, Widget>
-  ): ApplicationShell.IMainArea | null {
+  ): ILabShell.IMainArea | null {
     if (!area) {
       return null;
     }

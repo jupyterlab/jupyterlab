@@ -33,6 +33,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/services": "^3.2.1",
+    "@jupyterlab/ui-components": "^0.0.1",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.6.1",
     "@phosphor/coreutils": "^1.3.0",

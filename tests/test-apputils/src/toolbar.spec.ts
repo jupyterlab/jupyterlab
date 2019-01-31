@@ -97,6 +97,40 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#insertAfter()', () => {
+      it('should insert an item into the toolbar after `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertAfter('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'c', 'd', 'b']);
+      });
+
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertAfter('c', 'd', new Widget());
+        expect(value).to.be.false;
+      });
+    });
+
+    describe('#insertBefore()', () => {
+      it('should insert an item into the toolbar before `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertBefore('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'd', 'c', 'b']);
+      });
+
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertBefore('c', 'd', new Widget());
+        expect(value).to.be.false;
+      });
+    });
+
     describe('.createFromCommand', () => {
       const commands = new CommandRegistry();
       const testLogCommandId = 'test:toolbar-log';
@@ -153,7 +187,8 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.title).to.equal('Test log command caption');
-        const iconNode = buttonNode.firstChild as HTMLElement;
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
         button.dispose();
       });
@@ -238,7 +273,8 @@ describe('@jupyterlab/apputils', () => {
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
-        const iconNode = buttonNode.firstChild as HTMLElement;
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
 
         cmd.dispose();
@@ -250,11 +286,7 @@ describe('@jupyterlab/apputils', () => {
         const button = Toolbar.createInterruptButton(session);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-StopIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-StopIcon')).to.exist;
       });
     });
 
@@ -263,11 +295,7 @@ describe('@jupyterlab/apputils', () => {
         const button = Toolbar.createRestartButton(session);
         Widget.attach(button, document.body);
         await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-RefreshIcon'
-          )
-        ).to.equal(true);
+        expect(button.node.querySelector('.jp-RefreshIcon')).to.exist;
       });
     });
 
@@ -358,9 +386,7 @@ describe('@jupyterlab/apputils', () => {
         await framePromise();
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).to.equal(true);
-        expect(
-          (button.firstChild as HTMLElement).classList.contains('iconFoo')
-        ).to.equal(true);
+        expect(button.querySelector('.iconFoo')).to.exist;
         expect(button.title).to.equal('bar');
       });
     });
@@ -391,7 +417,39 @@ describe('@jupyterlab/apputils', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+      });
+      describe('keydown', () => {
+        it('Enter should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: 'Enter'
+          });
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+        it('Space should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: ' '
+          });
           expect(called).to.equal(true);
           button.dispose();
         });

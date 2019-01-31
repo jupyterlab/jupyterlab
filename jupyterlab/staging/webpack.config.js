@@ -76,11 +76,11 @@ function maybeSync(localPath, name, rest) {
 /**
  * A WebPack Plugin that copies the assets to the static directory.
  */
-function JupyterLabPlugin() {}
+function JupyterFrontEndPlugin() {}
 
-JupyterLabPlugin.prototype.apply = function(compiler) {
+JupyterFrontEndPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
-    'JupyterLabPlugin',
+    'JupyterFrontEndPlugin',
     function() {
       var staticDir = jlab.staticDir;
       if (!staticDir) {
@@ -96,7 +96,7 @@ JupyterLabPlugin.prototype.apply = function(compiler) {
   );
 };
 
-JupyterLabPlugin.prototype._first = true;
+JupyterFrontEndPlugin.prototype._first = true;
 
 module.exports = {
   mode: 'development',
@@ -199,6 +199,6 @@ module.exports = {
       title: jlab.name || 'JupyterLab'
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new JupyterLabPlugin({})
+    new JupyterFrontEndPlugin({})
   ]
 };

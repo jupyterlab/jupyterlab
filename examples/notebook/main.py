@@ -15,19 +15,37 @@ import os
 from jinja2 import FileSystemLoader
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from notebook.notebookapp import NotebookApp
+from notebook.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
-class ExampleHandler(IPythonHandler):
-    """Handle requests between the main app page and notebook server."""
+class NotebookHandler(IPythonHandler):
+    """
+    Serve a notebook file from the filesystem in the notebook interface
+    """
 
-    def get(self):
+    def get(self, notebook_path):
         """Get the main page for the application's interface."""
-        return self.write(self.render_template('index.html',
-                                               static=self.static_url,
-                                               base_url=self.base_url,
-                                               token=self.settings['token']))
+        # Options set here can be read with PageConfig.getOption
+        config_data = {
+            # Use camelCase here, since that's what the lab components expect
+            'baseUrl': self.base_url,
+            'token': self.settings['token'],
+            'notebookPath': notebook_path,
+            'bundleUrl': ujoin(self.base_url, 'build/'),
+            # FIXME: Don't use a CDN here
+            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
+            'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
+        }
+        return self.write(
+            self.render_template(
+                'index.html',
+                static=self.static_url,
+                base_url=self.base_url,
+                config_data=config_data
+            )
+        )
 
     def get_template(self, name):
         loader = FileSystemLoader(HERE)
@@ -36,15 +54,15 @@ class ExampleHandler(IPythonHandler):
 
 class ExampleApp(NotebookApp):
 
-    default_url = Unicode('/example')
+    default_url = Unicode('/notebook/test.ipynb')
 
     def init_webapp(self):
         """initialize tornado webapp and httpserver.
         """
         super(ExampleApp, self).init_webapp()
         default_handlers = [
-            (r'/example/?', ExampleHandler),
-            (r"/example/(.*)", FileFindHandler,
+            (ujoin(self.base_url, r'notebook/(.*)?'), NotebookHandler),
+            (ujoin(self.base_url, r"build/(.*)"), FileFindHandler,
                 {'path': os.path.join(HERE, 'build')})
         ]
         self.web_app.add_handlers('.*$', default_handlers)

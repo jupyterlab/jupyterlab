@@ -35,6 +35,8 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
   constructor(options: IRenderMime.IRendererOptions) {
     super();
     this.addClass(CSS_CLASS);
+    this.addClass('CodeMirror');
+    this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
   }
 
@@ -44,14 +46,14 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as any;
     const metadata = (model.metadata[this._mimeType] as any) || {};
-    const props = { data, metadata, theme: 'cm-s-jupyter' };
-
     return new Promise<void>((resolve, reject) => {
-      const component = <Component {...props} />;
-
-      ReactDOM.render(component, this.node, () => {
-        resolve();
-      });
+      ReactDOM.render(
+        <Component data={data} metadata={metadata} />,
+        this.node,
+        () => {
+          resolve();
+        }
+      );
     });
   }
 

@@ -233,7 +233,6 @@ export class CompleterModel implements Completer.IModel {
       this._options = values;
       this._typeMap = types;
       this._orderedTypes = Private.findOrderedTypes(types);
-      this._subsetMatch = true;
     } else {
       this._options = [];
       this._typeMap = {};
@@ -252,7 +251,7 @@ export class CompleterModel implements Completer.IModel {
     }
 
     const { column, line } = change;
-    const { original } = this;
+    const { current, original } = this;
 
     if (!original) {
       return;
@@ -266,13 +265,13 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If a cursor change results in the cursor being set to a position that
-    // precedes the original request, cancel.
+    // precedes the original column, cancel.
     if (column < original.column) {
       this.reset(true);
       return;
     }
 
-    const { cursor, current } = this;
+    const { cursor } = this;
 
     if (!cursor || !current) {
       return;
@@ -358,7 +357,6 @@ export class CompleterModel implements Completer.IModel {
     if (!hard && this._subsetMatch) {
       return;
     }
-    this._subsetMatch = false;
     this._reset();
     this._stateChanged.emit(undefined);
   }

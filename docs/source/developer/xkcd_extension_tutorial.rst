@@ -41,7 +41,7 @@ Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Start by installing miniconda, following
-`Conda's installation documentation <https://conda.io/docs/user-guide/install/index.html>`__.
+`Conda's installation documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__.
 
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 
@@ -227,7 +227,7 @@ repository root folder install the dependency and save it to your
 
     jlpm add @jupyterlab/apputils
 
-Locate the ``extension`` object of type ``JupyterLabPlugin``. Change the
+Locate the ``extension`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
 .. code:: typescript
@@ -235,11 +235,11 @@ definition so that it reads like so:
     /**
      * Initialization data for the jupyterlab_xkcd extension.
      */
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
         console.log('ICommandPalette:', palette);
       }
@@ -300,7 +300,7 @@ code:
 
 .. code-block:: typescript
 
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -316,7 +316,7 @@ code:
           execute: () => {
             if (!widget.isAttached) {
               // Attach the widget to the main work area if it's not there
-              app.shell.addToMainArea(widget);
+              app.shell.add(widget, 'main');
             }
             // Activate the widget
             app.shell.activateById(widget.id);
@@ -448,7 +448,7 @@ The beginning of the function should read like the following:
 .. code-block:: typescript
       :emphasize-lines: 9,13,16-23
 
-      activate: (app: JupyterLab, palette: ICommandPalette) => {
+      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
         console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
         // Create a single widget
@@ -590,7 +590,7 @@ these changes:
     /**
      * Activate the xckd widget extension.
      */
-    function activate(app: JupyterLab, palette: ICommandPalette) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Create a single widget
@@ -603,7 +603,7 @@ these changes:
         execute: () => {
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
-            app.shell.addToMainArea(widget);
+            app.shell.add(widget, 'main');
           }
           // Refresh the comic in the widget
           widget.update();
@@ -617,12 +617,12 @@ these changes:
     };
 
 Remove the ``activate`` function definition from the
-``JupyterLabPlugin`` object and refer instead to the top-level function
+``JupyterFrontEndPlugin`` object and refer instead to the top-level function
 like so:
 
 .. code-block:: typescript
 
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette],
@@ -662,7 +662,7 @@ entire list of import statements looks like the following:
     :emphasize-lines: 2,6,9-11
 
     import {
-      JupyterLab, JupyterLabPlugin, ILayoutRestorer // new
+      JupyterFrontEnd, JupyterFrontEndPlugin, ILayoutRestorer // new
     } from '@jupyterlab/application';
 
     import {
@@ -690,13 +690,13 @@ Install this dependency:
 
     jlpm add @phosphor/coreutils
 
-Then, add the ``ILayoutRestorer`` interface to the ``JupyterLabPlugin``
+Then, add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
 definition. This addition passes the global ``LayoutRestorer`` to the
 third parameter of the ``activate``.
 
 .. code:: typescript
 
-    const extension: JupyterLabPlugin<void> = {
+    const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_xkcd',
       autoStart: true,
       requires: [ICommandPalette, ILayoutRestorer],
@@ -713,7 +713,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 .. code-block:: typescript
 
-    function activate(app: JupyterLab, palette: ICommandPalette, restorer: ILayoutRestorer) {
+    function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
       console.log('JupyterLab extension jupyterlab_xkcd is activated!');
 
       // Declare a widget variable
@@ -735,7 +735,7 @@ Finally, rewrite the ``activate`` function so that it:
           }
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
-            app.shell.addToMainArea(widget);
+            app.shell.add(widget, 'main');
           } else {
             // Refresh the comic in the widget
             widget.update();

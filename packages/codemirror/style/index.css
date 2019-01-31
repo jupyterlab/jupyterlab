@@ -5,6 +5,7 @@
 
 @import url('~codemirror/lib/codemirror.css');
 @import url('~codemirror/addon/dialog/dialog.css');
+@import url('~codemirror/addon/fold/foldgutter.css');
 
 @import url('~codemirror/theme/material.css');
 @import url('~codemirror/theme/zenburn.css');
@@ -59,20 +60,22 @@
 }
 
 .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
-  border-left: 1.4px solid var(--jp-editor-cursor-color);
+  border-left: var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color);
 }
 
 /* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
 @media screen and (min-width: 2138px) and (max-width: 4319px) {
   .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
-    border-left: 2px solid var(--jp-editor-cursor-color);
+    border-left: var(--jp-code-cursor-width1) solid
+      var(--jp-editor-cursor-color);
   }
 }
 
 /* When zoomed out less than 33% */
 @media screen and (min-width: 4320px) {
   .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-cursor {
-    border-left: 4px solid var(--jp-editor-cursor-color);
+    border-left: var(--jp-code-cursor-width2) solid
+      var(--jp-editor-cursor-color);
   }
 }
 
@@ -120,6 +123,10 @@
   text-align: center;
   font-size: var(--jp-ui-font-size1);
   white-space: nowrap;
+}
+
+.jp-CodeMirror-ruler {
+  border-left: 1px dashed var(--jp-border-color2);
 }
 
 /**

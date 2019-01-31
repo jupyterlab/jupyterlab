@@ -28,8 +28,16 @@ import {
 import { Mode } from './mode';
 
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/fold/foldcode.js';
+import 'codemirror/addon/fold/foldgutter.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/indent-fold.js';
+import 'codemirror/addon/fold/markdown-fold.js';
+import 'codemirror/addon/fold/xml-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
@@ -1139,6 +1147,11 @@ export namespace CodeMirrorEditor {
     fixedGutter?: boolean;
 
     /**
+     * Whether the folding gutter should be drawn
+     */
+    foldGutter?: boolean;
+
+    /**
      * Whether the cursor should be drawn when a selection is active.
      */
     showCursorWhenSelecting?: boolean;
@@ -1230,7 +1243,9 @@ export namespace CodeMirrorEditor {
     scrollPastEnd: false,
     styleActiveLine: false,
     styleSelectedText: false,
-    selectionPointer: false
+    selectionPointer: false,
+    rulers: [],
+    foldGutter: false
   };
 
   /**
@@ -1371,6 +1386,22 @@ namespace Private {
   }
 
   /**
+   * Get the list of active gutters
+   *
+   * @param config Editor configuration
+   */
+  function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
+    // The order of the classes will be the gutters order
+    let classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
+      'CodeMirror-linenumbers': 'lineNumbers',
+      'CodeMirror-foldgutter': 'codeFolding'
+    };
+    return Object.keys(classToSwitch).filter(
+      gutter => config[classToSwitch[gutter]]
+    );
+  }
+
+  /**
    * Set a config option for the editor.
    */
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
@@ -1409,6 +1440,18 @@ namespace Private {
       case 'autoClosingBrackets':
         editor.setOption('autoCloseBrackets', value);
         break;
+      case 'rulers':
+        let rulers = value as Array<number>;
+        editor.setOption(
+          'rulers',
+          rulers.map(column => {
+            return {
+              column,
+              className: 'jp-CodeMirror-ruler'
+            };
+          })
+        );
+        break;
       case 'readOnly':
         el.classList.toggle(READ_ONLY_CLASS, value);
         editor.setOption(option, value);
@@ -1421,6 +1464,17 @@ namespace Private {
         break;
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
+        break;
+      case 'gutters':
+        editor.setOption(option, getActiveGutters(config));
+        break;
+      case 'lineNumbers':
+        editor.setOption(option, value);
+        editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'codeFolding':
+        editor.setOption('foldGutter', value);
+        editor.setOption('gutters', getActiveGutters(config));
         break;
       default:
         editor.setOption(option, value);

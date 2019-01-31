@@ -60,7 +60,8 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
     script.type = 'text/javascript';
     script.src = `${this._url}?config=${
       this._config
-    }&amp;delayStartupUntil=configured" charset="utf-8"`;
+    }&amp;delayStartupUntil=configured`;
+    script.charset = 'utf-8';
     head.appendChild(script);
     script.addEventListener('load', () => {
       this._onLoad();

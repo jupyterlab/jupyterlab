@@ -17,24 +17,19 @@
   padding: 2px;
 }
 
-/* select wrapper */
-.jp-Toolbar-item.jp-Notebook-toolbarCellType > .jp-select-wrapper {
-  height: 100%;
-  background-color: var(--jp-notebook-select-background);
-}
-
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
   border: none;
   box-shadow: none;
 }
 
-/* Actual select element */
-.jp-Notebook-toolbarCellType select.jp-Notebook-toolbarCellTypeDropdown {
+.jp-Notebook-toolbarCellTypeDropdown select {
+  height: 24px;
   font-size: var(--jp-ui-font-size1);
-  background-size: 16px;
-  padding-right: 16px;
-  border: none;
+  line-height: 14px;
   border-radius: 0;
-  outline: none;
-  background-color: var(--jp-layout-color1);
+  display: block;
+}
+
+.jp-Notebook-toolbarCellTypeDropdown span {
+  top: 5px !important;
 }

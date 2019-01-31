@@ -4,7 +4,11 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
@@ -42,35 +46,40 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 /**
  * Initialization data for the statusbar extension.
  */
-const statusBar: JupyterLabPlugin<IStatusBar> = {
+const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterLab) => {
+  activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
-    app.shell.addToBottomArea(statusBar);
-    // Trigger a refresh of active status items if
-    // the application layout is modified.
-    app.shell.layoutModified.connect(() => {
-      statusBar.update();
-    });
+    app.shell.add(statusBar, 'bottom');
+
+    // If available, connect to the shell's layout modified signal.
+    if (labShell) {
+      labShell.layoutModified.connect(() => {
+        statusBar.update();
+      });
+    }
+
     return statusBar;
-  }
+  },
+  optional: [ILabShell]
 };
 
 /**
  * A plugin that provides a kernel status item to the status bar.
  */
-export const kernelStatus: JupyterLabPlugin<void> = {
+export const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IConsoleTracker],
+  requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    labShell: ILabShell
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
@@ -94,7 +103,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
     };
 
     // Keep the session object on the status item up-to-date.
-    app.shell.currentChanged.connect((shell, change) => {
+    labShell.currentChanged.connect((_, change) => {
       const { oldValue, newValue } = change;
 
       // Clean up after the old value if it exists,
@@ -124,7 +133,7 @@ export const kernelStatus: JupyterLabPlugin<void> = {
         align: 'left',
         rank: 1,
         isActive: () => {
-          const current = app.shell.currentWidget;
+          const current = labShell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) || consoleTracker.has(current))
@@ -138,16 +147,23 @@ export const kernelStatus: JupyterLabPlugin<void> = {
 /**
  * A plugin providing a line/column status item to the application.
  */
-export const lineColItem: JupyterLabPlugin<void> = {
+export const lineColItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:line-col-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IEditorTracker, IConsoleTracker],
+  requires: [
+    IStatusBar,
+    INotebookTracker,
+    IEditorTracker,
+    IConsoleTracker,
+    ILabShell
+  ],
   activate: (
-    app: JupyterLab,
+    _: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    labShell: ILabShell
   ) => {
     const item = new LineCol();
 
@@ -159,7 +175,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
       item.model!.editor = prompt && prompt.editor;
     };
 
-    app.shell.currentChanged.connect((shell, change) => {
+    labShell.currentChanged.connect((_, change) => {
       const { oldValue, newValue } = change;
 
       // Check if we need to disconnect the console listener
@@ -204,7 +220,7 @@ export const lineColItem: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 2,
         isActive: () => {
-          const current = app.shell.currentWidget;
+          const current = labShell.currentWidget;
           return (
             current &&
             (notebookTracker.has(current) ||
@@ -224,11 +240,11 @@ export const lineColItem: JupyterLabPlugin<void> = {
  * This plugin will not work unless the memory usage server extension
  * is installed.
  */
-export const memoryUsageItem: JupyterLabPlugin<void> = {
+export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
   requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
+  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
     let item = new MemoryUsage();
 
     statusBar.registerStatusItem(
@@ -248,11 +264,11 @@ export const memoryUsageItem: JupyterLabPlugin<void> = {
  * A plugin providing running terminals and sessions information
  * to the status bar.
  */
-export const runningSessionsItem: JupyterLabPlugin<void> = {
+export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
   requires: [IStatusBar],
-  activate: (app: JupyterLab, statusBar: IStatusBar) => {
+  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
     const item = new RunningSessions({
       onClick: () => app.shell.activateById('jp-running-sessions'),
       serviceManager: app.serviceManager
@@ -269,7 +285,7 @@ export const runningSessionsItem: JupyterLabPlugin<void> = {
   }
 };
 
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,

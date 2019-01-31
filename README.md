@@ -45,7 +45,7 @@ Project installation instructions from the git sources are available in the [con
 
 #### conda
 
-Conda is an open source package management system and environment management system that runs on Windows, macOS, and Linux. Conda packages and distributes software for any language, and by default uses the Anaconda repository managed by Anaconda Inc. To install conda, please [see the conda installation instructions](https://conda.io/docs/user-guide/install/index.html).
+Conda is an open source package management system and environment management system that runs on Windows, macOS, and Linux. Conda packages and distributes software for any language, and by default uses the Anaconda repository managed by Anaconda Inc. To install conda, please [see the conda installation instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
 Install the [JupyterLab `conda` package](https://anaconda.org/conda-forge/jupyterlab) with:
 

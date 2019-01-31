@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
@@ -26,10 +29,10 @@ const RECORD_SEPARATOR = String.fromCharCode(30);
  * them to the new keyboard shortcuts plugin below before removing the old
  * shortcuts.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:plugin',
   requires: [ISettingRegistry],
-  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
+  activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
     try {
       const old = await registry.load(plugin.id);
       const settings = await registry.load(shortcuts.id);
@@ -135,10 +138,10 @@ const plugin: JupyterLabPlugin<void> = {
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
-const shortcuts: JupyterLabPlugin<void> = {
+const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
-  activate: async (app: JupyterLab, registry: ISettingRegistry) => {
+  activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
@@ -147,6 +150,8 @@ const shortcuts: JupyterLabPlugin<void> = {
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
+      const commands = app.commands.listCommands().join('\n');
+
       loaded = {};
       schema.properties.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
@@ -157,6 +162,11 @@ const shortcuts: JupyterLabPlugin<void> = {
         })
         .reduce((acc, val) => acc.concat(val), [])
         .sort((a, b) => a.command.localeCompare(b.command));
+      schema.properties.shortcuts.title =
+        'List of Commands (followed by shortcuts)';
+      schema.properties.shortcuts.description = `${commands}
+
+List of Keyboard Shortcuts`;
     }
 
     registry.pluginChanged.connect(async (sender, plugin) => {
@@ -237,7 +247,7 @@ const shortcuts: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [plugin, shortcuts];
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, shortcuts];
 
 export default plugins;
 
