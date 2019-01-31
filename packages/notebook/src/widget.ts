@@ -2056,8 +2056,16 @@ export class Notebook extends StaticNotebook {
       }
     }
 
-    // Otherwise enter command mode.
-    this.mode = 'command';
+    // Otherwise enter command mode if not already.
+    if (this.mode !== 'command') {
+      this.mode = 'command';
+
+      // Switching to command mode currently focuses the notebook element, so
+      // refocus the relatedTarget so the focus actually switches as intended.
+      if (relatedTarget) {
+        relatedTarget.focus();
+      }
+    }
   }
 
   /**
