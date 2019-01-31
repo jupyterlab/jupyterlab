@@ -5,7 +5,11 @@ import '../style/index.css';
 import { SearchProviderRegistry } from './searchproviderregistry';
 import { SearchInstance } from './searchinstance';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { ISignal } from '@phosphor/signaling';
@@ -144,11 +148,11 @@ export interface IDisplayState {
 /**
  * Initialization data for the document-search extension.
  */
-const extension: JupyterLabPlugin<void> = {
+const extension: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/documentsearch:plugin',
   autoStart: true,
   requires: [ICommandPalette],
-  activate: (app: JupyterLab, palette: ICommandPalette) => {
+  activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
     const activeSearches: Private.ActiveSearchMap = {};
