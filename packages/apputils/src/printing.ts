@@ -20,16 +20,81 @@ import { Printd, PrintdCallback } from 'printd';
 import { Widget } from '@phosphor/widgets';
 
 /**
+ * Partial function from (T, V) -> U
+ */
+type PartialFunction<T, U, V> = (t: T) => ((u: U) => V) | null;
+
+type PartialFunctionSame<T, U> = PartialFunction<T, T, U>;
+
+
+function emptyFunction(t: unknown): null {
+  return null;
+}
+/**
+ * Takes two partial functions and returns a new one that tries the both to see if either is implemented for an arg.
+ */
+function combine<T, U, V, W>(
+  f: PartialFunction<T, U, V>,
+  g: PartialFunction<T, U, W>
+): PartialFunction<T, U, V | W> {
+  return (t: T) => {
+    const fRes = f(t);
+    if (fRes !== null) {
+      return fRes;
+    }
+    return g(t);
+  };
+}
+
+function combineMany<T, U, V>(fs: Iterable<PartialFunction<T, U, V>): PartialFunction< T, U, V> {
+  return [...fs].reduce(combine, emptyFunction)
+}
+
+function canCall<T>(fn: PartialFunction<T, any, any>, arg: T): boolean {
+  return fn(arg) !== null;
+}
+
+function call<T, U, V>(fn: PartialFunction<T, U, V>, t: T, u: U): V {
+  return fn(t)(u);
+}
+
+function callSame<T, U>(fn: PartialFunctionSame<T, U>, t: T): U {
+  return call(fn, t, t);
+}
+
+function createSame<T, U>(
+  canCall: (arg: T) => boolean,
+  call: (arg: T) => U
+): PartialFunctionSame<T, U> {
+  return (arg: T) => {
+    if (canCall(arg)) {
+      return call;
+    }
+    return null;
+  };
+}
+
+
+type PrintFunction<T, U> = PartialFunction<T, U, Promise<void>>; 
+
+function printPrintable(a: unknown): (() => Promise<void>) | null {
+  if (isPrintable(a)) {
+    return () => a[printSymbol]();
+  }
+  return null;
+}
+
+/**
  * Symbol to use for a method that prints out out the object.
  */
 export const printSymbol = Symbol();
 
 /**
- * Widgets who provide a custom way of printing themselves
+ * Objects who provide a custom way of printing themselves
  * should implement this interface.
  */
 export interface IPrintable {
-  [printSymbol]: () => void;
+  [printSymbol]: () => Promise<void>;
 }
 
 /**

@@ -277,6 +277,7 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
+    NotebookPanel.prototype[printSymbol] = () => {};
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
