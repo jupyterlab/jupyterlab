@@ -206,8 +206,7 @@ export function addCommands(
     iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
     execute: args => {
       const name = args['name'] as string;
-      const initialCommand = args['initialCommand'] as string;
-      const term = new Terminal({ initialCommand });
+      const term = new Terminal();
       const promise = name
         ? serviceManager.terminals.connectTo(name)
         : serviceManager.terminals.startNew();
