@@ -132,7 +132,7 @@ interface ISearchOverlayProps {
   onRegexToggled: Function;
   onHightlightNext: Function;
   onHighlightPrevious: Function;
-  onStartSearch: Function;
+  onStartQuery: Function;
   onEndSearch: Function;
 }
 
@@ -186,7 +186,7 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartSearch(query);
+    this.props.onStartQuery(query);
   }
 
   private onClose() {
@@ -240,7 +240,7 @@ export function createSearchOverlay(
   onRegexToggled: Function,
   onHightlightNext: Function,
   onHighlightPrevious: Function,
-  onStartSearch: Function,
+  onStartQuery: Function,
   onEndSearch: Function
 ): Widget {
   const widget = ReactWidget.create(
@@ -252,7 +252,7 @@ export function createSearchOverlay(
             onRegexToggled={onRegexToggled}
             onHightlightNext={onHightlightNext}
             onHighlightPrevious={onHighlightPrevious}
-            onStartSearch={onStartSearch}
+            onStartQuery={onStartQuery}
             onEndSearch={onEndSearch}
             overlayState={args}
           />

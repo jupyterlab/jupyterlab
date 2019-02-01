@@ -25,7 +25,7 @@ export class SearchInstance implements IDisposable {
       this._onRegexToggled.bind(this),
       this._highlightNext.bind(this),
       this._highlightPrevious.bind(this),
-      this._startSearch.bind(this),
+      this._startQuery.bind(this),
       this.dispose.bind(this)
     );
 
@@ -79,13 +79,13 @@ export class SearchInstance implements IDisposable {
     this._displayUpdateSignal.emit(this._displayState);
   }
 
-  private async _startSearch(query: RegExp) {
+  private async _startQuery(query: RegExp) {
     // save the last query (or set it to the current query if this is the first)
     if (this._activeProvider && this._displayState.query) {
-      await this._activeProvider.endSearch();
+      await this._activeProvider.endQuery();
     }
     this._displayState.query = query;
-    await this._activeProvider.startSearch(query, this._widget);
+    await this._activeProvider.startQuery(query, this._widget);
     this.updateIndices();
 
     // this signal should get injected when the widget is
@@ -105,7 +105,11 @@ export class SearchInstance implements IDisposable {
     }
     this._isDisposed = true;
 
-    this._activeProvider.endSearch();
+    // If a query hasn't been executed yet, no need to call endSearch
+    if (this._displayState.query) {
+      this._activeProvider.endSearch();
+    }
+
     this._searchWidget.dispose();
     Signal.clearData(this);
   }

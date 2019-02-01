@@ -26,19 +26,19 @@ export class NotebookSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startSearch(
+  async startQuery(
     query: RegExp,
     searchTarget: NotebookPanel
   ): Promise<ISearchMatch[]> {
     this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
-    console.log('startSearch: ', query, this._searchTarget);
 
+    this._query = query;
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
     const cellList = this._searchTarget.model.cells;
     cellList.changed.connect(
-      this._restartSearch.bind(this, query, this._searchTarget),
+      this._restartQuery.bind(this),
       this
     );
 
@@ -49,7 +49,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     for (let cell of cells) {
       const cmEditor = cell.editor as CodeMirrorEditor;
       const cmSearchProvider = new CodeMirrorSearchProvider();
-      cmSearchProvider.shouldLoop = false;
+      cmSearchProvider.isSubProvider = true;
 
       // If a rendered MarkdownCell contains a match, unrender it so that
       // CodeMirror can show the match(es).  If the MarkdownCell is not
@@ -68,7 +68,7 @@ export class NotebookSearchProvider implements ISearchProvider {
         cell.inputHidden = false;
       }
       // chain promises to ensure indexing is sequential
-      const matchesFromCell = await cmSearchProvider.startSearch(
+      const matchesFromCell = await cmSearchProvider.startQuery(
         query,
         cmEditor
       );
@@ -107,6 +107,27 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   /**
+   * Clears state of a search provider to prepare for startQuery to be called
+   * in order to start a new query or refresh an existing one.
+   *
+   * @returns A promise that resolves when the search provider is ready to
+   * begin a new search.
+   */
+  async endQuery(): Promise<void> {
+    this._cmSearchProviders.forEach(({ provider }) => {
+      provider.endQuery();
+      provider.changed.disconnect(this._onCmSearchProviderChanged, this);
+    });
+    Signal.disconnectBetween(this._searchTarget.model.cells, this);
+
+    this._cmSearchProviders = [];
+    this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
+      cell.rendered = true;
+    });
+    this._unRenderedMarkdownCells = [];
+  }
+
+  /**
    * Resets UI state, removes all matches.
    *
    * @returns A promise that resolves when all state has been cleaned up.
@@ -119,13 +140,15 @@ export class NotebookSearchProvider implements ISearchProvider {
       provider.endSearch();
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
-    this._searchTarget.content.activeCellIndex = index;
-    this._searchTarget.content.mode = 'edit';
+
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
       cell.rendered = true;
     });
     this._unRenderedMarkdownCells = [];
+
+    this._searchTarget.content.activeCellIndex = index;
+    this._searchTarget.content.mode = 'edit';
     this._searchTarget = null;
     this._currentMatch = null;
   }
@@ -160,7 +183,7 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   /**
-   * The same list of matches provided by the startSearch promise resoluton
+   * The same list of matches provided by the startQuery promise resoluton
    */
   get matches(): ISearchMatch[] {
     return [].concat(...this._getMatchesFromCells());
@@ -194,7 +217,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     const { provider } = this._cmSearchProviders[cellIndex];
 
     // highlightNext/Previous will not be able to search rendered MarkdownCells or
-    // hidden code cells, but that is okay here because in startSearch, we unrendered
+    // hidden code cells, but that is okay here because in startQuery, we unrendered
     // all cells with matches and unhid all cells
     const match = reverse
       ? await provider.highlightPrevious()
@@ -226,9 +249,9 @@ export class NotebookSearchProvider implements ISearchProvider {
     return match;
   }
 
-  private async _restartSearch(query: RegExp) {
-    await this.endSearch();
-    await this.startSearch(query, this._searchTarget);
+  private async _restartQuery() {
+    await this.endQuery();
+    await this.startQuery(this._query, this._searchTarget);
     this._changed.emit(undefined);
   }
 
@@ -251,6 +274,7 @@ export class NotebookSearchProvider implements ISearchProvider {
   }
 
   private _searchTarget: NotebookPanel;
+  private _query: RegExp;
   private _cmSearchProviders: ICellSearchPair[] = [];
   private _currentMatch: ISearchMatch;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];

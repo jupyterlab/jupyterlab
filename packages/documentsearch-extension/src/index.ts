@@ -60,10 +60,20 @@ export interface ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startSearch(query: RegExp, searchTarget: any): Promise<ISearchMatch[]>;
+  startQuery(query: RegExp, searchTarget: any): Promise<ISearchMatch[]>;
 
   /**
-   * Resets UI state, removes all matches.
+   * Clears state of a search provider to prepare for startQuery to be called
+   * in order to start a new query or refresh an existing one.
+   *
+   * @returns A promise that resolves when the search provider is ready to
+   * begin a new search.
+   */
+  endQuery(): Promise<void>;
+
+  /**
+   * Resets UI state as it was before the search process began.  Cleans up and
+   * disposes of all internal state.
    *
    * @returns A promise that resolves when all state has been cleaned up.
    */
@@ -84,7 +94,7 @@ export interface ISearchProvider {
   highlightPrevious(): Promise<ISearchMatch | undefined>;
 
   /**
-   * The same list of matches provided by the startSearch promise resoluton
+   * The same list of matches provided by the startQuery promise resoluton
    */
   readonly matches: ISearchMatch[];
 
@@ -96,7 +106,7 @@ export interface ISearchProvider {
   /**
    * The current index of the selected match.
    */
-  readonly currentMatchIndex: number;
+  readonly currentMatchIndex: number | null;
 }
 
 export interface IDisplayState {

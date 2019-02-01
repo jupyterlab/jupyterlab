@@ -51,15 +51,15 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startSearch(query: RegExp, domain: any): Promise<ISearchMatch[]> {
+  async startQuery(query: RegExp, domain: any): Promise<ISearchMatch[]> {
     if (domain instanceof CodeMirrorEditor) {
       this._cm = domain;
     } else if (domain) {
       this._cm = domain.content.editor;
     }
+    await this.endQuery();
 
     this._query = query;
-    this._clearSearch();
 
     CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
     this._refreshOverlay();
@@ -69,8 +69,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     if (matches.length === 0) {
       return [];
     }
-    if (this.shouldLoop) {
-      // TODO: refactor out to the SearchInstance
+    if (!this.isSubProvider) {
       const cursorMatch = this._findNext(false);
       const match = this._matchState[cursorMatch.from.line][
         cursorMatch.from.ch
@@ -81,18 +80,29 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   /**
+   * Clears state of a search provider to prepare for startQuery to be called
+   * in order to start a new query or refresh an existing one.
+   *
+   * @returns A promise that resolves when the search provider is ready to
+   * begin a new search.
+   */
+  async endQuery(): Promise<void> {
+    this._matchState = {};
+    this._matchIndex = null;
+    this._cm.removeOverlay(this._overlay);
+    CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
+  }
+
+  /**
    * Resets UI state, removes all matches.
    *
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
-    this._cm.focus();
-    this._matchState = {};
-    this._matchIndex = 0;
-    if (this._cm) {
-      this._clearSearch();
+    if (!this.isSubProvider) {
+      this._cm.focus();
     }
-    CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
+    this.endQuery();
   }
 
   /**
@@ -133,7 +143,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   /**
-   * The same list of matches provided by the startSearch promise resoluton
+   * The same list of matches provided by the startQuery promise resoluton
    */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
@@ -161,13 +171,14 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively
    */
-  shouldLoop = true;
+  isSubProvider = false;
 
   private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange) {
     // If we get newlines added/removed, the line numbers across the
     // match state are all shifted, so here we need to recalculate it
     if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
       this._setInitialMatches(this._query);
+      this._changed.emit(undefined);
     }
   }
 
@@ -179,10 +190,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       this._cm.addOverlay(this._overlay);
       this._changed.emit(null);
     });
-  }
-
-  private _clearSearch() {
-    this._cm.removeOverlay(this._overlay);
   }
 
   /**
@@ -271,6 +278,12 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
           this._matchState[line][currentPos] = matchObj;
           // move the stream along and return searching style for the token
           stream.pos += matchLength || 1;
+
+          // if the last thing on the line was a match, make sure we still
+          // emit the changed signal so the display can pick up the updates
+          if (stream.eol) {
+            this._changed.emit(undefined);
+          }
           return 'searching';
         } else if (match) {
           // there's a match in the stream, advance the stream to its position
@@ -297,8 +310,9 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       );
       if (!cursor.find(reverse)) {
         // if we don't want to loop, no more matches found, reset the cursor and exit
-        if (!this.shouldLoop) {
+        if (this.isSubProvider) {
           this._cm.setCursorPosition(position);
+          this._matchIndex = null;
           return null;
         }
 
