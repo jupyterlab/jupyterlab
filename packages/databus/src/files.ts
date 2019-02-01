@@ -6,6 +6,7 @@
 import { Dataset } from './dataregistry';
 import { createURLDataset, resolverToConverter } from './resolvers';
 import { Converter } from './converters';
+import { createURLMimeType } from '.';
 
 export function createFileDataSet(path: string): Dataset<null> {
   const url = new URL('file:');
@@ -23,7 +24,7 @@ export function createFileConverter(
     if (path === null || !path.endsWith(extension)) {
       return null;
     }
-    return [mimeType, () => getDownloadURL(path)];
+    return [createURLMimeType(mimeType), () => getDownloadURL(path)];
   });
 }
 

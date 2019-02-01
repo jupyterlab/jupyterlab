@@ -10,6 +10,18 @@ import * as React from 'react';
 import { IDataBus } from './databus';
 import { Dataset } from '.';
 
+function MimeTypesComponent({ mimeTypes }: { mimeTypes: Iterable<string> }) {
+  return (
+    <ul>
+      {[...mimeTypes].map(mimeType => (
+        <li>
+          <pre>{mimeType}</pre>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function DatasetCompononent({
   url,
   databus,
@@ -24,9 +36,9 @@ function DatasetCompononent({
       <h3>URL:</h3>
       <pre>{url.toString()}</pre>
       <h3>MimeTypes:</h3>
-      <pre>{[...databus.data.mimeTypesForURL(url)].join(' ')}</pre>
+      <MimeTypesComponent mimeTypes={databus.data.mimeTypesForURL(url)} />
       <h3>Possible MimeTypes:</h3>
-      <pre>{[...databus.possibleMimeTypesForURL(url)].join(' ')}</pre>
+      <MimeTypesComponent mimeTypes={databus.possibleMimeTypesForURL(url)} />
       <h3>Viewers:</h3>
       <span>
         {[...databus.viewersForURL(url)].map((label: string) => (

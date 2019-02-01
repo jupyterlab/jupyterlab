@@ -39,6 +39,9 @@ function activate(
           path
         )
       ),
-    async (widget: Widget) => app.shell.activateById(widget.id)
+    async (widget: Widget) => {
+      app.shell.addToMainArea(widget);
+      app.shell.activateById(widget.id);
+    }
   );
 }

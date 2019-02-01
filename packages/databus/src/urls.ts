@@ -2,8 +2,8 @@ import { Converter, seperateConverter } from './converters';
 
 const baseMimeType = 'application/x.jupyter.url; mimeType=';
 
-export function createURLMimeType(url: URL) {
-  return `${baseMimeType}${url}`;
+export function createURLMimeType(mimeType: string) {
+  return `${baseMimeType}${mimeType}`;
 }
 
 function computeMimeType(mimeType: string): string | null {
