@@ -109,13 +109,16 @@ export abstract class JupyterFrontEnd<
   contextMenuHitTest(
     test: (node: HTMLElement) => boolean
   ): HTMLElement | undefined {
-    if (!this._contextMenuEvent) {
+    if (
+      !this._contextMenuEvent ||
+      !(this._contextMenuEvent.target instanceof HTMLElement)
+    ) {
       return undefined;
     }
     // This one-liner doesn't work, but should at some point in the future
     // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
     // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
-    let node: HTMLElement = this._contextMenuEvent.target as HTMLElement;
+    let node = this._contextMenuEvent.target as HTMLElement;
     do {
       if (test(node)) {
         return node;
