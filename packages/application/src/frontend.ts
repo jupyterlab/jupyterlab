@@ -106,14 +106,22 @@ export abstract class JupyterFrontEnd<
    *
    * @returns an HTMLElement or undefined, if none is found.
    */
-  contextMenuFirst(
+  contextMenuHitTest(
     test: (node: HTMLElement) => boolean
   ): HTMLElement | undefined {
-    for (let node of this._getContextMenuNodes()) {
+    if (!this._contextMenuEvent) {
+      return undefined;
+    }
+    // This one-liner doesn't work, but should at some point in the future
+    // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
+    // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
+    let node: HTMLElement = this._contextMenuEvent.target as HTMLElement;
+    do {
       if (test(node)) {
         return node;
       }
-    }
+      node = node.parentNode as HTMLElement;
+    } while (node.parentNode && node !== node.parentNode);
     return undefined;
   }
 
@@ -123,30 +131,6 @@ export abstract class JupyterFrontEnd<
   protected evtContextMenu(event: MouseEvent): void {
     this._contextMenuEvent = event;
     super.evtContextMenu(event);
-  }
-
-  /**
-   * Gets the hierarchy of html nodes that was under the cursor
-   * when the most recent contextmenu event was issued
-   */
-  private _getContextMenuNodes(): HTMLElement[] {
-    if (!this._contextMenuEvent) {
-      return [];
-    }
-
-    // This one-liner doesn't work, but should at some point in the future
-    // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
-    // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
-
-    const nodes: HTMLElement[] = [this._contextMenuEvent.target as HTMLElement];
-    while (
-      'parentNode' in nodes[nodes.length - 1] &&
-      nodes[nodes.length - 1].parentNode &&
-      nodes[nodes.length - 1] !== nodes[nodes.length - 1].parentNode
-    ) {
-      nodes.push(nodes[nodes.length - 1].parentNode as HTMLElement);
-    }
-    return nodes;
   }
 
   private _contextMenuEvent: MouseEvent;
