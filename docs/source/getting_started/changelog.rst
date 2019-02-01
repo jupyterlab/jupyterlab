@@ -93,7 +93,7 @@ Bugs Fixed
 Upgrades
 ^^^^^^^^
 * Update Xterm.js To 3.10.1 (`#5922 <https://github.com/jupyterlab/jupyterlab/pull/5922>`__, `#2581 <https://github.com/jupyterlab/jupyterlab/pull/2581>`__)
-* Update To Typescript 2.0 (`#833 <https://github.com/jupyterlab/jupyterlab/pull/833>`__)
+* Update To Typescript 3.3 (`#5929 <https://github.com/jupyterlab/jupyterlab/pull/5929>`__)
 * Upgrade Codemirror From 5.39 To 5.42 (`#5692 <https://github.com/jupyterlab/jupyterlab/pull/5692>`__, `#5588 <https://github.com/jupyterlab/jupyterlab/issues/5588>`__)
 * Update Marked To 0.5.1 (`#5490 <https://github.com/jupyterlab/jupyterlab/pull/5490>`__, `#5375 <https://github.com/jupyterlab/jupyterlab/issues/5375>`__)
 
