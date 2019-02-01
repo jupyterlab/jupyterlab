@@ -7,7 +7,7 @@ import { createSearchOverlay } from './searchoverlay';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
 import { Widget } from '@phosphor/widgets';
-import { Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 
 /**
@@ -28,6 +28,13 @@ export class SearchInstance implements IDisposable {
       this._startQuery.bind(this),
       this.dispose.bind(this)
     );
+
+    this._widget.disposed.connect(() => {
+      this.dispose();
+    });
+    this._searchWidget.disposed.connect(() => {
+      this.dispose();
+    });
 
     // TODO: this does not update if the toolbar changes height.
     if (this._widget instanceof MainAreaWidget) {
@@ -111,6 +118,7 @@ export class SearchInstance implements IDisposable {
     }
 
     this._searchWidget.dispose();
+    this._disposed.emit(undefined);
     Signal.clearData(this);
   }
 
@@ -119,6 +127,13 @@ export class SearchInstance implements IDisposable {
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * A signal emitted when the context is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
   private async _highlightNext() {
@@ -162,4 +177,5 @@ export class SearchInstance implements IDisposable {
   private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;
   private _isDisposed = false;
+  private _disposed = new Signal<this, void>(this);
 }

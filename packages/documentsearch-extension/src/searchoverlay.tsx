@@ -43,10 +43,6 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     super(props);
   }
 
-  componentDidMount() {
-    this.focusInput();
-  }
-
   /**
    * Focus the input.
    */
