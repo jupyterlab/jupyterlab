@@ -25,6 +25,6 @@
     "@types/jest": "^23.3.1",
     "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
-    "typescript": "~3.1.1"
+    "typescript": "~3.3.1"
   }
 }
