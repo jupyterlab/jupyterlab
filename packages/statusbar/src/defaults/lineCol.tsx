@@ -114,7 +114,7 @@ class LineFormComponent extends React.Component<
 
             <input
               type="submit"
-              className={classes(lineFormButton, 'lineForm-enter-icon')}
+              className={classes(lineFormButton, 'jp-StatusItem-line-form')}
               value=""
             />
           </div>
