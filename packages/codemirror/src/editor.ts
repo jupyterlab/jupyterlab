@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/// <reference types="codemirror"/>
+/// <reference types="codemirror/searchcursor"/>
 
 import CodeMirror from 'codemirror';
 
@@ -377,6 +379,65 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._clearHover();
   }
 
+  // todo: docs, maybe define overlay options as a type?
+  addOverlay(mode: string | object, options?: object): void {
+    this._editor.addOverlay(mode, options);
+  }
+
+  removeOverlay(mode: string | object): void {
+    this._editor.removeOverlay(mode);
+  }
+
+  getSearchCursor(
+    query: string | RegExp,
+    start?: CodeMirror.Position,
+    caseFold?: boolean
+  ): CodeMirror.SearchCursor {
+    return this._editor.getDoc().getSearchCursor(query, start, caseFold);
+  }
+
+  getCursor(start?: string): CodeMirror.Position {
+    return this._editor.getDoc().getCursor(start);
+  }
+
+  get state(): any {
+    return this._editor.state;
+  }
+
+  operation<T>(fn: () => T): T {
+    return this._editor.operation(fn);
+  }
+
+  firstLine(): number {
+    return this._editor.getDoc().firstLine();
+  }
+
+  lastLine(): number {
+    return this._editor.getDoc().lastLine();
+  }
+
+  scrollIntoView(
+    pos: { from: CodeMirror.Position; to: CodeMirror.Position },
+    margin: number
+  ): void {
+    this._editor.scrollIntoView(pos, margin);
+  }
+
+  cursorCoords(
+    where: boolean,
+    mode?: 'window' | 'page' | 'local'
+  ): { left: number; top: number; bottom: number } {
+    return this._editor.cursorCoords(where, mode);
+  }
+
+  getRange(
+    from: CodeMirror.Position,
+    to: CodeMirror.Position,
+    seperator?: string
+  ): string {
+    return this._editor.getDoc().getRange(from, to, seperator);
+  }
+
   /**
    * Add a keydown handler to the editor.
    *
@@ -415,7 +476,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = this._toCodeMirrorRange(selection);
+    const range = {
+      from: this._toCodeMirrorPosition(selection.start),
+      to: this._toCodeMirrorPosition(selection.end)
+    };
     this._editor.scrollIntoView(range);
   }
 
@@ -760,16 +824,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     return {
       anchor: this._toCodeMirrorPosition(anchor),
       head: this._toCodeMirrorPosition(head)
-    };
-  }
-
-  /**
-   * Converts an editor selection to a code mirror selection.
-   */
-  private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
-    return {
-      from: this._toCodeMirrorPosition(range.start),
-      to: this._toCodeMirrorPosition(range.end)
     };
   }
 
