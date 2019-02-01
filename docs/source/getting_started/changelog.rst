@@ -3,8 +3,8 @@
 JupyterLab Changelog
 ====================
 
-`v1.0.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.0.0>`__
----------------------------------------------------------------------------
+v1.0.0 (not released yet)
+-------------------------
 
 2019
 ^^^^
