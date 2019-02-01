@@ -151,11 +151,19 @@
   max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
+#setting-editor
+  .jp-SettingsRawEditor
+  .jp-Toolbar
+  .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
   margin-top: 2px;
 }
 
-#setting-editor
+.jp-ToolbarButtonComponent-label
+  #setting-editor
   .jp-SettingsRawEditor.jp-mod-error
   .jp-Toolbar-item.jp-BugIcon::after {
   color: red;
@@ -170,12 +178,13 @@
 
 #setting-editor .jp-SettingsRawEditor .jp-Inspector {
   border-top: 2px solid var(--jp-layout-color2);
+  min-height: var(--jp-private-settingeditor-debug-height);
   max-height: var(--jp-private-settingeditor-debug-height);
 }
 
 #setting-editor
   .jp-SettingsRawEditor
-  .jp-InspectorItem.jp-SettingsDebug
+  .jp-Inspector.jp-SettingsDebug
   .jp-RenderedHTMLCommon {
   padding: 2px 5px 2px 0;
   width: 100%;
@@ -183,7 +192,7 @@
 
 #setting-editor
   .jp-SettingsRawEditor
-  .jp-InspectorItem.jp-SettingsDebug
+  .jp-Inspector.jp-SettingsDebug
   .jp-RenderedHTMLCommon
   p {
   text-align: right;

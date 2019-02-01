@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
@@ -93,17 +93,16 @@ namespace CommandIDs {
 /**
  * The editor tracker extension.
  */
-const plugin: JupyterLabPlugin<IEditorTracker> = {
+const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [
     IConsoleTracker,
     IEditorServices,
     IFileBrowserFactory,
-    ILayoutRestorer,
     ISettingRegistry
   ],
-  optional: [ICommandPalette, ILauncher, IMainMenu],
+  optional: [ICommandPalette, ILauncher, IMainMenu, ILayoutRestorer],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -112,12 +111,12 @@ const plugin: JupyterLabPlugin<IEditorTracker> = {
  * A plugin that provides a status item allowing the user to
  * switch tabs vs spaces and tab widths for text editors.
  */
-export const tabSpaceStatus: JupyterLabPlugin<void> = {
+export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
   requires: [IStatusBar, IEditorTracker, ISettingRegistry],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     statusBar: IStatusBar,
     editorTracker: IEditorTracker,
     settingRegistry: ISettingRegistry
@@ -125,6 +124,7 @@ export const tabSpaceStatus: JupyterLabPlugin<void> = {
     // Create a menu for switching tabs vs spaces.
     const menu = new Menu({ commands: app.commands });
     const command = 'fileeditor:change-tabs';
+    const { shell } = app;
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
@@ -170,10 +170,7 @@ export const tabSpaceStatus: JupyterLabPlugin<void> = {
         align: 'right',
         rank: 1,
         isActive: () => {
-          return (
-            app.shell.currentWidget &&
-            editorTracker.has(app.shell.currentWidget)
-          );
+          return shell.currentWidget && editorTracker.has(shell.currentWidget);
         }
       }
     );
@@ -183,22 +180,22 @@ export const tabSpaceStatus: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [plugin, tabSpaceStatus];
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, tabSpaceStatus];
 export default plugins;
 
 /**
  * Activate the editor tracker plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   consoleTracker: IConsoleTracker,
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,
-  restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  palette: ICommandPalette,
+  palette: ICommandPalette | null,
   launcher: ILauncher | null,
-  menu: IMainMenu | null
+  menu: IMainMenu | null,
+  restorer: ILayoutRestorer | null
 ): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
@@ -210,22 +207,24 @@ function activate(
       defaultFor: ['markdown', '*'] // it outranks the defaultRendered viewer.
     }
   });
-  const { commands, restored } = app;
+  const { commands, restored, shell } = app;
   const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
     namespace
   });
   const isEnabled = () =>
     tracker.currentWidget !== null &&
-    tracker.currentWidget === app.shell.currentWidget;
+    tracker.currentWidget === shell.currentWidget;
 
   let config = { ...CodeEditor.defaultConfig };
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
+    });
+  }
 
   /**
    * Update the setting values.

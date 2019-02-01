@@ -76,13 +76,6 @@ export interface ILauncher {
  */
 export class LauncherModel extends VDomModel implements ILauncher {
   /**
-   * Create a new launcher model.
-   */
-  constructor() {
-    super();
-  }
-
-  /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
    *
@@ -354,7 +347,9 @@ function Card(
   // Get some properties of the command
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };
+  const caption = commands.caption(command, args);
   const label = commands.label(command, args);
+  const title = caption || label;
 
   // Build the onclick handler.
   let onclick = () => {
@@ -386,7 +381,7 @@ function Card(
   return (
     <div
       className="jp-LauncherCard"
-      title={label}
+      title={title}
       onClick={onclick}
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
@@ -412,7 +407,7 @@ function Card(
             </div>
           )}
       </div>
-      <div className="jp-LauncherCard-label" title={label}>
+      <div className="jp-LauncherCard-label" title={title}>
         {label}
       </div>
     </div>

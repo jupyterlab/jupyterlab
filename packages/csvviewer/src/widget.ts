@@ -272,12 +272,12 @@ export class CSVViewer extends Widget {
    * Go to line
    */
   goToLine(lineNumber: number) {
-    let scrollY = this._grid.scrollY;
+    let scrollY = 0;
     /* The lines might not all have uniform height, so we can't just scroll to lineNumber * this._grid.baseRowSize
     see https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 for discussions around
     this. It would be nice if DataGrid had a method to scroll to cell, which could be implemented more efficiently
     because datagrid knows more about the shape of the cells. */
-    for (let i = scrollY; i < lineNumber - 1; i++) {
+    for (let i = 0; i < lineNumber - 1; i++) {
       scrollY += this._grid.sectionSize('row', i);
     }
     this._grid.scrollTo(this._grid.scrollX, scrollY);
@@ -347,6 +347,31 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
         content.delimiter = delimiter;
       }
     );
+  }
+
+  /**
+   * Set URI fragment identifier for rows
+   */
+  setFragment(fragment: string): void {
+    let parseFragments = fragment.split('=');
+
+    // TODO: expand to allow columns and cells to be selected
+    // reference: https://tools.ietf.org/html/rfc7111#section-3
+    if (parseFragments[0] !== '#row') {
+      return;
+    }
+
+    // multiple rows, separated by semi-colons can be provided, we will just
+    // go to the top one
+    let topRow = parseFragments[1].split(';')[0];
+
+    // a range of rows can be provided, we will take the first value
+    topRow = topRow.split('-')[0];
+
+    // go to that row
+    this.context.ready.then(() => {
+      this.content.goToLine(Number(topRow));
+    });
   }
 }
 

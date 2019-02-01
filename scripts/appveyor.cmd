@@ -20,6 +20,7 @@ IF "%NAME%"=="python" (
     python -m jupyterlab.browser_check
 
 ) ELSE (
+    set NODE_OPTIONS=--max-old-space-size=1028
     jlpm run build:packages
     if !errorlevel! neq 0 exit /b !errorlevel!
     jlpm run build:test

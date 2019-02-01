@@ -252,6 +252,35 @@ describe('@jupyterlab/docmanager', () => {
       it('should fail to find a widget', () => {
         expect(manager.findWidget('foo')).to.be.undefined;
       });
+
+      it('should fail to find a widget with non default factory and the default widget name', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['text']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        expect(manager.findWidget(model.path)).to.be.undefined;
+      });
+
+      it('should find a widget with non default factory given a file and a null widget name', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['text']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        expect(manager.findWidget(model.path, null)).to.equal(widget);
+        await dismissDialog();
+      });
     });
 
     describe('#contextForWidget()', () => {

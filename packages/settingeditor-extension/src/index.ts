@@ -5,8 +5,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -42,7 +42,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
+const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
@@ -61,7 +61,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
  * Activate the setting editor extension.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   registry: ISettingRegistry,
   editorServices: IEditorServices,
@@ -134,7 +134,7 @@ function activate(
 
       let main = new MainAreaWidget({ content: editor });
       tracker.add(main);
-      shell.addToMainArea(main);
+      shell.add(main);
     },
     label: 'Advanced Settings Editor'
   });

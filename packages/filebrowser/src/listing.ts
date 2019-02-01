@@ -781,7 +781,8 @@ export class DirListing extends Widget {
 
       node.classList.add(RUNNING_CLASS);
       if (specs) {
-        name = specs.kernelspecs[name].display_name;
+        const spec = specs.kernelspecs[name];
+        name = spec ? spec.display_name : 'unknown';
       }
       node.title = `${node.title}\nKernel: ${name}`;
     });

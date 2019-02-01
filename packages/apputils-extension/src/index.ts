@@ -6,8 +6,8 @@
 import {
   ILayoutRestorer,
   IRouter,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -23,7 +23,6 @@ import {
 import {
   ISettingRegistry,
   IStateDB,
-  PageConfig,
   SettingRegistry,
   StateDB,
   URLExt
@@ -39,7 +38,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Menu } from '@phosphor/widgets';
 
-import { activatePalette, restorePalette } from './palette';
+import { Palette } from './palette';
 
 import { createRedirectForm } from './redirect';
 
@@ -75,21 +74,10 @@ namespace CommandIDs {
 }
 
 /**
- * The routing regular expressions used by the apputils plugin.
- */
-namespace Patterns {
-  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}([^?\/]+)`
-  );
-}
-
-/**
  * The default command palette extension.
  */
-const palette: JupyterLabPlugin<ICommandPalette> = {
-  activate: activatePalette,
+const palette: JupyterFrontEndPlugin<ICommandPalette> = {
+  activate: Palette.activate,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
   autoStart: true
@@ -104,8 +92,8 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
  * causes the command palette to be unavailable to other extensions earlier
  * in the application load cycle.
  */
-const paletteRestorer: JupyterLabPlugin<void> = {
-  activate: restorePalette,
+const paletteRestorer: JupyterFrontEndPlugin<void> = {
+  activate: Palette.restore,
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
@@ -114,9 +102,9 @@ const paletteRestorer: JupyterLabPlugin<void> = {
 /**
  * The default setting registry provider.
  */
-const settings: JupyterLabPlugin<ISettingRegistry> = {
+const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterLab): Promise<ISettingRegistry> => {
+  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
     const connector = app.serviceManager.settings;
     const plugins = (await connector.list()).values;
 
@@ -129,20 +117,21 @@ const settings: JupyterLabPlugin<ISettingRegistry> = {
 /**
  * The default theme manager provider.
  */
-const themes: JupyterLabPlugin<IThemeManager> = {
+const themes: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, ISplashScreen],
+  requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ISplashScreen],
   optional: [ICommandPalette, IMainMenu],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     settings: ISettingRegistry,
-    splash: ISplashScreen,
+    paths: JupyterFrontEnd.IPaths,
+    splash: ISplashScreen | null,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null
   ): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(app.info.urls.base, app.info.urls.themes);
+    const url = URLExt.join(paths.urls.base, paths.urls.themes);
     const key = themes.id;
     const manager = new ThemeManager({ key, host, settings, splash, url });
 
@@ -220,44 +209,41 @@ const themes: JupyterLabPlugin<IThemeManager> = {
 /**
  * The default window name resolver provider.
  */
-const resolver: JupyterLabPlugin<IWindowResolver> = {
+const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [IRouter],
-  activate: async (app: JupyterLab, router: IRouter) => {
-    const resolver = new WindowResolver();
-    const match = router.current.path.match(Patterns.workspace);
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: async (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
+    const workspacePattern = new RegExp(`^${paths.urls.workspaces}([^?\/]+)`);
+    const solver = new WindowResolver();
+    const match = router.current.path.match(workspacePattern);
     const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = workspace
-      ? URLExt.join(
-          PageConfig.getOption('baseUrl'),
-          PageConfig.getOption('workspacesUrl'),
-          workspace
-        )
-      : app.info.defaultWorkspace;
+    const candidate = Private.candidate(paths, workspace);
 
     try {
-      await resolver.resolve(candidate);
+      await solver.resolve(candidate);
     } catch (error) {
       console.warn('Window resolution failed:', error);
 
       // Return a promise that never resolves.
       return new Promise<IWindowResolver>(() => {
-        Private.redirect(router);
+        Private.redirect(router, paths, workspacePattern);
       });
     }
 
-    PageConfig.setOption('workspace', resolver.name);
-
-    return resolver;
+    return solver;
   }
 };
 
 /**
  * The default splash screen provider.
  */
-const splash: JupyterLabPlugin<ISplashScreen> = {
+const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
@@ -275,27 +261,30 @@ const splash: JupyterLabPlugin<ISplashScreen> = {
 /**
  * The default state database for storing application state.
  */
-const state: JupyterLabPlugin<IStateDB> = {
+const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [IRouter, IWindowResolver, ISplashScreen],
+  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  optional: [ISplashScreen],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     resolver: IWindowResolver,
-    splash: ISplashScreen
+    splash: ISplashScreen | null
   ) => {
     let debouncer: number;
     let resolved = false;
 
-    const { commands, info, serviceManager } = app;
+    const { commands, serviceManager } = app;
     const { workspaces } = serviceManager;
+    const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
-    const state = new StateDB({
-      namespace: info.namespace,
+    const db = new StateDB({
+      namespace: app.namespace,
       transform: transform.promise,
-      windowName: resolver.name
+      windowName: workspace
     });
 
     commands.addCommand(CommandIDs.recoverState, {
@@ -305,7 +294,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Clear the state silently so that the state changed signal listener
         // will not be triggered as it causes a save state.
-        await state.clear(silent);
+        await db.clear(silent);
 
         // If the user explictly chooses to recover state, all of local storage
         // should be cleared.
@@ -331,9 +320,8 @@ const state: JupyterLabPlugin<IStateDB> = {
     let conflated: PromiseDelegate<void> | null = null;
 
     commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${app.info.workspace})`,
+      label: () => `Save Workspace (${workspace})`,
       execute: ({ immediate }) => {
-        const { workspace } = app.info;
         const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
         const id = workspace;
         const metadata = { id };
@@ -353,7 +341,7 @@ const state: JupyterLabPlugin<IStateDB> = {
             return;
           }
 
-          const data = await state.toJSON();
+          const data = await db.toJSON();
 
           try {
             await workspaces.save(id, { data, metadata });
@@ -381,17 +369,13 @@ const state: JupyterLabPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { defaultWorkspace, workspace } = app.info;
+        const { urls } = paths;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? defaultWorkspace
-              : URLExt.join(
-                  PageConfig.getOption('baseUrl'),
-                  PageConfig.getOption('workspacesUrl'),
-                  query['clone']
-                )
+              ? urls.defaultWorkspace
+              : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
         const source = clone || workspace;
 
@@ -417,9 +401,9 @@ const state: JupyterLabPlugin<IStateDB> = {
 
         // Any time the local state database changes, save the workspace.
         if (workspace) {
-          state.changed.connect(
+          db.changed.connect(
             listener,
-            state
+            db
           );
         }
 
@@ -478,7 +462,10 @@ const state: JupyterLabPlugin<IStateDB> = {
           return;
         }
 
-        const loading = splash.show();
+        // If a splash provider exists, launch the splash screen.
+        const loading = splash
+          ? splash.show()
+          : new DisposableDelegate(() => undefined);
 
         // If the state database has already been resolved, resetting is
         // impossible without reloading.
@@ -518,7 +505,7 @@ const state: JupyterLabPlugin<IStateDB> = {
 
     router.register({
       command: CommandIDs.resetOnLoad,
-      pattern: Patterns.resetOnLoad,
+      pattern: /(\?reset|\&reset)($|&)/,
       rank: 10 // Very high priority: 10:100.
     });
 
@@ -526,19 +513,19 @@ const state: JupyterLabPlugin<IStateDB> = {
     window.addEventListener('beforeunload', () => {
       const silent = true;
 
-      state.clear(silent).catch(() => {
+      db.clear(silent).catch(() => {
         /* no-op */
       });
     });
 
-    return state;
+    return db;
   }
 };
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
   resolver,
@@ -553,6 +540,22 @@ export default plugins;
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * Generate a workspace name candidate.
+   *
+   * @param workspace - A potential workspace name parsed from the URL.
+   *
+   * @returns A workspace name candidate.
+   */
+  export function candidate(
+    paths: JupyterFrontEnd.IPaths,
+    workspace = ''
+  ): string {
+    return workspace
+      ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
+      : paths.urls.defaultWorkspace;
+  }
+
   /**
    * Create a splash element.
    */
@@ -634,7 +637,12 @@ namespace Private {
   /**
    * Allows the user to clear state if splash screen takes too long.
    */
-  export async function redirect(router: IRouter, warn = false): Promise<void> {
+  export async function redirect(
+    router: IRouter,
+    paths: JupyterFrontEnd.IPaths,
+    workspacePattern: RegExp,
+    warn = false
+  ): Promise<void> {
     const form = createRedirectForm(warn);
     const dialog = new Dialog({
       title: 'Please use a different workspace.',
@@ -646,13 +654,13 @@ namespace Private {
 
     dialog.dispose();
     if (!result.value) {
-      return redirect(router, true);
+      return redirect(router, paths, workspacePattern, true);
     }
 
     // Navigate to a new workspace URL and abandon this session altogether.
-    const page = PageConfig.getOption('pageUrl');
-    const workspaces = PageConfig.getOption('workspacesUrl');
-    const match = router.current.path.match(Patterns.workspace);
+    const page = paths.urls.page;
+    const workspaces = paths.urls.workspaces;
+    const match = router.current.path.match(workspacePattern);
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const prefix = (workspace ? workspaces : page).length + workspace.length;
     const rest = router.current.request.substring(prefix);

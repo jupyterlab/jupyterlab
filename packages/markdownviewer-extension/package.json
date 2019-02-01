@@ -11,8 +11,7 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js",
-    "style/*.css"
+    "lib/*.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -31,6 +30,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyterlab/application": "^0.19.1",
+    "@jupyterlab/apputils": "^0.19.1",
+    "@jupyterlab/coreutils": "^2.2.1",
+    "@jupyterlab/markdownviewer": "^0.19.1",
     "@jupyterlab/rendermime": "^0.19.1"
   },
   "devDependencies": {
@@ -42,6 +45,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "mimeExtension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }

@@ -2,10 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab,
-  JupyterLabPlugin,
+  ILabShell,
+  ILabStatus,
   ILayoutRestorer,
   IRouter,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  JupyterLab,
+  LabShell,
   LayoutRestorer,
   Router
 } from '@jupyterlab/application';
@@ -19,7 +23,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig,
   PathExt,
   IStateDB,
   ISettingRegistry,
@@ -58,28 +61,21 @@ namespace CommandIDs {
 }
 
 /**
- * The routing regular expressions used by the application plugin.
- */
-namespace Patterns {
-  export const tree = new RegExp(`^${PageConfig.getOption('treeUrl')}([^?]+)`);
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?]+)`
-  );
-}
-
-/**
  * The main extension.
  */
-const main: JupyterLabPlugin<void> = {
+const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette, IRouter, IWindowResolver],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver
   ) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${main.id} must be activated in JupyterLab.`);
+    }
+
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
@@ -166,7 +162,7 @@ const main: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      if (app.isDirty) {
+      if (app.status.isDirty) {
         return ((event as any).returnValue = message);
       }
     });
@@ -177,18 +173,18 @@ const main: JupyterLabPlugin<void> = {
 /**
  * The default layout restorer provider.
  */
-const layout: JupyterLabPlugin<ILayoutRestorer> = {
+const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
+  requires: [IStateDB, ILabShell],
+  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
 
     restorer.fetch().then(saved => {
-      app.shell.restoreLayout(saved);
-      app.shell.layoutModified.connect(() => {
-        restorer.save(app.shell.saveLayout());
+      labShell.restoreLayout(saved);
+      labShell.layoutModified.connect(() => {
+        restorer.save(labShell.saveLayout());
       });
     });
 
@@ -201,11 +197,12 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
 /**
  * The default URL router provider.
  */
-const router: JupyterLabPlugin<IRouter> = {
+const router: JupyterFrontEndPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: (app: JupyterLab) => {
+  requires: [JupyterFrontEnd.IPaths],
+  activate: (app: JupyterFrontEnd, paths: JupyterFrontEnd.IPaths) => {
     const { commands } = app;
-    const base = PageConfig.getOption('baseUrl');
+    const base = paths.urls.base;
     const router = new Router({ base, commands });
 
     app.started.then(() => {
@@ -227,23 +224,34 @@ const router: JupyterLabPlugin<IRouter> = {
 /**
  * The tree route handler provider.
  */
-const tree: JupyterLabPlugin<void> = {
+const tree: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
-  requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  activate: (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter,
+    resolver: IWindowResolver
+  ) => {
     const { commands } = app;
+    const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
+    const workspacePattern = new RegExp(
+      `^${paths.urls.workspaces}[^?\/]+/tree/([^?]+)`
+    );
 
     commands.addCommand(CommandIDs.tree, {
       execute: async (args: IRouter.ILocation) => {
-        const treeMatch = args.path.match(Patterns.tree);
-        const workspaceMatch = args.path.match(Patterns.workspace);
+        const treeMatch = args.path.match(treePattern);
+        const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
         const path = decodeURI(match[1]);
-        const { page, workspaces } = app.info.urls;
-        const workspace = PathExt.basename(app.info.workspace);
+        // const { page, workspaces } = info.urls;
+        const workspace = PathExt.basename(resolver.name);
         const url =
-          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
+          (workspaceMatch
+            ? URLExt.join(paths.urls.workspaces, workspace)
+            : paths.urls.page) +
           args.search +
           args.hash;
         const immediate = true;
@@ -261,26 +269,32 @@ const tree: JupyterLabPlugin<void> = {
       }
     });
 
-    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
-    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
+    router.register({ command: CommandIDs.tree, pattern: treePattern });
+    router.register({ command: CommandIDs.tree, pattern: workspacePattern });
   }
 };
 
 /**
  * The default URL not found extension.
  */
-const notfound: JupyterLabPlugin<void> = {
+const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterLab, router: IRouter) => {
-    const bad = PageConfig.getOption('notFoundUrl');
-    const base = router.base;
-    const message = `
-      The path: ${bad} was not found. JupyterLab redirected to: ${base}
-    `;
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
+    const bad = paths.urls.notFound;
 
     if (!bad) {
       return;
     }
+
+    const base = router.base;
+    const message = `
+      The path: ${bad} was not found. JupyterLab redirected to: ${base}
+    `;
 
     // Change the URL back to the base application URL without adding the
     // URL change to the browser history.
@@ -288,17 +302,17 @@ const notfound: JupyterLabPlugin<void> = {
 
     showErrorMessage('Path Not Found', { message });
   },
-  requires: [IRouter],
   autoStart: true
 };
 
 /**
  * Change the favicon changing based on the busy status;
  */
-const busy: JupyterLabPlugin<void> = {
+const busy: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterLab) => {
-    app.busySignal.connect((_, isBusy) => {
+  requires: [ILabStatus],
+  activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
+    status.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
@@ -322,7 +336,6 @@ const busy: JupyterLabPlugin<void> = {
       }
     });
   },
-  requires: [],
   autoStart: true
 };
 
@@ -331,24 +344,28 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
 /**
  * Keep user settings for where to show the side panels.
  */
-const sidebar: JupyterLabPlugin<void> = {
+const sidebar: JupyterFrontEndPlugin<void> = {
   id: SIDEBAR_ID,
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    labShell: ILabShell
+  ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
-      each(app.shell.widgets('left'), widget => {
+      each(labShell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          app.shell.addToRightArea(widget);
+          labShell.add(widget, 'right');
         }
       });
-      each(app.shell.widgets('right'), widget => {
+      each(labShell.widgets('right'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          app.shell.addToLeftArea(widget);
+          labShell.add(widget, 'left');
         }
       });
     };
-    app.shell.layoutModified.connect(handleLayoutOverrides);
+    labShell.layoutModified.connect(handleLayoutOverrides);
     // Fetch overrides from the settings system.
     Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
       ([settings]) => {
@@ -405,7 +422,7 @@ const sidebar: JupyterLabPlugin<void> = {
       rank: 500
     });
   },
-  requires: [ISettingRegistry],
+  requires: [ISettingRegistry, ILabShell],
   autoStart: true
 };
 
@@ -521,16 +538,85 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 }
 
 /**
+ * The default JupyterLab application shell.
+ */
+const shell: JupyterFrontEndPlugin<ILabShell> = {
+  id: '@jupyterlab/application-extension:shell',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app.shell instanceof LabShell)) {
+      throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    return app.shell;
+  },
+  autoStart: true,
+  provides: ILabShell
+};
+
+/**
+ * The default JupyterLab application status provider.
+ */
+const status: JupyterFrontEndPlugin<ILabStatus> = {
+  id: '@jupyterlab/application-extension:status',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${status.id} must be activated in JupyterLab.`);
+    }
+    return app.status;
+  },
+  autoStart: true,
+  provides: ILabStatus
+};
+
+/**
+ * The default JupyterLab application-specific information provider.
+ *
+ * #### Notes
+ * This plugin should only be used by plugins that specifically need to access
+ * JupyterLab application information, e.g., listing extensions that have been
+ * loaded or deferred within JupyterLab.
+ */
+const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
+  id: '@jupyterlab/application-extension:info',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${info.id} must be activated in JupyterLab.`);
+    }
+    return app.info;
+  },
+  autoStart: true,
+  provides: JupyterLab.IInfo
+};
+
+/**
+ * The default JupyterLab paths dictionary provider.
+ */
+const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
+  id: '@jupyterlab/apputils-extension:paths',
+  activate: (app: JupyterFrontEnd): JupyterFrontEnd.IPaths => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${paths.id} must be activated in JupyterLab.`);
+    }
+    return app.paths;
+  },
+  autoStart: true,
+  provides: JupyterFrontEnd.IPaths
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   layout,
   router,
   tree,
   notfound,
   busy,
-  sidebar
+  sidebar,
+  shell,
+  status,
+  info,
+  paths
 ];
 
 export default plugins;

@@ -91,6 +91,12 @@
       "path": "../help-extension"
     },
     {
+      "path": "../htmlviewer"
+    },
+    {
+      "path": "../htmlviewer-extension"
+    },
+    {
       "path": "../imageviewer"
     },
     {
@@ -119,6 +125,9 @@
     },
     {
       "path": "../mainmenu-extension"
+    },
+    {
+      "path": "../markdownviewer"
     },
     {
       "path": "../markdownviewer-extension"
@@ -197,6 +206,9 @@
     },
     {
       "path": "../tooltip-extension"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "../vdom-extension"

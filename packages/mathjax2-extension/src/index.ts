@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -14,13 +14,22 @@ import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 /**
  * The MathJax latexTypesetter plugin.
  */
-const plugin: JupyterLabPlugin<ILatexTypesetter> = {
+const plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax2-extension:plugin',
   autoStart: true,
   provides: ILatexTypesetter,
   activate: () => {
-    let url = PageConfig.getOption('mathjaxUrl');
-    let config = PageConfig.getOption('mathjaxConfig');
+    const url = PageConfig.getOption('mathjaxUrl');
+    const config = PageConfig.getOption('mathjaxConfig');
+
+    if (!url) {
+      const message =
+        `${plugin.id} uses 'mathJaxUrl' and 'mathjaxConfig' in PageConfig ` +
+        `to operate but 'mathJaxUrl' was not found.`;
+
+      throw new Error(message);
+    }
+
     return new MathJaxTypesetter({ url, config });
   }
 };

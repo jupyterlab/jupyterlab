@@ -18,7 +18,7 @@ body {
   overflow: hidden;
 }
 
-.jp-ApplicationShell {
+.jp-LabShell {
   position: absolute;
   top: 0;
   left: 0;
@@ -26,7 +26,7 @@ body {
   bottom: 0;
 }
 
-.jp-ApplicationShell.jp-mod-devMode {
+.jp-LabShell.jp-mod-devMode {
   border-top: 4px solid red;
 }
 
