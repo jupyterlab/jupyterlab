@@ -98,10 +98,11 @@ is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
 
--  A ``top`` area for things like top level menus and toolbars
--  ``left`` and ``right`` side bar areas for collapsible content
+-  A ``top`` area for things like top level menus and toolbars.
+-  ``left`` and ``right`` side bar areas for collapsible content.
 -  A ``main`` work area for user activity.
--  A ``bottom`` area for things like status bars
+-  A ``bottom`` area for things like status bars.
+-  A ``header`` area for custom elements.
 
 Phosphor
 ~~~~~~~~

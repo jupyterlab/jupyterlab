@@ -80,7 +80,7 @@ export namespace ILabShell {
   /**
    * The areas of the application shell where widgets can reside.
    */
-  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
+  export type Area = 'main' | 'header' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
@@ -247,8 +247,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     rootLayout.addWidget(bottomPanel);
 
     // initially hiding header and bottom panel when no elements inside
-    this._bottomPanel.hide();
     this._headerPanel.hide();
+    this._bottomPanel.hide();
 
     this.layout = rootLayout;
 
@@ -521,6 +521,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._addToLeftArea(widget, options);
       case 'right':
         return this._addToRightArea(widget, options);
+      case 'header':
+        return this._addToHeaderArea(widget, options);
       case 'top':
         return this._addToTopArea(widget, options);
       case 'bottom':
@@ -673,6 +675,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
       case 'right':
         return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'header':
+        return this._headerPanel.children();
       case 'top':
         return this._topPanel.children();
       case 'bottom':
@@ -796,6 +800,28 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this._onLayoutModified();
   }
 
+  /**
+   * Add a widget to the header content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToHeaderArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._headerPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._headerPanel.isHidden) {
+      this._headerPanel.show();
+    }
+  }
   /**
    * Add a widget to the bottom content area.
    *
@@ -945,6 +971,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _restored = new PromiseDelegate<ILabShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
+  private _headerPanel: Panel;
   private _topPanel: Panel;
   private _bottomPanel: Panel;
   private _debouncer = 0;
