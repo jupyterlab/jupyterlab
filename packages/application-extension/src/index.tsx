@@ -386,7 +386,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
         // application context menu click,
         // If we can't find it there, look for use the active
         // left/right widgets.
-        const contextNode: HTMLElement = app.contextMenuFirst(
+        const contextNode: HTMLElement = app.contextMenuHitTest(
           node => !!node.dataset.id
         );
         let id: string;
