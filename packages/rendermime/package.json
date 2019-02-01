@@ -49,8 +49,8 @@
     "@types/lodash.escape": "^4.0.4",
     "@types/marked": "~0.3.0",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.3.1"
   },
   "publishConfig": {
     "access": "public"

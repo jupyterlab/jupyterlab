@@ -97,6 +97,40 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#insertAfter()', () => {
+      it('should insert an item into the toolbar after `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertAfter('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'c', 'd', 'b']);
+      });
+
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertAfter('c', 'd', new Widget());
+        expect(value).to.be.false;
+      });
+    });
+
+    describe('#insertBefore()', () => {
+      it('should insert an item into the toolbar before `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertBefore('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'd', 'c', 'b']);
+      });
+
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertBefore('c', 'd', new Widget());
+        expect(value).to.be.false;
+      });
+    });
+
     describe('.createFromCommand', () => {
       const commands = new CommandRegistry();
       const testLogCommandId = 'test:toolbar-log';

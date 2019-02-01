@@ -188,6 +188,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* This gives a magnification of about 125% in presentation mode over normal. */
   --jp-code-presentation-font-size: 16px;
 
+  /* may need to tweak cursor width if you change font size */
+  --jp-code-cursor-width0: 1.4px;
+  --jp-code-cursor-width1: 2px;
+  --jp-code-cursor-width2: 4px;
+
   /* Layout
    *
    * The following are the main layout colors use in JupyterLab. In a light
@@ -363,4 +368,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Sidebar-related styles */
 
   --jp-sidebar-min-width: 180px;
+
+  /* Search-related styles */
+
+  --jp-search-toggle-off-opacity: 0.5;
+  --jp-search-toggle-hover-opacity: 0.75;
+  --jp-search-toggle-on-opacity: 1;
 }

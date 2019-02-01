@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -21,7 +24,7 @@ namespace CommandIDs {
 /**
  * A plugin providing a rendermime registry.
  */
-const plugin: JupyterLabPlugin<RenderMimeRegistry> = {
+const plugin: JupyterFrontEndPlugin<RenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
   requires: [IDocumentManager],
   optional: [ILatexTypesetter],
@@ -39,7 +42,7 @@ export default plugin;
  * Activate the rendermine plugin.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   docManager: IDocumentManager,
   latexTypesetter: ILatexTypesetter | null
 ) {

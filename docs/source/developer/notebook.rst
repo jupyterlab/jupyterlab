@@ -176,7 +176,7 @@ Copy the following to ``src/index.ts``:
     } from '@phosphor/disposable';
 
     import {
-      JupyterLab, JupyterLabPlugin
+      JupyterFrontEnd, JupyterFrontEndPlugin
     } from '@jupyterlab/application';
 
     import {
@@ -195,7 +195,7 @@ Copy the following to ``src/index.ts``:
     /**
      * The plugin registration information.
      */
-    const plugin: JupyterLabPlugin<void> = {
+    const plugin: JupyterFrontEndPlugin<void> = {
       activate,
       id: 'my-extension-name:buttonPlugin',
       autoStart: true
@@ -231,7 +231,7 @@ Copy the following to ``src/index.ts``:
     /**
      * Activate the extension.
      */
-    function activate(app: JupyterLab) {
+    function activate(app: JupyterFrontEnd) {
       app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
     };
 

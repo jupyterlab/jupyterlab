@@ -34,13 +34,13 @@
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/console": "^0.19.1",
     "@jupyterlab/inspector": "^0.19.1",
-    "@jupyterlab/notebook": "^0.19.2",
-    "@phosphor/disposable": "^1.1.2"
+    "@jupyterlab/launcher": "^0.19.1",
+    "@jupyterlab/notebook": "^0.19.2"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.3.1"
   },
   "publishConfig": {
     "access": "public"

@@ -22,84 +22,27 @@
   min-height: 120px;
 }
 
-/* default inspector items: hints */
-.jp-InspectorItem.jp-HintsInspectorItem,
-.jp-InspectorItem.jp-HintsInspectorItem .p-Widget {
+.jp-Inspector-content {
   background: var(--jp-layout-color1);
-}
-
-.jp-InspectorItem.jp-HintsInspectorItem .jp-Toolbar {
-  display: none;
-}
-
-/* default inspector items: details */
-.jp-InspectorItem.jp-DetailsInspectorItem .p-Widget {
-  background: var(--jp-layout-color1);
-}
-
-/*-----------------------------------------------------------------------------
-| Inspector tabs
-|----------------------------------------------------------------------------*/
-
-.jp-Inspector .p-TabBar {
-  min-width: var(--jp-sidebar-min-width);
-  min-height: var(--jp-private-inspector-tab-height);
-  color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-}
-
-.jp-Inspector .p-TabBar .p-TabBar-tab {
-  flex-basis: var(--jp-private-inspector-tab-width);
-  min-height: var(--jp-private-inspector-tab-height);
-  min-width: var(--jp-private-inspector-tab-width);
-  padding: 0px 8px;
-  background: var(--jp-layout-color1);
-  transform: none;
-  margin-right: 0px;
-  line-height: var(--jp-private-inspector-tab-height);
-}
-
-.jp-Inspector .p-TabBar .p-TabBar-tab.p-mod-current {
-  min-height: var(--jp-private-inspector-tab-height);
-  color: var(--jp-ui-font-color0);
-  transform: none;
-  background: var(--jp-layout-color2);
-}
-
-.jp-Inspector .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: var(--jp-layout-color1);
-}
-
-/*-----------------------------------------------------------------------------
-| InspectorItem
-|----------------------------------------------------------------------------*/
-
-.jp-InspectorItem {
   display: flex;
   border: none;
 }
 
-.jp-InspectorItem-content {
-  overflow: auto;
+.jp-Inspector-content {
   padding: 8px;
   width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-clear::before {
-  content: '\f05e'; /* ban */
-}
-
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-back::before {
-  content: '\f060'; /* arrow-left */
-}
-
-.jp-InspectorItem .jp-Toolbar-button.jp-InspectorItem-forward::before {
-  content: '\f061'; /* arrow-right */
-}
-
-.jp-InspectorItem pre {
-  white-space: pre-wrap;
+.jp-Inspector-content pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   margin: 0;
+  white-space: pre-wrap;
+}
+
+.jp-InspectorIcon {
+  background-image: var(--jp-icon-inspector);
+  transform: scaleX(-1);
 }

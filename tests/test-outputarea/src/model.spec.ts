@@ -153,6 +153,29 @@ describe('outputarea/model', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[2]);
         expect(model.length).to.equal(2);
       });
+
+      it('should remove carriage returns and backspaces from streams', () => {
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['Jupyter\rj']
+        });
+        expect(model.get(0).toJSON().text).to.equal('jupyter');
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['\njj\bupyter']
+        });
+        expect(model.get(0).toJSON().text).to.equal('jupyter\njupyter');
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['\r\r\njupyter']
+        });
+        expect(model.get(0).toJSON().text).to.equal(
+          'jupyter\njupyter\njupyter'
+        );
+      });
     });
 
     describe('#clear()', () => {

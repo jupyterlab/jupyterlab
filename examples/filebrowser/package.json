@@ -22,7 +22,7 @@
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
-    "@types/codemirror": "~0.0.46",
+    "@types/codemirror": "~0.0.70",
     "css-loader": "~0.28.7",
     "file-loader": "~1.1.11",
     "mini-css-extract-plugin": "~0.4.4",
@@ -32,7 +32,7 @@
     "svg-url-loader": "~2.3.1",
     "svgo": "~1.0.4",
     "svgo-loader": "~2.1.0",
-    "typescript": "~3.1.1",
+    "typescript": "~3.3.1",
     "url-loader": "~1.0.1",
     "watch": "~1.0.2",
     "webpack": "~4.12.0",

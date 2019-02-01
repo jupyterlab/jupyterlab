@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { Terminal as Xterm } from 'xterm';
 
-import { fit } from 'xterm/lib/addons/fit';
+import { fit } from 'xterm/lib/addons/fit/fit';
 
 /**
  * The class name added to a terminal widget.
@@ -134,6 +134,7 @@ export class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
+    this._term.dispose();
     super.dispose();
   }
 

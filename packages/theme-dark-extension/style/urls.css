@@ -65,6 +65,7 @@
   --jp-icon-home: url('icons/md/ic_home_24px.svg');
   --jp-icon-image-selected: url('icons/jupyter/image_selected.svg');
   --jp-icon-image: url('icons/jupyter/image.svg');
+  --jp-icon-inspector: url('icons/md/baseline-web-24px.svg');
   --jp-icon-inverse-circle: url('icons/md/circle-inverse.svg');
   --jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');
   --jp-icon-inverse-close: url('icons/md/close-inverse.svg');
@@ -90,6 +91,10 @@
   --jp-icon-save: url('icons/md/save.svg');
   --jp-icon-search-white: url('icons/md/search.svg');
   --jp-icon-search: url('icons/md/search.svg');
+  --jp-icon-search-arrow-up: url('icons/jupyter/search_arrow_up.svg');
+  --jp-icon-search-arrow-down: url('icons/jupyter/search_arrow_down.svg');
+  --jp-icon-search-case-sensitive: url('icons/jupyter/search_case_sensitive.svg');
+  --jp-icon-search-regex: url('icons/jupyter/search_regex.svg');
   --jp-icon-settings: url('icons/jupyter/settings.svg');
   --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
   --jp-icon-spreadsheet: url('icons/jupyter/csv.svg');

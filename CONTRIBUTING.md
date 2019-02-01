@@ -69,7 +69,7 @@ If you use `conda`, you can install notebook using:
 conda install -c conda-forge notebook
 ```
 
-You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](http://conda.pydata.org/docs/using/envs.html)
+You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
 
 ```bash
 conda install -c conda-forge nb_conda_kernels

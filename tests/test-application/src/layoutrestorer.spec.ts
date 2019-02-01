@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ApplicationShell, LayoutRestorer } from '@jupyterlab/application/src';
+import { ILabShell, LayoutRestorer } from '@jupyterlab/application/src';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
@@ -63,7 +63,7 @@ describe('apputils', () => {
         });
         const currentWidget = new Widget();
         const mode: DockPanel.Mode = 'single-document';
-        const dehydrated: ApplicationShell.ILayout = {
+        const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget, dock: null, mode },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
@@ -98,7 +98,7 @@ describe('apputils', () => {
         });
         const currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.
-        const dehydrated: ApplicationShell.ILayout = {
+        const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {
@@ -159,7 +159,7 @@ describe('apputils', () => {
           registry: new CommandRegistry(),
           state: new StateDB({ namespace: NAMESPACE })
         });
-        const dehydrated: ApplicationShell.ILayout = {
+        const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
@@ -180,7 +180,7 @@ describe('apputils', () => {
         });
         const currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.
-        const dehydrated: ApplicationShell.ILayout = {
+        const dehydrated: ILabShell.ILayout = {
           fresh: false,
           mainArea: { currentWidget: null, dock: null, mode: null },
           leftArea: {

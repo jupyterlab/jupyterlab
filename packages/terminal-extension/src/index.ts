@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -16,8 +16,6 @@ import {
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ServiceManager } from '@jupyterlab/services';
 
 import { ITerminalTracker, Terminal } from '@jupyterlab/terminal';
 
@@ -48,12 +46,12 @@ const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 /**
  * The default terminal extension.
  */
-const plugin: JupyterLabPlugin<ITerminalTracker> = {
+const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer, ISettingRegistry],
-  optional: [ILauncher],
+  requires: [ISettingRegistry],
+  optional: [ICommandPalette, ILauncher, ILayoutRestorer, IMainMenu],
   autoStart: true
 };
 
@@ -66,12 +64,12 @@ export default plugin;
  * Activate the terminal plugin.
  */
 function activate(
-  app: JupyterLab,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer,
+  app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry,
-  launcher: ILauncher | null
+  palette: ICommandPalette | null,
+  launcher: ILauncher | null,
+  restorer: ILayoutRestorer | null,
+  mainMenu: IMainMenu | null
 ): ITerminalTracker {
   const { serviceManager } = app;
   const category = 'Terminal';
@@ -87,11 +85,13 @@ function activate(
   }
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.createNew,
-    args: widget => ({ name: widget.content.session.name }),
-    name: widget => widget.content.session && widget.content.session.name
-  });
+  if (restorer) {
+    restorer.restore(tracker, {
+      command: CommandIDs.createNew,
+      args: widget => ({ name: widget.content.session.name }),
+      name: widget => widget.content.session && widget.content.session.name
+    });
+  }
 
   // The terminal options from the setting editor.
   let options: Partial<Terminal.IOptions>;
@@ -141,31 +141,35 @@ function activate(
       console.error(reason.message);
     });
 
-  addCommands(app, serviceManager, tracker, settingRegistry);
+  addCommands(app, tracker, settingRegistry);
 
-  // Add some commands to the application view menu.
-  const viewGroup = [
-    CommandIDs.increaseFont,
-    CommandIDs.decreaseFont,
-    CommandIDs.toggleTheme
-  ].map(command => {
-    return { command };
-  });
-  mainMenu.settingsMenu.addGroup(viewGroup, 40);
+  if (mainMenu) {
+    // Add some commands to the application view menu.
+    const viewGroup = [
+      CommandIDs.increaseFont,
+      CommandIDs.decreaseFont,
+      CommandIDs.toggleTheme
+    ].map(command => {
+      return { command };
+    });
+    mainMenu.settingsMenu.addGroup(viewGroup, 40);
 
-  // Add command palette items.
-  [
-    CommandIDs.createNew,
-    CommandIDs.refresh,
-    CommandIDs.increaseFont,
-    CommandIDs.decreaseFont,
-    CommandIDs.toggleTheme
-  ].forEach(command => {
-    palette.addItem({ command, category, args: { isPalette: true } });
-  });
+    // Add terminal creation to the file menu.
+    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
+  }
 
-  // Add terminal creation to the file menu.
-  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
+  if (palette) {
+    // Add command palette items.
+    [
+      CommandIDs.createNew,
+      CommandIDs.refresh,
+      CommandIDs.increaseFont,
+      CommandIDs.decreaseFont,
+      CommandIDs.toggleTheme
+    ].forEach(command => {
+      palette.addItem({ command, category, args: { isPalette: true } });
+    });
+  }
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -189,12 +193,11 @@ function activate(
  * Add the commands for the terminal.
  */
 export function addCommands(
-  app: JupyterLab,
-  services: ServiceManager,
+  app: JupyterFrontEnd,
   tracker: InstanceTracker<MainAreaWidget<Terminal>>,
   settingRegistry: ISettingRegistry
 ) {
-  let { commands, shell } = app;
+  const { commands, serviceManager } = app;
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
@@ -203,22 +206,23 @@ export function addCommands(
     iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
     execute: args => {
       const name = args['name'] as string;
-      const initialCommand = args['initialCommand'] as string;
-      const term = new Terminal({ initialCommand });
+      const term = new Terminal();
       const promise = name
-        ? services.terminals.connectTo(name)
-        : services.terminals.startNew();
+        ? serviceManager.terminals
+            .connectTo(name)
+            .catch(() => serviceManager.terminals.startNew())
+        : serviceManager.terminals.startNew();
 
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
       let main = new MainAreaWidget({ content: term });
-      shell.addToMainArea(main);
+      app.shell.add(main);
 
       return promise
         .then(session => {
           term.session = session;
           tracker.add(main);
-          shell.activateById(main.id);
+          app.shell.activateById(main.id);
 
           return main;
         })
@@ -237,7 +241,7 @@ export function addCommands(
         return (content.session && content.session.name === name) || false;
       });
       if (widget) {
-        shell.activateById(widget.id);
+        app.shell.activateById(widget.id);
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
@@ -253,7 +257,7 @@ export function addCommands(
       if (!current) {
         return;
       }
-      shell.activateById(current.id);
+      app.shell.activateById(current.id);
 
       return current.content.refresh().then(() => {
         if (current) {

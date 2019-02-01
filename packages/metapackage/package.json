@@ -49,6 +49,7 @@
     "@jupyterlab/docmanager": "^0.19.1",
     "@jupyterlab/docmanager-extension": "^0.19.1",
     "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/documentsearch-extension": "^0.19.1",
     "@jupyterlab/extensionmanager": "^0.19.1",
     "@jupyterlab/extensionmanager-extension": "^0.19.1",
     "@jupyterlab/faq-extension": "^0.19.1",
@@ -57,6 +58,8 @@
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/fileeditor-extension": "^0.19.1",
     "@jupyterlab/help-extension": "^0.19.1",
+    "@jupyterlab/htmlviewer": "^0.19.0",
+    "@jupyterlab/htmlviewer-extension": "^0.19.0",
     "@jupyterlab/imageviewer": "^0.19.1",
     "@jupyterlab/imageviewer-extension": "^0.19.1",
     "@jupyterlab/inspector": "^0.19.1",
@@ -67,6 +70,7 @@
     "@jupyterlab/launcher-extension": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/mainmenu-extension": "^0.8.1",
+    "@jupyterlab/markdownviewer": "^0.19.1",
     "@jupyterlab/markdownviewer-extension": "^0.19.1",
     "@jupyterlab/mathjax2": "^0.7.1",
     "@jupyterlab/mathjax2-extension": "^0.7.1",
@@ -100,8 +104,8 @@
   "devDependencies": {
     "fs-extra": "~4.0.2",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.3.1"
   },
   "publishConfig": {
     "access": "public"

@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/// <reference types="codemirror"/>
+/// <reference types="codemirror/searchcursor"/>
 
 import CodeMirror from 'codemirror';
 
@@ -29,6 +31,13 @@ import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/fold/foldcode.js';
+import 'codemirror/addon/fold/foldgutter.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/indent-fold.js';
+import 'codemirror/addon/fold/markdown-fold.js';
+import 'codemirror/addon/fold/xml-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
@@ -370,6 +379,65 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._clearHover();
   }
 
+  // todo: docs, maybe define overlay options as a type?
+  addOverlay(mode: string | object, options?: object): void {
+    this._editor.addOverlay(mode, options);
+  }
+
+  removeOverlay(mode: string | object): void {
+    this._editor.removeOverlay(mode);
+  }
+
+  getSearchCursor(
+    query: string | RegExp,
+    start?: CodeMirror.Position,
+    caseFold?: boolean
+  ): CodeMirror.SearchCursor {
+    return this._editor.getDoc().getSearchCursor(query, start, caseFold);
+  }
+
+  getCursor(start?: string): CodeMirror.Position {
+    return this._editor.getDoc().getCursor(start);
+  }
+
+  get state(): any {
+    return this._editor.state;
+  }
+
+  operation<T>(fn: () => T): T {
+    return this._editor.operation(fn);
+  }
+
+  firstLine(): number {
+    return this._editor.getDoc().firstLine();
+  }
+
+  lastLine(): number {
+    return this._editor.getDoc().lastLine();
+  }
+
+  scrollIntoView(
+    pos: { from: CodeMirror.Position; to: CodeMirror.Position },
+    margin: number
+  ): void {
+    this._editor.scrollIntoView(pos, margin);
+  }
+
+  cursorCoords(
+    where: boolean,
+    mode?: 'window' | 'page' | 'local'
+  ): { left: number; top: number; bottom: number } {
+    return this._editor.cursorCoords(where, mode);
+  }
+
+  getRange(
+    from: CodeMirror.Position,
+    to: CodeMirror.Position,
+    seperator?: string
+  ): string {
+    return this._editor.getDoc().getRange(from, to, seperator);
+  }
+
   /**
    * Add a keydown handler to the editor.
    *
@@ -408,7 +476,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = this._toCodeMirrorRange(selection);
+    const range = {
+      from: this._toCodeMirrorPosition(selection.start),
+      to: this._toCodeMirrorPosition(selection.end)
+    };
     this._editor.scrollIntoView(range);
   }
 
@@ -757,16 +828,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
-   * Converts an editor selection to a code mirror selection.
-   */
-  private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
-    return {
-      from: this._toCodeMirrorPosition(range.start),
-      to: this._toCodeMirrorPosition(range.end)
-    };
-  }
-
-  /**
    * Convert a code mirror position to an editor position.
    */
   private _toPosition(position: CodeMirror.Position) {
@@ -1086,6 +1147,11 @@ export namespace CodeMirrorEditor {
     fixedGutter?: boolean;
 
     /**
+     * Whether the folding gutter should be drawn
+     */
+    foldGutter?: boolean;
+
+    /**
      * Whether the cursor should be drawn when a selection is active.
      */
     showCursorWhenSelecting?: boolean;
@@ -1178,7 +1244,8 @@ export namespace CodeMirrorEditor {
     styleActiveLine: false,
     styleSelectedText: false,
     selectionPointer: false,
-    rulers: []
+    rulers: [],
+    foldGutter: false
   };
 
   /**
@@ -1319,6 +1386,22 @@ namespace Private {
   }
 
   /**
+   * Get the list of active gutters
+   *
+   * @param config Editor configuration
+   */
+  function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
+    // The order of the classes will be the gutters order
+    let classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
+      'CodeMirror-linenumbers': 'lineNumbers',
+      'CodeMirror-foldgutter': 'codeFolding'
+    };
+    return Object.keys(classToSwitch).filter(
+      gutter => config[classToSwitch[gutter]]
+    );
+  }
+
+  /**
    * Set a config option for the editor.
    */
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
@@ -1381,6 +1464,17 @@ namespace Private {
         break;
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
+        break;
+      case 'gutters':
+        editor.setOption(option, getActiveGutters(config));
+        break;
+      case 'lineNumbers':
+        editor.setOption(option, value);
+        editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'codeFolding':
+        editor.setOption('foldGutter', value);
+        editor.setOption('gutters', getActiveGutters(config));
         break;
       default:
         editor.setOption(option, value);

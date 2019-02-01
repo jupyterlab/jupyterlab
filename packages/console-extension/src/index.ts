@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabStatus,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -39,6 +40,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { find } from '@phosphor/algorithm';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
+
+import { DisposableSet } from '@phosphor/disposable';
 
 import { DockLayout, Menu } from '@phosphor/widgets';
 
@@ -80,7 +83,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterLabPlugin<IConsoleTracker> = {
+const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -93,7 +96,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher],
+  optional: [ILauncher, ILabStatus],
   activate: activateConsole,
   autoStart: true
 };
@@ -101,12 +104,12 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
@@ -115,14 +118,14 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**
  * Activate the console extension.
  */
 async function activateConsole(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
@@ -131,7 +134,8 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  launcher: ILauncher | null
+  launcher: ILauncher | null,
+  status: ILabStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands, shell } = app;
@@ -142,10 +146,16 @@ async function activateConsole(
 
   // Handle state restoration.
   restorer.restore(tracker, {
-    command: CommandIDs.open,
+    command: CommandIDs.create,
     args: panel => ({
       path: panel.console.session.path,
-      name: panel.console.session.name
+      name: panel.console.session.name,
+      kernelPreference: {
+        name: panel.console.session.kernel && panel.console.session.kernel.name,
+        language:
+          panel.console.session.language &&
+          panel.console.session.kernel.language
+      }
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
@@ -154,26 +164,38 @@ async function activateConsole(
   // Add a launcher item if the launcher is available.
   if (launcher) {
     manager.ready.then(() => {
-      const specs = manager.specs;
-      if (!specs) {
-        return;
-      }
-      let baseUrl = PageConfig.getBaseUrl();
-      for (let name in specs.kernelspecs) {
-        let rank = name === specs.default ? 0 : Infinity;
-        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
-        if (kernelIconUrl) {
-          let index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+      let disposables: DisposableSet | null = null;
+      const onSpecsChanged = () => {
+        if (disposables) {
+          disposables.dispose();
+          disposables = null;
         }
-        launcher.add({
-          command: CommandIDs.create,
-          args: { isLauncher: true, kernelPreference: { name } },
-          category: 'Console',
-          rank,
-          kernelIconUrl
-        });
-      }
+        const specs = manager.specs;
+        if (!specs) {
+          return;
+        }
+        disposables = new DisposableSet();
+        let baseUrl = PageConfig.getBaseUrl();
+        for (let name in specs.kernelspecs) {
+          let rank = name === specs.default ? 0 : Infinity;
+          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          if (kernelIconUrl) {
+            let index = kernelIconUrl.indexOf('kernelspecs');
+            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+          }
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.create,
+              args: { isLauncher: true, kernelPreference: { name } },
+              category: 'Console',
+              rank,
+              kernelIconUrl
+            })
+          );
+        }
+      };
+      onSpecsChanged();
+      manager.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -206,14 +228,14 @@ async function activateConsole(
    * Create a console for a given path.
    */
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
-    let panel: ConsolePanel;
     await manager.ready;
-    panel = new ConsolePanel({
+
+    const panel = new ConsolePanel({
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: app.setBusy.bind(app),
+      setBusy: status ? status.setBusy.bind(status) : undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
@@ -229,7 +251,7 @@ async function activateConsole(
     tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
-    shell.addToMainArea(panel, {
+    shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
       activate: options.activate
@@ -259,7 +281,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

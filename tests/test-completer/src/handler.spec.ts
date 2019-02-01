@@ -122,6 +122,20 @@ describe('@jupyterlab/completer', () => {
         handler.editor = two.editor;
         expect(handler.editor).to.equal(two.editor);
       });
+
+      it('should remove the completer active and enabled classes of the old editor', () => {
+        const handler = new CompletionHandler({
+          connector,
+          completer: new Completer({ editor: null })
+        });
+        const widget = createEditorWidget();
+        handler.editor = widget.editor;
+        widget.toggleClass('jp-mod-completer-enabled');
+        widget.toggleClass('jp-mod-completer-active');
+        handler.editor = null;
+        expect(widget.hasClass('jp-mod-completer-enabled')).to.equal(false);
+        expect(widget.hasClass('jp-mod-completer-active')).to.equal(false);
+      });
     });
 
     describe('#isDisposed', () => {
@@ -186,7 +200,7 @@ describe('@jupyterlab/completer', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
-        (editor.model.value.changed as any).emit(void 0);
+        (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' });
         expect(model.methods).to.contain('handleTextChange');
       });
     });
