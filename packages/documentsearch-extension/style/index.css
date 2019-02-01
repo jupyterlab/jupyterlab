@@ -45,7 +45,9 @@
   border: none;
   width: 20px;
   height: 20px;
+  box-sizing: border-box;
   background-color: var(--jp-layout-color0);
+  background-repeat: no-repeat;
 }
 
 .jp-DocumentSearch-regex-button {
@@ -92,6 +94,7 @@
   height: 20px;
   padding-bottom: 5px;
   background-color: var(--jp-layout-color0);
+  background-repeat: no-repeat;
 }
 
 .jp-DocumentSearch-up-button {
