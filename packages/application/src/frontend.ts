@@ -115,9 +115,6 @@ export abstract class JupyterFrontEnd<
     ) {
       return undefined;
     }
-    // This one-liner doesn't work, but should at some point in the future
-    // `return this._contextMenuEvent.composedPath() as HTMLElement[];`
-    // cf. (https://developer.mozilla.org/en-US/docs/Web/API/Event)
     let node = this._contextMenuEvent.target as HTMLElement;
     do {
       if (test(node)) {
@@ -126,6 +123,19 @@ export abstract class JupyterFrontEnd<
       node = node.parentNode as HTMLElement;
     } while (node.parentNode && node !== node.parentNode);
     return undefined;
+
+    // TODO: we should be able to use .composedPath() to simplify this function
+    // down to something like the below, but it seems like composedPath is
+    // sometimes returning an empty list.
+    /*
+    if (this._contextMenuEvent) {
+      this._contextMenuEvent
+        .composedPath()
+        .filter(x => x instanceof HTMLElement)
+        .find(test);
+    }
+    return undefined;
+    */
   }
 
   /**
