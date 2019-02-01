@@ -230,15 +230,18 @@ class SearchOverlay extends React.Component<
 }
 
 export function createSearchOverlay(
-  widgetChanged: Signal<SearchInstance, IDisplayState>,
-  overlayState: IDisplayState,
-  onCaseSensitiveToggled: Function,
-  onRegexToggled: Function,
-  onHightlightNext: Function,
-  onHighlightPrevious: Function,
-  onStartQuery: Function,
-  onEndSearch: Function
+  options: createSearchOverlay.IOptions
 ): Widget {
+  const {
+    widgetChanged,
+    overlayState,
+    onCaseSensitiveToggled,
+    onRegexToggled,
+    onHightlightNext,
+    onHighlightPrevious,
+    onStartQuery,
+    onEndSearch
+  } = options;
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
       {(_, args) => {
@@ -258,6 +261,19 @@ export function createSearchOverlay(
   );
   widget.addClass(OVERLAY_CLASS);
   return widget;
+}
+
+namespace createSearchOverlay {
+  export interface IOptions {
+    widgetChanged: Signal<SearchInstance, IDisplayState>;
+    overlayState: IDisplayState;
+    onCaseSensitiveToggled: Function;
+    onRegexToggled: Function;
+    onHightlightNext: Function;
+    onHighlightPrevious: Function;
+    onStartQuery: Function;
+    onEndSearch: Function;
+  }
 }
 
 namespace Private {

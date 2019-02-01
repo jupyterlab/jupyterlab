@@ -18,16 +18,16 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
-    this._searchWidget = createSearchOverlay(
-      this._displayUpdateSignal,
-      this._displayState,
-      this._onCaseSensitiveToggled.bind(this),
-      this._onRegexToggled.bind(this),
-      this._highlightNext.bind(this),
-      this._highlightPrevious.bind(this),
-      this._startQuery.bind(this),
-      this.dispose.bind(this)
-    );
+    this._searchWidget = createSearchOverlay({
+      widgetChanged: this._displayUpdateSignal,
+      overlayState: this._displayState,
+      onCaseSensitiveToggled: this._onCaseSensitiveToggled.bind(this),
+      onRegexToggled: this._onRegexToggled.bind(this),
+      onHightlightNext: this._highlightNext.bind(this),
+      onHighlightPrevious: this._highlightPrevious.bind(this),
+      onStartQuery: this._startQuery.bind(this),
+      onEndSearch: this.dispose.bind(this)
+    });
 
     this._widget.disposed.connect(() => {
       this.dispose();
@@ -43,6 +43,7 @@ export class SearchInstance implements IDisposable {
         this._widget.toolbar.node.clientHeight
       }px`;
     }
+    this._displaySearchWidget();
   }
 
   /**
@@ -123,17 +124,26 @@ export class SearchInstance implements IDisposable {
   }
 
   /**
-   * Test whether the tracker is disposed.
+   * Test if the object has been disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * A signal emitted when the context is disposed.
+   * A signal emitted when the object is disposed.
    */
   get disposed(): ISignal<this, void> {
     return this._disposed;
+  }
+
+  /**
+   * Display search widget.
+   */
+  _displaySearchWidget() {
+    if (!this._searchWidget.isAttached) {
+      Widget.attach(this._searchWidget, this._widget.node);
+    }
   }
 
   private async _highlightNext() {
@@ -152,15 +162,15 @@ export class SearchInstance implements IDisposable {
     this.updateIndices();
   }
 
-  private _onCaseSensitiveToggled = () => {
+  private _onCaseSensitiveToggled() {
     this._displayState.caseSensitive = !this._displayState.caseSensitive;
     this._updateDisplay();
-  };
+  }
 
-  private _onRegexToggled = () => {
+  private _onRegexToggled() {
     this._displayState.useRegex = !this._displayState.useRegex;
     this._updateDisplay();
-  };
+  }
 
   private _widget: Widget;
   private _displayState: IDisplayState = {

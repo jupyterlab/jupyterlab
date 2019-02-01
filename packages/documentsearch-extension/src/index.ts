@@ -15,7 +15,6 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
 
 export interface ISearchMatch {
   /**
@@ -201,7 +200,6 @@ const extension: JupyterFrontEndPlugin<void> = {
             return;
           }
           searchInstance = new SearchInstance(currentWidget, searchProvider);
-          Widget.attach(searchInstance.searchWidget, currentWidget.node);
 
           activeSearches[widgetId] = searchInstance;
           // find next and previous are now enabled
