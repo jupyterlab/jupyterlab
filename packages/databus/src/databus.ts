@@ -31,7 +31,7 @@ export class DataBus {
    * i.e. checks whether it can be converted to anything useful.
    */
   validFileDataSet(dataset: Dataset<null>): boolean {
-    return this.converters.listTargetMimeTypes(dataset.mimeType).size > 1;
+    return this.converters.listTargetMimeTypes([dataset.mimeType]).size > 1;
   }
   registerViewer(options: IViewerOptions<any>): IDisposable {
     return this.converters.register(createViewerConverter(options));

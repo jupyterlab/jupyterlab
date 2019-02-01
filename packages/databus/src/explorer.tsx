@@ -22,7 +22,7 @@ function DatasetCompononent({
   return (
     <div style={{ backgroundColor: active ? 'grey' : 'white' }}>
       <h3>URL:</h3>
-      <pre>{url}</pre>
+      <pre>{url.toString()}</pre>
       <h3>MimeTypes:</h3>
       <pre>{[...databus.data.mimeTypesForURL(url)].join(' ')}</pre>
       <h3>Possible MimeTypes:</h3>
@@ -55,7 +55,9 @@ function DataExplorer({
             <DatasetCompononent
               url={url}
               databus={databus}
-              active={activeURL.toString() === url.toString()}
+              active={
+                activeURL !== null && activeURL.toString() === url.toString()
+              }
             />
           ))
         }
