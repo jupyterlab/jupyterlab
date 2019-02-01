@@ -9,6 +9,14 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { Dataset } from './dataregistry';
 import { reachable, expandPath } from './graph';
 
+/**
+ * Function that can possibly convert between data type T to
+ * data type V.
+ *
+ * It determines if it is able to convert T, based on it's mimetype
+ * and returns a mapping of possible resulting mimetypes and
+ * a function to compute their data.
+ */
 export type Converter<T, V> = (
   mimeType: string
 ) => Map<string, (data: T) => Promise<V>>;
