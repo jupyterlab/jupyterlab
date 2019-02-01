@@ -25,6 +25,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../mainmenu"
+    },
+    {
       "path": "../notebook"
     }
   ]
