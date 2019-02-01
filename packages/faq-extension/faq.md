@@ -15,3 +15,8 @@ Click on a question to be directed to relevant information in our documentation 
 - [How can you report a bug or provide feedback?](https://github.com/jupyterlab/jupyterlab/issues)
 - [How can you contribute?](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md)
 - [How can you extend or customize JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html)
+
+## Issues
+
+- How to start JupyterLab with a clean workspace?
+Add `'c.NotebookApp.default_url = '/lab?reset'` to your `c.NotebookApp.default_url = '/lab?reset'`
