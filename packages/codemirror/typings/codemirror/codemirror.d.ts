@@ -62,7 +62,7 @@ declare module 'codemirror' {
 
     /** Trigger key events onto the editor instance. Not for production use, only for testing.
      See this comment: https://github.com/codemirror/CodeMirror/issues/1935#issuecomment-28178991 */
-     triggerOnKeyDown(event: Event): void;
+    triggerOnKeyDown(event: Event): void;
   }
 
   interface Selection {
