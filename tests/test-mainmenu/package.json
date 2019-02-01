@@ -27,6 +27,6 @@
     "@types/chai": "~4.0.10",
     "@types/jest": "^23.3.1",
     "rimraf": "~2.6.2",
-    "typescript": "~3.1.1"
+    "typescript": "~3.3.1"
   }
 }
