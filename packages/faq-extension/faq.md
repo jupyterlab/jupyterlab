@@ -16,7 +16,7 @@ Click on a question to be directed to relevant information in our documentation 
 - [How can you contribute?](https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md)
 - [How can you extend or customize JupyterLab?](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html)
 
-## Issues
+## Tips and Tricks
 
 - How to start JupyterLab with a clean workspace?
 
