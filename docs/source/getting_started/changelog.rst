@@ -128,6 +128,14 @@ See the `JupyterLab
 0.35.0 <https://github.com/jupyterlab/jupyterlab/milestone/18?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
+.. 
+More PRs that weren't in the 1.0 milestone...
+https://github.com/jupyterlab/jupyterlab/pull/5643
+https://github.com/jupyterlab/jupyterlab/pull/5750
+https://github.com/jupyterlab/jupyterlab/pull/5590
+https://github.com/jupyterlab/jupyterlab/pull/5640
+
+
 Features
 ^^^^^^^^
 * A notebook cell can now be readonly, reflecting its ``enabled`` metadata. (`#5401 <https://github.com/jupyterlab/jupyterlab/pull/5401>`__, `#1312 <https://github.com/jupyterlab/jupyterlab/issues/1312>`__)
