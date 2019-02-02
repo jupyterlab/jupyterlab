@@ -274,12 +274,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
     10
   );
 
-  // Add the find/replace commands the the Edit menu.
-  commands.addCommand(CommandIDs.find, {
-    label: 'Find…',
-    isEnabled: Private.delegateEnabled(app, menu.findReplacers, 'find'),
-    execute: Private.delegateExecute(app, menu.findReplacers, 'find')
-  });
+  // Add the find-replace command to the Edit menu.
   commands.addCommand(CommandIDs.findAndReplace, {
     label: 'Find and Replace…',
     isEnabled: Private.delegateEnabled(
