@@ -138,7 +138,7 @@ for prnumber in large_prs:
     prs[prnumber] = {'mergeCommit': pr['mergeCommit']['oid'],
                             'commits': pr_commits}
     if total_commits > len(pr_commits):
-        print("WARNING: PR %d has %d commits, but GitHub is only giving us %d of them"%(prnumber, total_commits, len(pr_commits)))
+        print("WARNING: PR %d (merge %s) has %d commits, but GitHub is only giving us %d of them"%(prnumber, pr['mergeCommit']['oid'], total_commits, len(pr_commits)))
 
 
 
@@ -178,3 +178,9 @@ This probably means the commit's PR needs to be assigned to this milestone,
 or the commit was pushed to master directly.
 """)
 print('\n'.join('%s %s %s'%(c, commits[c][0], commits[c][1]) for c in notfound))
+
+print("""
+Try checking these PRs. They probably should be in the milestone, but probably aren't:
+""")
+print('\n'.join('%s %s'%(c, commits[c][1]) for c in notfound if 'Merge pull request #' in commits[c][1] and commits[c][0] == 'noreply@github.com'))
+
