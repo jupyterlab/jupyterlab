@@ -78,7 +78,6 @@ while True:
     for pr in pr_list:
         if pr['commits']['totalCount'] > 100:
             large_prs.append(pr['number'])
-            print('Large PR, fetching commits individually: %s'%pr['number'])
             continue
             # TODO fetch commits
         prs[pr['number']] = {'mergeCommit': pr['mergeCommit']['oid'],
@@ -163,24 +162,40 @@ for c in commits:
 
 prs_not_represented = set(prs.keys()) - good
 
-print("Milestone: %s, %d merged PRs"%(MILESTONE, total_prs))
-print("""
+print("Milestone: %s, %d merged PRs, %d commits in history"%(MILESTONE, total_prs, len(commits)))
+
+print()
+print('-'*40)
+print()
+
+if len(prs_not_represented) > 0:
+    print("""
 PRs that are in the milestone, but have no commits in the version range. 
 These PRs probably belong in a different milestone.
 """)
-print('\n'.join('https://github.com/jupyterlab/jupyterlab/pull/%d'%i for i in prs_not_represented))
+    print('\n'.join('https://github.com/jupyterlab/jupyterlab/pull/%d'%i for i in prs_not_represented))
+else:
+    print('Congratulations! All PRs in this milestone have commits in the commit history for this version range, so they all probably belong in this milestone.')
 
+print()
 print('-'*40)
+print()
 
-print("""
-Commits that are not included in any PR on this milestone.
+if len(notfound):
+    print("""The following commits are not included in any PR on this milestone.
 This probably means the commit's PR needs to be assigned to this milestone,
 or the commit was pushed to master directly.
 """)
-print('\n'.join('%s %s %s'%(c, commits[c][0], commits[c][1]) for c in notfound))
+    print('\n'.join('%s %s %s'%(c, commits[c][0], commits[c][1]) for c in notfound))
+    prs_to_check = [c for c in notfound if 'Merge pull request #' in commits[c][1] and commits[c][0] == 'noreply@github.com']
+    if len(prs_to_check)>0:
+        print()
+        print("Try checking these PRs. They probably should be in the milestone, but probably aren't:")
+        print()
+        print('\n'.join('%s %s'%(c, commits[c][1]) for c in prs_to_check))
+else:
+    print('Congratulations! All commits in the commit history are included in some PR in this milestone.')
 
-print("""
-Try checking these PRs. They probably should be in the milestone, but probably aren't:
-""")
-print('\n'.join('%s %s'%(c, commits[c][1]) for c in notfound if 'Merge pull request #' in commits[c][1] and commits[c][0] == 'noreply@github.com'))
+
+
 
