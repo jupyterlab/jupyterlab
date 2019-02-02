@@ -51,11 +51,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  async startQuery(query: RegExp, domain: any): Promise<ISearchMatch[]> {
-    if (domain instanceof CodeMirrorEditor) {
-      this._cm = domain;
-    } else if (domain) {
-      this._cm = domain.content.editor;
+  async startQuery(query: RegExp, searchTarget: any): Promise<ISearchMatch[]> {
+    if (searchTarget instanceof CodeMirrorEditor) {
+      this._cm = searchTarget;
+    } else if (searchTarget) {
+      this._cm = searchTarget.content.editor;
     }
     await this.endQuery();
 

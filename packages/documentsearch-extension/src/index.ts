@@ -2,7 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 import '../style/index.css';
 
-import { SearchProviderRegistry } from './searchproviderregistry';
+import {
+  SearchProviderRegistry,
+  ISearchProviderRegistry
+} from './searchproviderregistry';
 import { SearchInstance } from './searchinstance';
 
 import {
@@ -15,6 +18,8 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISignal } from '@phosphor/signaling';
+
+export { ISearchProviderRegistry } from './searchproviderregistry';
 
 export interface ISearchMatch {
   /**
@@ -159,11 +164,12 @@ export interface IDisplayState {
 /**
  * Initialization data for the document-search extension.
  */
-const extension: JupyterFrontEndPlugin<void> = {
+const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
-  autoStart: true,
+  provides: ISearchProviderRegistry,
   requires: [ICommandPalette],
   optional: [IMainMenu],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
@@ -279,6 +285,7 @@ const extension: JupyterFrontEndPlugin<void> = {
         10
       );
     }
+    return registry;
   }
 };
 
