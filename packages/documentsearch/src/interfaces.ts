@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISignal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
 export interface IDisplayState {
   /**
@@ -81,7 +82,7 @@ export interface ISearchProviderConstructor {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  canSearchOn(domain: any): boolean;
+  canSearchOn(domain: Widget): boolean;
 }
 
 export interface ISearchProvider {
@@ -94,7 +95,7 @@ export interface ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startQuery(query: RegExp, searchTarget: any): Promise<ISearchMatch[]>;
+  startQuery(query: RegExp, searchTarget: Widget): Promise<ISearchMatch[]>;
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called

@@ -1,13 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { ISearchProvider, ISearchProviderConstructor } from './index';
+import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 import { CodeMirrorSearchProvider } from './providers/codemirrorsearchprovider';
 import { NotebookSearchProvider } from './providers/notebooksearchprovider';
 
-const DEFAULT_NOTEBOOK_SEARCH_PROVIDER = 'jl-defaultNotebookSearchProvider';
-const DEFAULT_CODEMIRROR_SEARCH_PROVIDER = 'jl-defaultCodeMirrorSearchProvider';
-
 import { Token } from '@phosphor/coreutils';
+import { Widget } from '@phosphor/widgets';
 
 /* tslint:disable */
 /**
@@ -46,11 +44,11 @@ export interface ISearchProviderRegistry {
 export class SearchProviderRegistry implements ISearchProviderRegistry {
   constructor() {
     this._registerDefaultProviders(
-      DEFAULT_NOTEBOOK_SEARCH_PROVIDER,
+      'jl-defaultNotebookSearchProvider',
       NotebookSearchProvider
     );
     this._registerDefaultProviders(
-      DEFAULT_CODEMIRROR_SEARCH_PROVIDER,
+      'jl-defaultCodeMirrorSearchProvider',
       CodeMirrorSearchProvider
     );
   }
@@ -80,7 +78,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProviderForWidget(widget: any): ISearchProvider | undefined {
+  getProviderForWidget(widget: Widget): ISearchProvider | undefined {
     return (
       this._findMatchingProvider(this._customProviders, widget) ||
       this._findMatchingProvider(this._defaultProviders, widget)
@@ -96,7 +94,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
 
   private _findMatchingProvider(
     providerMap: Private.ProviderMap,
-    widget: any
+    widget: Widget
   ): ISearchProvider | undefined {
     // iterate through all providers and ask each one if it can search on the
     // widget.

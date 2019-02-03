@@ -1,12 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import '@jupyterlab/documentsearch/style/index.css';
-
-import {
-  SearchProviderRegistry,
-  ISearchProviderRegistry
-} from '@jupyterlab/documentsearch';
-import { SearchInstance } from '@jupyterlab/documentsearch';
 
 import {
   JupyterFrontEnd,
@@ -15,9 +8,13 @@ import {
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import {
+  ISearchProviderRegistry,
+  SearchInstance,
+  SearchProviderRegistry
+} from '@jupyterlab/documentsearch';
 
-export { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 /**
  * Initialization data for the document-search extension.
@@ -35,9 +32,10 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   ) => {
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
-    const activeSearches: {
-      [key: string]: SearchInstance;
-    } = {};
+    // TODO: Should register the default providers, with an application-specific
+    // enabler.
+
+    const activeSearches = new Map<string, SearchInstance>();
 
     const startCommand: string = 'documentsearch:start';
     const nextCommand: string = 'documentsearch:highlightNext';
@@ -57,7 +55,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           return;
         }
         const widgetId = currentWidget.id;
-        let searchInstance = activeSearches[widgetId];
+        let searchInstance = activeSearches.get(widgetId);
         if (!searchInstance) {
           const searchProvider = registry.getProviderForWidget(currentWidget);
           if (!searchProvider) {
@@ -65,12 +63,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           }
           searchInstance = new SearchInstance(currentWidget, searchProvider);
 
-          activeSearches[widgetId] = searchInstance;
+          activeSearches.set(widgetId, searchInstance);
           // find next and previous are now enabled
           app.commands.notifyCommandChanged();
 
           searchInstance.disposed.connect(() => {
-            delete activeSearches[widgetId];
+            activeSearches.delete(widgetId);
             // find next and previous are now not enabled
             app.commands.notifyCommandChanged();
           });
@@ -86,14 +84,14 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-        return !!activeSearches[currentWidget.id];
+        return activeSearches.has(currentWidget.id);
       },
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
           return;
         }
-        const instance = activeSearches[currentWidget.id];
+        const instance = activeSearches.get(currentWidget.id);
         if (!instance) {
           return;
         }
@@ -110,14 +108,14 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-        return !!activeSearches[currentWidget.id];
+        return activeSearches.has(currentWidget.id);
       },
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
           return;
         }
-        const instance = activeSearches[currentWidget.id];
+        const instance = activeSearches.get(currentWidget.id);
         if (!instance) {
           return;
         }
@@ -143,6 +141,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         10
       );
     }
+
+    // Provide the registry to the system.
     return registry;
   }
 };
