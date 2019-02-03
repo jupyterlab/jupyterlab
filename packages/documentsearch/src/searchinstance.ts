@@ -7,8 +7,8 @@ import { createSearchOverlay } from './searchoverlay';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
 import { Widget } from '@phosphor/widgets';
-import { ISignal, Signal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * Represents a search on a single widget.

@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { ISearchProvider, ISearchProviderConstructor } from './index';
-import {
-  CodeMirrorSearchProvider,
-  NotebookSearchProvider
-} from './searchproviders';
+import { CodeMirrorSearchProvider } from './providers/codemirrorsearchprovider';
+import { NotebookSearchProvider } from './providers/notebooksearchprovider';
 
 const DEFAULT_NOTEBOOK_SEARCH_PROVIDER = 'jl-defaultNotebookSearchProvider';
 const DEFAULT_CODEMIRROR_SEARCH_PROVIDER = 'jl-defaultCodeMirrorSearchProvider';
