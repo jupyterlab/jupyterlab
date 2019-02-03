@@ -143,7 +143,26 @@ export abstract class JupyterFrontEnd<
    */
   protected evtContextMenu(event: MouseEvent): void {
     this._contextMenuEvent = event;
-    super.evtContextMenu(event);
+    if (event.shiftKey) {
+      return;
+    }
+    const opened = this.contextMenu.open(event);
+    if (opened) {
+      const items = this.contextMenu.menu.items;
+      // If only the context menu information will be shown,
+      // with no real commands, close the context menu and
+      // allow the native one to open.
+      if (
+        items.length === 1 &&
+        items[0].command === 'application:context-menu-info'
+      ) {
+        this.contextMenu.menu.close();
+        return;
+      }
+      // Stop propagation and allow the application context menu to show.
+      event.preventDefault();
+      event.stopPropagation();
+    }
   }
 
   private _contextMenuEvent: MouseEvent;
