@@ -55,8 +55,6 @@ namespace CommandIDs {
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
-  export const contextMenuInfo = 'application:context-menu-info';
-
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
@@ -537,18 +535,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
   palette.addItem({ command, category });
-
-  app.commands.addCommand(CommandIDs.contextMenuInfo, {
-    label: 'Shift+Right Click for Browser Menu',
-    isEnabled: () => false,
-    execute: () => void 0
-  });
-
-  app.contextMenu.addItem({
-    command: CommandIDs.contextMenuInfo,
-    selector: 'body',
-    rank: 9999
-  });
 }
 
 /**
