@@ -125,12 +125,12 @@ export class GridSearchService {
     const minColumn = this._grid.scrollX / this._grid.baseColumnSize;
     const maxColumn =
       (this._grid.scrollX + this._grid.pageWidth) / this._grid.baseColumnSize;
-    const isMatchInViewport = () => {
+    const isInViewport = (row: number, column: number) => {
       return (
-        this._row >= minRow &&
-        this._row <= maxRow &&
-        this._column >= minColumn &&
-        this._column <= maxColumn
+        row >= minRow &&
+        row <= maxRow &&
+        column >= minColumn &&
+        column <= maxColumn
       );
     };
 
@@ -154,15 +154,15 @@ export class GridSearchService {
           // cell rects, not the entire grid.
           this._grid.repaint();
 
-          if (!isMatchInViewport()) {
+          if (!isInViewport(row, col)) {
             // scroll the matching cell into view
-            let scrollX = this._grid.scrollX;
-            let scrollY = this._grid.scrollY;
+            let scrollX = 0;
+            let scrollY = 0;
             /* see also https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 */
-            for (let i = scrollY; i < row - 1; i++) {
+            for (let i = 0; i < row - 1; i++) {
               scrollY += this._grid.sectionSize('row', i);
             }
-            for (let j = scrollX; j < col - 1; j++) {
+            for (let j = 0; j < col - 1; j++) {
               scrollX += this._grid.sectionSize('column', j);
             }
             this._grid.scrollTo(scrollX, scrollY);
