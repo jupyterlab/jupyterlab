@@ -3,15 +3,21 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterLab,
+  JupyterLabPlugin,
+  ILayoutRestorer
+} from '@jupyterlab/application';
 import {
   DataBus,
   IConverterRegistry,
   IDataBus,
-  IDataRegistry
+  IDataRegistry,
+  extractArgs
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { Widget } from '@phosphor/widgets';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
 /**
  * The converter registry extension.
@@ -19,7 +25,12 @@ import { Widget } from '@phosphor/widgets';
 export default {
   activate,
   id: '@jupyterlab/databus-extension:databus',
-  requires: [IConverterRegistry, IDataRegistry, IFileBrowserFactory],
+  requires: [
+    IConverterRegistry,
+    IDataRegistry,
+    IFileBrowserFactory,
+    ILayoutRestorer
+  ],
   provides: IDataBus,
   autoStart: true
 } as JupyterLabPlugin<IDataBus>;
@@ -28,9 +39,11 @@ function activate(
   app: JupyterLab,
   converters: IConverterRegistry,
   data: IDataRegistry,
-  fileBrowserFactory: IFileBrowserFactory
+  fileBrowserFactory: IFileBrowserFactory,
+  restorer: ILayoutRestorer
 ): IDataBus {
-  return new DataBus(
+  const tracker = new InstanceTracker({ namespace: 'databus' });
+  const databus = new DataBus(
     converters,
     data,
     async (path: string) =>
@@ -40,8 +53,28 @@ function activate(
         )
       ),
     async (widget: Widget) => {
-      app.shell.addToMainArea(widget);
+      tracker.add(widget);
+      if (!widget.isAttached) {
+        app.shell.addToMainArea(widget);
+      }
       app.shell.activateById(widget.id);
     }
   );
+
+  const commandID = 'databus:view-url';
+  app.commands.addCommand(commandID, {
+    execute: args => {
+      console.log('calling commands');
+      databus.viewURL(new URL(args.url as string), args.label as string);
+    },
+    label: args => `${args.label} ${args.url}`
+  });
+
+  restorer.restore(tracker, {
+    name: (widget: Widget) => widget.id,
+    command: commandID,
+    args: extractArgs
+  });
+
+  return databus;
 }

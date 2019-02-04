@@ -3,7 +3,7 @@ import { IDisposable } from '@phosphor/disposable';
 import { IConverterRegistry } from './converters';
 import { Dataset, IDataRegistry } from './dataregistry';
 import { createFileConverter } from './files';
-import { Resolver, resolverToConverter } from './resolvers';
+import { Resolver, resolverToConverter, createURLDataset } from './resolvers';
 import {
   createViewerConverter,
   createViewerMimeType,
@@ -70,6 +70,10 @@ export class DataBus {
    * View a dataset with a certain URL with the viewer with a certain label.
    */
   async viewURL(url: URL, label: string): Promise<void> {
+    if (this.data.filterByURL(url).size === 0) {
+      this.data.publish(createURLDataset(url));
+    }
+
     const viewer: Dataset<() => Promise<void>> = await this.convertByURL(
       url,
       createViewerMimeType(label)

@@ -1,4 +1,4 @@
-import { staticConverter, Converter } from './converters';
+import { staticConverter, Converter, Convert } from './converters';
 import { Widget } from '@phosphor/widgets';
 
 const baseMimeType = 'application/x.jupyter.viewer; label=';
@@ -14,20 +14,22 @@ export function extractViewerLabel(mimeType: string): string | null {
   return mimeType.slice(baseMimeType.length);
 }
 
+export type ViewConverter<T> = Converter<T, () => Promise<void>>;
+
 export interface IViewerOptions<T> {
   mimeType: string;
   label: string;
-  view: (data: T) => Promise<void>;
+  view: Convert<T, () => Promise<void>>;
 }
 export function createViewerConverter<T>({
   mimeType,
   label,
   view
-}: IViewerOptions<T>): Converter<T, () => Promise<void>> {
+}: IViewerOptions<T>): ViewConverter<T> {
   return staticConverter({
     sourceMimeType: mimeType,
     targetMimeType: createViewerMimeType(label),
-    convert: async (data: T) => () => view(data)
+    convert: view
   });
 }
 
@@ -37,13 +39,30 @@ export interface IWidgetViewerOptions<T> {
   view: (data: T) => Promise<Widget>;
 }
 
+export function extractArgs(
+  widget: Widget
+): {
+  label: string;
+  url: string;
+} {
+  const [label, url] = JSON.parse(widget.id);
+  console.log('extracting args', label, url);
+  return { label, url };
+}
+
 export function createWidgetViewerConverter<T>(
   display: (widget: Widget) => Promise<void>,
   { mimeType, label, view }: IWidgetViewerOptions<T>
-): Converter<T, () => Promise<void>> {
+): ViewConverter<T> {
   return createViewerConverter({
     mimeType: mimeType,
     label: label,
-    view: async (data: T) => await display(await view(data))
+    view: async (data: T, url: URL) => {
+      const widget = await view(data);
+      widget.id = JSON.stringify([label, url]);
+      widget.title.label = `${label}: ${url}`;
+      widget.title.closable = true;
+      return async () => await display(widget);
+    }
   });
 }

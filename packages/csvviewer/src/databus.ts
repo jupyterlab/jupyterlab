@@ -16,7 +16,6 @@ export const CSVConverter: IWidgetViewerOptions<string> = {
       baseColumnHeaderSize: 36,
       baseRowHeaderSize: 64
     });
-    grid.id = 'databus-csv-viewer';
     grid.headerVisibility = 'all';
     grid.model = new DSVModel({ data, delimiter: ',' });
     return grid;

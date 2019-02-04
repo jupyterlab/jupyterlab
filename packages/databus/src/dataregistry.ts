@@ -8,7 +8,7 @@ import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
- * An interface for an abstract dataset, with a mimetype, URI, and data.
+ * A class class for a dataset, with a mimetype, URI, and data.
  *
  * This is templated over the type of data `T`.
  *
@@ -34,10 +34,9 @@ export class Dataset<T> {
    *
    * #### Notes
    * This can be used by other extensions and services to maintain
-   * persistent pointers to datasets across sessions. This is needed
-   * as the datasets themselves are not assumed to be serializable.
-   *
-   * The term "URL" is prefered over "URI" by the WHATWG:
+   * persistent pointers to datasets across sessions. It is also used interally
+   * to understand that new datasets produced by conversions refer to the same
+   * dataset. The term "URL" is prefered over "URI" by the WHATWG:
    * https://url.spec.whatwg.org/#goals
    */
   readonly url: URL;
