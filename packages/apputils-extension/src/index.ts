@@ -119,15 +119,13 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
  */
 const themes: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ISplashScreen],
-  optional: [ICommandPalette, IMainMenu],
+  requires: [ISettingRegistry, JupyterFrontEnd.IPaths],
+  optional: [ISplashScreen],
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
     paths: JupyterFrontEnd.IPaths,
-    splash: ISplashScreen | null,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
+    splash: ISplashScreen | null
   ): IThemeManager => {
     const host = app.shell;
     const commands = app.commands;
@@ -163,6 +161,32 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       }
     });
 
+    return manager;
+  },
+  autoStart: true,
+  provides: IThemeManager
+};
+
+/**
+ * The default theme manager's UI command palette and main menu functionality.
+ *
+ * #### Notes
+ * This plugin loads separately from the theme manager plugin in order to
+ * prevent blocking of the theme manager while it waits for the command palette
+ * and main menu to become available.
+ */
+const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:themes-palette-menu',
+  requires: [IThemeManager],
+  optional: [ICommandPalette, IMainMenu],
+  activate: (
+    app: JupyterFrontEnd,
+    manager: IThemeManager,
+    palette: ICommandPalette | null,
+    mainMenu: IMainMenu | null
+  ): void => {
+    const commands = app.commands;
+
     // If we have a main menu, add the theme manager to the settings menu.
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
@@ -192,18 +216,14 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
         const category = 'Settings';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
-        currentTheme = manager.theme;
 
         manager.themes.forEach(theme => {
           palette.addItem({ command, args: { isPalette, theme }, category });
         });
       });
     }
-
-    return manager;
   },
-  autoStart: true,
-  provides: IThemeManager
+  autoStart: true
 };
 
 /**
@@ -532,7 +552,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   settings,
   state,
   splash,
-  themes
+  themes,
+  themesPaletteMenu
 ];
 export default plugins;
 
