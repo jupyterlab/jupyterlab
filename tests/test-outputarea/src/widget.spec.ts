@@ -270,6 +270,7 @@ describe('outputarea/widget', () => {
       describe('#createStdin()', () => {
         it('should create a stdin widget', async () => {
           const kernel = await Kernel.startNew();
+          await kernel.ready;
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {

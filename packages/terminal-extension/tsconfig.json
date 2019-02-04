@@ -22,9 +22,6 @@
       "path": "../mainmenu"
     },
     {
-      "path": "../services"
-    },
-    {
       "path": "../terminal"
     }
   ]
