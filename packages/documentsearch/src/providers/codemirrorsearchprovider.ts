@@ -39,7 +39,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
 
 import * as CodeMirror from 'codemirror';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { FileEditor } from '@jupyterlab/fileeditor';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
@@ -53,29 +53,29 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  // TODO: Make the searchTarget a normal file editor, and get the codemirror
-  // out of that. TODO: change the canSearch to be a function from the
-  // registrar, so that it can interface with the system at registration time.
   async startQuery(
     query: RegExp,
-    searchTarget: IDocumentWidget<FileEditor>
+    searchTarget: Widget
   ): Promise<ISearchMatch[]> {
-    // Extract the codemirror object from the editor widget
-    this._cm = searchTarget.content.editor;
-    return this._startQuery(query);
-
-    if (searchTarget instanceof CodeMirrorEditor) {
-      this._cm = searchTarget;
-    } else if (searchTarget instanceof MainAreaWidget) {
-    } else {
+    if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
       throw new Error('Cannot find Codemirror instance to search');
     }
+
+    // Extract the codemirror object from the editor widget. Each of these casts
+    // is justified by the canSearchOn call above.
+    let target = searchTarget as MainAreaWidget;
+    let content = target.content as FileEditor;
+    this._cm = content.editor as CodeMirrorEditor;
+    return this._startQuery(query);
   }
 
   /**
    * Initialize the search using a CodeMirrorEditor object.
    */
-  async startQueryCodeMirror(query: RegExp, searchTarget: CodeMirrorEditor): Promise<ISearchMatch[]> {
+  async startQueryCodeMirror(
+    query: RegExp,
+    searchTarget: CodeMirrorEditor
+  ): Promise<ISearchMatch[]> {
     this._cm = searchTarget;
     return this._startQuery(query);
   }
@@ -165,7 +165,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   static canSearchOn(domain: Widget): boolean {
     return (
       domain instanceof MainAreaWidget &&
-      domain.content &&
+      domain.content instanceof FileEditor &&
       domain.content.editor instanceof CodeMirrorEditor
     );
   }
