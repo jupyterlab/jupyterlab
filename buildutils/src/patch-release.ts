@@ -16,7 +16,6 @@ if (process.argv.length < 3) {
 
 // Use npm here so this file can be used outside of JupyterLab.
 utils.run('npm run build:packages');
-utils.run('npm run build:themes');
 
 // Extract the desired package target(s).
 process.argv.slice(2).forEach(target => {
