@@ -19,6 +19,12 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../documentsearch-extension"
+    },
+    {
       "path": "../mainmenu"
     }
   ]

@@ -398,10 +398,6 @@ function activateEditorCommands(
     // Add find-replace capabilities to the edit menu.
     mainMenu.editMenu.findReplacers.add({
       tracker,
-      find: (widget: IDocumentWidget<FileEditor>) => {
-        let editor = widget.content.editor as CodeMirrorEditor;
-        editor.execCommand('find');
-      },
       findAndReplace: (widget: IDocumentWidget<FileEditor>) => {
         let editor = widget.content.editor as CodeMirrorEditor;
         editor.execCommand('replace');

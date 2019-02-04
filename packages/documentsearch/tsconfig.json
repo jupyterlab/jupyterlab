@@ -7,9 +7,6 @@
   "include": ["src/**/*"],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {
@@ -25,10 +22,7 @@
       "path": "../docregistry"
     },
     {
-      "path": "../documentsearch"
-    },
-    {
-      "path": "../mainmenu"
+      "path": "../fileeditor"
     },
     {
       "path": "../notebook"

@@ -34,8 +34,11 @@
     "@jupyterlab/apputils": "^0.19.1",
     "@jupyterlab/csvviewer": "^0.19.1",
     "@jupyterlab/docregistry": "^0.19.1",
+    "@jupyterlab/documentsearch": "^0.7.1",
+    "@jupyterlab/documentsearch-extension": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
-    "@phosphor/datagrid": "^0.1.6"
+    "@phosphor/datagrid": "^0.1.6",
+    "@phosphor/signaling": "^1.2.2"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
