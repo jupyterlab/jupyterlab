@@ -13,25 +13,10 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
       "path": "../documentsearch"
     },
     {
       "path": "../mainmenu"
-    },
-    {
-      "path": "../notebook"
     }
   ]
 }
