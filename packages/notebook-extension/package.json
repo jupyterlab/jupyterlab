@@ -39,7 +39,7 @@
     "@jupyterlab/filebrowser": "^1.0.0-alpha.1",
     "@jupyterlab/launcher": "^1.0.0-alpha.1",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.1",
-    "@jupyterlab/notebook": "^1.0.0-alpha.1",
+    "@jupyterlab/notebook": "^1.0.0-alpha.2",
     "@jupyterlab/rendermime": "^1.0.0-alpha.1",
     "@jupyterlab/services": "^4.0.0-alpha.1",
     "@jupyterlab/statusbar": "^1.0.0-alpha.1",

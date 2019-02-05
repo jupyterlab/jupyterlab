@@ -34,8 +34,8 @@
     "@jupyterlab/shortcuts-extension": "^1.0.0-alpha.1",
     "@jupyterlab/tabmanager-extension": "^1.0.0-alpha.1",
     "@jupyterlab/terminal-extension": "^1.0.0-alpha.1",
-    "@jupyterlab/theme-dark-extension": "^1.0.0-alpha.1",
-    "@jupyterlab/theme-light-extension": "^1.0.0-alpha.1",
+    "@jupyterlab/theme-dark-extension": "^1.0.0-alpha.2",
+    "@jupyterlab/theme-light-extension": "^1.0.0-alpha.2",
     "@jupyterlab/tooltip-extension": "^1.0.0-alpha.1",
     "es6-promise": "~4.1.1"
   },
