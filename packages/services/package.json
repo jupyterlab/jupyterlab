@@ -36,6 +36,10 @@
     "prepublishOnly": "jlpm run build && webpack",
     "watch": "tsc -b --watch"
   },
+  "browser": {
+    "node-fetch": false,
+    "ws": false
+  },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.0.0-alpha.1",
     "@jupyterlab/observables": "^2.2.0-alpha.1",
@@ -43,8 +47,8 @@
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
-    "node-fetch": "^2.3.0",
-    "ws": "^6.1.3"
+    "node-fetch": "~2.2.0",
+    "ws": "~6.0.0"
   },
   "devDependencies": {
     "@types/node": "~8.0.47",
@@ -55,10 +59,6 @@
     "typescript": "~3.3.1",
     "webpack": "~4.12.0",
     "webpack-cli": "^3.0.3"
-  },
-  "browser": {
-    "node-fetch": false,
-    "ws": false
   },
   "publishConfig": {
     "access": "public"
