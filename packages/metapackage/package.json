@@ -50,7 +50,7 @@
     "@jupyterlab/docmanager-extension": "^1.0.0-alpha.2",
     "@jupyterlab/docregistry": "^1.0.0-alpha.2",
     "@jupyterlab/documentsearch": "^1.0.0-alpha.2",
-    "@jupyterlab/documentsearch-extension": "^1.0.0-alpha.2",
+    "@jupyterlab/documentsearch-extension": "^1.0.0-alpha.3",
     "@jupyterlab/extensionmanager": "^1.0.0-alpha.2",
     "@jupyterlab/extensionmanager-extension": "^1.0.0-alpha.2",
     "@jupyterlab/faq-extension": "^1.0.0-alpha.2",
