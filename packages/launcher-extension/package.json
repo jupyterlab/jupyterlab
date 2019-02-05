@@ -12,6 +12,7 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
+    "schema/*.json",
     "style/*.css"
   ],
   "main": "lib/index.js",

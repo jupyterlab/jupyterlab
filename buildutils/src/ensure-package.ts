@@ -156,6 +156,42 @@ export async function ensurePackage(
     utils.writeJSONFile(tsConfigPath, tsConfigData);
   }
 
+  // Get a list of all the published files.
+  // This will not catch .js or .d.ts files if they have not been built,
+  // but we primarily use this to check for files that are published as-is,
+  // like styles, assets, and schemas.
+  const published = new Set<string>(
+    data.files
+      ? data.files.reduce((acc: string[], curr: string) => {
+          return acc.concat(glob.sync(path.join(pkgPath, curr)));
+        }, [])
+      : []
+  );
+
+  // Ensure that the `schema` directories match what is in the `package.json`
+  const schemaDir = data.jupyterlab && data.jupyterlab.schemaDir;
+  const schemas = glob.sync(
+    path.join(pkgPath, schemaDir || 'schema', '*.json')
+  );
+  if (schemaDir && !schemas.length) {
+    messages.push(`No schemas found in ${path.join(pkgPath, schemaDir)}.`);
+  } else if (!schemaDir && schemas.length) {
+    messages.push(`Schemas found, but no schema indicated in ${pkgPath}`);
+  }
+  for (let schema of schemas) {
+    if (!published.has(schema)) {
+      messages.push(`Schema ${schema} not published in ${pkgPath}`);
+    }
+  }
+
+  // Ensure that the `style` directories match what is in the `package.json`
+  const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
+  for (let style of styles) {
+    if (!published.has(style)) {
+      messages.push(`Style file ${style} not published in ${pkgPath}`);
+    }
+  }
+
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
   data.devDependencies = devDeps;
