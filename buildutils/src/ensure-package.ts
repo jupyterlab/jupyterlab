@@ -156,6 +156,19 @@ export async function ensurePackage(
     utils.writeJSONFile(tsConfigPath, tsConfigData);
   }
 
+  // Ensure that the `schema` directories match what is in the `package.json`
+  const schemaDir = data.jupyterlab && data.jupyterlab.schemaDir;
+  const schemas = glob.sync(
+    path.join(pkgPath, schemaDir || 'schema', '*.json')
+  );
+  if (schemaDir && !schemas.length) {
+    messages.push(`No schemas found in ${path.join(pkgPath, schemaDir)}.`);
+  } else if (!schemaDir && schemas.length) {
+    messages.push(`Schemas found, but no schema indicated in ${pkgPath}`);
+  }
+
+  // Ensure that the `style` directories match what is in the `package.json`
+
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
   data.devDependencies = devDeps;
