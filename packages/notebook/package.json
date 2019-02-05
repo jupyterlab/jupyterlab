@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -12,7 +12,7 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
