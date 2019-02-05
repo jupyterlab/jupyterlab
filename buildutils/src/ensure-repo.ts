@@ -24,7 +24,7 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['font-awesome'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/services': ['ws'],
+  '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
