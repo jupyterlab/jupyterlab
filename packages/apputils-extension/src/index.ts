@@ -456,8 +456,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     commands.addCommand(CommandIDs.autoRedirect, {
       label: 'Redirect to New Workspace',
       execute: (args: IRouter.ILocation) => {
-        const { hash, search } = args;
-        const query = URLExt.queryStringToObject(search || '');
+        const query = URLExt.queryStringToObject(args.search || '');
         const autoredirect = 'autoredirect' in query;
 
         if (!autoredirect) {
@@ -468,15 +467,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['autoredirect'];
 
         const { base, workspaces } = paths.urls;
-        const workspace = `auto-${Private.token(6)}`;
         const url =
-          URLExt.join(base, workspaces, workspace) +
+          URLExt.join(base, workspaces, `auto-${Private.token(6)}`) +
           URLExt.objectToQueryString(query) +
-          hash;
-        const hard = true;
-        const silent = true;
+          (args.hash || '');
 
-        router.navigate(url, { hard, silent });
+        router.navigate(url, { hard: true, silent: true });
       }
     });
 
