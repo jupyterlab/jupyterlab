@@ -10,6 +10,9 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {

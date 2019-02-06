@@ -53,7 +53,9 @@ function activate(
         )
       ),
     async (widget: Widget) => {
-      tracker.add(widget);
+      if (!tracker.has(widget)) {
+        await tracker.add(widget);
+      }
       if (!widget.isAttached) {
         app.shell.addToMainArea(widget);
       }
@@ -63,9 +65,8 @@ function activate(
 
   const commandID = 'databus:view-url';
   app.commands.addCommand(commandID, {
-    execute: args => {
-      console.log('calling commands');
-      databus.viewURL(new URL(args.url as string), args.label as string);
+    execute: async args => {
+      await databus.viewURL(new URL(args.url as string), args.label as string);
     },
     label: args => `${args.label} ${args.url}`
   });

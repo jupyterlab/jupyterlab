@@ -70,6 +70,7 @@ export class DataBus {
    * View a dataset with a certain URL with the viewer with a certain label.
    */
   async viewURL(url: URL, label: string): Promise<void> {
+    console.log('Trying to view URL');
     if (this.data.filterByURL(url).size === 0) {
       this.data.publish(createURLDataset(url));
     }

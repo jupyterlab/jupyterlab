@@ -1,5 +1,6 @@
 import { staticConverter, Converter, Convert } from './converters';
 import { Widget } from '@phosphor/widgets';
+import { MainAreaWidget } from '@jupyterlab/apputils';
 
 const baseMimeType = 'application/x.jupyter.viewer; label=';
 
@@ -46,7 +47,6 @@ export function extractArgs(
   url: string;
 } {
   const [label, url] = JSON.parse(widget.id);
-  console.log('extracting args', label, url);
   return { label, url };
 }
 
@@ -58,7 +58,7 @@ export function createWidgetViewerConverter<T>(
     mimeType: mimeType,
     label: label,
     view: async (data: T, url: URL) => {
-      const widget = await view(data);
+      const widget = new MainAreaWidget({ content: await view(data) });
       widget.id = JSON.stringify([label, url]);
       widget.title.label = `${label}: ${url}`;
       widget.title.closable = true;

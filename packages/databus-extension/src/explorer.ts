@@ -3,7 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterLab,
+  JupyterLabPlugin,
+  ILayoutRestorer
+} from '@jupyterlab/application';
 import {
   createDataExplorer,
   IDataExplorer,
@@ -17,13 +21,18 @@ const id = '@jupyterlab/databus-extension:data-explorer';
 export default {
   activate,
   id,
-  requires: [IDataBus],
+  requires: [IDataBus, ILayoutRestorer],
   provides: IDataExplorer,
   autoStart: true
 } as JupyterLabPlugin<IDataExplorer>;
 
-function activate(app: JupyterLab, dataBus: IDataBus): IDataExplorer {
+function activate(
+  app: JupyterLab,
+  dataBus: IDataBus,
+  restorer: ILayoutRestorer
+): IDataExplorer {
   const widget = createDataExplorer(dataBus);
+  restorer.add(widget, widget.id);
   app.shell.addToLeftArea(widget);
   return widget;
 }
