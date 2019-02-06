@@ -1,0 +1,57 @@
+{
+  "name": "@jupyterlab/datastore",
+  "version": "1.0.0-alpha.3",
+  "description": "JupyterLab - Datastore",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf lib",
+    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^1.0.0-alpha.3",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
+    "@jupyterlab/docregistry": "^1.0.0-alpha.3",
+    "@jupyterlab/services": "^4.0.0-alpha.3",
+    "@jupyterlab/statusbar": "^1.0.0-alpha.3",
+    "@phosphor/algorithm": "^1.1.2",
+    "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/datastore": "file:../../../phosphor/packages/datastore",
+    "@phosphor/disposable": "^1.1.2",
+    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/properties": "^1.1.2",
+    "@phosphor/signaling": "^1.2.2",
+    "@phosphor/widgets": "^1.6.0",
+    "react": "~16.4.2"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typedoc": "^0.14.2",
+    "typescript": "~3.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c"
+}

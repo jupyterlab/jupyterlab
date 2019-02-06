@@ -9,7 +9,7 @@ import { JSONPrimitive } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { ServerConnection } from '..';
+import { ServerConnection, WSConnection } from '..';
 
 import { TerminalSession } from './terminal';
 
@@ -21,15 +21,17 @@ const TERMINAL_SERVICE_URL = 'api/terminals';
 /**
  * An implementation of a terminal interface.
  */
-export class DefaultTerminalSession implements TerminalSession.ISession {
+export class DefaultTerminalSession
+  extends WSConnection<JSONPrimitive[], JSONPrimitive[]>
+  implements TerminalSession.ISession {
   /**
    * Construct a new terminal session.
    */
   constructor(name: string, options: TerminalSession.IOptions = {}) {
+    super();
     this._name = name;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
-    this._readyPromise = this._initializeSocket();
   }
 
   /**
@@ -66,40 +68,15 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Test whether the session is ready.
-   */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that fulfills when the session is ready.
-   */
-  get ready(): Promise<void> {
-    return this._readyPromise;
-  }
-
-  /**
-   * Test whether the session is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Dispose of the resources held by the session.
    */
   dispose(): void {
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
 
     this.terminated.emit(undefined);
-    this._isDisposed = true;
-    if (this._ws) {
-      this._ws.close();
-      this._ws = null;
-    }
+    super.dispose();
     delete Private.running[this._url];
     Signal.clearData(this);
   }
@@ -108,26 +85,12 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
    * Send a message to the terminal session.
    */
   send(message: TerminalSession.IMessage): void {
-    if (this._isDisposed || !message.content) {
+    if (this.isDisposed || !message.content) {
       return;
     }
 
     const msg = [message.type, ...message.content];
-    const socket = this._ws;
-    const value = JSON.stringify(msg);
-
-    if (this._isReady && socket) {
-      socket.send(value);
-      return;
-    }
-
-    this.ready.then(() => {
-      const socket = this._ws;
-
-      if (socket) {
-        socket.send(value);
-      }
-    });
+    this.sendMessage(msg);
   }
 
   /**
@@ -136,9 +99,8 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
    * @returns A promise that resolves when the terminal has reconnected.
    */
   reconnect(): Promise<void> {
-    this._reconnectAttempt = 0;
-    this._readyPromise = this._initializeSocket();
-    return this._readyPromise;
+    this.doReconnect();
+    return this.ready;
   }
 
   /**
@@ -157,126 +119,41 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
     return new DefaultTerminalSession(name, { serverSettings });
   }
 
-  /**
-   * Connect to the websocket.
-   */
-  private _initializeSocket(): Promise<void> {
-    const name = this._name;
-    let socket = this._ws;
+  protected wsFactory() {
+    const settings = this.serverSettings;
+    const token = this.serverSettings.token;
 
-    if (socket) {
-      // Clear the websocket event handlers and the socket itself.
-      socket.onopen = this._noOp;
-      socket.onclose = this._noOp;
-      socket.onerror = this._noOp;
-      socket.onmessage = this._noOp;
-      socket.close();
-      this._ws = null;
+    this._url = Private.getTermUrl(settings.baseUrl, this._name);
+    Private.running[this._url] = this;
+
+    let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
+
+    if (token) {
+      wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
     }
-    this._isReady = false;
 
-    return new Promise<void>((resolve, reject) => {
-      const settings = this.serverSettings;
-      const token = this.serverSettings.token;
+    return new settings.WebSocket(wsUrl);
+  }
 
-      this._url = Private.getTermUrl(settings.baseUrl, this._name);
-      Private.running[this._url] = this;
-
-      let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
-
-      if (token) {
-        wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
+  protected handleMessage(data: JSONPrimitive[]): boolean {
+    if (this.reconnectAttempt > 0) {
+      // After reconnection, ignore all messages until a 'setup' message.
+      if (data[0] === 'setup') {
+        this.reconnectAttempt = 0;
       }
+      return;
+    }
 
-      socket = this._ws = new settings.WebSocket(wsUrl);
-
-      socket.onmessage = (event: MessageEvent) => {
-        if (this._isDisposed) {
-          return;
-        }
-
-        const data = JSON.parse(event.data) as JSONPrimitive[];
-
-        if (this._reconnectAttempt > 0) {
-          // After reconnection, ignore all messages until a 'setup' message.
-          if (data[0] === 'setup') {
-            this._reconnectAttempt = 0;
-          }
-          return;
-        }
-
-        this._messageReceived.emit({
-          type: data[0] as TerminalSession.MessageType,
-          content: data.slice(1)
-        });
-      };
-
-      socket.onopen = (event: MessageEvent) => {
-        if (!this._isDisposed) {
-          this._isReady = true;
-          resolve(undefined);
-        }
-      };
-
-      socket.onerror = (event: Event) => {
-        if (!this._isDisposed) {
-          reject(event);
-        }
-      };
-
-      socket.onclose = (event: CloseEvent) => {
-        console.warn(`Terminal websocket closed: ${event.code}`);
-        this._reconnectSocket();
-      };
+    this._messageReceived.emit({
+      type: data[0] as TerminalSession.MessageType,
+      content: data.slice(1)
     });
   }
 
-  private _reconnectSocket(): void {
-    if (this._isDisposed || !this._ws) {
-      return;
-    }
-
-    const attempt = this._reconnectAttempt;
-    const limit = this._reconnectLimit;
-
-    if (attempt >= limit) {
-      console.log(`Terminal reconnect aborted: ${attempt} attempts`);
-      return;
-    }
-
-    const timeout = Math.pow(2, attempt);
-
-    console.log(`Terminal will attempt to reconnect in ${timeout}s`);
-    this._isReady = false;
-    this._reconnectAttempt += 1;
-
-    setTimeout(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._initializeSocket()
-        .then(() => {
-          console.log('Terminal reconnected');
-        })
-        .catch(reason => {
-          console.warn(`Terminal reconnect failed`, reason);
-        });
-    }, 1e3 * timeout);
-  }
-
-  private _isDisposed = false;
-  private _isReady = false;
   private _messageReceived = new Signal<this, TerminalSession.IMessage>(this);
   private _terminated = new Signal<this, void>(this);
   private _name: string;
-  private _readyPromise: Promise<void>;
   private _url: string;
-  private _ws: WebSocket | null = null;
-  private _noOp = () => {
-    /* no-op */
-  };
-  private _reconnectLimit = 7;
-  private _reconnectAttempt = 0;
 }
 
 /**
