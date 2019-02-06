@@ -60,6 +60,8 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
+  export const autoRedirect = 'apputils:auto-redirect';
+
   export const changeTheme = 'apputils:change-theme';
 
   export const loadState = 'apputils:load-statedb';
@@ -451,10 +453,31 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       }
     });
 
-    router.register({
-      command: CommandIDs.loadState,
-      pattern: /.?/,
-      rank: 20 // Very high priority: 20:100.
+    commands.addCommand(CommandIDs.autoRedirect, {
+      label: 'Redirect to New Workspace',
+      execute: (args: IRouter.ILocation) => {
+        const { hash, search } = args;
+        const query = URLExt.queryStringToObject(search || '');
+        const autoredirect = 'autoredirect' in query;
+
+        if (!autoredirect) {
+          return;
+        }
+
+        // Maintain the query string parameters but remove `autoredirect`.
+        delete query['autoredirect'];
+
+        const { base, workspaces } = paths.urls;
+        const workspace = `auto-${Private.token(6)}`;
+        const url =
+          URLExt.join(base, workspaces, workspace) +
+          URLExt.objectToQueryString(query) +
+          hash;
+        const hard = true;
+        const silent = true;
+
+        router.navigate(url, { hard, silent });
+      }
     });
 
     commands.addCommand(CommandIDs.reset, {
@@ -524,9 +547,21 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     router.register({
+      command: CommandIDs.loadState,
+      pattern: /.?/,
+      rank: 30 // High priority: 30:100.
+    });
+
+    router.register({
+      command: CommandIDs.autoRedirect,
+      pattern: /(\?autoredirect|\&autoredirect)($|&)/,
+      rank: 20 // Very high priority: 20:100.
+    });
+
+    router.register({
       command: CommandIDs.resetOnLoad,
       pattern: /(\?reset|\&reset)($|&)/,
-      rank: 10 // Very high priority: 10:100.
+      rank: 10 // Even higher priority: 10:100.
     });
 
     // Clean up state database when the window unloads.
@@ -760,5 +795,29 @@ namespace Private {
         }
       });
     });
+  }
+
+  /**
+   * Returns a random string composed of characters in the range [A-Z,a-z].
+   *
+   * @param length - The desired length of the random token.
+   */
+  export function token(length: number): string {
+    const start = 'A'.charCodeAt(0);
+    const end = 'Z'.charCodeAt(0);
+    const delta = end - start;
+
+    return ' '
+      .repeat(length)
+      .split('')
+      .reduce(acc => {
+        // Pick a random character from range [start-end], inclusively.
+        const char = String.fromCharCode(
+          start + Math.round(Math.random() * delta)
+        );
+
+        // Switch case half the time and append to accumulator.
+        return acc + (Math.random() < 0.5 ? char : char.toLocaleLowerCase());
+      }, '');
   }
 }
