@@ -14,16 +14,27 @@ import {
 } from './viewers';
 import { Widget } from '@phosphor/widgets';
 
+export interface IDataBusConfig {
+  converters: IConverterRegistry;
+  data: IDataRegistry;
+  getDownloadURL: (path: string) => Promise<URL>;
+  displayWidget: (widget: Widget) => Promise<void>;
+}
+
 /**
  * Registry that composes all other databus registries, to implement logic that require multiple of them.
  */
 export class DataBus {
-  constructor(
-    public readonly converters: IConverterRegistry,
-    public readonly data: IDataRegistry,
-    private _getDownloadURL: (path: string) => Promise<URL>,
-    private _displayWidget: (widget: Widget) => Promise<void>
-  ) {}
+  public readonly converters: IConverterRegistry;
+  public readonly data: IDataRegistry;
+  private _getDownloadURL: (path: string) => Promise<URL>;
+  private _displayWidget: (widget: Widget) => Promise<void>;
+  constructor(config: IDataBusConfig) {
+    this.converters = config.converters;
+    this.data = config.data;
+    this._getDownloadURL = config.getDownloadURL;
+    this._displayWidget = config.displayWidget;
+  }
 
   /**
    * Returns whether a file dataset can be recoginzed.

@@ -43,16 +43,16 @@ function activate(
   restorer: ILayoutRestorer
 ): IDataBus {
   const tracker = new InstanceTracker({ namespace: 'databus' });
-  const databus = new DataBus(
+  const databus = new DataBus({
     converters,
     data,
-    async (path: string) =>
+    getDownloadURL: async (path: string) =>
       new URL(
         await fileBrowserFactory.defaultBrowser.model.manager.services.contents.getDownloadUrl(
           path
         )
       ),
-    async (widget: Widget) => {
+    displayWidget: async (widget: Widget) => {
       if (!tracker.has(widget)) {
         await tracker.add(widget);
       }
@@ -61,7 +61,7 @@ function activate(
       }
       app.shell.activateById(widget.id);
     }
-  );
+  });
 
   const commandID = 'databus:view-url';
   app.commands.addCommand(commandID, {
