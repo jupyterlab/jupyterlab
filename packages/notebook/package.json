@@ -43,6 +43,7 @@
     "@jupyterlab/ui-components": "^1.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
+    "@phosphor/disposable": "^1.1.2",
     "@phosphor/domutils": "^1.1.2",
     "@phosphor/dragdrop": "^1.3.0",
     "@phosphor/messaging": "^1.2.2",
