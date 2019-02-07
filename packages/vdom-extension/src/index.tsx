@@ -95,19 +95,21 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     if (this._timer) {
       window.clearTimeout(this._timer);
     }
-    this._timer = window.setTimeout(() => {
-      if (!this._comms[targetName]) {
-        this._comms[targetName] = this._session.kernel.connectToComm(
-          targetName
-        );
-        this._comms[targetName].open();
-      }
-      this._comms[targetName].send(JSON.stringify(event));
-    }, 16);
+    if (this._session) {
+      this._timer = window.setTimeout(() => {
+        if (!this._comms[targetName]) {
+          this._comms[targetName] = this._session.kernel.connectToComm(
+            targetName
+          );
+          this._comms[targetName].open();
+        }
+        this._comms[targetName].send(JSON.stringify(event));
+      }, 16);
+    }
   };
 
   private _mimeType: string;
-  private _session: Session.ISession;
+  private _session?: Session.ISession;
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
 }
