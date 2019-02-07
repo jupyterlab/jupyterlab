@@ -2,15 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
-  IMimeDocumentTracker,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
+
+import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
@@ -32,15 +34,16 @@ import '../style/index.css';
 /**
  * Initialization data for the jupyterlab-toc extension.
  */
-const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
+const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: 'jupyterlab-toc',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [
     IDocumentManager,
     IEditorTracker,
+    ILabShell,
     ILayoutRestorer,
-    IMimeDocumentTracker,
+    IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry
   ],
@@ -51,11 +54,12 @@ const extension: JupyterLabPlugin<ITableOfContentsRegistry> = {
  * Activate the ToC extension.
  */
 function activateTOC(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
+  labShell: ILabShell,
   restorer: ILayoutRestorer,
-  mimeDocumentTracker: IMimeDocumentTracker,
+  markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry
 ): ITableOfContentsRegistry {
@@ -69,7 +73,7 @@ function activateTOC(
   toc.title.iconClass = 'jp-TableOfContents-icon jp-SideBar-tabIcon';
   toc.title.caption = 'Table of Contents';
   toc.id = 'table-of-contents';
-  app.shell.addToLeftArea(toc, { rank: 700 });
+  labShell.add(toc, 'left', { rank: 700 });
 
   // Add the ToC widget to the application restorer.
   restorer.add(toc, 'juputerlab-toc');
@@ -92,7 +96,7 @@ function activateTOC(
 
   // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-    mimeDocumentTracker,
+    markdownViewerTracker,
     rendermime.sanitizer,
     toc
   );
@@ -103,7 +107,7 @@ function activateTOC(
   registry.addGenerator(latexGenerator);
 
   // Change the ToC when the active widget changes.
-  app.shell.currentChanged.connect(() => {
+  labShell.currentChanged.connect(() => {
     let widget = app.shell.currentWidget;
     if (!widget) {
       return;
