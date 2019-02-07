@@ -16,8 +16,12 @@ export interface INumberedHeading extends IHeading {
  * update the dictionary.
  */
 function incrementNumberingDict(dict: any, level: number) {
-  if (dict[level + 1] != undefined) {
-    dict[level + 1] = undefined;
+  let x = level + 1;
+  while (x <= 6) {
+    if (dict[x] != undefined) {
+      dict[x] = undefined;
+    }
+    x++;
   }
   if (dict[level] === undefined) {
     dict[level] = 1;
