@@ -208,6 +208,18 @@
     "@phosphor/widgets" "^1.6.0"
     react "~16.4.2"
 
+"@jupyterlab/markdownviewer@^1.0.0-alpha.3":
+  version "1.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/markdownviewer/-/markdownviewer-1.0.0-alpha.3.tgz#140bc46fee0861d01f41053eead08927377cdc03"
+  dependencies:
+    "@jupyterlab/apputils" "^1.0.0-alpha.3"
+    "@jupyterlab/coreutils" "^3.0.0-alpha.3"
+    "@jupyterlab/docregistry" "^1.0.0-alpha.3"
+    "@jupyterlab/rendermime" "^1.0.0-alpha.3"
+    "@phosphor/coreutils" "^1.3.0"
+    "@phosphor/messaging" "^1.2.2"
+    "@phosphor/widgets" "^1.6.0"
+
 "@jupyterlab/notebook@^1.0.0-alpha.4":
   version "1.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@jupyterlab/notebook/-/notebook-1.0.0-alpha.4.tgz#62bd27c0aa409ea1eeb9d2dc3506d8874f74f0bb"

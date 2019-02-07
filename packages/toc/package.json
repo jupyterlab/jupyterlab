@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "1.0.0",
+  "version": "1.0.0-pre",
   "private": false,
   "description": "Table of Contents extension for JupyterLab",
   "keywords": [
@@ -39,6 +39,7 @@
     "@jupyterlab/docmanager": "^1.0.0-alpha.3",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",
     "@jupyterlab/fileeditor": "^1.0.0-alpha.3",
+    "@jupyterlab/markdownviewer": "^1.0.0-alpha.3",
     "@jupyterlab/notebook": "^1.0.0-alpha.4",
     "@jupyterlab/rendermime": "^1.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",

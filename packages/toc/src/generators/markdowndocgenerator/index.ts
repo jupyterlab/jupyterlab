@@ -1,9 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDocumentWidget, MimeDocument } from '@jupyterlab/docregistry';
+import { ISanitizer } from '@jupyterlab/apputils';
+
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+
+import {
+  IMarkdownViewerTracker,
+  MarkdownDocument
+} from '@jupyterlab/markdownviewer';
 
 import { TableOfContentsRegistry } from '../../registry';
 
@@ -13,8 +20,6 @@ import {
   isMarkdown,
   INumberedHeading
 } from '../shared';
-
-import { IInstanceTracker, ISanitizer } from '@jupyterlab/apputils';
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
@@ -81,10 +86,10 @@ export function createMarkdownGenerator(
  * @returns A TOC generator that can parse markdown files.
  */
 export function createRenderedMarkdownGenerator(
-  tracker: IInstanceTracker<MimeDocument>,
+  tracker: IMarkdownViewerTracker,
   sanitizer: ISanitizer,
   widget: TableOfContents
-): TableOfContentsRegistry.IGenerator<MimeDocument> {
+): TableOfContentsRegistry.IGenerator<MarkdownDocument> {
   const options = new MarkdownDocGeneratorOptionsManager(widget, {
     needsNumbering: true,
     sanitizer
@@ -98,11 +103,6 @@ export function createRenderedMarkdownGenerator(
     },
     itemRenderer: (item: INumberedHeading) => {
       return markdownDocItemRenderer(options, item);
-    },
-    isEnabled: widget => {
-      // Only enable this if the editor mimetype matches
-      // one of a few markdown variants.
-      return isMarkdown(widget.content.mimeType);
     },
     generate: widget => {
       let numberingDict: { [level: number]: number } = {};

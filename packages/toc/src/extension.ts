@@ -4,7 +4,6 @@
 import {
   ILabShell,
   ILayoutRestorer,
-  IMimeDocumentTracker,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -12,6 +11,8 @@ import {
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
+
+import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
@@ -42,7 +43,7 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     IEditorTracker,
     ILabShell,
     ILayoutRestorer,
-    IMimeDocumentTracker,
+    IMarkdownViewerTracker,
     INotebookTracker,
     IRenderMimeRegistry
   ],
@@ -58,7 +59,7 @@ function activateTOC(
   editorTracker: IEditorTracker,
   labShell: ILabShell,
   restorer: ILayoutRestorer,
-  mimeDocumentTracker: IMimeDocumentTracker,
+  markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry
 ): ITableOfContentsRegistry {
@@ -95,7 +96,7 @@ function activateTOC(
 
   // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
-    mimeDocumentTracker,
+    markdownViewerTracker,
     rendermime.sanitizer,
     toc
   );
