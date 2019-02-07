@@ -5,6 +5,7 @@
 import { createViewerMimeType, View } from './viewers';
 import { singleConverter, Converter } from './converters';
 import { extractFileMimeType } from './files';
+import { extractURLMimeType } from './urls';
 const baseMimeType = 'application/x.jupyter.snippet; label=';
 
 export function snippetMimeType(label: string) {
@@ -23,6 +24,7 @@ export interface IFileSnippetConverterOptions {
   createSnippet: (path: string) => string;
   label: string;
 }
+
 export function fileSnippetConverter({
   mimeType,
   createSnippet,
@@ -39,6 +41,30 @@ export function fileSnippetConverter({
     ];
   });
 }
+
+export interface IURLSnippetConverter {
+  mimeType: string;
+  createSnippet: (url: string | URL) => string;
+  label: string;
+}
+
+export function URLSnippetConverter({
+  mimeType,
+  createSnippet,
+  label
+}: IURLSnippetConverter): Converter<URL | string, string> {
+  return singleConverter((someMimeType: string) => {
+    const innerMimeType = extractURLMimeType(someMimeType);
+    if (innerMimeType !== mimeType) {
+      return null;
+    }
+    return [
+      snippetMimeType(label),
+      async (url: string | URL) => createSnippet(url)
+    ];
+  });
+}
+
 export function snippetViewerConverter(
   insert: (snippet: string) => Promise<void>
 ): Converter<string, View> {

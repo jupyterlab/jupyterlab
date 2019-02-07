@@ -23,9 +23,12 @@ class RendererDataset extends ReactWidget implements IRenderMime.IRenderer {
   }
 
   render() {
+    if (!this._dataset) {
+      return <span>Waiting for dataset...</span>;
+    }
     return (
       <button onClick={() => this._register(this._dataset!)}>
-        Register Dataset
+        Register {this._dataset.url.toString()}
       </button>
     );
   }
@@ -33,8 +36,8 @@ class RendererDataset extends ReactWidget implements IRenderMime.IRenderer {
     const { mimeType, url, data } = model.data[
       datasetMimeType
     ] as DatasetMimeData;
-    console.log(model.data);
     this._dataset = new Dataset(mimeType, new URL(url), data);
+    this.update();
   }
   private _dataset: Dataset<any> | undefined;
 }

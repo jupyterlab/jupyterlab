@@ -7,7 +7,8 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
   IConverterRegistry,
   snippetViewerConverter,
-  fileSnippetConverter
+  fileSnippetConverter,
+  URLSnippetConverter
 } from '@jupyterlab/databus';
 import { INotebookTracker } from '@jupyterlab/notebook';
 
@@ -35,6 +36,16 @@ function activate(
       createSnippet: (path: string) =>
         `import pandas as pd\n\ndf = pd.read_csv(${JSON.stringify(
           '.' + path
+        )})\ndf`
+    })
+  );
+  converters.register(
+    URLSnippetConverter({
+      mimeType: 'text/csv',
+      label: 'Snippet',
+      createSnippet: (url: string | URL) =>
+        `import pandas as pd\n\ndf = pd.read_csv(${JSON.stringify(
+          url.toString()
         )})\ndf`
     })
   );
