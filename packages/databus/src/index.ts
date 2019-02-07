@@ -14,3 +14,4 @@ export * from './snippets';
 export * from './urls';
 export * from './viewers';
 export * from './widgets';
+export * from './rendermime';

@@ -12,6 +12,7 @@ import filePlugin from './files';
 import snippetsPlugin from './snippets';
 import widgetPlugin from './widgets';
 import URLPlugin from './urls';
+import renderMimePlugin from './rendermime';
 
 export default [
   dataRegistryPlugin,
@@ -21,5 +22,6 @@ export default [
   filePlugin,
   widgetPlugin,
   snippetsPlugin,
-  URLPlugin
+  URLPlugin,
+  renderMimePlugin
 ] as JupyterLabPlugin<any>[];
