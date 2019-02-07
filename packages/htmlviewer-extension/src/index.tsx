@@ -13,7 +13,11 @@ import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { HTMLViewer, HTMLViewerFactory } from '@jupyterlab/htmlviewer';
+import {
+  HTMLViewer,
+  HTMLViewerFactory,
+  IHTMLViewerTracker
+} from '@jupyterlab/htmlviewer';
 
 /**
  * The CSS class for an HTML5 icon.
@@ -32,9 +36,10 @@ namespace CommandIDs {
 /**
  * The HTML file handler extension.
  */
-const htmlPlugin: JupyterFrontEndPlugin<void> = {
+const htmlPlugin: JupyterFrontEndPlugin<IHTMLViewerTracker> = {
   activate: activateHTMLViewer,
   id: '@jupyterlab/htmlviewer-extension:plugin',
+  provides: IHTMLViewerTracker,
   optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
@@ -46,7 +51,7 @@ function activateHTMLViewer(
   app: JupyterFrontEnd,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null
-): void {
+): IHTMLViewerTracker {
   // Add an HTML file type to the docregistry.
   const ft: DocumentRegistry.IFileType = {
     name: 'html',
@@ -126,6 +131,8 @@ function activateHTMLViewer(
       category: 'File Operations'
     });
   }
+
+  return tracker;
 }
 /**
  * Export the plugins as default.
