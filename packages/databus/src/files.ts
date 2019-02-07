@@ -3,28 +3,56 @@
  *
  * Then convert to known filetype, with URL on it.
  */
-import { Dataset } from './dataregistry';
-import { createURLDataset, resolverToConverter } from './resolvers';
-import { Converter } from './converters';
-import { createURLMimeType } from '.';
+import { resolveConverter } from './resolvers';
+import { Converter, singleConverter } from './converters';
+import { URLMimeType } from './urls';
 
-export function createFileDataSet(path: string): Dataset<null> {
-  const url = new URL('file:');
-  url.pathname = path;
-  return createURLDataset(url);
+const baseMimeType = 'application/x.jupyter.file; mimeType=';
+
+function fileMimeType(mimeType: string) {
+  return `${baseMimeType}${mimeType}`;
 }
 
-export function createFileConverter(
-  getDownloadURL: (path: string) => Promise<URL>,
+export function extractFileMimeType(mimeType: string): string | null {
+  if (!mimeType.startsWith(baseMimeType)) {
+    return null;
+  }
+  return mimeType.slice(baseMimeType.length);
+}
+export function createFileURL(path: string): URL {
+  const url = new URL('file:');
+  url.pathname = path;
+  return url;
+}
+
+/**
+ * Creates a converter from a resolver mimetype to a file mimetype.
+ */
+export function resolveFileConverter(
   extension: string,
   mimeType: string
-): Converter<null, URL> {
-  return resolverToConverter((url: URL) => {
+): Converter<null, string> {
+  return resolveConverter((url: URL) => {
     const path = parseFileURL(url);
     if (path === null || !path.endsWith(extension)) {
+      return new Map();
+    }
+    return new Map([[fileMimeType(mimeType), async () => path]]);
+  });
+}
+
+/**
+ * Creates a converter from file paths to their download URLs
+ */
+export function fileURLConverter(
+  getDownloadURL: (path: string) => Promise<URL>
+): Converter<string, URL> {
+  return singleConverter((mimeType: string) => {
+    const resMimeType = extractFileMimeType(mimeType);
+    if (resMimeType === null) {
       return null;
     }
-    return [createURLMimeType(mimeType), () => getDownloadURL(path)];
+    return [URLMimeType(resMimeType), getDownloadURL];
   });
 }
 

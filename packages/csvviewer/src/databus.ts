@@ -1,11 +1,12 @@
-import { IWidgetViewerOptions } from '@jupyterlab/databus';
+import { Converter, staticWidgetConverter } from '@jupyterlab/databus';
 import { DataGrid } from '@phosphor/datagrid';
+import { Widget } from '@phosphor/widgets';
 import { DSVModel } from './model';
 
-export const CSVConverter: IWidgetViewerOptions<string> = {
+export const CSVConverter: Converter<string, Widget> = staticWidgetConverter({
   mimeType: 'text/csv',
   label: 'Grid',
-  view: async (data: string) => {
+  convert: async (data: string) => {
     // Copies the default grid setup from `widget.ts`
     // It would be great to use `CSVViewer` itself,
     // But it assumes a model that changes over time, whereas
@@ -20,4 +21,4 @@ export const CSVConverter: IWidgetViewerOptions<string> = {
     grid.model = new DSVModel({ data, delimiter: ',' });
     return grid;
   }
-};
+});

@@ -2,23 +2,12 @@ import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { IConverterRegistry } from './converters';
 import { Dataset, IDataRegistry } from './dataregistry';
-import { createFileConverter } from './files';
-import { Resolver, resolverToConverter, createURLDataset } from './resolvers';
-import {
-  createViewerConverter,
-  createViewerMimeType,
-  extractViewerLabel,
-  IViewerOptions,
-  IWidgetViewerOptions,
-  createWidgetViewerConverter
-} from './viewers';
-import { Widget } from '@phosphor/widgets';
+import { resolveDataSet } from './resolvers';
+import { createViewerMimeType, extractViewerLabel } from './viewers';
 
 export interface IDataBusConfig {
   converters: IConverterRegistry;
   data: IDataRegistry;
-  getDownloadURL: (path: string) => Promise<URL>;
-  displayWidget: (widget: Widget) => Promise<void>;
 }
 
 /**
@@ -27,40 +16,17 @@ export interface IDataBusConfig {
 export class DataBus {
   public readonly converters: IConverterRegistry;
   public readonly data: IDataRegistry;
-  private _getDownloadURL: (path: string) => Promise<URL>;
-  private _displayWidget: (widget: Widget) => Promise<void>;
   constructor(config: IDataBusConfig) {
     this.converters = config.converters;
     this.data = config.data;
-    this._getDownloadURL = config.getDownloadURL;
-    this._displayWidget = config.displayWidget;
   }
 
-  /**
-   * Returns whether a file dataset can be recoginzed.
-   *
-   * i.e. checks whether it can be converted to anything useful.
-   */
-  validFileDataSet(dataset: Dataset<null>): boolean {
-    return this.converters.listTargetMimeTypes([dataset.mimeType]).size > 1;
-  }
-  registerViewer(options: IViewerOptions<any>): IDisposable {
-    return this.converters.register(createViewerConverter(options));
-  }
-
-  registerResolver(resolver: Resolver<any>): IDisposable {
-    return this.converters.register(resolverToConverter(resolver));
-  }
-  registerFileResolver(extension: string, mimeType: string): IDisposable {
-    return this.converters.register(
-      createFileConverter(this._getDownloadURL, extension, mimeType)
-    );
-  }
-
-  registerWidgetViewer(options: IWidgetViewerOptions<any>): IDisposable {
-    return this.converters.register(
-      createWidgetViewerConverter(this._displayWidget, options)
-    );
+  registerURL(url: URL): IDisposable | null {
+    const dataset = resolveDataSet(url);
+    if (this.data.contains(dataset)) {
+      return null;
+    }
+    return this.data.publish(dataset);
   }
 
   possibleMimeTypesForURL(url: URL): Set<string> {
@@ -70,22 +36,16 @@ export class DataBus {
    * Returns the viewer labels for a given URL.
    */
   viewersForURL(url: URL): Set<string> {
-    return new Set(
-      [...this.possibleMimeTypesForURL(url)]
-        .map(extractViewerLabel)
-        .filter(label => label !== null)
-    );
+    return new Set([...this.possibleMimeTypesForURL(url)]
+      .map(extractViewerLabel)
+      .filter(label => label !== null) as string[]);
   }
 
   /**
    * View a dataset with a certain URL with the viewer with a certain label.
    */
   async viewURL(url: URL, label: string): Promise<void> {
-    console.log('Trying to view URL');
-    if (this.data.filterByURL(url).size === 0) {
-      this.data.publish(createURLDataset(url));
-    }
-
+    this.registerURL(url);
     const viewer: Dataset<() => Promise<void>> = await this.convertByURL(
       url,
       createViewerMimeType(label)
@@ -110,7 +70,7 @@ export class DataBus {
         this.data.publish(dataset);
       }
     }
-    return finalDataSet;
+    return finalDataSet!;
   }
 }
 

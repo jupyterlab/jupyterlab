@@ -25,7 +25,7 @@ export function reachable<NODE, EDGE>(
    * If we do not, we record a path to them and add them to the nodes to traverse.
    */
   function traverse(node: NODE) {
-    const path = paths.get(node);
+    const path = paths.get(node)!;
     for (const [child, edge] of edges(node).entries()) {
       if (paths.has(child)) {
         continue;
@@ -51,9 +51,9 @@ export function reachable<NODE, EDGE>(
 export function* expandPath<NODE, EDGE>(
   final: NODE,
   path: Path<NODE, EDGE>
-): Iterable<[NODE, EDGE, NODE]> {
-  let lastStart: NODE = null;
-  let lastEdge: EDGE = null;
+): Iterable<[NODE | null, EDGE | null, NODE]> {
+  let lastStart: NODE | null = null;
+  let lastEdge: EDGE | null = null;
   for (const [start, edge] of path) {
     yield [lastStart, lastEdge, start];
     lastStart = start;

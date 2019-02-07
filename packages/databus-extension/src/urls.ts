@@ -4,19 +4,15 @@
 |----------------------------------------------------------------------------*/
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ConverterRegistry, IConverterRegistry } from '@jupyterlab/databus';
+import { IConverterRegistry, URLStringConverter } from '@jupyterlab/databus';
 
-/**
- * The converter registry extension.
- */
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:converter-registry',
-  requires: [],
-  provides: IConverterRegistry,
+  id: '@jupyterlab/databus-extension:urls',
+  requires: [IConverterRegistry],
   autoStart: true
-} as JupyterLabPlugin<IConverterRegistry>;
+} as JupyterLabPlugin<void>;
 
-function activate(app: JupyterLab): IConverterRegistry {
-  return new ConverterRegistry();
+function activate(app: JupyterLab, converters: IConverterRegistry) {
+  converters.register(URLStringConverter);
 }

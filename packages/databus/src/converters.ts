@@ -9,8 +9,8 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { Dataset } from './dataregistry';
 import { reachable, expandPath } from './graph';
 
-export type Convert<T, V> = (data: T, url?: URL) => Promise<V>;
-
+export type Convert<T, V> = (data: T, url: URL) => Promise<V>;
+export type Converts<T, V> = Map<string, Convert<T, V>>;
 /**
  * Function that can possibly convert between data type T to
  * data type V.
@@ -19,38 +19,44 @@ export type Convert<T, V> = (data: T, url?: URL) => Promise<V>;
  * and returns a mapping of possible resulting mimetypes and
  * a function to compute their data.
  */
-export type Converter<T, V> = (mimeType: string) => Map<string, Convert<T, V>>;
+export type Converter<T, V> = (mimeType: string) => Converts<T, V>;
 
-function combineConverters<T, V, U>(
-  a: Converter<T, V>,
-  b: Converter<U, V>
-): Converter<T | U, V> {
+function combineConverters<T, U>(
+  a: Converter<T, U>,
+  b: Converter<T, U>
+): Converter<T, U> {
   return (mimeType: string) => {
-    return new Map<string, Convert<T | U, V>>([...a(mimeType), ...b(mimeType)]);
+    return new Map<string, Convert<T, U>>([...a(mimeType), ...b(mimeType)]);
   };
 }
 
-/**
- * composeConverters(a)(b)(c) =~= a(b(c))
- *
- *
- */
-// function composeConverters<T, V, U>(
-//   a: Converter<V, U>,
-//   b: Converter<T, V>
-// ): Converter<T, U> {
-//   return (mimeType: string) => {
-//     return new Map(
-//       [...b(mimeType).entries()].map(
-//         ([mimeType, convert]) =>
-//           [mimeType, async (data: T, url: URL) => await convert(data, url)] as [
-//             string,
-//             Convert<T, U>
-//           ]
-//       )
-//     );
-//   };
-// }
+export function composeConvert<T, U, V>(
+  f: Convert<U, V>,
+  g: Convert<T, U>
+): Convert<T, V> {
+  return async (data: T, url: URL) => {
+    return await f(await g(data, url), url);
+  };
+}
+
+function mapValues<T, U, V>(map: Map<T, U>, fn: (val: U) => V): Map<T, V> {
+  const newMap = new Map<T, V>();
+  for (const [k, v] of map) {
+    newMap.set(k, fn(v));
+  }
+  return newMap;
+}
+
+export function composeConverter<T, U, V>(
+  converter: Converter<T, U>,
+  convert: Convert<U, V>
+): Converter<T, V> {
+  return (mimeType: string) => {
+    return mapValues(converter(mimeType), oldConvert =>
+      composeConvert(convert, oldConvert)
+    );
+  };
+}
 
 function combineManyConverters<T, V>(
   converters: Iterable<Converter<T, V>>
@@ -151,7 +157,7 @@ export class ConverterRegistry {
    *
    * @throws An error if the converter is already registered.
    */
-  register(converter: Converter<unknown, unknown>): IDisposable {
+  register(converter: Converter<any, any>): IDisposable {
     this._converters.add(converter);
 
     this._convertersChanged.emit({ converter, type: 'added' });
@@ -203,13 +209,13 @@ export class ConverterRegistry {
 
     for (const [initialMimeType, convert, resultMimeType] of expandPath(
       targetMimeType,
-      this._reachable(datas.keys()).get(targetMimeType)
+      this._reachable(datas.keys()).get(targetMimeType)!
     )) {
       // First part of path only has result
-      if (!initialMimeType) {
+      if (!initialMimeType || !convert) {
         yield [...sourceDatasets].find(
           dataset => dataset.mimeType === resultMimeType
-        );
+        )!;
         continue;
       }
       const data = await convert(datas.get(initialMimeType), url);

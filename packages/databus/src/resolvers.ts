@@ -1,33 +1,31 @@
 import { Dataset } from './dataregistry';
-import { Converter, singleConverter } from './converters';
+import { Converter, Converts } from './converters';
 
-const baseMimeType = 'application/x.jupyter.unknown; url=';
+const baseMimeType = 'application/x.jupyter.resolve; url=';
 
-function createMimeType(url: URL) {
+export function resolveMimeType(url: URL) {
   return `${baseMimeType}${url}`;
 }
 
-export function createURLDataset(url: URL): Dataset<null> {
-  return new Dataset(createMimeType(url), url, null);
+export function resolveDataSet(url: URL): Dataset<null> {
+  return new Dataset(resolveMimeType(url), url, null);
 }
 
-function extractURL(mimeType: string): URL | null {
+function extractResolveURL(mimeType: string): URL | null {
   if (!mimeType.startsWith(baseMimeType)) {
     return null;
   }
   return new URL(mimeType.slice(baseMimeType.length));
 }
 
-export type Resolver<T> = (url: URL) => null | [string, () => Promise<T>];
+export type Resolver<T> = (url: URL) => Converts<null, T>;
 
-export function resolverToConverter<T>(
-  resolver: Resolver<T>
-): Converter<null, T> {
-  return singleConverter((mimeType: string) => {
-    const url = extractURL(mimeType);
+export function resolveConverter<T>(resolver: Resolver<T>): Converter<null, T> {
+  return (mimeType: string) => {
+    const url = extractResolveURL(mimeType);
     if (url === null) {
-      return null;
+      return new Map();
     }
     return resolver(url);
-  });
+  };
 }

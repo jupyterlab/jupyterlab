@@ -7,8 +7,9 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
   IDataExplorer,
   IDataBus,
-  createFileDataSet,
-  Dataset
+  createFileURL,
+  resolveFileConverter,
+  fileURLConverter
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -34,38 +35,52 @@ function activate(
   fileBrowserFactory: IFileBrowserFactory,
   dataExplorer: IDataExplorer
 ) {
-  dataBus.registerFileResolver('.csv', 'text/csv');
+  dataBus.converters.register(resolveFileConverter('.csv', 'text/csv'));
+  dataBus.converters.register(
+    fileURLConverter(
+      async (path: string) =>
+        new URL(
+          await fileBrowserFactory.defaultBrowser.model.manager.services.contents.getDownloadUrl(
+            path
+          )
+        )
+    )
+  );
 
+  /**
+   * Register right click on file menu.
+   */
   app.contextMenu.addItem({
     command: open,
     selector: selectorNotDir,
     rank: 2.1 // right after open with
   });
 
-  function getDataSet(): Dataset<null> | null {
+  function getURL(): URL | null {
     const widget = fileBrowserFactory.tracker.currentWidget;
     if (!widget) {
       return null;
     }
-    const path = widget.selectedItems().next().path;
-    const dataset = createFileDataSet(path);
-    if (!dataBus.validFileDataSet(dataset)) {
-      return null;
-    }
-    return dataset;
+    const path = widget.selectedItems().next()!.path;
+    const url = createFileURL(path);
+    // Disable dataset option if we won't be able to view the dataset.
+    // if (dataBus.viewersForURL(url).size === 0) {
+    //   return null;
+    // }
+    return url;
   }
   app.commands.addCommand(open, {
     execute: async () => {
-      const dataset = getDataSet();
-      if (dataset === null) {
+      const url = getURL();
+      if (url === null) {
         return;
       }
-      dataBus.data.publish(dataset);
+      dataBus.registerURL(url);
       app.shell.activateById(dataExplorer.id);
-      dataExplorer.reveal(dataset);
+      dataExplorer.reveal(url);
     },
     isEnabled: () => {
-      return getDataSet() !== null;
+      return getURL() !== null;
     },
     label: 'Open as Dataset',
     iconClass: 'jp-MaterialIcon jp-??'

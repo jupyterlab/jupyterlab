@@ -95,7 +95,7 @@ function activateCsv(
   const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
   });
-  databus.registerWidgetViewer(CSVConverter);
+  databus.converters.register(CSVConverter);
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;

@@ -4,16 +4,22 @@
 |----------------------------------------------------------------------------*/
 
 import { JupyterLabPlugin } from '@jupyterlab/application';
-
-import dataRegistryPlugin from './dataregistry';
 import converterRegistryPlugin from './converters';
-import dataExplorerPlugin from './explorer';
 import dataBusPlugin from './databus';
+import dataRegistryPlugin from './dataregistry';
+import dataExplorerPlugin from './explorer';
 import filePlugin from './files';
+import snippetsPlugin from './snippets';
+import widgetPlugin from './widgets';
+import URLPlugin from './urls';
+
 export default [
   dataRegistryPlugin,
   converterRegistryPlugin,
   dataExplorerPlugin,
   dataBusPlugin,
-  filePlugin
+  filePlugin,
+  widgetPlugin,
+  snippetsPlugin,
+  URLPlugin
 ] as JupyterLabPlugin<any>[];

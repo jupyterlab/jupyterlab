@@ -5,10 +5,8 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Token } from '@phosphor/coreutils';
-import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 import { IDataBus } from './databus';
-import { Dataset } from '.';
 
 function MimeTypesComponent({ mimeTypes }: { mimeTypes: Iterable<string> }) {
   return (
@@ -90,8 +88,8 @@ class DataExplorerWidget extends ReactWidget implements IDataExplorer {
     return <DataExplorer databus={this._databus} activeURL={this._activeURL} />;
   }
 
-  reveal(dataset: Dataset<any>): void {
-    this._activeURL = dataset.url;
+  reveal(url: URL): void {
+    this._activeURL = url;
     this.update();
   }
   private _activeURL: URL | null;
@@ -105,9 +103,4 @@ export const IDataExplorer = new Token<IDataExplorer>(
   '@jupyterlab/databus:IDataExplorer'
 );
 
-export interface IDataExplorer extends Widget {
-  /**
-   * Highlights a dataset in the explorer.
-   */
-  reveal(dataset: Dataset<any>): void;
-}
+export interface IDataExplorer extends DataExplorerWidget {}

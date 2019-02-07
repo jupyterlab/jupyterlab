@@ -20,6 +20,9 @@
     },
     {
       "path": "../filebrowser"
+    },
+    {
+      "path": "../notebook"
     }
   ]
 }

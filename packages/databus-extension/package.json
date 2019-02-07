@@ -33,6 +33,7 @@
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/databus": "^0.7.1",
     "@jupyterlab/filebrowser": "^0.19.3",
+    "@jupyterlab/notebook": "^0.19.2",
     "@phosphor/widgets": "^1.6.0"
   },
   "devDependencies": {

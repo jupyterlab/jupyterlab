@@ -102,11 +102,11 @@ export class DataRegistry {
     func: (value: Dataset<any>) => value is T
   ): Set<T> {
     let result: Set<T> = new Set();
-    this._datasets.forEach((value: T) => {
-      if (func(value)) {
-        result.add(value);
+    for (const dataset of this._datasets) {
+      if (func(dataset)) {
+        result.add(dataset);
       }
-    });
+    }
     return result;
   }
 
