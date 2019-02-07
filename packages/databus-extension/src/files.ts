@@ -9,7 +9,8 @@ import {
   IDataBus,
   createFileURL,
   resolveFileConverter,
-  fileURLConverter
+  fileURLConverter,
+  resolveMimeType
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -63,10 +64,12 @@ function activate(
     }
     const path = widget.selectedItems().next()!.path;
     const url = createFileURL(path);
-    // Disable dataset option if we won't be able to view the dataset.
-    // if (dataBus.viewersForURL(url).size === 0) {
-    //   return null;
-    // }
+    if (
+      dataBus.converters.listTargetMimeTypes([resolveMimeType(url)]).size <= 1
+    ) {
+      return null;
+    }
+
     return url;
   }
   app.commands.addCommand(open, {
