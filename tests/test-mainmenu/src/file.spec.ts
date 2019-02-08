@@ -71,19 +71,19 @@ describe('@jupyterlab/mainmenu', () => {
       });
     });
 
-    describe('#persistAndSavers', () => {
-      it('should allow setting of an IPersistAndSave', () => {
-        const persistAndSaver: IFileMenu.IPersistAndSave<Wodget> = {
+    describe('#saveWithOptions', () => {
+      it('should allow setting of an ISaveWithOptions', () => {
+        const saveWithOptions: IFileMenu.ISaveWithOptions<Wodget> = {
           tracker,
           name: 'Wodget',
           action: 'with Save',
-          persistAndSave: widget => {
+          saveWithOptions: widget => {
             widget.state = 'saved';
             return Promise.resolve(void 0);
           }
         };
-        menu.persistAndSavers.add(persistAndSaver);
-        delegateExecute(wodget, menu.persistAndSavers, 'persistAndSave');
+        menu.saveWithOptions.add(saveWithOptions);
+        delegateExecute(wodget, menu.saveWithOptions, 'saveWithOptions');
         expect(wodget.state).to.equal('saved');
       });
     });

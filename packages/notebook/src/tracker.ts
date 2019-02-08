@@ -12,6 +12,38 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { NotebookPanel, Notebook } from './';
 
 /**
+ * save means to save new state, overwriting old state
+ * clear means to delete old state
+ * previous means to leave old state there.
+ */
+export type ISaveAction = 'save' | 'clear' | 'previous';
+
+/**
+ * An option for saving content in the notebook.
+ */
+export interface ISaveOption {
+  /**
+   * The name of the option
+   */
+  name: string;
+  /**
+   * The user-visible label of the option.
+   */
+  label: string;
+  /**
+   * A brief description of the option.
+   */
+  help: string;
+  /**
+   * The callback that will act on the option to modify the notebook model
+   * before saving.
+   *
+   * We could make this asynchronous in the future if we needed to do so.
+   */
+  callback: (w: Notebook, name: string, action: ISaveAction) => void;
+}
+
+/**
  * An object that tracks notebook widgets.
  */
 export interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
@@ -35,6 +67,11 @@ export interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * A signal emitted when the selection state changes.
    */
   readonly selectionChanged: ISignal<this, void>;
+
+  /**
+   * List of save options.
+   */
+  saveOptions: ISaveOption[];
 }
 
 /* tslint:disable */
@@ -139,6 +176,8 @@ export class NotebookTracker extends InstanceTracker<NotebookPanel>
       this._selectionChanged.emit(void 0);
     }
   }
+
+  saveOptions: ISaveOption[] = [];
 
   private _activeCell: Cell | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);

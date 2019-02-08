@@ -58,7 +58,7 @@ export namespace CommandIDs {
 
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export const persistAndSave = 'filemenu:persist-and-save';
+  export const saveWithOptions = 'filemenu:save-with-options';
 
   export const createConsole = 'filemenu:create-console';
 
@@ -329,30 +329,30 @@ export function createFileMenu(
     )
   });
 
-  // Add a delegator command for persisting data then saving.
-  commands.addCommand(CommandIDs.persistAndSave, {
+  // Add a delegator command for saving with options.
+  commands.addCommand(CommandIDs.saveWithOptions, {
     label: () => {
       const action = Private.delegateLabel(
         app,
-        menu.persistAndSavers,
+        menu.saveWithOptions,
         'action'
       );
-      const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
+      const name = Private.delegateLabel(app, menu.saveWithOptions, 'name');
       return `Save ${name} ${action || 'with Extras'}`;
     },
     isEnabled: args => {
       return (
         Private.delegateEnabled(
           app,
-          menu.persistAndSavers,
-          'persistAndSave'
+          menu.saveWithOptions,
+          'saveWithOptions'
         )() && commands.isEnabled('docmanager:save', args)
       );
     },
     execute: Private.delegateExecute(
       app,
-      menu.persistAndSavers,
-      'persistAndSave'
+      menu.saveWithOptions,
+      'saveWithOptions'
     )
   });
 
@@ -433,7 +433,7 @@ export function createFileMenu(
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'filemenu:persist-and-save',
+    'filemenu:save-with-options',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => {

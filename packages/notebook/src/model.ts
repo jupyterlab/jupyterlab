@@ -17,7 +17,6 @@ import {
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import {
   IObservableJSON,
@@ -60,13 +59,6 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
-
-  /**
-   * Register a save hook.
-   *
-   * A save hook is a callback that gets this notebook model, a copy of the notebook model that will be serialized, and a value parameter, which says if the user selected the option (true), deselected the option (false).
-   */
-  addSaveOption(name: string, callback: SaveHook): void;
 }
 
 /**
@@ -115,18 +107,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       this
     );
     this._deletedCells = [];
-
-    this.addSaveOption('Outputs', (value, model, nb) => {
-      // Default behavior is to save the outputs, so we just strip them if
-      // false.
-      if (!value) {
-        nb.cells.forEach(cell => {
-          if (nbformat.isCode(cell)) {
-            cell.outputs = [];
-          }
-        });
-      }
-    });
   }
 
   /**
@@ -232,43 +212,12 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
 
-    // When we pick a particular save model, we expect the notebook to reflect what we've said to save, so that after saving, if we refresh we get the same thing (i.e., loading from disk gives us the same thing as we see).
-
-    /**
-     * So how do the following work:
-     *
-     * - Saving widget state - modify the notebook widget state, or clear the
-     *   widget state if not saving. If the widget state box is not checked,
-     *   don't clear the current widget manager. I guess widget state is a bit
-     *   different than other state since we're really serializing something to
-     *   the state. So we won't have an option to leave the widget state alone
-     *   in the document?
-     * - Saving view state - if checked, then we reflect the widget view state
-     *   into the model. If not checked, do we leave the model state alone, or
-     *   do we clear the view state from the model? Should we distinguish
-     *   between leaving the initial state alone, vs clearing the initial state?
-     * - Saving outputs - if checked, leave the outputs in the model. If not
-     *   checked, clear the outputs in the model and save.
-     *
-     * Maybe we should distinguish between "Clear and save" and serializing
-     * extra stuff to the model, like view state and widget state. Extra stuff
-     * is a "serialize", "clear", and "leave alone", while things like output
-     * can't be left alone.
-     * 
-     * So perhaps "Clear output and save" is a special menu option, and other things are 
-     */
-
-    // create a saveModel that can be modified
-    const jsonModel = {
+    return {
       metadata,
       nbformat_minor: this._nbformatMinor,
       nbformat: this._nbformat,
       cells
     };
-    this._saveOptions.forEach(hook => {
-      hook(false, this, jsonModel);
-    });
-    return jsonModel;
   }
 
   /**
@@ -338,28 +287,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
-   * Register a transformation for the toJSON function.
-   * 
-   * This allows a specific function to 
-   * 
-   * Suppose a model has two views. When the model is saved, does it call both view's transformations? Each view might have different state. Perhaps the saving needs to go through the view, fundamentally? A clunky way to do this now is for each view, on activation, to register itself as the model json transformer.
-   * 
-   * Another way to do it nicely is like Saul does. The save command is provided by the view, and then the view modifies the living model, then calls save. I like this approach - the view provides the save. In fact, we can call it the same thing?
-   */
-
-  /**
-   * Register a save hook.
-   *
-   * A save hook is a callback that gets this notebook model, a copy of the notebook model that will be serialized, and a value parameter, which says if the user selected the option (true), deselected the option (false).
-   */
-  addSaveOption(name: string, callback: SaveHook): IDisposable {
-    this._saveOptions.set(name, callback);
-    return new DisposableDelegate(() => {
-      this._saveOptions.delete(name);
-    });
-  }
-
-  /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(
@@ -419,7 +346,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
-  private _saveOptions = new Map<string, SaveHook>();
 }
 
 /**

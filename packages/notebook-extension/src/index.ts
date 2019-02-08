@@ -1718,6 +1718,9 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
+        // Get registry of notebook persistence callbacks. Call each one with
+        // the notebook.
+
         NotebookActions.persistViewState(current.content);
         app.commands.execute('docmanager:save');
       }
@@ -1876,15 +1879,15 @@ function populateMenus(
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
 
   // Add a save with view command to the file menu.
-  mainMenu.fileMenu.persistAndSavers.add({
+  mainMenu.fileMenu.saveWithOptions.add({
     tracker,
-    action: 'with View State',
+    action: 'with options',
     name: 'Notebook',
-    persistAndSave: (current: NotebookPanel) => {
+    saveWithOptions: (current: NotebookPanel) => {
       NotebookActions.persistViewState(current.content);
       return app.commands.execute('docmanager:save');
     }
-  } as IFileMenu.IPersistAndSave<NotebookPanel>);
+  } as IFileMenu.ISaveWithOptions<NotebookPanel>);
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });

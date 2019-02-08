@@ -25,9 +25,9 @@ export interface IFileMenu extends IJupyterLabMenu {
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 
   /**
-   * The persist and save extension point.
+   * The save with options extension point.
    */
-  readonly persistAndSavers: Set<IFileMenu.IPersistAndSave<Widget>>;
+  readonly saveWithOptions: Set<IFileMenu.ISaveWithOptions<Widget>>;
 
   /**
    * A set storing IConsoleCreators for the File menu.
@@ -50,7 +50,7 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.newMenu = new JupyterLabMenu(options, false);
     this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
-    this.persistAndSavers = new Set<IFileMenu.IPersistAndSave<Widget>>();
+    this.saveWithOptions = new Set<IFileMenu.ISaveWithOptions<Widget>>();
     this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
 
@@ -67,7 +67,7 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
   /**
    * The persist and save extension point.
    */
-  readonly persistAndSavers: Set<IFileMenu.IPersistAndSave<Widget>>;
+  readonly saveWithOptions: Set<IFileMenu.ISaveWithOptions<Widget>>;
 
   /**
    * A set storing IConsoleCreators for the Kernel menu.
@@ -115,24 +115,23 @@ export namespace IFileMenu {
   }
 
   /**
-   * Interface for an activity that has some persistence action
-   * before saving.
+   * Interface for an activity that has some options for saving.
    */
-  export interface IPersistAndSave<T extends Widget> extends IMenuExtender<T> {
+  export interface ISaveWithOptions<T extends Widget> extends IMenuExtender<T> {
     /**
      * A label to use for the activity that is being saved.
      */
     name: string;
 
     /**
-     * A label to describe what is being persisted before saving.
+     * A label to describe what kinds of options are available.
      */
     action: string;
 
     /**
-     * A function to perform the persistence.
+     * A function to perform the save (possibly getting user input on the options first).
      */
-    persistAndSave: (widget: T) => Promise<void>;
+    saveWithOptions: (widget: T) => Promise<void>;
   }
 
   /**
