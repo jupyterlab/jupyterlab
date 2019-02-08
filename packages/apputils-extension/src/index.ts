@@ -60,8 +60,6 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
-  export const autoRedirect = 'apputils:auto-redirect';
-
   export const changeTheme = 'apputils:change-theme';
 
   export const loadState = 'apputils:load-statedb';
@@ -241,21 +239,53 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     paths: JupyterFrontEnd.IPaths,
     router: IRouter
   ) => {
+    const { hash, path, search } = router.current;
     const workspacePattern = new RegExp(`^${paths.urls.workspaces}([^?\/]+)`);
     const solver = new WindowResolver();
-    const match = router.current.path.match(workspacePattern);
+    const match = path.match(workspacePattern);
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = Private.candidate(paths, workspace);
+    const query = URLExt.queryStringToObject(search || '');
 
     try {
       await solver.resolve(candidate);
     } catch (error) {
-      console.warn('Window resolution failed:', error);
-
-      // Return a promise that never resolves.
+      // Window resolution has failed so the URL must change. Return a promise
+      // that never resolves to prevent the application from loading plugins
+      // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
+        // If the user has requested `autoredirect` create a new workspace name.
+        if ('autoredirect' in query) {
+          const { base, workspaces } = paths.urls;
+          const auto = `auto-${Private.token(6)}`;
+          const path = URLExt.join(base, workspaces, auto);
+
+          // Maintain the query string parameters but remove `autoredirect`.
+          delete query['autoredirect'];
+
+          // Clone the originally requested workspace after redirecting.
+          query['clone'] = workspace;
+
+          // Change the URL and trigger the router by triggering a hard reload.
+          const url = path + URLExt.objectToQueryString(query) + (hash || '');
+          router.navigate(url, { hard: true, silent: true });
+          return;
+        }
+
+        // Launch a dialog to ask the user for a new workspace name.
+        console.warn('Window resolution failed:', error);
         Private.redirect(router, paths, workspacePattern);
       });
+    }
+
+    // If the user has requested `autoredirect` remove the query parameter.
+    if ('autoredirect' in query) {
+      // Maintain the query string parameters but remove `autoredirect`.
+      delete query['autoredirect'];
+
+      // Silently scrub the URL.
+      const url = path + URLExt.objectToQueryString(query) + (hash || '');
+      router.navigate(url, { silent: true });
     }
 
     return solver;
@@ -453,29 +483,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       }
     });
 
-    commands.addCommand(CommandIDs.autoRedirect, {
-      label: 'Redirect to New Workspace',
-      execute: (args: IRouter.ILocation) => {
-        const query = URLExt.queryStringToObject(args.search || '');
-        const autoredirect = 'autoredirect' in query;
-
-        if (!autoredirect) {
-          return;
-        }
-
-        // Maintain the query string parameters but remove `autoredirect`.
-        delete query['autoredirect'];
-
-        const { base, workspaces } = paths.urls;
-        const url =
-          URLExt.join(base, workspaces, `auto-${Private.token(6)}`) +
-          URLExt.objectToQueryString(query) +
-          (args.hash || '');
-
-        router.navigate(url, { hard: true, silent: true });
-      }
-    });
-
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
       execute: async () => {
@@ -549,15 +556,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     router.register({
-      command: CommandIDs.autoRedirect,
-      pattern: /(\?autoredirect|\&autoredirect)($|&)/,
-      rank: 20 // Very high priority: 20:100.
-    });
-
-    router.register({
       command: CommandIDs.resetOnLoad,
       pattern: /(\?reset|\&reset)($|&)/,
-      rank: 10 // Even higher priority: 10:100.
+      rank: 20 // High priority: 20:100.
     });
 
     // Clean up state database when the window unloads.
