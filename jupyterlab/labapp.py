@@ -60,8 +60,8 @@ class LabBuildApp(JupyterApp):
     dev_build = Bool(True, config=True,
         help="Whether to build in dev mode (defaults to dev mode)")
 
-    pre_clean = Bool(True, config=True,
-        help="Whether to clean before building (defaults to True)")
+    pre_clean = Bool(False, config=True,
+        help="Whether to clean before building (defaults to False)")
 
     def start(self):
         command = 'build:prod' if not self.dev_build else 'build'

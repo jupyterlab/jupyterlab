@@ -99,6 +99,13 @@ def ensure_dev(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
+        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+                            cwd=parent, logger=logger)
+        had_dupes = yarn_proc.wait() != 0
+        if had_dupes:
+            yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
+            yarn_proc.wait()
+
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
                             logger=logger)
@@ -117,6 +124,13 @@ def ensure_core(logger=None):
     if not osp.exists(pjoin(staging, 'node_modules')):
         yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
         yarn_proc.wait()
+
+        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+                            cwd=staging, logger=logger)
+        had_dupes = yarn_proc.wait() != 0
+        if had_dupes:
+            yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
+            yarn_proc.wait()
 
     if not osp.exists(pjoin(HERE, 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
@@ -141,6 +155,13 @@ def watch_packages(logger=None):
     if not osp.exists(pjoin(parent, 'node_modules')):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
+
+        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+                            cwd=parent, logger=logger)
+        had_dupes = yarn_proc.wait() != 0
+        if had_dupes:
+            yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
+            yarn_proc.wait()
 
     logger = _ensure_logger(logger)
     ts_dir = osp.abspath(osp.join(HERE, '..', 'packages', 'metapackage'))
@@ -447,6 +468,11 @@ class _AppHandler(object):
             msg = 'npm dependencies failed to install'
             self.logger.error(msg)
             raise RuntimeError(msg)
+        had_dupes = 0 != self._run(
+            ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+            cwd=staging)
+        if had_dupes:
+            self._run(['node', YARN_PATH, 'install'], cwd=staging)
 
         # Build the app.
         ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
@@ -465,6 +491,11 @@ class _AppHandler(object):
 
         # Make sure packages are installed.
         self._run(['node', YARN_PATH, 'install'], cwd=staging)
+        had_dupes = 0 != self._run(
+            ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+            cwd=staging)
+        if had_dupes:
+            self._run(['node', YARN_PATH, 'install'], cwd=staging)
 
         proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
                            cwd=pjoin(self.app_dir, 'staging'),
@@ -881,12 +912,6 @@ class _AppHandler(object):
                       '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)
-
-        # Remove an existing yarn.lock file
-        # Because otherwise we can end up with unwanted duplicates
-        # cf https://github.com/yarnpkg/yarn/issues/3967
-        if osp.exists(pjoin(staging, 'yarn.lock')):
-            os.remove(pjoin(staging, 'yarn.lock'))
 
         # Ensure a clean templates directory
         templates = pjoin(staging, 'templates')

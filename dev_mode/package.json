@@ -136,7 +136,8 @@
     "webpack": "~4.29.6",
     "webpack-cli": "^3.3.0",
     "webpack-merge": "^4.2.1",
-    "webpack-visualizer-plugin": "^0.1.11"
+    "webpack-visualizer-plugin": "^0.1.11",
+    "yarn-deduplicate": "^1.1.1"
   },
   "engines": {
     "node": ">=6.11.5"
