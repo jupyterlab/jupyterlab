@@ -1533,11 +1533,7 @@ namespace Private {
 
     // Handle the restart on all of the kernels with the same id.
     await Promise.all(
-      runningKernels.map(async k => {
-        if (k.id === kernel.id) {
-          await k.handleRestart();
-        }
-      })
+      runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
     );
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status !== 200) {
