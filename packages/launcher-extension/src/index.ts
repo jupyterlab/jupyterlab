@@ -9,11 +9,13 @@ import {
 
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
 import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -30,7 +32,7 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette, ILabShell],
+  requires: [ICommandPalette, ILabShell, ISettingRegistry],
   provides: ILauncher,
   autoStart: true
 };
@@ -46,10 +48,22 @@ export default plugin;
 function activate(
   app: JupyterFrontEnd,
   palette: ICommandPalette,
-  labShell: ILabShell
+  labShell: ILabShell,
+  settingRegistry: ISettingRegistry
 ): ILauncher {
   const { commands } = app;
   const model = new LauncherModel();
+
+  Promise.all([settingRegistry.load(plugin.id), app.restored]).then(
+    ([settings]) => {
+      let usageData = settings.get('usage-data').composite || {};
+      model.fromJSON(usageData as JSONValue);
+      settings.changed.connect(settings => {
+        usageData = settings.get('usage-data').composite || {};
+        model.fromJSON(usageData as JSONValue);
+      });
+    }
+  );
 
   commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',
@@ -62,6 +76,7 @@ function activate(
       const launcher = new Launcher({ cwd, callback, commands });
 
       launcher.model = model;
+      launcher.model.setSettingRegistey(settingRegistry);
       launcher.title.label = 'Launcher';
       launcher.title.iconClass = 'jp-LauncherIcon';
 

@@ -8,7 +8,11 @@
       "selector": "body"
     }
   ],
-  "properties": {},
+  "properties": {
+    "usage-data": {
+      "default": {}
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }
