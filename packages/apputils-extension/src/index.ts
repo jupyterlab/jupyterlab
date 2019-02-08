@@ -256,11 +256,10 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         // If the user has requested `autoredirect` create a new workspace name.
         if ('autoredirect' in query) {
           const { base, workspaces } = paths.urls;
-          const auto = `auto-${Private.token(6)}`;
-          const path = URLExt.join(base, workspaces, auto);
-
-          // Maintain the query string parameters but remove `autoredirect`.
-          delete query['autoredirect'];
+          const pool =
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          const random = pool[Math.floor(Math.random() * pool.length)];
+          const path = URLExt.join(base, workspaces, `auto-${random}`);
 
           // Clone the originally requested workspace after redirecting.
           query['clone'] = workspace;
@@ -789,29 +788,5 @@ namespace Private {
         }
       });
     });
-  }
-
-  /**
-   * Returns a random string composed of characters in the range [A-Z,a-z].
-   *
-   * @param length - The desired length of the random token.
-   */
-  export function token(length: number): string {
-    const start = 'A'.charCodeAt(0);
-    const end = 'Z'.charCodeAt(0);
-    const delta = end - start;
-
-    return ' '
-      .repeat(length)
-      .split('')
-      .reduce(acc => {
-        // Pick a random character from range [start-end], inclusively.
-        const char = String.fromCharCode(
-          start + Math.round(Math.random() * delta)
-        );
-
-        // Switch case half the time and append to accumulator.
-        return acc + (Math.random() < 0.5 ? char : char.toLocaleLowerCase());
-      }, '');
   }
 }
