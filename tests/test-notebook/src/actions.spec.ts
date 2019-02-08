@@ -552,7 +552,7 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        sleep(100);
+        await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
         await ipySession.kernel.restart();
@@ -641,7 +641,7 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        sleep(100);
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -719,7 +719,7 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        sleep(100);
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -789,7 +789,7 @@ describe('@jupyterlab/notebook', () => {
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
-        sleep(100);
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         await ipySession.kernel.restart();
