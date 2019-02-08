@@ -13,7 +13,6 @@ import {
   IObservableList,
   ObservableList,
   IObservableValue,
-  ObservableValue,
   IModelDB
 } from '@jupyterlab/observables';
 
@@ -449,7 +448,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    */
   private _onSerializedChanged(
     sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
+    args: IObservableValue.IChangedArgs
   ) {
     if (!this._changeGuard) {
       this._changeGuard = true;

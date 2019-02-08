@@ -13,7 +13,6 @@ import {
   IModelDB,
   ModelDB,
   IObservableValue,
-  ObservableValue,
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
@@ -291,7 +290,7 @@ export namespace CodeEditor {
 
     private _onMimeTypeChanged(
       mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
+      args: IObservableValue.IChangedArgs
     ): void {
       this._mimeTypeChanged.emit({
         name: 'mimeType',

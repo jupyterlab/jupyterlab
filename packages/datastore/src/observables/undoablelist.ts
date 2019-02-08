@@ -1,81 +1,37 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyJSONValue } from '@phosphor/coreutils';
+import {
+  IObservableUndoableList,
+  ISerializer,
+  IObservableList
+} from '@jupyterlab/observables';
 
 import { each } from '@phosphor/algorithm';
 
-import { IObservableList, ObservableList } from './observablelist';
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-/**
- * An object which knows how to serialize and
- * deserialize the type T.
- */
-export interface ISerializer<T> {
-  /**
-   * Convert the object to JSON.
-   */
-  toJSON(value: T): ReadonlyJSONValue;
+import { Datastore, Schema } from '@phosphor/datastore';
 
-  /**
-   * Deserialize the object from JSON.
-   */
-  fromJSON(value: ReadonlyJSONValue): T;
-}
-
-/**
- * An observable list that supports undo/redo.
- */
-export interface IObservableUndoableList<T> extends IObservableList<T> {
-  /**
-   * Whether the object can redo changes.
-   */
-  readonly canRedo: boolean;
-
-  /**
-   * Whether the object can undo changes.
-   */
-  readonly canUndo: boolean;
-
-  /**
-   * Begin a compound operation.
-   *
-   * @param isUndoAble - Whether the operation is undoable.
-   *   The default is `false`.
-   */
-  beginCompoundOperation(isUndoAble?: boolean): void;
-
-  /**
-   * End a compound operation.
-   */
-  endCompoundOperation(): void;
-
-  /**
-   * Undo an operation.
-   */
-  undo(): void;
-
-  /**
-   * Redo an operation.
-   */
-  redo(): void;
-
-  /**
-   * Clear the change stack.
-   */
-  clearUndo(): void;
-}
+import { ObservableList } from './list';
 
 /**
  * A concrete implementation of an observable undoable list.
  */
-export class ObservableUndoableList<T> extends ObservableList<T>
+export class ObservableUndoableList<T extends ReadonlyJSONValue>
+  extends ObservableList<T>
   implements IObservableUndoableList<T> {
   /**
    * Construct a new undoable observable list.
    */
-  constructor(serializer: ISerializer<T>) {
-    super();
+  constructor(
+    datastore: Datastore,
+    schema: Schema,
+    recordId: string,
+    fieldId: string,
+    serializer: ISerializer<T>
+  ) {
+    super(datastore, schema, recordId, fieldId);
     this._serializer = serializer;
     this.changed.connect(
       this._onListChanged,

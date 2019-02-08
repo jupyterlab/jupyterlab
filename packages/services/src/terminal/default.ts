@@ -99,7 +99,8 @@ export class DefaultTerminalSession
    * @returns A promise that resolves when the terminal has reconnected.
    */
   reconnect(): Promise<void> {
-    this.doReconnect();
+    this.reconnectAttempt = 0;
+    this._createSocket();
     return this.ready;
   }
 

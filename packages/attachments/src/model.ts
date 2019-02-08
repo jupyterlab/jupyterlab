@@ -7,7 +7,6 @@ import {
   IObservableMap,
   ObservableMap,
   IObservableValue,
-  ObservableValue,
   IModelDB
 } from '@jupyterlab/observables';
 
@@ -309,7 +308,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    */
   private _onSerializedChanged(
     sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
+    args: IObservableValue.IChangedArgs
   ) {
     if (!this._changeGuard) {
       this._changeGuard = true;

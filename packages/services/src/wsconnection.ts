@@ -1,17 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate, JSONValue } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 /**
  * Abstract base for a class that sends/receives messages over websocket.
  */
-export abstract class WSConnection<
-  TSendMsg extends JSONValue,
-  TRecvMsg extends JSONValue
-> implements IDisposable {
+export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
   /**
    * Create a new websocket based connection.
    */
@@ -91,21 +88,13 @@ export abstract class WSConnection<
   protected abstract handleMessage(msg: TRecvMsg): boolean;
 
   /**
-   * Reconnect the websocket.
-   */
-  protected doReconnect() {
-    this.reconnectAttempt = 0;
-    this._createSocket();
-  }
-
-  /**
    * Whether a closed connection should reconnect.
    *
-   * @return {false | number} Returns false if it should not reconnect.
+   * @return - Returns false if it should not reconnect.
    * Otherwise it returns a number indicating the delay before reconnecting
    * in ms. Return 0 to reconnect as soon as possible.
    */
-  protected shouldReconnect() {
+  protected shouldReconnect(): false | number {
     if (this.reconnectAttempt >= this.reconnectLimit) {
       console.log(
         `Websocket reconnect abandoned after ${this.reconnectAttempt} attempts`
@@ -134,16 +123,13 @@ export abstract class WSConnection<
     }
   }
 
-  protected readonly reconnectLimit = 7;
-  protected reconnectAttempt = 0;
-
   /**
    * Create the websocket connection and add socket status handlers.
    */
-  private _createSocket = () => {
+  protected _createSocket = () => {
     this._clearSocket();
     this._wsStopped = false;
-    this._ws = this._wsFactory();
+    this._ws = this.wsFactory();
     this._readyPromise = new PromiseDelegate<void>();
 
     this._ws.onmessage = this._onWSMessage.bind(this);
@@ -227,9 +213,11 @@ export abstract class WSConnection<
     }, delay);
   }
 
-  private _wsFactory: WSConnection.WSFactory;
-  private _ws: WebSocket | null = null;
-  private _wsStopped: boolean;
+  protected readonly reconnectLimit = 7;
+  protected reconnectAttempt = 0;
+  protected _ws: WebSocket | null = null;
+  protected _wsStopped: boolean;
+
   private _isDisposed = false;
   private _readyPromise: PromiseDelegate<void>;
 
