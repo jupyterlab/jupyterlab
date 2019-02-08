@@ -265,7 +265,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
           // Clone the originally requested workspace after redirecting.
           query['clone'] = workspace;
 
-          // Change the URL and trigger the router by triggering a hard reload.
+          // Change the URL and trigger a hard reload to re-route.
           const url = path + URLExt.objectToQueryString(query) + (hash || '');
           router.navigate(url, { hard: true, silent: true });
           return;
