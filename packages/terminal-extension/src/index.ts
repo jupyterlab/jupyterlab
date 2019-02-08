@@ -10,6 +10,7 @@ import {
 import {
   ICommandPalette,
   InstanceTracker,
+  IThemeManager,
   MainAreaWidget
 } from '@jupyterlab/apputils';
 
@@ -51,7 +52,13 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
   requires: [ISettingRegistry],
-  optional: [ICommandPalette, ILauncher, ILayoutRestorer, IMainMenu],
+  optional: [
+    ICommandPalette,
+    ILauncher,
+    ILayoutRestorer,
+    IMainMenu,
+    IThemeManager
+  ],
   autoStart: true
 };
 
@@ -69,7 +76,8 @@ function activate(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null
+  mainMenu: IMainMenu | null,
+  themeManager: IThemeManager
 ): ITerminalTracker {
   const { serviceManager } = app;
   const category = 'Terminal';
@@ -140,6 +148,14 @@ function activate(
     .catch((reason: Error) => {
       console.error(reason.message);
     });
+
+  // Subscribe to changes in theme.
+  themeManager.themeChanged.connect((sender, args) => {
+    tracker.forEach(widget => {
+      const terminal = widget.content;
+      terminal.setOption('theme', args.newValue as 'light' | 'dark');
+    });
+  });
 
   addCommands(app, tracker, settingRegistry);
 
