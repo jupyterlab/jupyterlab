@@ -35,8 +35,6 @@ namespace CommandIDs {
   export const increaseFont = 'terminal:increase-font';
 
   export const decreaseFont = 'terminal:decrease-font';
-
-  export const toggleTheme = 'terminal:toggle-theme';
 }
 
 /**
@@ -161,13 +159,11 @@ function activate(
 
   if (mainMenu) {
     // Add some commands to the application view menu.
-    const viewGroup = [
-      CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
-    ].map(command => {
-      return { command };
-    });
+    const viewGroup = [CommandIDs.increaseFont, CommandIDs.decreaseFont].map(
+      command => {
+        return { command };
+      }
+    );
     mainMenu.settingsMenu.addGroup(viewGroup, 40);
 
     // Add terminal creation to the file menu.
@@ -180,8 +176,7 @@ function activate(
       CommandIDs.createNew,
       CommandIDs.refresh,
       CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
+      CommandIDs.decreaseFont
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
     });
@@ -309,20 +304,6 @@ export function addCommands(
           .set(plugin.id, 'fontSize', fontSize - 1)
           .catch(showErrorMessage);
       }
-    }
-  });
-
-  commands.addCommand(CommandIDs.toggleTheme, {
-    label: 'Use Dark Terminal Theme',
-    caption: 'Whether to use the dark terminal theme',
-    isToggled: () => Terminal.defaultOptions.theme === 'dark',
-    execute: () => {
-      let { theme } = Terminal.defaultOptions;
-      theme = theme === 'dark' ? 'light' : 'dark';
-      return settingRegistry
-        .set(plugin.id, 'theme', theme)
-        .then(() => commands.notifyCommandChanged(CommandIDs.toggleTheme))
-        .catch(showErrorMessage);
     }
   });
 }

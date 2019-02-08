@@ -42,12 +42,6 @@
       "$ref": "#/definitions/lineHeight",
       "default": 1.0
     },
-    "theme": {
-      "title": "Theme",
-      "description": "The theme for the terminal.",
-      "$ref": "#/definitions/theme",
-      "default": "dark"
-    },
     "scrollback": {
       "title": "Scrollback Buffer",
       "description": "The amount of scrollback beyond initial viewport",
