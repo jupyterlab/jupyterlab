@@ -240,12 +240,11 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     router: IRouter
   ) => {
     const { hash, path, search } = router.current;
-    const workspacePattern = new RegExp(`^${paths.urls.workspaces}([^?\/]+)`);
+    const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
-    const match = path.match(workspacePattern);
+    const match = path.match(new RegExp(`^${paths.urls.workspaces}([^?\/]+)`));
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = Private.candidate(paths, workspace);
-    const query = URLExt.queryStringToObject(search || '');
 
     try {
       await solver.resolve(candidate);
@@ -274,7 +273,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
 
         // Launch a dialog to ask the user for a new workspace name.
         console.warn('Window resolution failed:', error);
-        Private.redirect(router, paths, workspacePattern);
+        Private.redirect(router, paths, workspace);
       });
     }
 
@@ -693,7 +692,7 @@ namespace Private {
   export async function redirect(
     router: IRouter,
     paths: JupyterFrontEnd.IPaths,
-    workspacePattern: RegExp,
+    workspace: string,
     warn = false
   ): Promise<void> {
     const form = createRedirectForm(warn);
@@ -707,14 +706,12 @@ namespace Private {
 
     dialog.dispose();
     if (!result.value) {
-      return redirect(router, paths, workspacePattern, true);
+      return redirect(router, paths, workspace, true);
     }
 
     // Navigate to a new workspace URL and abandon this session altogether.
     const page = paths.urls.page;
     const workspaces = paths.urls.workspaces;
-    const match = router.current.path.match(workspacePattern);
-    const workspace = (match && decodeURIComponent(match[1])) || '';
     const prefix = (workspace ? workspaces : page).length + workspace.length;
     const rest = router.current.request.substring(prefix);
     const url = URLExt.join(workspaces, result.value, rest);
