@@ -332,11 +332,7 @@ export function createFileMenu(
   // Add a delegator command for saving with options.
   commands.addCommand(CommandIDs.saveWithOptions, {
     label: () => {
-      const action = Private.delegateLabel(
-        app,
-        menu.saveWithOptions,
-        'action'
-      );
+      const action = Private.delegateLabel(app, menu.saveWithOptions, 'action');
       const name = Private.delegateLabel(app, menu.saveWithOptions, 'name');
       return `Save ${name} ${action || 'with Extras'}`;
     },

@@ -23,7 +23,7 @@ import {
   ISettingRegistry,
   IStateDB,
   PageConfig,
-  URLExt
+  URLExt,
 } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
@@ -55,7 +55,9 @@ import {
   NotebookWidgetFactory,
   StaticNotebook,
   CommandEditStatus,
-  NotebookTrustStatus
+  NotebookTrustStatus,
+  Notebook,
+  SaveAction
 } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -69,6 +71,7 @@ import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
+import { saveOptionsDialog } from './dialog';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -509,6 +512,48 @@ function activateNotebookHandler(
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
+  tracker.saveOptions.push({
+    name: 'outputs',
+    label: 'Cell Outputs',
+    help: 'The outputs of the cells.',
+    action: 'save',
+    callback: (w: Notebook, name: string, action: SaveAction) => {
+      switch (action) {
+        case 'clear':
+          console.log(w);
+          NotebookActions.clearAllOutputs(w);
+          break;
+
+        case 'save':
+        case 'previous':
+        case 'previous':
+        default:
+      }
+    }
+  });
+
+  tracker.saveOptions.push({
+    name: 'collapse-scroll-state',
+    label: 'Cell collapsed and scrolled state',
+    help:
+      'The input and output collapsed state, as well as the output scrolled state for code cells',
+    action: 'save',
+    callback: (w: Notebook, name: string, action: SaveAction) => {
+      switch (action) {
+        case 'clear':
+          NotebookActions.clearCollapseScrollState(w);
+          break;
+
+        case 'save':
+          NotebookActions.persistCollapseScrollState(w);
+          break;
+
+        case 'previous':
+        default:
+      }
+    }
+  });
+
   // Handle state restoration.
   if (restorer) {
     restorer.restore(tracker, {
@@ -583,13 +628,26 @@ function activateNotebookHandler(
   }
 
   /**
-   * Update the settings of the current tracker instances.
+   * Update the settings of the current tracker.
    */
-  function updateTracker(): void {
+  function updateTracker(settings: ISettingRegistry.ISettings | null): void {
     tracker.forEach(widget => {
       widget.content.editorConfig = editorConfig;
       widget.content.notebookConfig = notebookConfig;
     });
+
+    // Update the save option values.
+    let saveValues = settings
+      ? (settings.get('saveOptions').composite as {
+          [key: string]: SaveAction;
+        })
+      : {};
+
+    let entries = Object.keys(saveValues).map<[string, SaveAction]>(k => [
+      k,
+      saveValues[k]
+    ]);
+    tracker.saveValues = new Map(entries);
   }
 
   // Fetch settings if possible.
@@ -600,20 +658,20 @@ function activateNotebookHandler(
     .then(() => fetchSettings)
     .then(settings => {
       updateConfig(settings);
-      updateTracker();
+      updateTracker(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
-        updateTracker();
+        updateTracker(settings);
       });
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
-      updateTracker();
+      updateTracker(null);
     });
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(app, mainMenu, tracker, services, palette);
+    populateMenus(app, mainMenu, tracker, services, palette, fetchSettings);
   }
 
   // Utility function to create a new notebook.
@@ -1712,23 +1770,23 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.saveWithView, {
-    label: 'Save Notebook with View State',
-    execute: args => {
-      const current = getCurrent(args);
+  // commands.addCommand(CommandIDs.saveWithView, {
+  //   label: 'Save Notebook with View State',
+  //   execute: args => {
+  //     const current = getCurrent(args);
 
-      if (current) {
-        // Get registry of notebook persistence callbacks. Call each one with
-        // the notebook.
+  //     if (current) {
+  //       // Get registry of notebook persistence callbacks. Call each one with
+  //       // the notebook.
 
-        NotebookActions.persistViewState(current.content);
-        app.commands.execute('docmanager:save');
-      }
-    },
-    isEnabled: args => {
-      return isEnabled() && commands.isEnabled('docmanager:save', args);
-    }
-  });
+  //       NotebookActions.persistViewState(current.content);
+  //       app.commands.execute('docmanager:save');
+  //     }
+  //   },
+  //   isEnabled: args => {
+  //     return isEnabled() && commands.isEnabled('docmanager:save', args);
+  //   }
+  // });
 }
 
 /**
@@ -1826,7 +1884,8 @@ function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  fetchSettings: Promise<ISettingRegistry.ISettings>
 ): void {
   let { commands } = app;
 
@@ -1881,11 +1940,38 @@ function populateMenus(
   // Add a save with view command to the file menu.
   mainMenu.fileMenu.saveWithOptions.add({
     tracker,
-    action: 'with options',
+    action: 'with options…',
     name: 'Notebook',
-    saveWithOptions: (current: NotebookPanel) => {
-      NotebookActions.persistViewState(current.content);
-      return app.commands.execute('docmanager:save');
+    saveWithOptions: async (current: NotebookPanel) => {
+      // Pop up dialog box with options
+      let result = await saveOptionsDialog(
+        tracker.saveOptions,
+        tracker.saveValues
+      );
+
+      // If dialog was cancelled, abort.
+      if (!result.button.accept) {
+        return;
+      }
+
+      // Call each option callback with the action from the dialog
+      tracker.saveOptions.forEach(({ name, callback }) => {
+        const action = result.value.get(name);
+        callback(current.content, name, action);
+      });
+
+      // execute the save command
+      await app.commands.execute('docmanager:save');
+
+      // If "remember" checked, save option state to notebook options.
+      if (result.value) {
+        let settings = await fetchSettings;
+        let options = Object.create(null);
+        for (let [k, v] of result.value) {
+          options[k] = v;
+        }
+        await settings.set('saveOptions', options);
+      }
     }
   } as IFileMenu.ISaveWithOptions<NotebookPanel>);
 

@@ -11,9 +11,16 @@ import {
   IIconProps
 } from '@blueprintjs/core/lib/cjs/components/icon/icon';
 import {
+  Checkbox as BPCheckbox, ICheckboxProps
+} from '@blueprintjs/core/lib/cjs/components/forms/controls'
+import {
   Collapse as BPCollapse,
   ICollapseProps
 } from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
+import {
+  FormGroup as BPFormGroup,
+  IFormGroupProps
+} from '@blueprintjs/core/lib/cjs/components/forms/formGroup';
 import {
   InputGroup as BPInputGroup,
   IInputGroupProps as IBPInputGroupProps
@@ -26,6 +33,7 @@ import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
+
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '../style/index.css';
@@ -98,5 +106,19 @@ export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
   <BPSelect
     {...props}
     className={combineClassNames(props.className, 'jp-Select')}
+  />
+);
+
+export const Checkbox = (props: ICheckboxProps & CommonProps<any>) => (
+  <BPCheckbox
+    {...props}
+    className={combineClassNames(props.className, 'jp-Checkbox')}
+  />
+);
+
+export const FormGroup = (props: IFormGroupProps & CommonProps<any>) => (
+  <BPFormGroup
+    {...props}
+    className={combineClassNames(props.className, 'jp-FormGroup')}
   />
 );

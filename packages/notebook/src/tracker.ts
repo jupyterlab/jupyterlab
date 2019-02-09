@@ -16,7 +16,7 @@ import { NotebookPanel, Notebook } from './';
  * clear means to delete old state
  * previous means to leave old state there.
  */
-export type ISaveAction = 'save' | 'clear' | 'previous';
+export type SaveAction = 'save' | 'clear' | 'previous';
 
 /**
  * An option for saving content in the notebook.
@@ -35,12 +35,16 @@ export interface ISaveOption {
    */
   help: string;
   /**
+   * The action (can be overridden by the user).
+   */
+  action: SaveAction;
+  /**
    * The callback that will act on the option to modify the notebook model
    * before saving.
    *
    * We could make this asynchronous in the future if we needed to do so.
    */
-  callback: (w: Notebook, name: string, action: ISaveAction) => void;
+  callback: (w: Notebook, name: string, action: SaveAction) => void;
 }
 
 /**
@@ -72,6 +76,11 @@ export interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
    * List of save options.
    */
   saveOptions: ISaveOption[];
+
+  /**
+   * List of save values.
+   */
+  saveValues: Map<string, SaveAction>;
 }
 
 /* tslint:disable */
@@ -178,7 +187,7 @@ export class NotebookTracker extends InstanceTracker<NotebookPanel>
   }
 
   saveOptions: ISaveOption[] = [];
-
+  saveValues = new Map<string, SaveAction>();
   private _activeCell: Cell | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _selectionChanged = new Signal<this, void>(this);

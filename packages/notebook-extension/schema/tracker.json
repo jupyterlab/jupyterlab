@@ -329,6 +329,15 @@
       "description": "Whether to be able to scroll so the last cell is at the top of the panel",
       "type": "boolean",
       "default": true
+    },
+    "saveOptions": {
+      "title": "Save options",
+      "description": "The save options.",
+      "type": "object",
+      "default": {
+        "outputs": "save",
+        "collapse-scroll-state": "save"
+      }
     }
   },
   "additionalProperties": false,

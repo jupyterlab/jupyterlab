@@ -1168,11 +1168,45 @@ export namespace NotebookActions {
   }
 
   /**
-   * Persists the collapsed state of all code cell outputs to the model.
+   * Clear the collapsed and scrolled state of all cells in the model.
+   */
+  export function clearCollapseScrollState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+    notebook.widgets.forEach(cell => {
+      const { model } = cell;
+      const metadata = model.metadata;
+      const jupyter = (metadata.get('jupyter') as any) || {};
+
+      delete jupyter.source_hidden;
+
+      if (cell.model.type === 'code') {
+        // set both metadata keys
+        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
+        model.metadata.delete('collapsed');
+        delete jupyter.outputs_hidden;
+
+        model.metadata.delete('scrolled');
+      }
+
+      if (Object.keys(jupyter).length === 0) {
+        metadata.delete('jupyter');
+      } else {
+        metadata.set('jupyter', jupyter);
+      }
+    });
+    Private.handleState(notebook, state);
+  }
+
+  /**
+   * Persists the collapsed and scrolled state of all cells to the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function persistViewState(notebook: Notebook): void {
+  export function persistCollapseScrollState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
