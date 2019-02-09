@@ -1,5 +1,5 @@
 jobs:
-  - job: 'Travis'
+  - job: 'Linux'
     pool:
       vmImage: 'ubuntu-16.04'
     variables:
@@ -51,7 +51,7 @@ jobs:
           targetType: 'filePath'
           filePath: ./scripts/travis_after_success.sh
 
-  - job: 'Appveyor'
+  - job: 'Windows'
     pool:
       vmImage: 'vs2017-win2016'
     variables:
