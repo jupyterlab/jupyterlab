@@ -42,6 +42,7 @@ describe('@jupyterlab/notebook', () => {
         kernelPreference: { name: 'ipython' }
       });
       await Promise.all([ipySession.initialize(), session.initialize()]);
+      await Promise.all([ipySession.kernel.ready, session.kernel.ready]);
     });
 
     beforeEach(() => {

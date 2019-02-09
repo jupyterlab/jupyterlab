@@ -105,6 +105,7 @@ describe('@jupyterlab/console', () => {
       [local, foreign] = await Promise.all(sessions);
       session = await createClientSession({ path: local.path });
       await (session as ClientSession).initialize();
+      await session.kernel.ready;
     });
 
     beforeEach(() => {
