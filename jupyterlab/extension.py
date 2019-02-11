@@ -86,6 +86,7 @@ def load_jupyter_server_extension(nbapp):
     from .extension_manager_handler import (
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
+    from .datastore import DatastoreHandler, datastore_path
     from .commands import (
         DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev, get_app_dir
     )
@@ -184,10 +185,15 @@ def load_jupyter_server_extension(nbapp):
         config.cache_files = False
 
     base_url = web_app.settings['base_url']
+
     build_url = ujoin(base_url, build_path)
     builder = Builder(logger, core_mode, app_dir)
     build_handler = (build_url, BuildHandler, {'builder': builder})
-    handlers = [build_handler]
+
+    datastore_url = ujoin(base_url, datastore_path)
+    datastore_handler = (datastore_url, DatastoreHandler, {})
+
+    handlers = [build_handler, datastore_handler]
 
     if not core_mode:
         ext_url = ujoin(base_url, extensions_handler_path)
