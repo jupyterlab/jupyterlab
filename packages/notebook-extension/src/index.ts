@@ -1940,7 +1940,7 @@ function populateMenus(
   // Add a save with view command to the file menu.
   mainMenu.fileMenu.saveWithOptions.add({
     tracker,
-    action: 'with options…',
+    action: 'with Options…',
     name: 'Notebook',
     saveWithOptions: async (current: NotebookPanel) => {
       // Pop up dialog box with options
