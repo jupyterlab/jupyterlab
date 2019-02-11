@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, ReactWidget } from '@jupyterlab/apputils';
+import { Text } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 import { ISaveOption, SaveAction } from '@jupyterlab/notebook';
@@ -30,10 +31,13 @@ class BodyComponent extends ReactWidget {
       >
         <HTMLSelect
           name={option.name}
-          options={['clear', 'previous', 'save']}
-          value={this.optionValues.get(option.name)}
+          options={['save', 'clear', 'previous'].map(Text.titleCase)}
+          value={Text.titleCase(this.optionValues.get(option.name))}
           onChange={(event: any) => {
-            this.optionValues.set(option.name, event.target.value);
+            this.optionValues.set(
+              option.name,
+              event.target.value.toLowerCase()
+            );
             this.update();
           }}
         />
