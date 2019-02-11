@@ -69,7 +69,7 @@ export async function saveOptionsDialog(
   values: Map<string, SaveAction>
 ) {
   return showDialog({
-    title: 'Save With Options',
+    title: 'Save Notebook with Options',
     body: new BodyComponent(options, values),
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Save' })]
   });
