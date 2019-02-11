@@ -334,7 +334,7 @@ export function createFileMenu(
     label: () => {
       const action = Private.delegateLabel(app, menu.saveWithOptions, 'action');
       const name = Private.delegateLabel(app, menu.saveWithOptions, 'name');
-      return `Save ${name} ${action || 'with Extras'}`;
+      return `Save ${name} ${action || 'with Options'}`;
     },
     isEnabled: args => {
       return (
