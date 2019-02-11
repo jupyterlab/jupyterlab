@@ -1956,7 +1956,7 @@ function populateMenus(
 
       // Call each option callback with the action from the dialog
       tracker.saveOptions.forEach(({ name, callback }) => {
-        const action = result.value.get(name);
+        const action = result.value.options.get(name);
         callback(current.content, name, action);
       });
 
@@ -1964,10 +1964,10 @@ function populateMenus(
       await app.commands.execute('docmanager:save');
 
       // If "remember" checked, save option state to notebook options.
-      if (result.value) {
+      if (result.value.remember) {
         let settings = await fetchSettings;
         let options = Object.create(null);
-        for (let [k, v] of result.value) {
+        for (let [k, v] of result.value.options) {
           options[k] = v;
         }
         await settings.set('saveOptions', options);

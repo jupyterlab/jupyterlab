@@ -61,7 +61,7 @@ class BodyComponent extends ReactWidget {
   }
 
   getValue() {
-    return this.remember ? this.optionValues : null;
+    return { remember: this.remember, options: this.optionValues };
   }
   options: ISaveOption[];
   optionValues: Map<string, SaveAction>;
