@@ -23,7 +23,7 @@ import {
   ISettingRegistry,
   IStateDB,
   PageConfig,
-  URLExt,
+  URLExt
 } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';

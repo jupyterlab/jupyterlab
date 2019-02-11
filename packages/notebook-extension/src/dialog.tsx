@@ -27,7 +27,6 @@ class BodyComponent extends ReactWidget {
         key={option.name}
         label={option.label}
         helperText={option.help}
-        inline={true}
       >
         <HTMLSelect
           name={option.name}

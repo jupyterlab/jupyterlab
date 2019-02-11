@@ -11,8 +11,9 @@ import {
   IIconProps
 } from '@blueprintjs/core/lib/cjs/components/icon/icon';
 import {
-  Checkbox as BPCheckbox, ICheckboxProps
-} from '@blueprintjs/core/lib/cjs/components/forms/controls'
+  Checkbox as BPCheckbox,
+  ICheckboxProps
+} from '@blueprintjs/core/lib/cjs/components/forms/controls';
 import {
   Collapse as BPCollapse,
   ICollapseProps
