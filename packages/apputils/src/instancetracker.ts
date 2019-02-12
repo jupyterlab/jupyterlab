@@ -7,7 +7,7 @@ import { ArrayExt, each, find } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -334,20 +334,39 @@ export class InstanceTracker<T extends Widget>
 
     this._restore = options;
 
-    return Promise.all(promises).then(([saved]) => {
-      return Promise.all(
-        saved.ids.map((id, index) => {
-          const value = saved.values[index];
-          const args = value && (value as any).data;
-          if (args === undefined) {
-            return state.remove(id);
-          }
+    return Promise.all(promises)
+      .then(([saved]) => {
+        return Promise.all(
+          saved.ids.map((id, index) => {
+            const value = saved.values[index];
+            const args = value && (value as any).data;
+            if (args === undefined) {
+              return state.remove(id);
+            }
 
-          // Execute the command and if it fails, delete the state restore data.
-          return registry.execute(command, args).catch(() => state.remove(id));
-        })
-      );
-    });
+            // Execute the command and if it fails, delete the state restore data.
+            return registry
+              .execute(command, args)
+              .catch(() => state.remove(id));
+          })
+        );
+      })
+      .then(val => {
+        this._restored.resolve(void 0);
+        return val;
+      });
+  }
+
+  /**
+   * A promise resolved when the instance tracker has been restored.
+   *
+   * #### Notes
+   * This promise is not exposed on the IInstanceTracker interface.
+   * It is intended to allow for the owner/creator of an instance tracker
+   * to perform additional actions after restoration in specialized use-cases.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
   }
 
   /**
@@ -448,6 +467,7 @@ export class InstanceTracker<T extends Widget>
   }
 
   private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
+  private _restored = new PromiseDelegate<void>();
   private _tracker = new FocusTracker<T>();
   private _currentChanged = new Signal<this, T | null>(this);
   private _widgetAdded = new Signal<this, T>(this);
