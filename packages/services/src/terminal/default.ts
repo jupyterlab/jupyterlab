@@ -9,7 +9,9 @@ import { JSONPrimitive } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { ServerConnection, WSConnection } from '..';
+import { ServerConnection } from '../serverconnection';
+
+import { WSConnection } from '../wsconnection';
 
 import { TerminalSession } from './terminal';
 
@@ -32,6 +34,7 @@ export class DefaultTerminalSession
     this._name = name;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
+    this._createSocket();
   }
 
   /**

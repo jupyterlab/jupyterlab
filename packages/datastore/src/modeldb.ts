@@ -26,6 +26,8 @@ import {
 
 import { iterValues } from './objiter';
 
+import { DatastoreSession } from './session';
+
 /**
  *
  */
@@ -295,5 +297,13 @@ export namespace DSModelDB {
 }
 
 namespace Private {
-  export function createDatastore(schemas: Schema[]): Datastore {}
+  export function createDatastore(schemas: Schema[]): Datastore {
+    const session = new DatastoreSession();
+    const ds = Datastore.create({
+      id: 0,
+      schemas
+    });
+    session.handler = ds;
+    return ds;
+  }
 }

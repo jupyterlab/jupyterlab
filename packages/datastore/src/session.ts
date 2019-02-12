@@ -16,7 +16,7 @@ import { DatastoreWSMessages } from './wsmessages';
 /**
  * The url for the datastore service.
  */
-const DATASTORE_SERVICE_URL = 'api/datastore';
+const DATASTORE_SERVICE_URL = 'lab/api/datastore';
 
 /**
  * A class that manages exchange of transactions with the datastore server.
@@ -28,16 +28,14 @@ export class DatastoreSession extends WSConnection<
   /**
    *
    */
-  constructor(
-    key: string,
-    handler: IMessageHandler,
-    options: DatastoreSession.IOptions = {}
-  ) {
+  constructor(options: DatastoreSession.IOptions = {}) {
     super();
-    this.key = key;
-    this._handler = handler;
+    this.sessionId = options.sessionId;
+    this.key = options.key;
+    this.handler = options.handler || null;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
+    this._createSocket();
   }
 
   /**
@@ -98,7 +96,11 @@ export class DatastoreSession extends WSConnection<
    */
   readonly serverSettings: ServerConnection.ISettings;
 
-  readonly key: string;
+  readonly sessionId: string | undefined;
+
+  readonly key: string | undefined;
+
+  handler: IMessageHandler | null;
 
   protected wsFactory() {
     const settings = this.serverSettings;
@@ -141,9 +143,11 @@ export class DatastoreSession extends WSConnection<
   private _handleTransactions(
     transactions: ReadonlyArray<Datastore.Transaction>
   ) {
-    for (let t of transactions) {
-      const message = new DatastoreSession.RemoteTransactionMessage(t);
-      this._handler.processMessage(message);
+    if (this.handler !== null) {
+      for (let t of transactions) {
+        const message = new DatastoreSession.RemoteTransactionMessage(t);
+        this.handler.processMessage(message);
+      }
     }
   }
 
@@ -166,11 +170,10 @@ export class DatastoreSession extends WSConnection<
     return promise;
   }
 
-  private _delegates: Map<
+  private _delegates = new Map<
     string,
     PromiseDelegate<DatastoreWSMessages.IReplyMessage>
-  >;
-  private _handler: IMessageHandler;
+  >();
 }
 
 /**
@@ -179,9 +182,24 @@ export class DatastoreSession extends WSConnection<
 export namespace DatastoreSession {
   export interface IOptions {
     /**
+     *
+     */
+    key?: string;
+
+    /**
+     *
+     */
+    sessionId?: string;
+
+    /**
      * The server settings for the session.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     *
+     */
+    handler?: IMessageHandler;
   }
 
   /**

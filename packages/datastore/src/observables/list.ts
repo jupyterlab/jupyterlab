@@ -13,12 +13,13 @@ import {
   each
 } from '@phosphor/algorithm';
 
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
+
 import { ListField, Datastore, Schema } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { ObservableBase } from './base';
-import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 /**
  * A concrete implementation of [[IObservableList]].

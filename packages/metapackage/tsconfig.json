@@ -58,6 +58,9 @@
       "path": "../datastore"
     },
     {
+      "path": "../datastore-extension"
+    },
+    {
       "path": "../docmanager"
     },
     {

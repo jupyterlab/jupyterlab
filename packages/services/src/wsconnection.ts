@@ -10,13 +10,6 @@ import { IDisposable } from '@phosphor/disposable';
  */
 export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
   /**
-   * Create a new websocket based connection.
-   */
-  constructor() {
-    this._createSocket();
-  }
-
-  /**
    * Dispose of the resources held by the connection.
    */
   dispose(): void {

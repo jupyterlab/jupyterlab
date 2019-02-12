@@ -4,6 +4,8 @@ import json
 import sqlite3
 
 
+sqlite3.enable_callback_tracebacks(True)
+
 def serialized(transactions):
     for t in transactions:
         yield (
