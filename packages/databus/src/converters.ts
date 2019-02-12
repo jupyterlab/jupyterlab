@@ -6,61 +6,104 @@
 import { Token } from '@phosphor/coreutils';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
-import { IDataset } from './dataregistry';
+import { Dataset } from './dataregistry';
+import { reachable, expandPath } from './graph';
 
-/**
- * An interface for a converter between data of two mime types.
- */
-export interface IConverter<A extends IDataset<any>, B extends IDataset<any>> {
+export type Converter<T, V> = (
+  mimeType: string
+) => Map<string, (data: T) => Promise<V>>;
+
+function composeConverters<T, V>(
+  a: Converter<T, V>,
+  b: Converter<T, V>
+): Converter<T, V> {
+  return (mimeType: string) => {
+    return new Map([...a(mimeType), ...b(mimeType)]);
+  };
+}
+
+function emptyConverter(mimeType: string): Map<string, (data: never) => never> {
+  return new Map();
+}
+
+function composeManyConverters<T, V>(
+  converters: Iterable<Converter<T, V>>
+): Converter<T, V> {
+  return [...converters].reduce(composeConverters, emptyConverter);
+}
+
+export function singleConverter<T, V>(
+  fn: (mimeType: string) => null | [string, (data: T) => Promise<V>]
+): Converter<T, V> {
+  return (mimeType: string) => {
+    const possibleResult = fn(mimeType);
+    if (possibleResult === null) {
+      return new Map();
+    }
+    return new Map([possibleResult]);
+  };
+}
+
+export interface ISeperateConverterOptions<T, V> {
   /**
    * Computes the target mime type, given some source mimetype. If the convert is unable to
    * convert this mimetype, it should return `null`.
    */
-  computeTargetMimeType: (sourceMimeType: string) => string | null;
+  computeMimeType: (mimeType: string) => string | null;
 
   /**
    * The conversion function.
-   *
-   * #### Notes
-   * This takes an input `A` and converts it to a promise of
-   * an `B`.
    */
-  converter: (input: A) => Promise<B>;
+  convert: (data: T) => Promise<V>;
 }
 
 /**
- * An abstract class that provides conversion between two static mimetypes.
+ * Create a convert by specifying seperate functions to compute the mimetype
+ * and convert the data.
  */
-export abstract class StaticConverter<
-  A extends IDataset<any>,
-  B extends IDataset<any>
-> implements IConverter<A, B> {
+export function seperateConverter<T, V>({
+  computeMimeType,
+  convert
+}: ISeperateConverterOptions<T, V>): Converter<T, V> {
+  return singleConverter((mimeType: string) => {
+    const targetMimeType = computeMimeType(mimeType);
+    if (targetMimeType == null) {
+      return null;
+    }
+    return [targetMimeType, convert];
+  });
+}
+
+export interface IStaticConverterOptions<T, V> {
   /**
    * The input mime type of the data of type `A` to be converted.
    */
-  abstract sourceMimeType: string;
+  sourceMimeType: string;
 
   /**
    * The output mime type of the converted data of type `B`.
    */
-  abstract targetMimeType: string;
-
-  /**
-   * Only returns the output mimetype if the source mimetype is correct.
-   */
-  computeTargetMimeType(sourceMimeType: string): string | null {
-    if (sourceMimeType === this.sourceMimeType) {
-      return this.sourceMimeType;
-    }
-  }
+  targetMimeType: string;
   /**
    * The conversion function.
-   *
-   * #### Notes
-   * This takes an input `A` and converts it to a promise of
-   * an `B`.
    */
-  abstract converter: (input: A) => Promise<B>;
+  convert: (data: T) => Promise<V>;
+}
+
+export function staticConverter<T, V>({
+  sourceMimeType,
+  targetMimeType,
+  convert
+}: IStaticConverterOptions<T, V>): Converter<T, V> {
+  return seperateConverter({
+    computeMimeType: (mimeType: string) => {
+      if (mimeType === sourceMimeType) {
+        return targetMimeType;
+      }
+      return null;
+    },
+    convert
+  });
 }
 
 /**
@@ -82,7 +125,7 @@ export class ConverterRegistry {
    *
    * @throws An error if the converter is already registered.
    */
-  register(converter: IConverter<any, any>): IDisposable {
+  register(converter: Converter<any, any>): IDisposable {
     this._converters.add(converter);
 
     this._convertersChanged.emit({ converter, type: 'added' });
@@ -104,69 +147,70 @@ export class ConverterRegistry {
   }
 
   /**
-   * Convert an `IDataset<A>` to an `IDataset<B>`.
+   * Converts a dataset to a new mimetype.
    *
-   * @param sourceDataset - the input dataset.
-   *
-   * @param targetMimeType - the desired mimeType of the output dataset.
-   *
-   * @returns A promise that resolves to the converted dataset with the target mime
-   *          type and type `IDataset<B>`.
+   * Takes in a set of datasets that
+   * Returns a an asyncronous iterator of the dataset(s) to get from the initial
+   * dataset to the target.
    */
-  convert<A extends IDataset<any>, B extends IDataset<any>>(
-    sourceDataset: A,
+  async *convert(
+    sourceDatasets: Iterable<Dataset<any>>,
     targetMimeType: string
-  ): Promise<B> {
-    let converter: IConverter<A, B> = this._resolveConverter(
-      sourceDataset.mimeType,
-      targetMimeType
-    );
-    return converter.converter(sourceDataset);
+  ): AsyncIterableIterator<Dataset<any>> {
+    const urls: Set<URL> = new Set();
+    const datas: Map<string, any> = new Map();
+    for (const { url, mimeType, data } of sourceDatasets) {
+      urls.add(url);
+      datas.set(mimeType, data);
+    }
+    if (urls.size !== 1) {
+      throw new Error(
+        `Datasets with different URLs were passed into convert: ${urls}`
+      );
+    }
+    const [url] = urls;
+
+    for (const [initialMimeType, convert, resultMimeType] of expandPath(
+      targetMimeType,
+      this._reachable(datas.keys()).get(targetMimeType)
+    )) {
+      // First part of path only has result
+      if (!initialMimeType) {
+        yield [...sourceDatasets].find(
+          dataset => dataset.mimeType === resultMimeType
+        );
+        continue;
+      }
+      const data = await convert(datas.get(initialMimeType));
+      datas.set(resultMimeType, data);
+      yield new Dataset(resultMimeType, url, data);
+    }
   }
 
   /**
-   * List the available target mime types for an input mime type.
+   * List the available target mime types for input mime types.
    *
-   * @param sourceMimeType - the input mime type.
+   * @param sourceMimeType - the input mime types.
    *
    * @returns An `Set<string>` of the available target mime types.
    */
-  listTargetMimeTypes(sourceMimeType: string): Set<string> {
-    const targetMimeTypes = new Set();
-    for (const converter of this._converters) {
-      const targetMimeType = converter.computeTargetMimeType(sourceMimeType);
-      if (targetMimeType !== null) {
-        targetMimeTypes.add(targetMimeType);
-      }
-    }
-    return targetMimeTypes;
+  listTargetMimeTypes(sourceMimeTypes: Iterable<string>): Set<string> {
+    return new Set(this._reachable(sourceMimeTypes).keys());
   }
 
   /**
-   * Lookup a converter between source and target mime types.
-   *
-   * @param sourceMimeType - the mime type of the input dataset.
-   *
-   * @param targetMimeType - the mime type of the converted output dataset.
-   *
-   * @returns The `IConverter<A.B>` capable of doing the conversion or undefined.
-   *
-   * #### Notes
-   * This does not currently traverse the directed graph of converters to identify chains of
-   * converters that match.
+   * Returns a mapping of mimetypes to the path to get to them,
+   * of the new mimetype and the function converting the data.
+   * @param mimeType Mimetype to start at.
    */
-  private _resolveConverter<A extends IDataset<any>, B extends IDataset<any>>(
-    sourceMimeType: string,
-    targetMimeType: string
-  ): IConverter<A, B> {
-    for (const converter of this._converters) {
-      if (converter.computeTargetMimeType(sourceMimeType) === targetMimeType) {
-        return converter;
-      }
-    }
+  private _reachable(
+    mimeTypes: Iterable<string>
+  ): Map<string, Iterable<[string, (data: any) => any]>> {
+    const converter = composeManyConverters(this._converters);
+    return reachable(converter, new Set(mimeTypes));
   }
 
-  private _converters: Set<IConverter<any, any>> = new Set();
+  private _converters: Set<Converter<any, any>> = new Set();
   private _convertersChanged = new Signal<
     this,
     ConverterRegistry.IConvertersChangedArgs
@@ -184,7 +228,7 @@ export namespace ConverterRegistry {
     /**
      * The converter begin added or removed.
      */
-    readonly converter: IConverter<any, any>;
+    readonly converter: Converter<any, any>;
 
     /**
      * The type of change.

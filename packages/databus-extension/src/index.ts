@@ -7,13 +7,13 @@ import { JupyterLabPlugin } from '@jupyterlab/application';
 
 import dataRegistryPlugin from './dataregistry';
 import converterRegistryPlugin from './converters';
-import filePlugin from './files';
 import dataExplorerPlugin from './explorer';
-import resolverRegistryPlugin from './resolverregistry';
+import dataBusPlugin from './databus';
+import filePlugin from './files';
 export default [
   dataRegistryPlugin,
   converterRegistryPlugin,
-  filePlugin,
   dataExplorerPlugin,
-  resolverRegistryPlugin
+  dataBusPlugin,
+  filePlugin
 ] as JupyterLabPlugin<any>[];

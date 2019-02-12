@@ -6,9 +6,8 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
   createDataExplorer,
-  IConverterRegistry,
   IDataExplorer,
-  IDataRegistry
+  IDataBus
 } from '@jupyterlab/databus';
 
 const id = '@jupyterlab/databus-extension:data-explorer';
@@ -18,17 +17,13 @@ const id = '@jupyterlab/databus-extension:data-explorer';
 export default {
   activate,
   id,
-  requires: [IDataRegistry, IConverterRegistry],
+  requires: [IDataBus],
   provides: IDataExplorer,
   autoStart: true
 } as JupyterLabPlugin<IDataExplorer>;
 
-function activate(
-  app: JupyterLab,
-  dataRegistry: IDataRegistry,
-  converterRegistry: IConverterRegistry
-): IDataExplorer {
-  const widget = createDataExplorer({ dataRegistry, converterRegistry });
+function activate(app: JupyterLab, dataBus: IDataBus): IDataExplorer {
+  const widget = createDataExplorer(dataBus);
   app.shell.addToLeftArea(widget);
   return widget;
 }

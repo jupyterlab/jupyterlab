@@ -1,63 +1,39 @@
-import { IResolver } from './resolverregistry';
-import { Token } from '@phosphor/coreutils';
-import { URLDataset } from './urls';
+/**
+ * Start with files as unkown mimetype
+ *
+ * Then convert to known filetype, with URL on it.
+ */
+import { Dataset } from './dataregistry';
+import { createURLDataset, resolverToConverter } from './resolvers';
+import { Converter } from './converters';
 
-interface IFileDatasetOptions {
-  url: URL;
-  path: string;
-  mimeType: string;
+export function createFileDataSet(path: string): Dataset<null> {
+  const url = new URL('file:');
+  url.pathname = path;
+  return createURLDataset(url);
 }
-export class FileDataset extends URLDataset {
-  constructor({ url, path, mimeType }: IFileDatasetOptions) {
-    super(url, mimeType, new URL('file:'));
-    this.url.pathname = path;
-  }
-}
 
-export class FileExtensionRegistry {
-  register(extension: string, mimeType: string) {
-    this._extensions.set(extension, mimeType);
-  }
-
-  whichMimeType(path: string): string | null {
-    for (const [extension, mimeType] of this._extensions.entries()) {
-      if (path.endsWith(extension)) {
-        return mimeType;
-      }
+export function createFileConverter(
+  getDownloadURL: (path: string) => Promise<URL>,
+  extension: string,
+  mimeType: string
+): Converter<null, URL> {
+  return resolverToConverter((url: URL) => {
+    const path = parseFileURL(url);
+    if (path === null || !path.endsWith(extension)) {
+      return null;
     }
+    return [mimeType, () => getDownloadURL(path)];
+  });
+}
+
+/**
+ * Returns the path of a file URL, or null if it is not one.
+ * @param url
+ */
+function parseFileURL(url: URL): null | string {
+  if (url.protocol !== 'file:') {
     return null;
   }
-
-  _extensions = new Map<string, string>();
-}
-export interface IFileExtensionRegistry extends FileExtensionRegistry {}
-
-/* tslint:disable */
-export const IFileExtensionRegistry = new Token<IFileExtensionRegistry>(
-  '@jupyterlab/databus:IFileExtensionRegistry'
-);
-
-export interface IFileResolverOptions {
-  fileExtensionRegistry: FileExtensionRegistry;
-  resolveURL: (path: string) => Promise<URL>;
-}
-
-export class FileResolver implements IResolver<FileDataset> {
-  constructor(private options: IFileResolverOptions) {}
-
-  async resolve(url: URL): Promise<FileDataset | null> {
-    if (url.protocol !== 'file:') {
-      return null;
-    }
-    const path = url.pathname;
-    const mimeType = this.options.fileExtensionRegistry.whichMimeType(path);
-    if (mimeType === null) {
-      return null;
-    }
-    return new FileDataset({
-      url: await this.options.resolveURL(path),
-      path,
-      mimeType
-    });
-  }
+  return url.pathname;
 }

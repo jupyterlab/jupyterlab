@@ -3,44 +3,60 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
-import { IDataRegistry, IDataset } from './dataregistry';
-import { IConverterRegistry } from './converters';
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import * as React from 'react';
-import { IVisualizerRegistry, IVisualizer } from './visualizers';
+import { IDataBus } from './databus';
+import { Dataset } from '.';
 
-// TODO: Maybe make converters clone URLs?
-// URL is like UUID. Data with some URLs can is converted between.
-
-function visualizers<V, T extends IDataset<V>>(
-  dataset: T,
-  visualizers: IVisualizerRegistry,
-  converters: IConverterRegistry
-): Iterable<IVisualizer<T>> {
-  converters.listTargetMimeTypes(dataset.mimeType);
-  visualizers.
-}
-
-function DatasetCompononent({ dataset }: { dataset: IDataset<any> }) {
+function DatasetCompononent({
+  url,
+  databus,
+  active
+}: {
+  url: URL;
+  databus: IDataBus;
+  active: boolean;
+}) {
   return (
-    <div>
-      <pre>{JSON.stringify(dataset)}</pre>
+    <div style={{ backgroundColor: active ? 'grey' : 'white' }}>
+      <h3>URL:</h3>
+      <pre>{url}</pre>
+      <h3>MimeTypes:</h3>
+      <pre>{[...databus.data.mimeTypesForURL(url)].join(' ')}</pre>
+      <h3>Possible MimeTypes:</h3>
+      <pre>{[...databus.possibleMimeTypesForURL(url)].join(' ')}</pre>
+      <h3>Viewers:</h3>
+      <span>
+        {[...databus.viewersForURL(url)].map((label: string) => (
+          <button onClick={() => databus.viewURL(url, label)}>{label}</button>
+        ))}
+      </span>
     </div>
   );
 }
 
-function DataExplorer(props: IDataExplorerOptions) {
+function DataExplorer({
+  databus,
+  activeURL
+}: {
+  databus: IDataBus;
+  activeURL: URL | null;
+}) {
   return (
     <div>
       <h2>Data Explorer</h2>
-      <UseSignal signal={props.dataRegistry.datasetsChanged}>
+      <UseSignal signal={databus.data.datasetsChanged}>
         {() =>
-          [...props.dataRegistry.datasets].map((dataset: IDataset<any>) => (
+          [...databus.data.URLs].map((url: URL) => (
             // TODO: Add ID for object? How?
             // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
-            <DatasetCompononent dataset={dataset} />
+            <DatasetCompononent
+              url={url}
+              databus={databus}
+              active={activeURL.toString() === url.toString()}
+            />
           ))
         }
       </UseSignal>
@@ -48,34 +64,27 @@ function DataExplorer(props: IDataExplorerOptions) {
   );
 }
 
-/**
- * Options to pass in to construct the data explorer widget.
- */
-export interface IDataExplorerOptions {
-  converterRegistry: IConverterRegistry;
-  dataRegistry: IDataRegistry;
-}
-
 class DataExplorerWidget extends ReactWidget implements IDataExplorer {
-  constructor(private _options: IDataExplorerOptions) {
+  constructor(private _databus: IDataBus) {
     super();
     this.id = '@jupyterlab-databus/explorer';
     this.title.iconClass = 'jp-SpreadsheetIcon  jp-SideBar-tabIcon';
     this.title.caption = 'Data Explorer';
+    this._activeURL = null;
   }
   render() {
-    return <DataExplorer {...this._options} />;
+    return <DataExplorer databus={this._databus} activeURL={this._activeURL} />;
   }
 
-  reveal(dataset: IDataset<any>): void {
-    return;
+  reveal(dataset: Dataset<any>): void {
+    this._activeURL = dataset.url;
+    this.update();
   }
+  private _activeURL: URL | null;
 }
 
-export function createDataExplorer(
-  options: IDataExplorerOptions
-): IDataExplorer {
-  return new DataExplorerWidget(options);
+export function createDataExplorer(databus: IDataBus): IDataExplorer {
+  return new DataExplorerWidget(databus);
 }
 /* tslint:disable */
 export const IDataExplorer = new Token<IDataExplorer>(
@@ -86,5 +95,5 @@ export interface IDataExplorer extends Widget {
   /**
    * Highlights a dataset in the explorer.
    */
-  reveal(dataset: IDataset<any>): void;
+  reveal(dataset: Dataset<any>): void;
 }

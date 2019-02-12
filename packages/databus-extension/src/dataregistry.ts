@@ -5,7 +5,6 @@
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import { DataRegistry, IDataRegistry } from '@jupyterlab/databus';
-import { IStateDB } from '@jupyterlab/coreutils';
 
 const id = '@jupyterlab/databus-extension:data-registry';
 /**
@@ -19,6 +18,6 @@ export default {
   autoStart: true
 } as JupyterLabPlugin<IDataRegistry>;
 
-function activate(app: JupyterLab, state: IStateDB): IDataRegistry {
+function activate(app: JupyterLab): IDataRegistry {
   return new DataRegistry();
 }

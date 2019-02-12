@@ -1,11 +1,11 @@
-import { StaticVisualizer, IDataset } from '@jupyterlab/databus';
+import { IWidgetViewerOptions } from '@jupyterlab/databus';
 import { DataGrid } from '@phosphor/datagrid';
 import { DSVModel } from './model';
-import { Widget } from '@phosphor/widgets';
-export class CSVVisualizer extends StaticVisualizer<IDataset<string>> {
-  mimeType: 'text/csv';
-  label: 'Data Grid';
-  async visualize({ data }: IDataset<string>): Promise<Widget> {
+
+export const CSVConverter: IWidgetViewerOptions<string> = {
+  mimeType: 'text/csv',
+  label: 'Grid',
+  view: async (data: string) => {
     // Copies the default grid setup from `widget.ts`
     // It would be great to use `CSVViewer` itself,
     // But it assumes a model that changes over time, whereas
@@ -18,7 +18,6 @@ export class CSVVisualizer extends StaticVisualizer<IDataset<string>> {
     });
     grid.headerVisibility = 'all';
     grid.model = new DSVModel({ data, delimiter: ',' });
-    // For now we aren't setting the styles at all, so they don't update for dark themes.
     return grid;
   }
-}
+};

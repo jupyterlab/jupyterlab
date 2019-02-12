@@ -17,11 +17,17 @@ import { ISignal, Signal } from '@phosphor/signaling';
  * but with only a single mimetype and different structure. We expect there
  * to be utilities to convert between this formats.
  */
-export interface IDataset<T> {
+export class Dataset<T> {
+  constructor(mimetype: string, url: URL, data: T) {
+    this.mimeType = mimetype;
+    this.url = url;
+    this.data = data;
+  }
+
   /**
    * The string mimetype for the dataset.
    */
-  mimeType: string;
+  readonly mimeType: string;
 
   /**
    * A persistent URL that points to the dataset.
@@ -34,7 +40,7 @@ export interface IDataset<T> {
    * The term "URL" is prefered over "URI" by the WHATWG:
    * https://url.spec.whatwg.org/#goals
    */
-  url: URL;
+  readonly url: URL;
 
   /***
    * The data of the dataset.
@@ -44,7 +50,18 @@ export interface IDataset<T> {
    * over. Publishers and consumers of a given mimetype will need to agree
    * what the actual data is and cast it appropriately before use.
    */
-  data: T;
+  readonly data: T;
+
+  /**
+   * Checks whether this dataset has the same fields as another.
+   */
+  equals(other: Dataset<T>): boolean {
+    return (
+      this.mimeType === other.mimeType &&
+      this.url === other.url &&
+      this.data === other.data
+    );
+  }
 }
 
 /**
@@ -60,8 +77,8 @@ export class DataRegistry {
    *
    * @throws An error if the given dataset is already published.
    */
-  publish(dataset: IDataset<any>): IDisposable {
-    if (this._datasets.has(dataset)) {
+  publish(dataset: Dataset<any>): IDisposable {
+    if (this.contains(dataset)) {
       throw new Error(`Dataset already published`);
     }
 
@@ -82,8 +99,8 @@ export class DataRegistry {
    *
    * @returns An set of matching `IDataset` objects.
    */
-  filter<T extends IDataset<any>>(
-    func: (value: IDataset<any>) => value is T
+  filter<T extends Dataset<any>>(
+    func: (value: Dataset<any>) => value is T
   ): Set<T> {
     let result: Set<T> = new Set();
     this._datasets.forEach((value: T) => {
@@ -95,10 +112,40 @@ export class DataRegistry {
   }
 
   /**
+   * Filters the datasets to this with a certain URL.
+   */
+  filterByURL(url: URL): Set<Dataset<any>> {
+    return new Set([...this._datasets].filter(dataset => dataset.url === url));
+  }
+
+  mimeTypesForURL(url: URL): Set<string> {
+    return new Set([...this.filterByURL(url)].map(dataset => dataset.mimeType));
+  }
+
+  /**
+   * Returns if the registry contains a dataset.
+   */
+  contains(dataset: Dataset<any>): boolean {
+    for (const other of this._datasets) {
+      if (dataset.equals(other)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Return a set of all published datasets.
    */
-  get datasets(): Set<IDataset<any>> {
-    return this._datasets;
+  get datasets(): Set<Dataset<any>> {
+    return new Set(this._datasets);
+  }
+
+  /**
+   * Return a set of all dataset URLs.
+   */
+  get URLs(): Set<URL> {
+    return new Set([...this._datasets].map(d => d.url));
   }
 
   /**
@@ -108,7 +155,7 @@ export class DataRegistry {
     return this._datasetsChanged;
   }
 
-  private _datasets: Set<IDataset<any>> = new Set();
+  private _datasets: Set<Dataset<any>> = new Set();
   private _datasetsChanged = new Signal<
     this,
     DataRegistry.IDatasetsChangedArgs
@@ -126,7 +173,7 @@ export namespace DataRegistry {
     /**
      * The dataset begin added or removed.
      */
-    readonly dataset: IDataset<any>;
+    readonly dataset: Dataset<any>;
 
     /**
      * The type of change.

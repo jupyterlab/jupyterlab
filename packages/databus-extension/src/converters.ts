@@ -7,7 +7,7 @@ import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
   ConverterRegistry,
   IConverterRegistry,
-  FetchURL
+  fetchConverter
 } from '@jupyterlab/databus';
 
 /**
@@ -23,6 +23,6 @@ export default {
 
 function activate(app: JupyterLab): IConverterRegistry {
   const registry = new ConverterRegistry();
-  registry.register(new FetchURL());
+  registry.register(fetchConverter);
   return registry;
 }

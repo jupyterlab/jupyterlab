@@ -1,39 +1,22 @@
-import { IDataset } from './dataregistry';
-import { IConverter } from './converters';
+import { Converter, seperateConverter } from './converters';
 
-const MIMETYPE_POSTFIX = '+url';
-/**
- * Dataset where the data is URL pointing to a file that can be fetched.
- */
-export class URLDataset implements IDataset<URL> {
-  constructor(dataURL: URL, mimeType: string, public url: URL) {
-    this.data = dataURL;
-    this.mimeType = `${mimeType}${MIMETYPE_POSTFIX}`;
-  }
-  mimeType: string;
-  data: URL;
+const baseMimeType = 'application/x.jupyter.url; mimeType=';
+
+export function createURLMimeType(url: URL) {
+  return `${baseMimeType}${url}`;
 }
 
-export class FetchURL implements IConverter<URLDataset, IDataset<string>> {
-  computeTargetMimeType(sourceMimeType: string): string | null {
-    if (sourceMimeType.endsWith(MIMETYPE_POSTFIX)) {
-      return sourceMimeType.slice(
-        0,
-        sourceMimeType.length - MIMETYPE_POSTFIX.length
-      );
-    }
-    return;
+function computeMimeType(mimeType: string): string | null {
+  if (!mimeType.startsWith(baseMimeType)) {
+    return null;
   }
-  async converter({
-    data,
-    mimeType,
-    url
-  }: URLDataset): Promise<IDataset<string>> {
-    const response = await fetch(data.toString());
-    return {
-      mimeType: this.computeTargetMimeType(mimeType),
-      data: await response.text(),
-      url
-    };
-  }
+  return mimeType.slice(baseMimeType.length);
 }
+
+export const fetchConverter: Converter<URL, string> = seperateConverter({
+  computeMimeType,
+  convert: async (url: URL) => {
+    const response = await fetch(url.toString());
+    return await response.text();
+  }
+});

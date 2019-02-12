@@ -5,13 +5,10 @@
 
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
 import {
-  IConverterRegistry,
   IDataExplorer,
-  IDataRegistry,
-  IFileExtensionRegistry,
-  IResolverRegistry,
-  FileResolver,
-  FileExtensionRegistry
+  IDataBus,
+  createFileDataSet,
+  Dataset
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -27,74 +24,50 @@ const open = 'databus:filebrowser-open';
 export default {
   activate,
   id: '@jupyterlab/databus-extension:files',
-  requires: [
-    IDataRegistry,
-    IConverterRegistry,
-    IDataExplorer,
-    IFileBrowserFactory,
-    IResolverRegistry
-  ],
-  provides: IFileExtensionRegistry,
+  requires: [IDataBus, IFileBrowserFactory, IDataExplorer],
   autoStart: true
-} as JupyterLabPlugin<IFileExtensionRegistry>;
+} as JupyterLabPlugin<void>;
 
 function activate(
   app: JupyterLab,
-  dataRegistry: IDataRegistry,
-  converterRegistry: IConverterRegistry,
-  dataExplorer: IDataExplorer,
-  factory: IFileBrowserFactory,
-  resolverRegistry: IResolverRegistry
-): IFileExtensionRegistry {
-  const fileExtensionRegistry = new FileExtensionRegistry();
-  fileExtensionRegistry.register('.csv', 'text/csv');
+  dataBus: IDataBus,
+  fileBrowserFactory: IFileBrowserFactory,
+  dataExplorer: IDataExplorer
+) {
+  dataBus.registerFileResolver('.csv', 'text/csv');
 
-  resolverRegistry.register(
-    new FileResolver({
-      fileExtensionRegistry,
-      resolveURL: async (path: string) =>
-        new URL(
-          await factory.defaultBrowser.model.manager.services.contents.getDownloadUrl(
-            path
-          )
-        )
-    })
-  );
   app.contextMenu.addItem({
     command: open,
     selector: selectorNotDir,
     rank: 2.1 // right after open with
   });
 
-  function getPath(): string | null {
-    const widget = factory.tracker.currentWidget;
+  function getDataSet(): Dataset<null> | null {
+    const widget = fileBrowserFactory.tracker.currentWidget;
     if (!widget) {
       return null;
     }
-    return widget.selectedItems().next().path;
+    const path = widget.selectedItems().next().path;
+    const dataset = createFileDataSet(path);
+    if (!dataBus.validFileDataSet(dataset)) {
+      return null;
+    }
+    return dataset;
   }
   app.commands.addCommand(open, {
     execute: async () => {
-      const path = getPath();
-      if (path === null) {
-        return;
-      }
-      const url = new URL('file:');
-      url.pathname = path;
-      const dataset = await resolverRegistry.resolve(url);
+      const dataset = getDataSet();
       if (dataset === null) {
         return;
       }
-      dataRegistry.publish(dataset);
+      dataBus.data.publish(dataset);
       app.shell.activateById(dataExplorer.id);
       dataExplorer.reveal(dataset);
     },
     isEnabled: () => {
-      const path = getPath();
-      return path && fileExtensionRegistry.whichMimeType(path) !== null;
+      return getDataSet() !== null;
     },
     label: 'Open as Dataset',
     iconClass: 'jp-MaterialIcon jp-??'
   });
-  return fileExtensionRegistry;
 }
