@@ -11,6 +11,7 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  InstanceTracker,
   MainAreaWidget,
   showDialog
 } from '@jupyterlab/apputils';
@@ -26,7 +27,9 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+
+import { JSONObject, UUID } from '@phosphor/coreutils';
 
 import { DisposableSet } from '@phosphor/disposable';
 
@@ -67,6 +70,8 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
+
+import { AttachedProperty } from '@phosphor/properties';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -251,6 +256,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   provides: INotebookTracker,
   requires: [
     NotebookPanel.IContentFactory,
+    IDocumentManager,
     IEditorServices,
     IRenderMimeRegistry
   ],
@@ -480,6 +486,7 @@ function activateCellTools(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   contentFactory: NotebookPanel.IContentFactory,
+  docManager: IDocumentManager,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   palette: ICommandPalette | null,
@@ -508,6 +515,9 @@ function activateNotebookHandler(
   });
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+  const clonedOutputs = new InstanceTracker<MainAreaWidget>({
+    namespace: 'cloned-outputs'
+  });
 
   // Handle state restoration.
   if (restorer) {
@@ -517,13 +527,22 @@ function activateNotebookHandler(
       name: panel => panel.context.path,
       when: services.ready
     });
+    restorer.restore(clonedOutputs, {
+      command: CommandIDs.createOutputView,
+      args: widget => Private.clonedOutputArgs.get(widget),
+      name: widget => {
+        const args = Private.clonedOutputArgs.get(widget);
+        return `${args.path}:${args.index}`;
+      },
+      when: tracker.restored
+    });
   }
 
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
-  addCommands(app, services, tracker);
+  addCommands(app, docManager, services, tracker, clonedOutputs);
   if (palette) {
     populatePalette(palette, services);
   }
@@ -815,8 +834,10 @@ function activateNotebookHandler(
  */
 function addCommands(
   app: JupyterFrontEnd,
+  docManager: IDocumentManager,
   services: ServiceManager,
-  tracker: NotebookTracker
+  tracker: NotebookTracker,
+  clonedOutputs: InstanceTracker<MainAreaWidget>
 ): void {
   const { commands, shell } = app;
 
@@ -1487,11 +1508,35 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.createOutputView, {
     label: 'Create New View for Output',
-    execute: args => {
+    execute: async args => {
+      let cell: CodeCell | undefined;
+      let current: NotebookPanel | undefined;
+      // If we are given a notebook path and cell index, then
+      // use that, otherwise use the current active cell.
+      let path = args.path as string | undefined | null;
+      let index = args.index as number | undefined | null;
+      if (path && index !== undefined && index !== null) {
+        current = docManager.findWidget(path, FACTORY) as NotebookPanel;
+        if (!current) {
+          return;
+        }
+        await current.context.ready;
+        const cells = current.content.widgets;
+        if (cells.length < args.index) {
+          return;
+        }
+        cell = current.content.widgets[index] as CodeCell;
+      } else {
+        current = getCurrent({ ...args, activate: false });
+        if (!current) {
+          return;
+        }
+        cell = current.content.activeCell as CodeCell;
+        index = current.content.activeCellIndex;
+        path = current.context.path;
+      }
       // Clone the OutputArea
-      const current = getCurrent({ ...args, activate: false });
-      const nb = current.content;
-      const content = (nb.activeCell as CodeCell).cloneOutputArea();
+      const content = cell.cloneOutputArea();
       // Create a MainAreaWidget
       const widget = new MainAreaWidget({ content });
       widget.id = `LinkedOutputView-${UUID.uuid4()}`;
@@ -1506,11 +1551,28 @@ function addCommands(
         mode: 'split-bottom'
       });
 
+      const updateCloned = () => {
+        path = current.context.path;
+        index = current.content.activeCellIndex;
+
+        // Store the args for creating the output area so they
+        // may be used to restore the cloned output.
+        Private.clonedOutputArgs.set(widget, { path, index });
+        clonedOutputs.save(widget);
+      };
+      updateCloned();
+      current.context.pathChanged.connect(updateCloned);
+      current.content.model.cells.changed.connect(updateCloned);
+
+      // Add the cloned output to the output instance tracker.
+      clonedOutputs.add(widget);
+
       // Remove the output view if the parent notebook is closed.
-      nb.disposed.connect(
-        widget.dispose,
-        widget
-      );
+      current.content.disposed.connect(() => {
+        current.context.pathChanged.disconnect(updateCloned);
+        current.content.model.cells.changed.disconnect(updateCloned);
+        widget.dispose();
+      });
     },
     isEnabled: isEnabledAndSingleSelected
   });
@@ -2092,4 +2154,22 @@ function populateMenus(
     tracker,
     getKernel: current => current.session.kernel
   } as IHelpMenu.IKernelUser<NotebookPanel>);
+}
+
+/**
+ * A namespace for module private functionality.
+ */
+namespace Private {
+  /**
+   * A property for tracking the arguments used to
+   * create cloned cell outputs. This is used to restore
+   * them upon page refresh.
+   */
+  export const clonedOutputArgs = new AttachedProperty<
+    MainAreaWidget,
+    JSONObject
+  >({
+    name: 'cloned',
+    create: () => ({})
+  });
 }
