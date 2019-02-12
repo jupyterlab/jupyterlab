@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  JupyterLab,
-  JupyterLabPlugin,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  ILabShell,
   ILayoutRestorer
 } from '@jupyterlab/application';
 import {
@@ -21,18 +22,19 @@ const id = '@jupyterlab/databus-extension:data-explorer';
 export default {
   activate,
   id,
-  requires: [IDataBus, ILayoutRestorer],
+  requires: [ILabShell, IDataBus, ILayoutRestorer],
   provides: IDataExplorer,
   autoStart: true
-} as JupyterLabPlugin<IDataExplorer>;
+} as JupyterFrontEndPlugin<IDataExplorer>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
+  labShell: ILabShell,
   dataBus: IDataBus,
   restorer: ILayoutRestorer
 ): IDataExplorer {
   const widget = createDataExplorer(dataBus);
   restorer.add(widget, widget.id);
-  app.shell.addToLeftArea(widget);
+  labShell.add(widget, 'left');
   return widget;
 }

@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { DataRegistry, IDataRegistry } from '@jupyterlab/databus';
 
 const id = '@jupyterlab/databus-extension:data-registry';
@@ -16,8 +19,8 @@ export default {
   requires: [],
   provides: IDataRegistry,
   autoStart: true
-} as JupyterLabPlugin<IDataRegistry>;
+} as JupyterFrontEndPlugin<IDataRegistry>;
 
-function activate(app: JupyterLab): IDataRegistry {
+function activate(app: JupyterFrontEnd): IDataRegistry {
   return new DataRegistry();
 }

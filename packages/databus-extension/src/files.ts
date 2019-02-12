@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   IDataExplorer,
   IDataBus,
@@ -28,10 +31,10 @@ export default {
   id: '@jupyterlab/databus-extension:files',
   requires: [IDataBus, IFileBrowserFactory, IDataExplorer],
   autoStart: true
-} as JupyterLabPlugin<void>;
+} as JupyterFrontEndPlugin<void>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   dataBus: IDataBus,
   fileBrowserFactory: IFileBrowserFactory,
   dataExplorer: IDataExplorer

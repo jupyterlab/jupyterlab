@@ -11,6 +11,9 @@
   "references": [
     {
       "path": "../apputils"
+    },
+    {
+      "path": "../rendermime-interfaces"
     }
   ]
 }

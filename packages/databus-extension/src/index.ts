@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import converterRegistryPlugin from './converters';
 import dataBusPlugin from './databus';
 import dataRegistryPlugin from './dataregistry';
@@ -24,4 +24,4 @@ export default [
   snippetsPlugin,
   URLPlugin,
   renderMimePlugin
-] as JupyterLabPlugin<any>[];
+] as JupyterFrontEndPlugin<any>[];

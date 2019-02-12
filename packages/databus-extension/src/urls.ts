@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { IConverterRegistry, URLStringConverter } from '@jupyterlab/databus';
 
 export default {
@@ -11,8 +14,8 @@ export default {
   id: '@jupyterlab/databus-extension:urls',
   requires: [IConverterRegistry],
   autoStart: true
-} as JupyterLabPlugin<void>;
+} as JupyterFrontEndPlugin<void>;
 
-function activate(app: JupyterLab, converters: IConverterRegistry) {
+function activate(app: JupyterFrontEnd, converters: IConverterRegistry) {
   converters.register(URLStringConverter);
 }

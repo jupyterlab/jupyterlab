@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { ConverterRegistry, IConverterRegistry } from '@jupyterlab/databus';
 
 /**
@@ -15,8 +18,8 @@ export default {
   requires: [],
   provides: IConverterRegistry,
   autoStart: true
-} as JupyterLabPlugin<IConverterRegistry>;
+} as JupyterFrontEndPlugin<IConverterRegistry>;
 
-function activate(app: JupyterLab): IConverterRegistry {
+function activate(app: JupyterFrontEnd): IConverterRegistry {
   return new ConverterRegistry();
 }

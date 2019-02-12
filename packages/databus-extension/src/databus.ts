@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   DataBus,
   IConverterRegistry,
@@ -20,10 +23,10 @@ export default {
   requires: [IConverterRegistry, IDataRegistry],
   provides: IDataBus,
   autoStart: true
-} as JupyterLabPlugin<IDataBus>;
+} as JupyterFrontEndPlugin<IDataBus>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   converters: IConverterRegistry,
   data: IDataRegistry
 ): IDataBus {

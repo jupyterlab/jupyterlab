@@ -3,7 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   IConverterRegistry,
   snippetViewerConverter,
@@ -17,10 +20,10 @@ export default {
   id: '@jupyterlab/databus-extension:snippets',
   requires: [IConverterRegistry, INotebookTracker],
   autoStart: true
-} as JupyterLabPlugin<void>;
+} as JupyterFrontEndPlugin<void>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   converters: IConverterRegistry,
   notebookTracker: INotebookTracker
 ) {

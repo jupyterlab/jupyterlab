@@ -5,8 +5,9 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 import { InstanceTracker } from '@jupyterlab/apputils';
 import {
@@ -22,12 +23,13 @@ const commandID = 'databus:view-url';
 export default {
   activate,
   id: '@jupyterlab/databus-extension:widgets',
-  requires: [IDataBus, ILayoutRestorer],
+  requires: [ILabShell, IDataBus, ILayoutRestorer],
   autoStart: true
-} as JupyterLabPlugin<void>;
+} as JupyterFrontEndPlugin<void>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
+  labShell: ILabShell,
   dataBus: IDataBus,
   restorer: ILayoutRestorer
 ) {
@@ -37,7 +39,7 @@ function activate(
         await tracker.add(widget);
       }
       if (!widget.isAttached) {
-        app.shell.addToMainArea(widget);
+        labShell.add(widget, 'main');
       }
       app.shell.activateById(widget.id);
     })

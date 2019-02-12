@@ -5,7 +5,10 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   createRenderMimeFactory,
   IDataRegistry,
@@ -18,10 +21,10 @@ export default {
   id: '@jupyterlab/databus-extension:rendermime',
   requires: [IRenderMimeRegistry, IDataRegistry, IDataExplorer],
   autoStart: true
-} as JupyterLabPlugin<void>;
+} as JupyterFrontEndPlugin<void>;
 
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   data: IDataRegistry,
   dataExplorer: IDataExplorer
