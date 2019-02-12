@@ -10,18 +10,6 @@ import { IDataBus } from './databus';
 import { IActiveDataset } from './active';
 import { Widget } from '@phosphor/widgets';
 
-function MimeTypesComponent({ mimeTypes }: { mimeTypes: Iterable<string> }) {
-  return (
-    <ul>
-      {[...mimeTypes].map(mimeType => (
-        <li>
-          <pre>{mimeType}</pre>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function DatasetCompononent({
   url,
   databus,
@@ -40,10 +28,6 @@ function DatasetCompononent({
     >
       <h3>URL:</h3>
       <pre>{url.toString()}</pre>
-      <h3>MimeTypes:</h3>
-      <MimeTypesComponent mimeTypes={databus.data.mimeTypesForURL(url)} />
-      <h3>Possible MimeTypes:</h3>
-      <MimeTypesComponent mimeTypes={databus.possibleMimeTypesForURL(url)} />
       <h3>Viewers:</h3>
       <span>
         {[...databus.viewersForURL(url)].map((label: string) => (
