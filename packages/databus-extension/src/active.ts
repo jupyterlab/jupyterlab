@@ -11,7 +11,8 @@ import {
 import {
   IActiveDataset,
   ActiveDataset,
-  createFileURL
+  createFileURL,
+  hasURL
 } from '@jupyterlab/databus';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { Widget } from '@phosphor/widgets';
@@ -30,22 +31,20 @@ export default {
 function activate(app: JupyterFrontEnd, labShell: ILabShell): IActiveDataset {
   const active = new ActiveDataset();
   labShell.currentChanged.connect((sender, args) => {
-    const path = getPath(args.newValue);
-    if (path === null) {
-      active.active = null;
-    } else {
-      active.active = createFileURL(path);
-    }
+    active.active = getURL(args.newValue);
   });
   return active;
 }
 
-function getPath(widget: Widget | null): string | null {
+function getURL(widget: Widget | null): URL | null {
   if (widget === null) {
     return null;
   }
   if (isDocumentWidget(widget)) {
-    return widget.context.session.path;
+    return createFileURL(widget.context.session.path);
+  }
+  if (hasURL(widget)) {
+    return widget.url;
   }
   return null;
 }

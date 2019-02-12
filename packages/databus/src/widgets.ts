@@ -31,13 +31,27 @@ export function extractWidgetArgs(
   return { label, url };
 }
 
+export interface IHasURL {
+  url: URL;
+}
+
+export function hasURL(t: any): t is IHasURL {
+  return 'url' in t;
+}
+
+class DataWidget extends MainAreaWidget implements IHasURL {
+  constructor(content: Widget, url: URL, label: string) {
+    super({ content });
+    this.id = JSON.stringify([label, url]);
+    this.title.label = `${label}: ${url}`;
+    this.title.closable = true;
+    this.url = url;
+  }
+  url: URL;
+}
 function widgetConvert(label: string): Convert<Widget, Widget> {
   return async (data: Widget, url: URL) => {
-    const widget = new MainAreaWidget({ content: data });
-    widget.id = JSON.stringify([label, url]);
-    widget.title.label = `${label}: ${url}`;
-    widget.title.closable = true;
-    return widget;
+    return new DataWidget(data, url, label);
   };
 }
 export function widgetConverter<T>(
