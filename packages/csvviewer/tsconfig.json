@@ -13,6 +13,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../databus"
+    },
+    {
       "path": "../docregistry"
     }
   ]

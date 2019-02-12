@@ -10,13 +10,13 @@
       "path": "../application"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../databus"
     },
     {
       "path": "../filebrowser"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }

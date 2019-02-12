@@ -33,6 +33,7 @@
     "@jupyterlab/application": "^1.0.0-alpha.3",
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
     "@jupyterlab/csvviewer": "^1.0.0-alpha.3",
+    "@jupyterlab/databus": "^0.7.1",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",
     "@jupyterlab/documentsearch": "^1.0.0-alpha.3",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.3",

@@ -16,6 +16,9 @@
       "path": "../csvviewer"
     },
     {
+      "path": "../databus"
+    },
+    {
       "path": "../docregistry"
     },
     {
