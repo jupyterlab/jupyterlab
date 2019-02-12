@@ -7,6 +7,8 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Token } from '@phosphor/coreutils';
 import * as React from 'react';
 import { IDataBus } from './databus';
+import { IActiveDataset } from './active';
+import { Widget } from '@phosphor/widgets';
 
 function MimeTypesComponent({ mimeTypes }: { mimeTypes: Iterable<string> }) {
   return (
@@ -27,10 +29,15 @@ function DatasetCompononent({
 }: {
   url: URL;
   databus: IDataBus;
-  active: boolean;
+  active: IActiveDataset;
 }) {
+  const isActive =
+    active.active !== null && active.active.toString() === url.toString();
   return (
-    <div style={{ backgroundColor: active ? 'grey' : 'white' }}>
+    <div
+      style={{ backgroundColor: isActive ? 'grey' : 'white' }}
+      onClick={() => (active.active = url)}
+    >
       <h3>URL:</h3>
       <pre>{url.toString()}</pre>
       <h3>MimeTypes:</h3>
@@ -49,58 +56,50 @@ function DatasetCompononent({
 
 function DataExplorer({
   databus,
-  activeURL
+  active
 }: {
   databus: IDataBus;
-  activeURL: URL | null;
+  active: IActiveDataset;
 }) {
   return (
     <div>
       <h2>Data Explorer</h2>
       <UseSignal signal={databus.data.datasetsChanged}>
-        {() =>
-          [...databus.data.URLs].map((url: URL) => (
-            // TODO: Add ID for object? How?
-            // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
-            <DatasetCompononent
-              url={url}
-              databus={databus}
-              active={
-                activeURL !== null && activeURL.toString() === url.toString()
-              }
-            />
-          ))
-        }
+        {() => (
+          <UseSignal signal={active.signal}>
+            {() =>
+              [...databus.data.URLs].map((url: URL) => (
+                // TODO: Add ID for object? How?
+                // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
+                <DatasetCompononent
+                  url={url}
+                  databus={databus}
+                  active={active}
+                />
+              ))
+            }
+          </UseSignal>
+        )}
       </UseSignal>
     </div>
   );
 }
 
-class DataExplorerWidget extends ReactWidget implements IDataExplorer {
-  constructor(private _databus: IDataBus) {
-    super();
-    this.id = '@jupyterlab-databus/explorer';
-    this.title.iconClass = 'jp-SpreadsheetIcon  jp-SideBar-tabIcon';
-    this.title.caption = 'Data Explorer';
-    this._activeURL = null;
-  }
-  render() {
-    return <DataExplorer databus={this._databus} activeURL={this._activeURL} />;
-  }
-
-  reveal(url: URL): void {
-    this._activeURL = url;
-    this.update();
-  }
-  private _activeURL: URL | null;
-}
-
-export function createDataExplorer(databus: IDataBus): IDataExplorer {
-  return new DataExplorerWidget(databus);
+export function createDataExplorer(
+  databus: IDataBus,
+  active: IActiveDataset
+): IDataExplorer {
+  const widget = ReactWidget.create(
+    <DataExplorer databus={databus} active={active} />
+  );
+  widget.id = '@jupyterlab-databus/explorer';
+  widget.title.iconClass = 'jp-SpreadsheetIcon  jp-SideBar-tabIcon';
+  widget.title.caption = 'Data Explorer';
+  return widget;
 }
 /* tslint:disable */
 export const IDataExplorer = new Token<IDataExplorer>(
   '@jupyterlab/databus:IDataExplorer'
 );
 
-export interface IDataExplorer extends DataExplorerWidget {}
+export interface IDataExplorer extends Widget {}

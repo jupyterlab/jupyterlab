@@ -13,7 +13,8 @@ import {
   createFileURL,
   resolveFileConverter,
   fileURLConverter,
-  resolveMimeType
+  resolveMimeType,
+  IActiveDataset
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -29,7 +30,7 @@ const open = 'databus:filebrowser-open';
 export default {
   activate,
   id: '@jupyterlab/databus-extension:files',
-  requires: [IDataBus, IFileBrowserFactory, IDataExplorer],
+  requires: [IDataBus, IFileBrowserFactory, IDataExplorer, IActiveDataset],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
@@ -37,7 +38,8 @@ function activate(
   app: JupyterFrontEnd,
   dataBus: IDataBus,
   fileBrowserFactory: IFileBrowserFactory,
-  dataExplorer: IDataExplorer
+  dataExplorer: IDataExplorer,
+  active: IActiveDataset
 ) {
   dataBus.converters.register(resolveFileConverter('.csv', 'text/csv'));
   dataBus.converters.register(
@@ -83,7 +85,7 @@ function activate(
       }
       dataBus.registerURL(url);
       app.shell.activateById(dataExplorer.id);
-      dataExplorer.reveal(url);
+      active.active = url;
     },
     isEnabled: () => {
       return getURL() !== null;

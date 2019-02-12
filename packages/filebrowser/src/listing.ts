@@ -871,6 +871,7 @@ export class DirListing extends Widget {
       // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
         this._selection = Object.create(null);
+        // Mark
         this._selection[this._softSelection] = true;
         this.update();
       }

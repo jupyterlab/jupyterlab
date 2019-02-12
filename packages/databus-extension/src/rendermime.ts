@@ -13,13 +13,14 @@ import {
   createRenderMimeFactory,
   IDataRegistry,
   Dataset,
-  IDataExplorer
+  IDataExplorer,
+  IActiveDataset
 } from '@jupyterlab/databus';
 
 export default {
   activate,
   id: '@jupyterlab/databus-extension:rendermime',
-  requires: [IRenderMimeRegistry, IDataRegistry, IDataExplorer],
+  requires: [IRenderMimeRegistry, IDataRegistry, IDataExplorer, IActiveDataset],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
@@ -27,13 +28,14 @@ function activate(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   data: IDataRegistry,
-  dataExplorer: IDataExplorer
+  dataExplorer: IDataExplorer,
+  active: IActiveDataset
 ) {
   rendermime.addFactory(
     createRenderMimeFactory(async (dataset: Dataset<any>) => {
       data.publish(dataset);
       app.shell.activateById(dataExplorer.id);
-      dataExplorer.reveal(dataset.url);
+      active.active = dataset.url;
     })
   );
 }

@@ -13,6 +13,7 @@ import snippetsPlugin from './snippets';
 import widgetPlugin from './widgets';
 import URLPlugin from './urls';
 import renderMimePlugin from './rendermime';
+import activePlugin from './active';
 
 export default [
   dataRegistryPlugin,
@@ -23,5 +24,6 @@ export default [
   widgetPlugin,
   snippetsPlugin,
   URLPlugin,
-  renderMimePlugin
+  renderMimePlugin,
+  activePlugin
 ] as JupyterFrontEndPlugin<any>[];

@@ -12,7 +12,8 @@ import {
 import {
   createDataExplorer,
   IDataExplorer,
-  IDataBus
+  IDataBus,
+  IActiveDataset
 } from '@jupyterlab/databus';
 
 const id = '@jupyterlab/databus-extension:data-explorer';
@@ -22,7 +23,7 @@ const id = '@jupyterlab/databus-extension:data-explorer';
 export default {
   activate,
   id,
-  requires: [ILabShell, IDataBus, ILayoutRestorer],
+  requires: [ILabShell, IDataBus, ILayoutRestorer, IActiveDataset],
   provides: IDataExplorer,
   autoStart: true
 } as JupyterFrontEndPlugin<IDataExplorer>;
@@ -31,9 +32,10 @@ function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
   dataBus: IDataBus,
-  restorer: ILayoutRestorer
+  restorer: ILayoutRestorer,
+  active: IActiveDataset
 ): IDataExplorer {
-  const widget = createDataExplorer(dataBus);
+  const widget = createDataExplorer(dataBus, active);
   restorer.add(widget, widget.id);
   labShell.add(widget, 'left');
   return widget;
