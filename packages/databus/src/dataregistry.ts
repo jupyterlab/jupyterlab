@@ -3,8 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { Token } from '@phosphor/coreutils';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
@@ -131,3 +131,9 @@ export namespace DataRegistry {
     readonly type: 'added' | 'removed';
   }
 }
+/* tslint:disable */
+export const IDataRegistry = new Token<IDataRegistry>(
+  '@jupyterlab/databus:IDataRegistry'
+);
+
+export interface IDataRegistry extends DataRegistry {}

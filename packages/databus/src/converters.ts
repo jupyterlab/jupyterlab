@@ -3,10 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { Token } from '@phosphor/coreutils';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
-
 import { ISignal, Signal } from '@phosphor/signaling';
-
 import { IDataset } from './dataregistry';
 
 /**
@@ -193,3 +192,10 @@ export namespace ConverterRegistry {
     readonly type: 'added' | 'removed';
   }
 }
+
+/* tslint:disable */
+export const IConverterRegistry = new Token<IConverterRegistry>(
+  '@jupyterlab/databus:IConverterRegistry'
+);
+
+export interface IConverterRegistry extends ConverterRegistry {}

@@ -47,6 +47,7 @@
     "@jupyterlab/csvviewer": "^1.0.0-alpha.3",
     "@jupyterlab/csvviewer-extension": "^1.0.0-alpha.3",
     "@jupyterlab/databus": "^0.7.1",
+    "@jupyterlab/databus-extension": "^0.7.1",
     "@jupyterlab/docmanager": "^1.0.0-alpha.3",
     "@jupyterlab/docmanager-extension": "^1.0.0-alpha.3",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",

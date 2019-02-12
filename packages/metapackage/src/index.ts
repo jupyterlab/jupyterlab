@@ -17,6 +17,8 @@ import '@jupyterlab/console-extension';
 import '@jupyterlab/coreutils';
 import '@jupyterlab/csvviewer';
 import '@jupyterlab/csvviewer-extension';
+import '@jupyterlab/databus';
+import '@jupyterlab/databus-extension';
 import '@jupyterlab/docmanager';
 import '@jupyterlab/docmanager-extension';
 import '@jupyterlab/docregistry';

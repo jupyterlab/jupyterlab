@@ -58,6 +58,9 @@
       "path": "../databus"
     },
     {
+      "path": "../databus-extension"
+    },
+    {
       "path": "../docmanager"
     },
     {
