@@ -325,7 +325,7 @@ export class InstanceTracker<T extends Widget>
    * multiple instance trackers and, when ready, asks them each to restore their
    * respective widgets.
    */
-  restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
+  async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     const { command, registry, state, when } = options;
     const namespace = this.namespace;
     const promises = when
@@ -334,36 +334,25 @@ export class InstanceTracker<T extends Widget>
 
     this._restore = options;
 
-    return Promise.all(promises)
-      .then(([saved]) => {
-        return Promise.all(
-          saved.ids.map((id, index) => {
-            const value = saved.values[index];
-            const args = value && (value as any).data;
-            if (args === undefined) {
-              return state.remove(id);
-            }
+    const [saved] = await Promise.all(promises);
+    const val = await Promise.all(
+      saved.ids.map((id, index) => {
+        const value = saved.values[index];
+        const args = value && (value as any).data;
+        if (args === undefined) {
+          return state.remove(id);
+        }
 
-            // Execute the command and if it fails, delete the state restore data.
-            return registry
-              .execute(command, args)
-              .catch(() => state.remove(id));
-          })
-        );
+        // Execute the command and if it fails, delete the state restore data.
+        return registry.execute(command, args).catch(() => state.remove(id));
       })
-      .then(val => {
-        this._restored.resolve(void 0);
-        return val;
-      });
+    );
+    this._restored.resolve(void 0);
+    return val;
   }
 
   /**
    * A promise resolved when the instance tracker has been restored.
-   *
-   * #### Notes
-   * This promise is not exposed on the IInstanceTracker interface.
-   * It is intended to allow for the owner/creator of an instance tracker
-   * to perform additional actions after restoration in specialized use-cases.
    */
   get restored(): Promise<void> {
     return this._restored.promise;
