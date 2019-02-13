@@ -138,8 +138,6 @@ export class LauncherModel extends VDomModel implements ILauncher {
     this.stateChanged.emit(void 0);
 
     return new DisposableDelegate(() => {
-      // ArrayExt.removeFirstOf(this._items, item);
-      // ArrayExt.removeFirstOf(this._items, item);
       this.stateChanged.emit(void 0);
     });
   }
@@ -511,7 +509,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     // Wrap the sections in body and content divs.
     return (
-      <div className="jp-Launcher-body">
+      <div>
         <div className="jp-Launcher-toolbar">
           <div className="jp-Launcher-search-div">
             <input
@@ -525,11 +523,13 @@ export class Launcher extends VDomRenderer<LauncherModel> {
             />
           </div>
         </div>
-        <div className="jp-Launcher-content">
-          <div className="jp-Launcher-cwd">
-            <h3>{this.cwd}</h3>
+        <div className="jp-Launcher-body">
+          <div className="jp-Launcher-content">
+            <div className="jp-Launcher-cwd">
+              <h3>{this.cwd}</h3>
+            </div>
+            {sections}
           </div>
-          {sections}
         </div>
       </div>
     );
