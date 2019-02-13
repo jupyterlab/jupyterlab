@@ -54,7 +54,7 @@ export class ThemeManager {
 
     this._base = url;
     this._host = host;
-    this._splash = splash;
+    this._splash = splash || null;
 
     registry.load(key).then(settings => {
       this._settings = settings;
@@ -227,7 +227,9 @@ export class ThemeManager {
     const current = this._current;
     const links = this._links;
     const themes = this._themes;
-    const splash = this._splash.show(themes[theme].isLight);
+    const splash = this._splash
+      ? this._splash.show(themes[theme].isLight)
+      : new DisposableDelegate(() => undefined);
 
     // Unload any CSS files that have been loaded.
     links.forEach(link => {
@@ -276,7 +278,7 @@ export class ThemeManager {
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};
   private _settings: ISettingRegistry.ISettings;
-  private _splash: ISplashScreen;
+  private _splash: ISplashScreen | null;
   private _themes: { [key: string]: ThemeManager.ITheme } = {};
   private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
 }
@@ -307,7 +309,7 @@ export namespace ThemeManager {
     /**
      * The splash screen to show when loading themes.
      */
-    splash: ISplashScreen;
+    splash?: ISplashScreen;
 
     /**
      * The url for local theme loading.

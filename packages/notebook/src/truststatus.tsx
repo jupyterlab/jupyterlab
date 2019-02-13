@@ -21,21 +21,21 @@ function cellTrust(
       `Notebook trusted: ${props.trustedCells} of ${
         props.totalCells
       } cells trusted.`,
-      'trusted-item'
+      'jp-StatusItem-trusted'
     ];
   } else if (props.activeCellTrusted) {
     return [
       `Active cell trusted: ${props.trustedCells} of ${
         props.totalCells
       } cells trusted. `,
-      'trusted-item'
+      'jp-StatusItem-trusted'
     ];
   } else {
     return [
       `Notebook not trusted: ${props.trustedCells} of ${
         props.totalCells
       } cells trusted.`,
-      'not-trusted-item'
+      'jp-StatusItem-untrusted'
     ];
   }
 }

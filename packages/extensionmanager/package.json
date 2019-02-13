@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "0.19.1",
+  "version": "1.0.0-alpha.3",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,9 +31,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/services": "^3.2.1",
-    "@jupyterlab/ui-components": "^0.0.1",
+    "@jupyterlab/apputils": "^1.0.0-alpha.3",
+    "@jupyterlab/services": "^4.0.0-alpha.3",
+    "@jupyterlab/ui-components": "^1.0.0-alpha.3",
     "@phosphor/messaging": "^1.2.2",
     "react": "~16.4.2",
     "react-paginate": "^5.2.3",
@@ -48,5 +48,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c"
 }

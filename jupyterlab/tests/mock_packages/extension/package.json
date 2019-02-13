@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
-    "@jupyterlab/launcher": "^0.19.1"
+    "@jupyterlab/launcher": "^1.0.0-alpha.3"
   },
   "jupyterlab": {
     "extension": true

@@ -366,8 +366,8 @@ describe('session', () => {
         expect(session.kernel.id).to.equal(kernel.id);
         expect(session.kernel).to.not.equal(previous);
         expect(session.kernel).to.not.equal(kernel);
-        await previous.dispose();
-        await kernel.dispose();
+        previous.dispose();
+        kernel.dispose();
       });
 
       it('should update the session path if it has changed', async () => {

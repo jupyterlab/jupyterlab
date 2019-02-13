@@ -24,7 +24,7 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['font-awesome'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/services': ['ws'],
+  '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
@@ -207,12 +207,17 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Validate each package.
   for (let name in pkgData) {
+    let unused = UNUSED[name] || [];
+    // Allow jest-junit to be unused in the test suite.
+    if (name.indexOf('@jupyterlab/test-') === 0) {
+      unused.push('jest-junit');
+    }
     let options: IEnsurePackageOptions = {
       pkgPath: pkgPaths[name],
       data: pkgData[name],
       depCache,
       missing: MISSING[name],
-      unused: UNUSED[name],
+      unused,
       locals
     };
 

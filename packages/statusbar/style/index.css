@@ -1,0 +1,16 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-StatusItem-kernel {
+  background-image: url('./kernel-icon.svg');
+}
+
+.jp-StatusItem-terminal {
+  background-image: url('./terminal-icon.svg');
+}
+
+.jp-StatusItem-line-form {
+  background-image: url('./line-form.svg');
+}

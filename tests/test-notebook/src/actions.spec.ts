@@ -42,6 +42,7 @@ describe('@jupyterlab/notebook', () => {
         kernelPreference: { name: 'ipython' }
       });
       await Promise.all([ipySession.initialize(), session.initialize()]);
+      await Promise.all([ipySession.kernel.ready, session.kernel.ready]);
     });
 
     beforeEach(() => {
@@ -549,6 +550,10 @@ describe('@jupyterlab/notebook', () => {
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
         const result = await NotebookActions.run(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
         await ipySession.kernel.restart();
@@ -634,6 +639,10 @@ describe('@jupyterlab/notebook', () => {
         cell.rendered = false;
         widget.select(cell);
         const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -708,6 +717,10 @@ describe('@jupyterlab/notebook', () => {
         cell.rendered = false;
         widget.select(cell);
         const result = await NotebookActions.runAndInsert(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -774,6 +787,10 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         const result = await NotebookActions.runAll(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         await ipySession.kernel.restart();

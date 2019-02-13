@@ -130,11 +130,6 @@ export namespace IEditMenu {
    */
   export interface IFindReplacer<T extends Widget> extends IMenuExtender<T> {
     /**
-     * Execute a find command for the activity.
-     */
-    find?: (widget: T) => void;
-
-    /**
      * Execute a find/replace command for the activity.
      */
     findAndReplace?: (widget: T) => void;

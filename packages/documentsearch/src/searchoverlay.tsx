@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import * as React from 'react';
+import { IDisplayState } from './interfaces';
+import { SearchInstance } from './searchinstance';
 
-import '../style/index.css';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import { IDisplayState } from '.';
-import { SearchInstance } from './searchinstance';
+import * as React from 'react';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
@@ -195,8 +194,14 @@ class SearchOverlay extends React.Component<
       <SearchEntry
         useRegex={this.props.overlayState.useRegex}
         caseSensitive={this.props.overlayState.caseSensitive}
-        onCaseSensitiveToggled={() => this.props.onCaseSensitiveToggled()}
-        onRegexToggled={() => this.props.onRegexToggled()}
+        onCaseSensitiveToggled={() => {
+          this.props.onCaseSensitiveToggled();
+          this._executeSearch(true);
+        }}
+        onRegexToggled={() => {
+          this.props.onRegexToggled();
+          this._executeSearch(true);
+        }}
         onKeydown={(e: KeyboardEvent) => this._onKeydown(e)}
         onChange={(e: React.ChangeEvent) => this._onChange(e)}
         inputText={this.state.inputText}

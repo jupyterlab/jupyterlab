@@ -68,7 +68,7 @@ export class NotebookSearchProvider implements ISearchProvider {
         cell.inputHidden = false;
       }
       // chain promises to ensure indexing is sequential
-      const matchesFromCell = await cmSearchProvider.startQuery(
+      const matchesFromCell = await cmSearchProvider.startQueryCodeMirror(
         query,
         cmEditor
       );

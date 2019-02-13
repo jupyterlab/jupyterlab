@@ -37,7 +37,8 @@ describe('StateDB', () => {
       await prepopulate.save(key, incorrect);
       let value = await prepopulate.fetch(key);
       expect(value).to.equal(incorrect);
-      await transform.resolve(transformation);
+      transform.resolve(transformation);
+      await transform.promise;
       value = await db.fetch(key);
       expect(value).to.equal(correct);
       await db.clear();

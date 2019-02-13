@@ -41,6 +41,7 @@
     "patch:release": "node buildutils/lib/patch-release.js",
     "publish": "jlpm run pre-publish && lerna publish --force-publish=* -m \"Publish\"",
     "publish:next": "jlpm run pre-publish && lerna publish --npm-tag=next --force-publish=* -m \"Publish with 'next' tag\"",
+    "publish:next:changed": "jlpm run pre-publish && lerna publish --npm-tag=next -m \"Publish with 'next' tag\"",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
     "remove:sibling": "node buildutils/lib/remove-package.js",

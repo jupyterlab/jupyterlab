@@ -95,18 +95,12 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IFindReplacer', () => {
         const finder: IEditMenu.IFindReplacer<Wodget> = {
           tracker,
-          find: widget => {
-            widget.state = 'find';
-            return;
-          },
           findAndReplace: widget => {
             widget.state = 'findAndReplace';
             return;
           }
         };
         menu.findReplacers.add(finder);
-        delegateExecute(wodget, menu.findReplacers, 'find');
-        expect(wodget.state).to.equal('find');
         delegateExecute(wodget, menu.findReplacers, 'findAndReplace');
         expect(wodget.state).to.equal('findAndReplace');
       });

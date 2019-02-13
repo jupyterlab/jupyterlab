@@ -9,6 +9,8 @@ import {
 
 import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
 
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+
 import {
   CSVViewer,
   TextRenderConfig,
@@ -21,6 +23,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { DataGrid } from '@phosphor/datagrid';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { CSVSearchProvider } from './searchprovider';
 
 /**
  * The name of the factories that creates widgets.
@@ -35,6 +38,7 @@ const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
   requires: [ILayoutRestorer, IThemeManager, IMainMenu],
+  optional: [ISearchProviderRegistry],
   autoStart: true
 };
 
@@ -45,6 +49,7 @@ const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
   requires: [ILayoutRestorer, IThemeManager, IMainMenu],
+  optional: [ISearchProviderRegistry],
   autoStart: true
 };
 
@@ -55,21 +60,6 @@ function addMenuEntries(
   mainMenu: IMainMenu,
   tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
 ) {
-  // Add find capability to the edit menu.
-  mainMenu.editMenu.findReplacers.add({
-    tracker,
-    find: (widget: IDocumentWidget<CSVViewer>) => {
-      return Dialog.prompt<string>(
-        'Search Text',
-        widget.content.searchService.searchText
-      ).then(value => {
-        if (value.button.accept) {
-          widget.content.searchService.find(value.value);
-        }
-      });
-    }
-  } as IEditMenu.IFindReplacer<IDocumentWidget<CSVViewer>>);
-
   // Add go to line capability to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
@@ -90,7 +80,8 @@ function activateCsv(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
-  mainMenu: IMainMenu
+  mainMenu: IMainMenu,
+  searchregistry: ISearchProviderRegistry = null
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
@@ -147,6 +138,9 @@ function activateCsv(
   themeManager.themeChanged.connect(updateThemes);
 
   addMenuEntries(mainMenu, tracker);
+  if (searchregistry) {
+    searchregistry.registerProvider('csv', CSVSearchProvider);
+  }
 }
 
 /**
@@ -156,7 +150,8 @@ function activateTsv(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
-  mainMenu: IMainMenu
+  mainMenu: IMainMenu,
+  searchregistry: ISearchProviderRegistry = null
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
@@ -213,6 +208,9 @@ function activateTsv(
   themeManager.themeChanged.connect(updateThemes);
 
   addMenuEntries(mainMenu, tracker);
+  if (searchregistry) {
+    searchregistry.registerProvider('tsv', CSVSearchProvider);
+  }
 }
 
 /**

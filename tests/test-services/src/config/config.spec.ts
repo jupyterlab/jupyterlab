@@ -38,11 +38,6 @@ describe('config', () => {
       expect(Object.keys(config.data).length).to.equal(0);
     });
 
-    it('should load a config', async () => {
-      const config = await ConfigSection.create({ name: randomName() });
-      expect(Object.keys(config.data).length).to.equal(0);
-    });
-
     it('should accept server settings', async () => {
       const serverSettings = makeSettings();
       const config = await ConfigSection.create({

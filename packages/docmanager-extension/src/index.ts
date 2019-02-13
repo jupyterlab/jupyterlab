@@ -623,7 +623,7 @@ function addLabCommands(
     const pathRe = /[Pp]ath:\s?(.*)\n?/;
     const test = (node: HTMLElement) =>
       node['title'] && !!node['title'].match(pathRe);
-    const node = app.contextMenuFirst(test);
+    const node = app.contextMenuHitTest(test);
 
     if (!node) {
       // Fall back to active doc widget if path cannot be obtained from event.

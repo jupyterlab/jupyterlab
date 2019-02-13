@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "0.19.1",
+  "version": "1.0.0-alpha.3",
   "description": "JupyterLab - Editor Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,17 +31,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/codeeditor": "^0.19.1",
-    "@jupyterlab/console": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.3",
-    "@jupyterlab/fileeditor": "^0.19.1",
-    "@jupyterlab/launcher": "^0.19.1",
-    "@jupyterlab/mainmenu": "^0.8.1",
-    "@jupyterlab/statusbar": "^0.7.1",
+    "@jupyterlab/application": "^1.0.0-alpha.3",
+    "@jupyterlab/apputils": "^1.0.0-alpha.3",
+    "@jupyterlab/codeeditor": "^1.0.0-alpha.3",
+    "@jupyterlab/console": "^1.0.0-alpha.3",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
+    "@jupyterlab/docregistry": "^1.0.0-alpha.3",
+    "@jupyterlab/filebrowser": "^1.0.0-alpha.3",
+    "@jupyterlab/fileeditor": "^1.0.0-alpha.3",
+    "@jupyterlab/launcher": "^1.0.0-alpha.3",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.3",
+    "@jupyterlab/statusbar": "^1.0.0-alpha.3",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.6.0"
   },
@@ -53,6 +53,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c",
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"

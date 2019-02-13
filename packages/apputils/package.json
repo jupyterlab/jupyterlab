@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "0.19.1",
+  "version": "1.0.0-alpha.3",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,9 +31,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/services": "^3.2.1",
-    "@jupyterlab/ui-components": "^0.0.1",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
+    "@jupyterlab/services": "^4.0.0-alpha.3",
+    "@jupyterlab/ui-components": "^1.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.6.1",
     "@phosphor/coreutils": "^1.3.0",
@@ -58,5 +58,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c"
 }

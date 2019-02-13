@@ -465,7 +465,7 @@ describe('Kernel.IKernel', () => {
       };
       const msg = KernelMessage.createShellMessage(options);
       kernel.sendShellMessage(msg, true);
-      await done;
+      await done.promise;
       await tester.shutdown();
       tester.dispose();
     });
@@ -502,7 +502,7 @@ describe('Kernel.IKernel', () => {
         data.buffer
       ]);
       kernel.sendShellMessage(msg, true);
-      await done;
+      await done.promise;
       await tester.shutdown();
       tester.dispose();
     });
@@ -817,7 +817,7 @@ describe('Kernel.IKernel', () => {
         done.resolve(null);
       });
       kernel.sendInputReply({ value: 'test' });
-      await done;
+      await done.promise;
       await tester.shutdown();
       tester.dispose();
     });

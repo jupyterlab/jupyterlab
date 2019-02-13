@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "0.19.1",
+  "version": "1.0.0-alpha.3",
   "description": "JupyterLab - Terminal Emulator Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -11,7 +11,8 @@
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -30,13 +31,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/launcher": "^0.19.1",
-    "@jupyterlab/mainmenu": "^0.8.1",
-    "@jupyterlab/services": "^3.2.1",
-    "@jupyterlab/terminal": "^0.19.1"
+    "@jupyterlab/application": "^1.0.0-alpha.3",
+    "@jupyterlab/apputils": "^1.0.0-alpha.3",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
+    "@jupyterlab/launcher": "^1.0.0-alpha.3",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.3",
+    "@jupyterlab/terminal": "^1.0.0-alpha.3"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
@@ -46,6 +46,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c",
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"

@@ -109,13 +109,14 @@ describe('csvviewer/widget', () => {
 
       // searching for "match", cells at (0,1) and (1,1) should match.
       // (0,1) is the current match
-      searchService.find('match');
+      const query = /match/;
+      searchService.find(query);
       expect(fakeRenderCell(0, 1)).to.equal('currentMatch');
       expect(fakeRenderCell(1, 1)).to.equal('anotherMatch');
       expect(fakeRenderCell(0, 0)).to.equal(undefined);
 
       // search again, the current match "moves" to be (1,1)
-      searchService.find('match');
+      searchService.find(query);
       expect(fakeRenderCell(0, 1)).to.equal('anotherMatch');
       expect(fakeRenderCell(1, 1)).to.equal('currentMatch');
     });
