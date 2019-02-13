@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import * as React from 'react';
 
 import {
   JupyterFrontEnd,
@@ -14,9 +15,12 @@ import {
   resolveFileConverter,
   fileURLConverter,
   resolveMimeType,
-  IActiveDataset
+  IActiveDataset,
+  staticWidgetConverter,
+  URLMimeType
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 // Copied from filebrowser because it isn't exposed there
 // ./packages/filebrowser-extension/src/index.ts
@@ -42,6 +46,15 @@ function activate(
   active: IActiveDataset
 ) {
   dataBus.converters.register(resolveFileConverter('.csv', 'text/csv'));
+  dataBus.converters.register(resolveFileConverter('.png', 'image/png'));
+  dataBus.converters.register(
+    staticWidgetConverter({
+      mimeType: URLMimeType('image/png'),
+      label: 'Image',
+      convert: async (url: URL | string) =>
+        ReactWidget.create(<img src={url.toString()} />)
+    })
+  );
   dataBus.converters.register(
     fileURLConverter(
       async (path: string) =>
