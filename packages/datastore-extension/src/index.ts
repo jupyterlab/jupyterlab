@@ -108,10 +108,7 @@ async function makeTestWidget(): Promise<Widget> {
     }
   });
 
-  const history = await chatSession.getHistory();
-  for (let t of history) {
-    MessageLoop.sendMessage(ds, new Datastore.TransactionMessage(t));
-  }
+  await chatSession.replayHistory();
 
   return w;
 }

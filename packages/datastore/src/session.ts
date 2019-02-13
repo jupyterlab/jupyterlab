@@ -22,8 +22,8 @@ const DATASTORE_SERVICE_URL = 'lab/api/datastore';
  * A class that manages exchange of transactions with the datastore server.
  */
 export class DatastoreSession extends WSConnection<
-  DatastoreWSMessages.IMessage,
-  DatastoreWSMessages.IMessage
+  DatastoreWSMessages.Request,
+  DatastoreWSMessages.Reply | DatastoreWSMessages.TransactionBroadcast
 > {
   /**
    *
@@ -56,39 +56,29 @@ export class DatastoreSession extends WSConnection<
    * @param transactions - The transactions to broadcast.
    * @returns An array of acknowledged transactionIds from the server.
    */
-  async broadcastTransactions(
-    transactions: Datastore.Transaction[]
-  ): Promise<ReadonlyArray<string>> {
+  broadcastTransactions(transactions: Datastore.Transaction[]): void {
     const msg = DatastoreWSMessages.createMessage('transaction-broadcast', {
       transactions
     });
-    const reply = await this._requestMessageReply(msg);
-    // TODO: Acknowledgment should be an internal detail, do not expose
-    return reply.content.transactionIds;
-  }
-
-  /**
-   * Request specific transactions by their ids.
-   *
-   * @param transactionIds - The transaction ids that are requested.
-   */
-  async fetchTransactions(
-    transactionIds: ReadonlyArray<string>
-  ): Promise<ReadonlyArray<Datastore.Transaction>> {
-    const msg = DatastoreWSMessages.createMessage('fetch-transaction-request', {
-      transactionIds
-    });
-    const reply = await this._requestMessageReply(msg);
-    return reply.content.transactions;
+    this._requestMessageReply(msg)
+      .then(reply => {
+        // TODO: Mark transactions as sent
+        // Resend any that were not acknowledged.
+      })
+      .catch(() => {
+        // TODO: Resend transactions
+      });
   }
 
   /**
    * Request the complete history of the datastore.
+   *
+   * The transactions of the history will be sent to the set handler.
    */
-  async getHistory(): Promise<ReadonlyArray<Datastore.Transaction>> {
+  async replayHistory(): Promise<void> {
     const msg = DatastoreWSMessages.createMessage('history-request', {});
     const reply = await this._requestMessageReply(msg);
-    return reply.content.history.transactions;
+    this._handleTransactions(reply.content.transactions);
   }
 
   /**
@@ -114,7 +104,9 @@ export class DatastoreSession extends WSConnection<
     return new settings.WebSocket(wsUrl);
   }
 
-  protected handleMessage(msg: DatastoreWSMessages.IMessage): boolean {
+  protected handleMessage(
+    msg: DatastoreWSMessages.Reply | DatastoreWSMessages.TransactionBroadcast
+  ): boolean {
     try {
       // TODO: Write a validator?
       // validate.validateMessage(msg);
@@ -154,10 +146,10 @@ export class DatastoreSession extends WSConnection<
   /**
    * Send a message to the server and resolve the reply message.
    */
-  private _requestMessageReply<T extends DatastoreWSMessages.IRequestMessage>(
+  private _requestMessageReply<T extends DatastoreWSMessages.Request>(
     msg: T
-  ): Promise<DatastoreWSMessages.IMessageReplyMap[T['msgType']]> {
-    const delegate = new PromiseDelegate<DatastoreWSMessages.IReplyMessage>();
+  ): Promise<DatastoreWSMessages.IReplyMap[T['msgType']]> {
+    const delegate = new PromiseDelegate<DatastoreWSMessages.Reply>();
     this._delegates.set(msg.msgId, delegate);
 
     const promise = delegate.promise.then(reply => {
@@ -172,7 +164,7 @@ export class DatastoreSession extends WSConnection<
 
   private _delegates = new Map<
     string,
-    PromiseDelegate<DatastoreWSMessages.IReplyMessage>
+    PromiseDelegate<DatastoreWSMessages.Reply>
   >();
 }
 
