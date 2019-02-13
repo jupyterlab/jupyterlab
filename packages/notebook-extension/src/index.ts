@@ -535,7 +535,7 @@ function activateNotebookHandler(
         path: widget.content.path,
         index: widget.content.index
       }),
-      name: widget => `${widget.path}:${widget.index}`,
+      name: widget => `${widget.content.path}:${widget.content.index}`,
       when: tracker.restored
     });
   }
