@@ -21,6 +21,9 @@
       "path": "../databus"
     },
     {
+      "path": "../docregistry"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -28,9 +31,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../docregistry"
     }
   ]
 }

@@ -9,6 +9,57 @@ import * as React from 'react';
 import { IDataBus } from './databus';
 import { IActiveDataset } from './active';
 import { Widget } from '@phosphor/widgets';
+import { style, classes } from 'typestyle';
+
+const buttonClassName = style({
+  color: '#2196F3',
+  borderRadius: 2,
+  background: '#FFFFFF',
+  fontSize: 10,
+  borderWidth: 0,
+  margin: 2,
+  marginRight: 12, // 2 + 10 spacer between
+  paddingRight: 2,
+  paddingLeft: 2,
+  paddingTop: 4,
+  paddingBottom: 4,
+  $nest: {
+    '&:hover': {
+      background: '#E0E0E0'
+    },
+    '&:active': {
+      background: '#BDBDBD'
+    }
+  }
+});
+
+function Button({ onClick, text }: { onClick: () => void; text: string }) {
+  return (
+    <button className={buttonClassName} onClick={onClick}>
+      {text}
+    </button>
+  );
+}
+
+const datasetClassName = style({
+  borderBottom: '1px solid #E0E0E0',
+  color: '#333333',
+  padding: 4,
+  $nest: {
+    '&:hover': {
+      background: '#F2F2F2'
+    }
+  }
+});
+
+const activeDatasetClassName = style({
+  backgroundColor: '#E0E0E0',
+  $nest: {
+    '&:hover': {
+      background: '#E0E0E0'
+    }
+  }
+});
 
 function DatasetCompononent({
   url,
@@ -19,22 +70,78 @@ function DatasetCompononent({
   databus: IDataBus;
   active: IActiveDataset;
 }) {
-  const isActive =
-    active.active !== null && active.active.toString() === url.toString();
+  const classNames = [datasetClassName];
+  if (active.active !== null && active.active.toString() === url.toString()) {
+    classNames.push(activeDatasetClassName);
+  }
+  const viewers = [...databus.viewersForURL(url)];
+  viewers.sort();
   return (
     <div
-      style={{ backgroundColor: isActive ? 'grey' : 'white' }}
+      className={classes(...classNames)}
       onClick={() => (active.active = url)}
     >
-      <h3>URL:</h3>
-      <pre>{url.toString()}</pre>
-      <h3>Viewers:</h3>
+      <h3
+        style={{
+          fontSize: 12,
+          fontWeight: 'unset',
+          margin: 'unset'
+        }}
+      >
+        {url.toString()}
+      </h3>
+      <h3
+        style={{
+          fontSize: 10,
+          fontWeight: 'unset',
+          paddingTop: 12,
+          paddingBottom: 4,
+          margin: 'unset'
+        }}
+      >
+        Launch:
+      </h3>
       <span>
-        {[...databus.viewersForURL(url)].map((label: string) => (
-          <button onClick={() => databus.viewURL(url, label)}>{label}</button>
+        {viewers.map((label: string) => (
+          <Button onClick={() => databus.viewURL(url, label)} text={label} />
         ))}
       </span>
     </div>
+  );
+}
+
+function Name() {
+  return (
+    <div
+      style={{
+        height: 27,
+        paddingTop: 8,
+        paddingLeft: 8,
+        borderBottom: '1px solid #E0E0E0',
+        fontSize: 13
+      }}
+    >
+      [ADRF] : sensitive_project
+    </div>
+  );
+}
+
+function Heading() {
+  return (
+    <h2
+      style={{
+        paddingTop: 8,
+        paddingBottom: 6,
+        fontSize: 14,
+        textAlign: 'center',
+        letterSpacing: '0.1em',
+        margin: 'unset',
+        color: '#333333',
+        borderBottom: '1px solid #E0E0E0'
+      }}
+    >
+      Project Datasets
+    </h2>
   );
 }
 
@@ -46,8 +153,15 @@ function DataExplorer({
   active: IActiveDataset;
 }) {
   return (
-    <div>
-      <h2>Data Explorer</h2>
+    <div
+      style={{
+        background: '#FFFFFF',
+        color: '#000000',
+        fontFamily: 'Helvetica'
+      }}
+    >
+      <Name />
+      <Heading />
       <UseSignal signal={databus.data.datasetsChanged}>
         {() => (
           <UseSignal signal={active.signal}>

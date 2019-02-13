@@ -57,7 +57,7 @@ export class Dataset<T> {
   equals(other: Dataset<T>): boolean {
     return (
       this.mimeType === other.mimeType &&
-      this.url === other.url &&
+      this.url.toString() === other.url.toString() &&
       this.data === other.data
     );
   }
