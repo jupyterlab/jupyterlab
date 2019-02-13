@@ -339,6 +339,10 @@ export class InstanceTracker<T extends Widget>
    * respective widgets.
    */
   async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
+    if (this._hasRestored) {
+      throw new Error('Instance tracker has already restored');
+    }
+    this._hasRestored = true;
     const { command, registry, state, when } = options;
     const namespace = this.namespace;
     const promises = when
@@ -348,7 +352,7 @@ export class InstanceTracker<T extends Widget>
     this._restore = options;
 
     const [saved] = await Promise.all(promises);
-    const val = await Promise.all(
+    const values = await Promise.all(
       saved.ids.map((id, index) => {
         const value = saved.values[index];
         const args = value && (value as any).data;
@@ -360,8 +364,8 @@ export class InstanceTracker<T extends Widget>
         return registry.execute(command, args).catch(() => state.remove(id));
       })
     );
-    this._restored.resolve(void 0);
-    return val;
+    this._restored.resolve(undefined);
+    return values;
   }
 
   /**
@@ -468,6 +472,7 @@ export class InstanceTracker<T extends Widget>
     }
   }
 
+  private _hasRestored = false;
   private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
   private _restored = new PromiseDelegate<void>();
   private _tracker = new FocusTracker<T>();
