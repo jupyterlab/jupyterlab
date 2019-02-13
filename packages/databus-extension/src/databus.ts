@@ -30,8 +30,11 @@ function activate(
   converters: IConverterRegistry,
   data: IDataRegistry
 ): IDataBus {
-  return new DataBus({
+  const databus = new DataBus({
     converters,
     data
   });
+  databus.registerURL(new URL('file:///data.csv'));
+  databus.registerURL(new URL('file:///data2.csv'));
+  return databus;
 }
