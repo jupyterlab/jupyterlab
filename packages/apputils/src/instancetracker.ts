@@ -53,6 +53,19 @@ export interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly size: number;
 
   /**
+   * A promise that is resolved when the instance tracker has been
+   * restored from a serialized state.
+   *
+   * #### Notes
+   * Most client code will not need to use this, since they can wait
+   * for the whole application to restore. However, if an extension
+   * wants to perform actions during the application restoration, but
+   * after the restoration of another instance tracker, they can use
+   * this promise.
+   */
+  readonly restored: Promise<void>;
+
+  /**
    * Find the first widget in the tracker that satisfies a filter function.
    *
    * @param - fn The filter function to call on each widget.

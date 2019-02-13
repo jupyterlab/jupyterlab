@@ -536,7 +536,7 @@ function activateNotebookHandler(
         index: widget.content.index
       }),
       name: widget => `${widget.content.path}:${widget.content.index}`,
-      when: tracker.restored
+      when: tracker.restored // After the notebook widgets (but not contents).
     });
   }
 
