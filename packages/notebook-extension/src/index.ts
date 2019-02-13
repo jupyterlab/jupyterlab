@@ -585,6 +585,15 @@ function activateNotebookHandler(
     });
     // Add the notebook panel to the tracker.
     tracker.add(widget);
+
+    widget.context.saveState.connect((sender, state) => {
+      if (state === 'started') {
+        // Always sync view state if we are the shell's current widget.
+        if (app.shell.currentWidget === widget) {
+          NotebookActions.persistCollapseScrollState(widget.content);
+        }
+      }
+    });
   });
 
   /**
