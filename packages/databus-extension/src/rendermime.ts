@@ -32,10 +32,12 @@ function activate(
   active: IActiveDataset
 ) {
   rendermime.addFactory(
-    createRenderMimeFactory(async (dataset: Dataset<any>) => {
-      data.publish(dataset);
+    createRenderMimeFactory(async (datasets: Array<Dataset<any>>) => {
+      for (const dataset of datasets) {
+        data.publish(dataset);
+        active.active = dataset.url;
+      }
       app.shell.activateById(dataExplorer.id);
-      active.active = dataset.url;
     })
   );
 }

@@ -11,35 +11,33 @@ import { Dataset } from './dataregistry';
 // https://github.com/jupyter/nbformat/blob/9dd1b8719c9095eaebce1846416bb3a5e939758f/nbformat/v4/nbformat.v4.schema.json#L407
 const datasetMimeType = 'application/x.jupyter.dataset+json';
 
-type DatasetMimeData = {
+type DatasetMimeData = Array<{
   mimeType: string;
   url: string;
   data: JSONValue;
-};
-type Register = (dataset: Dataset<any>) => Promise<void>;
+}>;
+type Register = (datasets: Array<Dataset<any>>) => Promise<void>;
 class RendererDataset extends ReactWidget implements IRenderMime.IRenderer {
   constructor(private _register: Register) {
     super();
   }
 
   render() {
-    if (!this._dataset) {
-      return <span>Waiting for dataset...</span>;
-    }
     return (
-      <button onClick={() => this._register(this._dataset!)}>
-        Register {this._dataset.url.toString()}
+      <button onClick={() => this._register(this._datasets)}>
+        Register datasets
       </button>
     );
   }
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const { mimeType, url, data } = model.data[
+    this._datasets = [];
+    for (const { mimeType, url, data } of model.data[
       datasetMimeType
-    ] as DatasetMimeData;
-    this._dataset = new Dataset(mimeType, new URL(url), data);
-    this.update();
+    ] as DatasetMimeData) {
+      this._datasets.push(new Dataset(mimeType, new URL(url), data));
+    }
   }
-  private _dataset: Dataset<any> | undefined;
+  private _datasets: Array<Dataset<any>> = [];
 }
 
 export function createRenderMimeFactory(

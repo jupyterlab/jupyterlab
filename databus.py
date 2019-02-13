@@ -1,14 +1,17 @@
 import IPython.display
 import pandas
 
-def display_dataset(mime_type, url, data):
+def display_datasets(*datasets):
     IPython.display.publish_display_data({
-        'text/plain': f'Dataset: {url}, {mime_type}, {data}',
-        'application/x.jupyter.dataset+json': {
-            "mimeType": mime_type,
-            "url": url,
-            "data": data
-        }
+        'application/x.jupyter.dataset+json': datasets
+    })
+
+
+def display_dataset(mime_type, url, data):
+    display_datasets({
+        "mimeType": mime_type,
+        "url": url,
+        "data": data
     })
 
 def display_url_dataset(mime_type, url):

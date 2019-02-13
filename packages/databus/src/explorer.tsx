@@ -10,6 +10,7 @@ import { IDataBus } from './databus';
 import { IActiveDataset } from './active';
 import { Widget } from '@phosphor/widgets';
 import { style, classes } from 'typestyle';
+import { Classes } from '@blueprintjs/core';
 
 const buttonClassName = style({
   color: '#2196F3',
@@ -19,16 +20,16 @@ const buttonClassName = style({
   borderWidth: 0,
   margin: 2,
   marginRight: 12, // 2 + 10 spacer between
-  paddingRight: 2,
-  paddingLeft: 2,
-  paddingTop: 4,
-  paddingBottom: 4,
+  padding: 4,
   $nest: {
-    '&:hover': {
-      background: '#E0E0E0'
-    },
     '&:active': {
       background: '#BDBDBD'
+    },
+    '&:active:hover': {
+      background: '#BDBDBD'
+    },
+    '&:hover': {
+      background: '#E0E0E0'
     }
   }
 });
@@ -45,6 +46,8 @@ const datasetClassName = style({
   borderBottom: '1px solid #E0E0E0',
   color: '#333333',
   padding: 4,
+  paddingRight: 12,
+  paddingLeft: 12,
   $nest: {
     '&:hover': {
       background: '#F2F2F2'
@@ -53,10 +56,11 @@ const datasetClassName = style({
 });
 
 const activeDatasetClassName = style({
-  backgroundColor: '#E0E0E0',
+  backgroundColor: 'var(--jp-brand-color1)',
+  color: 'white',
   $nest: {
     '&:hover': {
-      background: '#E0E0E0'
+      background: 'var(--jp-brand-color1)'
     }
   }
 });
@@ -85,21 +89,14 @@ function DatasetCompononent({
         style={{
           fontSize: 12,
           fontWeight: 'unset',
-          margin: 'unset'
+          margin: 'unset',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          direction: 'rtl',
+          textAlign: 'left'
         }}
       >
         {url.toString()}
-      </h3>
-      <h3
-        style={{
-          fontSize: 10,
-          fontWeight: 'unset',
-          paddingTop: 12,
-          paddingBottom: 4,
-          margin: 'unset'
-        }}
-      >
-        Launch:
       </h3>
       <span>
         {viewers.map((label: string) => (
@@ -110,77 +107,98 @@ function DatasetCompononent({
   );
 }
 
-function Name() {
-  return (
-    <div
-      style={{
-        height: 27,
-        paddingTop: 8,
-        paddingLeft: 8,
-        borderBottom: '1px solid #E0E0E0',
-        fontSize: 13
-      }}
-    >
-      [ADRF] : sensitive_project
-    </div>
-  );
-}
-
-function Heading() {
+function Heading({
+  search,
+  onSearch
+}: {
+  search: string;
+  onSearch: (search: string) => void;
+}) {
   return (
     <h2
       style={{
         paddingTop: 8,
         paddingBottom: 6,
+        paddingLeft: 12,
+        paddingRight: 12,
         fontSize: 14,
-        textAlign: 'center',
         letterSpacing: '0.1em',
         margin: 'unset',
         color: '#333333',
-        borderBottom: '1px solid #E0E0E0'
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottom:
+          'var(--jp-border-width) solid var(--jp-toolbar-border-color)',
+        boxShadow: 'var(--jp-toolbar-box-shadow)'
       }}
     >
-      Project Datasets
+      Datasets
+      <input
+        type="text"
+        placeholder="Search..."
+        style={{ marginLeft: 12 }}
+        className={classes(Classes.INPUT, Classes.SMALL)}
+        value={search}
+        onChange={event => onSearch(event.target.value)}
+      />
     </h2>
   );
 }
 
-function DataExplorer({
-  databus,
-  active
-}: {
-  databus: IDataBus;
-  active: IActiveDataset;
-}) {
-  return (
-    <div
-      style={{
-        background: '#FFFFFF',
-        color: '#000000',
-        fontFamily: 'Helvetica'
-      }}
-    >
-      <Name />
-      <Heading />
-      <UseSignal signal={databus.data.datasetsChanged}>
-        {() => (
-          <UseSignal signal={active.signal}>
-            {() =>
-              [...databus.data.URLs].map((url: URL) => (
-                // TODO: Add ID for object? How?
-                // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
-                <DatasetCompononent
-                  url={url}
-                  databus={databus}
-                  active={active}
-                />
-              ))
-            }
+class DataExplorer extends React.Component<
+  {
+    databus: IDataBus;
+    active: IActiveDataset;
+  },
+  { search: string }
+> {
+  state: { search: string } = {
+    search: ''
+  };
+
+  urls(): Array<URL> {
+    return [...this.props.databus.data.URLs].filter(
+      url => url.toString().indexOf(this.state.search) !== -1
+    );
+  }
+  render() {
+    return (
+      <div
+        style={{
+          background: '#FFFFFF',
+          color: '#000000',
+          fontFamily: 'Helvetica',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Heading
+          search={this.state.search}
+          onSearch={(search: string) => this.setState({ search })}
+        />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <UseSignal signal={this.props.databus.data.datasetsChanged}>
+            {() => (
+              <UseSignal signal={this.props.active.signal}>
+                {() =>
+                  this.urls().map((url: URL) => (
+                    // TODO: Add ID for object? How?
+                    // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
+                    <DatasetCompononent
+                      url={url}
+                      databus={this.props.databus}
+                      active={this.props.active}
+                    />
+                  ))
+                }
+              </UseSignal>
+            )}
           </UseSignal>
-        )}
-      </UseSignal>
-    </div>
-  );
+        </div>
+      </div>
+    );
+  }
 }
 
 export function createDataExplorer(
