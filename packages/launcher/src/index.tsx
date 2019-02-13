@@ -775,7 +775,10 @@ function Card(
           onClick={onclickFactory(item.commands[option])}
         >
           <span className="jp-Launcher-option-button-text">
-            {(option === 'Other' ? 'Open' : option).toUpperCase()}
+            {(option === 'Other' || option === '' || option === null
+              ? 'Open'
+              : option
+            ).toUpperCase()}
           </span>
         </div>
       );
