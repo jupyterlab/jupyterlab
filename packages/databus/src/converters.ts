@@ -9,7 +9,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { Dataset } from './dataregistry';
 import { reachable, expandPath } from './graph';
 
-export type Convert<T, V> = (data: T, url: URL) => Promise<V>;
+export type Convert<T, V> = (data: T) => Promise<V>;
 export type Converts<T, V> = Map<string, Convert<T, V>>;
 /**
  * Function that can possibly convert between data type T to
@@ -19,42 +19,17 @@ export type Converts<T, V> = Map<string, Convert<T, V>>;
  * and returns a mapping of possible resulting mimetypes and
  * a function to compute their data.
  */
-export type Converter<T, V> = (mimeType: string) => Converts<T, V>;
+export type Converter<T, V> = (mimeType: string, url: URL) => Converts<T, V>;
 
 function combineConverters<T, U>(
   a: Converter<T, U>,
   b: Converter<T, U>
 ): Converter<T, U> {
-  return (mimeType: string) => {
-    return new Map<string, Convert<T, U>>([...a(mimeType), ...b(mimeType)]);
-  };
-}
-
-export function composeConvert<T, U, V>(
-  f: Convert<U, V>,
-  g: Convert<T, U>
-): Convert<T, V> {
-  return async (data: T, url: URL) => {
-    return await f(await g(data, url), url);
-  };
-}
-
-function mapValues<T, U, V>(map: Map<T, U>, fn: (val: U) => V): Map<T, V> {
-  const newMap = new Map<T, V>();
-  for (const [k, v] of map) {
-    newMap.set(k, fn(v));
-  }
-  return newMap;
-}
-
-export function composeConverter<T, U, V>(
-  converter: Converter<T, U>,
-  convert: Convert<U, V>
-): Converter<T, V> {
-  return (mimeType: string) => {
-    return mapValues(converter(mimeType), oldConvert =>
-      composeConvert(convert, oldConvert)
-    );
+  return (mimeType: string, url: URL) => {
+    return new Map<string, Convert<T, U>>([
+      ...a(mimeType, url),
+      ...b(mimeType, url)
+    ]);
   };
 }
 
@@ -65,10 +40,10 @@ function combineManyConverters<T, V>(
 }
 
 export function singleConverter<T, V>(
-  fn: (mimeType: string) => null | [string, Convert<T, V>]
+  fn: (mimeType: string, url: URL) => null | [string, Convert<T, V>]
 ): Converter<T, V> {
-  return (mimeType: string) => {
-    const possibleResult = fn(mimeType);
+  return (mimeType: string, url: URL) => {
+    const possibleResult = fn(mimeType, url);
     if (possibleResult === null) {
       return new Map();
     }
@@ -189,27 +164,34 @@ export class ConverterRegistry {
     sourceDatasets: Iterable<Dataset<unknown>>,
     targetMimeType: string
   ): AsyncIterableIterator<Dataset<unknown>> {
-    const urls: Set<URL> = new Set();
+    let singleURL: URL | null = null;
     const datas: Map<string, unknown> = new Map();
     for (const { url, mimeType, data } of sourceDatasets) {
-      urls.add(url);
+      if (singleURL === null) {
+        singleURL = url;
+      } else {
+        if (url.toString() !== singleURL.toString()) {
+          throw new Error(
+            `Datasets with different URLs were passed into convert: ${url} ${singleURL} `
+          );
+        }
+      }
       datas.set(mimeType, data);
     }
-    if (urls.size === 0) {
-      throw new Error(`Cannot find any source datasets`);
+    if (singleURL === null) {
+      throw new Error(`No datasets passed in for ${targetMimeType}`);
     }
-    if (urls.size !== 1) {
+    const reachable = this._reachable(singleURL, datas.keys());
+    if (!reachable.has(targetMimeType)) {
       throw new Error(
-        `Datasets with different URLs were passed into convert: ${JSON.stringify(
-          urls
-        )}`
+        `Cannot get from ${[
+          ...reachable.keys()
+        ]} to ${targetMimeType} for URL ${singleURL}`
       );
     }
-    const [url] = urls;
-
     for (const [initialMimeType, convert, resultMimeType] of expandPath(
       targetMimeType,
-      this._reachable(datas.keys()).get(targetMimeType)!
+      reachable.get(targetMimeType)!
     )) {
       // First part of path only has result
       if (!initialMimeType || !convert) {
@@ -218,21 +200,26 @@ export class ConverterRegistry {
         )!;
         continue;
       }
-      const data = await convert(datas.get(initialMimeType), url);
+      const data = await convert(datas.get(initialMimeType));
       datas.set(resultMimeType, data);
-      yield new Dataset(resultMimeType, url, data);
+      yield new Dataset(resultMimeType, singleURL, data);
     }
   }
 
   /**
-   * List the available target mime types for input mime types.
+   * List the available target mime types for input mime types and URL.
+   *
+   * @param url - the input URL
    *
    * @param sourceMimeType - the input mime types.
    *
    * @returns An `Set<string>` of the available target mime types.
    */
-  listTargetMimeTypes(sourceMimeTypes: Iterable<string>): Set<string> {
-    return new Set(this._reachable(sourceMimeTypes).keys());
+  listTargetMimeTypes(
+    url: URL,
+    sourceMimeTypes: Iterable<string>
+  ): Set<string> {
+    return new Set(this._reachable(url, sourceMimeTypes).keys());
   }
 
   /**
@@ -241,10 +228,11 @@ export class ConverterRegistry {
    * @param mimeType Mimetype to start at.
    */
   private _reachable(
+    url: URL,
     mimeTypes: Iterable<string>
   ): Map<string, Iterable<[string, Convert<unknown, unknown>]>> {
     const converter = combineManyConverters(this._converters);
-    return reachable(converter, new Set(mimeTypes));
+    return reachable(mimeType => converter(mimeType, url), new Set(mimeTypes));
   }
 
   private _converters: Set<Converter<unknown, unknown>> = new Set();

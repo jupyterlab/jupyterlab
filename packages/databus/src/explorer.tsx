@@ -100,7 +100,11 @@ function DatasetCompononent({
       </h3>
       <span>
         {viewers.map((label: string) => (
-          <Button onClick={() => databus.viewURL(url, label)} text={label} />
+          <Button
+            key={label}
+            onClick={() => databus.viewURL(url, label)}
+            text={label}
+          />
         ))}
       </span>
     </div>
@@ -183,9 +187,8 @@ class DataExplorer extends React.Component<
               <UseSignal signal={this.props.active.signal}>
                 {() =>
                   this.urls().map((url: URL) => (
-                    // TODO: Add ID for object? How?
-                    // Keep weakmap of objects to IDs in registry: https://stackoverflow.com/a/35306050/907060
                     <DatasetCompononent
+                      key={url.toString()}
                       url={url}
                       databus={this.props.databus}
                       active={this.props.active}

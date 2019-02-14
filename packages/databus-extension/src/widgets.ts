@@ -47,7 +47,16 @@ function activate(
 
   app.commands.addCommand(commandID, {
     execute: async args => {
-      await dataBus.viewURL(new URL(args.url as string), args.label as string);
+      const url = new URL(args.url as string);
+      const disposable = dataBus.registerURL(url);
+      try {
+        await dataBus.viewURL(url, args.label as string);
+      } catch (e) {
+        console.warn(`Could not load dataset ${url}`, e);
+        if (disposable) {
+          disposable.dispose();
+        }
+      }
     },
     label: args => `${args.label} ${args.url}`
   });

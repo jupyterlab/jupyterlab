@@ -1,10 +1,4 @@
-import {
-  Converter,
-  Convert,
-  composeConverter,
-  singleConverter,
-  staticConverter
-} from './converters';
+import { Converter, Convert, singleConverter, Converts } from './converters';
 import { Widget } from '@phosphor/widgets';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { View, createViewerMimeType } from './viewers';
@@ -49,17 +43,6 @@ class DataWidget extends MainAreaWidget implements IHasURL {
   }
   url: URL;
 }
-function widgetConvert(label: string): Convert<Widget, Widget> {
-  return async (data: Widget, url: URL) => {
-    return new DataWidget(data, url, label);
-  };
-}
-export function widgetConverter<T>(
-  label: string,
-  converter: Converter<T, Widget>
-): Converter<T, Widget> {
-  return composeConverter(converter, widgetConvert(label));
-}
 
 export interface IStaticWidgetConverterOptions<T> {
   mimeType: string;
@@ -72,14 +55,16 @@ export function staticWidgetConverter<T>({
   label,
   convert
 }: IStaticWidgetConverterOptions<T>): Converter<T, Widget> {
-  return widgetConverter(
-    label,
-    staticConverter({
-      sourceMimeType: mimeType,
-      targetMimeType: widgetMimeType(label),
-      convert
-    })
-  );
+  return (currentMimeType: string, url: URL) => {
+    const res: Converts<T, Widget> = new Map();
+    if (currentMimeType === mimeType) {
+      res.set(
+        widgetMimeType(label),
+        async (data: T) => new DataWidget(await convert(data), url, label)
+      );
+    }
+    return res;
+  };
 }
 
 export function widgetViewerConverter(

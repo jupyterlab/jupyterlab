@@ -30,7 +30,10 @@ export class DataBus {
   }
 
   possibleMimeTypesForURL(url: URL): Set<string> {
-    return this.converters.listTargetMimeTypes(this.data.mimeTypesForURL(url));
+    return this.converters.listTargetMimeTypes(
+      url,
+      this.data.mimeTypesForURL(url)
+    );
   }
   /**
    * Returns the viewer labels for a given URL.
@@ -45,7 +48,6 @@ export class DataBus {
    * View a dataset with a certain URL with the viewer with a certain label.
    */
   async viewURL(url: URL, label: string): Promise<void> {
-    this.registerURL(url);
     const viewer: Dataset<() => Promise<void>> = await this.convertByURL(
       url,
       createViewerMimeType(label)

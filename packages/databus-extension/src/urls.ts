@@ -7,7 +7,11 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IConverterRegistry, URLStringConverter } from '@jupyterlab/databus';
+import {
+  IConverterRegistry,
+  URLStringConverter,
+  resolverURLConverter
+} from '@jupyterlab/databus';
 
 export default {
   activate,
@@ -18,4 +22,5 @@ export default {
 
 function activate(app: JupyterFrontEnd, converters: IConverterRegistry) {
   converters.register(URLStringConverter);
+  converters.register(resolverURLConverter);
 }

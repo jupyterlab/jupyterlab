@@ -114,7 +114,11 @@ export class DataRegistry {
    * Filters the datasets to this with a certain URL.
    */
   filterByURL(url: URL): Set<Dataset<any>> {
-    return new Set([...this._datasets].filter(dataset => dataset.url === url));
+    return new Set(
+      [...this._datasets].filter(
+        dataset => dataset.url.toString() === url.toString()
+      )
+    );
   }
 
   mimeTypesForURL(url: URL): Set<string> {

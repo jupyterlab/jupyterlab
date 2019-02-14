@@ -24,7 +24,9 @@ export function reachable<NODE, EDGE>(
    * To traverse a node, we go throw it's children and see if we already have paths to them
    * If we do not, we record a path to them and add them to the nodes to traverse.
    */
-  function traverse(node: NODE) {
+
+  while (toTraverse.size !== 0) {
+    const node = toTraverse.values().next().value;
     const path = paths.get(node)!;
     for (const [child, edge] of edges(node).entries()) {
       if (paths.has(child)) {
@@ -34,10 +36,6 @@ export function reachable<NODE, EDGE>(
       toTraverse.add(child);
     }
     toTraverse.delete(node);
-  }
-
-  while (toTraverse.size !== 0) {
-    traverse(toTraverse.values().next().value);
   }
   return paths;
 }

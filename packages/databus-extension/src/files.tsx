@@ -12,12 +12,13 @@ import {
   IDataExplorer,
   IDataBus,
   createFileURL,
-  resolveFileConverter,
+  resolveExtensionConverter,
   fileURLConverter,
   resolveMimeType,
   IActiveDataset,
   staticWidgetConverter,
-  URLMimeType
+  URLMimeType,
+  resolveFileConverter
 } from '@jupyterlab/databus';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ReactWidget } from '@jupyterlab/apputils';
@@ -45,8 +46,9 @@ function activate(
   dataExplorer: IDataExplorer,
   active: IActiveDataset
 ) {
-  dataBus.converters.register(resolveFileConverter('.csv', 'text/csv'));
-  dataBus.converters.register(resolveFileConverter('.png', 'image/png'));
+  dataBus.converters.register(resolveFileConverter);
+  dataBus.converters.register(resolveExtensionConverter('.csv', 'text/csv'));
+  dataBus.converters.register(resolveExtensionConverter('.png', 'image/png'));
   dataBus.converters.register(
     staticWidgetConverter({
       mimeType: URLMimeType('image/png'),
@@ -83,7 +85,7 @@ function activate(
     const path = widget.selectedItems().next()!.path;
     const url = createFileURL(path);
     if (
-      dataBus.converters.listTargetMimeTypes([resolveMimeType(url)]).size <= 1
+      dataBus.converters.listTargetMimeTypes(url, [resolveMimeType]).size <= 1
     ) {
       return null;
     }
