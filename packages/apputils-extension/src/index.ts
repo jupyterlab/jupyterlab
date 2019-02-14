@@ -52,6 +52,12 @@ import '../style/index.css';
 const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
 
 /**
+ * The query string parameter indicating that a workspace name should be
+ * automatically generated if the current request collides with an open session.
+ */
+const WORKSPACE_RESOLVE = 'resolve-workspace';
+
+/**
  * The interval in milliseconds before recover options appear during splash.
  */
 const SPLASH_RECOVER_TIMEOUT = 12000;
@@ -253,8 +259,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
       // that never resolves to prevent the application from loading plugins
       // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        // If the user has requested `autoredirect` create a new workspace name.
-        if ('autoredirect' in query) {
+        // If the user has requested workspace resolution create a new one.
+        if (WORKSPACE_RESOLVE in query) {
           const { base, workspaces } = paths.urls;
           const pool =
             'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -276,10 +282,9 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
       });
     }
 
-    // If the user has requested `autoredirect` remove the query parameter.
-    if ('autoredirect' in query) {
-      // Maintain the query string parameters but remove `autoredirect`.
-      delete query['autoredirect'];
+    // If the user has requested workspace resolution remove the query param.
+    if (WORKSPACE_RESOLVE in query) {
+      delete query[WORKSPACE_RESOLVE];
 
       // Silently scrub the URL.
       const url = path + URLExt.objectToQueryString(query) + (hash || '');
