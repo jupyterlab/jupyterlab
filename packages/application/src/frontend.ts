@@ -59,6 +59,18 @@ export abstract class JupyterFrontEnd<
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
+
+    this.commands.addCommand(Private.CONTEXT_MENU_INFO, {
+      label: 'Shift+Right Click for Browser Menu',
+      isEnabled: () => false,
+      execute: () => void 0
+    });
+
+    this.contextMenu.addItem({
+      command: Private.CONTEXT_MENU_INFO,
+      selector: 'body',
+      rank: Infinity
+    });
   }
 
   /**
@@ -143,7 +155,26 @@ export abstract class JupyterFrontEnd<
    */
   protected evtContextMenu(event: MouseEvent): void {
     this._contextMenuEvent = event;
-    super.evtContextMenu(event);
+    if (event.shiftKey) {
+      return;
+    }
+    const opened = this.contextMenu.open(event);
+    if (opened) {
+      const items = this.contextMenu.menu.items;
+      // If only the context menu information will be shown,
+      // with no real commands, close the context menu and
+      // allow the native one to open.
+      if (
+        items.length === 1 &&
+        items[0].command === Private.CONTEXT_MENU_INFO
+      ) {
+        this.contextMenu.menu.close();
+        return;
+      }
+      // Stop propagation and allow the application context menu to show.
+      event.preventDefault();
+      event.stopPropagation();
+    }
   }
 
   private _contextMenuEvent: MouseEvent;
@@ -263,4 +294,15 @@ export namespace JupyterFrontEnd {
       readonly workspaces: string;
     };
   }
+}
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * An id for a private context-menu-info
+   * ersatz command.
+   */
+  export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
 }
