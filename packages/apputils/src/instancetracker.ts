@@ -181,6 +181,13 @@ export class InstanceTracker<T extends Widget>
   }
 
   /**
+   * A promise resolved when the instance tracker has been restored.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
+  }
+
+  /**
    * The number of widgets held by the tracker.
    */
   get size(): number {
@@ -366,13 +373,6 @@ export class InstanceTracker<T extends Widget>
     );
     this._restored.resolve(undefined);
     return values;
-  }
-
-  /**
-   * A promise resolved when the instance tracker has been restored.
-   */
-  get restored(): Promise<void> {
-    return this._restored.promise;
   }
 
   /**
