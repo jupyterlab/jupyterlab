@@ -9,7 +9,7 @@
     "lib.es2015.promise.d.ts",
     "lib.dom.d.ts"
   ],
-  "out": "../../docs/api/imageviewer",
+  "out": "../../docs/api/markdownviewer",
   "baseUrl": ".",
   "paths": {
     "@jupyterlab/*": ["../packages/*"]
