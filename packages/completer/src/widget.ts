@@ -241,6 +241,17 @@ export class Completer extends Widget {
       return;
     }
 
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    const options = toArray(model.options());
+    if (options.length === 1) {
+      this._selected.emit(options[0]);
+      this.reset();
+      return;
+    }
+
     // Clear the node.
     let node = this.node;
     node.textContent = '';
