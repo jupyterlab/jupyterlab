@@ -50,14 +50,13 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
-  requires: [ISettingRegistry, IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
-    mainMenu: IMainMenu,
-    palette: ICommandPalette,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    mainMenu: IMainMenu | null,
+    palette: ICommandPalette | null
   ) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
@@ -77,37 +76,45 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       label: 'Show Status Bar',
       execute: (args: any) => {
         statusBar.setHidden(statusBar.isVisible);
-        settingRegistry.set(
-          STATUSBAR_PLUGIN_ID,
-          'visible',
-          statusBar.isVisible
-        );
+        if (settingRegistry) {
+          settingRegistry.set(
+            STATUSBAR_PLUGIN_ID,
+            'visible',
+            statusBar.isVisible
+          );
+        }
       },
       isToggled: () => statusBar.isVisible
     });
 
-    palette.addItem({ command, category });
-    mainMenu.viewMenu.addGroup([{ command }], 1);
+    if (palette) {
+      palette.addItem({ command, category });
+    }
+    if (mainMenu) {
+      mainMenu.viewMenu.addGroup([{ command }], 1);
+    }
 
-    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      const visible = settings.get('visible').composite as boolean;
-      statusBar.setHidden(!visible);
-    };
+    if (settingRegistry) {
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const visible = settings.get('visible').composite as boolean;
+        statusBar.setHidden(!visible);
+      };
 
-    Promise.all([settingRegistry.load(STATUSBAR_PLUGIN_ID), app.restored])
-      .then(([settings]) => {
-        updateSettings(settings);
-        settings.changed.connect(settings => {
+      Promise.all([settingRegistry.load(STATUSBAR_PLUGIN_ID), app.restored])
+        .then(([settings]) => {
           updateSettings(settings);
+          settings.changed.connect(settings => {
+            updateSettings(settings);
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
         });
-      })
-      .catch((reason: Error) => {
-        console.error(reason.message);
-      });
+    }
 
     return statusBar;
   },
-  optional: [ILabShell]
+  optional: [ILabShell, ISettingRegistry, IMainMenu, ICommandPalette]
 };
 
 /**

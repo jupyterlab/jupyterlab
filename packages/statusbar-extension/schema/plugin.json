@@ -25,7 +25,7 @@
     "visible": {
       "type": "boolean",
       "title": "Status Bar Visibility",
-      "description": "Whether to show status bar at launch",
+      "description": "Whether to show status bar or not",
       "default": true
     }
   },
