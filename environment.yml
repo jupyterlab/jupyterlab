@@ -1,0 +1,40 @@
+#   A JupyterLab development environment for Windows, Linux and MacOSX
+
+name: jupyterlab-dev
+
+#   conda env update -p .env                # Install/update the env
+#   conda activate -p .env                  # Activate the env
+#   pip install -e .                        # Install source in local python
+#   jupyter serverextension enable --py jupyterlab --sys-prefix  # serverextension
+#   jlpm                                    # Install frontend build dependencies
+#   jlpm build                              # Build the dev mode assets
+#   jupyter lab --debug --dev-mode --watch  # Serve & watch/rebuild (optional)
+                                            #
+# We recommend conda-forge for developing Lab in conda
+channels:
+- conda-forge
+
+dependencies:
+## Serving
+- python >=3.7,<3.8
+- notebook >=4.3.1
+- jupyterlab_server >=0.2,<0.3
+
+## Frontend Building
+- nodejs >10,<11
+
+## Testing
+- pytest >=4.0,<5
+- requests
+
+## Documenting
+- sphinx
+- recommonmark
+- sphinx_rtd_theme
+# - graphviz                                # for buildutils/src/dependency-graph.ts
+
+
+## Not yet available from conda-forge
+- pip:
+  # Docs
+  - pytest-check-links
