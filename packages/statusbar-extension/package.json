@@ -13,8 +13,7 @@
     "lib/**/*.js.map",
     "lib/**/*.js",
     "style/*.css",
-    "style/images/*.svg",
-    "schema/*.json"
+    "style/images/*.svg"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -55,7 +54,6 @@
   },
   "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c",
   "jupyterlab": {
-    "extension": true,
-    "schemaDir": "schema"
+    "extension": true
   }
 }
