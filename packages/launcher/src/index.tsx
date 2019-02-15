@@ -397,7 +397,10 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     while (cnt < 4 && i < orderedItems.length) {
       let item = orderedItems[i];
       i++;
-      if (!item || (item && item.category === 'Other')) {
+      if (
+        !item ||
+        (item && (item.category === 'Other' || item.category === ''))
+      ) {
         continue;
       }
       topUsed.push(item);
