@@ -301,7 +301,7 @@ function activateBrowser(
           const { path } = context;
           Private.navigateToPath(path, factory)
             .then(() => {
-              docManager.findWidget(path).activate();
+              labShell.currentWidget.activate();
             })
             .catch((reason: any) => {
               console.warn(
