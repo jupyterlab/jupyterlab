@@ -21,6 +21,12 @@
         "memory-usage-item",
         "saving-status-item"
       ]
+    },
+    "visible": {
+      "type": "boolean",
+      "title": "Status Bar Visibility",
+      "description": "Whether to show status bar at launch",
+      "default": true
     }
   },
   "additionalProperties": false,

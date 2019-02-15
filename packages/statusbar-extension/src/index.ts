@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
@@ -36,6 +36,10 @@ import {
   StatusBar
 } from '@jupyterlab/statusbar';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import { Title, Widget } from '@phosphor/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
@@ -46,8 +50,15 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
+  requires: [ISettingRegistry, IMainMenu, ICommandPalette],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    mainMenu: IMainMenu,
+    palette: ICommandPalette,
+    labShell: ILabShell | null
+  ) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
     app.shell.add(statusBar, 'bottom');
@@ -58,6 +69,41 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
         statusBar.update();
       });
     }
+
+    const category: string = 'Main Area';
+    const command: string = 'toggle-jp-main-statusbar';
+
+    app.commands.addCommand(command, {
+      label: 'Show Status Bar',
+      execute: (args: any) => {
+        statusBar.setHidden(statusBar.isVisible);
+        settingRegistry.set(
+          STATUSBAR_PLUGIN_ID,
+          'visible',
+          statusBar.isVisible
+        );
+      },
+      isToggled: () => statusBar.isVisible
+    });
+
+    palette.addItem({ command, category });
+    mainMenu.viewMenu.addGroup([{ command }], 1);
+
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const visible = settings.get('visible').composite as boolean;
+      statusBar.setHidden(!visible);
+    };
+
+    Promise.all([settingRegistry.load(STATUSBAR_PLUGIN_ID), app.restored])
+      .then(([settings]) => {
+        updateSettings(settings);
+        settings.changed.connect(settings => {
+          updateSettings(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
 
     return statusBar;
   },
