@@ -70,7 +70,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
     }
 
     const category: string = 'Main Area';
-    const command: string = 'toggle-jp-main-statusbar';
+    const command: string = 'statusbar:toggle';
 
     app.commands.addCommand(command, {
       label: 'Show Status Bar',
