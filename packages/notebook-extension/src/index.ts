@@ -554,6 +554,16 @@ function activateNotebookHandler(
     }
   });
 
+  tracker.saveOptions.push({
+    name: 'jupyter-widgets-state',
+    label: 'Jupyter Widget State',
+    help: '',
+    action: 'save',
+    callback: (w, name, action) => {
+      return;
+    }
+  });
+
   // Handle state restoration.
   if (restorer) {
     restorer.restore(tracker, {
