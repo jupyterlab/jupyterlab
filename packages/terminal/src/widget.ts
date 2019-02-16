@@ -53,7 +53,6 @@ export class Terminal extends Widget {
     // Create the xterm.
 
     Private.ensureXTerm().then(() => {
-      console.log('creating the xterm');
       this._term = new XTerm(xtermOptions);
       this._initializeTerm();
       this.update();
@@ -82,18 +81,20 @@ export class Terminal extends Widget {
       if (this.isDisposed || value !== this._session) {
         return;
       }
-      value.messageReceived.connect(
-        this._onMessage,
-        this
-      );
-      this.title.label = `Terminal ${value.name}`;
-      this._setSessionSize();
-      if (this._options.initialCommand) {
-        this._session.send({
-          type: 'stdin',
-          content: [this._options.initialCommand + '\r']
-        });
-      }
+      this._ready.promise.then(() => {
+        value.messageReceived.connect(
+          this._onMessage,
+          this
+        );
+        this.title.label = `Terminal ${value.name}`;
+        this._setSessionSize();
+        if (this._options.initialCommand) {
+          this._session.send({
+            type: 'stdin',
+            content: [this._options.initialCommand + '\r']
+          });
+        }
+      });
     });
   }
 
@@ -146,7 +147,9 @@ export class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._term.dispose();
+    this._ready.promise.then(() => {
+      this._term.dispose();
+    });
     super.dispose();
   }
 
@@ -266,6 +269,8 @@ export class Terminal extends Widget {
 
   /**
    * Handle a message from the terminal session.
+   *
+   * The `connect` is only called after `_ready`, so don't check every time
    */
   private _onMessage(
     sender: TerminalSession.ISession,
@@ -274,15 +279,11 @@ export class Terminal extends Widget {
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {
-          this._ready.promise.then(() => {
-            this._term.write(msg.content[0] as string);
-          });
+          this._term.write(msg.content[0] as string);
         }
         break;
       case 'disconnect':
-        this._ready.promise.then(() => {
-          this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-        });
+        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
         break;
       default:
         break;
@@ -291,36 +292,37 @@ export class Terminal extends Widget {
 
   /**
    * Resize the terminal based on computed geometry.
+   *
+   * At present, only called from `onUpdateRequest`, so do not check `_ready`
    */
   private _resizeTerminal() {
-    this._ready.promise.then(() => {
-      fit(this._term);
-      if (this._offsetWidth === -1) {
-        this._offsetWidth = this.node.offsetWidth;
-      }
-      if (this._offsetHeight === -1) {
-        this._offsetHeight = this.node.offsetHeight;
-      }
-      this._setSessionSize();
-      this._needsResize = false;
-    });
+    fit(this._term);
+    if (this._offsetWidth === -1) {
+      this._offsetWidth = this.node.offsetWidth;
+    }
+    if (this._offsetHeight === -1) {
+      this._offsetHeight = this.node.offsetHeight;
+    }
+    this._setSessionSize();
+    this._needsResize = false;
   }
 
   /**
    * Set the size of the terminal in the session.
+   *
+   * Only called from a message received after _ready, so don't wait for _ready
+   * again
    */
   private _setSessionSize(): void {
-    this._ready.promise.then(() => {
-      let content = [
-        this._term.rows,
-        this._term.cols,
-        this._offsetHeight,
-        this._offsetWidth
-      ];
-      if (this._session) {
-        this._session.send({ type: 'set_size', content });
-      }
-    });
+    let content = [
+      this._term.rows,
+      this._term.cols,
+      this._offsetHeight,
+      this._offsetWidth
+    ];
+    if (this._session) {
+      this._session.send({ type: 'set_size', content });
+    }
   }
 
   private _term: XTermModuleType.Terminal;
