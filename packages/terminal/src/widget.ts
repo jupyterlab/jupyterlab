@@ -3,13 +3,17 @@
 
 import { TerminalSession } from '@jupyterlab/services';
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { Terminal as Xterm } from 'xterm';
+import * as XTermModuleType from 'xterm';
+import * as XTermFitModuleType from 'xterm/lib/addons/fit/fit';
 
-import { fit } from 'xterm/lib/addons/fit/fit';
+let XTerm: typeof XTermModuleType.Terminal;
+let fit: typeof XTermFitModuleType.fit;
 
 /**
  * The class name added to a terminal widget.
@@ -47,8 +51,14 @@ export class Terminal extends Widget {
     }
 
     // Create the xterm.
-    this._term = new Xterm(xtermOptions);
-    this._initializeTerm();
+
+    Private.ensureXTerm().then(() => {
+      console.log('creating the xterm');
+      this._term = new XTerm(xtermOptions);
+      this._initializeTerm();
+      this._ready.resolve(void 0);
+      fit(this._term);
+    });
 
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
@@ -113,20 +123,22 @@ export class Terminal extends Widget {
       return;
     }
 
-    if (option === 'theme') {
-      if (value === 'light') {
-        this.addClass('jp-mod-light');
-        this._term.setOption('theme', Private.lightTheme);
+    this._ready.promise.then(() => {
+      if (option === 'theme') {
+        if (value === 'light') {
+          this.addClass('jp-mod-light');
+          this._term.setOption('theme', Private.lightTheme);
+        } else {
+          this.removeClass('jp-mod-light');
+          this._term.setOption('theme', Private.darkTheme);
+        }
       } else {
-        this.removeClass('jp-mod-light');
-        this._term.setOption('theme', Private.darkTheme);
+        this._term.setOption(option, value);
+        this._needsResize = true;
       }
-    } else {
-      this._term.setOption(option, value);
-      this._needsResize = true;
-    }
 
-    this.update();
+      this.update();
+    });
   }
 
   /**
@@ -146,7 +158,9 @@ export class Terminal extends Widget {
       return Promise.reject(void 0);
     }
     return this._session.reconnect().then(() => {
-      this._term.clear();
+      this._ready.promise.then(() => {
+        this._term.clear();
+      });
     });
   }
 
@@ -203,9 +217,11 @@ export class Terminal extends Widget {
 
     // Open the terminal if necessary.
     if (!this._termOpened) {
-      this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
-      this._termOpened = true;
+      this._ready.promise.then(() => {
+        this._term.open(this.node);
+        this._term.element.classList.add(TERMINAL_BODY_CLASS);
+        this._termOpened = true;
+      });
     }
 
     if (this._needsResize) {
@@ -225,7 +241,9 @@ export class Terminal extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._term.focus();
+    this._ready.promise.then(() => {
+      this._term.focus();
+    });
   }
 
   /**
@@ -256,11 +274,15 @@ export class Terminal extends Widget {
     switch (msg.type) {
       case 'stdout':
         if (msg.content) {
-          this._term.write(msg.content[0] as string);
+          this._ready.promise.then(() => {
+            this._term.write(msg.content[0] as string);
+          });
         }
         break;
       case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        this._ready.promise.then(() => {
+          this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+        });
         break;
       default:
         break;
@@ -271,39 +293,44 @@ export class Terminal extends Widget {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    fit(this._term);
-    if (this._offsetWidth === -1) {
-      this._offsetWidth = this.node.offsetWidth;
-    }
-    if (this._offsetHeight === -1) {
-      this._offsetHeight = this.node.offsetHeight;
-    }
-    this._setSessionSize();
-    this._needsResize = false;
+    this._ready.promise.then(() => {
+      fit(this._term);
+      if (this._offsetWidth === -1) {
+        this._offsetWidth = this.node.offsetWidth;
+      }
+      if (this._offsetHeight === -1) {
+        this._offsetHeight = this.node.offsetHeight;
+      }
+      this._setSessionSize();
+      this._needsResize = false;
+    });
   }
 
   /**
    * Set the size of the terminal in the session.
    */
   private _setSessionSize(): void {
-    let content = [
-      this._term.rows,
-      this._term.cols,
-      this._offsetHeight,
-      this._offsetWidth
-    ];
-    if (this._session) {
-      this._session.send({ type: 'set_size', content });
-    }
+    this._ready.promise.then(() => {
+      let content = [
+        this._term.rows,
+        this._term.cols,
+        this._offsetHeight,
+        this._offsetWidth
+      ];
+      if (this._session) {
+        this._session.send({ type: 'set_size', content });
+      }
+    });
   }
 
-  private _term: Xterm;
+  private _term: XTermModuleType.Terminal;
   private _needsResize = true;
   private _session: TerminalSession.ISession | null = null;
   private _termOpened = false;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _options: Terminal.IOptions;
+  private _ready = new PromiseDelegate<void>();
 }
 
 /**
@@ -400,4 +427,39 @@ namespace Private {
     cursorAccent: '#000',
     selection: 'rgba(255, 255, 255, 0.3)'
   };
+
+  /**
+   * A Promise for the initial load of xterm.
+   */
+  export let xtermReady: Promise<void>;
+
+  /**
+   * Lazy-load the xterm library and addons
+   */
+  export function ensureXTerm(): Promise<void> {
+    if (xtermReady) {
+      return xtermReady;
+    }
+
+    xtermReady = new Promise((resolve, reject) => {
+      require.ensure(
+        ['xterm', 'xterm/lib/addons/fit/fit'],
+        // see https://webpack.js.org/api/module-methods/#require-ensure
+        // this argument MUST be named `require` for the WebPack parser
+        require => {
+          XTerm = (require('xterm') as typeof XTermModuleType).Terminal;
+          fit = (require('xterm/lib/addons/fit/fit') as typeof XTermFitModuleType)
+            .fit;
+          resolve();
+        },
+        (error: any) => {
+          console.error(error);
+          reject();
+        },
+        'xterm'
+      );
+    });
+
+    return xtermReady;
+  }
 }
