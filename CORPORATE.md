@@ -28,7 +28,7 @@ happy and healthy requires a ton of work and money.
 
 Working in a yard full of puppies is CRAZY! At times, there can be a line around
 the block of people wanting to play with the puppies and talk, or complain, to
-the maintainers. Sometimes, people show up wth more puppies. These are like pull
+the maintainers. Sometimes, people show up with more puppies. These are like pull
 requests to an open-source project. While the maintainers love puppies and would
 love to be able to have more of them for everyone to enjoy, each new puppy has
 to be cleaned, fed, trained, taken to the vet, etc.
