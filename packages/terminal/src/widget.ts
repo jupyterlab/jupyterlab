@@ -56,8 +56,8 @@ export class Terminal extends Widget {
       console.log('creating the xterm');
       this._term = new XTerm(xtermOptions);
       this._initializeTerm();
+      this.update();
       this._ready.resolve(void 0);
-      fit(this._term);
     });
 
     this.id = `jp-Terminal-${Private.id++}`;
@@ -215,18 +215,18 @@ export class Terminal extends Widget {
       return;
     }
 
-    // Open the terminal if necessary.
-    if (!this._termOpened) {
-      this._ready.promise.then(() => {
+    this._ready.promise.then(() => {
+      // Open the terminal if necessary.
+      if (!this._termOpened) {
         this._term.open(this.node);
         this._term.element.classList.add(TERMINAL_BODY_CLASS);
         this._termOpened = true;
-      });
-    }
+      }
 
-    if (this._needsResize) {
-      this._resizeTerminal();
-    }
+      if (this._needsResize) {
+        this._resizeTerminal();
+      }
+    });
   }
 
   /**
