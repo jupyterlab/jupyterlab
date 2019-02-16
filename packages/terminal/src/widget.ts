@@ -55,8 +55,8 @@ export class Terminal extends Widget {
     Private.ensureXTerm().then(() => {
       this._term = new XTerm(xtermOptions);
       this._initializeTerm();
-      this.update();
       this._ready.resolve(void 0);
+      this.update();
     });
 
     this.id = `jp-Terminal-${Private.id++}`;
@@ -77,24 +77,22 @@ export class Terminal extends Widget {
     if (!value) {
       return;
     }
-    value.ready.then(() => {
+    Promise.all([value.ready, this._ready]).then(() => {
       if (this.isDisposed || value !== this._session) {
         return;
       }
-      this._ready.promise.then(() => {
-        value.messageReceived.connect(
-          this._onMessage,
-          this
-        );
-        this.title.label = `Terminal ${value.name}`;
-        this._setSessionSize();
-        if (this._options.initialCommand) {
-          this._session.send({
-            type: 'stdin',
-            content: [this._options.initialCommand + '\r']
-          });
-        }
-      });
+      value.messageReceived.connect(
+        this._onMessage,
+        this
+      );
+      this.title.label = `Terminal ${value.name}`;
+      this._setSessionSize();
+      if (this._options.initialCommand) {
+        this._session.send({
+          type: 'stdin',
+          content: [this._options.initialCommand + '\r']
+        });
+      }
     });
   }
 
@@ -160,10 +158,8 @@ export class Terminal extends Widget {
     if (!this._session) {
       return Promise.reject(void 0);
     }
-    return this._session.reconnect().then(() => {
-      this._ready.promise.then(() => {
-        this._term.clear();
-      });
+    return Promise.all([this._session.reconnect(), this._ready]).then(() => {
+      this._term.clear();
     });
   }
 

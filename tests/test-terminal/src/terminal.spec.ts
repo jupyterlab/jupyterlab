@@ -192,12 +192,13 @@ describe('terminal/index', () => {
     });
 
     describe('#onActivateRequest', () => {
-      it('should focus the terminal element', () => {
+      it('should focus the terminal element', async () => {
         Widget.detach(widget);
         Widget.attach(widget, document.body);
         expect(widget.node.contains(document.activeElement)).to.equal(false);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
+        await framePromise();
         expect(widget.node.contains(document.activeElement)).to.equal(true);
       });
     });
