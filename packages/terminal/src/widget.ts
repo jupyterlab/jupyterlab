@@ -265,25 +265,25 @@ export class Terminal extends Widget {
 
   /**
    * Handle a message from the terminal session.
-   *
-   * The `connect` is only called after `_ready`, so don't check every time
    */
   private _onMessage(
     sender: TerminalSession.ISession,
     msg: TerminalSession.IMessage
   ): void {
-    switch (msg.type) {
-      case 'stdout':
-        if (msg.content) {
-          this._term.write(msg.content[0] as string);
-        }
-        break;
-      case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-        break;
-      default:
-        break;
-    }
+    this._ready.promise.then(() => {
+      switch (msg.type) {
+        case 'stdout':
+          if (msg.content) {
+            this._term.write(msg.content[0] as string);
+          }
+          break;
+        case 'disconnect':
+          this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   /**
