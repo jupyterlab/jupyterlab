@@ -94,6 +94,9 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
         styles: { '.MathJax_Display': { margin: 0 } },
         linebreaks: { automatic: true }
       },
+      TeX: {
+        extensions: ['newcommand.js', 'begingroup.js'] // Support for \gdef
+      },
       skipStartupTypeset: true
     });
     MathJax.Hub.Configured();
