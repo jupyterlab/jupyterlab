@@ -7,6 +7,13 @@ import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
+import {
+  Schema,
+  TextField,
+  RegisterField,
+  MapField
+} from '@phosphor/datastore';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
@@ -234,6 +241,27 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
     return mode && mode.mode;
   }
 
+  /**
+   * The schemas for the datastore.
+   */
+  get schemas(): ReadonlyArray<Schema> {
+    return [
+      {
+        id: 'TextModelSchema.v1',
+        fields: {
+          value: new TextField({ description: 'The text value of the model' }),
+          mimeType: new RegisterField<string>({
+            value: 'text/plain',
+            description: 'The MIME type of the text'
+          }),
+          selections: new MapField({
+            description: 'A map of all text selections for all users'
+          })
+        }
+      }
+    ];
+  }
+
   private _isDisposed = false;
 }
 
@@ -268,6 +296,23 @@ export class Base64ModelFactory extends TextModelFactory {
    */
   get fileFormat(): Contents.FileFormat {
     return 'base64';
+  }
+
+  /**
+   * The schemas for the datastore.
+   */
+  get schemas(): ReadonlyArray<Schema> {
+    return [
+      {
+        id: 'Base64ModelSchema.v1',
+        fields: {
+          value: new RegisterField<string>({
+            value: '',
+            description: 'The value of the model'
+          })
+        }
+      }
+    ];
   }
 }
 

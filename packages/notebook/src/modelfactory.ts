@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Schema } from '@phosphor/datastore';
+
 import { CodeCellModel } from '@jupyterlab/cells';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -83,6 +85,10 @@ export class NotebookModelFactory
    */
   preferredLanguage(path: string): string {
     return '';
+  }
+
+  get schemas(): ReadonlyArray<Schema> {
+    return [];
   }
 
   private _disposed = false;

@@ -35,9 +35,9 @@ export class DSModelDB implements IModelDB {
   /**
    *
    */
-  constructor(schemas: Schema[], options: DSModelDB.ICreateOptions = {}) {
+  constructor(datastore: Datastore, options: DSModelDB.ICreateOptions = {}) {
     this._basePath = options.basePath || 'root';
-    this._db = options.baseDB;
+    this._baseDB = options.baseDB;
     this._schemas = {};
     this._recordId = UUID.uuid4();
     for (let s of schemas) {
@@ -58,7 +58,7 @@ export class DSModelDB implements IModelDB {
    * @returns an `IObservable`.
    */
   get(path: string): IObservable | undefined {
-    return this._db.get(this._resolvePath(path));
+    return this._baseDB.get(this._resolvePath(path));
   }
 
   /**
@@ -69,7 +69,7 @@ export class DSModelDB implements IModelDB {
    * @returns a boolean for whether an object is at `path`.
    */
   has(path: string): boolean {
-    return this._db.has(this._resolvePath(path));
+    return this._baseDB.has(this._resolvePath(path));
   }
 
   /**
@@ -220,7 +220,7 @@ export class DSModelDB implements IModelDB {
     }
     this._isDisposed = true;
     if (this._toDispose) {
-      this._db.dispose();
+      this._baseDB.dispose();
     }
     // this._disposables.dispose();
   }
@@ -266,6 +266,9 @@ export class DSModelDB implements IModelDB {
    */
   readonly collaborators?: ICollaboratorMap;
 
+  /**
+   * The underlying datastore.
+   */
   readonly datastore: Datastore;
 
   /**
@@ -279,7 +282,7 @@ export class DSModelDB implements IModelDB {
   }
 
   private _basePath: string;
-  private _db: DSModelDB;
+  private _baseDB: DSModelDB;
   private _schemas: { [key: string]: Schema };
   private _recordId: string;
   private _toDispose = false;
@@ -293,17 +296,5 @@ export namespace DSModelDB {
   export interface ICreateOptions {
     basePath?: string;
     baseDB?: DSModelDB;
-  }
-}
-
-namespace Private {
-  export function createDatastore(schemas: Schema[]): Datastore {
-    const session = new DatastoreSession();
-    const ds = Datastore.create({
-      id: 0,
-      schemas
-    });
-    session.handler = ds;
-    return ds;
   }
 }

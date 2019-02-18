@@ -3,6 +3,8 @@
 
 import { IDisposable, DisposableSet } from '@phosphor/disposable';
 
+import { Schema } from '@phosphor/datastore';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { JSONExt, JSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
@@ -266,6 +268,21 @@ export interface IModelDB extends IDisposable {
    * Dispose of the resources held by the database.
    */
   dispose(): void;
+}
+
+/**
+ * A namespace for the `IModelDB` interface.
+ */
+export namespace IModelDB {
+  /**
+   * A factory interface for creating `IModelDB` objects.
+   */
+  export interface IFactory {
+    /**
+     * Create a new `IModelDB` instance.
+     */
+    createNew(path: string, schemas: ReadonlyArray<Schema>): Promise<IModelDB>;
+  }
 }
 
 /**
@@ -588,15 +605,5 @@ export namespace ModelDB {
      * ModelDB. If none is given, it uses its own store.
      */
     baseDB?: ModelDB;
-  }
-
-  /**
-   * A factory interface for creating `IModelDB` objects.
-   */
-  export interface IFactory {
-    /**
-     * Create a new `IModelDB` instance.
-     */
-    createNew(path: string): IModelDB;
   }
 }

@@ -23,7 +23,7 @@ const DATASTORE_SERVICE_URL = 'lab/api/datastore';
  */
 export class DatastoreSession extends WSConnection<
   DatastoreWSMessages.Request,
-  DatastoreWSMessages.Reply | DatastoreWSMessages.TransactionBroadcast
+  DatastoreWSMessages.RawReply | DatastoreWSMessages.TransactionBroadcast
 > {
   /**
    *
@@ -48,6 +48,18 @@ export class DatastoreSession extends WSConnection<
     const msg = DatastoreWSMessages.createMessage('storeid-request', {});
     const reply = await this._requestMessageReply(msg);
     return reply.content.storeId;
+  }
+
+  /**
+   * The permissions for the current use on the datastore session.
+   */
+  get permissions(): Promise<DatastoreSession.Permissions> {
+    return Promise.resolve().then(async () => {
+      await this.ready;
+      const msg = DatastoreWSMessages.createMessage('permissions-request', {});
+      const reply = await this._requestMessageReply(msg);
+      return reply.content;
+    });
   }
 
   /**
@@ -105,7 +117,7 @@ export class DatastoreSession extends WSConnection<
   }
 
   protected handleMessage(
-    msg: DatastoreWSMessages.Reply | DatastoreWSMessages.TransactionBroadcast
+    msg: DatastoreWSMessages.RawReply | DatastoreWSMessages.TransactionBroadcast
   ): boolean {
     try {
       // TODO: Write a validator?
@@ -118,7 +130,12 @@ export class DatastoreSession extends WSConnection<
     if (DatastoreWSMessages.isReply(msg)) {
       let delegate = this._delegates && this._delegates.get(msg.parentId!);
       if (delegate) {
-        delegate.resolve(msg);
+        if (msg.msgType === 'error-reply') {
+          console.warn('Received datastore error from server', msg.content);
+          delegate.reject(msg.content.reason);
+        } else {
+          delegate.resolve(msg);
+        }
         return true;
       }
     }
@@ -147,15 +164,29 @@ export class DatastoreSession extends WSConnection<
    * Send a message to the server and resolve the reply message.
    */
   private _requestMessageReply<T extends DatastoreWSMessages.Request>(
-    msg: T
+    msg: T,
+    timeout = 0
   ): Promise<DatastoreWSMessages.IReplyMap[T['msgType']]> {
     const delegate = new PromiseDelegate<DatastoreWSMessages.Reply>();
     this._delegates.set(msg.msgId, delegate);
 
-    const promise = delegate.promise.then(reply => {
-      this._delegates.delete(msg.msgId);
-      return reply;
-    });
+    // .finally(), delete from delegate map
+    const promise = delegate.promise.then(
+      reply => {
+        this._delegates.delete(msg.msgId);
+        return reply;
+      },
+      reason => {
+        this._delegates.delete(msg.msgId);
+        throw reason;
+      }
+    );
+
+    if (timeout > 0) {
+      setTimeout(() => {
+        delegate.reject('Timed out waiting for reply');
+      }, timeout);
+    }
 
     this.sendMessage(msg);
 
@@ -213,4 +244,19 @@ export namespace DatastoreSession {
      */
     readonly transaction: Datastore.Transaction;
   }
+
+  /**
+   * Datastore permissions object.
+   */
+  export type Permissions = {
+    /**
+     * Whether the current user can read from the datastore session.
+     */
+    read: boolean;
+
+    /**
+     * Whether the current user can write to the datastore session.
+     */
+    write: boolean;
+  };
 }

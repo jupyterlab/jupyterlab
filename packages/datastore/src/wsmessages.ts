@@ -41,7 +41,10 @@ export namespace DatastoreWSMessages {
       | 'transaction-request'
       | 'transaction-reply'
       | 'serial-request'
-      | 'serial-reply';
+      | 'serial-reply'
+      | 'permissions-request'
+      | 'permissions-reply'
+      | 'error-reply';
 
     parentId: undefined;
 
@@ -65,6 +68,9 @@ export namespace DatastoreWSMessages {
     'transaction-reply': TransactionReply;
     'serial-request': SerialRequest;
     'serial-reply': SerialReply;
+    'permissions-request': PermissionsRequest;
+    'permissions-reply': PermissionsReply;
+    'error-reply': ErrorReply;
   }
 
   /**
@@ -76,6 +82,7 @@ export namespace DatastoreWSMessages {
     'history-request': HistoryReply;
     'transaction-request': TransactionReply;
     'serial-request': SerialReply;
+    'permissions-request': PermissionsReply;
   }
 
   export type BaseReply = Base & {
@@ -213,6 +220,45 @@ export namespace DatastoreWSMessages {
   };
 
   /**
+   * A message requesting which permission we have on the central store.
+   */
+  export type PermissionsRequest = Base & {
+    readonly msgType: 'permissions-request';
+    readonly content: {};
+  };
+
+  /**
+   * A reply to a 'permission-request'.
+   */
+  export type PermissionsReply = BaseReply & {
+    readonly msgType: 'permissions-reply';
+    readonly content: {
+      /**
+       * Whether we can read transactions from the store.
+       */
+      readonly read: boolean;
+
+      /**
+       * Whether we can write transactions to the store.
+       */
+      readonly write: boolean;
+    };
+  };
+
+  /**
+   * An error reply message.
+   */
+  export type ErrorReply = BaseReply & {
+    readonly msgType: 'error-reply';
+    readonly content: {
+      /**
+       * The reason for the error.
+       */
+      readonly reason: string;
+    };
+  };
+
+  /**
    * A union type for all request messages.
    */
   export type Request =
@@ -220,22 +266,36 @@ export namespace DatastoreWSMessages {
     | TransactionBroadcast
     | TransactionRequest
     | HistoryRequest
-    | SerialRequest;
+    | SerialRequest
+    | PermissionsRequest;
 
   /**
    * A union type for all reply messages.
+   */
+  export type RawReply =
+    | StoreIdReply
+    | TransactionAck
+    | TransactionReply
+    | HistoryReply
+    | SerialReply
+    | PermissionsReply
+    | ErrorReply;
+
+  /**
+   * A union type for all successful messages.
    */
   export type Reply =
     | StoreIdReply
     | TransactionAck
     | TransactionReply
     | HistoryReply
-    | SerialReply;
+    | SerialReply
+    | PermissionsReply;
 
   /**
    * A union type for all messages.
    */
-  export type Message = Request | Reply;
+  export type Message = Request | RawReply;
 
   /**
    * Create a WSServerAdapter message.
@@ -286,7 +346,7 @@ export namespace DatastoreWSMessages {
    * @param message - The message to consider.
    * @returns Whether the message is a reply.
    */
-  export function isReply(message: Message): message is Reply {
+  export function isReply(message: Message): message is RawReply {
     return message.parentId !== undefined;
   }
 }

@@ -13,7 +13,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { DatastoreSession } from '@jupyterlab/datastore';
+import { DatastoreSession, DSModelDB } from '@jupyterlab/datastore';
 
 const pluginId = '@jupyterlab/datastore-extension:plugin';
 
@@ -45,6 +45,10 @@ async function makeTestWidget(): Promise<Widget> {
       }
     }
   };
+  const permissions = await chatSession.permissions;
+  if (!permissions.read) {
+    return;
+  }
   const storeId = await chatSession.createStoreId();
   const ds = Datastore.create({
     id: storeId,
@@ -55,33 +59,35 @@ async function makeTestWidget(): Promise<Widget> {
   const w = new Panel();
   w.id = 'datastore-test';
   w.title.label = 'datastore';
-  const inputW = new Widget();
-  const inputText = document.createElement('textarea');
-  const submitBtn = document.createElement('button');
-  submitBtn.innerText = 'Send';
-  inputW.node.appendChild(inputText);
-  inputW.node.appendChild(submitBtn);
-  w.addWidget(inputW);
-  submitBtn.onclick = ev => {
-    const chatTable = ds.get(chatSchema);
-    const record = chatTable.get('chat');
-    const n = record ? record.entries.length : 0;
-    ds.beginTransaction();
-    try {
-      chatTable.update({
-        chat: {
-          entries: {
-            index: n,
-            remove: 0,
-            values: [inputText.value]
+  if (permissions.write) {
+    const inputW = new Widget();
+    const inputText = document.createElement('textarea');
+    const submitBtn = document.createElement('button');
+    submitBtn.innerText = 'Send';
+    inputW.node.appendChild(inputText);
+    inputW.node.appendChild(submitBtn);
+    w.addWidget(inputW);
+    submitBtn.onclick = ev => {
+      const chatTable = ds.get(chatSchema);
+      const record = chatTable.get('chat');
+      const n = record ? record.entries.length : 0;
+      ds.beginTransaction();
+      try {
+        chatTable.update({
+          chat: {
+            entries: {
+              index: n,
+              remove: 0,
+              values: [inputText.value]
+            }
           }
-        }
-      });
-      inputText.value = '';
-    } finally {
-      ds.endTransaction();
-    }
-  };
+        });
+        inputText.value = '';
+      } finally {
+        ds.endTransaction();
+      }
+    };
+  }
 
   function getChatChange(
     args: Datastore.IChangedArgs
@@ -116,12 +122,44 @@ async function makeTestWidget(): Promise<Widget> {
 /**
  * The default document manager provider.
  */
-const docManagerPlugin: JupyterFrontEndPlugin<void> = {
+const datastorePlugin: JupyterFrontEndPlugin<void> = {
   id: pluginId,
   requires: [],
   optional: [ILabShell],
   autoStart: true,
   activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
+    const registry = app.docRegistry;
+    registry.addModelDBFactory('phosphor-datastore', {
+      createNew: async (path, schemas) => {
+        // Set up session to server:
+        const session = new DatastoreSession({ key: path });
+        const clearance = {
+          processMessage: (msg: Message) => {
+            if (msg.type === 'remote-transactions') {
+              MessageLoop.sendMessage(
+                ds,
+                new Datastore.TransactionMessage(
+                  (msg as DatastoreSession.RemoteTransactionMessage).transaction
+                )
+              );
+            } else if (msg.type === 'datastore-transaction') {
+              session.broadcastTransactions([
+                (msg as Datastore.TransactionMessage).transaction
+              ]);
+            }
+          }
+        };
+
+        const storeId = await session.createStoreId();
+        const db = Datastore.create({
+          id: storeId,
+          schemas,
+          broadcastHandler: clearance
+        });
+        session.handler = clearance;
+        return new DSModelDB(schemas, { db });
+      }
+    });
     labShell.restored
       .then(() => {
         return makeTestWidget();
@@ -135,5 +173,5 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [docManagerPlugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [datastorePlugin];
 export default plugins;
