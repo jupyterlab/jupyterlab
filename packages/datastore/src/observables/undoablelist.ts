@@ -25,7 +25,7 @@ export class ObservableUndoableList<T extends ReadonlyJSONValue>
    * Construct a new undoable observable list.
    */
   constructor(
-    datastore: Datastore,
+    datastore: Promise<Datastore>,
     schema: Schema,
     recordId: string,
     fieldId: string,

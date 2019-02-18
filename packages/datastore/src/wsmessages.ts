@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 
 import { Datastore } from '@phosphor/datastore';
 
@@ -22,36 +22,11 @@ export namespace DatastoreWSMessages {
   /**
    *
    */
-  export type Base = JSONObject & {
+  export type Base = ReadonlyJSONObject & {
     /**
      * The unique message id.
      */
     msgId: string;
-
-    /**
-     * The message type.
-     */
-    msgType:
-      | 'storeid-request'
-      | 'storeid-reply'
-      | 'transaction-broadcast'
-      | 'transaction-ack'
-      | 'history-request'
-      | 'history-reply'
-      | 'transaction-request'
-      | 'transaction-reply'
-      | 'serial-request'
-      | 'serial-reply'
-      | 'permissions-request'
-      | 'permissions-reply'
-      | 'error-reply';
-
-    parentId: undefined;
-
-    /**
-     * The message content.
-     */
-    readonly content: ReadonlyJSONObject;
   };
 
   /**
@@ -333,12 +308,12 @@ export namespace DatastoreWSMessages {
     parentId: string
   ): T {
     const msgId = UUID.uuid4();
-    return {
+    return ({
       msgId,
       msgType,
       parentId,
       content
-    } as T;
+    } as unknown) as T;
   }
 
   /**

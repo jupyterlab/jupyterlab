@@ -34,8 +34,9 @@ export class ObservableValue
   /**
    * Get the current value, or `undefined` if it has not been set.
    */
-  get(): JSONValue {
-    const record = this.ds.get(this.schema).get(this.recordID);
+  get(): JSONValue | undefined {
+    this.ensureBackend();
+    const record = this.ds!.get(this.schema).get(this.recordID);
     return record ? (record[this.fieldId] as JSONValue) : undefined;
   }
 
@@ -44,11 +45,11 @@ export class ObservableValue
    */
   set(value: JSONValue): void {
     let oldValue = this.get();
-    if (JSONExt.deepEqual(oldValue, value)) {
+    if (oldValue !== undefined && JSONExt.deepEqual(oldValue, value)) {
       return;
     }
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -59,7 +60,7 @@ export class ObservableValue
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 

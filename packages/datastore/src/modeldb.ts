@@ -8,7 +8,8 @@ import {
   IObservableString,
   IObservableUndoableList,
   IObservableValue,
-  IObservableJSON
+  IObservableJSON,
+  ObservableMap
 } from '@jupyterlab/observables';
 
 import { toArray } from '@phosphor/algorithm';
@@ -26,8 +27,6 @@ import {
 
 import { iterValues } from './objiter';
 
-import { DatastoreSession } from './session';
-
 /**
  *
  */
@@ -35,19 +34,27 @@ export class DSModelDB implements IModelDB {
   /**
    *
    */
-  constructor(datastore: Datastore, options: DSModelDB.ICreateOptions = {}) {
+  constructor(options: DSModelDB.ICreateOptions) {
     this._basePath = options.basePath || 'root';
-    this._baseDB = options.baseDB;
+    if (options.baseDB) {
+      this._baseDB = options.baseDB;
+    } else {
+      this._baseDB = new ObservableMap<IObservable>();
+      this._toDispose = true;
+    }
     this._schemas = {};
     this._recordId = UUID.uuid4();
-    for (let s of schemas) {
+    for (let s of options.schemas) {
       this._schemas[s.id] = s;
     }
     if (options.baseDB) {
       this.datastore = options.baseDB.datastore;
     } else {
-      this.datastore = Private.createDatastore(schemas);
+      this.datastore = options.datastore;
     }
+    this.connected = this.datastore.then(ds => {
+      this._ds = ds;
+    });
   }
 
   /**
@@ -161,14 +168,18 @@ export class DSModelDB implements IModelDB {
   }
 
   /**
-   * Get a value at a path, or `undefined if it has not been set
+   * Get a value at a path, or `undefined` if it has not been set
    * That value must already have been created using `createValue`.
    *
    * @param path: the path for the value.
    */
   getValue(path: string): ReadonlyJSONValue | undefined {
+    if (this._ds === undefined) {
+      throw new Error('Cannot use model db before conenction completed!');
+    }
     const schema = this._schemas[this._basePath];
-    return this.datastore.get(schema).get(this._recordId)[path];
+    const record = this._ds.get(schema).get(this._recordId);
+    return record && record[path];
   }
 
   /**
@@ -180,9 +191,12 @@ export class DSModelDB implements IModelDB {
    * @param value: the new value.
    */
   setValue(path: string, value: ReadonlyJSONValue): void {
-    const table = this.datastore.get(this._schemas[this._basePath]);
+    if (this._ds === undefined) {
+      throw new Error('Cannot use model db before conenction completed!');
+    }
+    const table = this._ds.get(this._schemas[this._basePath]);
     let oldValue = this.getValue(path);
-    this.datastore.beginTransaction();
+    this._ds.beginTransaction();
     try {
       table.update({
         [this._recordId]: {
@@ -191,9 +205,9 @@ export class DSModelDB implements IModelDB {
             current: value
           }
         }
-      });
+      } as any);
     } finally {
-      this.datastore.endTransaction();
+      this._ds.endTransaction();
     }
   }
 
@@ -207,8 +221,9 @@ export class DSModelDB implements IModelDB {
    */
   view(basePath: string): IModelDB {
     const schemas = toArray(iterValues(this._schemas));
+    const datastore = this.datastore;
     // TODO: resolve path?
-    return new DSModelDB(schemas, { basePath, baseDB: this });
+    return new DSModelDB({ schemas, datastore, basePath, baseDB: this });
   }
 
   /**
@@ -269,7 +284,7 @@ export class DSModelDB implements IModelDB {
   /**
    * The underlying datastore.
    */
-  readonly datastore: Datastore;
+  readonly datastore: Promise<Datastore>;
 
   /**
    * Compute the fully resolved path for a path argument.
@@ -281,8 +296,10 @@ export class DSModelDB implements IModelDB {
     return path;
   }
 
+  private _ds: Datastore | undefined = undefined;
+
   private _basePath: string;
-  private _baseDB: DSModelDB;
+  private _baseDB: DSModelDB | ObservableMap<IObservable>;
   private _schemas: { [key: string]: Schema };
   private _recordId: string;
   private _toDispose = false;
@@ -294,6 +311,8 @@ export class DSModelDB implements IModelDB {
  */
 export namespace DSModelDB {
   export interface ICreateOptions {
+    schemas: ReadonlyArray<Schema>;
+    datastore: Promise<Datastore>;
     basePath?: string;
     baseDB?: DSModelDB;
   }

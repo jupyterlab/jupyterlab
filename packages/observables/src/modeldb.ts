@@ -281,7 +281,7 @@ export namespace IModelDB {
     /**
      * Create a new `IModelDB` instance.
      */
-    createNew(path: string, schemas: ReadonlyArray<Schema>): Promise<IModelDB>;
+    createNew(path: string, schemas: ReadonlyArray<Schema>): IModelDB;
   }
 }
 

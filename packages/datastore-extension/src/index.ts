@@ -130,34 +130,38 @@ const datastorePlugin: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
     const registry = app.docRegistry;
     registry.addModelDBFactory('phosphor-datastore', {
-      createNew: async (path, schemas) => {
+      createNew: (path, schemas) => {
         // Set up session to server:
         const session = new DatastoreSession({ key: path });
-        const clearance = {
-          processMessage: (msg: Message) => {
-            if (msg.type === 'remote-transactions') {
-              MessageLoop.sendMessage(
-                ds,
-                new Datastore.TransactionMessage(
-                  (msg as DatastoreSession.RemoteTransactionMessage).transaction
-                )
-              );
-            } else if (msg.type === 'datastore-transaction') {
-              session.broadcastTransactions([
-                (msg as Datastore.TransactionMessage).transaction
-              ]);
-            }
-          }
-        };
 
-        const storeId = await session.createStoreId();
-        const db = Datastore.create({
-          id: storeId,
-          schemas,
-          broadcastHandler: clearance
+        const datastore = Promise.resolve().then(async () => {
+          const clearance = {
+            processMessage: (msg: Message) => {
+              if (msg.type === 'remote-transactions') {
+                MessageLoop.sendMessage(
+                  ds,
+                  new Datastore.TransactionMessage(
+                    (msg as DatastoreSession.RemoteTransactionMessage).transaction
+                  )
+                );
+              } else if (msg.type === 'datastore-transaction') {
+                session.broadcastTransactions([
+                  (msg as Datastore.TransactionMessage).transaction
+                ]);
+              }
+            }
+          };
+          session.handler = clearance;
+
+          const ds = Datastore.create({
+            id: await session.createStoreId(),
+            schemas,
+            broadcastHandler: clearance
+          });
+          return ds;
         });
-        session.handler = clearance;
-        return new DSModelDB(schemas, { db });
+
+        return new DSModelDB({ datastore, schemas });
       }
     });
     labShell.restored

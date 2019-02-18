@@ -31,9 +31,10 @@ export class ObservableString extends ObservableBase<TextField.Change>
   /**
    * The value of the string.
    */
-  get text(): string | undefined {
-    const record = this.ds.get(this.schema).get(this.recordID);
-    return record ? (record[this.fieldId] as string) : undefined;
+  get text(): string {
+    this.ensureBackend();
+    const record = this.ds!.get(this.schema).get(this.recordID);
+    return record ? (record[this.fieldId] as string) : '';
   }
 
   /**
@@ -44,8 +45,9 @@ export class ObservableString extends ObservableBase<TextField.Change>
    * @param text - The substring to insert.
    */
   insert(index: number, text: string): void {
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -57,7 +59,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -69,8 +71,9 @@ export class ObservableString extends ObservableBase<TextField.Change>
    * @param end - The ending index.
    */
   remove(start: number, end: number): void {
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -82,7 +85,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -90,9 +93,10 @@ export class ObservableString extends ObservableBase<TextField.Change>
    * Set the ObservableString to an empty string.
    */
   clear(): void {
-    const table = this.ds.get(this.schema);
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
     const current = this.text;
-    this.ds.beginTransaction();
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -104,7 +108,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 

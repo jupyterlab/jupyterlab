@@ -25,7 +25,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * Construct a new observable map.
    */
   constructor(
-    datastore: Datastore,
+    datastore: Promise<Datastore>,
     schema: Schema,
     recordId: string,
     fieldId: string,
@@ -82,8 +82,8 @@ export class ObservableMap<T extends ReadonlyJSONValue>
       return oldVal;
     }
 
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -93,7 +93,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
     return oldVal;
   }
@@ -157,8 +157,8 @@ export class ObservableMap<T extends ReadonlyJSONValue>
   delete(key: string): T | undefined {
     let oldVal = this._map.get(key);
 
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -168,7 +168,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
     return oldVal;
   }
@@ -177,6 +177,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * Set the ObservableMap to an empty map.
    */
   clear(): void {
+    this.ensureBackend();
     // Delete one by one to emit the correct signals.
     let keyList = this.keys();
     const update: { [key: string]: T | null } = {};
@@ -184,8 +185,8 @@ export class ObservableMap<T extends ReadonlyJSONValue>
       update[key] = null;
     }
 
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -193,7 +194,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -205,7 +206,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
           type: 'add',
           key,
           oldValue: undefined,
-          newValue: cur
+          newValue: cur === null ? undefined : cur
         });
       }
     });
@@ -215,14 +216,14 @@ export class ObservableMap<T extends ReadonlyJSONValue>
         this._changed.emit({
           type: 'remove',
           key,
-          oldValue: prev,
+          oldValue: prev === null ? undefined : prev,
           newValue: undefined
         });
       } else if (!this._itemCmp(cur, prev)) {
         this._changed.emit({
           type: 'change',
           key,
-          oldValue: prev,
+          oldValue: prev === null ? undefined : prev,
           newValue: cur
         });
       }
@@ -230,12 +231,13 @@ export class ObservableMap<T extends ReadonlyJSONValue>
   }
 
   private get _map(): ReadonlyMap<string, T> {
-    const record = this.ds.get(this.schema).get(this.recordID);
+    this.ensureBackend();
+    const record = this.ds!.get(this.schema).get(this.recordID);
     return record
       ? ((record[this.fieldId] as unknown) as ReadonlyMap<string, T>)
-      : undefined;
+      : new Map();
   }
-  private _itemCmp: (first: T, second: T) => boolean;
+  private _itemCmp: (first: T | null, second: T | null) => boolean;
   private _changed = new Signal<this, IObservableMap.IChangedArgs<T>>(this);
 }
 

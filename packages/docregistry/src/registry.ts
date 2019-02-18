@@ -790,7 +790,7 @@ export namespace DocumentRegistry {
     /**
      * The data model for the document.
      */
-    readonly model: Promise<T>;
+    readonly model: T;
 
     /**
      * The client session object associated with the context.

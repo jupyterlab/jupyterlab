@@ -31,7 +31,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * Construct a new observable list.
    */
   constructor(
-    datastore: Datastore,
+    datastore: Promise<Datastore>,
     schema: Schema,
     recordId: string,
     fieldId: string,
@@ -118,8 +118,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
       return;
     }
 
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -131,7 +131,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -150,8 +150,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
    */
   push(value: T): number {
     let current = this._array;
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -163,7 +163,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
     return current.length + 1;
   }
@@ -188,8 +188,9 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * An `index` which is non-integral.
    */
   insert(index: number, value: T): void {
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -201,7 +202,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -249,8 +250,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
     if (index < 0 || index >= this.length) {
       return;
     }
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -262,7 +263,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -276,8 +277,9 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * All current iterators are invalidated.
    */
   clear(): void {
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -289,7 +291,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -330,8 +332,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
       return;
     }
 
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -350,7 +352,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -369,8 +371,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
    */
   pushAll(values: IterableOrArrayLike<T>): number {
     let length = this.length;
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     const newValues = toArray(values);
     try {
       table.update({
@@ -383,7 +385,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
     return length + newValues.length;
   }
@@ -408,8 +410,9 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * An `index` which is non-integral.
    */
   insertAll(index: number, values: IterableOrArrayLike<T>): void {
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    this.ensureBackend();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -421,7 +424,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
   }
 
@@ -445,8 +448,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
    */
   removeRange(startIndex: number, endIndex: number): number {
     const length = this.length;
-    const table = this.ds.get(this.schema);
-    this.ds.beginTransaction();
+    const table = this.ds!.get(this.schema);
+    this.ds!.beginTransaction();
     try {
       table.update({
         [this.recordID]: {
@@ -458,7 +461,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
         }
       } as any);
     } finally {
-      this.ds.endTransaction();
+      this.ds!.endTransaction();
     }
     return length - (endIndex - startIndex);
   }
@@ -508,8 +511,9 @@ export class ObservableList<T extends ReadonlyJSONValue>
   }
 
   private get _array(): ReadonlyArray<T> {
-    const record = this.ds.get(this.schema).get(this.recordID);
-    return record ? (record[this.fieldId] as ReadonlyArray<T>) : undefined;
+    this.ensureBackend();
+    const record = this.ds!.get(this.schema).get(this.recordID);
+    return record ? (record[this.fieldId] as ReadonlyArray<T>) : [];
   }
 
   private _itemCmp: (first: T, second: T) => boolean;

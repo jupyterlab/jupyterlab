@@ -19,7 +19,7 @@ export class ObservableJSON extends ObservableMap<JSONValue> {
    * Construct a new observable JSON object.
    */
   constructor(
-    datastore: Datastore,
+    datastore: Promise<Datastore>,
     schema: Schema,
     recordId: string,
     fieldId: string,

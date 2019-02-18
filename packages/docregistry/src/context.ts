@@ -53,12 +53,10 @@ export class Context<T extends DocumentRegistry.IModel>
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
-      dbFactory.createNew(localPath, this._factory.schemas).then(db => {
-        this._modelDBDelegate.resolve(db);
-        this._model.resolve(this._factory.createNew(lang, db));
-      });
+      this._modelDB = dbFactory.createNew(localPath, this._factory.schemas);
+      this._model = this._factory.createNew(lang, this._modelDB);
     } else {
-      this._model.resolve(this._factory.createNew(lang));
+      this._model = this._factory.createNew(lang);
     }
 
     this._readyPromise = manager.ready.then(() => {
@@ -120,8 +118,8 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Get the model associated with the document.
    */
-  get model(): Promise<T> {
-    return this._model.promise;
+  get model(): T {
+    return this._model;
   }
 
   /**
@@ -182,12 +180,10 @@ export class Context<T extends DocumentRegistry.IModel>
     }
     this._isDisposed = true;
     this.session.dispose();
-    this._modelDBDelegate.promise.then(db => {
-      db.dispose();
-    });
-    this._model.promise.then(model => {
-      model.dispose();
-    });
+    if (this._modelDB) {
+      this._modelDB.dispose();
+    }
+    this._model.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
   }
@@ -218,54 +214,65 @@ export class Context<T extends DocumentRegistry.IModel>
    *
    * @returns a promise that resolves upon initialization.
    */
-  async initialize(isNew: boolean): Promise<void> {
+  initialize(isNew: boolean): Promise<void> {
     if (isNew) {
-      (await this._model.promise).initialize();
+      this._model.initialize();
       return this._save();
     }
-    const db = await this._modelDBDelegate.promise;
-    if (db) {
-      await db.connected;
-      if (db.isPrepopulated) {
-        (await this._model.promise).initialize();
-        this._save();
-        return void 0;
-      }
+    if (this._modelDB) {
+      return this._modelDB.connected.then(() => {
+        if (this._modelDB.isPrepopulated) {
+          this._model.initialize();
+          this._save();
+          return void 0;
+        } else {
+          return this._revert(true);
+        }
+      });
+    } else {
+      return this._revert(true);
     }
-    return this._revert(true);
   }
 
   /**
    * Save the document contents to disk.
    */
-  async save(): Promise<void> {
-    await this.ready;
-    return this._save();
+  save(): Promise<void> {
+    return this.ready.then(() => {
+      return this._save();
+    });
   }
 
   /**
    * Save the document to a different path chosen by the user.
    */
-  async saveAs(): Promise<void> {
-    await this.ready;
-    const newPath = await Private.getSavePath(this._path);
-    if (this.isDisposed || !newPath) {
-      return;
-    }
-    if (newPath === this._path) {
-      return this.save();
-    }
-    // Make sure the path does not exist.
-    try {
-      await this._manager.ready;
-      await this._manager.contents.get(newPath);
-      await this._maybeOverWrite(newPath);
-    } catch (err) {
-      if (!err.response || err.response.status !== 404) {
-        throw err;
-      }
-      await this._finishSaveAs(newPath);
-    }
+  saveAs(): Promise<void> {
+    return this.ready
+      .then(() => {
+        return Private.getSavePath(this._path);
+      })
+      .then(newPath => {
+        if (this.isDisposed || !newPath) {
+          return;
+        }
+        if (newPath === this._path) {
+          return this.save();
+        }
+        // Make sure the path does not exist.
+        return this._manager.ready
+          .then(() => {
+            return this._manager.contents.get(newPath);
+          })
+          .then(() => {
+            return this._maybeOverWrite(newPath);
+          })
+          .catch(err => {
+            if (!err.response || err.response.status !== 404) {
+              throw err;
+            }
+            return this._finishSaveAs(newPath);
+          });
+      });
   }
 
   /**
@@ -431,33 +438,34 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Handle an initial population.
    */
-  private async _populate(): Promise<void> {
+  private _populate(): Promise<void> {
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
-    await this._maybeCheckpoint(false);
-    if (this.isDisposed) {
-      return;
-    }
-    // Update the kernel preference.
-    const model = await this.model;
-    const name = model.defaultKernelName || this.session.kernelPreference.name;
-    this.session.kernelPreference = {
-      ...this.session.kernelPreference,
-      name,
-      language: model.defaultKernelLanguage
-    };
-    this.session.initialize();
+    return this._maybeCheckpoint(false).then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      // Update the kernel preference.
+      let name =
+        this._model.defaultKernelName || this.session.kernelPreference.name;
+      this.session.kernelPreference = {
+        ...this.session.kernelPreference,
+        name,
+        language: this._model.defaultKernelLanguage
+      };
+      this.session.initialize();
+    });
   }
 
   /**
    * Save the document contents to disk.
    */
-  private async _save(): Promise<void> {
+  private _save(): Promise<void> {
     this._saveState.emit('started');
-    let model = await this._model.promise;
+    let model = this._model;
     let content: JSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
@@ -528,88 +536,94 @@ export class Context<T extends DocumentRegistry.IModel>
    * @param initializeModel - call the model's initialization function after
    * deserializing the content.
    */
-  private async _revert(initializeModel: boolean = false): Promise<void> {
+  private _revert(initializeModel: boolean = false): Promise<void> {
     let opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.contentType,
       content: true
     };
     let path = this._path;
-    const model = await this._model.promise;
-    try {
-      await this._manager.ready;
-      const contents = await this._manager.contents.get(path, opts);
-      if (this.isDisposed) {
-        return;
-      }
-      let dirty = false;
-      if (contents.format === 'json') {
-        model.fromJSON(contents.content);
-        if (initializeModel) {
-          model.initialize();
+    let model = this._model;
+    return this._manager.ready
+      .then(() => {
+        return this._manager.contents.get(path, opts);
+      })
+      .then(contents => {
+        if (this.isDisposed) {
+          return;
         }
-      } else {
-        let content = contents.content;
-        // Convert line endings if necessary, marking the file
-        // as dirty.
-        if (content.indexOf('\r') !== -1) {
-          this._useCRLF = true;
-          content = content.replace(/\r\n/g, '\n');
+        let dirty = false;
+        if (contents.format === 'json') {
+          model.fromJSON(contents.content);
+          if (initializeModel) {
+            model.initialize();
+          }
         } else {
-          this._useCRLF = false;
+          let content = contents.content;
+          // Convert line endings if necessary, marking the file
+          // as dirty.
+          if (content.indexOf('\r') !== -1) {
+            this._useCRLF = true;
+            content = content.replace(/\r\n/g, '\n');
+          } else {
+            this._useCRLF = false;
+          }
+          model.fromString(content);
+          if (initializeModel) {
+            model.initialize();
+          }
         }
-        model.fromString(content);
-        if (initializeModel) {
-          model.initialize();
+        this._updateContentsModel(contents);
+        model.dirty = dirty;
+        if (!this._isPopulated) {
+          return this._populate();
         }
-      }
-      this._updateContentsModel(contents);
-      model.dirty = dirty;
-      if (!this._isPopulated) {
-        return this._populate();
-      }
-    } catch (err) {
-      const localPath = this._manager.contents.localPath(this._path);
-      const name = PathExt.basename(localPath);
-      if (err.message === 'Invalid response: 400 bad format') {
-        err = new Error('JupyterLab is unable to open this file type.');
-      }
-      this._handleError(err, `File Load Error for ${name}`);
-      throw err;
-    }
+      })
+      .catch(err => {
+        const localPath = this._manager.contents.localPath(this._path);
+        const name = PathExt.basename(localPath);
+        if (err.message === 'Invalid response: 400 bad format') {
+          err = new Error('JupyterLab is unable to open this file type.');
+        }
+        this._handleError(err, `File Load Error for ${name}`);
+        throw err;
+      });
   }
 
   /**
    * Save a file, dealing with conflicts.
    */
-  private async _maybeSave(
+  private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
     let path = this._path;
     // Make sure the file has not changed on disk.
-    try {
-      const model = await this._manager.contents.get(path, { content: false });
-      if (this.isDisposed) {
-        return Promise.reject(new Error('Disposed'));
-      }
-      // We want to check last_modified (disk) > last_modified (client)
-      // (our last save)
-      // In some cases the filesystem reports an inconsistent time,
-      // so we allow 0.5 seconds difference before complaining.
-      let modified = this.contentsModel && this.contentsModel.last_modified;
-      let tClient = new Date(modified);
-      let tDisk = new Date(model.last_modified);
-      if (modified && tDisk.getTime() - tClient.getTime() > 500) {
-        // 500 ms
-        return this._timeConflict(tClient, model, options);
-      }
-      return this._manager.contents.save(path, options);
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
+    let promise = this._manager.contents.get(path, { content: false });
+    return promise.then(
+      model => {
+        if (this.isDisposed) {
+          return Promise.reject(new Error('Disposed'));
+        }
+        // We want to check last_modified (disk) > last_modified (client)
+        // (our last save)
+        // In some cases the filesystem reports an inconsistent time,
+        // so we allow 0.5 seconds difference before complaining.
+        let modified = this.contentsModel && this.contentsModel.last_modified;
+        let tClient = new Date(modified);
+        let tDisk = new Date(model.last_modified);
+        if (modified && tDisk.getTime() - tClient.getTime() > 500) {
+          // 500 ms
+          return this._timeConflict(tClient, model, options);
+        }
         return this._manager.contents.save(path, options);
+      },
+      err => {
+        if (err.response && err.response.status === 404) {
+          return this._manager.contents.save(path, options);
+        }
+        throw err;
       }
-      throw err;
-    }
+    );
   }
 
   /**
@@ -753,13 +767,13 @@ export class Context<T extends DocumentRegistry.IModel>
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
-  private _model = new PromiseDelegate<T>();
+  private _model: T;
+  private _modelDB: IModelDB;
   private _path = '';
   private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
   private _readyPromise: Promise<void>;
-  private _modelDBDelegate = new PromiseDelegate<IModelDB>();
   private _populatedPromise = new PromiseDelegate<void>();
   private _isPopulated = false;
   private _isReady = false;

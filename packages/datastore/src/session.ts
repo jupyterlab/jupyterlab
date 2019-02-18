@@ -108,7 +108,12 @@ export class DatastoreSession extends WSConnection<
     const settings = this.serverSettings;
     const token = this.serverSettings.token;
 
-    let wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL, this.key);
+    let wsUrl;
+    if (this.key) {
+      wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL, this.key);
+    } else {
+      wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL);
+    }
     if (token) {
       wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
     }

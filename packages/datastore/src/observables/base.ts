@@ -15,19 +15,22 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
    *
    */
   constructor(
-    datastore: Datastore,
+    datastore: Promise<Datastore>,
     schema: Schema,
     recordId: string,
     fieldId: string
   ) {
-    this.ds = datastore;
+    this.ds = undefined;
     this.schema = schema;
     this.fieldId = fieldId;
     this.recordID = recordId;
-    this.ds.changed.connect(
-      this._onChange,
-      this
-    );
+    datastore.then(ds => {
+      this.ds = ds;
+      ds.changed.connect(
+        this._onChange,
+        this
+      );
+    });
   }
 
   /**
@@ -36,6 +39,10 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
   dispose(): void {
     if (this._isDisposed) {
       return;
+    }
+    if (this.ds) {
+      this.ds.dispose();
+      this.ds = undefined;
     }
     this._isDisposed = true;
     Signal.clearData(this);
@@ -51,6 +58,12 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
     return this._isDisposed;
   }
 
+  protected ensureBackend(): void {
+    if (this.ds === undefined) {
+      throw new Error('Cannot use model db before conenction completed!');
+    }
+  }
+
   private _onChange(ds: Datastore, args: Datastore.IChangedArgs) {
     const local = Private.getLocalChange(
       ds,
@@ -64,7 +77,7 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
 
   protected abstract onChange(change: T): void;
 
-  protected ds: Datastore;
+  protected ds: Datastore | undefined;
   protected schema: Schema;
   protected fieldId: string;
   protected recordID: string;
