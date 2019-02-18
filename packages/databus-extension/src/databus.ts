@@ -34,7 +34,5 @@ function activate(
     converters,
     data
   });
-  databus.registerURL(new URL('file:///data.csv'));
-  databus.registerURL(new URL('file:///data2.csv'));
   return databus;
 }
