@@ -105,7 +105,7 @@ function activate(
     isEnabled: () => {
       return getURL() !== null;
     },
-    label: 'Open as Dataset',
+    label: 'Register Dataset',
     iconClass: 'jp-MaterialIcon jp-??'
   });
 }
