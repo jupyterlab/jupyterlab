@@ -22,6 +22,12 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../running"
+    },
+    {
+      "path": "../services"
+    },
+    {
       "path": "../terminal"
     }
   ]
