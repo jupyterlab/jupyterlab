@@ -41,6 +41,8 @@ a keyboard shortcut or automatically on save.
 
 ## Setting Up a Development Environment
 
+You can launch a binder with the latest JupyterLab master to test something (this may take a few minutes to load): [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/)
+
 ### Installing Node.js and jlpm
 
 Building JupyterLab from its GitHub source code requires Node.js.
