@@ -74,7 +74,6 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     return new Promise((resolve, reject) => {
       const data = model.data[this._mimeType] as any;
-      // const metadata = model.metadata[this._mimeType] as any || {};
       ReactDOM.render(
         <VDOM data={data} onVDOMEvent={this.handleVDOMEvent} />,
         this.node,
