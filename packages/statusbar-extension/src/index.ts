@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
@@ -36,6 +36,10 @@ import {
   StatusBar
 } from '@jupyterlab/statusbar';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import { Title, Widget } from '@phosphor/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
@@ -47,7 +51,13 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
   provides: IStatusBar,
   autoStart: true,
-  activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    mainMenu: IMainMenu | null,
+    palette: ICommandPalette | null
+  ) => {
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
     app.shell.add(statusBar, 'bottom');
@@ -59,9 +69,52 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       });
     }
 
+    const category: string = 'Main Area';
+    const command: string = 'statusbar:toggle';
+
+    app.commands.addCommand(command, {
+      label: 'Show Status Bar',
+      execute: (args: any) => {
+        statusBar.setHidden(statusBar.isVisible);
+        if (settingRegistry) {
+          settingRegistry.set(
+            STATUSBAR_PLUGIN_ID,
+            'visible',
+            statusBar.isVisible
+          );
+        }
+      },
+      isToggled: () => statusBar.isVisible
+    });
+
+    if (palette) {
+      palette.addItem({ command, category });
+    }
+    if (mainMenu) {
+      mainMenu.viewMenu.addGroup([{ command }], 1);
+    }
+
+    if (settingRegistry) {
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const visible = settings.get('visible').composite as boolean;
+        statusBar.setHidden(!visible);
+      };
+
+      Promise.all([settingRegistry.load(STATUSBAR_PLUGIN_ID), app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+          settings.changed.connect(settings => {
+            updateSettings(settings);
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
+
     return statusBar;
   },
-  optional: [ILabShell]
+  optional: [ILabShell, ISettingRegistry, IMainMenu, ICommandPalette]
 };
 
 /**
