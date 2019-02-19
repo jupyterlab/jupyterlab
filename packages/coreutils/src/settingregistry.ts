@@ -1304,7 +1304,7 @@ export namespace Private {
       prefix(`${title || untitled}`),
       prefix(plugin),
       prefix(description || nondescript),
-      prefix(line(length)),
+      prefix('*'.repeat(length)),
       '',
       join(keys.map(key => defaultDocumentedValue(schema, key))),
       '}'
@@ -1331,7 +1331,7 @@ export namespace Private {
       prefix(`${title || untitled}`),
       prefix(plugin.id),
       prefix(description || nondescript),
-      prefix(line(length)),
+      prefix('*'.repeat(length)),
       '',
       join(keys.map(key => documentedValue(plugin.schema, key, data[key]))),
       '}'
@@ -1395,13 +1395,6 @@ export namespace Private {
 
       return acc + val + comma + separator;
     }, '');
-  }
-
-  /**
-   * Returns a line of a specified length.
-   */
-  function line(length: number, ch = '*'): string {
-    return new Array(length + 1).join(ch);
   }
 
   /**
