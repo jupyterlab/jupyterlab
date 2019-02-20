@@ -35,7 +35,7 @@ export class DSModelDB implements IModelDB {
    *
    */
   constructor(options: DSModelDB.ICreateOptions) {
-    this._basePath = options.basePath || 'root';
+    this._basePath = options.basePath || options.schemas[0].id;
     if (options.baseDB) {
       this._baseDB = options.baseDB;
     } else {

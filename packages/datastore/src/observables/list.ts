@@ -88,6 +88,9 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * An `index` which is non-integral or out of range.
    */
   get(index: number): T | undefined {
+    if (this.ds === undefined) {
+      return undefined;
+    }
     return this._array[index];
   }
 

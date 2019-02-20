@@ -8,13 +8,12 @@ import re
 
 sqlite3.enable_callback_tracebacks(True)
 
-def serialized(transactions, checkpoint_id):
+def serialized(transactions):
     for t in transactions:
         yield (
             t['id'],
             t['storeId'],
             json.dumps(t['patch']).encode('ascii'),
-            checkpoint_id,
         )
 
 def deserialized(rows):
@@ -34,7 +33,7 @@ def decode_serials(rows):
 _table_name_re = re.compile(r'[a-zA-Z][a-zA-Z0-9_\-]*')
 
 def validate_table_name(name):
-    if _table_name_re.fullmatch(name) is None:
+    if _table_name_re.fullmatch(name) is None or name.startswith('checkpoints'):
         raise ValueError('Invalid table name %r' % (name,))
 
 
@@ -61,14 +60,23 @@ class DatastoreDB:
         c = self._conn
 
         with c:
-            # Create table
+            # Create table for transactions
             c.execute('''
                 CREATE TABLE IF NOT EXISTS
                 [{0}] (
                     id text NOT NULL UNIQUE ON CONFLICT IGNORE,
                     storeId integer,
-                    patch json,
-                    checkpoint integer
+                    patch json
+                )
+                '''.format(self._table_name)
+            )
+            # Create table for checkpoints
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS
+                [checkpoints-{0}] (
+                    id integer PRIMARY KEY ON CONFLICT REPLACE,
+                    state text,
+                    serial number
                 )
                 '''.format(self._table_name)
             )
@@ -88,10 +96,10 @@ class DatastoreDB:
             # that duplicate transactions are discarded.
             c.executemany(
                 '''
-                    INSERT INTO [{0}](id, storeId, patch, checkpoint)
-                    VALUES(?, ?, ?, ?)
+                    INSERT INTO [{0}](id, storeId, patch)
+                    VALUES(?, ?, ?)
                 '''.format(self._table_name),
-                serialized(transactions, self.checkpoint_id)
+                serialized(transactions)
             )
 
             ids = [t['id'] for t in transactions]
@@ -131,8 +139,15 @@ class DatastoreDB:
             self._conn.execute(statement, ids)
         )
 
-    def history(self):
-        """Get all transactions stored (in order)."""
+    def history(self, checkpoint=None):
+        """Get all stored transactions since checkpoint (in order)."""
+        if checkpoint is None:
+            serial = -1
+        else:
+            serial = tuple(self._conn.execute('''
+                SELECT serial
+                FROM
+            '''))[0]
         yield from deserialized(
             self._conn.execute(
                 '''
@@ -148,91 +163,24 @@ class DatastoreDB:
             )
         )
 
-    def checkpoint(self, base_transaction, replaced_transaction_ids):
+    def checkpoint(self, state, serial):
         """Make a checkpoint in the transaction history.
 
-        This adds one transaction (`base_transaction`) that replaces
-        a set of other transactions (`replaced_transaction_ids`).
+        This creates a new checkpoint after the given serial
+        with the given serialized state.
         """
-        # TODO: Write a ton of unit cases for this function!
 
-        # - Validation:
-        #   All replaced tranasctions should be from the current checkpoint.
-        # - The base transaction should be the first transaction in the new checkpoint.
-        # - Any transactions on the current checkpoint that is not replaced
-        #   should:
-        #   * Have their checkpoint updated to the new current id
-        #   * Have their rowid updated to follow that of the base transaction
-
-        # Validation:
-        subst = ','.join('?' * len(replaced_transaction_ids))
-        invalid = 0 < len(self._conn.execute(
-            '''
-                SELECT id, checkpoint
-                FROM [{0}]
-                WHERE (
-                    id IN ({1}),
-                    checkpoint != ?
-                )
-                LIMIT 1
-            '''.format(self._table_name, subst),
-            chain(replaced_transaction_ids, (self.checkpoint_id,))
-        ))
-        if invalid:
-            raise ValueError('Invalid checkpoint')
-
-        # Perform all operations in one commit:
-        with self._conn as c:
-            # Insert the new base transaction for the new checkpoint
-            old_checkpoint_id = self.checkpoint_id
-            self.checkpoint_id += 1
-
-            base_entry = tuple(serialized([base_transaction], self.checkpoint_id))[0]
+        # Insert the base for the new checkpoint into the checkpoint table
+        try:
             c.execute(
                 '''
-                    INSERT INTO [{0}](id, storeId, patch, checkpoint)
-                    VALUES(?, ?, ?, ?)
+                    INSERT INTO [checkpoints-{0}](id, state, serial)
+                    VALUES(?, ?)
                 '''.format(self._table_name),
-                base_entry
+                (self.checkpoint_id, state, serial)
             )
-
-            # Get rowid of base:
-            base_rowid = tuple(self._conn.execute(
-                'SELECT rowid, id FROM [{0}] WHERE id = ?'.format(self._table_name),
-                base_transaction['id']
-            ))[0][0]
-
-            # Update transactions not included in checkpoint:
-            # Update rowid by replacing rows:
-            c.execute(
-                '''
-                    REPLACE INTO [{0}](id, storeId, patch, checkpoint)
-                    SELECT id, storeId, patch, checkpoint
-                    FROM (
-                        SELECT *
-                        FROM [{0}]
-                        WHERE (
-                            checkpoint == ?,
-                            id NOT IN ({1})
-                        )
-                        ORDER BY rowid
-                    )
-                '''.format(self._table_name, replaced_transaction_ids),
-                (old_checkpoint_id,)
-            )
-            # Update checkpoint id:
-            c.execute(
-                '''
-                    UPDATE [{0}]
-                    SET checkpoint = ?
-                    WHERE (
-                        checkpoint == ?,
-                        id NOT IN ({1})
-                    )
-                '''.format(self._table_name, replaced_transaction_ids),
-                (self.checkpoint_id, old_checkpoint_id)
-            )
-
+        else:
+            self.checkpoint_id += 1
 
 
 __all__ = ['DatastoreDB']

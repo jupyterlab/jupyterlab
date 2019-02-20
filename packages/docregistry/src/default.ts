@@ -7,12 +7,7 @@ import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
-import {
-  Schema,
-  TextField,
-  RegisterField,
-  MapField
-} from '@phosphor/datastore';
+import { Schema, Fields } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -249,12 +244,12 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
       {
         id: 'TextModelSchema.v1',
         fields: {
-          value: new TextField({ description: 'The text value of the model' }),
-          mimeType: new RegisterField<string>({
+          value: Fields.Text({ description: 'The text value of the model' }),
+          mimeType: Fields.String({
             value: 'text/plain',
             description: 'The MIME type of the text'
           }),
-          selections: new MapField({
+          selections: Fields.Map({
             description: 'A map of all text selections for all users'
           })
         }
@@ -306,8 +301,7 @@ export class Base64ModelFactory extends TextModelFactory {
       {
         id: 'Base64ModelSchema.v1',
         fields: {
-          value: new RegisterField<string>({
-            value: '',
+          value: Fields.String({
             description: 'The value of the model'
           })
         }

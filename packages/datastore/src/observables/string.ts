@@ -31,8 +31,10 @@ export class ObservableString extends ObservableBase<TextField.Change>
   /**
    * The value of the string.
    */
-  get text(): string {
-    this.ensureBackend();
+  get text(): string | undefined {
+    if (this.ds === undefined) {
+      return undefined;
+    }
     const record = this.ds!.get(this.schema).get(this.recordID);
     return record ? (record[this.fieldId] as string) : '';
   }
@@ -102,7 +104,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
         [this.recordID]: {
           [this.fieldId]: {
             index: 0,
-            remove: current.length,
+            remove: current ? current.length : 0,
             text: ''
           }
         }

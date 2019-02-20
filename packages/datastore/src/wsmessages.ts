@@ -46,6 +46,7 @@ export namespace DatastoreWSMessages {
     'permissions-request': PermissionsRequest;
     'permissions-reply': PermissionsReply;
     'error-reply': ErrorReply;
+    'state-stable': StableStateNotice;
   }
 
   /**
@@ -221,6 +222,22 @@ export namespace DatastoreWSMessages {
   };
 
   /**
+   * A notice that the current state of the datastore is *stable*.
+   *
+   * Stability here means that all concurrent transactions are known
+   * to have been applied.
+   */
+  export type StableStateNotice = Base & {
+    readonly msgType: 'state-stable';
+    readonly content: {
+      /**
+       * The datastore version of the stable state.
+       */
+      version: number;
+    };
+  };
+
+  /**
    * An error reply message.
    */
   export type ErrorReply = BaseReply & {
@@ -257,7 +274,7 @@ export namespace DatastoreWSMessages {
     | ErrorReply;
 
   /**
-   * A union type for all successful messages.
+   * A union type for all successful reply messages.
    */
   export type Reply =
     | StoreIdReply
@@ -268,9 +285,14 @@ export namespace DatastoreWSMessages {
     | PermissionsReply;
 
   /**
+   * A union type of all notice messages (no reply expected).
+   */
+  export type Notice = StableStateNotice;
+
+  /**
    * A union type for all messages.
    */
-  export type Message = Request | RawReply;
+  export type Message = Request | RawReply | Notice;
 
   /**
    * Create a WSServerAdapter message.

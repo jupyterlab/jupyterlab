@@ -6,6 +6,8 @@ import uuid
 from notebook.base.handlers import IPythonHandler
 from notebook.base.zmqhandlers import WebSocketMixin
 from tornado import gen, web
+from tornado.concurrent import Future
+from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
 from .messages import (
@@ -76,10 +78,39 @@ class DatastoreHandler(WSBaseHandler):
         self.log.info("Initializing datastore connection %s", self.request.path)
         self.session = None
         self.session_id = None
+        self.store_id = None
 
     @property
     def datastore_file(self):
         return self.settings.setdefault('datastore_file', ':memory:')
+
+    @gen.coroutine
+    def pre_get(self):
+        # authenticate first
+        super(DatastoreHandler, self).pre_get()
+
+        self.store_id = self.get_query_argument('storeId', None)
+        # TODO: Check if store id supplied, if so, check if already open
+        if self.store_id is not None:
+            # TODO: Temporary minimal reaction:
+            self.log.warning("Trying to reopen store that is already connected")
+            raise web.HTTPError(400)
+
+            # If so, give the message loop time to process any
+            # transactions that were sent before disconnect,
+            # before attempting recovery.
+            #
+            # TODO: Make a future that can be resolved on close
+            future = None
+            def give_up():
+                """Don't wait forever for close event"""
+                if future.done():
+                    return
+                future.set_result({})
+            loop = IOLoop.current()
+            loop.add_timeout(loop.time() + self.rtc_recovery_wait, give_up)
+            # actually wait for it
+            yield future
 
     def open(self, session_id=None):
         self.log.info('Datastore open called...')
@@ -146,7 +177,8 @@ class DatastoreHandler(WSBaseHandler):
                     msg_id,
                     'Permisson error: Cannot access session: %s' % (self.session_id,)
                 )
-            reply = create_storeid_reply(msg_id, self.session.create_store_id())
+            self.store_id = self.session.create_store_id()
+            reply = create_storeid_reply(msg_id, self.store_id)
             self.write_message(json.dumps(reply))
 
         elif msg_type == 'history-request':

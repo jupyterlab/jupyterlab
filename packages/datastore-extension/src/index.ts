@@ -132,7 +132,9 @@ const datastorePlugin: JupyterFrontEndPlugin<void> = {
     registry.addModelDBFactory('phosphor-datastore', {
       createNew: (path, schemas) => {
         // Set up session to server:
-        const session = new DatastoreSession({ key: path });
+        // const key = UUID.uuid4();
+        const key = path.replace(/[^0-9a-zA-Z_\-]/, '');
+        const session = new DatastoreSession({ key });
 
         const datastore = Promise.resolve().then(async () => {
           const clearance = {

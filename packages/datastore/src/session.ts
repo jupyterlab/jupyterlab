@@ -7,7 +7,7 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Datastore } from '@phosphor/datastore';
 
-import { IMessageHandler, Message } from '@phosphor/messaging';
+import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
 
 import { ServerConnection, WSConnection } from '@jupyterlab/services';
 
@@ -31,7 +31,6 @@ export class DatastoreSession extends WSConnection<
   constructor(options: DatastoreSession.IOptions = {}) {
     super();
     this.sessionId = options.sessionId;
-    this.key = options.key;
     this.handler = options.handler || null;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
@@ -100,8 +99,6 @@ export class DatastoreSession extends WSConnection<
 
   readonly sessionId: string | undefined;
 
-  readonly key: string | undefined;
-
   handler: IMessageHandler | null;
 
   protected wsFactory() {
@@ -109,8 +106,12 @@ export class DatastoreSession extends WSConnection<
     const token = this.serverSettings.token;
 
     let wsUrl;
-    if (this.key) {
-      wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL, this.key);
+    if (this.sessionId) {
+      wsUrl = URLExt.join(
+        settings.wsUrl,
+        DATASTORE_SERVICE_URL,
+        this.sessionId
+      );
     } else {
       wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL);
     }
@@ -122,7 +123,10 @@ export class DatastoreSession extends WSConnection<
   }
 
   protected handleMessage(
-    msg: DatastoreWSMessages.RawReply | DatastoreWSMessages.TransactionBroadcast
+    msg:
+      | DatastoreWSMessages.RawReply
+      | DatastoreWSMessages.TransactionBroadcast
+      | DatastoreWSMessages.StableStateNotice
   ): boolean {
     try {
       // TODO: Write a validator?
@@ -148,6 +152,14 @@ export class DatastoreSession extends WSConnection<
       this._handleTransactions(msg.content.transactions);
       return true;
     }
+    if (msg.msgType === 'state-stable') {
+      if (this.handler !== null) {
+        MessageLoop.postMessage(
+          this.handler,
+          new Datastore.GCChanceMessage(msg.content.version)
+        );
+      }
+    }
     return false;
   }
 
@@ -160,7 +172,7 @@ export class DatastoreSession extends WSConnection<
     if (this.handler !== null) {
       for (let t of transactions) {
         const message = new DatastoreSession.RemoteTransactionMessage(t);
-        this.handler.processMessage(message);
+        MessageLoop.postMessage(this.handler, message);
       }
     }
   }
@@ -209,11 +221,6 @@ export class DatastoreSession extends WSConnection<
  */
 export namespace DatastoreSession {
   export interface IOptions {
-    /**
-     *
-     */
-    key?: string;
-
     /**
      *
      */
