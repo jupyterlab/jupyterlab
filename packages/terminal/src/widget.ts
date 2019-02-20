@@ -77,7 +77,7 @@ export class Terminal extends Widget {
     if (!value) {
       return;
     }
-    Promise.all([value.ready, this._ready]).then(() => {
+    Promise.all([value.ready, this._ready.promise]).then(() => {
       if (this.isDisposed || value !== this._session) {
         return;
       }
@@ -158,9 +158,9 @@ export class Terminal extends Widget {
     if (!this._session) {
       return Promise.reject(void 0);
     }
-    return Promise.all([this._session.reconnect(), this._ready]).then(() => {
-      this._term.clear();
-    });
+    return Promise.all([this._session.reconnect(), this._ready.promise]).then(
+      () => this._term.clear()
+    );
   }
 
   /**
