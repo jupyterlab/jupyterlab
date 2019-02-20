@@ -394,7 +394,14 @@ function activateCellTools(
   const activeCellTool = new CellTools.ActiveCellTool();
   const slideShow = CellTools.createSlideShowSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
-  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const cellMetadataEditor = new CellTools.CellMetadataEditorTool({
+    title: 'Edit Cell Metadata',
+    editorFactory
+  });
+  const notebookMetadataEditor = new CellTools.NotebookMetadataEditorTool({
+    title: 'Edit Notebook Metadata',
+    editorFactory
+  });
   const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
@@ -435,7 +442,8 @@ function activateCellTools(
   celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: metadataEditor, rank: 4 });
+  celltools.addItem({ tool: cellMetadataEditor, rank: 4 });
+  celltools.addItem({ tool: notebookMetadataEditor, rank: 5 });
   MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.

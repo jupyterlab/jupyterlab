@@ -25,7 +25,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
-import { INotebookTracker } from './';
+import { INotebookTracker, NotebookPanel } from './';
 
 /**
  * The class name added to a CellTools instance.
@@ -95,6 +95,13 @@ export class CellTools extends Widget {
    */
   get activeCell(): Cell | null {
     return this._tracker.activeCell;
+  }
+
+  /**
+   * The active notebook panel.
+   */
+  get activeNotebook(): NotebookPanel | null {
+    return this._tracker.currentWidget;
   }
 
   /**
@@ -399,7 +406,7 @@ export namespace CellTools {
   /**
    * A raw metadata editor.
    */
-  export class MetadataEditorTool extends Tool {
+  class MetadataEditorTool extends Tool {
     /**
      * Construct a new raw metadata tool.
      */
@@ -410,7 +417,7 @@ export namespace CellTools {
       let layout = (this.layout = new PanelLayout());
       this.editor = new JSONEditor({
         editorFactory,
-        title: 'Edit Metadata',
+        title: options.title || 'Edit Metadata',
         collapsible: true
       });
       layout.addWidget(this.editor);
@@ -420,14 +427,6 @@ export namespace CellTools {
      * The editor used by the tool.
      */
     readonly editor: JSONEditor;
-
-    /**
-     * Handle a change to the active cell.
-     */
-    protected onActiveCellChanged(msg: Message): void {
-      let cell = this.parent.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
-    }
   }
 
   /**
@@ -442,7 +441,50 @@ export namespace CellTools {
        * The editor factory used by the tool.
        */
       editorFactory: CodeEditor.Factory;
+
+      /**
+       * The title to give to the editor.
+       */
+      title?: string;
     }
+  }
+
+  /**
+   * A metadata editor for cells.
+   */
+  export class CellMetadataEditorTool extends MetadataEditorTool {
+    /**
+     * Handle a change to the active cell.
+     */
+    protected onActiveCellChanged(msg: Message): void {
+      let cell = this.parent.activeCell;
+      this.editor.source = cell ? cell.model.metadata : null;
+    }
+  }
+
+  /**
+   * A metadata editor for notebooks.
+   */
+  export class NotebookMetadataEditorTool extends MetadataEditorTool {
+    /**
+     * Handle a change to the active cell.
+     *
+     * #### Notes
+     * This is fired more than we need, since every notebook change involves
+     * a cell change, but not vice versa. We check a reference to the current
+     * notebook so that we don't have to update the notebook metadata on every
+     * cell change.
+     */
+    protected onActiveCellChanged(msg: Message): void {
+      let notebook = this.parent.activeNotebook;
+      if (this._nb === notebook) {
+        return;
+      }
+      this._nb = notebook;
+      this.editor.source = notebook ? notebook.content.model.metadata : null;
+    }
+
+    private _nb: NotebookPanel | null;
   }
 
   /**
