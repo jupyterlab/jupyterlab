@@ -77,7 +77,7 @@ export class Terminal extends Widget {
     if (!value) {
       return;
     }
-    Promise.all([value.ready, this._ready.promise]).then(() => {
+    Promise.all([value.ready, this.ready]).then(() => {
       if (this.isDisposed || value !== this._session) {
         return;
       }
@@ -122,7 +122,7 @@ export class Terminal extends Widget {
       return;
     }
 
-    this._ready.promise.then(() => {
+    this.ready.then(() => {
       if (option === 'theme') {
         if (value === 'light') {
           this.addClass('jp-mod-light');
@@ -145,7 +145,7 @@ export class Terminal extends Widget {
    */
   dispose(): void {
     this._session = null;
-    this._ready.promise.then(() => {
+    this.ready.then(() => {
       this._term.dispose();
     });
     super.dispose();
@@ -158,9 +158,9 @@ export class Terminal extends Widget {
     if (!this._session) {
       return Promise.reject(void 0);
     }
-    return Promise.all([this._session.reconnect(), this._ready.promise]).then(
-      () => this._term.clear()
-    );
+    return Promise.all([this._session.reconnect(), this.ready]).then(() => {
+      this._term.clear();
+    });
   }
 
   /**
@@ -180,6 +180,13 @@ export class Terminal extends Widget {
       default:
         break;
     }
+  }
+
+  /**
+   * A promise that resolves when the terminal is initialized.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -214,7 +221,7 @@ export class Terminal extends Widget {
       return;
     }
 
-    this._ready.promise.then(() => {
+    this.ready.then(() => {
       // Open the terminal if necessary.
       if (!this._termOpened) {
         this._term.open(this.node);
@@ -240,7 +247,7 @@ export class Terminal extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this._ready.promise.then(() => {
+    this.ready.then(() => {
       this._term.focus();
     });
   }
@@ -270,7 +277,7 @@ export class Terminal extends Widget {
     sender: TerminalSession.ISession,
     msg: TerminalSession.IMessage
   ): void {
-    this._ready.promise.then(() => {
+    this.ready.then(() => {
       switch (msg.type) {
         case 'stdout':
           if (msg.content) {

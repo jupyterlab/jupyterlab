@@ -80,7 +80,7 @@ describe('terminal/index', () => {
       it('should set the title when ready', async () => {
         widget.session = session;
         expect(widget.session).to.equal(session);
-        await session.ready;
+        await Promise.all([session.ready, widget.ready]);
         expect(widget.title.label).to.contain(session.name);
       });
     });
