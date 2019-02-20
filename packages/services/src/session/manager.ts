@@ -147,15 +147,13 @@ export class SessionManager implements Session.IManager {
   /**
    * Start a new session.  See also [[startNewSession]].
    *
-   * @param options - Overrides for the default options, must include a
-   *   `'path'`.
+   * @param options - Overrides for the default options, must include a `path`.
    */
-  startNew(options: Session.IOptions): Promise<Session.ISession> {
-    let serverSettings = this.serverSettings;
-    return Session.startNew({ ...options, serverSettings }).then(session => {
-      this._onStarted(session);
-      return session;
-    });
+  async startNew(options: Session.IOptions): Promise<Session.ISession> {
+    const { serverSettings } = this;
+    const session = await Session.startNew({ ...options, serverSettings });
+    this._onStarted(session);
+    return session;
   }
 
   /**
@@ -166,18 +164,19 @@ export class SessionManager implements Session.IManager {
    *
    * @returns A promise that resolves when the relevant sessions are stopped.
    */
-  stopIfNeeded(path: string): Promise<void> {
-    return Session.listRunning(this.serverSettings)
-      .then(sessions => {
-        const matches = sessions.filter(value => value.path === path);
-        if (matches.length === 1) {
-          const id = matches[0].id;
-          return this.shutdown(id).catch(() => {
-            /* no-op */
-          });
-        }
-      })
-      .catch(() => Promise.resolve(void 0)); // Always succeed.
+  async stopIfNeeded(path: string): Promise<void> {
+    try {
+      const sessions = await Session.listRunning(this.serverSettings);
+      const matches = sessions.filter(value => value.path === path);
+      if (matches.length === 1) {
+        const id = matches[0].id;
+        return this.shutdown(id).catch(() => {
+          /* no-op */
+        });
+      }
+    } catch (error) {
+      /* Always succeed. */
+    }
   }
 
   /**
@@ -206,26 +205,25 @@ export class SessionManager implements Session.IManager {
   /**
    * Shut down a session by id.
    */
-  shutdown(id: string): Promise<void> {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+  async shutdown(id: string): Promise<void> {
+    const models = this._models;
+    const sessions = this._sessions;
+    const index = ArrayExt.findFirstIndex(models, model => model.id === id);
+
     if (index === -1) {
       return;
     }
-    // Proactively remove the model.
-    this._models.splice(index, 1);
-    this._runningChanged.emit(this._models.slice());
 
-    return Session.shutdown(id, this.serverSettings).then(() => {
-      let toRemove: Session.ISession[] = [];
-      this._sessions.forEach(s => {
-        if (s.id === id) {
-          s.dispose();
-          toRemove.push(s);
-        }
-      });
-      toRemove.forEach(s => {
-        this._sessions.delete(s);
-      });
+    // Proactively remove the model.
+    models.splice(index, 1);
+    this._runningChanged.emit(models.slice());
+
+    await Session.shutdown(id, this.serverSettings);
+    sessions.forEach(session => {
+      if (session.id === id) {
+        sessions.delete(session);
+        session.dispose();
+      }
     });
   }
 
@@ -234,32 +232,30 @@ export class SessionManager implements Session.IManager {
    *
    * @returns A promise that resolves when all of the sessions are shut down.
    */
-  shutdownAll(): Promise<void> {
+  async shutdownAll(): Promise<void> {
     // Proactively remove all models.
-    let models = this._models;
-    if (models.length > 0) {
+    const models = this._models;
+
+    if (models.length) {
       this._models = [];
-      this._runningChanged.emit([]);
     }
 
-    return this._refreshRunning().then(() => {
-      return Promise.all(
-        models.map(model => {
-          return Session.shutdown(model.id, this.serverSettings).then(() => {
-            let toRemove: Session.ISession[] = [];
-            this._sessions.forEach(s => {
-              s.dispose();
-              toRemove.push(s);
-            });
-            toRemove.forEach(s => {
-              this._sessions.delete(s);
-            });
-          });
-        })
-      ).then(() => {
-        return undefined;
-      });
+    await this._refreshRunning();
+    await Promise.all(
+      models.map(async model => {
+        await Session.shutdown(model.id, this.serverSettings);
+      })
+    );
+
+    const sessions = this._sessions;
+    sessions.forEach(session => {
+      session.dispose();
     });
+    sessions.clear();
+
+    if (models.length) {
+      this._runningChanged.emit([]);
+    }
   }
 
   /**
@@ -312,36 +308,31 @@ export class SessionManager implements Session.IManager {
   /**
    * Refresh the specs.
    */
-  private _refreshSpecs(): Promise<void> {
-    return Kernel.getSpecs(this.serverSettings).then(specs => {
-      if (!JSONExt.deepEqual(specs, this._specs)) {
-        this._specs = specs;
-        this._specsChanged.emit(specs);
-      }
-    });
+  private async _refreshSpecs(): Promise<void> {
+    const specs = await Kernel.getSpecs(this.serverSettings);
+    if (!JSONExt.deepEqual(specs, this._specs)) {
+      this._specs = specs;
+      this._specsChanged.emit(specs);
+    }
   }
 
   /**
    * Refresh the running sessions.
    */
-  private _refreshRunning(): Promise<void> {
-    return Session.listRunning(this.serverSettings).then(models => {
-      if (!JSONExt.deepEqual(models, this._models)) {
-        let ids = models.map(r => r.id);
-        let toRemove: Session.ISession[] = [];
-        this._sessions.forEach(s => {
-          if (ids.indexOf(s.id) === -1) {
-            s.dispose();
-            toRemove.push(s);
-          }
-        });
-        toRemove.forEach(s => {
-          this._sessions.delete(s);
-        });
-        this._models = models.slice();
-        this._runningChanged.emit(models);
-      }
-    });
+  private async _refreshRunning(): Promise<void> {
+    const models = await Session.listRunning(this.serverSettings);
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const ids = models.map(model => model.id);
+      const sessions = this._sessions;
+      sessions.forEach(session => {
+        if (ids.indexOf(session.id) === -1) {
+          session.dispose();
+          sessions.delete(session);
+        }
+      });
+      this._models = models.slice();
+      this._runningChanged.emit(models);
+    }
   }
 
   private _isDisposed = false;
