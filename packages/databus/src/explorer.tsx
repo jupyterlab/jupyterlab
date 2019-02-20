@@ -79,6 +79,11 @@ function DatasetCompononent({
     classNames.push(activeDatasetClassName);
   }
   const viewers = [...databus.viewersForURL(url)];
+  console.log('Dataset', {
+    url,
+    mimeType: databus.data.mimeTypesForURL(url),
+    possible: databus.possibleMimeTypesForURL(url)
+  });
   viewers.sort();
   return (
     <div
