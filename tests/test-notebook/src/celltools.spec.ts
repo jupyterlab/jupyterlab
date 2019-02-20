@@ -136,6 +136,15 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
+      describe('#activeNotebook', () => {
+        it('should be the active notebook', () => {
+          expect(celltools.activeNotebook).to.equal(panel1);
+          tabpanel.currentIndex = 0;
+          simulate(panel0.node, 'focus');
+          expect(celltools.activeNotebook).to.equal(panel0);
+        });
+      });
+
       describe('#selectedCells', () => {
         it('should be the currently selected cells', () => {
           expect(celltools.selectedCells).to.deep.equal([
@@ -233,17 +242,17 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('CellTools.MetadataEditorTool', () => {
+    describe('CellTools.CellMetadataEditorTool', () => {
       const editorServices = new CodeMirrorEditorFactory();
       const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
       it('should create a new metadata editor tool', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
-        expect(tool).to.be.an.instanceof(CellTools.MetadataEditorTool);
+        const tool = new CellTools.CellMetadataEditorTool({ editorFactory });
+        expect(tool).to.be.an.instanceof(CellTools.CellMetadataEditorTool);
       });
 
       it('should handle a change to the active cell', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
+        const tool = new CellTools.CellMetadataEditorTool({ editorFactory });
         celltools.addItem({ tool });
         const model = tool.editor.model;
         expect(JSON.stringify(model.value.text)).to.be.ok;
@@ -254,11 +263,50 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should handle a change to the metadata', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
+        const tool = new CellTools.CellMetadataEditorTool({ editorFactory });
         celltools.addItem({ tool });
         const model = tool.editor.model;
         const previous = model.value.text;
         const metadata = celltools.activeCell.model.metadata;
+        metadata.set('foo', 1);
+        expect(model.value.text).to.not.equal(previous);
+      });
+    });
+
+    describe('CellTools.NotebookMetadataEditorTool', () => {
+      const editorServices = new CodeMirrorEditorFactory();
+      const editorFactory = editorServices.newInlineEditor.bind(editorServices);
+
+      it('should create a new metadata editor tool', () => {
+        const tool = new CellTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        expect(tool).to.be.an.instanceof(CellTools.NotebookMetadataEditorTool);
+      });
+
+      it('should handle a change to the active notebook', async () => {
+        const tool = new CellTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        celltools.addItem({ tool });
+        const model = tool.editor.model;
+        expect(JSON.stringify(model.value.text)).to.be.ok;
+        expect(tracker.currentWidget).to.equal(panel1);
+        tabpanel.currentIndex = 0;
+        simulate(panel0.node, 'focus');
+        expect(tracker.currentWidget).to.equal(panel0);
+        panel0.content.model.metadata.set('bar', 1);
+        expect(JSON.stringify(model.value.text)).to.contain('bar');
+      });
+
+      it('should handle a change to the metadata', () => {
+        const tool = new CellTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        celltools.addItem({ tool });
+        const model = tool.editor.model;
+        const previous = model.value.text;
+        const metadata = celltools.activeNotebook.model.metadata;
         metadata.set('foo', 1);
         expect(model.value.text).to.not.equal(previous);
       });
