@@ -2,7 +2,7 @@ import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { IConverterRegistry } from './converters';
 import { Dataset, IDataRegistry } from './dataregistry';
-import { resolveDataSet } from './resolvers';
+import { resolveDataSet, resolveMimeType } from './resolvers';
 import { createViewerMimeType, extractViewerLabel } from './viewers';
 
 export interface IDataBusConfig {
@@ -29,6 +29,19 @@ export class DataBus {
     return this.data.publish(dataset);
   }
 
+  /**
+   * Returns whether a URL, if registered, will have any conversions.
+   *
+   * Basically checks if the we will be able to resolve the mimetype just from the URL.
+   */
+  hasConversions(url: URL): boolean {
+    return this.converters.listTargetMimeTypes(url, [resolveMimeType]).size > 1;
+  }
+
+  /**
+   * Returns all mimetypes a URL that is already registered
+   * can be converted to.
+   */
   possibleMimeTypesForURL(url: URL): Set<string> {
     return this.converters.listTargetMimeTypes(
       url,

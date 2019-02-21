@@ -13,6 +13,7 @@ export class ActiveDataset {
   }
 
   set active(newURL: URL | null) {
+    console.log('Setting active', newURL);
     this._active = newURL;
     this._signal.emit(newURL);
   }

@@ -18,7 +18,7 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { Widget } from '@phosphor/widgets';
 
 /**
- * The converter registry extension.
+ * The active dataset extension.
  */
 export default {
   activate,
@@ -30,6 +30,8 @@ export default {
 
 function activate(app: JupyterFrontEnd, labShell: ILabShell): IActiveDataset {
   const active = new ActiveDataset();
+
+  // Track active documents open.
   labShell.currentChanged.connect((sender, args) => {
     active.active = getURL(args.newValue);
   });
