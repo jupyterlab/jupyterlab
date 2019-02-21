@@ -35,9 +35,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/rendermime": "^0.19.1",
-    "mathjax3": "3.0.0-beta.2"
+    "@jupyterlab/application": "^1.0.0-alpha.3",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.3",
+    "mathjax3": "^3.0.0-beta.2"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",

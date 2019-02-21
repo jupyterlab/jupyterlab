@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLabPlugin } from '@jupyterlab/application';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
@@ -61,7 +61,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
 /**
  * The MathJax 3 extension.
  */
-const mathJax3Plugin: JupyterLabPlugin<ILatexTypesetter> = {
+const mathJax3Plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax3-extension:plugin',
   requires: [],
   provides: ILatexTypesetter,
