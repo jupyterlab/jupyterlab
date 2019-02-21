@@ -59,7 +59,10 @@ export class Poll implements IDisposable {
         } catch (error) {
           const old = interval;
           interval = Math.min(old * 2, max);
-          console.warn(`Poll error, raise interval from ${old} to ${interval}`);
+          console.warn(
+            `Polling error, increasing interval from ${old} to ${interval}`,
+            error
+          );
         }
       }
 
