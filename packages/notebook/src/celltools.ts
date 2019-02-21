@@ -541,6 +541,7 @@ export namespace NotebookTools {
       super({ node: Private.createSelectorNode(options) });
       this.addClass('jp-KeySelector');
       this.key = options.key;
+      this._default = options.default;
       this._validCellTypes = options.validCellTypes || [];
       this._getter = options.getter || this._getValue;
       this._setter = options.setter || this._setValue;
@@ -657,14 +658,18 @@ export namespace NotebookTools {
      * Get the value for the data.
      */
     private _getValue = (cell: Cell) => {
-      return cell.model.metadata.get(this.key);
+      let value = cell.model.metadata.get(this.key);
+      if (value === undefined) {
+        value = this._default;
+      }
+      return value;
     };
 
     /**
      * Set the value for the data.
      */
     private _setValue = (cell: Cell, value: JSONValue) => {
-      if (value === null) {
+      if (value === this._default) {
         cell.model.metadata.delete(this.key);
       } else {
         cell.model.metadata.set(this.key, value);
@@ -675,6 +680,7 @@ export namespace NotebookTools {
     private _validCellTypes: string[];
     private _getter: (cell: Cell) => JSONValue;
     private _setter: (cell: Cell, value: JSONValue) => void;
+    private _default: JSONValue;
   }
 
   /**
@@ -694,8 +700,8 @@ export namespace NotebookTools {
        * The map of options to values.
        *
        * #### Notes
-       * A value may be undefined, signifying the
-       * option should be erased from the metadata.
+       * If a value equals the default, choosing it may erase the key from the
+       * metadata.
        */
       optionsMap: { [key: string]: JSONValue };
 
@@ -726,10 +732,15 @@ export namespace NotebookTools {
        * @param value - The value of the selector.
        *
        * #### Notes
-       * The setter should set the appropriate metadata value
-       * given the value of the selector.
+       * The setter should set the appropriate metadata value given the value of
+       * the selector.
        */
       setter?: (cell: Cell, value: JSONValue) => void;
+
+      /**
+       * Default value for default setters and getters if value is not found.
+       */
+      default?: JSONValue;
     }
   }
 
@@ -769,6 +780,100 @@ export namespace NotebookTools {
       }
     };
     return new KeySelector(options);
+  }
+
+  /**
+   * Create a scrolled cell state selector.
+   *
+   * TODO: we don't support 'auto'? See
+   * https://nbformat.readthedocs.io/en/latest/format_description.html#cell-metadata
+   */
+  export function createScrolledSelector(): KeySelector {
+    return new KeySelector({
+      key: 'scrolled',
+      title: 'Output scrolled initially',
+      optionsMap: {
+        True: true,
+        False: false
+      },
+      default: false,
+      validCellTypes: ['code']
+    });
+  }
+
+  /**
+   * Create an input initial collapse state selector.
+   */
+  export function createInputHiddenSelector(): KeySelector {
+    return new KeySelector({
+      key: 'jupyter',
+      title: 'Input collapsed initially',
+      optionsMap: {
+        True: true,
+        False: false
+      },
+      getter: cell => {
+        let value = cell.model.metadata.get('jupyter');
+        return (value && (value as JSONObject)['source_hidden']) || false;
+      },
+      setter: (cell, value) => {
+        let data = cell.model.metadata.get('jupyter') || Object.create(null);
+        if (value === false) {
+          // Make a shallow copy so we aren't modifying the original metadata.
+          data = { ...data };
+          delete data.source_hidden;
+        } else {
+          data = { ...data, source_hidden: value };
+        }
+        if (Object.keys(data).length > 0) {
+          cell.model.metadata.set('jupyter', data);
+        } else {
+          cell.model.metadata.delete('jupyter');
+        }
+      }
+    });
+  }
+
+  /**
+   * Create an output initial collapse state selector.
+   */
+  export function createOutputCollapsedSelector(): KeySelector {
+    return new KeySelector({
+      key: 'collapsed',
+      title: 'Output collapsed initially',
+      optionsMap: {
+        True: true,
+        False: false
+      },
+      getter: cell => {
+        return cell.model.metadata.get('collapsed') || false;
+      },
+      setter: (cell, value) => {
+        // Set the 'collapsed' key
+        if (value === false) {
+          cell.model.metadata.delete('collapsed');
+        } else {
+          cell.model.metadata.set('collapsed', value);
+        }
+
+        // We don't distinguish between the jupyter.outputs_hidden metadata, and
+        // the collapsed metadata. Set the jupyter.outputs_hidden as well.
+        let data = cell.model.metadata.get('jupyter') || Object.create(null);
+        if (value === false) {
+          // Make a shallow copy so we aren't modifying the original metadata.
+          data = { ...data };
+          delete data.outputs_hidden;
+        } else {
+          data = { ...data, outputs_hidden: value };
+        }
+        if (Object.keys(data).length > 0) {
+          cell.model.metadata.set('jupyter', data);
+        } else {
+          cell.model.metadata.delete('jupyter');
+        }
+      },
+      validCellTypes: ['code']
+    });
   }
 
   /**

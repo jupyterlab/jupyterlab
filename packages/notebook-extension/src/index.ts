@@ -387,6 +387,9 @@ function activateNotebookTools(
   const celltools = new NotebookTools({ tracker });
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const slideShow = NotebookTools.createSlideShowSelector();
+  const scrolled = NotebookTools.createScrolledSelector();
+  const inputHidden = NotebookTools.createInputHiddenSelector();
+  const outputCollapsed = NotebookTools.createOutputCollapsedSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory
@@ -434,6 +437,9 @@ function activateNotebookTools(
   celltools.title.caption = 'Cell Inspector';
   celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
+  celltools.addItem({ tool: scrolled, rank: 2 });
+  celltools.addItem({ tool: inputHidden, rank: 2 });
+  celltools.addItem({ tool: outputCollapsed, rank: 2 });
   celltools.addItem({ tool: slideShow, rank: 2 });
   celltools.addItem({ tool: cellMetadataEditor, rank: 4 });
   celltools.addItem({ tool: notebookMetadataEditor, rank: 5 });
@@ -548,6 +554,8 @@ function activateNotebookHandler(
     // Add the notebook panel to the tracker.
     tracker.add(widget);
 
+    // TODO: Add cell widget events for when the scrolled or collapse state
+    // changes, so that we can sync metadata, then delete this save handler.
     widget.context.saveState.connect((sender, state) => {
       if (state === 'started') {
         // Always sync view state if we are the shell's current widget.
