@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
@@ -9,7 +11,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Kernel } from '../kernel';
 
-import { ServerConnection } from '..';
+import { ServerConnection } from '../serverconnection';
 
 import { Session } from './session';
 
@@ -31,21 +33,17 @@ export class SessionManager implements Session.IManager {
       return this._refreshRunning();
     });
 
-    // Set up polling.
-    this._modelsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      return this._refreshRunning();
-    }, 10000);
-    this._specsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      return this._refreshSpecs();
-    }, 61000);
+    // Start model and specs polling with exponential backoff.
+    this._pollModels = new Poll({
+      interval: 10 * 1000,
+      max: 300 * 1000,
+      poll: () => this._refreshRunning()
+    });
+    this._pollSpecs = new Poll({
+      interval: 61 * 1000,
+      max: 305 * 1000,
+      poll: () => this._refreshSpecs()
+    });
   }
 
   /**
@@ -103,10 +101,10 @@ export class SessionManager implements Session.IManager {
       return;
     }
     this._isDisposed = true;
-    clearInterval(this._modelsTimer);
-    clearInterval(this._specsTimer);
-    Signal.clearData(this);
     this._models.length = 0;
+    this._pollModels.dispose();
+    this._pollSpecs.dispose();
+    Signal.clearData(this);
   }
 
   /**
@@ -337,13 +335,13 @@ export class SessionManager implements Session.IManager {
 
   private _isDisposed = false;
   private _models: Session.IModel[] = [];
+  private _pollModels: Poll;
+  private _pollSpecs: Poll;
+  private _readyPromise: Promise<void>;
+  private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;
-  private _modelsTimer = -1;
-  private _specsTimer = -1;
-  private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
-  private _runningChanged = new Signal<this, Session.IModel[]>(this);
 }
 
 /**
