@@ -11,6 +11,8 @@ import { Terminal as Xterm } from 'xterm';
 
 import { fit } from 'xterm/lib/addons/fit/fit';
 
+import { ITerminal } from '.';
+
 /**
  * The class name added to a terminal widget.
  */
@@ -24,17 +26,17 @@ const TERMINAL_BODY_CLASS = 'jp-Terminal-body';
 /**
  * A widget which manages a terminal session.
  */
-export class Terminal extends Widget {
+export class Terminal extends Widget implements ITerminal.ITerminal {
   /**
    * Construct a new terminal widget.
    *
    * @param options - The terminal configuration options.
    */
-  constructor(options: Partial<Terminal.IOptions> = {}) {
+  constructor(options: Partial<ITerminal.IOptions> = {}) {
     super();
 
     // Initialize settings.
-    this._options = { ...Terminal.defaultOptions, ...options };
+    this._options = { ...ITerminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
     const { lightTheme, darkTheme } = Private;
@@ -65,43 +67,26 @@ export class Terminal extends Widget {
       this._session.messageReceived.disconnect(this._onMessage, this);
     }
     this._session = value || null;
-    if (!value) {
-      return;
+    if (value) {
+      this._setSession(value);
     }
-    value.ready.then(() => {
-      if (this.isDisposed || value !== this._session) {
-        return;
-      }
-      value.messageReceived.connect(
-        this._onMessage,
-        this
-      );
-      this.title.label = `Terminal ${value.name}`;
-      this._setSessionSize();
-      if (this._options.initialCommand) {
-        this._session.send({
-          type: 'stdin',
-          content: [this._options.initialCommand + '\r']
-        });
-      }
-    });
   }
 
   /**
-   * Set a config option for the terminal.
+   * Get a config option for the terminal.
    */
-  getOption<K extends keyof Terminal.IOptions>(
+  getOption<K extends keyof ITerminal.IOptions>(
     option: K
-  ): Terminal.IOptions[K] {
+  ): ITerminal.IOptions[K] {
     return this._options[option];
   }
 
   /**
    * Set a config option for the terminal.
    */
-  setOption<K extends keyof Terminal.IOptions>(
+  setOption<K extends keyof ITerminal.IOptions>(
     option: K,
-    value: Terminal.IOptions[K]
+    value: ITerminal.IOptions[K]
   ): void {
     if (this._options[option] === value) {
       return;
@@ -109,21 +94,21 @@ export class Terminal extends Widget {
 
     this._options[option] = value;
 
-    if (option === 'initialCommand') {
-      return;
-    }
-
-    if (option === 'theme') {
-      if (value === 'light') {
-        this.addClass('jp-mod-light');
-        this._term.setOption('theme', Private.lightTheme);
-      } else {
-        this.removeClass('jp-mod-light');
-        this._term.setOption('theme', Private.darkTheme);
-      }
-    } else {
-      this._term.setOption(option, value);
-      this._needsResize = true;
+    switch (option) {
+      case 'initialCommand':
+        return;
+      case 'theme':
+        if (value === 'light') {
+          this.addClass('jp-mod-light');
+          this._term.setOption('theme', Private.lightTheme);
+        } else {
+          this.removeClass('jp-mod-light');
+          this._term.setOption('theme', Private.darkTheme);
+        }
+        break;
+      default:
+        this._term.setOption(option, value);
+        this._needsResize = true;
     }
 
     this.update();
@@ -141,13 +126,12 @@ export class Terminal extends Widget {
   /**
    * Refresh the terminal session.
    */
-  refresh(): Promise<void> {
+  async refresh(): Promise<void> {
     if (!this._session) {
       return Promise.reject(void 0);
     }
-    return this._session.reconnect().then(() => {
-      this._term.clear();
-    });
+    await this._session.reconnect();
+    this._term.clear();
   }
 
   /**
@@ -166,6 +150,26 @@ export class Terminal extends Widget {
         break;
       default:
         break;
+    }
+  }
+
+  protected async _setSession(session: TerminalSession.ISession) {
+    await session.ready;
+
+    if (this.isDisposed || session !== this._session) {
+      return;
+    }
+    session.messageReceived.connect(
+      this._onMessage,
+      this
+    );
+    this.title.label = `Terminal ${session.name}`;
+    this._setSessionSize();
+    if (this._options.initialCommand) {
+      this._session.send({
+        type: 'stdin',
+        content: [this._options.initialCommand + '\r']
+      });
     }
   }
 
@@ -303,71 +307,7 @@ export class Terminal extends Widget {
   private _termOpened = false;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
-  private _options: Terminal.IOptions;
-}
-
-/**
- * The namespace for `Terminal` class statics.
- */
-export namespace Terminal {
-  /**
-   * Options for the terminal widget.
-   */
-  export interface IOptions {
-    /**
-     * The font family used to render text.
-     */
-    fontFamily: string | null;
-
-    /**
-     * The font size of the terminal in pixels.
-     */
-    fontSize: number;
-
-    /**
-     * The line height used to render text.
-     */
-    lineHeight: number | null;
-
-    /**
-     * The theme of the terminal.
-     */
-    theme: Theme;
-
-    /**
-     * The amount of buffer scrollback to be used
-     * with the terminal
-     */
-    scrollback: number | null;
-
-    /**
-     * Whether to blink the cursor.  Can only be set at startup.
-     */
-    cursorBlink: boolean;
-
-    /**
-     * An optional command to run when the session starts.
-     */
-    initialCommand: string;
-  }
-
-  /**
-   * The default options used for creating terminals.
-   */
-  export const defaultOptions: IOptions = {
-    theme: 'dark',
-    fontFamily: 'courier-new, courier, monospace',
-    fontSize: 13,
-    lineHeight: 1.0,
-    scrollback: 1000,
-    cursorBlink: true,
-    initialCommand: ''
-  };
-
-  /**
-   * A type for the terminal theme.
-   */
-  export type Theme = 'light' | 'dark';
+  private _options: ITerminal.IOptions;
 }
 
 /**
