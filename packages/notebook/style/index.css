@@ -194,7 +194,7 @@
 | Cell toolbar
 |----------------------------------------------------------------------------*/
 
-.jp-CellTools {
+.jp-NotebookTools {
   display: block;
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
@@ -226,7 +226,7 @@
   background: transparent;
 }
 
-.jp-CellTools-tool:not(:nth-child(2)) {
+.jp-NotebookTools-tool:not(:nth-child(2)) {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
 }
 

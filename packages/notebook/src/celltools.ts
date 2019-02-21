@@ -26,104 +26,86 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
-
-/**
- * The class name added to a CellTools instance.
- */
-const CELLTOOLS_CLASS = 'jp-CellTools';
-
-/**
- * The class name added to a CellTools tool.
- */
-const CHILD_CLASS = 'jp-CellTools-tool';
-
-/**
- * The class name added to a CellTools active cell.
- */
-const ACTIVE_CELL_CLASS = 'jp-ActiveCellTool';
-
-/**
- * The class name added to an Editor instance.
- */
-const EDITOR_CLASS = 'jp-MetadataEditorTool';
-
-/**
- * The class name added to a KeySelector instance.
- */
-const KEYSELECTOR_CLASS = 'jp-KeySelector';
+import { NotebookPanel } from './panel';
 
 /* tslint:disable */
 /**
  * The main menu token.
  */
-export const ICellTools = new Token<ICellTools>(
-  '@jupyterlab/notebook:ICellTools'
+export const INotebookTools = new Token<INotebookTools>(
+  '@jupyterlab/notebook:INotebookTools'
 );
 /* tslint:enable */
 
 /**
- * The interface for cell metadata tools.
+ * The interface for notebook metadata tools.
  */
-export interface ICellTools extends CellTools {}
+export interface INotebookTools extends Widget {
+  notebookPanel: NotebookPanel | null;
+  activeCell: Cell | null;
+  selectedCells: Cell[];
+  addItem(options: NotebookTools.IAddOptions): void;
+}
 
 /**
  * A widget that provides cell metadata tools.
  */
-export class CellTools extends Widget {
+export class NotebookTools extends Widget implements INotebookTools {
   /**
-   * Construct a new CellTools object.
+   * Construct a new NotebookTools object.
    */
-  constructor(options: CellTools.IOptions) {
+  constructor(options: NotebookTools.IOptions) {
     super();
-    this.addClass(CELLTOOLS_CLASS);
+    this.addClass('jp-NotebookTools');
     this.layout = new PanelLayout();
     this._tracker = options.tracker;
-    this._tracker.activeCellChanged.connect(
-      this._onActiveCellChanged,
+    this._tracker.currentChanged.connect(
+      this._onNotebookPanelChanged,
       this
     );
-    this._tracker.selectionChanged.connect(
-      this._onSelectionChanged,
-      this
-    );
-    this._onActiveCellChanged();
-    this._onSelectionChanged();
+    this._onNotebookPanelChanged();
   }
 
   /**
    * The active cell widget.
    */
   get activeCell(): Cell | null {
-    return this._tracker.activeCell;
+    const panel = this._tracker.currentWidget;
+    if (!panel) {
+      return null;
+    }
+    return panel.content.activeCell || null;
   }
 
   /**
    * The currently selected cells.
    */
   get selectedCells(): Cell[] {
-    let selected: Cell[] = [];
-    let panel = this._tracker.currentWidget;
+    const panel = this._tracker.currentWidget;
     if (!panel) {
-      return selected;
+      return [];
     }
-    each(panel.content.widgets, widget => {
-      if (panel.content.isSelectedOrActive(widget)) {
-        selected.push(widget);
-      }
-    });
-    return selected;
+    const notebook = panel.content;
+    return notebook.widgets.filter(cell => notebook.isSelectedOrActive(cell));
+  }
+
+  /**
+   * The current notebook.
+   */
+  get notebookPanel(): NotebookPanel | null {
+    return this._tracker.currentWidget;
   }
 
   /**
    * Add a cell tool item.
    */
-  addItem(options: CellTools.IAddOptions): void {
+  addItem(options: NotebookTools.IAddOptions): void {
     let tool = options.tool;
     let rank = 'rank' in options ? options.rank : 100;
     let rankItem = { tool, rank };
     let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
-    tool.addClass(CHILD_CLASS);
+    tool.addClass('jp-NotebookTools-tool');
 
     // Add the tool.
     ArrayExt.insert(this._items, index, rankItem);
@@ -131,7 +113,7 @@ export class CellTools extends Widget {
     layout.insertWidget(index, tool);
 
     // Trigger the tool to update its active cell.
-    MessageLoop.sendMessage(tool, CellTools.ActiveCellMessage);
+    MessageLoop.sendMessage(tool, NotebookTools.ActiveCellMessage);
   }
 
   /**
@@ -148,6 +130,39 @@ export class CellTools extends Widget {
   }
 
   /**
+   * Handle a change to the notebook panel.
+   */
+  private _onNotebookPanelChanged(): void {
+    if (this._prevPanel && !this._prevPanel.isDisposed) {
+      this._prevPanel.content.activeCellChanged.disconnect(
+        this._onActiveCellChanged,
+        this
+      );
+      this._prevPanel.content.selectionChanged.disconnect(
+        this._onSelectionChanged,
+        this
+      );
+    }
+    const panel = this.notebookPanel;
+    this._prevPanel = panel;
+    if (panel) {
+      panel.content.activeCellChanged.connect(
+        this._onActiveCellChanged,
+        this
+      );
+      panel.content.selectionChanged.connect(
+        this._onSelectionChanged,
+        this
+      );
+    }
+    each(this.children(), widget => {
+      MessageLoop.sendMessage(widget, NotebookTools.NotebookPanelMessage);
+    });
+    this._onActiveCellChanged();
+    this._onSelectionChanged();
+  }
+
+  /**
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(): void {
@@ -157,16 +172,16 @@ export class CellTools extends Widget {
         this
       );
     }
-    let activeCell = this._tracker.activeCell;
-    this._prevActive = activeCell ? activeCell.model : null;
+    let activeCell = this.activeCell ? this.activeCell.model : null;
+    this._prevActive = activeCell;
     if (activeCell) {
-      activeCell.model.metadata.changed.connect(
+      activeCell.metadata.changed.connect(
         this._onMetadataChanged,
         this
       );
     }
     each(this.children(), widget => {
-      MessageLoop.sendMessage(widget, CellTools.ActiveCellMessage);
+      MessageLoop.sendMessage(widget, NotebookTools.ActiveCellMessage);
     });
   }
 
@@ -175,7 +190,7 @@ export class CellTools extends Widget {
    */
   private _onSelectionChanged(): void {
     each(this.children(), widget => {
-      MessageLoop.sendMessage(widget, CellTools.SelectionMessage);
+      MessageLoop.sendMessage(widget, NotebookTools.SelectionMessage);
     });
   }
 
@@ -186,7 +201,10 @@ export class CellTools extends Widget {
     sender: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
-    let message = new ObservableJSON.ChangeMessage(args);
+    let message = new ObservableJSON.ChangeMessage(
+      'cell-metadata-changed',
+      args
+    );
     each(this.children(), widget => {
       MessageLoop.sendMessage(widget, message);
     });
@@ -194,15 +212,16 @@ export class CellTools extends Widget {
 
   private _items: Private.IRankItem[] = [];
   private _tracker: INotebookTracker;
+  private _prevPanel: NotebookPanel | null;
   private _prevActive: ICellModel | null;
 }
 
 /**
- * The namespace for CellTools class statics.
+ * The namespace for NotebookTools class statics.
  */
-export namespace CellTools {
+export namespace NotebookTools {
   /**
-   * The options used to create a CellTools object.
+   * The options used to create a NotebookTools object.
    */
   export interface IOptions {
     /**
@@ -227,15 +246,20 @@ export namespace CellTools {
   }
 
   /**
+   * A singleton conflatable `'notebookpanel-changed'` message.
+   */
+  export const NotebookPanelMessage = new ConflatableMessage(
+    'notebookpanel-changed'
+  );
+
+  /**
    * A singleton conflatable `'activecell-changed'` message.
    */
-  // tslint:disable-next-line
   export const ActiveCellMessage = new ConflatableMessage('activecell-changed');
 
   /**
    * A singleton conflatable `'selection-changed'` message.
    */
-  // tslint:disable-next-line
   export const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
@@ -245,7 +269,7 @@ export namespace CellTools {
     /**
      * The cell tools object.
      */
-    readonly parent: ICellTools;
+    readonly parent: INotebookTools;
 
     /**
      * Process a message sent to the widget.
@@ -255,18 +279,31 @@ export namespace CellTools {
     processMessage(msg: Message): void {
       super.processMessage(msg);
       switch (msg.type) {
+        case 'notebookpanel-changed':
+          this.onNotebookPanelChanged(msg);
+          break;
         case 'activecell-changed':
           this.onActiveCellChanged(msg);
           break;
         case 'selection-changed':
           this.onSelectionChanged(msg);
           break;
-        case 'jsonvalue-changed':
-          this.onMetadataChanged(msg as ObservableJSON.ChangeMessage);
+        case 'cell-metadata-changed':
+          this.onCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
           break;
         default:
           break;
       }
+    }
+
+    /**
+     * Handle a change to the notebook panel.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
+     */
+    protected onNotebookPanelChanged(msg: Message): void {
+      /* no-op */
     }
 
     /**
@@ -295,7 +332,7 @@ export namespace CellTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
+    protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
       /* no-op */
     }
   }
@@ -309,7 +346,7 @@ export namespace CellTools {
      */
     constructor() {
       super();
-      this.addClass(ACTIVE_CELL_CLASS);
+      this.addClass('jp-ActiveCellTool');
       this.addClass('jp-InputArea');
       this.layout = new PanelLayout();
     }
@@ -406,11 +443,11 @@ export namespace CellTools {
     constructor(options: MetadataEditorTool.IOptions) {
       super();
       let editorFactory = options.editorFactory;
-      this.addClass(EDITOR_CLASS);
+      this.addClass('jp-MetadataEditorTool');
       let layout = (this.layout = new PanelLayout());
       this.editor = new JSONEditor({
         editorFactory,
-        title: 'Edit Metadata',
+        title: options.label || 'Edit Metadata',
         collapsible: true
       });
       layout.addWidget(this.editor);
@@ -420,14 +457,6 @@ export namespace CellTools {
      * The editor used by the tool.
      */
     readonly editor: JSONEditor;
-
-    /**
-     * Handle a change to the active cell.
-     */
-    protected onActiveCellChanged(msg: Message): void {
-      let cell = this.parent.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
-    }
   }
 
   /**
@@ -442,6 +471,61 @@ export namespace CellTools {
        * The editor factory used by the tool.
        */
       editorFactory: CodeEditor.Factory;
+
+      /**
+       * The label for the JSON editor
+       */
+      label?: string;
+    }
+  }
+
+  /**
+   * A notebook metadata editor
+   */
+  export class NotebookMetadataEditorTool extends MetadataEditorTool {
+    constructor(options: MetadataEditorTool.IOptions) {
+      options.label = options.label || 'Edit Notebook Metadata';
+      super(options);
+    }
+
+    /**
+     * Handle a change of the notebook.
+     */
+    protected onNotebookPanelChanged(msg: Message): void {
+      const nb = this.parent.notebookPanel && this.parent.notebookPanel.content;
+      this.editor.source = nb ? nb.model.metadata : null;
+    }
+    /**
+     * Handle a change to the notebook metadata.
+     */
+    protected onNotebookMetadataChanged(msg: Message): void {
+      const nb = this.parent.notebookPanel && this.parent.notebookPanel.content;
+      this.editor.source = nb ? nb.model.metadata : null;
+    }
+  }
+
+  /**
+   * A cell metadata editor
+   */
+  export class CellMetadataEditorTool extends MetadataEditorTool {
+    constructor(options: MetadataEditorTool.IOptions) {
+      options.label = options.label || 'Edit Cell Metadata';
+      super(options);
+    }
+
+    /**
+     * Handle a change to the active cell.
+     */
+    protected onActiveCellChanged(msg: Message): void {
+      let cell = this.parent.activeCell;
+      this.editor.source = cell ? cell.model.metadata : null;
+    }
+    /**
+     * Handle a change to the active cell metadata.
+     */
+    protected onCellMetadataChanged(msg: Message): void {
+      let cell = this.parent.activeCell;
+      this.editor.source = cell ? cell.model.metadata : null;
     }
   }
 
@@ -453,8 +537,9 @@ export namespace CellTools {
      * Construct a new KeySelector.
      */
     constructor(options: KeySelector.IOptions) {
+      // TODO: use react
       super({ node: Private.createSelectorNode(options) });
-      this.addClass(KEYSELECTOR_CLASS);
+      this.addClass('jp-KeySelector');
       this.key = options.key;
       this._validCellTypes = options.validCellTypes || [];
       this._getter = options.getter || this._getValue;
@@ -525,6 +610,7 @@ export namespace CellTools {
         this._validCellTypes.length &&
         this._validCellTypes.indexOf(cellType) === -1
       ) {
+        select.value = undefined;
         select.disabled = true;
         return;
       }
@@ -538,7 +624,7 @@ export namespace CellTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
@@ -578,7 +664,11 @@ export namespace CellTools {
      * Set the value for the data.
      */
     private _setValue = (cell: Cell, value: JSONValue) => {
-      cell.model.metadata.set(this.key, value);
+      if (value === null) {
+        cell.model.metadata.delete(this.key);
+      } else {
+        cell.model.metadata.set(this.key, value);
+      }
     };
 
     private _changeGuard = false;
@@ -602,6 +692,10 @@ export namespace CellTools {
 
       /**
        * The map of options to values.
+       *
+       * #### Notes
+       * A value may be undefined, signifying the
+       * option should be erased from the metadata.
        */
       optionsMap: { [key: string]: JSONValue };
 
@@ -647,7 +741,7 @@ export namespace CellTools {
       key: 'slideshow',
       title: 'Slide Type',
       optionsMap: {
-        '-': '-',
+        '-': null,
         Slide: 'slide',
         'Sub-Slide': 'subslide',
         Fragment: 'fragment',
@@ -660,8 +754,18 @@ export namespace CellTools {
       },
       setter: (cell, value) => {
         let data = cell.model.metadata.get('slideshow') || Object.create(null);
-        data = { ...data, slide_type: value };
-        cell.model.metadata.set('slideshow', data);
+        if (value === null) {
+          // Make a shallow copy so we aren't modifying the original metadata.
+          data = { ...data };
+          delete data.slide_type;
+        } else {
+          data = { ...data, slide_type: value };
+        }
+        if (Object.keys(data).length > 0) {
+          cell.model.metadata.set('slideshow', data);
+        } else {
+          cell.model.metadata.delete('slideshow');
+        }
       }
     };
     return new KeySelector(options);
@@ -693,7 +797,7 @@ namespace Private {
     /**
      * The widget for the item.
      */
-    tool: CellTools.Tool;
+    tool: NotebookTools.Tool;
 
     /**
      * The sort rank of the menu.
@@ -712,7 +816,7 @@ namespace Private {
    * Create the node for a KeySelector.
    */
   export function createSelectorNode(
-    options: CellTools.KeySelector.IOptions
+    options: NotebookTools.KeySelector.IOptions
   ): HTMLElement {
     let name = options.key;
     let title = options.title || name[0].toLocaleUpperCase() + name.slice(1);
@@ -722,7 +826,7 @@ namespace Private {
       optionNodes.push(h.option({ value }, label));
     }
     let node = VirtualDOM.realize(
-      h.div({}, h.label(title), h.select({}, optionNodes))
+      h.div({}, h.label(title, h.select({}, optionNodes)))
     );
     Styling.styleNode(node);
     return node;

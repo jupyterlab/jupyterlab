@@ -45,8 +45,8 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import {
-  CellTools,
-  ICellTools,
+  NotebookTools,
+  INotebookTools,
   INotebookTracker,
   NotebookActions,
   NotebookModelFactory,
@@ -55,9 +55,7 @@ import {
   NotebookWidgetFactory,
   StaticNotebook,
   CommandEditStatus,
-  NotebookTrustStatus,
-  Notebook,
-  SaveAction
+  NotebookTrustStatus
 } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -71,7 +69,6 @@ import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Menu } from '@phosphor/widgets';
-import { saveOptionsDialog } from './dialog';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -286,9 +283,9 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 /**
  * The cell tools extension.
  */
-const tools: JupyterFrontEndPlugin<ICellTools> = {
-  activate: activateCellTools,
-  provides: ICellTools,
+const tools: JupyterFrontEndPlugin<INotebookTools> = {
+  activate: activateNotebookTools,
+  provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB],
@@ -379,19 +376,25 @@ export default plugins;
 /**
  * Activate the cell tools extension.
  */
-function activateCellTools(
+function activateNotebookTools(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
   labShell: ILabShell | null
-): ICellTools {
+): INotebookTools {
   const id = 'cell-tools';
-  const celltools = new CellTools({ tracker });
-  const activeCellTool = new CellTools.ActiveCellTool();
-  const slideShow = CellTools.createSlideShowSelector();
+  const celltools = new NotebookTools({ tracker });
+  const activeCellTool = new NotebookTools.ActiveCellTool();
+  const slideShow = NotebookTools.createSlideShowSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
-  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
+    editorFactory
+  });
+  const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
+    editorFactory
+  });
+
   const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
@@ -410,7 +413,7 @@ function activateCellTools(
     return true;
   };
   let optionsMap: { [key: string]: JSONValue } = {};
-  optionsMap.None = '-';
+  optionsMap.None = null;
   services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // convert exportList to palette and menu items
@@ -423,7 +426,7 @@ function activateCellTools(
           optionsMap[labelStr] = mimeType;
         }
       });
-      const nbConvert = CellTools.createNBConvertSelector(optionsMap);
+      const nbConvert = NotebookTools.createNBConvertSelector(optionsMap);
       celltools.addItem({ tool: nbConvert, rank: 3 });
     }
   });
@@ -432,7 +435,8 @@ function activateCellTools(
   celltools.id = id;
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: metadataEditor, rank: 4 });
+  celltools.addItem({ tool: cellMetadataEditor, rank: 4 });
+  celltools.addItem({ tool: notebookMetadataEditor, rank: 5 });
   MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.
@@ -511,58 +515,6 @@ function activateNotebookHandler(
   });
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
-
-  tracker.saveOptions.push({
-    name: 'outputs',
-    label: 'Cell Outputs',
-    help: 'The outputs of the cells.',
-    action: 'save',
-    callback: (w: Notebook, name: string, action: SaveAction) => {
-      switch (action) {
-        case 'clear':
-          console.log(w);
-          NotebookActions.clearAllOutputs(w);
-          break;
-
-        case 'save':
-        case 'previous':
-        case 'previous':
-        default:
-      }
-    }
-  });
-
-  tracker.saveOptions.push({
-    name: 'collapse-scroll-state',
-    label: 'Cell collapsed and scrolled state',
-    help:
-      'The input and output collapsed state, as well as the output scrolled state for code cells',
-    action: 'save',
-    callback: (w: Notebook, name: string, action: SaveAction) => {
-      switch (action) {
-        case 'clear':
-          NotebookActions.clearCollapseScrollState(w);
-          break;
-
-        case 'save':
-          NotebookActions.persistCollapseScrollState(w);
-          break;
-
-        case 'previous':
-        default:
-      }
-    }
-  });
-
-  tracker.saveOptions.push({
-    name: 'jupyter-widgets-state',
-    label: 'Jupyter Widget State',
-    help: '',
-    action: 'save',
-    callback: (w, name, action) => {
-      return;
-    }
-  });
 
   // Handle state restoration.
   if (restorer) {
@@ -654,19 +606,6 @@ function activateNotebookHandler(
       widget.content.editorConfig = editorConfig;
       widget.content.notebookConfig = notebookConfig;
     });
-
-    // Update the save option values.
-    let saveValues = settings
-      ? (settings.get('saveOptions').composite as {
-          [key: string]: SaveAction;
-        })
-      : {};
-
-    let entries = Object.keys(saveValues).map<[string, SaveAction]>(k => [
-      k,
-      saveValues[k]
-    ]);
-    tracker.saveValues = new Map(entries);
   }
 
   // Fetch settings if possible.
@@ -1955,44 +1894,6 @@ function populateMenus(
       });
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
-
-  // Add a save with view command to the file menu.
-  mainMenu.fileMenu.saveWithOptions.add({
-    tracker,
-    action: 'with Options…',
-    name: 'Notebook',
-    saveWithOptions: async (current: NotebookPanel) => {
-      // Pop up dialog box with options
-      let result = await saveOptionsDialog(
-        tracker.saveOptions,
-        tracker.saveValues
-      );
-
-      // If dialog was cancelled, abort.
-      if (!result.button.accept) {
-        return;
-      }
-
-      // Call each option callback with the action from the dialog
-      tracker.saveOptions.forEach(({ name, callback }) => {
-        const action = result.value.options.get(name);
-        callback(current.content, name, action);
-      });
-
-      // execute the save command
-      await app.commands.execute('docmanager:save');
-
-      // If "remember" checked, save option state to notebook options.
-      if (result.value.remember) {
-        let settings = await fetchSettings;
-        let options = Object.create(null);
-        for (let [k, v] of result.value.options) {
-          options[k] = v;
-        }
-        await settings.set('saveOptions', options);
-      }
-    }
-  } as IFileMenu.ISaveWithOptions<NotebookPanel>);
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });

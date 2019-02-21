@@ -5,8 +5,10 @@ import { Dialog, showDialog, ReactWidget } from '@jupyterlab/apputils';
 import { Text } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
-import { ISaveOption, SaveAction } from '@jupyterlab/notebook';
 import { HTMLSelect, FormGroup, Checkbox } from '@jupyterlab/ui-components';
+
+type ISaveOption = any;
+type SaveAction = any;
 
 export type saveValues = { [key: string]: SaveAction };
 
