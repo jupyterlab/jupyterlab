@@ -5,6 +5,7 @@
 
 import {
   IFrame,
+  IInstanceTracker,
   ReactWidget,
   ToolbarButton,
   ToolbarButtonComponent,
@@ -20,12 +21,25 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
+import { Token } from '@phosphor/coreutils';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import * as React from 'react';
 
 import '../style/index.css';
 
+/**
+ * A class that tracks HTML viewer widgets.
+ */
+export interface IHTMLViewerTracker extends IInstanceTracker<HTMLViewer> {}
+
+/**
+ * The HTML viewer tracker token.
+ */
+export const IHTMLViewerTracker = new Token<IHTMLViewerTracker>(
+  '@jupyterlab/htmlviewer:IHTMLViewerTracker'
+);
 /**
  * The timeout to wait for change activity to have ceased before rendering.
  */

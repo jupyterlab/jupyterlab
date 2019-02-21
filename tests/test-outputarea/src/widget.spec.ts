@@ -122,6 +122,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(async () => {
@@ -130,7 +131,6 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        await session.kernel.ready;
         const future = session.kernel.requestExecute({ code: CODE });
         widget.future = future;
         const reply = await future.done;
@@ -141,7 +141,6 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        await session.kernel.ready;
         const future = session.kernel.requestExecute({ code: CODE });
         widget.future = future;
         const reply = await future.done;
@@ -183,6 +182,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(async () => {
@@ -191,7 +191,6 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        await session.kernel.ready;
         const reply = await OutputArea.execute(CODE, widget, session);
         expect(reply.content.execution_count).to.be.ok;
         expect(reply.content.status).to.equal('ok');
@@ -241,6 +240,7 @@ describe('outputarea/widget', () => {
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
+        await ipySession.kernel.ready;
         const promise0 = OutputArea.execute(code0, widget0, ipySession);
         const promise1 = OutputArea.execute(code1, widget1, ipySession);
         await Promise.all([promise0, promise1]);

@@ -615,6 +615,43 @@ describe('completer/widget', () => {
     });
 
     describe('#onUpdateRequest()', () => {
+      it('should emit a selection if there is only one match', () => {
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: Completer.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
+          line: 0,
+          coords: coords as CodeEditor.ICoordinate,
+          text: 'f'
+        };
+
+        let value = '';
+        let options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        let listener = (sender: any, selected: string) => {
+          value = selected;
+        };
+
+        Widget.attach(anchor, document.body);
+        model.original = request;
+        model.setOptions(['foo']);
+
+        let widget = new Completer(options);
+        widget.selected.connect(listener);
+        Widget.attach(widget, document.body);
+
+        expect(value).to.equal('');
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(value).to.equal('foo');
+        widget.dispose();
+        anchor.dispose();
+      });
+
       it('should do nothing if a model does not exist', () => {
         let widget = new LogWidget({ editor: null });
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);

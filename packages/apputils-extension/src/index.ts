@@ -52,6 +52,12 @@ import '../style/index.css';
 const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
 
 /**
+ * The query string parameter indicating that a workspace name should be
+ * automatically generated if the current request collides with an open session.
+ */
+const WORKSPACE_RESOLVE = 'resolve-workspace';
+
+/**
  * The interval in milliseconds before recover options appear during splash.
  */
 const SPLASH_RECOVER_TIMEOUT = 12000;
@@ -239,21 +245,50 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     paths: JupyterFrontEnd.IPaths,
     router: IRouter
   ) => {
-    const workspacePattern = new RegExp(`^${paths.urls.workspaces}([^?\/]+)`);
+    const { hash, path, search } = router.current;
+    const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
-    const match = router.current.path.match(workspacePattern);
+    const match = path.match(new RegExp(`^${paths.urls.workspaces}([^?\/]+)`));
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = Private.candidate(paths, workspace);
 
     try {
       await solver.resolve(candidate);
     } catch (error) {
-      console.warn('Window resolution failed:', error);
-
-      // Return a promise that never resolves.
+      // Window resolution has failed so the URL must change. Return a promise
+      // that never resolves to prevent the application from loading plugins
+      // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        Private.redirect(router, paths, workspacePattern);
+        // If the user has requested workspace resolution create a new one.
+        if (WORKSPACE_RESOLVE in query) {
+          const { base, workspaces } = paths.urls;
+          const pool =
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          const random = pool[Math.floor(Math.random() * pool.length)];
+          const path = URLExt.join(base, workspaces, `auto-${random}`);
+
+          // Clone the originally requested workspace after redirecting.
+          query['clone'] = workspace;
+
+          // Change the URL and trigger a hard reload to re-route.
+          const url = path + URLExt.objectToQueryString(query) + (hash || '');
+          router.navigate(url, { hard: true, silent: true });
+          return;
+        }
+
+        // Launch a dialog to ask the user for a new workspace name.
+        console.warn('Window resolution failed:', error);
+        Private.redirect(router, paths, workspace);
       });
+    }
+
+    // If the user has requested workspace resolution remove the query param.
+    if (WORKSPACE_RESOLVE in query) {
+      delete query[WORKSPACE_RESOLVE];
+
+      // Silently scrub the URL.
+      const url = path + URLExt.objectToQueryString(query) + (hash || '');
+      router.navigate(url, { silent: true });
     }
 
     return solver;
@@ -451,12 +486,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       }
     });
 
-    router.register({
-      command: CommandIDs.loadState,
-      pattern: /.?/,
-      rank: 20 // Very high priority: 20:100.
-    });
-
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
       execute: async () => {
@@ -524,9 +553,15 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     router.register({
+      command: CommandIDs.loadState,
+      pattern: /.?/,
+      rank: 30 // High priority: 30:100.
+    });
+
+    router.register({
       command: CommandIDs.resetOnLoad,
       pattern: /(\?reset|\&reset)($|&)/,
-      rank: 10 // Very high priority: 10:100.
+      rank: 20 // High priority: 20:100.
     });
 
     // Clean up state database when the window unloads.
@@ -661,7 +696,7 @@ namespace Private {
   export async function redirect(
     router: IRouter,
     paths: JupyterFrontEnd.IPaths,
-    workspacePattern: RegExp,
+    workspace: string,
     warn = false
   ): Promise<void> {
     const form = createRedirectForm(warn);
@@ -675,14 +710,12 @@ namespace Private {
 
     dialog.dispose();
     if (!result.value) {
-      return redirect(router, paths, workspacePattern, true);
+      return redirect(router, paths, workspace, true);
     }
 
     // Navigate to a new workspace URL and abandon this session altogether.
     const page = paths.urls.page;
     const workspaces = paths.urls.workspaces;
-    const match = router.current.path.match(workspacePattern);
-    const workspace = (match && decodeURIComponent(match[1])) || '';
     const prefix = (workspace ? workspaces : page).length + workspace.length;
     const rest = router.current.request.substring(prefix);
     const url = URLExt.join(workspaces, result.value, rest);
