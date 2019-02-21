@@ -32,17 +32,12 @@ strong {
   font-weight: unset;
 }
 
-::selection {
-  /* background: unset; */
-}
-
 a {
   text-decoration: unset;
   color: unset;
 }
 
 a:hover {
-  cursor: unset;
   text-decoration: unset;
   color: unset;
 }
