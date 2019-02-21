@@ -898,6 +898,12 @@ export class MarkdownCell extends Cell {
     }
     this._rendered = value;
     this._handleRendered();
+    // Refreshing an editor can be really expensive, so we don't call it from
+    // _handleRendered, since _handledRendered is also called on every update
+    // request.
+    if (!this._rendered) {
+      this.editor.refresh();
+    }
   }
 
   /**
