@@ -430,8 +430,8 @@ export class InstanceTracker<T extends Widget>
         this._tracker.currentWidget ||
         this._widgets[this._widgets.length - 1] ||
         null;
-      this._currentChanged.emit(this._currentWidget);
       this.onCurrentChanged(this._currentWidget);
+      this._currentChanged.emit(this._currentWidget);
     }
 
     // If there is no restore data, return.
