@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -19,9 +21,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 
+// Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
-
-import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -141,9 +142,7 @@ function activate(
         updateTracker();
       });
     })
-    .catch((reason: Error) => {
-      console.error(reason.message);
-    });
+    .catch(Private.showErrorMessage);
 
   addCommands(app, tracker, settingRegistry);
 
@@ -210,7 +209,13 @@ export function addCommands(
     iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
     execute: async args => {
       // wait for the widget to lazy load
-      const { Terminal } = await Private.ensureWidget();
+      let Terminal: typeof WidgetModuleType.Terminal;
+      try {
+        Terminal = (await Private.ensureWidget()).Terminal;
+      } catch (err) {
+        Private.showErrorMessage(err);
+      }
+
       const name = args['name'] as string;
       const term = new Terminal();
 
@@ -262,17 +267,17 @@ export function addCommands(
         return;
       }
       app.shell.activateById(current.id);
-      await current.content.refresh();
-      if (current) {
-        current.content.activate();
+      try {
+        await current.content.refresh();
+        if (current) {
+          current.content.activate();
+        }
+      } catch (err) {
+        Private.showErrorMessage(err);
       }
     },
     isEnabled: () => tracker.currentWidget !== null
   });
-
-  function showErrorMessage(error: Error): void {
-    console.error(`Failed to set ${plugin.id}: ${error.message}`);
-  }
 
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
@@ -282,7 +287,7 @@ export function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
-          showErrorMessage(err);
+          Private.showErrorMessage(err);
         }
       }
     }
@@ -296,7 +301,7 @@ export function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
-          showErrorMessage(err);
+          Private.showErrorMessage(err);
         }
       }
     }
@@ -313,7 +318,7 @@ export function addCommands(
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.toggleTheme);
       } catch (err) {
-        showErrorMessage(err);
+        Private.showErrorMessage(err);
       }
     }
   });
@@ -343,7 +348,7 @@ namespace Private {
         // this argument MUST be named `require` for the WebPack parser
         require => resolve(require('@jupyterlab/terminal/lib/widget')),
         (error: any) => {
-          console.error(error);
+          showErrorMessage(error);
           reject();
         },
         'terminal'
@@ -351,5 +356,12 @@ namespace Private {
     });
 
     return widgetReady;
+  }
+
+  /**
+   *  Utility function for consistent error reporting
+   */
+  export function showErrorMessage(error: Error): void {
+    console.error(`Failed to configure ${plugin.id}: ${error.message}`);
   }
 }

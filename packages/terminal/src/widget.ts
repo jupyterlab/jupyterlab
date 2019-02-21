@@ -44,9 +44,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     const xtermOptions = { theme: xtermTheme, ...other };
 
     this.addClass(TERMINAL_CLASS);
-    if (theme === 'light') {
-      this.addClass('jp-mod-light');
-    }
+    this.toggleClass('jp-mod-light', theme === 'light');
 
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
@@ -68,7 +66,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
     this._session = value || null;
     if (value) {
-      this._setSession(value);
+      this.setSession(value);
     }
   }
 
@@ -98,17 +96,16 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       case 'initialCommand':
         return;
       case 'theme':
-        if (value === 'light') {
-          this.addClass('jp-mod-light');
-          this._term.setOption('theme', Private.lightTheme);
-        } else {
-          this.removeClass('jp-mod-light');
-          this._term.setOption('theme', Private.darkTheme);
-        }
+        this.toggleClass('jp-mod-light', value === 'light');
+        this._term.setOption(
+          'theme',
+          value === 'light' ? Private.lightTheme : Private.darkTheme
+        );
         break;
       default:
         this._term.setOption(option, value);
         this._needsResize = true;
+        break;
     }
 
     this.update();
@@ -125,6 +122,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
   /**
    * Refresh the terminal session.
+   *
+   * #### Notes
+   * Failure to reconnect to the session should be caught appropriately
    */
   async refresh(): Promise<void> {
     if (!this._session) {
@@ -153,11 +153,29 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
   }
 
-  protected async _setSession(session: TerminalSession.ISession) {
-    await session.ready;
+  /**
+   * Handle the setting of, connecting to, and sending of (if configured)
+   * initial command on a non-null server session
+   *
+   * @param session - the server session to bind to the terminal
+   * @retuns whether successfully connected to server session
+   *
+   * #### Notes
+   * Subclasses may reimplement this method as needed, but must
+   * `await super.setSession(session)` for proper initialization
+   */
+  protected async setSession(
+    session: TerminalSession.ISession
+  ): Promise<boolean> {
+    try {
+      await session.ready;
+    } catch (err) {
+      console.error(`Terminal session failed to start: ${err}`);
+      return false;
+    }
 
     if (this.isDisposed || session !== this._session) {
-      return;
+      return false;
     }
     session.messageReceived.connect(
       this._onMessage,
@@ -171,6 +189,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         content: [this._options.initialCommand + '\r']
       });
     }
+    return true;
   }
 
   /**
