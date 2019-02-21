@@ -41,7 +41,7 @@ export class SessionManager implements Session.IManager {
     });
     this._pollSpecs = new Poll({
       interval: 61 * 1000,
-      max: 305 * 1000,
+      max: 300 * 1000,
       poll: () => this._refreshSpecs()
     });
   }

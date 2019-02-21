@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
@@ -29,21 +31,17 @@ export class KernelManager implements Kernel.IManager {
       return this._refreshRunning();
     });
 
-    // Set up polling.
-    this._modelsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      return this._refreshRunning();
-    }, 10000);
-    this._specsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      return this._refreshSpecs();
-    }, 61000);
+    // Start model and specs polling with exponential backoff.
+    this._pollModels = new Poll({
+      interval: 10 * 1000,
+      max: 300 * 1000,
+      poll: () => this._refreshRunning()
+    });
+    this._pollSpecs = new Poll({
+      interval: 61 * 1000,
+      max: 300 * 1000,
+      poll: () => this._refreshSpecs()
+    });
   }
 
   /**
@@ -75,10 +73,10 @@ export class KernelManager implements Kernel.IManager {
       return;
     }
     this._isDisposed = true;
-    clearInterval(this._modelsTimer);
-    clearInterval(this._specsTimer);
+    this._models.length = 0;
+    this._pollModels.dispose();
+    this._pollSpecs.dispose();
     Signal.clearData(this);
-    this._models = [];
   }
 
   /**
@@ -152,12 +150,11 @@ export class KernelManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
-    let newOptions = { ...options, serverSettings: this.serverSettings };
-    return Kernel.startNew(newOptions).then(kernel => {
-      this._onStarted(kernel);
-      return kernel;
-    });
+  async startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+    const newOptions = { ...options, serverSettings: this.serverSettings };
+    const kernel = await Kernel.startNew(newOptions);
+    this._onStarted(kernel);
+    return kernel;
   }
 
   /**
@@ -315,16 +312,16 @@ export class KernelManager implements Kernel.IManager {
     });
   }
 
-  private _models: Kernel.IModel[] = [];
-  private _kernels = new Set<Kernel.IKernel>();
-  private _specs: Kernel.ISpecModels | null = null;
   private _isDisposed = false;
-  private _modelsTimer = -1;
-  private _specsTimer = -1;
-  private _readyPromise: Promise<void>;
   private _isReady = false;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _kernels = new Set<Kernel.IKernel>();
+  private _models: Kernel.IModel[] = [];
+  private _pollModels: Poll;
+  private _pollSpecs: Poll;
+  private _readyPromise: Promise<void>;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
+  private _specs: Kernel.ISpecModels | null = null;
+  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
 }
 
 /**

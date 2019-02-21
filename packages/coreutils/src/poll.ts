@@ -3,6 +3,10 @@
 
 import { IDisposable } from '@phosphor/disposable';
 
+/**
+ * A class that wraps an asynchronous function to poll at a regular interval
+ * with exponential increases to the interval length if the poll fails.
+ */
 export class Poll implements IDisposable {
   /**
    * Instantiate a new poll with exponential back-off in case of failure.
