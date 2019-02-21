@@ -1179,7 +1179,9 @@ export namespace NotebookActions {
     notebook.widgets.forEach(cell => {
       const { model } = cell;
       const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
+
+      // Make a shallow copy of the metadata value so the `set` below works.
+      const jupyter = { ...(metadata.get('jupyter') as any) };
 
       delete jupyter.source_hidden;
 
@@ -1202,11 +1204,11 @@ export namespace NotebookActions {
   }
 
   /**
-   * Persists the collapsed and scrolled state of all cells to the model.
+   * Persists the collapsed state of all cells to the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function persistCollapseScrollState(notebook: Notebook): void {
+  export function persistCollapseState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
@@ -1216,7 +1218,9 @@ export namespace NotebookActions {
     notebook.widgets.forEach(cell => {
       const { model, inputHidden } = cell;
       const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
+
+      // Make a shallow copy of the metadata value so the `set` below works.
+      const jupyter = { ...(metadata.get('jupyter') as any) };
 
       if (inputHidden) {
         jupyter.source_hidden = true;
@@ -1224,8 +1228,8 @@ export namespace NotebookActions {
         delete jupyter.source_hidden;
       }
 
-      if (cell.model.type === 'code') {
-        const { outputHidden, outputsScrolled } = cell as CodeCell;
+      if (model.type === 'code') {
+        const { outputHidden } = cell as CodeCell;
 
         // set both metadata keys
         // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
@@ -1236,6 +1240,64 @@ export namespace NotebookActions {
           model.metadata.delete('collapsed');
           delete jupyter.outputs_hidden;
         }
+      }
+
+      if (Object.keys(jupyter).length === 0) {
+        metadata.delete('jupyter');
+      } else {
+        metadata.set('jupyter', jupyter);
+      }
+    });
+    Private.handleState(notebook, state);
+  }
+
+  /**
+   * Revert the collapsed state of all cells to the model.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function revertCollapseState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+
+    notebook.widgets.forEach(cell => {
+      const { model } = cell;
+      const metadata = model.metadata;
+      const jupyter = (metadata.get('jupyter') as any) || {};
+
+      cell.inputHidden = !!jupyter.source_hidden;
+
+      if (model.type === 'code') {
+        if (model.metadata.get('collapsed') || jupyter.outputs_hidden) {
+          (cell as CodeCell).outputHidden = true;
+        } else {
+          (cell as CodeCell).outputHidden = false;
+        }
+      }
+    });
+    Private.handleState(notebook, state);
+  }
+
+  /**
+   * Persists the scrolled state of all cells to the model.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function persistScrollState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+
+    notebook.widgets.forEach(cell => {
+      const { model } = cell;
+
+      if (model.type === 'code') {
+        const { outputsScrolled } = cell as CodeCell;
 
         if (outputsScrolled) {
           model.metadata.set('scrolled', true);
@@ -1243,11 +1305,26 @@ export namespace NotebookActions {
           model.metadata.delete('scrolled');
         }
       }
+    });
+    Private.handleState(notebook, state);
+  }
 
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
+  /**
+   * Revert the scrolled state of all cells to the model.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function revertScrollState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+    const state = Private.getState(notebook);
+
+    notebook.widgets.forEach(cell => {
+      const { model } = cell;
+
+      if (model.type === 'code') {
+        (cell as CodeCell).outputsScrolled = !!model.metadata.get('scrolled');
       }
     });
     Private.handleState(notebook, state);

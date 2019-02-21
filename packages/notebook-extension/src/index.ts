@@ -396,6 +396,8 @@ function activateNotebookTools(
   const scrolled = NotebookTools.createScrolledSelector();
   const inputHidden = NotebookTools.createInputHiddenSelector();
   const outputCollapsed = NotebookTools.createOutputCollapsedSelector();
+  const syncScrolledState = new NotebookTools.SyncScrolledState();
+  const syncCollapsedState = new NotebookTools.SyncCollapsedState();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory
@@ -442,6 +444,10 @@ function activateNotebookTools(
   celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
   celltools.title.caption = 'Cell Inspector';
   celltools.id = id;
+
+  celltools.addItem({ tool: syncScrolledState, rank: 1 });
+  celltools.addItem({ tool: syncCollapsedState, rank: 1 });
+
   celltools.addItem({ tool: activeCellTool, rank: 1 });
   celltools.addItem({ tool: scrolled, rank: 2 });
   celltools.addItem({ tool: inputHidden, rank: 2 });
@@ -575,16 +581,16 @@ function activateNotebookHandler(
     // Add the notebook panel to the tracker.
     tracker.add(widget);
 
-    // TODO: Add cell widget events for when the scrolled or collapse state
-    // changes, so that we can sync metadata, then delete this save handler.
-    widget.context.saveState.connect((sender, state) => {
-      if (state === 'started') {
-        // Always sync view state if we are the shell's current widget.
-        if (app.shell.currentWidget === widget) {
-          NotebookActions.persistCollapseScrollState(widget.content);
-        }
-      }
-    });
+    // // TODO: Add cell widget events for when the scrolled or collapse state
+    // // changes, so that we can sync metadata, then delete this save handler.
+    // widget.context.saveState.connect((sender, state) => {
+    //   if (state === 'started') {
+    //     // Always sync view state if we are the shell's current widget.
+    //     if (app.shell.currentWidget === widget) {
+    //       NotebookActions.persistCollapseScrollState(widget.content);
+    //     }
+    //   }
+    // });
   });
 
   /**

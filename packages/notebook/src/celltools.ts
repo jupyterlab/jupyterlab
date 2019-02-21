@@ -27,6 +27,7 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
+import { NotebookActions } from './actions';
 
 /* tslint:disable */
 /**
@@ -334,6 +335,73 @@ export namespace NotebookTools {
      */
     protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
       /* no-op */
+    }
+  }
+
+  /**
+   * A notebook-level convenience tool to sync state of the view and metadata.
+   */
+  export class SyncState extends Tool {
+    constructor() {
+      super();
+
+      this.node.innerHTML = `${this.label()}<br/>`;
+      const viewToMetadata = document.createElement('button');
+      viewToMetadata.textContent = 'Metadata <- View';
+      viewToMetadata.addEventListener('click', event => this.viewToMetadata());
+
+      const metadataToView = document.createElement('button');
+      metadataToView.textContent = 'Metadata -> View';
+      metadataToView.addEventListener('click', event => this.metadataToView());
+
+      this.node.appendChild(viewToMetadata);
+      this.node.appendChild(metadataToView);
+    }
+
+    protected label(): string {
+      return '';
+    }
+    protected viewToMetadata(): void {
+      /* no-op */
+    }
+    protected metadataToView(): void {
+      /* no-op */
+    }
+  }
+
+  export class SyncScrolledState extends SyncState {
+    protected label() {
+      return 'All Cell Scroll State: ';
+    }
+    protected viewToMetadata() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.persistScrollState(panel.content);
+      }
+    }
+    protected metadataToView() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.revertScrollState(panel.content);
+      }
+    }
+  }
+
+  export class SyncCollapsedState extends SyncState {
+    protected label() {
+      return 'All Cell Collapse State: ';
+    }
+    protected viewToMetadata() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.persistCollapseState(panel.content);
+      }
+    }
+    protected metadataToView() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.revertCollapseState(panel.content);
+      }
     }
   }
 
