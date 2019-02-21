@@ -3,7 +3,7 @@
 
 import { IModelDB } from '@jupyterlab/observables';
 
-import { each, map, toArray } from '@phosphor/algorithm';
+import { map, toArray } from '@phosphor/algorithm';
 
 import { Schema, Datastore } from '@phosphor/datastore';
 
@@ -33,22 +33,9 @@ function cloneDS(
     broadcastHandler: source.broadcastHandler || undefined,
     ...overrides,
     id: newId,
-    schemas: toArray(map(source.iter(), table => table.schema))
+    schemas: toArray(map(source.iter(), table => table.schema)),
+    restoreState: source.toString()
   });
-  // Create one initial copy-transaction
-  dest.beginTransaction();
-  try {
-    each(dest.iter(), table => {
-      const s = source.get(table.schema);
-      const data: { [key: string]: any } = {};
-      each(s.iter(), record => {
-        data[record.$id] = record;
-      });
-      table.update(data);
-    });
-  } finally {
-    dest.endTransaction();
-  }
   return dest;
 }
 
@@ -108,7 +95,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
         handler: this
       });
     }
-    const storeId = await this._session.createStoreId();
+    const storeId = await this._session.aquireStoreId();
     this._remoteDS = cloneDS(storeId, this._localDS);
     this._localDS.dispose();
     this._localDS = null;
@@ -170,6 +157,9 @@ export class DSModelDBFactory implements IModelDB.IFactory {
 
     const manager = new DatastoreManager(key, schemas);
 
-    return new DSModelDB({ manager, schemas });
+    return new DSModelDB({
+      schemas,
+      datastore: Promise.resolve(manager.datastore)
+    });
   }
 }

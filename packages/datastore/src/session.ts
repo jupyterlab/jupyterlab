@@ -19,11 +19,16 @@ import { DatastoreWSMessages } from './wsmessages';
 const DATASTORE_SERVICE_URL = 'lab/api/datastore';
 
 /**
+ * The default treshold for idle time, in seconds.
+ */
+const DEFAULT_IDLE_TIME = 3;
+
+/**
  * A class that manages exchange of transactions with the datastore server.
  */
 export class DatastoreSession extends WSConnection<
-  DatastoreWSMessages.Request,
-  DatastoreWSMessages.RawReply | DatastoreWSMessages.TransactionBroadcast
+  DatastoreWSMessages.Message,
+  DatastoreWSMessages.Message
 > {
   /**
    *
@@ -32,6 +37,7 @@ export class DatastoreSession extends WSConnection<
     super();
     this.sessionId = options.sessionId;
     this.handler = options.handler || null;
+    this._idleTreshold = options.idleTreshold || DEFAULT_IDLE_TIME;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     this._createSocket();
@@ -42,11 +48,14 @@ export class DatastoreSession extends WSConnection<
    *
    * @returns {Promise<number>} A promise to the new store id.
    */
-  async createStoreId(): Promise<number> {
-    await this.ready;
-    const msg = DatastoreWSMessages.createMessage('storeid-request', {});
-    const reply = await this._requestMessageReply(msg);
-    return reply.content.storeId;
+  async aquireStoreId(): Promise<number> {
+    if (this._storeId === null) {
+      await this.ready;
+      const msg = DatastoreWSMessages.createMessage('storeid-request', {});
+      const reply = await this._requestMessageReply(msg);
+      this._storeId = reply.content.storeId;
+    }
+    return this._storeId;
   }
 
   /**
@@ -68,17 +77,39 @@ export class DatastoreSession extends WSConnection<
    * @returns An array of acknowledged transactionIds from the server.
    */
   broadcastTransactions(transactions: Datastore.Transaction[]): void {
+    // Brand outgoing transactions with our serial
+    const branded = [];
+    for (let t of transactions) {
+      const b = { ...t, serial: this._ourSerial++ };
+      branded.push(b);
+      this._pendingTransactions[b.id] = b;
+    }
+    this._resetIdleTimer();
     const msg = DatastoreWSMessages.createMessage('transaction-broadcast', {
-      transactions
+      transactions: branded
     });
-    this._requestMessageReply(msg)
-      .then(reply => {
-        // TODO: Mark transactions as sent
-        // Resend any that were not acknowledged.
-      })
-      .catch(() => {
+    this._requestMessageReply(msg).then(
+      reply => {
+        const { serials, transactionIds } = reply.content;
+        for (let i = 0; i < serials.length; ++i) {
+          const serial = serials[i];
+          const id = transactionIds[i];
+          delete this._pendingTransactions[id];
+          if (serial !== this._serverSerial + 1) {
+            // Out of order serials!
+            // Something has gone wrong somewhere.
+            // TODO: Trigger recovery?
+            throw new Error(
+              'Critical! Out of order transactions in datastore.'
+            );
+          }
+          this._serverSerial = serial;
+        }
+      },
+      () => {
         // TODO: Resend transactions
-      });
+      }
+    );
   }
 
   /**
@@ -86,8 +117,10 @@ export class DatastoreSession extends WSConnection<
    *
    * The transactions of the history will be sent to the set handler.
    */
-  async replayHistory(): Promise<void> {
-    const msg = DatastoreWSMessages.createMessage('history-request', {});
+  async replayHistory(checkpointId?: number): Promise<void> {
+    const msg = DatastoreWSMessages.createMessage('history-request', {
+      checkpointId: checkpointId === undefined ? null : checkpointId
+    });
     const reply = await this._requestMessageReply(msg);
     this._handleTransactions(reply.content.transactions);
   }
@@ -104,6 +137,7 @@ export class DatastoreSession extends WSConnection<
   protected wsFactory() {
     const settings = this.serverSettings;
     const token = this.serverSettings.token;
+    const queryParams = [];
 
     let wsUrl;
     if (this.sessionId) {
@@ -115,8 +149,17 @@ export class DatastoreSession extends WSConnection<
     } else {
       wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL);
     }
+
     if (token) {
-      wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
+      queryParams.push(`token=${encodeURIComponent(token)}`);
+    }
+    if (this._storeId !== null) {
+      queryParams.push(
+        `storeId=${encodeURIComponent(this._storeId.toString(10))}`
+      );
+    }
+    if (queryParams) {
+      wsUrl = wsUrl + `?${queryParams.join('&')}`;
     }
 
     return new settings.WebSocket(wsUrl);
@@ -150,31 +193,36 @@ export class DatastoreSession extends WSConnection<
     }
     if (msg.msgType === 'transaction-broadcast') {
       this._handleTransactions(msg.content.transactions);
-      return true;
-    }
-    if (msg.msgType === 'state-stable') {
-      if (this.handler !== null) {
-        MessageLoop.postMessage(
-          this.handler,
-          new Datastore.GCChanceMessage(msg.content.version)
-        );
+    } else if (msg.msgType === 'state-stable') {
+      if (this.handler !== null && this._serverSerial === msg.content.serial) {
+        MessageLoop.sendMessage(this.handler, new Datastore.GCChanceMessage());
       }
+    } else {
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
    * Process transactions received over the websocket.
    */
   private _handleTransactions(
-    transactions: ReadonlyArray<Datastore.Transaction>
+    transactions: ReadonlyArray<DatastoreWSMessages.SerialTransaction>
   ) {
     if (this.handler !== null) {
       for (let t of transactions) {
+        if (this._serverSerial !== t.serial + 1) {
+          // Out of order serials!
+          // Something has gone wrong somewhere.
+          // TODO: Trigger recovery?
+          throw new Error('Critical! Out of order transactions in datastore.');
+        }
+        this._serverSerial = t.serial;
         const message = new DatastoreSession.RemoteTransactionMessage(t);
         MessageLoop.postMessage(this.handler, message);
       }
     }
+    this._resetIdleTimer();
   }
 
   /**
@@ -210,10 +258,36 @@ export class DatastoreSession extends WSConnection<
     return promise;
   }
 
+  private _onIdle() {
+    const msg = DatastoreWSMessages.createMessage('serial-update', {
+      serial: this._serverSerial
+    });
+    this.sendMessage(msg);
+    this._idleTimer = null;
+  }
+
+  private _resetIdleTimer() {
+    if (this._idleTimer !== null) {
+      clearTimeout(this._idleTimer);
+    }
+    this._idleTimer = setTimeout(this._onIdle.bind(this), this._idleTreshold);
+  }
+
   private _delegates = new Map<
     string,
     PromiseDelegate<DatastoreWSMessages.Reply>
   >();
+
+  private _ourSerial = 0;
+  private _serverSerial = 0;
+  private _pendingTransactions: {
+    [key: string]: DatastoreWSMessages.SerialTransaction;
+  } = {};
+
+  private _idleTreshold: number;
+  private _idleTimer: number | null = null;
+
+  private _storeId: number | null = null;
 }
 
 /**
@@ -222,7 +296,7 @@ export class DatastoreSession extends WSConnection<
 export namespace DatastoreSession {
   export interface IOptions {
     /**
-     *
+     * The session id to connect to.
      */
     sessionId?: string;
 
@@ -232,9 +306,14 @@ export namespace DatastoreSession {
     serverSettings?: ServerConnection.ISettings;
 
     /**
-     *
+     * The handler for any incoming data.
      */
     handler?: IMessageHandler;
+
+    /**
+     * How long to wait before the session is considered idle.
+     */
+    idleTreshold?: number;
   }
 
   /**

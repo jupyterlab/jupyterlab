@@ -1,4 +1,5 @@
 
+from itertools import tee
 import json
 import os
 import uuid
@@ -14,11 +15,18 @@ from .messages import (
     create_error_reply,
     create_history_reply,
     create_permissions_reply,
+    create_serial_reply,
     create_storeid_reply,
     create_transaction_reply,
     create_transactions_ack
 )
 from .session import Session
+
+
+def filter_duplicates(transactions, serials, is_duplicate):
+    for (t, s, d) in zip(transactions, serials, is_duplicate):
+        if not d:
+            yield (t, s)
 
 
 class WSBaseHandler(WebSocketMixin, WebSocketHandler, IPythonHandler):
@@ -79,6 +87,7 @@ class DatastoreHandler(WSBaseHandler):
         self.session = None
         self.session_id = None
         self.store_id = None
+        self.store_transaction_serial = -1
 
     @property
     def datastore_file(self):
@@ -129,12 +138,31 @@ class DatastoreHandler(WSBaseHandler):
         super(DatastoreHandler, self).open()
         self.log.info('Opened datastore websocket')
 
-    def on_close(self):
-        self.session.handlers.remove(self)
+    def cleanup_closed(self):
+        """Cleanup after clean close, or after recovery timeout on unclean close.
+        """
+        # Unmark as dangling if needed:
+        try:
+            self.session.forget_dangling(self.store_id)
+        except KeyError:
+            pass
+
         if self.datastore_file != ':memory:' and not self.session.handlers:
             self.session.close()
             self.session = None
             del self.sessions[self.session_id]
+
+    def on_close(self):
+        clean_close = self.close_code in (1000, 1001)
+        self.session.handlers.remove(self)
+        if clean_close:
+            self.cleanup_closed()
+        elif self.store_id:
+            # Un-clean close after a store was established
+            self.session.mark_dangling(self.store_id)
+            loop = IOLoop.current()
+            loop.add_timeout(loop.time() + self.rtc_recovery_timeout, self.cleanup_closed)
+
         super(DatastoreHandler, self).on_close()
         self.log.info('Closed datastore websocket')
 
@@ -162,14 +190,39 @@ class DatastoreHandler(WSBaseHandler):
                     'Permisson error: Cannot write transactions to current session.'
                 )
 
+            # Get the transactions:
             content = msg.pop('content', None)
             if content is None:
+                self.log.warning('Malformed transaction broadcast message received')
                 return
-            transactions = content.pop('transactions', [])
+            transactions = content.pop('transactions', None)
+            if transactions is None:
+                self.log.warning('Malformed transaction broadcast message received')
+                return
+
+            # Ensure that transaction serials increment as expected:
+            for t in transactions:
+                if t['content']['serial'] != self.store_transaction_serial + 1:
+                    # TODO: ! Missing a transaction, recover !
+                    raise ValueError('Missing transaction %d from %r' % (
+                        self.store_transaction_serial, self.store_id
+                    ))
+                self.store_transaction_serial += 1
+
+            # Check for any duplicates before adding
+            is_duplicate = self.session.db.has_transactions(t.id for t in transactions)
+
+            # Add to transaction store, generating a central serial for each
             serials = self.session.db.add_transactions(transactions)
+
+            # Create an acknowledgment message to the source
             reply = create_transactions_ack(msg_id, transactions, serials)
             self.write_message(json.dumps(reply))
-            self.session.broadcast(self, message)
+
+            # Broadcast the tranasctions to all other stores
+            # First, filter away duplicates
+            filtered = filter_duplicates(transactions, serials, is_duplicate)
+            self.session.broadcast_transactions(self, *zip(*filtered))
 
         elif msg_type == 'storeid-request':
             if not self.check_permissions('r'):
@@ -187,8 +240,14 @@ class DatastoreHandler(WSBaseHandler):
                     msg_id,
                     'Permisson error: Cannot access session: %s' % (self.session_id,)
                 )
-            transactions = tuple(self.session.db.history())
-            reply = create_history_reply(msg_id, transactions)
+            content = msg.pop('content', {})
+            checkpoint_id = content.pop('checkpointId', None)
+            history = self.session.db.history(checkpoint_id)
+            reply = create_history_reply(
+                msg_id,
+                tuple(history.transactions),
+                history.state
+            )
             self.write_message(json.dumps(reply))
 
         elif msg_type == 'transaction-request':
@@ -205,6 +264,20 @@ class DatastoreHandler(WSBaseHandler):
             reply = create_transaction_reply(msg_id, transactions)
             self.write_message(json.dumps(reply))
 
+        elif msg_type == 'serial-request':
+            if not self.check_permissions('r'):
+                return self.send_error_reply(
+                    msg_id,
+                    'Permisson error: Cannot access session: %s' % (self.session_id,)
+                )
+            content = msg.pop('content', None)
+            if content is None:
+                return
+            serials = content.pop('serials', [])
+            transactions = tuple(self.session.db.get_serials(serials))
+            reply = create_serial_reply(msg_id, transactions)
+            self.write_message(json.dumps(reply))
+
         elif msg_type == 'permissions-request':
             reply = create_permissions_reply(
                 msg_id,
@@ -212,6 +285,14 @@ class DatastoreHandler(WSBaseHandler):
                 self.check_permissions('w')
             )
             self.write_message(json.dumps(reply))
+
+        elif msg_type == 'serial-update':
+            content = msg.pop('content', None)
+            if content is None:
+                return
+            serial = content.pop('serial', None)
+            if serial is not None:
+                self.session.update_serial(self.store_id, serial)
 
         if reply:
             self.log.info('Sent reply: \n%r' % (reply, ))

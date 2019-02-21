@@ -45,8 +45,9 @@ export namespace DatastoreWSMessages {
     'serial-reply': SerialReply;
     'permissions-request': PermissionsRequest;
     'permissions-reply': PermissionsReply;
-    'error-reply': ErrorReply;
+    'serial-update': SerialNotice;
     'state-stable': StableStateNotice;
+    'error-reply': ErrorReply;
   }
 
   /**
@@ -98,9 +99,7 @@ export namespace DatastoreWSMessages {
       /**
        * The transactions being broadcast.
        */
-      readonly transactions: ReadonlyArray<
-        Datastore.Transaction | SerialTransaction
-      >;
+      readonly transactions: ReadonlyArray<SerialTransaction>;
     };
   };
 
@@ -153,7 +152,12 @@ export namespace DatastoreWSMessages {
    */
   export type HistoryRequest = Base & {
     readonly msgType: 'history-request';
-    readonly content: {};
+    readonly content: {
+      /**
+       * The checkpoint to start from.
+       */
+      checkpointId: number | null;
+    };
   };
 
   /**
@@ -162,6 +166,11 @@ export namespace DatastoreWSMessages {
   export type HistoryReply = BaseReply & {
     readonly msgType: 'history-reply';
     readonly content: {
+      /**
+       * The state at the checkpoint, if given.
+       */
+      readonly state: string | null;
+
       /**
        * The transactions that make up the history.
        */
@@ -204,7 +213,7 @@ export namespace DatastoreWSMessages {
   };
 
   /**
-   * A reply to a 'permission-request'.
+   * A reply to a `permission-request`.
    */
   export type PermissionsReply = BaseReply & {
     readonly msgType: 'permissions-reply';
@@ -222,7 +231,20 @@ export namespace DatastoreWSMessages {
   };
 
   /**
-   * A notice that the current state of the datastore is *stable*.
+   * An update to the server of the last applied server serial.
+   */
+  export type SerialNotice = Base & {
+    readonly msgType: 'serial-update';
+    readonly content: {
+      /**
+       * The server-side serial of last transaction applied.
+       */
+      readonly serial: number;
+    };
+  };
+
+  /**
+   * A notice that the datastore is *stable* up to the given serial.
    *
    * Stability here means that all concurrent transactions are known
    * to have been applied.
@@ -231,9 +253,9 @@ export namespace DatastoreWSMessages {
     readonly msgType: 'state-stable';
     readonly content: {
       /**
-       * The datastore version of the stable state.
+       * The server-side serial of the stable state.
        */
-      version: number;
+      serial: number;
     };
   };
 
@@ -287,7 +309,7 @@ export namespace DatastoreWSMessages {
   /**
    * A union type of all notice messages (no reply expected).
    */
-  export type Notice = StableStateNotice;
+  export type Notice = StableStateNotice | SerialNotice;
 
   /**
    * A union type for all messages.

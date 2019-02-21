@@ -30,6 +30,9 @@ def decode_serials(rows):
         yield r[0:2]
 
 
+History = collections.namedtuple('History', ('state', 'transactions'))
+
+
 _table_name_re = re.compile(r'[a-zA-Z][a-zA-Z0-9_\-]*')
 
 def validate_table_name(name):
@@ -87,7 +90,7 @@ class DatastoreDB:
         Returns a generator to the serial numbers of the added transactions.
 
         Note: Any transactions with ids already present in the store
-        will be ignored.
+        will be ignored. Their existing serial number will still be returned.
         """
         c = self._conn
         with c:
@@ -116,7 +119,6 @@ class DatastoreDB:
                 )
             ))
 
-
     def get_transactions(self, ids):
         """Get the transactions with the given ids.
 
@@ -139,31 +141,46 @@ class DatastoreDB:
             self._conn.execute(statement, ids)
         )
 
-    def history(self, checkpoint=None):
-        """Get all stored transactions since checkpoint (in order)."""
-        if checkpoint is None:
-            serial = -1
-        else:
-            serial = tuple(self._conn.execute('''
-                SELECT serial
-                FROM
-            '''))[0]
-        yield from deserialized(
-            self._conn.execute(
-                '''
-                    SELECT id, storeId, patch, rowid
-                    FROM (
-                        SELECT *
-                        FROM [{0}]
-                        WHERE checkpoint=?
-                        ORDER BY rowid
-                    )
-                '''.format(self._table_name),
-                (self.checkpoint_id,)
+    def get_serials(self, serials):
+        """Get the transactions with the given serials.
+
+        Returns a generator with the transactions in the store
+        that match the given ids. Note that any missing ids will
+        simply not be included in the result.
+        """
+        subst = ','.join('?' * len(serials))
+        statement = '''
+            SELECT id, storeId, patch, rowid
+            FROM (
+                SELECT *
+                FROM [{0}]
+                WHERE rowid IN ({1})
+                ORDER BY rowid
             )
+        '''.format(self._table_name, subst)
+
+        yield from deserialized(
+            self._conn.execute(statement, serials)
         )
 
-    def checkpoint(self, state, serial):
+    def has_transactions(self, ids):
+        """Whether the transactions with the given ids exist in the db.
+
+        Returns a generator of booleans indicating the prescence of the
+        given ids.
+        """
+        subst = ','.join('?' * len(ids))
+        statement = '''
+            SELECT id
+            FROM [{0}]
+            WHERE id IN ({1})
+        '''.format(self._table_name, subst)
+
+        present = set(r[0] for r in self._conn.execute(statement, ids))
+        for i in ids:
+            yield i in present
+
+    def make_checkpoint(self, state, serial):
         """Make a checkpoint in the transaction history.
 
         This creates a new checkpoint after the given serial
@@ -171,16 +188,54 @@ class DatastoreDB:
         """
 
         # Insert the base for the new checkpoint into the checkpoint table
-        try:
-            c.execute(
-                '''
-                    INSERT INTO [checkpoints-{0}](id, state, serial)
-                    VALUES(?, ?)
-                '''.format(self._table_name),
-                (self.checkpoint_id, state, serial)
-            )
+        self._conn.execute(
+            '''
+                INSERT INTO [checkpoints-{0}](id, state, serial)
+                VALUES(?, ?)
+            '''.format(self._table_name),
+            (self.checkpoint_id, state, serial)
+        )
+        self.checkpoint_id += 1
+
+    def history(self, checkpoint_id=None):
+        """Get the history for the given checkpoint id (in order).
+
+        If the checkpoint id is not given, returns the full history
+        since the start.
+
+        Returns a namedtuple (state, transactions), with tranascations
+        being an iterator of the transactions.
+        """
+        if checkpoint_id is None:
+            serial = -1
+            state = None
         else:
-            self.checkpoint_id += 1
+            serial, state = tuple(next(self._conn.execute(
+                '''
+                    SELECT serial, state, id
+                    FROM [checkpoints-{0}]
+                    WHERE id = ?
+                    LIMIT 1
+                '''.format(self._table_name),
+                (checkpoint_id,)
+            ), (-1, None)))[0:2]
+
+        transactions = deserialized(
+            self._conn.execute(
+                '''
+                    SELECT id, storeId, patch, rowid
+                    FROM (
+                        SELECT *
+                        FROM [{0}]
+                        WHERE rowid > ?
+                        ORDER BY rowid
+                    )
+                '''.format(self._table_name),
+                (serial,)
+            )
+        )
+
+        return History(state, transactions)
 
 
 __all__ = ['DatastoreDB']
