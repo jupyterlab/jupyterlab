@@ -107,6 +107,10 @@ pre.CodeMirror-line {
   margin-right: -5px;
 }
 
+.CodeMirror-selectedtext.cm-searching {
+  background-color: orangered !important;
+}
+
 .CodeMirror-focused .CodeMirror-selected {
   background-color: var(--jp-editor-selected-focused-background);
 }
