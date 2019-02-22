@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
-    "@jupyterlab/cells": "^1.0.0-alpha.3",
+    "@jupyterlab/cells": "^1.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^1.0.0-alpha.3",
     "@jupyterlab/codemirror": "^1.0.0-alpha.3",
     "@jupyterlab/console": "^1.0.0-alpha.3",

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
-    "@jupyterlab/cells": "^1.0.0-alpha.3",
+    "@jupyterlab/cells": "^1.0.0-alpha.4",
     "@jupyterlab/codemirror": "^1.0.0-alpha.3",
     "@jupyterlab/completer": "^1.0.0-alpha.3",
     "@jupyterlab/rendermime": "^1.0.0-alpha.3",
