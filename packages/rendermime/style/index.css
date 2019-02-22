@@ -525,7 +525,7 @@ h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
-.jp-RenderedHTML kbd {
+.jp-RenderedHTMLCommon kbd {
   background-color: var(--md-grey-100);
   border: 1px solid var(--md-grey-400);
   border-bottom-color: var(--md-grey-200);
