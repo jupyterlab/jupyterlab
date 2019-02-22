@@ -55,8 +55,19 @@ export class Poll implements IDisposable {
       if (typeof document === 'undefined' || !document.hidden) {
         try {
           await poll();
+
+          // Bail if disposed while poll promise was in flight.
+          if (this._isDisposed) {
+            return;
+          }
+
           interval = this._interval;
         } catch (error) {
+          // Bail if disposed while poll promise was in flight.
+          if (this._isDisposed) {
+            return;
+          }
+
           const old = interval;
           interval = Math.min(old * 2, max);
           console.warn(
