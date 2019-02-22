@@ -5,7 +5,7 @@ import { IObservableMap } from '@jupyterlab/observables';
 
 import { each } from '@phosphor/algorithm';
 
-import { ReadonlyJSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONValue, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { MapField, Schema } from '@phosphor/datastore';
 
@@ -55,7 +55,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * The number of key-value pairs in the map.
    */
   get size(): number {
-    return this._map.size;
+    return Object.keys(this._map).length;
   }
 
   /**
@@ -74,7 +74,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T | undefined {
-    let oldVal = this._map.get(key);
+    let oldVal = this._map[key] as T | undefined;
     if (value === undefined) {
       throw Error('Cannot set an undefined value, use remove');
     }
@@ -108,7 +108,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * @returns the value for that key.
    */
   get(key: string): T | undefined {
-    return this._map.get(key);
+    return this._map[key] as T | undefined;
   }
 
   /**
@@ -119,7 +119,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * @returns `true` if the map has the key, `false` otherwise.
    */
   has(key: string): boolean {
-    return this._map.has(key);
+    return this._map[key] !== undefined;
   }
 
   /**
@@ -128,11 +128,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * @returns - a list of keys.
    */
   keys(): string[] {
-    let keyList: string[] = [];
-    this._map.forEach((v: T, k: string) => {
-      keyList.push(k);
-    });
-    return keyList;
+    return Object.keys(this._map);
   }
 
   /**
@@ -141,11 +137,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * @returns - a list of values.
    */
   values(): T[] {
-    let valList: T[] = [];
-    this._map.forEach((v: T, k: string) => {
-      valList.push(v);
-    });
-    return valList;
+    return Object.keys(this._map).map(k => this._map[k] as T);
   }
 
   /**
@@ -157,7 +149,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    *   or undefined if that does not exist.
    */
   delete(key: string): T | undefined {
-    let oldVal = this._map.get(key);
+    let oldVal = this._map[key] as T | undefined;
 
     const table = this.ds!.get(this.schema);
     this.ds!.beginTransaction();
@@ -232,12 +224,10 @@ export class ObservableMap<T extends ReadonlyJSONValue>
     });
   }
 
-  private get _map(): ReadonlyMap<string, T> {
+  private get _map(): ReadonlyJSONObject {
     this.ensureBackend();
     const record = this.ds!.get(this.schema).get(this.recordID);
-    return record
-      ? ((record[this.fieldId] as unknown) as ReadonlyMap<string, T>)
-      : new Map();
+    return record ? (record[this.fieldId] as ReadonlyJSONObject) : {};
   }
   private _itemCmp: (first: T | null, second: T | null) => boolean;
   private _changed = new Signal<this, IObservableMap.IChangedArgs<T>>(this);

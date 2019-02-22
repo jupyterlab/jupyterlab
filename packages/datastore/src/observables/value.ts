@@ -53,10 +53,7 @@ export class ObservableValue
     try {
       table.update({
         [this.recordID]: {
-          [this.fieldId]: {
-            previous: oldValue,
-            current: value
-          }
+          [this.fieldId]: value
         }
       } as any);
     } finally {

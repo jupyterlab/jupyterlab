@@ -61,9 +61,12 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
     }
 
     try {
-      this.connectRemote();
+      this.connected = this.connectRemote();
     } catch (err) {
       console.error(err);
+      this.connected = new Promise(() => {
+        // never resolve
+      });
     }
   }
 
@@ -88,20 +91,6 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       this._client.dispose();
       this._client = null;
     }
-  }
-
-  /**
-   *
-   */
-  protected async connectRemote(): Promise<void> {
-    if (this._client === null) {
-      this._client = new CollaborationClient({
-        collaborationId: this.key,
-        handler: this
-      });
-    }
-    this._storeId = await this._client.storeId;
-    this._client.replayHistory();
   }
 
   /**
@@ -145,13 +134,18 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
         });
       } else if (state === null) {
         // 1.
-        this._remoteDS = cloneDS(this._storeId!, this._localDS!);
+        this._remoteDS = cloneDS(this._storeId!, this._localDS!, {
+          broadcastHandler: this
+        });
       } else {
         // 4.
         throw new Error(
           'Cannot replace the state of an immediate collaboration session!'
         );
       }
+
+      this._datastoreChanged.emit({ datastore: this._remoteDS });
+
       if (this._localDS) {
         this._localDS.dispose();
         this._localDS = null;
@@ -173,6 +167,22 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
    *
    */
   readonly key: string;
+
+  readonly connected: Promise<void>;
+
+  /**
+   *
+   */
+  protected async connectRemote(): Promise<void> {
+    if (this._client === null) {
+      this._client = new CollaborationClient({
+        collaborationId: this.key,
+        handler: this
+      });
+    }
+    this._storeId = await this._client.storeId;
+    this._client.replayHistory();
+  }
 
   private _schemas: ReadonlyArray<Schema>;
 
@@ -210,6 +220,6 @@ export class DSModelDBFactory implements IModelDB.IFactory {
 
     const manager = new DatastoreManager(key, schemas, true);
 
-    return new DSModelDB({ schemas, manager });
+    return new DSModelDB({ schemas, manager, recordId: key });
   }
 }

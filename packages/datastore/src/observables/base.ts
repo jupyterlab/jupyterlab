@@ -69,18 +69,23 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
     args: DatastoreManager.IChangedArgs
   ) {
     this.ds = args.datastore;
-    this.ds.changed.connect(this._onChange);
+    this.ds.changed.connect(
+      this._onChange,
+      this
+    );
   }
 
   private _onChange(ds: Datastore, args: Datastore.IChangedArgs) {
-    const local = Private.getLocalChange(
+    const local = Private.getLocalChange<T>(
       ds,
       this.schema,
       this.recordID,
       this.fieldId,
       args.change
     );
-    this.onChange(local as T);
+    if (local !== undefined) {
+      this.onChange(local);
+    }
   }
 
   protected abstract onChange(change: T): void;
@@ -94,19 +99,19 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
 }
 
 namespace Private {
-  export function getLocalChange(
+  export function getLocalChange<T>(
     ds: Datastore,
     schema: Schema,
     recordId: string,
     fieldId: string,
     change: Datastore.Change
-  ) {
+  ): T | undefined {
     if (
       change[schema.id] === undefined ||
       change[schema.id][recordId] === undefined
     ) {
       return undefined;
     }
-    return change[schema.id][recordId][fieldId];
+    return change[schema.id][recordId][fieldId] as T | undefined;
   }
 }

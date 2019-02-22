@@ -14,9 +14,11 @@ import {
 
 import { toArray } from '@phosphor/algorithm';
 
-import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { Schema } from '@phosphor/datastore';
+
+import { DisposableSet } from '@phosphor/disposable';
 
 import {
   ObservableJSON,
@@ -45,7 +47,7 @@ export class DSModelDB implements IModelDB {
       this._toDispose = true;
     }
     this._schemas = {};
-    this._recordId = UUID.uuid4();
+    this._recordId = options.recordId;
     for (let s of options.schemas) {
       this._schemas[s.id] = s;
     }
@@ -54,6 +56,7 @@ export class DSModelDB implements IModelDB {
     } else {
       this.manager = options.manager;
     }
+    this.connected = this.manager.connected;
   }
 
   /**
@@ -93,7 +96,10 @@ export class DSModelDB implements IModelDB {
         `Cannot create a string for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableString(this.manager, schema, this._recordId, path);
+    let str = new ObservableString(this.manager, schema, this._recordId, path);
+    this._disposables.add(str);
+    this.set(path, str);
+    return str;
   }
 
   /**
@@ -117,13 +123,16 @@ export class DSModelDB implements IModelDB {
         `Cannot create a list for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableUndoableList(
+    let vec = new ObservableUndoableList(
       this.manager,
       schema,
       path,
       this._recordId,
       new ObservableUndoableList.IdentitySerializer<T>()
     );
+    this._disposables.add(vec);
+    this.set(path, vec);
+    return vec;
   }
 
   /**
@@ -145,7 +154,10 @@ export class DSModelDB implements IModelDB {
         `Cannot create a map for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableJSON(this.manager, schema, this._recordId, path);
+    let map = new ObservableJSON(this.manager, schema, this._recordId, path);
+    this._disposables.add(map);
+    this.set(path, map);
+    return map;
   }
 
   /**
@@ -163,7 +175,10 @@ export class DSModelDB implements IModelDB {
         `Cannot create a value for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableValue(this.manager, schema, this._recordId, path);
+    let val = new ObservableValue(this.manager, schema, this._recordId, path);
+    this._disposables.add(val);
+    this.set(path, val);
+    return val;
   }
 
   /**
@@ -224,7 +239,26 @@ export class DSModelDB implements IModelDB {
     const schemas = toArray(iterValues(this._schemas));
     const manager = this.manager;
     // TODO: resolve path?
-    return new DSModelDB({ schemas, manager, basePath, baseDB: this });
+    return new DSModelDB({
+      schemas,
+      manager,
+      basePath,
+      baseDB: this,
+      recordId: this._recordId
+    });
+  }
+
+  /**
+   * Set a value at a path. Not intended to
+   * be called by user code, instead use the
+   * `create*` factory methods.
+   *
+   * @param path: the path to set the value at.
+   *
+   * @param value: the value to set at the path.
+   */
+  set(path: string, value: IObservable): void {
+    this._baseDB.set(this._resolvePath(path), value);
   }
 
   /**
@@ -238,7 +272,7 @@ export class DSModelDB implements IModelDB {
     if (this._toDispose) {
       this._baseDB.dispose();
     }
-    // this._disposables.dispose();
+    this._disposables.dispose();
   }
 
   /**
@@ -303,6 +337,7 @@ export class DSModelDB implements IModelDB {
   private _recordId: string;
   private _toDispose = false;
   private _isDisposed = false;
+  private _disposables = new DisposableSet();
 }
 
 /**
@@ -314,5 +349,6 @@ export namespace DSModelDB {
     manager: DatastoreManager;
     basePath?: string;
     baseDB?: DSModelDB;
+    recordId: string;
   }
 }

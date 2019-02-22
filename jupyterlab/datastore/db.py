@@ -14,6 +14,7 @@ def serialized(transactions):
             t['id'],
             t['storeId'],
             json.dumps(t['patch']).encode('ascii'),
+            t['version'],
         )
 
 def deserialized(rows):
@@ -22,7 +23,8 @@ def deserialized(rows):
             id=r[0],
             storeId=r[1],
             patch=json.loads(r[2], encoding='ascii'),
-            serial=r[3],
+            version=r[3],
+            serial=r[4],
         )
 
 def decode_serials(rows):
@@ -69,7 +71,8 @@ class DatastoreDB:
                 [{0}] (
                     id text NOT NULL UNIQUE ON CONFLICT IGNORE,
                     storeId integer,
-                    patch json
+                    patch json,
+                    version integer
                 )
                 '''.format(self._table_name)
             )
@@ -101,8 +104,8 @@ class DatastoreDB:
             # that duplicate transactions are discarded.
             c.executemany(
                 '''
-                    INSERT INTO [{0}](id, storeId, patch)
-                    VALUES(?, ?, ?)
+                    INSERT INTO [{0}](id, storeId, patch, version)
+                    VALUES(?, ?, ?, ?)
                 '''.format(self._table_name),
                 serialized(transactions)
             )
@@ -129,7 +132,7 @@ class DatastoreDB:
         """
         subst = ','.join('?' * len(ids))
         statement = '''
-            SELECT id, storeId, patch, rowid
+            SELECT id, storeId, patch, version, rowid
             FROM (
                 SELECT *
                 FROM [{0}]
@@ -150,7 +153,7 @@ class DatastoreDB:
         """
         subst = ','.join('?' * len(serials))
         statement = '''
-            SELECT id, storeId, patch, rowid
+            SELECT id, storeId, patch, version, rowid
             FROM (
                 SELECT *
                 FROM [{0}]
@@ -223,7 +226,7 @@ class DatastoreDB:
         transactions = deserialized(
             self._conn.execute(
                 '''
-                    SELECT id, storeId, patch, rowid
+                    SELECT id, storeId, patch, version, rowid
                     FROM [{0}]
                     WHERE rowid > ?
                     ORDER BY rowid
