@@ -530,7 +530,7 @@ h6:hover .jp-InternalAnchorLink {
   border: 1px solid var(--jp-border-color0);
   border-bottom-color: var(--jp-border-color2);
   border-radius: 3px;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.25);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   display: inline-block;
   font-size: 0.8em;
   line-height: 1em;
