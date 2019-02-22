@@ -103,6 +103,9 @@ export class ThemeManager {
       link.setAttribute('rel', 'stylesheet');
       link.setAttribute('type', 'text/css');
       link.setAttribute('href', href);
+      // document.addEventListener('load', () => {
+      //   resolve(undefined);
+      // });
       link.addEventListener('load', () => {
         resolve(undefined);
       });
@@ -149,6 +152,17 @@ export class ThemeManager {
    */
   isLight(name: string): boolean {
     return this._themes[name].isLight;
+  }
+
+  /**
+   * Test whether a given theme styles scrollbar,
+   * and if the user has scrollbar styling enabled.
+   */
+  isScrollbar(name: string): boolean {
+    return (
+      !!this._settings.composite['theme-scrollbar'] &&
+      !!this._themes[name].isScrollbar
+    );
   }
 
   /**
@@ -245,13 +259,21 @@ export class ThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
-        Private.fitAll(this._host);
-        splash.dispose();
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
           newValue: theme
         });
+        // Private.calcWidgetStyle(this._host);
+        const style = this._host.node.getAttribute('style');
+        this._host.node.setAttribute('style', 'display: none');
+        requestAnimationFrame(() => {
+          this._host.node.setAttribute('style', style);
+          Private.fitAll(this._host);
+          splash.dispose();
+        });
+        // window.setTimeout(() => { this._host.node.setAttribute('style', style) }, 100);
+        // window.setTimeout(() => { Private.fitAll(this._host); splash.dispose() }, 100);
       })
       .catch(reason => {
         this._onError(reason);
@@ -334,6 +356,12 @@ export namespace ThemeManager {
     isLight: boolean;
 
     /**
+     * Whether the theme includes styling for the scrollbar.
+     * If set to false, this theme will leave the native scrollbar untouched.
+     */
+    isScrollbar?: boolean;
+
+    /**
      * Load the theme.
      *
      * @returns A promise that resolves when the theme has loaded.
@@ -359,5 +387,19 @@ namespace Private {
   export function fitAll(widget: Widget): void {
     each(widget.children(), fitAll);
     widget.fit();
+  }
+
+  export function calcWidgetStyle(widget: Widget): void {
+    // each(widget.children(), calcWidgetStyle);
+    if (!widget.isHidden) {
+      const style = widget.node.getAttribute('style');
+      widget.node.setAttribute('style', 'display: none');
+      Promise.resolve(
+        setTimeout(() => {
+          widget.node.setAttribute('style', style);
+        }, 200)
+      );
+      // window.getComputedStyle(widget.node, 'height');
+    }
   }
 }

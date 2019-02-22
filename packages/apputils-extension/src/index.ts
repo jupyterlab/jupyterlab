@@ -149,6 +149,14 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       currentTheme = args.newValue;
       app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
       app.shell.dataset.themeName = currentTheme;
+      if (
+        app.shell.dataset.themeScrollbar !=
+        String(manager.isScrollbar(currentTheme))
+      ) {
+        app.shell.dataset.themeScrollbar = String(
+          manager.isScrollbar(currentTheme)
+        );
+      }
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 
@@ -595,7 +603,7 @@ export default plugins;
 /**
  * The namespace for module private data.
  */
-namespace Private {
+export namespace Private {
   /**
    * Generate a workspace name candidate.
    *
@@ -615,7 +623,7 @@ namespace Private {
   /**
    * Create a splash element.
    */
-  function createSplash(): HTMLElement {
+  export function createSplash(): HTMLElement {
     const splash = document.createElement('div');
     const galaxy = document.createElement('div');
     const logo = document.createElement('div');
@@ -731,7 +739,7 @@ namespace Private {
   /**
    * The splash element.
    */
-  const splash = createSplash();
+  export let splash = createSplash();
 
   /**
    * The splash screen counter.
