@@ -264,16 +264,17 @@ export class ThemeManager {
           oldValue: current,
           newValue: theme
         });
-        // Private.calcWidgetStyle(this._host);
+
+        // Need to force a redraw of the app here to avoid a Chrome rendering bug/race condition
         const style = this._host.node.getAttribute('style');
         this._host.node.setAttribute('style', 'display: none');
+
+        // If we set/unset 'display: none' too quickly, no redraw will actually happen
         requestAnimationFrame(() => {
           this._host.node.setAttribute('style', style);
           Private.fitAll(this._host);
           splash.dispose();
         });
-        // window.setTimeout(() => { this._host.node.setAttribute('style', style) }, 100);
-        // window.setTimeout(() => { Private.fitAll(this._host); splash.dispose() }, 100);
       })
       .catch(reason => {
         this._onError(reason);
