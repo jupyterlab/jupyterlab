@@ -3,14 +3,34 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-StatusItem-kernel {
-  background-image: url('./kernel-icon.svg');
+/*
+ * icons for light themes
+ */
+
+[data-theme-light='true'] .jp-StatusItem-kernel {
+  background-image: url('./kernel-icon-light.svg');
 }
 
-.jp-StatusItem-terminal {
-  background-image: url('./terminal-icon.svg');
+[data-theme-light='true'] .jp-StatusItem-terminal {
+  background-image: url('./terminal-icon-light.svg');
 }
 
-.jp-StatusItem-line-form {
-  background-image: url('./line-form.svg');
+[data-theme-light='true'] .jp-StatusItem-line-form {
+  background-image: url('./line-form-light.svg');
+}
+
+/*
+ * icons for dark themes
+ */
+
+[data-theme-light='false'] .jp-StatusItem-kernel {
+  background-image: url('./kernel-icon-dark.svg');
+}
+
+[data-theme-light='false'] .jp-StatusItem-terminal {
+  background-image: url('./terminal-icon-dark.svg');
+}
+
+[data-theme-light='false'] .jp-StatusItem-line-form {
+  background-image: url('./line-form-dark.svg');
 }
