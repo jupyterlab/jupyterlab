@@ -848,6 +848,7 @@ export class CodeCell extends Cell {
     switch (args.key) {
       case 'collapsed':
       case 'scrolled':
+      case 'jupyter':
         this.update();
         break;
       case 'editable':
