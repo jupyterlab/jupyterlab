@@ -16,7 +16,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
-import { Schema, Datastore } from '@phosphor/datastore';
+import { Schema } from '@phosphor/datastore';
 
 import {
   ObservableJSON,
@@ -26,6 +26,8 @@ import {
 } from './observables';
 
 import { iterValues } from './objiter';
+
+import { DatastoreManager } from './manager';
 
 /**
  *
@@ -48,13 +50,10 @@ export class DSModelDB implements IModelDB {
       this._schemas[s.id] = s;
     }
     if (options.baseDB) {
-      this.datastore = options.baseDB.datastore;
+      this.manager = options.baseDB.manager;
     } else {
-      this.datastore = options.datastore;
+      this.manager = options.manager;
     }
-    this.connected = this.datastore.then(ds => {
-      this._ds = ds;
-    });
   }
 
   /**
@@ -94,7 +93,7 @@ export class DSModelDB implements IModelDB {
         `Cannot create a string for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableString(this.datastore, schema, path, this._recordId);
+    return new ObservableString(this.manager, schema, this._recordId, path);
   }
 
   /**
@@ -119,7 +118,7 @@ export class DSModelDB implements IModelDB {
       );
     }
     return new ObservableUndoableList(
-      this.datastore,
+      this.manager,
       schema,
       path,
       this._recordId,
@@ -146,7 +145,7 @@ export class DSModelDB implements IModelDB {
         `Cannot create a map for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableJSON(this.datastore, schema, path, this._recordId);
+    return new ObservableJSON(this.manager, schema, this._recordId, path);
   }
 
   /**
@@ -164,7 +163,7 @@ export class DSModelDB implements IModelDB {
         `Cannot create a value for path '${path}', incompatible with schema.`
       );
     }
-    return new ObservableValue(this.datastore, schema, path, this._recordId);
+    return new ObservableValue(this.manager, schema, this._recordId, path);
   }
 
   /**
@@ -174,11 +173,12 @@ export class DSModelDB implements IModelDB {
    * @param path: the path for the value.
    */
   getValue(path: string): ReadonlyJSONValue | undefined {
-    if (this._ds === undefined) {
-      throw new Error('Cannot use model db before conenction completed!');
+    const ds = this.manager.datastore!;
+    if (ds === undefined) {
+      throw new Error('Cannot use model db before connection completed!');
     }
     const schema = this._schemas[this._basePath];
-    const record = this._ds.get(schema).get(this._recordId);
+    const record = ds.get(schema).get(this._recordId);
     return record && record[path];
   }
 
@@ -191,12 +191,13 @@ export class DSModelDB implements IModelDB {
    * @param value: the new value.
    */
   setValue(path: string, value: ReadonlyJSONValue): void {
-    if (this._ds === undefined) {
-      throw new Error('Cannot use model db before conenction completed!');
+    const ds = this.manager.datastore!;
+    if (ds === undefined) {
+      throw new Error('Cannot use model db before connection completed!');
     }
-    const table = this._ds.get(this._schemas[this._basePath]);
+    const table = ds.get(this._schemas[this._basePath]);
     let oldValue = this.getValue(path);
-    this._ds.beginTransaction();
+    ds.beginTransaction();
     try {
       table.update({
         [this._recordId]: {
@@ -207,7 +208,7 @@ export class DSModelDB implements IModelDB {
         }
       } as any);
     } finally {
-      this._ds.endTransaction();
+      ds.endTransaction();
     }
   }
 
@@ -221,9 +222,9 @@ export class DSModelDB implements IModelDB {
    */
   view(basePath: string): IModelDB {
     const schemas = toArray(iterValues(this._schemas));
-    const datastore = this.datastore;
+    const manager = this.manager;
     // TODO: resolve path?
-    return new DSModelDB({ schemas, datastore, basePath, baseDB: this });
+    return new DSModelDB({ schemas, manager, basePath, baseDB: this });
   }
 
   /**
@@ -282,9 +283,9 @@ export class DSModelDB implements IModelDB {
   readonly collaborators?: ICollaboratorMap;
 
   /**
-   * The underlying datastore.
+   * The underlying datastore manager.
    */
-  readonly datastore: Promise<Datastore>;
+  readonly manager: DatastoreManager;
 
   /**
    * Compute the fully resolved path for a path argument.
@@ -295,8 +296,6 @@ export class DSModelDB implements IModelDB {
     }
     return path;
   }
-
-  private _ds: Datastore | undefined = undefined;
 
   private _basePath: string;
   private _baseDB: DSModelDB | ObservableMap<IObservable>;
@@ -312,7 +311,7 @@ export class DSModelDB implements IModelDB {
 export namespace DSModelDB {
   export interface ICreateOptions {
     schemas: ReadonlyArray<Schema>;
-    datastore: Promise<Datastore>;
+    manager: DatastoreManager;
     basePath?: string;
     baseDB?: DSModelDB;
   }

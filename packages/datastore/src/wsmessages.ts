@@ -6,9 +6,9 @@ import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 import { Datastore } from '@phosphor/datastore';
 
 /**
- * Namespace for datastore websocket protocol message statics.
+ * Namespace for datastore collaboration statics.
  */
-export namespace DatastoreWSMessages {
+export namespace Collaboration {
   /**
    * A transaction with a serial number.
    */
@@ -18,6 +18,11 @@ export namespace DatastoreWSMessages {
      */
     serial: number;
   };
+
+  /**
+   * A lookup for transactions by their transaction id.
+   */
+  export type SerialTransactionMap = { [key: string]: SerialTransaction };
 
   /**
    *
@@ -70,7 +75,7 @@ export namespace DatastoreWSMessages {
   };
 
   /**
-   * A message reqeusting a new, unique store id.
+   * A message requesting the store id of the client.
    */
   export type StoreIdRequest = Base & {
     readonly msgType: 'storeid-request';
@@ -84,7 +89,7 @@ export namespace DatastoreWSMessages {
     readonly msgType: 'storeid-reply';
     readonly content: {
       /**
-       * The newly created unique store id.
+       * The unique store id for this client.
        */
       readonly storeId: number;
     };

@@ -13,7 +13,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { DatastoreSession, DSModelDB } from '@jupyterlab/datastore';
+import { CollaborationClient, DSModelDBFactory } from '@jupyterlab/datastore';
 
 const pluginId = '@jupyterlab/datastore-extension:plugin';
 
@@ -21,8 +21,8 @@ const pluginId = '@jupyterlab/datastore-extension:plugin';
  *
  */
 async function makeTestWidget(): Promise<Widget> {
-  // Set up session to server:
-  const chatSession = new DatastoreSession({ key: 'chat' });
+  // Set up client to collaboration server:
+  const chatClient = new CollaborationClient({ collaborationId: 'chat' });
   const chatSchema = {
     id: 'chat',
     fields: {
@@ -35,27 +35,27 @@ async function makeTestWidget(): Promise<Widget> {
         MessageLoop.sendMessage(
           ds,
           new Datastore.TransactionMessage(
-            (msg as DatastoreSession.RemoteTransactionMessage).transaction
+            (msg as CollaborationClient.RemoteTransactionMessage).transaction
           )
         );
       } else if (msg.type === 'datastore-transaction') {
-        chatSession.broadcastTransactions([
+        chatClient.broadcastTransactions([
           (msg as Datastore.TransactionMessage).transaction
         ]);
       }
     }
   };
-  const permissions = await chatSession.permissions;
+  const permissions = await chatClient.permissions;
   if (!permissions.read) {
     return;
   }
-  const storeId = await chatSession.createStoreId();
+  const storeId = await chatClient.storeId;
   const ds = Datastore.create({
     id: storeId,
     schemas: [chatSchema],
     broadcastHandler: clearance
   });
-  chatSession.handler = clearance;
+  chatClient.handler = clearance;
   const w = new Panel();
   w.id = 'datastore-test';
   w.title.label = 'datastore';
@@ -114,7 +114,7 @@ async function makeTestWidget(): Promise<Widget> {
     }
   });
 
-  await chatSession.replayHistory();
+  await chatClient.replayHistory();
 
   return w;
 }
@@ -129,43 +129,8 @@ const datastorePlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
     const registry = app.docRegistry;
-    registry.addModelDBFactory('phosphor-datastore', {
-      createNew: (path, schemas) => {
-        // Set up session to server:
-        // const key = UUID.uuid4();
-        const key = path.replace(/[^0-9a-zA-Z_\-]/, '');
-        const session = new DatastoreSession({ key });
-
-        const datastore = Promise.resolve().then(async () => {
-          const clearance = {
-            processMessage: (msg: Message) => {
-              if (msg.type === 'remote-transactions') {
-                MessageLoop.sendMessage(
-                  ds,
-                  new Datastore.TransactionMessage(
-                    (msg as DatastoreSession.RemoteTransactionMessage).transaction
-                  )
-                );
-              } else if (msg.type === 'datastore-transaction') {
-                session.broadcastTransactions([
-                  (msg as Datastore.TransactionMessage).transaction
-                ]);
-              }
-            }
-          };
-          session.handler = clearance;
-
-          const ds = Datastore.create({
-            id: await session.createStoreId(),
-            schemas,
-            broadcastHandler: clearance
-          });
-          return ds;
-        });
-
-        return new DSModelDB({ datastore, schemas });
-      }
-    });
+    const factory = new DSModelDBFactory();
+    registry.addModelDBFactory('phosphor-datastore', factory);
     labShell.restored
       .then(() => {
         return makeTestWidget();

@@ -79,7 +79,7 @@ class DatastoreDB:
                 [checkpoints-{0}] (
                     id integer PRIMARY KEY ON CONFLICT REPLACE,
                     state text,
-                    serial number
+                    serial integer
                 )
                 '''.format(self._table_name)
             )
@@ -87,10 +87,12 @@ class DatastoreDB:
     def add_transactions(self, transactions):
         """Add a sequence of transactions to the store.
 
-        Returns a generator to the serial numbers of the added transactions.
+        Returns a dictionary mapping the ids of the passed transactions
+        to their serial numbers.
 
         Note: Any transactions with ids already present in the store
-        will be ignored. Their existing serial number will still be returned.
+        will be ignored. Their existing serial number will still be present
+        in the returned dictionary.
         """
         c = self._conn
         with c:
@@ -122,9 +124,8 @@ class DatastoreDB:
     def get_transactions(self, ids):
         """Get the transactions with the given ids.
 
-        Returns a generator with the transactions in the store
-        that match the given ids. Note that any missing ids will
-        simply not be included in the result.
+        Yields transactions in the store that match the given ids. Note that
+        any missing ids will simply not be included in the result.
         """
         subst = ','.join('?' * len(ids))
         statement = '''
@@ -144,9 +145,8 @@ class DatastoreDB:
     def get_serials(self, serials):
         """Get the transactions with the given serials.
 
-        Returns a generator with the transactions in the store
-        that match the given ids. Note that any missing ids will
-        simply not be included in the result.
+        Yields transactions in the store that match the given serials. Note
+        that any missing serials will simply not be included in the result.
         """
         subst = ','.join('?' * len(serials))
         statement = '''
@@ -169,6 +169,7 @@ class DatastoreDB:
         Returns a generator of booleans indicating the prescence of the
         given ids.
         """
+        ids = tuple(ids)
         subst = ','.join('?' * len(ids))
         statement = '''
             SELECT id
@@ -177,8 +178,7 @@ class DatastoreDB:
         '''.format(self._table_name, subst)
 
         present = set(r[0] for r in self._conn.execute(statement, ids))
-        for i in ids:
-            yield i in present
+        return (i in present for i in ids)
 
     def make_checkpoint(self, state, serial):
         """Make a checkpoint in the transaction history.
@@ -224,12 +224,9 @@ class DatastoreDB:
             self._conn.execute(
                 '''
                     SELECT id, storeId, patch, rowid
-                    FROM (
-                        SELECT *
-                        FROM [{0}]
-                        WHERE rowid > ?
-                        ORDER BY rowid
-                    )
+                    FROM [{0}]
+                    WHERE rowid > ?
+                    ORDER BY rowid
                 '''.format(self._table_name),
                 (serial,)
             )

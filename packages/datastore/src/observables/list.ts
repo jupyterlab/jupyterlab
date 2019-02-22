@@ -15,11 +15,13 @@ import {
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { ListField, Datastore, Schema } from '@phosphor/datastore';
+import { ListField, Schema } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { ObservableBase } from './base';
+
+import { DatastoreManager } from '../manager';
 
 /**
  * A concrete implementation of [[IObservableList]].
@@ -31,13 +33,13 @@ export class ObservableList<T extends ReadonlyJSONValue>
    * Construct a new observable list.
    */
   constructor(
-    datastore: Promise<Datastore>,
+    manager: DatastoreManager,
     schema: Schema,
     recordId: string,
     fieldId: string,
     options: ObservableList.IOptions<T> = {}
   ) {
-    super(datastore, schema, recordId, fieldId);
+    super(manager, schema, recordId, fieldId);
     this._itemCmp = options.itemCmp || Private.itemCmp;
   }
 

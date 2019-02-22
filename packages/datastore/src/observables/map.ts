@@ -7,13 +7,15 @@ import { each } from '@phosphor/algorithm';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { MapField, Datastore, Schema } from '@phosphor/datastore';
+import { MapField, Schema } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { ObservableBase } from './base';
 
 import { iterItems } from '../objiter';
+
+import { DatastoreManager } from '../manager';
 
 /**
  * A concrete implementation of IObservbleMap<T>.
@@ -25,13 +27,13 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * Construct a new observable map.
    */
   constructor(
-    datastore: Promise<Datastore>,
+    manager: DatastoreManager,
     schema: Schema,
     recordId: string,
     fieldId: string,
     options: ObservableMap.IOptions<T> = {}
   ) {
-    super(datastore, schema, recordId, fieldId);
+    super(manager, schema, recordId, fieldId);
     this._itemCmp = options.itemCmp || Private.itemCmp;
   }
 

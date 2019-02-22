@@ -7,11 +7,13 @@ import { map, toArray } from '@phosphor/algorithm';
 
 import { Schema, Datastore } from '@phosphor/datastore';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { Message, IMessageHandler, MessageLoop } from '@phosphor/messaging';
 
-import { DatastoreSession } from './session';
+import { Signal, ISignal } from '@phosphor/signaling';
 
-import { IDisposable } from '@phosphor/disposable';
+import { CollaborationClient } from './client';
 
 import { DSModelDB } from './modeldb';
 
@@ -46,12 +48,18 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
   /**
    *
    */
-  constructor(key: string, schemas: ReadonlyArray<Schema>) {
+  constructor(key: string, schemas: ReadonlyArray<Schema>, immediate: boolean) {
     this.key = key;
-    this._localDS = Datastore.create({
-      id: LOCAL_DS_STORE_ID,
-      schemas
-    });
+    this._schemas = schemas;
+    if (immediate) {
+      this._localDS = Datastore.create({
+        id: LOCAL_DS_STORE_ID,
+        schemas
+      });
+    } else {
+      this._localDS = null;
+    }
+
     try {
       this.connectRemote();
     } catch (err) {
@@ -76,29 +84,24 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       this._remoteDS.dispose();
       this._remoteDS = null;
     }
-    if (this._session) {
-      this._session.dispose();
-      this._session = null;
+    if (this._client) {
+      this._client.dispose();
+      this._client = null;
     }
   }
 
   /**
    *
    */
-  async connectRemote(): Promise<void> {
-    if (!this._localDS) {
-      return;
-    }
-    if (this._session === null) {
-      this._session = new DatastoreSession({
-        sessionId: this.key,
+  protected async connectRemote(): Promise<void> {
+    if (this._client === null) {
+      this._client = new CollaborationClient({
+        collaborationId: this.key,
         handler: this
       });
     }
-    const storeId = await this._session.aquireStoreId();
-    this._remoteDS = cloneDS(storeId, this._localDS);
-    this._localDS.dispose();
-    this._localDS = null;
+    this._storeId = await this._client.storeId;
+    this._client.replayHistory();
   }
 
   /**
@@ -112,20 +115,58 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       MessageLoop.sendMessage(
         this._remoteDS || this._localDS!,
         new Datastore.TransactionMessage(
-          (msg as DatastoreSession.RemoteTransactionMessage).transaction
+          (msg as CollaborationClient.RemoteTransactionMessage).transaction
         )
       );
     } else if (msg.type === 'datastore-transaction') {
-      if (this._session) {
-        this._session.broadcastTransactions([
+      if (this._client) {
+        this._client.broadcastTransactions([
           (msg as Datastore.TransactionMessage).transaction
         ]);
       }
+    } else if (msg.type === 'initial-state') {
+      const state = (msg as CollaborationClient.InitialStateMessage).state;
+
+      // Scenarios:
+      // 1. Immediate (has localDS), and state is null: Clone local.
+      // 2. Non-immediate, and state is null: Simple create of remote.
+      // 3. Non-immediate, and state is non-null: Recreate remote from state.
+      // 4. Immediate, and non-null state: Error!
+      // 5. Has remote already: Treat as non-immediate (recovery)
+
+      const immediate = this._localDS !== null && this._remoteDS === null;
+      if (!immediate) {
+        // 2. / 3.  ( 5.)
+        this._remoteDS = Datastore.create({
+          id: this._storeId!,
+          schemas: this._schemas,
+          broadcastHandler: this,
+          restoreState: state || undefined
+        });
+      } else if (state === null) {
+        // 1.
+        this._remoteDS = cloneDS(this._storeId!, this._localDS!);
+      } else {
+        // 4.
+        throw new Error(
+          'Cannot replace the state of an immediate collaboration session!'
+        );
+      }
+      if (this._localDS) {
+        this._localDS.dispose();
+        this._localDS = null;
+      }
+    } else if (msg.type === 'datastore-gc-chance') {
+      MessageLoop.sendMessage(this._remoteDS || this._localDS!, msg);
     }
   }
 
   get datastore() {
-    return this._remoteDS || this._localDS!;
+    return this._remoteDS || this._localDS;
+  }
+
+  get datastoreChanged(): ISignal<this, DatastoreManager.IChangedArgs> {
+    return this._datastoreChanged;
   }
 
   /**
@@ -133,11 +174,23 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
    */
   readonly key: string;
 
-  private _session: DatastoreSession | null = null;
+  private _schemas: ReadonlyArray<Schema>;
+
+  private _client: CollaborationClient | null = null;
   private _localDS: Datastore | null;
   private _remoteDS: Datastore | null = null;
+  private _storeId: number | null = null;
 
   private _isDisposed = false;
+  private _datastoreChanged = new Signal<this, DatastoreManager.IChangedArgs>(
+    this
+  );
+}
+
+export namespace DatastoreManager {
+  export interface IChangedArgs {
+    datastore: Datastore;
+  }
 }
 
 /**
@@ -155,11 +208,8 @@ export class DSModelDBFactory implements IModelDB.IFactory {
     // const key = UUID.uuid4();
     const key = path.replace(/[^0-9a-zA-Z_\-]/, '');
 
-    const manager = new DatastoreManager(key, schemas);
+    const manager = new DatastoreManager(key, schemas, true);
 
-    return new DSModelDB({
-      schemas,
-      datastore: Promise.resolve(manager.datastore)
-    });
+    return new DSModelDB({ schemas, manager });
   }
 }

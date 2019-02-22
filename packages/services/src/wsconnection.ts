@@ -38,7 +38,7 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
    * A promise that resolves once the connection is open.
    */
   get ready(): Promise<void> {
-    return this._readyPromise.promise;
+    return this._readyDelegate.promise;
   }
 
   /**
@@ -59,16 +59,7 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
 
     const value = this.serializeWSMessage(msg);
 
-    if (this._readyPromise && this._ws) {
-      this._ws.send(value);
-      return;
-    }
-
-    this.ready.then(() => {
-      if (this._ws) {
-        this._ws.send(value);
-      }
-    });
+    this._ws.send(value);
   }
 
   /**
@@ -123,7 +114,7 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
     this._clearSocket();
     this._wsStopped = false;
     this._ws = this.wsFactory();
-    this._readyPromise = new PromiseDelegate<void>();
+    this._readyDelegate = new PromiseDelegate<void>();
 
     this._ws.onmessage = this._onWSMessage.bind(this);
     this._ws.onopen = this._onWSOpen.bind(this);
@@ -151,7 +142,7 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
     if (!this.isDisposed) {
       this.reconnectAttempt = 0;
       this._wsStopped = false;
-      this._readyPromise.resolve(undefined);
+      this._readyDelegate.resolve(undefined);
     }
   }
 
@@ -178,7 +169,7 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
 
   private _onWSError(evt: Event) {
     if (!this._isDisposed) {
-      this._readyPromise.reject(evt);
+      this._readyDelegate.reject(evt);
     }
   }
 
@@ -209,10 +200,10 @@ export abstract class WSConnection<TSendMsg, TRecvMsg> implements IDisposable {
   protected readonly reconnectLimit = 7;
   protected reconnectAttempt = 0;
   protected _ws: WebSocket | null = null;
-  protected _wsStopped: boolean;
+  protected _wsStopped = true;
 
   private _isDisposed = false;
-  private _readyPromise: PromiseDelegate<void>;
+  private _readyDelegate: PromiseDelegate<void> | null = null;
 
   private readonly _noOp = () => {
     /* no-op */

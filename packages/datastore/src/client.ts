@@ -11,7 +11,7 @@ import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
 
 import { ServerConnection, WSConnection } from '@jupyterlab/services';
 
-import { DatastoreWSMessages } from './wsmessages';
+import { Collaboration } from './wsmessages';
 
 /**
  * The url for the datastore service.
@@ -24,20 +24,20 @@ const DATASTORE_SERVICE_URL = 'lab/api/datastore';
 const DEFAULT_IDLE_TIME = 3;
 
 /**
- * A class that manages exchange of transactions with the datastore server.
+ * A class that manages exchange of transactions with the collaboration server.
  */
-export class DatastoreSession extends WSConnection<
-  DatastoreWSMessages.Message,
-  DatastoreWSMessages.Message
+export class CollaborationClient extends WSConnection<
+  Collaboration.Message,
+  Collaboration.Message
 > {
   /**
    *
    */
-  constructor(options: DatastoreSession.IOptions = {}) {
+  constructor(options: CollaborationClient.IOptions = {}) {
     super();
-    this.sessionId = options.sessionId;
+    this.collaborationId = options.collaborationId;
     this.handler = options.handler || null;
-    this._idleTreshold = options.idleTreshold || DEFAULT_IDLE_TIME;
+    this._idleTreshold = 1000 * (options.idleTreshold || DEFAULT_IDLE_TIME);
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     this._createSocket();
@@ -48,23 +48,24 @@ export class DatastoreSession extends WSConnection<
    *
    * @returns {Promise<number>} A promise to the new store id.
    */
-  async aquireStoreId(): Promise<number> {
-    if (this._storeId === null) {
-      await this.ready;
-      const msg = DatastoreWSMessages.createMessage('storeid-request', {});
-      const reply = await this._requestMessageReply(msg);
-      this._storeId = reply.content.storeId;
+  get storeId(): Promise<number> {
+    if (this._storeId !== null) {
+      return Promise.resolve(this._storeId);
     }
-    return this._storeId;
+    return this.ready.then(async () => {
+      const msg = Collaboration.createMessage('storeid-request', {});
+      const reply = await this._requestMessageReply(msg);
+      return (this._storeId = reply.content.storeId);
+    });
   }
 
   /**
    * The permissions for the current use on the datastore session.
    */
-  get permissions(): Promise<DatastoreSession.Permissions> {
+  get permissions(): Promise<CollaborationClient.Permissions> {
     return Promise.resolve().then(async () => {
       await this.ready;
-      const msg = DatastoreWSMessages.createMessage('permissions-request', {});
+      const msg = Collaboration.createMessage('permissions-request', {});
       const reply = await this._requestMessageReply(msg);
       return reply.content;
     });
@@ -85,7 +86,7 @@ export class DatastoreSession extends WSConnection<
       this._pendingTransactions[b.id] = b;
     }
     this._resetIdleTimer();
-    const msg = DatastoreWSMessages.createMessage('transaction-broadcast', {
+    const msg = Collaboration.createMessage('transaction-broadcast', {
       transactions: branded
     });
     this._requestMessageReply(msg).then(
@@ -105,6 +106,7 @@ export class DatastoreSession extends WSConnection<
           }
           this._serverSerial = serial;
         }
+        this._resetIdleTimer();
       },
       () => {
         // TODO: Resend transactions
@@ -118,11 +120,19 @@ export class DatastoreSession extends WSConnection<
    * The transactions of the history will be sent to the set handler.
    */
   async replayHistory(checkpointId?: number): Promise<void> {
-    const msg = DatastoreWSMessages.createMessage('history-request', {
+    const msg = Collaboration.createMessage('history-request', {
       checkpointId: checkpointId === undefined ? null : checkpointId
     });
     const reply = await this._requestMessageReply(msg);
-    this._handleTransactions(reply.content.transactions);
+    const content = reply.content;
+    // TODO: Set initial state
+    if (this.handler !== null) {
+      const message = new CollaborationClient.InitialStateMessage(
+        content.state
+      );
+      MessageLoop.postMessage(this.handler, message);
+    }
+    this._handleTransactions(content.transactions);
   }
 
   /**
@@ -130,7 +140,7 @@ export class DatastoreSession extends WSConnection<
    */
   readonly serverSettings: ServerConnection.ISettings;
 
-  readonly sessionId: string | undefined;
+  readonly collaborationId: string | undefined;
 
   handler: IMessageHandler | null;
 
@@ -140,11 +150,11 @@ export class DatastoreSession extends WSConnection<
     const queryParams = [];
 
     let wsUrl;
-    if (this.sessionId) {
+    if (this.collaborationId) {
       wsUrl = URLExt.join(
         settings.wsUrl,
         DATASTORE_SERVICE_URL,
-        this.sessionId
+        this.collaborationId
       );
     } else {
       wsUrl = URLExt.join(settings.wsUrl, DATASTORE_SERVICE_URL);
@@ -167,9 +177,9 @@ export class DatastoreSession extends WSConnection<
 
   protected handleMessage(
     msg:
-      | DatastoreWSMessages.RawReply
-      | DatastoreWSMessages.TransactionBroadcast
-      | DatastoreWSMessages.StableStateNotice
+      | Collaboration.RawReply
+      | Collaboration.TransactionBroadcast
+      | Collaboration.StableStateNotice
   ): boolean {
     try {
       // TODO: Write a validator?
@@ -179,7 +189,7 @@ export class DatastoreSession extends WSConnection<
       return false;
     }
 
-    if (DatastoreWSMessages.isReply(msg)) {
+    if (Collaboration.isReply(msg)) {
       let delegate = this._delegates && this._delegates.get(msg.parentId!);
       if (delegate) {
         if (msg.msgType === 'error-reply') {
@@ -207,18 +217,18 @@ export class DatastoreSession extends WSConnection<
    * Process transactions received over the websocket.
    */
   private _handleTransactions(
-    transactions: ReadonlyArray<DatastoreWSMessages.SerialTransaction>
+    transactions: ReadonlyArray<Collaboration.SerialTransaction>
   ) {
     if (this.handler !== null) {
       for (let t of transactions) {
-        if (this._serverSerial !== t.serial + 1) {
+        if (t.serial !== this._serverSerial + 1) {
           // Out of order serials!
           // Something has gone wrong somewhere.
           // TODO: Trigger recovery?
           throw new Error('Critical! Out of order transactions in datastore.');
         }
         this._serverSerial = t.serial;
-        const message = new DatastoreSession.RemoteTransactionMessage(t);
+        const message = new CollaborationClient.RemoteTransactionMessage(t);
         MessageLoop.postMessage(this.handler, message);
       }
     }
@@ -228,11 +238,11 @@ export class DatastoreSession extends WSConnection<
   /**
    * Send a message to the server and resolve the reply message.
    */
-  private _requestMessageReply<T extends DatastoreWSMessages.Request>(
+  private _requestMessageReply<T extends Collaboration.Request>(
     msg: T,
     timeout = 0
-  ): Promise<DatastoreWSMessages.IReplyMap[T['msgType']]> {
-    const delegate = new PromiseDelegate<DatastoreWSMessages.Reply>();
+  ): Promise<Collaboration.IReplyMap[T['msgType']]> {
+    const delegate = new PromiseDelegate<Collaboration.Reply>();
     this._delegates.set(msg.msgId, delegate);
 
     // .finally(), delete from delegate map
@@ -259,7 +269,7 @@ export class DatastoreSession extends WSConnection<
   }
 
   private _onIdle() {
-    const msg = DatastoreWSMessages.createMessage('serial-update', {
+    const msg = Collaboration.createMessage('serial-update', {
       serial: this._serverSerial
     });
     this.sendMessage(msg);
@@ -273,16 +283,11 @@ export class DatastoreSession extends WSConnection<
     this._idleTimer = setTimeout(this._onIdle.bind(this), this._idleTreshold);
   }
 
-  private _delegates = new Map<
-    string,
-    PromiseDelegate<DatastoreWSMessages.Reply>
-  >();
+  private _delegates = new Map<string, PromiseDelegate<Collaboration.Reply>>();
 
   private _ourSerial = 0;
   private _serverSerial = 0;
-  private _pendingTransactions: {
-    [key: string]: DatastoreWSMessages.SerialTransaction;
-  } = {};
+  private _pendingTransactions: Collaboration.SerialTransactionMap = {};
 
   private _idleTreshold: number;
   private _idleTimer: number | null = null;
@@ -293,12 +298,12 @@ export class DatastoreSession extends WSConnection<
 /**
  *
  */
-export namespace DatastoreSession {
+export namespace CollaborationClient {
   export interface IOptions {
     /**
-     * The session id to connect to.
+     * The id of the collaboration to connect to.
      */
-    sessionId?: string;
+    collaborationId?: string;
 
     /**
      * The server settings for the session.
@@ -311,7 +316,7 @@ export namespace DatastoreSession {
     handler?: IMessageHandler;
 
     /**
-     * How long to wait before the session is considered idle.
+     * How long to wait before the session is considered idle, in seconds.
      */
     idleTreshold?: number;
   }
@@ -334,6 +339,26 @@ export namespace DatastoreSession {
      * The patch object.
      */
     readonly transaction: Datastore.Transaction;
+  }
+
+  /**
+   * A message class for initial state messages.
+   */
+  export class InitialStateMessage extends Message {
+    /**
+     * Construct a new initial state message.
+     *
+     * @param state - he serialized state
+     */
+    constructor(state: string | null) {
+      super('initial-state');
+      this.state = state;
+    }
+
+    /**
+     * The serialized state.
+     */
+    readonly state: string | null;
   }
 
   /**

@@ -11,9 +11,11 @@ import { each } from '@phosphor/algorithm';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { Datastore, Schema } from '@phosphor/datastore';
+import { Schema } from '@phosphor/datastore';
 
 import { ObservableList } from './list';
+
+import { DatastoreManager } from '../manager';
 
 /**
  * A concrete implementation of an observable undoable list.
@@ -25,13 +27,13 @@ export class ObservableUndoableList<T extends ReadonlyJSONValue>
    * Construct a new undoable observable list.
    */
   constructor(
-    datastore: Promise<Datastore>,
+    manager: DatastoreManager,
     schema: Schema,
     recordId: string,
     fieldId: string,
     serializer: ISerializer<T>
   ) {
-    super(datastore, schema, recordId, fieldId);
+    super(manager, schema, recordId, fieldId);
     this._serializer = serializer;
     this.changed.connect(
       this._onListChanged,

@@ -7,6 +7,8 @@ import { Datastore, Schema } from '@phosphor/datastore';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
+import { DatastoreManager } from '../manager';
+
 /**
  *
  */
@@ -15,22 +17,20 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
    *
    */
   constructor(
-    datastore: Promise<Datastore>,
+    manager: DatastoreManager,
     schema: Schema,
     recordId: string,
     fieldId: string
   ) {
-    this.ds = undefined;
+    this.manager = manager;
     this.schema = schema;
     this.fieldId = fieldId;
     this.recordID = recordId;
-    datastore.then(ds => {
-      this.ds = ds;
-      ds.changed.connect(
-        this._onChange,
-        this
-      );
-    });
+    this.ds = manager.datastore;
+    manager.datastoreChanged.connect(
+      this._onDsChange,
+      this
+    );
   }
 
   /**
@@ -40,9 +40,9 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
     if (this._isDisposed) {
       return;
     }
-    if (this.ds) {
-      this.ds.dispose();
-      this.ds = undefined;
+    if (this.manager) {
+      this.manager.dispose();
+      this.manager = undefined!;
     }
     this._isDisposed = true;
     Signal.clearData(this);
@@ -59,9 +59,17 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
   }
 
   protected ensureBackend(): void {
-    if (this.ds === undefined) {
-      throw new Error('Cannot use model db before conenction completed!');
+    if (this.ds === null) {
+      throw new Error('Cannot use model db before connection completed!');
     }
+  }
+
+  private _onDsChange(
+    manager: DatastoreManager,
+    args: DatastoreManager.IChangedArgs
+  ) {
+    this.ds = args.datastore;
+    this.ds.changed.connect(this._onChange);
   }
 
   private _onChange(ds: Datastore, args: Datastore.IChangedArgs) {
@@ -77,10 +85,11 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
 
   protected abstract onChange(change: T): void;
 
-  protected ds: Datastore | undefined;
+  protected manager: DatastoreManager;
   protected schema: Schema;
   protected fieldId: string;
   protected recordID: string;
+  protected ds: Datastore | null;
   private _isDisposed = false;
 }
 

@@ -20,13 +20,13 @@ from .messages import (
     create_transaction_reply,
     create_transactions_ack
 )
-from .session import Session
+from .collaboration import Collaboration
 
 
-def filter_duplicates(transactions, serials, is_duplicate):
-    for (t, s, d) in zip(transactions, serials, is_duplicate):
+def filter_duplicates(transactions, is_duplicate):
+    for (t, d) in zip(transactions, is_duplicate):
         if not d:
-            yield (t, s)
+            yield t
 
 
 class WSBaseHandler(WebSocketMixin, WebSocketHandler, IPythonHandler):
@@ -65,8 +65,8 @@ class WSBaseHandler(WebSocketMixin, WebSocketHandler, IPythonHandler):
 class DefaultDatastoreAuth:
     """Default implementation of a datastore authenticator."""
 
-    def check_permissions(self, user, session_id, action):
-        """Whether a specific user can perform an action for a given session.
+    def check_permissions(self, user, collaboration_id, action):
+        """Whether a specific user can perform an action for a given collaboration.
 
         This default implementation always returns True.
         """
@@ -80,18 +80,23 @@ class DatastoreHandler(WSBaseHandler):
     def auth(self):
         return self.settings.setdefault('auth', DefaultDatastoreAuth())
 
-    sessions = {} # map of RTC session id -> session
+    collaborations = {} # map of collaboration id -> collaboration
 
     def initialize(self):
         self.log.info("Initializing datastore connection %s", self.request.path)
-        self.session = None
-        self.session_id = None
+        self.collaboration = None
+        self.collaboration_id = None
         self.store_id = None
         self.store_transaction_serial = -1
+        self.history_inited = False
 
     @property
     def datastore_file(self):
         return self.settings.setdefault('datastore_file', ':memory:')
+
+    @property
+    def rtc_recovery_timeout(self):
+        return self.settings.get('rtc_recovery_timeout', 120)
 
     @gen.coroutine
     def pre_get(self):
@@ -105,7 +110,10 @@ class DatastoreHandler(WSBaseHandler):
             self.log.warning("Trying to reopen store that is already connected")
             raise web.HTTPError(400)
 
-            # If so, give the message loop time to process any
+            # Unmark for cleanup
+            self.session.forget_dangling(self.store_id)
+
+            # Give the message loop time to process any
             # transactions that were sent before disconnect,
             # before attempting recovery.
             #
@@ -121,19 +129,19 @@ class DatastoreHandler(WSBaseHandler):
             # actually wait for it
             yield future
 
-    def open(self, session_id=None):
+    def open(self, collaboration_id=None):
         self.log.info('Datastore open called...')
 
-        if session_id is None:
-            self.log.warning("No session id specified")
-            session_id = uuid.uuid4()
-        self.session_id = session_id
+        if collaboration_id is None:
+            self.log.warning("No collaboration id specified")
+            collaboration_id = uuid.uuid4()
+        self.collaboration_id = collaboration_id
 
-        if self.sessions.get(self.session_id, None) is None:
-            self.sessions[self.session_id] = Session(self.session_id, self.datastore_file)
-        self.session = self.sessions[self.session_id]
+        if self.collaborations.get(self.collaboration_id, None) is None:
+            self.collaborations[self.collaboration_id] = Collaboration(self.collaboration_id, self.datastore_file)
+        self.collaboration = self.collaborations[self.collaboration_id]
 
-        self.session.handlers.append(self)
+        self.store_id = self.collaboration.add_client(self)
 
         super(DatastoreHandler, self).open()
         self.log.info('Opened datastore websocket')
@@ -143,25 +151,24 @@ class DatastoreHandler(WSBaseHandler):
         """
         # Unmark as dangling if needed:
         try:
-            self.session.forget_dangling(self.store_id)
+            self.collaboration.forget_dangling(self.store_id)
         except KeyError:
             pass
 
-        if self.datastore_file != ':memory:' and not self.session.handlers:
-            self.session.close()
-            self.session = None
-            del self.sessions[self.session_id]
+        if self.datastore_file != ':memory:' and not self.collaboration.has_clients:
+            self.collaboration.close()
+            self.collaboration = None
+            del self.collaborations[self.collaboration_id]
 
     def on_close(self):
         clean_close = self.close_code in (1000, 1001)
-        self.session.handlers.remove(self)
+        self.collaboration.remove_client(self)
         if clean_close:
             self.cleanup_closed()
         elif self.store_id:
             # Un-clean close after a store was established
-            self.session.mark_dangling(self.store_id)
-            loop = IOLoop.current()
-            loop.add_timeout(loop.time() + self.rtc_recovery_timeout, self.cleanup_closed)
+            self.collaboration.mark_dangling(
+                self.store_id, self.rtc_recovery_timeout, self.cleanup_closed)
 
         super(DatastoreHandler, self).on_close()
         self.log.info('Closed datastore websocket')
@@ -172,8 +179,7 @@ class DatastoreHandler(WSBaseHandler):
         self.write_message(json.dumps(msg))
 
     def check_permissions(self, action):
-        self.log.info(self.current_user)
-        return self.auth.check_permissions(self.current_user, self.session_id, action)
+        return self.auth.check_permissions(self.current_user, self.collaboration_id, action)
 
     def on_message(self, message):
         msg = json.loads(message)
@@ -187,7 +193,7 @@ class DatastoreHandler(WSBaseHandler):
             if not self.check_permissions('w'):
                 return self.send_error_reply(
                     msg_id,
-                    'Permisson error: Cannot write transactions to current session.'
+                    'Permisson error: Cannot write transactions to current collaboration.'
                 )
 
             # Get the transactions:
@@ -202,7 +208,7 @@ class DatastoreHandler(WSBaseHandler):
 
             # Ensure that transaction serials increment as expected:
             for t in transactions:
-                if t['content']['serial'] != self.store_transaction_serial + 1:
+                if t['serial'] != self.store_transaction_serial + 1:
                     # TODO: ! Missing a transaction, recover !
                     raise ValueError('Missing transaction %d from %r' % (
                         self.store_transaction_serial, self.store_id
@@ -210,10 +216,10 @@ class DatastoreHandler(WSBaseHandler):
                 self.store_transaction_serial += 1
 
             # Check for any duplicates before adding
-            is_duplicate = self.session.db.has_transactions(t.id for t in transactions)
+            is_duplicate = self.collaboration.db.has_transactions(t['id'] for t in transactions)
 
             # Add to transaction store, generating a central serial for each
-            serials = self.session.db.add_transactions(transactions)
+            serials = self.collaboration.db.add_transactions(transactions)
 
             # Create an acknowledgment message to the source
             reply = create_transactions_ack(msg_id, transactions, serials)
@@ -221,16 +227,15 @@ class DatastoreHandler(WSBaseHandler):
 
             # Broadcast the tranasctions to all other stores
             # First, filter away duplicates
-            filtered = filter_duplicates(transactions, serials, is_duplicate)
-            self.session.broadcast_transactions(self, *zip(*filtered))
+            filtered = filter_duplicates(transactions, is_duplicate)
+            self.collaboration.broadcast_transactions(self, filtered, serials)
 
         elif msg_type == 'storeid-request':
             if not self.check_permissions('r'):
                 return self.send_error_reply(
                     msg_id,
-                    'Permisson error: Cannot access session: %s' % (self.session_id,)
+                    'Permisson error: Cannot access collaboration: %s' % (self.collaboration_id,)
                 )
-            self.store_id = self.session.create_store_id()
             reply = create_storeid_reply(msg_id, self.store_id)
             self.write_message(json.dumps(reply))
 
@@ -238,29 +243,30 @@ class DatastoreHandler(WSBaseHandler):
             if not self.check_permissions('r'):
                 return self.send_error_reply(
                     msg_id,
-                    'Permisson error: Cannot access session: %s' % (self.session_id,)
+                    'Permisson error: Cannot access collaboration: %s' % (self.collaboration_id,)
                 )
             content = msg.pop('content', {})
             checkpoint_id = content.pop('checkpointId', None)
-            history = self.session.db.history(checkpoint_id)
+            history = self.collaboration.db.history(checkpoint_id)
             reply = create_history_reply(
                 msg_id,
                 tuple(history.transactions),
                 history.state
             )
             self.write_message(json.dumps(reply))
+            self.history_inited = True
 
         elif msg_type == 'transaction-request':
             if not self.check_permissions('r'):
                 return self.send_error_reply(
                     msg_id,
-                    'Permisson error: Cannot access session: %s' % (self.session_id,)
+                    'Permisson error: Cannot access collaboration: %s' % (self.collaboration_id,)
                 )
             content = msg.pop('content', None)
             if content is None:
                 return
             transactionIds = content.pop('transactionIds', [])
-            transactions = tuple(self.session.db.get_transactions(transactionIds))
+            transactions = tuple(self.collaboration.db.get_transactions(transactionIds))
             reply = create_transaction_reply(msg_id, transactions)
             self.write_message(json.dumps(reply))
 
@@ -268,13 +274,13 @@ class DatastoreHandler(WSBaseHandler):
             if not self.check_permissions('r'):
                 return self.send_error_reply(
                     msg_id,
-                    'Permisson error: Cannot access session: %s' % (self.session_id,)
+                    'Permisson error: Cannot access collaboration: %s' % (self.collaboration_id,)
                 )
             content = msg.pop('content', None)
             if content is None:
                 return
             serials = content.pop('serials', [])
-            transactions = tuple(self.session.db.get_serials(serials))
+            transactions = tuple(self.collaboration.db.get_serials(serials))
             reply = create_serial_reply(msg_id, transactions)
             self.write_message(json.dumps(reply))
 
@@ -292,7 +298,7 @@ class DatastoreHandler(WSBaseHandler):
                 return
             serial = content.pop('serial', None)
             if serial is not None:
-                self.session.update_serial(self.store_id, serial)
+                self.collaboration.update_serial(self.store_id, serial)
 
         if reply:
             self.log.info('Sent reply: \n%r' % (reply, ))
@@ -300,4 +306,4 @@ class DatastoreHandler(WSBaseHandler):
 
 # The path for lab build.
 # TODO: Is this a reasonable path?
-datastore_path = r"/lab/api/datastore/(?P<session_id>\w+)"
+datastore_path = r"/lab/api/datastore/(?P<collaboration_id>\w+)"

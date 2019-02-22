@@ -74,7 +74,7 @@ def create_stable_state_broadcast(serial):
     )
 
 def create_transaction_broadcast(transactions, serials):
-    rebranded = [ dict(t, serial=s) for t, s in zip(transactions, serials) ]
+    rebranded = [ dict(t, serial=serials[t['id']]) for t in transactions ]
     return dict(
         msgId=str(uuid.uuid4()),
         msgType='transaction-broadcast',

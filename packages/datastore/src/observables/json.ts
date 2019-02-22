@@ -5,11 +5,13 @@ import { IObservableJSON } from '@jupyterlab/observables';
 
 import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
 
-import { Datastore, Schema } from '@phosphor/datastore';
+import { Schema } from '@phosphor/datastore';
 
 import { Message } from '@phosphor/messaging';
 
 import { ObservableMap } from './map';
+
+import { DatastoreManager } from '../manager';
 
 /**
  * A concrete Observable map for JSON data.
@@ -19,13 +21,13 @@ export class ObservableJSON extends ObservableMap<JSONValue> {
    * Construct a new observable JSON object.
    */
   constructor(
-    datastore: Promise<Datastore>,
+    manager: DatastoreManager,
     schema: Schema,
     recordId: string,
     fieldId: string,
     options: ObservableJSON.IOptions = {}
   ) {
-    super(datastore, schema, recordId, fieldId, {
+    super(manager, schema, recordId, fieldId, {
       itemCmp: JSONExt.deepEqual
     });
   }
