@@ -585,6 +585,15 @@ function activateNotebookHandler(
     // Add the notebook panel to the tracker.
     tracker.add(widget);
 
+    /**
+     * TODO:
+     * * Add settings for each syncable cell attribute (collapse, scrolled, editable)
+     * * Have notebook-level widget settings for each syncable attribute
+     * * On the setting change, set each existing notebook accordingly
+     * * For each new notebook, set the attributes according to the setting
+     * * in a notebook, when a syncable attribute is set, set each cell appropriately and create new cells appropriately.
+     */
+
     // // TODO: Add cell widget events for when the scrolled or collapse state
     // // changes, so that we can sync metadata, then delete this save handler.
     // widget.context.saveState.connect((sender, state) => {
