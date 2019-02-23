@@ -18,9 +18,8 @@ const buttonClassName = style({
   background: '#FFFFFF',
   fontSize: 10,
   borderWidth: 0,
-  margin: 2,
   marginRight: 12, // 2 + 10 spacer between
-  padding: 4,
+  padding: '2px 4px',
   $nest: {
     '&:active': {
       background: '#BDBDBD'
@@ -48,19 +47,33 @@ const datasetClassName = style({
   padding: 4,
   paddingRight: 12,
   paddingLeft: 12,
+  borderLeftWidth: 8,
+  borderLeftColor: 'white',
+  borderLeftStyle: 'solid',
   $nest: {
     '&:hover': {
-      background: '#F2F2F2'
+      borderLeftColor: '#E0E0E0'
+    },
+    '&:active': {
+      borderLeftColor: '#BDBDBD'
+    },
+    '&:active:hover': {
+      borderLeftColor: '#BDBDBD'
     }
   }
 });
 
 const activeDatasetClassName = style({
-  backgroundColor: 'var(--jp-brand-color1)',
-  color: 'white',
+  borderLeftColor: 'var(--jp-brand-color1)',
   $nest: {
     '&:hover': {
-      background: 'var(--jp-brand-color1)'
+      borderLeftColor: 'var(--jp-brand-color1)'
+    },
+    '&:active': {
+      borderLeftColor: 'var(--jp-brand-color1)'
+    },
+    '&:active:hover': {
+      borderLeftColor: 'var(--jp-brand-color1)'
     }
   }
 });
