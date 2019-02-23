@@ -1216,37 +1216,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(cell => {
-      const { model, inputHidden } = cell;
-      const metadata = model.metadata;
-
-      // Make a shallow copy of the metadata value so the `set` below works.
-      const jupyter = { ...(metadata.get('jupyter') as any) };
-
-      if (inputHidden) {
-        jupyter.source_hidden = true;
-      } else {
-        delete jupyter.source_hidden;
-      }
-
-      if (model.type === 'code') {
-        const { outputHidden } = cell as CodeCell;
-
-        // set both metadata keys
-        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
-        if (outputHidden) {
-          model.metadata.set('collapsed', true);
-          jupyter.outputs_hidden = true;
-        } else {
-          model.metadata.delete('collapsed');
-          delete jupyter.outputs_hidden;
-        }
-      }
-
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
-      }
+      cell.persistCollapseState();
     });
     Private.handleState(notebook, state);
   }
@@ -1264,19 +1234,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(cell => {
-      const { model } = cell;
-      const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
-
-      cell.inputHidden = !!jupyter.source_hidden;
-
-      if (model.type === 'code') {
-        if (model.metadata.get('collapsed') || jupyter.outputs_hidden) {
-          (cell as CodeCell).outputHidden = true;
-        } else {
-          (cell as CodeCell).outputHidden = false;
-        }
-      }
+      cell.revertCollapseState();
     });
     Private.handleState(notebook, state);
   }
@@ -1295,15 +1253,8 @@ export namespace NotebookActions {
 
     notebook.widgets.forEach(cell => {
       const { model } = cell;
-
       if (model.type === 'code') {
-        const { outputsScrolled } = cell as CodeCell;
-
-        if (outputsScrolled) {
-          model.metadata.set('scrolled', true);
-        } else {
-          model.metadata.delete('scrolled');
-        }
+        (cell as CodeCell).persistScrolledState();
       }
     });
     Private.handleState(notebook, state);
@@ -1324,7 +1275,7 @@ export namespace NotebookActions {
       const { model } = cell;
 
       if (model.type === 'code') {
-        (cell as CodeCell).outputsScrolled = !!model.metadata.get('scrolled');
+        (cell as CodeCell).revertScrolledState();
       }
     });
     Private.handleState(notebook, state);

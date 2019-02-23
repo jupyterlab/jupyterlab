@@ -212,8 +212,7 @@ export class Cell extends Widget {
    * Should be called at the end of the subclasses's constructor.
    */
   protected initializeState() {
-    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-    this.inputHidden = jupyter.source_hidden === true;
+    this.revertCollapseState();
     this._readOnly = this.model.metadata.get('editable') === false;
   }
 
@@ -652,13 +651,8 @@ export class CodeCell extends Cell {
    */
   protected initializeState() {
     super.initializeState();
-
-    const metadataScrolled = this.model.metadata.get('scrolled');
-    this.outputsScrolled = metadataScrolled === true;
-
-    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-    const collapsed = this.model.metadata.get('collapsed');
-    this.outputHidden = collapsed === true || jupyter.outputs_hidden === true;
+    this.revertCollapseState();
+    this.revertScrolledState;
 
     this.setPrompt(`${this.model.executionCount || ''}`);
   }
@@ -724,9 +718,10 @@ export class CodeCell extends Cell {
    * Revert view collapse state from model.
    */
   revertCollapseState() {
+    super.revertCollapseState();
     const jupyter = (this.model.metadata.get('jupyter') as any) || {};
     const collapsed = this.model.metadata.get('collapsed');
-    this.inputHidden = !!jupyter.outputs_hidden || !!collapsed;
+    this.outputHidden = !!jupyter.outputs_hidden || !!collapsed;
   }
 
   /**
@@ -738,6 +733,26 @@ export class CodeCell extends Cell {
   set outputsScrolled(value: boolean) {
     this.toggleClass('jp-mod-outputsScrolled', value);
     this._outputsScrolled = value;
+  }
+
+  /**
+   * Save view collapse state to model
+   */
+  persistScrolledState() {
+    const metadata = this.model.metadata;
+    if (this.outputsScrolled) {
+      metadata.set('scrolled', true);
+    } else {
+      metadata.delete('scrolled');
+    }
+  }
+
+  /**
+   * Revert view collapse state from model.
+   */
+  revertScrolledState() {
+    const metadata = this.model.metadata;
+    this.outputsScrolled = !!metadata.get('scrolled');
   }
 
   /**
