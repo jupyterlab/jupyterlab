@@ -200,7 +200,6 @@ export class Cell extends Widget {
       );
     }
 
-    // Initialize state
     model.metadata.changed.connect(
       this.onMetadataChanged,
       this
@@ -286,6 +285,16 @@ export class Cell extends Widget {
    * Save view editable state to model
    */
   saveEditableState() {
+    const { metadata } = this.model;
+    const current = metadata.get('editable');
+
+    if (
+      (this.readOnly && current === false) ||
+      (!this.readOnly && current === undefined)
+    ) {
+      return;
+    }
+
     if (this.readOnly) {
       this.model.metadata.set('editable', false);
     } else {
@@ -351,6 +360,7 @@ export class Cell extends Widget {
     ) {
       return;
     }
+
     if (this.inputHidden) {
       jupyter.source_hidden = true;
     } else {
@@ -824,10 +834,12 @@ export class CodeCell extends Cell {
    * Save view collapse state to model
    */
   saveScrolledState() {
-    const metadata = this.model.metadata;
+    const { metadata } = this.model;
+    const current = metadata.get('scrolled');
+
     if (
-      (this.outputsScrolled && metadata.get('scrolled') === true) ||
-      (!this.outputsScrolled && metadata.get('scrolled') === undefined)
+      (this.outputsScrolled && current === true) ||
+      (!this.outputsScrolled && current === undefined)
     ) {
       return;
     }
