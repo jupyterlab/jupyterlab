@@ -119,6 +119,8 @@ namespace CommandIDs {
 
   export const runAllBelow = 'notebook:run-all-below';
 
+  export const runAllMarkdown = 'notebook:run-all-markdown';
+
   export const toCode = 'notebook:change-cell-to-code';
 
   export const toMarkdown = 'notebook:change-cell-to-markdown';
@@ -1037,6 +1039,17 @@ function addCommands(
       );
     }
   });
+  commands.addCommand(CommandIDs.runAllMarkdown, {
+    label: 'Run All Markdown Cells',
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        const { context, content } = current;
+        return NotebookActions.runAllMarkdown(content, context.session);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel…',
     execute: args => {
@@ -1788,6 +1801,7 @@ function populatePalette(
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
+    CommandIDs.runAllMarkdown,
     CommandIDs.runAllAbove,
     CommandIDs.runAllBelow,
     CommandIDs.selectAll,
@@ -2059,6 +2073,12 @@ function populateMenus(
     runAll: current => {
       const { context, content } = current;
       return NotebookActions.runAll(content, context.session).then(
+        () => void 0
+      );
+    },
+    runAllMarkdown: current => {
+      const { context, content } = current;
+      return NotebookActions.runAllMarkdown(content, context.session).then(
         () => void 0
       );
     },

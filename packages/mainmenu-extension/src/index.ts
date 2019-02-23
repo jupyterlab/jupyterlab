@@ -92,6 +92,8 @@ export namespace CommandIDs {
 
   export const runAll = 'runmenu:run-all';
 
+  export const runAllMarkdown = 'runmenu:run-all-markdown';
+
   export const restartAndRunAll = 'runmenu:restart-and-run-all';
 
   export const runAbove = 'runmenu:run-above';
@@ -675,6 +677,19 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
 
+  commands.addCommand(CommandIDs.runAllMarkdown, {
+    label: () => {
+      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      const enabled = Private.delegateEnabled(
+        app,
+        menu.codeRunners,
+        'runAllMarkdown'
+      )();
+      return `Run All Markdown ${enabled ? ` ${noun}` : ''}`;
+    },
+    isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAllMarkdown'),
+    execute: Private.delegateExecute(app, menu.codeRunners, 'runAllMarkdown')
+  });
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
@@ -693,11 +708,13 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
   });
 
-  const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
-    command => {
-      return { command };
-    }
-  );
+  const runAllGroup = [
+    CommandIDs.runAll,
+    CommandIDs.restartAndRunAll,
+    CommandIDs.runAllMarkdown
+  ].map(command => {
+    return { command };
+  });
 
   menu.addGroup([{ command: CommandIDs.run }], 0);
   menu.addGroup(runAllGroup, 999);

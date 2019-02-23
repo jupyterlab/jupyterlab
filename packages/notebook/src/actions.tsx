@@ -517,7 +517,33 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(child => {
+      console.log('I came in runAll');
+      console.log(child.model.type);
       notebook.select(child);
+    });
+
+    const promise = Private.runSelected(notebook, session);
+
+    Private.handleRunState(notebook, state, true);
+    return promise;
+  }
+
+  export function runAllMarkdown(
+    notebook: Notebook,
+    session?: IClientSession
+  ): Promise<boolean> {
+    if (!notebook.model || !notebook.activeCell) {
+      return Promise.resolve(false);
+    }
+
+    const state = Private.getState(notebook);
+    console.log('I came here first');
+    notebook.widgets.forEach(child => {
+      console.log('I came here second');
+      console.log(child.model.type);
+      if (child.model.type === 'markdown') {
+        notebook.select(child);
+      }
     });
 
     const promise = Private.runSelected(notebook, session);
