@@ -102,11 +102,6 @@ const CELL_INPUT_COLLAPSER_CLASS = 'jp-Cell-inputCollapser';
 const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
 
 /**
- * The class name added to the cell when collapsed.
- */
-const COLLAPSED_CLASS = 'jp-mod-collapsed';
-
-/**
  * The class name added to the cell when readonly.
  */
 const READONLY_CLASS = 'jp-mod-readOnly';
