@@ -1812,8 +1812,7 @@ function populatePalette(
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
-    CommandIDs.trust,
-    CommandIDs.saveWithView
+    CommandIDs.trust
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -1881,7 +1880,7 @@ function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette | null,
+  palette: ICommandPalette | null
 ): void {
   let { commands } = app;
 
