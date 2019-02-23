@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@phosphor/algorithm';
+import { ArrayExt, each, chain } from '@phosphor/algorithm';
 
 import { JSONObject, JSONValue, Token } from '@phosphor/coreutils';
 
@@ -28,6 +28,7 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
 import { NotebookActions } from './actions';
+import { Collapse } from './collapse';
 
 /* tslint:disable */
 /**
@@ -48,6 +49,38 @@ export interface INotebookTools extends Widget {
   addItem(options: NotebookTools.IAddOptions): void;
 }
 
+class RankedPanel<T extends Widget = Widget> extends Widget {
+  constructor() {
+    super();
+    this.layout = new PanelLayout();
+  }
+
+  addWidget(widget: Widget, rank: number): void {
+    const rankItem = { widget, rank };
+    const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
+    ArrayExt.insert(this._items, index, rankItem);
+
+    const layout = this.layout as PanelLayout;
+    layout.insertWidget(index, widget);
+  }
+
+  /**
+   * Handle the removal of a child
+   *
+   */
+  protected onChildRemoved(msg: Widget.ChildMessage): void {
+    let index = ArrayExt.findFirstIndex(
+      this._items,
+      item => item.widget === msg.child
+    );
+    if (index !== -1) {
+      ArrayExt.removeAt(this._items, index);
+    }
+  }
+
+  private _items: Private.IRankItem<T>[] = [];
+}
+
 /**
  * A widget that provides cell metadata tools.
  */
@@ -58,7 +91,16 @@ export class NotebookTools extends Widget implements INotebookTools {
   constructor(options: NotebookTools.IOptions) {
     super();
     this.addClass('jp-NotebookTools');
-    this.layout = new PanelLayout();
+
+    this._cellTools = new RankedPanel<NotebookTools.Tool>();
+    this._cellTools.title.label = 'Cell Tools';
+    this._notebookTools = new RankedPanel<NotebookTools.Tool>();
+    this._notebookTools.title.label = 'Notebook Tools';
+
+    const layout = (this.layout = new PanelLayout());
+    layout.addWidget(new Collapse({ widget: this._notebookTools }));
+    layout.addWidget(new Collapse({ widget: this._cellTools }));
+
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
       this._onNotebookPanelChanged,
@@ -103,31 +145,22 @@ export class NotebookTools extends Widget implements INotebookTools {
   addItem(options: NotebookTools.IAddOptions): void {
     let tool = options.tool;
     let rank = 'rank' in options ? options.rank : 100;
-    let rankItem = { tool, rank };
-    let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
+
+    let section: RankedPanel<NotebookTools.Tool>;
+    if (options.section === 'notebook') {
+      section = this._notebookTools;
+    } else if (options.section === 'cell') {
+      section = this._cellTools;
+    }
 
     tool.addClass('jp-NotebookTools-tool');
-
-    // Add the tool.
-    ArrayExt.insert(this._items, index, rankItem);
-    let layout = this.layout as PanelLayout;
-    layout.insertWidget(index, tool);
+    section.addWidget(tool, rank);
+    // TODO: perhaps the necessary notebookTools functionality should be
+    // consolidated into a single object, rather than a broad reference to this.
+    tool.notebookTools = this;
 
     // Trigger the tool to update its active cell.
     MessageLoop.sendMessage(tool, NotebookTools.ActiveCellMessage);
-  }
-
-  /**
-   * Handle the removal of a child
-   */
-  protected onChildRemoved(msg: Widget.ChildMessage): void {
-    let index = ArrayExt.findFirstIndex(
-      this._items,
-      item => item.tool === msg.child
-    );
-    if (index !== -1) {
-      ArrayExt.removeAt(this._items, index);
-    }
   }
 
   /**
@@ -156,7 +189,7 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this.children(), widget => {
+    each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.NotebookPanelMessage);
     });
     this._onActiveCellChanged();
@@ -181,7 +214,7 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    each(this.children(), widget => {
+    each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveCellMessage);
     });
   }
@@ -190,7 +223,7 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the selection.
    */
   private _onSelectionChanged(): void {
-    each(this.children(), widget => {
+    each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.SelectionMessage);
     });
   }
@@ -206,12 +239,17 @@ export class NotebookTools extends Widget implements INotebookTools {
       'cell-metadata-changed',
       args
     );
-    each(this.children(), widget => {
+    each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, message);
     });
   }
 
-  private _items: Private.IRankItem[] = [];
+  private _toolChildren() {
+    return chain(this._notebookTools.children(), this._cellTools.children());
+  }
+
+  private _cellTools: RankedPanel<NotebookTools.Tool>;
+  private _notebookTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
   private _prevPanel: NotebookPanel | null;
   private _prevActive: ICellModel | null;
@@ -226,19 +264,24 @@ export namespace NotebookTools {
    */
   export interface IOptions {
     /**
-     * The notebook tracker used by the cell tools.
+     * The notebook tracker used by the notebook tools.
      */
     tracker: INotebookTracker;
   }
 
   /**
-   * The options used to add an item to the cell tools.
+   * The options used to add an item to the notebook tools.
    */
   export interface IAddOptions {
     /**
-     * The tool to add to the cell tools area.
+     * The tool to add to the notebook tools area.
      */
     tool: Tool;
+
+    /**
+     * The section to which the tool should be added.
+     */
+    section: 'notebook' | 'cell';
 
     /**
      * The rank order of the widget among its siblings.
@@ -264,13 +307,18 @@ export namespace NotebookTools {
   export const SelectionMessage = new ConflatableMessage('selection-changed');
 
   /**
-   * The base cell tool, meant to be subclassed.
+   * The base notebook tool, meant to be subclassed.
    */
   export class Tool extends Widget {
     /**
-     * The cell tools object.
+     * The notebook tools object.
      */
-    readonly parent: INotebookTools;
+    notebookTools: INotebookTools;
+
+    dispose() {
+      super.dispose();
+      this.notebookTools = null;
+    }
 
     /**
      * Process a message sent to the widget.
@@ -374,13 +422,13 @@ export namespace NotebookTools {
       return 'All Cell Scroll State: ';
     }
     protected viewToMetadata() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.saveScrollState(panel.content);
       }
     }
     protected metadataToView() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.loadScrollState(panel.content);
       }
@@ -392,13 +440,13 @@ export namespace NotebookTools {
       return 'All Cell Collapse State: ';
     }
     protected viewToMetadata() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.saveCollapseState(panel.content);
       }
     }
     protected metadataToView() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.loadCollapseState(panel.content);
       }
@@ -410,13 +458,13 @@ export namespace NotebookTools {
       return 'All Cell Editable State: ';
     }
     protected viewToMetadata() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.saveEditableState(panel.content);
       }
     }
     protected metadataToView() {
-      const panel = this.parent.notebookPanel;
+      const panel = this.notebookTools.notebookPanel;
       if (panel) {
         NotebookActions.loadEditableState(panel.content);
       }
@@ -453,7 +501,7 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(): void {
-      let activeCell = this.parent.activeCell;
+      let activeCell = this.notebookTools.activeCell;
       let layout = this.layout as PanelLayout;
       let count = layout.widgets.length;
       for (let i = 0; i < count; i++) {
@@ -578,14 +626,18 @@ export namespace NotebookTools {
      * Handle a change of the notebook.
      */
     protected onNotebookPanelChanged(msg: Message): void {
-      const nb = this.parent.notebookPanel && this.parent.notebookPanel.content;
+      const nb =
+        this.notebookTools.notebookPanel &&
+        this.notebookTools.notebookPanel.content;
       this.editor.source = nb ? nb.model.metadata : null;
     }
     /**
      * Handle a change to the notebook metadata.
      */
     protected onNotebookMetadataChanged(msg: Message): void {
-      const nb = this.parent.notebookPanel && this.parent.notebookPanel.content;
+      const nb =
+        this.notebookTools.notebookPanel &&
+        this.notebookTools.notebookPanel.content;
       this.editor.source = nb ? nb.model.metadata : null;
     }
   }
@@ -603,14 +655,14 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
-      let cell = this.parent.activeCell;
+      let cell = this.notebookTools.activeCell;
       this.editor.source = cell ? cell.model.metadata : null;
     }
     /**
      * Handle a change to the active cell metadata.
      */
     protected onCellMetadataChanged(msg: Message): void {
-      let cell = this.parent.activeCell;
+      let cell = this.notebookTools.activeCell;
       this.editor.source = cell ? cell.model.metadata : null;
     }
   }
@@ -686,7 +738,7 @@ export namespace NotebookTools {
      */
     protected onActiveCellChanged(msg: Message): void {
       let select = this.selectNode;
-      let activeCell = this.parent.activeCell;
+      let activeCell = this.notebookTools.activeCell;
       if (!activeCell) {
         select.disabled = true;
         select.value = '';
@@ -716,7 +768,7 @@ export namespace NotebookTools {
         return;
       }
       let select = this.selectNode;
-      let cell = this.parent.activeCell;
+      let cell = this.notebookTools.activeCell;
       if (msg.args.key === this.key && cell) {
         this._changeGuard = true;
         let getter = this._getter;
@@ -729,7 +781,7 @@ export namespace NotebookTools {
      * Handle a change to the value.
      */
     protected onValueChanged(): void {
-      let activeCell = this.parent.activeCell;
+      let activeCell = this.notebookTools.activeCell;
       if (!activeCell || this._changeGuard) {
         return;
       }
@@ -999,11 +1051,11 @@ namespace Private {
   /**
    * An object which holds a widget and its sort rank.
    */
-  export interface IRankItem {
+  export interface IRankItem<T extends Widget = Widget> {
     /**
      * The widget for the item.
      */
-    tool: NotebookTools.Tool;
+    widget: T;
 
     /**
      * The sort rank of the menu.

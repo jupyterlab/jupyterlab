@@ -217,9 +217,9 @@ const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const FACTORY = 'Notebook';
 
 /**
- * The rank of the cell tools tab in the sidebar
+ * The rank of the notebook tools tab in the sidebar
  */
-const CELL_TOOLS_RANK = 400;
+const NOTEBOOK_TOOLS_RANK = 400;
 
 /**
  * The exluded Export To ...
@@ -285,7 +285,7 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 };
 
 /**
- * The cell tools extension.
+ * The notebook tools extension.
  */
 const tools: JupyterFrontEndPlugin<INotebookTools> = {
   activate: activateNotebookTools,
@@ -378,7 +378,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 export default plugins;
 
 /**
- * Activate the cell tools extension.
+ * Activate the notebook tools extension.
  */
 function activateNotebookTools(
   app: JupyterFrontEnd,
@@ -387,8 +387,8 @@ function activateNotebookTools(
   state: IStateDB,
   labShell: ILabShell | null
 ): INotebookTools {
-  const id = 'cell-tools';
-  const celltools = new NotebookTools({ tracker });
+  const id = 'notebook-tools';
+  const notebookTools = new NotebookTools({ tracker });
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const slideShow = NotebookTools.createSlideShowSelector();
   const scrolled = NotebookTools.createScrolledSelector();
@@ -438,26 +438,42 @@ function activateNotebookTools(
         }
       });
       const nbConvert = NotebookTools.createNBConvertSelector(optionsMap);
-      celltools.addItem({ tool: nbConvert, rank: 3 });
+      notebookTools.addItem({ tool: nbConvert, section: 'cell', rank: 3 });
     }
   });
-  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
-  celltools.title.caption = 'Cell Inspector';
-  celltools.id = id;
+  notebookTools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  notebookTools.title.caption = 'Notebook Tools';
+  notebookTools.id = id;
 
-  celltools.addItem({ tool: syncScrolledState, rank: 1 });
-  celltools.addItem({ tool: syncCollapsedState, rank: 1 });
-  celltools.addItem({ tool: syncEditableState, rank: 1 });
+  notebookTools.addItem({
+    tool: syncScrolledState,
+    section: 'notebook',
+    rank: 1
+  });
+  notebookTools.addItem({
+    tool: syncCollapsedState,
+    section: 'notebook',
+    rank: 1
+  });
+  notebookTools.addItem({
+    tool: syncEditableState,
+    section: 'notebook',
+    rank: 1
+  });
+  notebookTools.addItem({
+    tool: notebookMetadataEditor,
+    section: 'notebook',
+    rank: 5
+  });
 
-  celltools.addItem({ tool: activeCellTool, rank: 1 });
-  celltools.addItem({ tool: editable, rank: 2 });
-  celltools.addItem({ tool: scrolled, rank: 2 });
-  celltools.addItem({ tool: inputHidden, rank: 2 });
-  celltools.addItem({ tool: outputCollapsed, rank: 2 });
-  celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: cellMetadataEditor, rank: 4 });
-  celltools.addItem({ tool: notebookMetadataEditor, rank: 5 });
-  MessageLoop.installMessageHook(celltools, hook);
+  notebookTools.addItem({ tool: activeCellTool, section: 'cell', rank: 1 });
+  notebookTools.addItem({ tool: editable, section: 'cell', rank: 2 });
+  notebookTools.addItem({ tool: scrolled, section: 'cell', rank: 2 });
+  notebookTools.addItem({ tool: inputHidden, section: 'cell', rank: 2 });
+  notebookTools.addItem({ tool: outputCollapsed, section: 'cell', rank: 2 });
+  notebookTools.addItem({ tool: slideShow, section: 'cell', rank: 2 });
+  notebookTools.addItem({ tool: cellMetadataEditor, section: 'cell', rank: 4 });
+  MessageLoop.installMessageHook(notebookTools, hook);
 
   // Wait until the application has finished restoring before rendering.
   Promise.all([state.fetch(id), app.restored]).then(([value]) => {
@@ -465,28 +481,28 @@ function activateNotebookTools(
       value && ((value as ReadonlyJSONObject)['open'] as boolean)
     );
 
-    // After initial restoration, check if the cell tools should render.
+    // After initial restoration, check if the notebook tools should render.
     if (tracker.size) {
-      app.shell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
+      app.shell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
       if (open) {
-        app.shell.activateById(celltools.id);
+        app.shell.activateById(notebookTools.id);
       }
     }
 
     const updateTools = () => {
-      // If there are any open notebooks, add cell tools to the side panel if
+      // If there are any open notebooks, add notebook tools to the side panel if
       // it is not already there.
       if (tracker.size) {
-        if (!celltools.isAttached) {
-          labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
+        if (!notebookTools.isAttached) {
+          labShell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
         }
         return;
       }
-      // If there are no notebooks, close cell tools.
-      celltools.close();
+      // If there are no notebooks, close notebook tools.
+      notebookTools.close();
     };
 
-    // For all subsequent widget changes, check if the cell tools should render.
+    // For all subsequent widget changes, check if the notebook tools should render.
     if (labShell) {
       labShell.currentChanged.connect((sender, args) => {
         updateTools();
@@ -498,7 +514,7 @@ function activateNotebookTools(
     }
   });
 
-  return celltools;
+  return notebookTools;
 }
 
 /**
