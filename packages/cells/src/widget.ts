@@ -271,6 +271,24 @@ export class Cell extends Widget {
   }
 
   /**
+   * Save view editable state to model
+   */
+  saveEditableState() {
+    if (this.readOnly) {
+      this.model.metadata.set('editable', false);
+    } else {
+      this.model.metadata.delete('editable');
+    }
+  }
+
+  /**
+   * Load view editable state from model.
+   */
+  loadEditableState() {
+    this.readOnly = this.model.metadata.get('editable') === false;
+  }
+
+  /**
    * A promise that resolves when the widget renders for the first time.
    */
   get ready(): Promise<void> {
@@ -304,7 +322,7 @@ export class Cell extends Widget {
     }
     this._inputHidden = value;
     if (this.syncCollapse) {
-      this.persistCollapseState();
+      this.saveCollapseState();
     }
     this.handleInputHidden(value);
   }
@@ -312,7 +330,7 @@ export class Cell extends Widget {
   /**
    * Save view collapse state to model
    */
-  persistCollapseState() {
+  saveCollapseState() {
     const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
     if (this.inputHidden) {
       jupyter.source_hidden = true;
@@ -329,7 +347,7 @@ export class Cell extends Widget {
   /**
    * Revert view collapse state from model.
    */
-  revertCollapseState() {
+  loadCollapseState() {
     const jupyter = (this.model.metadata.get('jupyter') as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
@@ -357,22 +375,23 @@ export class Cell extends Widget {
       return;
     }
     if (value) {
-      const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-      this.inputHidden = jupyter.source_hidden === true;
+      this.loadCollapseState();
     }
-    this.handleSyncCollapse(value);
   }
 
   /**
-   * Handle the input being hidden.
-   *
-   * #### Notes
-   * This is called by the `syncCollapse` setter so that subclasses
-   * can perform actions upon the input being hidden without accessing
-   * private state.
+   * Whether to sync the editable state to the cell model.
    */
-  protected handleSyncCollapse(value: boolean): void {
-    return;
+  get syncEditable(): boolean {
+    return this._syncEditable;
+  }
+  set syncEditable(value: boolean) {
+    if (this._syncEditable === value) {
+      return;
+    }
+    if (value) {
+      this.loadEditableState();
+    }
   }
 
   /**
@@ -689,8 +708,8 @@ export class CodeCell extends Cell {
   /**
    * Save view collapse state to model
    */
-  persistCollapseState() {
-    super.persistCollapseState();
+  saveCollapseState() {
+    super.saveCollapseState();
     const metadata = this.model.metadata;
     const jupyter = { ...(metadata.get('jupyter') as any) };
     if (this.outputHidden) {
@@ -712,8 +731,8 @@ export class CodeCell extends Cell {
   /**
    * Revert view collapse state from model.
    */
-  revertCollapseState() {
-    super.revertCollapseState();
+  loadCollapseState() {
+    super.loadCollapseState();
     const jupyter = (this.model.metadata.get('jupyter') as any) || {};
     const collapsed = this.model.metadata.get('collapsed');
     this.outputHidden = !!jupyter.outputs_hidden || !!collapsed;
@@ -733,7 +752,7 @@ export class CodeCell extends Cell {
   /**
    * Save view collapse state to model
    */
-  persistScrolledState() {
+  saveScrolledState() {
     const metadata = this.model.metadata;
     if (this.outputsScrolled) {
       metadata.set('scrolled', true);
@@ -745,9 +764,24 @@ export class CodeCell extends Cell {
   /**
    * Revert view collapse state from model.
    */
-  revertScrolledState() {
+  loadScrolledState() {
     const metadata = this.model.metadata;
     this.outputsScrolled = !!metadata.get('scrolled');
+  }
+
+  /**
+   * Whether to sync the scrolled state to the cell model.
+   */
+  get syncScrolled(): boolean {
+    return this._syncScrolled;
+  }
+  set syncScrolled(value: boolean) {
+    if (this._syncScrolled === value) {
+      return;
+    }
+    if (value) {
+      this.loadScrolledState();
+    }
   }
 
   /**
@@ -763,22 +797,6 @@ export class CodeCell extends Cell {
       this._outputWrapper.show();
     } else if (value && !this._outputWrapper.isHidden && this._outputHidden) {
       this._outputWrapper.hide();
-    }
-  }
-
-  /**
-   * Handle the input being hidden.
-   *
-   * #### Notes
-   * This is called by the `syncCollapse` setter so that subclasses
-   * can perform actions upon the input being hidden without accessing
-   * private state.
-   */
-  protected handleSyncCollapse(value: boolean): void {
-    if (value) {
-      const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-      this.outputHidden =
-        !!jupyter.output_hidden || !!this.model.metadata.get('collapsed');
     }
   }
 
@@ -821,18 +839,6 @@ export class CodeCell extends Cell {
     this._outputWrapper = null;
     this._outputPlaceholder = null;
     super.dispose();
-  }
-
-  /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    let value = this.model.metadata.get('collapsed') as boolean;
-    this.toggleClass(COLLAPSED_CLASS, value);
-    if (this._output) {
-      // TODO: handle scrolled state.
-    }
-    super.onUpdateRequest(msg);
   }
 
   /**
@@ -883,6 +889,7 @@ export class CodeCell extends Cell {
   private _outputWrapper: Widget = null;
   private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
+  private _syncScrolled = false;
 }
 
 /**

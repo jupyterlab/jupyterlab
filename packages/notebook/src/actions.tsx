@@ -1204,11 +1204,11 @@ export namespace NotebookActions {
   }
 
   /**
-   * Persists the collapsed state of all cells to the model.
+   * Saves the collapsed state of all cells to the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function persistCollapseState(notebook: Notebook): void {
+  export function saveCollapseState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
@@ -1216,17 +1216,17 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(cell => {
-      cell.persistCollapseState();
+      cell.saveCollapseState();
     });
     Private.handleState(notebook, state);
   }
 
   /**
-   * Revert the collapsed state of all cells to the model.
+   * Load the collapsed state of all cells from the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function revertCollapseState(notebook: Notebook): void {
+  export function loadCollapseState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
@@ -1234,17 +1234,17 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(cell => {
-      cell.revertCollapseState();
+      cell.loadCollapseState();
     });
     Private.handleState(notebook, state);
   }
 
   /**
-   * Persists the scrolled state of all cells to the model.
+   * Saves the scrolled state of all cells to the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function persistScrollState(notebook: Notebook): void {
+  export function saveScrollState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
@@ -1254,18 +1254,18 @@ export namespace NotebookActions {
     notebook.widgets.forEach(cell => {
       const { model } = cell;
       if (model.type === 'code') {
-        (cell as CodeCell).persistScrolledState();
+        (cell as CodeCell).saveScrolledState();
       }
     });
     Private.handleState(notebook, state);
   }
 
   /**
-   * Revert the scrolled state of all cells to the model.
+   * Loads the scrolled state of all cells from the model.
    *
    * @param notebook - The target notebook widget.
    */
-  export function revertScrollState(notebook: Notebook): void {
+  export function loadScrollState(notebook: Notebook): void {
     if (!notebook.model) {
       return;
     }
@@ -1275,8 +1275,43 @@ export namespace NotebookActions {
       const { model } = cell;
 
       if (model.type === 'code') {
-        (cell as CodeCell).revertScrolledState();
+        (cell as CodeCell).loadScrolledState();
       }
+    });
+    Private.handleState(notebook, state);
+  }
+
+  /**
+   * Saves the editable state of all cells to the model.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function saveEditableState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+
+    const state = Private.getState(notebook);
+
+    notebook.widgets.forEach(cell => {
+      cell.saveEditableState();
+    });
+    Private.handleState(notebook, state);
+  }
+
+  /**
+   * Loads the editable state of all cells from the model.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function loadEditableState(notebook: Notebook): void {
+    if (!notebook.model) {
+      return;
+    }
+    const state = Private.getState(notebook);
+
+    notebook.widgets.forEach(cell => {
+      cell.loadEditableState();
     });
     Private.handleState(notebook, state);
   }

@@ -376,13 +376,13 @@ export namespace NotebookTools {
     protected viewToMetadata() {
       const panel = this.parent.notebookPanel;
       if (panel) {
-        NotebookActions.persistScrollState(panel.content);
+        NotebookActions.saveScrollState(panel.content);
       }
     }
     protected metadataToView() {
       const panel = this.parent.notebookPanel;
       if (panel) {
-        NotebookActions.revertScrollState(panel.content);
+        NotebookActions.loadScrollState(panel.content);
       }
     }
   }
@@ -394,13 +394,31 @@ export namespace NotebookTools {
     protected viewToMetadata() {
       const panel = this.parent.notebookPanel;
       if (panel) {
-        NotebookActions.persistCollapseState(panel.content);
+        NotebookActions.saveCollapseState(panel.content);
       }
     }
     protected metadataToView() {
       const panel = this.parent.notebookPanel;
       if (panel) {
-        NotebookActions.revertCollapseState(panel.content);
+        NotebookActions.loadCollapseState(panel.content);
+      }
+    }
+  }
+
+  export class SyncEditableState extends SyncState {
+    protected label() {
+      return 'All Cell Editable State: ';
+    }
+    protected viewToMetadata() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.saveEditableState(panel.content);
+      }
+    }
+    protected metadataToView() {
+      const panel = this.parent.notebookPanel;
+      if (panel) {
+        NotebookActions.loadEditableState(panel.content);
       }
     }
   }
@@ -866,6 +884,21 @@ export namespace NotebookTools {
       },
       default: false,
       validCellTypes: ['code']
+    });
+  }
+
+  /**
+   * Create a editable cell state selector.
+   */
+  export function createEditableSelector(): KeySelector {
+    return new KeySelector({
+      key: 'editable',
+      title: 'Editable initially',
+      optionsMap: {
+        True: true,
+        False: false
+      },
+      default: true
     });
   }
 

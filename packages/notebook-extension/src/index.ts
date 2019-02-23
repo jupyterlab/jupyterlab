@@ -394,9 +394,11 @@ function activateNotebookTools(
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const slideShow = NotebookTools.createSlideShowSelector();
   const scrolled = NotebookTools.createScrolledSelector();
+  const editable = NotebookTools.createEditableSelector();
   const inputHidden = NotebookTools.createInputHiddenSelector();
   const outputCollapsed = NotebookTools.createOutputCollapsedSelector();
   const syncScrolledState = new NotebookTools.SyncScrolledState();
+  const syncEditableState = new NotebookTools.SyncEditableState();
   const syncCollapsedState = new NotebookTools.SyncCollapsedState();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
@@ -447,8 +449,10 @@ function activateNotebookTools(
 
   celltools.addItem({ tool: syncScrolledState, rank: 1 });
   celltools.addItem({ tool: syncCollapsedState, rank: 1 });
+  celltools.addItem({ tool: syncEditableState, rank: 1 });
 
   celltools.addItem({ tool: activeCellTool, rank: 1 });
+  celltools.addItem({ tool: editable, rank: 2 });
   celltools.addItem({ tool: scrolled, rank: 2 });
   celltools.addItem({ tool: inputHidden, rank: 2 });
   celltools.addItem({ tool: outputCollapsed, rank: 2 });
