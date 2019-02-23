@@ -330,14 +330,30 @@
       "type": "boolean",
       "default": true
     },
-    "saveOptions": {
-      "title": "Save options",
-      "description": "The save options.",
-      "type": "object",
+    "syncOptions": {
+      "title": "Metadata Sync options",
+      "description": "The metadata that is automatically synced.",
+      "properties": {
+        "scrolled": {
+          "type": "boolean",
+          "default": true
+        },
+        "editable": {
+          "type": "boolean",
+          "default": true
+        },
+        "collapsed": {
+          "type": "boolean",
+          "default": false
+        }
+      },
       "default": {
-        "outputs": "save",
-        "collapse-scroll-state": "save"
-      }
+        "scrolled": true,
+        "editable": true,
+        "collapsed": true
+      },
+      "additionalProperties": false,
+      "type": "object"
     }
   },
   "additionalProperties": false,

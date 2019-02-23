@@ -475,7 +475,12 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createCodeCell(options, this);
+    const cell = this.contentFactory.createCodeCell(options, this);
+    const { editable, collapsed, scrolled } = this._notebookConfig.syncOptions;
+    cell.syncCollapse = collapsed;
+    cell.syncEditable = editable;
+    cell.syncScrolled = scrolled;
+    return cell;
   }
 
   /**
@@ -492,7 +497,11 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createMarkdownCell(options, this);
+    const cell = this.contentFactory.createMarkdownCell(options, this);
+    const { editable, collapsed } = this._notebookConfig.syncOptions;
+    cell.syncCollapse = collapsed;
+    cell.syncEditable = editable;
+    return cell;
   }
 
   /**
@@ -507,7 +516,11 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createRawCell(options, this);
+    const cell = this.contentFactory.createRawCell(options, this);
+    const { editable, collapsed } = this._notebookConfig.syncOptions;
+    cell.syncCollapse = collapsed;
+    cell.syncEditable = editable;
+    return cell;
   }
 
   /**
@@ -590,13 +603,24 @@ export class StaticNotebook extends Widget {
   }
 
   /**
-   * Update editor settings for notebook.
+   * Apply updated notebook settings.
    */
   private _updateNotebookConfig() {
+    // Apply scrollPastEnd setting.
     this.toggleClass(
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+
+    // Apply cell sync settings.
+    const { editable, collapsed, scrolled } = this._notebookConfig.syncOptions;
+    this.widgets.forEach(cell => {
+      cell.syncCollapse = collapsed;
+      cell.syncEditable = editable;
+      if (cell.model.type === 'code') {
+        (cell as CodeCell).syncScrolled = scrolled;
+      }
+    });
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;
@@ -728,12 +752,26 @@ export namespace StaticNotebook {
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
+
+    /**
+     * Synced properties
+     */
+    syncOptions: {
+      scrolled: boolean;
+      editable: boolean;
+      collapsed: boolean;
+    };
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
-    scrollPastEnd: true
+    scrollPastEnd: true,
+    syncOptions: {
+      scrolled: true,
+      editable: true,
+      collapsed: false
+    }
   };
 
   /**

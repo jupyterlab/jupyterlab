@@ -276,6 +276,9 @@ export class Cell extends Widget {
       return;
     }
     this._readOnly = value;
+    if (this.syncEditable) {
+      this.saveEditableState();
+    }
     this.update();
   }
 
@@ -341,6 +344,13 @@ export class Cell extends Widget {
    */
   saveCollapseState() {
     const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+
+    if (
+      (this.inputHidden && jupyter.source_hidden === true) ||
+      (!this.inputHidden && jupyter.source_hidden === undefined)
+    ) {
+      return;
+    }
     if (this.inputHidden) {
       jupyter.source_hidden = true;
     } else {
@@ -383,6 +393,7 @@ export class Cell extends Widget {
     if (this._syncCollapse === value) {
       return;
     }
+    this._syncCollapse = value;
     if (value) {
       this.loadCollapseState();
     }
@@ -398,6 +409,7 @@ export class Cell extends Widget {
     if (this._syncEditable === value) {
       return;
     }
+    this._syncEditable = value;
     if (value) {
       this.loadEditableState();
     }
@@ -731,15 +743,39 @@ export class CodeCell extends Cell {
       layout.addWidget(this._output);
     }
     this._outputHidden = value;
+    if (this.syncCollapse) {
+      this.saveCollapseState();
+    }
   }
 
   /**
    * Save view collapse state to model
    */
   saveCollapseState() {
-    super.saveCollapseState();
     const metadata = this.model.metadata;
     const jupyter = { ...(metadata.get('jupyter') as any) };
+    const collapsed = this.model.metadata.get('collapsed');
+
+    // Check to see that the two fields are already set appropriately.
+    if (
+      (this.outputHidden &&
+        jupyter.outputs_hidden === true &&
+        collapsed === true) ||
+      (!this.outputHidden &&
+        jupyter.outputs_hidden === undefined &&
+        collapsed === undefined)
+    ) {
+      // State is already what we want for output collapse, so just call the
+      // super method.
+      super.saveCollapseState();
+      return;
+    }
+
+    // There are a number of metadata changes below, so ignore any metadata
+    // changes in our syncing until we reach the last change.
+    this._ignoreMetadataChanges = true;
+    super.saveCollapseState();
+
     if (this.outputHidden) {
       // set both metadata keys
       // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
@@ -749,6 +785,10 @@ export class CodeCell extends Cell {
       metadata.delete('collapsed');
       delete jupyter.outputs_hidden;
     }
+
+    // Now we make our last metadata change, so unblock listening to metadata
+    // changes.
+    this._ignoreMetadataChanges = false;
     if (Object.keys(jupyter).length === 0) {
       metadata.delete('jupyter');
     } else {
@@ -775,6 +815,9 @@ export class CodeCell extends Cell {
   set outputsScrolled(value: boolean) {
     this.toggleClass('jp-mod-outputsScrolled', value);
     this._outputsScrolled = value;
+    if (this.syncScrolled) {
+      this.saveScrolledState();
+    }
   }
 
   /**
@@ -782,6 +825,12 @@ export class CodeCell extends Cell {
    */
   saveScrolledState() {
     const metadata = this.model.metadata;
+    if (
+      (this.outputsScrolled && metadata.get('scrolled') === true) ||
+      (!this.outputsScrolled && metadata.get('scrolled') === undefined)
+    ) {
+      return;
+    }
     if (this.outputsScrolled) {
       metadata.set('scrolled', true);
     } else {
@@ -807,6 +856,7 @@ export class CodeCell extends Cell {
     if (this._syncScrolled === value) {
       return;
     }
+    this._syncScrolled = value;
     if (value) {
       this.loadScrolledState();
     }
@@ -889,6 +939,10 @@ export class CodeCell extends Cell {
     model: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
+    if (this._ignoreMetadataChanges) {
+      // We are in middle of a metadata transaction, so don't react to it.
+      return;
+    }
     switch (args.key) {
       case 'scrolled':
         if (this.syncScrolled) {
@@ -921,6 +975,7 @@ export class CodeCell extends Cell {
   private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
   private _syncScrolled = false;
+  private _ignoreMetadataChanges = false;
 }
 
 /**

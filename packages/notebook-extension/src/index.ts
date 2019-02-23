@@ -642,7 +642,12 @@ function activateNotebookHandler(
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
     factory.notebookConfig = notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
+      syncOptions: settings.get('syncOptions').composite as {
+        scrolled: boolean;
+        editable: boolean;
+        collapsed: boolean;
+      }
     };
   }
 
