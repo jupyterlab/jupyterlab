@@ -8,14 +8,14 @@
  */
 
 /* use standard opaque scrollbars for most nodes */
-div.jp-LabShell[data-theme-scrollbar='true'] {
+div.jp-LabShell[data-theme-scrollbars='true'] {
   scrollbar-color: rgb(var(--jp-scrollbar-thumb-color))
     var(--jp-scrollbar-background-color);
 }
 
 /* for code nodes, use a transparent style of scrollbar */
-[data-theme-scrollbar='true'] .CodeMirror-hscrollbar,
-[data-theme-scrollbar='true'] .CodeMirror-vscrollbar {
+[data-theme-scrollbars='true'] .CodeMirror-hscrollbar,
+[data-theme-scrollbars='true'] .CodeMirror-vscrollbar {
   scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
 }
 
@@ -25,26 +25,26 @@ div.jp-LabShell[data-theme-scrollbar='true'] {
 
 /* use standard opaque scrollbars for most nodes */
 
-[data-theme-scrollbar='true'] ::-webkit-scrollbar,
-[data-theme-scrollbar='true'] ::-webkit-scrollbar-corner {
+[data-theme-scrollbars='true'] ::-webkit-scrollbar,
+[data-theme-scrollbars='true'] ::-webkit-scrollbar-corner {
   background: var(--jp-scrollbar-background-color);
 }
 
-[data-theme-scrollbar='true'] ::-webkit-scrollbar-thumb {
+[data-theme-scrollbars='true'] ::-webkit-scrollbar-thumb {
   background: rgb(var(--jp-scrollbar-thumb-color));
   border: var(--jp-scrollbar-thumb-margin) solid transparent;
   background-clip: content-box;
   border-radius: var(--jp-scrollbar-thumb-radius);
 }
 
-[data-theme-scrollbar='true'] ::-webkit-scrollbar-track:horizontal {
+[data-theme-scrollbars='true'] ::-webkit-scrollbar-track:horizontal {
   border-left: var(--jp-scrollbar-endpad) solid
     var(--jp-scrollbar-background-color);
   border-right: var(--jp-scrollbar-endpad) solid
     var(--jp-scrollbar-background-color);
 }
 
-[data-theme-scrollbar='true'] ::-webkit-scrollbar-track:vertical {
+[data-theme-scrollbars='true'] ::-webkit-scrollbar-track:vertical {
   border-top: var(--jp-scrollbar-endpad) solid
     var(--jp-scrollbar-background-color);
   border-bottom: var(--jp-scrollbar-endpad) solid
@@ -53,28 +53,29 @@ div.jp-LabShell[data-theme-scrollbar='true'] {
 
 /* for code nodes, use a transparent style of scrollbar */
 
-[data-theme-scrollbar='true'] .CodeMirror-hscrollbar::-webkit-scrollbar,
-[data-theme-scrollbar='true'] .CodeMirror-vscrollbar::-webkit-scrollbar,
-[data-theme-scrollbar='true'] .CodeMirror-hscrollbar::-webkit-scrollbar-corner,
-[data-theme-scrollbar='true'] .CodeMirror-vscrollbar::-webkit-scrollbar-corner {
+[data-theme-scrollbars='true'] .CodeMirror-hscrollbar::-webkit-scrollbar,
+[data-theme-scrollbars='true'] .CodeMirror-vscrollbar::-webkit-scrollbar,
+[data-theme-scrollbars='true'] .CodeMirror-hscrollbar::-webkit-scrollbar-corner,
+[data-theme-scrollbars='true']
+  .CodeMirror-vscrollbar::-webkit-scrollbar-corner {
   background-color: transparent;
 }
 
-[data-theme-scrollbar='true'] .CodeMirror-hscrollbar::-webkit-scrollbar-thumb,
-[data-theme-scrollbar='true'] .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+[data-theme-scrollbars='true'] .CodeMirror-hscrollbar::-webkit-scrollbar-thumb,
+[data-theme-scrollbars='true'] .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
   background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
   border: var(--jp-scrollbar-thumb-margin) solid transparent;
   background-clip: content-box;
   border-radius: var(--jp-scrollbar-thumb-radius);
 }
 
-[data-theme-scrollbar='true']
+[data-theme-scrollbars='true']
   .CodeMirror-hscrollbar::-webkit-scrollbar-track:horizontal {
   border-left: var(--jp-scrollbar-endpad) solid transparent;
   border-right: var(--jp-scrollbar-endpad) solid transparent;
 }
 
-[data-theme-scrollbar='true']
+[data-theme-scrollbars='true']
   .CodeMirror-vscrollbar::-webkit-scrollbar-track:vertical {
   border-top: var(--jp-scrollbar-endpad) solid transparent;
   border-bottom: var(--jp-scrollbar-endpad) solid transparent;

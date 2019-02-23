@@ -152,13 +152,13 @@ export class ThemeManager {
   }
 
   /**
-   * Test whether a given theme styles scrollbar,
+   * Test whether a given theme styles scrollbars,
    * and if the user has scrollbar styling enabled.
    */
-  isScrollbar(name: string): boolean {
+  themeScrollbars(name: string): boolean {
     return (
-      !!this._settings.composite['theme-scrollbar'] &&
-      !!this._themes[name].isScrollbar
+      !!this._settings.composite['theme-scrollbars'] &&
+      !!this._themes[name].themeScrollbars
     );
   }
 
@@ -357,7 +357,7 @@ export namespace ThemeManager {
      * Whether the theme includes styling for the scrollbar.
      * If set to false, this theme will leave the native scrollbar untouched.
      */
-    isScrollbar?: boolean;
+    themeScrollbars?: boolean;
 
     /**
      * Load the theme.
