@@ -603,7 +603,7 @@ export default plugins;
 /**
  * The namespace for module private data.
  */
-export namespace Private {
+namespace Private {
   /**
    * Generate a workspace name candidate.
    *

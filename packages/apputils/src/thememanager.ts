@@ -103,9 +103,6 @@ export class ThemeManager {
       link.setAttribute('rel', 'stylesheet');
       link.setAttribute('type', 'text/css');
       link.setAttribute('href', href);
-      // document.addEventListener('load', () => {
-      //   resolve(undefined);
-      // });
       link.addEventListener('load', () => {
         resolve(undefined);
       });
@@ -388,19 +385,5 @@ namespace Private {
   export function fitAll(widget: Widget): void {
     each(widget.children(), fitAll);
     widget.fit();
-  }
-
-  export function calcWidgetStyle(widget: Widget): void {
-    // each(widget.children(), calcWidgetStyle);
-    if (!widget.isHidden) {
-      const style = widget.node.getAttribute('style');
-      widget.node.setAttribute('style', 'display: none');
-      Promise.resolve(
-        setTimeout(() => {
-          widget.node.setAttribute('style', style);
-        }, 200)
-      );
-      // window.getComputedStyle(widget.node, 'height');
-    }
   }
 }
