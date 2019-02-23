@@ -262,13 +262,14 @@ export class ThemeManager {
           newValue: theme
         });
 
-        // Need to force a redraw of the app here to avoid a Chrome rendering bug/race condition
-        const style = this._host.node.getAttribute('style');
-        this._host.node.setAttribute('style', 'display: none');
+        // Need to force a redraw of the app here to avoid a Chrome rendering
+        // bug that can leave the scrollbars in an invalid state
+        this._host.hide();
 
-        // If we set/unset 'display: none' too quickly, no redraw will actually happen
+        // If we hide/show the widget too quickly, no redraw will happen.
+        // requestAnimationFrame delays until after the next frame render.
         requestAnimationFrame(() => {
-          this._host.node.setAttribute('style', style);
+          this._host.show();
           Private.fitAll(this._host);
           splash.dispose();
         });

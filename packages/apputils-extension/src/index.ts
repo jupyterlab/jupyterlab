@@ -623,7 +623,7 @@ namespace Private {
   /**
    * Create a splash element.
    */
-  export function createSplash(): HTMLElement {
+  function createSplash(): HTMLElement {
     const splash = document.createElement('div');
     const galaxy = document.createElement('div');
     const logo = document.createElement('div');
@@ -739,7 +739,7 @@ namespace Private {
   /**
    * The splash element.
    */
-  export let splash = createSplash();
+  const splash = createSplash();
 
   /**
    * The splash screen counter.
