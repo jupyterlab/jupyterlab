@@ -62,19 +62,6 @@ export interface INotebookModel extends DocumentRegistry.IModel {
 }
 
 /**
- * Save hook
- *
- * @param value - whether the user selected true or false for the save option.
- * @param model - the notebook model
- * @param savedJSON - the mutable model to transform.
- */
-export type SaveHook = (
-  value: boolean,
-  model: INotebookModel,
-  savedJSON: nbformat.INotebookContent
-) => void;
-
-/**
  * An implementation of a notebook Model.
  */
 export class NotebookModel extends DocumentModel implements INotebookModel {

@@ -25,11 +25,6 @@ export interface IFileMenu extends IJupyterLabMenu {
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 
   /**
-   * The save with options extension point.
-   */
-  readonly saveWithOptions: Set<IFileMenu.ISaveWithOptions<Widget>>;
-
-  /**
    * A set storing IConsoleCreators for the File menu.
    */
   readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
@@ -50,7 +45,6 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.newMenu = new JupyterLabMenu(options, false);
     this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
-    this.saveWithOptions = new Set<IFileMenu.ISaveWithOptions<Widget>>();
     this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
 
@@ -63,11 +57,6 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    * The close and cleanup extension point.
    */
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
-
-  /**
-   * The persist and save extension point.
-   */
-  readonly saveWithOptions: Set<IFileMenu.ISaveWithOptions<Widget>>;
 
   /**
    * A set storing IConsoleCreators for the Kernel menu.
@@ -112,26 +101,6 @@ export namespace IFileMenu {
      * A function to perform the close and cleanup action.
      */
     closeAndCleanup: (widget: T) => Promise<void>;
-  }
-
-  /**
-   * Interface for an activity that has some options for saving.
-   */
-  export interface ISaveWithOptions<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A label to use for the activity that is being saved.
-     */
-    name: string;
-
-    /**
-     * A label to describe what kinds of options are available.
-     */
-    action: string;
-
-    /**
-     * A function to perform the save (possibly getting user input on the options first).
-     */
-    saveWithOptions: (widget: T) => Promise<void>;
   }
 
   /**

@@ -204,8 +204,6 @@ namespace CommandIDs {
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
-
-  export const saveWithView = 'notebook:save-with-view';
 }
 
 /**
@@ -584,26 +582,6 @@ function activateNotebookHandler(
     });
     // Add the notebook panel to the tracker.
     tracker.add(widget);
-
-    /**
-     * TODO:
-     * * Add settings for each syncable cell attribute (collapse, scrolled, editable)
-     * * Have notebook-level widget settings for each syncable attribute
-     * * On the setting change, set each existing notebook accordingly
-     * * For each new notebook, set the attributes according to the setting
-     * * in a notebook, when a syncable attribute is set, set each cell appropriately and create new cells appropriately.
-     */
-
-    // // TODO: Add cell widget events for when the scrolled or collapse state
-    // // changes, so that we can sync metadata, then delete this save handler.
-    // widget.context.saveState.connect((sender, state) => {
-    //   if (state === 'started') {
-    //     // Always sync view state if we are the shell's current widget.
-    //     if (app.shell.currentWidget === widget) {
-    //       NotebookActions.persistCollapseScrollState(widget.content);
-    //     }
-    //   }
-    // });
   });
 
   /**
@@ -682,7 +660,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(app, mainMenu, tracker, services, palette, fetchSettings);
+    populateMenus(app, mainMenu, tracker, services, palette);
   }
 
   // Utility function to create a new notebook.
@@ -1806,23 +1784,6 @@ function addCommands(
     },
     isEnabled
   });
-  // commands.addCommand(CommandIDs.saveWithView, {
-  //   label: 'Save Notebook with View State',
-  //   execute: args => {
-  //     const current = getCurrent(args);
-
-  //     if (current) {
-  //       // Get registry of notebook persistence callbacks. Call each one with
-  //       // the notebook.
-
-  //       NotebookActions.persistViewState(current.content);
-  //       app.commands.execute('docmanager:save');
-  //     }
-  //   },
-  //   isEnabled: args => {
-  //     return isEnabled() && commands.isEnabled('docmanager:save', args);
-  //   }
-  // });
 }
 
 /**
@@ -1921,7 +1882,6 @@ function populateMenus(
   tracker: INotebookTracker,
   services: ServiceManager,
   palette: ICommandPalette | null,
-  fetchSettings: Promise<ISettingRegistry.ISettings>
 ): void {
   let { commands } = app;
 

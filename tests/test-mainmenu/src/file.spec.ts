@@ -71,23 +71,6 @@ describe('@jupyterlab/mainmenu', () => {
       });
     });
 
-    describe('#saveWithOptions', () => {
-      it('should allow setting of an ISaveWithOptions', () => {
-        const saveWithOptions: IFileMenu.ISaveWithOptions<Wodget> = {
-          tracker,
-          name: 'Wodget',
-          action: 'with Save',
-          saveWithOptions: widget => {
-            widget.state = 'saved';
-            return Promise.resolve(void 0);
-          }
-        };
-        menu.saveWithOptions.add(saveWithOptions);
-        delegateExecute(wodget, menu.saveWithOptions, 'saveWithOptions');
-        expect(wodget.state).to.equal('saved');
-      });
-    });
-
     describe('#consoleCreators', () => {
       it('should allow setting of an IConsoleCreator', () => {
         const creator: IFileMenu.IConsoleCreator<Wodget> = {

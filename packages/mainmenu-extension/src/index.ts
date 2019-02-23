@@ -58,8 +58,6 @@ export namespace CommandIDs {
 
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export const saveWithOptions = 'filemenu:save-with-options';
-
   export const createConsole = 'filemenu:create-console';
 
   export const quit = 'filemenu:quit';
@@ -329,29 +327,6 @@ export function createFileMenu(
     )
   });
 
-  // Add a delegator command for saving with options.
-  commands.addCommand(CommandIDs.saveWithOptions, {
-    label: () => {
-      const action = Private.delegateLabel(app, menu.saveWithOptions, 'action');
-      const name = Private.delegateLabel(app, menu.saveWithOptions, 'name');
-      return `Save ${name} ${action || 'with Options'}`;
-    },
-    isEnabled: args => {
-      return (
-        Private.delegateEnabled(
-          app,
-          menu.saveWithOptions,
-          'saveWithOptions'
-        )() && commands.isEnabled('docmanager:save', args)
-      );
-    },
-    execute: Private.delegateExecute(
-      app,
-      menu.saveWithOptions,
-      'saveWithOptions'
-    )
-  });
-
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
@@ -429,7 +404,6 @@ export function createFileMenu(
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'filemenu:save-with-options',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => {
