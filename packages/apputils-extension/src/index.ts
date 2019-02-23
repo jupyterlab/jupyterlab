@@ -150,7 +150,7 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
       app.shell.dataset.themeName = currentTheme;
       if (
-        app.shell.dataset.themeScrollbars !=
+        app.shell.dataset.themeScrollbars !==
         String(manager.themeScrollbars(currentTheme))
       ) {
         app.shell.dataset.themeScrollbars = String(
