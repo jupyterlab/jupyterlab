@@ -334,12 +334,14 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
       it('should create a code cell widget', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         expect(widget).to.be.an.instanceof(CodeCell);
       });
 
       it('should accept a custom contentFactory', () => {
         const contentFactory = NBTestUtils.createCodeCellFactory();
         const widget = new CodeCell({ model, contentFactory, rendermime });
+        widget.initializeState();
         expect(widget).to.be.an.instanceof(CodeCell);
       });
     });
@@ -347,6 +349,7 @@ describe('cells/widget', () => {
     describe('#outputArea', () => {
       it('should be the output area used by the cell', () => {
         const widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
         expect(widget.outputArea).to.be.an.instanceof(OutputArea);
       });
     });
@@ -355,21 +358,25 @@ describe('cells/widget', () => {
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
         let widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputHidden).to.equal(false);
 
         collapsedModel.metadata.set('collapsed', true);
         collapsedModel.metadata.set('jupyter', { outputs_hidden: false });
         widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputHidden).to.equal(true);
 
         collapsedModel.metadata.set('collapsed', false);
         collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
         widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputHidden).to.equal(true);
       });
 
       it('should be the view state of the output being collapsed', () => {
         const widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
         expect(widget.outputHidden).to.equal(false);
         widget.outputHidden = true;
         expect(widget.outputHidden).to.equal(true);
@@ -380,18 +387,22 @@ describe('cells/widget', () => {
       it('should initialize from the model', () => {
         const collapsedModel = new CodeCellModel({});
         let widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', false);
         widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', 'auto');
         widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
         collapsedModel.metadata.set('scrolled', true);
         widget = new CodeCell({ model: collapsedModel, rendermime });
+        widget.initializeState();
         expect(widget.outputsScrolled).to.equal(true);
       });
     });
@@ -399,12 +410,14 @@ describe('cells/widget', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
@@ -413,7 +426,7 @@ describe('cells/widget', () => {
 
     describe('#onUpdateRequest()', () => {
       it('should update the widget', () => {
-        const widget = new LogCodeCell();
+        const widget = new LogCodeCell().initializeState();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -423,7 +436,7 @@ describe('cells/widget', () => {
     describe('#onMetadataChanged()', () => {
       it('should fire when model metadata changes', () => {
         const method = 'onMetadataChanged';
-        const widget = new LogCodeCell();
+        const widget = new LogCodeCell().initializeState();
         expect(widget.methods).to.not.contain(method);
         widget.model.metadata.set('foo', 1);
         expect(widget.methods).to.contain(method);
@@ -445,6 +458,7 @@ describe('cells/widget', () => {
 
       it('should fulfill a promise if there is no code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         try {
           await CodeCell.execute(widget, session);
         } catch (error) {
@@ -454,6 +468,7 @@ describe('cells/widget', () => {
 
       it('should fulfill a promise if there is code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         let originalCount: number;
         widget.model.value.text = 'foo';
         originalCount = widget.model.executionCount;
@@ -471,16 +486,19 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
       it('should create a markdown cell widget', () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         expect(widget).to.be.an.instanceof(MarkdownCell);
       });
 
       it('should accept a custom contentFactory', () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         expect(widget).to.be.an.instanceof(MarkdownCell);
       });
 
       it('should set the default mimetype to text/x-ipythongfm', () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         expect(widget.model.mimeType).to.equal('text/x-ipythongfm');
       });
     });
@@ -488,6 +506,7 @@ describe('cells/widget', () => {
     describe('#rendered', () => {
       it('should default to true', async () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         Widget.attach(widget, document.body);
         expect(widget.rendered).to.equal(true);
         await framePromise();
@@ -496,6 +515,7 @@ describe('cells/widget', () => {
 
       it('should unrender the widget', async () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         Widget.attach(widget, document.body);
         widget.rendered = false;
         await framePromise();
@@ -507,12 +527,14 @@ describe('cells/widget', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
         const widget = new MarkdownCell({ model, rendermime, contentFactory });
+        widget.initializeState();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
@@ -525,7 +547,7 @@ describe('cells/widget', () => {
           model,
           rendermime,
           contentFactory
-        });
+        }).initializeState();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -539,7 +561,7 @@ describe('cells/widget', () => {
     describe('#constructor()', () => {
       it('should create a raw cell widget', () => {
         const model = new RawCellModel({});
-        const widget = new RawCell({ model, contentFactory });
+        const widget = new RawCell({ model, contentFactory }).initializeState();
         expect(widget).to.be.an.instanceof(RawCell);
       });
     });

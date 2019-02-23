@@ -54,7 +54,7 @@ function main(): void {
   const cellWidget = new CodeCell({
     rendermime,
     model: new CodeCellModel({})
-  });
+  }).initializeState();
 
   // Handle the mimeType for the current kernel.
   session.kernelChanged.connect(() => {

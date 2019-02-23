@@ -199,16 +199,25 @@ export class Cell extends Widget {
         }
       );
     }
+
+    // Initialize state
+    model.metadata.changed.connect(
+      this.onMetadataChanged,
+      this
+    );
   }
 
   /**
-   * Modify some state for initialization.
+   * Initialize view state from model.
    *
-   * Should be called at the end of the subclasses's constructor.
+   * #### Notes
+   * Should be called after construction. For convenience, returns this, so it
+   * can be chained in the construction, like `new Foo().initializeState();`
    */
-  protected initializeState() {
-    this.revertCollapseState();
-    this._readOnly = this.model.metadata.get('editable') === false;
+  initializeState(): this {
+    this.loadCollapseState();
+    this.loadEditableState();
+    return this;
   }
 
   /**
@@ -448,6 +457,29 @@ export class Cell extends Widget {
     }
   }
 
+  /**
+   * Handle changes in the metadata.
+   */
+  protected onMetadataChanged(
+    model: IObservableMap<JSONValue>,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ): void {
+    switch (args.key) {
+      case 'jupyter':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
+        break;
+      case 'editable':
+        if (this.syncEditable) {
+          this.loadEditableState();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   private _readOnly = false;
   private _model: ICellModel = null;
   private _inputHidden = false;
@@ -455,6 +487,7 @@ export class Cell extends Widget {
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
   private _syncCollapse = false;
+  private _syncEditable = false;
 }
 
 /**
@@ -640,15 +673,8 @@ export class CodeCell extends Cell {
     this._outputPlaceholder = new OutputPlaceholder(() => {
       this.outputHidden = !this.outputHidden;
     });
-
-    // Modify state
-    this.initializeState();
     model.stateChanged.connect(
       this.onStateChanged,
-      this
-    );
-    model.metadata.changed.connect(
-      this.onMetadataChanged,
       this
     );
   }
@@ -659,16 +685,18 @@ export class CodeCell extends Cell {
   readonly model: ICodeCellModel;
 
   /**
-   * Modify some state for initialization.
+   * Initialize view state from model.
    *
-   * Should be called at the end of the subclasses's constructor.
+   * #### Notes
+   * Should be called after construction. For convenience, returns this, so it
+   * can be chained in the construction, like `new Foo().initializeState();`
    */
-  protected initializeState() {
+  initializeState(): this {
     super.initializeState();
-    this.revertCollapseState();
-    this.revertScrolledState;
+    this.loadScrolledState();
 
     this.setPrompt(`${this.model.executionCount || ''}`);
+    return this;
   }
 
   /**
@@ -862,17 +890,20 @@ export class CodeCell extends Cell {
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
     switch (args.key) {
-      case 'collapsed':
       case 'scrolled':
-      case 'jupyter':
-        this.update();
+        if (this.syncScrolled) {
+          this.loadScrolledState();
+        }
         break;
-      case 'editable':
-        this.readOnly = !args.newValue;
+      case 'collapsed':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
         break;
       default:
         break;
     }
+    super.onMetadataChanged(model, args);
   }
 
   /**
@@ -994,8 +1025,6 @@ export class MarkdownCell extends Cell {
       this._ready.resolve(void 0);
     });
     this.renderInput(this._renderer);
-
-    super.initializeState();
   }
 
   /**
@@ -1134,7 +1163,6 @@ export class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
-    super.initializeState();
   }
 
   /**

@@ -755,7 +755,8 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      const cell = new CodeCell(options).initializeState();
+      return cell;
     }
 
     /**
@@ -772,7 +773,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new MarkdownCell(options);
+      return new MarkdownCell(options).initializeState();
     }
 
     /**
@@ -786,7 +787,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 
