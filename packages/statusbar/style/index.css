@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-StatusItem-line-form {
+  background-image: url('./line-form.svg');
+}
+
 /*
  * icons for light themes
  */
@@ -15,10 +19,6 @@
   background-image: url('./terminal-icon-light.svg');
 }
 
-[data-theme-light='true'] .jp-StatusItem-line-form {
-  background-image: url('./line-form-light.svg');
-}
-
 /*
  * icons for dark themes
  */
@@ -29,8 +29,4 @@
 
 [data-theme-light='false'] .jp-StatusItem-terminal {
   background-image: url('./terminal-icon-dark.svg');
-}
-
-[data-theme-light='false'] .jp-StatusItem-line-form {
-  background-image: url('./line-form-dark.svg');
 }
