@@ -87,8 +87,6 @@ namespace CommandIDs {
 
   export const runAllCode = 'fileeditor:run-all';
 
-  export const runAllMarkdown = 'fileeditor:run-all-markdown';
-
   export const markdownPreview = 'fileeditor:markdown-preview';
 }
 
@@ -748,7 +746,6 @@ function activate(
       },
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
-      runAllMarkdown: () => commands.execute(CommandIDs.runAllMarkdown),
       restartAndRunAll: current => {
         return current.context.session.restart().then(restarted => {
           if (restarted) {

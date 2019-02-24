@@ -1040,7 +1040,7 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.runAllMarkdown, {
-    label: 'Run All Markdown Cells',
+    label: 'Render All Markdown Cells',
     execute: args => {
       const current = getCurrent(args);
       if (current) {
