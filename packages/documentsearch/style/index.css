@@ -17,7 +17,7 @@
   border-bottom-left-radius: var(--jp-border-radius);
   top: 0;
   right: 0;
-  z-index: 5;
+  z-index: 7;
   min-width: 300px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
