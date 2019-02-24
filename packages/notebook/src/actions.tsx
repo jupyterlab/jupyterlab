@@ -533,16 +533,19 @@ export namespace NotebookActions {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
-
+    const previousIndex = notebook.activeCellIndex;
     const state = Private.getState(notebook);
-    notebook.widgets.forEach(child => {
+    notebook.widgets.forEach((child, index) => {
       if (child.model.type === 'markdown') {
         notebook.select(child);
+        // This is to make sure that the activeCell
+        // does not get executed
+        notebook.activeCellIndex = index;
       }
     });
 
     const promise = Private.runSelected(notebook, session);
-
+    notebook.activeCellIndex = previousIndex;
     Private.handleRunState(notebook, state, true);
     return promise;
   }

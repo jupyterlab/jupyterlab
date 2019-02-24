@@ -679,13 +679,7 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
 
   commands.addCommand(CommandIDs.runAllMarkdown, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
-      const enabled = Private.delegateEnabled(
-        app,
-        menu.codeRunners,
-        'runAllMarkdown'
-      )();
-      return `Run All Markdown ${enabled ? ` ${noun}` : ''}`;
+      return `Render All Markdown Cells`;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAllMarkdown'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAllMarkdown')
