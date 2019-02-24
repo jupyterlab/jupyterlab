@@ -15,6 +15,8 @@ import {
 
 import { GroupItem, IconItem, interactiveItem, TextItem } from '..';
 
+import KernelIcon from '../../style/kernel-icon.svg';
+
 /**
  * Half spacing between subitems in a status item.
  */
@@ -34,11 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <IconItem source={'jp-StatusItem-terminal'} />
+        <IconItem source={'jp-StatusItem-terminal'} offset={{ x: 1, y: 3 }} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <IconItem source={'jp-StatusItem-kernel'} />
+        <KernelIcon />
       </GroupItem>
     </GroupItem>
   );
