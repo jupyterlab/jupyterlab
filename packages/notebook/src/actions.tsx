@@ -517,8 +517,6 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.widgets.forEach(child => {
-      console.log('I came in runAll');
-      console.log(child.model.type);
       notebook.select(child);
     });
 
@@ -537,10 +535,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    console.log('I came here first');
     notebook.widgets.forEach(child => {
-      console.log('I came here second');
-      console.log(child.model.type);
       if (child.model.type === 'markdown') {
         notebook.select(child);
       }
