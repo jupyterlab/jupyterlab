@@ -543,7 +543,9 @@ export namespace NotebookActions {
         notebook.activeCellIndex = index;
       }
     });
-
+    if (notebook.widgets[notebook.activeCellIndex].model.type !== 'markdown') {
+      return Promise.resolve(true);
+    }
     const promise = Private.runSelected(notebook, session);
     notebook.activeCellIndex = previousIndex;
     Private.handleRunState(notebook, state, true);
