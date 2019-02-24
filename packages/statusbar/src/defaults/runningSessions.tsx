@@ -13,7 +13,13 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { GroupItem, IconItem, interactiveItem, TextItem } from '..';
+import {
+  GroupItem,
+  IconItem,
+  SVGIconItem,
+  interactiveItem,
+  TextItem
+} from '..';
 
 import KernelIcon from '../../style/kernel-icon.svg';
 
@@ -40,7 +46,7 @@ function RunningSessionsComponent(
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <KernelIcon />
+        <SVGIconItem Src={KernelIcon} offset={{ x: 0, y: 2 }} />
       </GroupItem>
     </GroupItem>
   );
