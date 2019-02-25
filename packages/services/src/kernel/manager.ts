@@ -35,11 +35,13 @@ export class KernelManager implements Kernel.IManager {
     this._pollModels = new Poll({
       interval: 10 * 1000,
       max: 300 * 1000,
+      name: `@jupyterlab/services:KernelManager#models`,
       poll: () => this._refreshRunning()
     });
     this._pollSpecs = new Poll({
       interval: 61 * 1000,
       max: 300 * 1000,
+      name: `@jupyterlab/services:KernelManager#specs`,
       poll: () => this._refreshSpecs()
     });
   }
