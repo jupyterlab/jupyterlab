@@ -14,16 +14,23 @@ export class Poll implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions) {
-    const { interval, max, poll } = options;
+    const { interval, max, name, poll } = options;
 
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
     }
 
+    this.name = name || 'unknown';
+
     // Cache the original interval length and start polling.
     this._interval = interval;
     this._poll(poll, interval, max);
   }
+
+  /**
+   * The name of the poll. Defaults to `'unknown'`.
+   */
+  readonly name: string;
 
   /**
    * Whether the poll is disposed.
@@ -71,7 +78,9 @@ export class Poll implements IDisposable {
           const old = interval;
           interval = Math.min(old * 2, max);
           console.warn(
-            `Polling error, increasing interval from ${old} to ${interval}`,
+            `Poll (${
+              this.name
+            }) failed, increasing interval from ${old} to ${interval}`,
             error
           );
         }
@@ -99,6 +108,11 @@ export namespace Poll {
      * The maximum interval to wait between failing poll requests.
      */
     max: number;
+
+    /**
+     * The name of the poll. Defaults to `'unknown'`.
+     */
+    name?: string;
 
     /**
      * A function that returns a poll promise.
