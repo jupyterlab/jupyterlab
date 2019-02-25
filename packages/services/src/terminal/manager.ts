@@ -10,6 +10,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { ServerConnection } from '..';
 
 import { TerminalSession } from './terminal';
+import { Poll } from '@jupyterlab/coreutils';
 
 /**
  * A terminal session manager.
@@ -27,14 +28,13 @@ export class TerminalManager implements TerminalSession.IManager {
       // Initialize internal data.
       this._readyPromise = this._refreshRunning();
 
-      // Set up polling.
-      this._refreshTimer = (setInterval as any)(() => {
-        if (typeof document !== 'undefined' && document.hidden) {
-          // Don't poll when nobody's looking.
-          return;
-        }
-        return this._refreshRunning();
-      }, 10000);
+      // Start polling with exponential backoff.
+      this._pollRunning = new Poll({
+        interval: 10 * 1000,
+        max: 300 * 1000,
+        name: `@jupyterlab/services:TerminalManager#models`,
+        poll: () => this._refreshRunning()
+      });
     }
   }
 
@@ -72,9 +72,9 @@ export class TerminalManager implements TerminalSession.IManager {
       return;
     }
     this._isDisposed = true;
-    clearInterval(this._refreshTimer);
+    this._models.length = 0;
+    this._pollRunning.dispose();
     Signal.clearData(this);
-    this._models = [];
   }
 
   /**
@@ -259,25 +259,21 @@ export class TerminalManager implements TerminalSession.IManager {
   /**
    * Refresh the running sessions.
    */
-  private _refreshRunning(): Promise<void> {
-    return TerminalSession.listRunning(this.serverSettings).then(models => {
-      this._isReady = true;
-      if (!JSONExt.deepEqual(models, this._models)) {
-        let names = models.map(r => r.name);
-        let toRemove: TerminalSession.ISession[] = [];
-        this._sessions.forEach(s => {
-          if (names.indexOf(s.name) === -1) {
-            s.dispose();
-            toRemove.push(s);
-          }
-        });
-        toRemove.forEach(s => {
-          this._sessions.delete(s);
-        });
-        this._models = models.slice();
-        this._runningChanged.emit(models);
-      }
-    });
+  private async _refreshRunning(): Promise<void> {
+    const models = await TerminalSession.listRunning(this.serverSettings);
+    this._isReady = true;
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const names = models.map(model => model.name);
+      const sessions = this._sessions;
+      sessions.forEach(session => {
+        if (names.indexOf(session.name) === -1) {
+          session.dispose();
+          sessions.delete(session);
+        }
+      });
+      this._models = models.slice();
+      this._runningChanged.emit(models);
+    }
   }
 
   /**
@@ -289,11 +285,11 @@ export class TerminalManager implements TerminalSession.IManager {
     return { ...options, serverSettings: this.serverSettings };
   }
 
-  private _models: TerminalSession.IModel[] = [];
-  private _sessions = new Set<TerminalSession.ISession>();
   private _isDisposed = false;
   private _isReady = false;
-  private _refreshTimer = -1;
+  private _models: TerminalSession.IModel[] = [];
+  private _pollRunning: Poll;
+  private _sessions = new Set<TerminalSession.ISession>();
   private _readyPromise: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
 }
