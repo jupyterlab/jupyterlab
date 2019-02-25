@@ -27,22 +27,24 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._readyPromise = this._refreshSpecs().then(() => {
-      return this._refreshRunning();
-    });
+    this._readyPromise = this._refreshSpecs().then(() =>
+      this._refreshRunning()
+    );
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
       interval: 10 * 1000,
       max: 300 * 1000,
       name: `@jupyterlab/services:KernelManager#models`,
-      poll: () => this._refreshRunning()
+      poll: () => this._refreshRunning(),
+      when: this._readyPromise
     });
     this._pollSpecs = new Poll({
       interval: 61 * 1000,
       max: 300 * 1000,
       name: `@jupyterlab/services:KernelManager#specs`,
-      poll: () => this._refreshSpecs()
+      poll: () => this._refreshSpecs(),
+      when: this._readyPromise
     });
   }
 
