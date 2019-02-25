@@ -37,11 +37,13 @@ export class SessionManager implements Session.IManager {
     this._pollModels = new Poll({
       interval: 10 * 1000,
       max: 300 * 1000,
+      name: `@jupyterlab/services:SessionManager#models`,
       poll: () => this._refreshRunning()
     });
     this._pollSpecs = new Poll({
       interval: 61 * 1000,
       max: 300 * 1000,
+      name: `@jupyterlab/services:SessionManager#specs`,
       poll: () => this._refreshSpecs()
     });
   }
