@@ -25,15 +25,16 @@ export class TerminalManager implements TerminalSession.IManager {
 
     // Set up state handling if terminals are available.
     if (TerminalSession.isAvailable()) {
-      // Initialize internal data.
+      // Initialize internal data then start polling.
       this._readyPromise = this._refreshRunning();
 
       // Start polling with exponential backoff.
-      this._pollRunning = new Poll({
+      this._pollModels = new Poll({
         interval: 10 * 1000,
         max: 300 * 1000,
         name: `@jupyterlab/services:TerminalManager#models`,
-        poll: () => this._refreshRunning()
+        poll: () => this._refreshRunning(),
+        when: this._readyPromise
       });
     }
   }
@@ -73,7 +74,7 @@ export class TerminalManager implements TerminalSession.IManager {
     }
     this._isDisposed = true;
     this._models.length = 0;
-    this._pollRunning.dispose();
+    this._pollModels.dispose();
     Signal.clearData(this);
   }
 
@@ -111,13 +112,12 @@ export class TerminalManager implements TerminalSession.IManager {
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  startNew(
+  async startNew(
     options?: TerminalSession.IOptions
   ): Promise<TerminalSession.ISession> {
-    return TerminalSession.startNew(this._getOptions(options)).then(session => {
-      this._onStarted(session);
-      return session;
-    });
+    const session = await TerminalSession.startNew(this._getOptions(options));
+    this._onStarted(session);
+    return session;
   }
 
   /*
@@ -133,46 +133,46 @@ export class TerminalManager implements TerminalSession.IManager {
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  connectTo(
+  async connectTo(
     name: string,
     options?: TerminalSession.IOptions
   ): Promise<TerminalSession.ISession> {
-    return TerminalSession.connectTo(name, this._getOptions(options)).then(
-      session => {
-        this._onStarted(session);
-        return session;
-      }
+    const session = await TerminalSession.connectTo(
+      name,
+      this._getOptions(options)
     );
+    this._onStarted(session);
+    return session;
   }
 
   /**
    * Shut down a terminal session by name.
    */
-  shutdown(name: string): Promise<void> {
-    let index = ArrayExt.findFirstIndex(
-      this._models,
-      value => value.name === name
-    );
+  async shutdown(name: string): Promise<void> {
+    const models = this._models;
+    const sessions = this._sessions;
+    const index = ArrayExt.findFirstIndex(models, model => model.name === name);
+
     if (index === -1) {
       return;
     }
 
     // Proactively remove the model.
-    this._models.splice(index, 1);
-    this._runningChanged.emit(this._models.slice());
+    models.splice(index, 1);
 
-    return TerminalSession.shutdown(name, this.serverSettings).then(() => {
-      let toRemove: TerminalSession.ISession[] = [];
-      this._sessions.forEach(s => {
-        if (s.name === name) {
-          s.dispose();
-          toRemove.push(s);
-        }
-      });
-      toRemove.forEach(s => {
-        this._sessions.delete(s);
-      });
+    // Delete and dispose the session locally.
+    sessions.forEach(session => {
+      if (session.name === name) {
+        sessions.delete(session);
+        session.dispose();
+      }
     });
+
+    // Emit the new model list without waiting for API request.
+    this._runningChanged.emit(models.slice());
+
+    // Shut down the remote session.
+    await TerminalSession.shutdown(name, this.serverSettings);
   }
 
   /**
@@ -180,34 +180,35 @@ export class TerminalManager implements TerminalSession.IManager {
    *
    * @returns A promise that resolves when all of the sessions are shut down.
    */
-  shutdownAll(): Promise<void> {
-    // Proactively remove all models.
-    let models = this._models;
-    if (models.length > 0) {
-      this._models = [];
-      this._runningChanged.emit([]);
+  async shutdownAll(): Promise<void> {
+    // Remove all models.
+    if (this._models.length) {
+      this._models.length = 0;
     }
 
-    return this._refreshRunning().then(() => {
-      return Promise.all(
-        models.map(model => {
-          return TerminalSession.shutdown(model.name, this.serverSettings).then(
-            () => {
-              let toRemove: TerminalSession.ISession[] = [];
-              this._sessions.forEach(s => {
-                s.dispose();
-                toRemove.push(s);
-              });
-              toRemove.forEach(s => {
-                this._sessions.delete(s);
-              });
-            }
-          );
-        })
-      ).then(() => {
-        return undefined;
-      });
+    // Emit the new model list without waiting for API requests.
+    this._runningChanged.emit([]);
+
+    // Repopulate list of models silently.
+    await this._refreshRunning(true);
+
+    // Shut down every model.
+    await Promise.all(
+      this._models.map(({ name }) =>
+        TerminalSession.shutdown(name, this.serverSettings)
+      )
+    );
+
+    // Dispose every session and clear the set.
+    this._sessions.forEach(session => {
+      session.dispose();
     });
+    this._sessions.clear();
+
+    // Remove all models even if the API returned with some models.
+    if (this._models.length) {
+      this._models.length = 0;
+    }
   }
 
   /**
@@ -259,7 +260,7 @@ export class TerminalManager implements TerminalSession.IManager {
   /**
    * Refresh the running sessions.
    */
-  private async _refreshRunning(): Promise<void> {
+  private async _refreshRunning(silent = false): Promise<void> {
     const models = await TerminalSession.listRunning(this.serverSettings);
     this._isReady = true;
     if (!JSONExt.deepEqual(models, this._models)) {
@@ -272,7 +273,9 @@ export class TerminalManager implements TerminalSession.IManager {
         }
       });
       this._models = models.slice();
-      this._runningChanged.emit(models);
+      if (!silent) {
+        this._runningChanged.emit(models);
+      }
     }
   }
 
@@ -288,7 +291,7 @@ export class TerminalManager implements TerminalSession.IManager {
   private _isDisposed = false;
   private _isReady = false;
   private _models: TerminalSession.IModel[] = [];
-  private _pollRunning: Poll;
+  private _pollModels: Poll;
   private _sessions = new Set<TerminalSession.ISession>();
   private _readyPromise: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
