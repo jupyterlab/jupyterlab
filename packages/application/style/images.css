@@ -4,9 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 /* CSS for generic svg icons */
-.jp-icon {
-  fill: var(--jp-ui-font-color0);
-  stroke: var(--jp-ui-font-color0);
+.jp-icon-fill {
+  fill: var(--jp-ui-font-color1);
+}
+
+.jp-icon-stroke {
+  stroke: var(--jp-ui-font-color1);
 }
 
 .jp-icon-accent0 {

@@ -58,17 +58,3 @@ export function SVGIconItem(
   const { SVG, className, offset, ...rest } = props;
   return <SVG className={classes(className, style(icon(offset)))} {...rest} />;
 }
-
-export function SVGInputItem(
-  props: SVGIconItem.IProps &
-    React.HTMLAttributes<SVGElement> &
-    React.HTMLAttributes<HTMLInputElement>
-): React.ReactElement<SVGIconItem.IProps> {
-  const { SVG, className, ...rest } = props;
-  return (
-    <SVG
-      className={classes(className, style(icon({ x: 0, y: 0 })))}
-      {...rest}
-    />
-  );
-}
