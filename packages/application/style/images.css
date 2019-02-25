@@ -3,6 +3,24 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* CSS for generic svg icons */
+.jp-icon {
+  fill: var(--jp-ui-font-color0);
+  stroke: var(--jp-ui-font-color0);
+}
+
+.jp-icon-accent0 {
+  fill: var(--jp-layout-color0);
+  stroke: var(--jp-layout-color0);
+}
+
+.jp-icon-accent1 {
+  fill: var(--jp-layout-color1);
+  stroke: var(--jp-layout-color1);
+}
+
+/* CSS for specific icons */
+
 .jp-ImageJupyterLab {
   background-image: var(--jp-image-jupyterlab);
 }

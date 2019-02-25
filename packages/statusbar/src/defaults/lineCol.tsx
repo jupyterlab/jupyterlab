@@ -20,6 +20,8 @@ import {
 
 import { classes } from 'typestyle/lib';
 
+import LineFormIcon from '../../style/line-form.svg';
+
 /**
  * A namespace for LineFormComponent statics.
  */
@@ -112,11 +114,14 @@ class LineFormComponent extends React.Component<
               }}
             />
 
-            <input
-              type="submit"
-              className={classes(lineFormButton, 'jp-StatusItem-line-form')}
-              value=""
-            />
+            <div>
+              <LineFormIcon />
+              <input
+                type="submit"
+                className={classes(lineFormButton)}
+                value=""
+              />
+            </div>
           </div>
           <label className={lineFormCaption}>
             Go to line number between 1 and {this.props.maxLine}

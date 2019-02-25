@@ -13,15 +13,10 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import {
-  GroupItem,
-  IconItem,
-  SVGIconItem,
-  interactiveItem,
-  TextItem
-} from '..';
+import { GroupItem, SVGIconItem, interactiveItem, TextItem } from '..';
 
 import KernelIcon from '../../style/kernel-icon.svg';
+import TerminalIcon from '../../style/terminal-icon.svg';
 
 /**
  * Half spacing between subitems in a status item.
@@ -42,11 +37,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <IconItem source={'jp-StatusItem-terminal'} offset={{ x: 1, y: 3 }} />
+        <SVGIconItem SVG={TerminalIcon} offset={{ x: 1, y: 3 }} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <SVGIconItem Src={KernelIcon} offset={{ x: 0, y: 2 }} />
+        <SVGIconItem SVG={KernelIcon} offset={{ x: 0, y: 2 }} />
       </GroupItem>
     </GroupItem>
   );

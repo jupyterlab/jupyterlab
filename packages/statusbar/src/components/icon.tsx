@@ -35,26 +35,40 @@ export function IconItem(
 }
 
 /**
- * A namespace for IconItem statics.
+ * A namespace for SVGIconItem statics.
  */
 export namespace SVGIconItem {
   /**
-   * Props for an IconItem
+   * Props for an SVGIconItem
    */
   export interface IProps {
     /**
      * The inline svg
      */
-    Src: ComponentType<HTMLAttributes<SVGElement>>;
+    SVG: ComponentType<HTMLAttributes<SVGElement>>;
   }
 }
 
 export function SVGIconItem(
   props: SVGIconItem.IProps &
-    React.HTMLAttributes<HTMLImageElement> & {
+    React.HTMLAttributes<SVGElement> & {
       offset: { x: number; y: number };
     }
 ): React.ReactElement<SVGIconItem.IProps> {
-  const { Src, className, offset } = props;
-  return <Src className={classes(className, style(icon(offset)))} />;
+  const { SVG, className, offset, ...rest } = props;
+  return <SVG className={classes(className, style(icon(offset)))} {...rest} />;
+}
+
+export function SVGInputItem(
+  props: SVGIconItem.IProps &
+    React.HTMLAttributes<SVGElement> &
+    React.HTMLAttributes<HTMLInputElement>
+): React.ReactElement<SVGIconItem.IProps> {
+  const { SVG, className, ...rest } = props;
+  return (
+    <SVG
+      className={classes(className, style(icon({ x: 0, y: 0 })))}
+      {...rest}
+    />
+  );
 }
