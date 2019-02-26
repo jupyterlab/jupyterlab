@@ -31,7 +31,7 @@ export class CollaborationClient extends WSConnection<
   Collaboration.Message
 > {
   /**
-   *
+   * Create a new collaboration client connection.
    */
   constructor(options: CollaborationClient.IOptions = {}) {
     super();
@@ -140,10 +140,19 @@ export class CollaborationClient extends WSConnection<
    */
   readonly serverSettings: ServerConnection.ISettings;
 
+  /**
+   * The id of the collaboration.
+   */
   readonly collaborationId: string | undefined;
 
+  /**
+   * The message handler of any data messages.
+   */
   handler: IMessageHandler | null;
 
+  /**
+   * Factory method for creating the web socket object.
+   */
   protected wsFactory() {
     const settings = this.serverSettings;
     const token = this.serverSettings.token;
@@ -175,6 +184,9 @@ export class CollaborationClient extends WSConnection<
     return new settings.WebSocket(wsUrl);
   }
 
+  /**
+   * Handler for deserialized websocket messages.
+   */
   protected handleMessage(
     msg:
       | Collaboration.RawReply
@@ -268,6 +280,9 @@ export class CollaborationClient extends WSConnection<
     return promise;
   }
 
+  /**
+   * Callback called when idle after activity.
+   */
   private _onIdle() {
     const msg = Collaboration.createMessage('serial-update', {
       serial: this._serverSerial
@@ -276,6 +291,9 @@ export class CollaborationClient extends WSConnection<
     this._idleTimer = null;
   }
 
+  /**
+   * Reset the idle timer.
+   */
   private _resetIdleTimer() {
     if (this._idleTimer !== null) {
       clearTimeout(this._idleTimer);

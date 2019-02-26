@@ -171,7 +171,10 @@ export class ObservableMap<T extends ReadonlyJSONValue>
    * Set the ObservableMap to an empty map.
    */
   clear(): void {
-    this.ensureBackend();
+    if (this.size < 1) {
+      // Nothing to clear
+      return;
+    }
     // Delete one by one to emit the correct signals.
     let keyList = this.keys();
     const update: { [key: string]: T | null } = {};

@@ -5,3 +5,4 @@ export * from './client';
 export * from './manager';
 export * from './modeldb';
 export * from './observables';
+export * from './rest';

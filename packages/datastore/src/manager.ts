@@ -5,6 +5,8 @@ import { IModelDB } from '@jupyterlab/observables';
 
 import { map, toArray } from '@phosphor/algorithm';
 
+import { UUID } from '@phosphor/coreutils';
+
 import { Schema, Datastore } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -42,14 +44,18 @@ function cloneDS(
 }
 
 /**
- *
+ * A manager for a single datastore.
  */
 export class DatastoreManager implements IMessageHandler, IDisposable {
   /**
    *
    */
-  constructor(key: string, schemas: ReadonlyArray<Schema>, immediate: boolean) {
-    this.key = key;
+  constructor(
+    collaborationId: string,
+    schemas: ReadonlyArray<Schema>,
+    immediate: boolean
+  ) {
+    this.collaborationId = collaborationId;
     this._schemas = schemas;
     if (immediate) {
       this._localDS = Datastore.create({
@@ -169,7 +175,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
   /**
    *
    */
-  readonly key: string;
+  readonly collaborationId: string;
 
   readonly connected: Promise<void>;
 
@@ -183,11 +189,14 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
   protected async connectRemote(): Promise<void> {
     if (this._client === null) {
       this._client = new CollaborationClient({
-        collaborationId: this.key,
+        collaborationId: this.collaborationId,
         handler: this
       });
     }
     this._storeId = await this._client.storeId;
+    if (this._storeId > 1) {
+      this._prepopulated = true;
+    }
     return this._client.replayHistory();
   }
 
@@ -223,16 +232,15 @@ export class DSModelDBFactory implements IModelDB.IFactory {
    */
   createNew(path: string, schemas: ReadonlyArray<Schema>) {
     // Set up session to server:
-    // const key = UUID.uuid4();
-    const key = path.replace(/[^0-9a-zA-Z_\-]/, '');
+    const collaborationId = UUID.uuid4();
 
-    const manager = new DatastoreManager(key, schemas, true);
+    const manager = new DatastoreManager(collaborationId, schemas, true);
 
     return new DSModelDB({
       schemas,
       manager,
-      recordId: key,
-      basePath: schemas[0].id
+      recordId: collaborationId,
+      schemaId: schemas[0].id
     });
   }
 }

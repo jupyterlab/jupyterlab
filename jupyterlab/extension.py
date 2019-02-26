@@ -86,7 +86,10 @@ def load_jupyter_server_extension(nbapp):
     from .extension_manager_handler import (
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
-    from .datastore import DatastoreHandler, datastore_path
+    from .datastore import (
+        CollaborationHandler, collaboration_path,
+        CollaborationsManagerHandler, datastore_rest_path
+    )
     from .commands import (
         DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev, get_app_dir
     )
@@ -190,10 +193,13 @@ def load_jupyter_server_extension(nbapp):
     builder = Builder(logger, core_mode, app_dir)
     build_handler = (build_url, BuildHandler, {'builder': builder})
 
-    datastore_url = ujoin(base_url, datastore_path)
-    datastore_handler = (datastore_url, DatastoreHandler, {})
+    collaborations_url = ujoin(base_url, collaboration_path)
+    collaborations_handler = (collaborations_url, CollaborationHandler, {})
 
-    handlers = [build_handler, datastore_handler]
+    colab_manager_url = ujoin(base_url, datastore_rest_path)
+    colab_manager_handler = (datastore_url, CollaborationsManagerHandler, {})
+
+    handlers = [build_handler, collaborations_handler, colab_manager_handler]
 
     if not core_mode:
         ext_url = ujoin(base_url, extensions_handler_path)

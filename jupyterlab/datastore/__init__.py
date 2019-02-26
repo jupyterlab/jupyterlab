@@ -1,2 +1,5 @@
 
-from .handler import DatastoreHandler, datastore_path
+from .handler import (
+    CollaborationHandler, collaboration_path,
+    CollaborationsManagerHandler, datastore_rest_path
+)

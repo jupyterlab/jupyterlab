@@ -47,7 +47,7 @@ export abstract class DocumentModel implements IDisposable {
     this._defaultLang = languagePreference || '';
 
     let mimeTypeObs = this.modelDB.createValue('mimeType');
-    mimeTypeObs.set(mimeType || 'text/plain');
+    mimeTypeObs.set(mimeTypeObs.get() || mimeType || 'text/plain');
     mimeTypeObs.changed.connect(
       this._onMimeTypeChanged,
       this

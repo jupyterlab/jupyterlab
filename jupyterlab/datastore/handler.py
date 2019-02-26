@@ -29,7 +29,44 @@ def filter_duplicates(transactions, is_duplicate):
             yield t
 
 
-class WSBaseHandler(WebSocketMixin, WebSocketHandler, IPythonHandler):
+
+class DefaultDatastoreAuth:
+    """Default implementation of a datastore authenticator."""
+
+    def check_permissions(self, user, collaboration_id, action):
+        """Whether a specific user can perform an action for a given collaboration.
+
+        This default implementation always returns True.
+        """
+        return True
+
+
+class DatastoreHandler(IPythonHandler):
+
+    @property
+    def auth(self):
+        return self.settings.setdefault('auth', DefaultDatastoreAuth())
+
+    collaborations = {} # map of collaboration id -> collaboration
+
+
+class CollaborationsManagerHandler(DatastoreHandler):
+
+    @web.authenticated
+    def get(self, *args, **kwargs):
+        # For unqualified GET, list current sessions we have read access to
+        collaborations = {
+            (key, dict(
+                id=key,
+                friendlyName=c.friendly_name
+            ))
+            for key, c in self.collaborations.items()
+            if self.auth.check_permissions(self.current_user, key, 'r')
+        }
+        self.finish(json.dumps(dict(collaborations=collaborations)))
+
+
+class WSBaseHandler(WebSocketMixin, WebSocketHandler, DatastoreHandler):
     """Base class for websockets reusing jupyter code"""
 
     def set_default_headers(self):
@@ -62,25 +99,8 @@ class WSBaseHandler(WebSocketMixin, WebSocketHandler, IPythonHandler):
         return self.settings.get('websocket_compression_options', None)
 
 
-class DefaultDatastoreAuth:
-    """Default implementation of a datastore authenticator."""
-
-    def check_permissions(self, user, collaboration_id, action):
-        """Whether a specific user can perform an action for a given collaboration.
-
-        This default implementation always returns True.
-        """
-        return True
-
-
-class DatastoreHandler(WSBaseHandler):
+class CollaborationHandler(WSBaseHandler):
     """Request handler for the datastore API"""
-
-    @property
-    def auth(self):
-        return self.settings.setdefault('auth', DefaultDatastoreAuth())
-
-    collaborations = {} # map of collaboration id -> collaboration
 
     def initialize(self):
         self.log.info("Initializing datastore connection %s", self.request.path)
@@ -306,4 +326,5 @@ class DatastoreHandler(WSBaseHandler):
 
 # The path for lab build.
 # TODO: Is this a reasonable path?
-datastore_path = r"/lab/api/datastore/(?P<collaboration_id>\w+)"
+collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>\w+)"
+datastore_rest_path = r"/lab/api/datastore/?"
