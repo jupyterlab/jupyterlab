@@ -189,15 +189,18 @@ export class TerminalManager implements TerminalSession.IManager {
     // Emit the new model list without waiting for API requests.
     this._runningChanged.emit([]);
 
-    // Repopulate list of models silently.
-    await this._refreshRunning(true);
-
-    // Shut down every model.
-    await Promise.all(
-      this._models.map(({ name }) =>
-        TerminalSession.shutdown(name, this.serverSettings)
-      )
-    );
+    // Repopulate list of models silently then shut down every session.
+    let error: any;
+    try {
+      await this._refreshRunning(true);
+      await Promise.all(
+        this._models.map(({ name }) =>
+          TerminalSession.shutdown(name, this.serverSettings)
+        )
+      );
+    } catch (reason) {
+      error = reason;
+    }
 
     // Dispose every session and clear the set.
     this._sessions.forEach(session => {
@@ -208,6 +211,11 @@ export class TerminalManager implements TerminalSession.IManager {
     // Remove all models even if the API returned with some models.
     if (this._models.length) {
       this._models.length = 0;
+    }
+
+    // If the API requests failed, reject the promise.
+    if (error) {
+      throw error;
     }
   }
 
