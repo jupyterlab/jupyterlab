@@ -41,7 +41,6 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
       return;
     }
     if (this.manager) {
-      this.manager.dispose();
       this.manager = undefined!;
     }
     this._isDisposed = true;

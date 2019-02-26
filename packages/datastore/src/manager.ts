@@ -132,6 +132,9 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
           broadcastHandler: this,
           restoreState: state || undefined
         });
+        if (state !== null) {
+          this._prepopulated = true;
+        }
       } else if (state === null) {
         // 1.
         this._remoteDS = cloneDS(this._storeId!, this._localDS!, {
@@ -170,6 +173,10 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
 
   readonly connected: Promise<void>;
 
+  get isPrepopulated(): boolean {
+    return this._prepopulated;
+  }
+
   /**
    *
    */
@@ -181,7 +188,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       });
     }
     this._storeId = await this._client.storeId;
-    this._client.replayHistory();
+    return this._client.replayHistory();
   }
 
   private _schemas: ReadonlyArray<Schema>;
@@ -190,6 +197,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
   private _localDS: Datastore | null;
   private _remoteDS: Datastore | null = null;
   private _storeId: number | null = null;
+  private _prepopulated = false;
 
   private _isDisposed = false;
   private _datastoreChanged = new Signal<this, DatastoreManager.IChangedArgs>(
@@ -220,6 +228,11 @@ export class DSModelDBFactory implements IModelDB.IFactory {
 
     const manager = new DatastoreManager(key, schemas, true);
 
-    return new DSModelDB({ schemas, manager, recordId: key });
+    return new DSModelDB({
+      schemas,
+      manager,
+      recordId: key,
+      basePath: schemas[0].id
+    });
   }
 }

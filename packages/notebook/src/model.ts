@@ -69,12 +69,16 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.modelDB);
+    super(
+      'application/x-ipynb+json',
+      options.languagePreference,
+      options.modelDB
+    );
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
-    if (!this._cells.length) {
+    if (!this._cells.length && !this.modelDB.isPrepopulated) {
       this._cells.push(factory.createCodeCell({}));
     }
     this._cells.changed.connect(

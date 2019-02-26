@@ -8,8 +8,7 @@ import {
   IObservableString,
   IObservableUndoableList,
   IObservableValue,
-  IObservableJSON,
-  ObservableMap
+  IObservableJSON
 } from '@jupyterlab/observables';
 
 import { toArray } from '@phosphor/algorithm';
@@ -39,11 +38,11 @@ export class DSModelDB implements IModelDB {
    *
    */
   constructor(options: DSModelDB.ICreateOptions) {
-    this._basePath = options.basePath || options.schemas[0].id;
+    this._schemaId = options.schemaId;
     if (options.baseDB) {
       this._baseDB = options.baseDB;
     } else {
-      this._baseDB = new ObservableMap<IObservable>();
+      this._baseDB = new Map<string, IObservable>();
       this._toDispose = true;
     }
     this._schemas = {};
@@ -66,8 +65,11 @@ export class DSModelDB implements IModelDB {
    *
    * @returns an `IObservable`.
    */
-  get(path: string): IObservable | undefined {
-    return this._baseDB.get(this._resolvePath(path));
+  get(path: string, resolved = false): IObservable | undefined {
+    if (!resolved) {
+      path = this._resolvePath(path);
+    }
+    return this._baseDB.get(path, true);
   }
 
   /**
@@ -77,8 +79,11 @@ export class DSModelDB implements IModelDB {
    *
    * @returns a boolean for whether an object is at `path`.
    */
-  has(path: string): boolean {
-    return this._baseDB.has(this._resolvePath(path));
+  has(path: string, resolved = false): boolean {
+    if (!resolved) {
+      path = this._resolvePath(path);
+    }
+    return this._baseDB.has(path, true);
   }
 
   /**
@@ -89,7 +94,7 @@ export class DSModelDB implements IModelDB {
    * @returns the string that was created.
    */
   createString(path: string): IObservableString {
-    const schema = this._schemas[this._basePath];
+    const schema = this._schemas[this._schemaId];
     const field = schema.fields[path];
     if (!field || field.type !== 'text') {
       throw new Error(
@@ -116,7 +121,7 @@ export class DSModelDB implements IModelDB {
   createList<T extends ReadonlyJSONValue>(
     path: string
   ): IObservableUndoableList<T> {
-    const schema = this._schemas[this._basePath];
+    const schema = this._schemas[this._schemaId];
     const field = schema.fields[path];
     if (!field || field.type !== 'list') {
       throw new Error(
@@ -126,8 +131,8 @@ export class DSModelDB implements IModelDB {
     let vec = new ObservableUndoableList(
       this.manager,
       schema,
-      path,
       this._recordId,
+      path,
       new ObservableUndoableList.IdentitySerializer<T>()
     );
     this._disposables.add(vec);
@@ -147,7 +152,7 @@ export class DSModelDB implements IModelDB {
    * JSON Objects and primitives.
    */
   createMap(path: string): IObservableJSON {
-    const schema = this._schemas[this._basePath];
+    const schema = this._schemas[this._schemaId];
     const field = schema.fields[path];
     if (!field || field.type !== 'map') {
       throw new Error(
@@ -168,7 +173,7 @@ export class DSModelDB implements IModelDB {
    * @returns the value that was created.
    */
   createValue(path: string): IObservableValue {
-    const schema = this._schemas[this._basePath];
+    const schema = this._schemas[this._schemaId];
     const field = schema.fields[path];
     if (!field || field.type !== 'register') {
       throw new Error(
@@ -192,7 +197,7 @@ export class DSModelDB implements IModelDB {
     if (ds === undefined) {
       throw new Error('Cannot use model db before connection completed!');
     }
-    const schema = this._schemas[this._basePath];
+    const schema = this._schemas[this._schemaId];
     const record = ds.get(schema).get(this._recordId);
     return record && record[path];
   }
@@ -210,16 +215,12 @@ export class DSModelDB implements IModelDB {
     if (ds === undefined) {
       throw new Error('Cannot use model db before connection completed!');
     }
-    const table = ds.get(this._schemas[this._basePath]);
-    let oldValue = this.getValue(path);
+    const table = ds.get(this._schemas[this._schemaId]);
     ds.beginTransaction();
     try {
       table.update({
         [this._recordId]: {
-          [path]: {
-            previous: oldValue,
-            current: value
-          }
+          [path]: value
         }
       } as any);
     } finally {
@@ -230,21 +231,29 @@ export class DSModelDB implements IModelDB {
   /**
    * Create a view onto a subtree of the model database.
    *
-   * @param basePath: the path for the root of the subtree.
+   * @param path: the path for the root of the subtree.
    *
    * @returns an `IModelDB` with a view onto the original
    *   `IModelDB`, with `basePath` prepended to all paths.
    */
-  view(basePath: string): IModelDB {
+  view(path: string): IModelDB {
+    // If path does not resolve to a schema name
+    // append it to the recordId instead
+    let resolved = this._resolvePath(path, false);
+    let recordId = this._recordId;
+    if (this._schemas[resolved] === undefined) {
+      resolved = this._schemaId;
+      recordId = `${this._recordId}.${path}`;
+    }
     const schemas = toArray(iterValues(this._schemas));
     const manager = this.manager;
     // TODO: resolve path?
     return new DSModelDB({
       schemas,
       manager,
-      basePath,
+      schemaId: resolved,
       baseDB: this,
-      recordId: this._recordId
+      recordId: recordId
     });
   }
 
@@ -257,8 +266,11 @@ export class DSModelDB implements IModelDB {
    *
    * @param value: the value to set at the path.
    */
-  set(path: string, value: IObservable): void {
-    this._baseDB.set(this._resolvePath(path), value);
+  set(path: string, value: IObservable, resolved = false): void {
+    if (!resolved) {
+      path = this._resolvePath(path);
+    }
+    this._baseDB.set(path, value, true);
   }
 
   /**
@@ -270,7 +282,7 @@ export class DSModelDB implements IModelDB {
     }
     this._isDisposed = true;
     if (this._toDispose) {
-      this._baseDB.dispose();
+      (this._baseDB as Map<any, any>).clear();
     }
     this._disposables.dispose();
   }
@@ -281,7 +293,7 @@ export class DSModelDB implements IModelDB {
    * functions of the object.
    */
   get basePath(): string {
-    return this._basePath;
+    return this._schemaId;
   }
 
   /**
@@ -295,12 +307,14 @@ export class DSModelDB implements IModelDB {
    * Whether the database has been populated
    * with model values prior to connection.
    */
-  readonly isPrepopulated: boolean;
+  get isPrepopulated(): boolean {
+    return this.manager.isPrepopulated;
+  }
 
   /**
    * Whether the database is collaborative.
    */
-  get isCollaborative(): true {
+  get isCollaborative(): boolean {
     return true;
   }
 
@@ -314,7 +328,7 @@ export class DSModelDB implements IModelDB {
    * A map of the currently active collaborators
    * for the database, including the local user.
    */
-  readonly collaborators?: ICollaboratorMap;
+  collaborators: ICollaboratorMap;
 
   /**
    * The underlying datastore manager.
@@ -324,15 +338,18 @@ export class DSModelDB implements IModelDB {
   /**
    * Compute the fully resolved path for a path argument.
    */
-  private _resolvePath(path: string): string {
-    if (this._basePath) {
-      path = this._basePath + '.' + path;
+  private _resolvePath(path: string, includeRecord = true): string {
+    if (this._schemaId) {
+      path = `${this._schemaId}.${path}`;
+    }
+    if (includeRecord && this._recordId) {
+      path = `${path}:${this._recordId}`;
     }
     return path;
   }
 
-  private _basePath: string;
-  private _baseDB: DSModelDB | ObservableMap<IObservable>;
+  private _schemaId: string;
+  private _baseDB: DSModelDB | Map<string, IObservable>;
   private _schemas: { [key: string]: Schema };
   private _recordId: string;
   private _toDispose = false;
@@ -345,10 +362,10 @@ export class DSModelDB implements IModelDB {
  */
 export namespace DSModelDB {
   export interface ICreateOptions {
-    schemas: ReadonlyArray<Schema>;
     manager: DatastoreManager;
-    basePath?: string;
-    baseDB?: DSModelDB;
+    schemas: ReadonlyArray<Schema>;
+    schemaId: string;
     recordId: string;
+    baseDB?: DSModelDB;
   }
 }

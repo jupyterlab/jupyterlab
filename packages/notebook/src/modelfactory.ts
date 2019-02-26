@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Schema } from '@phosphor/datastore';
+import { Schema, Fields } from '@phosphor/datastore';
 
 import { CodeCellModel } from '@jupyterlab/cells';
 
@@ -88,7 +88,44 @@ export class NotebookModelFactory
   }
 
   get schemas(): ReadonlyArray<Schema> {
-    return [];
+    return [
+      {
+        id: 'NotebookModelSchema.v1',
+        fields: {
+          mimeType: Fields.String(),
+          metadata: Fields.Map(),
+          cellOrder: Fields.List<string>()
+        }
+      },
+      {
+        id: 'NotebookModelSchema.v1.cells',
+        fields: {
+          // General fields for cells:
+          type: Fields.String(),
+          metadata: Fields.Map(),
+          trusted: Fields.Boolean(),
+
+          // Fields for editable models:
+          value: Fields.Text({
+            description: 'The text value of the model'
+          }),
+          mimeType: Fields.String({
+            value: 'text/plain',
+            description: 'The MIME type of the text'
+          }),
+          selections: Fields.Map({
+            description: 'A map of all text selections for all users'
+          }),
+
+          // Code cell specific:
+          executionCount: Fields.Register<number | null>({ value: null }),
+          outputs: Fields.String(),
+
+          // Cells with attachments (md/raw):
+          attachments: Fields.String()
+        }
+      }
+    ];
   }
 
   private _disposed = false;

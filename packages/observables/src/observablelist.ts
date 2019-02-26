@@ -285,7 +285,7 @@ export namespace IObservableList {
      * #### Notes
      * The values will be contiguous starting at the `newIndex`.
      */
-    newValues: T[];
+    newValues: ReadonlyArray<T>;
 
     /**
      * The old index associated with the change.
@@ -298,7 +298,7 @@ export namespace IObservableList {
      * #### Notes
      * The values will be contiguous starting at the `oldIndex`.
      */
-    oldValues: T[];
+    oldValues: ReadonlyArray<T>;
   }
 }
 

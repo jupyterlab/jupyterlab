@@ -8,7 +8,6 @@ import {
   ArrayIterator,
   IIterator,
   IterableOrArrayLike,
-  retro,
   toArray,
   each
 } from '@phosphor/algorithm';
@@ -472,46 +471,36 @@ export class ObservableList<T extends ReadonlyJSONValue>
   }
 
   protected onChange(change: ListField.Change<T>): void {
-    let arr = this._array.slice();
-    let args: IObservableList.IChangedArgs<T>[] = [];
-    each(retro(change), c => {
-      let newer = arr.slice();
+    each(change, c => {
+      // Check for 1-to-1 replacement (translate to `set`)
       if (c.removed.length === 1 && c.inserted.length === 1) {
-        arr.splice(c.index, c.inserted.length, ...c.removed);
-        args.push({
+        this._changed.emit({
           type: 'set',
           newIndex: c.index,
           oldIndex: c.index,
-          newValues: newer,
-          oldValues: arr.slice()
+          newValues: c.inserted,
+          oldValues: c.removed
         });
       } else {
         if (c.removed.length > 0) {
-          arr.splice(c.index, 0, ...c.removed);
-          const tmp = arr.slice();
-          args.push({
+          this._changed.emit({
             type: 'remove',
             newIndex: c.index,
             oldIndex: c.index,
-            newValues: newer,
-            oldValues: tmp
+            newValues: [],
+            oldValues: c.removed
           });
-          newer = tmp;
         }
         if (c.inserted.length > 0) {
-          arr.splice(c.index, c.inserted.length);
-          args.push({
+          this._changed.emit({
             type: 'add',
             newIndex: c.index,
             oldIndex: c.index,
-            newValues: newer,
-            oldValues: arr.slice()
+            newValues: c.inserted,
+            oldValues: []
           });
         }
       }
-    });
-    each(retro(args), a => {
-      this._changed.emit(a);
     });
   }
 
