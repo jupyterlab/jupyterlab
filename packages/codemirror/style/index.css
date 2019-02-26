@@ -43,7 +43,12 @@
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
-  padding: var(--jp-code-padding);
+  padding: var(--jp-code-padding) 0;
+}
+
+/* Set horizontal padding on line nodes for correct margins */
+pre.CodeMirror-line {
+  padding: 0 var(--jp-code-padding);
 }
 
 .CodeMirror-linenumbers {
@@ -153,7 +158,7 @@
 }
 
 .cm-s-jupyter .CodeMirror-cursor {
-  border-left: 1.4px solid var(--jp-editor-cursor-color);
+  border-left: var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color);
 }
 .cm-s-jupyter span.cm-keyword {
   color: var(--jp-mirror-editor-keyword-color);

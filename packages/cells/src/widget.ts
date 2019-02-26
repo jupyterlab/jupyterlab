@@ -365,6 +365,14 @@ export class Cell extends Widget {
   }
 
   /**
+   * Handle `fit-request` messages.
+   */
+  protected onFitRequest(msg: Message): void {
+    // need this for for when a theme changes font size
+    this.editor.refresh();
+  }
+
+  /**
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
