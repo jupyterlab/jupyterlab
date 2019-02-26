@@ -1138,6 +1138,21 @@ describe('@jupyter/notebook', () => {
           expect(selected(widget)).to.deep.equal([2, 3]);
         });
 
+        it('should not extend a selection if there is text selected in the output', () => {
+          widget.activeCellIndex = 2;
+
+          // Set a selection in the active cell outputs.
+          const selection = window.getSelection();
+          selection.selectAllChildren(
+            (widget.activeCell as CodeCell).outputArea.node
+          );
+
+          // Shift click below, which should not extend cells selection.
+          simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).to.equal(2);
+          expect(selected(widget)).to.deep.equal([]);
+        });
+
         it('should leave a markdown cell rendered', () => {
           const code = widget.model.contentFactory.createCodeCell({});
           const md = widget.model.contentFactory.createMarkdownCell({});
