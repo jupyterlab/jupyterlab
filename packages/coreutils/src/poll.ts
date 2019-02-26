@@ -14,16 +14,17 @@ export class Poll implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions) {
-    const { interval, max, name, poll, when } = options;
+    const { interval, max, name, poll, variance, when } = options;
 
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
     }
 
+    this.interval = typeof interval === 'number' ? interval : 1000;
     this.name = name || 'unknown';
+    this.variance = typeof variance === 'number' ? variance : 0.2;
 
     // Cache the original interval length and start polling.
-    this._interval = interval;
     (when || Promise.resolve())
       .then(() => {
         this._poll(poll, interval, max);
@@ -34,9 +35,19 @@ export class Poll implements IDisposable {
   }
 
   /**
+   * The polling interval.
+   */
+  readonly interval: number;
+
+  /**
    * The name of the poll. Defaults to `'unknown'`.
    */
   readonly name: string;
+
+  /**
+   * The range within which the poll interval "wobbles".
+   */
+  readonly variance: number;
 
   /**
    * Whether the poll is disposed.
@@ -74,15 +85,17 @@ export class Poll implements IDisposable {
             return;
           }
 
-          interval = this._interval;
+          // The poll succeeded. Reset the interval.
+          interval = Private.wobble(this.interval, this.variance);
         } catch (error) {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
             return;
           }
 
+          // The poll failed. Increase the interval.
           const old = interval;
-          interval = Math.min(old * 2, max);
+          interval = Private.wobble(Math.min(old * 2, max), this.variance);
           console.warn(
             `Poll (${
               this.name
@@ -96,7 +109,6 @@ export class Poll implements IDisposable {
     }, interval);
   }
 
-  private _interval: number;
   private _isDisposed = false;
 }
 
@@ -129,5 +141,40 @@ export namespace Poll {
      * If set, a promise which must resolve (or reject) before polling begins.
      */
     when?: Promise<any>;
+
+    /**
+     * The range within which the poll interval "wobbles". Defaults to `0.2`.
+     * Unless set to `0` the poll interval will be irregular.
+     */
+    variance?: number;
   }
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Returns a randomly wobbled integer from a base value.
+   *
+   * @param base - The base value that is being wobbled.
+   *
+   * @param factor - Factor multiplied by the base to define wobble amplitude.
+   * A factor of `0` will return the base unchanged.
+   *
+   * #### Notes
+   * This function returns integers, so it is only useful for larger numbers.
+   */
+  export function wobble(base: number, factor: number): number {
+    if (factor === 0) {
+      return base;
+    }
+
+    const direction = Math.random() < 0.5 ? 1 : -1;
+    const jitter = Math.random() * base * Math.abs(factor) * direction;
+
+    return Math.floor(base + jitter);
+  }
+
+  (window as any).wobble = wobble;
 }
