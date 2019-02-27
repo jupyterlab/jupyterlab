@@ -88,7 +88,7 @@ export class Poll implements IDisposable {
 
           // Check if this is a reconnection before setting connected state.
           if (!this._connected) {
-            console.log(`Poll ${this.name} reconnected.`);
+            console.log(`Poll (${this.name}) reconnected.`);
           }
           this._connected = true;
 
@@ -108,7 +108,7 @@ export class Poll implements IDisposable {
           console.warn(
             `Poll (${
               this.name
-            }) failed, increasing interval from ${old} to ${interval}`,
+            }) failed, increasing interval from ${old} to ${interval}.`,
             error
           );
         }
