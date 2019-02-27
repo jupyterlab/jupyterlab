@@ -14,13 +14,11 @@
   cursor: pointer;
   color: var(--jp-ui-font-color0);
   background-color: var(--jp-layout-color1);
-  border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size2);
 }
 
 .jp-Collapse-open > .jp-Collapse-header {
   cursor: default;
-  border-bottom: none;
 }
 
 .jp-Collapse .jp-Collapse-header::before {
@@ -42,8 +40,5 @@
   padding: 4px 4px 4px 12px;
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
-  border-left: var(--jp-border-width) solid var(--jp-border-color1);
-  border-right: var(--jp-border-width) solid var(--jp-border-color1);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: auto;
 }

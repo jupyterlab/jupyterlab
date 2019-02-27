@@ -9,8 +9,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
  * Clicking on the title expands or contracts the widget.
  */
 export class Collapse<T extends Widget = Widget> extends Widget {
-  constructor(options: Collapse.IOptions<T> = {}) {
+  constructor(options: Collapse.IOptions<T>) {
     super(options);
+    const { widget, collapsed = true } = options;
+
     this.addClass('jp-Collapse');
     this._header = new Widget();
     this._header.addClass('jp-Collapse-header');
@@ -22,10 +24,9 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this.layout = layout;
     layout.addWidget(this._header);
     layout.addWidget(this._content);
-    if (options.widget) {
-      this.widget = options.widget;
-    }
-    this.collapsed = false;
+
+    this.widget = widget;
+    this.collapsed = collapsed;
   }
 
   /**
@@ -88,9 +89,11 @@ export class Collapse<T extends Widget = Widget> extends Widget {
       return;
     }
     super.dispose();
-    this._header = null;
-    this._widget = null;
-    this._content = null;
+
+    // Delete references we explicitly hold to other widgets.
+    delete this._header;
+    delete this._widget;
+    delete this._content;
   }
 
   /**
@@ -151,6 +154,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
 
 export namespace Collapse {
   export interface IOptions<T extends Widget = Widget> extends Widget.IOptions {
-    widget?: T;
+    widget: T;
+    collapsed?: boolean;
   }
 }
