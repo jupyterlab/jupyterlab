@@ -393,7 +393,8 @@ function activateNotebookTools(
   const slideShow = NotebookTools.createSlideShowSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
-    editorFactory
+    editorFactory,
+    collapsed: false
   });
   const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
     editorFactory
@@ -431,22 +432,27 @@ function activateNotebookTools(
         }
       });
       const nbConvert = NotebookTools.createNBConvertSelector(optionsMap);
-      notebookTools.addItem({ tool: nbConvert, section: 'cell', rank: 3 });
+      notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
     }
   });
   notebookTools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
   notebookTools.title.caption = 'Notebook Tools';
   notebookTools.id = id;
 
+  notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
+  notebookTools.addItem({ tool: slideShow, section: 'common', rank: 2 });
+
+  notebookTools.addItem({
+    tool: cellMetadataEditor,
+    section: 'advanced',
+    rank: 1
+  });
   notebookTools.addItem({
     tool: notebookMetadataEditor,
-    section: 'notebook',
-    rank: 5
+    section: 'advanced',
+    rank: 2
   });
 
-  notebookTools.addItem({ tool: activeCellTool, section: 'cell', rank: 1 });
-  notebookTools.addItem({ tool: slideShow, section: 'cell', rank: 2 });
-  notebookTools.addItem({ tool: cellMetadataEditor, section: 'cell', rank: 4 });
   MessageLoop.installMessageHook(notebookTools, hook);
 
   // Wait until the application has finished restoring before rendering.

@@ -27,7 +27,7 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
-import { Collapse } from '@jupyterlab/apputils/src/collapse';
+import { Collapse } from '@jupyterlab/apputils';
 
 /* tslint:disable */
 /**
@@ -91,14 +91,13 @@ export class NotebookTools extends Widget implements INotebookTools {
     super();
     this.addClass('jp-NotebookTools');
 
-    this._cellTools = new RankedPanel<NotebookTools.Tool>();
-    this._cellTools.title.label = 'Cell Tools';
-    this._notebookTools = new RankedPanel<NotebookTools.Tool>();
-    this._notebookTools.title.label = 'Notebook Tools';
+    this._commonTools = new RankedPanel<NotebookTools.Tool>();
+    this._advancedTools = new RankedPanel<NotebookTools.Tool>();
+    this._advancedTools.title.label = 'Advanced Tools';
 
     const layout = (this.layout = new PanelLayout());
-    layout.addWidget(new Collapse({ widget: this._cellTools }));
-    layout.addWidget(new Collapse({ widget: this._notebookTools }));
+    layout.addWidget(this._commonTools);
+    layout.addWidget(new Collapse({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -146,10 +145,10 @@ export class NotebookTools extends Widget implements INotebookTools {
     let rank = 'rank' in options ? options.rank : 100;
 
     let section: RankedPanel<NotebookTools.Tool>;
-    if (options.section === 'notebook') {
-      section = this._notebookTools;
-    } else if (options.section === 'cell') {
-      section = this._cellTools;
+    if (options.section === 'advanced') {
+      section = this._advancedTools;
+    } else if (options.section === 'common') {
+      section = this._commonTools;
     }
 
     tool.addClass('jp-NotebookTools-tool');
@@ -244,11 +243,11 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   private _toolChildren() {
-    return chain(this._notebookTools.children(), this._cellTools.children());
+    return chain(this._advancedTools.children(), this._commonTools.children());
   }
 
-  private _cellTools: RankedPanel<NotebookTools.Tool>;
-  private _notebookTools: RankedPanel<NotebookTools.Tool>;
+  private _commonTools: RankedPanel<NotebookTools.Tool>;
+  private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
   private _prevPanel: NotebookPanel | null;
   private _prevActive: ICellModel | null;
@@ -280,7 +279,7 @@ export namespace NotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section: 'notebook' | 'cell';
+    section: 'common' | 'advanced';
 
     /**
      * The rank order of the widget among its siblings.
@@ -490,15 +489,14 @@ export namespace NotebookTools {
      */
     constructor(options: MetadataEditorTool.IOptions) {
       super();
-      let editorFactory = options.editorFactory;
+      const { editorFactory, collapsed } = options;
       this.addClass('jp-MetadataEditorTool');
       let layout = (this.layout = new PanelLayout());
       this.editor = new JSONEditor({
-        editorFactory,
-        title: options.label || 'Edit Metadata',
-        collapsible: true
+        editorFactory
       });
-      layout.addWidget(this.editor);
+      this.editor.title.label = options.label || 'Edit Metadata';
+      layout.addWidget(new Collapse({ widget: this.editor, collapsed }));
     }
 
     /**
@@ -524,6 +522,11 @@ export namespace NotebookTools {
        * The label for the JSON editor
        */
       label?: string;
+
+      /**
+       * Initial collapse state, defaults to true.
+       */
+      collapsed?: boolean;
     }
   }
 
@@ -532,7 +535,7 @@ export namespace NotebookTools {
    */
   export class NotebookMetadataEditorTool extends MetadataEditorTool {
     constructor(options: MetadataEditorTool.IOptions) {
-      options.label = options.label || 'Edit Notebook Metadata';
+      options.label = options.label || 'Notebook Metadata';
       super(options);
     }
 
@@ -561,7 +564,7 @@ export namespace NotebookTools {
    */
   export class CellMetadataEditorTool extends MetadataEditorTool {
     constructor(options: MetadataEditorTool.IOptions) {
-      options.label = options.label || 'Edit Cell Metadata';
+      options.label = options.label || 'Cell Metadata';
       super(options);
     }
 
