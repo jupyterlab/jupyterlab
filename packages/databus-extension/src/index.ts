@@ -14,7 +14,7 @@ import widgetPlugin from './widgets';
 import URLPlugin from './urls';
 import renderMimePlugin from './rendermime';
 import activePlugin from './active';
-import dataBusFilePlugin from './dataBusFile';
+import dataBusFilePlugin from './databusFile';
 
 export default [
   dataRegistryPlugin,
