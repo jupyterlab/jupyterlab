@@ -5,7 +5,7 @@ import { Widget, Panel, PanelLayout, Title } from '@phosphor/widgets';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
- * A panel that supports a collapsible header, made from the widget's title.
+ * A panel that supports a collapsible header made from the widget's title.
  * Clicking on the title expands or contracts the widget.
  */
 export class Collapse<T extends Widget = Widget> extends Widget {
@@ -28,20 +28,12 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this.collapsed = false;
   }
 
-  dispose() {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
-    this._header = null;
-    this._widget = null;
-    this._content = null;
-  }
-
+  /**
+   * The widget inside the collapse panel.
+   */
   get widget(): T {
     return this._widget;
   }
-
   set widget(widget: T) {
     let oldWidget = this._widget;
     if (oldWidget) {
@@ -57,10 +49,12 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this._content.addWidget(widget);
   }
 
+  /**
+   * The collapsed state of the panel.
+   */
   get collapsed() {
     return this._collapsed;
   }
-
   set collapsed(value: boolean) {
     if (value === this._collapsed) {
       return;
@@ -72,29 +66,31 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     }
   }
 
-  toggle() {
-    this.collapsed = !this.collapsed;
-  }
-
+  /**
+   * A signal for when the widget collapse state changes.
+   */
   get collapseChanged(): ISignal<Collapse, void> {
     return this._collapseChanged;
   }
 
-  private _collapse() {
-    this._collapsed = true;
-    if (this._content) {
-      this._content.hide();
-    }
-    this.removeClass('jp-Collapse-open');
-    this._collapseChanged.emit(void 0);
+  /**
+   * Toggle the collapse state of the panel.
+   */
+  toggle() {
+    this.collapsed = !this.collapsed;
   }
-  private _uncollapse() {
-    this._collapsed = false;
-    if (this._content) {
-      this._content.show();
+
+  /**
+   * Dispose the widget.
+   */
+  dispose() {
+    if (this.isDisposed) {
+      return;
     }
-    this.addClass('jp-Collapse-open');
-    this._collapseChanged.emit(void 0);
+    super.dispose();
+    this._header = null;
+    this._widget = null;
+    this._content = null;
   }
 
   /**
@@ -117,6 +113,24 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     }
   }
 
+  private _collapse() {
+    this._collapsed = true;
+    if (this._content) {
+      this._content.hide();
+    }
+    this.removeClass('jp-Collapse-open');
+    this._collapseChanged.emit(void 0);
+  }
+
+  private _uncollapse() {
+    this._collapsed = false;
+    if (this._content) {
+      this._content.show();
+    }
+    this.addClass('jp-Collapse-open');
+    this._collapseChanged.emit(void 0);
+  }
+
   private _evtClick(event: MouseEvent) {
     this.toggle();
   }
@@ -129,11 +143,10 @@ export class Collapse<T extends Widget = Widget> extends Widget {
   }
 
   private _collapseChanged = new Signal<Collapse, void>(this);
-
-  _collapsed: boolean;
-  _content: Panel;
-  _widget: T;
-  _header: Widget;
+  private _collapsed: boolean;
+  private _content: Panel;
+  private _header: Widget;
+  private _widget: T;
 }
 
 export namespace Collapse {

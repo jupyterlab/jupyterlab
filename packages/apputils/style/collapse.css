@@ -24,7 +24,7 @@
 }
 
 .jp-Collapse .jp-Collapse-header::before {
-  content: '\f0da\00A0';  /* caret-right, non-breaking space */
+  content: '\f0da\00A0'; /* caret-right, non-breaking space */
   width: 12px;
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;

@@ -27,7 +27,7 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
-import { Collapse } from './collapse';
+import { Collapse } from '@jupyterlab/apputils/src/collapse';
 
 /* tslint:disable */
 /**
