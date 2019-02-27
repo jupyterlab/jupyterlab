@@ -38,6 +38,7 @@
     "@phosphor/widgets": "^1.6.0",
     "@types/js-yaml": "3.12.0",
     "js-yaml": "3.12.2",
+    "path": "~0.12.7",
     "react": "~16.4.2",
     "typestyle": "^2.0.1"
   },
