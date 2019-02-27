@@ -14,6 +14,7 @@ import widgetPlugin from './widgets';
 import URLPlugin from './urls';
 import renderMimePlugin from './rendermime';
 import activePlugin from './active';
+import dataBusFilePlugin from './dataBusFile';
 
 export default [
   dataRegistryPlugin,
@@ -25,5 +26,6 @@ export default [
   snippetsPlugin,
   URLPlugin,
   renderMimePlugin,
-  activePlugin
+  activePlugin,
+  dataBusFilePlugin
 ] as JupyterFrontEndPlugin<any>[];

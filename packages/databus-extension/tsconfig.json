@@ -21,6 +21,9 @@
       "path": "../databus"
     },
     {
+      "path": "../docmanager"
+    },
+    {
       "path": "../docregistry"
     },
     {

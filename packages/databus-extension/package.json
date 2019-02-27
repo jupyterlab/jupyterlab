@@ -32,12 +32,14 @@
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
     "@jupyterlab/coreutils": "^3.0.0-alpha.3",
     "@jupyterlab/databus": "^0.7.1",
+    "@jupyterlab/docmanager": "^1.0.0-alpha.3",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",
     "@jupyterlab/filebrowser": "^1.0.0-alpha.3",
     "@jupyterlab/notebook": "^1.0.0-alpha.4",
     "@jupyterlab/rendermime": "^1.0.0-alpha.3",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
+    "js-yaml": "3.12.2",
     "react": "~16.4.2"
   },
   "devDependencies": {
