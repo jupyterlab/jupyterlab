@@ -6,6 +6,8 @@ import { createViewerMimeType, View } from './viewers';
 import { singleConverter, Converter } from './converters';
 import { extractFileMimeType } from './files';
 import { extractURLMimeType } from './urls';
+
+import { relative, dirname } from 'path';
 const baseMimeType = 'application/x.jupyter.snippet; label=';
 
 export function snippetMimeType(label: string) {
@@ -19,6 +21,12 @@ export function extractSnippetLabel(mimeType: string): string | null {
   return mimeType.slice(baseMimeType.length);
 }
 
+type Context = {
+  path: string;
+};
+
+type Snippet = (context: Context) => string;
+
 export interface IFileSnippetConverterOptions {
   mimeType: string;
   createSnippet: (path: string) => string;
@@ -29,7 +37,7 @@ export function fileSnippetConverter({
   mimeType,
   createSnippet,
   label
-}: IFileSnippetConverterOptions): Converter<string, string> {
+}: IFileSnippetConverterOptions): Converter<string, Snippet> {
   return singleConverter((someMimeType: string) => {
     const innerMimeType = extractFileMimeType(someMimeType);
     if (innerMimeType !== mimeType) {
@@ -37,7 +45,9 @@ export function fileSnippetConverter({
     }
     return [
       snippetMimeType(label),
-      async (path: string) => createSnippet(path)
+      async (dataPath: string) => (context: Context) => {
+        return createSnippet(relative(dirname(context.path), dataPath));
+      }
     ];
   });
 }
@@ -52,7 +62,7 @@ export function URLSnippetConverter({
   mimeType,
   createSnippet,
   label
-}: IURLSnippetConverter): Converter<URL | string, string> {
+}: IURLSnippetConverter): Converter<URL | string, Snippet> {
   return singleConverter((someMimeType: string) => {
     const innerMimeType = extractURLMimeType(someMimeType);
     if (innerMimeType !== mimeType) {
@@ -60,14 +70,15 @@ export function URLSnippetConverter({
     }
     return [
       snippetMimeType(label),
-      async (url: string | URL) => createSnippet(url)
+      async (url: string | URL) => () => createSnippet(url)
     ];
   });
 }
 
 export function snippetViewerConverter(
-  insert: (snippet: string) => Promise<void>
-): Converter<string, View> {
+  insert: (snippet: string) => Promise<void>,
+  getContext: () => Promise<Context>
+): Converter<Snippet, View> {
   return singleConverter((mimeType: string) => {
     const label = extractSnippetLabel(mimeType);
     if (label === null) {
@@ -75,7 +86,7 @@ export function snippetViewerConverter(
     }
     return [
       createViewerMimeType(label),
-      async data => async () => insert(data)
+      async data => async () => await insert(data(await getContext()))
     ];
   });
 }

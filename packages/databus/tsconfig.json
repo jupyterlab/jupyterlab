@@ -5,7 +5,8 @@
     "rootDir": "src",
     "jsx": "react",
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "types": ["node"]
   },
   "include": ["src/*"],
   "references": [

@@ -28,18 +28,21 @@ function activate(
   notebookTracker: INotebookTracker
 ) {
   converters.register(
-    snippetViewerConverter(async (snippet: string) => {
-      notebookTracker.activeCell.model.value.insert(0, snippet);
-    })
+    snippetViewerConverter(
+      async (snippet: string) => {
+        notebookTracker.activeCell.model.value.insert(0, snippet);
+      },
+      async () => ({
+        path: notebookTracker.currentWidget!.context.path
+      })
+    )
   );
   converters.register(
     fileSnippetConverter({
       mimeType: 'text/csv',
       label: 'Snippet',
-      createSnippet: (path: string) =>
-        `import pandas as pd\n\ndf = pd.read_csv(${JSON.stringify(
-          '.' + path
-        )})\ndf`
+      createSnippet: path =>
+        `import pandas as pd\n\ndf = pd.read_csv(${JSON.stringify(path)})\ndf`
     })
   );
   converters.register(

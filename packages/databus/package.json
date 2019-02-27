@@ -42,6 +42,7 @@
     "typestyle": "^2.0.1"
   },
   "devDependencies": {
+    "@types/node": "~8.0.47",
     "rimraf": "~2.6.2",
     "typescript": "~3.3.1"
   },
