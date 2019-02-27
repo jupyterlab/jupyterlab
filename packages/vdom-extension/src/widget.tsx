@@ -7,6 +7,8 @@ import * as ReactDOM from 'react-dom';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Kernel } from '@jupyterlab/services';
@@ -25,30 +27,24 @@ import '../style/index.css';
 const CSS_CLASS = 'jp-RenderedVDOM';
 
 /**
- * The CSS class for a VDOM icon.
- */
-const CSS_ICON_CLASS = 'jp-MaterialIcon jp-VDOMIcon';
-
-/**
- * The MIME type for VDOM.
- */
-export const MIME_TYPE = 'application/vdom.v1+json';
-
-/**
  * A renderer for declarative virtual DOM content.
  */
 export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   /**
    * Create a new widget for rendering DOM.
    */
-  constructor(options: IRenderMime.IRendererOptions) {
+  constructor(
+    options: IRenderMime.IRendererOptions,
+    context?: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ) {
     super();
     this.addClass(CSS_CLASS);
     this.addClass('jp-RenderedHTML');
     this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
-    // Get current kernel session (hack for mimerender extension)
-    this._session = (options.resolver as any).session;
+    if (context) {
+      this._session = context.session;
+    }
   }
 
   /**
@@ -114,35 +110,3 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
 }
-
-/**
- * A mime renderer factory for VDOM data.
- */
-export const rendererFactory: IRenderMime.IRendererFactory = {
-  safe: true,
-  mimeTypes: [MIME_TYPE],
-  createRenderer: options => new RenderedVDOM(options)
-};
-
-const extension: IRenderMime.IExtension = {
-  id: '@jupyterlab/vdom-extension:factory',
-  rendererFactory,
-  rank: 0,
-  dataType: 'json',
-  fileTypes: [
-    {
-      name: 'vdom',
-      mimeTypes: [MIME_TYPE],
-      extensions: ['.vdom', '.vdom.json'],
-      iconClass: CSS_ICON_CLASS
-    }
-  ],
-  documentWidgetFactoryOptions: {
-    name: 'VDOM',
-    primaryFileType: 'vdom',
-    fileTypes: ['vdom', 'json'],
-    defaultFor: ['vdom']
-  }
-};
-
-export default extension;

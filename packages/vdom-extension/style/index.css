@@ -21,10 +21,6 @@
   padding: 5px;
 }
 
-/* Output styles */
-.jp-OutputArea .jp-RenderedVDOM {
-}
-
 /* Document icon */
 .jp-VDOMIcon {
   background-image: var(--jp-icon-vdom);
