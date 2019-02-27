@@ -391,13 +391,6 @@ function activateNotebookTools(
   const notebookTools = new NotebookTools({ tracker });
   const activeCellTool = new NotebookTools.ActiveCellTool();
   const slideShow = NotebookTools.createSlideShowSelector();
-  const scrolled = NotebookTools.createScrolledSelector();
-  const editable = NotebookTools.createEditableSelector();
-  const inputHidden = NotebookTools.createInputHiddenSelector();
-  const outputCollapsed = NotebookTools.createOutputCollapsedSelector();
-  const syncScrolledState = new NotebookTools.SyncScrolledState();
-  const syncEditableState = new NotebookTools.SyncEditableState();
-  const syncCollapsedState = new NotebookTools.SyncCollapsedState();
   const editorFactory = editorServices.factoryService.newInlineEditor;
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory
@@ -446,31 +439,12 @@ function activateNotebookTools(
   notebookTools.id = id;
 
   notebookTools.addItem({
-    tool: syncScrolledState,
-    section: 'notebook',
-    rank: 1
-  });
-  notebookTools.addItem({
-    tool: syncCollapsedState,
-    section: 'notebook',
-    rank: 1
-  });
-  notebookTools.addItem({
-    tool: syncEditableState,
-    section: 'notebook',
-    rank: 1
-  });
-  notebookTools.addItem({
     tool: notebookMetadataEditor,
     section: 'notebook',
     rank: 5
   });
 
   notebookTools.addItem({ tool: activeCellTool, section: 'cell', rank: 1 });
-  notebookTools.addItem({ tool: editable, section: 'cell', rank: 2 });
-  notebookTools.addItem({ tool: scrolled, section: 'cell', rank: 2 });
-  notebookTools.addItem({ tool: inputHidden, section: 'cell', rank: 2 });
-  notebookTools.addItem({ tool: outputCollapsed, section: 'cell', rank: 2 });
   notebookTools.addItem({ tool: slideShow, section: 'cell', rank: 2 });
   notebookTools.addItem({ tool: cellMetadataEditor, section: 'cell', rank: 4 });
   MessageLoop.installMessageHook(notebookTools, hook);
@@ -636,12 +610,7 @@ function activateNotebookHandler(
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
     factory.notebookConfig = notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
-      syncOptions: settings.get('syncOptions').composite as {
-        scrolled: boolean;
-        editable: boolean;
-        collapsed: boolean;
-      }
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
     };
   }
 

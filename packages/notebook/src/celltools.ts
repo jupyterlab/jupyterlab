@@ -27,7 +27,6 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
-import { NotebookActions } from './actions';
 import { Collapse } from './collapse';
 
 /* tslint:disable */
@@ -383,91 +382,6 @@ export namespace NotebookTools {
      */
     protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
       /* no-op */
-    }
-  }
-
-  /**
-   * A notebook-level convenience tool to sync state of the view and metadata.
-   */
-  export class SyncState extends Tool {
-    constructor() {
-      super();
-
-      this.node.innerHTML = `${this.label()}<br/>`;
-      const viewToMetadata = document.createElement('button');
-      viewToMetadata.textContent = 'Metadata <- View';
-      viewToMetadata.addEventListener('click', event => this.viewToMetadata());
-
-      const metadataToView = document.createElement('button');
-      metadataToView.textContent = 'Metadata -> View';
-      metadataToView.addEventListener('click', event => this.metadataToView());
-
-      this.node.appendChild(viewToMetadata);
-      this.node.appendChild(metadataToView);
-    }
-
-    protected label(): string {
-      return '';
-    }
-    protected viewToMetadata(): void {
-      /* no-op */
-    }
-    protected metadataToView(): void {
-      /* no-op */
-    }
-  }
-
-  export class SyncScrolledState extends SyncState {
-    protected label() {
-      return 'All Cell Scroll State: ';
-    }
-    protected viewToMetadata() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.saveScrollState(panel.content);
-      }
-    }
-    protected metadataToView() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.loadScrollState(panel.content);
-      }
-    }
-  }
-
-  export class SyncCollapsedState extends SyncState {
-    protected label() {
-      return 'All Cell Collapse State: ';
-    }
-    protected viewToMetadata() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.saveCollapseState(panel.content);
-      }
-    }
-    protected metadataToView() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.loadCollapseState(panel.content);
-      }
-    }
-  }
-
-  export class SyncEditableState extends SyncState {
-    protected label() {
-      return 'All Cell Editable State: ';
-    }
-    protected viewToMetadata() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.saveEditableState(panel.content);
-      }
-    }
-    protected metadataToView() {
-      const panel = this.notebookTools.notebookPanel;
-      if (panel) {
-        NotebookActions.loadEditableState(panel.content);
-      }
     }
   }
 

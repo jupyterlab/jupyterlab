@@ -329,31 +329,6 @@
       "description": "Whether to be able to scroll so the last cell is at the top of the panel",
       "type": "boolean",
       "default": true
-    },
-    "syncOptions": {
-      "title": "Metadata Sync options",
-      "description": "The metadata that is automatically synced.",
-      "properties": {
-        "scrolled": {
-          "type": "boolean",
-          "default": true
-        },
-        "editable": {
-          "type": "boolean",
-          "default": true
-        },
-        "collapsed": {
-          "type": "boolean",
-          "default": false
-        }
-      },
-      "default": {
-        "scrolled": true,
-        "editable": true,
-        "collapsed": true
-      },
-      "additionalProperties": false,
-      "type": "object"
     }
   },
   "additionalProperties": false,

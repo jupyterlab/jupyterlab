@@ -476,10 +476,9 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false
     };
     const cell = this.contentFactory.createCodeCell(options, this);
-    const { editable, collapsed, scrolled } = this._notebookConfig.syncOptions;
-    cell.syncCollapse = collapsed;
-    cell.syncEditable = editable;
-    cell.syncScrolled = scrolled;
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    cell.syncScrolled = true;
     return cell;
   }
 
@@ -498,9 +497,8 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
-    const { editable, collapsed } = this._notebookConfig.syncOptions;
-    cell.syncCollapse = collapsed;
-    cell.syncEditable = editable;
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
     return cell;
   }
 
@@ -517,9 +515,8 @@ export class StaticNotebook extends Widget {
       updateEditorOnShow: false
     };
     const cell = this.contentFactory.createRawCell(options, this);
-    const { editable, collapsed } = this._notebookConfig.syncOptions;
-    cell.syncCollapse = collapsed;
-    cell.syncEditable = editable;
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
     return cell;
   }
 
@@ -611,16 +608,6 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
-
-    // Apply cell sync settings.
-    const { editable, collapsed, scrolled } = this._notebookConfig.syncOptions;
-    this.widgets.forEach(cell => {
-      cell.syncCollapse = collapsed;
-      cell.syncEditable = editable;
-      if (cell.model.type === 'code') {
-        (cell as CodeCell).syncScrolled = scrolled;
-      }
-    });
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;
@@ -752,26 +739,12 @@ export namespace StaticNotebook {
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
-
-    /**
-     * Synced properties
-     */
-    syncOptions: {
-      scrolled: boolean;
-      editable: boolean;
-      collapsed: boolean;
-    };
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
-    scrollPastEnd: true,
-    syncOptions: {
-      scrolled: true,
-      editable: true,
-      collapsed: false
-    }
+    scrollPastEnd: true
   };
 
   /**
