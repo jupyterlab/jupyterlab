@@ -1364,7 +1364,7 @@ namespace Private {
       return;
     }
     let cur = doc.getCursor();
-    let tabsize = cm.getOption('tabSize');
+    let tabsize = cm.getOption('indentUnit');
     let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
     from = { ch: cur.ch - chToPrevTabStop, line: cur.line };
     let select = doc.getRange(from, cur);
