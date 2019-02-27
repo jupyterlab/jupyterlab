@@ -23,15 +23,17 @@ export class Poll implements IDisposable {
     this.interval = typeof interval === 'number' ? interval : 1000;
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
+    this._fn = poll;
+    this._max = max;
 
     // Cache the original interval length and start polling.
     (when || Promise.resolve())
       .then(() => {
         this._connected = true;
-        this._poll(poll, interval, max);
+        this._poll(interval);
       })
       .catch(() => {
-        this._poll(poll, interval, max);
+        this._poll(interval);
       });
   }
 
@@ -68,10 +70,21 @@ export class Poll implements IDisposable {
   }
 
   /**
+   * Refresh the poll.
+   */
+  refresh(): void {
+    this._poll(0, true);
+  }
+
+  /**
    * Schedule a poll request.
    */
-  private _poll(poll: () => Promise<any>, interval: number, max: number): void {
-    setTimeout(async () => {
+  private _poll(interval: number, manual = false): void {
+    let timeout: number;
+    if (this._timeout) {
+      clearTimeout(this._timeout);
+    }
+    timeout = this._timeout = setTimeout(async () => {
       if (this._isDisposed) {
         return;
       }
@@ -79,7 +92,7 @@ export class Poll implements IDisposable {
       // Only execute promise if not in a hidden tab.
       if (typeof document === 'undefined' || !document.hidden) {
         try {
-          await poll();
+          await this._fn.call(null, manual);
 
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
@@ -104,6 +117,7 @@ export class Poll implements IDisposable {
 
           // The poll failed. Increase the interval.
           const old = interval;
+          const max = this._max;
           interval = Private.jitter(Math.min(old * 2, max), this.variance);
           console.warn(
             `Poll (${
@@ -114,12 +128,18 @@ export class Poll implements IDisposable {
         }
       }
 
-      this._poll(poll, interval, max);
+      // If no other timeout has superseded this one continue polling.
+      if (timeout === this._timeout) {
+        this._poll(interval);
+      }
     }, interval);
   }
 
   private _connected = false;
+  private _fn: (manual: boolean) => Promise<any>;
   private _isDisposed = false;
+  private _max: number;
+  private _timeout = 0;
 }
 
 export namespace Poll {
@@ -143,9 +163,10 @@ export namespace Poll {
     name?: string;
 
     /**
-     * A function that returns a poll promise.
+     * A function that returns a poll promise. If the `manual` flag is `true`,
+     * it indicates a user-initiated poll request.
      */
-    poll: () => Promise<any>;
+    poll: (manual?: boolean) => Promise<any>;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
