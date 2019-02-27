@@ -12,8 +12,7 @@
     "lib/**/*.d.ts",
     "lib/**/*.js.map",
     "lib/**/*.js",
-    "style/*.css",
-    "style/images/*.svg",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "schema/*.json"
   ],
   "main": "lib/index.js",
