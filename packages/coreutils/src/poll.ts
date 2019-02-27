@@ -27,6 +27,7 @@ export class Poll implements IDisposable {
     // Cache the original interval length and start polling.
     (when || Promise.resolve())
       .then(() => {
+        this._connected = true;
         this._poll(poll, interval, max);
       })
       .catch(() => {
@@ -85,17 +86,25 @@ export class Poll implements IDisposable {
             return;
           }
 
+          // Check if this is a reconnection before setting connected state.
+          if (!this._connected) {
+            console.log(`Poll ${this.name} reconnected.`);
+          }
+          this._connected = true;
+
           // The poll succeeded. Reset the interval.
-          interval = Private.wobble(this.interval, this.variance);
+          interval = Private.jitter(this.interval, this.variance);
         } catch (error) {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
             return;
           }
 
+          this._connected = false;
+
           // The poll failed. Increase the interval.
           const old = interval;
-          interval = Private.wobble(Math.min(old * 2, max), this.variance);
+          interval = Private.jitter(Math.min(old * 2, max), this.variance);
           console.warn(
             `Poll (${
               this.name
@@ -109,6 +118,7 @@ export class Poll implements IDisposable {
     }, interval);
   }
 
+  private _connected = false;
   private _isDisposed = false;
 }
 
@@ -155,19 +165,19 @@ export namespace Poll {
  */
 namespace Private {
   /**
-   * Returns a randomly wobbled integer from a base value.
+   * Returns a randomly jittered integer value.
    *
    * @param base - The base value that is being wobbled.
    *
-   * @param factor - Factor multiplied by the base to define wobble amplitude.
+   * @param factor - Factor multiplied by the base to define jitter amplitude.
    * A factor of `0` will return the base unchanged.
    *
    * #### Notes
    * This function returns integers, so it is only useful for larger numbers.
    */
-  export function wobble(base: number, factor: number): number {
+  export function jitter(base: number, factor: number): number {
     if (factor === 0) {
-      return base;
+      return Math.floor(base);
     }
 
     const direction = Math.random() < 0.5 ? 1 : -1;
@@ -175,6 +185,4 @@ namespace Private {
 
     return Math.floor(base + jitter);
   }
-
-  (window as any).wobble = wobble;
 }
