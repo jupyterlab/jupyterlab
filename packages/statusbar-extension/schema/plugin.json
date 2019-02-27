@@ -4,24 +4,6 @@
   "title": "Status Bar",
   "description": "Status Bar settings.",
   "properties": {
-    "enabledDefaultItems": {
-      "type": "array",
-      "title": "Default Status Items",
-      "description": "Which default items should appear in the status bar",
-      "default": [
-        "command-edit-item",
-        "editor-syntax-item",
-        "file-path-item",
-        "file-upload-item",
-        "kernel-status-item",
-        "line-col-item",
-        "notebook-trust-item",
-        "running-sessions-item",
-        "tab-space-item",
-        "memory-usage-item",
-        "saving-status-item"
-      ]
-    },
     "visible": {
       "type": "boolean",
       "title": "Status Bar Visibility",
