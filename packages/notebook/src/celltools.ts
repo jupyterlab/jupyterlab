@@ -97,8 +97,8 @@ export class NotebookTools extends Widget implements INotebookTools {
     this._notebookTools.title.label = 'Notebook Tools';
 
     const layout = (this.layout = new PanelLayout());
-    layout.addWidget(new Collapse({ widget: this._notebookTools }));
     layout.addWidget(new Collapse({ widget: this._cellTools }));
+    layout.addWidget(new Collapse({ widget: this._notebookTools }));
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
