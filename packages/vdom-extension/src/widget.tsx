@@ -1,19 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel, Session } from '@jupyterlab/services';
-
-import { Message } from '@phosphor/messaging';
-
-import { Widget } from '@phosphor/widgets';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Kernel } from '@jupyterlab/services';
+
 import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
+
+import { Message } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
@@ -46,7 +48,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
     // Get current kernel session (hack for mimerender extension)
-    this._session = (options.resolver as any)._session;
+    this._session = (options.resolver as any).session;
   }
 
   /**
@@ -108,7 +110,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   };
 
   private _mimeType: string;
-  private _session?: Session.ISession;
+  private _session?: IClientSession;
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
 }
@@ -122,27 +124,25 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
   createRenderer: options => new RenderedVDOM(options)
 };
 
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
-  {
-    id: '@jupyterlab/vdom-extension:factory',
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
-    fileTypes: [
-      {
-        name: 'vdom',
-        mimeTypes: [MIME_TYPE],
-        extensions: ['.vdom', '.vdom.json'],
-        iconClass: CSS_ICON_CLASS
-      }
-    ],
-    documentWidgetFactoryOptions: {
-      name: 'VDOM',
-      primaryFileType: 'vdom',
-      fileTypes: ['vdom', 'json'],
-      defaultFor: ['vdom']
+const extension: IRenderMime.IExtension = {
+  id: '@jupyterlab/vdom-extension:factory',
+  rendererFactory,
+  rank: 0,
+  dataType: 'json',
+  fileTypes: [
+    {
+      name: 'vdom',
+      mimeTypes: [MIME_TYPE],
+      extensions: ['.vdom', '.vdom.json'],
+      iconClass: CSS_ICON_CLASS
     }
+  ],
+  documentWidgetFactoryOptions: {
+    name: 'VDOM',
+    primaryFileType: 'vdom',
+    fileTypes: ['vdom', 'json'],
+    defaultFor: ['vdom']
   }
-];
+};
 
-export default extensions;
+export default extension;
