@@ -52,7 +52,7 @@
     },
     "hideFrontMatter": {
       "title": "Hide Front Matter",
-      "description": "Whether to hide YALM front matter.\nThe YALM front matter must be placed at the top of the document,\nstarted by a line of three dashes (---) and ended by a line of\nthree dashes (---) or three points (...).",
+      "description": "Whether to hide YAML front matter.\nThe YAML front matter must be placed at the top of the document,\nstarted by a line of three dashes (---) and ended by a line of\nthree dashes (---) or three points (...).",
       "$ref": "#/definitions/hideFrontMatter",
       "default": true
     },
