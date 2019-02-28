@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
 
 /**
@@ -66,25 +68,49 @@ export class Poll implements IDisposable {
     if (this._isDisposed) {
       return;
     }
+    if (this._outstanding) {
+      const delegate = this._outstanding;
+      this._outstanding = null;
+      delegate.reject(new Error(`Poll (${this.name}) is disposed.`));
+    }
     this._isDisposed = true;
   }
 
   /**
    * Refresh the poll.
    */
-  refresh(): void {
-    this._poll(0, true);
+  refresh(): Promise<Poll.Next> {
+    return this._poll(0, true);
   }
 
   /**
    * Schedule a poll request.
    */
-  private _poll(interval: number, manual = false): void {
-    let timeout: number;
-    if (this._timeout) {
-      clearTimeout(this._timeout);
+  private _poll(interval: number, override = false): Promise<Poll.Next> {
+    // If poll is being overridden, generate a new poll.
+    if (override && this._outstanding) {
+      // Reset the previously outstanding poll and generate the next poll.
+      const previous = this._outstanding;
+      this._outstanding = null;
+      const next = this._poll(0, override);
+
+      // Short-circuit the previous poll promise and return a reference to the
+      // next poll promise - which supersedes - scheduled to run immediately.
+      previous.resolve(next);
+
+      return next;
     }
-    timeout = this._timeout = setTimeout(async () => {
+
+    // If there is already an outstanding poll, return a reference to it.
+    if (this._outstanding) {
+      return this._outstanding.promise;
+    }
+
+    // Create a new outstanding poll.
+    const delegate = new PromiseDelegate<Poll.Next>();
+    this._outstanding = delegate;
+
+    setTimeout(async () => {
       if (this._isDisposed) {
         return;
       }
@@ -92,10 +118,19 @@ export class Poll implements IDisposable {
       // Only execute promise if not in a hidden tab.
       if (typeof document === 'undefined' || !document.hidden) {
         try {
-          await this._fn.call(null, manual);
+          await this._fn({
+            connected: this._connected,
+            interval,
+            schedule: override ? 'override' : 'automatic'
+          });
 
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
+            return;
+          }
+
+          // Bail if this promise has already been superseded and resolved.
+          if (this._outstanding !== delegate) {
             return;
           }
 
@@ -110,6 +145,11 @@ export class Poll implements IDisposable {
         } catch (error) {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
+            return;
+          }
+
+          // Bail if this promise has already been superseded and resolved.
+          if (this._outstanding !== delegate) {
             return;
           }
 
@@ -128,21 +168,45 @@ export class Poll implements IDisposable {
         }
       }
 
-      // If no other timeout has superseded this one continue polling.
-      if (timeout === this._timeout) {
-        this._poll(interval);
-      }
+      // Schedule the next poll and reset outstanding.
+      this._outstanding = null;
+      delegate.resolve(this._poll(interval));
+      return;
     }, interval);
+
+    return delegate.promise;
   }
 
   private _connected = false;
-  private _fn: (manual: boolean) => Promise<any>;
+  private _fn: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
   private _max: number;
-  private _timeout = 0;
+  private _outstanding: PromiseDelegate<Poll.Next> | null = null;
 }
 
 export namespace Poll {
+  /**
+   * Definition of poll state that gets passed into the poll promise factory.
+   */
+  export type State = {
+    /**
+     * Whether the last poll succeeded.
+     */
+    connected: boolean;
+
+    /**
+     * The number of milliseconds that elapsed since the last poll.
+     */
+    interval: number;
+
+    /**
+     * Whether the poll was scheduled automatically or overridden.
+     */
+    schedule: 'automatic' | 'override';
+  };
+
+  export type Next = Private.INext;
+
   /**
    * Instantiation options for polls.
    */
@@ -166,7 +230,7 @@ export namespace Poll {
      * A function that returns a poll promise. If the `manual` flag is `true`,
      * it indicates a user-initiated poll request.
      */
-    poll: (manual?: boolean) => Promise<any>;
+    poll: (state: Poll.State) => Promise<any>;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
@@ -185,6 +249,8 @@ export namespace Poll {
  * A namespace for private module data.
  */
 namespace Private {
+  export interface INext extends Promise<INext> {}
+
   /**
    * Returns a randomly jittered integer value.
    *
