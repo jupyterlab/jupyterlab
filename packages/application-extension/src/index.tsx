@@ -615,7 +615,7 @@ function addCommands(
   palette.addItem({ command: CommandIDs.closeOtherTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeOtherTabs,
-    selector: '[data-type="document-title"]',
+    selector: '.p-TabBar-tab',
     rank: 4
   });
 
@@ -634,7 +634,7 @@ function addCommands(
   palette.addItem({ command: CommandIDs.closeRightTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeRightTabs,
-    selector: '[data-type="document-title"]',
+    selector: '.p-TabBar-tab',
     rank: 5
   });
 
