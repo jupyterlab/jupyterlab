@@ -14,6 +14,9 @@
     },
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
     }
   ]
 }

@@ -29,7 +29,11 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { each } from '@phosphor/algorithm';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+
+import { each, iter, toArray } from '@phosphor/algorithm';
+
+import { Widget, DockLayout } from '@phosphor/widgets';
 
 import * as React from 'react';
 
@@ -41,6 +45,14 @@ namespace CommandIDs {
 
   export const activatePreviousTab: string =
     'application:activate-previous-tab';
+
+  export const close = 'application:close';
+
+  export const closeAllFiles = 'docmanager:close-all-files';
+
+  export const closeOtherTabs = 'application:close-other-tabs';
+
+  export const closeRightTabs = 'application:close-right-tabs';
 
   export const closeAll: string = 'application:close-all';
 
@@ -65,12 +77,20 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, IWindowResolver],
+  requires: [
+    ICommandPalette,
+    IRouter,
+    IWindowResolver,
+    ILabShell,
+    IDocumentManager
+  ],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
-    resolver: IWindowResolver
+    resolver: IWindowResolver,
+    labShell: ILabShell,
+    docManager: IDocumentManager
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -92,7 +112,7 @@ const main: JupyterFrontEndPlugin<void> = {
       void showErrorMessage('Error Registering Plugins', { message: body });
     }
 
-    addCommands(app, palette);
+    addCommands(app, palette, labShell, docManager);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -429,38 +449,196 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 /**
  * Add the main application commands.
  */
-function addCommands(app: JupyterLab, palette: ICommandPalette): void {
+function addCommands(
+  app: JupyterLab,
+  palette: ICommandPalette,
+  labShell: ILabShell,
+  docManager: IDocumentManager
+): void {
+  const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
-  let command = CommandIDs.activateNextTab;
 
-  app.commands.addCommand(command, {
+  // Returns the doc widget associated with the most recent contextmenu event.
+  const contextMenuWidget = (): Widget => {
+    const pathRe = /[Pp]ath:\s?(.*)\n?/;
+    const test = (node: HTMLElement) =>
+      node['title'] && !!node['title'].match(pathRe);
+    const node = app.contextMenuHitTest(test);
+
+    if (!node) {
+      // Fall back to active doc widget if path cannot be obtained from event.
+      return labShell.currentWidget;
+    }
+    const pathMatch = node['title'].match(pathRe);
+    return docManager.findWidget(pathMatch[1]);
+  };
+
+  // Closes an array of widgets.
+  const closeWidgets = (widgets: Array<Widget>): void => {
+    widgets.forEach(widget => widget.close());
+  };
+
+  // Find the tab area for a widget within a specific dock area.
+  const findTab = (
+    area: DockLayout.AreaConfig,
+    widget: Widget
+  ): DockLayout.ITabAreaConfig | null => {
+    switch (area.type) {
+      case 'split-area':
+        const iterator = iter(area.children);
+        let tab: DockLayout.ITabAreaConfig | null = null;
+        let value: DockLayout.AreaConfig | null = null;
+        do {
+          value = iterator.next();
+          if (value) {
+            tab = findTab(value, widget);
+          }
+        } while (!tab && value);
+        return tab;
+      case 'tab-area':
+        const { id } = widget;
+        return area.widgets.some(widget => widget.id === id) ? area : null;
+      default:
+        return null;
+    }
+  };
+
+  // Find the tab area for a widget within the main dock area.
+  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
+    const { mainArea } = labShell.saveLayout();
+    if (mainArea.mode !== 'multiple-document') {
+      return null;
+    }
+    let area = mainArea.dock.main;
+    if (!area) {
+      return null;
+    }
+    return findTab(area, widget);
+  };
+
+  // Returns an array of all widgets to the right of a widget in a tab area.
+  const widgetsRightOf = (widget: Widget): Array<Widget> => {
+    const { id } = widget;
+    const tabArea = tabAreaFor(widget);
+    const widgets = tabArea ? tabArea.widgets || [] : [];
+    const index = widgets.findIndex(widget => widget.id === id);
+    if (index < 0) {
+      return [];
+    }
+    return widgets.slice(index + 1);
+  };
+
+  commands.addCommand(CommandIDs.activateNextTab, {
     label: 'Activate Next Tab',
     execute: () => {
       app.shell.activateNextTab();
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.activateNextTab, category });
 
-  command = CommandIDs.activatePreviousTab;
-  app.commands.addCommand(command, {
+  commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
     execute: () => {
       app.shell.activatePreviousTab();
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.activatePreviousTab, category });
 
-  command = CommandIDs.closeAll;
-  app.commands.addCommand(command, {
+  commands.addCommand(CommandIDs.close, {
+    label: () => {
+      // Returns the file type for a widget.
+      function fileType(widget: Widget, docManager: IDocumentManager): string {
+        if (!widget) {
+          return 'File';
+        }
+        const context = docManager.contextForWidget(widget);
+        if (!context) {
+          return '';
+        }
+        const fts = docManager.registry.getFileTypesForPath(context.path);
+        return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
+      }
+
+      const widget = shell.currentWidget;
+      let name = 'File';
+      if (widget) {
+        const typeName = fileType(widget, docManager);
+        name = typeName || widget.title.label;
+      }
+      return `Close ${name}`;
+    },
+    isEnabled: () =>
+      !!shell.currentWidget && !!shell.currentWidget.title.closable,
+    execute: () => {
+      if (shell.currentWidget) {
+        shell.currentWidget.close();
+      }
+    }
+  });
+  palette.addItem({ command: CommandIDs.close, category });
+
+  commands.addCommand(CommandIDs.closeAll, {
     label: 'Close All Tabs',
     execute: () => {
       app.shell.closeAll();
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.closeAll, category });
 
-  command = CommandIDs.toggleLeftArea;
-  app.commands.addCommand(command, {
+  commands.addCommand(CommandIDs.closeAllFiles, {
+    label: 'Close All',
+    execute: () => {
+      labShell.closeAll();
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeAllFiles, category });
+
+  commands.addCommand(CommandIDs.closeOtherTabs, {
+    label: () => `Close Other Tabs`,
+    isEnabled: () => {
+      // Ensure there are at least two widgets.
+      const iterator = labShell.widgets('main');
+      return !!iterator.next() && !!iterator.next();
+    },
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      const { id } = widget;
+      const otherWidgets = toArray(labShell.widgets('main')).filter(
+        widget => widget.id !== id
+      );
+      closeWidgets(otherWidgets);
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+  contextMenu.addItem({
+    command: CommandIDs.closeOtherTabs,
+    selector: '[data-type="document-title"]',
+    rank: 4
+  });
+
+  commands.addCommand(CommandIDs.closeRightTabs, {
+    label: () => `Close Tabs to Right`,
+    isEnabled: () =>
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      closeWidgets(widgetsRightOf(widget));
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeRightTabs, category });
+  contextMenu.addItem({
+    command: CommandIDs.closeRightTabs,
+    selector: '[data-type="document-title"]',
+    rank: 5
+  });
+
+  app.commands.addCommand(CommandIDs.toggleLeftArea, {
     label: args => 'Show Left Sidebar',
     execute: () => {
       if (app.shell.leftCollapsed) {
@@ -475,10 +653,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !app.shell.leftCollapsed,
     isVisible: () => !app.shell.isEmpty('left')
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
-  command = CommandIDs.toggleRightArea;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.toggleLeftArea, {
     label: args => 'Show Right Sidebar',
     execute: () => {
       if (app.shell.rightCollapsed) {
@@ -493,10 +670,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !app.shell.rightCollapsed,
     isVisible: () => !app.shell.isEmpty('right')
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
-  command = CommandIDs.togglePresentationMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.togglePresentationMode, {
     label: args => 'Presentation Mode',
     execute: () => {
       app.shell.presentationMode = !app.shell.presentationMode;
@@ -504,10 +680,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => app.shell.presentationMode,
     isVisible: () => true
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.togglePresentationMode, category });
 
-  command = CommandIDs.setMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.setMode, {
     isVisible: args => {
       const mode = args['mode'] as string;
       return mode === 'single-document' || mode === 'multiple-document';
@@ -522,8 +697,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
 
-  command = CommandIDs.toggleMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.toggleMode, {
     label: 'Single-Document Mode',
     isToggled: () => app.shell.mode === 'single-document',
     execute: () => {
@@ -534,7 +708,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleMode, category });
 }
 
 /**
