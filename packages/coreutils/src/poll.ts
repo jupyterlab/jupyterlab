@@ -190,6 +190,9 @@ export class Poll implements IDisposable {
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
 }
 
+/**
+ * A namespace for `Poll` class statics, types, and interfaces.
+ */
 export namespace Poll {
   /**
    * Definition of poll state that gets passed into the poll promise factory.
@@ -229,8 +232,8 @@ export namespace Poll {
      * The millisecond interval between poll requests.
      *
      * #### Notes
-     * If set to `0`, the poll will schedule an animation frame after promise
-     * resolution.
+     * If set to `0`, the poll will schedule an animation frame after each
+     * promise resolution.
      */
     interval: number;
 
