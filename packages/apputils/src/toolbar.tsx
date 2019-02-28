@@ -346,7 +346,7 @@ export namespace Toolbar {
    */
   export function createInterruptButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-StopIcon',
       onClick: () => {
         if (session.kernel) {
           session.kernel.interrupt();
@@ -361,7 +361,7 @@ export namespace Toolbar {
    */
   export function createRestartButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-RefreshIcon',
       onClick: () => {
         session.restart();
       },

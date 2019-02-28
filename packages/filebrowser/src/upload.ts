@@ -14,7 +14,7 @@ export class Uploader extends ToolbarButton {
    */
   constructor(options: Uploader.IOptions) {
     super({
-      iconClassName: 'jp-FileUploadIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-FileUploadIcon',
       onClick: () => {
         this._input.click();
       },

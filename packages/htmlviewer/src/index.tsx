@@ -92,7 +92,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+        iconClassName: 'jp-RefreshIcon',
         onClick: () => {
           this.content.url = this.content.url;
         },
