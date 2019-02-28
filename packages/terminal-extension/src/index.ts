@@ -22,6 +22,8 @@ import { ITerminalTracker, Terminal } from '@jupyterlab/terminal';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import { Menu } from '@phosphor/widgets';
+
 /**
  * The command IDs used by the terminal plugin.
  */
@@ -35,6 +37,8 @@ namespace CommandIDs {
   export const increaseFont = 'terminal:increase-font';
 
   export const decreaseFont = 'terminal:decrease-font';
+
+  export const setTheme = 'terminal:set-theme';
 }
 
 /**
@@ -77,7 +81,7 @@ function activate(
   mainMenu: IMainMenu | null,
   themeManager: IThemeManager
 ): ITerminalTracker {
-  const { serviceManager } = app;
+  const { serviceManager, commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<MainAreaWidget<Terminal>>({ namespace });
@@ -151,20 +155,44 @@ function activate(
   themeManager.themeChanged.connect((sender, args) => {
     tracker.forEach(widget => {
       const terminal = widget.content;
-      terminal.setOption('theme', args.newValue as 'light' | 'dark');
+      if (terminal.getOption('theme') === 'inherit') {
+        terminal.setOption('theme', 'inherit');
+      }
     });
   });
 
   addCommands(app, tracker, settingRegistry);
 
   if (mainMenu) {
-    // Add some commands to the application view menu.
-    const viewGroup = [CommandIDs.increaseFont, CommandIDs.decreaseFont].map(
-      command => {
-        return { command };
-      }
+    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
+    const themeMenu = new Menu({ commands });
+    themeMenu.title.label = 'Terminal Theme';
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'inherit', isPalette: false }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'light', isPalette: false }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'dark', isPalette: false }
+    });
+    mainMenu.settingsMenu.addGroup(
+      [{ type: 'submenu', submenu: themeMenu }],
+      2
     );
-    mainMenu.settingsMenu.addGroup(viewGroup, 40);
+
+    // Add some commands to the "View" menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.increaseFont },
+        { command: CommandIDs.decreaseFont },
+        { type: 'submenu', submenu: themeMenu }
+      ],
+      40
+    );
 
     // Add terminal creation to the file menu.
     mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
@@ -179,6 +207,21 @@ function activate(
       CommandIDs.decreaseFont
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'inherit', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'light', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'dark', isPalette: true }
     });
   }
 
@@ -304,6 +347,25 @@ export function addCommands(
           .set(plugin.id, 'fontSize', fontSize - 1)
           .catch(showErrorMessage);
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.setTheme, {
+    label: args => {
+      const theme = args['theme'] as string;
+      const displayName = theme[0].toUpperCase() + theme.substring(1);
+      return args['isPalette']
+        ? `Use ${displayName} Terminal Theme`
+        : displayName;
+    },
+    caption: 'Set the terminal theme',
+    isToggled: args => args['theme'] === Terminal.defaultOptions.theme,
+    execute: args => {
+      const theme = args['theme'] as Terminal.ITheme;
+      return settingRegistry
+        .set(plugin.id, 'theme', theme)
+        .then(() => commands.notifyCommandChanged(CommandIDs.setTheme))
+        .catch(showErrorMessage);
     }
   });
 }

@@ -37,7 +37,7 @@ export class Terminal extends Widget {
     this._options = { ...Terminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
-    const xtermOptions = { theme: Private.getCurrentTheme(), ...other };
+    const xtermOptions = { theme: Private.getXTermTheme(theme), ...other };
 
     this.addClass(TERMINAL_CLASS);
 
@@ -98,23 +98,25 @@ export class Terminal extends Widget {
     option: K,
     value: Terminal.IOptions[K]
   ): void {
-    if (this._options[option] === value) {
+    if (
+      option !== 'theme' &&
+      (this._options[option] === value || option === 'initialCommand')
+    ) {
       return;
     }
 
     this._options[option] = value;
 
-    if (option === 'initialCommand') {
-      return;
-    }
-
     if (option === 'theme') {
-      this._term.setOption('theme', Private.getCurrentTheme());
+      this._term.setOption(
+        'theme',
+        Private.getXTermTheme(value as Terminal.ITheme)
+      );
     } else {
       this._term.setOption(option, value);
-      this._needsResize = true;
     }
 
+    this._needsResize = true;
     this.update();
   }
 
@@ -321,7 +323,7 @@ export namespace Terminal {
     /**
      * The theme of the terminal.
      */
-    theme: 'light' | 'dark' | ITheme;
+    theme: ITheme;
 
     /**
      * The amount of buffer scrollback to be used
@@ -344,7 +346,7 @@ export namespace Terminal {
    * The default options used for creating terminals.
    */
   export const defaultOptions: IOptions = {
-    theme: 'light',
+    theme: 'inherit',
     fontFamily: 'courier-new, courier, monospace',
     fontSize: 13,
     lineHeight: 1.0,
@@ -356,7 +358,12 @@ export namespace Terminal {
   /**
    * A type for the terminal theme.
    */
-  export interface ITheme {
+  export type ITheme = 'light' | 'dark' | 'inherit' | string;
+
+  /**
+   * A type for the terminal theme.
+   */
+  export interface IThemeObject {
     foreground: string;
     background: string;
     cursor: string;
@@ -375,25 +382,57 @@ namespace Private {
   export let id = 0;
 
   /**
+   * The light terminal theme.
+   */
+  export const lightTheme: Terminal.IThemeObject = {
+    foreground: '#000',
+    background: '#fff',
+    cursor: '#616161', // md-grey-700
+    cursorAccent: '#F5F5F5', // md-grey-100
+    selection: 'rgba(97, 97, 97, 0.3)' // md-grey-700
+  };
+
+  /**
+   * The dark terminal theme.
+   */
+  export const darkTheme: Terminal.IThemeObject = {
+    foreground: '#fff',
+    background: '#000',
+    cursor: '#fff',
+    cursorAccent: '#000',
+    selection: 'rgba(255, 255, 255, 0.3)'
+  };
+
+  /**
    * The current theme.
    */
-  export function getCurrentTheme(): Terminal.ITheme {
-    return {
-      foreground: getComputedStyle(document.body).getPropertyValue(
-        '--jp-ui-font-color0'
-      ),
-      background: getComputedStyle(document.body).getPropertyValue(
-        '--jp-layout-color0'
-      ),
-      cursor: getComputedStyle(document.body).getPropertyValue(
-        '--jp-ui-font-color1'
-      ),
-      cursorAccent: getComputedStyle(document.body).getPropertyValue(
-        '--jp-ui-inverse-font-color0'
-      ),
-      selection: getComputedStyle(document.body).getPropertyValue(
-        '--jp-ui-font-color3'
-      )
-    };
+  export const inheritTheme = (): Terminal.IThemeObject => ({
+    foreground: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color0'
+    ),
+    background: getComputedStyle(document.body).getPropertyValue(
+      '--jp-layout-color0'
+    ),
+    cursor: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color1'
+    ),
+    cursorAccent: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-inverse-font-color0'
+    ),
+    selection: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color3'
+    )
+  });
+
+  export function getXTermTheme(theme: Terminal.ITheme): Terminal.IThemeObject {
+    switch (theme) {
+      case 'light':
+        return lightTheme;
+      case 'dark':
+        return darkTheme;
+      case 'inherit':
+      default:
+        return inheritTheme();
+    }
   }
 }
