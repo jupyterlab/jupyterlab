@@ -80,14 +80,14 @@ export class Poll implements IDisposable {
   /**
    * Refresh the poll.
    */
-  refresh(): Promise<Poll.Next> {
+  refresh(): Poll.Next {
     return this._poll(0, true);
   }
 
   /**
    * Schedule a poll request.
    */
-  private _poll(interval: number, override = false): Promise<Poll.Next> {
+  private _poll(interval: number, override = false): Poll.Next {
     // If poll is being overridden, generate a new poll.
     if (override && this._outstanding) {
       // Reset the previously outstanding poll and generate the next poll.
@@ -214,7 +214,12 @@ export namespace Poll {
   /**
    * A poll promise that resolves to the next scheduled poll promise.
    */
-  export type Next = Private.INext;
+  export type Next = INextPromise;
+
+  /**
+   * A poll promise that resolves to the next scheduled poll promise.
+   */
+  interface INextPromise extends Promise<Next> {}
 
   /**
    * Instantiation options for polls.
@@ -262,11 +267,6 @@ export namespace Poll {
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * A poll promise that resolves to the next scheduled poll promise.
-   */
-  export interface INext extends Promise<INext> {}
-
   /**
    * Returns a randomly jittered integer value.
    *
