@@ -22,7 +22,8 @@ export class Poll implements IDisposable {
       throw new Error('Poll interval cannot exceed max interval length');
     }
 
-    this.interval = typeof interval === 'number' ? interval : 1000;
+    this.interval =
+      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
     this._fn = poll;
@@ -50,7 +51,7 @@ export class Poll implements IDisposable {
   readonly name: string;
 
   /**
-   * The range within which the poll interval "wobbles".
+   * The range within which the poll interval jitters.
    */
   readonly variance: number;
 
@@ -106,11 +107,9 @@ export class Poll implements IDisposable {
       return this._outstanding.promise;
     }
 
-    // Create a new outstanding poll.
+    // Create a new and set the outstanding reference.
     const delegate = new PromiseDelegate<Poll.Next>();
-    this._outstanding = delegate;
-
-    setTimeout(async () => {
+    const poll = async () => {
       if (this._isDisposed) {
         return;
       }
@@ -172,7 +171,14 @@ export class Poll implements IDisposable {
       this._outstanding = null;
       delegate.resolve(this._poll(interval));
       return;
-    }, interval);
+    };
+
+    this._outstanding = delegate;
+    if (interval) {
+      setTimeout(poll, interval);
+    } else {
+      requestAnimationFrame(poll);
+    }
 
     return delegate.promise;
   }
@@ -205,6 +211,9 @@ export namespace Poll {
     schedule: 'automatic' | 'override';
   };
 
+  /**
+   * A poll promise that resolves to the next scheduled poll promise.
+   */
   export type Next = Private.INext;
 
   /**
@@ -213,6 +222,10 @@ export namespace Poll {
   export interface IOptions {
     /**
      * The millisecond interval between poll requests.
+     *
+     * #### Notes
+     * If set to `0`, the poll will schedule an animation frame after promise
+     * resolution.
      */
     interval: number;
 
@@ -238,7 +251,7 @@ export namespace Poll {
     when?: Promise<any>;
 
     /**
-     * The range within which the poll interval "wobbles". Defaults to `0.2`.
+     * The range within which the poll interval jitters. Defaults to `0.2`.
      * Unless set to `0` the poll interval will be irregular.
      */
     variance?: number;
@@ -249,6 +262,9 @@ export namespace Poll {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * A poll promise that resolves to the next scheduled poll promise.
+   */
   export interface INext extends Promise<INext> {}
 
   /**
@@ -260,7 +276,7 @@ namespace Private {
    * A factor of `0` will return the base unchanged.
    *
    * #### Notes
-   * This function returns integers, so it is only useful for larger numbers.
+   * This function returns only positive integers.
    */
   export function jitter(base: number, factor: number): number {
     if (factor === 0) {
@@ -270,6 +286,7 @@ namespace Private {
     const direction = Math.random() < 0.5 ? 1 : -1;
     const jitter = Math.random() * base * Math.abs(factor) * direction;
 
-    return Math.floor(base + jitter);
+    // Always return an integer > 0.
+    return Math.abs(Math.floor(base + jitter)) || 1;
   }
 }
