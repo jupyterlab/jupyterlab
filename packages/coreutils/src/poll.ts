@@ -16,7 +16,7 @@ export class Poll implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions) {
-    const { interval, max, name, poll, variance, when } = options;
+    const { interval, max, min, name, poll, variance, when } = options;
 
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
@@ -27,7 +27,8 @@ export class Poll implements IDisposable {
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
     this._fn = poll;
-    this._max = max;
+    this._max = typeof max === 'number' ? Math.abs(max) : 10 * interval;
+    this._min = typeof min === 'number' ? Math.abs(min) : 100;
 
     // Cache the original interval length and start polling.
     (when || Promise.resolve())
@@ -96,7 +97,7 @@ export class Poll implements IDisposable {
       const next = this._poll(0, override);
 
       // Short-circuit the previous poll promise and return a reference to the
-      // next poll promise - which supersedes - scheduled to run immediately.
+      // next poll promise (which supersedes it) scheduled to run immediately.
       previous.resolve(next);
 
       return next;
@@ -116,6 +117,10 @@ export class Poll implements IDisposable {
 
       // Only execute promise if not in a hidden tab.
       if (typeof document === 'undefined' || !document.hidden) {
+        const max = this._max;
+        const min = this._min;
+        const variance = this.variance;
+
         try {
           await this._fn({
             connected: this._connected,
@@ -140,7 +145,7 @@ export class Poll implements IDisposable {
           this._connected = true;
 
           // The poll succeeded. Reset the interval.
-          interval = Private.jitter(this.interval, this.variance);
+          interval = Private.jitter(this.interval, variance, min, max);
         } catch (error) {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
@@ -156,8 +161,7 @@ export class Poll implements IDisposable {
 
           // The poll failed. Increase the interval.
           const old = interval;
-          const max = this._max;
-          interval = Private.jitter(Math.min(old * 2, max), this.variance);
+          interval = Private.jitter(Math.min(old * 2, max), variance, min, max);
           console.warn(
             `Poll (${
               this.name
@@ -186,6 +190,7 @@ export class Poll implements IDisposable {
   private _connected = false;
   private _fn: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
+  private _min: number;
   private _max: number;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
 }
@@ -238,9 +243,14 @@ export namespace Poll {
     interval: number;
 
     /**
-     * The maximum interval to wait between failing poll requests.
+     * The maximum interval to wait between polls. Defaults to `10 * interval`.
      */
-    max: number;
+    max?: number;
+
+    /**
+     * The minimum interval to wait between polls. Defaults to `100`.
+     */
+    min?: number;
 
     /**
      * The name of the poll. Defaults to `'unknown'`.
@@ -278,18 +288,27 @@ namespace Private {
    * @param factor - Factor multiplied by the base to define jitter amplitude.
    * A factor of `0` will return the base unchanged.
    *
+   * @param min - The smallest acceptable value to return.
+   *
+   * @param max - The largest acceptable value to return.
+   *
    * #### Notes
    * This function returns only positive integers.
    */
-  export function jitter(base: number, factor: number): number {
+  export function jitter(
+    base: number,
+    factor: number,
+    min: number,
+    max: number
+  ): number {
     if (factor === 0) {
       return Math.floor(base);
     }
 
     const direction = Math.random() < 0.5 ? 1 : -1;
     const jitter = Math.random() * base * Math.abs(factor) * direction;
+    const candidate = Math.abs(Math.floor(base + jitter));
 
-    // Always return an integer > 0.
-    return Math.abs(Math.floor(base + jitter)) || 1;
+    return Math.min(Math.max(min, candidate), max);
   }
 }
