@@ -461,7 +461,10 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     >
       {props.iconClassName && (
         <span
-          className={props.iconClassName + ' jp-ToolbarButtonComponent-icon'}
+          className={
+            props.iconClassName +
+            ' jp-ToolbarButtonComponent-icon jp-Icon jp-Icon-16'
+          }
         />
       )}
       {props.label && (
