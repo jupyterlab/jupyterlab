@@ -35,17 +35,19 @@ export class SessionManager implements Session.IManager {
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
+      factory: () => this._refreshRunning(),
       interval: 10 * 1000,
       max: 300 * 1000,
+      min: 100,
       name: `@jupyterlab/services:SessionManager#models`,
-      poll: () => this._refreshRunning(),
       when: this._readyPromise
     });
     this._pollSpecs = new Poll({
+      factory: () => this._refreshSpecs(),
       interval: 61 * 1000,
       max: 300 * 1000,
+      min: 100,
       name: `@jupyterlab/services:SessionManager#specs`,
-      poll: () => this._refreshSpecs(),
       when: this._readyPromise
     });
   }
