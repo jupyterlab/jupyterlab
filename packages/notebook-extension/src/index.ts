@@ -119,7 +119,7 @@ namespace CommandIDs {
 
   export const runAllBelow = 'notebook:run-all-below';
 
-  export const runAllMarkdown = 'notebook:run-all-markdown';
+  export const renderAllMarkdown = 'notebook:render-all-markdown';
 
   export const toCode = 'notebook:change-cell-to-code';
 
@@ -1039,13 +1039,13 @@ function addCommands(
       );
     }
   });
-  commands.addCommand(CommandIDs.runAllMarkdown, {
+  commands.addCommand(CommandIDs.renderAllMarkdown, {
     label: 'Render All Markdown Cells',
     execute: args => {
       const current = getCurrent(args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.runAllMarkdown(content, context.session);
+        return NotebookActions.renderAllMarkdown(content, context.session);
       }
     },
     isEnabled
@@ -1801,7 +1801,7 @@ function populatePalette(
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
-    CommandIDs.runAllMarkdown,
+    CommandIDs.renderAllMarkdown,
     CommandIDs.runAllAbove,
     CommandIDs.runAllBelow,
     CommandIDs.selectAll,
@@ -2076,12 +2076,6 @@ function populateMenus(
         () => void 0
       );
     },
-    runAllMarkdown: current => {
-      const { context, content } = current;
-      return NotebookActions.runAllMarkdown(content, context.session).then(
-        () => void 0
-      );
-    },
     restartAndRunAll: current => {
       const { context, content } = current;
       return context.session.restart().then(restarted => {
@@ -2093,6 +2087,14 @@ function populateMenus(
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
+  // Add a renderAllMarkdown group to the run menu.
+  const renderAllMarkdown = [
+    CommandIDs.renderAllMarkdown,
+    CommandIDs.run,
+    CommandIDs.runInConsole
+  ].map(command => {
+    return { command };
+  });
   // Add a run+insert and run+don't advance group to the run menu.
   const runExtras = [
     CommandIDs.runAndInsert,
@@ -2152,6 +2154,7 @@ function populateMenus(
   mainMenu.editMenu.addGroup(splitMergeGroup, 9);
   mainMenu.runMenu.addGroup(runExtras, 10);
   mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
+  mainMenu.runMenu.addGroup(renderAllMarkdown, 12);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({

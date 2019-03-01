@@ -526,7 +526,7 @@ export namespace NotebookActions {
     return promise;
   }
 
-  export function runAllMarkdown(
+  export function renderAllMarkdown(
     notebook: Notebook,
     session?: IClientSession
   ): Promise<boolean> {
