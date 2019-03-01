@@ -16,19 +16,22 @@ export class Poll implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions) {
-    const { interval, max, min, name, poll, variance, when } = options;
+    const { factory, interval, max, min, name, variance, when } = options;
 
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
     }
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
 
     this.interval =
       typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
+    this.max = typeof max === 'number' ? Math.abs(max) : 10 * this.interval;
+    this.min = typeof min === 'number' ? Math.abs(min) : 100;
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
-    this._fn = poll;
-    this._max = typeof max === 'number' ? Math.abs(max) : 10 * interval;
-    this._min = typeof min === 'number' ? Math.abs(min) : 100;
+    this._factory = factory;
 
     // Cache the original interval length and start polling.
     (when || Promise.resolve())
@@ -45,6 +48,16 @@ export class Poll implements IDisposable {
    * The polling interval.
    */
   readonly interval: number;
+
+  /**
+   * The maximum interval between poll requests.
+   */
+  readonly max: number;
+
+  /**
+   * The minimum interval between poll requests.
+   */
+  readonly min: number;
 
   /**
    * The name of the poll. Defaults to `'unknown'`.
@@ -117,12 +130,10 @@ export class Poll implements IDisposable {
 
       // Only execute promise if not in a hidden tab.
       if (typeof document === 'undefined' || !document.hidden) {
-        const max = this._max;
-        const min = this._min;
-        const variance = this.variance;
+        const { max, min, variance } = this;
 
         try {
-          await this._fn({
+          await this._factory({
             connected: this._connected,
             interval,
             schedule: override ? 'override' : 'automatic'
@@ -188,10 +199,8 @@ export class Poll implements IDisposable {
   }
 
   private _connected = false;
-  private _fn: (state: Poll.State) => Promise<any>;
+  private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
-  private _min: number;
-  private _max: number;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
 }
 
@@ -206,17 +215,17 @@ export namespace Poll {
     /**
      * Whether the last poll succeeded.
      */
-    connected: boolean;
+    readonly connected: boolean;
 
     /**
      * The number of milliseconds that elapsed since the last poll.
      */
-    interval: number;
+    readonly interval: number;
 
     /**
      * Whether the poll was scheduled automatically or overridden.
      */
-    schedule: 'automatic' | 'override';
+    readonly schedule: 'automatic' | 'override';
   };
 
   /**
@@ -258,10 +267,10 @@ export namespace Poll {
     name?: string;
 
     /**
-     * A function that returns a poll promise. If the `manual` flag is `true`,
-     * it indicates a user-initiated poll request.
+     * A factory function that returns a poll promise. The poll state is passed
+     * into the factory function. It is safe to ignore the state argument.
      */
-    poll: (state: Poll.State) => Promise<any>;
+    factory: (state: Poll.State) => Promise<any>;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
