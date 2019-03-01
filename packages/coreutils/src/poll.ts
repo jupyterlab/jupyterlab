@@ -86,10 +86,17 @@ export class Poll<T = any> implements IDisposable {
   }
 
   /**
+   * A signal emitted when the poll promise rejects.
+   */
+  get rejected(): ISignal<this, any> {
+    return this._rejected;
+  }
+
+  /**
    * A signal emitted when the poll promise successfully resolves.
    */
-  get payload(): ISignal<this, T> {
-    return this._payload;
+  get resolved(): ISignal<this, T> {
+    return this._resolved;
   }
 
   /**
@@ -167,9 +174,6 @@ export class Poll<T = any> implements IDisposable {
             return;
           }
 
-          // Emit the promise's payload.
-          this._payload.emit(payload);
-
           // Check if this is a reconnection before setting connected state.
           if (!this._connected) {
             console.log(`Poll (${this.name}) reconnected.`);
@@ -178,7 +182,10 @@ export class Poll<T = any> implements IDisposable {
 
           // The poll succeeded. Reset the interval.
           interval = Private.jitter(this.interval, variance, min, max);
-        } catch (error) {
+
+          // Emit the promise resolution's payload.
+          this._resolved.emit(payload);
+        } catch (payload) {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
             return;
@@ -198,8 +205,11 @@ export class Poll<T = any> implements IDisposable {
             `Poll (${
               this.name
             }) failed, increasing interval from ${old} to ${interval}.`,
-            error
+            payload
           );
+
+          // Emit the promise rejection's error payload.
+          this._rejected.emit(payload);
         }
       }
 
@@ -224,7 +234,8 @@ export class Poll<T = any> implements IDisposable {
   private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
-  private _payload = new Signal<this, T>(this);
+  private _rejected = new Signal<this, any>(this);
+  private _resolved = new Signal<this, T>(this);
 }
 
 /**
