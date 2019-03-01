@@ -38,7 +38,7 @@
     "chai": "~4.1.2",
     "expect.js": "~0.3.1",
     "json-to-html": "~0.1.2",
-    "react": "~16.4.2",
+    "react": "~16.8.3",
     "simulate-event": "~1.4.0"
   },
   "devDependencies": {
