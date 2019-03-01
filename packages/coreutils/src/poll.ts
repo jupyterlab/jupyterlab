@@ -5,17 +5,19 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
+import { ISignal, Signal } from '@phosphor/signaling';
+
 /**
  * A class that wraps an asynchronous function to poll at a regular interval
  * with exponential increases to the interval length if the poll fails.
  */
-export class Poll implements IDisposable {
+export class Poll<T = any> implements IDisposable {
   /**
    * Instantiate a new poll with exponential back-off in case of failure.
    *
    * @param options - The poll instantiation options.
    */
-  constructor(options: Poll.IOptions) {
+  constructor(options: Poll.IOptions<T>) {
     const { factory, interval, max, min, name, variance, when } = options;
 
     if (interval > max) {
@@ -70,10 +72,24 @@ export class Poll implements IDisposable {
   readonly variance: number;
 
   /**
+   * A signal emitted when the poll is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
+  }
+
+  /**
    * Whether the poll is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * A signal emitted when the poll promise successfully resolves.
+   */
+  get payload(): ISignal<this, T> {
+    return this._payload;
   }
 
   /**
@@ -83,12 +99,14 @@ export class Poll implements IDisposable {
     if (this._isDisposed) {
       return;
     }
+    this._isDisposed = true;
+    this._disposed.emit();
+    Signal.clearData(this);
     if (this._outstanding) {
       const delegate = this._outstanding;
       this._outstanding = null;
       delegate.reject(new Error(`Poll (${this.name}) is disposed.`));
     }
-    this._isDisposed = true;
   }
 
   /**
@@ -133,7 +151,7 @@ export class Poll implements IDisposable {
         const { max, min, variance } = this;
 
         try {
-          await this._factory({
+          const payload = await this._factory({
             connected: this._connected,
             interval,
             schedule: override ? 'override' : 'automatic'
@@ -148,6 +166,9 @@ export class Poll implements IDisposable {
           if (this._outstanding !== delegate) {
             return;
           }
+
+          // Emit the promise's payload.
+          this._payload.emit(payload);
 
           // Check if this is a reconnection before setting connected state.
           if (!this._connected) {
@@ -199,9 +220,11 @@ export class Poll implements IDisposable {
   }
 
   private _connected = false;
+  private _disposed = new Signal<this, void>(this);
   private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
+  private _payload = new Signal<this, T>(this);
 }
 
 /**
@@ -241,7 +264,7 @@ export namespace Poll {
   /**
    * Instantiation options for polls.
    */
-  export interface IOptions {
+  export interface IOptions<T> {
     /**
      * The millisecond interval between poll requests.
      *
@@ -267,10 +290,14 @@ export namespace Poll {
     name?: string;
 
     /**
-     * A factory function that returns a poll promise. The poll state is passed
-     * into the factory function. It is safe to ignore the state argument.
+     * A factory function that is passed poll state and returns a poll promise.
+     *
+     * #### Notes
+     * The generic type argument `T` is the poll promise resolution's payload.
+     *
+     * It is safe to ignore the state argument.
      */
-    factory: (state: Poll.State) => Promise<any>;
+    factory: (state: Poll.State) => Promise<T>;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
@@ -279,6 +306,8 @@ export namespace Poll {
 
     /**
      * The range within which the poll interval jitters. Defaults to `0.2`.
+     *
+     * #### Notes
      * Unless set to `0` the poll interval will be irregular.
      */
     variance?: number;
