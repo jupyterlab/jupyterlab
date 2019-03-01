@@ -100,6 +100,13 @@ export class Poll<T = any> implements IDisposable {
   }
 
   /**
+   * The most recently recorded poll tick time.
+   */
+  get tick(): number {
+    return this._tick;
+  }
+
+  /**
    * Dispose the poll, stop executing future poll requests.
    */
   dispose(): void {
@@ -180,6 +187,9 @@ export class Poll<T = any> implements IDisposable {
           }
           this._connected = true;
 
+          // Record the current tick.
+          this._tick = new Date().getTime();
+
           // The poll succeeded. Reset the interval.
           interval = Private.jitter(this.interval, variance, min, max);
 
@@ -196,6 +206,7 @@ export class Poll<T = any> implements IDisposable {
             return;
           }
 
+          // Set connected state.
           this._connected = false;
 
           // The poll failed. Increase the interval.
@@ -207,6 +218,10 @@ export class Poll<T = any> implements IDisposable {
             }) failed, increasing interval from ${old} to ${interval}.`,
             payload
           );
+
+          // Record and emit the current tick.
+          this._tick = new Date().getTime();
+          this._ticked.emit(this._tick);
 
           // Emit the promise rejection's error payload.
           this._rejected.emit(payload);
@@ -236,6 +251,8 @@ export class Poll<T = any> implements IDisposable {
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
   private _rejected = new Signal<this, any>(this);
   private _resolved = new Signal<this, T>(this);
+  private _tick = new Date().getTime();
+  private _ticked = new Signal<this, number>(this);
 }
 
 /**
