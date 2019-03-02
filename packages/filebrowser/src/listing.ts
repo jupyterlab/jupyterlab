@@ -18,6 +18,8 @@ import {
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { imageRendererFactory } from '@jupyterlab/rendermime';
+
 import { Contents } from '@jupyterlab/services';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
@@ -116,6 +118,11 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
  * The mime type for a con tents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
+
+/**
+ * The mime type for attachments
+ */
+const ATTACHMENTS_MIME = 'application/vnd.jupyter.attachments;closure=true';
 
 /**
  * The class name added to drop targets.
@@ -1189,12 +1196,37 @@ export class DirListing extends Widget {
       proposedAction: 'move'
     });
     let basePath = this._model.path;
+
     let paths = toArray(
       map(selectedNames, name => {
         return PathExt.join(basePath, name);
       })
     );
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
+
+    let services = this.model.manager.services;
+    const selectedItems: Contents.IModel[] = [];
+    Object.keys(this._selection).forEach(itemname => {
+      if (this._selection[itemname]) {
+        const item = find(items, item => item.name === itemname);
+        if (
+          item.type === 'file' &&
+          imageRendererFactory.mimeTypes.indexOf(item.mimetype) !== -1
+        ) {
+          selectedItems.push(item);
+        }
+      }
+    });
+    // We thunk this so we don't try to make a network call
+    // when it's not needed. E.g. just moving files around
+    // in a filebrowser
+    if (selectedItems.length > 0) {
+      let attachmentThunks = paths.map(path => {
+        return () => services.contents.get(path);
+      });
+      this._drag.mimeData.setData(ATTACHMENTS_MIME, attachmentThunks);
+    }
+
     if (item && item.type !== 'directory') {
       const otherPaths = paths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {

@@ -1299,6 +1299,7 @@ export class Notebook extends StaticNotebook {
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('dblclick', this);
+
     node.addEventListener('focusin', this);
     node.addEventListener('focusout', this);
     // Capture drag events for the notebook widget
