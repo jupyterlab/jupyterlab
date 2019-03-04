@@ -83,6 +83,13 @@ export class Poll<T = any> implements IDisposable {
   readonly variance: number;
 
   /**
+   * Whether the last poll request succeeded.
+   */
+  get connected(): boolean {
+    return this._connected;
+  }
+
+  /**
    * A signal emitted when the poll is disposed.
    */
   get disposed(): ISignal<this, void> {
@@ -175,8 +182,7 @@ export class Poll<T = any> implements IDisposable {
     }
 
     const { max, min, variance } = this;
-    const connected = this._connected;
-    const promise = this._factory({ connected, interval, schedule });
+    const promise = this._factory({ interval, schedule });
 
     promise
       .then((payload: T) => {
@@ -329,11 +335,6 @@ export namespace Poll {
    * Definition of poll state that gets passed into the poll promise factory.
    */
   export type State = {
-    /**
-     * Whether the last poll succeeded.
-     */
-    readonly connected: boolean;
-
     /**
      * The number of milliseconds that elapsed since the last poll.
      */
