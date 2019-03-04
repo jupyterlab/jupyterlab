@@ -241,19 +241,19 @@ export class Poll<T = any> implements IDisposable {
           }
           this._connected = true;
 
-          // Record and emit the current tick.
-          this._tick = new Date().getTime();
-          this._ticked.emit(this._tick);
-
           // The poll succeeded. Reset the interval.
           interval = Private.jitter(this.interval, variance, min, max);
-
-          // Emit the promise resolution's payload.
-          this._resolved.emit(payload);
 
           // Schedule the next poll.
           this._outstanding = null;
           delegate.resolve(this._poll(interval));
+
+          // Record and emit the current tick.
+          this._tick = new Date().getTime();
+          this._ticked.emit(this._tick);
+
+          // Emit the promise resolution's payload.
+          this._resolved.emit(payload);
         })
         .catch((reason: any) => {
           // Bail if disposed while poll promise was in flight.
@@ -280,16 +280,16 @@ export class Poll<T = any> implements IDisposable {
             reason
           );
 
+          // Schedule the next poll.
+          this._outstanding = null;
+          delegate.resolve(this._poll(interval));
+
           // Record and emit the current tick.
           this._tick = new Date().getTime();
           this._ticked.emit(this._tick);
 
           // Emit the promise rejection's error payload.
           this._rejected.emit(reason);
-
-          // Schedule the next poll.
-          this._outstanding = null;
-          delegate.resolve(this._poll(interval));
         });
     }
   }
