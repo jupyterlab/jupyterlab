@@ -97,17 +97,20 @@ export class Poll<T = any> implements IDisposable {
    * A handle to the next link in the poll promise chain.
    */
   get next(): Poll.Next {
+    // If polling has begun return the outstanding promise or schedule one.
     if (this._isReady) {
       return this._outstanding || this._schedule(this.interval);
     }
+
+    // Return a proxy to the ready promise.
     const ready = this._ready;
-    const delegate = new PromiseDelegate<Poll.Next>();
+    const proxy = new PromiseDelegate<Poll.Next>();
 
     ready.then(next => {
-      delegate.resolve(next);
+      proxy.resolve(next);
     });
 
-    return delegate;
+    return proxy;
   }
 
   /**
