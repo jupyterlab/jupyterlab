@@ -14,6 +14,11 @@ html {
   box-sizing: unset;
 }
 
+body {
+  color: unset;
+  font-family: var(--jp-ui-font-family);
+}
+
 p {
   margin-top: unset;
   margin-bottom: unset;
