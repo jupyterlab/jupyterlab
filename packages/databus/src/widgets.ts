@@ -50,17 +50,18 @@ export interface IStaticWidgetConverterOptions<T> {
   convert: Convert<T, Widget>;
 }
 
+type WidgetCreator = () => Promise<Widget>;
+
 export function staticWidgetConverter<T>({
   mimeType,
   label,
   convert
-}: IStaticWidgetConverterOptions<T>): Converter<T, Widget> {
+}: IStaticWidgetConverterOptions<T>): Converter<T, WidgetCreator> {
   return (currentMimeType: string, url: URL) => {
-    const res: Converts<T, Widget> = new Map();
+    const res: Converts<T, WidgetCreator> = new Map();
     if (currentMimeType === mimeType) {
-      res.set(
-        widgetMimeType(label),
-        async (data: T) => new DataWidget(await convert(data), url, label)
+      res.set(widgetMimeType(label), async (data: T) => async () =>
+        new DataWidget(await convert(data), url, label)
       );
     }
     return res;
@@ -69,7 +70,7 @@ export function staticWidgetConverter<T>({
 
 export function widgetViewerConverter(
   display: (widget: Widget) => Promise<void>
-): Converter<Widget, View> {
+): Converter<WidgetCreator, View> {
   return singleConverter((mimeType: string) => {
     const label = extractWidgetLabel(mimeType);
     if (label === null) {
@@ -77,7 +78,7 @@ export function widgetViewerConverter(
     }
     return [
       createViewerMimeType(label),
-      async data => async () => display(data)
+      async data => async () => display(await data())
     ];
   });
 }
