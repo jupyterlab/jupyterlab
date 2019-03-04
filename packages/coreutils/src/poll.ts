@@ -217,81 +217,87 @@ export class Poll<T = any> implements IDisposable {
       return;
     }
 
-    // Only execute promise if not in a hidden tab.
-    if (typeof document === 'undefined' || !document.hidden) {
-      const { max, min, variance } = this;
-      const connected = this._connected;
-      const schedule = override ? 'override' : 'automatic';
-      const promise = this._factory({ connected, interval, schedule });
-      promise
-        .then((payload: T) => {
-          // Bail if disposed while poll promise was in flight.
-          if (this._isDisposed) {
-            return;
-          }
-
-          // Bail if this promise has already been superseded.
-          if (this._outstanding !== delegate) {
-            return;
-          }
-
-          // Check if this is a reconnection before setting connected state.
-          if (!this._connected) {
-            console.log(`Poll (${this.name}) reconnected.`);
-          }
-          this._connected = true;
-
-          // The poll succeeded. Reset the interval.
-          interval = Private.jitter(this.interval, variance, min, max);
-
-          // Schedule the next poll.
-          this._outstanding = null;
-          delegate.resolve(this._poll(interval));
-
-          // Record and emit the current tick.
-          this._tick = new Date().getTime();
-          this._ticked.emit(this._tick);
-
-          // Emit the promise resolution's payload.
-          this._resolved.emit(payload);
-        })
-        .catch((reason: any) => {
-          // Bail if disposed while poll promise was in flight.
-          if (this._isDisposed) {
-            return;
-          }
-
-          // Bail if this promise has already been superseded.
-          if (this._outstanding !== delegate) {
-            return;
-          }
-
-          // Set connected state.
-          this._connected = false;
-
-          // The poll failed. Increase the interval.
-          const old = interval;
-          const increased = Math.min(interval * 2, max);
-          interval = Private.jitter(increased, variance, min, max);
-          console.warn(
-            `Poll (${
-              this.name
-            }) failed, increasing interval from ${old} to ${interval}.`,
-            reason
-          );
-
-          // Schedule the next poll.
-          this._outstanding = null;
-          delegate.resolve(this._poll(interval));
-
-          // Record and emit the current tick.
-          this._tick = new Date().getTime();
-          this._ticked.emit(this._tick);
-
-          // Emit the promise rejection's error payload.
-          this._rejected.emit(reason);
-        });
+    // Do not execute promise if application is currently not visible.
+    if (typeof document !== 'undefined' && document.hidden) {
+      // Schedule the next poll.
+      this._outstanding = null;
+      delegate.resolve(this._poll(interval));
+      return;
     }
+
+    const { max, min, variance } = this;
+    const connected = this._connected;
+    const schedule = override ? 'override' : 'automatic';
+    const promise = this._factory({ connected, interval, schedule });
+
+    promise
+      .then((payload: T) => {
+        // Bail if disposed while poll promise was in flight.
+        if (this._isDisposed) {
+          return;
+        }
+
+        // Bail if this promise has already been superseded.
+        if (this._outstanding !== delegate) {
+          return;
+        }
+
+        // Check if this is a reconnection before setting connected state.
+        if (!this._connected) {
+          console.log(`Poll (${this.name}) reconnected.`);
+        }
+        this._connected = true;
+
+        // The poll succeeded. Reset the interval.
+        interval = Private.jitter(this.interval, variance, min, max);
+
+        // Schedule the next poll.
+        this._outstanding = null;
+        delegate.resolve(this._poll(interval));
+
+        // Record and emit the current tick.
+        this._tick = new Date().getTime();
+        this._ticked.emit(this._tick);
+
+        // Emit the promise resolution's payload.
+        this._resolved.emit(payload);
+      })
+      .catch((reason: any) => {
+        // Bail if disposed while poll promise was in flight.
+        if (this._isDisposed) {
+          return;
+        }
+
+        // Bail if this promise has already been superseded.
+        if (this._outstanding !== delegate) {
+          return;
+        }
+
+        // Set connected state.
+        this._connected = false;
+
+        // The poll failed. Increase the interval.
+        const old = interval;
+        const increased = Math.min(interval * 2, max);
+        interval = Private.jitter(increased, variance, min, max);
+        console.warn(
+          `Poll (${
+            this.name
+          }) failed, increasing interval from ${old} to ${interval}.`,
+          reason
+        );
+
+        // Schedule the next poll.
+        this._outstanding = null;
+        delegate.resolve(this._poll(interval));
+
+        // Record and emit the current tick.
+        this._tick = new Date().getTime();
+        this._ticked.emit(this._tick);
+
+        // Emit the promise rejection's error payload.
+        this._rejected.emit(reason);
+      });
   }
 
   private _connected = false;
