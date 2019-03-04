@@ -37,12 +37,13 @@ export class Poll<T = any> implements IDisposable {
     this.min = typeof min === 'number' ? Math.abs(min) : 100;
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
-    this._connected = false;
     this._factory = factory;
 
     // Create the initial outstanding next poll promise.
     const next = new PromiseDelegate<Poll.Next>();
     this._outstanding = next;
+
+    // Schedule the first poll execution after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
         this._connected = true;
@@ -50,6 +51,7 @@ export class Poll<T = any> implements IDisposable {
         next.resolve(this._schedule(interval));
       })
       .catch(() => {
+        this._connected = false;
         this._outstanding = null;
         next.resolve(this._schedule(interval));
       });
@@ -281,25 +283,25 @@ export class Poll<T = any> implements IDisposable {
       return outstanding;
     }
 
-    // Create a new promise delegate and set the outstanding reference.
-    const delegate = new PromiseDelegate<Poll.Next>();
-    this._outstanding = delegate;
+    // Create the next poll promise and set the outstanding reference.
+    const next = new PromiseDelegate<Poll.Next>();
+    this._outstanding = next;
 
     // Schedule the poll request.
     if (interval) {
       setTimeout(() => {
-        this._execute(delegate, interval, schedule);
+        this._execute(next, interval, schedule);
       }, interval);
     } else {
       requestAnimationFrame(() => {
-        this._execute(delegate, interval, schedule);
+        this._execute(next, interval, schedule);
       });
     }
 
-    return delegate;
+    return next;
   }
 
-  private _connected: boolean;
+  private _connected = false;
   private _disposed = new Signal<this, void>(this);
   private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
