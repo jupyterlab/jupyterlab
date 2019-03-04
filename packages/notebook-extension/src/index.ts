@@ -937,7 +937,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let kernel = cell.model.metadata.get('kernel');
+      let metadata = cell.model.metadata.toJSON();
       let path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
@@ -980,7 +980,7 @@ function addCommands(
         activate: false,
         code,
         path,
-        kernel
+        metadata
       });
     },
     isEnabled
