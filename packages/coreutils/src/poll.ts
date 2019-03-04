@@ -36,13 +36,17 @@ export class Poll<T = any> implements IDisposable {
     this._factory = factory;
 
     // Cache the original interval length and start polling.
-    (when || Promise.resolve())
+    this._ready = (when || Promise.resolve())
       .then(() => {
         this._connected = true;
-        this._poll(interval);
+        this._isReady = true;
+        this._ready = null;
+        return this._poll(interval);
       })
       .catch(() => {
-        this._poll(interval);
+        this._isReady = true;
+        this._ready = null;
+        return this._poll(interval);
       });
   }
 
@@ -86,6 +90,23 @@ export class Poll<T = any> implements IDisposable {
   }
 
   /**
+   * A handle to the next link in the poll promise chain.
+   */
+  get next(): Poll.Next {
+    if (this._isReady) {
+      return this._outstanding || this._poll(this.interval);
+    }
+    const ready = this._ready;
+    const delegate = new PromiseDelegate<Poll.Next>();
+
+    ready.then(next => {
+      delegate.resolve(next);
+    });
+
+    return delegate;
+  }
+
+  /**
    * A signal emitted when the poll promise rejects.
    */
   get rejected(): ISignal<this, any> {
@@ -107,6 +128,13 @@ export class Poll<T = any> implements IDisposable {
   }
 
   /**
+   * A signal emitted when the poll ticks.
+   */
+  get ticked(): ISignal<this, number> {
+    return this._ticked;
+  }
+
+  /**
    * Dispose the poll, stop executing future poll requests.
    */
   dispose(): void {
@@ -117,9 +145,9 @@ export class Poll<T = any> implements IDisposable {
     this._disposed.emit();
     Signal.clearData(this);
     if (this._outstanding) {
-      const delegate = this._outstanding;
+      const outstanding = this._outstanding;
       this._outstanding = null;
-      delegate.reject(new Error(`Poll (${this.name}) is disposed.`));
+      outstanding.reject(new Error(`Poll (${this.name}) is disposed.`));
     }
   }
 
@@ -131,52 +159,78 @@ export class Poll<T = any> implements IDisposable {
   }
 
   /**
-   * Schedule a poll request.
+   * Schedule a poll request and return the next link in the promise chain,
+   * disrupting the outstanding poll if necessary.
+   *
+   * #### Notes
+   * The next poll promise returned is guaranteed to always resolve with a
+   * handle on the correct next link in the poll promise chain.
    */
   private _poll(interval: number, override = false): Poll.Next {
+    const outstanding = this._outstanding;
+
     // If poll is being overridden, generate a new poll.
-    if (override && this._outstanding) {
+    if (override && outstanding) {
       // Reset the previously outstanding poll and generate the next poll.
-      const previous = this._outstanding;
       this._outstanding = null;
       const next = this._poll(0, override);
 
       // Short-circuit the previous poll promise and return a reference to the
       // next poll promise (which supersedes it) scheduled to run immediately.
-      previous.resolve(next);
+      outstanding.resolve(next);
 
       return next;
     }
 
     // If there is already an outstanding poll, return a reference to it.
-    if (this._outstanding) {
-      return this._outstanding.promise;
+    if (outstanding) {
+      return outstanding;
     }
 
-    // Create a new and set the outstanding reference.
+    // Create a new promise delegate and set the outstanding reference.
     const delegate = new PromiseDelegate<Poll.Next>();
-    const poll = async () => {
-      if (this._isDisposed) {
-        return;
-      }
+    this._outstanding = delegate;
 
-      // Only execute promise if not in a hidden tab.
-      if (typeof document === 'undefined' || !document.hidden) {
-        const { max, min, variance } = this;
+    // Schedule the poll request.
+    if (interval) {
+      setTimeout(() => {
+        this._execute(delegate, interval, override);
+      }, interval);
+    } else {
+      requestAnimationFrame(() => {
+        this._execute(delegate, interval, override);
+      });
+    }
 
-        try {
-          const payload = await this._factory({
-            connected: this._connected,
-            interval,
-            schedule: override ? 'override' : 'automatic'
-          });
+    return delegate;
+  }
 
+  /**
+   * Execute a poll request.
+   */
+  private _execute(
+    delegate: PromiseDelegate<Poll.Next>,
+    interval: number,
+    override: boolean
+  ): void {
+    if (this._isDisposed) {
+      return;
+    }
+
+    // Only execute promise if not in a hidden tab.
+    if (typeof document === 'undefined' || !document.hidden) {
+      const { max, min, variance } = this;
+      const connected = this._connected;
+      const schedule = override ? 'override' : 'automatic';
+      const promise = this._factory({ connected, interval, schedule });
+      promise
+        .then((payload: T) => {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
             return;
           }
 
-          // Bail if this promise has already been superseded and resolved.
+          // Bail if this promise has already been superseded.
           if (this._outstanding !== delegate) {
             return;
           }
@@ -187,21 +241,27 @@ export class Poll<T = any> implements IDisposable {
           }
           this._connected = true;
 
-          // Record the current tick.
+          // Record and emit the current tick.
           this._tick = new Date().getTime();
+          this._ticked.emit(this._tick);
 
           // The poll succeeded. Reset the interval.
           interval = Private.jitter(this.interval, variance, min, max);
 
           // Emit the promise resolution's payload.
           this._resolved.emit(payload);
-        } catch (payload) {
+
+          // Schedule the next poll.
+          this._outstanding = null;
+          delegate.resolve(this._poll(interval));
+        })
+        .catch((reason: any) => {
           // Bail if disposed while poll promise was in flight.
           if (this._isDisposed) {
             return;
           }
 
-          // Bail if this promise has already been superseded and resolved.
+          // Bail if this promise has already been superseded.
           if (this._outstanding !== delegate) {
             return;
           }
@@ -211,12 +271,13 @@ export class Poll<T = any> implements IDisposable {
 
           // The poll failed. Increase the interval.
           const old = interval;
-          interval = Private.jitter(Math.min(old * 2, max), variance, min, max);
+          const increased = Math.min(interval * 2, max);
+          interval = Private.jitter(increased, variance, min, max);
           console.warn(
             `Poll (${
               this.name
             }) failed, increasing interval from ${old} to ${interval}.`,
-            payload
+            reason
           );
 
           // Record and emit the current tick.
@@ -224,31 +285,22 @@ export class Poll<T = any> implements IDisposable {
           this._ticked.emit(this._tick);
 
           // Emit the promise rejection's error payload.
-          this._rejected.emit(payload);
-        }
-      }
+          this._rejected.emit(reason);
 
-      // Schedule the next poll and reset outstanding.
-      this._outstanding = null;
-      delegate.resolve(this._poll(interval));
-      return;
-    };
-
-    this._outstanding = delegate;
-    if (interval) {
-      setTimeout(poll, interval);
-    } else {
-      requestAnimationFrame(poll);
+          // Schedule the next poll.
+          this._outstanding = null;
+          delegate.resolve(this._poll(interval));
+        });
     }
-
-    return delegate.promise;
   }
 
   private _connected = false;
   private _disposed = new Signal<this, void>(this);
   private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
+  private _isReady = false;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
+  private _ready: Promise<Poll.Next> | null = null;
   private _rejected = new Signal<this, any>(this);
   private _resolved = new Signal<this, T>(this);
   private _tick = new Date().getTime();
@@ -282,12 +334,7 @@ export namespace Poll {
   /**
    * A poll promise that resolves to the next scheduled poll promise.
    */
-  export type Next = INextPromise;
-
-  /**
-   * A poll promise that resolves to the next scheduled poll promise.
-   */
-  interface INextPromise extends Promise<Next> {}
+  export type Next = { promise: Promise<Next> };
 
   /**
    * Instantiation options for polls.
