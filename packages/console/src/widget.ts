@@ -349,9 +349,13 @@ export class CodeConsole extends Widget {
    *
    * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): Promise<void> {
+  inject(code: string, kernel: string = ''): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value.text = code;
+    if (kernel) {
+      // How to copy JSONObject here?
+      cell.model.metadata.set('kernel', kernel);
+    }
     this.addCell(cell);
     return this._execute(cell);
   }

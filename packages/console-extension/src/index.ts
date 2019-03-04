@@ -461,7 +461,10 @@ async function activateConsole(
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
-          widget.console.inject(args['code'] as string);
+          widget.console.inject(
+            args['code'] as string,
+            args['kernel'] as string
+          );
           return true;
         }
         return false;

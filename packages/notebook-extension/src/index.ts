@@ -937,6 +937,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
+      let kernel = cell.model.metadata.get('kernel');
       let path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
@@ -978,7 +979,8 @@ function addCommands(
       await commands.execute('console:inject', {
         activate: false,
         code,
-        path
+        path,
+        kernel
       });
     },
     isEnabled
