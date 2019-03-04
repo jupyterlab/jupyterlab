@@ -148,6 +148,10 @@ export class TerminalManager implements TerminalSession.IManager {
 
   /**
    * Force a refresh of the running sessions.
+   *
+   * #### Notes
+   * This is intended to be called only in response to a user action,
+   * since the manager maintains its internal state.
    */
   async refreshRunning(): Promise<void> {
     if (this._pollModels) {
@@ -230,17 +234,12 @@ export class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
-   * Handle a session terminating.
+   * Get a set of options to pass.
    */
-  private _onTerminated(name: string): void {
-    let index = ArrayExt.findFirstIndex(
-      this._models,
-      value => value.name === name
-    );
-    if (index !== -1) {
-      this._models.splice(index, 1);
-      this._runningChanged.emit(this._models.slice());
-    }
+  private _getOptions(
+    options: TerminalSession.IOptions = {}
+  ): TerminalSession.IOptions {
+    return { ...options, serverSettings: this.serverSettings };
   }
 
   /**
@@ -263,13 +262,27 @@ export class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
+   * Handle a session terminating.
+   */
+  private _onTerminated(name: string): void {
+    let index = ArrayExt.findFirstIndex(
+      this._models,
+      value => value.name === name
+    );
+    if (index !== -1) {
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
+    }
+  }
+
+  /**
    * Refresh the running sessions.
    */
   private async _refreshRunning(silent = false): Promise<void> {
     const models = await TerminalSession.listRunning(this.serverSettings);
     this._isReady = true;
     if (!JSONExt.deepEqual(models, this._models)) {
-      const names = models.map(model => model.name);
+      const names = models.map(({ name }) => name);
       const sessions = this._sessions;
       sessions.forEach(session => {
         if (names.indexOf(session.name) === -1) {
@@ -282,15 +295,6 @@ export class TerminalManager implements TerminalSession.IManager {
         this._runningChanged.emit(models);
       }
     }
-  }
-
-  /**
-   * Get a set of options to pass.
-   */
-  private _getOptions(
-    options: TerminalSession.IOptions = {}
-  ): TerminalSession.IOptions {
-    return { ...options, serverSettings: this.serverSettings };
   }
 
   private _isDisposed = false;

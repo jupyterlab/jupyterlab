@@ -10,6 +10,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
 /**
  * A class that wraps an asynchronous function to poll at a regular interval
  * with exponential increases to the interval length if the poll fails.
+ *
+ * #### Notes
+ * The generic argument `T` indicates the resolved type of the promises returned
+ * by the poll's promise factory.
  */
 export class Poll<T = any> implements IDisposable {
   /**
