@@ -37,20 +37,21 @@ export class Poll<T = any> implements IDisposable {
     this.min = typeof min === 'number' ? Math.abs(min) : 100;
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
+    this._connected = false;
     this._factory = factory;
 
-    // Cache the original interval length and start polling.
-    this._ready = (when || Promise.resolve())
+    // Create the initial outstanding next poll promise.
+    const next = new PromiseDelegate<Poll.Next>();
+    this._outstanding = next;
+    (when || Promise.resolve())
       .then(() => {
         this._connected = true;
-        this._isReady = true;
-        this._ready = null;
-        return this._schedule(interval);
+        this._outstanding = null;
+        next.resolve(this._schedule(interval));
       })
       .catch(() => {
-        this._isReady = true;
-        this._ready = null;
-        return this._schedule(interval);
+        this._outstanding = null;
+        next.resolve(this._schedule(interval));
       });
   }
 
@@ -97,20 +98,7 @@ export class Poll<T = any> implements IDisposable {
    * A handle to the next link in the poll promise chain.
    */
   get next(): Poll.Next {
-    // If polling has begun return the outstanding promise or schedule one.
-    if (this._isReady) {
-      return this._outstanding || this._schedule(this.interval);
-    }
-
-    // Return a proxy to the ready promise.
-    const ready = this._ready;
-    const proxy = new PromiseDelegate<Poll.Next>();
-
-    ready.then(next => {
-      proxy.resolve(next);
-    });
-
-    return proxy;
+    return this._outstanding || this._schedule(this.interval);
   }
 
   /**
@@ -266,7 +254,8 @@ export class Poll<T = any> implements IDisposable {
    *
    * #### Notes
    * The next poll promise returned is guaranteed to always resolve with a
-   * handle on the correct next link in the poll promise chain.
+   * handle on the correct next link in the poll promise chain except when the
+   * poll is disposed.
    */
   private _schedule(
     interval: number,
@@ -310,13 +299,11 @@ export class Poll<T = any> implements IDisposable {
     return delegate;
   }
 
-  private _connected = false;
+  private _connected: boolean;
   private _disposed = new Signal<this, void>(this);
   private _factory: (state: Poll.State) => Promise<any>;
   private _isDisposed = false;
-  private _isReady = false;
   private _outstanding: PromiseDelegate<Poll.Next> | null = null;
-  private _ready: Promise<Poll.Next> | null = null;
   private _rejected = new Signal<this, any>(this);
   private _resolved = new Signal<this, T>(this);
   private _tick = new Date().getTime();
