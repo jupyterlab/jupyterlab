@@ -155,7 +155,7 @@ export class Poll<T = any> implements IDisposable {
    * Refresh the poll.
    */
   refresh(): Poll.Next {
-    return this._schedule(0, true);
+    return this._schedule(0, 'override');
   }
 
   /**
@@ -164,7 +164,7 @@ export class Poll<T = any> implements IDisposable {
   private _execute(
     delegate: PromiseDelegate<Poll.Next>,
     interval: number,
-    override: boolean
+    schedule: Poll.Schedule
   ): void {
     if (this._isDisposed) {
       return;
@@ -173,13 +173,12 @@ export class Poll<T = any> implements IDisposable {
     // Reschedule without executing poll promise if application is hidden.
     if (typeof document !== 'undefined' && document.hidden) {
       this._outstanding = null;
-      delegate.resolve(this._schedule(interval));
+      delegate.resolve(this._schedule(interval, 'standby'));
       return;
     }
 
     const { max, min, variance } = this;
     const connected = this._connected;
-    const schedule = override ? 'override' : 'automatic';
     const promise = this._factory({ connected, interval, schedule });
 
     promise
@@ -262,14 +261,17 @@ export class Poll<T = any> implements IDisposable {
    * The next poll promise returned is guaranteed to always resolve with a
    * handle on the correct next link in the poll promise chain.
    */
-  private _schedule(interval: number, override = false): Poll.Next {
+  private _schedule(
+    interval: number,
+    schedule: Poll.Schedule = 'automatic'
+  ): Poll.Next {
     const outstanding = this._outstanding;
 
     // If poll is being overridden, generate a new poll.
-    if (override && outstanding) {
+    if (schedule === 'override' && outstanding) {
       // Reset the previously outstanding poll and generate the next poll.
       this._outstanding = null;
-      const next = this._schedule(0, override);
+      const next = this._schedule(0, 'override');
 
       // Short-circuit the previous poll promise and return a reference to the
       // next poll promise (which supersedes it) scheduled to run immediately.
@@ -290,11 +292,11 @@ export class Poll<T = any> implements IDisposable {
     // Schedule the poll request.
     if (interval) {
       setTimeout(() => {
-        this._execute(delegate, interval, override);
+        this._execute(delegate, interval, schedule);
       }, interval);
     } else {
       requestAnimationFrame(() => {
-        this._execute(delegate, interval, override);
+        this._execute(delegate, interval, schedule);
       });
     }
 
@@ -319,6 +321,15 @@ export class Poll<T = any> implements IDisposable {
  */
 export namespace Poll {
   /**
+   * A poll promise that resolves to the next scheduled poll promise.
+   */
+  export type Next = { promise: Promise<Next> };
+
+  /**
+   * Whether polling was scheduled automatically, overridden, or from standby.
+   */
+  export type Schedule = 'automatic' | 'override' | 'standby';
+  /**
    * Definition of poll state that gets passed into the poll promise factory.
    */
   export type State = {
@@ -333,15 +344,10 @@ export namespace Poll {
     readonly interval: number;
 
     /**
-     * Whether the poll was scheduled automatically or overridden.
+     * Whether polling was scheduled automatically, overridden, or from standby.
      */
-    readonly schedule: 'automatic' | 'override';
+    readonly schedule: Schedule;
   };
-
-  /**
-   * A poll promise that resolves to the next scheduled poll promise.
-   */
-  export type Next = { promise: Promise<Next> };
 
   /**
    * Instantiation options for polls.
