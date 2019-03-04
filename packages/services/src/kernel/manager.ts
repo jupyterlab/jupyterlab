@@ -51,50 +51,15 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * A signal emitted when the specs change.
+   * The server settings for the manager.
    */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
-  }
-
-  /**
-   * A signal emitted when the running kernels change.
-   */
-  get runningChanged(): ISignal<this, Kernel.IModel[]> {
-    return this._runningChanged;
-  }
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * Test whether the terminal manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
-  }
-
-  /**
-   * Dispose of the resources used by the manager.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    this._models.length = 0;
-    this._pollModels.dispose();
-    this._pollSpecs.dispose();
-    Signal.clearData(this);
-  }
-
-  /**
-   * The server settings for the manager.
-   */
-  readonly serverSettings: ServerConnection.ISettings;
-
-  /**
-   * Get the most recently fetched kernel specs.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this._specs;
   }
 
   /**
@@ -112,12 +77,75 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Create an iterator over the most recent running kernels.
-   *
-   * @returns A new iterator over the running kernels.
+   * A signal emitted when the running kernels change.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter(this._models);
+  get runningChanged(): ISignal<this, Kernel.IModel[]> {
+    return this._runningChanged;
+  }
+
+  /**
+   * Get the most recently fetched kernel specs.
+   */
+  get specs(): Kernel.ISpecModels | null {
+    return this._specs;
+  }
+
+  /**
+   * A signal emitted when the specs change.
+   */
+  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
+    return this._specsChanged;
+  }
+
+  /**
+   * Connect to an existing kernel.
+   *
+   * @param model - The model of the target kernel.
+   *
+   * @returns A promise that resolves with the new kernel instance.
+   */
+  connectTo(model: Kernel.IModel): Kernel.IKernel {
+    let kernel = Kernel.connectTo(model, this.serverSettings);
+    this._onStarted(kernel);
+    return kernel;
+  }
+
+  /**
+   * Dispose of the resources used by the manager.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._models.length = 0;
+    this._pollModels.dispose();
+    this._pollSpecs.dispose();
+    Signal.clearData(this);
+  }
+
+  /**
+   * Find a kernel by id.
+   *
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves with the kernel's model.
+   */
+  findById(id: string): Promise<Kernel.IModel> {
+    return Kernel.findById(id, this.serverSettings);
+  }
+
+  /**
+   * Force a refresh of the running kernels.
+   *
+   * @returns A promise that resolves when the running list has been refreshed.
+   *
+   * #### Notes
+   * This is not typically meant to be called by the user, since the
+   * manager maintains its own internal state.
+   */
+  async refreshRunning(): Promise<void> {
+    await this._pollModels.refresh().promise;
   }
 
   /**
@@ -129,21 +157,96 @@ export class KernelManager implements Kernel.IManager {
    * This is intended to be called only in response to a user action,
    * since the manager maintains its internal state.
    */
-  refreshSpecs(): Promise<void> {
-    return this._refreshSpecs();
+  async refreshSpecs(): Promise<void> {
+    await this._pollSpecs.refresh().promise;
   }
 
   /**
-   * Force a refresh of the running kernels.
+   * Create an iterator over the most recent running kernels.
    *
-   * @returns A promise that with the list of running sessions.
+   * @returns A new iterator over the running kernels.
+   */
+  running(): IIterator<Kernel.IModel> {
+    return iter(this._models);
+  }
+
+  /**
+   * Shut down a kernel by id.
+   *
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves when the operation is complete.
    *
    * #### Notes
-   * This is not typically meant to be called by the user, since the
-   * manager maintains its own internal state.
+   * This will emit [[runningChanged]] if the running kernels list
+   * changes.
    */
-  refreshRunning(): Promise<void> {
-    return this._refreshRunning();
+  async shutdown(id: string): Promise<void> {
+    const models = this._models;
+    const kernels = this._kernels;
+    const index = ArrayExt.findFirstIndex(models, value => value.id === id);
+
+    if (index === -1) {
+      return;
+    }
+
+    // Proactively remove the model.
+    models.splice(index, 1);
+
+    // Delete and dispose the kernel locally.
+    kernels.forEach(kernel => {
+      if (kernel.id === id) {
+        kernels.delete(kernel);
+        kernel.dispose();
+      }
+    });
+
+    // Emit the new model list without waiting for API request.
+    this._runningChanged.emit(models.slice());
+
+    // Shut down the remote session.
+    await Kernel.shutdown(id, this.serverSettings);
+  }
+
+  /**
+   * Shut down all kernels.
+   *
+   * @returns A promise that resolves when all of the kernels are shut down.
+   */
+  async shutdownAll(): Promise<void> {
+    // Remove all models.
+    if (this._models.length) {
+      this._models.length = 0;
+    }
+
+    // Emit the new model list without waiting for API requests.
+    this._runningChanged.emit([]);
+
+    // Repopulate list of models silently then shut down every session.
+    let error: any;
+    try {
+      await this._refreshRunning(true);
+      await Promise.all(
+        this._models.map(({ id }) => Kernel.shutdown(id, this.serverSettings))
+      );
+    } catch (reason) {
+      error = reason;
+    }
+    // Dispose every kernel and clear the set.
+    this._kernels.forEach(kernel => {
+      kernel.dispose();
+    });
+    this._kernels.clear();
+
+    // Remove all models even if the API returned with some models.
+    if (this._models.length) {
+      this._models.length = 0;
+    }
+
+    // If the API requests failed, reject the promise.
+    if (error) {
+      throw error;
+    }
   }
 
   /**
@@ -164,109 +267,6 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Find a kernel by id.
-   *
-   * @param id - The id of the target kernel.
-   *
-   * @returns A promise that resolves with the kernel's model.
-   */
-  findById(id: string): Promise<Kernel.IModel> {
-    return Kernel.findById(id, this.serverSettings);
-  }
-
-  /**
-   * Connect to an existing kernel.
-   *
-   * @param model - The model of the target kernel.
-   *
-   * @returns A promise that resolves with the new kernel instance.
-   */
-  connectTo(model: Kernel.IModel): Kernel.IKernel {
-    let kernel = Kernel.connectTo(model, this.serverSettings);
-    this._onStarted(kernel);
-    return kernel;
-  }
-
-  /**
-   * Shut down a kernel by id.
-   *
-   * @param id - The id of the target kernel.
-   *
-   * @returns A promise that resolves when the operation is complete.
-   *
-   * #### Notes
-   * This will emit [[runningChanged]] if the running kernels list
-   * changes.
-   */
-  shutdown(id: string): Promise<void> {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
-    if (index === -1) {
-      return;
-    }
-
-    // Proactively remove the model.
-    this._models.splice(index, 1);
-    this._runningChanged.emit(this._models.slice());
-
-    return Kernel.shutdown(id, this.serverSettings).then(() => {
-      let toRemove: Kernel.IKernel[] = [];
-      this._kernels.forEach(k => {
-        if (k.id === id) {
-          k.dispose();
-          toRemove.push(k);
-        }
-      });
-      toRemove.forEach(k => {
-        this._kernels.delete(k);
-      });
-    });
-  }
-
-  /**
-   * Shut down all kernels.
-   *
-   * @returns A promise that resolves when all of the kernels are shut down.
-   */
-  shutdownAll(): Promise<void> {
-    // Proactively remove all models.
-    let models = this._models;
-    if (models.length > 0) {
-      this._models = [];
-      this._runningChanged.emit([]);
-    }
-
-    return this._refreshRunning().then(() => {
-      return Promise.all(
-        models.map(model => {
-          return Kernel.shutdown(model.id, this.serverSettings).then(() => {
-            let toRemove: Kernel.IKernel[] = [];
-            this._kernels.forEach(k => {
-              k.dispose();
-              toRemove.push(k);
-            });
-            toRemove.forEach(k => {
-              this._kernels.delete(k);
-            });
-          });
-        })
-      ).then(() => {
-        return undefined;
-      });
-    });
-  }
-
-  /**
-   * Handle a kernel terminating.
-   */
-  private _onTerminated(id: string): void {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
-    if (index !== -1) {
-      this._models.splice(index, 1);
-      this._runningChanged.emit(this._models.slice());
-    }
-  }
-
-  /**
    * Handle a kernel starting.
    */
   private _onStarted(kernel: Kernel.IKernel): void {
@@ -283,39 +283,47 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Refresh the specs.
+   * Handle a kernel terminating.
    */
-  private _refreshSpecs(): Promise<void> {
-    return Kernel.getSpecs(this.serverSettings).then(specs => {
-      if (!JSONExt.deepEqual(specs, this._specs)) {
-        this._specs = specs;
-        this._specsChanged.emit(specs);
-      }
-    });
+  private _onTerminated(id: string): void {
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+    if (index !== -1) {
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
+    }
   }
 
   /**
    * Refresh the running sessions.
    */
-  private _refreshRunning(): Promise<void> {
-    return Kernel.listRunning(this.serverSettings).then(models => {
-      this._isReady = true;
-      if (!JSONExt.deepEqual(models, this._models)) {
-        let ids = models.map(r => r.id);
-        let toRemove: Kernel.IKernel[] = [];
-        this._kernels.forEach(k => {
-          if (ids.indexOf(k.id) === -1) {
-            k.dispose();
-            toRemove.push(k);
-          }
-        });
-        toRemove.forEach(s => {
-          this._kernels.delete(s);
-        });
-        this._models = models.slice();
+  private async _refreshRunning(silent = false): Promise<void> {
+    const models = await Kernel.listRunning(this.serverSettings);
+    this._isReady = true;
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const ids = models.map(({ id }) => id);
+      const kernels = this._kernels;
+      kernels.forEach(kernel => {
+        if (ids.indexOf(kernel.id) === -1) {
+          kernel.dispose();
+          kernels.delete(kernel);
+        }
+      });
+      this._models = models.slice();
+      if (!silent) {
         this._runningChanged.emit(models);
       }
-    });
+    }
+  }
+
+  /**
+   * Refresh the specs.
+   */
+  private async _refreshSpecs(): Promise<void> {
+    const specs = await Kernel.getSpecs(this.serverSettings);
+    if (!JSONExt.deepEqual(specs, this._specs)) {
+      this._specs = specs;
+      this._specsChanged.emit(specs);
+    }
   }
 
   private _isDisposed = false;
