@@ -147,6 +147,15 @@ export class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
+   * Force a refresh of the running sessions.
+   */
+  async refreshRunning(): Promise<void> {
+    if (this._pollModels) {
+      await this._pollModels.refresh().promise;
+    }
+  }
+
+  /**
    * Shut down a terminal session by name.
    */
   async shutdown(name: string): Promise<void> {
@@ -218,19 +227,6 @@ export class TerminalManager implements TerminalSession.IManager {
     if (error) {
       throw error;
     }
-  }
-
-  /**
-   * Force a refresh of the running sessions.
-   *
-   * @returns A promise that with the list of running sessions.
-   *
-   * #### Notes
-   * This is not typically meant to be called by the user, since the
-   * manager maintains its own internal state.
-   */
-  refreshRunning(): Promise<void> {
-    return this._refreshRunning();
   }
 
   /**
