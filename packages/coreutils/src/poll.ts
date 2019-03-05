@@ -46,11 +46,19 @@ export class Poll<T = any> implements IDisposable {
     // Schedule the first poll execution after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
+        // Bail if disposed while `when` promise was in flight.
+        if (this._isDisposed) {
+          return;
+        }
         this._connected = true;
         this._outstanding = null;
         next.resolve(this._schedule(interval));
       })
       .catch(() => {
+        // Bail if disposed while `when` promise was in flight.
+        if (this._isDisposed) {
+          return;
+        }
         this._connected = false;
         this._outstanding = null;
         next.resolve(this._schedule(interval));
@@ -151,6 +159,9 @@ export class Poll<T = any> implements IDisposable {
     if (this._outstanding) {
       const outstanding = this._outstanding;
       this._outstanding = null;
+
+      // Catch disposal rejection before rejecting the outstanding promise.
+      outstanding.promise.catch(_ => undefined);
       outstanding.reject(new Error(`Poll (${this.name}) is disposed.`));
     }
   }
@@ -241,7 +252,7 @@ export class Poll<T = any> implements IDisposable {
         console.warn(
           `Poll (${
             this.name
-          }) failed, increasing interval from ${old} to ${interval}.`,
+          }) failed, changing interval from ${old} to ${interval}.`,
           reason
         );
 
@@ -296,10 +307,18 @@ export class Poll<T = any> implements IDisposable {
     // Schedule the poll request.
     if (interval) {
       setTimeout(() => {
+        // Bail if disposed during the timeout.
+        if (this._isDisposed) {
+          return;
+        }
         this._execute(next, interval, schedule);
       }, interval);
     } else {
       requestAnimationFrame(() => {
+        // Bail if disposed in the last frame.
+        if (this._isDisposed) {
+          return;
+        }
         this._execute(next, interval, schedule);
       });
     }
