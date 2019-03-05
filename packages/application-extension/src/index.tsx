@@ -73,13 +73,12 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, IWindowResolver, ILabShell],
+  requires: [ICommandPalette, IRouter, IWindowResolver],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
-    resolver: IWindowResolver,
-    labShell: ILabShell
+    resolver: IWindowResolver
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -101,7 +100,7 @@ const main: JupyterFrontEndPlugin<void> = {
       void showErrorMessage('Error Registering Plugins', { message: body });
     }
 
-    addCommands(app, palette, labShell);
+    addCommands(app, palette);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -438,11 +437,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 /**
  * Add the main application commands.
  */
-function addCommands(
-  app: JupyterLab,
-  palette: ICommandPalette,
-  labShell: ILabShell
-): void {
+function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
 
@@ -455,7 +450,7 @@ function addCommands(
 
     if (!node) {
       // Fall back to active doc widget if path cannot be obtained from event.
-      return labShell.currentWidget;
+      return shell.currentWidget;
     }
 
     const matches = toArray(shell.widgets('main')).filter(
@@ -501,7 +496,7 @@ function addCommands(
 
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
-    const { mainArea } = labShell.saveLayout();
+    const { mainArea } = shell.saveLayout();
     if (mainArea.mode !== 'multiple-document') {
       return null;
     }
@@ -564,7 +559,7 @@ function addCommands(
     label: () => `Close Other Tabs`,
     isEnabled: () => {
       // Ensure there are at least two widgets.
-      const iterator = labShell.widgets('main');
+      const iterator = shell.widgets('main');
       return !!iterator.next() && !!iterator.next();
     },
     execute: () => {
@@ -573,7 +568,7 @@ function addCommands(
         return;
       }
       const { id } = widget;
-      const otherWidgets = toArray(labShell.widgets('main')).filter(
+      const otherWidgets = toArray(shell.widgets('main')).filter(
         widget => widget.id !== id
       );
       closeWidgets(otherWidgets);
