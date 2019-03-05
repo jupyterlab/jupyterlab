@@ -232,7 +232,9 @@ export class DSModelDBFactory implements IModelDB.IFactory {
    */
   createNew(path: string, schemas: ReadonlyArray<Schema>) {
     // Set up session to server:
-    const collaborationId = UUID.uuid4();
+    // TODO: Keep path, or use UUID?
+    let collaborationId = UUID.uuid4();
+    collaborationId = path.replace(/[^0-9a-zA-Z_\-]/, '');
 
     const manager = new DatastoreManager(collaborationId, schemas, true);
 

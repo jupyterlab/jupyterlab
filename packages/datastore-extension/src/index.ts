@@ -9,36 +9,7 @@ import {
 
 import { DSModelDBFactory } from '@jupyterlab/datastore';
 
-import { Collaborations } from './widget';
-
-import {
-  DatastoreManager,
-  DSModelDB,
-  currentCollaborations
-} from '@jupyterlab/datastore';
-
 const pluginId = '@jupyterlab/datastore-extension:plugin';
-
-async function openCollaboration(
-  sender: unknown,
-  info: currentCollaborations.CollaborationInfo
-) {
-  // Set up session to server:
-  const collaborationId = info.id;
-
-  const manager = new DatastoreManager(collaborationId, schemas, true);
-
-  const modelDB = new DSModelDB({
-    schemas,
-    manager,
-    recordId: collaborationId,
-    schemaId: schemas[0].id
-  });
-
-  await modelDB.connected;
-
-  // Now we create the document and open it.
-}
 
 /**
  * The default document manager provider.
@@ -52,13 +23,6 @@ const datastorePlugin: JupyterFrontEndPlugin<void> = {
     const registry = app.docRegistry;
     const factory = new DSModelDBFactory();
     registry.addModelDBFactory('phosphor-datastore', factory);
-
-    const collabs = new Collaborations();
-    collabs.openRequested.connect(openCollaboration);
-
-    labShell.restored.then(() => {
-      labShell.add(collabs, 'left');
-    });
   }
 };
 
