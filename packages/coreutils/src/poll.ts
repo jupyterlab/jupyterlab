@@ -115,7 +115,7 @@ export class Poll<T = any> implements IDisposable {
    * A handle to the next link in the poll promise chain.
    */
   get next(): Poll.Next {
-    return this._outstanding || this._schedule(this.interval);
+    return this._schedule(this.interval);
   }
 
   /**
