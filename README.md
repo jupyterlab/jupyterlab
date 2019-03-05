@@ -66,7 +66,6 @@ JupyterLab requires Python 3.5 or higher.
     ```bash
     python3 -m pip install jupyterlab
     ```
-    On SUSE Enterprise Linux and openSUSE, use `py -3` instead of `python3` in the above command.
 3.  Using the `python` command directly is another option, but this will use the _current_ version of Python (which may be Python version 2 or version 3 if both are installed):
     ```bash
     python -m pip install jupyterlab
