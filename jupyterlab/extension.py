@@ -197,7 +197,7 @@ def load_jupyter_server_extension(nbapp):
     collaborations_handler = (collaborations_url, CollaborationHandler, {})
 
     colab_manager_url = ujoin(base_url, datastore_rest_path)
-    colab_manager_handler = (datastore_url, CollaborationsManagerHandler, {})
+    colab_manager_handler = (colab_manager_url, CollaborationsManagerHandler, {})
 
     handlers = [build_handler, collaborations_handler, colab_manager_handler]
 

@@ -121,7 +121,7 @@ class CollaborationHandler(WSBaseHandler):
     @gen.coroutine
     def pre_get(self):
         # authenticate first
-        super(DatastoreHandler, self).pre_get()
+        super(CollaborationHandler, self).pre_get()
 
         self.store_id = self.get_query_argument('storeId', None)
         # TODO: Check if store id supplied, if so, check if already open
@@ -163,7 +163,7 @@ class CollaborationHandler(WSBaseHandler):
 
         self.store_id = self.collaboration.add_client(self)
 
-        super(DatastoreHandler, self).open()
+        super(CollaborationHandler, self).open()
         self.log.info('Opened datastore websocket')
 
     def cleanup_closed(self):
@@ -190,7 +190,7 @@ class CollaborationHandler(WSBaseHandler):
             self.collaboration.mark_dangling(
                 self.store_id, self.rtc_recovery_timeout, self.cleanup_closed)
 
-        super(DatastoreHandler, self).on_close()
+        super(CollaborationHandler, self).on_close()
         self.log.info('Closed datastore websocket')
 
     def send_error_reply(self, parent_msg_id, reason):
@@ -326,5 +326,5 @@ class CollaborationHandler(WSBaseHandler):
 
 # The path for lab build.
 # TODO: Is this a reasonable path?
-collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>\w+)"
+collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>[a-zA-Z0-9\-]+)"
 datastore_rest_path = r"/lab/api/datastore/?"
