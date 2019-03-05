@@ -15,7 +15,7 @@ class Collaboration:
 
     def __init__(self, collaboration_id, db_file, friendly_name=None):
         self.id = collaboration_id
-        self.db = DatastoreDB(collaboration_id, db_file)
+        self.db = DatastoreDB(f'collab-{collaboration_id}', db_file)
         self.friendly_name = friendly_name or collaboration_id
 
         self.last_serial = None
