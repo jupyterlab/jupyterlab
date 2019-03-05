@@ -522,7 +522,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.activateNextTab, {
     label: 'Activate Next Tab',
     execute: () => {
-      app.shell.activateNextTab();
+      shell.activateNextTab();
     }
   });
   palette.addItem({ command: CommandIDs.activateNextTab, category });
@@ -530,7 +530,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
     execute: () => {
-      app.shell.activatePreviousTab();
+      shell.activatePreviousTab();
     }
   });
   palette.addItem({ command: CommandIDs.activatePreviousTab, category });
@@ -550,7 +550,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.closeAll, {
     label: 'Close All Tabs',
     execute: () => {
-      app.shell.closeAll();
+      shell.closeAll();
     }
   });
   palette.addItem({ command: CommandIDs.closeAll, category });
@@ -603,43 +603,43 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   app.commands.addCommand(CommandIDs.toggleLeftArea, {
     label: args => 'Show Left Sidebar',
     execute: () => {
-      if (app.shell.leftCollapsed) {
-        app.shell.expandLeft();
+      if (shell.leftCollapsed) {
+        shell.expandLeft();
       } else {
-        app.shell.collapseLeft();
-        if (app.shell.currentWidget) {
-          app.shell.activateById(app.shell.currentWidget.id);
+        shell.collapseLeft();
+        if (shell.currentWidget) {
+          shell.activateById(shell.currentWidget.id);
         }
       }
     },
-    isToggled: () => !app.shell.leftCollapsed,
-    isVisible: () => !app.shell.isEmpty('left')
+    isToggled: () => !shell.leftCollapsed,
+    isVisible: () => !shell.isEmpty('left')
   });
   palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
-  app.commands.addCommand(CommandIDs.toggleLeftArea, {
+  app.commands.addCommand(CommandIDs.toggleRightArea, {
     label: args => 'Show Right Sidebar',
     execute: () => {
-      if (app.shell.rightCollapsed) {
-        app.shell.expandRight();
+      if (shell.rightCollapsed) {
+        shell.expandRight();
       } else {
-        app.shell.collapseRight();
-        if (app.shell.currentWidget) {
-          app.shell.activateById(app.shell.currentWidget.id);
+        shell.collapseRight();
+        if (shell.currentWidget) {
+          shell.activateById(shell.currentWidget.id);
         }
       }
     },
-    isToggled: () => !app.shell.rightCollapsed,
-    isVisible: () => !app.shell.isEmpty('right')
+    isToggled: () => !shell.rightCollapsed,
+    isVisible: () => !shell.isEmpty('right')
   });
-  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
+  palette.addItem({ command: CommandIDs.toggleRightArea, category });
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
     label: args => 'Presentation Mode',
     execute: () => {
-      app.shell.presentationMode = !app.shell.presentationMode;
+      shell.presentationMode = !shell.presentationMode;
     },
-    isToggled: () => app.shell.presentationMode,
+    isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
   palette.addItem({ command: CommandIDs.togglePresentationMode, category });
@@ -652,7 +652,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     execute: args => {
       const mode = args['mode'] as string;
       if (mode === 'single-document' || mode === 'multiple-document') {
-        app.shell.mode = mode;
+        shell.mode = mode;
         return;
       }
       throw new Error(`Unsupported application shell mode: ${mode}`);
@@ -661,10 +661,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   app.commands.addCommand(CommandIDs.toggleMode, {
     label: 'Single-Document Mode',
-    isToggled: () => app.shell.mode === 'single-document',
+    isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =
-        app.shell.mode === 'multiple-document'
+        shell.mode === 'multiple-document'
           ? { mode: 'single-document' }
           : { mode: 'multiple-document' };
       return app.commands.execute(CommandIDs.setMode, args);
