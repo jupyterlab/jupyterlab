@@ -29,8 +29,6 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
-
 import { each, iter, toArray } from '@phosphor/algorithm';
 
 import { Widget, DockLayout } from '@phosphor/widgets';
@@ -77,20 +75,13 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [
-    ICommandPalette,
-    IRouter,
-    IWindowResolver,
-    ILabShell,
-    IDocumentManager
-  ],
+  requires: [ICommandPalette, IRouter, IWindowResolver, ILabShell],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver,
-    labShell: ILabShell,
-    docManager: IDocumentManager
+    labShell: ILabShell
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -112,7 +103,7 @@ const main: JupyterFrontEndPlugin<void> = {
       void showErrorMessage('Error Registering Plugins', { message: body });
     }
 
-    addCommands(app, palette, labShell, docManager);
+    addCommands(app, palette, labShell);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -452,8 +443,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 function addCommands(
   app: JupyterLab,
   palette: ICommandPalette,
-  labShell: ILabShell,
-  docManager: IDocumentManager
+  labShell: ILabShell
 ): void {
   const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
@@ -469,8 +459,16 @@ function addCommands(
       // Fall back to active doc widget if path cannot be obtained from event.
       return labShell.currentWidget;
     }
-    const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1]);
+
+    const matches = toArray(shell.widgets('main')).filter(
+      widget => widget.node === node
+    );
+
+    if (matches.length < 1) {
+      return shell.currentWidget;
+    }
+
+    return matches[0];
   };
 
   // Closes an array of widgets.
@@ -545,28 +543,7 @@ function addCommands(
   palette.addItem({ command: CommandIDs.activatePreviousTab, category });
 
   commands.addCommand(CommandIDs.close, {
-    label: () => {
-      // Returns the file type for a widget.
-      function fileType(widget: Widget, docManager: IDocumentManager): string {
-        if (!widget) {
-          return 'File';
-        }
-        const context = docManager.contextForWidget(widget);
-        if (!context) {
-          return '';
-        }
-        const fts = docManager.registry.getFileTypesForPath(context.path);
-        return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
-      }
-
-      const widget = shell.currentWidget;
-      let name = 'File';
-      if (widget) {
-        const typeName = fileType(widget, docManager);
-        name = typeName || widget.title.label;
-      }
-      return `Close ${name}`;
-    },
+    label: () => 'Close Tab',
     isEnabled: () =>
       !!shell.currentWidget && !!shell.currentWidget.title.closable,
     execute: () => {
