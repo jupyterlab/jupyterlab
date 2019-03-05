@@ -46,8 +46,6 @@ namespace CommandIDs {
 
   export const close = 'application:close';
 
-  export const closeAllFiles = 'docmanager:close-all-files';
-
   export const closeOtherTabs = 'application:close-other-tabs';
 
   export const closeRightTabs = 'application:close-right-tabs';
@@ -561,14 +559,6 @@ function addCommands(
     }
   });
   palette.addItem({ command: CommandIDs.closeAll, category });
-
-  commands.addCommand(CommandIDs.closeAllFiles, {
-    label: 'Close All',
-    execute: () => {
-      labShell.closeAll();
-    }
-  });
-  palette.addItem({ command: CommandIDs.closeAllFiles, category });
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
     label: () => `Close Other Tabs`,
