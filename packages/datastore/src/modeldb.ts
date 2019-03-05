@@ -193,8 +193,8 @@ export class DSModelDB implements IModelDB {
    * @param path: the path for the value.
    */
   getValue(path: string): ReadonlyJSONValue | undefined {
-    const ds = this.manager.datastore!;
-    if (ds === undefined) {
+    const ds = this.manager.datastore;
+    if (!ds) {
       throw new Error('Cannot use model db before connection completed!');
     }
     const schema = this._schemas[this._schemaId];
@@ -211,21 +211,18 @@ export class DSModelDB implements IModelDB {
    * @param value: the new value.
    */
   setValue(path: string, value: ReadonlyJSONValue): void {
-    const ds = this.manager.datastore!;
-    if (ds === undefined) {
+    const ds = this.manager.datastore;
+    if (!ds) {
       throw new Error('Cannot use model db before connection completed!');
     }
     const table = ds.get(this._schemas[this._schemaId]);
-    ds.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this._recordId]: {
           [path]: value
         }
       } as any);
-    } finally {
-      ds.endTransaction();
-    }
+    });
   }
 
   /**
@@ -255,6 +252,22 @@ export class DSModelDB implements IModelDB {
       baseDB: this,
       recordId: recordId
     });
+  }
+
+  withTransaction(fn: (transactionId?: string) => void): void {
+    const ds = this.manager.datastore;
+    if (!ds) {
+      throw new Error('Cannot use model db before connection completed!');
+    }
+    if (ds.inTransaction) {
+      return fn();
+    }
+    const transactionId = ds.beginTransaction();
+    try {
+      fn(transactionId);
+    } finally {
+      ds.endTransaction();
+    }
   }
 
   /**

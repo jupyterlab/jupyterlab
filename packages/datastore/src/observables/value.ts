@@ -49,16 +49,13 @@ export class ObservableValue
       return;
     }
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: value
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   protected onChange(change: RegisterField.Change<ReadonlyJSONValue>) {

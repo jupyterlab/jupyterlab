@@ -265,6 +265,13 @@ export interface IModelDB extends IDisposable {
   view(basePath: string): IModelDB;
 
   /**
+   * Run a funcion where all changes become part of a transaction.
+   * @param fn: the function to run. It recevies the transaction id
+   *            as an argument.
+   */
+  withTransaction(fn: (transactionId?: string) => void): void;
+
+  /**
    * Dispose of the resources held by the database.
    */
   dispose(): void;
@@ -554,6 +561,15 @@ export class ModelDB implements IModelDB {
    */
   set(path: string, value: IObservable): void {
     this._db.set(this._resolvePath(path), value);
+  }
+
+  /**
+   * Run a funcion where all changes become part of a transaction.
+   * @param fn: the function to run. It recevies the transaction id
+   *            as an argument.
+   */
+  withTransaction(fn: (transactionId?: string) => void): void {
+    fn();
   }
 
   /**

@@ -85,8 +85,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
     }
 
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -94,9 +93,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
     return oldVal;
   }
 
@@ -152,8 +149,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
     let oldVal = this._map[key] as T | undefined;
 
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -161,9 +157,7 @@ export class ObservableMap<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
     return oldVal;
   }
 
@@ -183,16 +177,13 @@ export class ObservableMap<T extends ReadonlyJSONValue>
     }
 
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: update
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   protected onChange(change: MapField.Change<T>): void {

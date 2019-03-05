@@ -123,8 +123,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
     }
 
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -134,9 +133,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -155,8 +152,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
   push(value: T): number {
     let current = this._array;
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -166,9 +162,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
     return current.length + 1;
   }
 
@@ -194,8 +188,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
   insert(index: number, value: T): void {
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -205,9 +198,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -255,8 +246,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
       return;
     }
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -266,9 +256,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -283,8 +271,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
   clear(): void {
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -294,9 +281,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -337,8 +322,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
     }
 
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: [
@@ -355,9 +339,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           ]
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -376,9 +358,8 @@ export class ObservableList<T extends ReadonlyJSONValue>
   pushAll(values: IterableOrArrayLike<T>): number {
     let length = this.length;
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
     const newValues = toArray(values);
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -388,9 +369,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
     return length + newValues.length;
   }
 
@@ -416,8 +395,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
   insertAll(index: number, values: IterableOrArrayLike<T>): void {
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -427,9 +405,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -453,8 +429,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
   removeRange(startIndex: number, endIndex: number): number {
     const length = this.length;
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -464,9 +439,7 @@ export class ObservableList<T extends ReadonlyJSONValue>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
     return length - (endIndex - startIndex);
   }
 

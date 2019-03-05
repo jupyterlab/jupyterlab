@@ -47,11 +47,11 @@ export abstract class DocumentModel implements IDisposable {
     this._defaultLang = languagePreference || '';
 
     let mimeTypeObs = this.modelDB.createValue('mimeType');
-    mimeTypeObs.set(mimeTypeObs.get() || mimeType || 'text/plain');
     mimeTypeObs.changed.connect(
       this._onMimeTypeChanged,
       this
     );
+    this._defaultMimeType = mimeType;
   }
 
   /**
@@ -169,7 +169,8 @@ export abstract class DocumentModel implements IDisposable {
    * Initialize the model with its current state.
    */
   initialize(): void {
-    return;
+    const mimeType = this.modelDB.get('mimeType') as IObservableValue;
+    mimeType.set(mimeType.get() || this._defaultMimeType || 'text/plain');
   }
 
   /**
@@ -226,6 +227,7 @@ export abstract class DocumentModel implements IDisposable {
   private _dirty = false;
   private _isDisposed = false;
   private _readOnly = false;
+  private _defaultMimeType: string;
   private _contentChanged = new Signal<this, void>(this);
   private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -242,8 +244,7 @@ export class TextModel extends DocumentModel
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super('text/plain', languagePreference, modelDB);
     let value = this.modelDB.createString('value');
-    value.text = value.text || '';
-    this.value.changed.connect(
+    value.changed.connect(
       this.triggerContentChange,
       this
     );
@@ -280,6 +281,12 @@ export class TextModel extends DocumentModel
   fromJSON(value: JSONValue): void {
     this.fromString(JSON.stringify(value));
   }
+
+  initialize(): void {
+    super.initialize();
+    const value = this.value;
+    value.text = value.text || '';
+  }
 }
 
 /**
@@ -292,8 +299,7 @@ export class Base64Model extends DocumentModel {
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super('text/plain', languagePreference, modelDB);
     let value = this.modelDB.createValue('value');
-    value.set('');
-    this.value.changed.connect(
+    value.changed.connect(
       this.triggerContentChange,
       this
     );
@@ -320,6 +326,12 @@ export class Base64Model extends DocumentModel {
 
   fromJSON(value: JSONValue): void {
     this.fromString(JSON.stringify(value));
+  }
+
+  initialize(): void {
+    super.initialize();
+    const value = this.value;
+    value.set(value.get() || '');
   }
 }
 

@@ -49,8 +49,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
       return;
     }
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -60,9 +59,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -75,8 +72,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
   insert(index: number, text: string): void {
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -86,9 +82,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -101,8 +95,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
   remove(start: number, end: number): void {
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -112,9 +105,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   /**
@@ -124,8 +115,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
     this.ensureBackend();
     const table = this.ds!.get(this.schema);
     const current = this.text;
-    this.ds!.beginTransaction();
-    try {
+    this.withTransaction(() => {
       table.update({
         [this.recordID]: {
           [this.fieldId]: {
@@ -135,9 +125,7 @@ export class ObservableString extends ObservableBase<TextField.Change>
           }
         }
       } as any);
-    } finally {
-      this.ds!.endTransaction();
-    }
+    });
   }
 
   protected onChange(change: TextField.Change) {

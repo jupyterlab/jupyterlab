@@ -31,6 +31,13 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
       this._onDsChange,
       this
     );
+    const ds = this.ds;
+    if (ds) {
+      ds.changed.connect(
+        this._onChange,
+        this
+      );
+    }
   }
 
   /**
@@ -63,6 +70,8 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
     }
   }
 
+  protected abstract onChange(change: T): void;
+
   private _onDsChange(
     manager: DatastoreManager,
     args: DatastoreManager.IChangedArgs
@@ -87,7 +96,18 @@ export abstract class ObservableBase<T extends ReadonlyJSONValue> {
     }
   }
 
-  protected abstract onChange(change: T): void;
+  protected withTransaction(fn: () => void): void {
+    this.ensureBackend();
+    if (this.ds!.inTransaction) {
+      return fn();
+    }
+    this.ds!.beginTransaction();
+    try {
+      fn();
+    } finally {
+      this.ds!.endTransaction();
+    }
+  }
 
   protected manager: DatastoreManager;
   protected schema: Schema;

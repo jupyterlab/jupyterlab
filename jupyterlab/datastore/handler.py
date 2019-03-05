@@ -207,7 +207,10 @@ class CollaborationHandler(WSBaseHandler):
         msg_id = msg.pop('msgId', None)
         reply = None
 
-        self.log.info('Received datastore message %s: \n%r' % (msg_type, msg))
+        self.log.info('Received datastore message %s: \n%s' % (
+            msg_type,
+            json.dumps(msg, indent=2)
+        ))
 
         if msg_type == 'transaction-broadcast':
             if not self.check_permissions('w'):
@@ -319,9 +322,6 @@ class CollaborationHandler(WSBaseHandler):
             serial = content.pop('serial', None)
             if serial is not None:
                 self.collaboration.update_serial(self.store_id, serial)
-
-        if reply:
-            self.log.info('Sent reply: \n%r' % (reply, ))
 
 
 # The path for lab build.
