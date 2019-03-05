@@ -179,7 +179,7 @@ export class Poll<T = any> implements IDisposable {
   private _execute(
     delegate: PromiseDelegate<Poll.Next>,
     interval: number,
-    schedule: Poll.Schedule
+    origin: Poll.Origin
   ): void {
     if (this._isDisposed) {
       return;
@@ -193,7 +193,7 @@ export class Poll<T = any> implements IDisposable {
     }
 
     const { max, min, variance } = this;
-    const promise = this._factory({ interval, schedule });
+    const promise = this._factory({ interval, origin });
 
     promise
       .then((payload: T) => {
@@ -278,15 +278,15 @@ export class Poll<T = any> implements IDisposable {
    */
   private _schedule(
     interval: number,
-    schedule: Poll.Schedule = 'automatic'
+    origin: Poll.Origin = 'automatic'
   ): Poll.Next {
     const outstanding = this._outstanding;
 
     // If poll is being overridden, generate a new poll.
-    if (schedule === 'override' && outstanding) {
+    if (origin === 'override' && outstanding) {
       // Reset the previously outstanding poll and generate the next poll.
       this._outstanding = null;
-      const next = this._schedule(0, 'override');
+      const next = this._schedule(0, origin);
 
       // Short-circuit the previous poll promise and return a reference to the
       // next poll promise (which supersedes it) scheduled to run immediately.
@@ -311,7 +311,7 @@ export class Poll<T = any> implements IDisposable {
         if (this._isDisposed) {
           return;
         }
-        this._execute(next, interval, schedule);
+        this._execute(next, interval, origin);
       }, interval);
     } else {
       requestAnimationFrame(() => {
@@ -319,7 +319,7 @@ export class Poll<T = any> implements IDisposable {
         if (this._isDisposed) {
           return;
         }
-        this._execute(next, interval, schedule);
+        this._execute(next, interval, origin);
       });
     }
 
@@ -347,9 +347,9 @@ export namespace Poll {
   export type Next = { promise: Promise<Next> };
 
   /**
-   * Whether polling was scheduled automatically, overridden, or from standby.
+   * The origin of a scheduled poll request.
    */
-  export type Schedule = 'automatic' | 'override' | 'standby';
+  export type Origin = 'automatic' | 'override' | 'standby';
   /**
    * Definition of poll state that gets passed into the poll promise factory.
    */
@@ -360,9 +360,9 @@ export namespace Poll {
     readonly interval: number;
 
     /**
-     * Whether polling was scheduled automatically, overridden, or from standby.
+     * The origin of a scheduled poll request.
      */
-    readonly schedule: Schedule;
+    readonly origin: Origin;
   };
 
   /**
