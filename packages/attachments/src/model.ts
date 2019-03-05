@@ -132,7 +132,7 @@ export namespace IAttachmentsModel {
  */
 export class AttachmentsModel implements IAttachmentsModel {
   /**
-   * Construct a new observable outputs instance.
+   * Construct a new observable attachments instance.
    */
   constructor(options: IAttachmentsModel.IOptions = {}) {
     this.contentFactory =
@@ -303,7 +303,7 @@ export class AttachmentsModel implements IAttachmentsModel {
   }
 
   /**
-   * If the serialized version of the outputs have changed due to a remote
+   * If the serialized version of the attachments have changed due to a remote
    * action, then update the model accordingly.
    */
   private _onSerializedChanged(
