@@ -44,6 +44,14 @@ export class Poll<T = any, U = any> implements IDisposable {
     const next = new PromiseDelegate<Poll.Next>();
     this._next = next;
 
+    // Set the initial poll state.
+    this._state = {
+      interval: this.interval,
+      payload: null,
+      phase: 'standby',
+      tick: new Date().getTime()
+    };
+
     // Schedule the first poll execution after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
@@ -53,18 +61,30 @@ export class Poll<T = any, U = any> implements IDisposable {
         }
         this._next = null;
         next.resolve(
-          this._schedule(interval, null, 'when-resolved', new Date().getTime())
+          this._schedule({
+            interval: this.interval,
+            payload: null,
+            phase: 'when-resolved',
+            tick: new Date().getTime()
+          })
         );
       })
-      .catch(() => {
+      .catch(reason => {
         // Bail if disposed while `when` promise was in flight.
         if (this._isDisposed) {
           return;
         }
         this._next = null;
         next.resolve(
-          this._schedule(interval, null, 'when-rejected', new Date().getTime())
+          this._schedule({
+            interval: this.interval,
+            payload: null,
+            phase: 'when-rejected',
+            tick: new Date().getTime()
+          })
         );
+        // Warn that `when` promise was rejected but starting anyway.
+        console.warn(`Poll (${this.name}) starting despite rejection.`, reason);
       });
   }
 
@@ -115,9 +135,16 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
+   * A handle to the next link in the poll promise chain.
+   */
+  get state(): Poll.State<T, U> {
+    return this._state;
+  }
+
+  /**
    * A signal emitted when the poll ticks and fires off a new request.
    */
-  get ticked(): ISignal<this, Poll.State<T, U>> {
+  get ticked(): ISignal<this, void> {
     return this._ticked;
   }
 
@@ -145,38 +172,41 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Refresh the poll.
    */
   refresh(): Poll.Next {
-    return this._schedule(0, null, 'override', new Date().getTime());
+    return this._schedule({
+      interval: 0,
+      payload: null,
+      phase: 'override',
+      tick: new Date().getTime()
+    });
   }
 
   /**
    * Execute a poll request.
    */
-  private _execute(
-    delegate: PromiseDelegate<Poll.Next>,
-    interval: number,
-    payload: T | U | null,
-    phase: Poll.Phase,
-    tick: number
-  ): void {
+  private _execute(delegate: PromiseDelegate<Poll.Next>): void {
     if (this._isDisposed) {
       return;
     }
+
+    const { max, min, variance } = this;
 
     // Reschedule without executing poll promise if application is hidden.
     if (typeof document !== 'undefined' && document.hidden) {
       this._next = null;
       delegate.resolve(
-        this._schedule(interval, null, 'standby', new Date().getTime())
+        this._schedule({
+          interval: Private.jitter(this.interval, variance, min, max),
+          payload: null,
+          phase: 'standby',
+          tick: new Date().getTime()
+        })
       );
       return;
     }
 
-    const { max, min, variance } = this;
-    const state = { interval, payload, phase, tick };
-
     // Generate a new poll promise and handle its resolution.
-    this._factory(state)
-      .then((payload: T) => {
+    this._factory(this._state)
+      .then((resolved: T) => {
         // Bail if disposed while poll promise was in flight.
         if (this._isDisposed) {
           return;
@@ -187,21 +217,18 @@ export class Poll<T = any, U = any> implements IDisposable {
           return;
         }
 
-        // The poll succeeded. Reset the interval.
-        interval = Private.jitter(this.interval, variance, min, max);
-
         // Schedule the next poll.
         this._next = null;
         delegate.resolve(
-          this._schedule(
-            interval,
-            payload,
-            phase === 'rejected' ? 'reconnect' : 'resolved',
-            new Date().getTime()
-          )
+          this._schedule({
+            interval: Private.jitter(this.interval, variance, min, max),
+            payload: resolved,
+            phase: this._state.phase === 'rejected' ? 'reconnect' : 'resolved',
+            tick: new Date().getTime()
+          })
         );
       })
-      .catch((payload: U) => {
+      .catch((rejected: U) => {
         // Bail if disposed while poll promise was in flight.
         if (this._isDisposed) {
           return;
@@ -212,27 +239,26 @@ export class Poll<T = any, U = any> implements IDisposable {
           return;
         }
 
-        // The poll failed. Increase the interval.
-        const old = interval;
-        const increased = Math.min(interval * 2, max);
-        interval = Private.jitter(increased, variance, min, max);
-
-        console.warn(
-          `Poll (${
-            this.name
-          }) failed, changing interval from ${old} to ${interval}.`,
-          payload
-        );
-
         // Schedule the next poll.
+        const old = this._state;
+        const increased = Math.min(old.interval * 2, max);
+        const updated: Poll.State<T, U> = {
+          interval: Private.jitter(increased, variance, min, max),
+          payload: rejected,
+          phase: 'rejected',
+          tick: new Date().getTime()
+        };
         this._next = null;
-        delegate.resolve(
-          this._schedule(interval, payload, 'rejected', new Date().getTime())
+        delegate.resolve(this._schedule(updated));
+
+        // Warn that the poll request was rejected.
+        console.warn(
+          `Poll (${this.name}) failed, changing interval from ${
+            old.interval
+          } to ${updated.interval}.`,
+          rejected
         );
       });
-
-    // Emit ticked signal with poll state.
-    this._ticked.emit(state);
   }
 
   /**
@@ -243,23 +269,17 @@ export class Poll<T = any, U = any> implements IDisposable {
    * The next poll promise returned is guaranteed to always resolve with a
    * handle on the correct next link in the poll promise chain except when the
    * poll is disposed.
+   *
+   * This method is responsible for maintaining internal poll state.
    */
-  private _schedule(
-    interval: number,
-    payload: T | U | null,
-    phase: Poll.Phase,
-    tick: number
-  ): Poll.Next {
+  private _schedule(state: Poll.State<T, U>): Poll.Next {
     const outstanding = this._next;
 
-    // Normalize the payload.
-    payload = payload === undefined ? null : payload;
-
     // If poll is being overridden, generate a new poll.
-    if (phase === 'override' && outstanding) {
-      // Reset the previously outstanding poll and generate the next poll.
+    if (state.phase === 'override' && outstanding) {
+      // Reset the previously outstanding poll and schedule the next poll.
       this._next = null;
-      const next = this._schedule(0, payload, phase, tick);
+      const next = this._schedule(state);
 
       // Short-circuit the previous poll promise and return a reference to the
       // next poll promise (which supersedes it) scheduled to run immediately.
@@ -273,6 +293,12 @@ export class Poll<T = any, U = any> implements IDisposable {
       return outstanding;
     }
 
+    // Update the state.
+    this._state = state;
+
+    // Emit ticked signal.
+    this._ticked.emit();
+
     // Create the next poll promise and set the outstanding reference.
     const next = new PromiseDelegate<Poll.Next>();
     this._next = next;
@@ -281,21 +307,17 @@ export class Poll<T = any, U = any> implements IDisposable {
     clearTimeout(this._timeout);
 
     // Schedule the poll request.
-    if (interval) {
+    if (state.interval) {
       this._timeout = setTimeout(() => {
-        // Bail if disposed during the timeout.
-        if (this._isDisposed) {
-          return;
+        if (!this._isDisposed) {
+          this._execute(next);
         }
-        this._execute(next, interval, payload, phase, tick);
-      }, interval);
+      }, state.interval);
     } else {
       this._timeout = requestAnimationFrame(() => {
-        // Bail if disposed in the last frame.
-        if (this._isDisposed) {
-          return;
+        if (!this._isDisposed) {
+          this._execute(next);
         }
-        this._execute(next, interval, payload, phase, tick);
       });
     }
 
@@ -306,7 +328,8 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _factory: Poll.Factory<T, U>;
   private _isDisposed = false;
   private _next: PromiseDelegate<Poll.Next> | null = null;
-  private _ticked = new Signal<this, Poll.State<T, U>>(this);
+  private _state: Poll.State<T, U>;
+  private _ticked = new Signal<this, void>(this);
   private _timeout = 0;
 }
 
@@ -366,9 +389,9 @@ export namespace Poll {
     readonly phase: Phase;
 
     /**
-     * The timestamp of the last tick of the poll.
+     * The timestamp of the current poll tick.
      */
-    tick: number;
+    readonly tick: number;
   };
 
   /**
