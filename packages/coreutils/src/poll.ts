@@ -169,14 +169,14 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * Refresh the poll.
    */
-  refresh(): this {
+  refresh(): Promise<this> {
     this._schedule({
       interval: 0,
       payload: null,
       phase: 'override',
       tick: new Date().getTime()
     });
-    return this;
+    return this.next;
   }
 
   /**
