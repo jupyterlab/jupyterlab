@@ -354,11 +354,11 @@ export namespace Poll {
     | 'when-resolved';
 
   /**
-   * Definition of poll state that gets passed into the poll promise factory.
+   * Definition of poll state at any given tick.
    */
   export type State<T, U> = {
     /**
-     * The number of milliseconds that elapsed since the last poll.
+     * The number of milliseconds until the next poll request.
      */
     readonly interval: number;
 
@@ -366,14 +366,13 @@ export namespace Poll {
      * The payload of the last poll resolution or rejection.
      *
      * #### Notes
-     * Payload is `null` unless the phase is `resolved` or `rejected`.
-     * It is of type `T` for resolutions and `U` for rejections.
+     * `payload` is `null` unless the `phase` is `'resolved'` or `'rejected'`.
+     * `payload` is of type `T` for resolutions and `U` for rejections.
      */
     readonly payload: T | U | null;
 
     /**
-     * The phase of tbe poll when the current request was scheduled, i.e. the end
-     * state of the immediately preceding link of the promise chain.
+     * The current poll phase.
      */
     readonly phase: Phase;
 
@@ -393,13 +392,13 @@ export namespace Poll {
    */
   export interface IOptions<T, U> {
     /**
-     * The millisecond interval between poll requests.
+     * The millisecond interval between poll requests. Defaults to `1000`.
      *
      * #### Notes
      * If set to `0`, the poll will schedule an animation frame after each
      * promise resolution.
      */
-    interval: number;
+    interval?: number;
 
     /**
      * The maximum interval to wait between polls. Defaults to `10 * interval`.
