@@ -668,7 +668,7 @@ export namespace CellTools {
   }
 
   /**
-   * Create an nbcovert selector.
+   * Create an nbconvert selector.
    */
   export function createNBConvertSelector(optionsMap: {
     [key: string]: JSONValue;
