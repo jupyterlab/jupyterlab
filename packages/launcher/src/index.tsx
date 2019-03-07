@@ -49,7 +49,7 @@ const LAUNCHER_CLASS = 'jp-Launcher';
 /**
  * The known categories of launcher items and their default ordering.
  */
-const KNOWN_CATEGORIES = ['Environment', 'Other'];
+const KNOWN_CATEGORIES = ['Kernels', 'Other'];
 
 /**
  * These launcher item categories are known to have kernels, so the kernel icons
@@ -345,14 +345,14 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       ).toLocaleLowerCase();
       if (
         this._searchInput === null ||
-        this._searchInput.length == 0 ||
+        this._searchInput.length === 0 ||
         (displayName &&
           displayName.indexOf(this._searchInput.toLocaleLowerCase()) >= 0)
       ) {
-        if (cat == 'Other') {
+        if (cat === 'Other') {
           categories['Other'].push(item);
         } else {
-          categories['Environment'].push(item);
+          categories['Kernels'].push(item);
         }
       }
     });
@@ -412,7 +412,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       section = (
         <div className="jp-Launcher-section" key="most-used">
           <div className="jp-Launcher-sectionHeader">
-            <h2 className="jp-Launcher-sectionTitle">Most used</h2>
+            <h2 className="jp-Launcher-sectionTitle">Most Used</h2>
           </div>
           <div className="jp-Launcher-cardContainer">
             {toArray(
@@ -478,7 +478,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     }); */
 
     orderedCategories.forEach(cat => {
-      let kernel = cat == 'Environment';
+      let kernel = cat === 'Kernels';
       if (
         cat in tableCategories &&
         categories[cat] &&
@@ -513,25 +513,27 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Wrap the sections in body and content divs.
     return (
       <React.Fragment>
-        <div className="jp-Launcher-toolbar">
-          <div className="jp-Launcher-search-div">
-            <input
-              className="jp-Launcher-search-input"
-              spellCheck={false}
-              placeholder="SEARCH"
-              onChange={event => {
-                this._searchInput = event.target.value;
-                this.update();
-              }}
-            />
-          </div>
-        </div>
         <div className="jp-Launcher-body">
           <div className="jp-Launcher-content">
-            <div className="jp-Launcher-cwd">
-              <h3>{this.cwd}</h3>
+            <div className="jp-Launcher-toolbar">
+              <div className="jp-Launcher-search-div">
+                <input
+                  className="jp-Launcher-search-input"
+                  spellCheck={false}
+                  placeholder="SEARCH"
+                  onChange={event => {
+                    this._searchInput = event.target.value;
+                    this.update();
+                  }}
+                />
+              </div>
             </div>
-            {sections}
+            <div className="jp-Launcher-content-main">
+              <div className="jp-Launcher-cwd">
+                <h3>{'Current Path: ' + this.cwd}</h3>
+              </div>
+              {sections}
+            </div>
           </div>
         </div>
       </React.Fragment>
