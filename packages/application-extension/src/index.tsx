@@ -441,20 +441,18 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
 
-  // Returns the doc widget associated with the most recent contextmenu event.
+  // Returns the widget associated with the most recent contextmenu event.
   const contextMenuWidget = (): Widget => {
-    const pathRe = /[Pp]ath:\s?(.*)\n?/;
-    const test = (node: HTMLElement) =>
-      node['title'] && !!node['title'].match(pathRe);
+    const test = (node: HTMLElement) => !!node.dataset.id;
     const node = app.contextMenuHitTest(test);
 
     if (!node) {
-      // Fall back to active doc widget if path cannot be obtained from event.
+      // Fall back to active widget if path cannot be obtained from event.
       return shell.currentWidget;
     }
 
     const matches = toArray(shell.widgets('main')).filter(
-      widget => widget.node === node
+      widget => widget.id === node.dataset.id
     );
 
     if (matches.length < 1) {

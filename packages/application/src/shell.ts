@@ -734,6 +734,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (options.ref) {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
+
+    widget.title.dataset = { ...widget.title.dataset, id: widget.id };
+
     dock.addWidget(widget, { mode, ref });
 
     // The dock panel doesn't account for placement information while
