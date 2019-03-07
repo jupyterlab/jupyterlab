@@ -541,7 +541,7 @@ describe('Kernel.IKernel', () => {
       };
       const msg = KernelMessage.createShellMessage(options);
       kernel.sendShellMessage(msg, true);
-      await done;
+      await done.promise;
     });
 
     it('should send a binary message', async () => {
@@ -575,7 +575,7 @@ describe('Kernel.IKernel', () => {
         data.buffer
       ]);
       kernel.sendShellMessage(msg, true);
-      await done;
+      await done.promise;
     });
 
     it('should fail if the kernel is dead', async () => {
@@ -922,7 +922,7 @@ describe('Kernel.IKernel', () => {
         done.resolve(null);
       });
       kernel.sendInputReply({ value: 'test' });
-      await done;
+      await done.promise;
       await tester.shutdown();
       tester.dispose();
     });
