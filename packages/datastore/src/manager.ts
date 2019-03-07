@@ -233,6 +233,8 @@ export class DSModelDBFactory implements IModelDB.IFactory {
   createNew(path: string, schemas: ReadonlyArray<Schema>) {
     // Set up session to server:
     // TODO: Keep path, or use UUID?
+    // Note: We probably want to use a UUID, as paths are mutable (rename)
+    //       Then, we need a way to map and sync paths to UUIDs.
     let collaborationId = UUID.uuid4();
     collaborationId = path.replace(/[^0-9a-zA-Z_\-]/, '');
 
