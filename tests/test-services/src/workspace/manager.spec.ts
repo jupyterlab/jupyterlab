@@ -50,7 +50,7 @@ describe('workspace', () => {
     });
 
     describe('#list()', async () => {
-      it('should fetch a workspace list supporting arbitrary IDs', async () => {
+      it.skip('should fetch a workspace list supporting arbitrary IDs', async () => {
         const ids = ['foo', 'bar', 'baz', 'f/o/o', 'b/a/r', 'b/a/z'];
         const promises = ids.map(id =>
           manager.save(id, { data: {}, metadata: { id } })

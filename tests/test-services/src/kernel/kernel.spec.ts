@@ -50,8 +50,8 @@ describe('kernel', () => {
     expect(running.length).to.equal(0);
   });
 
-  describe('Kernel.listRunning()', () => {
-    it('should yield a list of valid kernel ids', async () => {
+  describe.only('Kernel.listRunning()', () => {
+    it.only('should yield a list of valid kernel ids', async () => {
       const kernel = await Kernel.startNew();
       const response = await Kernel.listRunning();
       expect(toArray(response).length).to.be.greaterThan(0);
@@ -149,10 +149,10 @@ describe('kernel', () => {
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
-      expect(kernel.connectionStatus).to.equal('connected');
+      await kernel.ready;
 
-      const emission = testEmission(kernel.connectionStatusChanged, {
-        find: (k, status) => status === 'connecting'
+      const emission = testEmission(kernel.statusChanged, {
+        find: (k, status) => status === 'reconnecting'
       });
       // Closing will close the websocket.
       tester.close();
@@ -166,10 +166,8 @@ describe('kernel', () => {
     let defaultKernel: Kernel.IKernel;
     beforeEach(async () => {
       defaultKernel = await Kernel.startNew();
-      // Wait until the kernel says it is connected
-      await testEmission(defaultKernel.connectionStatusChanged, {
-        find: (k, status) => status === 'connected'
-      });
+      // TODO: do we need to await .ready?
+      await defaultKernel.ready;
     });
 
     afterEach(async () => {
@@ -179,7 +177,7 @@ describe('kernel', () => {
       defaultKernel.dispose();
     });
 
-    it('should connect to an existing kernel', async () => {
+    it('should connect to an existing kernel', () => {
       const id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.equal(id);

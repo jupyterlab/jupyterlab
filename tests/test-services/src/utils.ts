@@ -484,7 +484,7 @@ export class KernelTester extends SocketTester {
     this._kernel = await Kernel.startNew({ serverSettings });
     // console.log('Starting new KernelTester');
     await this.ready;
-
+    await this._kernel.ready;
     return this._kernel;
   }
 
@@ -523,7 +523,6 @@ export class KernelTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    // debugger;
     // console.log('onSocket called');
     // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
     // this.sendStatus(this._initialStatus);
@@ -554,11 +553,9 @@ export class KernelTester extends SocketTester {
     });
     sock.on('close', (code, reason) => {
       // console.log('websocket closed', code, reason);
-      debugger;
     });
     sock.on('error', e => {
       // console.log('error in websocket', e);
-      debugger;
     });
   }
 
@@ -604,6 +601,7 @@ export class SessionTester extends SocketTester {
       serverSettings
     });
     await this.ready;
+    await this._session.kernel.ready;
     return this._session;
   }
 

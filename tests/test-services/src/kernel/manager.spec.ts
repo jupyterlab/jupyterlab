@@ -186,7 +186,7 @@ describe('kernel/manager', () => {
           called = true;
         });
         const k = await Kernel.startNew();
-        await manager.connectTo(k.model);
+        manager.connectTo(k.model);
         expect(called).to.equal(true);
       });
     });

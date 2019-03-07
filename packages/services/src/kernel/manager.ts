@@ -176,7 +176,7 @@ export class KernelManager implements Kernel.IManager {
    *
    * @param model - The model of the target kernel.
    *
-   * @returns A promise that resolves with the new kernel instance.
+   * @returns The new kernel instance.
    */
   connectTo(model: Kernel.IModel): Kernel.IKernel {
     let kernel = Kernel.connectTo(model, this.serverSettings);
