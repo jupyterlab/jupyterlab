@@ -230,6 +230,7 @@ class SocketTester implements IService {
    * Create a new request and socket tester.
    */
   constructor() {
+    // TODO: we should set up just *one* server, and multiplex that based on URLs.
     const port = 8081;
     this._server = new WebSocket.Server({ port });
     this.serverSettings = ServerConnection.makeSettings({
@@ -467,6 +468,7 @@ export class KernelTester extends SocketTester {
    * Send a kernel message from the server to the client.
    */
   send(msg: KernelMessage.IMessage): void {
+    // console.log('KernelTester server sending msg', msg);
     this.sendRaw(serialize(msg));
   }
 
@@ -480,8 +482,13 @@ export class KernelTester extends SocketTester {
     // Construct a new kernel.
     const serverSettings = this.serverSettings;
     this._kernel = await Kernel.startNew({ serverSettings });
+    // console.log('Starting new KernelTester');
     await this.ready;
-    await this._kernel.ready;
+
+    // Wait until the kernel says it is connected
+    await testEmission(this._kernel.connectionStatusChanged, {
+      find: (k, status) => status === 'connected'
+    });
     return this._kernel;
   }
 
@@ -492,6 +499,7 @@ export class KernelTester extends SocketTester {
     if (this._kernel && !this._kernel.isDisposed) {
       // Set up the kernel request response.
       handleRequest(this, 204, {});
+      // console.warn('shutting down kernel');
       await this._kernel.shutdown();
     }
   }
@@ -519,13 +527,17 @@ export class KernelTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
+    // debugger;
+    // console.log('onSocket called');
     // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
     // this.sendStatus(this._initialStatus);
     sock.on('message', (msg: any) => {
+      // console.log('Mock server message received');
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
       const data = deserialize(msg);
+      // console.log('Mock server ws received message', msg);
       if (data.header.msg_type === 'kernel_info_request') {
         // First send status busy message.
         this.parentHeader = data.header;
@@ -543,6 +555,14 @@ export class KernelTester extends SocketTester {
           onMessage(data);
         }
       }
+    });
+    sock.on('close', (code, reason) => {
+      // console.log('websocket closed', code, reason);
+      debugger;
+    });
+    sock.on('error', e => {
+      // console.log('error in websocket', e);
+      debugger;
     });
   }
 
@@ -588,7 +608,6 @@ export class SessionTester extends SocketTester {
       serverSettings
     });
     await this.ready;
-    await this._session.kernel.ready;
     return this._session;
   }
 

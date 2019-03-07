@@ -10,14 +10,29 @@ import { KernelTester, createMsg } from '../utils';
 describe('Kernel.IFuture', () => {
   let tester: KernelTester;
 
-  afterEach(() => {
-    if (tester) {
+  // Tests should clean up after themselves, in that they should shut down
+  // resources they created. We check that a test cleans up its resources (and
+  // fail if it doesn't), and then we clean up the resources to make sure that
+  // one test not cleaning up doesn't affect succeeding tests. Since afterEach
+  // handlers are run in reverse order, you see below the final cleanup first,
+  // then the cleanup check.
+
+  afterEach(async () => {
+    if (tester && !tester.isDisposed) {
       tester.dispose();
     }
+    await Kernel.shutdownAll();
   });
 
-  afterAll(() => {
-    Kernel.shutdownAll();
+  afterEach(async () => {
+    if (tester) {
+      // Failure indicates the test did not dispose the kernel tester it
+      // created.
+      expect(tester.isDisposed).to.be.true;
+    }
+    let running = await Kernel.listRunning();
+    // Failure indicates the test did not shut down kernels it started.
+    expect(running.length).to.equal(0);
   });
 
   it('should have a msg attribute', async () => {
@@ -25,9 +40,19 @@ describe('Kernel.IFuture', () => {
     const future = kernel.requestExecute({ code: 'print("hello")' });
     expect(typeof future.msg.header.msg_id).to.equal('string');
     await future.done;
+    await kernel.shutdown();
   });
 
   describe('Message hooks', () => {
+    beforeEach(() => {
+      tester = new KernelTester();
+    });
+
+    afterEach(async () => {
+      await tester.shutdown();
+      tester.dispose();
+    });
+
     it('should have the most recently registered hook run first', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
@@ -38,7 +63,6 @@ describe('Kernel.IFuture', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      tester = new KernelTester();
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
@@ -113,7 +137,6 @@ describe('Kernel.IFuture', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      tester = new KernelTester();
       let future: Kernel.IFuture;
       let kernel: Kernel.IKernel;
 
@@ -169,7 +192,6 @@ describe('Kernel.IFuture', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      tester = new KernelTester();
       let future: Kernel.IFuture;
 
       tester.onMessage(message => {
@@ -222,7 +244,6 @@ describe('Kernel.IFuture', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      tester = new KernelTester();
       let future: Kernel.IFuture;
 
       const toDelete = (msg: KernelMessage.IIOPubMessage) => {
