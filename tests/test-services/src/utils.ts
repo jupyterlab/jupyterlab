@@ -485,10 +485,6 @@ export class KernelTester extends SocketTester {
     // console.log('Starting new KernelTester');
     await this.ready;
 
-    // Wait until the kernel says it is connected
-    await testEmission(this._kernel.connectionStatusChanged, {
-      find: (k, status) => status === 'connected'
-    });
     return this._kernel;
   }
 
