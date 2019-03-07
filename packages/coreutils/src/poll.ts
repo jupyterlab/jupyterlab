@@ -41,8 +41,8 @@ export class Poll<T = any, U = any> implements IDisposable {
     this._factory = factory;
 
     // Create the initial outstanding next poll promise.
-    const next = new PromiseDelegate<this>();
-    this._next = next;
+    const poll = new PromiseDelegate<this>();
+    this._next = poll;
 
     // Set the initial poll state.
     this._state = {
@@ -66,7 +66,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           phase: 'when-resolved',
           tick: new Date().getTime()
         });
-        this._resolve(next);
+        this._resolve(poll);
       })
       .catch(reason => {
         // Bail if disposed while `when` promise was in flight.
@@ -80,7 +80,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           phase: 'when-rejected',
           tick: new Date().getTime()
         });
-        this._resolve(next);
+        this._resolve(poll);
         // Warn that `when` promise was rejected but starting anyway.
         console.warn(`Poll (${this.name}) starting despite rejection.`, reason);
       });
@@ -182,7 +182,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * Execute a poll request.
    */
-  private _execute(delegate: PromiseDelegate<this>): void {
+  private _execute(poll: PromiseDelegate<this>): void {
     if (this._isDisposed) {
       return;
     }
@@ -198,7 +198,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         phase: 'standby',
         tick: new Date().getTime()
       });
-      this._resolve(delegate);
+      this._resolve(poll);
       return;
     }
 
@@ -211,7 +211,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         }
 
         // Bail if this promise has already been superseded.
-        if (this._next !== delegate) {
+        if (poll !== this._next) {
           return;
         }
 
@@ -223,7 +223,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           phase: this._state.phase === 'rejected' ? 'reconnect' : 'resolved',
           tick: new Date().getTime()
         });
-        this._resolve(delegate);
+        this._resolve(poll);
       })
       .catch((rejected: U) => {
         // Bail if disposed while poll promise was in flight.
@@ -232,7 +232,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         }
 
         // Bail if this promise has already been superseded.
-        if (this._next !== delegate) {
+        if (this._next !== poll) {
           return;
         }
 
@@ -247,7 +247,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         };
         this._next = null;
         this._schedule(updated);
-        this._resolve(delegate);
+        this._resolve(poll);
 
         // Warn that the poll request was rejected.
         console.warn(
@@ -260,13 +260,13 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * Resolve an outstanding delegate and emit a ticked signal.
+   * Resolve an outstanding poll request and emit a ticked signal.
    */
-  private _resolve(delegate: PromiseDelegate<this>): void {
-    delegate.promise.then(() => {
+  private _resolve(poll: PromiseDelegate<this>): void {
+    poll.promise.then(() => {
       this._ticked.emit();
     });
-    delegate.resolve(this);
+    poll.resolve(this);
   }
 
   /**
@@ -285,7 +285,6 @@ export class Poll<T = any, U = any> implements IDisposable {
 
     // If poll is being overridden, generate a new poll.
     if (state.phase === 'override' && outstanding) {
-      // Schedule the next poll and resolve the outstanding promise.
       this._next = null;
       this._schedule(state);
       this._resolve(outstanding);
@@ -301,15 +300,12 @@ export class Poll<T = any, U = any> implements IDisposable {
     this._state = state;
 
     // Create the next poll promise and set the outstanding reference.
-    const next = new PromiseDelegate<this>();
-    this._next = next;
+    const poll = new PromiseDelegate<this>();
+    this._next = poll;
 
     // Schedule the poll request.
     const request = () => {
-      if (this._isDisposed) {
-        return;
-      }
-      this._execute(next);
+      this._execute(poll);
     };
     clearTimeout(this._timeout);
     this._timeout = state.interval
