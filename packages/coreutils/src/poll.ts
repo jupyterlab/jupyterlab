@@ -237,25 +237,15 @@ export class Poll<T = any, U = any> implements IDisposable {
         }
 
         // Schedule the next poll.
-        const old = this._state;
-        const increased = Math.min(old.interval * 2, max);
-        const updated: Poll.State<T, U> = {
+        const increased = Math.min(this._state.interval * 2, max);
+        this._next = null;
+        this._schedule({
           interval: Private.jitter(increased, variance, min, max),
           payload: rejected,
           phase: 'rejected',
           tick: new Date().getTime()
-        };
-        this._next = null;
-        this._schedule(updated);
+        });
         this._resolve(poll);
-
-        // Warn that the poll request was rejected.
-        console.warn(
-          `Poll (${this.name}) failed, changing interval from ${
-            old.interval
-          } to ${updated.interval}.`,
-          rejected
-        );
       });
   }
 
