@@ -1396,8 +1396,8 @@ class _AppHandler(object):
         with TemporaryDirectory() as tempdir:
             ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir, quiet=True)
             if ret != 0:
-                msg = '"%s" is not a valid npm package'
-                raise ValueError(msg % keys)
+                msg = 'One or more packages is not a valid npm package: %r'
+                raise ValueError(msg % (keys,))
 
             for key in keys:
                 fname = key[0].replace('@', '') + key[1:].replace('@', '-').replace('/', '-') + '.tgz'
