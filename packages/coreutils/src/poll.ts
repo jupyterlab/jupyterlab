@@ -164,6 +164,10 @@ export class Poll<T = any, U = any> implements IDisposable {
 
   /**
    * Resolves the outstanding poll and schedules the next tick immediately.
+   *
+   * #### Notes
+   * It is safe to call this method multiple times. It returns the outstanding
+   * poll request if the current tick phase is `'refreshed'`.
    */
   refresh(): Promise<this> {
     if (this._state.phase === 'refreshed') {
@@ -180,6 +184,10 @@ export class Poll<T = any, U = any> implements IDisposable {
 
   /**
    * Starts polling.
+   *
+   * #### Notes
+   * It is safe to call this method multiple times. The poll will only start
+   * if its current tick phase is `'standby'` or `'stopped'`.
    */
   start(): Promise<this> {
     if (this._state.phase !== 'standby' && this._state.phase !== 'stopped') {
@@ -196,6 +204,10 @@ export class Poll<T = any, U = any> implements IDisposable {
 
   /**
    * Stops polling.
+   *
+   * #### Notes
+   * It is safe to call this method multiple times. The poll will stop
+   * if its current tick phase is not `'stopped'`.
    */
   stop(): Promise<this> {
     if (this._state.phase === 'stopped') {
@@ -274,34 +286,11 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Resolve an outstanding poll and schedule the next poll tick.
    */
   private _resolve(
-    poll: PromiseDelegate<this>,
+    outstanding: PromiseDelegate<this>,
     tick: Poll.Tick<T, U>
   ): PromiseDelegate<this> {
-    this._schedule(tick);
-    poll.promise.then(() => {
-      this._ticked.emit(tick);
-    });
-    poll.resolve(this);
-    return this._tick;
-  }
-
-  /**
-   * Schedule a poll tick.
-   *
-   * #### Notes
-   * This method is responsible for maintaining internal poll state.
-   *
-   * This method will always replace the internal tick.
-   */
-  private _schedule(tick: Poll.Tick<T, U>): void {
-    // Update the state.
-    this._state = tick;
-
-    // Create the next poll promise and set the outstanding reference.
+    const { interval } = tick;
     const poll = new PromiseDelegate<this>();
-    this._tick = poll;
-
-    // Schedule the poll request.
     const request = () => {
       // Bail if disposed during timeout.
       if (this.isDisposed) {
@@ -309,13 +298,26 @@ export class Poll<T = any, U = any> implements IDisposable {
       }
       this._request(poll);
     };
-    const { interval } = tick;
+
+    // Cancel outstanding request if possible.
     clearTimeout(this._timeout);
+
+    // Update poll state and schedule the next tick.
+    this._tick = poll;
+    this._state = tick;
     this._timeout = interval
       ? interval === Infinity
-        ? -1
-        : setTimeout(request, tick.interval)
-      : requestAnimationFrame(request);
+        ? -1 // Never execute request.
+        : setTimeout(request, interval) // Execute request later.
+      : requestAnimationFrame(request); // Execute request immediately.
+
+    // Resolve the outstanding poll promise and emit the ticked signal.
+    outstanding.promise.then(() => {
+      this._ticked.emit(tick);
+    });
+    outstanding.resolve(this);
+
+    return poll;
   }
 
   private _disposed = new Signal<this, void>(this);
