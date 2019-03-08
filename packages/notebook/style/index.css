@@ -230,6 +230,10 @@
   flex-direction: column;
 }
 
+.jp-RankedPanel > :not(:first-child) {
+  margin-top: 12px;
+}
+
 .jp-KeySelector {
   padding: 0px 12px 0 12px;
 }
@@ -240,7 +244,8 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.jp-KeySelector label {
+.jp-KeySelector label,
+.jp-MetadataEditorTool label {
   line-height: 1.4;
 }
 

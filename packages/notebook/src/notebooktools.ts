@@ -51,6 +51,7 @@ class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
     this.layout = new PanelLayout();
+    this.addClass('jp-RankedPanel');
   }
 
   addWidget(widget: Widget, rank: number): void {
@@ -495,11 +496,10 @@ export namespace NotebookTools {
         editorFactory
       });
       this.editor.title.label = options.label || 'Edit Metadata';
-      const titleNode = new Widget();
+      const titleNode = new Widget({ node: document.createElement('label') });
       titleNode.node.textContent = options.label || 'Edit Metadata';
       layout.addWidget(titleNode);
       layout.addWidget(this.editor);
-      // layout.addWidget(new Collapse({ widget: this.editor, collapsed }));
     }
 
     /**
