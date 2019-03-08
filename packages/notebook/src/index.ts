@@ -4,7 +4,7 @@
 import '../style/index.css';
 
 export * from './actions';
-export * from './celltools';
+export * from './notebooktools';
 export * from './default-toolbar';
 export * from './model';
 export * from './modelfactory';
