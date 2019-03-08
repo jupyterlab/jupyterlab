@@ -11,23 +11,28 @@ import {
 } from '@jupyterlab/application';
 import {
   createRenderMimeFactory,
-  IDataRegistry,
+  IDatasetRegistry,
   Dataset,
   IDataExplorer,
   IActiveDataset
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:rendermime',
-  requires: [IRenderMimeRegistry, IDataRegistry, IDataExplorer, IActiveDataset],
+  id: '@jupyterlab/dataregistry-extension:rendermime',
+  requires: [
+    IRenderMimeRegistry,
+    IDatasetRegistry,
+    IDataExplorer,
+    IActiveDataset
+  ],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
 function activate(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
-  data: IDataRegistry,
+  data: IDatasetRegistry,
   dataExplorer: IDataExplorer,
   active: IActiveDataset
 ) {

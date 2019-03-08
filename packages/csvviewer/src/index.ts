@@ -7,4 +7,4 @@ export * from './model';
 export * from './parse';
 export * from './toolbar';
 export * from './widget';
-export * from './databus';
+export * from './dataregistry';

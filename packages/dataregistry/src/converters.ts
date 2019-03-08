@@ -6,7 +6,7 @@
 import { Token } from '@phosphor/coreutils';
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
-import { Dataset } from './dataregistry';
+import { Dataset } from './datasets';
 import { reachable, expandPath } from './graph';
 
 export type Convert<T, V> = (data: T) => Promise<V>;
@@ -264,7 +264,7 @@ export namespace ConverterRegistry {
 
 /* tslint:disable */
 export const IConverterRegistry = new Token<IConverterRegistry>(
-  '@jupyterlab/databus:IConverterRegistry'
+  '@jupyterlab/dataregistry:IConverterRegistry'
 );
 
 export interface IConverterRegistry extends ConverterRegistry {}

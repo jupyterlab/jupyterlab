@@ -1,22 +1,23 @@
 import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 import { IConverterRegistry } from './converters';
-import { Dataset, IDataRegistry } from './dataregistry';
+import { Dataset, IDatasetRegistry } from './datasets';
 import { resolveDataSet, resolveMimeType } from './resolvers';
 import { createViewerMimeType, extractViewerLabel } from './viewers';
 
-export interface IDataBusConfig {
+export interface IDataRegistryConfig {
   converters: IConverterRegistry;
-  data: IDataRegistry;
+  data: IDatasetRegistry;
 }
 
 /**
- * Registry that composes all other databus registries, to implement logic that require multiple of them.
+ * Registry that composes converter and dataset registry
+ * in order to implement logic that requires both of them.
  */
-export class DataBus {
+export class DataRegistry {
   public readonly converters: IConverterRegistry;
-  public readonly data: IDataRegistry;
-  constructor(config: IDataBusConfig) {
+  public readonly data: IDatasetRegistry;
+  constructor(config: IDataRegistryConfig) {
     this.converters = config.converters;
     this.data = config.data;
   }
@@ -89,5 +90,7 @@ export class DataBus {
   }
 }
 
-export interface IDataBus extends DataBus {}
-export const IDataBus = new Token<IDataBus>('@jupyterlab/databus:IDataBus');
+export interface IDataRegistry extends DataRegistry {}
+export const IDataRegistry = new Token<IDataRegistry>(
+  '@jupyterlab/dataregistry:IDataRegistry'
+);

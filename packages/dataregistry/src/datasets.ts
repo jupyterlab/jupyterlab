@@ -45,7 +45,7 @@ export class Dataset<T> {
    * The data of the dataset.
    *
    * #### Notes
-   * The notion of data in the databus is completely abstract, and templated
+   * The notion of data in the data registry is completely abstract, and templated
    * over. Publishers and consumers of a given mimetype will need to agree
    * what the actual data is and cast it appropriately before use.
    */
@@ -66,7 +66,7 @@ export class Dataset<T> {
 /**
  * A data registry object, for managing datasets in JupyterLab.
  */
-export class DataRegistry {
+export class DatasetRegistry {
   /**
    * Publish a dataset to the data registry.
    *
@@ -154,21 +154,21 @@ export class DataRegistry {
   /**
    * A signal that will fire when datasets are published or removed.
    */
-  get datasetsChanged(): ISignal<this, DataRegistry.IDatasetsChangedArgs> {
+  get datasetsChanged(): ISignal<this, DatasetRegistry.IDatasetsChangedArgs> {
     return this._datasetsChanged;
   }
 
   private _datasets: Set<Dataset<any>> = new Set();
   private _datasetsChanged = new Signal<
     this,
-    DataRegistry.IDatasetsChangedArgs
+    DatasetRegistry.IDatasetsChangedArgs
   >(this);
 }
 
 /**
- * A public namespace for the databus.
+ * A public namespace for the Dataset Registry.
  */
-export namespace DataRegistry {
+export namespace DatasetRegistry {
   /**
    * An interface for the changed args of the dataset changed signal.
    */
@@ -185,8 +185,8 @@ export namespace DataRegistry {
   }
 }
 /* tslint:disable */
-export const IDataRegistry = new Token<IDataRegistry>(
-  '@jupyterlab/databus:IDataRegistry'
+export const IDatasetRegistry = new Token<IDatasetRegistry>(
+  '@jupyterlab/dataregistry:IDatasetRegistry'
 );
 
-export interface IDataRegistry extends DataRegistry {}
+export interface IDatasetRegistry extends DatasetRegistry {}

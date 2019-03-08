@@ -7,7 +7,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IDataBus, IDataExplorer } from '@jupyterlab/databus';
+import { IDataRegistry, IDataExplorer } from '@jupyterlab/dataregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   ABCWidgetFactory,
@@ -20,32 +20,37 @@ import * as yaml from 'js-yaml';
 
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:databus-file',
-  requires: [IDataBus, IDocumentManager, IDataExplorer],
+  id: '@jupyterlab/dataregistry-extension:file',
+  requires: [IDataRegistry, IDocumentManager, IDataExplorer],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
 function activate(
   app: JupyterFrontEnd,
-  dataBus: IDataBus,
+  dataRegistry: IDataRegistry,
   docManager: IDocumentManager,
   explorer: IDataExplorer
 ) {
   docManager.registry.addWidgetFactory(
-    new DataBusFileFactory(dataBus, explorer)
+    new DataRegistryFileFactory(dataRegistry, explorer)
   );
 }
 
 // TODO: Move this out of extension
-type DataBusFile = {
+type DataRegistryFile = {
   version: string;
   datasets: Array<{ url: string }>;
 };
 
-class DataBusFileFactory extends ABCWidgetFactory<IDocumentWidget<Widget>> {
-  constructor(private dataBus: IDataBus, private explorer: IDataExplorer) {
+class DataRegistryFileFactory extends ABCWidgetFactory<
+  IDocumentWidget<Widget>
+> {
+  constructor(
+    private dataRegistry: IDataRegistry,
+    private explorer: IDataExplorer
+  ) {
     super({
-      name: 'DataBus',
+      name: 'DataRegistry',
       fileTypes: ['yaml'],
       defaultFor: ['yaml']
     });
@@ -59,12 +64,14 @@ class DataBusFileFactory extends ABCWidgetFactory<IDocumentWidget<Widget>> {
         // Not loaded yet.
         return;
       }
-      const file: DataBusFile = yaml.safeLoad(text);
+      const file: DataRegistryFile = yaml.safeLoad(text);
       if (file.version !== '1') {
-        throw `Version "${file.version}" not supported in databus.yml file`;
+        throw `Version "${
+          file.version
+        }" not supported in dataregistry.yml file`;
       }
       for (const { url } of file.datasets) {
-        this.dataBus.registerURL(new URL(url));
+        this.dataRegistry.registerURL(new URL(url));
       }
     });
 

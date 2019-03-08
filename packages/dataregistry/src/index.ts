@@ -5,8 +5,8 @@
 
 export * from './active';
 export * from './converters';
-export * from './databus';
 export * from './dataregistry';
+export * from './datasets';
 export * from './explorer';
 export * from './files';
 export * from './graph';

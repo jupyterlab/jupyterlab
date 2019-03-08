@@ -55,10 +55,10 @@
       "path": "../csvviewer-extension"
     },
     {
-      "path": "../databus"
+      "path": "../dataregistry"
     },
     {
-      "path": "../databus-extension"
+      "path": "../dataregistry-extension"
     },
     {
       "path": "../docmanager"

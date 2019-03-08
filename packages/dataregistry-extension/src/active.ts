@@ -13,7 +13,7 @@ import {
   ActiveDataset,
   createFileURL,
   hasURL
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { Widget } from '@phosphor/widgets';
 
@@ -22,7 +22,7 @@ import { Widget } from '@phosphor/widgets';
  */
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:active-dataset',
+  id: '@jupyterlab/dataregistry-extension:active-dataset',
   requires: [ILabShell],
   provides: IActiveDataset,
   autoStart: true

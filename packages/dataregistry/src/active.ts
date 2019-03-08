@@ -24,5 +24,5 @@ export class ActiveDataset {
 
 export interface IActiveDataset extends ActiveDataset {}
 export const IActiveDataset = new Token<IActiveDataset>(
-  '@jupyterlab/databus:IActiveDataset'
+  '@jupyterlab/dataregistry:IActiveDataset'
 );

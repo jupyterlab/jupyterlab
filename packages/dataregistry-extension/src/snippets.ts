@@ -12,12 +12,12 @@ import {
   snippetViewerConverter,
   fileSnippetConverter,
   URLSnippetConverter
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:snippets',
+  id: '@jupyterlab/dataregistry-extension:snippets',
   requires: [IConverterRegistry, INotebookTracker],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;

@@ -8,19 +8,21 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  IConverterRegistry,
-  URLStringConverter,
-  resolverURLConverter
-} from '@jupyterlab/databus';
+  ConverterRegistry,
+  IConverterRegistry
+} from '@jupyterlab/dataregistry';
 
+/**
+ * The converter registry extension.
+ */
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:urls',
-  requires: [IConverterRegistry],
+  id: '@jupyterlab/dataregistry-extension:converter-registry',
+  requires: [],
+  provides: IConverterRegistry,
   autoStart: true
-} as JupyterFrontEndPlugin<void>;
+} as JupyterFrontEndPlugin<IConverterRegistry>;
 
-function activate(app: JupyterFrontEnd, converters: IConverterRegistry) {
-  converters.register(URLStringConverter);
-  converters.register(resolverURLConverter);
+function activate(app: JupyterFrontEnd): IConverterRegistry {
+  return new ConverterRegistry();
 }

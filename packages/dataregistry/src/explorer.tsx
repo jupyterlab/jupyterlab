@@ -6,7 +6,7 @@
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Token } from '@phosphor/coreutils';
 import * as React from 'react';
-import { IDataBus } from './databus';
+import { IDataRegistry } from './dataregistry';
 import { IActiveDataset } from './active';
 import { Widget } from '@phosphor/widgets';
 import { style, classes } from 'typestyle';
@@ -80,22 +80,22 @@ const activeDatasetClassName = style({
 
 function DatasetCompononent({
   url,
-  databus,
+  dataRegistry,
   active
 }: {
   url: URL;
-  databus: IDataBus;
+  dataRegistry: IDataRegistry;
   active: IActiveDataset;
 }) {
   const classNames = [datasetClassName];
   if (active.active !== null && active.active.toString() === url.toString()) {
     classNames.push(activeDatasetClassName);
   }
-  const viewers = [...databus.viewersForURL(url)];
+  const viewers = [...dataRegistry.viewersForURL(url)];
   console.log('Dataset', {
     url,
-    mimeType: databus.data.mimeTypesForURL(url),
-    possible: databus.possibleMimeTypesForURL(url)
+    mimeType: dataRegistry.data.mimeTypesForURL(url),
+    possible: dataRegistry.possibleMimeTypesForURL(url)
   });
   viewers.sort();
   return (
@@ -120,7 +120,7 @@ function DatasetCompononent({
         {viewers.map((label: string) => (
           <Button
             key={label}
-            onClick={() => databus.viewURL(url, label)}
+            onClick={() => dataRegistry.viewURL(url, label)}
             text={label}
           />
         ))}
@@ -169,7 +169,7 @@ function Heading({
 
 class DataExplorer extends React.Component<
   {
-    databus: IDataBus;
+    dataRegistry: IDataRegistry;
     active: IActiveDataset;
   },
   { search: string }
@@ -179,7 +179,7 @@ class DataExplorer extends React.Component<
   };
 
   urls(): Array<URL> {
-    return [...this.props.databus.data.URLs].filter(
+    return [...this.props.dataRegistry.data.URLs].filter(
       url => url.toString().indexOf(this.state.search) !== -1
     );
   }
@@ -200,7 +200,7 @@ class DataExplorer extends React.Component<
           onSearch={(search: string) => this.setState({ search })}
         />
         <div style={{ flex: 1, overflow: 'auto' }}>
-          <UseSignal signal={this.props.databus.data.datasetsChanged}>
+          <UseSignal signal={this.props.dataRegistry.data.datasetsChanged}>
             {() => (
               <UseSignal signal={this.props.active.signal}>
                 {() =>
@@ -208,7 +208,7 @@ class DataExplorer extends React.Component<
                     <DatasetCompononent
                       key={url.toString()}
                       url={url}
-                      databus={this.props.databus}
+                      dataRegistry={this.props.dataRegistry}
                       active={this.props.active}
                     />
                   ))
@@ -223,20 +223,20 @@ class DataExplorer extends React.Component<
 }
 
 export function createDataExplorer(
-  databus: IDataBus,
+  dataRegistry: IDataRegistry,
   active: IActiveDataset
 ): IDataExplorer {
   const widget = ReactWidget.create(
-    <DataExplorer databus={databus} active={active} />
+    <DataExplorer dataRegistry={dataRegistry} active={active} />
   );
-  widget.id = '@jupyterlab-databus/explorer';
+  widget.id = '@jupyterlab-dataRegistry/explorer';
   widget.title.iconClass = 'jp-SpreadsheetIcon  jp-SideBar-tabIcon';
   widget.title.caption = 'Data Explorer';
   return widget;
 }
 /* tslint:disable */
 export const IDataExplorer = new Token<IDataExplorer>(
-  '@jupyterlab/databus:IDataExplorer'
+  '@jupyterlab/dataRegistry:IDataExplorer'
 );
 
 export interface IDataExplorer extends Widget {}

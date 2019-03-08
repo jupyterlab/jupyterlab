@@ -1,9 +1,8 @@
-import { Converter, staticWidgetConverter } from '@jupyterlab/databus';
+import { staticWidgetConverter } from '@jupyterlab/dataregistry';
 import { DataGrid } from '@phosphor/datagrid';
-import { Widget } from '@phosphor/widgets';
 import { DSVModel } from './model';
 
-export const CSVConverter: Converter<string, Widget> = staticWidgetConverter({
+export const CSVConverter = staticWidgetConverter({
   mimeType: 'text/csv',
   label: 'Grid',
   convert: async (data: string) => {

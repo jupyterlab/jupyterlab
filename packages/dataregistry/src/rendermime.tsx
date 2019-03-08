@@ -5,7 +5,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import * as React from 'react';
 import { JSONValue } from '@phosphor/coreutils';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { Dataset } from './dataregistry';
+import { Dataset } from './datasets';
 
 // Needs to end in +json or else can't be JSON data
 // https://github.com/jupyter/nbformat/blob/9dd1b8719c9095eaebce1846416bb3a5e939758f/nbformat/v4/nbformat.v4.schema.json#L407

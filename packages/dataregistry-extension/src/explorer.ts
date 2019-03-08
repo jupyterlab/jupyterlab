@@ -12,18 +12,18 @@ import {
 import {
   createDataExplorer,
   IDataExplorer,
-  IDataBus,
+  IDataRegistry,
   IActiveDataset
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 
-const id = '@jupyterlab/databus-extension:data-explorer';
+const id = '@jupyterlab/dataregistry-extension:data-explorer';
 /**
  * Adds a visual data explorer to the sidebar.
  */
 export default {
   activate,
   id,
-  requires: [ILabShell, IDataBus, ILayoutRestorer, IActiveDataset],
+  requires: [ILabShell, IDataRegistry, ILayoutRestorer, IActiveDataset],
   provides: IDataExplorer,
   autoStart: true
 } as JupyterFrontEndPlugin<IDataExplorer>;
@@ -31,11 +31,11 @@ export default {
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
-  dataBus: IDataBus,
+  dataRegistry: IDataRegistry,
   restorer: ILayoutRestorer,
   active: IActiveDataset
 ): IDataExplorer {
-  const widget = createDataExplorer(dataBus, active);
+  const widget = createDataExplorer(dataRegistry, active);
   restorer.add(widget, widget.id);
   labShell.add(widget, 'left');
   return widget;

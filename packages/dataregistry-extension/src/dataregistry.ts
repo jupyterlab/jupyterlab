@@ -7,20 +7,31 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { DataRegistry, IDataRegistry } from '@jupyterlab/databus';
+import {
+  DataRegistry,
+  IConverterRegistry,
+  IDataRegistry,
+  IDatasetRegistry
+} from '@jupyterlab/dataregistry';
 
-const id = '@jupyterlab/databus-extension:data-registry';
 /**
- * The data registry extension.
+ * The converter registry extension.
  */
 export default {
   activate,
-  id,
-  requires: [],
+  id: '@jupyterlab/dataregistry-extension:data-registry',
+  requires: [IConverterRegistry, IDatasetRegistry],
   provides: IDataRegistry,
   autoStart: true
 } as JupyterFrontEndPlugin<IDataRegistry>;
 
-function activate(app: JupyterFrontEnd): IDataRegistry {
-  return new DataRegistry();
+function activate(
+  app: JupyterFrontEnd,
+  converters: IConverterRegistry,
+  data: IDatasetRegistry
+): IDataRegistry {
+  return new DataRegistry({
+    converters,
+    data
+  });
 }

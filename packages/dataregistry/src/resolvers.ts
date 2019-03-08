@@ -1,4 +1,4 @@
-import { Dataset } from './dataregistry';
+import { Dataset } from './datasets';
 import { Converter, Converts } from './converters';
 
 export const resolveMimeType = 'application/x.jupyter.resolve';

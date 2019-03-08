@@ -11,13 +11,13 @@ import {
   createFileURL,
   fileURLConverter,
   IActiveDataset,
-  IDataBus,
+  IDataRegistry,
   IDataExplorer,
   resolveExtensionConverter,
   resolveFileConverter,
   staticWidgetConverter,
   URLMimeType
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 import { DirListing, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { MessageLoop } from '@phosphor/messaging';
 import { PanelLayout, Widget } from '@phosphor/widgets';
@@ -27,30 +27,34 @@ import * as React from 'react';
 // ./packages/filebrowser-extension/src/index.ts
 const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
 
-const open = 'databus:filebrowser-open';
+const open = 'dataregistry:filebrowser-open';
 
 /**
- * Integrates the databus into the doc registry.
+ * Integrates the dataregistry into the doc registry.
  */
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:files',
-  requires: [IDataBus, IFileBrowserFactory, IDataExplorer, IActiveDataset],
+  id: '@jupyterlab/dataregistry-extension:files',
+  requires: [IDataRegistry, IFileBrowserFactory, IDataExplorer, IActiveDataset],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
 function activate(
   app: JupyterFrontEnd,
-  dataBus: IDataBus,
+  dataRegistry: IDataRegistry,
   fileBrowserFactory: IFileBrowserFactory,
   dataExplorer: IDataExplorer,
   active: IActiveDataset
 ) {
   // Add default converters
-  dataBus.converters.register(resolveFileConverter);
-  dataBus.converters.register(resolveExtensionConverter('.csv', 'text/csv'));
-  dataBus.converters.register(resolveExtensionConverter('.png', 'image/png'));
-  dataBus.converters.register(
+  dataRegistry.converters.register(resolveFileConverter);
+  dataRegistry.converters.register(
+    resolveExtensionConverter('.csv', 'text/csv')
+  );
+  dataRegistry.converters.register(
+    resolveExtensionConverter('.png', 'image/png')
+  );
+  dataRegistry.converters.register(
     staticWidgetConverter({
       mimeType: URLMimeType('image/png'),
       label: 'Image',
@@ -58,7 +62,7 @@ function activate(
         ReactWidget.create(<img src={url.toString()} />)
     })
   );
-  dataBus.converters.register(
+  dataRegistry.converters.register(
     fileURLConverter(
       async (path: string) =>
         new URL(
@@ -94,16 +98,16 @@ function activate(
   app.commands.addCommand(open, {
     execute: async () => {
       const url = getURL();
-      if (url === null || !dataBus.hasConversions(url)) {
+      if (url === null || !dataRegistry.hasConversions(url)) {
         return;
       }
-      dataBus.registerURL(url);
+      dataRegistry.registerURL(url);
       app.shell.activateById(dataExplorer.id);
       active.active = url;
     },
     isEnabled: () => {
       const url = getURL();
-      return url !== null && dataBus.hasConversions(url);
+      return url !== null && dataRegistry.hasConversions(url);
     },
     label: 'Register Dataset',
     iconClass: 'jp-MaterialIcon jp-??'

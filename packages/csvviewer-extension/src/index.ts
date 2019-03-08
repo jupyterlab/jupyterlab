@@ -24,7 +24,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { DataGrid } from '@phosphor/datagrid';
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
-import { IDataBus } from '@jupyterlab/databus';
+import { IDataRegistry } from '@jupyterlab/dataregistry';
 import { CSVSearchProvider } from './searchprovider';
 
 /**
@@ -39,7 +39,7 @@ const FACTORY_TSV = 'TSVTable';
 const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [ILayoutRestorer, IThemeManager, IMainMenu, IDataBus],
+  requires: [ILayoutRestorer, IThemeManager, IMainMenu, IDataRegistry],
   optional: [ISearchProviderRegistry],
   autoStart: true
 };
@@ -83,7 +83,7 @@ function activateCsv(
   restorer: ILayoutRestorer,
   themeManager: IThemeManager,
   mainMenu: IMainMenu,
-  databus: IDataBus,
+  dataRegistry: IDataRegistry,
   searchregistry: ISearchProviderRegistry = null
 ): void {
   const factory = new CSVViewerFactory({
@@ -95,7 +95,7 @@ function activateCsv(
   const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
   });
-  databus.converters.register(CSVConverter);
+  dataRegistry.converters.register(CSVConverter);
 
   // The current styles for the data grids.
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;

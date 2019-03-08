@@ -50,7 +50,7 @@ export interface IStaticWidgetConverterOptions<T> {
   convert: Convert<T, Widget>;
 }
 
-type WidgetCreator = () => Promise<Widget>;
+export type WidgetCreator = () => Promise<Widget>;
 
 export function staticWidgetConverter<T>({
   mimeType,

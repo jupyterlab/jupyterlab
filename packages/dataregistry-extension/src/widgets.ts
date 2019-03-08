@@ -12,28 +12,28 @@ import {
 import { InstanceTracker } from '@jupyterlab/apputils';
 import {
   extractWidgetArgs,
-  IDataBus,
+  IDataRegistry,
   widgetViewerConverter
-} from '@jupyterlab/databus';
+} from '@jupyterlab/dataregistry';
 import { Widget } from '@phosphor/widgets';
 
-const tracker = new InstanceTracker({ namespace: 'databus' });
-const commandID = 'databus:view-url';
+const tracker = new InstanceTracker({ namespace: 'dataregistry' });
+const commandID = 'dataregistry:view-url';
 
 export default {
   activate,
-  id: '@jupyterlab/databus-extension:widgets',
-  requires: [ILabShell, IDataBus, ILayoutRestorer],
+  id: '@jupyterlab/dataregistry-extension:widgets',
+  requires: [ILabShell, IDataRegistry, ILayoutRestorer],
   autoStart: true
 } as JupyterFrontEndPlugin<void>;
 
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
-  dataBus: IDataBus,
+  dataRegistry: IDataRegistry,
   restorer: ILayoutRestorer
 ) {
-  dataBus.converters.register(
+  dataRegistry.converters.register(
     widgetViewerConverter(async (widget: Widget) => {
       if (!tracker.has(widget)) {
         await tracker.add(widget);
@@ -48,9 +48,9 @@ function activate(
   app.commands.addCommand(commandID, {
     execute: async args => {
       const url = new URL(args.url as string);
-      const disposable = dataBus.registerURL(url);
+      const disposable = dataRegistry.registerURL(url);
       try {
-        await dataBus.viewURL(url, args.label as string);
+        await dataRegistry.viewURL(url, args.label as string);
       } catch (e) {
         console.warn(`Could not load dataset ${url}`, e);
         if (disposable) {
