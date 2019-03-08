@@ -48,7 +48,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     this._state = {
       interval: this.interval,
       payload: null,
-      phase: 'standby',
+      phase: 'started',
       timestamp: new Date().getTime()
     };
 
@@ -134,7 +134,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * A handle to the next link in the poll promise chain.
+   * The poll state, which is the content of the current poll tick.
    */
   get state(): Poll.Tick<T, U> {
     return this._state;
@@ -167,13 +167,49 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * Resolves the outstanding poll and schedules the next one immediately.
+   * Resolves the outstanding poll and schedules the next tick immediately.
    */
   refresh(): Promise<this> {
+    if (this._state.phase === 'refreshed') {
+      return this._tick.promise;
+    }
+
     return this._resolve(this._tick, {
       interval: 0, // Immediately.
       payload: null,
-      phase: 'refresh',
+      phase: 'refreshed',
+      timestamp: new Date().getTime()
+    }).promise;
+  }
+
+  /**
+   * Starts polling.
+   */
+  start(): Promise<this> {
+    if (this._state.phase !== 'standby' && this._state.phase !== 'stopped') {
+      return this._tick.promise;
+    }
+
+    return this._resolve(this._tick, {
+      interval: 0, // Immediately.
+      payload: null,
+      phase: 'started',
+      timestamp: new Date().getTime()
+    }).promise;
+  }
+
+  /**
+   * Stops polling.
+   */
+  stop(): Promise<this> {
+    if (this._state.phase === 'stopped') {
+      return this._tick.promise;
+    }
+
+    return this._resolve(this._tick, {
+      interval: Infinity, // Never.
+      payload: null,
+      phase: 'stopped',
       timestamp: new Date().getTime()
     }).promise;
   }
@@ -216,7 +252,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         this._resolve(poll, {
           interval: Private.jitter(this.interval, variance, min, max),
           payload: resolved,
-          phase: this._state.phase === 'rejected' ? 'reconnect' : 'resolved',
+          phase: this._state.phase === 'rejected' ? 'reconnected' : 'resolved',
           timestamp: new Date().getTime()
         });
       })
@@ -279,9 +315,12 @@ export class Poll<T = any, U = any> implements IDisposable {
     const request = () => {
       this._execute(poll);
     };
+    const { interval } = tick;
     clearTimeout(this._timeout);
-    this._timeout = tick.interval
-      ? setTimeout(request, tick.interval)
+    this._timeout = interval
+      ? interval === Infinity
+        ? -1
+        : setTimeout(request, tick.interval)
       : requestAnimationFrame(request);
   }
 
@@ -291,7 +330,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _state: Poll.Tick<T, U>;
   private _tick: PromiseDelegate<this> | null = null;
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
-  private _timeout = 0;
+  private _timeout = -1;
 }
 
 /**
@@ -302,11 +341,13 @@ export namespace Poll {
    * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
-    | 'reconnect'
-    | 'refresh'
+    | 'reconnected'
+    | 'refreshed'
     | 'rejected'
     | 'resolved'
     | 'standby'
+    | 'started'
+    | 'stopped'
     | 'when-rejected'
     | 'when-resolved';
 
