@@ -57,6 +57,11 @@
 .jp-Launcher-content-main {
   padding-left: var(--jp-private-launcher-side-padding);
   padding-right: var(--jp-private-launcher-side-padding);
+  padding-top: var(--jp-private-launcher-top-padding);
+}
+
+.jp-Launcher-cwd {
+  padding-right: var(--jp-private-launcher-side-padding);
 }
 
 /* Launcher section */
@@ -223,6 +228,7 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 

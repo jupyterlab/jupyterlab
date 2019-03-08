@@ -527,13 +527,12 @@ export class Launcher extends VDomRenderer<LauncherModel> {
                   }}
                 />
               </div>
-            </div>
-            <div className="jp-Launcher-content-main">
               <div className="jp-Launcher-cwd">
-                <h3>{'Current Path: ' + this.cwd}</h3>
+                <span className="jp-MaterialIcon jp-HomeIcon" title="Home" />
+                {this.cwd}
               </div>
-              {sections}
             </div>
+            <div className="jp-Launcher-content-main">{sections}</div>
           </div>
         </div>
       </React.Fragment>
