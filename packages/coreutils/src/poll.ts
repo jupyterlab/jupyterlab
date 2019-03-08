@@ -56,7 +56,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     (when || Promise.resolve())
       .then(() => {
         // Bail if disposed while `when` promise was in flight.
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           return;
         }
 
@@ -70,7 +70,7 @@ export class Poll<T = any, U = any> implements IDisposable {
       })
       .catch(reason => {
         // Bail if disposed while `when` promise was in flight.
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           return;
         }
 
@@ -123,7 +123,7 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Whether the poll is disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed;
+    return this._tick === null;
   }
 
   /**
@@ -151,17 +151,13 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Dispose the poll, stop executing future poll requests.
    */
   dispose(): void {
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
-    if (this._tick) {
-      const poll = this._tick;
 
-      this._tick = null;
-      poll.promise.catch(_ => undefined);
-      poll.reject(new Error(`Poll (${this.name}) is disposed.`));
-    }
+    this._tick.promise.catch(_ => undefined);
+    this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
+    this._tick = null;
     this._disposed.emit();
     Signal.clearData(this);
   }
@@ -215,13 +211,9 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * Execute a poll request.
+   * Make a poll request.
    */
-  private _execute(poll: PromiseDelegate<this>): void {
-    if (this._isDisposed) {
-      return;
-    }
-
+  private _request(poll: PromiseDelegate<this>): void {
     const { max, min, variance } = this;
 
     // Reschedule without executing poll promise if application is hidden.
@@ -239,7 +231,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     this._factory(this._state)
       .then((resolved: T) => {
         // Bail if disposed while poll promise was in flight.
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           return;
         }
 
@@ -258,7 +250,7 @@ export class Poll<T = any, U = any> implements IDisposable {
       })
       .catch((rejected: U) => {
         // Bail if disposed while poll promise was in flight.
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           return;
         }
 
@@ -282,16 +274,14 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Resolve an outstanding poll and schedule the next poll tick.
    */
   private _resolve(
-    poll: PromiseDelegate<this> | null,
+    poll: PromiseDelegate<this>,
     tick: Poll.Tick<T, U>
   ): PromiseDelegate<this> {
     this._schedule(tick);
-    if (poll) {
-      poll.promise.then(() => {
-        this._ticked.emit(tick);
-      });
-      poll.resolve(this);
-    }
+    poll.promise.then(() => {
+      this._ticked.emit(tick);
+    });
+    poll.resolve(this);
     return this._tick;
   }
 
@@ -313,7 +303,11 @@ export class Poll<T = any, U = any> implements IDisposable {
 
     // Schedule the poll request.
     const request = () => {
-      this._execute(poll);
+      // Bail if disposed during timeout.
+      if (this.isDisposed) {
+        return;
+      }
+      this._request(poll);
     };
     const { interval } = tick;
     clearTimeout(this._timeout);
@@ -326,7 +320,6 @@ export class Poll<T = any, U = any> implements IDisposable {
 
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
-  private _isDisposed = false;
   private _state: Poll.Tick<T, U>;
   private _tick: PromiseDelegate<this> | null = null;
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
