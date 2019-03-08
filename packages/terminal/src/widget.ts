@@ -358,7 +358,7 @@ export namespace Terminal {
   /**
    * A type for the terminal theme.
    */
-  export type ITheme = 'light' | 'dark' | 'inherit' | string;
+  export type ITheme = 'light' | 'dark' | 'inherit';
 
   /**
    * A type for the terminal theme.
