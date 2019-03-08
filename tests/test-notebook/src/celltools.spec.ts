@@ -16,7 +16,7 @@ import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 import { ObservableJSON } from '@jupyterlab/observables';
 
 import {
-  CellTools,
+  NotebookTools,
   NotebookPanel,
   NotebookTracker,
   NotebookActions
@@ -28,7 +28,7 @@ import {
   NBTestUtils
 } from '@jupyterlab/testutils';
 
-class LogTool extends CellTools.Tool {
+class LogTool extends NotebookTools.Tool {
   methods: string[] = [];
 
   protected onActiveCellChanged(msg: Message): void {
@@ -47,7 +47,7 @@ class LogTool extends CellTools.Tool {
   }
 }
 
-class LogKeySelector extends CellTools.KeySelector {
+class LogKeySelector extends NotebookTools.KeySelector {
   events: string[] = [];
   methods: string[] = [];
 
@@ -83,8 +83,8 @@ class LogKeySelector extends CellTools.KeySelector {
 }
 
 describe('@jupyterlab/notebook', () => {
-  describe('celltools', () => {
-    let celltools: CellTools;
+  describe('notebooktools', () => {
+    let notebookTools: NotebookTools;
     let tabpanel: TabPanel;
     let tracker: NotebookTracker;
     let panel0: NotebookPanel;
@@ -104,11 +104,11 @@ describe('@jupyterlab/notebook', () => {
       tracker = new NotebookTracker({ namespace: 'notebook' });
       tracker.add(panel0);
       tracker.add(panel1);
-      celltools = new CellTools({ tracker });
+      notebookTools = new NotebookTools({ tracker });
       tabpanel = new TabPanel();
       tabpanel.addWidget(panel0);
       tabpanel.addWidget(panel1);
-      tabpanel.addWidget(celltools);
+      tabpanel.addWidget(notebookTools);
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
       // Give the posted messages a chance to be handled.
@@ -117,75 +117,75 @@ describe('@jupyterlab/notebook', () => {
 
     afterEach(() => {
       tabpanel.dispose();
-      celltools.dispose();
+      notebookTools.dispose();
     });
 
-    describe('CellTools', () => {
+    describe('NotebookTools', () => {
       describe('#constructor()', () => {
-        it('should create a celltools object', () => {
-          expect(celltools).to.be.an.instanceof(CellTools);
+        it('should create a notebooktools object', () => {
+          expect(notebookTools).to.be.an.instanceof(NotebookTools);
         });
       });
 
       describe('#activeCell', () => {
         it('should be the active cell', () => {
-          expect(celltools.activeCell).to.equal(panel1.content.activeCell);
+          expect(notebookTools.activeCell).to.equal(panel1.content.activeCell);
           tabpanel.currentIndex = 0;
           simulate(panel0.node, 'focus');
-          expect(celltools.activeCell).to.equal(panel0.content.activeCell);
+          expect(notebookTools.activeCell).to.equal(panel0.content.activeCell);
         });
       });
 
       describe('#selectedCells', () => {
         it('should be the currently selected cells', () => {
-          expect(celltools.selectedCells).to.deep.equal([
+          expect(notebookTools.selectedCells).to.deep.equal([
             panel1.content.activeCell
           ]);
           tabpanel.currentIndex = 0;
           simulate(panel0.node, 'focus');
-          expect(celltools.selectedCells).to.deep.equal([
+          expect(notebookTools.selectedCells).to.deep.equal([
             panel0.content.activeCell
           ]);
           panel0.content.select(panel0.content.widgets[1]);
-          expect(celltools.selectedCells.length).to.equal(2);
+          expect(notebookTools.selectedCells.length).to.equal(2);
         });
       });
 
       describe('#addItem()', () => {
         it('should add a cell tool item', () => {
-          const tool = new CellTools.Tool();
-          celltools.addItem({ tool });
+          const tool = new NotebookTools.Tool();
+          notebookTools.addItem({ tool });
           tool.dispose();
         });
 
         it('should accept a rank', () => {
-          const tool = new CellTools.Tool();
-          celltools.addItem({ tool, rank: 100 });
+          const tool = new NotebookTools.Tool();
+          notebookTools.addItem({ tool, rank: 100 });
           tool.dispose();
         });
       });
     });
 
-    describe('CellTools.Tool', () => {
+    describe('NotebookTools.Tool', () => {
       describe('#constructor', () => {
         it('should create a new base tool', () => {
-          const tool = new CellTools.Tool();
-          expect(tool).to.be.an.instanceof(CellTools.Tool);
+          const tool = new NotebookTools.Tool();
+          expect(tool).to.be.an.instanceof(NotebookTools.Tool);
         });
       });
 
       describe('#parent', () => {
-        it('should be the celltools object used by the tool', () => {
-          const tool = new CellTools.Tool({});
-          celltools.addItem({ tool });
-          expect(tool.parent).to.equal(celltools);
+        it('should be the notebooktools object used by the tool', () => {
+          const tool = new NotebookTools.Tool({});
+          notebookTools.addItem({ tool });
+          expect(tool.parent).to.equal(notebookTools);
         });
       });
 
       describe('#onActiveCellChanged()', () => {
         it('should be called when the active cell changes', () => {
           const tool = new LogTool({});
-          celltools.addItem({ tool });
+          notebookTools.addItem({ tool });
           tool.methods = [];
           simulate(panel0.node, 'focus');
           expect(tool.methods).to.contain('onActiveCellChanged');
@@ -195,7 +195,7 @@ describe('@jupyterlab/notebook', () => {
       describe('#onSelectionChanged()', () => {
         it('should be called when the selection changes', () => {
           const tool = new LogTool({});
-          celltools.addItem({ tool });
+          notebookTools.addItem({ tool });
           tool.methods = [];
           const current = tracker.currentWidget;
           current.content.select(current.content.widgets[1]);
@@ -206,9 +206,9 @@ describe('@jupyterlab/notebook', () => {
       describe('#onMetadataChanged()', () => {
         it('should be called when the metadata changes', () => {
           const tool = new LogTool({});
-          celltools.addItem({ tool });
+          notebookTools.addItem({ tool });
           tool.methods = [];
-          const metadata = celltools.activeCell.model.metadata;
+          const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
           metadata.set('foo', 2);
           expect(tool.methods).to.contain('onMetadataChanged');
@@ -216,16 +216,16 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('CellTools.ActiveCellTool', () => {
+    describe('NotebookTools.ActiveCellTool', () => {
       it('should create a new active cell tool', () => {
-        const tool = new CellTools.ActiveCellTool();
-        celltools.addItem({ tool });
-        expect(tool).to.be.an.instanceof(CellTools.ActiveCellTool);
+        const tool = new NotebookTools.ActiveCellTool();
+        notebookTools.addItem({ tool });
+        expect(tool).to.be.an.instanceof(NotebookTools.ActiveCellTool);
       });
 
       it('should handle a change to the active cell', () => {
-        const tool = new CellTools.ActiveCellTool();
-        celltools.addItem({ tool });
+        const tool = new NotebookTools.ActiveCellTool();
+        notebookTools.addItem({ tool });
         const widget = tracker.currentWidget;
         widget.content.activeCellIndex++;
         widget.content.activeCell.model.metadata.set('bar', 1);
@@ -233,18 +233,18 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('CellTools.MetadataEditorTool', () => {
+    describe('NotebookTools.MetadataEditorTool', () => {
       const editorServices = new CodeMirrorEditorFactory();
       const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
       it('should create a new metadata editor tool', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
-        expect(tool).to.be.an.instanceof(CellTools.MetadataEditorTool);
+        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
+        expect(tool).to.be.an.instanceof(NotebookTools.MetadataEditorTool);
       });
 
       it('should handle a change to the active cell', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
-        celltools.addItem({ tool });
+        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
+        notebookTools.addItem({ tool });
         const model = tool.editor.model;
         expect(JSON.stringify(model.value.text)).to.be.ok;
         const widget = tracker.currentWidget;
@@ -254,17 +254,17 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should handle a change to the metadata', () => {
-        const tool = new CellTools.MetadataEditorTool({ editorFactory });
-        celltools.addItem({ tool });
+        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
+        notebookTools.addItem({ tool });
         const model = tool.editor.model;
         const previous = model.value.text;
-        const metadata = celltools.activeCell.model.metadata;
+        const metadata = notebookTools.activeCell.model.metadata;
         metadata.set('foo', 1);
         expect(model.value.text).to.not.equal(previous);
       });
     });
 
-    describe('CellTools.KeySelector', () => {
+    describe('NotebookTools.KeySelector', () => {
       let tool: LogKeySelector;
 
       beforeEach(() => {
@@ -275,7 +275,7 @@ describe('@jupyterlab/notebook', () => {
             baz: [1, 2, 'a']
           }
         });
-        celltools.addItem({ tool });
+        notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
         tabpanel.currentIndex = 2;
       });
@@ -286,7 +286,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#constructor()', () => {
         it('should create a new key selector', () => {
-          expect(tool).to.be.an.instanceof(CellTools.KeySelector);
+          expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
         });
       });
 
@@ -310,7 +310,7 @@ describe('@jupyterlab/notebook', () => {
             select.selectedIndex = 1;
             simulate(select, 'change');
             expect(tool.events).to.contain('change');
-            const metadata = celltools.activeCell.model.metadata;
+            const metadata = notebookTools.activeCell.model.metadata;
             expect(metadata.get('foo')).to.deep.equal([1, 2, 'a']);
           });
         });
@@ -350,7 +350,7 @@ describe('@jupyterlab/notebook', () => {
       describe('#onBeforeDetach()', () => {
         it('should remove event listeners', () => {
           const select = tool.selectNode;
-          celltools.dispose();
+          notebookTools.dispose();
           expect(tool.methods).to.contain('onBeforeDetach');
           simulate(select, 'focus');
           simulate(select, 'blur');
@@ -366,7 +366,7 @@ describe('@jupyterlab/notebook', () => {
           select.selectedIndex = 1;
           simulate(select, 'change');
           expect(tool.methods).to.contain('onValueChanged');
-          const metadata = celltools.activeCell.model.metadata;
+          const metadata = notebookTools.activeCell.model.metadata;
           expect(metadata.get('foo')).to.deep.equal([1, 2, 'a']);
         });
       });
@@ -383,7 +383,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#onMetadataChanged()', () => {
         it('should update the select value', () => {
-          const metadata = celltools.activeCell.model.metadata;
+          const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
           expect(tool.methods).to.contain('onMetadataChanged');
           expect(tool.selectNode.value).to.equal('1');
@@ -391,18 +391,18 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('CellTools.createSlideShowSelector()', () => {
+    describe('NotebookTools.createSlideShowSelector()', () => {
       it('should create a slide show selector', () => {
-        const tool = CellTools.createSlideShowSelector();
+        const tool = NotebookTools.createSlideShowSelector();
         tool.selectNode.selectedIndex = -1;
-        celltools.addItem({ tool });
+        notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(CellTools.KeySelector);
+        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
         expect(tool.key).to.equal('slideshow');
         const select = tool.selectNode;
         expect(select.value).to.equal('');
-        const metadata = celltools.activeCell.model.metadata;
+        const metadata = notebookTools.activeCell.model.metadata;
         expect(metadata.get('slideshow')).to.be.undefined;
         simulate(select, 'focus');
         tool.selectNode.selectedIndex = 1;
@@ -413,7 +413,7 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('CellTools.createNBConvertSelector()', () => {
+    describe('NotebookTools.createNBConvertSelector()', () => {
       it('should create a raw mimetype selector', () => {
         let optionsMap: { [key: string]: JSONValue } = {
           None: '-',
@@ -424,18 +424,18 @@ describe('@jupyterlab/notebook', () => {
           Python: 'text/x-python'
         };
         optionsMap.None = '-';
-        const tool = CellTools.createNBConvertSelector(optionsMap);
+        const tool = NotebookTools.createNBConvertSelector(optionsMap);
         tool.selectNode.selectedIndex = -1;
-        celltools.addItem({ tool });
+        notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
         NotebookActions.changeCellType(panel0.content, 'raw');
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(CellTools.KeySelector);
+        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
         expect(tool.key).to.equal('raw_mimetype');
         const select = tool.selectNode;
         expect(select.value).to.equal('');
 
-        const metadata = celltools.activeCell.model.metadata;
+        const metadata = notebookTools.activeCell.model.metadata;
         expect(metadata.get('raw_mimetype')).to.be.undefined;
         simulate(select, 'focus');
         tool.selectNode.selectedIndex = 2;
@@ -452,14 +452,14 @@ describe('@jupyterlab/notebook', () => {
           Markdown: 'text/markdown',
           Python: 'text/x-python'
         };
-        const tool = CellTools.createNBConvertSelector(optionsMap);
+        const tool = NotebookTools.createNBConvertSelector(optionsMap);
         tool.selectNode.selectedIndex = -1;
-        celltools.addItem({ tool });
+        notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
         NotebookActions.changeCellType(panel0.content, 'code');
 
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(CellTools.KeySelector);
+        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
         expect(tool.key).to.equal('raw_mimetype');
         const select = tool.selectNode;
         expect(select.disabled).to.equal(true);
