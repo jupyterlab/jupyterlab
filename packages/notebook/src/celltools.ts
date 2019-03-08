@@ -489,14 +489,18 @@ export namespace NotebookTools {
      */
     constructor(options: MetadataEditorTool.IOptions) {
       super();
-      const { editorFactory, collapsed } = options;
+      const { editorFactory } = options;
       this.addClass('jp-MetadataEditorTool');
       let layout = (this.layout = new PanelLayout());
       this.editor = new JSONEditor({
         editorFactory
       });
       this.editor.title.label = options.label || 'Edit Metadata';
-      layout.addWidget(new Collapse({ widget: this.editor, collapsed }));
+      const titleNode = new Widget();
+      titleNode.node.textContent = options.label || 'Edit Metadata';
+      layout.addWidget(titleNode);
+      layout.addWidget(this.editor);
+      // layout.addWidget(new Collapse({ widget: this.editor, collapsed }));
     }
 
     /**

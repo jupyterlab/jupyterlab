@@ -226,16 +226,12 @@
   background: transparent;
 }
 
-.jp-NotebookTools-tool:not(:nth-child(2)) {
-  border-top: var(--jp-border-width) solid var(--jp-border-color2);
-}
-
 .jp-MetadataEditorTool {
   flex-direction: column;
 }
 
 .jp-KeySelector {
-  padding: 12px;
+  padding: 0px 12px 0 12px;
 }
 
 .jp-KeySelector select.jp-mod-styled {

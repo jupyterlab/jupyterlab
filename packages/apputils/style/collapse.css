@@ -7,37 +7,30 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  border-top: 1px solid var(--jp-border-color2);
+  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 .jp-Collapse-header {
-  padding: 4px;
-  cursor: pointer;
-  color: var(--jp-ui-font-color0);
+  padding: 4px 12px 4px 12px;
+  color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size2);
+  background-image: var(--jp-icon-caretdown);
+  background-repeat: no-repeat;
+  background-position-x: right 12px; /* TODO: does not work in Chrome */
+}
+
+.jp-Collapse-header:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-Collapse-open > .jp-Collapse-header {
-  cursor: default;
-}
-
-.jp-Collapse .jp-Collapse-header::before {
-  content: '\f0da\00A0'; /* caret-right, non-breaking space */
-  width: 12px;
-  display: inline-block;
-  font: normal normal normal 14px/1 FontAwesome;
-  font-size: inherit;
-  text-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.jp-Collapse-open > .jp-Collapse-header::before {
-  content: '\f0d7\00A0'; /* caret-down, non-breaking space */
+  background-image: var(--jp-icon-caretup);
 }
 
 .jp-Collapse-contents {
-  padding: 4px 4px 4px 12px;
+  padding: 4px 12px 4px 12px;
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   overflow: auto;
