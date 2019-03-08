@@ -170,7 +170,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Serialize the model to a string.
    */
   toString(): string {
-    // make a new model
     return JSON.stringify(this.toJSON());
   }
 
@@ -198,7 +197,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     for (let key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
-
     return {
       metadata,
       nbformat_minor: this._nbformatMinor,

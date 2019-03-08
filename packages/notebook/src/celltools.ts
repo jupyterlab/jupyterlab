@@ -11,7 +11,7 @@ import { h, VirtualDOM, VirtualNode } from '@phosphor/virtualdom';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import { Styling } from '@jupyterlab/apputils';
+import { Collapse, Styling } from '@jupyterlab/apputils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
 
@@ -27,11 +27,10 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
-import { Collapse } from '@jupyterlab/apputils';
 
 /* tslint:disable */
 /**
- * The main menu token.
+ * The notebook tools token.
  */
 export const INotebookTools = new Token<INotebookTools>(
   '@jupyterlab/notebook:INotebookTools'
@@ -243,7 +242,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   private _toolChildren() {
-    return chain(this._advancedTools.children(), this._commonTools.children());
+    return chain(this._commonTools.children(), this._advancedTools.children());
   }
 
   private _commonTools: RankedPanel<NotebookTools.Tool>;

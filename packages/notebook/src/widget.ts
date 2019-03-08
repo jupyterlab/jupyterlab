@@ -766,8 +766,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      const cell = new CodeCell(options).initializeState();
-      return cell;
+      return new CodeCell(options).initializeState();
     }
 
     /**
