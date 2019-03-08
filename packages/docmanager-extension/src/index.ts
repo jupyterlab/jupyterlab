@@ -46,8 +46,6 @@ import { IDisposable } from '@phosphor/disposable';
 namespace CommandIDs {
   export const clone = 'docmanager:clone';
 
-  // export const closeAllFiles = 'docmanager:close-all-files';
-
   export const deleteFile = 'docmanager:delete-file';
 
   export const newUntitled = 'docmanager:new-untitled';
@@ -298,13 +296,6 @@ function addCommands(
   if (labShell) {
     addLabCommands(app, docManager, labShell, opener, palette);
   }
-
-  // commands.addCommand(CommandIDs.closeAllFiles, {
-  //   label: 'Close All',
-  //   execute: () => {
-  //     labShell.closeAll();
-  //   }
-  // });
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
