@@ -18,7 +18,7 @@
   font-size: var(--jp-ui-font-size2);
   background-image: var(--jp-icon-caretdown);
   background-repeat: no-repeat;
-  background-position-x: right 12px; /* TODO: does not work in Chrome */
+  background-position: right 12px top 50%;
 }
 
 .jp-Collapse-header:hover {
