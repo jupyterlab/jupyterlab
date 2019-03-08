@@ -44,15 +44,15 @@ export class Poll<T = any, U = any> implements IDisposable {
     const poll = new PromiseDelegate<this>();
     this._tick = poll;
 
-    // Set the initial poll state.
+    // Set the initial poll tick state.
     this._state = {
       interval: this.interval,
       payload: null,
       phase: 'standby',
-      tick: new Date().getTime()
+      timestamp: new Date().getTime()
     };
 
-    // Schedule the first poll execution after the `when` promise is resolved.
+    // Schedule the first poll tick after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
         // Bail if disposed while `when` promise was in flight.
@@ -65,7 +65,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           interval: this.interval,
           payload: null,
           phase: 'when-resolved',
-          tick: new Date().getTime()
+          timestamp: new Date().getTime()
         });
       })
       .catch(reason => {
@@ -79,7 +79,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           interval: this.interval,
           payload: null,
           phase: 'when-rejected',
-          tick: new Date().getTime()
+          timestamp: new Date().getTime()
         });
 
         // Warn that `when` promise was rejected but starting anyway.
@@ -136,14 +136,14 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * A handle to the next link in the poll promise chain.
    */
-  get state(): Poll.State<T, U> {
+  get state(): Poll.Tick<T, U> {
     return this._state;
   }
 
   /**
    * A signal emitted when the poll ticks and fires off a new request.
    */
-  get ticked(): ISignal<this, void> {
+  get ticked(): ISignal<this, Poll.Tick<T, U>> {
     return this._ticked;
   }
 
@@ -174,7 +174,7 @@ export class Poll<T = any, U = any> implements IDisposable {
       interval: 0, // Immediately.
       payload: null,
       phase: 'refresh',
-      tick: new Date().getTime()
+      timestamp: new Date().getTime()
     }).promise;
   }
 
@@ -194,7 +194,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         interval: Private.jitter(this.interval, variance, min, max),
         payload: null,
         phase: 'standby',
-        tick: new Date().getTime()
+        timestamp: new Date().getTime()
       });
       return;
     }
@@ -217,7 +217,7 @@ export class Poll<T = any, U = any> implements IDisposable {
           interval: Private.jitter(this.interval, variance, min, max),
           payload: resolved,
           phase: this._state.phase === 'rejected' ? 'reconnect' : 'resolved',
-          tick: new Date().getTime()
+          timestamp: new Date().getTime()
         });
       })
       .catch((rejected: U) => {
@@ -237,22 +237,22 @@ export class Poll<T = any, U = any> implements IDisposable {
           interval: Private.jitter(increased, variance, min, max),
           payload: rejected,
           phase: 'rejected',
-          tick: new Date().getTime()
+          timestamp: new Date().getTime()
         });
       });
   }
 
   /**
-   * Resolve an outstanding poll request and schedule the next poll state.
+   * Resolve an outstanding poll and schedule the next poll tick.
    */
   private _resolve(
     poll: PromiseDelegate<this> | null,
-    state: Poll.State<T, U>
+    tick: Poll.Tick<T, U>
   ): PromiseDelegate<this> {
-    this._schedule(state);
+    this._schedule(tick);
     if (poll) {
       poll.promise.then(() => {
-        this._ticked.emit();
+        this._ticked.emit(tick);
       });
       poll.resolve(this);
     }
@@ -260,16 +260,16 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * Schedule a poll request.
+   * Schedule a poll tick.
    *
    * #### Notes
    * This method is responsible for maintaining internal poll state.
    *
    * This method will always replace the internal tick.
    */
-  private _schedule(state: Poll.State<T, U>): void {
+  private _schedule(tick: Poll.Tick<T, U>): void {
     // Update the state.
-    this._state = state;
+    this._state = tick;
 
     // Create the next poll promise and set the outstanding reference.
     const poll = new PromiseDelegate<this>();
@@ -280,17 +280,17 @@ export class Poll<T = any, U = any> implements IDisposable {
       this._execute(poll);
     };
     clearTimeout(this._timeout);
-    this._timeout = state.interval
-      ? setTimeout(request, state.interval)
+    this._timeout = tick.interval
+      ? setTimeout(request, tick.interval)
       : requestAnimationFrame(request);
   }
 
   private _disposed = new Signal<this, void>(this);
-  private _factory: Poll.Factory<T, U>;
+  private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
   private _isDisposed = false;
-  private _state: Poll.State<T, U>;
+  private _state: Poll.Tick<T, U>;
   private _tick: PromiseDelegate<this> | null = null;
-  private _ticked = new Signal<this, void>(this);
+  private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
   private _timeout = 0;
 }
 
@@ -299,18 +299,7 @@ export class Poll<T = any, U = any> implements IDisposable {
  */
 export namespace Poll {
   /**
-   * A factory that generates poll request promises.
-   *
-   * #### Notes
-   * The generic arguments are as follows:
-   *  - `T` indicates the resolved type of the factory's promises.
-   *  - `U` indicates the rejected type of the factory's promises.
-   */
-  export type Factory<T, U> = (state: State<T, U>) => Promise<T>;
-
-  /**
-   * The phase of tbe poll when the current request was scheduled, i.e. the end
-   * state of the immediately preceding link of the promise chain.
+   * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
     | 'reconnect'
@@ -324,7 +313,7 @@ export namespace Poll {
   /**
    * Definition of poll state at any given tick.
    */
-  export type State<T, U> = {
+  export type Tick<T, U> = {
     /**
      * The number of milliseconds until the next poll request.
      */
@@ -345,9 +334,9 @@ export namespace Poll {
     readonly phase: Phase;
 
     /**
-     * The timestamp of the current poll tick.
+     * The timestamp of the poll tick.
      */
-    readonly tick: number;
+    readonly timestamp: number;
   };
 
   /**
@@ -384,16 +373,14 @@ export namespace Poll {
     name?: string;
 
     /**
-     * A factory function that is passed poll state and returns a poll promise.
+     * A factory function that is passed a poll tick and returns a poll promise.
      *
      * #### Notes
-     * It is safe to ignore the state argument.
-     *
      * The generic arguments are as follows:
      *  - `T` indicates the resolved type of the factory's promises.
      *  - `U` indicates the rejected type of the factory's promises.
      */
-    factory: Factory<T, U>;
+    factory: (tick: Tick<T, U>) => Promise<T>;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
