@@ -104,18 +104,24 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._onNotebookPanelChanged,
       this
     );
+    this._tracker.activeCellChanged.connect(
+      this._onActiveCellChanged,
+      this
+    );
+    this._tracker.selectionChanged.connect(
+      this._onSelectionChanged,
+      this
+    );
     this._onNotebookPanelChanged();
+    this._onActiveCellChanged();
+    this._onSelectionChanged();
   }
 
   /**
    * The active cell widget.
    */
   get activeCell(): Cell | null {
-    const panel = this._tracker.currentWidget;
-    if (!panel) {
-      return null;
-    }
-    return panel.content.activeCell || null;
+    return this._tracker.activeCell;
   }
 
   /**
@@ -165,33 +171,10 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change to the notebook panel.
    */
   private _onNotebookPanelChanged(): void {
-    if (this._prevPanel && !this._prevPanel.isDisposed) {
-      this._prevPanel.content.activeCellChanged.disconnect(
-        this._onActiveCellChanged,
-        this
-      );
-      this._prevPanel.content.selectionChanged.disconnect(
-        this._onSelectionChanged,
-        this
-      );
-    }
     const panel = this.notebookPanel;
-    this._prevPanel = panel;
-    if (panel) {
-      panel.content.activeCellChanged.connect(
-        this._onActiveCellChanged,
-        this
-      );
-      panel.content.selectionChanged.connect(
-        this._onSelectionChanged,
-        this
-      );
-    }
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.NotebookPanelMessage);
     });
-    this._onActiveCellChanged();
-    this._onSelectionChanged();
   }
 
   /**
@@ -204,7 +187,7 @@ export class NotebookTools extends Widget implements INotebookTools {
         this
       );
     }
-    let activeCell = this.activeCell ? this.activeCell.model : null;
+    const activeCell = this.activeCell ? this.activeCell.model : null;
     this._prevActive = activeCell;
     if (activeCell) {
       activeCell.metadata.changed.connect(
@@ -249,7 +232,6 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
-  private _prevPanel: NotebookPanel | null;
   private _prevActive: ICellModel | null;
 }
 
