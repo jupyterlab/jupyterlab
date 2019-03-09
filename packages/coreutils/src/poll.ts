@@ -39,20 +39,14 @@ export class Poll<T = any, U = any> implements IDisposable {
     this.name = name || 'unknown';
     this.variance = typeof variance === 'number' ? variance : 0.2;
     this._factory = factory;
-
-    // Create the first poll tick.
-    const poll = new PromiseDelegate<this>();
-    this._tick = poll;
-
-    // Set the initial poll tick state.
     this._state = {
       interval: this.interval,
       payload: null,
-      phase: 'started',
+      phase: 'instantiated',
       timestamp: new Date().getTime()
     };
 
-    // Schedule the first poll tick after the `when` promise is resolved.
+    // Schedule a poll tick after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
         // Bail if disposed while `when` promise was in flight.
@@ -60,8 +54,8 @@ export class Poll<T = any, U = any> implements IDisposable {
           return;
         }
 
-        // Resolve the poll and schedule the next one.
-        this._resolve(poll, {
+        // Resolve the poll and schedule the next tick.
+        this._resolve(this._tick, {
           interval: this.interval,
           payload: null,
           phase: 'when-resolved',
@@ -74,8 +68,8 @@ export class Poll<T = any, U = any> implements IDisposable {
           return;
         }
 
-        // Resolve the poll and schedule the next one.
-        this._resolve(poll, {
+        // Resolve the poll and schedule the next tick.
+        this._resolve(this._tick, {
           interval: this.interval,
           payload: null,
           phase: 'when-rejected',
@@ -166,10 +160,17 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Resolves the outstanding poll and schedules the next tick immediately.
    *
    * #### Notes
+   * If the poll has been instantiated but its `when` promise has not yet
+   * resolved, this call will be scheduled after the `when` promise resolves.
+   *
    * It is safe to call this method multiple times. It returns the outstanding
    * poll request if the current tick phase is `'refreshed'`.
    */
-  refresh(): Promise<this> {
+  async refresh(): Promise<this> {
+    if (this._state.phase === 'instantiated') {
+      await this._tick.promise;
+    }
+
     if (this._state.phase === 'refreshed') {
       return this._tick.promise;
     }
@@ -186,10 +187,17 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Starts polling.
    *
    * #### Notes
+   * If the poll has been instantiated but its `when` promise has not yet
+   * resolved, this call will be scheduled after the `when` promise resolves.
+   *
    * It is safe to call this method multiple times. The poll will only start
    * if its current tick phase is `'standby'` or `'stopped'`.
    */
-  start(): Promise<this> {
+  async start(): Promise<this> {
+    if (this._state.phase === 'instantiated') {
+      await this._tick.promise;
+    }
+
     if (this._state.phase !== 'standby' && this._state.phase !== 'stopped') {
       return this._tick.promise;
     }
@@ -206,10 +214,17 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Stops polling.
    *
    * #### Notes
-   * It is safe to call this method multiple times. The poll will stop
-   * if its current tick phase is not `'stopped'`.
+   * If the poll has been instantiated but its `when` promise has not yet
+   * resolved, this call will be scheduled after the `when` promise resolves.
+   *
+   * It is safe to call this method multiple times. The poll will only stop if
+   * its current tick phase is not `'stopped'`.
    */
-  stop(): Promise<this> {
+  async stop(): Promise<this> {
+    if (this._state.phase === 'instantiated') {
+      await this._tick.promise;
+    }
+
     if (this._state.phase === 'stopped') {
       return this._tick.promise;
     }
@@ -223,7 +238,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * Make a poll request.
+   * Execute a poll request.
    */
   private _request(poll: PromiseDelegate<this>): void {
     const { max, min, variance } = this;
@@ -239,20 +254,13 @@ export class Poll<T = any, U = any> implements IDisposable {
       return;
     }
 
-    // Generate a new poll promise and handle its resolution.
     this._factory(this._state)
       .then((resolved: T) => {
-        // Bail if disposed while poll promise was in flight.
-        if (this.isDisposed) {
+        // Bail if poll was disposed or superseded while promise was in flight.
+        if (this.isDisposed || poll !== this._tick) {
           return;
         }
 
-        // Bail if this promise has already been superseded.
-        if (poll !== this._tick) {
-          return;
-        }
-
-        // Resolve the poll and schedule the next one.
         this._resolve(poll, {
           interval: Private.jitter(this.interval, variance, min, max),
           payload: resolved,
@@ -261,17 +269,11 @@ export class Poll<T = any, U = any> implements IDisposable {
         });
       })
       .catch((rejected: U) => {
-        // Bail if disposed while poll promise was in flight.
-        if (this.isDisposed) {
+        // Bail if poll was disposed or superseded while promise was in flight.
+        if (this.isDisposed || poll !== this._tick) {
           return;
         }
 
-        // Bail if this promise has already been superseded.
-        if (poll !== this._tick) {
-          return;
-        }
-
-        // Resolve the poll and schedule next one with an increased interval.
         const increased = Math.min(this._state.interval * 2, max);
         this._resolve(poll, {
           interval: Private.jitter(increased, variance, min, max),
@@ -292,19 +294,18 @@ export class Poll<T = any, U = any> implements IDisposable {
     const { interval } = tick;
     const poll = new PromiseDelegate<this>();
     const request = () => {
-      // Bail if disposed during timeout.
       if (this.isDisposed) {
         return;
       }
       this._request(poll);
     };
 
-    // Cancel outstanding request if possible.
+    // Clear the schedule if possible.
     clearTimeout(this._timeout);
 
     // Update poll state and schedule the next tick.
-    this._tick = poll;
     this._state = tick;
+    this._tick = poll;
     this._timeout = interval
       ? interval === Infinity
         ? -1 // Never execute request.
@@ -323,7 +324,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
   private _state: Poll.Tick<T, U>;
-  private _tick: PromiseDelegate<this> | null = null;
+  private _tick: PromiseDelegate<this> | null = new PromiseDelegate<this>();
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
   private _timeout = -1;
 }
@@ -336,6 +337,7 @@ export namespace Poll {
    * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
+    | 'instantiated'
     | 'reconnected'
     | 'refreshed'
     | 'rejected'
@@ -359,8 +361,8 @@ export namespace Poll {
      * The payload of the last poll resolution or rejection.
      *
      * #### Notes
-     * `payload` is `null` unless the `phase` is `'resolved'` or `'rejected'`.
-     * `payload` is of type `T` for resolutions and `U` for rejections.
+     * The payload is `null` unless the `phase` is `'reconnected`, `'resolved'`,
+     * or `'rejected'`. Its type is `T` for resolutions and `U` for rejections.
      */
     readonly payload: T | U | null;
 
