@@ -1,9 +1,10 @@
 import { Token } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
-import { IConverterRegistry } from './converters';
+import { IConverterRegistry, MimeType_ } from './converters';
 import { Dataset, IDatasetRegistry } from './datasets';
-import { resolveDataSet, resolveMimeType } from './resolvers';
-import { createViewerMimeType, extractViewerLabel } from './viewers';
+import { resolveDataSet, resolveDataType } from './resolvers';
+import { viewerDataType } from './viewers';
+import { INVALID } from './datatype';
 
 export interface IDataRegistryConfig {
   converters: IConverterRegistry;
@@ -36,7 +37,10 @@ export class DataRegistry {
    * Basically checks if the we will be able to resolve the mimetype just from the URL.
    */
   hasConversions(url: URL): boolean {
-    return this.converters.listTargetMimeTypes(url, [resolveMimeType]).size > 1;
+    return (
+      this.converters.listTargetMimeTypes(url, [resolveDataType.mimeType])
+        .size > 1
+    );
   }
 
   /**
@@ -53,9 +57,14 @@ export class DataRegistry {
    * Returns the viewer labels for a given URL.
    */
   viewersForURL(url: URL): Set<string> {
-    return new Set([...this.possibleMimeTypesForURL(url)]
-      .map(extractViewerLabel)
-      .filter(label => label !== null) as string[]);
+    const res = new Set<string>();
+    for (const mimeType of this.possibleMimeTypesForURL(url)) {
+      const label = viewerDataType.parseMimeType(mimeType);
+      if (label !== INVALID) {
+        res.add(label);
+      }
+    }
+    return res;
   }
 
   /**
@@ -64,7 +73,7 @@ export class DataRegistry {
   async viewURL(url: URL, label: string): Promise<void> {
     const viewer: Dataset<() => Promise<void>> = await this.convertByURL(
       url,
-      createViewerMimeType(label)
+      viewerDataType.createMimeType(label)
     );
     await viewer.data();
   }
@@ -75,7 +84,10 @@ export class DataRegistry {
    *
    * Any datasets that are created will be added to the registery.
    */
-  async convertByURL(url: URL, targetMimeType: string): Promise<Dataset<any>> {
+  async convertByURL(
+    url: URL,
+    targetMimeType: MimeType_
+  ): Promise<Dataset<any>> {
     let finalDataSet: Dataset<any>;
     for await (const dataset of this.converters.convert(
       this.data.filterByURL(url),

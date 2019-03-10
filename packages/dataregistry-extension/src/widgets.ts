@@ -13,7 +13,8 @@ import { InstanceTracker } from '@jupyterlab/apputils';
 import {
   extractWidgetArgs,
   IDataRegistry,
-  widgetViewerConverter
+  widgetViewerConverter,
+  wrapWidgetConverter
 } from '@jupyterlab/dataregistry';
 import { Widget } from '@phosphor/widgets';
 
@@ -33,6 +34,7 @@ function activate(
   dataRegistry: IDataRegistry,
   restorer: ILayoutRestorer
 ) {
+  dataRegistry.converters.register(wrapWidgetConverter);
   dataRegistry.converters.register(
     widgetViewerConverter(async (widget: Widget) => {
       if (!tracker.has(widget)) {

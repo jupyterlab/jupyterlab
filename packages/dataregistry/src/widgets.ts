@@ -1,19 +1,18 @@
-import { Converter, Convert, singleConverter, Converts } from './converters';
+import { Converter } from './converters';
 import { Widget } from '@phosphor/widgets';
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { View, createViewerMimeType } from './viewers';
+import { View, viewerDataType } from './viewers';
+import { DataTypeStringArg } from './datatype';
 
-const baseMimeType = 'application/x.jupyter.widget; label=';
-function widgetMimeType(label: string) {
-  return `${baseMimeType}${label}`;
-}
+/**
+ * A function that creates a widget for the data.
+ */
+export type WidgetCreator = () => Promise<Widget>;
 
-export function extractWidgetLabel(mimeType: string): string | null {
-  if (!mimeType.startsWith(baseMimeType)) {
-    return null;
-  }
-  return mimeType.slice(baseMimeType.length);
-}
+export const widgetDataType = new DataTypeStringArg<WidgetCreator>(
+  'application/x.jupyter.widget',
+  'label'
+);
 
 export function extractWidgetArgs(
   widget: Widget
@@ -44,41 +43,27 @@ class DataWidget extends MainAreaWidget implements IHasURL {
   url: URL;
 }
 
-export interface IStaticWidgetConverterOptions<T> {
-  mimeType: string;
-  label: string;
-  convert: Convert<T, Widget>;
-}
+export type WrappedWidgetCreator = () => Promise<DataWidget>;
 
-export type WidgetCreator = () => Promise<Widget>;
+export const wrappedWidgetDataType = new DataTypeStringArg<
+  WrappedWidgetCreator
+>('application/x.jupyter.wrapped-widget', 'label');
 
-export function staticWidgetConverter<T>({
-  mimeType,
-  label,
-  convert
-}: IStaticWidgetConverterOptions<T>): Converter<T, WidgetCreator> {
-  return (currentMimeType: string, url: URL) => {
-    const res: Converts<T, WidgetCreator> = new Map();
-    if (currentMimeType === mimeType) {
-      res.set(widgetMimeType(label), async (data: T) => async () =>
-        new DataWidget(await convert(data), url, label)
-      );
-    }
-    return res;
-  };
-}
+export const wrapWidgetConverter = widgetDataType.createSingleTypedConverter(
+  wrappedWidgetDataType,
+  (label, url) => {
+    return [
+      label,
+      async creator => async () => new DataWidget(await creator(), url, label)
+    ];
+  }
+);
 
 export function widgetViewerConverter(
   display: (widget: Widget) => Promise<void>
-): Converter<WidgetCreator, View> {
-  return singleConverter((mimeType: string) => {
-    const label = extractWidgetLabel(mimeType);
-    if (label === null) {
-      return null;
-    }
-    return [
-      createViewerMimeType(label),
-      async data => async () => display(await data())
-    ];
-  });
+): Converter<WrappedWidgetCreator, View> {
+  return wrappedWidgetDataType.createSingleTypedConverter(
+    viewerDataType,
+    label => [label, async creator => async () => display(await creator())]
+  );
 }

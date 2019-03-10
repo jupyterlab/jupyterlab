@@ -15,8 +15,8 @@ import {
   IDataExplorer,
   resolveExtensionConverter,
   resolveFileConverter,
-  staticWidgetConverter,
-  URLMimeType
+  URLDataType,
+  widgetDataType
 } from '@jupyterlab/dataregistry';
 import { DirListing, IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { MessageLoop } from '@phosphor/messaging';
@@ -55,11 +55,15 @@ function activate(
     resolveExtensionConverter('.png', 'image/png')
   );
   dataRegistry.converters.register(
-    staticWidgetConverter({
-      mimeType: URLMimeType('image/png'),
-      label: 'Image',
-      convert: async (url: URL | string) =>
-        ReactWidget.create(<img src={url.toString()} />)
+    URLDataType.createSingleTypedConverter(widgetDataType, mimeType => {
+      if (mimeType !== 'image/png') {
+        return null;
+      }
+      return [
+        'Image',
+        async (url: URL | string) => async () =>
+          ReactWidget.create(<img src={url.toString()} />)
+      ];
     })
   );
   dataRegistry.converters.register(

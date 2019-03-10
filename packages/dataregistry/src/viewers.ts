@@ -1,21 +1,11 @@
-const baseMimeType = 'application/x.jupyter.viewer; label=';
+import { DataTypeStringArg } from './datatype';
+
 /**
- * Two types of viewers:
- *
- * Those that return widgets, those that etc.
- *
- * OK so first convert to widget. Then have conversion from widget to viewer :D
- * @param label
+ * A function that is called to view the data in some way.
  */
-export function createViewerMimeType(label: string) {
-  return `${baseMimeType}${label}`;
-}
-
-export function extractViewerLabel(mimeType: string): string | null {
-  if (!mimeType.startsWith(baseMimeType)) {
-    return null;
-  }
-  return mimeType.slice(baseMimeType.length);
-}
-
 export type View = () => Promise<void>;
+
+export const viewerDataType = new DataTypeStringArg<View>(
+  'application/x.jupyter.viewer',
+  'label'
+);

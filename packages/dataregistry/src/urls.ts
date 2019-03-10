@@ -1,42 +1,34 @@
-import { Converter, seperateConverter, singleConverter } from './converters';
-import { extractResolveMimeType } from '.';
+import { DataTypeStringArg } from './datatype';
+import { resolveMimetypeDataType } from './resolvers';
 
-const baseMimeType = 'application/x.jupyter.url; mimeType=';
+/**
+ * Type where data is a HTTP URL pointing to the data.
+ *
+ * Note: it can either be a URL or a string type to accomedate loading it directly
+ * from JSON as a string type.
+ */
+export const URLDataType = new DataTypeStringArg<URL | string>(
+  'application/x.jupyter.url',
+  'mimeType'
+);
 
-export function URLMimeType(mimeType: string) {
-  return `${baseMimeType}${mimeType}`;
-}
-
-export function extractURLMimeType(mimeType: string): string | null {
-  if (!mimeType.startsWith(baseMimeType)) {
-    return null;
-  }
-  return mimeType.slice(baseMimeType.length);
-}
-
-export const resolverURLConverter: Converter<string, URL> = singleConverter(
-  (mimeType: string, url: URL) => {
-    const resMimeType = extractResolveMimeType(mimeType);
-    if (resMimeType === null) {
-      return null;
-    }
+export const resolverURLConverter = resolveMimetypeDataType.createSingleTypedConverter(
+  URLDataType,
+  (resMimeType, url) => {
     const isHTTP = url.protocol === 'http:';
     const isHTTPS = url.protocol === 'https:';
-    // TODO: What if URL is differnt from this URL? How to support mimetypes then
     if (isHTTP || isHTTPS) {
-      return [URLMimeType(resMimeType), async () => url];
+      return [resMimeType, async () => url];
     }
     return null;
   }
 );
 
-export const URLStringConverter: Converter<
-  URL | string,
-  string
-> = seperateConverter({
-  computeMimeType: extractURLMimeType,
-  convert: async (url: URL | string) => {
-    const response = await fetch(url.toString());
-    return await response.text();
-  }
-});
+async function fetchURL(url: URL | string): Promise<string> {
+  const response = await fetch(url.toString());
+  return await response.text();
+}
+
+export const URLStringConverter = URLDataType.createSingleConverter<string>(
+  mimeType => [mimeType, fetchURL]
+);

@@ -1,42 +1,35 @@
 import { Dataset } from './datasets';
-import { Converter, Converts } from './converters';
+import { Converter, MimeType_ } from './converters';
+import { DataTypeNoArgs, DataTypeStringArg } from './datatype';
 
-export const resolveMimeType = 'application/x.jupyter.resolve';
-const baseMimeTypeKnown = 'application/x.jupyter.resolve; mimetype=';
-
-export function resolveMimeTypeKnown(mimeType: string) {
-  return `${baseMimeTypeKnown}${mimeType}`;
-}
+export const resolveDataType = new DataTypeNoArgs<null>(
+  'application/x.jupyter.resolve'
+);
+export const resolveMimetypeDataType = new DataTypeStringArg<null>(
+  'application/x.jupyter.resolve',
+  'mimetype'
+);
 
 export function resolveDataSet(url: URL): Dataset<null> {
-  return new Dataset(resolveMimeType, url, null);
-}
-
-export function extractResolveMimeType(mimeType: string): string | null {
-  if (!mimeType.startsWith(baseMimeTypeKnown)) {
-    return null;
-  }
-  return mimeType.slice(baseMimeTypeKnown.length);
+  return new Dataset(resolveDataType.createMimeType(), url, null);
 }
 
 /**
  * Returns a set of possible mimetype for a URL.
  */
-export type Resolver<T> = (url: URL) => Set<string>;
+export type Resolver = (url: URL) => Set<MimeType_>;
 
-export function resolveConverter<T>(
-  resolver: Resolver<T>
-): Converter<null, null> {
-  return (mimeType: string, url: URL) => {
-    const res: Converts<null, null> = new Map();
-    if (resolveMimeType !== mimeType) {
+export function resolveConverter<T>(resolver: Resolver): Converter<null, null> {
+  return resolveDataType.createTypedConverter(
+    resolveMimetypeDataType,
+    (_, url) => {
+      const res = new Map<MimeType_, (data: null) => Promise<null>>();
+      for (const mimeType of resolver(url)) {
+        res.set(mimeType, async () => null);
+      }
       return res;
     }
-    for (const mimeType of resolver(url)) {
-      res.set(resolveMimeTypeKnown(mimeType), async () => null);
-    }
-    return res;
-  };
+  );
 }
 
 /**

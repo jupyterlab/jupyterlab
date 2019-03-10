@@ -9,8 +9,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { Dataset } from './datasets';
 import { reachable, expandPath } from './graph';
 
+// Cannot use name "MimeType" because it is already defined in `lib.dom.d.ts`
+export type MimeType_ = string;
 export type Convert<T, V> = (data: T) => Promise<V>;
-export type Converts<T, V> = Map<string, Convert<T, V>>;
+export type Converts<T, V> = Map<MimeType_, Convert<T, V>>;
 /**
  * Function that can possibly convert between data type T to
  * data type V.
@@ -19,14 +21,14 @@ export type Converts<T, V> = Map<string, Convert<T, V>>;
  * and returns a mapping of possible resulting mimetypes and
  * a function to compute their data.
  */
-export type Converter<T, V> = (mimeType: string, url: URL) => Converts<T, V>;
+export type Converter<T, V> = (mimeType: MimeType_, url: URL) => Converts<T, V>;
 
 function combineConverters<T, U>(
   a: Converter<T, U>,
   b: Converter<T, U>
 ): Converter<T, U> {
-  return (mimeType: string, url: URL) => {
-    return new Map<string, Convert<T, U>>([
+  return (mimeType: MimeType_, url: URL) => {
+    return new Map<MimeType_, Convert<T, U>>([
       ...a(mimeType, url),
       ...b(mimeType, url)
     ]);
@@ -39,78 +41,21 @@ function combineManyConverters<T, V>(
   return [...converters].reduce(combineConverters, () => new Map());
 }
 
+export type SingleConvert<T, V> = null | [MimeType_, Convert<T, V>];
+
+/**
+ * Helper function to create a creator that has either 0 or 1 resulting mimetype.
+ */
 export function singleConverter<T, V>(
-  fn: (mimeType: string, url: URL) => null | [string, Convert<T, V>]
+  fn: (mimeType: MimeType_, url: URL) => SingleConvert<T, V>
 ): Converter<T, V> {
-  return (mimeType: string, url: URL) => {
+  return (mimeType: MimeType_, url: URL) => {
     const possibleResult = fn(mimeType, url);
     if (possibleResult === null) {
       return new Map();
     }
     return new Map([possibleResult]);
   };
-}
-
-export interface ISeperateConverterOptions<T, V> {
-  /**
-   * Computes the target mime type, given some source mimetype. If the convert is unable to
-   * convert this mimetype, it should return `null`.
-   */
-  computeMimeType: (mimeType: string) => string | null;
-
-  /**
-   * The conversion function.
-   */
-  convert: Convert<T, V>;
-}
-
-/**
- * Create a convert by specifying seperate functions to compute the mimetype
- * and convert the data.
- */
-export function seperateConverter<T, V>({
-  computeMimeType,
-  convert
-}: ISeperateConverterOptions<T, V>): Converter<T, V> {
-  return singleConverter((mimeType: string) => {
-    const targetMimeType = computeMimeType(mimeType);
-    if (targetMimeType == null) {
-      return null;
-    }
-    return [targetMimeType, convert];
-  });
-}
-
-export interface IStaticConverterOptions<T, V> {
-  /**
-   * The input mime type of the data of type `A` to be converted.
-   */
-  sourceMimeType: string;
-
-  /**
-   * The output mime type of the converted data of type `B`.
-   */
-  targetMimeType: string;
-  /**
-   * The conversion function.
-   */
-  convert: Convert<T, V>;
-}
-
-export function staticConverter<T, V>({
-  sourceMimeType,
-  targetMimeType,
-  convert
-}: IStaticConverterOptions<T, V>): Converter<T, V> {
-  return seperateConverter({
-    computeMimeType: (mimeType: string) => {
-      if (mimeType === sourceMimeType) {
-        return targetMimeType;
-      }
-      return null;
-    },
-    convert
-  });
 }
 
 /**
@@ -162,10 +107,10 @@ export class ConverterRegistry {
    */
   async *convert(
     sourceDatasets: Iterable<Dataset<unknown>>,
-    targetMimeType: string
+    targetMimeType_: MimeType_
   ): AsyncIterableIterator<Dataset<unknown>> {
     let singleURL: URL | null = null;
-    const datas: Map<string, unknown> = new Map();
+    const datas: Map<MimeType_, unknown> = new Map();
     for (const { url, mimeType, data } of sourceDatasets) {
       if (singleURL === null) {
         singleURL = url;
@@ -179,30 +124,30 @@ export class ConverterRegistry {
       datas.set(mimeType, data);
     }
     if (singleURL === null) {
-      throw new Error(`No datasets passed in for ${targetMimeType}`);
+      throw new Error(`No datasets passed in for ${targetMimeType_}`);
     }
     const reachable = this._reachable(singleURL, datas.keys());
-    if (!reachable.has(targetMimeType)) {
+    if (!reachable.has(targetMimeType_)) {
       throw new Error(
         `Cannot get from ${[
           ...reachable.keys()
-        ]} to ${targetMimeType} for URL ${singleURL}`
+        ]} to ${targetMimeType_} for URL ${singleURL}`
       );
     }
-    for (const [initialMimeType, convert, resultMimeType] of expandPath(
-      targetMimeType,
-      reachable.get(targetMimeType)!
+    for (const [initialMimeType_, convert, resultMimeType_] of expandPath(
+      targetMimeType_,
+      reachable.get(targetMimeType_)!
     )) {
       // First part of path only has result
-      if (!initialMimeType || !convert) {
+      if (!initialMimeType_ || !convert) {
         yield [...sourceDatasets].find(
-          dataset => dataset.mimeType === resultMimeType
+          dataset => dataset.mimeType === resultMimeType_
         )!;
         continue;
       }
-      const data = await convert(datas.get(initialMimeType));
-      datas.set(resultMimeType, data);
-      yield new Dataset(resultMimeType, singleURL, data);
+      const data = await convert(datas.get(initialMimeType_));
+      datas.set(resultMimeType_, data);
+      yield new Dataset(resultMimeType_, singleURL, data);
     }
   }
 
@@ -211,14 +156,14 @@ export class ConverterRegistry {
    *
    * @param url - the input URL
    *
-   * @param sourceMimeType - the input mime types.
+   * @param sourceMimeType_ - the input mime types.
    *
    * @returns An `Set<string>` of the available target mime types.
    */
   listTargetMimeTypes(
     url: URL,
-    sourceMimeTypes: Iterable<string>
-  ): Set<string> {
+    sourceMimeTypes: Iterable<MimeType_>
+  ): Set<MimeType_> {
     return new Set(this._reachable(url, sourceMimeTypes).keys());
   }
 
@@ -229,8 +174,8 @@ export class ConverterRegistry {
    */
   private _reachable(
     url: URL,
-    mimeTypes: Iterable<string>
-  ): Map<string, Iterable<[string, Convert<unknown, unknown>]>> {
+    mimeTypes: Iterable<MimeType_>
+  ): Map<MimeType_, Iterable<[MimeType_, Convert<unknown, unknown>]>> {
     const converter = combineManyConverters(this._converters);
     return reachable(mimeType => converter(mimeType, url), new Set(mimeTypes));
   }

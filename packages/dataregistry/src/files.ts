@@ -3,22 +3,16 @@
  *
  * Then convert to known filetype, with URL on it.
  */
-import { extractResolveMimeType } from './resolvers';
-import { Converter, singleConverter, Converts } from './converters';
-import { URLMimeType } from './urls';
+import { Converter } from './converters';
+import { URLDataType } from './urls';
+import { DataTypeStringArg } from './datatype';
+import { resolveMimetypeDataType } from './resolvers';
 
-const baseMimeType = 'application/x.jupyter.file; mimeType=';
-
-function fileMimeType(mimeType: string) {
-  return `${baseMimeType}${mimeType}`;
-}
-
-export function extractFileMimeType(mimeType: string): string | null {
-  if (!mimeType.startsWith(baseMimeType)) {
-    return null;
-  }
-  return mimeType.slice(baseMimeType.length);
-}
+export type FilePath = string;
+export const fileDataType = new DataTypeStringArg<FilePath>(
+  'application/x.jupyter.file',
+  'mimeType'
+);
 export function createFileURL(path: string): URL {
   const url = new URL('file:');
   url.pathname = path;
@@ -28,43 +22,34 @@ export function createFileURL(path: string): URL {
 /**
  * Creates a converter from a resolver mimetype to a file mimetype.
  */
-export const resolveFileConverter: Converter<null, string> = (
-  mimeType: string,
-  url: URL
-) => {
-  const innerMimeType = extractResolveMimeType(mimeType);
-  const res: Converts<null, string> = new Map();
-  if (innerMimeType === null) {
-    return res;
+export const resolveFileConverter = resolveMimetypeDataType.createSingleTypedConverter(
+  fileDataType,
+  (innerMimeType, url) => {
+    const path = parseFileURL(url);
+    if (path === null) {
+      return null;
+    }
+    return [innerMimeType, async () => path];
   }
-  const path = parseFileURL(url);
-  if (path === null) {
-    return res;
-  }
-  res.set(fileMimeType(innerMimeType), async () => path);
-  return res;
-};
+);
 
 /**
  * Creates a converter from file paths to their download URLs
  */
 export function fileURLConverter(
-  getDownloadURL: (path: string) => Promise<URL>
-): Converter<string, URL> {
-  return singleConverter((mimeType: string) => {
-    const resMimeType = extractFileMimeType(mimeType);
-    if (resMimeType === null) {
-      return null;
-    }
-    return [URLMimeType(resMimeType), getDownloadURL];
-  });
+  getDownloadURL: (path: FilePath) => Promise<URL>
+): Converter<FilePath, URL | string> {
+  return fileDataType.createSingleTypedConverter(URLDataType, mimeType => [
+    mimeType,
+    getDownloadURL
+  ]);
 }
 
 /**
  * Returns the path of a file URL, or null if it is not one.
  * @param url
  */
-function parseFileURL(url: URL): null | string {
+function parseFileURL(url: URL): null | FilePath {
   if (url.protocol !== 'file:') {
     return null;
   }
