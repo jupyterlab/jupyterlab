@@ -226,15 +226,17 @@ export class Poll<T = any, U = any> implements IDisposable {
     }
 
     if (this._state.phase === 'stopped') {
-      return this._tick.promise;
+      return this;
     }
 
-    return this._resolve(this._tick, {
+    this._resolve(this._tick, {
       interval: Infinity, // Never.
       payload: null,
       phase: 'stopped',
       timestamp: new Date().getTime()
-    }).promise;
+    });
+
+    return this;
   }
 
   /**
