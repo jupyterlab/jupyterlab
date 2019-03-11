@@ -17,7 +17,7 @@ export namespace URLExt {
    * @returns A URL object.
    */
   export function parse(url: string): IUrl {
-    if (typeof document !== 'undefined') {
+    if (typeof document !== 'undefined' && document) {
       let a = document.createElement('a');
       a.href = url;
       return a;

@@ -260,7 +260,7 @@ namespace Private {
       authenticated = true;
       request.headers.append('Authorization', `token ${settings.token}`);
     }
-    if (typeof document !== 'undefined' && document.cookie) {
+    if (typeof document !== 'undefined' && document && document.cookie) {
       const xsrfToken = getCookie('_xsrf');
       if (xsrfToken !== undefined) {
         authenticated = true;

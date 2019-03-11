@@ -246,7 +246,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     const { max, min, variance } = this;
 
     // Reschedule without executing poll promise if application is hidden.
-    if (typeof document !== 'undefined' && document.hidden) {
+    if (typeof document !== 'undefined' && document && document.hidden) {
       this._resolve(poll, {
         interval: Private.jitter(this.interval, variance, min, max),
         payload: null,
