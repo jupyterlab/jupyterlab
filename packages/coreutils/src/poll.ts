@@ -58,7 +58,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         this._resolve(this._tick, {
           interval: this.interval,
           payload: null,
-          phase: 'when-resolved',
+          phase: 'instantiated-resolved',
           timestamp: new Date().getTime()
         });
       })
@@ -72,7 +72,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         this._resolve(this._tick, {
           interval: this.interval,
           payload: null,
-          phase: 'when-rejected',
+          phase: 'instantiated-rejected',
           timestamp: new Date().getTime()
         });
 
@@ -338,15 +338,15 @@ export namespace Poll {
    */
   export type Phase =
     | 'instantiated'
+    | 'instantiated-rejected'
+    | 'instantiated-resolved'
     | 'reconnected'
     | 'refreshed'
     | 'rejected'
     | 'resolved'
     | 'standby'
     | 'started'
-    | 'stopped'
-    | 'when-rejected'
-    | 'when-resolved';
+    | 'stopped';
 
   /**
    * Definition of poll state at any given tick.
