@@ -32,7 +32,7 @@ describe('Poll', () => {
 
       expect(poll.state.phase).to.equal('instantiated');
       await promise;
-      expect(poll.state.phase).to.equal('when-resolved');
+      expect(poll.state.phase).to.equal('instantiated-resolved');
       poll.dispose();
     });
 
@@ -47,7 +47,7 @@ describe('Poll', () => {
 
       expect(poll.state.phase).to.equal('instantiated');
       await promise.catch(() => undefined);
-      expect(poll.state.phase).to.equal('when-rejected');
+      expect(poll.state.phase).to.equal('instantiated-rejected');
       poll.dispose();
     });
   });
@@ -200,7 +200,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve(),
         variance: 0
       });
-      const expected = 'when-resolved resolved';
+      const expected = 'instantiated-resolved resolved';
       const ticker: Poll.Phase[] = [];
       const tock = (poll: Poll) => {
         ticker.push(poll.state.phase);
@@ -222,7 +222,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve(),
         variance: 0
       });
-      const expected = 'when-resolved resolved';
+      const expected = 'instantiated-resolved resolved';
       const ticker: Poll.Phase[] = [];
 
       poll.ticked.connect(() => {
@@ -242,7 +242,7 @@ describe('Poll', () => {
         variance: 0,
         when: promise
       });
-      const expected = 'when-rejected resolved';
+      const expected = 'instantiated-rejected resolved';
       const ticker: Poll.Phase[] = [];
 
       poll.ticked.connect(() => {
