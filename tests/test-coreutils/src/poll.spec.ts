@@ -285,4 +285,22 @@ describe('Poll', () => {
       expect(poll.isDisposed).to.equal(true);
     });
   });
+
+  describe('#refresh()', () => {
+    it('should refresh the poll', async () => {
+      const poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#dispose()-1',
+        interval: 200,
+        factory: () => Promise.resolve()
+      });
+      const expected = 'instantiated-resolved refreshed resolved';
+      const ticker: Poll.Phase[] = [];
+
+      poll.ticked.connect((_, tick) => {
+        ticker.push(tick.phase);
+      });
+      await poll.refresh();
+      expect(ticker.join(' ')).to.equal(expected);
+    });
+  });
 });
