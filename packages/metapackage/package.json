@@ -99,6 +99,7 @@
     "@jupyterlab/tooltip": "^1.0.0-alpha.3",
     "@jupyterlab/tooltip-extension": "^1.0.0-alpha.3",
     "@jupyterlab/ui-components": "^1.0.0-alpha.3",
+    "@jupyterlab/vdom": "^1.0.0-alpha.3",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.3",
     "@jupyterlab/vega5-extension": "^1.0.0-alpha.3"
   },

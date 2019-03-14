@@ -81,6 +81,7 @@
     "@jupyterlab/tooltip": "^1.0.0-alpha.3",
     "@jupyterlab/tooltip-extension": "^1.0.0-alpha.3",
     "@jupyterlab/ui-components": "^1.0.0-alpha.3",
+    "@jupyterlab/vdom": "^1.0.0-alpha.3",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.3",
     "@jupyterlab/vega5-extension": "^1.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",
@@ -304,6 +305,7 @@
       "@jupyterlab/tooltip": "../packages/tooltip",
       "@jupyterlab/tooltip-extension": "../packages/tooltip-extension",
       "@jupyterlab/ui-components": "../packages/ui-components",
+      "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension"
     }

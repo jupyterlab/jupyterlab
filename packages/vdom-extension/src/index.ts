@@ -11,7 +11,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { RenderedVDOM } from './widget';
+import { RenderedVDOM } from '@jupyterlab/vdom';
 
 /**
  * The CSS class for a VDOM icon.
