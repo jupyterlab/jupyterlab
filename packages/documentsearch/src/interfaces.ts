@@ -44,6 +44,8 @@ export interface IDisplayState {
    * Should the focus forced into the input on the next render?
    */
   forceFocus: boolean;
+
+  replaceText: string;
 }
 
 export interface ISearchMatch {
@@ -127,6 +129,20 @@ export interface ISearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   highlightPrevious(): Promise<ISearchMatch | undefined>;
+
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceCurrentMatch(newText: string): Promise<boolean>;
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceAllMatches(newText: string): Promise<boolean>;
 
   /**
    * The same list of matches provided by the startQuery promise resoluton

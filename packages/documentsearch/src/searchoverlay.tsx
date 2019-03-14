@@ -9,6 +9,7 @@ import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
+const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
 const REGEX_BUTTON_CLASS_OFF =
@@ -25,6 +26,10 @@ const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
 const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
+const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
+const REPLACE_CURRENT_BUTTON_CLASS = 'jp-DocumentSearch-replace-current-button';
+const REPLACE_ALL_BUTTON_CLASS = 'jp-DocumentSearch-replace-all-button';
+const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
@@ -38,6 +43,14 @@ interface ISearchEntryProps {
   useRegex: boolean;
   inputText: string;
   forceFocus: boolean;
+}
+
+interface IReplaceEntryProps {
+  onReplaceCurrent: Function;
+  onReplaceAll: Function;
+  onReplaceKeydown: Function;
+  onChange: Function;
+  replaceText: string;
 }
 
 class SearchEntry extends React.Component<ISearchEntryProps> {
@@ -102,6 +115,38 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 }
 
+class ReplaceEntry extends React.Component<IReplaceEntryProps> {
+  constructor(props: any) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className={REPLACE_WRAPPER_CLASS}>
+        <input
+          placeholder={this.props.replaceText ? null : 'REPLACE'}
+          className={REPLACE_ENTRY_CLASS}
+          value={this.props.replaceText}
+          onKeyDown={e => this.props.onReplaceKeydown(e)}
+          onChange={e => this.props.onChange(e)}
+        />
+        <button
+          className={REPLACE_CURRENT_BUTTON_CLASS}
+          onClick={() => this.props.onReplaceCurrent()}
+        >
+          Next
+        </button>
+        <button
+          className={REPLACE_ALL_BUTTON_CLASS}
+          onClick={() => this.props.onReplaceAll()}
+        >
+          All
+        </button>
+      </div>
+    );
+  }
+}
+
 interface IUpDownProps {
   onHighlightPrevious: Function;
   onHightlightNext: Function;
@@ -157,6 +202,8 @@ interface ISearchOverlayProps {
   onHighlightPrevious: Function;
   onStartQuery: Function;
   onEndSearch: Function;
+  onReplaceCurrent: Function;
+  onReplaceAll: Function;
 }
 
 class SearchOverlay extends React.Component<
@@ -168,29 +215,44 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
   }
 
-  private _onChange(event: React.ChangeEvent) {
-    this.setState({ inputText: (event.target as HTMLInputElement).value });
+  private _onSearchChange(event: React.ChangeEvent) {
+    const inputText = (event.target as HTMLInputElement).value;
+    this.setState({ inputText });
+    console.log('search change, calling debounced startSearch');
+    this._debouncedStartSearch(true, inputText);
   }
 
-  private _onKeydown(event: KeyboardEvent) {
+  private _onReplaceChange(event: React.ChangeEvent) {
+    this.setState({ replaceText: (event.target as HTMLInputElement).value });
+  }
+
+  private _onSearchKeydown(event: KeyboardEvent) {
     if (event.keyCode === 13) {
       event.preventDefault();
       event.stopPropagation();
       this._executeSearch(!event.shiftKey);
-    }
-    if (event.keyCode === 27) {
+    } else if (event.keyCode === 27) {
       event.preventDefault();
       event.stopPropagation();
       this.props.onEndSearch();
     }
   }
 
-  private _executeSearch(goForward: boolean) {
+  private _onReplaceKeydown(event: KeyboardEvent) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.props.onReplaceCurrent(this.state.replaceText);
+    }
+  }
+
+  private _executeSearch(goForward: boolean, inputText?: string) {
     // execute search!
     let query;
+    const input = inputText ? inputText : this.state.inputText;
     try {
       query = Private.parseQuery(
-        this.state.inputText,
+        input,
         this.props.overlayState.caseSensitive,
         this.props.overlayState.useRegex
       );
@@ -212,55 +274,86 @@ class SearchOverlay extends React.Component<
     this.props.onStartQuery(query);
   }
 
-  private onClose() {
+  private _onClose() {
     // clean up and close widget
     this.props.onEndSearch();
   }
 
+  private _debounce(func: Function, wait: number) {
+    const context = this;
+    let timeout: number;
+    return function(...args: any[]) {
+      const later = function() {
+        timeout = null;
+        return func.apply(context, args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  private _debouncedStartSearch = this._debounce(
+    this._executeSearch.bind(this),
+    100
+  );
+
   render() {
     return [
-      <SearchEntry
-        useRegex={this.props.overlayState.useRegex}
-        caseSensitive={this.props.overlayState.caseSensitive}
-        onCaseSensitiveToggled={() => {
-          this.props.onCaseSensitiveToggled();
-          this._executeSearch(true);
-        }}
-        onRegexToggled={() => {
-          this.props.onRegexToggled();
-          this._executeSearch(true);
-        }}
-        onKeydown={(e: KeyboardEvent) => this._onKeydown(e)}
-        onChange={(e: React.ChangeEvent) => this._onChange(e)}
-        inputText={this.state.inputText}
-        forceFocus={this.props.overlayState.forceFocus}
-        key={0}
-      />,
-      <SearchIndices
-        currentIndex={this.props.overlayState.currentIndex}
-        totalMatches={this.props.overlayState.totalMatches}
-        key={1}
-      />,
-      <UpDownButtons
-        onHighlightPrevious={() => this._executeSearch(false)}
-        onHightlightNext={() => this._executeSearch(true)}
-        key={2}
-      />,
-      <button
-        className={BUTTON_WRAPPER_CLASS}
-        onClick={() => this.onClose()}
-        tabIndex={6}
-        key={3}
-      >
-        <span
-          className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
+      <div className={OVERLAY_ROW_CLASS} key={0}>
+        <SearchEntry
+          useRegex={this.props.overlayState.useRegex}
+          caseSensitive={this.props.overlayState.caseSensitive}
+          onCaseSensitiveToggled={() => {
+            this.props.onCaseSensitiveToggled();
+            this._executeSearch(true);
+          }}
+          onRegexToggled={() => {
+            this.props.onRegexToggled();
+            this._executeSearch(true);
+          }}
+          onKeydown={(e: KeyboardEvent) => this._onSearchKeydown(e)}
+          onChange={(e: React.ChangeEvent) => this._onSearchChange(e)}
+          inputText={this.state.inputText}
+          forceFocus={this.props.overlayState.forceFocus}
+          key={0}
         />
-      </button>,
+        <SearchIndices
+          currentIndex={this.props.overlayState.currentIndex}
+          totalMatches={this.props.overlayState.totalMatches}
+          key={1}
+        />
+        <UpDownButtons
+          onHighlightPrevious={() => this._executeSearch(false)}
+          onHightlightNext={() => this._executeSearch(true)}
+          key={2}
+        />
+        <button
+          className={BUTTON_WRAPPER_CLASS}
+          onClick={() => this._onClose()}
+          tabIndex={6}
+          key={3}
+        >
+          <span
+            className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          />
+        </button>
+      </div>,
+      <div className={OVERLAY_ROW_CLASS} key={1}>
+        <ReplaceEntry
+          onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+          onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
+          onReplaceCurrent={() =>
+            this.props.onReplaceCurrent(this.state.replaceText)
+          }
+          onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
+          replaceText={this.state.replaceText}
+        />
+      </div>,
       <div
         className={REGEX_ERROR_CLASS}
         hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
-        key={4}
+        key={3}
       >
         {this.state.errorMessage}
       </div>
@@ -279,6 +372,8 @@ export function createSearchOverlay(
     onHightlightNext,
     onHighlightPrevious,
     onStartQuery,
+    onReplaceCurrent,
+    onReplaceAll,
     onEndSearch
   } = options;
   const widget = ReactWidget.create(
@@ -292,6 +387,8 @@ export function createSearchOverlay(
             onHighlightPrevious={onHighlightPrevious}
             onStartQuery={onStartQuery}
             onEndSearch={onEndSearch}
+            onReplaceCurrent={onReplaceCurrent}
+            onReplaceAll={onReplaceAll}
             overlayState={args}
           />
         );
@@ -312,6 +409,8 @@ namespace createSearchOverlay {
     onHighlightPrevious: Function;
     onStartQuery: Function;
     onEndSearch: Function;
+    onReplaceCurrent: Function;
+    onReplaceAll: Function;
   }
 }
 

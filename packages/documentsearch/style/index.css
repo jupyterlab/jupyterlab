@@ -22,6 +22,9 @@
   min-width: 300px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DocumentSearch-overlay-row {
   display: flex;
   align-items: center;
 }
@@ -136,4 +139,26 @@
 
 .jp-DocumentSearch-regex-error {
   color: var(--jp-error-color0);
+}
+
+.jp-DocumentSearch-replace-entry {
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  border-radius: var(--jp-border-radius);
+  display: flex;
+  background-color: var(--jp-layout-color0);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DocumentSearch-replace-current-button {
+  height: 16px;
+  width: 16px;
+}
+
+.jp-DocumentSearch-replace-all-button {
+  height: 16px;
+  width: 16px;
+}
+
+.jp-DocumentSearch-replace-wrapper-class {
+  display: flex;
 }

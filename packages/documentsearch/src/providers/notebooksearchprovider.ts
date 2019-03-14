@@ -13,7 +13,7 @@ import CodeMirror from 'codemirror';
 
 interface ICellSearchPair {
   cell: Cell;
-  provider: ISearchProvider;
+  provider: CodeMirrorSearchProvider;
 }
 
 export class NotebookSearchProvider implements ISearchProvider {
@@ -178,6 +178,52 @@ export class NotebookSearchProvider implements ISearchProvider {
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext(true);
     return this._currentMatch;
+  }
+
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    const notebook = this._searchTarget.content;
+    const editor = notebook.activeCell.editor as CodeMirrorEditor;
+    let replaceOccurred = false;
+    if (this._currentMatchIsSelected(editor)) {
+      const cellIndex = notebook.widgets.indexOf(notebook.activeCell);
+      const { provider } = this._cmSearchProviders[cellIndex];
+      replaceOccurred = await provider.replaceCurrentMatch(newText);
+      if (replaceOccurred) {
+        this._currentMatch = provider.currentMatch;
+        if (this._currentMatch) {
+          return Promise.resolve(replaceOccurred);
+        }
+      }
+    }
+    await this.highlightNext();
+    return Promise.resolve(replaceOccurred);
+  }
+
+  private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
+    if (!this._currentMatch) {
+      return false;
+    }
+    const currentSelection = cm.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    return (
+      this._currentMatch.line === currentSelection.start.line &&
+      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.text.length === currentSelectionLength &&
+      selectionIsOneLine
+    );
+  }
+
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    let replaceOccurred = false;
+    for (let index in this._cmSearchProviders) {
+      const { provider } = this._cmSearchProviders[index];
+      const singleReplaceOccurred = await provider.replaceAllMatches(newText);
+      replaceOccurred = singleReplaceOccurred ? true : replaceOccurred;
+    }
+    return Promise.resolve(replaceOccurred);
   }
 
   /**

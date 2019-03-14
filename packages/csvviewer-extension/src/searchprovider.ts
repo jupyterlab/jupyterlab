@@ -78,6 +78,26 @@ export class CSVSearchProvider implements ISearchProvider {
   }
 
   /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceCurrentMatch(newText: string): Promise<boolean> {
+    console.warn('Replace not implemented for the CSV search provider yet.');
+    return Promise.resolve(false);
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  replaceAllMatches(newText: string): Promise<boolean> {
+    console.warn('Replace not implemented for the CSV search provider yet.');
+    return Promise.resolve(false);
+  }
+
+  /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
   get changed(): ISignal<this, void> {

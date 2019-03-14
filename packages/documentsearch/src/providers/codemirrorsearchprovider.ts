@@ -98,7 +98,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       const match = this._matchState[cursorMatch.from.line][
         cursorMatch.from.ch
       ];
-      this._matchIndex = match.index;
+      this._currentMatch = match;
     }
     return matches;
   }
@@ -112,8 +112,16 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    */
   async endQuery(): Promise<void> {
     this._matchState = {};
-    this._matchIndex = null;
+    this._currentMatch = null;
     this._cm.removeOverlay(this._overlay);
+    const from = this._cm.getCursor('from');
+    const to = this._cm.getCursor('to');
+    if (from !== to) {
+      this._cm.setSelection({
+        start: this._toEditorPos(to),
+        end: this._toEditorPos(from)
+      });
+    }
     CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
   }
 
@@ -140,7 +148,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._matchIndex = match.index;
+    this._currentMatch = match;
     return match;
   }
 
@@ -155,8 +163,47 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._matchIndex = match.index;
+    this._currentMatch = match;
     return match;
+  }
+
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    // If the current selection exactly matches the current match,
+    // replace it.  Otherwise, just select the next match after the cursor.
+    let replaceOccurred = false;
+    if (this._currentMatchIsSelected()) {
+      console.log('CM: current match selected');
+      const cursor = this._cm.getSearchCursor(
+        this._query,
+        this._cm.getCursor('from'),
+        !this._query.ignoreCase
+      );
+      if (!cursor.findNext()) {
+        console.log('CM: cursor could not find next');
+        return Promise.resolve(replaceOccurred);
+      }
+      replaceOccurred = true;
+      cursor.replace(newText);
+      console.log('CM: replace occurred, higlight next');
+    }
+    await this.highlightNext();
+    return Promise.resolve(replaceOccurred);
+  }
+
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    let replaceOccurred = false;
+    this._cm.operation(() => {
+      const cursor = this._cm.getSearchCursor(
+        this._query,
+        null,
+        !this._query.ignoreCase
+      );
+      while (cursor.findNext()) {
+        replaceOccurred = true;
+        cursor.replace(newText);
+      }
+    });
+    return Promise.resolve(replaceOccurred);
   }
 
   /**
@@ -177,6 +224,10 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return this._parseMatchesFromState();
   }
 
+  get currentMatch(): ISearchMatch {
+    return this._currentMatch;
+  }
+
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
@@ -188,7 +239,10 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * The current index of the selected match.
    */
   get currentMatchIndex(): number {
-    return this._matchIndex;
+    if (!this._currentMatch) {
+      return 0;
+    }
+    return this._currentMatch.index;
   }
 
   clearSelection(): void {
@@ -328,7 +382,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
     return this._cm.operation(() => {
       const caseSensitive = this._query.ignoreCase;
-      const cursorToGet = reverse ? 'from' : 'to';
+      const cursorToGet = reverse ? 'from' : 'head';
       const lastPosition = this._cm.getCursor(cursorToGet);
       const position = this._toEditorPos(lastPosition);
       let cursor: CodeMirror.SearchCursor = this._cm.getSearchCursor(
@@ -340,7 +394,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
         // if we don't want to loop, no more matches found, reset the cursor and exit
         if (this.isSubProvider) {
           this._cm.setCursorPosition(position);
-          this._matchIndex = null;
+          this._currentMatch = null;
           return null;
         }
 
@@ -415,9 +469,26 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     };
   }
 
+  private _currentMatchIsSelected(): boolean {
+    if (!this._currentMatch) {
+      return false;
+    }
+    const currentSelection = this._cm.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    return (
+      this._currentMatch.line === currentSelection.start.line &&
+      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.text.length === currentSelectionLength &&
+      selectionIsOneLine
+    );
+  }
+
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
-  private _matchIndex: number;
+  private _currentMatch: ISearchMatch;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;

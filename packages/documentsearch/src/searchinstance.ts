@@ -25,6 +25,8 @@ export class SearchInstance implements IDisposable {
       onHightlightNext: this._highlightNext.bind(this),
       onHighlightPrevious: this._highlightPrevious.bind(this),
       onStartQuery: this._startQuery.bind(this),
+      onReplaceCurrent: this._replaceCurrent.bind(this),
+      onReplaceAll: this._replaceAll.bind(this),
       onEndSearch: this.dispose.bind(this)
     });
 
@@ -101,6 +103,20 @@ export class SearchInstance implements IDisposable {
       this.updateIndices,
       this
     );
+  }
+
+  private async _replaceCurrent(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      console.log('calling on active provider with new text:', newText);
+      await this._activeProvider.replaceCurrentMatch(newText);
+    }
+  }
+
+  private async _replaceAll(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      console.log('calling on active provider with new text:', newText);
+      await this._activeProvider.replaceAllMatches(newText);
+    }
   }
 
   /**
@@ -180,7 +196,8 @@ export class SearchInstance implements IDisposable {
     inputText: '',
     query: null,
     errorMessage: '',
-    forceFocus: true
+    forceFocus: true,
+    replaceText: ''
   };
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;
