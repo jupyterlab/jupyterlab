@@ -18,7 +18,7 @@ import { JSONModel, DataGrid, CellRenderer } from '@phosphor/datagrid';
 
 function createContext(): Context<DocumentRegistry.IModel> {
   const factory = new TextModelFactory();
-  const manager = new ServiceManager();
+  const manager = new ServiceManager({ standby: 'never' });
   const path = UUID.uuid4() + '.csv';
   return new Context({ factory, manager, path });
 }

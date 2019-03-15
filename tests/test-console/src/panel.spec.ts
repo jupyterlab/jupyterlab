@@ -38,7 +38,7 @@ const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
   let panel: TestPanel;
-  const manager = new ServiceManager();
+  const manager = new ServiceManager({ standby: 'never' });
 
   before(() => {
     return manager.ready;

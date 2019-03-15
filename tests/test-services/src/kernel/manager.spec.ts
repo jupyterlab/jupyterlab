@@ -30,7 +30,7 @@ describe('kernel/manager', () => {
   });
 
   beforeEach(() => {
-    manager = new KernelManager();
+    manager = new KernelManager({ standby: 'never' });
     expect(manager.specs).to.be.null;
     return manager.ready;
   });
@@ -47,7 +47,10 @@ describe('kernel/manager', () => {
     describe('#constructor()', () => {
       it('should take the options as an argument', () => {
         manager.dispose();
-        manager = new KernelManager({ serverSettings: makeSettings() });
+        manager = new KernelManager({
+          serverSettings: makeSettings(),
+          standby: 'never'
+        });
         expect(manager instanceof KernelManager).to.equal(true);
       });
     });
@@ -56,8 +59,9 @@ describe('kernel/manager', () => {
       it('should get the server settings', () => {
         manager.dispose();
         const serverSettings = makeSettings();
+        const standby = 'never';
         const token = serverSettings.token;
-        manager = new KernelManager({ serverSettings });
+        manager = new KernelManager({ serverSettings, standby });
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
@@ -120,7 +124,7 @@ describe('kernel/manager', () => {
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new KernelManager();
+        manager = new KernelManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);

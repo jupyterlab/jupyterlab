@@ -20,7 +20,7 @@ describe('terminal', () => {
   });
 
   beforeEach(() => {
-    manager = new TerminalManager();
+    manager = new TerminalManager({ standby: 'never' });
     return manager.ready;
   });
 
@@ -36,14 +36,15 @@ describe('terminal', () => {
     describe('#constructor()', () => {
       it('should accept no options', () => {
         manager.dispose();
-        manager = new TerminalManager();
+        manager = new TerminalManager({ standby: 'never' });
         expect(manager).to.be.an.instanceof(TerminalManager);
       });
 
       it('should accept options', () => {
         manager.dispose();
         manager = new TerminalManager({
-          serverSettings: ServerConnection.makeSettings()
+          serverSettings: ServerConnection.makeSettings(),
+          standby: 'never'
         });
         expect(manager).to.be.an.instanceof(TerminalManager);
       });
@@ -53,8 +54,9 @@ describe('terminal', () => {
       it('should get the server settings', () => {
         manager.dispose();
         const serverSettings = ServerConnection.makeSettings();
+        const standby = 'never';
         const token = serverSettings.token;
-        manager = new TerminalManager({ serverSettings });
+        manager = new TerminalManager({ serverSettings, standby });
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
@@ -62,7 +64,7 @@ describe('terminal', () => {
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new TerminalManager();
+        manager = new TerminalManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
