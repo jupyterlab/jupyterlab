@@ -207,7 +207,7 @@ describe('kernel/manager', () => {
         const kernel = await manager.startNew();
         const emission = testEmission(manager.runningChanged, {
           test: () => {
-            expect(kernel.isDisposed).to.equal(false);
+            expect(kernel.isDisposed).to.equal(true);
           }
         });
         await manager.shutdown(kernel.id);
