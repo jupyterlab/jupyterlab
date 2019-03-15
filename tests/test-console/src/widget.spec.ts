@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -18,7 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import { createClientSession, NBTestUtils, sleep } from '@jupyterlab/testutils';
+import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
 
 import {
   createConsoleFactory,
@@ -273,13 +273,11 @@ describe('console/widget', () => {
     });
 
     describe('#onActivateRequest()', () => {
-      it('should focus the prompt editor', async () => {
+      it('should focus the prompt editor', () => {
         expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('onActivateRequest');
         Widget.attach(widget, document.body);
-        widget.activate();
-        // Because test browser may be in a hidden tab, use sleep.
-        await sleep(1000);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.promptCell.editor.hasFocus()).to.equal(true);
       });
