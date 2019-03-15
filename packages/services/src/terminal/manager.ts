@@ -35,6 +35,7 @@ export class TerminalManager implements TerminalSession.IManager {
         max: 300 * 1000,
         min: 100,
         name: `@jupyterlab/services:TerminalManager#models`,
+        standby: options.standby || 'when-hidden',
         when: this._readyPromise
       });
     }
@@ -318,5 +319,10 @@ export namespace TerminalManager {
      * The server settings used by the manager.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }

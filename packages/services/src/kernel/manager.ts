@@ -38,6 +38,7 @@ export class KernelManager implements Kernel.IManager {
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:KernelManager#models`,
+      standby: options.standby || 'when-hidden',
       when: this._readyPromise
     });
     this._pollSpecs = new Poll({
@@ -46,6 +47,7 @@ export class KernelManager implements Kernel.IManager {
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:KernelManager#specs`,
+      standby: options.standby || 'when-hidden',
       when: this._readyPromise
     });
   }
@@ -350,5 +352,10 @@ export namespace KernelManager {
      * The server settings for the manager.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }
