@@ -37,6 +37,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     this.max = typeof max === 'number' ? Math.abs(max) : 10 * this.interval;
     this.min = typeof min === 'number' ? Math.abs(min) : 100;
     this.name = name || 'unknown';
+    this.standby = options.standby || 'when-hidden';
     this.variance = typeof variance === 'number' ? variance : 0.2;
     this._factory = factory;
     this._state = {
@@ -100,6 +101,11 @@ export class Poll<T = any, U = any> implements IDisposable {
    * The name of the poll. Defaults to `'unknown'`.
    */
   readonly name: string;
+
+  /**
+   * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
+   */
+  readonly standby: 'when-hidden' | 'never';
 
   /**
    * The range within which the poll interval jitters.
@@ -245,8 +251,8 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _request(poll: PromiseDelegate<this>): void {
     const { max, min, variance } = this;
 
-    // Reschedule without executing poll promise if application is hidden.
-    if (typeof document !== 'undefined' && document && document.hidden) {
+    // If poll is in standby mode, schedule tick without firing poll request.
+    if (this._standby()) {
       this._resolve(poll, {
         interval: Private.jitter(this.interval, variance, min, max),
         payload: null,
@@ -303,7 +309,11 @@ export class Poll<T = any, U = any> implements IDisposable {
     };
 
     // Clear the schedule if possible.
-    clearTimeout(this._timeout);
+    if (this._state.interval) {
+      clearTimeout(this._timeout);
+    } else {
+      cancelAnimationFrame(this._timeout);
+    }
 
     // Update poll state and schedule the next tick.
     this._state = tick;
@@ -321,6 +331,15 @@ export class Poll<T = any, U = any> implements IDisposable {
     outstanding.resolve(this);
 
     return poll;
+  }
+
+  /**
+   * Returns whether the poll is in standby mode.
+   */
+  private _standby(): boolean {
+    return this.standby === 'never'
+      ? false
+      : !!(typeof document !== 'undefined' && document && document.hidden);
   }
 
   private _disposed = new Signal<this, void>(this);
@@ -349,6 +368,11 @@ export namespace Poll {
     | 'standby'
     | 'started'
     | 'stopped';
+
+  /**
+   * Indicates when the poll switches to standby.
+   */
+  export type Standby = 'never' | 'when-hidden';
 
   /**
    * Definition of poll state at any given tick.
@@ -389,6 +413,16 @@ export namespace Poll {
    */
   export interface IOptions<T, U> {
     /**
+     * A factory function that is passed a poll tick and returns a poll promise.
+     *
+     * #### Notes
+     * The generic arguments are as follows:
+     *  - `T` indicates the resolved type of the factory's promises.
+     *  - `U` indicates the rejected type of the factory's promises.
+     */
+    factory: (tick: Tick<T, U>) => Promise<T>;
+
+    /**
      * The millisecond interval between poll requests. Defaults to `1000`.
      *
      * #### Notes
@@ -413,14 +447,9 @@ export namespace Poll {
     name?: string;
 
     /**
-     * A factory function that is passed a poll tick and returns a poll promise.
-     *
-     * #### Notes
-     * The generic arguments are as follows:
-     *  - `T` indicates the resolved type of the factory's promises.
-     *  - `U` indicates the rejected type of the factory's promises.
+     * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
      */
-    factory: (tick: Tick<T, U>) => Promise<T>;
+    standby?: Poll.Standby;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
