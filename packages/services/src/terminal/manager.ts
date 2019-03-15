@@ -167,7 +167,6 @@ export class TerminalManager implements TerminalSession.IManager {
     const models = this._models;
     const sessions = this._sessions;
     const index = ArrayExt.findFirstIndex(models, model => model.name === name);
-
     if (index === -1) {
       return;
     }
@@ -183,11 +182,11 @@ export class TerminalManager implements TerminalSession.IManager {
       }
     });
 
-    // Emit the new model list without waiting for API request.
-    this._runningChanged.emit(models.slice());
-
     // Shut down the remote session.
     await TerminalSession.shutdown(name, this.serverSettings);
+
+    // Emit the model list.
+    this._runningChanged.emit(models.slice());
   }
 
   /**
