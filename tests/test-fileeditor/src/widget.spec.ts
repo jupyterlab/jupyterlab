@@ -67,7 +67,7 @@ describe('fileeditorcodewrapper', () => {
   let manager: ServiceManager.IManager;
 
   beforeAll(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 
