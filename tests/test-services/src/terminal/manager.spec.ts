@@ -126,7 +126,7 @@ describe('terminal', () => {
         let called = false;
         session = await manager.startNew();
         manager.runningChanged.connect((sender, args) => {
-          expect(session.isDisposed).to.equal(false);
+          expect(session.isDisposed).to.equal(true);
           called = true;
         });
         await manager.shutdown(session.name);
