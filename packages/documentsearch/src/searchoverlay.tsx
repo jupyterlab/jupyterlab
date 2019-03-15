@@ -26,6 +26,9 @@ const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 
+const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
+const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
+
 interface ISearchEntryProps {
   onCaseSensitiveToggled: Function;
   onRegexToggled: Function;
@@ -71,16 +74,23 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           value={this.props.inputText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
+          tabIndex={1}
           ref="searchInputNode"
         />
         <button
-          className={caseButtonToggleClass}
+          className={`${caseButtonToggleClass} ${BUTTON_WRAPPER_CLASS}`}
           onClick={() => this.props.onCaseSensitiveToggled()}
-        />
+          tabIndex={2}
+        >
+          <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+        </button>
         <button
-          className={regexButtonToggleClass}
+          className={`${regexButtonToggleClass} ${BUTTON_WRAPPER_CLASS}`}
           onClick={() => this.props.onRegexToggled()}
-        />
+          tabIndex={3}
+        >
+          <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+        </button>
       </div>
     );
   }
@@ -95,13 +105,19 @@ function UpDownButtons(props: IUpDownProps) {
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
-        className={UP_BUTTON_CLASS}
+        className={`${UP_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
         onClick={() => props.onHighlightPrevious()}
-      />
+        tabIndex={4}
+      >
+        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+      </button>
       <button
-        className={DOWN_BUTTON_CLASS}
+        className={`${DOWN_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
         onClick={() => props.onHightlightNext()}
-      />
+        tabIndex={5}
+      >
+        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+      </button>
     </div>
   );
 }
@@ -218,11 +234,14 @@ class SearchOverlay extends React.Component<
         onHightlightNext={() => this._executeSearch(true)}
         key={2}
       />,
-      <div
-        className={CLOSE_BUTTON_CLASS}
+      <button
+        className={`${CLOSE_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
         onClick={() => this.onClose()}
+        tabIndex={6}
         key={3}
-      />,
+      >
+        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+      </button>,
       <div
         className={REGEX_ERROR_CLASS}
         hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
