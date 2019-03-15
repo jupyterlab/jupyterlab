@@ -203,11 +203,11 @@ export class KernelManager implements Kernel.IManager {
       }
     });
 
-    // Emit the new model list without waiting for API request.
-    this._runningChanged.emit(models.slice());
-
     // Shut down the remote session.
     await Kernel.shutdown(id, this.serverSettings);
+
+    // Emit the new model list.
+    this._runningChanged.emit(models.slice());
   }
 
   /**
