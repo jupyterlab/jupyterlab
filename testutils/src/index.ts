@@ -302,7 +302,7 @@ namespace Private {
    */
   export function getManager(): ServiceManager {
     if (!manager) {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
     }
     return manager;
   }

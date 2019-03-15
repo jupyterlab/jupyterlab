@@ -62,7 +62,7 @@ describe('ImageViewer', () => {
   let widget: LogImage;
 
   beforeAll(async () => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     await manager.ready;
     return manager.contents.save(IMAGE.path, IMAGE);
   });

@@ -18,11 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import {
-  createClientSession,
-  framePromise,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+import { createClientSession, NBTestUtils, sleep } from '@jupyterlab/testutils';
 
 import {
   createConsoleFactory,
@@ -35,23 +31,23 @@ class TestConsole extends CodeConsole {
   methods: string[] = [];
 
   protected newPromptCell(): void {
-    super.newPromptCell();
     this.methods.push('newPromptCell');
+    super.newPromptCell();
   }
 
   protected onActivateRequest(msg: Message): void {
-    super.onActivateRequest(msg);
     this.methods.push('onActivateRequest');
+    super.onActivateRequest(msg);
   }
 
   protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
+    super.onAfterAttach(msg);
   }
 
   protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
+    super.onUpdateRequest(msg);
   }
 }
 
@@ -281,9 +277,9 @@ describe('console/widget', () => {
         expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('onActivateRequest');
         Widget.attach(widget, document.body);
-        await framePromise();
         widget.activate();
-        await framePromise();
+        // Because test browser may be in a hidden tab, use sleep.
+        await sleep(1000);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.promptCell.editor.hasFocus()).to.equal(true);
       });

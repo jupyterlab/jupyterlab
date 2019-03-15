@@ -544,7 +544,7 @@ describe('docregistry/default', () => {
     };
 
     beforeAll(async () => {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
       await manager.ready;
     });
 
