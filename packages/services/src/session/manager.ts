@@ -40,6 +40,7 @@ export class SessionManager implements Session.IManager {
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:SessionManager#models`,
+      standby: options.standby || 'when-hidden',
       when: this._readyPromise
     });
     this._pollSpecs = new Poll({
@@ -48,6 +49,7 @@ export class SessionManager implements Session.IManager {
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:SessionManager#specs`,
+      standby: options.standby || 'when-hidden',
       when: this._readyPromise
     });
   }
@@ -362,5 +364,10 @@ export namespace SessionManager {
      * The server settings for the manager.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }
