@@ -55,7 +55,7 @@ export namespace PageConfig {
     let found = false;
 
     // Use script tag if available.
-    if (typeof document !== 'undefined') {
+    if (typeof document !== 'undefined' && document) {
       const el = document.getElementById('jupyter-config-data');
 
       if (el) {
