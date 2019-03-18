@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONObject } from '@phosphor/coreutils';
-
 import { Widget } from '@phosphor/widgets';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -67,46 +65,51 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
    * Render Vega/Vega-Lite into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const spec = model.data[this._mimeType] as JSONObject;
-    const metadata = model.metadata[this._mimeType] as {
-      embed_options?: VegaModuleType.EmbedOptions;
-    };
-    const embedOptions =
-      metadata && metadata.embed_options ? metadata.embed_options : {};
-    const mode: VegaModuleType.Mode =
-      this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
+    const data = model.data[this._mimeType] as string;
+    try {
+      const spec = JSON.parse(data);
+      const metadata = model.metadata[this._mimeType] as {
+        embed_options?: VegaModuleType.EmbedOptions;
+      };
+      const embedOptions =
+        metadata && metadata.embed_options ? metadata.embed_options : {};
+      const mode: VegaModuleType.Mode =
+        this._mimeType === VEGA_MIME_TYPE ? 'vega' : 'vega-lite';
 
-    const vega =
-      Private.vega != null ? Private.vega : await Private.ensureVega();
-    const path = await this._resolver.resolveUrl('');
-    const baseURL = await this._resolver.getDownloadUrl(path);
+      const vega =
+        Private.vega != null ? Private.vega : await Private.ensureVega();
+      const path = await this._resolver.resolveUrl('');
+      const baseURL = await this._resolver.getDownloadUrl(path);
 
-    const el = document.createElement('div');
+      const el = document.createElement('div');
 
-    // clear the output before attaching a chart
-    this.node.innerHTML = '';
-    this.node.appendChild(el);
+      // clear the output before attaching a chart
+      this.node.innerHTML = '';
+      this.node.appendChild(el);
 
-    this._result = await vega.default(el, spec, {
-      actions: true,
-      defaultStyle: true,
-      ...embedOptions,
-      mode,
-      loader: {
-        baseURL,
-        http: { credentials: 'same-origin' }
+      this._result = await vega.default(el, spec, {
+        actions: true,
+        defaultStyle: true,
+        ...embedOptions,
+        mode,
+        loader: {
+          baseURL,
+          http: { credentials: 'same-origin' }
+        }
+      });
+
+      if (model.data['image/png']) {
+        return;
       }
-    });
 
-    if (model.data['image/png']) {
-      return;
+      // Add png representation of vega chart to output
+      const imageURL = await this._result.view.toImageURL('png');
+      model.setData({
+        data: { ...model.data, 'image/png': imageURL.split(',')[1] }
+      });
+    } catch (error) {
+      return Promise.reject(error);
     }
-
-    // Add png representation of vega chart to output
-    const imageURL = await this._result.view.toImageURL('png');
-    model.setData({
-      data: { ...model.data, 'image/png': imageURL.split(',')[1] }
-    });
   }
 
   dispose(): void {
@@ -133,7 +136,7 @@ const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega-extension:factory',
   rendererFactory,
   rank: 50, // prefer over vega 2 extension
-  dataType: 'json',
+  dataType: 'string',
   documentWidgetFactoryOptions: [
     {
       name: 'Vega',
