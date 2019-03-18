@@ -18,70 +18,68 @@
 
 import { Printd, PrintdCallback } from 'printd';
 import { Widget } from '@phosphor/widgets';
+import { Signal, ISignal } from '@phosphor/signaling';
 
 /**
- * Partial function from (T, V) -> U
+ * Function that takes no arguments and when invoked prints out some object.
  */
-type PartialFunction<T, U, V> = (t: T) => ((u: U) => V) | null;
+type PrintThunk = () => Promise<void>;
 
-type PartialFunctionSame<T, U> = PartialFunction<T, T, U>;
-
-
-function emptyFunction(t: unknown): null {
-  return null;
-}
 /**
- * Takes two partial functions and returns a new one that tries the both to see if either is implemented for an arg.
+ * Function that takes in an object and returns a thunk that will print that object or null
+ * if printing is not supported for that object.
  */
-function combine<T, U, V, W>(
-  f: PartialFunction<T, U, V>,
-  g: PartialFunction<T, U, W>
-): PartialFunction<T, U, V | W> {
-  return (t: T) => {
-    const fRes = f(t);
+type PrintFunction = (val: unknown) => PrintThunk | null;
+
+/**
+ * Combines two print functions into a resulting print function that calls both in sequence, returning
+ * the first print function if it is returned.
+ */
+function combinePrintFunctions(
+  f: PrintFunction,
+  g: PrintFunction
+): PrintFunction {
+  return (val: unknown) => {
+    const fRes = f(val);
     if (fRes !== null) {
       return fRes;
     }
-    return g(t);
+    return g(val);
   };
 }
 
-function combineMany<T, U, V>(fs: Iterable<PartialFunction<T, U, V>): PartialFunction< T, U, V> {
-  return [...fs].reduce(combine, emptyFunction)
+function combineManyPrintFunctions(fs: Iterable<PrintFunction>): PrintFunction {
+  return [...fs].reduce(combinePrintFunctions, () => null);
 }
 
-function canCall<T>(fn: PartialFunction<T, any, any>, arg: T): boolean {
-  return fn(arg) !== null;
-}
-
-function call<T, U, V>(fn: PartialFunction<T, U, V>, t: T, u: U): V {
-  return fn(t)(u);
-}
-
-function callSame<T, U>(fn: PartialFunctionSame<T, U>, t: T): U {
-  return call(fn, t, t);
-}
-
-function createSame<T, U>(
-  canCall: (arg: T) => boolean,
-  call: (arg: T) => U
-): PartialFunctionSame<T, U> {
-  return (arg: T) => {
-    if (canCall(arg)) {
-      return call;
-    }
-    return null;
-  };
-}
-
-
-type PrintFunction<T, U> = PartialFunction<T, U, Promise<void>>; 
-
-function printPrintable(a: unknown): (() => Promise<void>) | null {
-  if (isPrintable(a)) {
-    return () => a[printSymbol]();
+export class PrintRegistry {
+  constructor() {
+    this._printerAdded = new Signal(this);
   }
-  return null;
+
+  /**
+   * Adds a print function to the registry.
+   */
+  addPrintFunction(fn: PrintFunction) {
+    this._printers.push(fn);
+  }
+
+  /**
+   * Returns the printer thunk for an object or null if it does not exist.
+   */
+  getPrinter(val: unknown): PrintThunk | null {
+    return combineManyPrintFunctions(this._printers)(val);
+  }
+
+  /**
+   * Returns a signal that is triggered after a new printer is added.
+   */
+  get printerAdded(): ISignal<PrintRegistry, PrintFunction> {
+    return this._printerAdded;
+  }
+
+  private readonly _printers = new Array<PrintFunction>();
+  private readonly _printerAdded: Signal<PrintRegistry, PrintFunction>;
 }
 
 /**
@@ -112,18 +110,25 @@ export function isPrintable(a: any): a is IPrintable {
 /**
  * Calls the print symbol on an object to print it.
  */
-export function print(a: IPrintable) {
-  a[printSymbol]();
+export function printPrintable(a: IPrintable): Promise<void> {
+  return a[printSymbol]();
 }
 
 /**
  * Sets the print method on the parent to that of the child, if it
  * exists on the child.
  */
-export function deferPrinting(parent: IPrintable, child: object) {
+export function delegatePrintMethod(parent: IPrintable, child: object) {
   if (isPrintable(child)) {
     parent[printSymbol] = child[printSymbol].bind(child);
   }
+}
+
+export function printableFunction(val: unknown): PrintThunk | null {
+  if (!isPrintable(val)) {
+    return null;
+  }
+  return () => printPrintable(val);
 }
 
 /**
