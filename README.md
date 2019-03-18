@@ -188,3 +188,13 @@ To be listed, please submit a pull request with your information.
 
 We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
 and participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab). Please use the [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+
+### Weekly Dev Meeting
+
+We have meetings every week where we discuss what we have been working on and get feedback from one another.
+
+Anyone is welcome to attend, if they would like to discuss a topic or just to listen in.
+
+* When: Wednesdays 9AM PT
+* Where: [`calpoly/jupyter` Zoom](https://calpoly.zoom.us/my/jupyter)
+* What: [Meeting notes on Dropbox Paper](https://paper.dropbox.com/doc/JLab-Dev-Meeting-Minutes-2019--AZlv6L3jnv8ntl6kJK88y5M5Ag-Lj0P4kI2JrbA0eXHZSdY5)
