@@ -44,16 +44,21 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
    * Render JSON into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const data = model.data[this._mimeType] as any;
+    const data = model.data[this._mimeType] as string;
     const metadata = (model.metadata[this._mimeType] as any) || {};
     return new Promise<void>((resolve, reject) => {
-      ReactDOM.render(
-        <Component data={data} metadata={metadata} />,
-        this.node,
-        () => {
-          resolve();
-        }
-      );
+      try {
+        const json = JSON.parse(data);
+        ReactDOM.render(
+          <Component data={json} metadata={metadata} />,
+          this.node,
+          () => {
+            resolve();
+          }
+        );
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -82,7 +87,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     id: '@jupyterlab/json-extension:factory',
     rendererFactory,
     rank: 0,
-    dataType: 'json',
+    dataType: 'string',
     documentWidgetFactoryOptions: {
       name: 'JSON',
       primaryFileType: 'json',
