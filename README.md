@@ -10,8 +10,10 @@
 [![PyPI version](https://badge.fury.io/py/jupyterlab.svg)](https://badge.fury.io/py/jupyterlab)
 [![Build Status](https://dev.azure.com/jupyterlab/jupyterlab/_apis/build/status/jupyterlab.jupyterlab?branchName=master)](https://dev.azure.com/jupyterlab/jupyterlab/_build/latest?definitionId=1&branchName=master)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](http://jupyterlab.readthedocs.io/en/stable/)
-[![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
-[![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
+[![GitHub](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/jupyterlab/jupyterlab/issues)
+[![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
+[![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
@@ -186,5 +188,6 @@ To be listed, please submit a pull request with your information.
 
 ## Getting help
 
-We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab). Please use the [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others while a question answered in the [Gitter chat room](https://gitter.im/jupyterlab/jupyterlab) probably won't be.
+
+Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
