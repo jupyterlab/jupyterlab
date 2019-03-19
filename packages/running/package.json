@@ -36,7 +36,7 @@
     "@jupyterlab/services": "^4.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
-    "react": "~16.8.3"
+    "react": "~16.8.4"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
