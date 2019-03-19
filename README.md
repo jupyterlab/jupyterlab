@@ -195,6 +195,7 @@ We have meetings every week where we discuss what we have been working on and ge
 
 Anyone is welcome to attend, if they would like to discuss a topic or just to listen in.
 
-* When: Wednesdays 9AM PT
-* Where: [`calpoly/jupyter` Zoom](https://calpoly.zoom.us/my/jupyter)
-* What: [Meeting notes on Dropbox Paper](https://paper.dropbox.com/doc/JLab-Dev-Meeting-Minutes-2019--AZlv6L3jnv8ntl6kJK88y5M5Ag-Lj0P4kI2JrbA0eXHZSdY5)
+- When: Wednesdays 9AM PT
+- Where: [`calpoly/jupyter` Zoom](https://calpoly.zoom.us/my/jupyter)
+- What: [Meeting notes on Dropbox Paper](https://paper.dropbox.com/doc/JLab-Dev-Meeting-Minutes-2019--AZlv6L3jnv8ntl6kJK88y5M5Ag-Lj0P4kI2JrbA0eXHZSdY5)
+
