@@ -11,6 +11,5 @@
 
 /* Left-justify the MathJax display equation in cell outputs. */
 .jp-OutputArea-output.jp-RenderedLatex .MathJax_Display {
-  padding: var(--jp-code-padding);
   text-align: left !important;
 }
