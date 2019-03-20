@@ -133,7 +133,7 @@ export namespace Printing {
    * creating an iframe and copying the DOM into it.
    */
   export function printWidget(
-    this: Widget,
+    widget: Widget,
     cssText?: string,
     callback?: PrintdCallback
   ) {
@@ -141,7 +141,7 @@ export namespace Printing {
     // const iframe = _PRINTD.getIFrame();
     // iframe.src = 'about://blank';
 
-    _PRINTD.print(this.node, [cssText], [], callback);
+    _PRINTD.print(widget.node, [cssText], [], callback);
   }
 
   /**

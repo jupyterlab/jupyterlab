@@ -164,7 +164,6 @@ export class StaticNotebook extends Widget {
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
     this.rendermime = options.rendermime;
-    this.baseUrl = options.baseUrl;
     this.layout = new Private.NotebookPanelLayout();
     this.contentFactory =
       options.contentFactory || StaticNotebook.defaultContentFactory;
@@ -201,11 +200,6 @@ export class StaticNotebook extends Widget {
    * The Rendermime instance used by the widget.
    */
   readonly rendermime: RenderMimeRegistry;
-
-  /**
-   * The base URL of the application, used to compute nbconvert URL.
-   */
-  readonly baseUrl?: string;
 
   /**
    * The model for the widget.
@@ -651,11 +645,6 @@ export namespace StaticNotebook {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
-
-    /**
-     * Base URL of the app, used to compute nbconvert URL for printing.
-     */
-    baseUrl?: string;
   }
 
   /**
@@ -2288,8 +2277,7 @@ namespace Private {
         rendermime: options.rendermime,
         languagePreference: options.languagePreference,
         contentFactory: Notebook.defaultContentFactory,
-        mimeTypeService: options.mimeTypeService,
-        baseUrl: options.baseUrl
+        mimeTypeService: options.mimeTypeService
       };
     }
   }

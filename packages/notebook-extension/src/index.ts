@@ -495,7 +495,6 @@ function activateNotebookHandler(
   // An object for tracking the current notebook settings.
   let editorConfig = StaticNotebook.defaultEditorConfig;
   let notebookConfig = StaticNotebook.defaultNotebookConfig;
-  // Pass URL in here.
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],

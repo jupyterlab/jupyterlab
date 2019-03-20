@@ -37,7 +37,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
-    this._baseUrl = options.baseUrl;
   }
 
   /*
@@ -86,14 +85,14 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   ): NotebookPanel {
     let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
 
-    let content = this.contentFactory.createNotebook({
+    let nbOptions = {
       rendermime,
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
       editorConfig: this._editorConfig,
-      notebookConfig: this._notebookConfig,
-      baseUrl: this._baseUrl
-    });
+      notebookConfig: this._notebookConfig
+    };
+    let content = this.contentFactory.createNotebook(nbOptions);
 
     return new NotebookPanel({ context, content });
   }
@@ -109,7 +108,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
 
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
-  private _baseUrl: string;
 }
 
 /**
@@ -145,12 +143,5 @@ export namespace NotebookWidgetFactory {
      * The notebook configuration.
      */
     notebookConfig?: StaticNotebook.INotebookConfig;
-
-    /**
-     * Base URL for the app.
-     *
-     * Used to compute the URL for notebook run through nbconvert.
-     */
-    baseUrl?: string;
   }
 }

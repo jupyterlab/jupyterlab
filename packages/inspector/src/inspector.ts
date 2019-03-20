@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { printSymbol, printd } from '@jupyterlab/apputils';
+import { Printing } from '@jupyterlab/apputils';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -90,7 +90,8 @@ export namespace IInspector {
 /**
  * A panel which contains a set of inspectors.
  */
-export class InspectorPanel extends Panel implements IInspector {
+export class InspectorPanel extends Panel
+  implements IInspector, Printing.IProvidesHandler {
   /**
    * Construct an inspector.
    */
@@ -102,8 +103,9 @@ export class InspectorPanel extends Panel implements IInspector {
   /**
    * Print in iframe
    */
-  [printSymbol]() {
-    printWidget.bind(this)('.p-mod-hidden {display: none;}');
+  [Printing.symbol]() {
+    return async () =>
+      Printing.printWidget(this, '.p-mod-hidden {display: none;}');
   }
 
   /**

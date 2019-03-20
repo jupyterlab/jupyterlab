@@ -3,7 +3,7 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { printSymbol, printWidget } from '@jupyterlab/apputils';
+import { Printing } from '@jupyterlab/apputils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -30,7 +30,8 @@ export const MIME_TYPE = 'application/json';
 /**
  * A renderer for JSON data.
  */
-export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
+export class RenderedJSON extends Widget
+  implements IRenderMime.IRenderer, Printing.IProvidesHandler {
   /**
    * Create a new widget for rendering JSON.
    */
@@ -42,7 +43,9 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
     this._mimeType = options.mimeType;
   }
 
-  [printSymbol] = printWidget;
+  [Printing.symbol]() {
+    return async () => Printing.printWidget(this);
+  }
 
   /**
    * Render JSON into this widget's node.
