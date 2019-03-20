@@ -5,7 +5,11 @@ import { expect } from 'chai';
 
 import { SessionManager } from '@jupyterlab/services';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils/src';
+import {
+  ClientSession,
+  Dialog,
+  IClientSession
+} from '@jupyterlab/apputils/src';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -28,6 +32,7 @@ describe('@jupyterlab/apputils', () => {
     afterEach(async () => {
       await session.shutdown();
       session.dispose();
+      Dialog.nuke();
     });
 
     describe('#constructor()', () => {
