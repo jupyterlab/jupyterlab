@@ -228,19 +228,19 @@ describe('rendermime/factories', () => {
       });
 
       // TODO we are disabling script execution for now.
-      // it('should execute a script tag when attached', () => {
-      //   const source = '<script>window.y=3;</script>';
-      //   const f = htmlRendererFactory;
-      //   const mimeType = 'text/html';
-      //   const model = createModel(mimeType, source, true);
-      //   const w = f.createRenderer({ mimeType, ...defaultOptions });
-      //   return w.renderModel(model).then(() => {
-      //     expect((window as any).y).to.be.undefined;
-      //     Widget.attach(w, document.body);
-      //     expect((window as any).y).to.equal(3);
-      //     w.dispose();
-      //   });
-      // });
+      it.skip('should execute a script tag when attached', () => {
+        const source = '<script>window.y=3;</script>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source, true);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        return w.renderModel(model).then(() => {
+          expect((window as any).y).to.be.undefined;
+          Widget.attach(w, document.body);
+          expect((window as any).y).to.equal(3);
+          w.dispose();
+        });
+      });
 
       it('should sanitize when untrusted', async () => {
         const source = '<pre><script>window.y=3;</script></pre>';
