@@ -10,13 +10,10 @@
       "path": "../apputils"
     },
     {
-      "path": "../ui-components",
-    },
-    {
-      "path": "../apputils"
-    },
-    {
       "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

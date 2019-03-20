@@ -17,8 +17,7 @@ import {
   showErrorMessage,
   Dialog,
   ICommandPalette,
-  isPrintable,
-  print
+  Printing
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
@@ -41,8 +40,6 @@ import { Contents, Kernel } from '@jupyterlab/services';
 import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { IDisposable } from '@phosphor/disposable';
-
-const _PRINTD = new Printd();
 
 /**
  * The command IDs used by the document manager plugin.
@@ -787,13 +784,14 @@ function addLabCommands(
   commands.addCommand(CommandIDs.print, {
     label: 'Print...',
     isEnabled: () => {
-      const { currentWidget } = shell;
-      return isPrintable(currentWidget);
+      const { currentWidget } = labShell;
+      return Printing.registry.resolve(currentWidget) !== null;
     },
     execute: () => {
       const widget = contextMenuWidget();
-      if (isPrintable(widget)) {
-        print(widget);
+      const printFunction = Printing.registry.resolve(widget);
+      if (printFunction) {
+        printFunction();
       }
     }
   });

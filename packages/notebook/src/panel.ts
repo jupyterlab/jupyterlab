@@ -9,7 +9,7 @@ import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IClientSession, printSymbol, printURL } from '@jupyterlab/apputils';
+import { IClientSession, Printing } from '@jupyterlab/apputils';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -18,7 +18,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { INotebookModel } from './model';
 
 import { Notebook } from './widget';
-import { URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The class name added to notebook panels.
@@ -54,12 +54,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onKernelChanged,
       this
     );
-
-    this._baseUrl = options.content.baseUrl;
-
-    if (this._baseUrl !== undefined) {
-      this[printSymbol] = this._print;
-    }
 
     this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
@@ -136,28 +130,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * Returns the URL converting this notebook to a certain
-   * format with nbconvert.
-   *
-   * If the `baseUrl` was not passed into the panel, then
-   * undefined is returned.
-   */
-  getNBConvertURL(
-    format: string,
-    download: boolean = true
-  ): string | undefined {
-    if (this._baseUrl === undefined) {
-      return undefined;
-    }
-    const notebookPath = URLExt.encodeParts(this.context.path);
-    const url = URLExt.join(this._baseUrl, 'nbconvert', format, notebookPath);
-    if (download) {
-      return url + '?download=true';
-    }
-    return url;
-  }
-
-  /**
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
@@ -169,18 +141,22 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
   /**
    * Prints the notebook by converting to HTML with nbconvert.
-   *
-   * Ideally the name of this method would be `[printSymbol]`, but
-   * typescript won't let us make this a method because our superclass
-   * has it as an assigned property.
    */
-  private async _print() {
-    // Save before generating HTML
-    if (this.context.model.dirty && !this.context.model.readOnly) {
-      await this.context.save();
-    }
+  [Printing.symbol]() {
+    return async () => {
+      // Save before generating HTML
+      if (this.context.model.dirty && !this.context.model.readOnly) {
+        await this.context.save();
+      }
 
-    printURL(this.getNBConvertURL('html', false));
+      Printing.printURL(
+        PageConfig.getNBConvertURL({
+          format: 'html',
+          download: false,
+          path: this.context.path
+        })
+      );
+    };
   }
 
   /**
@@ -226,7 +202,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   private _activated = new Signal<this, void>(this);
-  private _baseUrl?: string;
 }
 
 /**

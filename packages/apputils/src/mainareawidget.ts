@@ -11,7 +11,7 @@ import { Toolbar } from './toolbar';
 
 import { DOMUtils } from './domutils';
 
-import { printSymbol, deferPrinting } from './printing';
+import { Printing } from './printing';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -22,7 +22,8 @@ import { printSymbol, deferPrinting } from './printing';
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
  */
-export class MainAreaWidget<T extends Widget = Widget> extends Widget {
+export class MainAreaWidget<T extends Widget = Widget> extends Widget
+  implements Printing.IProvidesHandler {
   /**
    * Construct a new main area widget.
    *
@@ -43,8 +44,6 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     BoxLayout.setStretch(content, 1);
     layout.addWidget(toolbar);
     layout.addWidget(content);
-
-    deferPrinting(this, content);
 
     if (!content.id) {
       content.id = DOMUtils.createDomID();
@@ -109,7 +108,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
   /**
    * Print method. Defered to content.
    */
-  [printSymbol]: () => void;
+  [Printing.symbol](): Printing.OptionalAsyncThunk {
+    return Printing.retrievePrintFunction(this._content);
+  }
 
   /**
    * The content hosted by the widget.

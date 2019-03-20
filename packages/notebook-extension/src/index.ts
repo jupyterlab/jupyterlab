@@ -277,7 +277,6 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     let editorFactory = editorServices.factoryService.newInlineEditor;
-    NotebookPanel.prototype[printSymbol] = () => {};
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
@@ -503,7 +502,6 @@ function activateNotebookHandler(
     modelName: 'notebook',
     defaultFor: ['notebook'],
     preferKernel: true,
-    baseUrl: services.serverSettings.baseUrl,
     canStartKernel: true,
     rendermime: rendermime,
     contentFactory,
@@ -1095,7 +1093,11 @@ function addCommands(
         return;
       }
 
-      const url = current.getNBConvertURL(args['format'] as string);
+      const url = PageConfig.getNBConvertURL({
+        format: args['format'] as string,
+        download: true,
+        path: current.context.path
+      });
       const child = window.open('', '_blank');
       const { context } = current;
 

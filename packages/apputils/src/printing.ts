@@ -20,167 +20,159 @@ import { Printd, PrintdCallback } from 'printd';
 import { Widget } from '@phosphor/widgets';
 import { Signal, ISignal } from '@phosphor/signaling';
 
-/**
- * Function that takes no arguments and when invoked prints out some object.
- */
-type PrintThunk = () => Promise<void>;
+export namespace Printing {
+  /**
+   * Function that takes no arguments and when invoked prints out some object or null if printing is not defined.
+   */
+  export type OptionalAsyncThunk = () => Promise<void> | null;
 
-/**
- * Function that takes in an object and returns a thunk that will print that object or null
- * if printing is not supported for that object.
- */
-type PrintFunction = (val: unknown) => PrintThunk | null;
+  /**
+   * Function that takes in an object and returns a function that prints it or null if it cannot be printed.
+   */
+  type Handler = (val: unknown) => OptionalAsyncThunk;
 
-/**
- * Combines two print functions into a resulting print function that calls both in sequence, returning
- * the first print function if it is returned.
- */
-function combinePrintFunctions(
-  f: PrintFunction,
-  g: PrintFunction
-): PrintFunction {
-  return (val: unknown) => {
-    const fRes = f(val);
-    if (fRes !== null) {
-      return fRes;
+  /**
+   * Combines two print creators so that both are called in sequence.
+   */
+  function combineHandlers(f: Handler, g: Handler): Handler {
+    return (val: unknown) => {
+      const fRes = f(val);
+      if (fRes !== null) {
+        return fRes;
+      }
+      return g(val);
+    };
+  }
+
+  function combineManyHandlers(fs: Iterable<Handler>): Handler {
+    return [...fs].reduce(combineHandlers, () => null);
+  }
+
+  class Registry {
+    constructor() {
+      this._handlerAdded = new Signal(this);
     }
-    return g(val);
-  };
-}
 
-function combineManyPrintFunctions(fs: Iterable<PrintFunction>): PrintFunction {
-  return [...fs].reduce(combinePrintFunctions, () => null);
-}
+    /**
+     * Adds a print function to the registry.
+     */
+    registerHandler(handlers: Handler) {
+      this._handlers.push(handlers);
+    }
 
-export class PrintRegistry {
-  constructor() {
-    this._printerAdded = new Signal(this);
+    /**
+     * Returns the print thunk for an object or null if it does not exist.
+     */
+    resolve(val: unknown): OptionalAsyncThunk {
+      return combineManyHandlers(this._handlers)(val);
+    }
+
+    /**
+     * Returns a signal that is triggered after a new printer is added.
+     */
+    get handlerAdded(): ISignal<Registry, Handler> {
+      return this._handlerAdded;
+    }
+
+    private readonly _handlers = new Array<Handler>();
+    private readonly _handlerAdded: Signal<Registry, Handler>;
   }
 
   /**
-   * Adds a print function to the registry.
+   * Export a global registry for printing.
+   *
+   * We could move this to an extension if we prefer.
    */
-  addPrintFunction(fn: PrintFunction) {
-    this._printers.push(fn);
+  export const registry = new Registry();
+  /**
+   * Symbol to use for a method that returns a function to print an object.
+   */
+  export const symbol = Symbol('print function');
+
+  /**
+   * Objects who provide a custom way of printing themselves
+   * should implement this interface.
+   */
+  export interface IProvidesHandler {
+    /**
+     * Returns a function to print this object or null if it cannot be printed.
+     */
+    [symbol]: () => OptionalAsyncThunk;
   }
 
   /**
-   * Returns the printer thunk for an object or null if it does not exist.
+   * Returns whether an object implements a print method.
    */
-  getPrinter(val: unknown): PrintThunk | null {
-    return combineManyPrintFunctions(this._printers)(val);
+  export function providesHandler(a: any): a is IProvidesHandler {
+    try {
+      return symbol in a;
+    } catch {
+      // `in` raises a type error on non objects.
+      return false;
+    }
   }
 
   /**
-   * Returns a signal that is triggered after a new printer is added.
+   * Returns the print function for an object, or null if it does not provide a handler.
    */
-  get printerAdded(): ISignal<PrintRegistry, PrintFunction> {
-    return this._printerAdded;
-  }
-
-  private readonly _printers = new Array<PrintFunction>();
-  private readonly _printerAdded: Signal<PrintRegistry, PrintFunction>;
-}
-
-/**
- * Symbol to use for a method that prints out out the object.
- */
-export const printSymbol = Symbol();
-
-/**
- * Objects who provide a custom way of printing themselves
- * should implement this interface.
- */
-export interface IPrintable {
-  [printSymbol]: () => Promise<void>;
-}
-
-/**
- * Returns whether an object implements a print method.
- */
-export function isPrintable(a: any): a is IPrintable {
-  try {
-    return printSymbol in a;
-  } catch {
-    // `in` raises a type error on non objects.
-    return false;
-  }
-}
-
-/**
- * Calls the print symbol on an object to print it.
- */
-export function printPrintable(a: IPrintable): Promise<void> {
-  return a[printSymbol]();
-}
-
-/**
- * Sets the print method on the parent to that of the child, if it
- * exists on the child.
- */
-export function delegatePrintMethod(parent: IPrintable, child: object) {
-  if (isPrintable(child)) {
-    parent[printSymbol] = child[printSymbol].bind(child);
-  }
-}
-
-export function printableFunction(val: unknown): PrintThunk | null {
-  if (!isPrintable(val)) {
+  export function retrievePrintFunction(val: unknown): OptionalAsyncThunk {
+    if (providesHandler(val)) {
+      return val[symbol]();
+    }
     return null;
   }
-  return () => printPrintable(val);
-}
 
-/**
- * Global print instance
- */
-const _PRINTD = new Printd();
+  /**
+   * Global print instance
+   */
+  const _PRINTD = new Printd();
 
-/**
- * Use this as a print property for a widget that will
- * use the `printd` library to print the node, by
- * creating an iframe and copying the DOM into it.
- */
-export function printWidget(
-  this: Widget,
-  cssText?: string,
-  callback?: PrintdCallback
-) {
-  // reset URL if it's set.
-  const iframe = _PRINTD.getIFrame();
-  iframe.src = 'about://blank';
+  /**
+   * Use this as a print property for a widget that will
+   * use the `printd` library to print the node, by
+   * creating an iframe and copying the DOM into it.
+   */
+  export function printWidget(
+    this: Widget,
+    cssText?: string,
+    callback?: PrintdCallback
+  ) {
+    // // reset URL if it's set.
+    // const iframe = _PRINTD.getIFrame();
+    // iframe.src = 'about://blank';
 
-  _PRINTD.print(this.node, cssText, callback);
-}
+    _PRINTD.print(this.node, [cssText], [], callback);
+  }
 
-/**
- * Prints a URL by loading it into an iframe.
- *
- * NOTE: When https://github.com/joseluisq/printd/issues/20 is fixed this can be removed.
- * @param url URL to load into an iframe.
- */
-export function printURL(url: string) {
-  const iframe = _PRINTD.getIFrame();
+  /**
+   * Prints a URL by loading it into an iframe.
+   *
+   * @param url URL to load into an iframe.
+   */
+  export function printURL(url: string) {
+    _PRINTD.printURL('url');
+    // const iframe = _PRINTD.getIFrame();
 
-  // print iframe after it loads new page
-  iframe.addEventListener(
-    'load',
-    () => {
-      // copies logic from
-      // https://github.com/joseluisq/printd/blob/c7f05196da62d2f2be68386521c0af5908097253/src/index.ts#L62-L69
-      const result: boolean = iframe.contentWindow.document.execCommand(
-        'print',
-        false,
-        null
-      );
+    // // print iframe after it loads new page
+    // iframe.addEventListener(
+    //   'load',
+    //   () => {
+    //     // copies logic from
+    //     // https://github.com/joseluisq/printd/blob/c7f05196da62d2f2be68386521c0af5908097253/src/index.ts#L62-L69
+    //     const result: boolean = iframe.contentWindow.document.execCommand(
+    //       'print',
+    //       false,
+    //       null
+    //     );
 
-      if (!result) {
-        iframe.contentWindow.print();
-      }
-    },
-    { once: true }
-  );
+    //     if (!result) {
+    //       iframe.contentWindow.print();
+    //     }
+    //   },
+    //   { once: true }
+    // );
 
-  // load new page in iframe
-  iframe.src = url;
+    // // load new page in iframe
+    // iframe.src = url;
+  }
 }
