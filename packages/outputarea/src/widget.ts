@@ -906,7 +906,9 @@ namespace Private {
       this._wrapped = wrapped;
 
       // Once the iframe is loaded, the subarea is dynamically inserted
-      const iframe = this.node as HTMLIFrameElement;
+      const iframe = this.node as HTMLIFrameElement & {
+        heightChangeObserver: MutationObserver;
+      };
 
       iframe.frameBorder = '0';
       iframe.scrolling = 'auto';
@@ -928,12 +930,12 @@ namespace Private {
 
         // Adjust the iframe height automatically
         iframe.style.height = body.scrollHeight + 'px';
-        iframe.heightChangeObserver = MutationObserver(() => {
+        iframe.heightChangeObserver = new MutationObserver(() => {
           iframe.style.height = body.scrollHeight + 'px';
         });
         iframe.heightChangeObserver.observe(body, {
           attributes: true,
-          attributeFilter: ['scrollHeight'],
+          attributeFilter: ['scrollHeight']
         });
       });
     }
