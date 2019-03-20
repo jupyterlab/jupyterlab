@@ -23,7 +23,7 @@ import { Printing } from './printing';
  * This widget ensures its own focus when activated.
  */
 export class MainAreaWidget<T extends Widget = Widget> extends Widget
-  implements Printing.IProvidesHandler {
+  implements Printing.IPrintable {
   /**
    * Construct a new main area widget.
    *
@@ -109,7 +109,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    * Print method. Defered to content.
    */
   [Printing.symbol](): Printing.OptionalAsyncThunk {
-    return Printing.retrievePrintFunction(this._content);
+    return Printing.getPrintFunction(this._content);
   }
 
   /**

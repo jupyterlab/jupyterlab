@@ -785,11 +785,11 @@ function addLabCommands(
     label: 'Print...',
     isEnabled: () => {
       const { currentWidget } = labShell;
-      return Printing.registry.resolve(currentWidget) !== null;
+      return Printing.getPrintFunction(currentWidget) !== null;
     },
     execute: () => {
       const widget = contextMenuWidget();
-      const printFunction = Printing.registry.resolve(widget);
+      const printFunction = Printing.getPrintFunction(widget);
       if (printFunction) {
         printFunction();
       }

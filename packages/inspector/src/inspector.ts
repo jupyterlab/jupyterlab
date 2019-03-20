@@ -91,7 +91,7 @@ export namespace IInspector {
  * A panel which contains a set of inspectors.
  */
 export class InspectorPanel extends Panel
-  implements IInspector, Printing.IProvidesHandler {
+  implements IInspector, Printing.IPrintable {
   /**
    * Construct an inspector.
    */
