@@ -26,7 +26,7 @@ build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
-build_aliases['dev'] = 'LabBuildApp.dev_build'
+build_aliases['dev-build'] = 'LabBuildApp.dev_build'
 
 build_flags = dict(flags)
 
