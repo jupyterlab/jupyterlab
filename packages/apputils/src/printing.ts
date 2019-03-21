@@ -40,13 +40,11 @@ export namespace Printing {
   /**
    * Returns whether an object implements a print method.
    */
-  export function isPrintable(a: any): a is IPrintable {
-    try {
-      return symbol in a;
-    } catch {
-      // `in` raises a type error on non objects.
+  export function isPrintable(a: unknown): a is IPrintable {
+    if (typeof a !== 'object') {
       return false;
     }
+    return symbol in a;
   }
 
   /**
