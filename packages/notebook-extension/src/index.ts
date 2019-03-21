@@ -1163,27 +1163,47 @@ function addCommands(
         const filename = attachmentNameRegex.exec(
           response.headers.get('Content-Disposition')
         )[1];
-        const fileContent = await response.text();
         const model = await services.contents.newUntitled({
           path: PathExt.dirname(context.path),
           ext: PathExt.extname(filename),
           type: 'file'
         });
-        await services.contents.save(model.path, {
-          content: fileContent,
-          format: 'text',
-          mimetype: 'text/plain',
-          type: 'file'
-        });
-        // Fails if an exported file with that name already exists
-        await services.contents.rename(
-          model.path,
-          PathExt.join(PathExt.dirname(model.path), filename)
-        );
+        const blob = await response.blob();
+        const isText =
+          blob.type.split('/')[0] === 'text' &&
+          blob.type.split('/')[1] !== 'latex';
+        const reader = new FileReader();
+        if (isText) {
+          reader.readAsText(blob);
+        } else {
+          reader.readAsDataURL(blob);
+        }
+        reader.onload = async function(e) {
+          let persistedModel = null;
+          try {
+            persistedModel = await services.contents.save(model.path, {
+              content: reader.result,
+              format: isText ? 'text' : 'base64',
+              mimetype: isText ? 'text/plain' : 'application/octet-stream',
+              type: 'file'
+            });
+            // Fails if an exported file with that name already exists
+            await services.contents.rename(
+              persistedModel.path,
+              PathExt.join(PathExt.dirname(persistedModel.path), filename)
+            );
+          } catch (e) {
+            if (persistedModel) {
+              // Should these be shown in a popup instead?
+              console.error(`Renaming file failed`);
+            } else {
+              console.error(`Failed to export file. Error: ${e.message}`);
+            }
+          }
+        };
       } catch (e) {
         console.error(`Failed to export file. Error: ${e.message}`);
       }
-
       return new Promise<void>(resolve => {
         resolve(undefined);
       });
