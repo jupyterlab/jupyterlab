@@ -591,8 +591,8 @@ export namespace Dialog {
    * This function should only be used in tests or cases where application state
    * may be discarded.
    */
-  export function nuke(): void {
-    Private.nuke();
+  export function flush(): void {
+    Private.flush();
   }
 
   /**
@@ -813,7 +813,7 @@ namespace Private {
   /**
    * The collection of outstanding dialog instances.
    */
-  export let dialogs: DisposableSet | null = null;
+  export let dialogs = new DisposableSet();
 
   /**
    * The queue for launching dialogs.
@@ -864,10 +864,9 @@ namespace Private {
   /**
    * Disposes all outstanding dialog instances.
    */
-  export function nuke(): void {
-    if (dialogs) {
+  export function flush(): void {
+    if (!dialogs.isDisposed) {
       dialogs.dispose();
-      dialogs = null;
     }
   }
 
@@ -877,12 +876,12 @@ namespace Private {
    * @param dialog - The dialog being added.
    */
   export function register(dialog: Dialog<any>): void {
-    if (!dialogs) {
+    if (dialogs.isDisposed) {
       dialogs = new DisposableSet();
     }
     dialogs.add(dialog);
     dialog.disposed.connect(() => {
-      if (dialogs) {
+      if (!dialogs.isDisposed) {
         dialogs.remove(dialog);
       }
     });
