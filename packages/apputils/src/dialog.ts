@@ -591,8 +591,8 @@ export namespace Dialog {
    * This function should only be used in tests or cases where application state
    * may be discarded.
    */
-  export function nuke(): void {
-    Private.nuke();
+  export function flush(): void {
+    Private.flush();
   }
 
   /**
@@ -864,7 +864,7 @@ namespace Private {
   /**
    * Disposes all outstanding dialog instances.
    */
-  export function nuke(): void {
+  export function flush(): void {
     if (dialogs) {
       dialogs.dispose();
       dialogs = null;

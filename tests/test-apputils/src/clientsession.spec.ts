@@ -32,7 +32,7 @@ describe('@jupyterlab/apputils', () => {
     afterEach(async () => {
       await session.shutdown();
       session.dispose();
-      Dialog.nuke();
+      Dialog.flush();
     });
 
     describe('#constructor()', () => {
