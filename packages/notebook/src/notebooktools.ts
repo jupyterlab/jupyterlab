@@ -27,6 +27,7 @@ import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
 import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
+import { INotebookModel } from './model';
 
 /* tslint:disable */
 /**
@@ -41,7 +42,7 @@ export const INotebookTools = new Token<INotebookTools>(
  * The interface for notebook metadata tools.
  */
 export interface INotebookTools extends Widget {
-  notebookPanel: NotebookPanel | null;
+  activeNotebookPanel: NotebookPanel | null;
   activeCell: Cell | null;
   selectedCells: Cell[];
   addItem(options: NotebookTools.IAddOptions): void;
@@ -101,7 +102,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
-      this._onNotebookPanelChanged,
+      this._onActiveNotebookPanelChanged,
       this
     );
     this._tracker.activeCellChanged.connect(
@@ -112,7 +113,7 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._onSelectionChanged,
       this
     );
-    this._onNotebookPanelChanged();
+    this._onActiveNotebookPanelChanged();
     this._onActiveCellChanged();
     this._onSelectionChanged();
   }
@@ -139,7 +140,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   /**
    * The current notebook.
    */
-  get notebookPanel(): NotebookPanel | null {
+  get activeNotebookPanel(): NotebookPanel | null {
     return this._tracker.currentWidget;
   }
 
@@ -170,9 +171,29 @@ export class NotebookTools extends Widget implements INotebookTools {
   /**
    * Handle a change to the notebook panel.
    */
-  private _onNotebookPanelChanged(): void {
+  private _onActiveNotebookPanelChanged(): void {
+    if (
+      this._prevActiveNotebookModel &&
+      !this._prevActiveNotebookModel.isDisposed
+    ) {
+      this._prevActiveNotebookModel.metadata.changed.disconnect(
+        this._onActiveNotebookPanelMetadataChanged,
+        this
+      );
+    }
+    const activeNBModel =
+      this.activeNotebookPanel && this.activeNotebookPanel.content
+        ? this.activeNotebookPanel.content.model
+        : null;
+    this._prevActiveNotebookModel = activeNBModel;
+    if (activeNBModel) {
+      activeNBModel.metadata.changed.connect(
+        this._onActiveNotebookPanelMetadataChanged,
+        this
+      );
+    }
     each(this._toolChildren(), widget => {
-      MessageLoop.sendMessage(widget, NotebookTools.NotebookPanelMessage);
+      MessageLoop.sendMessage(widget, NotebookTools.ActiveNotebookPanelMessage);
     });
   }
 
@@ -180,17 +201,17 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(): void {
-    if (this._prevActive && !this._prevActive.isDisposed) {
-      this._prevActive.metadata.changed.disconnect(
-        this._onMetadataChanged,
+    if (this._prevActiveCell && !this._prevActiveCell.isDisposed) {
+      this._prevActiveCell.metadata.changed.disconnect(
+        this._onActiveCellMetadataChanged,
         this
       );
     }
     const activeCell = this.activeCell ? this.activeCell.model : null;
-    this._prevActive = activeCell;
+    this._prevActiveCell = activeCell;
     if (activeCell) {
       activeCell.metadata.changed.connect(
-        this._onMetadataChanged,
+        this._onActiveCellMetadataChanged,
         this
       );
     }
@@ -209,9 +230,25 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   /**
-   * Handle a change in the metadata.
+   * Handle a change in the active cell metadata.
    */
-  private _onMetadataChanged(
+  private _onActiveNotebookPanelMetadataChanged(
+    sender: IObservableMap<JSONValue>,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ): void {
+    let message = new ObservableJSON.ChangeMessage(
+      'activenotebookpanel-metadata-changed',
+      args
+    );
+    each(this._toolChildren(), widget => {
+      MessageLoop.sendMessage(widget, message);
+    });
+  }
+
+  /**
+   * Handle a change in the notebook model metadata.
+   */
+  private _onActiveCellMetadataChanged(
     sender: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
@@ -231,7 +268,8 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
-  private _prevActive: ICellModel | null;
+  private _prevActiveCell: ICellModel | null;
+  private _prevActiveNotebookModel: INotebookModel | null;
 }
 
 /**
@@ -269,10 +307,10 @@ export namespace NotebookTools {
   }
 
   /**
-   * A singleton conflatable `'notebookpanel-changed'` message.
+   * A singleton conflatable `'activenotebookpanel-changed'` message.
    */
-  export const NotebookPanelMessage = new ConflatableMessage(
-    'notebookpanel-changed'
+  export const ActiveNotebookPanelMessage = new ConflatableMessage(
+    'activenotebookpanel-changed'
   );
 
   /**
@@ -307,8 +345,8 @@ export namespace NotebookTools {
     processMessage(msg: Message): void {
       super.processMessage(msg);
       switch (msg.type) {
-        case 'notebookpanel-changed':
-          this.onNotebookPanelChanged(msg);
+        case 'activenotebookpanel-changed':
+          this.onActiveNotebookPanelChanged(msg);
           break;
         case 'activecell-changed':
           this.onActiveCellChanged(msg);
@@ -318,6 +356,11 @@ export namespace NotebookTools {
           break;
         case 'activecell-metadata-changed':
           this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+          break;
+        case 'activenotebookpanel-metadata-changed':
+          this.onActiveNotebookPanelMetadataChanged(
+            msg as ObservableJSON.ChangeMessage
+          );
           break;
         default:
           break;
@@ -330,7 +373,7 @@ export namespace NotebookTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onNotebookPanelChanged(msg: Message): void {
+    protected onActiveNotebookPanelChanged(msg: Message): void {
       /* no-op */
     }
 
@@ -361,6 +404,18 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
+      /* no-op */
+    }
+
+    /**
+     * Handle a change to the metadata of the active cell.
+     *
+     * #### Notes
+     * The default implementation is a no-op.
+     */
+    protected onActiveNotebookPanelMetadataChanged(
       msg: ObservableJSON.ChangeMessage
     ): void {
       /* no-op */
@@ -526,21 +581,12 @@ export namespace NotebookTools {
     }
 
     /**
-     * Handle a change of the notebook.
-     */
-    protected onNotebookPanelChanged(msg: Message): void {
-      const nb =
-        this.notebookTools.notebookPanel &&
-        this.notebookTools.notebookPanel.content;
-      this.editor.source = nb ? nb.model.metadata : null;
-    }
-    /**
      * Handle a change to the notebook metadata.
      */
-    protected onNotebookMetadataChanged(msg: Message): void {
+    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
       const nb =
-        this.notebookTools.notebookPanel &&
-        this.notebookTools.notebookPanel.content;
+        this.notebookTools.activeNotebookPanel &&
+        this.notebookTools.activeNotebookPanel.content;
       this.editor.source = nb ? nb.model.metadata : null;
     }
   }
