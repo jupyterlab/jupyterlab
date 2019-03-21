@@ -103,13 +103,13 @@ describe('cells/widget', () => {
 
     describe('#constructor()', () => {
       it('should create a base cell widget', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget).to.be.an.instanceof(Cell);
       });
 
       it('should accept a custom contentFactory', () => {
         const contentFactory = NBTestUtils.createBaseCellFactory();
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget).to.be.an.instanceof(Cell);
       });
 
@@ -118,7 +118,11 @@ describe('cells/widget', () => {
           insertSpaces: false,
           matchBrackets: false
         };
-        const widget = new Cell({ editorConfig, model, contentFactory });
+        const widget = new Cell({
+          editorConfig,
+          model,
+          contentFactory
+        }).initializeState();
         expect(widget.editor.getOption('insertSpaces')).to.equal(false);
         expect(widget.editor.getOption('matchBrackets')).to.equal(false);
         expect(widget.editor.getOption('lineNumbers')).to.equal(
@@ -130,40 +134,40 @@ describe('cells/widget', () => {
     describe('#model', () => {
       it('should be the model used by the widget', () => {
         const model = new CellModel({});
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget.model).to.equal(model);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be a code editor widget', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget.editorWidget).to.be.an.instanceof(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be a cell editor', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget.editor.uuid).to.be.ok;
       });
     });
 
     describe('#inputArea', () => {
       it('should be the input area for the cell', () => {
-        const widget = new Cell({ model });
+        const widget = new Cell({ model }).initializeState();
         expect(widget.inputArea).to.be.an.instanceof(InputArea);
       });
     });
 
     describe('#readOnly', () => {
       it('should be a boolean', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(typeof widget.readOnly).to.equal('boolean');
       });
 
       it('should default to false', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget.readOnly).to.equal(false);
       });
 
@@ -171,13 +175,13 @@ describe('cells/widget', () => {
         const widget = new Cell({
           model,
           contentFactory
-        });
+        }).initializeState();
         widget.readOnly = true;
         expect(widget.readOnly).to.equal(true);
       });
 
       it('should ignore being set to the same value', async () => {
-        const widget = new LogBaseCell();
+        const widget = new LogBaseCell().initializeState();
         widget.readOnly = true;
         widget.readOnly = true;
         await framePromise();
@@ -190,23 +194,157 @@ describe('cells/widget', () => {
         const widget = new Cell({
           model,
           contentFactory
-        });
-        expect(widget.readOnly).to.equal(false);
+        }).initializeState();
+        expect(widget.readOnly).to.equal(true);
       });
     });
 
     describe('#inputCollapsed', () => {
       it('should be the view state of the input being collapsed', () => {
-        const widget = new LogBaseCell();
+        const widget = new LogBaseCell().initializeState();
         expect(widget.inputHidden).to.equal(false);
         widget.inputHidden = true;
         expect(widget.inputHidden).to.equal(true);
       });
     });
 
+    describe('#loadEditableState()', () => {
+      it('should load the editable state from the model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.readOnly).to.equal(false);
+
+        model.metadata.set('editable', false);
+        widget.loadEditableState();
+        expect(widget.readOnly).to.equal(true);
+
+        model.metadata.set('editable', true);
+        widget.loadEditableState();
+        expect(widget.readOnly).to.equal(false);
+      });
+    });
+
+    describe('#saveEditableState()', () => {
+      it('should save the editable state to the model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.readOnly).to.equal(false);
+
+        widget.readOnly = true;
+        widget.saveEditableState();
+        expect(model.metadata.get('editable')).to.equal(false);
+
+        widget.readOnly = false;
+        widget.saveEditableState();
+        // Default values are not saved explicitly
+        expect(model.metadata.get('editable')).to.equal(undefined);
+      });
+    });
+
+    describe('#syncEditable', () => {
+      it('should control automatic syncing of editable state with model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.syncEditable).to.equal(false);
+        expect(widget.readOnly).to.equal(false);
+
+        // Not synced if setting widget attribute
+        widget.readOnly = true;
+        expect(model.metadata.get('editable')).to.equal(undefined);
+
+        // Not synced if setting metadata attribute
+        model.metadata.set('editable', true);
+        expect(widget.readOnly).to.equal(true);
+
+        widget.syncEditable = true;
+
+        // Setting sync does an initial sync from model to view. This also sets
+        // the metadata to undefined if it is the default value.
+        expect(model.metadata.get('editable')).to.equal(undefined);
+        expect(widget.readOnly).to.equal(false);
+
+        // Synced if setting widget attribute
+        widget.readOnly = true;
+        expect(model.metadata.get('editable')).to.equal(false);
+
+        // Synced if setting metadata attribute
+        model.metadata.set('editable', true);
+        expect(widget.readOnly).to.equal(false);
+      });
+    });
+
+    describe('#loadCollapseState()', () => {
+      it('should load the collapse state from the model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.inputHidden).to.equal(false);
+
+        model.metadata.set('jupyter', { source_hidden: true });
+        widget.loadCollapseState();
+        expect(widget.inputHidden).to.equal(true);
+
+        model.metadata.set('jupyter', { source_hidden: false });
+        widget.loadCollapseState();
+        expect(widget.inputHidden).to.equal(false);
+      });
+    });
+
+    describe('#saveCollapseState()', () => {
+      it('should save the collapse state to the model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.inputHidden).to.equal(false);
+
+        widget.inputHidden = true;
+        widget.saveCollapseState();
+        expect(model.metadata.get('jupyter')).to.deep.equal({
+          source_hidden: true
+        });
+
+        widget.inputHidden = false;
+        widget.saveCollapseState();
+        // Default values are not saved explicitly
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+      });
+    });
+
+    describe('#syncCollapse', () => {
+      it('should control automatic syncing of collapse state with model', () => {
+        const model = new CellModel({});
+        const widget = new Cell({ model, contentFactory }).initializeState();
+        expect(widget.syncCollapse).to.equal(false);
+        expect(widget.inputHidden).to.equal(false);
+
+        // Not synced if setting widget attribute
+        widget.inputHidden = true;
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+
+        // Not synced if setting metadata attribute
+        model.metadata.set('jupyter', { source_hidden: false });
+        expect(widget.inputHidden).to.equal(true);
+
+        widget.syncCollapse = true;
+
+        // Setting sync does an initial sync from model to view. This also sets
+        // the metadata to undefined if it is the default value.
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+        expect(widget.inputHidden).to.equal(false);
+
+        // Synced if setting widget attribute
+        widget.inputHidden = true;
+        expect(model.metadata.get('jupyter')).to.deep.equal({
+          source_hidden: true
+        });
+
+        // Synced if setting metadata attribute
+        model.metadata.set('jupyter', {});
+        expect(widget.inputHidden).to.equal(false);
+      });
+    });
+
     describe('#onActivateRequest()', () => {
       it('should focus the cell editor', async () => {
-        const widget = new LogBaseCell();
+        const widget = new LogBaseCell().initializeState();
         Widget.attach(widget, document.body);
         widget.activate();
         await framePromise();
@@ -219,7 +357,7 @@ describe('cells/widget', () => {
 
     describe('#setPrompt()', () => {
       it('should not throw an error (full test in input area)', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         expect(() => {
           widget.setPrompt(void 0);
         }).to.not.throw;
@@ -240,13 +378,13 @@ describe('cells/widget', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const widget = new Cell({ model, contentFactory });
+        const widget = new Cell({ model, contentFactory }).initializeState();
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
@@ -255,7 +393,7 @@ describe('cells/widget', () => {
 
     describe('#onAfterAttach()', () => {
       it('should run when widget is attached', () => {
-        const widget = new LogBaseCell();
+        const widget = new LogBaseCell().initializeState();
         expect(widget.methods).to.not.contain('onAfterAttach');
         Widget.attach(widget, document.body);
         expect(widget.methods).to.contain('onAfterAttach');
@@ -265,7 +403,7 @@ describe('cells/widget', () => {
 
     describe('#onUpdateRequest()', () => {
       it('should update the widget', () => {
-        const widget = new LogBaseCell();
+        const widget = new LogBaseCell().initializeState();
         expect(widget.methods).to.not.contain('onUpdateRequest');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
@@ -385,25 +523,180 @@ describe('cells/widget', () => {
 
     describe('#outputsScrolled', () => {
       it('should initialize from the model', () => {
-        const collapsedModel = new CodeCellModel({});
-        let widget = new CodeCell({ model: collapsedModel, rendermime });
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
-        collapsedModel.metadata.set('scrolled', false);
-        widget = new CodeCell({ model: collapsedModel, rendermime });
+        model.metadata.set('scrolled', false);
+        widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
-        collapsedModel.metadata.set('scrolled', 'auto');
-        widget = new CodeCell({ model: collapsedModel, rendermime });
+        model.metadata.set('scrolled', 'auto');
+        widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).to.equal(false);
 
-        collapsedModel.metadata.set('scrolled', true);
-        widget = new CodeCell({ model: collapsedModel, rendermime });
+        model.metadata.set('scrolled', true);
+        widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).to.equal(true);
+      });
+    });
+
+    describe('#loadScrolledState()', () => {
+      it('should load the output scrolled state from the model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.outputsScrolled).to.equal(false);
+
+        model.metadata.set('scrolled', true);
+        widget.loadScrolledState();
+        expect(widget.outputsScrolled).to.equal(true);
+
+        model.metadata.set('scrolled', false);
+        widget.loadScrolledState();
+        expect(widget.outputsScrolled).to.equal(false);
+      });
+    });
+
+    describe('#saveScrolledState()', () => {
+      it('should save the collapse state to the model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.outputsScrolled).to.equal(false);
+
+        widget.outputsScrolled = true;
+        widget.saveScrolledState();
+        expect(model.metadata.get('scrolled')).to.equal(true);
+
+        widget.outputsScrolled = false;
+        widget.saveScrolledState();
+        // Default values are not saved explicitly
+        expect(model.metadata.get('scrolled')).to.equal(undefined);
+      });
+    });
+
+    describe('#syncScrolled', () => {
+      it('should control automatic syncing of scrolled state with model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.syncScrolled).to.equal(false);
+        expect(widget.outputsScrolled).to.equal(false);
+
+        // Not synced if setting widget attribute
+        widget.outputsScrolled = true;
+        expect(model.metadata.get('scrolled')).to.equal(undefined);
+
+        // Not synced if setting metadata attribute
+        model.metadata.set('scrolled', false);
+        expect(widget.outputsScrolled).to.equal(true);
+
+        widget.syncScrolled = true;
+
+        // Setting sync does an initial sync from model to view. This also sets
+        // the metadata to undefined if it is the default value.
+        expect(model.metadata.get('scrolled')).to.equal(undefined);
+        expect(widget.outputsScrolled).to.equal(false);
+
+        // Synced if setting widget attribute
+        widget.outputsScrolled = true;
+        expect(model.metadata.get('scrolled')).to.equal(true);
+
+        // Synced if setting metadata attribute
+        model.metadata.set('scrolled', false);
+        expect(widget.outputsScrolled).to.equal(false);
+      });
+    });
+
+    describe('#loadCollapseState()', () => {
+      it('should load the output collapse state from the model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.outputHidden).to.equal(false);
+
+        model.metadata.set('jupyter', { outputs_hidden: true });
+        widget.loadCollapseState();
+        expect(widget.outputHidden).to.equal(true);
+
+        model.metadata.set('jupyter', { outputs_hidden: false });
+        widget.loadCollapseState();
+        expect(widget.outputHidden).to.equal(false);
+
+        // Either one of the existing attributes is enough to set the value.
+        model.metadata.set('collapsed', true);
+        widget.loadCollapseState();
+        expect(widget.outputHidden).to.equal(true);
+      });
+    });
+
+    describe('#saveCollapseState()', () => {
+      it('should save the collapse state to the model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.outputHidden).to.equal(false);
+
+        widget.outputHidden = true;
+        widget.saveCollapseState();
+        expect(model.metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+        expect(model.metadata.get('collapsed')).to.equal(true);
+
+        widget.outputHidden = false;
+        widget.saveCollapseState();
+        // Default values are not saved explicitly
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+        expect(model.metadata.get('collapsed')).to.equal(undefined);
+
+        // Preserves any jupyter keys that we don't manage
+        model.metadata.set('jupyter', { outputs_hidden: true, other: true });
+        widget.outputHidden = false;
+        widget.saveCollapseState();
+        // Default values are not saved explicitly
+        expect(model.metadata.get('jupyter')).to.deep.equal({ other: true });
+      });
+    });
+
+    describe('#syncCollapse', () => {
+      it('should control automatic syncing of collapse state with model', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.syncCollapse).to.equal(false);
+        expect(widget.outputHidden).to.equal(false);
+
+        // Not synced if setting widget attribute
+        widget.outputHidden = true;
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+
+        // Not synced if setting metadata attribute
+        model.metadata.set('jupyter', { outputs_hidden: false });
+        expect(widget.outputHidden).to.equal(true);
+
+        widget.syncCollapse = true;
+
+        // Setting sync does an initial sync from model to view. This also sets
+        // the metadata to undefined if it is the default value.
+        expect(model.metadata.get('jupyter')).to.equal(undefined);
+        expect(widget.outputHidden).to.equal(false);
+
+        // Synced if setting widget attribute
+        widget.outputHidden = true;
+        expect(model.metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+
+        // Synced if setting metadata attribute
+        model.metadata.set('jupyter', { other: true });
+        model.metadata.set('collapsed', false);
+        expect(widget.outputHidden).to.equal(false);
       });
     });
 

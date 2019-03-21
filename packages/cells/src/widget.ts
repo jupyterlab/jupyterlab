@@ -855,7 +855,13 @@ export class CodeCell extends Cell {
    */
   loadScrolledState() {
     const metadata = this.model.metadata;
-    this.outputsScrolled = !!metadata.get('scrolled');
+
+    // We don't have the notion of 'auto' scrolled, so we make it false.
+    if (metadata.get('scrolled') === 'auto') {
+      this.outputsScrolled = false;
+    } else {
+      this.outputsScrolled = !!metadata.get('scrolled');
+    }
   }
 
   /**
