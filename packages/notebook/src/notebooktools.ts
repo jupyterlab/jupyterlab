@@ -171,7 +171,6 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change to the notebook panel.
    */
   private _onNotebookPanelChanged(): void {
-    const panel = this.notebookPanel;
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.NotebookPanelMessage);
     });
