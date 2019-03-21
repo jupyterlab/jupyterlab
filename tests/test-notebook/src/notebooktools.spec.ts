@@ -41,9 +41,9 @@ class LogTool extends NotebookTools.Tool {
     this.methods.push('onSelectionChanged');
   }
 
-  protected onMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
-    super.onMetadataChanged(msg);
-    this.methods.push('onMetadataChanged');
+  protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
+    super.onCellMetadataChanged(msg);
+    this.methods.push('onCellMetadataChanged');
   }
 }
 
@@ -71,9 +71,9 @@ class LogKeySelector extends NotebookTools.KeySelector {
     this.methods.push('onActiveCellChanged');
   }
 
-  protected onMetadataChanged(message: ObservableJSON.ChangeMessage): void {
-    super.onMetadataChanged(message);
-    this.methods.push('onMetadataChanged');
+  protected onCellMetadataChanged(message: ObservableJSON.ChangeMessage): void {
+    super.onCellMetadataChanged(message);
+    this.methods.push('onCellMetadataChanged');
   }
 
   protected onValueChanged(): void {
@@ -203,7 +203,7 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
-      describe('#onMetadataChanged()', () => {
+      describe('#onCellMetadataChanged()', () => {
         it('should be called when the metadata changes', () => {
           const tool = new LogTool({});
           notebookTools.addItem({ tool });
@@ -211,7 +211,7 @@ describe('@jupyterlab/notebook', () => {
           const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
           metadata.set('foo', 2);
-          expect(tool.methods).to.contain('onMetadataChanged');
+          expect(tool.methods).to.contain('onCellMetadataChanged');
         });
       });
     });
@@ -381,11 +381,11 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
-      describe('#onMetadataChanged()', () => {
+      describe('#onCellMetadataChanged()', () => {
         it('should update the select value', () => {
           const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
-          expect(tool.methods).to.contain('onMetadataChanged');
+          expect(tool.methods).to.contain('onCellMetadataChanged');
           expect(tool.selectNode.value).to.equal('1');
         });
       });

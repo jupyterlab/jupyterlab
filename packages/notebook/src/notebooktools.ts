@@ -153,7 +153,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     let section: RankedPanel<NotebookTools.Tool>;
     if (options.section === 'advanced') {
       section = this._advancedTools;
-    } else if (options.section === 'common') {
+    } else {
       section = this._commonTools;
     }
 
@@ -260,7 +260,7 @@ export namespace NotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section: 'common' | 'advanced';
+    section?: 'common' | 'advanced';
 
     /**
      * The rank order of the widget among its siblings.
