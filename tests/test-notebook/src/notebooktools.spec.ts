@@ -41,9 +41,11 @@ class LogTool extends NotebookTools.Tool {
     this.methods.push('onSelectionChanged');
   }
 
-  protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
-    super.onCellMetadataChanged(msg);
-    this.methods.push('onCellMetadataChanged');
+  protected onActiveCellMetadataChanged(
+    msg: ObservableJSON.ChangeMessage
+  ): void {
+    super.onActiveCellMetadataChanged(msg);
+    this.methods.push('onActiveCellMetadataChanged');
   }
 }
 
@@ -71,9 +73,11 @@ class LogKeySelector extends NotebookTools.KeySelector {
     this.methods.push('onActiveCellChanged');
   }
 
-  protected onCellMetadataChanged(message: ObservableJSON.ChangeMessage): void {
-    super.onCellMetadataChanged(message);
-    this.methods.push('onCellMetadataChanged');
+  protected onActiveCellMetadataChanged(
+    message: ObservableJSON.ChangeMessage
+  ): void {
+    super.onActiveCellMetadataChanged(message);
+    this.methods.push('onActiveCellMetadataChanged');
   }
 
   protected onValueChanged(): void {
@@ -203,7 +207,7 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
-      describe('#onCellMetadataChanged()', () => {
+      describe('#onActiveCellMetadataChanged()', () => {
         it('should be called when the metadata changes', () => {
           const tool = new LogTool({});
           notebookTools.addItem({ tool });
@@ -211,7 +215,7 @@ describe('@jupyterlab/notebook', () => {
           const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
           metadata.set('foo', 2);
-          expect(tool.methods).to.contain('onCellMetadataChanged');
+          expect(tool.methods).to.contain('onActiveCellMetadataChanged');
         });
       });
     });
@@ -381,11 +385,11 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
-      describe('#onCellMetadataChanged()', () => {
+      describe('#onActiveCellMetadataChanged()', () => {
         it('should update the select value', () => {
           const metadata = notebookTools.activeCell.model.metadata;
           metadata.set('foo', 1);
-          expect(tool.methods).to.contain('onCellMetadataChanged');
+          expect(tool.methods).to.contain('onActiveCellMetadataChanged');
           expect(tool.selectNode.value).to.equal('1');
         });
       });

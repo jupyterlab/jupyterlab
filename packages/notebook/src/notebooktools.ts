@@ -216,7 +216,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
     let message = new ObservableJSON.ChangeMessage(
-      'cell-metadata-changed',
+      'activecell-metadata-changed',
       args
     );
     each(this._toolChildren(), widget => {
@@ -316,8 +316,8 @@ export namespace NotebookTools {
         case 'selection-changed':
           this.onSelectionChanged(msg);
           break;
-        case 'cell-metadata-changed':
-          this.onCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+        case 'activecell-metadata-changed':
+          this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
           break;
         default:
           break;
@@ -360,7 +360,9 @@ export namespace NotebookTools {
      * #### Notes
      * The default implementation is a no-op.
      */
-    protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage): void {
+    protected onActiveCellMetadataChanged(
+      msg: ObservableJSON.ChangeMessage
+    ): void {
       /* no-op */
     }
   }
@@ -562,7 +564,7 @@ export namespace NotebookTools {
     /**
      * Handle a change to the active cell metadata.
      */
-    protected onCellMetadataChanged(msg: Message): void {
+    protected onActiveCellMetadataChanged(msg: Message): void {
       let cell = this.notebookTools.activeCell;
       this.editor.source = cell ? cell.model.metadata : null;
     }
@@ -664,7 +666,7 @@ export namespace NotebookTools {
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
