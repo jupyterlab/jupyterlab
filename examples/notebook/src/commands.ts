@@ -69,9 +69,9 @@ export const SetupCommands = (
   });
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt',
-    execute: () => {
+    execute: async () => {
       if (nbWidget.context.session.kernel) {
-        nbWidget.context.session.kernel.interrupt();
+        await nbWidget.context.session.kernel.interrupt();
       }
     }
   });
@@ -86,7 +86,10 @@ export const SetupCommands = (
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.session);
+      return NotebookActions.runAndAdvance(
+        nbWidget.content,
+        nbWidget.context.session
+      );
     }
   });
   commands.addCommand(cmdIds.editMode, {
