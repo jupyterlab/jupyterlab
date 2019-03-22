@@ -164,7 +164,8 @@ export class NotebookTools extends Widget implements INotebookTools {
     // consolidated into a single object, rather than a broad reference to this.
     tool.notebookTools = this;
 
-    // Trigger the tool to update its active cell.
+    // Trigger the tool to update its active notebook and cell.
+    MessageLoop.sendMessage(tool, NotebookTools.ActiveNotebookPanelMessage);
     MessageLoop.sendMessage(tool, NotebookTools.ActiveCellMessage);
   }
 
@@ -581,9 +582,20 @@ export namespace NotebookTools {
     }
 
     /**
+     * Handle a change to the notebook.
+     */
+    protected onActiveNotebookPanelChanged(msg: Message): void {
+      this._update();
+    }
+
+    /**
      * Handle a change to the notebook metadata.
      */
     protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
+      this._update();
+    }
+
+    private _update() {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
@@ -604,13 +616,17 @@ export namespace NotebookTools {
      * Handle a change to the active cell.
      */
     protected onActiveCellChanged(msg: Message): void {
-      let cell = this.notebookTools.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
+      this._update();
     }
+
     /**
      * Handle a change to the active cell metadata.
      */
     protected onActiveCellMetadataChanged(msg: Message): void {
+      this._update();
+    }
+
+    private _update() {
       let cell = this.notebookTools.activeCell;
       this.editor.source = cell ? cell.model.metadata : null;
     }

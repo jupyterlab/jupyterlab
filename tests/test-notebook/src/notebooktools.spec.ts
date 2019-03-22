@@ -31,6 +31,11 @@ import {
 class LogTool extends NotebookTools.Tool {
   methods: string[] = [];
 
+  protected onActiveNotebookPanelChanged(msg: Message): void {
+    super.onActiveNotebookPanelChanged(msg);
+    this.methods.push('onActiveNotebookPanelChanged');
+  }
+
   protected onActiveCellChanged(msg: Message): void {
     super.onActiveCellChanged(msg);
     this.methods.push('onActiveCellChanged');
@@ -46,6 +51,13 @@ class LogTool extends NotebookTools.Tool {
   ): void {
     super.onActiveCellMetadataChanged(msg);
     this.methods.push('onActiveCellMetadataChanged');
+  }
+
+  protected onActiveNotebookPanelMetadataChanged(
+    msg: ObservableJSON.ChangeMessage
+  ): void {
+    super.onActiveNotebookPanelMetadataChanged(msg);
+    this.methods.push('onActiveNotebookPanelMetadataChanged');
   }
 }
 
@@ -99,12 +111,10 @@ describe('@jupyterlab/notebook', () => {
       await context0.initialize(true);
       panel0 = NBTestUtils.createNotebookPanel(context0);
       NBTestUtils.populateNotebook(panel0.content);
-
       const context1 = await createNotebookContext();
       await context1.initialize(true);
       panel1 = NBTestUtils.createNotebookPanel(context1);
       NBTestUtils.populateNotebook(panel1.content);
-
       tracker = new NotebookTracker({ namespace: 'notebook' });
       tracker.add(panel0);
       tracker.add(panel1);
@@ -128,6 +138,15 @@ describe('@jupyterlab/notebook', () => {
       describe('#constructor()', () => {
         it('should create a notebooktools object', () => {
           expect(notebookTools).to.be.an.instanceof(NotebookTools);
+        });
+      });
+
+      describe('#activeNotebookPanel', () => {
+        it('should be the active notebook', () => {
+          expect(notebookTools.activeNotebookPanel).to.equal(panel1);
+          tabpanel.currentIndex = 0;
+          simulate(panel0.node, 'focus');
+          expect(notebookTools.activeNotebookPanel).to.equal(panel0);
         });
       });
 
@@ -182,7 +201,17 @@ describe('@jupyterlab/notebook', () => {
         it('should be the notebooktools object used by the tool', () => {
           const tool = new NotebookTools.Tool({});
           notebookTools.addItem({ tool });
-          expect(tool.parent).to.equal(notebookTools);
+          expect(tool.notebookTools).to.equal(notebookTools);
+        });
+      });
+
+      describe('#onActiveNotebookPanelChanged()', () => {
+        it('should be called when the active notebook panel changes', () => {
+          const tool = new LogTool({});
+          notebookTools.addItem({ tool });
+          tool.methods = [];
+          simulate(panel0.node, 'focus');
+          expect(tool.methods).to.contain('onActiveNotebookPanelChanged');
         });
       });
 
@@ -208,7 +237,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       describe('#onActiveCellMetadataChanged()', () => {
-        it('should be called when the metadata changes', () => {
+        it('should be called when the active cell metadata changes', () => {
           const tool = new LogTool({});
           notebookTools.addItem({ tool });
           tool.methods = [];
@@ -216,6 +245,20 @@ describe('@jupyterlab/notebook', () => {
           metadata.set('foo', 1);
           metadata.set('foo', 2);
           expect(tool.methods).to.contain('onActiveCellMetadataChanged');
+        });
+      });
+
+      describe('#onActiveNotebookPanelMetadataChanged()', () => {
+        it('should be called when the active notebook panel metadata changes', () => {
+          const tool = new LogTool({});
+          notebookTools.addItem({ tool });
+          tool.methods = [];
+          const metadata = notebookTools.activeNotebookPanel.model.metadata;
+          metadata.set('foo', 1);
+          metadata.set('foo', 2);
+          expect(tool.methods).to.contain(
+            'onActiveNotebookPanelMetadataChanged'
+          );
         });
       });
     });
@@ -237,17 +280,21 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('NotebookTools.MetadataEditorTool', () => {
+    describe('NotebookTools.CellMetadataEditorTool', () => {
       const editorServices = new CodeMirrorEditorFactory();
       const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
       it('should create a new metadata editor tool', () => {
-        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
-        expect(tool).to.be.an.instanceof(NotebookTools.MetadataEditorTool);
+        const tool = new NotebookTools.CellMetadataEditorTool({
+          editorFactory
+        });
+        expect(tool).to.be.an.instanceof(NotebookTools.CellMetadataEditorTool);
       });
 
       it('should handle a change to the active cell', () => {
-        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
+        const tool = new NotebookTools.CellMetadataEditorTool({
+          editorFactory
+        });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
         expect(JSON.stringify(model.value.text)).to.be.ok;
@@ -258,13 +305,60 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should handle a change to the metadata', () => {
-        const tool = new NotebookTools.MetadataEditorTool({ editorFactory });
+        const tool = new NotebookTools.CellMetadataEditorTool({
+          editorFactory
+        });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
         const previous = model.value.text;
         const metadata = notebookTools.activeCell.model.metadata;
         metadata.set('foo', 1);
         expect(model.value.text).to.not.equal(previous);
+      });
+    });
+
+    describe('NotebookTools.NotebookMetadataEditorTool', () => {
+      const editorServices = new CodeMirrorEditorFactory();
+      const editorFactory = editorServices.newInlineEditor.bind(editorServices);
+
+      it('should create a new metadata editor tool', () => {
+        const tool = new NotebookTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        expect(tool).to.be.an.instanceof(
+          NotebookTools.NotebookMetadataEditorTool
+        );
+      });
+
+      it('should handle a change to the active notebook', () => {
+        panel0.model.metadata.set('panel0', 1);
+        panel1.model.metadata.set('panel1', 1);
+        const tool = new NotebookTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        notebookTools.addItem({ tool });
+        const model = tool.editor.model;
+        expect(JSON.stringify(model.value.text)).to.be.ok;
+
+        simulate(panel0.node, 'focus');
+        expect(JSON.stringify(model.value.text)).to.contain('panel0');
+        expect(JSON.stringify(model.value.text)).to.not.contain('panel1');
+
+        simulate(panel1.node, 'focus');
+        expect(JSON.stringify(model.value.text)).to.not.contain('panel0');
+        expect(JSON.stringify(model.value.text)).to.contain('panel1');
+      });
+
+      it('should handle a change to the metadata', () => {
+        const tool = new NotebookTools.NotebookMetadataEditorTool({
+          editorFactory
+        });
+        notebookTools.addItem({ tool });
+        const model = tool.editor.model;
+        const widget = tracker.currentWidget;
+        expect(JSON.stringify(model.value.text)).to.not.contain('newvalue');
+        widget.content.model.metadata.set('newvalue', 1);
+        expect(JSON.stringify(model.value.text)).to.contain('newvalue');
       });
     });
 
