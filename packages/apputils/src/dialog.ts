@@ -13,6 +13,8 @@ import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
+import { InstanceTracker } from './instancetracker';
+
 import { ReactWidget } from './vdom';
 
 import { Styling } from './styling';
@@ -98,7 +100,8 @@ export class Dialog<T> extends Widget {
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
 
-    Private.register(this);
+    // Add new dialogs to the tracker.
+    Dialog.tracker.add(this);
   }
 
   /**
@@ -592,7 +595,9 @@ export namespace Dialog {
    * may be discarded.
    */
   export function flush(): void {
-    Private.flush();
+    tracker.forEach(dialog => {
+      dialog.dispose();
+    });
   }
 
   /**
@@ -804,6 +809,13 @@ export namespace Dialog {
    * The default renderer instance.
    */
   export const defaultRenderer = new Renderer();
+
+  /**
+   * The dialog instance tracker.
+   */
+  export const tracker = new InstanceTracker<Dialog<any>>({
+    namespace: '@jupyterlab/apputils:Dialog'
+  });
 }
 
 /**
@@ -859,31 +871,5 @@ namespace Private {
       '[tabindex]'
     ].join(',');
     return node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
-  }
-
-  /**
-   * Disposes all outstanding dialog instances.
-   */
-  export function flush(): void {
-    if (!dialogs.isDisposed) {
-      dialogs.dispose();
-    }
-  }
-
-  /**
-   * Tracks a new dialog instance.
-   *
-   * @param dialog - The dialog being added.
-   */
-  export function register(dialog: Dialog<any>): void {
-    if (dialogs.isDisposed) {
-      dialogs = new DisposableSet();
-    }
-    dialogs.add(dialog);
-    dialog.disposed.connect(() => {
-      if (!dialogs.isDisposed) {
-        dialogs.remove(dialog);
-      }
-    });
   }
 }
