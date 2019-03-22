@@ -947,6 +947,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._unregisterComm(comm.commId);
     let onClose = comm.onClose;
     if (onClose) {
+      // tslint:disable-next-line:await-promise
       await onClose(msg);
     }
     (comm as CommHandler).dispose();
@@ -964,6 +965,7 @@ export class DefaultKernel implements Kernel.IKernel {
     }
     let onMsg = comm.onMsg;
     if (onMsg) {
+      // tslint:disable-next-line:await-promise
       await onMsg(msg);
     }
   }
