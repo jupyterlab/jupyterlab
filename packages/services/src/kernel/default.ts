@@ -344,8 +344,8 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle a restart on the kernel.  This is not part of the `IKernel`
    * interface.
    */
-  async handleRestart(): Promise<void> {
-    await this._clearState();
+  handleRestart(): void {
+    this._clearState();
     this._updateStatus('restarting');
     this._clearSocket();
   }
@@ -380,11 +380,11 @@ export class DefaultKernel implements Kernel.IKernel {
   async shutdown(): Promise<void> {
     if (this.status === 'dead') {
       this._clearSocket();
-      await this._clearState();
+      this._clearState();
       return;
     }
     await Private.shutdownKernel(this.id, this.serverSettings);
-    await this._clearState();
+    this._clearState();
     this._clearSocket();
   }
 
@@ -850,13 +850,11 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clear the internal state.
    */
-  private async _clearState(): Promise<void> {
+  private _clearState(): void {
     this._isReady = false;
     this._pendingMessages = [];
-    const futuresResolved: Promise<KernelMessage.IShellMessage>[] = [];
     this._futures.forEach(future => {
       future.dispose();
-      futuresResolved.push(future.done);
     });
     this._comms.forEach(comm => {
       comm.dispose();
@@ -867,10 +865,6 @@ export class DefaultKernel implements Kernel.IKernel {
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
-
-    await Promise.all(futuresResolved).catch(() => {
-      /* no-op */
-    });
   }
 
   /**
@@ -1532,9 +1526,7 @@ namespace Private {
     // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
-    await Promise.all(
-      runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
-    );
+    runningKernels.forEach(k => k.handleRestart());
     let response = await ServerConnection.makeRequest(url, init, settings);
     if (response.status !== 200) {
       throw new ServerConnection.ResponseError(response);
