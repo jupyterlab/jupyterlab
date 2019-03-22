@@ -16,9 +16,7 @@ describe('Kernel.IFuture', () => {
     }
   });
 
-  afterAll(() => {
-    Kernel.shutdownAll();
-  });
+  afterAll(() => Kernel.shutdownAll());
 
   it('should have a msg attribute', async () => {
     const kernel = await Kernel.startNew();

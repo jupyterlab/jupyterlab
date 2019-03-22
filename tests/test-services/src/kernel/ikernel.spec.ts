@@ -652,7 +652,7 @@ describe('Kernel.IKernel', () => {
       const kernel = defaultKernel;
       const comm = kernel.connectToComm('test');
       const future = kernel.requestExecute({ code: 'foo' });
-      kernel.restart();
+      await kernel.restart();
       await kernel.ready;
       expect(future.isDisposed).to.equal(true);
       expect(comm.isDisposed).to.equal(true);
