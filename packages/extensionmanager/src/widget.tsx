@@ -344,10 +344,9 @@ export class CollapsibleSection extends React.Component<
         <header>
           <ToolbarButtonComponent
             iconClassName={
-              'jp-Icon jp-Icon-16 ' +
-              (this.state.isOpen
+              this.state.isOpen
                 ? 'jp-extensionmanager-expandIcon'
-                : 'jp-extensionmanager-collapseIcon')
+                : 'jp-extensionmanager-collapseIcon'
             }
             onClick={() => {
               this.handleCollapse();
@@ -539,7 +538,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             <ToolbarButtonComponent
               key="refresh-button"
               className="jp-extensionmanager-refresh"
-              iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+              iconClassName="jp-RefreshIcon"
               onClick={() => {
                 model.refreshInstalled();
               }}
