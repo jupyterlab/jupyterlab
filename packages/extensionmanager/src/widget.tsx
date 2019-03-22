@@ -189,20 +189,20 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           )}
           {entry.enabled && (
             <Button
-              onClick={() => props.performAction('enable', entry)}
-              minimal
-              small
-            >
-              Enable
-            </Button>
-          )}
-          {!entry.enabled && (
-            <Button
               onClick={() => props.performAction('disable', entry)}
               minimal
               small
             >
               Disable
+            </Button>
+          )}
+          {!entry.enabled && (
+            <Button
+              onClick={() => props.performAction('enable', entry)}
+              minimal
+              small
+            >
+              Enable
             </Button>
           )}
         </div>
