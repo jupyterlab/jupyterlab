@@ -253,11 +253,15 @@ export async function acceptDialog(
   timeout?: number
 ): Promise<void> {
   host = host || document.body;
+  const tag = new Date().getTime();
+  console.log(`acceptDialog(0): ${tag}`);
   await waitForDialog(host, timeout);
+  console.log(`acceptDialog(1): ${tag}`);
 
   const node = host.getElementsByClassName('jp-Dialog')[0];
 
   if (node) {
+    console.log(`acceptDialog(2): ${tag}`);
     simulate(node as HTMLElement, 'keydown', { keyCode: 13 });
   }
 }
