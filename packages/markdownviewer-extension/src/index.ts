@@ -112,11 +112,11 @@ function activate(
   factory.widgetCreated.connect((sender, widget) => {
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
     // Handle the settings of new widgets.
     updateWidget(widget.content);
-    tracker.add(widget);
+    void tracker.add(widget);
   });
   docRegistry.addWidgetFactory(factory);
 

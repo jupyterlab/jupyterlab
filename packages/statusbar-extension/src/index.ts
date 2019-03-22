@@ -79,7 +79,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       execute: (args: any) => {
         statusBar.setHidden(statusBar.isVisible);
         if (settingRegistry) {
-          settingRegistry.set(
+          void settingRegistry.set(
             STATUSBAR_PLUGIN_ID,
             'visible',
             statusBar.isVisible
@@ -136,11 +136,11 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
     let currentSession: IClientSession | null = null;
-    const changeKernel = () => {
+    const changeKernel = async () => {
       if (!currentSession) {
         return;
       }
-      currentSession.selectKernel();
+      await currentSession.selectKernel();
     };
 
     // Create the status item.

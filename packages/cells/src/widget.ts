@@ -874,7 +874,7 @@ export class MarkdownCell extends Cell {
       this
     );
 
-    this._updateRenderedInput().then(() => {
+    void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
     this.renderInput(this._renderer);
@@ -946,7 +946,9 @@ export class MarkdownCell extends Cell {
     if (!this._rendered) {
       this.showEditor();
     } else {
-      this._updateRenderedInput();
+      // TODO: It would be nice for the cell to provide a way for
+      // its consumers to hook into when the rendering is done.
+      void this._updateRenderedInput();
       this.renderInput(this._renderer);
     }
   }

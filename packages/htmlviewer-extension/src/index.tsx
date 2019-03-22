@@ -89,10 +89,10 @@ function activateHTMLViewer(
   app.docRegistry.addWidgetFactory(factory);
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
-    tracker.add(widget);
+    void tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
     // Notify the application when the trust state changes so it
     // can update any renderings of the trust command.

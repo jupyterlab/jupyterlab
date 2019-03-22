@@ -121,7 +121,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.ready.then(() => {
+    void this.ready.then(() => {
       const socket = this._ws;
 
       if (socket) {

@@ -766,15 +766,15 @@ function addLabCommands(
   commands.addCommand(CommandIDs.showInFileBrowser, {
     label: () => `Show in File Browser`,
     isEnabled,
-    execute: () => {
+    execute: async () => {
       let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
 
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
-      commands.execute('filebrowser:activate', { path: context.path });
-      commands.execute('filebrowser:navigate', { path: context.path });
+      await commands.execute('filebrowser:activate', { path: context.path });
+      await commands.execute('filebrowser:navigate', { path: context.path });
     }
   });
 
@@ -835,7 +835,7 @@ function handleContext(
       }
     }
   };
-  context.ready.then(() => {
+  void context.ready.then(() => {
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
       disposable = status.setDirty();

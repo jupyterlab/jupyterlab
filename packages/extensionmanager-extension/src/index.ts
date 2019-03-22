@@ -65,13 +65,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
-    app.restored.then(() => {
+    void app.restored.then(() => {
       settings.changed.connect(async () => {
         enabled = settings.composite['enabled'] === true;
         if (enabled && (!view || (view && !view.isAttached))) {
           const accepted = await Private.showWarning();
           if (!accepted) {
-            settings.set('enabled', false);
+            void settings.set('enabled', false);
             return;
           }
           view = view || createView();

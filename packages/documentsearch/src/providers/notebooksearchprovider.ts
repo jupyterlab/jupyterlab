@@ -114,8 +114,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
+    const queriesEnded: Promise<void>[] = [];
     this._cmSearchProviders.forEach(({ provider }) => {
-      provider.endQuery();
+      queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
@@ -128,6 +129,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       }
     });
     this._unRenderedMarkdownCells = [];
+    await Promise.all(queriesEnded);
   }
 
   /**
@@ -139,8 +141,9 @@ export class NotebookSearchProvider implements ISearchProvider {
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
 
     const index = this._searchTarget.content.activeCellIndex;
+    const searchEnded: Promise<void>[] = [];
     this._cmSearchProviders.forEach(({ provider }) => {
-      provider.endSearch();
+      searchEnded.push(provider.endSearch());
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
 
@@ -154,6 +157,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     this._searchTarget.content.mode = 'edit';
     this._searchTarget = null;
     this._currentMatch = null;
+    await Promise.all(searchEnded);
   }
 
   /**

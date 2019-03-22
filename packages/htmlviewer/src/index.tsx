@@ -75,7 +75,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     });
     this.content.addClass(CSS_CLASS);
 
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
@@ -155,7 +155,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
       return;
     }
     this._renderPending = true;
-    this._renderModel().then(() => (this._renderPending = false));
+    void this._renderModel().then(() => (this._renderPending = false));
   }
 
   /**

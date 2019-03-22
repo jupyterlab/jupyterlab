@@ -318,9 +318,9 @@ export class InstanceTracker<T extends Widget>
    * for layout and state restoration in addition to injecting its widgets into
    * the parent plugin's instance tracker.
    */
-  inject(widget: T): void {
+  inject(widget: T): Promise<void> {
     Private.injectedProperty.set(widget, true);
-    this.add(widget);
+    return this.add(widget);
   }
 
   /**
@@ -380,7 +380,7 @@ export class InstanceTracker<T extends Widget>
    *
    * @param widget - The widget being saved.
    */
-  save(widget: T): void {
+  async save(widget: T): Promise<void> {
     const injected = Private.injectedProperty.get(widget);
 
     if (!this._restore || !this.has(widget) || injected) {
@@ -393,7 +393,7 @@ export class InstanceTracker<T extends Widget>
     const newName = widgetName ? `${this.namespace}:${widgetName}` : '';
 
     if (oldName && oldName !== newName) {
-      state.remove(oldName);
+      await state.remove(oldName);
     }
 
     // Set the name property irrespective of whether the new name is null.
@@ -401,7 +401,7 @@ export class InstanceTracker<T extends Widget>
 
     if (newName) {
       const data = this._restore.args(widget);
-      state.save(newName, { data });
+      await state.save(newName, { data });
     }
 
     if (oldName !== newName) {
@@ -468,7 +468,7 @@ export class InstanceTracker<T extends Widget>
     const name = Private.nameProperty.get(widget);
 
     if (name) {
-      state.remove(name);
+      void state.remove(name);
     }
   }
 

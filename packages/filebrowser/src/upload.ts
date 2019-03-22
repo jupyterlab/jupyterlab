@@ -39,8 +39,8 @@ export class Uploader extends ToolbarButton {
   private _onInputChanged = () => {
     let files = Array.prototype.slice.call(this._input.files) as File[];
     let pending = files.map(file => this.fileBrowserModel.upload(file));
-    Promise.all(pending).catch(error => {
-      showErrorMessage('Upload Error', error);
+    void Promise.all(pending).catch(error => {
+      void showErrorMessage('Upload Error', error);
     });
   };
 

@@ -229,7 +229,9 @@ export class DefaultKernel implements Kernel.IKernel {
     this._isDisposed = true;
     this._terminated.emit(void 0);
     this._status = 'dead';
-    this._clearState();
+    // TODO: Kernel status rework should avoid doing
+    // anything asynchronous in the disposal.
+    void this._clearState();
     this._clearSocket();
     this._kernelSession = '';
     this._msgChain = null;
@@ -1544,7 +1546,7 @@ namespace Private {
     // Reconnect the other kernels asynchronously, but don't wait for them.
     each(runningKernels, k => {
       if (k !== kernel && k.id === kernel.id) {
-        k.reconnect();
+        void k.reconnect();
       }
     });
     await kernel.reconnect();

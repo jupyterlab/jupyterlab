@@ -154,7 +154,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._state = options.state;
     this._first = options.first;
 
-    this._first
+    void this._first
       .then(() => {
         this._firstDone = true;
       })
