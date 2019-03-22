@@ -21,7 +21,7 @@ module.exports = function(name: string, baseDir: string) {
     ],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
-    testRegex: `tests\/test-${name}\/src\/.*\.spec\.ts$`,
+    testRegex: `tests\/test-${name}\/src\/.*\.spec\.tsx?$`,
     globals: {
       'ts-jest': {
         tsConfigFile: `tests/test-${name}/tsconfig.json`
