@@ -198,6 +198,12 @@ export class InstanceTracker<T extends Widget>
    * Add a new widget to the tracker.
    *
    * @param widget - The widget being added.
+   *
+   * #### Notes
+   * When a widget is added its state is saved to the state database.
+   * This function returns a promise that is resolved when that saving
+   * is completed. However, the widget is added to the in-memory tracker
+   * synchronously, and is available to use before the promise is resolved.
    */
   add(widget: T): Promise<void> {
     if (widget.isDisposed) {
@@ -318,9 +324,9 @@ export class InstanceTracker<T extends Widget>
    * for layout and state restoration in addition to injecting its widgets into
    * the parent plugin's instance tracker.
    */
-  inject(widget: T): Promise<void> {
+  inject(widget: T): void {
     Private.injectedProperty.set(widget, true);
-    return this.add(widget);
+    void this.add(widget);
   }
 
   /**

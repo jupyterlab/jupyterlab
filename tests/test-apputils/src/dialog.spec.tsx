@@ -87,7 +87,7 @@ describe('@jupyterlab/apputils', () => {
         const dialog = new TestDialog({ host });
 
         document.body.appendChild(host);
-        dialog.launch();
+        void dialog.launch();
         await waitForDialog();
         expect(host.firstChild).to.equal(dialog.node);
         dialog.dispose();
