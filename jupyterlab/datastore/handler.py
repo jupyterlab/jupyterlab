@@ -93,7 +93,7 @@ class WSBaseHandler(WebSocketMixin, WebSocketHandler, DatastoreHandler):
         # assign and yield in two step to avoid tornado 3 issues
         res = self.pre_get()
         yield gen.maybe_future(res)
-        super(WSBaseHandler, self).get(*args, **kwargs)
+        yield super(WSBaseHandler, self).get(*args, **kwargs)
 
     def get_compression_options(self):
         return self.settings.get('websocket_compression_options', None)
