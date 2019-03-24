@@ -1159,8 +1159,9 @@ function addCommands(
           { method: 'GET' },
           settings
         );
-        const attachmentNameRegex = /attachment; filename\*=utf-8\'\'(.*)/;
-        const filename = attachmentNameRegex.exec(
+        // FIXME - fix the regex
+        const attachmentRegex = /attachment; filename\*=utf-8\'\'(.*)/;
+        const filename = attachmentRegex.exec(
           response.headers.get('Content-Disposition')
         )[1];
         const model = await services.contents.newUntitled({
@@ -1169,9 +1170,8 @@ function addCommands(
           type: 'file'
         });
         const blob = await response.blob();
-        const isText =
-          blob.type.split('/')[0] === 'text' &&
-          blob.type.split('/')[1] !== 'latex';
+        const isText = blob.type.split('/')[0] === 'text';
+
         const reader = new FileReader();
         if (isText) {
           reader.readAsText(blob);
@@ -1179,28 +1179,27 @@ function addCommands(
           reader.readAsDataURL(blob);
         }
         reader.onload = async function(e) {
-          let persistedModel = null;
-          try {
-            persistedModel = await services.contents.save(model.path, {
-              content: reader.result,
-              format: isText ? 'text' : 'base64',
-              mimetype: isText ? 'text/plain' : 'application/octet-stream',
-              type: 'file'
-            });
+          await services.contents.save(model.path, {
+            content: reader.result,
+            format: isText ? 'text' : 'base64',
+            mimetype: isText ? 'text/plain' : 'application/octet-stream',
+            type: 'file',
+            name: filename
+          });
+          /*try {
             // Fails if an exported file with that name already exists
             await services.contents.rename(
               persistedModel.path,
               PathExt.join(PathExt.dirname(persistedModel.path), filename)
             );
           } catch (e) {
-            if (persistedModel) {
-              // Should these be shown in a popup instead?
-              console.error(`Renaming file failed`);
-            } else {
-              console.error(`Failed to export file. Error: ${e.message}`);
-            }
-          }
-        };
+            showDialog({
+              title: 'Rename failed',
+              body: `File with name ${persistedModel.name} already exists. File is named {persistedModel.name} instead`.
+
+            })
+          }*/
+        }
       } catch (e) {
         console.error(`Failed to export file. Error: ${e.message}`);
       }
