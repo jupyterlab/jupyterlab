@@ -82,7 +82,7 @@
     "@jupyterlab/tooltip-extension": "^1.0.0-alpha.3",
     "@jupyterlab/ui-components": "^1.0.0-alpha.3",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.3",
-    "@jupyterlab/vega4-extension": "^1.0.0-alpha.3",
+    "@jupyterlab/vega5-extension": "^1.0.0-alpha.3",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/application": "^1.6.0",
     "@phosphor/commands": "^1.6.1",
@@ -179,7 +179,7 @@
       "@jupyterlab/json-extension": "",
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vdom-extension": "",
-      "@jupyterlab/vega4-extension": ""
+      "@jupyterlab/vega5-extension": ""
     },
     "name": "JupyterLab",
     "buildDir": "./static",
@@ -305,7 +305,7 @@
       "@jupyterlab/tooltip-extension": "../packages/tooltip-extension",
       "@jupyterlab/ui-components": "../packages/ui-components",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
-      "@jupyterlab/vega4-extension": "../packages/vega4-extension"
+      "@jupyterlab/vega5-extension": "../packages/vega5-extension"
     }
   }
 }

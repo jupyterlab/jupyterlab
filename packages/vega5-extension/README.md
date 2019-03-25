@@ -1,4 +1,4 @@
-# vega4-extension
+# vega5-extension
 
 A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 4 and [Vega-Lite](https://vega.github.io/vega-lite) 2.
 

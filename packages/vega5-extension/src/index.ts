@@ -21,7 +21,7 @@ const VEGA_COMMON_CLASS = 'jp-RenderedVegaCommon4';
 /**
  * The CSS class to add to the Vega.
  */
-const VEGA_CLASS = 'jp-RenderedVega4';
+const VEGA_CLASS = 'jp-Rendered5';
 
 /**
  * The CSS class to add to the Vega-Lite.
@@ -137,27 +137,27 @@ const extension: IRenderMime.IExtension = {
   documentWidgetFactoryOptions: [
     {
       name: 'Vega',
-      primaryFileType: 'vega4',
-      fileTypes: ['vega4', 'json'],
-      defaultFor: ['vega4']
+      primaryFileType: 'vega5',
+      fileTypes: ['vega5', 'json'],
+      defaultFor: ['vega5']
     },
     {
       name: 'Vega-Lite',
-      primaryFileType: 'vega-lite2',
-      fileTypes: ['vega-lite2', 'json'],
-      defaultFor: ['vega-lite2']
+      primaryFileType: 'vega-lite3',
+      fileTypes: ['vega-lite3', 'json'],
+      defaultFor: ['vega-lite3']
     }
   ],
   fileTypes: [
     {
       mimeTypes: [VEGA_MIME_TYPE],
-      name: 'vega4',
+      name: 'vega5',
       extensions: ['.vg', '.vg.json', '.vega'],
       iconClass: 'jp-MaterialIcon jp-VegaIcon'
     },
     {
       mimeTypes: [VEGALITE_MIME_TYPE],
-      name: 'vega-lite2',
+      name: 'vega-lite3',
       extensions: ['.vl', '.vl.json', '.vegalite'],
       iconClass: 'jp-MaterialIcon jp-VegaIcon'
     }
