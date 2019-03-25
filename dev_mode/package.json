@@ -280,7 +280,6 @@
       "@jupyterlab/markdownviewer-extension": "../packages/markdownviewer-extension",
       "@jupyterlab/mathjax2": "../packages/mathjax2",
       "@jupyterlab/mathjax2-extension": "../packages/mathjax2-extension",
-      "@jupyterlab/metapackage": "../packages/metapackage",
       "@jupyterlab/notebook": "../packages/notebook",
       "@jupyterlab/notebook-extension": "../packages/notebook-extension",
       "@jupyterlab/observables": "../packages/observables",
