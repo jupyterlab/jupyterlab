@@ -64,7 +64,7 @@ describe('@jupyterlab/apputils', () => {
       dialog.dispose();
     });
 
-    describe.skip('#constructor()', () => {
+    describe('#constructor()', () => {
       it('should create a new dialog', () => {
         expect(dialog).toBeInstanceOf(Dialog);
       });
@@ -81,15 +81,15 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#launch()', () => {
-      it('should attach the dialog to the host', async () => {
+    describe('#launch()', () => {
+      it.skip('should attach the dialog to the host', async () => {
         const host = document.createElement('div');
         const dialog = new TestDialog({ host });
 
         document.body.appendChild(host);
         void dialog.launch();
-        await waitForDialog();
-        expect(host.firstChild).toBe(dialog.node);
+        await waitForDialog(host);
+        expect(host.contains(dialog.node)).toBe(true);
         dialog.dispose();
         document.body.removeChild(host);
       });
@@ -102,7 +102,7 @@ describe('@jupyterlab/apputils', () => {
         expect((await prompt).button.accept).toBe(true);
       });
 
-      it('should resolve with `false` when accepted', async () => {
+      it('should resolve with `false` when rejected', async () => {
         const prompt = dialog.launch();
 
         await waitForDialog();
@@ -136,7 +136,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#resolve()', () => {
+    describe('#resolve()', () => {
       it('should resolve with the default item', async () => {
         const prompt = dialog.launch();
 
@@ -154,7 +154,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#reject()', () => {
+    describe('#reject()', () => {
       it('should reject with the default reject item', async () => {
         const prompt = dialog.launch();
 
@@ -168,7 +168,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#handleEvent()', () => {
+    describe('#handleEvent()', () => {
       describe('keydown', () => {
         it('should reject on escape key', async () => {
           const prompt = dialog.launch();
@@ -259,7 +259,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#onAfterAttach()', () => {
+    describe('#onAfterAttach()', () => {
       it('should attach event listeners', () => {
         Widget.attach(dialog, document.body);
         expect(dialog.methods).toContain('onAfterAttach');
@@ -288,7 +288,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#onAfterDetach()', () => {
+    describe('#onAfterDetach()', () => {
       it('should remove event listeners', () => {
         Widget.attach(dialog, document.body);
         Widget.detach(dialog);
@@ -312,7 +312,7 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe.skip('#onCloseRequest()', () => {
+    describe('#onCloseRequest()', () => {
       it('should reject an existing promise', async () => {
         const prompt = dialog.launch();
 
@@ -410,8 +410,8 @@ describe('@jupyterlab/apputils', () => {
         it('should create a button node for the dialog', () => {
           let node = renderer.createButtonNode(data);
           expect(node.className).toContain('jp-Dialog-button');
-          expect(node.querySelector('.jp-Dialog-buttonIcon')).not.toBeNull();
-          expect(node.querySelector('.jp-Dialog-buttonLabel')).not.toBeNull();
+          expect(node.querySelector('.jp-Dialog-buttonIcon')).toBeTruthy();
+          expect(node.querySelector('.jp-Dialog-buttonLabel')).toBeTruthy();
         });
       });
 
