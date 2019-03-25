@@ -18,7 +18,8 @@
     "@jupyterlab/theme-light-extension": "^1.0.0-alpha.4",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.6.1",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.6.0",
+    "es6-promise": "~4.1.1"
   },
   "devDependencies": {
     "@types/codemirror": "~0.0.70",
