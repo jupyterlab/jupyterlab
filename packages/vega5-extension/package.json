@@ -38,7 +38,6 @@
     "vega-lite": "^3.0.0"
   },
   "devDependencies": {
-    "@types/json-stable-stringify": "^1.0.32",
     "@types/webpack-env": "~1.13.6",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
