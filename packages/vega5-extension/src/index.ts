@@ -16,17 +16,17 @@ import '../style/index.css';
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
  */
-const VEGA_COMMON_CLASS = 'jp-RenderedVegaCommon4';
+const VEGA_COMMON_CLASS = 'jp-RenderedVegaCommon5';
 
 /**
  * The CSS class to add to the Vega.
  */
-const VEGA_CLASS = 'jp-Rendered5';
+const VEGA_CLASS = 'jp-RenderedVega5';
 
 /**
  * The CSS class to add to the Vega-Lite.
  */
-const VEGALITE_CLASS = 'jp-RenderedVegaLite2';
+const VEGALITE_CLASS = 'jp-RenderedVegaLite3';
 
 /**
  * The MIME type for Vega.
@@ -34,7 +34,7 @@ const VEGALITE_CLASS = 'jp-RenderedVegaLite2';
  * #### Notes
  * The version of this follows the major version of Vega.
  */
-export const VEGA_MIME_TYPE = 'application/vnd.vega.v4+json';
+export const VEGA_MIME_TYPE = 'application/vnd.vega.v5+json';
 
 /**
  * The MIME type for Vega-Lite.
@@ -42,7 +42,7 @@ export const VEGA_MIME_TYPE = 'application/vnd.vega.v4+json';
  * #### Notes
  * The version of this follows the major version of Vega-Lite.
  */
-export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v2+json';
+export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v3+json';
 
 /**
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
