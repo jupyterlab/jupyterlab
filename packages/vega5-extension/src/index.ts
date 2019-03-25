@@ -132,7 +132,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega-extension:factory',
   rendererFactory,
-  rank: 50, // prefer over vega 2 extension
+  rank: 50,
   dataType: 'json',
   documentWidgetFactoryOptions: [
     {
