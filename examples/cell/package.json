@@ -8,7 +8,6 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.3",
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
     "@jupyterlab/cells": "^1.0.0-alpha.4",
     "@jupyterlab/codemirror": "^1.0.0-alpha.3",
