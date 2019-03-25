@@ -8,8 +8,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@jupyterlab/application": "^1.0.0-alpha.3",
     "@jupyterlab/codemirror": "^1.0.0-alpha.3",
     "@jupyterlab/completer": "^1.0.0-alpha.3",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
     "@jupyterlab/docmanager": "^1.0.0-alpha.3",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",
     "@jupyterlab/mathjax2": "^1.0.0-alpha.3",
