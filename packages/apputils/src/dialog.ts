@@ -3,8 +3,6 @@
 
 import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
 
-import { DisposableSet } from '@phosphor/disposable';
-
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
@@ -822,11 +820,6 @@ export namespace Dialog {
  * The namespace for module private data.
  */
 namespace Private {
-  /**
-   * The collection of outstanding dialog instances.
-   */
-  export let dialogs = new DisposableSet();
-
   /**
    * The queue for launching dialogs.
    */
