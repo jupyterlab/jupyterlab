@@ -142,7 +142,7 @@ setup_args['extras_require'] = {
         'pytest-check-links',
         'requests',
         # FIXME: pin tornado<6 while waiting for terminado 0.8.2
-        'tornado<6',
+        # 'tornado<6',
     ],
     'docs': [
         'sphinx',
