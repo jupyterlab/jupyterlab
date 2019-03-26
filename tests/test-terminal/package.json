@@ -13,7 +13,7 @@
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
     "watch": "tsc -b --watch",
-    "watch:src": "tsp -p src --watch"
+    "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
     "@jupyterlab/services": "^4.0.0-alpha.3",
