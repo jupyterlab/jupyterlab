@@ -33,6 +33,8 @@ jobs:
           targetType: 'filePath'
           filePath: ./scripts/travis_install.sh
       - script: python -m pip install virtualenv
+      - script: 'pip freeze'
+        displayName: 'list pip packages'
       - task: Bash@3
         displayName: 'script'
         inputs:
@@ -80,6 +82,8 @@ jobs:
         displayName: 'upgrade pip'
       - script: 'pip install --upgrade -e ".[test]"'
         displayName: 'install pip deps'
+      - script: 'pip freeze'
+        displayName: 'list pip packages'
       - script: 'jupyter kernelspec list'
         displayName: 'list kernels'
       - script: 'jlpm versions'
