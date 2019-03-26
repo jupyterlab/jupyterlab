@@ -21,6 +21,9 @@ jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab
 
+# FIXME: debug patch to notebook 5.7.x
+pip install https://github.com/minrk/notebook/archive/websocket-closed.zip
+
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1 'tornado<6'
 fi
