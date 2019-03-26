@@ -212,7 +212,7 @@ function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-AddIcon',
       onClick: () => {
         return Private.createLauncher(commands, widget);
       },

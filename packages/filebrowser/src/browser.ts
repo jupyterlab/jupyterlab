@@ -70,7 +70,7 @@ export class FileBrowser extends Widget {
 
     this._directoryPending = false;
     let newFolder = new ToolbarButton({
-      iconClassName: 'jp-NewFolderIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-NewFolderIcon',
       onClick: () => {
         this.createNewDirectory();
       },
@@ -80,7 +80,7 @@ export class FileBrowser extends Widget {
     let uploader = new Uploader({ model });
 
     let refresher = new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-RefreshIcon',
       onClick: () => {
         model.refresh();
       },

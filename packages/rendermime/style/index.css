@@ -525,6 +525,18 @@ h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
+.jp-RenderedHTMLCommon kbd {
+  background-color: var(--jp-rendermime-table-row-background);
+  border: 1px solid var(--jp-border-color0);
+  border-bottom-color: var(--jp-border-color2);
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  display: inline-block;
+  font-size: 0.8em;
+  line-height: 1em;
+  padding: 0.2em 0.5em;
+}
+
 /* Most direct children of .jp-RenderedHTMLCommon have a margin-bottom of 1.0.
  * At the bottom of cells this is a bit too much as there is also spacing
  * between cells. Going all the way to 0 gets too tight between markdown and

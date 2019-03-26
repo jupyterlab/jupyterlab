@@ -1515,7 +1515,7 @@ def _validate_extension(data):
         return ['The `jupyterlab` key must be a JSON object']
     extension = jlab.get('extension', False)
     mime_extension = jlab.get('mimeExtension', False)
-    themeDir = jlab.get('themeDir', '')
+    themePath = jlab.get('themePath', '')
     schemaDir = jlab.get('schemaDir', '')
 
     messages = []
@@ -1547,8 +1547,8 @@ def _validate_extension(data):
     if mime_extension and mime_extension not in files:
         messages.append('Missing mimeExtension module "%s"' % mime_extension)
 
-    if themeDir and not any(f.startswith(themeDir) for f in files):
-        messages.append('themeDir is empty: "%s"' % themeDir)
+    if themePath and not any(f.startswith(themePath) for f in files):
+        messages.append('themePath is empty: "%s"' % themePath)
 
     if schemaDir and not any(f.startswith(schemaDir) for f in files):
         messages.append('schemaDir is empty: "%s"' % schemaDir)

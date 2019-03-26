@@ -66,4 +66,4 @@ import '@jupyterlab/tooltip';
 import '@jupyterlab/tooltip-extension';
 import '@jupyterlab/ui-components';
 import '@jupyterlab/vdom-extension';
-import '@jupyterlab/vega4-extension';
+import '@jupyterlab/vega5-extension';

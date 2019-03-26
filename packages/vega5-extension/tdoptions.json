@@ -9,7 +9,7 @@
     "lib.es2015.promise.d.ts",
     "lib.dom.d.ts"
   ],
-  "out": "../../docs/api/vega4-extension",
+  "out": "../../docs/api/vega5-extension",
   "baseUrl": ".",
   "paths": {
     "@jupyterlab/*": ["../packages/*"]

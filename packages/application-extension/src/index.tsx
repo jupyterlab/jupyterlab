@@ -452,7 +452,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
 
   command = CommandIDs.closeAll;
   app.commands.addCommand(command, {
-    label: 'Close All Widgets',
+    label: 'Close All Tabs',
     execute: () => {
       app.shell.closeAll();
     }

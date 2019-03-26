@@ -33,7 +33,7 @@
   "dependencies": {
     "@jupyterlab/application": "^1.0.0-alpha.3",
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
-    "@jupyterlab/cells": "^1.0.0-alpha.3",
+    "@jupyterlab/cells": "^1.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^1.0.0-alpha.3",
     "@jupyterlab/coreutils": "^3.0.0-alpha.3",
     "@jupyterlab/docmanager": "^1.0.0-alpha.3",

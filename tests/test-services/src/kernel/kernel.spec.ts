@@ -144,7 +144,7 @@ describe('kernel', () => {
       const emission = testEmission(kernel.statusChanged, {
         find: (k, status) => status === 'reconnecting'
       });
-      tester.close();
+      await tester.close();
       await emission;
     });
   });

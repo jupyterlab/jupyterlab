@@ -1672,7 +1672,10 @@ export class Notebook extends StaticNotebook {
     if (targetArea === 'notebook') {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
-      if (button === 0 && shiftKey) {
+      // We don't want to prevent the default selection behavior
+      // if there is currently text selected in an output.
+      const hasSelection = window.getSelection().toString() !== '';
+      if (button === 0 && shiftKey && !hasSelection) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
 

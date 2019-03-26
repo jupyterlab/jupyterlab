@@ -12,8 +12,7 @@
     "lib/**/*.d.ts",
     "lib/**/*.js.map",
     "lib/**/*.js",
-    "style/*.css",
-    "style/images/*.svg",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "schema/*.json"
   ],
   "main": "lib/index.js",
@@ -35,7 +34,7 @@
   "dependencies": {
     "@jupyterlab/application": "^1.0.0-alpha.3",
     "@jupyterlab/apputils": "^1.0.0-alpha.3",
-    "@jupyterlab/cells": "^1.0.0-alpha.3",
+    "@jupyterlab/cells": "^1.0.0-alpha.4",
     "@jupyterlab/console": "^1.0.0-alpha.3",
     "@jupyterlab/coreutils": "^3.0.0-alpha.3",
     "@jupyterlab/docregistry": "^1.0.0-alpha.3",

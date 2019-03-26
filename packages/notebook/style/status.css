@@ -3,10 +3,26 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-StatusItem-untrusted {
-  background-image: url('./not-trusted-icon.svg');
+/*
+ * icons for light themes
+ */
+
+[data-theme-light='true'] .jp-StatusItem-untrusted {
+  background-image: url('./not-trusted-icon-light.svg');
 }
 
-.jp-StatusItem-trusted {
-  background-image: url('./trusted-icon.svg');
+[data-theme-light='true'] .jp-StatusItem-trusted {
+  background-image: url('./trusted-icon-light.svg');
+}
+
+/*
+ * icons for dark themes
+ */
+
+[data-theme-light='false'] .jp-StatusItem-untrusted {
+  background-image: url('./not-trusted-icon-dark.svg');
+}
+
+[data-theme-light='false'] .jp-StatusItem-trusted {
+  background-image: url('./trusted-icon-dark.svg');
 }

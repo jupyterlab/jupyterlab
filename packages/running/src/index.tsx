@@ -197,7 +197,7 @@ function Section<M>(props: SessionProps<M>) {
             <h2>{props.name} Sessions</h2>
             <ToolbarButtonComponent
               tooltip={`Shutdown All ${props.name} Sessions…`}
-              iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
+              iconClassName="jp-CloseIcon"
               onClick={onShutdown}
             />
           </header>
@@ -229,7 +229,7 @@ function RunningSessionsComponent({
       <div className={HEADER_CLASS}>
         <ToolbarButtonComponent
           tooltip="Refresh List"
-          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+          iconClassName="jp-RefreshIcon"
           onClick={() => {
             if (terminalsAvailable) {
               manager.terminals.refreshRunning();
