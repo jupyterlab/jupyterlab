@@ -762,58 +762,59 @@ export class CodeCell extends Cell {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    const metadata = this.model.metadata;
-    const jupyter = { ...(metadata.get('jupyter') as any) };
-    const collapsed = this.model.metadata.get('collapsed');
+    // Because collapse state for a code cell involves two different pieces of
+    // metadata, we block reacting to changes in metadata until we have fully
+    // committed our changes.
+    this._savingMetadata = true;
 
-    // Check to see that the two fields are already set appropriately.
-    if (
-      (this.outputHidden &&
-        jupyter.outputs_hidden === true &&
-        collapsed === true) ||
-      (!this.outputHidden &&
-        jupyter.outputs_hidden === undefined &&
-        collapsed === undefined)
-    ) {
-      // State is already what we want for output collapse, so just call the
-      // super method.
+    try {
       super.saveCollapseState();
-      return;
-    }
 
-    // There are a number of metadata changes below, so ignore any metadata
-    // changes in our syncing until we reach the last change.
-    this._ignoreMetadataChanges = true;
-    super.saveCollapseState();
+      const metadata = this.model.metadata;
+      const collapsed = this.model.metadata.get('collapsed');
+      const jupyter = { ...(metadata.get('jupyter') as any) };
 
-    if (this.outputHidden) {
-      // set both metadata keys
-      // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
-      metadata.set('collapsed', true);
-      jupyter.outputs_hidden = true;
-    } else {
-      metadata.delete('collapsed');
-      delete jupyter.outputs_hidden;
-    }
+      // Check to see that the two fields are already set appropriately.
+      if (
+        (this.outputHidden &&
+          jupyter.outputs_hidden === true &&
+          collapsed === true) ||
+        (!this.outputHidden &&
+          jupyter.outputs_hidden === undefined &&
+          collapsed === undefined)
+      ) {
+        return;
+      }
 
-    // Now we make our last metadata change, so unblock listening to metadata
-    // changes.
-    this._ignoreMetadataChanges = false;
-    if (Object.keys(jupyter).length === 0) {
-      metadata.delete('jupyter');
-    } else {
-      metadata.set('jupyter', jupyter);
+      if (this.outputHidden) {
+        // set both metadata keys
+        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
+        metadata.set('collapsed', true);
+        jupyter.outputs_hidden = true;
+      } else {
+        metadata.delete('collapsed');
+        delete jupyter.outputs_hidden;
+      }
+
+      if (Object.keys(jupyter).length === 0) {
+        metadata.delete('jupyter');
+      } else {
+        metadata.set('jupyter', jupyter);
+      }
+    } finally {
+      this._savingMetadata = false;
     }
   }
 
   /**
    * Revert view collapse state from model.
+   *
+   * We consider the `collapsed` metadata key as the source of truth for outputs
+   * being hidden.
    */
   loadCollapseState() {
     super.loadCollapseState();
-    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
-    const collapsed = this.model.metadata.get('collapsed');
-    this.outputHidden = !!jupyter.outputs_hidden || !!collapsed;
+    this.outputHidden = !!this.model.metadata.get('collapsed');
   }
 
   /**
@@ -957,7 +958,7 @@ export class CodeCell extends Cell {
     model: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
-    if (this._ignoreMetadataChanges) {
+    if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
     }
@@ -993,7 +994,7 @@ export class CodeCell extends Cell {
   private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
   private _syncScrolled = false;
-  private _ignoreMetadataChanges = false;
+  private _savingMetadata = false;
 }
 
 /**

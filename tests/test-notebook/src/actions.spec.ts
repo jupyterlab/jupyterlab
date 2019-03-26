@@ -1400,5 +1400,41 @@ describe('@jupyterlab/notebook', () => {
         await promise;
       });
     });
+
+    describe('#clearCollapseScrollState()', () => {
+      it.only('should clear the collapse and scroll metadata on all cells', () => {
+        const markmd = widget.widgets[1].model.metadata;
+        const codemd = widget.widgets[2].model.metadata;
+
+        markmd.set('jupyter', {
+          source_hidden: true,
+          othervalue: true
+        });
+        codemd.set('collapsed', true);
+        codemd.set('jupyter', {
+          source_hidden: true,
+          outputs_hidden: true
+        });
+        NotebookActions.clearCollapseScrollState(widget);
+        expect(markmd.get('jupyter')).to.deep.equal({ othervalue: true });
+        console.log(codemd.get('jupyter'));
+        expect(codemd.get('jupyter')).to.be.undefined;
+        expect(codemd.get('collapsed')).to.be.undefined;
+      });
+
+      it('should preserve the widget mode', () => {
+        NotebookActions.clearCollapseScrollState(widget);
+        expect(widget.mode).to.equal('command');
+        widget.mode = 'edit';
+        NotebookActions.clearCollapseScrollState(widget);
+        expect(widget.mode).to.equal('edit');
+      });
+
+      it('should be a no-op if there is no model', () => {
+        widget.model = null;
+        NotebookActions.clearCollapseScrollState(widget);
+        expect(widget.activeCellIndex).to.equal(-1);
+      });
+    });
   });
 });
