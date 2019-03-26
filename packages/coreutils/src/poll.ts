@@ -23,7 +23,16 @@ export class Poll<T = any, U = any> implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const { factory, interval, max, min, name, variance, when } = options;
+    const {
+      factory,
+      interval,
+      max,
+      min,
+      name,
+      readonly,
+      variance,
+      when
+    } = options;
 
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
@@ -32,20 +41,22 @@ export class Poll<T = any, U = any> implements IDisposable {
       throw new Error('Poll min cannot exceed poll interval or poll max');
     }
 
-    this.interval =
-      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
-    this.max = typeof max === 'number' ? Math.abs(max) : 10 * this.interval;
-    this.min = typeof min === 'number' ? Math.abs(min) : 100;
-    this.name = name || 'unknown';
-    this.standby = options.standby || 'when-hidden';
-    this.variance = typeof variance === 'number' ? variance : 0.2;
     this._factory = factory;
+    this._interval =
+      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
     this._state = {
-      interval: this.interval,
+      interval: this._interval,
       payload: null,
       phase: 'instantiated',
       timestamp: new Date().getTime()
     };
+
+    this.max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
+    this.min = typeof min === 'number' ? Math.abs(min) : 100;
+    this.name = name || 'unknown';
+    this.readonly = typeof readonly === 'boolean' ? readonly : false;
+    this.standby = options.standby || 'when-hidden';
+    this.variance = typeof variance === 'number' ? variance : 0.2;
 
     // Schedule a poll tick after the `when` promise is resolved.
     (when || Promise.resolve())
@@ -83,11 +94,6 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
-   * The polling interval.
-   */
-  readonly interval: number;
-
-  /**
    * The maximum interval between poll requests.
    */
   readonly max: number;
@@ -101,6 +107,11 @@ export class Poll<T = any, U = any> implements IDisposable {
    * The name of the poll. Defaults to `'unknown'`.
    */
   readonly name: string;
+
+  /**
+   * Whether the poll is readonly or can be modified. Defaults to `false`.
+   */
+  readonly readonly: boolean;
 
   /**
    * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
@@ -117,6 +128,19 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   get disposed(): ISignal<this, void> {
     return this._disposed;
+  }
+
+  /**
+   * The polling interval.
+   */
+  get interval(): number {
+    return this._interval;
+  }
+  set interval(interval: number) {
+    if (this.readonly) {
+      return;
+    }
+    this._interval = interval;
   }
 
   /**
@@ -344,6 +368,7 @@ export class Poll<T = any, U = any> implements IDisposable {
 
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
+  private _interval: number;
   private _state: Poll.Tick<T, U>;
   private _tick: PromiseDelegate<this> | null = new PromiseDelegate<this>();
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
@@ -351,7 +376,7 @@ export class Poll<T = any, U = any> implements IDisposable {
 }
 
 /**
- * A namespace for `Poll` class statics, types, and interfaces.
+ * A namespace for `Poll` types and interfaces.
  */
 export namespace Poll {
   /**
@@ -445,6 +470,11 @@ export namespace Poll {
      * The name of the poll. Defaults to `'unknown'`.
      */
     name?: string;
+
+    /**
+     * Whether the poll is readonly or can be modified. Defaults to `false`.
+     */
+    readonly?: boolean;
 
     /**
      * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
