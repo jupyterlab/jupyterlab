@@ -274,7 +274,7 @@ describe('cells/widget', () => {
     });
 
     describe('#loadCollapseState()', () => {
-      it('should load the collapse state from the model', () => {
+      it('should load the input collapse state from the model', () => {
         const model = new CellModel({});
         const widget = new Cell({ model, contentFactory }).initializeState();
         expect(widget.inputHidden).to.equal(false);
@@ -647,10 +647,10 @@ describe('cells/widget', () => {
         expect(widget.outputHidden).to.equal(false);
       });
 
-      it('should defer to `collapsed` metadata key as sole source of truth', () => {
+      it('should defer to `collapsed` metadata key as sole source of truth, ignoring the `jupyter.outputs_hidden` metadata', () => {
         const collapsedModel = new CodeCellModel({});
 
-        // No collapsed metadata set -> collapsed is false
+        // No collapsed metadata set -> output is not hidden
         collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
         let widget = new CodeCell({ model: collapsedModel, rendermime });
         widget.initializeState();
@@ -672,7 +672,7 @@ describe('cells/widget', () => {
     });
 
     describe('#saveCollapseState()', () => {
-      it('should save the collapse state to the model', () => {
+      it('should save the collapse state to the model `collapsed` metadata', () => {
         const model = new CodeCellModel({});
         let widget = new CodeCell({ model, rendermime });
         widget.initializeState();
@@ -680,23 +680,38 @@ describe('cells/widget', () => {
 
         widget.outputHidden = true;
         widget.saveCollapseState();
+        expect(model.metadata.get('collapsed')).to.equal(true);
+
+        // Default values are not saved explicitly
+        widget.outputHidden = false;
+        widget.saveCollapseState();
+        expect(model.metadata.get('collapsed')).to.equal(undefined);
+
+        // Default values are explicitly deleted
+        model.metadata.set('collapsed', false);
+        widget.outputHidden = false;
+        widget.saveCollapseState();
+        expect(model.metadata.get('collapsed')).to.equal(undefined);
+      });
+
+      it('should not write to the model `jupyter.outputs_hidden` metadata', () => {
+        const model = new CodeCellModel({});
+        let widget = new CodeCell({ model, rendermime });
+        widget.initializeState();
+        expect(widget.syncCollapse).to.equal(false);
+        expect(widget.outputHidden).to.equal(false);
+
+        widget.outputHidden = true;
+        widget.saveCollapseState();
+        // We do not write to the jupyter.outputs_hidden key
+        expect(model.metadata.get('jupyter')).to.deep.equal(undefined);
+
+        model.metadata.set('jupyter', { outputs_hidden: true });
+        widget.outputHidden = false;
+        widget.saveCollapseState();
         expect(model.metadata.get('jupyter')).to.deep.equal({
           outputs_hidden: true
         });
-        expect(model.metadata.get('collapsed')).to.equal(true);
-
-        widget.outputHidden = false;
-        widget.saveCollapseState();
-        // Default values are not saved explicitly
-        expect(model.metadata.get('jupyter')).to.equal(undefined);
-        expect(model.metadata.get('collapsed')).to.equal(undefined);
-
-        // Preserves any jupyter keys that we don't manage
-        model.metadata.set('jupyter', { outputs_hidden: true, other: true });
-        widget.outputHidden = false;
-        widget.saveCollapseState();
-        // Default values are not saved explicitly
-        expect(model.metadata.get('jupyter')).to.deep.equal({ other: true });
       });
     });
 
@@ -710,28 +725,30 @@ describe('cells/widget', () => {
 
         // Not synced if setting widget attribute
         widget.outputHidden = true;
-        expect(model.metadata.get('jupyter')).to.equal(undefined);
+        expect(model.metadata.get('collapsed')).to.equal(undefined);
 
         // Not synced if setting metadata attribute
-        model.metadata.set('jupyter', { outputs_hidden: false });
+        model.metadata.set('collapsed', false);
         expect(widget.outputHidden).to.equal(true);
 
         widget.syncCollapse = true;
 
-        // Setting sync does an initial sync from model to view. This also sets
-        // the metadata to undefined if it is the default value.
-        expect(model.metadata.get('jupyter')).to.equal(undefined);
+        // Setting sync does an initial sync from model to view.
+        expect(model.metadata.get('collapsed')).to.equal(undefined);
         expect(widget.outputHidden).to.equal(false);
 
         // Synced if setting widget attribute
         widget.outputHidden = true;
-        expect(model.metadata.get('jupyter')).to.deep.equal({
-          outputs_hidden: true
-        });
+        expect(model.metadata.get('collapsed')).to.equal(true);
 
         // Synced if setting metadata attribute
-        model.metadata.set('jupyter', { other: true });
         model.metadata.set('collapsed', false);
+        expect(widget.outputHidden).to.equal(false);
+
+        // Synced if deleting collapsed metadata attribute
+        widget.outputHidden = true;
+        expect(model.metadata.get('collapsed')).to.equal(true);
+        model.metadata.delete('collapsed');
         expect(widget.outputHidden).to.equal(false);
       });
     });

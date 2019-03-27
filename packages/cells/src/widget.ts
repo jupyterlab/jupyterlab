@@ -771,8 +771,10 @@ export class CodeCell extends Cell {
    */
   saveCollapseState() {
     // Because collapse state for a code cell involves two different pieces of
-    // metadata, we block reacting to changes in metadata until we have fully
-    // committed our changes.
+    // metadata (the `collapsed` and `jupyter` metadata keys), we block reacting
+    // to changes in metadata until we have fully committed our changes.
+    // Otherwise setting one key can trigger a write to the other key to
+    // maintain the synced consistency.
     this._savingMetadata = true;
 
     try {
@@ -780,34 +782,22 @@ export class CodeCell extends Cell {
 
       const metadata = this.model.metadata;
       const collapsed = this.model.metadata.get('collapsed');
-      const jupyter = { ...(metadata.get('jupyter') as any) };
 
-      // Check to see that the two fields are already set appropriately.
       if (
-        (this.outputHidden &&
-          jupyter.outputs_hidden === true &&
-          collapsed === true) ||
-        (!this.outputHidden &&
-          jupyter.outputs_hidden === undefined &&
-          collapsed === undefined)
+        (this.outputHidden && collapsed === true) ||
+        (!this.outputHidden && collapsed === undefined)
       ) {
         return;
       }
 
+      // Do not set jupyter.outputs_hidden until we can fully support it both in
+      // reading and writing. See
+      // https://github.com/jupyterlab/jupyterlab/pull/5968#issuecomment-477170937
+      // and https://github.com/jupyter/nbformat/issues/137
       if (this.outputHidden) {
-        // set both metadata keys
-        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
         metadata.set('collapsed', true);
-        jupyter.outputs_hidden = true;
       } else {
         metadata.delete('collapsed');
-        delete jupyter.outputs_hidden;
-      }
-
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
       }
     } finally {
       this._savingMetadata = false;
