@@ -23,27 +23,16 @@ export class Poll<T = any, U = any> implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const {
-      factory,
-      interval,
-      max,
-      min,
-      name,
-      readonly,
-      variance,
-      when
-    } = options;
+    const { factory, interval, jitter, max, min, readonly, when } = options;
 
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
-    }
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
+    this.name = options.name || 'unknown';
+    this.readonly = typeof readonly === 'boolean' ? readonly : false;
+    this.standby = options.standby || 'when-hidden';
+
+    // Initialize and validate poll frequency parameters.
+    this._setup(interval, jitter, max, min);
 
     this._factory = factory;
-    this._interval =
-      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
     this._state = {
       interval: this._interval,
       payload: null,
@@ -51,38 +40,29 @@ export class Poll<T = any, U = any> implements IDisposable {
       timestamp: new Date().getTime()
     };
 
-    this.max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
-    this.min = typeof min === 'number' ? Math.abs(min) : 100;
-    this.name = name || 'unknown';
-    this.readonly = typeof readonly === 'boolean' ? readonly : false;
-    this.standby = options.standby || 'when-hidden';
-    this.variance = typeof variance === 'number' ? variance : 0.2;
-
     // Schedule a poll tick after the `when` promise is resolved.
     (when || Promise.resolve())
       .then(() => {
-        // Bail if disposed while `when` promise was in flight.
         if (this.isDisposed) {
           return;
         }
 
         // Resolve the poll and schedule the next tick.
         this._resolve(this._tick, {
-          interval: this.interval,
+          interval: this._interval,
           payload: null,
           phase: 'instantiated-resolved',
           timestamp: new Date().getTime()
         });
       })
       .catch(reason => {
-        // Bail if disposed while `when` promise was in flight.
         if (this.isDisposed) {
           return;
         }
 
         // Resolve the poll and schedule the next tick.
         this._resolve(this._tick, {
-          interval: this.interval,
+          interval: this._interval,
           payload: null,
           phase: 'instantiated-rejected',
           timestamp: new Date().getTime()
@@ -92,16 +72,6 @@ export class Poll<T = any, U = any> implements IDisposable {
         console.warn(`Poll (${this.name}) starting despite rejection.`, reason);
       });
   }
-
-  /**
-   * The maximum interval between poll requests.
-   */
-  readonly max: number;
-
-  /**
-   * The minimum interval between poll requests.
-   */
-  readonly min: number;
 
   /**
    * The name of the poll. Defaults to `'unknown'`.
@@ -117,11 +87,6 @@ export class Poll<T = any, U = any> implements IDisposable {
    * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
    */
   readonly standby: 'when-hidden' | 'never';
-
-  /**
-   * The range within which the poll interval jitters.
-   */
-  readonly variance: number;
 
   /**
    * A signal emitted when the poll is disposed.
@@ -140,7 +105,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.readonly) {
       return;
     }
-    this._interval = interval;
+    this._setup(interval, this._jitter, this._max, this._min);
   }
 
   /**
@@ -149,12 +114,43 @@ export class Poll<T = any, U = any> implements IDisposable {
   get isDisposed(): boolean {
     return this._tick === null;
   }
+  /**
+   * The range within which the poll interval jitters.
+   */
+  get jitter(): number {
+    return this._jitter;
+  }
+  set jitter(jitter: number) {
+    if (this.readonly) {
+      return;
+    }
+    this._setup(this._interval, jitter, this._max, this._min);
+  }
 
   /**
-   * A promise that resolves when the poll next ticks.
+   * The maximum interval between poll requests.
    */
-  get tick(): Promise<this> {
-    return this._tick.promise;
+  get max(): number {
+    return this._max;
+  }
+  set max(max: number) {
+    if (this.readonly) {
+      return;
+    }
+    this._setup(this._interval, this._jitter, max, this._min);
+  }
+
+  /**
+   * The minimum interval between poll requests.
+   */
+  get min(): number {
+    return this._min;
+  }
+  set min(min: number) {
+    if (this.readonly) {
+      return;
+    }
+    this._setup(this._interval, this._jitter, this._max, min);
   }
 
   /**
@@ -162,6 +158,13 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   get state(): Poll.Tick<T, U> {
     return this._state;
+  }
+
+  /**
+   * A promise that resolves when the poll next ticks.
+   */
+  get tick(): Promise<this> {
+    return this._tick.promise;
   }
 
   /**
@@ -198,19 +201,21 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   async refresh(): Promise<this> {
     if (this._state.phase === 'instantiated') {
-      await this._tick.promise;
+      await this.tick;
     }
 
     if (this._state.phase === 'refreshed') {
-      return this._tick.promise;
+      return this.tick;
     }
 
-    return this._resolve(this._tick, {
+    this._resolve(this._tick, {
       interval: 0, // Immediately.
       payload: null,
       phase: 'refreshed',
       timestamp: new Date().getTime()
-    }).promise;
+    });
+
+    return this.tick;
   }
 
   /**
@@ -225,19 +230,21 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   async start(): Promise<this> {
     if (this._state.phase === 'instantiated') {
-      await this._tick.promise;
+      await this.tick;
     }
 
     if (this._state.phase !== 'standby' && this._state.phase !== 'stopped') {
-      return this._tick.promise;
+      return this.tick;
     }
 
-    return this._resolve(this._tick, {
+    this._resolve(this._tick, {
       interval: 0, // Immediately.
       payload: null,
       phase: 'started',
       timestamp: new Date().getTime()
-    }).promise;
+    });
+
+    return this.tick;
   }
 
   /**
@@ -252,7 +259,7 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   async stop(): Promise<this> {
     if (this._state.phase === 'instantiated') {
-      await this._tick.promise;
+      await this.tick;
     }
 
     if (this._state.phase === 'stopped') {
@@ -272,13 +279,12 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * Execute a poll request.
    */
-  private _request(poll: PromiseDelegate<this>): void {
-    const { max, min, variance } = this;
-
-    // If poll is in standby mode, schedule tick without firing poll request.
+  private _request(outstanding: PromiseDelegate<this>): void {
+    // If poll is in standby mode, schedule tick without firing a request.
     if (this._standby()) {
-      this._resolve(poll, {
-        interval: Private.jitter(this.interval, variance, min, max),
+      const { interval, jitter, max, min } = this;
+      this._resolve(outstanding, {
+        interval: Private.jitter(interval, jitter, min, max),
         payload: null,
         phase: 'standby',
         timestamp: new Date().getTime()
@@ -288,27 +294,27 @@ export class Poll<T = any, U = any> implements IDisposable {
 
     this._factory(this._state)
       .then((resolved: T) => {
-        // Bail if poll was disposed or superseded while promise was in flight.
-        if (this.isDisposed || poll !== this._tick) {
+        if (this.isDisposed || this._tick !== outstanding) {
           return;
         }
 
-        this._resolve(poll, {
-          interval: Private.jitter(this.interval, variance, min, max),
+        const { interval, jitter, max, min } = this;
+        this._resolve(outstanding, {
+          interval: Private.jitter(interval, jitter, min, max),
           payload: resolved,
           phase: this._state.phase === 'rejected' ? 'reconnected' : 'resolved',
           timestamp: new Date().getTime()
         });
       })
       .catch((rejected: U) => {
-        // Bail if poll was disposed or superseded while promise was in flight.
-        if (this.isDisposed || poll !== this._tick) {
+        if (this.isDisposed || this._tick !== outstanding) {
           return;
         }
 
+        const { jitter, max, min } = this;
         const increased = Math.min(this._state.interval * 2, max);
-        this._resolve(poll, {
-          interval: Private.jitter(increased, variance, min, max),
+        this._resolve(outstanding, {
+          interval: Private.jitter(increased, jitter, min, max),
           payload: rejected,
           phase: 'rejected',
           timestamp: new Date().getTime()
@@ -322,14 +328,14 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _resolve(
     outstanding: PromiseDelegate<this>,
     tick: Poll.Tick<T, U>
-  ): PromiseDelegate<this> {
+  ): void {
     const { interval } = tick;
-    const poll = new PromiseDelegate<this>();
+    const next = new PromiseDelegate<this>();
     const request = () => {
       if (this.isDisposed) {
         return;
       }
-      this._request(poll);
+      this._request(next);
     };
 
     // Clear the schedule if possible.
@@ -341,7 +347,7 @@ export class Poll<T = any, U = any> implements IDisposable {
 
     // Update poll state and schedule the next tick.
     this._state = tick;
-    this._tick = poll;
+    this._tick = next;
     this._timeout = interval
       ? interval === Infinity
         ? -1 // Never execute request.
@@ -353,8 +359,29 @@ export class Poll<T = any, U = any> implements IDisposable {
       this._ticked.emit(tick);
     });
     outstanding.resolve(this);
+  }
 
-    return poll;
+  /**
+   * Validates and sets the polling frequency configuration.
+   */
+  private _setup(
+    interval: number,
+    jitter: number,
+    max: number,
+    min: number
+  ): void {
+    if (interval > max) {
+      throw new Error('Poll interval cannot exceed max interval length');
+    }
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
+
+    this._interval =
+      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
+    this._jitter = typeof jitter === 'number' ? jitter : 0.2;
+    this._max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
+    this._min = typeof min === 'number' ? Math.abs(min) : 100;
   }
 
   /**
@@ -369,6 +396,9 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
   private _interval: number;
+  private _jitter: number;
+  private _max: number;
+  private _min: number;
   private _state: Poll.Tick<T, U>;
   private _tick: PromiseDelegate<this> | null = new PromiseDelegate<this>();
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
@@ -457,6 +487,14 @@ export namespace Poll {
     interval?: number;
 
     /**
+     * The range within which the poll interval jitters. Defaults to `0.2`.
+     *
+     * #### Notes
+     * Unless set to `0` the poll interval will be irregular.
+     */
+    jitter?: number;
+
+    /**
      * The maximum interval to wait between polls. Defaults to `10 * interval`.
      */
     max?: number;
@@ -485,14 +523,6 @@ export namespace Poll {
      * If set, a promise which must resolve (or reject) before polling begins.
      */
     when?: Promise<any>;
-
-    /**
-     * The range within which the poll interval jitters. Defaults to `0.2`.
-     *
-     * #### Notes
-     * Unless set to `0` the poll interval will be irregular.
-     */
-    variance?: number;
   }
 }
 
