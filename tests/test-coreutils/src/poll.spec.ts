@@ -11,9 +11,9 @@ describe('Poll', () => {
   describe('#constructor()', () => {
     it('should create a poll', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#constructor()-1',
-        interval: 1000,
         factory: () => Promise.resolve(),
+        interval: 1000,
+        name: '@jupyterlab/test-coreutils:Poll#constructor()-1',
         when: new Promise(() => undefined) // Never.
       });
 
@@ -24,9 +24,9 @@ describe('Poll', () => {
     it('should be `instantiated` and tick after `when` resolves', async () => {
       const promise = Promise.resolve();
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#constructor()-2',
-        interval: 1000,
         factory: () => Promise.resolve(),
+        interval: 1000,
+        name: '@jupyterlab/test-coreutils:Poll#constructor()-2',
         when: promise
       });
 
@@ -39,9 +39,9 @@ describe('Poll', () => {
     it('should be `instantiated` and tick after `when` rejects', async () => {
       const promise = Promise.reject();
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#constructor()-3',
-        interval: 1000,
         factory: () => Promise.resolve(),
+        interval: 1000,
+        name: '@jupyterlab/test-coreutils:Poll#constructor()-3',
         when: promise
       });
 
@@ -55,9 +55,9 @@ describe('Poll', () => {
   describe('#interval', () => {
     it('should be set to value passed in during instantation', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#interval-1',
+        factory: () => Promise.resolve(),
         interval: 9000,
-        factory: () => Promise.resolve()
+        name: '@jupyterlab/test-coreutils:Poll#interval-1'
       });
 
       expect(poll.interval).to.equal(9000);
@@ -66,8 +66,8 @@ describe('Poll', () => {
 
     it('should default to `1000`', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#interval-2',
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#interval-2'
       });
 
       expect(poll.interval).to.equal(1000);
@@ -75,12 +75,35 @@ describe('Poll', () => {
     });
   });
 
+  describe('#jitter', () => {
+    it('should be set to value passed in during instantation', () => {
+      const poll = new Poll({
+        factory: () => Promise.resolve(),
+        jitter: 0.5,
+        name: '@jupyterlab/test-coreutils:Poll#jitter-1'
+      });
+
+      expect(poll.jitter).to.equal(0.5);
+      poll.dispose();
+    });
+
+    it('should default to `0.2`', () => {
+      const poll = new Poll({
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#readonly-2'
+      });
+
+      expect(poll.jitter).to.equal(0.2);
+      poll.dispose();
+    });
+  });
+
   describe('#max', () => {
     it('should be set to value passed in during instantation', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#max-1',
+        factory: () => Promise.resolve(),
         max: 200000,
-        factory: () => Promise.resolve()
+        name: '@jupyterlab/test-coreutils:Poll#max-1'
       });
 
       expect(poll.max).to.equal(200000);
@@ -89,9 +112,9 @@ describe('Poll', () => {
 
     it('should default to 10x the interval', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#max-2',
         interval: 500,
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#max-2'
       });
 
       expect(poll.max).to.equal(10 * 500);
@@ -102,9 +125,9 @@ describe('Poll', () => {
   describe('#min', () => {
     it('should be set to value passed in during instantation', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#min-1',
+        factory: () => Promise.resolve(),
         min: 250,
-        factory: () => Promise.resolve()
+        name: '@jupyterlab/test-coreutils:Poll#min-1'
       });
 
       expect(poll.min).to.equal(250);
@@ -113,8 +136,8 @@ describe('Poll', () => {
 
     it('should default to `100`', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#min-2',
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#min-2'
       });
 
       expect(poll.min).to.equal(100);
@@ -124,8 +147,9 @@ describe('Poll', () => {
 
   describe('#name', () => {
     it('should be set to value passed in during instantation', () => {
+      const factory = () => Promise.resolve();
       const name = '@jupyterlab/test-coreutils:Poll#name-1';
-      const poll = new Poll({ name, factory: () => Promise.resolve() });
+      const poll = new Poll({ factory, name });
 
       expect(poll.name).to.equal(name);
       poll.dispose();
@@ -139,25 +163,52 @@ describe('Poll', () => {
     });
   });
 
-  describe('#variance', () => {
+  describe('#readonly', () => {
     it('should be set to value passed in during instantation', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#variance-1',
-        variance: 0.5,
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#readonly-1',
+        readonly: true
       });
 
-      expect(poll.variance).to.equal(0.5);
+      expect(poll.readonly).to.equal(true);
       poll.dispose();
     });
 
-    it('should default to `0.2`', () => {
+    it('should default to `false`', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#variance-2',
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#readonly-2'
       });
 
-      expect(poll.variance).to.equal(0.2);
+      expect(poll.readonly).to.equal(false);
+      poll.dispose();
+    });
+
+    it('should ignore changing poll frequency params if `true`', () => {
+      const interval = 900;
+      const jitter = 0.3;
+      const max = interval * 20;
+      const min = 200;
+      const poll = new Poll({
+        factory: () => Promise.resolve(),
+        interval,
+        jitter,
+        max,
+        min,
+        name: '@jupyterlab/test-coreutils:Poll#readonly-3',
+        readonly: true
+      });
+
+      poll.interval = interval * 2;
+      poll.jitter = jitter * 2;
+      poll.min = min * 2;
+      poll.max = max * 2;
+
+      expect(poll.interval).to.equal(interval);
+      expect(poll.jitter).to.equal(jitter);
+      expect(poll.min).to.equal(min);
+      expect(poll.max).to.equal(max);
       poll.dispose();
     });
   });
@@ -165,8 +216,8 @@ describe('Poll', () => {
   describe('#disposed', () => {
     it('should emit when the poll is disposed', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#disposed-1',
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#disposed-1'
       });
       let disposed = false;
 
@@ -182,8 +233,8 @@ describe('Poll', () => {
   describe('#isDisposed', () => {
     it('should indicate whether the poll is disposed', () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#isDisposed-1',
-        factory: () => Promise.resolve()
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#isDisposed-1'
       });
 
       expect(poll.isDisposed).to.equal(false);
@@ -195,10 +246,10 @@ describe('Poll', () => {
   describe('#tick', () => {
     it('should resolve after a tick', async () => {
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#tick-1',
-        interval: 400,
         factory: () => Promise.resolve(),
-        variance: 0
+        interval: 400,
+        jitter: 0,
+        name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'instantiated-resolved resolved';
       const ticker: Poll.Phase[] = [];
@@ -217,10 +268,10 @@ describe('Poll', () => {
   describe('#ticked', () => {
     it('should emit when the poll ticks after `when` resolves', async () => {
       const poll = new Poll<void, void>({
-        name: '@jupyterlab/test-coreutils:Poll#ticked-1',
-        interval: 400,
         factory: () => Promise.resolve(),
-        variance: 0
+        interval: 400,
+        jitter: 0,
+        name: '@jupyterlab/test-coreutils:Poll#ticked-1'
       });
       const expected = 'instantiated-resolved resolved';
       const ticker: Poll.Phase[] = [];
@@ -236,10 +287,10 @@ describe('Poll', () => {
     it('should emit when the poll ticks after `when` rejects', async () => {
       const promise = Promise.reject();
       const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#ticked-2',
-        interval: 400,
         factory: () => Promise.resolve(),
-        variance: 0,
+        interval: 400,
+        jitter: 0,
+        name: '@jupyterlab/test-coreutils:Poll#ticked-2',
         when: promise
       });
       const expected = 'instantiated-rejected resolved';
@@ -256,10 +307,10 @@ describe('Poll', () => {
 
     it('should emit a tick identical to the poll state', async () => {
       const poll = new Poll<void, void>({
-        name: '@jupyterlab/test-coreutils:Poll#ticked-3',
-        interval: 100,
         factory: () => Promise.resolve(),
-        variance: 0
+        interval: 100,
+        jitter: 0,
+        name: '@jupyterlab/test-coreutils:Poll#ticked-3'
       });
 
       poll.ticked.connect((sender: Poll, tick: Poll.Tick<void, void>) => {
