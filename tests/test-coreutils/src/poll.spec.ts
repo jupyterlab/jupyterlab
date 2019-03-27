@@ -87,13 +87,35 @@ describe('Poll', () => {
       poll.dispose();
     });
 
-    it('should default to `0.2`', () => {
+    it('should default to `0`', () => {
       const poll = new Poll({
         factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#readonly-2'
+        name: '@jupyterlab/test-coreutils:Poll#jitter-2'
       });
 
-      expect(poll.jitter).to.equal(0.2);
+      expect(poll.jitter).to.equal(0);
+      poll.dispose();
+    });
+
+    it('should default to `0` if false', () => {
+      const poll = new Poll({
+        factory: () => Promise.resolve(),
+        jitter: false,
+        name: '@jupyterlab/test-coreutils:Poll#jitter-2'
+      });
+
+      expect(poll.jitter).to.equal(0);
+      poll.dispose();
+    });
+
+    it('should default to `0.25` if true', () => {
+      const poll = new Poll({
+        factory: () => Promise.resolve(),
+        jitter: true,
+        name: '@jupyterlab/test-coreutils:Poll#jitter-3'
+      });
+
+      expect(poll.jitter).to.equal(0.25);
       poll.dispose();
     });
   });

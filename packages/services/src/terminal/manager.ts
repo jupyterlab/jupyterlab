@@ -32,6 +32,7 @@ export class TerminalManager implements TerminalSession.IManager {
       this._pollModels = new Poll({
         factory: () => this._refreshRunning(),
         interval: 10 * 1000,
+        jitter: true,
         max: 300 * 1000,
         min: 100,
         name: `@jupyterlab/services:TerminalManager#models`,

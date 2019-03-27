@@ -37,6 +37,7 @@ export class SessionManager implements Session.IManager {
     this._pollModels = new Poll({
       factory: () => this._refreshRunning(),
       interval: 10 * 1000,
+      jitter: true,
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:SessionManager#models`,
@@ -46,6 +47,7 @@ export class SessionManager implements Session.IManager {
     this._pollSpecs = new Poll({
       factory: () => this._refreshSpecs(),
       interval: 61 * 1000,
+      jitter: true,
       max: 300 * 1000,
       min: 100,
       name: `@jupyterlab/services:SessionManager#specs`,
