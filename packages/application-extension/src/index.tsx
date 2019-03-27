@@ -89,7 +89,7 @@ const main: JupyterFrontEndPlugin<void> = {
         <pre>{app.registerPluginErrors.map(e => e.message).join('\n')}</pre>
       );
 
-      showErrorMessage('Error Registering Plugins', { message: body });
+      void showErrorMessage('Error Registering Plugins', { message: body });
     }
 
     addCommands(app, palette);
@@ -120,14 +120,14 @@ const main: JupyterFrontEndPlugin<void> = {
           }
         })
         .catch(err => {
-          showErrorMessage('Build Failed', {
+          void showErrorMessage('Build Failed', {
             message: <pre>{err.message}</pre>
           });
         });
     };
 
     if (builder.isAvailable && builder.shouldCheck) {
-      builder.getStatus().then(response => {
+      void builder.getStatus().then(response => {
         if (response.status === 'building') {
           return build();
         }
@@ -144,7 +144,7 @@ const main: JupyterFrontEndPlugin<void> = {
           </div>
         );
 
-        showDialog({
+        void showDialog({
           title: 'Build Recommended',
           body,
           buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
@@ -181,10 +181,10 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     const registry = app.commands;
     const restorer = new LayoutRestorer({ first, registry, state });
 
-    restorer.fetch().then(saved => {
+    void restorer.fetch().then(saved => {
       labShell.restoreLayout(saved);
       labShell.layoutModified.connect(() => {
-        restorer.save(labShell.saveLayout());
+        void restorer.save(labShell.saveLayout());
       });
     });
 
@@ -205,13 +205,13 @@ const router: JupyterFrontEndPlugin<IRouter> = {
     const base = paths.urls.base;
     const router = new Router({ base, commands });
 
-    app.started.then(() => {
+    void app.started.then(() => {
       // Route the very first request on load.
-      router.route();
+      void router.route();
 
       // Route all pop state events.
       window.addEventListener('popstate', () => {
-        router.route();
+        void router.route();
       });
     });
 
@@ -300,7 +300,7 @@ const notfound: JupyterFrontEndPlugin<void> = {
     // URL change to the browser history.
     router.navigate('', { silent: true });
 
-    showErrorMessage('Path Not Found', { message });
+    void showErrorMessage('Path Not Found', { message });
   },
   autoStart: true
 };
@@ -367,7 +367,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
     };
     labShell.layoutModified.connect(handleLayoutOverrides);
     // Fetch overrides from the settings system.
-    Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
+    void Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
       ([settings]) => {
         overrides = (settings.get('overrides').composite as overrideMap) || {};
         settings.changed.connect(settings => {
@@ -411,7 +411,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
         // Move the panel to the other side.
         const newOverrides = { ...overrides };
         newOverrides[id] = side;
-        settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
+        return settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
       }
     });
 

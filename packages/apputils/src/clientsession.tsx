@@ -523,7 +523,8 @@ export class ClientSession implements IClientSession {
         let session = manager.connectTo(model);
         this._handleNewSession(session);
       } catch (err) {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
+        return Promise.reject(err);
       }
     }
     await this._startIfNecessary();
@@ -641,7 +642,7 @@ export class ClientSession implements IClientSession {
         return this._handleNewSession(session);
       })
       .catch(err => {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
         return Promise.reject(err);
       });
   }

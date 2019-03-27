@@ -458,7 +458,7 @@ export class DocumentWidget<
       this._onModelStateChanged,
       this
     );
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this._handleDirtyState();
     });
   }

@@ -84,7 +84,7 @@ export namespace ToolbarItems {
           buttons: [Dialog.okButton()]
         });
       }
-      panel.context.save().then(() => {
+      void panel.context.save().then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();
         }
@@ -172,7 +172,7 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       iconClassName: TOOLBAR_RUN_CLASS,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.content, panel.session);
+        void NotebookActions.runAndAdvance(panel.content, panel.session);
       },
       tooltip: 'Run the selected cells and advance'
     });

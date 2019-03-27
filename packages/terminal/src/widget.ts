@@ -68,7 +68,7 @@ export class Terminal extends Widget {
     if (!value) {
       return;
     }
-    value.ready.then(() => {
+    void value.ready.then(() => {
       if (this.isDisposed || value !== this._session) {
         return;
       }

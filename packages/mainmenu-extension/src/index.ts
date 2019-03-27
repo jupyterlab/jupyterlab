@@ -375,7 +375,7 @@ export function createFileMenu(
     label: 'Quit',
     caption: 'Quit JupyterLab',
     execute: () => {
-      showDialog({
+      return showDialog({
         title: 'Quit confirmation',
         body: 'Please confirm you want to quit JupyterLab.',
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
@@ -383,14 +383,18 @@ export function createFileMenu(
         if (result.button.accept) {
           let setting = ServerConnection.makeSettings();
           let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
-          ServerConnection.makeRequest(apiURL, { method: 'POST' }, setting)
+          return ServerConnection.makeRequest(
+            apiURL,
+            { method: 'POST' },
+            setting
+          )
             .then(result => {
               if (result.ok) {
                 // Close this window if the shutdown request has been successful
                 let body = document.createElement('div');
                 body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
                   <p>To use JupyterLab again, you will need to relaunch it.</p>`;
-                showDialog({
+                void showDialog({
                   title: 'Server stopped',
                   body: new Widget({ node: body }),
                   buttons: []
@@ -524,7 +528,7 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
     execute: () => {
-      showDialog({
+      return showDialog({
         title: 'Shutdown All?',
         body: 'Shut down all kernels?',
         buttons: [
@@ -762,7 +766,7 @@ export function createTabsMenu(
   });
 
   if (labShell) {
-    app.restored.then(() => {
+    void app.restored.then(() => {
       // Iterate over the current widgets in the
       // main area, and add them to the tab group
       // of the menu.

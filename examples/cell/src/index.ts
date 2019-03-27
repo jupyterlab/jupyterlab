@@ -58,7 +58,7 @@ function main(): void {
 
   // Handle the mimeType for the current kernel.
   session.kernelChanged.connect(() => {
-    session.kernel.ready.then(() => {
+    void session.kernel.ready.then(() => {
       const lang = session.kernel.info.language_info;
       const mimeType = mimeService.getMimeTypeByLanguage(lang);
       cellWidget.model.mimeType = mimeType;
@@ -67,7 +67,7 @@ function main(): void {
 
   // Start the default kernel.
   session.kernelPreference = { autoStartDefault: true };
-  session.initialize();
+  void session.initialize();
 
   // Set up a completer.
   const editor = cellWidget.editor;

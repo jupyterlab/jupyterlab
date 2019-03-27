@@ -42,7 +42,7 @@ class DelayedContentsManager extends ContentsManager {
     return new Promise<Contents.IModel>(resolve => {
       const delay = this._delay;
       this._delay -= 500;
-      super.get(path, options).then(contents => {
+      void super.get(path, options).then(contents => {
         setTimeout(() => {
           resolve(contents);
         }, Math.max(delay, 0));
@@ -81,7 +81,7 @@ describe('filebrowser/model', () => {
   });
 
   beforeEach(async () => {
-    state.clear();
+    await state.clear();
     model = new FileBrowserModel({ manager, state });
     const contents = await manager.newUntitled({ type: 'file' });
     name = contents.name;
@@ -444,7 +444,7 @@ describe('filebrowser/model', () => {
             4
           );
 
-          model.upload(file);
+          const uploaded = model.upload(file);
           expect(toArray(model.uploads())).to.deep.equal([]);
           expect(await start).to.deep.equal([
             model,
@@ -488,6 +488,7 @@ describe('filebrowser/model', () => {
             }
           ]);
           expect(toArray(model.uploads())).to.deep.equal([]);
+          await uploaded;
         });
 
         after(() => {

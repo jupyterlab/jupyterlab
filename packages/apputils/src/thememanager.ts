@@ -56,7 +56,7 @@ export class ThemeManager {
     this._host = host;
     this._splash = splash || null;
 
-    registry.load(key).then(settings => {
+    void registry.load(key).then(settings => {
       this._settings = settings;
       this._settings.changed.connect(
         this._loadSettings,
@@ -263,7 +263,7 @@ export class ThemeManager {
    * Handle a theme error.
    */
   private _onError(reason: any): void {
-    showDialog({
+    void showDialog({
       title: 'Error Loading Theme',
       body: String(reason),
       buttons: [Dialog.okButton({ label: 'OK' })]

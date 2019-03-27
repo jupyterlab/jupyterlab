@@ -349,7 +349,7 @@ export namespace Toolbar {
       iconClassName: 'jp-StopIcon',
       onClick: () => {
         if (session.kernel) {
-          session.kernel.interrupt();
+          void session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -363,7 +363,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        session.restart();
+        void session.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -582,7 +582,7 @@ namespace Private {
     }
     const tooltip = commands.caption(id) || label || iconLabel;
     const onClick = () => {
-      commands.execute(id);
+      void commands.execute(id);
     };
     const enabled = commands.isEnabled(id);
     return { className, iconClassName, tooltip, onClick, enabled, label };

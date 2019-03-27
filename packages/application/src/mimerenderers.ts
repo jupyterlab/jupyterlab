@@ -149,9 +149,9 @@ export function createRendermimePlugin(
           Private.factoryNameProperty.set(widget, factory.name);
           // Notify the instance tracker if restore data needs to update.
           widget.context.pathChanged.connect(() => {
-            tracker.save(widget);
+            void tracker.save(widget);
           });
-          tracker.add(widget);
+          void tracker.add(widget);
         });
       });
     }

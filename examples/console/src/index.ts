@@ -42,7 +42,7 @@ function main(): void {
   }
 
   let manager = new ServiceManager();
-  manager.ready.then(() => {
+  void manager.ready.then(() => {
     startApp(path, manager);
   });
 }
@@ -109,7 +109,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   commands.addCommand(command, {
     label: 'Execute Prompt',
     execute: () => {
-      consolePanel.console.execute();
+      return consolePanel.console.execute();
     }
   });
   palette.addItem({ command, category });
@@ -119,7 +119,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   commands.addCommand(command, {
     label: 'Execute Cell (forced)',
     execute: () => {
-      consolePanel.console.execute(true);
+      return consolePanel.console.execute(true);
     }
   });
   palette.addItem({ command, category });

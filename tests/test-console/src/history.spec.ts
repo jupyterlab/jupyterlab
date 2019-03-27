@@ -55,9 +55,7 @@ describe('console/history', () => {
     session = await createClientSession();
   });
 
-  after(() => {
-    session.shutdown();
-  });
+  after(() => session.shutdown());
 
   describe('ConsoleHistory', () => {
     describe('#constructor()', () => {

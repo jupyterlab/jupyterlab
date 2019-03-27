@@ -35,14 +35,14 @@ export class KernelManager implements Kernel.IManager {
         // Don't poll when nobody's looking.
         return;
       }
-      this._refreshRunning();
+      return this._refreshRunning();
     }, 10000);
     this._specsTimer = (setInterval as any)(() => {
       if (typeof document !== 'undefined' && document.hidden) {
         // Don't poll when nobody's looking.
         return;
       }
-      this._refreshSpecs();
+      return this._refreshSpecs();
     }, 61000);
   }
 

@@ -100,7 +100,7 @@ describe('docregistry/mimedocument', () => {
           renderTimeout: 1000,
           dataType: 'string'
         });
-        dContext.initialize(true);
+        void dContext.initialize(true);
         await widget.ready;
         const layout = widget.layout as BoxLayout;
         expect(layout.widgets.length).to.equal(1);

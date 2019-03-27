@@ -180,7 +180,7 @@ function List<M>(props: SessionProps<M>) {
  */
 function Section<M>(props: SessionProps<M>) {
   function onShutdown() {
-    showDialog({
+    void showDialog({
       title: `Shutdown All ${props.name} Sessions?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
     }).then(result => {
@@ -232,9 +232,9 @@ function RunningSessionsComponent({
           iconClassName="jp-RefreshIcon"
           onClick={() => {
             if (terminalsAvailable) {
-              manager.terminals.refreshRunning();
+              void manager.terminals.refreshRunning();
             }
-            manager.sessions.refreshRunning();
+            void manager.sessions.refreshRunning();
           }}
         />
       </div>

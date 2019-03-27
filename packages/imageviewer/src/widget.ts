@@ -43,7 +43,7 @@ export class ImageViewer extends Widget {
       this
     );
 
-    context.ready.then(() => {
+    void context.ready.then(() => {
       if (this.isDisposed) {
         return;
       }

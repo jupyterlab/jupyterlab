@@ -587,7 +587,7 @@ describe('docregistry/default', () => {
         // Our promise should resolve before the widget reveal promise.
         expect(await Promise.race([widget.revealed, reveal])).to.equal(x);
         // The context ready promise should also resolve first.
-        context.initialize(true);
+        void context.initialize(true);
         expect(
           await Promise.race([widget.revealed, contextReady])
         ).to.deep.equal([undefined, x]);

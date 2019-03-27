@@ -77,7 +77,7 @@ function activate(
     const model = rendermime.createModel({
       data: { 'text/markdown': SOURCE }
     });
-    content.renderModel(model);
+    void content.renderModel(model);
     content.addClass('jp-FAQ-content');
     let widget = new MainAreaWidget({ content });
     widget.addClass('jp-FAQ');
@@ -94,7 +94,7 @@ function activate(
         widget = createWidget();
       }
       if (!tracker.has(widget)) {
-        tracker.add(widget);
+        void tracker.add(widget);
         shell.add(widget, 'main', { activate: false });
       }
       shell.activateById(widget.id);

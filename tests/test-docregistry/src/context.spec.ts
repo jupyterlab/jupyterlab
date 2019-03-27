@@ -251,7 +251,7 @@ describe('docregistry/context', () => {
       it('should be set after population', async () => {
         const { path } = context;
 
-        context.initialize(true);
+        void context.initialize(true);
         await context.ready;
         expect(context.contentsModel.path).to.equal(path);
       });
