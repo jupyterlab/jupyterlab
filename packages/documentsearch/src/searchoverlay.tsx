@@ -30,6 +30,10 @@ const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_CURRENT_BUTTON_CLASS = 'jp-DocumentSearch-replace-current-button';
 const REPLACE_ALL_BUTTON_CLASS = 'jp-DocumentSearch-replace-all-button';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
+const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
+const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
+const FOCUSSED_INPUT = 'jp-DocumentSearch-focussed-input';
+const HIGHLIGHT_BUTTON = 'jp-DocumentSearch-highlight-button';
 
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
@@ -39,6 +43,9 @@ interface ISearchEntryProps {
   onRegexToggled: Function;
   onKeydown: Function;
   onChange: Function;
+  onInputFocus: Function;
+  onInputBlur: Function;
+  inputFocussed: boolean;
   caseSensitive: boolean;
   useRegex: boolean;
   inputText: string;
@@ -50,6 +57,9 @@ interface IReplaceEntryProps {
   onReplaceAll: Function;
   onReplaceKeydown: Function;
   onChange: Function;
+  onInputFocus: Function;
+  onInputBlur: Function;
+  inputFocussed: boolean;
   replaceText: string;
 }
 
@@ -66,7 +76,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   componentDidUpdate() {
-    if (this.props.forceFocus) {
+    if (this.props.forceFocus && this.props.inputFocussed) {
       this.focusInput();
     }
   }
@@ -79,15 +89,21 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
       ? REGEX_BUTTON_CLASS_ON
       : REGEX_BUTTON_CLASS_OFF;
 
+    const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
+      this.props.inputFocussed ? FOCUSSED_INPUT : ''
+    }`;
+
     return (
-      <div className={INPUT_WRAPPER_CLASS}>
+      <div className={wrapperClass}>
         <input
-          placeholder={this.props.inputText ? null : 'SEARCH'}
+          placeholder={this.props.inputText ? null : 'Find'}
           className={INPUT_CLASS}
           value={this.props.inputText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
           tabIndex={1}
+          onFocus={e => this.props.onInputFocus()}
+          onBlur={e => this.props.onInputBlur()}
           ref="searchInputNode"
         />
         <button
@@ -121,26 +137,31 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
   }
 
   render() {
+    const replaceCurrentClass = `${REPLACE_CURRENT_BUTTON_CLASS} ${
+      this.props.inputFocussed ? HIGHLIGHT_BUTTON : ''
+    }`;
     return (
       <div className={REPLACE_WRAPPER_CLASS}>
         <input
-          placeholder={this.props.replaceText ? null : 'REPLACE'}
+          placeholder={this.props.replaceText ? null : 'Replace'}
           className={REPLACE_ENTRY_CLASS}
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
           onChange={e => this.props.onChange(e)}
+          onFocus={e => this.props.onInputFocus()}
+          onBlur={e => this.props.onInputBlur()}
         />
         <button
-          className={REPLACE_CURRENT_BUTTON_CLASS}
+          className={replaceCurrentClass}
           onClick={() => this.props.onReplaceCurrent()}
         >
-          Next
+          Replace
         </button>
         <button
           className={REPLACE_ALL_BUTTON_CLASS}
           onClick={() => this.props.onReplaceAll()}
         >
-          All
+          Replace All
         </button>
       </div>
     );
@@ -153,6 +174,7 @@ interface IUpDownProps {
 }
 
 function UpDownButtons(props: IUpDownProps) {
+  console.log('rendering updown, props: ', props);
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
@@ -204,6 +226,7 @@ interface ISearchOverlayProps {
   onEndSearch: Function;
   onReplaceCurrent: Function;
   onReplaceAll: Function;
+  isReadOnly: boolean;
 }
 
 class SearchOverlay extends React.Component<
@@ -218,7 +241,6 @@ class SearchOverlay extends React.Component<
   private _onSearchChange(event: React.ChangeEvent) {
     const inputText = (event.target as HTMLInputElement).value;
     this.setState({ inputText });
-    console.log('search change, calling debounced startSearch');
     this._debouncedStartSearch(true, inputText);
   }
 
@@ -297,9 +319,47 @@ class SearchOverlay extends React.Component<
     100
   );
 
+  private _onReplaceToggled() {
+    this.setState({ replaceEntryShown: !this.state.replaceEntryShown });
+  }
+
+  private _onSearchInputFocus() {
+    if (!this.state.searchInputFocussed) {
+      this.setState({ searchInputFocussed: true });
+    }
+  }
+
+  private _onSearchInputBlur() {
+    if (this.state.searchInputFocussed) {
+      this.setState({ searchInputFocussed: false });
+    }
+  }
+
+  private _onReplaceInputFocus() {
+    if (!this.state.replaceInputFocussed) {
+      this.setState({ replaceInputFocussed: true });
+    }
+  }
+
+  private _onReplaceInputBlur() {
+    if (this.state.replaceInputFocussed) {
+      this.setState({ replaceInputFocussed: false });
+    }
+  }
+
   render() {
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
+        {this.props.isReadOnly ? null : (
+          <button
+            className={
+              this.state.replaceEntryShown
+                ? REPLACE_TOGGLE_EXPANDED
+                : REPLACE_TOGGLE_COLLAPSED
+            }
+            onClick={() => this._onReplaceToggled()}
+          />
+        )}
         <SearchEntry
           useRegex={this.props.overlayState.useRegex}
           caseSensitive={this.props.overlayState.caseSensitive}
@@ -313,6 +373,9 @@ class SearchOverlay extends React.Component<
           }}
           onKeydown={(e: KeyboardEvent) => this._onSearchKeydown(e)}
           onChange={(e: React.ChangeEvent) => this._onSearchChange(e)}
+          onInputFocus={this._onSearchInputFocus.bind(this)}
+          onInputBlur={this._onSearchInputBlur.bind(this)}
+          inputFocussed={this.state.searchInputFocussed}
           inputText={this.state.inputText}
           forceFocus={this.props.overlayState.forceFocus}
           key={0}
@@ -340,15 +403,20 @@ class SearchOverlay extends React.Component<
         </button>
       </div>,
       <div className={OVERLAY_ROW_CLASS} key={1}>
-        <ReplaceEntry
-          onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
-          onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
-          onReplaceCurrent={() =>
-            this.props.onReplaceCurrent(this.state.replaceText)
-          }
-          onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
-          replaceText={this.state.replaceText}
-        />
+        {!this.props.isReadOnly && this.state.replaceEntryShown ? (
+          <ReplaceEntry
+            onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+            onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
+            onReplaceCurrent={() =>
+              this.props.onReplaceCurrent(this.state.replaceText)
+            }
+            onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
+            replaceText={this.state.replaceText}
+            onInputFocus={this._onReplaceInputFocus.bind(this)}
+            onInputBlur={this._onReplaceInputBlur.bind(this)}
+            inputFocussed={this.state.replaceInputFocussed}
+          />
+        ) : null}
       </div>,
       <div
         className={REGEX_ERROR_CLASS}
@@ -374,7 +442,8 @@ export function createSearchOverlay(
     onStartQuery,
     onReplaceCurrent,
     onReplaceAll,
-    onEndSearch
+    onEndSearch,
+    isReadOnly
   } = options;
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
@@ -390,6 +459,7 @@ export function createSearchOverlay(
             onReplaceCurrent={onReplaceCurrent}
             onReplaceAll={onReplaceAll}
             overlayState={args}
+            isReadOnly={isReadOnly}
           />
         );
       }}
@@ -411,6 +481,7 @@ namespace createSearchOverlay {
     onEndSearch: Function;
     onReplaceCurrent: Function;
     onReplaceAll: Function;
+    isReadOnly: boolean;
   }
 }
 

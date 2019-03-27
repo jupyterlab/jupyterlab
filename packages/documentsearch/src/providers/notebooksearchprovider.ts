@@ -199,23 +199,6 @@ export class NotebookSearchProvider implements ISearchProvider {
     return Promise.resolve(replaceOccurred);
   }
 
-  private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
-    if (!this._currentMatch) {
-      return false;
-    }
-    const currentSelection = cm.getSelection();
-    const currentSelectionLength =
-      currentSelection.end.column - currentSelection.start.column;
-    const selectionIsOneLine =
-      currentSelection.start.line === currentSelection.end.line;
-    return (
-      this._currentMatch.line === currentSelection.start.line &&
-      this._currentMatch.column === currentSelection.start.column &&
-      this._currentMatch.text.length === currentSelectionLength &&
-      selectionIsOneLine
-    );
-  }
-
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     for (let index in this._cmSearchProviders) {
@@ -223,6 +206,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       const singleReplaceOccurred = await provider.replaceAllMatches(newText);
       replaceOccurred = singleReplaceOccurred ? true : replaceOccurred;
     }
+    this._currentMatch = null;
     return Promise.resolve(replaceOccurred);
   }
 
@@ -258,6 +242,13 @@ export class NotebookSearchProvider implements ISearchProvider {
     }
     return this._currentMatch.index;
   }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = false;
 
   private async _stepNext(
     reverse = false,
@@ -324,6 +315,23 @@ export class NotebookSearchProvider implements ISearchProvider {
 
   private _onCmSearchProviderChanged() {
     this._changed.emit(undefined);
+  }
+
+  private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
+    if (!this._currentMatch) {
+      return false;
+    }
+    const currentSelection = cm.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    return (
+      this._currentMatch.line === currentSelection.start.line &&
+      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.text.length === currentSelectionLength &&
+      selectionIsOneLine
+    );
   }
 
   private _searchTarget: NotebookPanel;

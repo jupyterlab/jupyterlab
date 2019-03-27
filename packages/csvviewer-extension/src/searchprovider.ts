@@ -79,21 +79,19 @@ export class CSVSearchProvider implements ISearchProvider {
 
   /**
    * Replace the currently selected match with the provided text
-   *
+   * Not implemented in the CSV viewer as it is read-only.
    * @returns A promise that resolves once the action has completed.
    */
   replaceCurrentMatch(newText: string): Promise<boolean> {
-    console.warn('Replace not implemented for the CSV search provider yet.');
     return Promise.resolve(false);
   }
 
   /**
    * Replace all matches in the notebook with the provided text
-   *
+   * Not implemented in the CSV viewer as it is read-only.
    * @returns A promise that resolves once the action has completed.
    */
   replaceAllMatches(newText: string): Promise<boolean> {
-    console.warn('Replace not implemented for the CSV search provider yet.');
     return Promise.resolve(false);
   }
 
@@ -113,6 +111,13 @@ export class CSVSearchProvider implements ISearchProvider {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null = null;
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = true;
 
   private _target: IDocumentWidget<CSVViewer>;
   private _query: RegExp;

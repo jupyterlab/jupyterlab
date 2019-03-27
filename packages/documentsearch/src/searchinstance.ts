@@ -17,6 +17,11 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
+    console.log(
+      'creating search instance, isreadonly: ',
+      this._activeProvider.isReadOnly
+    );
+
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
@@ -27,7 +32,8 @@ export class SearchInstance implements IDisposable {
       onStartQuery: this._startQuery.bind(this),
       onReplaceCurrent: this._replaceCurrent.bind(this),
       onReplaceAll: this._replaceAll.bind(this),
-      onEndSearch: this.dispose.bind(this)
+      onEndSearch: this.dispose.bind(this),
+      isReadOnly: this._activeProvider.isReadOnly
     });
 
     this._widget.disposed.connect(() => {
@@ -109,6 +115,7 @@ export class SearchInstance implements IDisposable {
     if (this._activeProvider && this._displayState.query && !!newText) {
       console.log('calling on active provider with new text:', newText);
       await this._activeProvider.replaceCurrentMatch(newText);
+      this.updateIndices();
     }
   }
 
@@ -116,6 +123,7 @@ export class SearchInstance implements IDisposable {
     if (this._activeProvider && this._displayState.query && !!newText) {
       console.log('calling on active provider with new text:', newText);
       await this._activeProvider.replaceAllMatches(newText);
+      this.updateIndices();
     }
   }
 
@@ -196,8 +204,11 @@ export class SearchInstance implements IDisposable {
     inputText: '',
     query: null,
     errorMessage: '',
+    searchInputFocussed: true,
+    replaceInputFocussed: false,
     forceFocus: true,
-    replaceText: ''
+    replaceText: '',
+    replaceEntryShown: false
   };
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;

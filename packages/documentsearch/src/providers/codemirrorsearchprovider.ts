@@ -192,18 +192,22 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
-    this._cm.operation(() => {
-      const cursor = this._cm.getSearchCursor(
-        this._query,
-        null,
-        !this._query.ignoreCase
-      );
-      while (cursor.findNext()) {
-        replaceOccurred = true;
-        cursor.replace(newText);
-      }
+    return new Promise((resolve, _) => {
+      this._cm.operation(() => {
+        const cursor = this._cm.getSearchCursor(
+          this._query,
+          null,
+          !this._query.ignoreCase
+        );
+        while (cursor.findNext()) {
+          replaceOccurred = true;
+          cursor.replace(newText);
+        }
+        this._matchState = {};
+        this._currentMatch = null;
+        resolve(replaceOccurred);
+      });
     });
-    return Promise.resolve(replaceOccurred);
   }
 
   /**
@@ -244,6 +248,13 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     }
     return this._currentMatch.index;
   }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = false;
 
   clearSelection(): void {
     return null;

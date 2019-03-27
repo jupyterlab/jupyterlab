@@ -45,7 +45,13 @@ export interface IDisplayState {
    */
   forceFocus: boolean;
 
+  searchInputFocussed: boolean;
+
+  replaceInputFocussed: boolean;
+
   replaceText: string;
+
+  replaceEntryShown: boolean;
 }
 
 export interface ISearchMatch {
@@ -158,4 +164,11 @@ export interface ISearchProvider {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null;
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly: boolean;
 }
