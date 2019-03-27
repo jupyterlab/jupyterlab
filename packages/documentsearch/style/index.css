@@ -28,19 +28,20 @@
 
 .jp-DocumentSearch-overlay * {
   color: var(--jp-ui-font-color0);
+  background-position: center;
 }
 
 .jp-DocumentSearch-button-content {
   display: inline-block;
   cursor: pointer;
-  width: 80%;
-  height: 80%;
-  margin: 10%;
-  background-color: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
 }
 
 .jp-DocumentSearch-button-wrapper {
   all: initial;
+  overflow: hidden;
   display: inline-block;
   outline: 0;
   border: none;
@@ -50,8 +51,10 @@
   background-repeat: no-repeat;
 }
 
-.jp-DocumentSearch-button-wrapper:focus > .jp-DocumentSearch-button-content {
-  box-shadow: 0 0 2px 2px #51a7e8;
+.jp-DocumentSearch-button-wrapper:focus {
+  outline: var(--jp-border-width) solid
+    var(--jp-cell-editor-active-border-color);
+  outline-offset: -1px;
 }
 
 .jp-DocumentSearch-button-wrapper,
@@ -104,8 +107,9 @@
 }
 
 .jp-DocumentSearch-up-down-wrapper button {
-  padding-bottom: 5px;
   background-color: var(--jp-layout-color0);
+  vertical-align: middle;
+  background-position: center;
 }
 
 .jp-DocumentSearch-up-button {
@@ -118,12 +122,11 @@
 
 .jp-DocumentSearch-close-button {
   display: inline-block;
-  margin-left: 4px;
   background-size: 16px;
-  height: 16px;
-  width: 16px;
   background-image: var(--jp-icon-close);
+  background-repeat: no-repeat;
   background-position: center;
+  vertical-align: middle;
 }
 
 .jp-DocumentSearch-close-button:hover {

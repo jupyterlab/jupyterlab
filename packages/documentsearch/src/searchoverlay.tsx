@@ -78,18 +78,24 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           ref="searchInputNode"
         />
         <button
-          className={`${caseButtonToggleClass} ${BUTTON_WRAPPER_CLASS}`}
+          className={`${BUTTON_WRAPPER_CLASS}`}
           onClick={() => this.props.onCaseSensitiveToggled()}
           tabIndex={2}
         >
-          <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+          <span
+            className={`${caseButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          />
         </button>
         <button
-          className={`${regexButtonToggleClass} ${BUTTON_WRAPPER_CLASS}`}
+          className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onRegexToggled()}
           tabIndex={3}
         >
-          <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+          <span
+            className={`${regexButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          />
         </button>
       </div>
     );
@@ -105,18 +111,24 @@ function UpDownButtons(props: IUpDownProps) {
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
-        className={`${UP_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
+        className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
         tabIndex={4}
       >
-        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+        <span
+          className={`${UP_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          tabIndex={-1}
+        />
       </button>
       <button
-        className={`${DOWN_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
+        className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHightlightNext()}
         tabIndex={5}
       >
-        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+        <span
+          className={`${DOWN_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          tabIndex={-1}
+        />
       </button>
     </div>
   );
@@ -235,12 +247,15 @@ class SearchOverlay extends React.Component<
         key={2}
       />,
       <button
-        className={`${CLOSE_BUTTON_CLASS} ${BUTTON_WRAPPER_CLASS}`}
+        className={BUTTON_WRAPPER_CLASS}
         onClick={() => this.onClose()}
         tabIndex={6}
         key={3}
       >
-        <span className={BUTTON_CONTENT_CLASS} tabIndex={-1} />
+        <span
+          className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          tabIndex={-1}
+        />
       </button>,
       <div
         className={REGEX_ERROR_CLASS}
