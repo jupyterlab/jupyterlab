@@ -23,13 +23,7 @@ export class Poll<T = any, U = any> implements IDisposable {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const { factory, interval, max, min, readonly, when } = options;
-    const jitter =
-      typeof options.jitter === 'boolean'
-        ? (options.jitter && 0.25) || 0
-        : typeof options.jitter === 'number'
-          ? options.jitter
-          : 0;
+    const { factory, interval, jitter, max, min, readonly, when } = options;
 
     this.name = options.name || 'unknown';
     this.readonly = typeof readonly === 'boolean' ? readonly : false;
@@ -120,13 +114,18 @@ export class Poll<T = any, U = any> implements IDisposable {
   get isDisposed(): boolean {
     return this._tick === null;
   }
+
   /**
-   * The range within which the poll interval jitters.
+   * Whether poll frequency jitters if boolean and jitter factor if number.
+   * Defaults to `0`.
+   *
+   * #### Notes
+   * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
    */
-  get jitter(): number {
+  get jitter(): boolean | number {
     return this._jitter;
   }
-  set jitter(jitter: number) {
+  set jitter(jitter: boolean | number) {
     if (this.readonly) {
       return;
     }
@@ -362,7 +361,7 @@ export class Poll<T = any, U = any> implements IDisposable {
       : requestAnimationFrame(request); // Execute request immediately.
 
     // Resolve the outstanding poll promise and emit the ticked signal.
-    outstanding.promise.then(() => {
+    void outstanding.promise.then(() => {
       this._ticked.emit(tick);
     });
     outstanding.resolve(this);
@@ -373,7 +372,7 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   private _setup(
     interval: number,
-    jitter: number,
+    jitter: boolean | number,
     max: number,
     min: number
   ): void {
@@ -386,7 +385,8 @@ export class Poll<T = any, U = any> implements IDisposable {
 
     this._interval =
       typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
-    this._jitter = typeof jitter === 'number' ? jitter : 0;
+    this._jitter =
+      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
     this._max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
     this._min = typeof min === 'number' ? Math.abs(min) : 100;
   }
@@ -403,7 +403,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
   private _interval: number;
-  private _jitter: number;
+  private _jitter: boolean | number;
   private _max: number;
   private _min: number;
   private _state: Poll.Tick<T, U>;
@@ -413,9 +413,14 @@ export class Poll<T = any, U = any> implements IDisposable {
 }
 
 /**
- * A namespace for `Poll` types and interfaces.
+ * A namespace for `Poll` statics, types, and interfaces.
  */
 export namespace Poll {
+  /**
+   * The jitter factor if `jitter` is set to `true`: `0.25`.
+   */
+  export const DEFAULT_JITTER = 0.25;
+
   /**
    * The phase of the poll when the current tick was scheduled.
    */
@@ -498,7 +503,7 @@ export namespace Poll {
      * Defaults to `0`.
      *
      * #### Notes
-     * If set to `true` the poll jitter factor will default to `0.25`.
+     * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
      */
     jitter?: boolean | number;
 
@@ -543,8 +548,7 @@ namespace Private {
    *
    * @param base - The base value that is being wobbled.
    *
-   * @param factor - Factor multiplied by the base to define jitter amplitude.
-   * A factor of `0` will return the nearest rounded integer to base.
+   * @param factor - The jitter factor quantity or boolean flag.
    *
    * @param min - The smallest acceptable value to return.
    *
@@ -555,13 +559,20 @@ namespace Private {
    */
   export function jitter(
     base: number,
-    factor: number,
+    factor: boolean | number,
     min: number,
     max: number
   ): number {
-    if (factor === 0) {
+    if (!factor) {
       return Math.round(base);
     }
+
+    factor =
+      typeof factor === 'boolean'
+        ? (factor && Poll.DEFAULT_JITTER) || 0
+        : typeof factor === 'number'
+          ? factor
+          : 0;
 
     const direction = Math.random() < 0.5 ? 1 : -1;
     const jitter = Math.random() * base * Math.abs(factor) * direction;
