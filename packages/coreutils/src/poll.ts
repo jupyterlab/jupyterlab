@@ -201,26 +201,25 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If the poll has been instantiated but its `when` promise has not yet
    * resolved, this call will be scheduled after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. It returns the outstanding
-   * poll request if the current tick phase is `'refreshed'`.
+   * It is safe to call this method multiple times. It will only schedule a
+   * new tick when necessary.
    */
   async refresh(): Promise<this> {
-    if (this._state.phase === 'instantiated') {
+    if (this.state.phase === 'instantiated') {
       await this.tick;
     }
 
-    if (this._state.phase === 'refreshed') {
-      return this.tick;
+    // Refresh the poll if necessary.
+    if (this.state.phase !== 'refreshed') {
+      this._resolve(this._tick, {
+        interval: 0, // Immediately.
+        payload: null,
+        phase: 'refreshed',
+        timestamp: new Date().getTime()
+      });
     }
 
-    this._resolve(this._tick, {
-      interval: 0, // Immediately.
-      payload: null,
-      phase: 'refreshed',
-      timestamp: new Date().getTime()
-    });
-
-    return this.tick;
+    return this;
   }
 
   /**
@@ -230,26 +229,25 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If the poll has been instantiated but its `when` promise has not yet
    * resolved, this call will be scheduled after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. The poll will only start
-   * if its current tick phase is `'standby'` or `'stopped'`.
+   * It is safe to call this method multiple times. It will only schedule a
+   * new tick when necessary.
    */
   async start(): Promise<this> {
-    if (this._state.phase === 'instantiated') {
+    if (this.state.phase === 'instantiated') {
       await this.tick;
     }
 
-    if (this._state.phase !== 'standby' && this._state.phase !== 'stopped') {
-      return this.tick;
+    // Start the poll if necessary.
+    if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
+      this._resolve(this._tick, {
+        interval: 0, // Immediately.
+        payload: null,
+        phase: 'started',
+        timestamp: new Date().getTime()
+      });
     }
 
-    this._resolve(this._tick, {
-      interval: 0, // Immediately.
-      payload: null,
-      phase: 'started',
-      timestamp: new Date().getTime()
-    });
-
-    return this.tick;
+    return this;
   }
 
   /**
@@ -259,24 +257,23 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If the poll has been instantiated but its `when` promise has not yet
    * resolved, this call will be scheduled after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. The poll will only stop if
-   * its current tick phase is not `'stopped'`.
+   * It is safe to call this method multiple times. It will only schedule a
+   * new tick when necessary.
    */
   async stop(): Promise<this> {
-    if (this._state.phase === 'instantiated') {
+    if (this.state.phase === 'instantiated') {
       await this.tick;
     }
 
-    if (this._state.phase === 'stopped') {
-      return this;
+    // Stop the poll if necessary.
+    if (this.state.phase !== 'stopped') {
+      this._resolve(this._tick, {
+        interval: Infinity, // Never.
+        payload: null,
+        phase: 'stopped',
+        timestamp: new Date().getTime()
+      });
     }
-
-    this._resolve(this._tick, {
-      interval: Infinity, // Never.
-      payload: null,
-      phase: 'stopped',
-      timestamp: new Date().getTime()
-    });
 
     return this;
   }
