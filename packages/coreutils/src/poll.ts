@@ -292,7 +292,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (standby) {
       const { interval, jitter, max, min } = this;
       this._schedule(outstanding, {
-        interval: Private.jitter(interval, jitter, min, max),
+        interval: Private.jitter(interval, jitter, max, min),
         payload: null,
         phase: 'standby',
         timestamp: new Date().getTime()
@@ -310,7 +310,7 @@ export class Poll<T = any, U = any> implements IDisposable {
 
         const { interval, jitter, max, min } = this;
         this._schedule(outstanding, {
-          interval: Private.jitter(interval, jitter, min, max),
+          interval: Private.jitter(interval, jitter, max, min),
           payload: resolved,
           phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
           timestamp: new Date().getTime()
@@ -324,7 +324,7 @@ export class Poll<T = any, U = any> implements IDisposable {
         const { jitter, max, min } = this;
         const increased = Math.min(this.state.interval * 2, max);
         this._schedule(outstanding, {
-          interval: Private.jitter(increased, jitter, min, max),
+          interval: Private.jitter(increased, jitter, max, min),
           payload: rejected,
           phase: 'rejected',
           timestamp: new Date().getTime()
@@ -341,19 +341,19 @@ export class Poll<T = any, U = any> implements IDisposable {
     max: number,
     min: number
   ): void {
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
-    }
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
-
     interval =
       typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
     jitter =
       typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
     max = typeof max === 'number' ? Math.abs(max) : 10 * interval;
     min = typeof min === 'number' ? Math.abs(min) : 100;
+
+    if (interval > max) {
+      throw new Error('Poll interval cannot exceed max interval length');
+    }
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
 
     this._interval = interval;
     this._jitter = jitter;
@@ -550,15 +550,15 @@ namespace Private {
    *
    * @param factor - The jitter factor quantity or boolean flag.
    *
-   * @param min - The smallest acceptable value to return.
-   *
    * @param max - The largest acceptable value to return.
+   *
+   * @param min - The smallest acceptable value to return.
    */
   export function jitter(
     base: number,
     factor: boolean | number,
-    min: number,
-    max: number
+    max: number,
+    min: number
   ): number {
     if (!factor) {
       return Math.round(base);
