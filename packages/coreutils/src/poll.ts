@@ -202,6 +202,8 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times.
+   *
+   * If `readonly` is true, this method will not schedule a new tick.
    */
   async refresh(): Promise<this> {
     if (this.state.phase === 'instantiated') {
@@ -209,7 +211,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     }
 
     // Refresh the poll if necessary.
-    if (this.state.phase !== 'refreshed') {
+    if (!this.readonly && this.state.phase !== 'refreshed') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -231,6 +233,8 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times.
+   *
+   * If `readonly` is true, this method will not schedule a new tick.
    */
   async start(): Promise<this> {
     if (this.state.phase === 'instantiated') {
@@ -238,7 +242,10 @@ export class Poll<T = any, U = any> implements IDisposable {
     }
 
     // Start the poll if necessary.
-    if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
+    if (
+      !this.readonly &&
+      (this.state.phase === 'standby' || this.state.phase === 'stopped')
+    ) {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -260,6 +267,8 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times.
+   *
+   * If `readonly` is true, this method will not schedule a new tick.
    */
   async stop(): Promise<this> {
     if (this.state.phase === 'instantiated') {
@@ -267,7 +276,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     }
 
     // Stop the poll if necessary.
-    if (this.state.phase !== 'stopped') {
+    if (!this.readonly && this.state.phase !== 'stopped') {
       this._schedule(this._tick, {
         interval: Infinity, // Never.
         payload: null,

@@ -226,14 +226,34 @@ describe('Poll', () => {
 
       poll.interval = interval * 2;
       poll.jitter = jitter * 2;
-      poll.min = min * 2;
       poll.max = max * 2;
+      poll.min = min * 2;
 
       expect(poll.interval).to.equal(interval);
       expect(poll.jitter).to.equal(jitter);
-      expect(poll.min).to.equal(min);
       expect(poll.max).to.equal(max);
+      expect(poll.min).to.equal(min);
       poll.dispose();
+    });
+
+    it('should ignore refresh/start/stop if `true`', async () => {
+      const poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#readonly-4',
+        interval: 100,
+        factory: () => Promise.resolve(),
+        readonly: true
+      });
+      const expected = 'instantiated-resolved resolved';
+      const ticker: Poll.Phase[] = [];
+
+      poll.ticked.connect((_, tick) => {
+        ticker.push(tick.phase);
+      });
+      await poll.refresh();
+      await poll.stop();
+      await poll.start();
+      await poll.tick;
+      expect(ticker.join(' ')).to.equal(expected);
     });
   });
 
@@ -357,6 +377,7 @@ describe('Poll', () => {
 
       expect(poll.isDisposed).to.equal(false);
       poll.dispose();
+      expect(poll.isDisposed).to.equal(true);
       try {
         await tick;
       } catch (error) {
@@ -364,7 +385,6 @@ describe('Poll', () => {
       }
       poll.dispose();
       expect(rejected).to.equal(true);
-      expect(poll.isDisposed).to.equal(true);
     });
   });
 
