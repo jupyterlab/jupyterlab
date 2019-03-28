@@ -210,8 +210,12 @@ export class Poll<T = any, U = any> implements IDisposable {
       await this.tick;
     }
 
+    if (this.readonly) {
+      return this;
+    }
+
     // Refresh the poll if necessary.
-    if (!this.readonly && this.state.phase !== 'refreshed') {
+    if (this.state.phase !== 'refreshed') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -241,11 +245,12 @@ export class Poll<T = any, U = any> implements IDisposable {
       await this.tick;
     }
 
+    if (this.readonly) {
+      return this;
+    }
+
     // Start the poll if necessary.
-    if (
-      !this.readonly &&
-      (this.state.phase === 'standby' || this.state.phase === 'stopped')
-    ) {
+    if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -275,8 +280,12 @@ export class Poll<T = any, U = any> implements IDisposable {
       await this.tick;
     }
 
+    if (this.readonly) {
+      return this;
+    }
+
     // Stop the poll if necessary.
-    if (!this.readonly && this.state.phase !== 'stopped') {
+    if (this.state.phase !== 'stopped') {
       this._schedule(this._tick, {
         interval: Infinity, // Never.
         payload: null,
