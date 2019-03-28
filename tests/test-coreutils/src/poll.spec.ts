@@ -347,16 +347,23 @@ describe('Poll', () => {
   });
 
   describe('#dispose()', () => {
-    it('should dispose the poll and be safe to call repeatedly', () => {
+    it('should dispose the poll and be safe to call repeatedly', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#dispose()-1',
         factory: () => Promise.resolve()
       });
+      const tick = poll.tick;
+      let rejected = false;
 
       expect(poll.isDisposed).to.equal(false);
       poll.dispose();
-      expect(poll.isDisposed).to.equal(true);
+      try {
+        await tick;
+      } catch (error) {
+        rejected = true;
+      }
       poll.dispose();
+      expect(rejected).to.equal(true);
       expect(poll.isDisposed).to.equal(true);
     });
   });
