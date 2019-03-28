@@ -282,7 +282,7 @@ describe('Poll', () => {
         poll.tick.then(tock).catch(() => undefined);
       };
 
-      poll.tick.then(tock);
+      void poll.tick.then(tock);
       await sleep(750);
       expect(ticker.join(' ')).to.eql(expected);
       poll.dispose();
@@ -362,26 +362,30 @@ describe('Poll', () => {
   });
 
   describe('#refresh()', () => {
-    it('should refresh the poll', async () => {
+    it('should interrupt current tick and refresh the poll', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
-        interval: 200,
+        interval: 100,
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved refreshed resolved';
       const ticker: Poll.Phase[] = [];
+      const interrupted = poll.tick;
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
       await poll.refresh();
+      expect(interrupted).not.to.equal(poll.tick);
+      await interrupted;
+      await poll.tick;
       expect(ticker.join(' ')).to.equal(expected);
     });
 
-    it('should not refresh multiple times if refresh is pending', async () => {
+    it('should be safe to call multiple times', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-2',
-        interval: 200,
+        interval: 100,
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved refreshed resolved';
@@ -390,8 +394,10 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
-      poll.refresh();
       await poll.refresh();
+      await poll.refresh();
+      await poll.refresh();
+      await poll.tick;
       expect(ticker.join(' ')).to.equal(expected);
     });
   });
@@ -400,7 +406,7 @@ describe('Poll', () => {
     it('should start the poll if it is stopped', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-1',
-        interval: 200,
+        interval: 100,
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved stopped started resolved';
@@ -411,13 +417,14 @@ describe('Poll', () => {
       });
       await poll.stop();
       await poll.start();
+      await poll.tick;
       expect(ticker.join(' ')).to.equal(expected);
     });
 
-    it('should not start the poll if it is already running', async () => {
+    it('be safe to call multiple times', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-2',
-        interval: 200,
+        interval: 100,
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved resolved';
@@ -427,15 +434,36 @@ describe('Poll', () => {
         ticker.push(tick.phase);
       });
       await poll.start();
+      await poll.start();
+      await poll.start();
+      await poll.tick;
       expect(ticker.join(' ')).to.equal(expected);
     });
   });
 
   describe('#stop()', () => {
-    it('should stop the poll', async () => {
+    it('should stop the poll if it is active', async () => {
       const poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#stop()-1',
-        interval: 200,
+        interval: 100,
+        factory: () => Promise.resolve()
+      });
+      const expected = 'instantiated-resolved stopped started resolved';
+      const ticker: Poll.Phase[] = [];
+
+      poll.ticked.connect((_, tick) => {
+        ticker.push(tick.phase);
+      });
+      await poll.stop();
+      await poll.start();
+      await poll.tick;
+      expect(ticker.join(' ')).to.equal(expected);
+    });
+
+    it('be safe to call multiple times', async () => {
+      const poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#stop()-2',
+        interval: 100,
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved stopped';
@@ -445,22 +473,7 @@ describe('Poll', () => {
         ticker.push(tick.phase);
       });
       await poll.stop();
-      expect(ticker.join(' ')).to.equal(expected);
-    });
-
-    it('should not stop the poll if it is already stopped', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#stop()-2',
-        interval: 200,
-        factory: () => Promise.resolve()
-      });
-      const expected = 'instantiated-resolved stopped';
-      const ticker: Poll.Phase[] = [];
-
-      poll.ticked.connect((_, tick) => {
-        ticker.push(tick.phase);
-      });
-      poll.stop();
+      await poll.stop();
       await poll.stop();
       expect(ticker.join(' ')).to.equal(expected);
     });
