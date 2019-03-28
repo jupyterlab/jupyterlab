@@ -434,10 +434,10 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
-  // The default action on `mousedown` event moves the focus from the main
-  // content to the button. To avoid this we call `preventDefault`.
-  // However, preventing `mousedown` default action stops `click` event from
-  // firing as well. So we have to bind button action to `mousedown`.
+  // In some browsers, a button click event moves the focus from the main
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus). 
+  // We avoid a click event by calling preventDefault in mousedown, and
+  // we bind the button action to `mousedown`.
   const handleMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
     props.onClick();
