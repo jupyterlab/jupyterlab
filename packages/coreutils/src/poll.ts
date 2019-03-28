@@ -284,9 +284,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   private _execute(outstanding: PromiseDelegate<this>): void {
     const standby =
-      this.standby === 'never'
-        ? false
-        : !!(typeof document !== 'undefined' && document && document.hidden);
+      this.standby === 'when-hidden'
+        ? !!(typeof document !== 'undefined' && document && document.hidden)
+        : false;
 
     // If in standby mode schedule next tick without calling the factory.
     if (standby) {
