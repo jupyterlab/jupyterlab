@@ -553,9 +553,6 @@ namespace Private {
    * @param min - The smallest acceptable value to return.
    *
    * @param max - The largest acceptable value to return.
-   *
-   * #### Notes
-   * This function returns only positive integers.
    */
   export function jitter(
     base: number,
