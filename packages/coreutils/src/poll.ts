@@ -201,8 +201,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If the poll has been instantiated but its `when` promise has not yet
    * resolved, this call will be scheduled after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. It will only schedule a
-   * new tick when necessary.
+   * This method schedules new ticks only when necessary.
+   *
+   * It is safe to call multiple times.
    */
   async refresh(): Promise<this> {
     if (this.state.phase === 'instantiated') {
@@ -229,8 +230,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If the poll has been instantiated but its `when` promise has not yet
    * resolved, this call will be scheduled after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. It will only schedule a
-   * new tick when necessary.
+   * This method schedules new ticks only when necessary.
+   *
+   * It is safe to call multiple times.
    */
   async start(): Promise<this> {
     if (this.state.phase === 'instantiated') {
@@ -255,10 +257,11 @@ export class Poll<T = any, U = any> implements IDisposable {
    *
    * #### Notes
    * If the poll has been instantiated but its `when` promise has not yet
-   * resolved, this call will be scheduled after the `when` promise resolves.
+   * resolved, this will schedule a tick after the `when` promise resolves.
    *
-   * It is safe to call this method multiple times. It will only schedule a
-   * new tick when necessary.
+   * This method schedules new ticks only when necessary.
+   *
+   * It is safe to call multiple times.
    */
   async stop(): Promise<this> {
     if (this.state.phase === 'instantiated') {
