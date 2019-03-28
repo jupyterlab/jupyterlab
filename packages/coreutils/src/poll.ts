@@ -29,8 +29,8 @@ export class Poll<T = any, U = any> implements IDisposable {
     this.readonly = typeof readonly === 'boolean' ? readonly : false;
     this.standby = options.standby || 'when-hidden';
 
-    // Initialize and validate poll frequency parameters.
-    this._setup(interval, jitter, max, min);
+    // Validate and set the initial polling frequency parameters.
+    this._frequency(interval, jitter, max, min);
 
     this._factory = factory;
     this._state = {
@@ -105,7 +105,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.readonly) {
       return;
     }
-    this._setup(interval, this._jitter, this._max, this._min);
+    this._frequency(interval, this._jitter, this._max, this._min);
   }
 
   /**
@@ -129,7 +129,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.readonly) {
       return;
     }
-    this._setup(this._interval, jitter, this._max, this._min);
+    this._frequency(this._interval, jitter, this._max, this._min);
   }
 
   /**
@@ -142,7 +142,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.readonly) {
       return;
     }
-    this._setup(this._interval, this._jitter, max, this._min);
+    this._frequency(this._interval, this._jitter, max, this._min);
   }
 
   /**
@@ -155,7 +155,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.readonly) {
       return;
     }
-    this._setup(this._interval, this._jitter, this._max, min);
+    this._frequency(this._interval, this._jitter, this._max, min);
   }
 
   /**
@@ -329,6 +329,30 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   /**
+   * Validates and sets the polling frequency parameters.
+   */
+  private _frequency(
+    interval: number,
+    jitter: boolean | number,
+    max: number,
+    min: number
+  ): void {
+    if (interval > max) {
+      throw new Error('Poll interval cannot exceed max interval length');
+    }
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
+
+    this._interval =
+      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
+    this._jitter =
+      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
+    this._max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
+    this._min = typeof min === 'number' ? Math.abs(min) : 100;
+  }
+
+  /**
    * Resolve an outstanding poll and schedule the next poll tick.
    */
   private _resolve(
@@ -365,30 +389,6 @@ export class Poll<T = any, U = any> implements IDisposable {
       this._ticked.emit(tick);
     });
     outstanding.resolve(this);
-  }
-
-  /**
-   * Validates and sets the polling frequency configuration.
-   */
-  private _setup(
-    interval: number,
-    jitter: boolean | number,
-    max: number,
-    min: number
-  ): void {
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
-    }
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
-
-    this._interval =
-      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
-    this._jitter =
-      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
-    this._max = typeof max === 'number' ? Math.abs(max) : 10 * this._interval;
-    this._min = typeof min === 'number' ? Math.abs(min) : 100;
   }
 
   /**
