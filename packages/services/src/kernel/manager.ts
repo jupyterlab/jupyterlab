@@ -27,9 +27,11 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._readyPromise = this._refreshSpecs().then(() =>
-      this._refreshRunning()
-    );
+    this._ready = Promise.all([this._refreshSpecs(), this._refreshRunning()])
+      .catch(_ => undefined)
+      .then(() => {
+        this._isReady = true;
+      });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -40,7 +42,7 @@ export class KernelManager implements Kernel.IManager {
       min: 100,
       name: `@jupyterlab/services:KernelManager#models`,
       standby: options.standby || 'when-hidden',
-      when: this._readyPromise
+      when: this.ready
     });
     this._pollSpecs = new Poll({
       factory: () => this._refreshSpecs(),
@@ -50,7 +52,7 @@ export class KernelManager implements Kernel.IManager {
       min: 100,
       name: `@jupyterlab/services:KernelManager#specs`,
       standby: options.standby || 'when-hidden',
-      when: this._readyPromise
+      when: this.ready
     });
   }
 
@@ -77,7 +79,7 @@ export class KernelManager implements Kernel.IManager {
    * A promise that fulfills when the manager is ready.
    */
   get ready(): Promise<void> {
-    return this._readyPromise;
+    return this._ready;
   }
 
   /**
@@ -149,8 +151,8 @@ export class KernelManager implements Kernel.IManager {
    * manager maintains its own internal state.
    */
   async refreshRunning(): Promise<void> {
-    const refreshed = await this._pollModels.refresh();
-    await refreshed.tick;
+    await this._pollModels.refresh();
+    await this._pollModels.tick;
   }
 
   /**
@@ -163,8 +165,8 @@ export class KernelManager implements Kernel.IManager {
    * since the manager maintains its internal state.
    */
   async refreshSpecs(): Promise<void> {
-    const refreshed = await this._pollSpecs.refresh();
-    await refreshed.tick;
+    await this._pollSpecs.refresh();
+    await this._pollSpecs.tick;
   }
 
   /**
@@ -304,7 +306,6 @@ export class KernelManager implements Kernel.IManager {
    */
   private async _refreshRunning(silent = false): Promise<void> {
     const models = await Kernel.listRunning(this.serverSettings);
-    this._isReady = true;
     if (!JSONExt.deepEqual(models, this._models)) {
       const ids = models.map(({ id }) => id);
       const kernels = this._kernels;
@@ -338,7 +339,7 @@ export class KernelManager implements Kernel.IManager {
   private _models: Kernel.IModel[] = [];
   private _pollModels: Poll;
   private _pollSpecs: Poll;
-  private _readyPromise: Promise<void>;
+  private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);

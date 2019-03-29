@@ -29,9 +29,9 @@ export class SessionManager implements Session.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._readyPromise = this._refreshSpecs().then(() =>
-      this._refreshRunning()
-    );
+    this._ready = Promise.all([this._refreshSpecs(), this._refreshRunning()])
+      .then(_ => undefined)
+      .catch(_ => undefined);
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -42,7 +42,7 @@ export class SessionManager implements Session.IManager {
       min: 100,
       name: `@jupyterlab/services:SessionManager#models`,
       standby: options.standby || 'when-hidden',
-      when: this._readyPromise
+      when: this.ready
     });
     this._pollSpecs = new Poll({
       factory: () => this._refreshSpecs(),
@@ -52,7 +52,7 @@ export class SessionManager implements Session.IManager {
       min: 100,
       name: `@jupyterlab/services:SessionManager#specs`,
       standby: options.standby || 'when-hidden',
-      when: this._readyPromise
+      when: this.ready
     });
   }
 
@@ -100,7 +100,7 @@ export class SessionManager implements Session.IManager {
    * A promise that fulfills when the manager is ready.
    */
   get ready(): Promise<void> {
-    return this._readyPromise;
+    return this._ready;
   }
 
   /**
@@ -136,8 +136,8 @@ export class SessionManager implements Session.IManager {
    * since the manager maintains its internal state.
    */
   async refreshSpecs(): Promise<void> {
-    const refreshed = await this._pollSpecs.refresh();
-    await refreshed.tick;
+    await this._pollSpecs.refresh();
+    await this._pollSpecs.tick;
   }
 
   /**
@@ -150,8 +150,8 @@ export class SessionManager implements Session.IManager {
    * manager maintains its own internal state.
    */
   async refreshRunning(): Promise<void> {
-    const refreshed = await this._pollModels.refresh();
-    await refreshed.tick;
+    await this._pollModels.refresh();
+    await this._pollModels.tick;
   }
 
   /**
@@ -250,7 +250,11 @@ export class SessionManager implements Session.IManager {
       this._models.length = 0;
     }
 
-    await this._refreshRunning();
+    try {
+      await this._refreshRunning(true);
+    } catch (error) {
+      // Continue attempting to shutdown the known models.
+    }
     await Promise.all(
       models.map(async model => {
         await Session.shutdown(model.id, this.serverSettings);
@@ -329,7 +333,7 @@ export class SessionManager implements Session.IManager {
   /**
    * Refresh the running sessions.
    */
-  private async _refreshRunning(): Promise<void> {
+  private async _refreshRunning(silent = false): Promise<void> {
     const models = await Session.listRunning(this.serverSettings);
     if (!JSONExt.deepEqual(models, this._models)) {
       const ids = models.map(model => model.id);
@@ -341,7 +345,9 @@ export class SessionManager implements Session.IManager {
         }
       });
       this._models = models.slice();
-      this._runningChanged.emit(models);
+      if (!silent) {
+        this._runningChanged.emit(models);
+      }
     }
   }
 
@@ -349,7 +355,7 @@ export class SessionManager implements Session.IManager {
   private _models: Session.IModel[] = [];
   private _pollModels: Poll;
   private _pollSpecs: Poll;
-  private _readyPromise: Promise<void>;
+  private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;

@@ -113,7 +113,6 @@ describe('kernel/manager', () => {
         const kernel = await manager.startNew();
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await kernel.shutdown();

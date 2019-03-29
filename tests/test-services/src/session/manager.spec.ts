@@ -128,7 +128,6 @@ describe('session/manager', () => {
         let called = false;
         const s = await startNew(manager);
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await s.shutdown();
@@ -138,7 +137,6 @@ describe('session/manager', () => {
       it('should be emitted when a session is renamed', async () => {
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await session.setPath(UUID.uuid4());
@@ -149,7 +147,6 @@ describe('session/manager', () => {
       it('should be emitted when a session changes kernels', async () => {
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await session.changeKernel({ name: session.kernel.name });

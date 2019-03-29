@@ -26,7 +26,11 @@ export class TerminalManager implements TerminalSession.IManager {
     // Set up state handling if terminals are available.
     if (TerminalSession.isAvailable()) {
       // Initialize internal data then start polling.
-      this._readyPromise = this._refreshRunning();
+      this._ready = this._refreshRunning()
+        .catch(_ => undefined)
+        .then(() => {
+          this._isReady = true;
+        });
 
       // Start polling with exponential backoff.
       this._pollModels = new Poll({
@@ -37,7 +41,7 @@ export class TerminalManager implements TerminalSession.IManager {
         min: 100,
         name: `@jupyterlab/services:TerminalManager#models`,
         standby: options.standby || 'when-hidden',
-        when: this._readyPromise
+        when: this.ready
       });
     }
   }
@@ -85,7 +89,7 @@ export class TerminalManager implements TerminalSession.IManager {
    * A promise that fulfills when the manager is ready.
    */
   get ready(): Promise<void> {
-    return this._readyPromise || Promise.reject('Terminals unavailable');
+    return this._ready || Promise.reject('Terminals unavailable');
   }
 
   /**
@@ -156,10 +160,8 @@ export class TerminalManager implements TerminalSession.IManager {
    * since the manager maintains its internal state.
    */
   async refreshRunning(): Promise<void> {
-    if (this._pollModels) {
-      const refreshed = await this._pollModels.refresh();
-      await refreshed.tick;
-    }
+    await this._pollModels.refresh();
+    await this._pollModels.tick;
   }
 
   /**
@@ -282,7 +284,6 @@ export class TerminalManager implements TerminalSession.IManager {
    */
   private async _refreshRunning(silent = false): Promise<void> {
     const models = await TerminalSession.listRunning(this.serverSettings);
-    this._isReady = true;
     if (!JSONExt.deepEqual(models, this._models)) {
       const names = models.map(({ name }) => name);
       const sessions = this._sessions;
@@ -304,7 +305,7 @@ export class TerminalManager implements TerminalSession.IManager {
   private _models: TerminalSession.IModel[] = [];
   private _pollModels: Poll;
   private _sessions = new Set<TerminalSession.ISession>();
-  private _readyPromise: Promise<void>;
+  private _ready: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
 }
 

@@ -184,10 +184,8 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-
     this._tick.promise.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
-    this._tick = null;
     this._disposed.emit();
     Signal.clearData(this);
   }
@@ -206,15 +204,12 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async refresh(): Promise<this> {
-    if (this.state.phase === 'instantiated') {
-      await this.tick;
-    }
-
     if (this.readonly) {
       return this;
     }
-
-    // Refresh the poll if necessary.
+    if (this.state.phase === 'instantiated') {
+      await this.tick;
+    }
     if (this.state.phase !== 'refreshed') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
@@ -223,7 +218,6 @@ export class Poll<T = any, U = any> implements IDisposable {
         timestamp: new Date().getTime()
       });
     }
-
     return this;
   }
 
@@ -241,15 +235,12 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async start(): Promise<this> {
-    if (this.state.phase === 'instantiated') {
-      await this.tick;
-    }
-
     if (this.readonly) {
       return this;
     }
-
-    // Start the poll if necessary.
+    if (this.state.phase === 'instantiated') {
+      await this.tick;
+    }
     if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
@@ -258,7 +249,6 @@ export class Poll<T = any, U = any> implements IDisposable {
         timestamp: new Date().getTime()
       });
     }
-
     return this;
   }
 
@@ -276,15 +266,12 @@ export class Poll<T = any, U = any> implements IDisposable {
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async stop(): Promise<this> {
-    if (this.state.phase === 'instantiated') {
-      await this.tick;
-    }
-
     if (this.readonly) {
       return this;
     }
-
-    // Stop the poll if necessary.
+    if (this.state.phase === 'instantiated') {
+      await this.tick;
+    }
     if (this.state.phase !== 'stopped') {
       this._schedule(this._tick, {
         interval: Infinity, // Never.
@@ -293,7 +280,6 @@ export class Poll<T = any, U = any> implements IDisposable {
         timestamp: new Date().getTime()
       });
     }
-
     return this;
   }
 
@@ -425,7 +411,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _max: number;
   private _min: number;
   private _state: Poll.Tick<T, U>;
-  private _tick: PromiseDelegate<this> | null = new PromiseDelegate<this>();
+  private _tick: PromiseDelegate<this> = new PromiseDelegate<this>();
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
   private _timeout = -1;
 }
