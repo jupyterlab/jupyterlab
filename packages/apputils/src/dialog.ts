@@ -99,7 +99,7 @@ export class Dialog<T> extends Widget {
     this._focusNodeSelector = options.focusNodeSelector;
 
     // Add new dialogs to the tracker.
-    Dialog.tracker.add(this);
+    void Dialog.tracker.add(this);
   }
 
   /**

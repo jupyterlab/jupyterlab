@@ -202,7 +202,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should connect to an existing kernel', async () => {
         // Shut down and dispose the session so it can be re-instantiated.
-        session.shutdown();
+        await session.shutdown();
         session.dispose();
 
         const other = await manager.startNew({ path: UUID.uuid4() });
