@@ -205,16 +205,16 @@ export class Poll<T = any, U = any> implements IDisposable {
    *
    * This method schedules new ticks only when necessary.
    *
-   * It is safe to call multiple times.
+   * It is safe to call multiple times. It will always succeed.
    *
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async refresh(): Promise<this> {
-    if (this.readonly) {
+    if (this.isDisposed || this.readonly) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
-      await this.tick;
+      return this.tick.then(_ => this.refresh()).catch(_ => this);
     }
     if (this.state.phase !== 'refreshed') {
       this._schedule(this._tick, {
@@ -236,16 +236,16 @@ export class Poll<T = any, U = any> implements IDisposable {
    *
    * This method schedules new ticks only when necessary.
    *
-   * It is safe to call multiple times.
+   * It is safe to call multiple times. It will always succeed.
    *
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async start(): Promise<this> {
-    if (this.readonly) {
+    if (this.isDisposed || this.readonly) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
-      await this.tick;
+      return this.tick.then(_ => this.start()).catch(_ => this);
     }
     if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
       this._schedule(this._tick, {
@@ -267,16 +267,16 @@ export class Poll<T = any, U = any> implements IDisposable {
    *
    * This method schedules new ticks only when necessary.
    *
-   * It is safe to call multiple times.
+   * It is safe to call multiple times. It will always succeed.
    *
    * If `readonly` is true, this method will not schedule a new tick.
    */
   async stop(): Promise<this> {
-    if (this.readonly) {
+    if (this.isDisposed || this.readonly) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
-      await this.tick;
+      return this.tick.then(_ => this.stop()).catch(_ => this);
     }
     if (this.state.phase !== 'stopped') {
       this._schedule(this._tick, {
