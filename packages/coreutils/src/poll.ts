@@ -12,10 +12,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
  *
  * #### Notes
  * The generic arguments are as follows:
- *  - `T` indicates the resolved type of the factory's promises.
- *  - `U` indicates the rejected type of the factory's promises.
+ *  - `T = any` indicates the resolved type of the factory's promises.
+ *  - `U = any` indicates the rejected type of the factory's promises.
  */
-export interface IPoll<T, U> {
+export interface IPoll<T = any, U = any> {
   /**
    * A signal emitted when the poll is disposed.
    */
