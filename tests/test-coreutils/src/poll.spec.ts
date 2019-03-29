@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Poll } from '@jupyterlab/coreutils/src';
+import { IPoll, Poll } from '@jupyterlab/coreutils/src';
 
 import { sleep } from '@jupyterlab/testutils';
 
@@ -187,76 +187,6 @@ describe('Poll', () => {
     });
   });
 
-  describe('#readonly', () => {
-    it('should be set to value passed in during instantation', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#readonly-1',
-        readonly: true
-      });
-
-      expect(poll.readonly).to.equal(true);
-      poll.dispose();
-    });
-
-    it('should default to `false`', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#readonly-2'
-      });
-
-      expect(poll.readonly).to.equal(false);
-      poll.dispose();
-    });
-
-    it('should ignore changing poll frequency params if `true`', () => {
-      const interval = 900;
-      const jitter = 0.3;
-      const max = interval * 20;
-      const min = 200;
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        interval,
-        jitter,
-        max,
-        min,
-        name: '@jupyterlab/test-coreutils:Poll#readonly-3',
-        readonly: true
-      });
-
-      poll.interval = interval * 2;
-      poll.jitter = jitter * 2;
-      poll.max = max * 2;
-      poll.min = min * 2;
-
-      expect(poll.interval).to.equal(interval);
-      expect(poll.jitter).to.equal(jitter);
-      expect(poll.max).to.equal(max);
-      expect(poll.min).to.equal(min);
-      poll.dispose();
-    });
-
-    it('should ignore refresh/start/stop if `true`', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#readonly-4',
-        interval: 100,
-        factory: () => Promise.resolve(),
-        readonly: true
-      });
-      const expected = 'instantiated-resolved resolved';
-      const ticker: Poll.Phase[] = [];
-
-      poll.ticked.connect((_, tick) => {
-        ticker.push(tick.phase);
-      });
-      await poll.refresh();
-      await poll.stop();
-      await poll.start();
-      await poll.tick;
-      expect(ticker.join(' ')).to.equal(expected);
-    });
-  });
-
   describe('#disposed', () => {
     it('should emit when the poll is disposed', () => {
       const poll = new Poll({
@@ -296,8 +226,8 @@ describe('Poll', () => {
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'instantiated-resolved resolved';
-      const ticker: Poll.Phase[] = [];
-      const tock = (poll: Poll) => {
+      const ticker: IPoll.Phase[] = [];
+      const tock = (poll: IPoll) => {
         ticker.push(poll.state.phase);
         poll.tick.then(tock).catch(() => undefined);
       };
@@ -318,7 +248,7 @@ describe('Poll', () => {
         name: '@jupyterlab/test-coreutils:Poll#ticked-1'
       });
       const expected = 'instantiated-resolved resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
@@ -338,7 +268,7 @@ describe('Poll', () => {
         when: promise
       });
       const expected = 'instantiated-rejected resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
@@ -357,8 +287,7 @@ describe('Poll', () => {
         name: '@jupyterlab/test-coreutils:Poll#ticked-3'
       });
 
-      poll.ticked.connect((sender: Poll, tick: Poll.Tick<void, void>) => {
-        expect(sender).to.equal(poll);
+      poll.ticked.connect((_, tick) => {
         expect(tick).to.equal(poll.state);
       });
       await sleep(250);
@@ -396,7 +325,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved refreshed resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
       const interrupted = poll.tick;
 
       poll.ticked.connect((_, tick) => {
@@ -416,7 +345,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved refreshed resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
@@ -437,7 +366,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved stopped started resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
@@ -455,7 +384,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
@@ -476,7 +405,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved stopped started resolved';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
@@ -494,7 +423,7 @@ describe('Poll', () => {
         factory: () => Promise.resolve()
       });
       const expected = 'instantiated-resolved stopped';
-      const ticker: Poll.Phase[] = [];
+      const ticker: IPoll.Phase[] = [];
 
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);

@@ -8,6 +8,129 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
+ * A poll that calls an asynchronous function with each tick.
+ *
+ * #### Notes
+ * The generic arguments are as follows:
+ *  - `T` indicates the resolved type of the factory's promises.
+ *  - `U` indicates the rejected type of the factory's promises.
+ */
+export interface IPoll<T, U> {
+  /**
+   * A signal emitted when the poll is disposed.
+   */
+  readonly disposed: ISignal<this, void>;
+
+  /**
+   * Whether the poll is disposed.
+   */
+  readonly isDisposed: boolean;
+
+  /**
+   * The polling interval.
+   */
+  readonly interval: number;
+
+  /**
+   * Whether poll frequency jitters if boolean and jitter factor if number.
+   *
+   * #### Notes
+   * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
+   */
+  readonly jitter: boolean | number;
+
+  /**
+   * The maximum interval between poll requests.
+   */
+  readonly max: number;
+
+  /**
+   * The minimum interval between poll requests.
+   */
+  readonly min: number;
+
+  /**
+   * The name of the poll.
+   */
+  readonly name: string;
+
+  /**
+   * Indicates when the poll switches to standby.
+   */
+  readonly standby: IPoll.Standby;
+
+  /**
+   * The poll state, which is the content of the current poll tick.
+   */
+  readonly state: IPoll.Tick<T, U>;
+
+  /**
+   * A promise that resolves when the poll next ticks.
+   */
+  readonly tick: Promise<IPoll<T, U>>;
+
+  /**
+   * A signal emitted when the poll ticks and fires off a new request.
+   */
+  readonly ticked: ISignal<IPoll<T, U>, IPoll.Tick<T, U>>;
+}
+
+/**
+ * A namespace for `IPoll` types.
+ */
+export namespace IPoll {
+  /**
+   * The phase of the poll when the current tick was scheduled.
+   */
+  export type Phase =
+    | 'disposed'
+    | 'instantiated'
+    | 'instantiated-rejected'
+    | 'instantiated-resolved'
+    | 'reconnected'
+    | 'refreshed'
+    | 'rejected'
+    | 'resolved'
+    | 'standby'
+    | 'started'
+    | 'stopped';
+
+  /**
+   * Indicates when the poll switches to standby.
+   */
+  export type Standby = 'never' | 'when-hidden';
+
+  /**
+   * Definition of poll state at any given tick.
+   */
+  export type Tick<T, U> = {
+    /**
+     * The number of milliseconds until the next poll request.
+     */
+    readonly interval: number;
+
+    /**
+     * The payload of the last poll resolution or rejection.
+     *
+     * #### Notes
+     * The payload is `null` unless the `phase` is `'reconnected`, `'resolved'`,
+     * or `'rejected'`. Its type is `T` for resolutions and `U` for rejections.
+     */
+    readonly payload: T | U | null;
+
+    /**
+     * The current poll phase.
+     */
+    readonly phase: Phase;
+
+    /**
+     * The timestamp of the poll tick.
+     */
+    readonly timestamp: number;
+  };
+}
+
+/**
  * A class that wraps an asynchronous function to poll at a regular interval
  * with exponential increases to the interval length if the poll fails.
  *
@@ -16,17 +139,16 @@ import { ISignal, Signal } from '@phosphor/signaling';
  *  - `T = any` indicates the resolved type of the factory's promises.
  *  - `U = any` indicates the rejected type of the factory's promises.
  */
-export class Poll<T = any, U = any> implements IDisposable {
+export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
    * Instantiate a new poll with exponential back-off in case of failure.
    *
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const { factory, interval, jitter, max, min, readonly, when } = options;
+    const { factory, interval, jitter, max, min, when } = options;
 
     this.name = options.name || 'unknown';
-    this.readonly = typeof readonly === 'boolean' ? readonly : false;
     this.standby = options.standby || 'when-hidden';
 
     // Validate and set the initial polling frequency parameters.
@@ -46,7 +168,6 @@ export class Poll<T = any, U = any> implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-
         this._schedule(this._tick, {
           interval: this.interval,
           payload: null,
@@ -58,15 +179,12 @@ export class Poll<T = any, U = any> implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-
         this._schedule(this._tick, {
           interval: this.interval,
           payload: null,
           phase: 'instantiated-rejected',
           timestamp: new Date().getTime()
         });
-
-        // Warn that `when` promise was rejected but starting anyway.
         console.warn(`Poll (${this.name}) starting despite rejection.`, reason);
       });
   }
@@ -77,14 +195,9 @@ export class Poll<T = any, U = any> implements IDisposable {
   readonly name: string;
 
   /**
-   * Whether the poll is readonly or can be modified. Defaults to `false`.
-   */
-  readonly readonly: boolean;
-
-  /**
    * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
    */
-  readonly standby: 'when-hidden' | 'never';
+  readonly standby: IPoll.Standby;
 
   /**
    * A signal emitted when the poll is disposed.
@@ -100,7 +213,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     return this._interval;
   }
   set interval(interval: number) {
-    if (this.readonly) {
+    if (this.isDisposed) {
       return;
     }
     this._frequency(interval, this.jitter, this.max, this.min);
@@ -124,7 +237,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     return this._jitter;
   }
   set jitter(jitter: boolean | number) {
-    if (this.readonly) {
+    if (this.isDisposed) {
       return;
     }
     this._frequency(this.interval, jitter, this.max, this.min);
@@ -137,7 +250,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     return this._max;
   }
   set max(max: number) {
-    if (this.readonly) {
+    if (this.isDisposed) {
       return;
     }
     this._frequency(this.interval, this.jitter, max, this.min);
@@ -150,7 +263,7 @@ export class Poll<T = any, U = any> implements IDisposable {
     return this._min;
   }
   set min(min: number) {
-    if (this.readonly) {
+    if (this.isDisposed) {
       return;
     }
     this._frequency(this.interval, this.jitter, this.max, min);
@@ -159,7 +272,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * The poll state, which is the content of the current poll tick.
    */
-  get state(): Poll.Tick<T, U> {
+  get state(): IPoll.Tick<T, U> {
     return this._state;
   }
 
@@ -173,7 +286,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   /**
    * A signal emitted when the poll ticks and fires off a new request.
    */
-  get ticked(): ISignal<this, Poll.Tick<T, U>> {
+  get ticked(): ISignal<this, IPoll.Tick<T, U>> {
     return this._ticked;
   }
 
@@ -206,11 +319,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times. It will always succeed.
-   *
-   * If `readonly` is true, this method will not schedule a new tick.
    */
   async refresh(): Promise<this> {
-    if (this.isDisposed || this.readonly) {
+    if (this.isDisposed) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
@@ -237,11 +348,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times. It will always succeed.
-   *
-   * If `readonly` is true, this method will not schedule a new tick.
    */
   async start(): Promise<this> {
-    if (this.isDisposed || this.readonly) {
+    if (this.isDisposed) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
@@ -268,11 +377,9 @@ export class Poll<T = any, U = any> implements IDisposable {
    * This method schedules new ticks only when necessary.
    *
    * It is safe to call multiple times. It will always succeed.
-   *
-   * If `readonly` is true, this method will not schedule a new tick.
    */
   async stop(): Promise<this> {
-    if (this.isDisposed || this.readonly) {
+    if (this.isDisposed) {
       return this;
     }
     if (this.state.phase === 'instantiated') {
@@ -376,7 +483,7 @@ export class Poll<T = any, U = any> implements IDisposable {
    */
   private _schedule(
     outstanding: PromiseDelegate<this>,
-    tick: Poll.Tick<T, U>
+    tick: IPoll.Tick<T, U>
   ): void {
     const next = new PromiseDelegate<this>();
     const request = () => {
@@ -411,14 +518,14 @@ export class Poll<T = any, U = any> implements IDisposable {
   }
 
   private _disposed = new Signal<this, void>(this);
-  private _factory: (tick: Poll.Tick<T, U>) => Promise<T>;
+  private _factory: (tick: IPoll.Tick<T, U>) => Promise<T>;
   private _interval: number;
   private _jitter: boolean | number;
   private _max: number;
   private _min: number;
-  private _state: Poll.Tick<T, U>;
+  private _state: IPoll.Tick<T, U>;
   private _tick: PromiseDelegate<this> = new PromiseDelegate<this>();
-  private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
+  private _ticked = new Signal<this, IPoll.Tick<T, U>>(this);
   private _timeout = -1;
 }
 
@@ -430,56 +537,6 @@ export namespace Poll {
    * The jitter factor if `jitter` is set to `true`: `0.25`.
    */
   export const DEFAULT_JITTER = 0.25;
-
-  /**
-   * The phase of the poll when the current tick was scheduled.
-   */
-  export type Phase =
-    | 'disposed'
-    | 'instantiated'
-    | 'instantiated-rejected'
-    | 'instantiated-resolved'
-    | 'reconnected'
-    | 'refreshed'
-    | 'rejected'
-    | 'resolved'
-    | 'standby'
-    | 'started'
-    | 'stopped';
-
-  /**
-   * Indicates when the poll switches to standby.
-   */
-  export type Standby = 'never' | 'when-hidden';
-
-  /**
-   * Definition of poll state at any given tick.
-   */
-  export type Tick<T, U> = {
-    /**
-     * The number of milliseconds until the next poll request.
-     */
-    readonly interval: number;
-
-    /**
-     * The payload of the last poll resolution or rejection.
-     *
-     * #### Notes
-     * The payload is `null` unless the `phase` is `'reconnected`, `'resolved'`,
-     * or `'rejected'`. Its type is `T` for resolutions and `U` for rejections.
-     */
-    readonly payload: T | U | null;
-
-    /**
-     * The current poll phase.
-     */
-    readonly phase: Phase;
-
-    /**
-     * The timestamp of the poll tick.
-     */
-    readonly timestamp: number;
-  };
 
   /**
    * Instantiation options for polls.
@@ -498,7 +555,7 @@ export namespace Poll {
      *  - `T` indicates the resolved type of the factory's promises.
      *  - `U` indicates the rejected type of the factory's promises.
      */
-    factory: (tick: Tick<T, U>) => Promise<T>;
+    factory: (tick: IPoll.Tick<T, U>) => Promise<T>;
 
     /**
      * The millisecond interval between poll requests. Defaults to `1000`.
@@ -534,14 +591,9 @@ export namespace Poll {
     name?: string;
 
     /**
-     * Whether the poll is readonly or can be modified. Defaults to `false`.
-     */
-    readonly?: boolean;
-
-    /**
      * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
      */
-    standby?: Poll.Standby;
+    standby?: IPoll.Standby;
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
