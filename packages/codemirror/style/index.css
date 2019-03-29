@@ -108,7 +108,15 @@ pre.CodeMirror-line {
 }
 
 .CodeMirror-selectedtext.cm-searching {
-  background-color: orangered !important;
+  background-color: var(--jp-search-selected-match-background-color) !important;
+  color: var(--jp-search-selected-match-color) !important;
+}
+
+.cm-searching {
+  background-color: var(
+    --jp-search-unselected-match-background-color
+  ) !important;
+  color: var(--jp-search-unselected-match-color) !important;
 }
 
 .CodeMirror-focused .CodeMirror-selected {
