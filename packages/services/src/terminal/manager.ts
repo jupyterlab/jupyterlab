@@ -157,7 +157,8 @@ export class TerminalManager implements TerminalSession.IManager {
    */
   async refreshRunning(): Promise<void> {
     if (this._pollModels) {
-      await this._pollModels.refresh();
+      const refreshed = await this._pollModels.refresh();
+      await refreshed.tick;
     }
   }
 

@@ -135,8 +135,9 @@ export class SessionManager implements Session.IManager {
    * This is intended to be called only in response to a user action,
    * since the manager maintains its internal state.
    */
-  refreshSpecs(): Promise<void> {
-    return this._refreshSpecs();
+  async refreshSpecs(): Promise<void> {
+    const refreshed = await this._pollSpecs.refresh();
+    await refreshed.tick;
   }
 
   /**
@@ -148,8 +149,9 @@ export class SessionManager implements Session.IManager {
    * This is not typically meant to be called by the user, since the
    * manager maintains its own internal state.
    */
-  refreshRunning(): Promise<void> {
-    return this._refreshRunning();
+  async refreshRunning(): Promise<void> {
+    const refreshed = await this._pollModels.refresh();
+    await refreshed.tick;
   }
 
   /**

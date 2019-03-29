@@ -149,7 +149,8 @@ export class KernelManager implements Kernel.IManager {
    * manager maintains its own internal state.
    */
   async refreshRunning(): Promise<void> {
-    await this._pollModels.refresh();
+    const refreshed = await this._pollModels.refresh();
+    await refreshed.tick;
   }
 
   /**
@@ -162,7 +163,8 @@ export class KernelManager implements Kernel.IManager {
    * since the manager maintains its internal state.
    */
   async refreshSpecs(): Promise<void> {
-    await this._pollSpecs.refresh();
+    const refreshed = await this._pollSpecs.refresh();
+    await refreshed.tick;
   }
 
   /**
