@@ -184,8 +184,15 @@ export class Poll<T = any, U = any> implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    this._state = {
+      interval: Infinity, // Never.
+      payload: null,
+      phase: 'disposed',
+      timestamp: new Date().getTime()
+    };
     this._tick.promise.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
+    this._tick = null;
     this._disposed.emit();
     Signal.clearData(this);
   }
@@ -411,7 +418,7 @@ export class Poll<T = any, U = any> implements IDisposable {
   private _max: number;
   private _min: number;
   private _state: Poll.Tick<T, U>;
-  private _tick: PromiseDelegate<this> = new PromiseDelegate<this>();
+  private _tick: PromiseDelegate<this> | null = new PromiseDelegate<this>();
   private _ticked = new Signal<this, Poll.Tick<T, U>>(this);
   private _timeout = -1;
 }
@@ -429,6 +436,7 @@ export namespace Poll {
    * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
+    | 'disposed'
     | 'instantiated'
     | 'instantiated-rejected'
     | 'instantiated-resolved'
