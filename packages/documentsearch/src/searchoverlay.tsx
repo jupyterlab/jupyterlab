@@ -33,7 +33,6 @@ const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
 const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
 const FOCUSSED_INPUT = 'jp-DocumentSearch-focussed-input';
-const HIGHLIGHT_BUTTON = 'jp-DocumentSearch-highlight-button';
 
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
@@ -137,9 +136,6 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
   }
 
   render() {
-    const replaceCurrentClass = `${REPLACE_CURRENT_BUTTON_CLASS} ${
-      this.props.inputFocussed ? HIGHLIGHT_BUTTON : ''
-    }`;
     return (
       <div className={REPLACE_WRAPPER_CLASS}>
         <input
@@ -152,7 +148,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           onBlur={e => this.props.onInputBlur()}
         />
         <button
-          className={replaceCurrentClass}
+          className={REPLACE_CURRENT_BUTTON_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
         >
           Replace
@@ -188,7 +184,11 @@ function UpDownButtons(props: IUpDownProps) {
         />
       </button>
       <button
+<<<<<<< HEAD
         className={BUTTON_WRAPPER_CLASS}
+=======
+        className={DOWN_BUTTON_CLASS}
+>>>>>>> remove highlight button on focus
         onClick={() => props.onHightlightNext()}
         tabIndex={5}
       >
@@ -378,23 +378,19 @@ class SearchOverlay extends React.Component<
           inputFocussed={this.state.searchInputFocussed}
           inputText={this.state.inputText}
           forceFocus={this.props.overlayState.forceFocus}
-          key={0}
         />
         <SearchIndices
           currentIndex={this.props.overlayState.currentIndex}
           totalMatches={this.props.overlayState.totalMatches}
-          key={1}
         />
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}
           onHightlightNext={() => this._executeSearch(true)}
-          key={2}
         />
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
           tabIndex={6}
-          key={3}
         >
           <span
             className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}

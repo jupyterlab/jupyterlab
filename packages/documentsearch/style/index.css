@@ -30,6 +30,7 @@
 .jp-DocumentSearch-overlay-row {
   display: flex;
   align-items: center;
+  margin-bottom: 2px;
 }
 
 .jp-DocumentSearch-overlay * {
@@ -51,10 +52,6 @@
   background-color: var(--jp-layout-color0);
   margin: 2px;
 }
-
-/* .jp-DocumentSearch-input-wrapper:focus-within {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
-} */
 
 .jp-DocumentSearch-focussed-input {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
@@ -129,10 +126,6 @@
 
 .jp-DocumentSearch-up-down-wrapper {
   display: inline-block;
-}
-
-.jp-DocumentSearch-highlight-button {
-  background-color: var(--jp-layout-color2) !important;
 }
 
 .jp-DocumentSearch-up-down-wrapper button {
