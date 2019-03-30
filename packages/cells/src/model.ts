@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject, JSONValue} from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -495,20 +495,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
     // We prefer output collapse status to be in the `collapse` metadata field
     // rather than the `jupyter.outputs_hidden` field for backwards
-    // compatibility. See https://github.com/jupyter/nbformat/issues/137.
+    // compatibility. We only do this conversion at construction, so See https://github.com/jupyter/nbformat/issues/137.
+
+    // We only do this conversion at construction so that we can understand
+    // nbformat 4.4. We don't do the conversion at runtime so the behavior is
+    // not confusing.
     this._convertCollapsed();
-    this.metadata.changed.connect(
-      (_, args) => {
-        if (
-          args.key === 'jupyter' &&
-          args.newValue &&
-          args.newValue.hasOwnProperty('outputs_hidden')
-        ) {
-          this._convertCollapsed();
-        }
-      },
-      this
-    );
   }
 
   /**
