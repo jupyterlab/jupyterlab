@@ -17,6 +17,7 @@ import {
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -294,6 +295,50 @@ describe('cells/model', () => {
         model.outputs.add(data);
         expect(called).to.equal(true);
       });
+
+      it('should consolidate collapsed and jupyter.outputs_hidden metadata on construction', () => {
+        let model: CodeCellModel;
+        let jupyter: JSONObject | undefined;
+
+        model = new CodeCellModel({
+          cell: { cell_type: 'code', source: '', metadata: { collapsed: true } }
+        });
+        expect(model.metadata.get('collapsed')).to.be.true;
+
+        // collapsed takes precedence
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { collapsed: true, jupyter: { outputs_hidden: false } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.true;
+        expect(model.metadata.get('jupyter')).to.be.undefined;
+
+        // default values are not set
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { jupyter: { outputs_hidden: false } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.undefined;
+        expect(model.metadata.get('jupyter')).to.be.undefined;
+
+        // other jupyter values are not disturbed
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { jupyter: { outputs_hidden: true, other: true } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.true;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.undefined;
+      });
     });
 
     describe('#type', () => {
@@ -399,6 +444,35 @@ describe('cells/model', () => {
         expect(serialized).to.deep.equal(cell);
         const output = serialized.outputs[0] as any;
         expect(output.data['application/json']['bar']).to.equal(1);
+      });
+    });
+
+    describe('.metadata', () => {
+      it('should consolidate collapsed and jupyter.outputs_hidden metadata when changed', () => {
+        const metadata = new CodeCellModel({}).metadata;
+        let jupyter: JSONObject | undefined;
+
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // collapsed takes precedence
+        metadata.set('collapsed', true);
+        metadata.set('jupyter', { outputs_hidden: false });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // default values are not set
+        metadata.delete('collapsed');
+        metadata.set('jupyter', { outputs_hidden: false });
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // other jupyter values are not disturbed
+        metadata.delete('collapsed');
+        metadata.set('jupyter', { outputs_hidden: true, other: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        jupyter = metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.undefined;
       });
     });
 

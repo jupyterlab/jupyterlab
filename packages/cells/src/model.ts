@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue} from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -492,6 +492,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this.onGenericChange,
       this
     );
+
+    // We prefer output collapse status to be in the `collapse` metadata field
+    // rather than the `jupyter.outputs_hidden` field for backwards
+    // compatibility. See https://github.com/jupyter/nbformat/issues/137.
+    this._convertCollapsed();
+    this.metadata.changed.connect(
+      (_, args) => {
+        if (
+          args.key === 'jupyter' &&
+          args.newValue &&
+          args.newValue.hasOwnProperty('outputs_hidden')
+        ) {
+          this._convertCollapsed();
+        }
+      },
+      this
+    );
   }
 
   /**
@@ -559,6 +576,34 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       oldValue: args.oldValue,
       newValue: args.newValue
     });
+  }
+
+  /**
+   * Consolidate `jupyter.outputs_hidden` metadata and `collapsed` metadata
+   *
+   * #### Notes
+   * We transfer `jupyter.outputs_hidden` metadata to the `collapsed` metadata
+   * field, with the `collapsed` metadata field taking precedence. See
+   * https://github.com/jupyter/nbformat/issues/137
+   */
+  private _convertCollapsed() {
+    const jupyter = this.metadata.get('jupyter') as JSONObject;
+    if (jupyter === undefined || !jupyter.hasOwnProperty('outputs_hidden')) {
+      return;
+    }
+
+    const { outputs_hidden, ...other } = jupyter;
+
+    // collapsed takes precedence over jupyter.outputs_hidden if it is defined
+    if (outputs_hidden === true && !this.metadata.has('collapsed')) {
+      this.metadata.set('collapsed', outputs_hidden);
+    }
+
+    if (Object.keys(other).length === 0) {
+      this.metadata.delete('jupyter');
+    } else {
+      this.metadata.set('jupyter', other);
+    }
   }
 
   /**

@@ -790,9 +790,7 @@ export class CodeCell extends Cell {
         return;
       }
 
-      // Do not set jupyter.outputs_hidden until we can fully support it both in
-      // reading and writing. See
-      // https://github.com/jupyterlab/jupyterlab/pull/5968#issuecomment-477170937
+      // Do not set jupyter.outputs_hidden since it is redundant. See
       // and https://github.com/jupyter/nbformat/issues/137
       if (this.outputHidden) {
         metadata.set('collapsed', true);

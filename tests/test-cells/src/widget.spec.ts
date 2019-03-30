@@ -503,27 +503,9 @@ describe('cells/widget', () => {
         widget = new CodeCell({ model: collapsedModel, rendermime });
         widget.initializeState();
         expect(widget.outputHidden).to.equal(true);
-      });
 
-      it('should defer to `collapsed` metadata key as sole source of truth', () => {
-        const collapsedModel = new CodeCellModel({});
-
-        // No collapsed metadata set -> collapsed is false
+        collapsedModel.metadata.delete('collapsed');
         collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
-        let widget = new CodeCell({ model: collapsedModel, rendermime });
-        widget.initializeState();
-        expect(widget.outputHidden).to.equal(false);
-
-        // We only pay attention to `collapsed` metadata, even when
-        // `jupyter.outputs_hidden` is defined.
-        collapsedModel.metadata.set('collapsed', false);
-        collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
-        widget = new CodeCell({ model: collapsedModel, rendermime });
-        widget.initializeState();
-        expect(widget.outputHidden).to.equal(false);
-
-        collapsedModel.metadata.set('collapsed', true);
-        collapsedModel.metadata.set('jupyter', { outputs_hidden: false });
         widget = new CodeCell({ model: collapsedModel, rendermime });
         widget.initializeState();
         expect(widget.outputHidden).to.equal(true);
@@ -649,13 +631,7 @@ describe('cells/widget', () => {
 
       it('should defer to `collapsed` metadata key as sole source of truth, ignoring the `jupyter.outputs_hidden` metadata', () => {
         const collapsedModel = new CodeCellModel({});
-
-        // No collapsed metadata set -> output is not hidden
-        collapsedModel.metadata.set('jupyter', { outputs_hidden: true });
         let widget = new CodeCell({ model: collapsedModel, rendermime });
-        widget.initializeState();
-        widget.loadCollapseState();
-        expect(widget.outputHidden).to.equal(false);
 
         // We only pay attention to `collapsed` metadata, even when
         // `jupyter.outputs_hidden` is defined.
@@ -704,14 +680,12 @@ describe('cells/widget', () => {
         widget.outputHidden = true;
         widget.saveCollapseState();
         // We do not write to the jupyter.outputs_hidden key
-        expect(model.metadata.get('jupyter')).to.deep.equal(undefined);
+        expect(model.metadata.get('jupyter')).to.be.undefined;
 
         model.metadata.set('jupyter', { outputs_hidden: true });
         widget.outputHidden = false;
         widget.saveCollapseState();
-        expect(model.metadata.get('jupyter')).to.deep.equal({
-          outputs_hidden: true
-        });
+        expect(model.metadata.get('jupyter')).to.be.undefined;
       });
     });
 
