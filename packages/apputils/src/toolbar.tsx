@@ -435,7 +435,7 @@ export namespace ToolbarButtonComponent {
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   // In some browsers, a button click event moves the focus from the main
-  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus). 
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   // We avoid a click event by calling preventDefault in mousedown, and
   // we bind the button action to `mousedown`.
   const handleMouseDown = (event: React.MouseEvent) => {
