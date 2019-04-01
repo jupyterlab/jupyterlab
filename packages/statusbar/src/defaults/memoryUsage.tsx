@@ -63,8 +63,10 @@ export namespace MemoryUsage {
       super();
       this._poll = new Poll<Private.IMetricRequestResult | null>({
         factory: () => Private.factory(),
-        interval: options.refreshRate,
-        jitter: true,
+        frequency: {
+          interval: options.refreshRate,
+          jitter: true
+        },
         name: '@jupyterlab/statusbar:MemoryUsage#metrics'
       });
       this._poll.ticked.connect(poll => {

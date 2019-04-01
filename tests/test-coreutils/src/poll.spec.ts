@@ -9,208 +9,196 @@ import { sleep } from '@jupyterlab/testutils';
 
 describe('Poll', () => {
   describe('#constructor()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should create a poll', () => {
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
-        interval: 1000,
         name: '@jupyterlab/test-coreutils:Poll#constructor()-1',
         when: new Promise(() => undefined) // Never.
       });
-
       expect(poll).to.be.an.instanceof(Poll);
-      poll.dispose();
     });
 
     it('should be `instantiated` and tick after `when` resolves', async () => {
       const promise = Promise.resolve();
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
-        interval: 1000,
         name: '@jupyterlab/test-coreutils:Poll#constructor()-2',
         when: promise
       });
-
       expect(poll.state.phase).to.equal('instantiated');
       await promise;
       expect(poll.state.phase).to.equal('instantiated-resolved');
-      poll.dispose();
     });
 
     it('should be `instantiated` and tick after `when` rejects', async () => {
       const promise = Promise.reject();
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
-        interval: 1000,
         name: '@jupyterlab/test-coreutils:Poll#constructor()-3',
         when: promise
       });
-
       expect(poll.state.phase).to.equal('instantiated');
       await promise.catch(() => undefined);
       expect(poll.state.phase).to.equal('instantiated-rejected');
-      poll.dispose();
-    });
-  });
-
-  describe('#interval', () => {
-    it('should be set to value passed in during instantation', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        interval: 9000,
-        name: '@jupyterlab/test-coreutils:Poll#interval-1'
-      });
-
-      expect(poll.interval).to.equal(9000);
-      poll.dispose();
-    });
-
-    it('should default to `1000`', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#interval-2'
-      });
-
-      expect(poll.interval).to.equal(1000);
-      poll.dispose();
-    });
-  });
-
-  describe('#jitter', () => {
-    it('should be set to value passed in during instantation', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        jitter: 0.5,
-        name: '@jupyterlab/test-coreutils:Poll#jitter-1'
-      });
-
-      expect(poll.jitter).to.equal(0.5);
-      poll.dispose();
-    });
-
-    it('should default to `0`', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#jitter-2'
-      });
-
-      expect(poll.jitter).to.equal(0);
-      poll.dispose();
-    });
-
-    it('should be settable to a number', () => {
-      const jitter = 3;
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        jitter: jitter,
-        name: '@jupyterlab/test-coreutils:Poll#jitter-3'
-      });
-
-      expect(poll.jitter).to.equal(jitter);
-      poll.dispose();
-    });
-
-    it('should be settable to a boolean', () => {
-      const jitter = false;
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        jitter: jitter,
-        name: '@jupyterlab/test-coreutils:Poll#jitter-4'
-      });
-
-      expect(poll.jitter).to.equal(jitter);
-      poll.dispose();
-    });
-  });
-
-  describe('#max', () => {
-    it('should be set to value passed in during instantation', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        max: 200000,
-        name: '@jupyterlab/test-coreutils:Poll#max-1'
-      });
-
-      expect(poll.max).to.equal(200000);
-      poll.dispose();
-    });
-
-    it('should default to 10x the interval', () => {
-      const poll = new Poll({
-        interval: 500,
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#max-2'
-      });
-
-      expect(poll.max).to.equal(10 * 500);
-      poll.dispose();
-    });
-  });
-
-  describe('#min', () => {
-    it('should be set to value passed in during instantation', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        min: 250,
-        name: '@jupyterlab/test-coreutils:Poll#min-1'
-      });
-
-      expect(poll.min).to.equal(250);
-      poll.dispose();
-    });
-
-    it('should default to `100`', () => {
-      const poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#min-2'
-      });
-
-      expect(poll.min).to.equal(100);
-      poll.dispose();
     });
   });
 
   describe('#name', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should be set to value passed in during instantation', () => {
       const factory = () => Promise.resolve();
       const name = '@jupyterlab/test-coreutils:Poll#name-1';
-      const poll = new Poll({ factory, name });
-
+      poll = new Poll({ factory, name });
       expect(poll.name).to.equal(name);
       poll.dispose();
     });
 
     it('should default to `unknown`', () => {
-      const poll = new Poll({ factory: () => Promise.resolve() });
-
+      poll = new Poll({ factory: () => Promise.resolve() });
       expect(poll.name).to.equal('unknown');
       poll.dispose();
     });
   });
 
   describe('#disposed', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should emit when the poll is disposed', () => {
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
         name: '@jupyterlab/test-coreutils:Poll#disposed-1'
       });
       let disposed = false;
-
       poll.disposed.connect(() => {
         disposed = true;
       });
       poll.dispose();
       expect(disposed).to.equal(true);
+    });
+  });
+
+  describe('#frequency', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
+    it('should set frequency interval', () => {
+      const interval = 9000;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { interval },
+        name: '@jupyterlab/test-coreutils:Poll#frequency:interval-1'
+      });
+      expect(poll.frequency.interval).to.equal(interval);
+    });
+
+    it('should default frequency interval to `1000`', () => {
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#frequency:interval-2'
+      });
+      expect(poll.frequency.interval).to.equal(1000);
+    });
+
+    it('should set jitter quantity', () => {
+      const jitter = 0.5;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { jitter },
+        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-1'
+      });
+      expect(poll.frequency.jitter).to.equal(jitter);
+    });
+
+    it('should default jitter quantity to `0`', () => {
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-2'
+      });
+      expect(poll.frequency.jitter).to.equal(0);
+    });
+
+    it('should accept jitter boolean', () => {
+      const jitter = false;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { jitter },
+        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-3'
+      });
+      expect(poll.frequency.jitter).to.equal(jitter);
+    });
+
+    it('should set max value', () => {
+      const max = 200000;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { max },
+        name: '@jupyterlab/test-coreutils:Poll#max-1'
+      });
+      expect(poll.frequency.max).to.equal(200000);
+    });
+
+    it('should default max to 10x the interval', () => {
+      const interval = 500;
+      const max = 10 * interval;
+      poll = new Poll({
+        frequency: { interval },
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#frequency:max-2'
+      });
+      expect(poll.frequency.max).to.equal(max);
+    });
+
+    it('should set min', () => {
+      const min = 250;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { min },
+        name: '@jupyterlab/test-coreutils:Poll#min-1'
+      });
+      expect(poll.frequency.min).to.equal(min);
+    });
+
+    it('should default min to `100`', () => {
+      const min = 100;
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        name: '@jupyterlab/test-coreutils:Poll#min-2'
+      });
+      expect(poll.frequency.min).to.equal(min);
       poll.dispose();
     });
   });
 
   describe('#isDisposed', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should indicate whether the poll is disposed', () => {
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
         name: '@jupyterlab/test-coreutils:Poll#isDisposed-1'
       });
-
       expect(poll.isDisposed).to.equal(false);
       poll.dispose();
       expect(poll.isDisposed).to.equal(true);
@@ -218,11 +206,16 @@ describe('Poll', () => {
   });
 
   describe('#tick', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should resolve after a tick', async () => {
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
-        interval: 400,
-        jitter: 0,
+        frequency: { interval: 400, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'instantiated-resolved resolved';
@@ -231,79 +224,80 @@ describe('Poll', () => {
         ticker.push(poll.state.phase);
         poll.tick.then(tock).catch(() => undefined);
       };
-
       void poll.tick.then(tock);
       await sleep(750);
       expect(ticker.join(' ')).to.eql(expected);
-      poll.dispose();
     });
   });
 
   describe('#ticked', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should emit when the poll ticks after `when` resolves', async () => {
-      const poll = new Poll<void, void>({
-        factory: () => Promise.resolve(),
-        interval: 400,
-        jitter: 0,
-        name: '@jupyterlab/test-coreutils:Poll#ticked-1'
-      });
       const expected = 'instantiated-resolved resolved';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll<void, void>({
+        factory: () => Promise.resolve(),
+        frequency: { interval: 400, jitter: 0 },
+        name: '@jupyterlab/test-coreutils:Poll#ticked-1'
+      });
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
       });
       await sleep(750);
       expect(ticker.join(' ')).to.eql(expected);
-      poll.dispose();
     });
 
     it('should emit when the poll ticks after `when` rejects', async () => {
+      const expected = 'instantiated-rejected resolved';
+      const ticker: IPoll.Phase[] = [];
       const promise = Promise.reject();
-      const poll = new Poll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
-        interval: 400,
-        jitter: 0,
+        frequency: { interval: 400, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#ticked-2',
         when: promise
       });
-      const expected = 'instantiated-rejected resolved';
-      const ticker: IPoll.Phase[] = [];
-
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
       });
       await promise.catch(() => undefined);
       await sleep(750);
       expect(ticker.join(' ')).to.eql(expected);
-      poll.dispose();
     });
 
     it('should emit a tick identical to the poll state', async () => {
-      const poll = new Poll<void, void>({
+      poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
-        interval: 100,
-        jitter: 0,
+        frequency: { interval: 100, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#ticked-3'
       });
-
       poll.ticked.connect((_, tick) => {
         expect(tick).to.equal(poll.state);
       });
       await sleep(250);
-      poll.dispose();
     });
   });
 
   describe('#dispose()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should dispose the poll and be safe to call repeatedly', async () => {
-      const poll = new Poll({
+      let rejected = false;
+      let tick: Promise<IPoll>;
+      poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#dispose()-1',
         factory: () => Promise.resolve()
       });
-      const tick = poll.tick;
-      let rejected = false;
-
+      tick = poll.tick;
       expect(poll.isDisposed).to.equal(false);
       poll.dispose();
       expect(poll.isDisposed).to.equal(true);
@@ -317,36 +311,62 @@ describe('Poll', () => {
     });
   });
 
-  describe('#refresh()', () => {
-    it('should interrupt current tick and refresh the poll', async () => {
-      const poll = new Poll({
+  describe('#override()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
+    it('should override the default frequency parameters', () => {
+      const interval = 25000;
+      const jitter = 0.025;
+      const max = 25 * interval;
+      const min = 250;
+      poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
-        interval: 100,
         factory: () => Promise.resolve()
       });
+      poll.override({ interval, jitter, max, min });
+      expect(poll.frequency).to.eql({ interval, jitter, max, min });
+    });
+  });
+
+  describe('#refresh()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
+    it('should interrupt current tick and refresh the poll', async () => {
       const expected = 'instantiated-resolved refreshed resolved';
       const ticker: IPoll.Phase[] = [];
-      const interrupted = poll.tick;
-
+      let tick: Promise<IPoll>;
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
+      tick = poll.tick;
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
       await poll.refresh();
-      expect(interrupted).not.to.equal(poll.tick);
-      await interrupted;
+      expect(tick).not.to.equal(poll.tick);
+      await tick;
       await poll.tick;
       expect(ticker.join(' ')).to.equal(expected);
     });
 
     it('should be safe to call multiple times', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#refresh()-2',
-        interval: 100,
-        factory: () => Promise.resolve()
-      });
       const expected = 'instantiated-resolved refreshed resolved';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#refresh()-2',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
@@ -359,15 +379,20 @@ describe('Poll', () => {
   });
 
   describe('#start()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should start the poll if it is stopped', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#start()-1',
-        interval: 100,
-        factory: () => Promise.resolve()
-      });
       const expected = 'instantiated-resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#start()-1',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
@@ -378,14 +403,13 @@ describe('Poll', () => {
     });
 
     it('be safe to call multiple times', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#start()-2',
-        interval: 100,
-        factory: () => Promise.resolve()
-      });
       const expected = 'instantiated-resolved resolved';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#start()-2',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
@@ -398,15 +422,20 @@ describe('Poll', () => {
   });
 
   describe('#stop()', () => {
+    let poll: Poll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
     it('should stop the poll if it is active', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#stop()-1',
-        interval: 100,
-        factory: () => Promise.resolve()
-      });
       const expected = 'instantiated-resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#stop()-1',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
@@ -417,14 +446,13 @@ describe('Poll', () => {
     });
 
     it('be safe to call multiple times', async () => {
-      const poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#stop()-2',
-        interval: 100,
-        factory: () => Promise.resolve()
-      });
       const expected = 'instantiated-resolved stopped';
       const ticker: IPoll.Phase[] = [];
-
+      poll = new Poll({
+        name: '@jupyterlab/test-coreutils:Poll#stop()-2',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });

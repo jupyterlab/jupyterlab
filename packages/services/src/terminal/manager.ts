@@ -36,10 +36,12 @@ export class TerminalManager implements TerminalSession.IManager {
       // Start polling with exponential backoff.
       this._pollModels = new Poll({
         factory: () => this._refreshRunning(),
-        interval: 10 * 1000,
-        jitter: true,
-        max: 300 * 1000,
-        min: 100,
+        frequency: {
+          interval: 10 * 1000,
+          jitter: true,
+          max: 300 * 1000,
+          min: 100
+        },
         name: `@jupyterlab/services:TerminalManager#models`,
         standby: options.standby || 'when-hidden',
         when: this.ready

@@ -10,10 +10,11 @@ import { ISignal, Signal } from '@phosphor/signaling';
 /**
  * A poll that calls an asynchronous function with each tick.
  *
- * #### Notes
- * The generic arguments are as follows:
- *  - `T = any` indicates the resolved type of the factory's promises.
- *  - `U = any` indicates the rejected type of the factory's promises.
+ * @typeparam T - The resolved type of the factory's promises.
+ * Defaults to `any`.
+ *
+ * @typeparam U - The rejected type of the factory's promises.
+ * Defaults to `any`.
  */
 export interface IPoll<T = any, U = any> {
   /**
@@ -22,32 +23,14 @@ export interface IPoll<T = any, U = any> {
   readonly disposed: ISignal<this, void>;
 
   /**
+   * The polling frequency.
+   */
+  readonly frequency: IPoll.Frequency;
+
+  /**
    * Whether the poll is disposed.
    */
   readonly isDisposed: boolean;
-
-  /**
-   * The polling interval.
-   */
-  readonly interval: number;
-
-  /**
-   * Whether poll frequency jitters if boolean and jitter factor if number.
-   *
-   * #### Notes
-   * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
-   */
-  readonly jitter: boolean | number;
-
-  /**
-   * The maximum interval between poll requests.
-   */
-  readonly max: number;
-
-  /**
-   * The minimum interval between poll requests.
-   */
-  readonly min: number;
 
   /**
    * The name of the poll.
@@ -80,6 +63,31 @@ export interface IPoll<T = any, U = any> {
  */
 export namespace IPoll {
   /**
+   * The polling frequency parameters.
+   */
+  export type Frequency = {
+    /**
+     * The polling interval in milliseconds (integer).
+     */
+    readonly interval: number;
+
+    /**
+     * Whether poll frequency jitters if boolean or jitter (float) quantity.
+     */
+    readonly jitter: boolean | number;
+
+    /**
+     * The maximum milliseconds (integer) between poll requests.
+     */
+    readonly max: number;
+
+    /**
+     * The minimum milliseconds (integer) between poll requests.
+     */
+    readonly min: number;
+  };
+
+  /**
    * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
@@ -102,8 +110,14 @@ export namespace IPoll {
 
   /**
    * Definition of poll state at any given tick.
+   *
+   * @typeparam T - The resolved type of the factory's promises.
+   * Defaults to `any`.
+   *
+   * @typeparam U - The rejected type of the factory's promises.
+   * Defaults to `any`.
    */
-  export type Tick<T, U> = {
+  export type Tick<T = any, U = any> = {
     /**
      * The number of milliseconds until the next poll request.
      */
@@ -134,10 +148,11 @@ export namespace IPoll {
  * A class that wraps an asynchronous function to poll at a regular interval
  * with exponential increases to the interval length if the poll fails.
  *
- * #### Notes
- * The generic arguments are as follows:
- *  - `T = any` indicates the resolved type of the factory's promises.
- *  - `U = any` indicates the rejected type of the factory's promises.
+ * @typeparam T - The resolved type of the factory's promises.
+ * Defaults to `any`.
+ *
+ * @typeparam U - The rejected type of the factory's promises.
+ * Defaults to `any`.
  */
 export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
@@ -146,30 +161,25 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const { factory, interval, jitter, max, min, when } = options;
-
+    this.override(options.frequency);
     this.name = options.name || 'unknown';
     this.standby = options.standby || 'when-hidden';
-
-    // Validate and set the initial polling frequency parameters.
-    this._frequency(interval, jitter, max, min);
-
-    this._factory = factory;
+    this._factory = options.factory;
     this._state = {
-      interval: this.interval,
+      interval: this.frequency.interval,
       payload: null,
       phase: 'instantiated',
       timestamp: new Date().getTime()
     };
 
     // Schedule a poll tick after the `when` promise is resolved.
-    (when || Promise.resolve())
+    (options.when || Promise.resolve())
       .then(() => {
         if (this.isDisposed) {
           return;
         }
         this._schedule(this._tick, {
-          interval: this.interval,
+          interval: this.frequency.interval,
           payload: null,
           phase: 'instantiated-resolved',
           timestamp: new Date().getTime()
@@ -180,7 +190,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
         this._schedule(this._tick, {
-          interval: this.interval,
+          interval: this.frequency.interval,
           payload: null,
           phase: 'instantiated-rejected',
           timestamp: new Date().getTime()
@@ -190,12 +200,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * The name of the poll. Defaults to `'unknown'`.
+   * The name of the poll.
    */
   readonly name: string;
 
   /**
-   * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
+   * Indicates when the poll switches to standby.
    */
   readonly standby: IPoll.Standby;
 
@@ -207,16 +217,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * The polling interval.
+   * The polling frequency parameters.
    */
-  get interval(): number {
-    return this._interval;
-  }
-  set interval(interval: number) {
-    if (this.isDisposed) {
-      return;
-    }
-    this._frequency(interval, this.jitter, this.max, this.min);
+  get frequency(): IPoll.Frequency {
+    return this._frequency;
   }
 
   /**
@@ -224,49 +228,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    */
   get isDisposed(): boolean {
     return this.state.phase === 'disposed';
-  }
-
-  /**
-   * Whether poll frequency jitters if boolean and jitter factor if number.
-   * Defaults to `0`.
-   *
-   * #### Notes
-   * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
-   */
-  get jitter(): boolean | number {
-    return this._jitter;
-  }
-  set jitter(jitter: boolean | number) {
-    if (this.isDisposed) {
-      return;
-    }
-    this._frequency(this.interval, jitter, this.max, this.min);
-  }
-
-  /**
-   * The maximum interval between poll requests.
-   */
-  get max(): number {
-    return this._max;
-  }
-  set max(max: number) {
-    if (this.isDisposed) {
-      return;
-    }
-    this._frequency(this.interval, this.jitter, max, this.min);
-  }
-
-  /**
-   * The minimum interval between poll requests.
-   */
-  get min(): number {
-    return this._min;
-  }
-  set min(min: number) {
-    if (this.isDisposed) {
-      return;
-    }
-    this._frequency(this.interval, this.jitter, this.max, min);
   }
 
   /**
@@ -307,6 +268,31 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
     this._disposed.emit();
     Signal.clearData(this);
+  }
+
+  /**
+   * Overrides default polling frequency parameters.
+   *
+   * @param frequency - Overrides applied to default frequency values.
+   */
+  override(frequency: Partial<IPoll.Frequency> = {}): void {
+    let { interval, jitter, max, min } = frequency;
+
+    interval =
+      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
+    jitter =
+      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
+    max = typeof max === 'number' ? Math.round(Math.abs(max)) : 10 * interval;
+    min = typeof min === 'number' ? Math.round(Math.abs(min)) : 100;
+
+    if (interval > max) {
+      throw new Error('Poll interval cannot exceed max interval length');
+    }
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
+
+    this._frequency = { interval, jitter, max, min };
   }
 
   /**
@@ -407,7 +393,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
     // If in standby mode schedule next tick without calling the factory.
     if (standby) {
-      const { interval, jitter, max, min } = this;
+      const { interval, jitter, max, min } = this.frequency;
       this._schedule(outstanding, {
         interval: Private.jitter(interval, jitter, max, min),
         payload: null,
@@ -425,7 +411,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        const { interval, jitter, max, min } = this;
+        const { interval, jitter, max, min } = this.frequency;
         this._schedule(outstanding, {
           interval: Private.jitter(interval, jitter, max, min),
           payload: resolved,
@@ -438,7 +424,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        const { jitter, max, min } = this;
+        const { jitter, max, min } = this.frequency;
         const increased = Math.min(this.state.interval * 2, max);
         this._schedule(outstanding, {
           interval: Private.jitter(increased, jitter, max, min),
@@ -447,35 +433,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           timestamp: new Date().getTime()
         });
       });
-  }
-
-  /**
-   * Validates and sets the polling frequency parameters.
-   */
-  private _frequency(
-    interval: number,
-    jitter: boolean | number,
-    max: number,
-    min: number
-  ): void {
-    interval =
-      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
-    jitter =
-      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
-    max = typeof max === 'number' ? Math.abs(max) : 10 * interval;
-    min = typeof min === 'number' ? Math.abs(min) : 100;
-
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
-    }
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
-
-    this._interval = interval;
-    this._jitter = jitter;
-    this._max = max;
-    this._min = min;
   }
 
   /**
@@ -519,10 +476,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
   private _disposed = new Signal<this, void>(this);
   private _factory: (tick: IPoll.Tick<T, U>) => Promise<T>;
-  private _interval: number;
-  private _jitter: boolean | number;
-  private _max: number;
-  private _min: number;
+  private _frequency: IPoll.Frequency;
   private _state: IPoll.Tick<T, U>;
   private _tick: PromiseDelegate<this> = new PromiseDelegate<this>();
   private _ticked = new Signal<this, IPoll.Tick<T, U>>(this);
@@ -534,64 +488,47 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
  */
 export namespace Poll {
   /**
-   * The jitter factor if `jitter` is set to `true`: `0.25`.
-   */
-  export const DEFAULT_JITTER = 0.25;
-
-  /**
    * Instantiation options for polls.
    *
-   * #### Notes
-   * The generic arguments are as follows:
-   *  - `T` indicates the resolved type of the factory's promises.
-   *  - `U` indicates the rejected type of the factory's promises.
+   * @typeparam T - The resolved type of the factory's promises.
+   * Defaults to `any`.
+   *
+   * @typeparam U - The rejected type of the factory's promises.
+   * Defaults to `any`.
    */
-  export interface IOptions<T, U> {
+  export interface IOptions<T = any, U = any> {
     /**
      * A factory function that is passed a poll tick and returns a poll promise.
-     *
-     * #### Notes
-     * The generic arguments are as follows:
-     *  - `T` indicates the resolved type of the factory's promises.
-     *  - `U` indicates the rejected type of the factory's promises.
      */
     factory: (tick: IPoll.Tick<T, U>) => Promise<T>;
 
     /**
-     * The millisecond interval between poll requests. Defaults to `1000`.
+     * The polling frequency parameters.
      *
      * #### Notes
+     * _interval_ defaults to `1000`.
      * If set to `0`, the poll will schedule an animation frame after each
      * promise resolution.
-     */
-    interval?: number;
-
-    /**
-     * Whether poll frequency jitters if boolean and jitter factor if number.
-     * Defaults to `0`.
      *
-     * #### Notes
-     * If set to `true` the poll jitter factor will be `Poll.DEFAULT_JITTER`.
+     * _jitter_ defaults to `0`.
+     * If set to `true` jitter quantity is `0.25`.
+     * If set to `false` jitter quantity to `0`.
+     *
+     * _max_ defaults to `10 * interval`.
+     *
+     * _min_ defaults to `250`.
      */
-    jitter?: boolean | number;
+    frequency?: Partial<IPoll.Frequency>;
 
     /**
-     * The maximum interval to wait between polls. Defaults to `10 * interval`.
-     */
-    max?: number;
-
-    /**
-     * The minimum interval to wait between polls. Defaults to `100`.
-     */
-    min?: number;
-
-    /**
-     * The name of the poll. Defaults to `'unknown'`.
+     * The name of the poll.
+     * Defaults to `'unknown'`.
      */
     name?: string;
 
     /**
-     * Indicates when the poll switches to standby. Defaults to `'when-hidden'`.
+     * Indicates when the poll switches to standby.
+     * Defaults to `'when-hidden'`.
      */
     standby?: IPoll.Standby;
 
@@ -607,37 +544,43 @@ export namespace Poll {
  */
 namespace Private {
   /**
-   * Returns a randomly jittered integer value.
+   * The jitter quantity if `jitter` is set to `true`.
+   */
+  export const DEFAULT_JITTER = 0.25;
+
+  /**
+   * Returns a randomly jittered (integer) value.
    *
-   * @param base - The base value that is being wobbled.
+   * @param base - The base (integer) value that is being wobbled.
    *
-   * @param factor - The jitter factor quantity or boolean flag.
+   * @param quantity - The jitter (float) quantity or boolean flag.
    *
-   * @param max - The largest acceptable value to return.
+   * @param max - The largest acceptable (integer) value to return.
    *
-   * @param min - The smallest acceptable value to return.
+   * @param min - The smallest acceptable (integer) value to return.
    */
   export function jitter(
     base: number,
-    factor: boolean | number,
+    quantity: boolean | number,
     max: number,
     min: number
   ): number {
-    if (!factor) {
+    if (!quantity) {
       return Math.round(base);
     }
 
-    factor =
-      typeof factor === 'boolean'
-        ? (factor && Poll.DEFAULT_JITTER) || 0
-        : typeof factor === 'number'
-          ? factor
+    base = Math.round(base);
+    quantity =
+      typeof quantity === 'boolean'
+        ? (quantity || 0) && DEFAULT_JITTER
+        : typeof quantity === 'number'
+          ? quantity
           : 0;
+    quantity = Math.abs(quantity);
 
     const direction = Math.random() < 0.5 ? 1 : -1;
-    const jitter = Math.random() * base * Math.abs(factor) * direction;
-    const candidate = Math.abs(Math.round(base + jitter));
+    const jitter = Math.round(Math.random() * base * quantity * direction);
 
-    return Math.min(Math.max(min, candidate), max);
+    return Math.min(Math.max(base + jitter, min), max);
   }
 }
