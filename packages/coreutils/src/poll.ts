@@ -176,9 +176,13 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     this.name = options.name || 'unknown';
     this.standby = options.standby || 'when-hidden';
 
-    // Initialize state interval value after frequency override.
+    // Override frequency parameters and set initial state.
     this.override(options.frequency);
-    this._state = { ...this._state, interval: this.frequency.interval };
+    this._state = {
+      ...this.state,
+      interval: this.frequency.interval,
+      timestamp: new Date().getTime()
+    };
 
     // Schedule a poll tick after the `when` promise is resolved.
     (options.when || Promise.resolve())
@@ -269,12 +273,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    this._state = {
-      interval: Infinity, // Never.
-      payload: null,
-      phase: 'disposed',
-      timestamp: new Date().getTime()
-    };
+    this._state = { ...Private.DISPOSED, timestamp: new Date().getTime() };
     this.tick.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
     this._disposed.emit();
@@ -282,7 +281,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * Overrides default polling frequency parameters.
+   * Override default polling frequency parameters.
    *
    * @param frequency - Overrides applied to default frequency values.
    */
@@ -413,10 +412,15 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     return this;
   }
 
+  /**
+   * The poll's promise factory invoked when the poll ticks.
+   */
   protected readonly factory: IPoll.Factory<T, U>;
 
   /**
    * Execute an outstanding poll tick promise.
+   *
+   * @param outstanding - The outstanding promise to resolve after execution.
    */
   protected execute(outstanding: PromiseDelegate<this>): void {
     const standby =
@@ -470,6 +474,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
   /**
    * Schedule the next poll tick and resolve the outstanding promise.
+   *
+   * @param outstanding - The outstanding poll promise to resolve.
+   *
+   * @param tick - The new tick data to populate the poll state.
    */
   protected schedule(
     outstanding: PromiseDelegate<this>,
@@ -510,19 +518,14 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
   private _disposed = new Signal<this, void>(this);
   private _frequency: IPoll.Frequency;
-  private _state: IPoll.Tick<T, U> = {
-    interval: -1,
-    payload: null,
-    phase: 'instantiated',
-    timestamp: new Date().getTime()
-  };
+  private _state: IPoll.Tick<T, U> = Private.INITIAL;
   private _tick = new PromiseDelegate<this>();
   private _ticked = new Signal<this, IPoll.Tick<T, U>>(this);
   private _timeout = -1;
 }
 
 /**
- * A namespace for `Poll` statics, types, and interfaces.
+ * A namespace for `Poll` interfaces.
  */
 export namespace Poll {
   /**
@@ -582,9 +585,28 @@ export namespace Poll {
  */
 namespace Private {
   /**
+   * The initial poll tick defaults.
+   */
+  export const INITIAL: IPoll.Tick = {
+    interval: Infinity, // Never.
+    payload: null,
+    phase: 'instantiated',
+    timestamp: new Date(0).getTime()
+  };
+
+  /**
+   * The disposed poll tick defaults.
+   */
+  export const DISPOSED: IPoll.Tick = {
+    interval: Infinity, // Never.
+    payload: null,
+    phase: 'disposed',
+    timestamp: new Date(0).getTime()
+  };
+  /**
    * The jitter quantity if `jitter` is set to `true`.
    */
-  export const DEFAULT_JITTER = 0.25;
+  const DEFAULT_JITTER = 0.25;
 
   /**
    * Returns a randomly jittered (integer) value.
