@@ -19,7 +19,8 @@ import {
   IObservableJSON,
   IModelDB,
   IObservableValue,
-  ObservableValue
+  ObservableValue,
+  IObservableMap
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
@@ -493,14 +494,35 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this
     );
 
-    // We prefer output collapse status to be in the `collapse` metadata field
-    // rather than the `jupyter.outputs_hidden` field for backwards
-    // compatibility. We only do this conversion at construction, so See https://github.com/jupyter/nbformat/issues/137.
+    // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
+    // they are redundant in nbformat 4.4. See
+    // https://github.com/jupyter/nbformat/issues/137
+    this.metadata.changed.connect(
+      Private.collapseChanged,
+      this
+    );
 
-    // We only do this conversion at construction so that we can understand
-    // nbformat 4.4. We don't do the conversion at runtime so the behavior is
-    // not confusing.
-    this._convertCollapsed();
+    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
+    // preference to `collapsed`.
+    if (this.metadata.has('collapsed')) {
+      let collapsed = this.metadata.get('collapsed');
+      Private.collapseChanged(this.metadata, {
+        type: 'change',
+        key: 'collapsed',
+        oldValue: collapsed,
+        newValue: collapsed
+      });
+    } else if (this.metadata.has('jupyter')) {
+      let jupyter = this.metadata.get('jupyter') as JSONObject;
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        Private.collapseChanged(this.metadata, {
+          type: 'change',
+          key: 'jupyter',
+          oldValue: jupyter,
+          newValue: jupyter
+        });
+      }
+    }
   }
 
   /**
@@ -571,34 +593,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
-   * Consolidate `jupyter.outputs_hidden` metadata and `collapsed` metadata
-   *
-   * #### Notes
-   * We transfer `jupyter.outputs_hidden` metadata to the `collapsed` metadata
-   * field, with the `collapsed` metadata field taking precedence. See
-   * https://github.com/jupyter/nbformat/issues/137
-   */
-  private _convertCollapsed() {
-    const jupyter = this.metadata.get('jupyter') as JSONObject;
-    if (jupyter === undefined || !jupyter.hasOwnProperty('outputs_hidden')) {
-      return;
-    }
-
-    const { outputs_hidden, ...other } = jupyter;
-
-    // collapsed takes precedence over jupyter.outputs_hidden if it is defined
-    if (outputs_hidden === true && !this.metadata.has('collapsed')) {
-      this.metadata.set('collapsed', outputs_hidden);
-    }
-
-    if (Object.keys(other).length === 0) {
-      this.metadata.delete('jupyter');
-    } else {
-      this.metadata.set('jupyter', other);
-    }
-  }
-
-  /**
    * Handle a change to the execution count.
    */
   private _onExecutionCountChanged(
@@ -656,4 +650,34 @@ export namespace CodeCellModel {
    * The shared `ContentFactory` instance.
    */
   export const defaultContentFactory = new ContentFactory();
+}
+
+namespace Private {
+  export function collapseChanged(
+    metadata: IObservableJSON,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ) {
+    if (args.key === 'collapsed') {
+      const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
+      const { outputs_hidden, ...newJupyter } = jupyter;
+
+      if (outputs_hidden !== args.newValue) {
+        if (args.newValue !== undefined) {
+          newJupyter['outputs_hidden'] = args.newValue;
+        }
+        if (Object.keys(newJupyter).length === 0) {
+          metadata.delete('jupyter');
+        } else {
+          metadata.set('jupyter', newJupyter);
+        }
+      }
+    } else if (args.key === 'jupyter') {
+      const jupyter = (args.newValue || {}) as JSONObject;
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        metadata.set('collapsed', jupyter.outputs_hidden);
+      } else {
+        metadata.delete('collapsed');
+      }
+    }
+  }
 }

@@ -296,48 +296,41 @@ describe('cells/model', () => {
         expect(called).to.equal(true);
       });
 
-      it('should consolidate collapsed and jupyter.outputs_hidden metadata on construction', () => {
+      it('should sync collapsed and jupyter.outputs_hidden metadata on construction', () => {
         let model: CodeCellModel;
         let jupyter: JSONObject | undefined;
 
+        // Setting `collapsed` works
         model = new CodeCellModel({
           cell: { cell_type: 'code', source: '', metadata: { collapsed: true } }
         });
         expect(model.metadata.get('collapsed')).to.be.true;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.true;
 
-        // collapsed takes precedence
+        // Setting `jupyter.outputs_hidden` works
         model = new CodeCellModel({
           cell: {
             cell_type: 'code',
             source: '',
-            metadata: { collapsed: true, jupyter: { outputs_hidden: false } }
-          }
-        });
-        expect(model.metadata.get('collapsed')).to.be.true;
-        expect(model.metadata.get('jupyter')).to.be.undefined;
-
-        // default values are not set
-        model = new CodeCellModel({
-          cell: {
-            cell_type: 'code',
-            source: '',
-            metadata: { jupyter: { outputs_hidden: false } }
-          }
-        });
-        expect(model.metadata.get('collapsed')).to.be.undefined;
-        expect(model.metadata.get('jupyter')).to.be.undefined;
-
-        // other jupyter values are not disturbed
-        model = new CodeCellModel({
-          cell: {
-            cell_type: 'code',
-            source: '',
-            metadata: { jupyter: { outputs_hidden: true, other: true } }
+            metadata: { jupyter: { outputs_hidden: true } }
           }
         });
         expect(model.metadata.get('collapsed')).to.be.true;
         jupyter = model.metadata.get('jupyter') as JSONObject;
-        expect(jupyter.outputs_hidden).to.be.undefined;
+        expect(jupyter.outputs_hidden).to.be.true;
+
+        // `collapsed` takes precedence
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { collapsed: false, jupyter: { outputs_hidden: true } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.false;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.false;
       });
     });
 
@@ -448,35 +441,70 @@ describe('cells/model', () => {
     });
 
     describe('.metadata', () => {
-      it('should not consolidate collapsed and jupyter.outputs_hidden metadata when changed', () => {
+      it('should sync collapsed and jupyter.outputs_hidden metadata when changed', () => {
         const metadata = new CodeCellModel({}).metadata;
 
         expect(metadata.get('collapsed')).to.be.undefined;
         expect(metadata.get('jupyter')).to.be.undefined;
 
-        // collapsed takes precedence
+        // Setting collapsed sets jupyter.outputs_hidden
         metadata.set('collapsed', true);
-        metadata.set('jupyter', { outputs_hidden: false });
         expect(metadata.get('collapsed')).to.be.true;
         expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+
+        metadata.set('collapsed', false);
+        expect(metadata.get('collapsed')).to.be.false;
+        expect(metadata.get('jupyter')).to.deep.equal({
           outputs_hidden: false
         });
 
-        // default values are not set
         metadata.delete('collapsed');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // Setting jupyter.outputs_hidden sets collapsed
+        metadata.set('jupyter', { outputs_hidden: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+
         metadata.set('jupyter', { outputs_hidden: false });
-        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('collapsed')).to.be.false;
         expect(metadata.get('jupyter')).to.deep.equal({
           outputs_hidden: false
         });
 
-        // other jupyter values are not disturbed
-        metadata.delete('collapsed');
+        metadata.delete('jupyter');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // Deleting jupyter.outputs_hidden preserves other jupyter fields
         metadata.set('jupyter', { outputs_hidden: true, other: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true,
+          other: true
+        });
+        metadata.set('jupyter', { other: true });
         expect(metadata.get('collapsed')).to.be.undefined;
         expect(metadata.get('jupyter')).to.deep.equal({
-          other: true,
-          outputs_hidden: false
+          other: true
+        });
+
+        // Deleting collapsed preserves other jupyter fields
+        metadata.set('jupyter', { outputs_hidden: true, other: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true,
+          other: true
+        });
+        metadata.delete('collapsed');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          other: true
         });
       });
     });
