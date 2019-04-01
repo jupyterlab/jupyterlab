@@ -120,17 +120,21 @@
   padding-left: 10px;
   padding-right: 10px;
   user-select: none;
-  min-width: 50px;
+  min-width: 43px;
   display: inline-block;
 }
 
 .jp-DocumentSearch-up-down-wrapper {
   display: inline-block;
+  padding-right: 2px;
 }
 
 .jp-DocumentSearch-up-down-wrapper button {
-  background-color: var(--jp-layout-color0);
-  vertical-align: middle;
+  outline: 0;
+  border: none;
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
   background-position: center;
 }
 

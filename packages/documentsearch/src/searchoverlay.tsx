@@ -184,11 +184,7 @@ function UpDownButtons(props: IUpDownProps) {
         />
       </button>
       <button
-<<<<<<< HEAD
         className={BUTTON_WRAPPER_CLASS}
-=======
-        className={DOWN_BUTTON_CLASS}
->>>>>>> remove highlight button on focus
         onClick={() => props.onHightlightNext()}
         tabIndex={5}
       >
