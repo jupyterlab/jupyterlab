@@ -349,7 +349,7 @@ export namespace Toolbar {
       iconClassName: 'jp-StopIcon',
       onClick: () => {
         if (session.kernel) {
-          session.kernel.interrupt();
+          void session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -363,7 +363,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        session.restart();
+        void session.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -434,7 +434,11 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
-  const handleClick = (event: React.MouseEvent) => {
+  // In some browsers, a button click event moves the focus from the main
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+  // We avoid a click event by calling preventDefault in mousedown, and
+  // we bind the button action to `mousedown`.
+  const handleMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
     props.onClick();
   };
@@ -454,7 +458,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           : 'jp-ToolbarButtonComponent'
       }
       disabled={props.enabled === false}
-      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
       minimal
@@ -582,7 +586,7 @@ namespace Private {
     }
     const tooltip = commands.caption(id) || label || iconLabel;
     const onClick = () => {
-      commands.execute(id);
+      void commands.execute(id);
     };
     const enabled = commands.isEnabled(id);
     return { className, iconClassName, tooltip, onClick, enabled, label };

@@ -151,7 +151,7 @@ export class DocumentManager implements IDisposable {
 
     // Close all the widgets for our contexts and dispose the widget manager.
     this._contexts.forEach(context => {
-      this._widgetManager.closeWidgets(context);
+      return this._widgetManager.closeWidgets(context);
     });
     this._widgetManager.dispose();
 
@@ -485,7 +485,7 @@ export class DocumentManager implements IDisposable {
       saveInterval: this.autosaveInterval
     });
     Private.saveHandlerProperty.set(context, handler);
-    context.ready.then(() => {
+    void context.ready.then(() => {
       if (this.autosave) {
         handler.start();
       }

@@ -52,7 +52,7 @@ export class MarkdownViewer extends Widget {
     const layout = (this.layout = new StackedLayout());
     layout.addWidget(this.renderer);
 
-    this.context.ready.then(async () => {
+    void this.context.ready.then(async () => {
       await this._render();
 
       // Throttle the rendering rate of the widget.
@@ -141,7 +141,7 @@ export class MarkdownViewer extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this.context.isReady && !this.isDisposed) {
-      this._render();
+      void this._render();
       this._fragment = '';
     }
   }
@@ -198,7 +198,7 @@ export class MarkdownViewer extends Widget {
       requestAnimationFrame(() => {
         this.dispose();
       });
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      void showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     }
   }
 

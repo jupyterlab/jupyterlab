@@ -87,9 +87,9 @@ describe('console/panel', () => {
     });
 
     describe('#onAfterAttach()', () => {
-      it('should start the session', () => {
+      it('should start the session', async () => {
         Widget.attach(panel, document.body);
-        dismissDialog();
+        await dismissDialog();
         return panel.session.ready;
       });
     });

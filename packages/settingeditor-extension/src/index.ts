@@ -133,7 +133,7 @@ function activate(
       editor.title.iconClass = 'jp-SettingsIcon';
 
       let main = new MainAreaWidget({ content: editor });
-      tracker.add(main);
+      void tracker.add(main);
       shell.add(main);
     },
     label: 'Advanced Settings Editor'

@@ -440,7 +440,7 @@ Command palette items
 
    .. code:: json
 
-      "notebook:run-in-console": {
+      {
         "command": "notebook:run-in-console",
         "keys": ["Ctrl G"],
         "selector": ".jp-Notebook.jp-mod-editMode"

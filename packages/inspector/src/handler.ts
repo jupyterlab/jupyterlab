@@ -147,7 +147,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
     const pending = ++this._pending;
 
-    this._connector
+    void this._connector
       .fetch({ offset, text })
       .then(reply => {
         // If handler has been disposed or a newer request is pending, bail.
@@ -163,7 +163,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
           const widget = this._rendermime.createRenderer(mimeType);
           const model = new MimeModel({ data });
 
-          widget.renderModel(model);
+          void widget.renderModel(model);
           update.content = widget;
         }
 

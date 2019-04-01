@@ -114,7 +114,7 @@ export class SearchInstance implements IDisposable {
 
     // If a query hasn't been executed yet, no need to call endSearch
     if (this._displayState.query) {
-      this._activeProvider.endSearch();
+      void this._activeProvider.endSearch();
     }
 
     this._searchWidget.dispose();

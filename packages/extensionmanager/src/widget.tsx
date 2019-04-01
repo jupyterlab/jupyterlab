@@ -474,7 +474,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     );
     const content = [];
     if (!model.initialized) {
-      model.initialize();
+      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list

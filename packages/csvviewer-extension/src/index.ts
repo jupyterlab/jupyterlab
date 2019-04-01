@@ -108,10 +108,10 @@ function activateCsv(
   let ft = app.docRegistry.getFileType('csv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
-    tracker.add(widget);
+    void tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
 
     if (ft) {
@@ -178,10 +178,10 @@ function activateTsv(
   let ft = app.docRegistry.getFileType('tsv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
-    tracker.add(widget);
+    void tracker.add(widget);
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
 
     if (ft) {

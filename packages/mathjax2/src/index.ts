@@ -36,7 +36,7 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
     if (!this._initialized) {
       this._init();
     }
-    this._initPromise.promise.then(() => {
+    void this._initPromise.promise.then(() => {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
       try {
         MathJax.Hub.Queue(

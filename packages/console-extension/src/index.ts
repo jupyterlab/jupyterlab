@@ -163,7 +163,7 @@ async function activateConsole(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    manager.ready.then(() => {
+    void manager.ready.then(() => {
       let disposables: DisposableSet | null = null;
       const onSpecsChanged = () => {
         if (disposables) {
@@ -245,10 +245,8 @@ async function activateConsole(
     )).composite as string;
     panel.console.node.dataset.jpInteractionMode = interactionMode;
 
-    await panel.session.ready;
-
-    // Add the console panel to the tracker.
-    tracker.add(panel);
+    // Add the console panel to the tracker and wait for it to be ready.
+    await Promise.all([tracker.add(panel), panel.session.ready]);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
     shell.add(panel, 'main', {
@@ -270,7 +268,7 @@ async function activateConsole(
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
-      updateSettings();
+      void updateSettings();
     }
   });
   await updateSettings();
@@ -385,7 +383,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      current.console.execute(true);
+      return current.console.execute(true);
     },
     isEnabled
   });
@@ -442,8 +440,9 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          current.console.session.shutdown().then(() => {
+          return current.console.session.shutdown().then(() => {
             current.dispose();
+            return true;
           });
         } else {
           return false;
@@ -461,7 +460,7 @@ async function activateConsole(
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
-          widget.console.inject(args['code'] as string);
+          void widget.console.inject(args['code'] as string);
           return true;
         }
         return false;
@@ -512,7 +511,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          current.console.session.shutdown().then(() => {
+          return current.console.session.shutdown().then(() => {
             current.dispose();
           });
         } else {

@@ -359,7 +359,7 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Paste Error', error);
+        void showErrorMessage('Paste Error', error);
       });
   }
 
@@ -415,19 +415,19 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Duplicate file', error);
+        void showErrorMessage('Duplicate file', error);
       });
   }
 
   /**
    * Download the currently selected item(s).
    */
-  download(): void {
-    each(this.selectedItems(), item => {
-      if (item.type !== 'directory') {
-        this._model.download(item.path);
-      }
-    });
+  async download(): Promise<void> {
+    await Promise.all(
+      toArray(this.selectedItems())
+        .filter(item => item.type !== 'directory')
+        .map(item => this._model.download(item.path))
+    );
   }
 
   /**
@@ -452,7 +452,7 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Shutdown kernel', error);
+        void showErrorMessage('Shutdown kernel', error);
       });
   }
 
@@ -1023,7 +1023,7 @@ export class DirListing extends Widget {
     }
     event.preventDefault();
     for (let i = 0; i < files.length; i++) {
-      this._model.upload(files[i]);
+      void this._model.upload(files[i]);
     }
   }
 
@@ -1136,7 +1136,7 @@ export class DirListing extends Widget {
       }
     }
     Promise.all(promises).catch(error => {
-      showErrorMessage('Error while copying/moving files', error);
+      void showErrorMessage('Error while copying/moving files', error);
     });
   }
 
@@ -1197,7 +1197,7 @@ export class DirListing extends Widget {
         }
         if (otherPaths.length) {
           const firstWidgetPlaced = new PromiseDelegate<void>();
-          firstWidgetPlaced.promise.then(() => {
+          void firstWidgetPlaced.promise.then(() => {
             let prevWidget = widget;
             otherPaths.forEach(path => {
               const options: DocumentRegistry.IOpenOptions = {
@@ -1223,7 +1223,7 @@ export class DirListing extends Widget {
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
     clearTimeout(this._selectTimer);
-    this._drag.start(clientX, clientY).then(action => {
+    void this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
       clearTimeout(this._selectTimer);
     });
@@ -1332,7 +1332,7 @@ export class DirListing extends Widget {
     for (let name of names) {
       let newPath = PathExt.join(basePath, name);
       let promise = this._model.manager.deleteFile(newPath).catch(err => {
-        showErrorMessage('Delete Failed', err);
+        void showErrorMessage('Delete Failed', err);
       });
       promises.push(promise);
     }
@@ -1360,7 +1360,7 @@ export class DirListing extends Widget {
         return original;
       }
       if (!isValidFileName(newName)) {
-        showErrorMessage(
+        void showErrorMessage(
           'Rename Error',
           Error(
             `"${newName}" is not a valid name for a file. ` +
@@ -1384,7 +1384,7 @@ export class DirListing extends Widget {
       return promise
         .catch(error => {
           if (error !== 'File not renamed') {
-            showErrorMessage('Rename Error', error);
+            void showErrorMessage('Rename Error', error);
           }
           this._inRename = false;
           return original;
@@ -1396,7 +1396,7 @@ export class DirListing extends Widget {
           }
           if (this._inRename) {
             // No need to catch because `newName` will always exit.
-            this.selectItemByName(newName);
+            void this.selectItemByName(newName);
           }
           this._inRename = false;
           return newName;
@@ -1466,10 +1466,10 @@ export class DirListing extends Widget {
       return;
     }
 
-    this.selectItemByName(name)
+    void this.selectItemByName(name)
       .then(() => {
         if (!this.isDisposed && newValue.type === 'directory') {
-          this._doRename();
+          return this._doRename();
         }
       })
       .catch(() => {

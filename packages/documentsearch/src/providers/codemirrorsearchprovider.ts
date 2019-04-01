@@ -126,7 +126,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     if (!this.isSubProvider) {
       this._cm.focus();
     }
-    this.endQuery();
+    return this.endQuery();
   }
 
   /**

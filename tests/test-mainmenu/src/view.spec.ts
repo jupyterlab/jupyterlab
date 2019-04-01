@@ -34,7 +34,7 @@ describe('@jupyterlab/mainmenu', () => {
       wodget = new Wodget();
       menu = new ViewMenu({ commands });
       tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -82,9 +82,9 @@ describe('@jupyterlab/mainmenu', () => {
           delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
         ).to.equal(false);
 
-        delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
-        delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
-        delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
 
         expect(
           delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')

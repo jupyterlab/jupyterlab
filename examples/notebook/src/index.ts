@@ -41,7 +41,7 @@ import { SetupCommands } from './commands';
 
 function main(): void {
   let manager = new ServiceManager();
-  manager.ready.then(() => {
+  void manager.ready.then(() => {
     createApp(manager);
   });
 }

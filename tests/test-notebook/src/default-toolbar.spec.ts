@@ -54,7 +54,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         let promise = signalToPromise(context.fileChanged);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         await promise;
         button.dispose();
       });
@@ -72,7 +72,7 @@ describe('@jupyterlab/notebook', () => {
         const button = ToolbarItems.createInsertButton(panel);
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         expect(panel.content.activeCellIndex).to.equal(1);
         expect(panel.content.activeCell).to.be.an.instanceof(CodeCell);
         button.dispose();
@@ -92,7 +92,7 @@ describe('@jupyterlab/notebook', () => {
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         expect(panel.content.widgets.length).to.equal(count - 1);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
@@ -112,7 +112,7 @@ describe('@jupyterlab/notebook', () => {
         const count = panel.content.widgets.length;
         Widget.attach(button, document.body);
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         expect(panel.content.widgets.length).to.equal(count);
         expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
         button.dispose();
@@ -133,7 +133,7 @@ describe('@jupyterlab/notebook', () => {
         Widget.attach(button, document.body);
         await framePromise();
         NotebookActions.copy(panel.content);
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         await sleep();
         expect(panel.content.widgets.length).to.equal(count + 1);
         button.dispose();
@@ -175,7 +175,7 @@ describe('@jupyterlab/notebook', () => {
           }
         });
         await framePromise();
-        simulate(button.node.firstChild as HTMLElement, 'click');
+        simulate(button.node.firstChild as HTMLElement, 'mousedown');
         await p.promise;
       }).timeout(30000); // Allow for slower CI
 

@@ -50,7 +50,7 @@ export class ServiceManager implements ServiceManager.IManager {
         return this.terminals.ready;
       }
     });
-    this._readyPromise.then(() => {
+    void this._readyPromise.then(() => {
       this._isReady = true;
     });
   }

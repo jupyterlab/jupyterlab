@@ -417,7 +417,7 @@ describe('@jupyterlab/apputils', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
-          simulate(button.node.firstChild as HTMLElement, 'click');
+          simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(called).to.equal(true);
           button.dispose();
         });

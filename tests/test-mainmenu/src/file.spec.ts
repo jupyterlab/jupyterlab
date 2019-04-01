@@ -32,7 +32,7 @@ describe('@jupyterlab/mainmenu', () => {
       wodget = new Wodget();
       menu = new FileMenu({ commands });
       tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -66,7 +66,7 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.closeAndCleaners.add(cleaner);
-        delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
+        void delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
         expect(wodget.state).to.equal('clean');
       });
     });
@@ -82,7 +82,7 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.consoleCreators.add(creator);
-        delegateExecute(wodget, menu.consoleCreators, 'createConsole');
+        void delegateExecute(wodget, menu.consoleCreators, 'createConsole');
         expect(wodget.state).to.equal('create');
       });
     });

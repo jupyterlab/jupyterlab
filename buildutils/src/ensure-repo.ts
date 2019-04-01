@@ -268,5 +268,5 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  ensureIntegrity();
+  void ensureIntegrity();
 }

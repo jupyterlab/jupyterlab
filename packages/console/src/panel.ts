@@ -79,7 +79,7 @@ export class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    session.initialize().then(() => {
+    void session.initialize().then(() => {
       this._connected = new Date();
       this._updateTitle();
     });

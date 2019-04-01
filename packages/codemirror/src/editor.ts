@@ -672,7 +672,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     let editor = this._editor;
-    Mode.ensure(mime).then(spec => {
+    // TODO: should we provide a hook for when the
+    // mode is done being set?
+    void Mode.ensure(mime).then(spec => {
       editor.setOption('mode', spec.mime);
     });
     let extraKeys = editor.getOption('extraKeys') || {};
@@ -1029,7 +1031,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
 
-    showDialog({
+    void showDialog({
       title: 'Code Editor out of Sync',
       body:
         'Please open your browser JavaScript console for bug report instructions'

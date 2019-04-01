@@ -82,7 +82,7 @@ export class FileBrowser extends Widget {
     let refresher = new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        model.refresh();
+        void model.refresh();
       },
       tooltip: 'Refresh File List'
     });
@@ -103,7 +103,7 @@ export class FileBrowser extends Widget {
     layout.addWidget(this._listing);
 
     this.layout = layout;
-    model.restore(this.id);
+    void model.restore(this.id);
   }
 
   /**
@@ -165,13 +165,18 @@ export class FileBrowser extends Widget {
       return;
     }
     this._directoryPending = true;
-    this._manager
+    // TODO: We should provide a hook into when the
+    // directory is done being created. This probably
+    // means storing a pendingDirectory promise and
+    // returning that if there is already a directory
+    // request.
+    void this._manager
       .newUntitled({
         path: this.model.path,
         type: 'directory'
       })
-      .then(model => {
-        this._listing.selectItemByName(model.name);
+      .then(async model => {
+        await this._listing.selectItemByName(model.name);
         this._directoryPending = false;
       })
       .catch(err => {
@@ -200,8 +205,8 @@ export class FileBrowser extends Widget {
   /**
    * Download the currently selected item(s).
    */
-  download(): void {
-    this._listing.download();
+  download(): Promise<void> {
+    return this._listing.download();
   }
 
   /**
@@ -263,7 +268,7 @@ export class FileBrowser extends Widget {
       }
     }
 
-    showErrorMessage(title, args).then(() => {
+    void showErrorMessage(title, args).then(() => {
       this._showingError = false;
     });
   }

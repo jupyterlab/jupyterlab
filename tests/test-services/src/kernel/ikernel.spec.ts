@@ -981,6 +981,7 @@ describe('Kernel.IKernel', () => {
 
         kernel.registerMessageHook(parentHeader.msg_id, async msg => {
           // Make this hook call asynchronous
+          // tslint:disable-next-line:await-promise
           await calls.push('last');
           return true;
         });
@@ -1058,6 +1059,7 @@ describe('Kernel.IKernel', () => {
         });
 
         future.onIOPub = async () => {
+          // tslint:disable-next-line:await-promise
           await calls.push('iopub');
         };
       });
@@ -1325,6 +1327,7 @@ describe('Kernel.IKernel', () => {
 
       kernel.registerMessageHook(future.msg.header.msg_id, async msg => {
         // Make this hook call asynchronous
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'kernel hook b']);
         return true;
       });
@@ -1335,17 +1338,21 @@ describe('Kernel.IKernel', () => {
       });
 
       kernel.registerCommTarget('commtarget', async (comm, msg) => {
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'comm open']);
 
         comm.onMsg = async msg => {
+          // tslint:disable-next-line:await-promise
           await calls.push([msg.header.msg_id, 'comm msg']);
         };
         comm.onClose = async msg => {
+          // tslint:disable-next-line:await-promise
           await calls.push([msg.header.msg_id, 'comm close']);
         };
       });
 
       future.registerMessageHook(async msg => {
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'future hook b']);
         return true;
       });
@@ -1353,19 +1360,23 @@ describe('Kernel.IKernel', () => {
       future.registerMessageHook(async msg => {
         // Delay processing until after we've checked the anyMessage results.
         await handlingBlock.promise;
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'future hook a']);
         return true;
       });
 
       future.onIOPub = async msg => {
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'iopub']);
       };
 
       future.onStdin = async msg => {
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'stdin']);
       };
 
       future.onReply = async msg => {
+        // tslint:disable-next-line:await-promise
         await calls.push([msg.header.msg_id, 'reply']);
       };
 

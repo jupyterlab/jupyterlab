@@ -61,6 +61,7 @@ describe('Kernel.IFuture', () => {
         };
 
         future.registerMessageHook(async msg => {
+          // tslint:disable-next-line:await-promise
           await calls.push('last');
           return true;
         });
