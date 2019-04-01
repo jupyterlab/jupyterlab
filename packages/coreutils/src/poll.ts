@@ -178,6 +178,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         if (this.isDisposed) {
           return;
         }
+
         this._schedule(this._tick, {
           interval: this.frequency.interval,
           payload: null,
@@ -189,6 +190,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         if (this.isDisposed) {
           return;
         }
+
         this._schedule(this._tick, {
           interval: this.frequency.interval,
           payload: null,
@@ -258,6 +260,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     if (this.isDisposed) {
       return;
     }
+
     this._state = {
       interval: Infinity, // Never.
       payload: null,
@@ -276,6 +279,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * @param frequency - Overrides applied to default frequency values.
    */
   override(frequency: Partial<IPoll.Frequency> = {}): void {
+    if (this.isDisposed) {
+      return;
+    }
+
     let { interval, jitter, max, min } = frequency;
 
     interval =
@@ -288,6 +295,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     if (interval > max) {
       throw new Error('Poll interval cannot exceed max interval length');
     }
+
     if (min > max || min > interval) {
       throw new Error('Poll min cannot exceed poll interval or poll max');
     }
@@ -307,13 +315,17 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. It will always succeed.
    */
   async refresh(): Promise<this> {
-    if (this.isDisposed) {
+    const { phase } = this.state;
+
+    if (phase === 'disposed') {
       return this;
     }
-    if (this.state.phase === 'instantiated') {
+
+    if (phase === 'instantiated') {
       return this.tick.then(_ => this.refresh()).catch(_ => this);
     }
-    if (this.state.phase !== 'refreshed') {
+
+    if (phase !== 'refreshed') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -321,6 +333,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         timestamp: new Date().getTime()
       });
     }
+
     return this;
   }
 
@@ -336,13 +349,17 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. It will always succeed.
    */
   async start(): Promise<this> {
-    if (this.isDisposed) {
+    const { phase } = this.state;
+
+    if (phase === 'disposed') {
       return this;
     }
-    if (this.state.phase === 'instantiated') {
+
+    if (phase === 'instantiated') {
       return this.tick.then(_ => this.start()).catch(_ => this);
     }
-    if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
+
+    if (phase === 'standby' || phase === 'stopped') {
       this._schedule(this._tick, {
         interval: 0, // Immediately.
         payload: null,
@@ -350,6 +367,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         timestamp: new Date().getTime()
       });
     }
+
     return this;
   }
 
@@ -365,13 +383,17 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. It will always succeed.
    */
   async stop(): Promise<this> {
-    if (this.isDisposed) {
+    const { phase } = this.state;
+
+    if (phase === 'disposed') {
       return this;
     }
-    if (this.state.phase === 'instantiated') {
+
+    if (phase === 'instantiated') {
       return this.tick.then(_ => this.stop()).catch(_ => this);
     }
-    if (this.state.phase !== 'stopped') {
+
+    if (phase !== 'stopped') {
       this._schedule(this._tick, {
         interval: Infinity, // Never.
         payload: null,
@@ -379,6 +401,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         timestamp: new Date().getTime()
       });
     }
+
     return this;
   }
 
@@ -443,10 +466,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     tick: IPoll.Tick<T, U>
   ): void {
     const next = new PromiseDelegate<this>();
-    const request = () => {
+    const execution = () => {
       if (this.isDisposed) {
         return;
       }
+
       this._execute(next);
     };
 
@@ -462,10 +486,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     this._tick = next;
     this._timeout =
       tick.interval === 0
-        ? requestAnimationFrame(request) // Execute request immediately.
+        ? requestAnimationFrame(execution) // Execute immediately.
         : tick.interval === Infinity
-          ? -1 // Never execute request.
-          : setTimeout(request, tick.interval); // Execute request later.
+          ? -1 // Never execute.
+          : setTimeout(execution, tick.interval); // Execute later.
 
     // Resolve the outstanding poll promise and emit the ticked signal.
     void outstanding.promise.then(() => {
