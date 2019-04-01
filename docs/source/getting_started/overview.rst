@@ -3,7 +3,7 @@
 Overview
 --------
 
-JupyterLab is the next-generation web-based user interface for Project Jupyter.
+JupyterLab is a next-generation web-based user interface for Project Jupyter.
 
 .. image:: ../user/images/interface_jupyterlab.png
    :align: center
