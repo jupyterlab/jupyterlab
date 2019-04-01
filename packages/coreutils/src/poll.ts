@@ -311,15 +311,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * Resolves the outstanding poll and schedules the next tick immediately.
+   * Refreshes the poll; schedules a `refreshed` tick when necessary.
    *
    * #### Notes
-   * If the poll has been instantiated but its `when` promise has not yet
-   * resolved, this call will be scheduled after the `when` promise resolves.
-   *
-   * This method schedules new ticks only when necessary.
-   *
-   * It is safe to call multiple times. It will always succeed.
+   * It is safe to call multiple times. The returned promise never rejects.
    */
   async refresh(): Promise<this> {
     const { phase } = this.state;
@@ -345,15 +340,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * Starts polling.
+   * Starts the poll; schedules a `started` tick when necessary.
    *
    * #### Notes
-   * If the poll has been instantiated but its `when` promise has not yet
-   * resolved, this call will be scheduled after the `when` promise resolves.
-   *
-   * This method schedules new ticks only when necessary.
-   *
-   * It is safe to call multiple times. It will always succeed.
+   * It is safe to call multiple times. The returned promise never rejects.
    */
   async start(): Promise<this> {
     const { phase } = this.state;
@@ -379,15 +369,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * Stops polling.
+   * Stops the poll; schedules a `stopped` tick when necessary.
    *
    * #### Notes
-   * If the poll has been instantiated but its `when` promise has not yet
-   * resolved, this will schedule a tick after the `when` promise resolves.
-   *
-   * This method schedules new ticks only when necessary.
-   *
-   * It is safe to call multiple times. It will always succeed.
+   * It is safe to call multiple times. The returned promise never rejects.
    */
   async stop(): Promise<this> {
     const { phase } = this.state;
