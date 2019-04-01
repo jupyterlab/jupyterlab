@@ -56,7 +56,7 @@ conda install -c conda-forge jupyterlab
 
 #### pip
 
-pip is a package management system for installing and updating Python packages, and comes with any Python installation. On Ubuntu and Fedora Linux, use the system package manager to install the `python3-pip` package. [\_The Hitchhiker's Guide to Python_provides guidance on how to install Python](https://docs.python-guide.org/starting/installation/); Another option is to [install Python directly from python.org](https://www.python.org/getit/). We suggest you [upgrade pip](https://pip.pypa.io/en/stable/installing/) before using it to install other programs.
+pip is a package management system for installing and updating Python packages, and comes with any Python installation. On Ubuntu, SUSE Enterprise Linux, openSUSE, and Fedora Linux, use the system package manager to install the `python3-pip` package. [\_The Hitchhiker's Guide to Python_provides guidance on how to install Python](https://docs.python-guide.org/starting/installation/); Another option is to [install Python directly from python.org](https://www.python.org/getit/). We suggest you [upgrade pip](https://pip.pypa.io/en/stable/installing/) before using it to install other programs.
 
 JupyterLab requires Python 3.5 or higher.
 
