@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd, ILayoutRestorer } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  ILayoutRestorer
+} from '@jupyterlab/application';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
@@ -11,7 +15,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { RenderedVDOM } from '@jupyterlab/vdom';
+import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
 
 /**
  * The CSS class for a VDOM icon.
@@ -28,9 +32,10 @@ export const MIME_TYPE = 'application/vdom.v1+json';
  */
 const FACTORY_NAME = 'VDOM';
 
-const plugin = {
+const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
   id: '@jupyterlab/vdom-extension:factory',
   requires: [IRenderMimeRegistry, INotebookTracker, ILayoutRestorer],
+  provides: IVDOMTracker,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
@@ -103,6 +108,8 @@ const plugin = {
       }),
       name: widget => widget.context.path
     });
+
+    return tracker;
   }
 };
 

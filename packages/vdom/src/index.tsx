@@ -5,15 +5,17 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { IClientSession, IInstanceTracker } from '@jupyterlab/apputils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Kernel } from '@jupyterlab/services';
 
 import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
+
+import { Token } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
 
@@ -25,6 +27,18 @@ import '../style/index.css';
  * The CSS class to add to the VDOM Widget.
  */
 const CSS_CLASS = 'jp-RenderedVDOM';
+
+/**
+ * A class that tracks VDOM widgets.
+ */
+export interface IVDOMTracker extends IInstanceTracker<MimeDocument> {}
+
+/**
+ * The VDOM tracker token.
+ */
+export const IVDOMTracker = new Token<IVDOMTracker>(
+  '@jupyterlab/vdom:IVDOMTracker'
+);
 
 /**
  * A renderer for declarative virtual DOM content.
