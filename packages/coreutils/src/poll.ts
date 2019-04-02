@@ -170,7 +170,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     this._standby = options.standby || Private.DEFAULT_STANDBY;
     this._state = {
       ...this.state,
-      interval: this.frequency.interval,
       timestamp: new Date().getTime()
     };
 
@@ -182,7 +181,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         }
 
         this.schedule({
-          interval: this.frequency.interval,
+          interval: 0, // Immediately.
           payload: null,
           phase: 'instantiated-resolved',
           timestamp: new Date().getTime()
@@ -194,7 +193,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         }
 
         this.schedule({
-          interval: this.frequency.interval,
+          interval: 0, // Immediately.
           payload: null,
           phase: 'instantiated-rejected',
           timestamp: new Date().getTime()

@@ -220,7 +220,7 @@ describe('Poll', () => {
     it('should resolve after a tick', async () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 400, jitter: 0 },
+        frequency: { interval: 2000, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'instantiated-resolved resolved';
@@ -230,8 +230,8 @@ describe('Poll', () => {
         poll.tick.then(tock).catch(() => undefined);
       };
       void poll.tick.then(tock);
-      await sleep(750);
-      expect(ticker.join(' ')).to.eql(expected);
+      await sleep(200); // Sleep for less than the interval.
+      expect(ticker.join(' ')).to.equal(expected);
     });
   });
 
@@ -247,14 +247,14 @@ describe('Poll', () => {
       const ticker: IPoll.Phase[] = [];
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
-        frequency: { interval: 400, jitter: 0 },
+        frequency: { interval: 2000, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#ticked-1'
       });
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
       });
-      await sleep(750);
-      expect(ticker.join(' ')).to.eql(expected);
+      await sleep(200); // Sleep for less than the interval.
+      expect(ticker.join(' ')).to.equal(expected);
     });
 
     it('should emit when the poll ticks after `when` rejects', async () => {
@@ -263,7 +263,7 @@ describe('Poll', () => {
       const promise = Promise.reject();
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 400, jitter: 0 },
+        frequency: { interval: 2000, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#ticked-2',
         when: promise
       });
@@ -271,8 +271,8 @@ describe('Poll', () => {
         ticker.push(poll.state.phase);
       });
       await promise.catch(() => undefined);
-      await sleep(750);
-      expect(ticker.join(' ')).to.eql(expected);
+      await sleep(200); // Sleep for less than the interval.
+      expect(ticker.join(' ')).to.equal(expected);
     });
 
     it('should emit a tick identical to the poll state', async () => {
