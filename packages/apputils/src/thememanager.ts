@@ -152,6 +152,17 @@ export class ThemeManager {
   }
 
   /**
+   * Test whether a given theme styles scrollbars,
+   * and if the user has scrollbar styling enabled.
+   */
+  themeScrollbars(name: string): boolean {
+    return (
+      !!this._settings.composite['theme-scrollbars'] &&
+      !!this._themes[name].themeScrollbars
+    );
+  }
+
+  /**
    * Handle the current settings.
    */
   private _loadSettings(): void {
@@ -245,12 +256,22 @@ export class ThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
-        Private.fitAll(this._host);
-        splash.dispose();
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
           newValue: theme
+        });
+
+        // Need to force a redraw of the app here to avoid a Chrome rendering
+        // bug that can leave the scrollbars in an invalid state
+        this._host.hide();
+
+        // If we hide/show the widget too quickly, no redraw will happen.
+        // requestAnimationFrame delays until after the next frame render.
+        requestAnimationFrame(() => {
+          this._host.show();
+          Private.fitAll(this._host);
+          splash.dispose();
         });
       })
       .catch(reason => {
@@ -332,6 +353,12 @@ export namespace ThemeManager {
      * UI depending upon the current theme.
      */
     isLight: boolean;
+
+    /**
+     * Whether the theme includes styling for the scrollbar.
+     * If set to false, this theme will leave the native scrollbar untouched.
+     */
+    themeScrollbars?: boolean;
 
     /**
      * Load the theme.
