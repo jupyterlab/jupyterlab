@@ -7,6 +7,20 @@ import { IPoll, Poll } from '@jupyterlab/coreutils/src';
 
 import { sleep } from '@jupyterlab/testutils';
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
+class TestPoll<T = any, U = any> extends Poll<T, U> {
+  protected schedule(
+    tick: IPoll.Tick<T, U>,
+    outstanding?: PromiseDelegate<this>
+  ): void {
+    super.schedule(tick, outstanding);
+    this.scheduled.push(tick.phase);
+  }
+
+  scheduled: string[] = [];
+}
+
 describe('Poll', () => {
   describe('#constructor()', () => {
     let poll: Poll;
@@ -46,6 +60,92 @@ describe('Poll', () => {
       expect(poll.state.phase).to.equal('instantiated');
       await promise.catch(() => undefined);
       expect(poll.state.phase).to.equal('instantiated-rejected');
+    });
+
+    describe('#options.frequency', () => {
+      let poll: Poll;
+
+      afterEach(() => {
+        poll.dispose();
+      });
+
+      it('should set frequency interval', () => {
+        const interval = 9000;
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          frequency: { interval },
+          name: '@jupyterlab/test-coreutils:Poll#frequency:interval-1'
+        });
+        expect(poll.frequency.interval).to.equal(interval);
+      });
+
+      it('should default frequency interval to `1000`', () => {
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          frequency: {},
+          name: '@jupyterlab/test-coreutils:Poll#frequency:interval-2'
+        });
+        expect(poll.frequency.interval).to.equal(1000);
+      });
+
+      it('should set jitter', () => {
+        const jitter = false;
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          frequency: { jitter },
+          name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-1'
+        });
+        expect(poll.frequency.jitter).to.equal(jitter);
+      });
+
+      it('should default jitter to `0`', () => {
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-2'
+        });
+        expect(poll.frequency.jitter).to.equal(0);
+      });
+
+      it('should set max value', () => {
+        const max = 200000;
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          frequency: { max },
+          name: '@jupyterlab/test-coreutils:Poll#max-1'
+        });
+        expect(poll.frequency.max).to.equal(200000);
+      });
+
+      it('should default max to 10x the interval', () => {
+        const interval = 500;
+        const max = 10 * interval;
+        poll = new Poll({
+          frequency: { interval },
+          factory: () => Promise.resolve(),
+          name: '@jupyterlab/test-coreutils:Poll#frequency:max-2'
+        });
+        expect(poll.frequency.max).to.equal(max);
+      });
+
+      it('should set min', () => {
+        const min = 250;
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          frequency: { min },
+          name: '@jupyterlab/test-coreutils:Poll#min-1'
+        });
+        expect(poll.frequency.min).to.equal(min);
+      });
+
+      it('should default min to `100`', () => {
+        const min = 100;
+        poll = new Poll({
+          factory: () => Promise.resolve(),
+          name: '@jupyterlab/test-coreutils:Poll#min-2'
+        });
+        expect(poll.frequency.min).to.equal(min);
+        poll.dispose();
+      });
     });
   });
 
@@ -89,101 +189,6 @@ describe('Poll', () => {
       });
       poll.dispose();
       expect(disposed).to.equal(true);
-    });
-  });
-
-  describe('#frequency', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
-    it('should set frequency interval', () => {
-      const interval = 9000;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        frequency: { interval },
-        name: '@jupyterlab/test-coreutils:Poll#frequency:interval-1'
-      });
-      expect(poll.frequency.interval).to.equal(interval);
-    });
-
-    it('should default frequency interval to `1000`', () => {
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#frequency:interval-2'
-      });
-      expect(poll.frequency.interval).to.equal(1000);
-    });
-
-    it('should set jitter quantity', () => {
-      const jitter = 0.5;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        frequency: { jitter },
-        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-1'
-      });
-      expect(poll.frequency.jitter).to.equal(jitter);
-    });
-
-    it('should default jitter quantity to `0`', () => {
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-2'
-      });
-      expect(poll.frequency.jitter).to.equal(0);
-    });
-
-    it('should accept jitter boolean', () => {
-      const jitter = false;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        frequency: { jitter },
-        name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-3'
-      });
-      expect(poll.frequency.jitter).to.equal(jitter);
-    });
-
-    it('should set max value', () => {
-      const max = 200000;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        frequency: { max },
-        name: '@jupyterlab/test-coreutils:Poll#max-1'
-      });
-      expect(poll.frequency.max).to.equal(200000);
-    });
-
-    it('should default max to 10x the interval', () => {
-      const interval = 500;
-      const max = 10 * interval;
-      poll = new Poll({
-        frequency: { interval },
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#frequency:max-2'
-      });
-      expect(poll.frequency.max).to.equal(max);
-    });
-
-    it('should set min', () => {
-      const min = 250;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        frequency: { min },
-        name: '@jupyterlab/test-coreutils:Poll#min-1'
-      });
-      expect(poll.frequency.min).to.equal(min);
-    });
-
-    it('should default min to `100`', () => {
-      const min = 100;
-      poll = new Poll({
-        factory: () => Promise.resolve(),
-        name: '@jupyterlab/test-coreutils:Poll#min-2'
-      });
-      expect(poll.frequency.min).to.equal(min);
-      poll.dispose();
     });
   });
 
@@ -308,27 +313,6 @@ describe('Poll', () => {
       }
       poll.dispose();
       expect(rejected).to.equal(true);
-    });
-  });
-
-  describe('#override()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
-    it('should override the default frequency parameters', () => {
-      const interval = 25000;
-      const jitter = 0.025;
-      const max = 25 * interval;
-      const min = 250;
-      poll = new Poll({
-        name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
-        factory: () => Promise.resolve()
-      });
-      poll.override({ interval, jitter, max, min });
-      expect(poll.frequency).to.eql({ interval, jitter, max, min });
     });
   });
 
@@ -460,6 +444,27 @@ describe('Poll', () => {
       await poll.stop();
       await poll.stop();
       expect(ticker.join(' ')).to.equal(expected);
+    });
+  });
+
+  describe('#schedule()', () => {
+    let poll: TestPoll;
+
+    afterEach(() => {
+      poll.dispose();
+    });
+
+    it('should schedule a poll tick', async () => {
+      const expected = 'instantiated-resolved stopped started resolved';
+      poll = new TestPoll({
+        name: '@jupyterlab/test-coreutils:Poll#schedule()-1',
+        frequency: { interval: 100 },
+        factory: () => Promise.resolve()
+      });
+      await poll.stop();
+      await poll.start();
+      await poll.tick;
+      expect(poll.scheduled.join(' ')).to.equal(expected);
     });
   });
 });
