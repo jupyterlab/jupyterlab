@@ -33,7 +33,7 @@ const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
 const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
 const FOCUSSED_INPUT = 'jp-DocumentSearch-focussed-input';
-
+const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 
@@ -56,9 +56,6 @@ interface IReplaceEntryProps {
   onReplaceAll: Function;
   onReplaceKeydown: Function;
   onChange: Function;
-  onInputFocus: Function;
-  onInputBlur: Function;
-  inputFocussed: boolean;
   replaceText: string;
 }
 
@@ -100,7 +97,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           value={this.props.inputText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
-          tabIndex={1}
+          tabIndex={2}
           onFocus={e => this.props.onInputFocus()}
           onBlur={e => this.props.onInputBlur()}
           ref="searchInputNode"
@@ -108,7 +105,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onCaseSensitiveToggled()}
-          tabIndex={2}
+          tabIndex={4}
         >
           <span
             className={`${caseButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
@@ -118,7 +115,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onRegexToggled()}
-          tabIndex={3}
+          tabIndex={5}
         >
           <span
             className={`${regexButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
@@ -144,17 +141,19 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
           onChange={e => this.props.onChange(e)}
-          onFocus={e => this.props.onInputFocus()}
-          onBlur={e => this.props.onInputBlur()}
+          tabIndex={3}
+          ref="replaceInputNode"
         />
         <button
           className={REPLACE_CURRENT_BUTTON_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
+          tabIndex={9}
         >
           Replace
         </button>
         <button
           className={REPLACE_ALL_BUTTON_CLASS}
+          tabIndex={10}
           onClick={() => this.props.onReplaceAll()}
         >
           Replace All
@@ -170,13 +169,12 @@ interface IUpDownProps {
 }
 
 function UpDownButtons(props: IUpDownProps) {
-  console.log('rendering updown, props: ', props);
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
-        tabIndex={4}
+        tabIndex={6}
       >
         <span
           className={`${UP_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -186,7 +184,7 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHightlightNext()}
-        tabIndex={5}
+        tabIndex={7}
       >
         <span
           className={`${DOWN_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -316,7 +314,9 @@ class SearchOverlay extends React.Component<
   );
 
   private _onReplaceToggled() {
-    this.setState({ replaceEntryShown: !this.state.replaceEntryShown });
+    this.setState({
+      replaceEntryShown: !this.state.replaceEntryShown
+    });
   }
 
   private _onSearchInputFocus() {
@@ -331,30 +331,24 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _onReplaceInputFocus() {
-    if (!this.state.replaceInputFocussed) {
-      this.setState({ replaceInputFocussed: true });
-    }
-  }
-
-  private _onReplaceInputBlur() {
-    if (this.state.replaceInputFocussed) {
-      this.setState({ replaceInputFocussed: false });
-    }
-  }
-
   render() {
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? null : (
           <button
-            className={
-              this.state.replaceEntryShown
-                ? REPLACE_TOGGLE_EXPANDED
-                : REPLACE_TOGGLE_COLLAPSED
-            }
+            className={TOGGLE_WRAPPER}
             onClick={() => this._onReplaceToggled()}
-          />
+            tabIndex={1}
+          >
+            <span
+              className={`${
+                this.state.replaceEntryShown
+                  ? REPLACE_TOGGLE_EXPANDED
+                  : REPLACE_TOGGLE_COLLAPSED
+              } ${BUTTON_CONTENT_CLASS}`}
+              tabIndex={-1}
+            />
+          </button>
         )}
         <SearchEntry
           useRegex={this.props.overlayState.useRegex}
@@ -386,7 +380,7 @@ class SearchOverlay extends React.Component<
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
-          tabIndex={6}
+          tabIndex={8}
         >
           <span
             className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -404,9 +398,7 @@ class SearchOverlay extends React.Component<
             }
             onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
             replaceText={this.state.replaceText}
-            onInputFocus={this._onReplaceInputFocus.bind(this)}
-            onInputBlur={this._onReplaceInputBlur.bind(this)}
-            inputFocussed={this.state.replaceInputFocussed}
+            ref="replaceEntry"
           />
         ) : null}
       </div>,
