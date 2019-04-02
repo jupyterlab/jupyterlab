@@ -1244,7 +1244,7 @@ export namespace CodeMirrorEditor {
     lineWiseCopyCut: true,
     scrollPastEnd: false,
     styleActiveLine: false,
-    styleSelectedText: false,
+    styleSelectedText: true,
     selectionPointer: false,
     rulers: [],
     foldGutter: false

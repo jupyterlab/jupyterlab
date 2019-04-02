@@ -32,7 +32,7 @@
       "type": "boolean",
       "title": "Style Selected Text",
       "description": "Value is boolean",
-      "default": false
+      "default": true
     },
     "selectionPointer": {
       "type": ["boolean", "string"],
