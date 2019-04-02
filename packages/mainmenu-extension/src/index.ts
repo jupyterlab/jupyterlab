@@ -92,8 +92,6 @@ export namespace CommandIDs {
 
   export const runAll = 'runmenu:run-all';
 
-  export const runAllMarkdown = 'runmenu:run-all-markdown';
-
   export const restartAndRunAll = 'runmenu:restart-and-run-all';
 
   export const runAbove = 'runmenu:run-above';
@@ -694,13 +692,11 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
   });
 
-  const runAllGroup = [
-    CommandIDs.runAll,
-    CommandIDs.restartAndRunAll,
-    CommandIDs.runAllMarkdown
-  ].map(command => {
-    return { command };
-  });
+  const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
+    command => {
+      return { command };
+    }
+  );
 
   menu.addGroup([{ command: CommandIDs.run }], 0);
   menu.addGroup(runAllGroup, 999);

@@ -2088,11 +2088,7 @@ function populateMenus(
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
   // Add a renderAllMarkdown group to the run menu.
-  const renderAllMarkdown = [
-    CommandIDs.renderAllMarkdown,
-    CommandIDs.run,
-    CommandIDs.runInConsole
-  ].map(command => {
+  const renderAllMarkdown = [CommandIDs.renderAllMarkdown].map(command => {
     return { command };
   });
   // Add a run+insert and run+don't advance group to the run menu.
