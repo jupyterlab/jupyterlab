@@ -195,10 +195,12 @@ only the desired children.
 When in doubt, there is little harm done in parents adding selectors to
 children.
 
-Commonly useful CSS selectors
+Commonly used CSS selectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The following common CSS class names are treated as public.
+We use CSS selectors to decide which context menu items to display and what command
+to invoke when a keyboard shortcut is used. The following common CSS selectors are 
+intended to be used for adding context menu items and keyboard shortcuts.
 
 **CSS classes that target widgets and their children**
 -  ``jp-Activity``: applied to elements in the main work area
@@ -224,10 +226,10 @@ The following common CSS class names are treated as public.
 -  ``jp-mod-has-primary-selection``: applied to editors that have a primary selection
 -  ``jp-mod-in-leading-whitespace``: applied to editors that have a selection within the beginning whitespace of a line
 -  ``jp-mod-tooltip``: applied to the body when a tooltip exists on the page
-**CSS classes that describe elements**
+**CSS selectors that target data attributes**
 -  ``[data-jp-code-runner]``: applied to widgets that can run code
--  ``[data-jp-interaction-mode=”terminal”]``: applied when a terminal is in use
--  ``[data-jp-interaction-mode=”notebook”]``: applied when a notebook is in use
+-  ``[data-jp-interaction-mode=”terminal”]``: applied when a code console is in terminal mode
+-  ``[data-jp-interaction-mode=”notebook”]``: applied when a code console is in notebook mode
 -  ``[data-jp-isdir]``: applied to describe whether file browser items are directories
 -  ``[data-jp-undoer]``: applied to widgets that can undo
 -  ``[data-type]``: applied to describe the type of element, such as “document-title”, ”submenu”, ”inline”
