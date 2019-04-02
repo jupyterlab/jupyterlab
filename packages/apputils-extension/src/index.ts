@@ -149,6 +149,14 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       currentTheme = args.newValue;
       app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
       app.shell.dataset.themeName = currentTheme;
+      if (
+        app.shell.dataset.themeScrollbars !==
+        String(manager.themeScrollbars(currentTheme))
+      ) {
+        app.shell.dataset.themeScrollbars = String(
+          manager.themeScrollbars(currentTheme)
+        );
+      }
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 
