@@ -14,7 +14,7 @@
       "type": "boolean",
       "title": "Scrollbar Theming",
       "description": "Enable/disable styling of the application scrollbars",
-      "default": true
+      "default": false
     }
   },
   "type": "object"
