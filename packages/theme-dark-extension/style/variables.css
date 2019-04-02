@@ -327,6 +327,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-input-background: var(--md-grey-800);
   --jp-input-border-color: var(--jp-border-color1);
   --jp-input-active-border-color: var(--jp-brand-color1);
+  --jp-input-active-box-shadow-color: rgba(19, 124, 189, 0.3);
 
   /* General editor styles */
 
