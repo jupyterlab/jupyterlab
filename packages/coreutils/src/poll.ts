@@ -151,7 +151,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    const base = this.frequency;
+    const base = Private.DEFAULT_FREQUENCY;
     const override: Partial<IPoll.Frequency> = options.frequency || {};
     const interval = 'interval' in override ? override.interval : base.interval;
     const jitter = 'jitter' in override ? override.jitter : base.jitter;
@@ -164,7 +164,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     const min = 'min' in override ? override.min : base.min;
 
     this.frequency = { interval, jitter, max, min };
-    this.name = options.name || 'unknown';
+    this.name = options.name || Private.DEFAULT_NAME;
 
     this._factory = options.factory;
     this._standby = options.standby || Private.DEFAULT_STANDBY;
@@ -223,7 +223,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     return this._frequency;
   }
   set frequency(frequency: IPoll.Frequency) {
-    if (this.isDisposed || JSONExt.deepEqual(frequency, this.frequency)) {
+    if (this.isDisposed || JSONExt.deepEqual(frequency, this.frequency || {})) {
       return;
     }
 
@@ -510,7 +510,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
   private _disposed = new Signal<this, void>(this);
   private _factory: Poll.Factory<T, U>;
-  private _frequency = Private.DEFAULT_FREQUENCY;
+  private _frequency: IPoll.Frequency;
   private _standby: Poll.Standby | (() => boolean | Poll.Standby);
   private _state: IPoll.Tick<T, U> = Private.DEFAULT_TICK;
   private _tick = new PromiseDelegate<this>();
@@ -565,7 +565,7 @@ export namespace Poll {
      *
      * _max_ defaults to `10 * interval`.
      *
-     * _min_ defaults to `250`.
+     * _min_ defaults to `100`.
      */
     frequency?: Partial<IPoll.Frequency>;
 
@@ -607,6 +607,11 @@ namespace Private {
     max: 10 * 1000,
     min: 100
   };
+
+  /**
+   * The default poll name.
+   */
+  export const DEFAULT_NAME = 'unknown';
 
   /**
    * The default poll standby behavior.
