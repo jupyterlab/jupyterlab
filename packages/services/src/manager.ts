@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IPoll } from '@jupyterlab/coreutils';
+import { Poll } from '@jupyterlab/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -244,6 +244,6 @@ export namespace ServiceManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: IPoll.Standby;
+    standby?: Poll.Standby;
   }
 }

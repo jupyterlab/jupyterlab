@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IPoll, Poll } from '@jupyterlab/coreutils';
+import { Poll } from '@jupyterlab/coreutils';
 
 import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
@@ -382,6 +382,6 @@ export namespace SessionManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: IPoll.Standby;
+    standby?: Poll.Standby;
   }
 }
