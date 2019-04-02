@@ -15,6 +15,8 @@ import { Signal } from '@phosphor/signaling';
 
 import { showDialog } from '@jupyterlab/apputils';
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { UUID } from '@phosphor/coreutils';
@@ -123,9 +125,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
-    this._timer = window.setInterval(() => {
-      this._checkSync();
-    }, 3000);
+    this._poll = new Poll({
+      factory: async () => {
+        this._checkSync();
+      },
+      frequency: { interval: 3000, jitter: false },
+      standby: () => {
+        // If changed, only stand by when hidden, otherwise always stand by.
+        return this._lastChange ? 'when-hidden' : true;
+      }
+    });
 
     // Connect to changes.
     model.value.changed.connect(
@@ -264,7 +273,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
-    window.clearInterval(this._timer);
+    this._poll.dispose();
     Signal.clearData(this);
   }
 
@@ -1068,7 +1077,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _needsRefresh = false;
   private _isDisposed = false;
   private _lastChange: CodeMirror.EditorChange | null = null;
-  private _timer = -1;
+  private _poll: Poll;
 }
 
 /**
