@@ -34,6 +34,7 @@ const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
 const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
 const FOCUSSED_INPUT = 'jp-DocumentSearch-focussed-input';
 const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
+const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 
@@ -334,7 +335,9 @@ class SearchOverlay extends React.Component<
   render() {
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
-        {this.props.isReadOnly ? null : (
+        {this.props.isReadOnly ? (
+          <div className={TOGGLE_PLACEHOLDER} />
+        ) : (
           <button
             className={TOGGLE_WRAPPER}
             onClick={() => this._onReplaceToggled()}
