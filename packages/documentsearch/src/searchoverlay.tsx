@@ -78,7 +78,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           ref="searchInputNode"
         />
         <button
-          className={`${BUTTON_WRAPPER_CLASS}`}
+          className={BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onCaseSensitiveToggled()}
           tabIndex={2}
         >
