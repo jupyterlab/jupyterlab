@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { JSONExt, PromiseDelegate } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
- * A poll that calls an asynchronous function with each tick.
+ * A readonly poll that calls an asynchronous function with each tick.
  *
  * @typeparam T - The resolved type of the factory's promises.
  * Defaults to `any`.
@@ -38,11 +38,6 @@ export interface IPoll<T = any, U = any> {
   readonly name: string;
 
   /**
-   * Indicates when the poll switches to standby.
-   */
-  readonly standby: IPoll.Standby;
-
-  /**
    * The poll state, which is the content of the current poll tick.
    */
   readonly state: IPoll.Tick<T, U>;
@@ -62,17 +57,6 @@ export interface IPoll<T = any, U = any> {
  * A namespace for `IPoll` types.
  */
 export namespace IPoll {
-  /**
-   * A promise factory that returns an individual poll request.
-   *
-   * @typeparam T - The resolved type of the factory's promises.
-   * Defaults to `any`.
-   *
-   * @typeparam U - The rejected type of the factory's promises.
-   * Defaults to `any`.
-   */
-  export type Factory<T = any, U = any> = (tick: Tick<T, U>) => Promise<T>;
-
   /**
    * The polling frequency parameters.
    */
@@ -113,11 +97,6 @@ export namespace IPoll {
     | 'standby'
     | 'started'
     | 'stopped';
-
-  /**
-   * Indicates when the poll switches to standby.
-   */
-  export type Standby = 'never' | 'when-hidden';
 
   /**
    * Definition of poll state at any given tick.
@@ -172,12 +151,23 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * @param options - The poll instantiation options.
    */
   constructor(options: Poll.IOptions<T, U>) {
-    this.factory = options.factory;
-    this.name = options.name || 'unknown';
-    this.standby = options.standby || 'when-hidden';
+    const base = this.frequency;
+    const override: Partial<IPoll.Frequency> = options.frequency || {};
+    const interval = 'interval' in override ? override.interval : base.interval;
+    const jitter = 'jitter' in override ? override.jitter : base.jitter;
+    const max =
+      'max' in override
+        ? override.max
+        : 'interval' in override
+          ? 10 * interval
+          : base.max;
+    const min = 'min' in override ? override.min : base.min;
 
-    // Override frequency parameters and set initial state.
-    this.override(options.frequency);
+    this.frequency = { interval, jitter, max, min };
+    this.name = options.name || 'unknown';
+
+    this._factory = options.factory;
+    this._standby = options.standby || Private.DEFAULT_STANDBY;
     this._state = {
       ...this.state,
       interval: this.frequency.interval,
@@ -191,7 +181,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        this.schedule(this._tick, {
+        this.schedule({
           interval: this.frequency.interval,
           payload: null,
           phase: 'instantiated-resolved',
@@ -203,13 +193,14 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        this.schedule(this._tick, {
+        this.schedule({
           interval: this.frequency.interval,
           payload: null,
           phase: 'instantiated-rejected',
           timestamp: new Date().getTime()
         });
-        console.warn(`Poll (${this.name}) starting despite rejection.`, reason);
+
+        console.warn(`Poll (${this.name}) started despite rejection.`, reason);
       });
   }
 
@@ -217,11 +208,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * The name of the poll.
    */
   readonly name: string;
-
-  /**
-   * Indicates when the poll switches to standby.
-   */
-  readonly standby: IPoll.Standby;
 
   /**
    * A signal emitted when the poll is disposed.
@@ -236,12 +222,46 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   get frequency(): IPoll.Frequency {
     return this._frequency;
   }
+  set frequency(frequency: IPoll.Frequency) {
+    if (this.isDisposed || JSONExt.deepEqual(frequency, this.frequency)) {
+      return;
+    }
+
+    let { interval, jitter, max, min } = frequency;
+
+    interval = Math.round(Math.abs(interval));
+    max = Math.round(Math.abs(max));
+    min = Math.round(Math.abs(min));
+
+    if (interval > max) {
+      throw new Error('Poll interval cannot exceed max interval length');
+    }
+
+    if (min > max || min > interval) {
+      throw new Error('Poll min cannot exceed poll interval or poll max');
+    }
+
+    this._frequency = { interval, jitter, max, min };
+  }
 
   /**
    * Whether the poll is disposed.
    */
   get isDisposed(): boolean {
     return this.state.phase === 'disposed';
+  }
+
+  /**
+   * Indicates when the poll switches to standby.
+   */
+  get standby(): Poll.Standby | (() => boolean | Poll.Standby) {
+    return this._standby;
+  }
+  set standby(standby: Poll.Standby | (() => boolean | Poll.Standby)) {
+    if (this.isDisposed || this.standby === standby) {
+      return;
+    }
+    this._standby = standby;
   }
 
   /**
@@ -273,41 +293,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    this._state = { ...Private.DISPOSED, timestamp: new Date().getTime() };
+    this._state = { ...Private.DISPOSED_TICK, timestamp: new Date().getTime() };
     this.tick.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
     this._disposed.emit();
     Signal.clearData(this);
-  }
-
-  /**
-   * Override default polling frequency parameters.
-   *
-   * @param frequency - Overrides applied to default frequency values.
-   */
-  override(frequency: Partial<IPoll.Frequency> = {}): void {
-    if (this.isDisposed) {
-      return;
-    }
-
-    let { interval, jitter, max, min } = frequency;
-
-    interval =
-      typeof interval === 'number' ? Math.round(Math.abs(interval)) : 1000;
-    jitter =
-      typeof jitter === 'boolean' || typeof jitter === 'number' ? jitter : 0;
-    max = typeof max === 'number' ? Math.round(Math.abs(max)) : 10 * interval;
-    min = typeof min === 'number' ? Math.round(Math.abs(min)) : 100;
-
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
-    }
-
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
-
-    this._frequency = { interval, jitter, max, min };
   }
 
   /**
@@ -328,7 +318,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     if (phase !== 'refreshed') {
-      this.schedule(this._tick, {
+      this.schedule({
         interval: 0, // Immediately.
         payload: null,
         phase: 'refreshed',
@@ -357,7 +347,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     if (phase === 'standby' || phase === 'stopped') {
-      this.schedule(this._tick, {
+      this.schedule({
         interval: 0, // Immediately.
         payload: null,
         phase: 'started',
@@ -386,7 +376,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     if (phase !== 'stopped') {
-      this.schedule(this._tick, {
+      this.schedule({
         interval: Infinity, // Never.
         payload: null,
         phase: 'stopped',
@@ -398,75 +388,26 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * The poll's promise factory invoked when the poll ticks.
-   */
-  protected readonly factory: IPoll.Factory<T, U>;
-
-  /**
-   * Execute an outstanding poll tick promise.
-   *
-   * @param outstanding - The outstanding promise to resolve after execution.
-   */
-  protected execute(outstanding: PromiseDelegate<this>): void {
-    const standby =
-      this.standby === 'when-hidden'
-        ? !!(typeof document !== 'undefined' && document && document.hidden)
-        : false;
-
-    // If in standby mode schedule next tick without calling the factory.
-    if (standby) {
-      const { interval, jitter, max, min } = this.frequency;
-      this.schedule(outstanding, {
-        interval: Private.jitter(interval, jitter, max, min),
-        payload: null,
-        phase: 'standby',
-        timestamp: new Date().getTime()
-      });
-
-      return;
-    }
-
-    // Execute a new promise generated by the factory.
-    this.factory(this.state)
-      .then((resolved: T) => {
-        if (this.isDisposed || this.tick !== outstanding.promise) {
-          return;
-        }
-
-        const { interval, jitter, max, min } = this.frequency;
-        this.schedule(outstanding, {
-          interval: Private.jitter(interval, jitter, max, min),
-          payload: resolved,
-          phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
-          timestamp: new Date().getTime()
-        });
-      })
-      .catch((rejected: U) => {
-        if (this.isDisposed || this.tick !== outstanding.promise) {
-          return;
-        }
-
-        const { jitter, max, min } = this.frequency;
-        const increased = Math.min(this.state.interval * 2, max);
-        this.schedule(outstanding, {
-          interval: Private.jitter(increased, jitter, max, min),
-          payload: rejected,
-          phase: 'rejected',
-          timestamp: new Date().getTime()
-        });
-      });
-  }
-
-  /**
    * Schedule the next poll tick and resolve the outstanding promise.
    *
-   * @param outstanding - The outstanding poll promise to resolve.
-   *
    * @param tick - The new tick data to populate the poll state.
+   *
+   * @param outstanding - The outstanding poll promise to resolve.
+   * Defaults to currently outstanding promise.
+   *
+   * #### Notes
+   * This method is protected to allow sub-classes to implement methods that can
+   * schedule poll ticks.
+   *
+   * This method synchronously modifies poll state so it should be invoked with
+   * consideration given to the poll state that will be overwritten. It will
+   * typically be invoked in a method that returns a promise, allowing the
+   * caller to e.g. `await this.tick` if `this.state.phase === 'instantiated'`
+   * before scheduling a new tick.
    */
   protected schedule(
-    outstanding: PromiseDelegate<this>,
-    tick: IPoll.Tick<T, U>
+    tick: IPoll.Tick<T, U>,
+    outstanding: PromiseDelegate<this> = this._tick
   ): void {
     const next = new PromiseDelegate<this>();
     const execution = () => {
@@ -474,7 +415,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         return;
       }
 
-      this.execute(next);
+      this._execute(next);
     };
 
     // Clear the schedule if possible.
@@ -501,18 +442,100 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     outstanding.resolve(this);
   }
 
+  /**
+   * Execute an outstanding poll tick promise.
+   *
+   * @param outstanding - The outstanding promise to resolve after execution.
+   */
+  private _execute(outstanding: PromiseDelegate<this>): void {
+    // If in standby mode schedule next tick without calling the factory.
+    let standby =
+      typeof this.standby === 'function' ? this.standby() : this.standby;
+    standby =
+      standby === 'never'
+        ? false
+        : standby === 'when-hidden'
+          ? !!(typeof document !== 'undefined' && document && document.hidden)
+          : true;
+    if (standby) {
+      const { interval, jitter, max, min } = this.frequency;
+      this.schedule(
+        {
+          interval: Private.jitter(interval, jitter, max, min),
+          payload: null,
+          phase: 'standby',
+          timestamp: new Date().getTime()
+        },
+        outstanding
+      );
+      return;
+    }
+
+    // Execute a new promise generated by the factory.
+    this._factory(this.state)
+      .then((resolved: T) => {
+        if (this.isDisposed || this.tick !== outstanding.promise) {
+          return;
+        }
+
+        const { interval, jitter, max, min } = this.frequency;
+        this.schedule(
+          {
+            interval: Private.jitter(interval, jitter, max, min),
+            payload: resolved,
+            phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
+            timestamp: new Date().getTime()
+          },
+          outstanding
+        );
+      })
+      .catch((rejected: U) => {
+        if (this.isDisposed || this.tick !== outstanding.promise) {
+          return;
+        }
+
+        const { jitter, max, min } = this.frequency;
+        const increased = Math.min(this.state.interval * 2, max);
+        this.schedule(
+          {
+            interval: Private.jitter(increased, jitter, max, min),
+            payload: rejected,
+            phase: 'rejected',
+            timestamp: new Date().getTime()
+          },
+          outstanding
+        );
+      });
+  }
+
   private _disposed = new Signal<this, void>(this);
-  private _frequency: IPoll.Frequency;
-  private _state: IPoll.Tick<T, U> = Private.INITIAL;
+  private _factory: Poll.Factory<T, U>;
+  private _frequency = Private.DEFAULT_FREQUENCY;
+  private _standby: Poll.Standby | (() => boolean | Poll.Standby);
+  private _state: IPoll.Tick<T, U> = Private.DEFAULT_TICK;
   private _tick = new PromiseDelegate<this>();
   private _ticked = new Signal<this, IPoll.Tick<T, U>>(this);
   private _timeout = -1;
 }
 
 /**
- * A namespace for `Poll` interfaces.
+ * A namespace for `Poll` types and interfaces.
  */
 export namespace Poll {
+  /**
+   * A promise factory that returns an individual poll request.
+   *
+   * @typeparam T - The resolved type of the factory's promises.
+   *
+   * @typeparam U - The rejected type of the factory's promises.
+   */
+  export type Factory<T, U> = (tick: IPoll.Tick<T, U>) => Promise<T>;
+
+  /**
+   * Indicates when the poll switches to standby.
+   */
+  export type Standby = 'never' | 'when-hidden';
+
   /**
    * Instantiation options for polls.
    *
@@ -526,7 +549,7 @@ export namespace Poll {
     /**
      * A factory function that is passed a poll tick and returns a poll promise.
      */
-    factory: IPoll.Factory<T, U>;
+    factory: Factory<T, U>;
 
     /**
      * The polling frequency parameters.
@@ -553,10 +576,16 @@ export namespace Poll {
     name?: string;
 
     /**
-     * Indicates when the poll switches to standby.
+     * Indicates when the poll switches to standby or a function that returns
+     * a boolean or a `Poll.Standby` value to indicate whether to stand by.
      * Defaults to `'when-hidden'`.
+     *
+     * #### Notes
+     * If a function is passed in, for any given context, it should be
+     * idempotent and safe to call multiple times. It will be called before each
+     * tick execution, but may be called by clients as well.
      */
-    standby?: IPoll.Standby;
+    standby?: Standby | (() => boolean | Standby);
 
     /**
      * If set, a promise which must resolve (or reject) before polling begins.
@@ -570,9 +599,24 @@ export namespace Poll {
  */
 namespace Private {
   /**
-   * The initial poll tick defaults.
+   * The default polling frequency.
    */
-  export const INITIAL: IPoll.Tick = {
+  export const DEFAULT_FREQUENCY: IPoll.Frequency = {
+    interval: 1000,
+    jitter: 0,
+    max: 10 * 1000,
+    min: 100
+  };
+
+  /**
+   * The default poll standby behavior.
+   */
+  export const DEFAULT_STANDBY: Poll.Standby = 'when-hidden';
+
+  /**
+   * The first tick's default values superseded in constructor.
+   */
+  export const DEFAULT_TICK: IPoll.Tick = {
     interval: Infinity, // Never.
     payload: null,
     phase: 'instantiated',
@@ -580,14 +624,15 @@ namespace Private {
   };
 
   /**
-   * The disposed poll tick defaults.
+   * The disposed tick values.
    */
-  export const DISPOSED: IPoll.Tick = {
+  export const DISPOSED_TICK: IPoll.Tick = {
     interval: Infinity, // Never.
     payload: null,
     phase: 'disposed',
     timestamp: new Date(0).getTime()
   };
+
   /**
    * The jitter quantity if `jitter` is set to `true`.
    */
