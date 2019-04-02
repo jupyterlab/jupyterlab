@@ -17,11 +17,6 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
-    console.log(
-      'creating search instance, isreadonly: ',
-      this._activeProvider.isReadOnly
-    );
-
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,

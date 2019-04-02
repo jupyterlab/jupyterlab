@@ -172,19 +172,16 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     // replace it.  Otherwise, just select the next match after the cursor.
     let replaceOccurred = false;
     if (this._currentMatchIsSelected()) {
-      console.log('CM: current match selected');
       const cursor = this._cm.getSearchCursor(
         this._query,
         this._cm.getCursor('from'),
         !this._query.ignoreCase
       );
       if (!cursor.findNext()) {
-        console.log('CM: cursor could not find next');
         return Promise.resolve(replaceOccurred);
       }
       replaceOccurred = true;
       cursor.replace(newText);
-      console.log('CM: replace occurred, higlight next');
     }
     await this.highlightNext();
     return Promise.resolve(replaceOccurred);
