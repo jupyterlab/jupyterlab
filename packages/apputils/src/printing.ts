@@ -12,7 +12,7 @@
  * See https://github.com/joseluisq/printd#print
  */
 
-import { Printd, PrintdCallback } from 'printd';
+import { Printd } from 'printd';
 import { Widget } from '@phosphor/widgets';
 
 export namespace Printing {
