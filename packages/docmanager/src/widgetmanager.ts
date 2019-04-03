@@ -107,8 +107,8 @@ export class DocumentWidgetManager implements IDisposable {
       this._onPathChanged,
       this
     );
-    context.ready.then(() => {
-      this.setCaption(widget);
+    void context.ready.then(() => {
+      void this.setCaption(widget);
     });
     return widget;
   }
@@ -238,7 +238,7 @@ export class DocumentWidgetManager implements IDisposable {
   messageHook(handler: IMessageHandler, msg: Message): boolean {
     switch (msg.type) {
       case 'close-request':
-        this.onClose(handler as Widget);
+        void this.onClose(handler as Widget);
         return false;
       case 'activate-request':
         let context = this.contextForWidget(handler as Widget);
@@ -257,7 +257,7 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The target widget.
    */
-  protected setCaption(widget: Widget): void {
+  protected setCaption(widget: Widget): Promise<void> {
     let context = Private.contextProperty.get(widget);
     if (!context) {
       return;
@@ -267,7 +267,7 @@ export class DocumentWidgetManager implements IDisposable {
       widget.title.caption = '';
       return;
     }
-    context
+    return context
       .listCheckpoints()
       .then((checkpoints: Contents.ICheckpointModel[]) => {
         if (widget.isDisposed) {
@@ -397,7 +397,7 @@ export class DocumentWidgetManager implements IDisposable {
   private _onFileChanged(context: DocumentRegistry.Context): void {
     let widgets = Private.widgetsProperty.get(context);
     each(widgets, widget => {
-      this.setCaption(widget);
+      void this.setCaption(widget);
     });
   }
 
@@ -407,7 +407,7 @@ export class DocumentWidgetManager implements IDisposable {
   private _onPathChanged(context: DocumentRegistry.Context): void {
     let widgets = Private.widgetsProperty.get(context);
     each(widgets, widget => {
-      this.setCaption(widget);
+      void this.setCaption(widget);
     });
   }
 

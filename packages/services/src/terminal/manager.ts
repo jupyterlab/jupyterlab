@@ -33,7 +33,7 @@ export class TerminalManager implements TerminalSession.IManager {
           // Don't poll when nobody's looking.
           return;
         }
-        this._refreshRunning();
+        return this._refreshRunning();
       }, 10000);
     }
   }

@@ -20,6 +20,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     manager.register({
       name: 'JupyterLab Dark',
       isLight: false,
+      themeScrollbars: true,
       load: () => manager.loadCSS(style),
       unload: () => Promise.resolve(undefined)
     });

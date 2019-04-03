@@ -396,11 +396,11 @@ function activateCellTools(
   const hook = (sender: any, message: Message): boolean => {
     switch (message.type) {
       case 'activate-request':
-        state.save(id, { open: true });
+        void state.save(id, { open: true });
         break;
       case 'after-hide':
       case 'close-request':
-        state.remove(id);
+        void state.remove(id);
         break;
       default:
         break;
@@ -409,7 +409,7 @@ function activateCellTools(
   };
   let optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = '-';
-  services.nbconvert.getExportFormats().then(response => {
+  void services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
@@ -434,7 +434,7 @@ function activateCellTools(
   MessageLoop.installMessageHook(celltools, hook);
 
   // Wait until the application has finished restoring before rendering.
-  Promise.all([state.fetch(id), app.restored]).then(([value]) => {
+  void Promise.all([state.fetch(id), app.restored]).then(([value]) => {
     const open = !!(
       value && ((value as ReadonlyJSONObject)['open'] as boolean)
     );
@@ -552,10 +552,10 @@ function activateNotebookHandler(
     widget.title.icon = NOTEBOOK_ICON_CLASS;
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
     // Add the notebook panel to the tracker.
-    tracker.add(widget);
+    void tracker.add(widget);
   });
 
   /**
@@ -670,7 +670,7 @@ function activateNotebookHandler(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    services.ready.then(() => {
+    void services.ready.then(() => {
       let disposables: DisposableSet | null = null;
       const onSpecsChanged = () => {
         if (disposables) {
@@ -1139,7 +1139,7 @@ function addCommands(
 
         return session.restart().then(restarted => {
           if (restarted) {
-            NotebookActions.runAll(content, context.session);
+            void NotebookActions.runAll(content, context.session);
           }
           return restarted;
         });
@@ -1535,13 +1535,13 @@ function addCommands(
       });
 
       const updateCloned = () => {
-        clonedOutputs.save(widget);
+        void clonedOutputs.save(widget);
       };
       current.context.pathChanged.connect(updateCloned);
       current.content.model.cells.changed.connect(updateCloned);
 
       // Add the cloned output to the output instance tracker.
-      clonedOutputs.add(widget);
+      void clonedOutputs.add(widget);
 
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
@@ -1752,12 +1752,12 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.saveWithView, {
     label: 'Save Notebook with View State',
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(args);
 
       if (current) {
         NotebookActions.persistViewState(current.content);
-        app.commands.execute('docmanager:save');
+        return app.commands.execute('docmanager:save');
       }
     },
     isEnabled: args => {
@@ -1927,7 +1927,7 @@ function populateMenus(
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });
   exportTo.title.label = 'Export Notebook As…';
-  services.nbconvert.getExportFormats().then(response => {
+  void services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
@@ -2058,7 +2058,7 @@ function populateMenus(
       const { context, content } = current;
       return context.session.restart().then(restarted => {
         if (restarted) {
-          NotebookActions.runAll(content, context.session);
+          void NotebookActions.runAll(content, context.session);
         }
         return restarted;
       });
@@ -2155,7 +2155,7 @@ namespace Private {
 
       // Wait for the notebook to be loaded before
       // cloning the output area.
-      this._notebook.context.ready.then(() => {
+      void this._notebook.context.ready.then(() => {
         if (!this._cell) {
           this._cell = this._notebook.content.widgets[this._index] as CodeCell;
         }

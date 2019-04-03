@@ -34,7 +34,7 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
       <button>Run</button>`;
       this.node.querySelector('button').onclick = event => {
         this.node.innerHTML = '';
-        renderJavascript();
+        void renderJavascript();
       };
       return Promise.resolve();
     }

@@ -80,7 +80,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
 
         // Save the reconciled list.
-        settings.set('shortcuts', shortcuts);
+        void settings.set('shortcuts', shortcuts);
       };
 
       if (!keys.length) {
@@ -101,7 +101,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       port(deprecated);
 
       // Remove all old shortcuts;
-      old.save('{}');
+      void old.save('{}');
     } catch (error) {
       console.error(`Loading ${plugin.id} failed.`, error);
     }

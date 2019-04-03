@@ -69,7 +69,10 @@ export class MimeContent extends Widget {
         requestAnimationFrame(() => {
           this.dispose();
         });
-        showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
+        void showErrorMessage(
+          `Renderer Failure: ${this._context.path}`,
+          reason
+        );
       });
   }
 
@@ -119,7 +122,7 @@ export class MimeContent extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._context.isReady) {
-      this._render();
+      void this._render();
       this._fragment = '';
     }
   }
@@ -170,7 +173,7 @@ export class MimeContent extends Widget {
       requestAnimationFrame(() => {
         this.dispose();
       });
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      void showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     }
   }
 

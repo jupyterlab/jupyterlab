@@ -55,7 +55,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
 
-    this.revealed.then(() => {
+    void this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
@@ -116,7 +116,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Set URI fragment identifier.
    */
   setFragment(fragment: string) {
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.content.setFragment(fragment);
     });
   }
@@ -170,12 +170,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       return;
     }
     let { newValue } = args;
-    newValue.ready.then(() => {
+    void newValue.ready.then(() => {
       if (this.model) {
         this._updateLanguage(newValue.info.language_info);
       }
     });
-    this._updateSpec(newValue);
+    void this._updateSpec(newValue);
   }
 
   /**
@@ -188,8 +188,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: Kernel.IKernelConnection): void {
-    kernel.getSpec().then(spec => {
+  private _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
+    return kernel.getSpec().then(spec => {
       if (this.isDisposed) {
         return;
       }

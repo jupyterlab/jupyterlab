@@ -213,6 +213,10 @@
   background-image: var(--jp-icon-run);
 }
 
+.jp-RunningIcon {
+  background-image: var(--jp-icon-stop-circle);
+}
+
 .jp-SaveIcon {
   background-image: var(--jp-icon-save);
 }

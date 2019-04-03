@@ -45,7 +45,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       this
     );
 
-    context.ready.then(() => {
+    void context.ready.then(() => {
       if (this.isDisposed) {
         return;
       }

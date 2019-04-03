@@ -102,8 +102,8 @@ describe('@jupyterlab/notebook', () => {
       NBTestUtils.populateNotebook(panel1.content);
 
       tracker = new NotebookTracker({ namespace: 'notebook' });
-      tracker.add(panel0);
-      tracker.add(panel1);
+      await tracker.add(panel0);
+      await tracker.add(panel1);
       celltools = new CellTools({ tracker });
       tabpanel = new TabPanel();
       tabpanel.addWidget(panel0);

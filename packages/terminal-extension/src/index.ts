@@ -221,7 +221,7 @@ export function addCommands(
       return promise
         .then(session => {
           term.session = session;
-          tracker.add(main);
+          void tracker.add(main);
           app.shell.activateById(main.id);
 
           return main;

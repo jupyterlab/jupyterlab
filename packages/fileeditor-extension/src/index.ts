@@ -154,7 +154,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       };
       item.model!.config = config;
     };
-    Promise.all([
+    void Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
       app.restored
     ]).then(([settings]) => {
@@ -283,9 +283,9 @@ function activate(
 
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
-    tracker.add(widget);
+    void tracker.add(widget);
     updateWidget(widget.content);
   });
   app.docRegistry.addWidgetFactory(factory);
@@ -749,7 +749,7 @@ function activate(
       restartAndRunAll: current => {
         return current.context.session.restart().then(restarted => {
           if (restarted) {
-            commands.execute(CommandIDs.runAllCode);
+            void commands.execute(CommandIDs.runAllCode);
           }
           return restarted;
         });

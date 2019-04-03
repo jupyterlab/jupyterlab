@@ -16,9 +16,7 @@ describe('Kernel.IFuture', () => {
     }
   });
 
-  afterAll(() => {
-    Kernel.shutdownAll();
-  });
+  afterAll(() => Kernel.shutdownAll());
 
   it('should have a msg attribute', async () => {
     const kernel = await Kernel.startNew();
@@ -63,6 +61,7 @@ describe('Kernel.IFuture', () => {
         };
 
         future.registerMessageHook(async msg => {
+          // tslint:disable-next-line:await-promise
           await calls.push('last');
           return true;
         });

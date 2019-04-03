@@ -24,7 +24,7 @@ from jupyterlab.commands import (
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
     check_extension, _test_overlap, _get_core_data,
-    update_extension,
+    update_extension
 )
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -195,6 +195,19 @@ class TestExtension(TestCase):
         extensions = get_app_info(self.app_dir)['extensions']
         assert name not in extensions
         assert not check_extension(name)
+
+    def test_uninstall_all_extensions(self):
+        install_extension(self.mock_extension)
+        install_extension(self.mock_mimeextension)
+        ext_name = self.pkg_names['extension']
+        mime_ext_name = self.pkg_names['mimeextension']
+        assert check_extension(ext_name) is True
+        assert check_extension(mime_ext_name) is True
+        assert uninstall_extension(all_=True) is True
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert ext_name not in extensions
+        assert mime_ext_name not in extensions
+
 
     def test_uninstall_core_extension(self):
         assert uninstall_extension('@jupyterlab/console-extension') is True

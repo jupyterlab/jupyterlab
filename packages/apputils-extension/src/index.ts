@@ -149,6 +149,14 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       currentTheme = args.newValue;
       app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
       app.shell.dataset.themeName = currentTheme;
+      if (
+        app.shell.dataset.themeScrollbars !==
+        String(manager.themeScrollbars(currentTheme))
+      ) {
+        app.shell.dataset.themeScrollbars = String(
+          manager.themeScrollbars(currentTheme)
+        );
+      }
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 
@@ -163,7 +171,7 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
         if (theme === manager.theme) {
           return;
         }
-        manager.setTheme(theme);
+        return manager.setTheme(theme);
       }
     });
 
@@ -197,7 +205,7 @@ const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
-      app.restored.then(() => {
+      void app.restored.then(() => {
         const command = CommandIDs.changeTheme;
         const isPalette = false;
 
@@ -218,7 +226,7 @@ const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
 
     // If we have a command palette, add theme switching options to it.
     if (palette) {
-      app.restored.then(() => {
+      void app.restored.then(() => {
         const category = 'Settings';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
@@ -278,7 +286,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
 
         // Launch a dialog to ask the user for a new workspace name.
         console.warn('Window resolution failed:', error);
-        Private.redirect(router, paths, workspace);
+        return Private.redirect(router, paths, workspace);
       });
     }
 
@@ -412,7 +420,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     const listener = (sender: any, change: StateDB.Change) => {
-      commands.execute(CommandIDs.saveState);
+      return commands.execute(CommandIDs.saveState);
     };
 
     commands.addCommand(CommandIDs.loadState, {
@@ -474,7 +482,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             .then(() => router.stop);
 
           // After the state has been cloned, navigate to the URL.
-          cloned.then(() => {
+          void cloned.then(() => {
             router.navigate(url, { silent: true });
           });
 
@@ -538,11 +546,11 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
-          cleared.then(() => {
+          void cleared.then(() => {
             router.navigate(url, { silent, hard });
           });
         } else {
-          cleared.then(() => {
+          void cleared.then(() => {
             router.navigate(url, { silent });
             loading.dispose();
           });
@@ -766,7 +774,7 @@ namespace Private {
     debouncer = window.setTimeout(() => {
       if (commands.hasCommand(recovery)) {
         recover(() => {
-          commands.execute(recovery);
+          return commands.execute(recovery);
         });
       }
     }, SPLASH_RECOVER_TIMEOUT);
@@ -774,7 +782,7 @@ namespace Private {
     document.body.appendChild(splash);
 
     return new DisposableDelegate(() => {
-      ready.then(() => {
+      void ready.then(() => {
         if (--splashCount === 0) {
           if (debouncer) {
             window.clearTimeout(debouncer);

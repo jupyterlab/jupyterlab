@@ -308,7 +308,7 @@ export class OutputArea extends Widget {
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
      */
-    input.value.then(value => {
+    void input.value.then(value => {
       // Use stdin as the stream so it does not get combined with stdout.
       this.model.add({
         output_type: 'stream',
@@ -329,7 +329,7 @@ export class OutputArea extends Widget {
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
     if (renderer.renderModel) {
-      renderer.renderModel(model);
+      void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
       this._insertOutput(index, model);

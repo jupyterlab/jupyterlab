@@ -213,6 +213,7 @@ export class KernelFutureHandler extends DisposableDelegate
   private async _handleReply(msg: KernelMessage.IShellMessage): Promise<void> {
     let reply = this._reply;
     if (reply) {
+      // tslint:disable-next-line:await-promise
       await reply(msg);
     }
     this._replyMsg = msg;
@@ -225,6 +226,7 @@ export class KernelFutureHandler extends DisposableDelegate
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
     let stdin = this._stdin;
     if (stdin) {
+      // tslint:disable-next-line:await-promise
       await stdin(msg);
     }
   }
@@ -233,6 +235,7 @@ export class KernelFutureHandler extends DisposableDelegate
     let process = await this._hooks.process(msg);
     let iopub = this._iopub;
     if (process && iopub) {
+      // tslint:disable-next-line:await-promise
       await iopub(msg);
     }
     if (
@@ -375,6 +378,7 @@ namespace Private {
 
         // Execute the hook and log any errors.
         try {
+          // tslint:disable-next-line:await-promise
           continueHandling = await hook(msg);
         } catch (err) {
           continueHandling = true;

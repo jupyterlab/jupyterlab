@@ -100,7 +100,7 @@
     "@jupyterlab/tooltip-extension": "^1.0.0-alpha.3",
     "@jupyterlab/ui-components": "^1.0.0-alpha.3",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.3",
-    "@jupyterlab/vega4-extension": "^1.0.0-alpha.3"
+    "@jupyterlab/vega5-extension": "^1.0.0-alpha.3"
   },
   "devDependencies": {
     "fs-extra": "~4.0.2",

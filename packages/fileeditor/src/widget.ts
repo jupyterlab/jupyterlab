@@ -52,13 +52,13 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[UNDOER] = 'true';
 
     editor.model.value.text = context.model.toString();
-    context.ready.then(() => {
+    void context.ready.then(() => {
       this._onContextReady();
     });
 
     if (context.model.modelDB.isCollaborative) {
       let modelDB = context.model.modelDB;
-      modelDB.connected.then(() => {
+      void modelDB.connected.then(() => {
         let collaborators = modelDB.collaborators;
         if (!collaborators) {
           return;
