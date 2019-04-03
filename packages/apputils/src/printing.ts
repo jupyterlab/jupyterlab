@@ -67,12 +67,8 @@ export namespace Printing {
    * use the `printd` library to print the node, by
    * creating an iframe and copying the DOM into it.
    */
-  export function printWidget(
-    widget: Widget,
-    cssText?: string,
-    callback?: PrintdCallback
-  ) {
-    _PRINTD.print(widget.node, [cssText], [], callback);
+  export function printWidget(widget: Widget, cssText?: string) {
+    _PRINTD.print(widget.node, [cssText], []);
   }
 
   /**
