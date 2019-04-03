@@ -7,14 +7,9 @@ import { IPoll, Poll } from '@jupyterlab/coreutils/src';
 
 import { sleep } from '@jupyterlab/testutils';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
-
 class TestPoll<T = any, U = any> extends Poll<T, U> {
-  protected schedule(
-    tick: IPoll.Tick<T, U>,
-    outstanding?: PromiseDelegate<this>
-  ): void {
-    super.schedule(tick, outstanding);
+  protected schedule(tick: IPoll.Tick<T, U>): void {
+    super.schedule(tick);
     this.scheduled.push(tick.phase);
   }
 

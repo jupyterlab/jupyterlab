@@ -404,10 +404,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * caller to e.g. `await this.tick` if `this.state.phase === 'instantiated'`
    * before scheduling a new tick.
    */
-  protected schedule(
-    tick: IPoll.Tick<T, U>,
-    outstanding: PromiseDelegate<this> = this._tick
-  ): void {
+  protected schedule(tick: IPoll.Tick<T, U>): void {
+    const outstanding = this._tick;
     const next = new PromiseDelegate<this>();
     const execution = () => {
       if (this.isDisposed) {
@@ -458,15 +456,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           : true;
     if (standby) {
       const { interval, jitter, max, min } = this.frequency;
-      this.schedule(
-        {
-          interval: Private.jitter(interval, jitter, max, min),
-          payload: null,
-          phase: 'standby',
-          timestamp: new Date().getTime()
-        },
-        outstanding
-      );
+      this.schedule({
+        interval: Private.jitter(interval, jitter, max, min),
+        payload: null,
+        phase: 'standby',
+        timestamp: new Date().getTime()
+      });
       return;
     }
 
@@ -478,15 +473,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         }
 
         const { interval, jitter, max, min } = this.frequency;
-        this.schedule(
-          {
-            interval: Private.jitter(interval, jitter, max, min),
-            payload: resolved,
-            phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
-            timestamp: new Date().getTime()
-          },
-          outstanding
-        );
+        this.schedule({
+          interval: Private.jitter(interval, jitter, max, min),
+          payload: resolved,
+          phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
+          timestamp: new Date().getTime()
+        });
       })
       .catch((rejected: U) => {
         if (this.isDisposed || this.tick !== outstanding.promise) {
@@ -495,15 +487,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
         const { jitter, max, min } = this.frequency;
         const increased = Math.min(this.state.interval * 2, max);
-        this.schedule(
-          {
-            interval: Private.jitter(increased, jitter, max, min),
-            payload: rejected,
-            phase: 'rejected',
-            timestamp: new Date().getTime()
-          },
-          outstanding
-        );
+        this.schedule({
+          interval: Private.jitter(increased, jitter, max, min),
+          payload: rejected,
+          phase: 'rejected',
+          timestamp: new Date().getTime()
+        });
       });
   }
 
