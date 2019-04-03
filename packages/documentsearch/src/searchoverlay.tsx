@@ -27,8 +27,8 @@ const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
-const REPLACE_CURRENT_BUTTON_CLASS = 'jp-DocumentSearch-replace-current-button';
-const REPLACE_ALL_BUTTON_CLASS = 'jp-DocumentSearch-replace-all-button';
+const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
+const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
 const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
@@ -146,18 +146,28 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           ref="replaceInputNode"
         />
         <button
-          className={REPLACE_CURRENT_BUTTON_CLASS}
+          className={REPLACE_BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
           tabIndex={9}
         >
-          Replace
+          <span
+            className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          >
+            Replace
+          </span>
         </button>
         <button
-          className={REPLACE_ALL_BUTTON_CLASS}
+          className={REPLACE_BUTTON_WRAPPER_CLASS}
           tabIndex={10}
           onClick={() => this.props.onReplaceAll()}
         >
-          Replace All
+          <span
+            className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          >
+            Replace All
+          </span>
         </button>
       </div>
     );

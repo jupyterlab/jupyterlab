@@ -67,8 +67,6 @@
   overflow: hidden;
   display: inline-block;
   border: none;
-  width: 20px;
-  height: 20px;
   box-sizing: border-box;
   background-repeat: no-repeat;
 }
@@ -184,21 +182,32 @@
   margin: 2px;
 }
 
+.jp-DocumentSearch-replace-button-wrapper {
+  overflow: hidden;
+  display: inline-block;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  margin: 2px;
+}
+
 .jp-DocumentSearch-replace-entry:focus,
-.jp-DocumentSearch-replace-current-button:focus,
-.jp-DocumentSearch-replace-all-button:focus {
+.jp-DocumentSearch-replace-button-wrapper:focus {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
 }
 
-.jp-DocumentSearch-replace-current-button,
-.jp-DocumentSearch-replace-all-button {
+.jp-DocumentSearch-replace-button {
   display: inline-block;
   text-align: center;
-  margin-left: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
   background-color: var(--jp-toolbar-background);
-  border: var(--jp-border-width) solid var(--jp-border-color0);
   color: var(--jp-font-color1);
-  margin: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-DocumentSearch-replace-button:focus {
+  outline: none;
 }
 
 .jp-DocumentSearch-replace-wrapper-class {
