@@ -60,14 +60,28 @@ export namespace Printing {
   /**
    * Global print instance
    */
-  const _PRINTD = new Printd();
+  let _PRINTD: Printd | null = null;
+
+  /**
+   * We don't create the printd instance initially, because
+   * doing so will trigger a false print on FireFox
+   *
+   * See https://github.com/joseluisq/printd/issues/29
+   */
+  function getPrintd(): Printd {
+    if (_PRINTD) {
+      return _PRINTD;
+    }
+    _PRINTD = new Printd();
+    return _PRINTD;
+  }
 
   /**
    * Prints a widget by copying it's DOM node
    * to a hidden iframe and printing that iframe.
    */
   export function printWidget(widget: Widget) {
-    _PRINTD.print(widget.node);
+    getPrintd().print(widget.node);
   }
 
   /**
@@ -76,6 +90,6 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export function printURL(url: string) {
-    _PRINTD.printURL(url);
+    getPrintd().printURL(url);
   }
 }
