@@ -294,7 +294,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     this._state = { ...Private.DISPOSED_TICK, timestamp: new Date().getTime() };
-    this.tick.catch(_ => undefined);
+    this._tick.promise.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
     this._disposed.emit();
     Signal.clearData(this);
@@ -307,11 +307,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. The returned promise never rejects.
    */
   async refresh(): Promise<this> {
-    await this.ready;
-
     if (this.isDisposed) {
       return this;
     }
+
+    await this.ready;
 
     if (this.state.phase !== 'refreshed') {
       this.schedule({
@@ -332,11 +332,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. The returned promise never rejects.
    */
   async start(): Promise<this> {
-    await this.ready;
-
     if (this.isDisposed) {
       return this;
     }
+
+    await this.ready;
 
     if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
       this.schedule({
@@ -357,11 +357,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * It is safe to call multiple times. The returned promise never rejects.
    */
   async stop(): Promise<this> {
-    await this.ready;
-
     if (this.isDisposed) {
       return this;
     }
+
+    await this.ready;
 
     if (this.state.phase !== 'stopped') {
       this.schedule({
@@ -393,7 +393,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     const current = new PromiseDelegate<this>();
     const pending = this._tick;
     const execute = () => {
-      if (!this.isDisposed && this.tick === current.promise) {
+      if (this.isDisposed || this.tick !== current.promise) {
         return;
       }
 
