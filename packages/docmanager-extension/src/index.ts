@@ -787,11 +787,11 @@ function addLabCommands(
       const { currentWidget } = labShell;
       return Printing.getPrintFunction(currentWidget) !== null;
     },
-    execute: () => {
+    execute: async () => {
       const widget = contextMenuWidget();
       const printFunction = Printing.getPrintFunction(widget);
       if (printFunction) {
-        printFunction();
+        await printFunction();
       }
     }
   });
