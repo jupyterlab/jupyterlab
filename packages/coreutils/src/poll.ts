@@ -638,11 +638,16 @@ namespace Private {
    *
    * @param base - The base (integer) value that is being wobbled.
    *
-   * @param quantity - The jitter (float) quantity or boolean flag.
+   * @param quantity - The jitter (float) quantity or boolean flag. The jitter
+   * is a percentage of the base.
    *
    * @param max - The largest acceptable (integer) value to return.
    *
    * @param min - The smallest acceptable (integer) value to return.
+   *
+   * #### Notes
+   * The returned value will be a random value between base +- (base*jitter),
+   * inclusive, capped by min and max.
    */
   export function jitter(
     base: number,
@@ -650,22 +655,37 @@ namespace Private {
     max: number,
     min: number
   ): number {
+    base = Math.round(base);
+
+    // If quantity is 0 or false, no jitter
     if (!quantity) {
-      return Math.round(base);
+      return base;
     }
 
-    base = Math.round(base);
-    quantity =
-      typeof quantity === 'boolean'
-        ? (quantity || 0) && DEFAULT_JITTER
-        : typeof quantity === 'number'
-          ? quantity
-          : 0;
+    if (quantity === true) {
+      quantity = DEFAULT_JITTER;
+    }
+
     quantity = Math.abs(quantity);
+    min = Math.max(min, base * (1 - quantity));
+    max = Math.min(max, base * (1 + quantity));
+    return getRandomIntInclusive(min, max);
+  }
 
-    const direction = Math.random() < 0.5 ? 1 : -1;
-    const jitter = Math.round(Math.random() * base * quantity * direction);
-
-    return Math.min(Math.max(base + jitter, min), max);
+  /**
+   * Get a random integer between min and max, inclusive of both.
+   *
+   * #### Notes
+   * From
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_integer_between_two_values_inclusive
+   *
+   * From the MDN page: It might be tempting to use Math.round() to accomplish
+   * that, but doing so would cause your random numbers to follow a non-uniform
+   * distribution, which may not be acceptable for your needs.
+   */
+  function getRandomIntInclusive(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
