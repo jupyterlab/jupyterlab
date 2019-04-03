@@ -63,12 +63,11 @@ export namespace Printing {
   const _PRINTD = new Printd();
 
   /**
-   * Use this as a print property for a widget that will
-   * use the `printd` library to print the node, by
-   * creating an iframe and copying the DOM into it.
+   * Prints a widget by copying it's DOM node
+   * to a hidden iframe and printing that iframe.
    */
-  export function printWidget(widget: Widget, cssText?: string) {
-    _PRINTD.print(widget.node, [cssText], []);
+  export function printWidget(widget: Widget) {
+    _PRINTD.print(widget.node);
   }
 
   /**
