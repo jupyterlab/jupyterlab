@@ -41,7 +41,7 @@ export namespace Printing {
    * Returns whether an object implements a print method.
    */
   export function isPrintable(a: unknown): a is IPrintable {
-    if (typeof a !== 'object') {
+    if (typeof a !== 'object' || !a) {
       return false;
     }
     return symbol in a;
