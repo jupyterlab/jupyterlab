@@ -50,6 +50,11 @@ const LAUNCHER_CLASS = 'jp-Launcher';
  */
 const KNOWN_CATEGORIES = ['Kernels', 'Other'];
 
+/**
+ * The maximum number of cards showed in recent section
+ */
+const MAX_RECENT_CARDS = 4;
+
 /* tslint:disable */
 /**
  * The launcher token.
@@ -83,6 +88,7 @@ interface IUsageData {
    * Count the number that a certain card is used.
    */
   usageCount: number;
+
   /**
    * The most recent timestamp a certain card is used.
    */
@@ -387,7 +393,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     let i = 0;
     let cnt = 0;
     let topUsed: ILauncher.IGroupedItemOptions[] = [];
-    while (cnt < 4 && i < orderedItems.length) {
+    while (cnt < MAX_RECENT_CARDS && i < orderedItems.length) {
       let item = orderedItems[i];
       i++;
       if (
@@ -687,6 +693,11 @@ export namespace ILauncher {
      */
     kernelIconUrl?: string;
 
+    /**
+     * The date when the item is used last time.
+     *
+     * If the item is never used, the field is set to null.
+     */
     mostRecentUsage?: string;
   }
 }
