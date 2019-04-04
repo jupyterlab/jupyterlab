@@ -115,7 +115,6 @@
   display: flex;
   position: relative;
   flex-direction: column;
-  /* cursor: pointer; */
   width: var(--jp-private-launcher-card-size);
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
@@ -182,7 +181,6 @@
 }
 
 .jp-LauncherCard-options {
-  /* margin-bottom: 10px; */
   position: absolute;
   bottom: 0px;
   display: table;
