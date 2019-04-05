@@ -17,7 +17,7 @@
       "minimum": 1.0
     },
     "theme": {
-      "enum": ["dark", "light"]
+      "enum": ["dark", "light", "inherit"]
     },
     "scrollback": {
       "type": "number"
@@ -46,7 +46,7 @@
       "title": "Theme",
       "description": "The theme for the terminal.",
       "$ref": "#/definitions/theme",
-      "default": "dark"
+      "default": "inherit"
     },
     "scrollback": {
       "title": "Scrollback Buffer",

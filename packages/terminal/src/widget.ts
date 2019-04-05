@@ -37,14 +37,9 @@ export class Terminal extends Widget {
     this._options = { ...Terminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
-    const { lightTheme, darkTheme } = Private;
-    const xtermTheme = theme === 'light' ? lightTheme : darkTheme;
-    const xtermOptions = { theme: xtermTheme, ...other };
+    const xtermOptions = { theme: Private.getXTermTheme(theme), ...other };
 
     this.addClass(TERMINAL_CLASS);
-    if (theme === 'light') {
-      this.addClass('jp-mod-light');
-    }
 
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
@@ -103,29 +98,25 @@ export class Terminal extends Widget {
     option: K,
     value: Terminal.IOptions[K]
   ): void {
-    if (this._options[option] === value) {
+    if (
+      option !== 'theme' &&
+      (this._options[option] === value || option === 'initialCommand')
+    ) {
       return;
     }
 
     this._options[option] = value;
 
-    if (option === 'initialCommand') {
-      return;
-    }
-
     if (option === 'theme') {
-      if (value === 'light') {
-        this.addClass('jp-mod-light');
-        this._term.setOption('theme', Private.lightTheme);
-      } else {
-        this.removeClass('jp-mod-light');
-        this._term.setOption('theme', Private.darkTheme);
-      }
+      this._term.setOption(
+        'theme',
+        Private.getXTermTheme(value as Terminal.ITheme)
+      );
     } else {
       this._term.setOption(option, value);
-      this._needsResize = true;
     }
 
+    this._needsResize = true;
     this.update();
   }
 
@@ -332,7 +323,7 @@ export namespace Terminal {
     /**
      * The theme of the terminal.
      */
-    theme: Theme;
+    theme: ITheme;
 
     /**
      * The amount of buffer scrollback to be used
@@ -355,7 +346,7 @@ export namespace Terminal {
    * The default options used for creating terminals.
    */
   export const defaultOptions: IOptions = {
-    theme: 'dark',
+    theme: 'inherit',
     fontFamily: 'courier-new, courier, monospace',
     fontSize: 13,
     lineHeight: 1.0,
@@ -367,7 +358,18 @@ export namespace Terminal {
   /**
    * A type for the terminal theme.
    */
-  export type Theme = 'light' | 'dark';
+  export type ITheme = 'light' | 'dark' | 'inherit';
+
+  /**
+   * A type for the terminal theme.
+   */
+  export interface IThemeObject {
+    foreground: string;
+    background: string;
+    cursor: string;
+    cursorAccent: string;
+    selection: string;
+  }
 }
 
 /**
@@ -382,7 +384,7 @@ namespace Private {
   /**
    * The light terminal theme.
    */
-  export const lightTheme = {
+  export const lightTheme: Terminal.IThemeObject = {
     foreground: '#000',
     background: '#fff',
     cursor: '#616161', // md-grey-700
@@ -393,11 +395,44 @@ namespace Private {
   /**
    * The dark terminal theme.
    */
-  export const darkTheme = {
+  export const darkTheme: Terminal.IThemeObject = {
     foreground: '#fff',
     background: '#000',
     cursor: '#fff',
     cursorAccent: '#000',
     selection: 'rgba(255, 255, 255, 0.3)'
   };
+
+  /**
+   * The current theme.
+   */
+  export const inheritTheme = (): Terminal.IThemeObject => ({
+    foreground: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color0'
+    ),
+    background: getComputedStyle(document.body).getPropertyValue(
+      '--jp-layout-color0'
+    ),
+    cursor: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color1'
+    ),
+    cursorAccent: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-inverse-font-color0'
+    ),
+    selection: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color3'
+    )
+  });
+
+  export function getXTermTheme(theme: Terminal.ITheme): Terminal.IThemeObject {
+    switch (theme) {
+      case 'light':
+        return lightTheme;
+      case 'dark':
+        return darkTheme;
+      case 'inherit':
+      default:
+        return inheritTheme();
+    }
+  }
 }
