@@ -82,7 +82,7 @@ class RankedPanel<T extends Widget = Widget> extends Widget {
 }
 
 /**
- * A widget that provides cell metadata tools.
+ * A widget that provides metadata tools.
  */
 export class NotebookTools extends Widget implements INotebookTools {
   /**
