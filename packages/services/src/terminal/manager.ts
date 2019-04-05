@@ -27,15 +27,19 @@ export class TerminalManager implements TerminalSession.IManager {
     // Set up state handling if terminals are available.
     if (TerminalSession.isAvailable()) {
       // Initialize internal data then start polling.
-      this._ready = this._refreshRunning()
+      this._ready = this.requestRunning()
+        .then(_ => undefined)
         .catch(_ => undefined)
         .then(() => {
+          if (this.isDisposed) {
+            return;
+          }
           this._isReady = true;
         });
 
       // Start polling with exponential backoff.
       this._pollModels = new Poll({
-        factory: () => this._refreshRunning(),
+        factory: () => this.requestRunning(),
         frequency: {
           interval: 10 * 1000,
           jitter: true,
@@ -213,7 +217,7 @@ export class TerminalManager implements TerminalSession.IManager {
     // Repopulate list of models silently then shut down every session.
     let error: any;
     try {
-      await this._refreshRunning(true);
+      await this.requestRunning(true);
       await Promise.all(
         this._models.map(({ name }) =>
           TerminalSession.shutdown(name, this.serverSettings)
@@ -237,6 +241,30 @@ export class TerminalManager implements TerminalSession.IManager {
     // If the API requests failed, reject the promise.
     if (error) {
       throw error;
+    }
+  }
+
+  /**
+   * Execute a request to the server to poll running terminals and update state.
+   */
+  protected async requestRunning(silent = false): Promise<void> {
+    const models = await TerminalSession.listRunning(this.serverSettings);
+    if (this.isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const names = models.map(({ name }) => name);
+      const sessions = this._sessions;
+      sessions.forEach(session => {
+        if (names.indexOf(session.name) === -1) {
+          session.dispose();
+          sessions.delete(session);
+        }
+      });
+      this._models = models.slice();
+      if (!silent) {
+        this._runningChanged.emit(models);
+      }
     }
   }
 
@@ -279,27 +307,6 @@ export class TerminalManager implements TerminalSession.IManager {
     if (index !== -1) {
       this._models.splice(index, 1);
       this._runningChanged.emit(this._models.slice());
-    }
-  }
-
-  /**
-   * Refresh the running sessions.
-   */
-  private async _refreshRunning(silent = false): Promise<void> {
-    const models = await TerminalSession.listRunning(this.serverSettings);
-    if (!JSONExt.deepEqual(models, this._models)) {
-      const names = models.map(({ name }) => name);
-      const sessions = this._sessions;
-      sessions.forEach(session => {
-        if (names.indexOf(session.name) === -1) {
-          session.dispose();
-          sessions.delete(session);
-        }
-      });
-      this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
     }
   }
 
