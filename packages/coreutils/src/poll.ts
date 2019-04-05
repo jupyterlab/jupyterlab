@@ -86,17 +86,17 @@ export namespace IPoll {
    * The phase of the poll when the current tick was scheduled.
    */
   export type Phase =
+    | 'constructed'
     | 'disposed'
-    | 'instantiated'
-    | 'instantiated-rejected'
-    | 'instantiated-resolved'
     | 'reconnected'
     | 'refreshed'
     | 'rejected'
     | 'resolved'
     | 'standby'
     | 'started'
-    | 'stopped';
+    | 'stopped'
+    | 'when-rejected'
+    | 'when-resolved';
 
   /**
    * Definition of poll state at any given tick.
@@ -178,7 +178,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         this.schedule({
           interval: Private.IMMEDIATE,
           payload: null,
-          phase: 'instantiated-resolved',
+          phase: 'when-resolved',
           timestamp: new Date().getTime()
         });
       })
@@ -190,7 +190,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         this.schedule({
           interval: Private.IMMEDIATE,
           payload: null,
-          phase: 'instantiated-rejected',
+          phase: 'when-rejected',
           timestamp: new Date().getTime()
         });
 
@@ -202,11 +202,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * The name of the poll.
    */
   readonly name: string;
-
-  /**
-   * A promise that resolves after the poll has scheduled its first tick.
-   */
-  readonly ready: Promise<void>;
 
   /**
    * A signal emitted when the poll is disposed.
@@ -301,17 +296,18 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   }
 
   /**
-   * Refreshes the poll; schedules a `refreshed` tick when necessary.
+   * Refreshes the poll. Schedules `refreshed` tick if necessary.
    *
-   * #### Notes
-   * It is safe to call multiple times. The returned promise never rejects.
+   * @returns A promise that resolves after tick is scheduled and never rejects.
    */
-  async refresh(): Promise<this> {
+  async refresh(): Promise<void> {
     if (this.isDisposed) {
-      return this;
+      return;
     }
 
-    await this.ready;
+    if (this.state.phase === 'constructed') {
+      await this.ready;
+    }
 
     if (this.state.phase !== 'refreshed') {
       this.schedule({
@@ -321,22 +317,21 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         timestamp: new Date().getTime()
       });
     }
-
-    return this;
   }
 
   /**
-   * Starts the poll; schedules a `started` tick when necessary.
+   * Starts the poll. Schedules `started` tick if necessary.
    *
-   * #### Notes
-   * It is safe to call multiple times. The returned promise never rejects.
+   * @returns A promise that resolves after tick is scheduled and never rejects.
    */
-  async start(): Promise<this> {
+  async start(): Promise<void> {
     if (this.isDisposed) {
-      return this;
+      return;
     }
 
-    await this.ready;
+    if (this.state.phase === 'constructed') {
+      await this.ready;
+    }
 
     if (this.state.phase === 'standby' || this.state.phase === 'stopped') {
       this.schedule({
@@ -346,34 +341,42 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         timestamp: new Date().getTime()
       });
     }
-
-    return this;
   }
 
   /**
-   * Stops the poll; schedules a `stopped` tick when necessary.
+   * Stops the poll. Schedules `stopped` tick if necessary.
    *
-   * #### Notes
-   * It is safe to call multiple times. The returned promise never rejects.
+   * @returns A promise that resolves after tick is scheduled and never rejects.
    */
-  async stop(): Promise<this> {
-    if (this.isDisposed) {
-      return this;
+  async stop(): Promise<void> {
+    if (this.state.phase === 'disposed') {
+      return;
     }
 
-    await this.ready;
+    if (this.state.phase === 'constructed') {
+      await this.ready;
+    }
 
     if (this.state.phase !== 'stopped') {
       this.schedule({
-        interval: Infinity, // Never.
+        interval: Private.NEVER,
         payload: null,
         phase: 'stopped',
         timestamp: new Date().getTime()
       });
     }
-
-    return this;
   }
+
+  /**
+   * A promise that resolves after the poll has scheduled its first tick.
+   *
+   * #### Notes
+   * This accessor is protected to allow sub-classes to implement methods that
+   * can `await this.ready` if `this.state.phase === 'constructed'`.
+   *
+   * A poll should handle ready state without needing to expose it to clients.
+   */
+  protected readonly ready: Promise<void>;
 
   /**
    * Schedule the next poll tick.
@@ -616,7 +619,7 @@ namespace Private {
   export const DEFAULT_TICK: IPoll.Tick = {
     interval: NEVER,
     payload: null,
-    phase: 'instantiated',
+    phase: 'constructed',
     timestamp: new Date(0).getTime()
   };
 

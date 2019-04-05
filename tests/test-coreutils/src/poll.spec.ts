@@ -33,28 +33,28 @@ describe('Poll', () => {
       expect(poll).to.be.an.instanceof(Poll);
     });
 
-    it('should be `instantiated` and tick after `when` resolves', async () => {
+    it('should be `when-resolved` after `when` resolves', async () => {
       const promise = Promise.resolve();
       poll = new Poll({
         factory: () => Promise.resolve(),
         name: '@jupyterlab/test-coreutils:Poll#constructor()-2',
         when: promise
       });
-      expect(poll.state.phase).to.equal('instantiated');
+      expect(poll.state.phase).to.equal('constructed');
       await promise;
-      expect(poll.state.phase).to.equal('instantiated-resolved');
+      expect(poll.state.phase).to.equal('when-resolved');
     });
 
-    it('should be `instantiated` and tick after `when` rejects', async () => {
+    it('should be `when-rejected` after `when` rejects', async () => {
       const promise = Promise.reject();
       poll = new Poll({
         factory: () => Promise.resolve(),
         name: '@jupyterlab/test-coreutils:Poll#constructor()-3',
         when: promise
       });
-      expect(poll.state.phase).to.equal('instantiated');
+      expect(poll.state.phase).to.equal('constructed');
       await promise.catch(() => undefined);
-      expect(poll.state.phase).to.equal('instantiated-rejected');
+      expect(poll.state.phase).to.equal('when-rejected');
     });
 
     describe('#options.frequency', () => {
@@ -218,7 +218,7 @@ describe('Poll', () => {
         frequency: { interval: 2000, jitter: 0 },
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
-      const expected = 'instantiated-resolved resolved';
+      const expected = 'when-resolved resolved';
       const ticker: IPoll.Phase[] = [];
       const tock = (poll: IPoll) => {
         ticker.push(poll.state.phase);
@@ -238,7 +238,7 @@ describe('Poll', () => {
     });
 
     it('should emit when the poll ticks after `when` resolves', async () => {
-      const expected = 'instantiated-resolved resolved';
+      const expected = 'when-resolved resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
@@ -253,7 +253,7 @@ describe('Poll', () => {
     });
 
     it('should emit when the poll ticks after `when` rejects', async () => {
-      const expected = 'instantiated-rejected resolved';
+      const expected = 'when-rejected resolved';
       const ticker: IPoll.Phase[] = [];
       const promise = Promise.reject();
       poll = new Poll({
@@ -318,28 +318,27 @@ describe('Poll', () => {
       poll.dispose();
     });
 
-    it('should interrupt current tick and refresh the poll', async () => {
-      const expected = 'instantiated-resolved refreshed resolved';
+    it('should refresh the poll when the poll is ready', async () => {
+      const expected = 'when-resolved refreshed resolved';
       const ticker: IPoll.Phase[] = [];
-      let tick: Promise<IPoll>;
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
         frequency: { interval: 100 },
         factory: () => Promise.resolve()
       });
-      tick = poll.tick;
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
+      expect(poll.state.phase).to.equal('constructed');
       await poll.refresh();
-      expect(tick).not.to.equal(poll.tick);
-      await tick;
+      expect(poll.state.phase).to.equal('refreshed');
       await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
 
     it('should be safe to call multiple times', async () => {
-      const expected = 'instantiated-resolved refreshed resolved';
+      const expected = 'when-resolved refreshed resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-2',
@@ -349,10 +348,17 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
-      await poll.refresh();
-      await poll.refresh();
-      await poll.refresh();
+      expect(poll.state.phase).to.equal('constructed');
       await poll.tick;
+      expect(poll.state.phase).to.equal('when-resolved');
+      await poll.refresh();
+      expect(poll.state.phase).to.equal('refreshed');
+      await poll.refresh();
+      expect(poll.state.phase).to.equal('refreshed');
+      await poll.refresh();
+      expect(poll.state.phase).to.equal('refreshed');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
   });
@@ -365,7 +371,7 @@ describe('Poll', () => {
     });
 
     it('should start the poll if it is stopped', async () => {
-      const expected = 'instantiated-resolved stopped started resolved';
+      const expected = 'when-resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-1',
@@ -375,14 +381,19 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
-      await poll.stop();
-      await poll.start();
       await poll.tick;
+      expect(poll.state.phase).to.equal('when-resolved');
+      await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
+      await poll.start();
+      expect(poll.state.phase).to.equal('started');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
 
-    it('be safe to call multiple times', async () => {
-      const expected = 'instantiated-resolved resolved';
+    it('be safe to call multiple times and no-op if unnecessary', async () => {
+      const expected = 'when-resolved resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-2',
@@ -392,10 +403,21 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
+      expect(poll.state.phase).to.equal('constructed');
       await poll.start();
+      expect(poll.state.phase).to.equal('when-resolved');
       await poll.start();
+      expect(poll.state.phase).to.equal('when-resolved');
       await poll.start();
+      expect(poll.state.phase).to.equal('when-resolved');
       await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
+      await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
+      await poll.start();
+      expect(poll.state.phase).to.equal('started');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
   });
@@ -408,7 +430,7 @@ describe('Poll', () => {
     });
 
     it('should stop the poll if it is active', async () => {
-      const expected = 'instantiated-resolved stopped started resolved';
+      const expected = 'when-resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#stop()-1',
@@ -418,14 +440,18 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
+      expect(poll.state.phase).to.equal('constructed');
       await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
       await poll.start();
+      expect(poll.state.phase).to.equal('started');
       await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
 
     it('be safe to call multiple times', async () => {
-      const expected = 'instantiated-resolved stopped';
+      const expected = 'when-resolved stopped started resolved';
       const ticker: IPoll.Phase[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#stop()-2',
@@ -435,9 +461,17 @@ describe('Poll', () => {
       poll.ticked.connect((_, tick) => {
         ticker.push(tick.phase);
       });
+      expect(poll.state.phase).to.equal('constructed');
       await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
       await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
       await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
+      await poll.start();
+      expect(poll.state.phase).to.equal('started');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(ticker.join(' ')).to.equal(expected);
     });
   });
@@ -450,15 +484,19 @@ describe('Poll', () => {
     });
 
     it('should schedule a poll tick', async () => {
-      const expected = 'instantiated-resolved stopped started resolved';
+      const expected = 'when-resolved stopped started resolved';
       poll = new TestPoll({
         name: '@jupyterlab/test-coreutils:Poll#schedule()-1',
         frequency: { interval: 100 },
         factory: () => Promise.resolve()
       });
+      expect(poll.state.phase).to.equal('constructed');
       await poll.stop();
+      expect(poll.state.phase).to.equal('stopped');
       await poll.start();
+      expect(poll.state.phase).to.equal('started');
       await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
       expect(poll.scheduled.join(' ')).to.equal(expected);
     });
   });
