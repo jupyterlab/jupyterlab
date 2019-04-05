@@ -285,7 +285,6 @@ export class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._source ? this._source.toJSON() : {};
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
@@ -293,22 +292,18 @@ export class JSONEditor extends Widget {
       return;
     }
 
-    // If it is in user and has changed from old, set in current.
+    // If it is in user and has changed from old, set in new.
     for (let key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
-        current[key] = user[key];
+        source.set(key, user[key]);
       }
     }
-    // If it was in old and is not in user, remove from current.
+
+    // If it was in old and is not in user, remove from source.
     for (let key in old) {
       if (!(key in user)) {
-        delete current[key];
         source.delete(key);
       }
-    }
-    // Set the values.
-    for (let key in current) {
-      source.set(key, current[key]);
     }
   }
 
