@@ -29,13 +29,19 @@ export class SessionManager implements Session.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._ready = Promise.all([this._refreshSpecs(), this._refreshRunning()])
+    this._ready = Promise.all([this.requestRunning(), this.requestSpecs()])
       .then(_ => undefined)
-      .catch(_ => undefined);
+      .catch(_ => undefined)
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+      });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
-      factory: () => this._refreshRunning(),
+      factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
         jitter: true,
@@ -47,7 +53,7 @@ export class SessionManager implements Session.IManager {
       when: this.ready
     });
     this._pollSpecs = new Poll({
-      factory: () => this._refreshSpecs(),
+      factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
         jitter: true,
@@ -97,7 +103,7 @@ export class SessionManager implements Session.IManager {
    * Test whether the manager is ready.
    */
   get isReady(): boolean {
-    return this._specs !== null;
+    return this._isReady;
   }
 
   /**
@@ -255,7 +261,7 @@ export class SessionManager implements Session.IManager {
     }
 
     try {
-      await this._refreshRunning(true);
+      await this.requestRunning(true);
     } catch (error) {
       // Continue attempting to shutdown the known models.
     }
@@ -273,6 +279,46 @@ export class SessionManager implements Session.IManager {
 
     if (models.length) {
       this._runningChanged.emit([]);
+    }
+  }
+
+  /**
+   * Execute a request to the server to poll running kernels and update state.
+   */
+  protected async requestRunning(silent = false): Promise<void> {
+    const models = await Session.listRunning(this.serverSettings);
+    if (this.isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const ids = models.map(model => model.id);
+      const sessions = this._sessions;
+      sessions.forEach(session => {
+        if (ids.indexOf(session.id) === -1) {
+          session.dispose();
+          sessions.delete(session);
+        }
+      });
+      this._models = models.slice();
+      if (!silent) {
+        this._runningChanged.emit(models);
+      }
+    }
+  }
+
+  /**
+   * Execute a request to the server to poll specs and update state.
+   */
+  protected async requestSpecs(silent = false): Promise<void> {
+    const specs = await Kernel.getSpecs(this.serverSettings);
+    if (this.isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(specs, this._specs)) {
+      this._specs = specs;
+      if (!silent) {
+        this._specsChanged.emit(specs);
+      }
     }
   }
 
@@ -323,39 +369,8 @@ export class SessionManager implements Session.IManager {
     }
   }
 
-  /**
-   * Refresh the specs.
-   */
-  private async _refreshSpecs(): Promise<void> {
-    const specs = await Kernel.getSpecs(this.serverSettings);
-    if (!JSONExt.deepEqual(specs, this._specs)) {
-      this._specs = specs;
-      this._specsChanged.emit(specs);
-    }
-  }
-
-  /**
-   * Refresh the running sessions.
-   */
-  private async _refreshRunning(silent = false): Promise<void> {
-    const models = await Session.listRunning(this.serverSettings);
-    if (!JSONExt.deepEqual(models, this._models)) {
-      const ids = models.map(model => model.id);
-      const sessions = this._sessions;
-      sessions.forEach(session => {
-        if (ids.indexOf(session.id) === -1) {
-          session.dispose();
-          sessions.delete(session);
-        }
-      });
-      this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
-    }
-  }
-
   private _isDisposed = false;
+  private _isReady = false;
   private _models: Session.IModel[] = [];
   private _pollModels: Poll;
   private _pollSpecs: Poll;

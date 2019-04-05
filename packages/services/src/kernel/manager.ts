@@ -27,15 +27,15 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._ready = Promise.all([
-      this.requestRunning(),
-      this.requestSpecs()
-    ]).then(() => {
-      if (this.isDisposed) {
-        return;
-      }
-      this._isReady = true;
-    });
+    this._ready = Promise.all([this.requestRunning(), this.requestSpecs()])
+      .then(_ => undefined)
+      .catch(_ => undefined)
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+      });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -287,6 +287,9 @@ export class KernelManager implements Kernel.IManager {
    */
   protected async requestRunning(silent = false): Promise<void> {
     const models = await Kernel.listRunning(this.serverSettings);
+    if (this._isDisposed) {
+      return;
+    }
     if (!JSONExt.deepEqual(models, this._models)) {
       const ids = models.map(({ id }) => id);
       const kernels = this._kernels;
@@ -308,7 +311,10 @@ export class KernelManager implements Kernel.IManager {
    */
   protected async requestSpecs(): Promise<void> {
     const specs = await Kernel.getSpecs(this.serverSettings);
-    if (!JSONExt.deepEqual(specs, this._specs || {})) {
+    if (this._isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(specs, this._specs)) {
       this._specs = specs;
       this._specsChanged.emit(specs);
     }
