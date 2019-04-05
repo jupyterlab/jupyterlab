@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget, Panel, PanelLayout, Title } from '@phosphor/widgets';
+import { Message } from '@phosphor/messaging';
 import { ISignal, Signal } from '@phosphor/signaling';
+import { Widget, Panel, PanelLayout, Title } from '@phosphor/widgets';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.
@@ -16,7 +17,6 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this.addClass('jp-Collapse');
     this._header = new Widget();
     this._header.addClass('jp-Collapse-header');
-    this._header.node.addEventListener('click', this);
     this._content = new Panel();
     this._content.addClass('jp-Collapse-contents');
 
@@ -114,6 +114,14 @@ export class Collapse<T extends Widget = Widget> extends Widget {
       default:
         break;
     }
+  }
+
+  protected onAfterAttach(msg: Message) {
+    this._header.node.addEventListener('click', this);
+  }
+
+  protected onBeforeDetach(msg: Message) {
+    this._header.node.removeEventListener('click', this);
   }
 
   private _collapse() {
