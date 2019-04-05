@@ -119,6 +119,8 @@ namespace CommandIDs {
 
   export const runAllBelow = 'notebook:run-all-below';
 
+  export const renderAllMarkdown = 'notebook:render-all-markdown';
+
   export const toCode = 'notebook:change-cell-to-code';
 
   export const toMarkdown = 'notebook:change-cell-to-markdown';
@@ -1037,6 +1039,17 @@ function addCommands(
       );
     }
   });
+  commands.addCommand(CommandIDs.renderAllMarkdown, {
+    label: 'Render All Markdown Cells',
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        const { context, content } = current;
+        return NotebookActions.renderAllMarkdown(content, context.session);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel…',
     execute: args => {
@@ -1788,6 +1801,7 @@ function populatePalette(
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
     CommandIDs.runAll,
+    CommandIDs.renderAllMarkdown,
     CommandIDs.runAllAbove,
     CommandIDs.runAllBelow,
     CommandIDs.selectAll,
@@ -2073,6 +2087,10 @@ function populateMenus(
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 
+  // Add a renderAllMarkdown group to the run menu.
+  const renderAllMarkdown = [CommandIDs.renderAllMarkdown].map(command => {
+    return { command };
+  });
   // Add a run+insert and run+don't advance group to the run menu.
   const runExtras = [
     CommandIDs.runAndInsert,
@@ -2132,6 +2150,7 @@ function populateMenus(
   mainMenu.editMenu.addGroup(splitMergeGroup, 9);
   mainMenu.runMenu.addGroup(runExtras, 10);
   mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
+  mainMenu.runMenu.addGroup(renderAllMarkdown, 12);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
