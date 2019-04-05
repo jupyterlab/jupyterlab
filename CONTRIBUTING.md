@@ -138,9 +138,11 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that are
-built in the dev-installed Python package. When running in dev mode, a red
-stripe will appear at the top of the page; this is to indicate running
-an unreleased version.
+built in the dev-installed Python package. Note that when running in dev mode,
+extensions will not be activated by default.
+
+When running in dev mode, a red stripe will appear at the top of the page;
+this is to indicate running an unreleased version.
 
 ### Build and Run the Tests
 
