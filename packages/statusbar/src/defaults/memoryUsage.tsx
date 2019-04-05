@@ -65,7 +65,7 @@ export namespace MemoryUsage {
         factory: () => Private.factory(),
         frequency: {
           interval: options.refreshRate,
-          jitter: true
+          backoff: true
         },
         name: '@jupyterlab/statusbar:MemoryUsage#metrics'
       });

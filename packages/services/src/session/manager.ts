@@ -44,9 +44,8 @@ export class SessionManager implements Session.IManager {
       factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
-        jitter: true,
-        max: 300 * 1000,
-        min: 100
+        backoff: true,
+        max: 300 * 1000
       },
       name: `@jupyterlab/services:SessionManager#models`,
       standby: options.standby || 'when-hidden',
@@ -56,9 +55,8 @@ export class SessionManager implements Session.IManager {
       factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
-        jitter: true,
-        max: 300 * 1000,
-        min: 100
+        backoff: true,
+        max: 300 * 1000
       },
       name: `@jupyterlab/services:SessionManager#specs`,
       standby: options.standby || 'when-hidden',

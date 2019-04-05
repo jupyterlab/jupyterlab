@@ -59,27 +59,36 @@ export interface IPoll<T = any, U = any> {
 export namespace IPoll {
   /**
    * The polling frequency parameters.
+   *
+   * ### Notes
+   * We implement the "decorrelated jitter" strategy from
+   * https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/.
+   * Essentially, if consecutive retries are needed, we choose an integer:
+   * `sleep=Math.min(max, rand_between(interval, backoff*sleep))`. This ensures
+   * that the poll is never less than `interval`, and nicely spreads out retries
+   * for consecutive tries. Over time, if interval<<max, the random number will
+   * be above `max` about (1-1/backoff) of the time (sleeping the `max`), and
+   * the rest of the time the sleep will be a random number below `max`,
+   * decorrelating our trigger time from other pollers.
    */
   export type Frequency = {
     /**
-     * The polling interval in milliseconds (integer).
+     * The basic polling interval in milliseconds (integer).
      */
     readonly interval: number;
 
     /**
-     * Whether poll frequency jitters if boolean or jitter (float) quantity.
+     * Whether poll frequency backs off (boolean) or the backoff growth rate (float > 1).
+     *
+     * #### Notes
+     * If true, the default backoff growth rate is 3.
      */
-    readonly jitter: boolean | number;
+    readonly backoff: boolean | number;
 
     /**
      * The maximum milliseconds (integer) between poll requests.
      */
     readonly max: number;
-
-    /**
-     * The minimum milliseconds (integer) between poll requests.
-     */
-    readonly min: number;
   };
 
   /**
@@ -155,19 +164,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     this._standby = options.standby || Private.DEFAULT_STANDBY;
     this._state = { ...Private.DEFAULT_TICK, timestamp: new Date().getTime() };
 
-    const base = Private.DEFAULT_FREQUENCY;
-    const override: Partial<IPoll.Frequency> = options.frequency || {};
-    const interval = 'interval' in override ? override.interval : base.interval;
-    const jitter = 'jitter' in override ? override.jitter : base.jitter;
-    const max =
-      'max' in override
-        ? override.max
-        : 'interval' in override
-          ? 10 * interval
-          : base.max;
-    const min = 'min' in override ? override.min : base.min;
-
-    this.frequency = { interval, jitter, max, min };
+    this.frequency = {
+      ...Private.DEFAULT_FREQUENCY,
+      ...(options.frequency || {})
+    };
     this.name = options.name || Private.DEFAULT_NAME;
     this.ready = (options.when || Promise.resolve())
       .then(() => {
@@ -221,21 +221,24 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    let { interval, jitter, max, min } = frequency;
+    let { interval, backoff, max } = frequency;
 
-    interval = Math.round(Math.abs(interval));
-    max = Math.round(Math.abs(max));
-    min = Math.round(Math.abs(min));
+    interval = Math.round(interval);
+    max = Math.round(max);
 
-    if (interval > max) {
-      throw new Error('Poll interval cannot exceed max interval length');
+    // Delays are 32-bit integers in many browsers, so check for overflow.
+    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
+    if (max > 2147483647) {
+      throw new Error('Max poll interval must be less than 2147483647');
+    }
+    if (interval < 0 || interval > max) {
+      throw new Error('Poll interval must be between 0 and max');
+    }
+    if (backoff < 1) {
+      throw new Error('backoff growth factor must be at least 1');
     }
 
-    if (min > max || min > interval) {
-      throw new Error('Poll min cannot exceed poll interval or poll max');
-    }
-
-    this._frequency = { interval, jitter, max, min };
+    this._frequency = { interval, backoff, max };
   }
 
   /**
@@ -442,15 +445,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
     // If in standby mode schedule next tick without calling the factory.
     if (standby) {
-      const { interval, jitter, max, min } = this.frequency;
-
       this.schedule({
-        interval: Private.jitter(interval, jitter, max, min),
+        interval: this.frequency.interval,
         payload: null,
         phase: 'standby',
         timestamp: new Date().getTime()
       });
-
       return;
     }
 
@@ -462,10 +462,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        const { interval, jitter, max, min } = this.frequency;
-
         this.schedule({
-          interval: Private.jitter(interval, jitter, max, min),
+          interval: this.frequency.interval,
           payload: resolved,
           phase: this.state.phase === 'rejected' ? 'reconnected' : 'resolved',
           timestamp: new Date().getTime()
@@ -476,11 +474,15 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        const { jitter, max, min } = this.frequency;
-        const increased = Math.min(this.state.interval * 2, max);
+        const { backoff, max, interval } = this.frequency;
+        const growth = backoff === true ? 3 : backoff === false ? 1 : backoff;
+        const sleep = Math.min(
+          max,
+          Private.getRandomIntInclusive(interval, this.state.interval * growth)
+        );
 
         this.schedule({
-          interval: Private.jitter(increased, jitter, max, min),
+          interval: sleep,
           payload: rejected,
           phase: 'rejected',
           timestamp: new Date().getTime()
@@ -533,19 +535,6 @@ export namespace Poll {
 
     /**
      * The polling frequency parameters.
-     *
-     * #### Notes
-     * _interval_ defaults to `1000`.
-     * If set to `0`, the poll will schedule an animation frame after each
-     * promise resolution.
-     *
-     * _jitter_ defaults to `0`.
-     * If set to `true` jitter quantity is `0.25`.
-     * If set to `false` jitter quantity to `0`.
-     *
-     * _max_ defaults to `10 * interval`.
-     *
-     * _min_ defaults to `100`.
      */
     frequency?: Partial<IPoll.Frequency>;
 
@@ -593,15 +582,9 @@ namespace Private {
    */
   export const DEFAULT_FREQUENCY: IPoll.Frequency = {
     interval: 1000,
-    jitter: 0,
-    max: 10 * 1000,
-    min: 100
+    backoff: true,
+    max: 30 * 1000
   };
-
-  /**
-   * The jitter quantity if `jitter` is set to `true`.
-   */
-  export const DEFAULT_JITTER = 0.25;
 
   /**
    * The default poll name.
@@ -634,45 +617,6 @@ namespace Private {
   };
 
   /**
-   * Returns a randomly jittered (integer) value.
-   *
-   * @param base - The base (integer) value that is being wobbled.
-   *
-   * @param quantity - The jitter (float) quantity or boolean flag. The jitter
-   * is a percentage of the base.
-   *
-   * @param max - The largest acceptable (integer) value to return.
-   *
-   * @param min - The smallest acceptable (integer) value to return.
-   *
-   * #### Notes
-   * The returned value will be a random value between base +- (base*jitter),
-   * inclusive, capped by min and max.
-   */
-  export function jitter(
-    base: number,
-    quantity: boolean | number,
-    max: number,
-    min: number
-  ): number {
-    base = Math.round(base);
-
-    // If quantity is 0 or false, no jitter
-    if (!quantity) {
-      return base;
-    }
-
-    if (quantity === true) {
-      quantity = DEFAULT_JITTER;
-    }
-
-    quantity = Math.abs(quantity);
-    min = Math.max(min, base * (1 - quantity));
-    max = Math.min(max, base * (1 + quantity));
-    return getRandomIntInclusive(min, max);
-  }
-
-  /**
    * Get a random integer between min and max, inclusive of both.
    *
    * #### Notes
@@ -683,7 +627,7 @@ namespace Private {
    * that, but doing so would cause your random numbers to follow a non-uniform
    * distribution, which may not be acceptable for your needs.
    */
-  function getRandomIntInclusive(min: number, max: number) {
+  export function getRandomIntInclusive(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;

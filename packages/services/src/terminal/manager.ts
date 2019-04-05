@@ -42,9 +42,8 @@ export class TerminalManager implements TerminalSession.IManager {
         factory: () => this.requestRunning(),
         frequency: {
           interval: 10 * 1000,
-          jitter: true,
-          max: 300 * 1000,
-          min: 100
+          backoff: true,
+          max: 300 * 1000
         },
         name: `@jupyterlab/services:TerminalManager#models`,
         standby: options.standby || 'when-hidden',

@@ -42,9 +42,8 @@ export class KernelManager implements Kernel.IManager {
       factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
-        jitter: true,
-        max: 300 * 1000,
-        min: 100
+        backoff: true,
+        max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#models`,
       standby: options.standby || 'when-hidden',
@@ -54,9 +53,8 @@ export class KernelManager implements Kernel.IManager {
       factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
-        jitter: true,
-        max: 300 * 1000,
-        min: 100
+        backoff: true,
+        max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#specs`,
       standby: options.standby || 'when-hidden',

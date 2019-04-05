@@ -129,7 +129,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       factory: async () => {
         this._checkSync();
       },
-      frequency: { interval: 3000, jitter: false },
+      frequency: { interval: 3000, backoff: false },
       standby: () => {
         // If changed, only stand by when hidden, otherwise always stand by.
         return this._lastChange ? 'when-hidden' : true;

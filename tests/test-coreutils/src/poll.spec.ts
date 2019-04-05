@@ -83,22 +83,22 @@ describe('Poll', () => {
         expect(poll.frequency.interval).to.equal(1000);
       });
 
-      it('should set jitter', () => {
-        const jitter = false;
+      it('should set backoff', () => {
+        const backoff = false;
         poll = new Poll({
           factory: () => Promise.resolve(),
-          frequency: { jitter },
-          name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-1'
+          frequency: { backoff },
+          name: '@jupyterlab/test-coreutils:Poll#frequency:backoff-1'
         });
-        expect(poll.frequency.jitter).to.equal(jitter);
+        expect(poll.frequency.backoff).to.equal(backoff);
       });
 
-      it('should default jitter to `0`', () => {
+      it('should default backoff to `true`', () => {
         poll = new Poll({
           factory: () => Promise.resolve(),
-          name: '@jupyterlab/test-coreutils:Poll#frequency:jitter-2'
+          name: '@jupyterlab/test-coreutils:Poll#frequency:backoff-2'
         });
-        expect(poll.frequency.jitter).to.equal(0);
+        expect(poll.frequency.backoff).to.equal(true);
       });
 
       it('should set max value', () => {
@@ -111,9 +111,9 @@ describe('Poll', () => {
         expect(poll.frequency.max).to.equal(200000);
       });
 
-      it('should default max to 10x the interval', () => {
+      it('should default max to 30s', () => {
         const interval = 500;
-        const max = 10 * interval;
+        const max = 30 * 1000;
         poll = new Poll({
           frequency: { interval },
           factory: () => Promise.resolve(),
@@ -121,25 +121,15 @@ describe('Poll', () => {
         });
         expect(poll.frequency.max).to.equal(max);
       });
-
-      it('should set min', () => {
-        const min = 250;
+      it('should default max to 30s', () => {
+        const interval = 500;
+        const max = 30 * 1000;
         poll = new Poll({
+          frequency: { interval },
           factory: () => Promise.resolve(),
-          frequency: { min },
-          name: '@jupyterlab/test-coreutils:Poll#min-1'
+          name: '@jupyterlab/test-coreutils:Poll#frequency:max-2'
         });
-        expect(poll.frequency.min).to.equal(min);
-      });
-
-      it('should default min to `100`', () => {
-        const min = 100;
-        poll = new Poll({
-          factory: () => Promise.resolve(),
-          name: '@jupyterlab/test-coreutils:Poll#min-2'
-        });
-        expect(poll.frequency.min).to.equal(min);
-        poll.dispose();
+        expect(poll.frequency.max).to.equal(max);
       });
     });
   });
@@ -215,7 +205,7 @@ describe('Poll', () => {
     it('should resolve after a tick', async () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, jitter: 0 },
+        frequency: { interval: 2000, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'when-resolved resolved';
@@ -242,7 +232,7 @@ describe('Poll', () => {
       const ticker: IPoll.Phase[] = [];
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, jitter: 0 },
+        frequency: { interval: 2000, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#ticked-1'
       });
       poll.ticked.connect(() => {
@@ -258,7 +248,7 @@ describe('Poll', () => {
       const promise = Promise.reject();
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, jitter: 0 },
+        frequency: { interval: 2000, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#ticked-2',
         when: promise
       });
@@ -273,7 +263,7 @@ describe('Poll', () => {
     it('should emit a tick identical to the poll state', async () => {
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
-        frequency: { interval: 100, jitter: 0 },
+        frequency: { interval: 100, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#ticked-3'
       });
       poll.ticked.connect((_, tick) => {
