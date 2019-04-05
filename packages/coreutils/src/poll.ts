@@ -64,26 +64,27 @@ export namespace IPoll {
    * We implement the "decorrelated jitter" strategy from
    * https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/.
    * Essentially, if consecutive retries are needed, we choose an integer:
-   * `sleep=Math.min(max, rand_between(interval, backoff*sleep))`. This ensures
-   * that the poll is never less than `interval`, and nicely spreads out retries
-   * for consecutive tries. Over time, if interval<<max, the random number will
-   * be above `max` about (1-1/backoff) of the time (sleeping the `max`), and
-   * the rest of the time the sleep will be a random number below `max`,
-   * decorrelating our trigger time from other pollers.
+   * `sleep = min(max, rand(interval, backoff * sleep))`
+   * This ensures that the poll is never less than `interval`, and nicely
+   * spreads out retries for consecutive tries. Over time, if (interval < max),
+   * the random number will be above `max` about (1 - 1/backoff) of the time
+   * (sleeping the `max`), and the rest of the time the sleep will be a random
+   * number below `max`, decorrelating our trigger time from other pollers.
    */
   export type Frequency = {
+    /**
+     * Whether poll frequency backs off (boolean) or the backoff growth rate
+     * (float > 1).
+     *
+     * #### Notes
+     * If `true`, the default backoff growth rate is `3`.
+     */
+    readonly backoff: boolean | number;
+
     /**
      * The basic polling interval in milliseconds (integer).
      */
     readonly interval: number;
-
-    /**
-     * Whether poll frequency backs off (boolean) or the backoff growth rate (float > 1).
-     *
-     * #### Notes
-     * If true, the default backoff growth rate is 3.
-     */
-    readonly backoff: boolean | number;
 
     /**
      * The maximum milliseconds (integer) between poll requests.
@@ -155,7 +156,7 @@ export namespace IPoll {
  */
 export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
-   * Instantiate a new poll with exponential back-off in case of failure.
+   * Instantiate a new poll with exponential backoff in case of failure.
    *
    * @param options - The poll instantiation options.
    */
@@ -221,24 +222,24 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    let { interval, backoff, max } = frequency;
+    let { backoff, interval, max } = frequency;
 
     interval = Math.round(interval);
     max = Math.round(max);
 
-    // Delays are 32-bit integers in many browsers, so check for overflow.
-    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
-    if (max > 2147483647) {
-      throw new Error('Max poll interval must be less than 2147483647');
+    if (typeof backoff === 'number' && backoff < 1) {
+      throw new Error('Poll backoff growth factor must be at least 1');
     }
+
     if (interval < 0 || interval > max) {
       throw new Error('Poll interval must be between 0 and max');
     }
-    if (backoff < 1) {
-      throw new Error('backoff growth factor must be at least 1');
+
+    if (max > Poll.MAX_INTERVAL) {
+      throw new Error(`Max interval must be less than ${Poll.MAX_INTERVAL}`);
     }
 
-    this._frequency = { interval, backoff, max };
+    this._frequency = { backoff, interval, max };
   }
 
   /**
@@ -474,15 +475,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        const { backoff, max, interval } = this.frequency;
-        const growth = backoff === true ? 3 : backoff === false ? 1 : backoff;
-        const sleep = Math.min(
-          max,
-          Private.getRandomIntInclusive(interval, this.state.interval * growth)
-        );
-
         this.schedule({
-          interval: sleep,
+          interval: Private.sleep(this.frequency, this.state),
           payload: rejected,
           phase: 'rejected',
           timestamp: new Date().getTime()
@@ -501,7 +495,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 }
 
 /**
- * A namespace for `Poll` types and interfaces.
+ * A namespace for `Poll` types, interfaces, and statics.
  */
 export namespace Poll {
   /**
@@ -561,6 +555,14 @@ export namespace Poll {
      */
     when?: Promise<any>;
   }
+
+  /**
+   * Delays are 32-bit integers in many browsers so intervals need to be capped.
+   *
+   * #### Notes
+   * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
+   */
+  export const MAX_INTERVAL = 2147483647;
 }
 
 /**
@@ -578,11 +580,16 @@ namespace Private {
   export const NEVER = Infinity;
 
   /**
+   * The default backoff growth rate if `backoff` is `true`.
+   */
+  export const DEFAULT_BACKOFF = 3;
+
+  /**
    * The default polling frequency.
    */
   export const DEFAULT_FREQUENCY: IPoll.Frequency = {
-    interval: 1000,
     backoff: true,
+    interval: 1000,
     max: 30 * 1000
   };
 
@@ -627,9 +634,24 @@ namespace Private {
    * that, but doing so would cause your random numbers to follow a non-uniform
    * distribution, which may not be acceptable for your needs.
    */
-  export function getRandomIntInclusive(min: number, max: number) {
+  function getRandomIntInclusive(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /**
+   * Returns the number of milliseconds to sleep before the next tick.
+   *
+   * @param frequency - The poll's base frequency.
+   * @param last - The poll's last tick.
+   */
+  export function sleep(frequency: IPoll.Frequency, last: IPoll.Tick): number {
+    const { backoff, interval, max } = frequency;
+    const growth =
+      backoff === true ? DEFAULT_BACKOFF : backoff === false ? 1 : backoff;
+    const random = getRandomIntInclusive(interval, last.interval * growth);
+
+    return Math.min(max, random);
   }
 }
