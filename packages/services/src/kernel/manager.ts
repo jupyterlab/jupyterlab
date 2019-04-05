@@ -27,15 +27,19 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._ready = Promise.all([this._refreshSpecs(), this._refreshRunning()])
-      .catch(_ => undefined)
-      .then(() => {
-        this._isReady = true;
-      });
+    this._ready = Promise.all([
+      this.requestRunning(),
+      this.requestSpecs()
+    ]).then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._isReady = true;
+    });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
-      factory: () => this._refreshRunning(),
+      factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
         jitter: true,
@@ -47,7 +51,7 @@ export class KernelManager implements Kernel.IManager {
       when: this.ready
     });
     this._pollSpecs = new Poll({
-      factory: () => this._refreshSpecs(),
+      factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
         jitter: true,
@@ -237,7 +241,7 @@ export class KernelManager implements Kernel.IManager {
     // Repopulate list of models silently then shut down every session.
     let error: any;
     try {
-      await this._refreshRunning(true);
+      await this.requestRunning(true);
       await Promise.all(
         this._models.map(({ id }) => Kernel.shutdown(id, this.serverSettings))
       );
@@ -279,6 +283,38 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
+   * Execute a request to the server to poll running kernels and update state.
+   */
+  protected async requestRunning(silent = false): Promise<void> {
+    const models = await Kernel.listRunning(this.serverSettings);
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const ids = models.map(({ id }) => id);
+      const kernels = this._kernels;
+      kernels.forEach(kernel => {
+        if (ids.indexOf(kernel.id) === -1) {
+          kernel.dispose();
+          kernels.delete(kernel);
+        }
+      });
+      this._models = models.slice();
+      if (!silent) {
+        this._runningChanged.emit(models);
+      }
+    }
+  }
+
+  /**
+   * Execute a request to the server to poll specs and update state.
+   */
+  protected async requestSpecs(): Promise<void> {
+    const specs = await Kernel.getSpecs(this.serverSettings);
+    if (!JSONExt.deepEqual(specs, this._specs || {})) {
+      this._specs = specs;
+      this._specsChanged.emit(specs);
+    }
+  }
+
+  /**
    * Handle a kernel starting.
    */
   private _onStarted(kernel: Kernel.IKernel): void {
@@ -302,38 +338,6 @@ export class KernelManager implements Kernel.IManager {
     if (index !== -1) {
       this._models.splice(index, 1);
       this._runningChanged.emit(this._models.slice());
-    }
-  }
-
-  /**
-   * Refresh the running sessions.
-   */
-  private async _refreshRunning(silent = false): Promise<void> {
-    const models = await Kernel.listRunning(this.serverSettings);
-    if (!JSONExt.deepEqual(models, this._models)) {
-      const ids = models.map(({ id }) => id);
-      const kernels = this._kernels;
-      kernels.forEach(kernel => {
-        if (ids.indexOf(kernel.id) === -1) {
-          kernel.dispose();
-          kernels.delete(kernel);
-        }
-      });
-      this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
-    }
-  }
-
-  /**
-   * Refresh the specs.
-   */
-  private async _refreshSpecs(): Promise<void> {
-    const specs = await Kernel.getSpecs(this.serverSettings);
-    if (!JSONExt.deepEqual(specs, this._specs)) {
-      this._specs = specs;
-      this._specsChanged.emit(specs);
     }
   }
 

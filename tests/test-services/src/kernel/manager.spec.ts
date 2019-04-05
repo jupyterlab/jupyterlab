@@ -17,6 +17,16 @@ import {
   testEmission
 } from '../utils';
 
+class TestManager extends KernelManager {
+  intercept: Kernel.ISpecModels | null = null;
+  protected async requestSpecs(): Promise<void> {
+    if (this.intercept) {
+      handleRequest(this, 200, this.intercept);
+    }
+    return super.requestSpecs();
+  }
+}
+
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
@@ -82,16 +92,18 @@ describe('kernel/manager', () => {
 
     describe('#specsChanged', () => {
       it('should be emitted when the specs change', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        specs.default = 'shell';
-        handleRequest(manager, 200, specs);
         let called = false;
-        manager.specsChanged.connect((sender, args) => {
-          expect(sender).to.equal(manager);
-          expect(args.default).to.equal(specs.default);
+        manager.specsChanged.connect(() => {
           called = true;
         });
+        await manager.ready;
+        expect(manager.specs.default).to.equal('echo');
+        specs.default = 'shell';
+        manager.intercept = specs;
         await manager.refreshSpecs();
+        expect(manager.specs.default).to.equal('shell');
         expect(called).to.equal(true);
       });
     });
@@ -138,11 +150,14 @@ describe('kernel/manager', () => {
 
     describe('#refreshSpecs()', () => {
       it('should update list of kernel specs', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+        await manager.ready;
         specs.default = 'shell';
-        handleRequest(manager, 200, specs);
+        manager.intercept = specs;
+        expect(manager.specs.default).not.to.equal('shell');
         await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal(specs.default);
+        expect(manager.specs.default).to.equal('shell');
       });
     });
 
