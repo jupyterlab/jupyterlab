@@ -30,7 +30,7 @@
 }
 
 .jp-Collapse-contents {
-  padding: 4px 12px 4px 12px;
+  padding: 0px 12px 0px 12px;
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   overflow: auto;
