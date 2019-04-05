@@ -349,7 +349,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * @returns A promise that resolves after tick is scheduled and never rejects.
    */
   async stop(): Promise<void> {
-    if (this.state.phase === 'disposed') {
+    if (this.isDisposed) {
       return;
     }
 
