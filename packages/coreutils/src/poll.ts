@@ -424,11 +424,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           ? -1
           : setTimeout(execute, tick.interval);
 
-    // Resolve the pending poll promise and emit the ticked signal.
-    void pending.promise.then(() => {
-      this._ticked.emit(tick);
-    });
     pending.resolve(this);
+    this._ticked.emit(tick);
   }
 
   /**
