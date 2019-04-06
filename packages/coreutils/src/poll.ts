@@ -414,18 +414,21 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       clearTimeout(this._timeout);
     }
 
-    // Update poll state and schedule the next tick.
+    // Update poll state.
     this._state = tick;
     this._tick = current;
+
+    // Resolve pending and emit signal.
+    pending.resolve(this);
+    this._ticked.emit(tick);
+
+    // Schedule next execution.
     this._timeout =
       tick.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
         : tick.interval === Private.NEVER
           ? -1
           : setTimeout(execute, tick.interval);
-
-    pending.resolve(this);
-    this._ticked.emit(tick);
   }
 
   /**
