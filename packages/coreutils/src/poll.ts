@@ -40,7 +40,7 @@ export interface IPoll<T = any, U = any> {
   /**
    * The poll state, which is the content of the currently-scheduled poll tick.
    */
-  readonly state: IPoll.Tick<T, U>;
+  readonly state: IPoll.State<T, U>;
 
   /**
    * A promise that resolves when the currently-scheduled tick completes.
@@ -55,7 +55,7 @@ export interface IPoll<T = any, U = any> {
   /**
    * A signal emitted when the poll state changes, i.e., a new tick is scheduled.
    */
-  readonly ticked: ISignal<IPoll<T, U>, IPoll.Tick<T, U>>;
+  readonly ticked: ISignal<IPoll<T, U>, IPoll.State<T, U>>;
 }
 
 /**
@@ -122,7 +122,7 @@ export namespace IPoll {
    * @typeparam U - The rejected type of the factory's promises.
    * Defaults to `any`.
    */
-  export type Tick<T = any, U = any> = {
+  export type State<T = any, U = any> = {
     /**
      * The number of milliseconds until the current tick resolves.
      */
@@ -168,7 +168,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   constructor(options: Poll.IOptions<T, U>) {
     this._factory = options.factory;
     this._standby = options.standby || Private.DEFAULT_STANDBY;
-    this._state = { ...Private.DEFAULT_TICK, timestamp: new Date().getTime() };
+    this._state = { ...Private.DEFAULT_STATE, timestamp: new Date().getTime() };
 
     this.frequency = {
       ...Private.DEFAULT_FREQUENCY,
@@ -271,7 +271,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
    * The poll state, which is the content of the current poll tick.
    */
-  get state(): IPoll.Tick<T, U> {
+  get state(): IPoll.State<T, U> {
     return this._state;
   }
 
@@ -285,7 +285,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
    * A signal emitted when the poll ticks and fires off a new request.
    */
-  get ticked(): ISignal<this, IPoll.Tick<T, U>> {
+  get ticked(): ISignal<this, IPoll.State<T, U>> {
     return this._ticked;
   }
 
@@ -297,7 +297,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    this._state = { ...Private.DISPOSED_TICK, timestamp: new Date().getTime() };
+    this._state = {
+      ...Private.DISPOSED_STATE,
+      timestamp: new Date().getTime()
+    };
     this._tick.promise.catch(_ => undefined);
     this._tick.reject(new Error(`Poll (${this.name}) is disposed.`));
     this._disposed.emit();
@@ -390,7 +393,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
    * Schedule the next poll tick.
    *
-   * @param tick - The new tick data to populate the poll state.
+   * @param state - The new poll state data to schedule.
    *
    * #### Notes
    * This method is protected to allow sub-classes to implement methods that can
@@ -401,7 +404,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * typically be invoked in a method that returns a promise, allowing the
    * caller e.g. to `await this.ready` before scheduling a new tick.
    */
-  protected schedule(tick: IPoll.Tick<T, U>): void {
+  protected schedule(state: IPoll.State<T, U>): void {
     const current = new PromiseDelegate<this>();
     const pending = this._tick;
     const execute = () => {
@@ -420,20 +423,20 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     // Update poll state.
-    this._state = tick;
+    this._state = state;
     this._tick = current;
 
     // Resolve pending and emit signal.
     pending.resolve(this);
-    this._ticked.emit(tick);
+    this._ticked.emit(state);
 
     // Schedule next execution.
     this._timeout =
-      tick.interval === Private.IMMEDIATE
+      state.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
-        : tick.interval === Private.NEVER
+        : state.interval === Private.NEVER
           ? -1
-          : setTimeout(execute, tick.interval);
+          : setTimeout(execute, state.interval);
   }
 
   /**
@@ -493,9 +496,9 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   private _factory: Poll.Factory<T, U>;
   private _frequency: IPoll.Frequency;
   private _standby: Poll.Standby | (() => boolean | Poll.Standby);
-  private _state: IPoll.Tick<T, U>;
+  private _state: IPoll.State<T, U>;
   private _tick = new PromiseDelegate<this>();
-  private _ticked = new Signal<this, IPoll.Tick<T, U>>(this);
+  private _ticked = new Signal<this, IPoll.State<T, U>>(this);
   private _timeout = -1;
 }
 
@@ -510,7 +513,7 @@ export namespace Poll {
    *
    * @typeparam U - The rejected type of the factory's promises.
    */
-  export type Factory<T, U> = (tick: IPoll.Tick<T, U>) => Promise<T>;
+  export type Factory<T, U> = (state: IPoll.State<T, U>) => Promise<T>;
 
   /**
    * Indicates when the poll switches to standby.
@@ -609,9 +612,9 @@ namespace Private {
   export const DEFAULT_STANDBY: Poll.Standby = 'when-hidden';
 
   /**
-   * The first tick's default values superseded in constructor.
+   * The first poll tick state's default values superseded in constructor.
    */
-  export const DEFAULT_TICK: IPoll.Tick = {
+  export const DEFAULT_STATE: IPoll.State = {
     interval: NEVER,
     payload: null,
     phase: 'constructed',
@@ -619,9 +622,9 @@ namespace Private {
   };
 
   /**
-   * The disposed tick values.
+   * The disposed tick state values.
    */
-  export const DISPOSED_TICK: IPoll.Tick = {
+  export const DISPOSED_STATE: IPoll.State = {
     interval: NEVER,
     payload: null,
     phase: 'disposed',
@@ -651,7 +654,7 @@ namespace Private {
    * @param frequency - The poll's base frequency.
    * @param last - The poll's last tick.
    */
-  export function sleep(frequency: IPoll.Frequency, last: IPoll.Tick): number {
+  export function sleep(frequency: IPoll.Frequency, last: IPoll.State): number {
     const { backoff, interval, max } = frequency;
     const growth =
       backoff === true ? DEFAULT_BACKOFF : backoff === false ? 1 : backoff;

@@ -8,9 +8,9 @@ import { IPoll, Poll } from '@jupyterlab/coreutils/src';
 import { sleep } from '@jupyterlab/testutils';
 
 class TestPoll<T = any, U = any> extends Poll<T, U> {
-  protected schedule(tick: IPoll.Tick<T, U>): void {
-    super.schedule(tick);
-    this.scheduled.push(tick.phase);
+  protected schedule(state: IPoll.State<T, U>): void {
+    super.schedule(state);
+    this.scheduled.push(state.phase);
   }
 
   scheduled: string[] = [];
