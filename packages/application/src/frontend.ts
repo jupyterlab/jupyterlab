@@ -133,7 +133,7 @@ export abstract class JupyterFrontEnd<
         return node;
       }
       node = node.parentNode as HTMLElement;
-    } while (node.parentNode && node !== node.parentNode);
+    } while (node && node.parentNode && node !== node.parentNode);
     return undefined;
 
     // TODO: we should be able to use .composedPath() to simplify this function
