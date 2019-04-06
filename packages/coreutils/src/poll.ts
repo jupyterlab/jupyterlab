@@ -23,7 +23,7 @@ export interface IPoll<T = any, U = any> {
   readonly disposed: ISignal<this, void>;
 
   /**
-   * The polling frequency.
+   * The polling frequency data.
    */
   readonly frequency: IPoll.Frequency;
 
@@ -38,17 +38,22 @@ export interface IPoll<T = any, U = any> {
   readonly name: string;
 
   /**
-   * The poll state, which is the content of the current poll tick.
+   * The poll state, which is the content of the currently-scheduled poll tick.
    */
   readonly state: IPoll.Tick<T, U>;
 
   /**
-   * A promise that resolves when the poll next ticks.
+   * A promise that resolves when the currently-scheduled tick completes.
+   *
+   * #### Notes
+   * Usually this will resolve after `state.interval` milliseconds from
+   * `state.timestamp`. It can resolve earlier if the user starts or refreshes the
+   * poll, etc.
    */
   readonly tick: Promise<IPoll<T, U>>;
 
   /**
-   * A signal emitted when the poll ticks and fires off a new request.
+   * A signal emitted when the poll state changes, i.e., a new tick is scheduled.
    */
   readonly ticked: ISignal<IPoll<T, U>, IPoll.Tick<T, U>>;
 }
@@ -60,7 +65,7 @@ export namespace IPoll {
   /**
    * The polling frequency parameters.
    *
-   * ### Notes
+   * #### Notes
    * We implement the "decorrelated jitter" strategy from
    * https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/.
    * Essentially, if consecutive retries are needed, we choose an integer:
@@ -109,7 +114,7 @@ export namespace IPoll {
     | 'when-resolved';
 
   /**
-   * Definition of poll state at any given tick.
+   * Definition of poll state at any given time.
    *
    * @typeparam T - The resolved type of the factory's promises.
    * Defaults to `any`.
@@ -119,7 +124,7 @@ export namespace IPoll {
    */
   export type Tick<T = any, U = any> = {
     /**
-     * The number of milliseconds until the next poll request.
+     * The number of milliseconds until the current tick resolves.
      */
     readonly interval: number;
 
@@ -138,7 +143,7 @@ export namespace IPoll {
     readonly phase: Phase;
 
     /**
-     * The timestamp of the poll tick.
+     * The timestamp for when this tick was scheduled.
      */
     readonly timestamp: number;
   };
