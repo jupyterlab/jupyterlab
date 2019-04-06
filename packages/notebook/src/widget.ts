@@ -475,7 +475,11 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createCodeCell(options, this);
+    const cell = this.contentFactory.createCodeCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    cell.syncScrolled = true;
+    return cell;
   }
 
   /**
@@ -492,7 +496,10 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createMarkdownCell(options, this);
+    const cell = this.contentFactory.createMarkdownCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
   }
 
   /**
@@ -507,7 +514,10 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createRawCell(options, this);
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
   }
 
   /**
@@ -590,9 +600,10 @@ export class StaticNotebook extends Widget {
   }
 
   /**
-   * Update editor settings for notebook.
+   * Apply updated notebook settings.
    */
   private _updateNotebookConfig() {
+    // Apply scrollPastEnd setting.
     this.toggleClass(
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
@@ -755,7 +766,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -772,7 +783,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new MarkdownCell(options);
+      return new MarkdownCell(options).initializeState();
     }
 
     /**
@@ -786,7 +797,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 

@@ -153,7 +153,11 @@ describe('console/widget', () => {
       it('should add a code cell to the content widget', () => {
         const contentFactory = NBTestUtils.createCodeCellFactory();
         const model = new CodeCellModel({});
-        const cell = new CodeCell({ model, contentFactory, rendermime });
+        const cell = new CodeCell({
+          model,
+          contentFactory,
+          rendermime
+        }).initializeState();
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.equal(0);
         widget.addCell(cell);

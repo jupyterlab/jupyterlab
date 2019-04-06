@@ -194,7 +194,7 @@
 | Cell toolbar
 |----------------------------------------------------------------------------*/
 
-.jp-CellTools {
+.jp-NotebookTools {
   display: block;
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
@@ -226,16 +226,17 @@
   background: transparent;
 }
 
-.jp-CellTools-tool:not(:nth-child(2)) {
-  border-top: var(--jp-border-width) solid var(--jp-border-color2);
-}
-
 .jp-MetadataEditorTool {
   flex-direction: column;
+  padding: 12px 0px 12px 0px;
+}
+
+.jp-RankedPanel > :not(:first-child) {
+  margin-top: 12px;
 }
 
 .jp-KeySelector {
-  padding: 12px;
+  padding: 0px 12px 0 12px;
 }
 
 .jp-KeySelector select.jp-mod-styled {
@@ -244,7 +245,8 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.jp-KeySelector label {
+.jp-KeySelector label,
+.jp-MetadataEditorTool label {
   line-height: 1.4;
 }
 

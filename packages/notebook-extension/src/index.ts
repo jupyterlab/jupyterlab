@@ -50,8 +50,8 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import {
-  CellTools,
-  ICellTools,
+  NotebookTools,
+  INotebookTools,
   INotebookTracker,
   NotebookActions,
   NotebookModelFactory,
@@ -206,8 +206,6 @@ namespace CommandIDs {
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
-
-  export const saveWithView = 'notebook:save-with-view';
 }
 
 /**
@@ -221,9 +219,9 @@ const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const FACTORY = 'Notebook';
 
 /**
- * The rank of the cell tools tab in the sidebar
+ * The rank of the notebook tools tab in the sidebar
  */
-const CELL_TOOLS_RANK = 400;
+const NOTEBOOK_TOOLS_RANK = 400;
 
 /**
  * The exluded Export To ...
@@ -289,11 +287,11 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 };
 
 /**
- * The cell tools extension.
+ * The notebook tools extension.
  */
-const tools: JupyterFrontEndPlugin<ICellTools> = {
-  activate: activateCellTools,
-  provides: ICellTools,
+const tools: JupyterFrontEndPlugin<INotebookTools> = {
+  activate: activateNotebookTools,
+  provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB],
@@ -382,21 +380,28 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 export default plugins;
 
 /**
- * Activate the cell tools extension.
+ * Activate the notebook tools extension.
  */
-function activateCellTools(
+function activateNotebookTools(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
   labShell: ILabShell | null
-): ICellTools {
-  const id = 'cell-tools';
-  const celltools = new CellTools({ tracker });
-  const activeCellTool = new CellTools.ActiveCellTool();
-  const slideShow = CellTools.createSlideShowSelector();
+): INotebookTools {
+  const id = 'notebook-tools';
+  const notebookTools = new NotebookTools({ tracker });
+  const activeCellTool = new NotebookTools.ActiveCellTool();
+  const slideShow = NotebookTools.createSlideShowSelector();
   const editorFactory = editorServices.factoryService.newInlineEditor;
-  const metadataEditor = new CellTools.MetadataEditorTool({ editorFactory });
+  const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
+    editorFactory,
+    collapsed: false
+  });
+  const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
+    editorFactory
+  });
+
   const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
@@ -415,8 +420,8 @@ function activateCellTools(
     return true;
   };
   let optionsMap: { [key: string]: JSONValue } = {};
-  optionsMap.None = '-';
-  void services.nbconvert.getExportFormats().then(response => {
+  optionsMap.None = null;
+  services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
@@ -428,17 +433,29 @@ function activateCellTools(
           optionsMap[labelStr] = mimeType;
         }
       });
-      const nbConvert = CellTools.createNBConvertSelector(optionsMap);
-      celltools.addItem({ tool: nbConvert, rank: 3 });
+      const nbConvert = NotebookTools.createNBConvertSelector(optionsMap);
+      notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
     }
   });
-  celltools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
-  celltools.title.caption = 'Cell Inspector';
-  celltools.id = id;
-  celltools.addItem({ tool: activeCellTool, rank: 1 });
-  celltools.addItem({ tool: slideShow, rank: 2 });
-  celltools.addItem({ tool: metadataEditor, rank: 4 });
-  MessageLoop.installMessageHook(celltools, hook);
+  notebookTools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  notebookTools.title.caption = 'Notebook Tools';
+  notebookTools.id = id;
+
+  notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
+  notebookTools.addItem({ tool: slideShow, section: 'common', rank: 2 });
+
+  notebookTools.addItem({
+    tool: cellMetadataEditor,
+    section: 'advanced',
+    rank: 1
+  });
+  notebookTools.addItem({
+    tool: notebookMetadataEditor,
+    section: 'advanced',
+    rank: 2
+  });
+
+  MessageLoop.installMessageHook(notebookTools, hook);
 
   // Wait until the application has finished restoring before rendering.
   void Promise.all([state.fetch(id), app.restored]).then(([value]) => {
@@ -446,28 +463,28 @@ function activateCellTools(
       value && ((value as ReadonlyJSONObject)['open'] as boolean)
     );
 
-    // After initial restoration, check if the cell tools should render.
+    // After initial restoration, check if the notebook tools should render.
     if (tracker.size) {
-      app.shell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
+      app.shell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
       if (open) {
-        app.shell.activateById(celltools.id);
+        app.shell.activateById(notebookTools.id);
       }
     }
 
     const updateTools = () => {
-      // If there are any open notebooks, add cell tools to the side panel if
+      // If there are any open notebooks, add notebook tools to the side panel if
       // it is not already there.
       if (tracker.size) {
-        if (!celltools.isAttached) {
-          labShell.add(celltools, 'left', { rank: CELL_TOOLS_RANK });
+        if (!notebookTools.isAttached) {
+          labShell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
         }
         return;
       }
-      // If there are no notebooks, close cell tools.
-      celltools.close();
+      // If there are no notebooks, close notebook tools.
+      notebookTools.close();
     };
 
-    // For all subsequent widget changes, check if the cell tools should render.
+    // For all subsequent widget changes, check if the notebook tools should render.
     if (labShell) {
       labShell.currentChanged.connect((sender, args) => {
         updateTools();
@@ -479,7 +496,7 @@ function activateCellTools(
     }
   });
 
-  return celltools;
+  return notebookTools;
 }
 
 /**
@@ -606,9 +623,9 @@ function activateNotebookHandler(
   }
 
   /**
-   * Update the settings of the current tracker instances.
+   * Update the settings of the current tracker.
    */
-  function updateTracker(): void {
+  function updateTracker(settings: ISettingRegistry.ISettings | null): void {
     tracker.forEach(widget => {
       widget.content.editorConfig = editorConfig;
       widget.content.notebookConfig = notebookConfig;
@@ -623,15 +640,15 @@ function activateNotebookHandler(
     .then(() => fetchSettings)
     .then(settings => {
       updateConfig(settings);
-      updateTracker();
+      updateTracker(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
-        updateTracker();
+        updateTracker(settings);
       });
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
-      updateTracker();
+      updateTracker(null);
     });
 
   // Add main menu notebook menu.
@@ -1771,20 +1788,6 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.saveWithView, {
-    label: 'Save Notebook with View State',
-    execute: async args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        NotebookActions.persistViewState(current.content);
-        return app.commands.execute('docmanager:save');
-      }
-    },
-    isEnabled: args => {
-      return isEnabled() && commands.isEnabled('docmanager:save', args);
-    }
-  });
 }
 
 /**
@@ -1814,8 +1817,7 @@ function populatePalette(
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
     CommandIDs.closeAndShutdown,
-    CommandIDs.trust,
-    CommandIDs.saveWithView
+    CommandIDs.trust
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -1934,17 +1936,6 @@ function populateMenus(
       });
     }
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
-
-  // Add a save with view command to the file menu.
-  mainMenu.fileMenu.persistAndSavers.add({
-    tracker,
-    action: 'with View State',
-    name: 'Notebook',
-    persistAndSave: (current: NotebookPanel) => {
-      NotebookActions.persistViewState(current.content);
-      return app.commands.execute('docmanager:save');
-    }
-  } as IFileMenu.IPersistAndSave<NotebookPanel>);
 
   // Add a notebook group to the File menu.
   let exportTo = new Menu({ commands });

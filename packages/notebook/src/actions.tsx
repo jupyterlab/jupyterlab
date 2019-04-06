@@ -1194,58 +1194,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Persists the collapsed state of all code cell outputs to the model.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function persistViewState(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-
-    const state = Private.getState(notebook);
-
-    notebook.widgets.forEach(cell => {
-      const { model, inputHidden } = cell;
-      const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
-
-      if (inputHidden) {
-        jupyter.source_hidden = true;
-      } else {
-        delete jupyter.source_hidden;
-      }
-
-      if (cell.model.type === 'code') {
-        const { outputHidden, outputsScrolled } = cell as CodeCell;
-
-        // set both metadata keys
-        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
-        if (outputHidden) {
-          model.metadata.set('collapsed', true);
-          jupyter.outputs_hidden = true;
-        } else {
-          model.metadata.delete('collapsed');
-          delete jupyter.outputs_hidden;
-        }
-
-        if (outputsScrolled) {
-          model.metadata.set('scrolled', true);
-        } else {
-          model.metadata.delete('scrolled');
-        }
-      }
-
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
-      }
-    });
-    Private.handleState(notebook, state);
-  }
-
-  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.

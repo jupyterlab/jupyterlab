@@ -2,14 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
-
 import { Cell } from '@jupyterlab/cells';
 
 import { Token } from '@phosphor/coreutils';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { NotebookPanel, Notebook } from './';
+import { NotebookPanel } from './panel';
+import { Notebook } from './widget';
 
 /**
  * An object that tracks notebook widgets.

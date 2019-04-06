@@ -58,8 +58,6 @@ export namespace CommandIDs {
 
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export const persistAndSave = 'filemenu:persist-and-save';
-
   export const createConsole = 'filemenu:create-console';
 
   export const quit = 'filemenu:quit';
@@ -329,33 +327,6 @@ export function createFileMenu(
     )
   });
 
-  // Add a delegator command for persisting data then saving.
-  commands.addCommand(CommandIDs.persistAndSave, {
-    label: () => {
-      const action = Private.delegateLabel(
-        app,
-        menu.persistAndSavers,
-        'action'
-      );
-      const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
-      return `Save ${name} ${action || 'with Extras'}`;
-    },
-    isEnabled: args => {
-      return (
-        Private.delegateEnabled(
-          app,
-          menu.persistAndSavers,
-          'persistAndSave'
-        )() && commands.isEnabled('docmanager:save', args)
-      );
-    },
-    execute: Private.delegateExecute(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    )
-  });
-
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
@@ -437,7 +408,6 @@ export function createFileMenu(
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'filemenu:persist-and-save',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => {

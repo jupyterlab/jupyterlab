@@ -244,7 +244,7 @@ export class CodeConsole extends Widget {
     let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
-    }));
+    })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
@@ -893,7 +893,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -907,7 +907,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 
