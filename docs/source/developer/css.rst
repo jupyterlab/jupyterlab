@@ -228,8 +228,8 @@ intended to be used for adding context menu items and keyboard shortcuts.
 -  ``jp-mod-tooltip``: applied to the body when a tooltip exists on the page
 **CSS selectors that target data attributes**
 -  ``[data-jp-code-runner]``: applied to widgets that can run code
--  ``[data-jp-interaction-mode=”terminal”]``: applied when a code console is in terminal mode
--  ``[data-jp-interaction-mode=”notebook”]``: applied when a code console is in notebook mode
+-  ``[data-jp-interaction-mode="terminal"]``: applied when a code console is in terminal mode
+-  ``[data-jp-interaction-mode="notebook"]``: applied when a code console is in notebook mode
 -  ``[data-jp-isdir]``: applied to describe whether file browser items are directories
 -  ``[data-jp-undoer]``: applied to widgets that can undo
--  ``[data-type]``: applied to describe the type of element, such as “document-title”, ”submenu”, ”inline”
+-  ``[data-type]``: applied to describe the type of element, such as "document-title", "submenu", "inline"
