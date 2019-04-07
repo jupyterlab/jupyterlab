@@ -172,7 +172,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+- Ian Rose, Quansight/City of LA (general core development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
