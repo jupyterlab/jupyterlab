@@ -18,23 +18,18 @@ import { Widget } from '@phosphor/widgets';
 /**
  * The type for all JupyterFrontEnd application plugins.
  *
- * #### Notes
- * The generic `T` argument indicates the type that the plugin `provides` upon
- * being activated.
+ * @typeparam T - The type that the plugin `provides` upon being activated.
  */
 export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
 
 /**
  * The base Jupyter front-end application class.
  *
+ * @typeparam `T` - The `shell` type. Defaults to `JupyterFrontEnd.IShell`.
+ *
  * #### Notes
  * This type is useful as a generic application against which front-end plugins
  * can be authored. It inherits from the phosphor `Application`.
- *
- * The generic type argument semantics are as follows.
- *
- * `T extends JupyterFrontEnd.Shell = JupyterFrontEnd.Shell` - the type of the
- * `shell` attribute of a `JupyterFrontEnd`.
  */
 export abstract class JupyterFrontEnd<
   T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
