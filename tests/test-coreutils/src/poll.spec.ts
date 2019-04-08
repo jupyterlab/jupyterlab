@@ -221,7 +221,8 @@ describe('Poll', () => {
 
     it('should resolve after `ticked` emits in lock step', async () => {
       poll = new Poll({
-        factory: () => Promise.resolve(),
+        factory: () =>
+          Math.random() > 0.5 ? Promise.resolve() : Promise.reject(),
         frequency: { interval: 0, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#tick-2'
       });
@@ -229,6 +230,7 @@ describe('Poll', () => {
       const tocker: IPoll.Phase[] = [];
       poll.ticked.connect((_, state) => {
         ticker.push(state.phase);
+        expect(ticker.length).to.equal(tocker.length + 1);
       });
       const tock = (poll: IPoll) => {
         tocker.push(poll.state.phase);
@@ -238,12 +240,18 @@ describe('Poll', () => {
       void poll.tick.then(tock);
       await poll.stop();
       await poll.start();
+      await poll.tick;
       await poll.refresh();
+      await poll.tick;
       await poll.refresh();
+      await poll.tick;
       await poll.refresh();
+      await poll.tick;
       await poll.stop();
       await poll.start();
+      await poll.tick;
       await sleep(100);
+      await poll.tick;
       expect(ticker.join(' ')).to.equal(tocker.join(' '));
     });
   });
