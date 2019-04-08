@@ -24,32 +24,35 @@ export class TerminalManager implements TerminalSession.IManager {
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
 
-    // Set up state handling if terminals are available.
-    if (TerminalSession.isAvailable()) {
-      // Initialize internal data then start polling.
-      this._ready = this.requestRunning()
-        .then(_ => undefined)
-        .catch(_ => undefined)
-        .then(() => {
-          if (this.isDisposed) {
-            return;
-          }
-          this._isReady = true;
-        });
-
-      // Start polling with exponential backoff.
-      this._pollModels = new Poll({
-        factory: () => this.requestRunning(),
-        frequency: {
-          interval: 10 * 1000,
-          backoff: true,
-          max: 300 * 1000
-        },
-        name: `@jupyterlab/services:TerminalManager#models`,
-        standby: options.standby || 'when-hidden',
-        when: this.ready
-      });
+    // Check if terminals are available
+    if (!TerminalSession.isAvailable()) {
+      this._ready = Promise.reject('Terminals unavailable');
+      return;
     }
+
+    // Initialize internal data then start polling.
+    this._ready = this.requestRunning()
+      .then(_ => undefined)
+      .catch(_ => undefined)
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+      });
+
+    // Start polling with exponential backoff.
+    this._pollModels = new Poll({
+      factory: () => this.requestRunning(),
+      frequency: {
+        interval: 10 * 1000,
+        backoff: true,
+        max: 300 * 1000
+      },
+      name: `@jupyterlab/services:TerminalManager#models`,
+      standby: options.standby || 'when-hidden',
+      when: this.ready
+    });
   }
 
   /**
@@ -95,7 +98,7 @@ export class TerminalManager implements TerminalSession.IManager {
    * A promise that fulfills when the manager is ready.
    */
   get ready(): Promise<void> {
-    return this._ready || Promise.reject('Terminals unavailable');
+    return this._ready;
   }
 
   /**
@@ -183,6 +186,7 @@ export class TerminalManager implements TerminalSession.IManager {
 
     // Proactively remove the model.
     models.splice(index, 1);
+    this._runningChanged.emit(models.slice());
 
     // Delete and dispose the session locally.
     sessions.forEach(session => {
@@ -194,9 +198,6 @@ export class TerminalManager implements TerminalSession.IManager {
 
     // Shut down the remote session.
     await TerminalSession.shutdown(name, this.serverSettings);
-
-    // Emit the model list.
-    this._runningChanged.emit(models.slice());
   }
 
   /**
@@ -205,48 +206,33 @@ export class TerminalManager implements TerminalSession.IManager {
    * @returns A promise that resolves when all of the sessions are shut down.
    */
   async shutdownAll(): Promise<void> {
-    // Remove all models.
-    if (this._models.length) {
-      this._models.length = 0;
-    }
-
-    // Emit the new model list without waiting for API requests.
-    this._runningChanged.emit([]);
-
-    // Repopulate list of models silently then shut down every session.
-    let error: any;
+    // Update the list of models then shut down every session.
     try {
-      await this.requestRunning(true);
+      await this.requestRunning();
       await Promise.all(
         this._models.map(({ name }) =>
           TerminalSession.shutdown(name, this.serverSettings)
         )
       );
-    } catch (reason) {
-      error = reason;
-    }
+    } finally {
+      // Dispose every kernel and clear the set.
+      this._sessions.forEach(session => {
+        session.dispose();
+      });
+      this._sessions.clear();
 
-    // Dispose every session and clear the set.
-    this._sessions.forEach(session => {
-      session.dispose();
-    });
-    this._sessions.clear();
-
-    // Remove all models even if the API returned with some models.
-    if (this._models.length) {
-      this._models.length = 0;
-    }
-
-    // If the API requests failed, reject the promise.
-    if (error) {
-      throw error;
+      // Remove all models even if we had an error.
+      if (this._models.length) {
+        this._models.length = 0;
+        this._runningChanged.emit([]);
+      }
     }
   }
 
   /**
    * Execute a request to the server to poll running terminals and update state.
    */
-  protected async requestRunning(silent = false): Promise<void> {
+  protected async requestRunning(): Promise<void> {
     const models = await TerminalSession.listRunning(this.serverSettings);
     if (this.isDisposed) {
       return;
@@ -261,9 +247,7 @@ export class TerminalManager implements TerminalSession.IManager {
         }
       });
       this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
+      this._runningChanged.emit(models);
     }
   }
 
