@@ -405,32 +405,33 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * caller e.g. to `await this.ready` before scheduling a new tick.
    */
   protected schedule(state: IPoll.State<T, U>): void {
-    const current = new PromiseDelegate<this>();
+    const last = this.state;
     const pending = this._tick;
-    const execute = () => {
-      if (this.isDisposed || this.tick !== current.promise) {
-        return;
-      }
+    const scheduled = new PromiseDelegate<this>();
 
-      this._execute();
-    };
+    // Update poll state.
+    this._state = state;
+    this._tick = scheduled;
 
     // Clear the schedule if possible.
-    if (this.state.interval === Private.IMMEDIATE) {
+    if (last.interval === Private.IMMEDIATE) {
       cancelAnimationFrame(this._timeout);
     } else {
       clearTimeout(this._timeout);
     }
 
-    // Update poll state.
-    this._state = state;
-    this._tick = current;
-
-    // Resolve pending and emit signal.
+    // Emit the ticked signal and resolve the pending promise.
+    this._ticked.emit(this.state);
     pending.resolve(this);
-    this._ticked.emit(state);
 
-    // Schedule next execution.
+    // Schedule next execution and cache its timeout handle.
+    const execute = () => {
+      if (this.isDisposed || this.tick !== scheduled.promise) {
+        return;
+      }
+
+      this._execute();
+    };
     this._timeout =
       state.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
