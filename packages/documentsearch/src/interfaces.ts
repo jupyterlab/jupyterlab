@@ -45,9 +45,9 @@ export interface IDisplayState {
    */
   forceFocus: boolean;
 
-  searchInputFocussed: boolean;
+  searchInputFocused: boolean;
 
-  replaceInputFocussed: boolean;
+  replaceInputFocused: boolean;
 
   replaceText: string;
 

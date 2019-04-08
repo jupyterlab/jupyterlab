@@ -191,12 +191,12 @@ export class NotebookSearchProvider implements ISearchProvider {
       if (replaceOccurred) {
         this._currentMatch = provider.currentMatch;
         if (this._currentMatch) {
-          return Promise.resolve(replaceOccurred);
+          return replaceOccurred;
         }
       }
     }
     await this.highlightNext();
-    return Promise.resolve(replaceOccurred);
+    return replaceOccurred;
   }
 
   async replaceAllMatches(newText: string): Promise<boolean> {
@@ -207,7 +207,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       replaceOccurred = singleReplaceOccurred ? true : replaceOccurred;
     }
     this._currentMatch = null;
-    return Promise.resolve(replaceOccurred);
+    return replaceOccurred;
   }
 
   /**

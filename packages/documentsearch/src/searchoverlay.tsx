@@ -32,7 +32,7 @@ const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
 const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
-const FOCUSSED_INPUT = 'jp-DocumentSearch-focussed-input';
+const FOCUSED_INPUT = 'jp-DocumentSearch-focused-input';
 const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
@@ -45,7 +45,7 @@ interface ISearchEntryProps {
   onChange: Function;
   onInputFocus: Function;
   onInputBlur: Function;
-  inputFocussed: boolean;
+  inputFocused: boolean;
   caseSensitive: boolean;
   useRegex: boolean;
   inputText: string;
@@ -73,7 +73,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   componentDidUpdate() {
-    if (this.props.forceFocus && this.props.inputFocussed) {
+    if (this.props.forceFocus && this.props.inputFocused) {
       this.focusInput();
     }
   }
@@ -87,7 +87,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
       : REGEX_BUTTON_CLASS_OFF;
 
     const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
-      this.props.inputFocussed ? FOCUSSED_INPUT : ''
+      this.props.inputFocused ? FOCUSED_INPUT : ''
     }`;
 
     return (
@@ -331,14 +331,14 @@ class SearchOverlay extends React.Component<
   }
 
   private _onSearchInputFocus() {
-    if (!this.state.searchInputFocussed) {
-      this.setState({ searchInputFocussed: true });
+    if (!this.state.searchInputFocused) {
+      this.setState({ searchInputFocused: true });
     }
   }
 
   private _onSearchInputBlur() {
-    if (this.state.searchInputFocussed) {
-      this.setState({ searchInputFocussed: false });
+    if (this.state.searchInputFocused) {
+      this.setState({ searchInputFocused: false });
     }
   }
 
@@ -378,7 +378,7 @@ class SearchOverlay extends React.Component<
           onChange={(e: React.ChangeEvent) => this._onSearchChange(e)}
           onInputFocus={this._onSearchInputFocus.bind(this)}
           onInputBlur={this._onSearchInputBlur.bind(this)}
-          inputFocussed={this.state.searchInputFocussed}
+          inputFocused={this.state.searchInputFocused}
           inputText={this.state.inputText}
           forceFocus={this.props.overlayState.forceFocus}
         />

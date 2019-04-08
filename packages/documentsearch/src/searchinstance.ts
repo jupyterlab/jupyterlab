@@ -199,8 +199,8 @@ export class SearchInstance implements IDisposable {
     inputText: '',
     query: null,
     errorMessage: '',
-    searchInputFocussed: true,
-    replaceInputFocussed: false,
+    searchInputFocused: true,
+    replaceInputFocused: false,
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false

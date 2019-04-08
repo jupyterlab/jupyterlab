@@ -72,7 +72,7 @@ export class CSVSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query, true);
     return undefined;
   }
@@ -82,8 +82,8 @@ export class CSVSearchProvider implements ISearchProvider {
    * Not implemented in the CSV viewer as it is read-only.
    * @returns A promise that resolves once the action has completed.
    */
-  replaceCurrentMatch(newText: string): Promise<boolean> {
-    return Promise.resolve(false);
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    return false;
   }
 
   /**
@@ -91,8 +91,8 @@ export class CSVSearchProvider implements ISearchProvider {
    * Not implemented in the CSV viewer as it is read-only.
    * @returns A promise that resolves once the action has completed.
    */
-  replaceAllMatches(newText: string): Promise<boolean> {
-    return Promise.resolve(false);
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    return false;
   }
 
   /**
