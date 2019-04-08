@@ -206,6 +206,7 @@ export class KernelManager implements Kernel.IManager {
 
     // Proactively remove the model.
     models.splice(index, 1);
+    this._runningChanged.emit(models.slice());
 
     // Delete and dispose the kernel locally.
     kernels.forEach(kernel => {
@@ -217,9 +218,6 @@ export class KernelManager implements Kernel.IManager {
 
     // Shut down the remote session.
     await Kernel.shutdown(id, this.serverSettings);
-
-    // Emit the new model list.
-    this._runningChanged.emit(models.slice());
   }
 
   /**
@@ -228,38 +226,24 @@ export class KernelManager implements Kernel.IManager {
    * @returns A promise that resolves when all of the kernels are shut down.
    */
   async shutdownAll(): Promise<void> {
-    // Remove all models.
-    if (this._models.length) {
-      this._models.length = 0;
-    }
-
-    // Emit the new model list without waiting for API requests.
-    this._runningChanged.emit([]);
-
-    // Repopulate list of models silently then shut down every session.
-    let error: any;
+    // Update the list of models then shut down every session.
     try {
-      await this.requestRunning(true);
+      await this.requestRunning();
       await Promise.all(
         this._models.map(({ id }) => Kernel.shutdown(id, this.serverSettings))
       );
-    } catch (reason) {
-      error = reason;
-    }
-    // Dispose every kernel and clear the set.
-    this._kernels.forEach(kernel => {
-      kernel.dispose();
-    });
-    this._kernels.clear();
+    } finally {
+      // Dispose every kernel and clear the set.
+      this._kernels.forEach(kernel => {
+        kernel.dispose();
+      });
+      this._kernels.clear();
 
-    // Remove all models even if the API returned with some models.
-    if (this._models.length) {
-      this._models.length = 0;
-    }
-
-    // If the API requests failed, reject the promise.
-    if (error) {
-      throw error;
+      // Remove all models even if we had an error.
+      if (this._models.length) {
+        this._models.length = 0;
+        this._runningChanged.emit([]);
+      }
     }
   }
 
@@ -283,7 +267,7 @@ export class KernelManager implements Kernel.IManager {
   /**
    * Execute a request to the server to poll running kernels and update state.
    */
-  protected async requestRunning(silent = false): Promise<void> {
+  protected async requestRunning(): Promise<void> {
     const models = await Kernel.listRunning(this.serverSettings);
     if (this._isDisposed) {
       return;
@@ -298,9 +282,7 @@ export class KernelManager implements Kernel.IManager {
         }
       });
       this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
+      this._runningChanged.emit(models);
     }
   }
 

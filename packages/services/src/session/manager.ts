@@ -236,54 +236,47 @@ export class SessionManager implements Session.IManager {
     models.splice(index, 1);
     this._runningChanged.emit(models.slice());
 
-    await Session.shutdown(id, this.serverSettings);
     sessions.forEach(session => {
       if (session.id === id) {
         sessions.delete(session);
         session.dispose();
       }
     });
+
+    await Session.shutdown(id, this.serverSettings);
   }
 
   /**
    * Shut down all sessions.
    *
-   * @returns A promise that resolves when all of the sessions are shut down.
+   * @returns A promise that resolves when all of the kernels are shut down.
    */
   async shutdownAll(): Promise<void> {
-    // Proactively remove all models.
-    const models = this._models;
-
-    if (models.length) {
-      this._models.length = 0;
-    }
-
+    // Update the list of models then shut down every session.
     try {
-      await this.requestRunning(true);
-    } catch (error) {
-      // Continue attempting to shutdown the known models.
-    }
-    await Promise.all(
-      models.map(async model => {
-        await Session.shutdown(model.id, this.serverSettings);
-      })
-    );
+      await this.requestRunning();
+      await Promise.all(
+        this._models.map(({ id }) => Session.shutdown(id, this.serverSettings))
+      );
+    } finally {
+      // Dispose every session and clear the set.
+      this._sessions.forEach(kernel => {
+        kernel.dispose();
+      });
+      this._sessions.clear();
 
-    const sessions = this._sessions;
-    sessions.forEach(session => {
-      session.dispose();
-    });
-    sessions.clear();
-
-    if (models.length) {
-      this._runningChanged.emit([]);
+      // Remove all models even if we had an error.
+      if (this._models.length) {
+        this._models.length = 0;
+        this._runningChanged.emit([]);
+      }
     }
   }
 
   /**
    * Execute a request to the server to poll running kernels and update state.
    */
-  protected async requestRunning(silent = false): Promise<void> {
+  protected async requestRunning(): Promise<void> {
     const models = await Session.listRunning(this.serverSettings);
     if (this.isDisposed) {
       return;
@@ -298,25 +291,21 @@ export class SessionManager implements Session.IManager {
         }
       });
       this._models = models.slice();
-      if (!silent) {
-        this._runningChanged.emit(models);
-      }
+      this._runningChanged.emit(models);
     }
   }
 
   /**
    * Execute a request to the server to poll specs and update state.
    */
-  protected async requestSpecs(silent = false): Promise<void> {
+  protected async requestSpecs(): Promise<void> {
     const specs = await Kernel.getSpecs(this.serverSettings);
     if (this.isDisposed) {
       return;
     }
     if (!JSONExt.deepEqual(specs, this._specs)) {
       this._specs = specs;
-      if (!silent) {
-        this._specsChanged.emit(specs);
-      }
+      this._specsChanged.emit(specs);
     }
   }
 
