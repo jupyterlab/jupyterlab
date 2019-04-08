@@ -218,6 +218,34 @@ describe('Poll', () => {
       await sleep(200); // Sleep for less than the interval.
       expect(ticker.join(' ')).to.equal(expected);
     });
+
+    it('should resolve after `ticked` emits in lock step', async () => {
+      poll = new Poll({
+        factory: () => Promise.resolve(),
+        frequency: { interval: 0, backoff: false },
+        name: '@jupyterlab/test-coreutils:Poll#tick-2'
+      });
+      const ticker: IPoll.Phase[] = [];
+      const tocker: IPoll.Phase[] = [];
+      poll.ticked.connect((_, state) => {
+        ticker.push(state.phase);
+      });
+      const tock = (poll: IPoll) => {
+        tocker.push(poll.state.phase);
+        expect(ticker.join(' ')).to.equal(tocker.join(' '));
+        poll.tick.then(tock).catch(() => undefined);
+      };
+      void poll.tick.then(tock);
+      await poll.stop();
+      await poll.start();
+      await poll.refresh();
+      await poll.refresh();
+      await poll.refresh();
+      await poll.stop();
+      await poll.start();
+      await sleep(100);
+      expect(ticker.join(' ')).to.equal(tocker.join(' '));
+    });
   });
 
   describe('#ticked', () => {
