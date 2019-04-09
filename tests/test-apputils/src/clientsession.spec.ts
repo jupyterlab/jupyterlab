@@ -19,11 +19,16 @@ describe('@jupyterlab/apputils', () => {
   describe('ClientSession', () => {
     const manager = new SessionManager();
     let session: ClientSession;
+    let i = 0;
 
     beforeAll(() => manager.ready);
 
     beforeEach(() => {
+<<<<<<< HEAD
       Dialog.flush();
+=======
+      console.warn(`TEST: ${++i}`);
+>>>>>>> Await kernel ready in a bunch of clientsession tests. I don't think we
       session = new ClientSession({
         manager,
         kernelPreference: { name: manager.specs.default }
@@ -206,6 +211,7 @@ describe('@jupyterlab/apputils', () => {
         session.dispose();
 
         const other = await manager.startNew({ path: UUID.uuid4() });
+        await other.kernel.ready;
         const kernelPreference = { id: other.kernel.id };
 
         session = new ClientSession({ manager, kernelPreference });
@@ -267,6 +273,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#changeKernel()', () => {
       it('should change the current kernel', async () => {
         await session.initialize();
+        await session.kernel.ready;
 
         const name = session.kernel.name;
         const id = session.kernel.id;
@@ -280,6 +287,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#selectKernel()', () => {
       it('should select a kernel for the session', async () => {
         await session.initialize();
+        await session.kernel.ready;
 
         const { id, name } = session.kernel;
         const accept = acceptDialog();
@@ -321,6 +329,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
 
           await session.initialize();
+          await session.kernel.ready;
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
               called = true;
@@ -391,12 +400,13 @@ describe('@jupyterlab/apputils', () => {
         async () => {
           let called = false;
 
+          await session.initialize();
+          await session.kernel.ready;
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
               called = true;
             }
           });
-          await session.initialize();
 
           const restart = ClientSession.restartKernel(session.kernel);
 
