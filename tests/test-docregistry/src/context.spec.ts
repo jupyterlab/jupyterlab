@@ -30,7 +30,7 @@ describe('docregistry/context', () => {
   const factory = new TextModelFactory();
 
   beforeAll(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 

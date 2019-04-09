@@ -20,7 +20,7 @@ describe('manager', () => {
     let manager: ServiceManager.IManager;
 
     beforeEach(() => {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
       return manager.ready;
     });
 
@@ -67,7 +67,7 @@ describe('manager', () => {
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new ServiceManager();
+        manager = new ServiceManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
