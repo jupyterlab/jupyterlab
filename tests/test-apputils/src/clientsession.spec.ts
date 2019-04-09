@@ -19,16 +19,11 @@ describe('@jupyterlab/apputils', () => {
   describe('ClientSession', () => {
     const manager = new SessionManager();
     let session: ClientSession;
-    let i = 0;
 
     beforeAll(() => manager.ready);
 
     beforeEach(() => {
-<<<<<<< HEAD
       Dialog.flush();
-=======
-      console.warn(`TEST: ${++i}`);
->>>>>>> Await kernel ready in a bunch of clientsession tests. I don't think we
       session = new ClientSession({
         manager,
         kernelPreference: { name: manager.specs.default }
