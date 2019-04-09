@@ -400,9 +400,12 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * schedule poll ticks.
    *
    * This method synchronously modifies poll state so it should be invoked with
-   * consideration given to the poll state that will be overwritten. It will
-   * typically be invoked in a method that returns a promise, allowing the
-   * caller e.g. to `await this.ready` before scheduling a new tick.
+   * consideration given to the poll state that will be overwritten. It should
+   * be invoked only once in any synchronous context, otherwise the `ticked`
+   * signal and the `tick` promise will fall out of sync with each other.
+   *
+   * It will typically be invoked in a method that returns a promise, allowing
+   * the caller e.g. to `await this.ready` before scheduling a new tick.
    */
   protected schedule(state: IPoll.State<T, U>): void {
     const last = this.state;
