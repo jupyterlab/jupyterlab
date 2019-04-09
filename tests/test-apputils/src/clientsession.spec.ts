@@ -211,6 +211,10 @@ describe('@jupyterlab/apputils', () => {
         session.dispose();
 
         const other = await manager.startNew({ path: UUID.uuid4() });
+        // FIXME: we should not need to wait on this,
+        // but there seems to be some race condition
+        // with starting kernels on the server with tornado 6,
+        // cf https://github.com/jupyterlab/jupyterlab/issues/6131.
         await other.kernel.ready;
         const kernelPreference = { id: other.kernel.id };
 
@@ -273,6 +277,10 @@ describe('@jupyterlab/apputils', () => {
     describe('#changeKernel()', () => {
       it('should change the current kernel', async () => {
         await session.initialize();
+        // FIXME: we should not need to wait on this,
+        // but there seems to be some race condition
+        // with starting kernels on the server with tornado 6,
+        // cf https://github.com/jupyterlab/jupyterlab/issues/6131.
         await session.kernel.ready;
 
         const name = session.kernel.name;
@@ -287,6 +295,10 @@ describe('@jupyterlab/apputils', () => {
     describe('#selectKernel()', () => {
       it('should select a kernel for the session', async () => {
         await session.initialize();
+        // FIXME: we should not need to wait on this,
+        // but there seems to be some race condition
+        // with starting kernels on the server with tornado 6,
+        // cf https://github.com/jupyterlab/jupyterlab/issues/6131.
         await session.kernel.ready;
 
         const { id, name } = session.kernel;
@@ -329,6 +341,10 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
 
           await session.initialize();
+          // FIXME: we should not need to wait on this,
+          // but there seems to be some race condition
+          // with starting kernels on the server with tornado 6,
+          // cf https://github.com/jupyterlab/jupyterlab/issues/6131.
           await session.kernel.ready;
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
@@ -401,6 +417,10 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
 
           await session.initialize();
+          // FIXME: we should not need to wait on this,
+          // but there seems to be some race condition
+          // with starting kernels on the server with tornado 6,
+          // cf https://github.com/jupyterlab/jupyterlab/issues/6131.
           await session.kernel.ready;
           session.statusChanged.connect((sender, args) => {
             if (args === 'restarting') {
