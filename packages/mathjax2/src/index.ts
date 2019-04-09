@@ -25,6 +25,19 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   }
 
   /**
+   * Remove typeset math from a node
+   */
+  removeOutput(node: HTMLElement) {
+    if (!this._initialized) {
+      return;
+    }
+    const jaxs = MathJax.Hub.getAllJax(node);
+    for (const jax of jaxs) {
+      jax.Remove();
+    }
+  }
+
+  /**
    * Typeset the math in a node.
    *
    * #### Notes

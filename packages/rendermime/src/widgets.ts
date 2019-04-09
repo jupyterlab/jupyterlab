@@ -29,6 +29,8 @@ export abstract class RenderedCommon extends Widget
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
     this.latexTypesetter = options.latexTypesetter;
+    this.incrementalTypeset = options.incrementalTypeset;
+    this.removeMathOnHide = options.removeMathOnHide;
     this.node.dataset['mimeType'] = this.mimeType;
   }
 
@@ -56,6 +58,16 @@ export abstract class RenderedCommon extends Widget
    * The latexTypesetter.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter;
+
+  /**
+   * Whether the LaTeX typeset should be incremental.
+   */
+  readonly incrementalTypeset: boolean;
+
+  /**
+   * Whether the typeset math should be removed when the widget is hidden.
+   */
+  readonly removeMathOnHide: boolean;
 
   /**
    * Render a mime model.
@@ -165,7 +177,11 @@ export class RenderedHTML extends RenderedHTMLCommon {
    */
   onAfterAttach(msg: Message): void {
     if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
+      renderers.typesetLatex({
+        host: this.node,
+        incrementalTypeset: this.incrementalTypeset,
+        latexTypesetter: this.latexTypesetter
+      });
     }
   }
 }
@@ -275,7 +291,8 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      incrementalTypeset: this.incrementalTypeset
     });
   }
 
@@ -284,7 +301,27 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    */
   onAfterAttach(msg: Message): void {
     if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
+      renderers.typesetLatex({
+        host: this.node,
+        incrementalTypeset: this.incrementalTypeset,
+        latexTypesetter: this.latexTypesetter
+      });
+    }
+  }
+
+  onAfterHide(msg: Message): void {
+    if (this.latexTypesetter && this.removeMathOnHide) {
+      this.latexTypesetter.removeOutput(this.node);
+    }
+  }
+
+  onAfterShow(msg: Message): void {
+    if (this.latexTypesetter && this.removeMathOnHide) {
+      renderers.typesetLatex({
+        host: this.node,
+        incrementalTypeset: this.incrementalTypeset,
+        latexTypesetter: this.latexTypesetter
+      });
     }
   }
 }

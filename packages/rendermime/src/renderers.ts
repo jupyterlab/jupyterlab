@@ -20,6 +20,69 @@ import escape = require('lodash.escape');
 import { removeMath, replaceMath } from './latex';
 
 /**
+ * Typeset latex math into a host node.
+ *
+ * @param options - The options for typesetting
+ */
+export function typesetLatex(options: typesetLatex.IOptions): void {
+  const { host, incrementalTypeset, latexTypesetter } = options;
+
+  if (!incrementalTypeset) {
+    latexTypesetter.typeset(host);
+  }
+
+  const callback = (
+    entries: IntersectionObserverEntry[],
+    observer: IntersectionObserver
+  ) => {
+    entries.forEach(entry => {
+      const { isIntersecting, target } = entry;
+      if (!isIntersecting) {
+        return;
+      }
+      latexTypesetter.typeset(target as HTMLElement);
+      observer.unobserve(target);
+    });
+  };
+  const { children } = host;
+  const observerOptions = {
+    root: host,
+    rootMargin: '100% 0% 100% 0%',
+    threshold: 0
+  };
+  const observer = new IntersectionObserver(callback, observerOptions);
+
+  for (let i = 0; i < children.length; i++) {
+    observer.observe(children[i]);
+  }
+}
+
+/**
+ * The namespace for the `typesetLatex` function statics.
+ */
+export namespace typesetLatex {
+  /**
+   * The options for the `typesetLatex` function.
+   */
+  export interface IOptions {
+    /**
+     * The node to typeset.
+     */
+    host: HTMLElement;
+
+    /**
+     * Whether the typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
+
+    /**
+     * The LaTeX typesetter for the application.
+     */
+    latexTypesetter: IRenderMime.ILatexTypesetter;
+  }
+}
+
+/**
  * Render HTML into a host node.
  *
  * @params options - The options for rendering.
@@ -36,6 +99,7 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
     resolver,
     linkHandler,
     shouldTypeset,
+    incrementalTypeset,
     latexTypesetter
   } = options;
 
@@ -94,8 +158,12 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
 
   // Return the final rendered promise.
   return promise.then(() => {
-    if (shouldTypeset && latexTypesetter) {
-      latexTypesetter.typeset(host);
+    if (shouldTypeset || latexTypesetter) {
+      typesetLatex({
+        host,
+        incrementalTypeset,
+        latexTypesetter
+      });
     }
   });
 }
@@ -142,6 +210,11 @@ export namespace renderHTML {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * Whether the typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
 
     /**
      * The LaTeX typesetter for the application.
@@ -386,6 +459,11 @@ export namespace renderMarkdown {
      * Whether the node should be typeset.
      */
     shouldTypeset: boolean;
+
+    /**
+     * Whether the typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
 
     /**
      * The LaTeX typesetter for the application.

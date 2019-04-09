@@ -61,7 +61,7 @@ export class MarkdownViewer extends Widget {
         timeout: this._config.renderTimeout
       });
       this._monitor.activityStopped.connect(
-        this.update,
+        this._setDirty,
         this
       );
 
@@ -81,7 +81,7 @@ export class MarkdownViewer extends Widget {
    */
   setFragment(fragment: string) {
     this._fragment = fragment;
-    this.update();
+    this._setDirty();
   }
 
   /**
@@ -104,7 +104,7 @@ export class MarkdownViewer extends Widget {
         style.fontSize = value ? value + 'px' : null;
         break;
       case 'hideFrontMatter':
-        this.update();
+        this._setDirty();
         break;
       case 'lineHeight':
         style.lineHeight = value ? value.toString() : null;
@@ -140,9 +140,15 @@ export class MarkdownViewer extends Widget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.context.isReady && !this.isDisposed) {
-      void this._render();
+    if (
+      this.context.isReady &&
+      !this.isDisposed &&
+      this._dirty &&
+      this.isVisible
+    ) {
+      this._render();
       this._fragment = '';
+      this._dirty = false;
     }
   }
 
@@ -151,6 +157,14 @@ export class MarkdownViewer extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.node.focus();
+  }
+
+  /**
+   * Set the dirty flag and request update.
+   */
+  private _setDirty(): void {
+    this._dirty = true;
+    this.update();
   }
 
   /**
@@ -206,6 +220,7 @@ export class MarkdownViewer extends Widget {
   readonly renderer: IRenderMime.IRenderer;
 
   private _config = { ...MarkdownViewer.defaultConfig };
+  private _dirty = false;
   private _fragment = '';
   private _monitor: ActivityMonitor<any, any> | null;
   private _ready = new PromiseDelegate<void>();
@@ -306,6 +321,8 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     context: DocumentRegistry.Context
   ): MarkdownDocument {
     const rendermime = this._rendermime.clone({
+      incrementalTypeset: true,
+      removeMathOnHide: true,
       resolver: context.urlResolver
     });
     const renderer = rendermime.createRenderer(MIMETYPE);

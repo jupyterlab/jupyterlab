@@ -62,6 +62,8 @@ export class RenderMimeRegistry {
     this.linkHandler = options.linkHandler || null;
     this.latexTypesetter = options.latexTypesetter || null;
     this.sanitizer = options.sanitizer || defaultSanitizer;
+    this.incrementalTypeset = options.incrementalTypeset || false;
+    this.removeMathOnHide = options.removeMathOnHide || false;
 
     // Add the initial factories.
     if (options.initialFactories) {
@@ -90,6 +92,16 @@ export class RenderMimeRegistry {
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * Whether the LaTeX typeset should be incremental.
+   */
+  readonly incrementalTypeset: boolean;
+
+  /**
+   * Whether the typeset math should be removed when the widget is hidden.
+   */
+  readonly removeMathOnHide: boolean;
 
   /**
    * The ordered list of mimeTypes.
@@ -158,7 +170,9 @@ export class RenderMimeRegistry {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      incrementalTypeset: this.incrementalTypeset,
+      removeMathOnHide: this.removeMathOnHide
     });
   }
 
@@ -186,7 +200,9 @@ export class RenderMimeRegistry {
       resolver: options.resolver || this.resolver || undefined,
       sanitizer: options.sanitizer || this.sanitizer || undefined,
       linkHandler: options.linkHandler || this.linkHandler || undefined,
-      latexTypesetter: options.latexTypesetter || this.latexTypesetter
+      latexTypesetter: options.latexTypesetter || this.latexTypesetter,
+      incrementalTypeset: options.incrementalTypeset || this.incrementalTypeset,
+      removeMathOnHide: options.removeMathOnHide || this.removeMathOnHide
     });
 
     // Clone the internal state.
@@ -321,6 +337,16 @@ export namespace RenderMimeRegistry {
      * An optional LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
+
+    /**
+     * Whether the LaTeX typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
+
+    /**
+     * Whether the typeset math should be removed when the widget is hidden.
+     */
+    removeMathOnHide?: boolean;
   }
 
   /**
@@ -346,6 +372,16 @@ export namespace RenderMimeRegistry {
      * The new LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
+
+    /**
+     * Whether the LaTeX typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
+
+    /**
+     * Whether the typeset math should be removed when the widget is hidden.
+     */
+    removeMathOnHide?: boolean;
   }
 
   /**

@@ -301,6 +301,16 @@ export namespace IRenderMime {
      * The LaTeX typesetter.
      */
     latexTypesetter: ILatexTypesetter | null;
+
+    /**
+     * Whether the LaTeX typeset should be incremental.
+     */
+    incrementalTypeset?: boolean;
+
+    /**
+     * Whether the typeset math should be removed when the widget is hidden.
+     */
+    removeMathOnHide?: boolean;
   }
 
   /**
@@ -372,5 +382,13 @@ export namespace IRenderMime {
      * own typesetter may replace that on the global `lab.rendermime`.
      */
     typeset(element: HTMLElement): void;
+
+    /**
+     * Remove typeset math from a DOM element.
+     *
+     * @param element - the DOM element from which typeset math should
+     *   be removed.
+     */
+    removeOutput(element: HTMLElement): void;
   }
 }
