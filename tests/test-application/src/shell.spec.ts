@@ -24,6 +24,12 @@ class ContentWidget extends Widget {
 describe('LabShell', () => {
   let shell: LabShell;
 
+  beforeAll(() => {
+    console.log(
+      'Expecting 5 console errors logged in this suite: "Widgets added to app shell must have unique id property."'
+    );
+  });
+
   beforeEach(() => {
     shell = new LabShell();
     Widget.attach(shell, document.body);
