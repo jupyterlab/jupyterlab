@@ -180,6 +180,11 @@ export class NotebookSearchProvider implements ISearchProvider {
     return this._currentMatch;
   }
 
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
   async replaceCurrentMatch(newText: string): Promise<boolean> {
     const notebook = this._searchTarget.content;
     const editor = notebook.activeCell.editor as CodeMirrorEditor;
@@ -199,6 +204,11 @@ export class NotebookSearchProvider implements ISearchProvider {
     return replaceOccurred;
   }
 
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     for (let index in this._cmSearchProviders) {
@@ -238,7 +248,7 @@ export class NotebookSearchProvider implements ISearchProvider {
    */
   get currentMatchIndex(): number {
     if (!this._currentMatch) {
-      return 0;
+      return null;
     }
     return this._currentMatch.index;
   }

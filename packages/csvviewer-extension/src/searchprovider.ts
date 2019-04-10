@@ -80,6 +80,7 @@ export class CSVSearchProvider implements ISearchProvider {
   /**
    * Replace the currently selected match with the provided text
    * Not implemented in the CSV viewer as it is read-only.
+   *
    * @returns A promise that resolves once the action has completed.
    */
   async replaceCurrentMatch(newText: string): Promise<boolean> {
@@ -89,6 +90,7 @@ export class CSVSearchProvider implements ISearchProvider {
   /**
    * Replace all matches in the notebook with the provided text
    * Not implemented in the CSV viewer as it is read-only.
+   *
    * @returns A promise that resolves once the action has completed.
    */
   async replaceAllMatches(newText: string): Promise<boolean> {

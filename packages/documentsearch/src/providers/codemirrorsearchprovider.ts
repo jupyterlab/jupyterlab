@@ -167,6 +167,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return match;
   }
 
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
   async replaceCurrentMatch(newText: string): Promise<boolean> {
     // If the current selection exactly matches the current match,
     // replace it.  Otherwise, just select the next match after the cursor.
@@ -178,15 +183,20 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
         !this._query.ignoreCase
       );
       if (!cursor.findNext()) {
-        return Promise.resolve(replaceOccurred);
+        return replaceOccurred;
       }
       replaceOccurred = true;
       cursor.replace(newText);
     }
     await this.highlightNext();
-    return Promise.resolve(replaceOccurred);
+    return replaceOccurred;
   }
 
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
   async replaceAllMatches(newText: string): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
@@ -225,7 +235,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return this._parseMatchesFromState();
   }
 
-  get currentMatch(): ISearchMatch {
+  get currentMatch(): ISearchMatch | null {
     return this._currentMatch;
   }
 
@@ -241,7 +251,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    */
   get currentMatchIndex(): number {
     if (!this._currentMatch) {
-      return 0;
+      return null;
     }
     return this._currentMatch.index;
   }
@@ -390,7 +400,20 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
     return this._cm.operation(() => {
       const caseSensitive = this._query.ignoreCase;
-      const cursorToGet = reverse ? 'from' : 'head';
+      /**
+       * In order to support search-as-you-type, we needed a way to allow the first
+       * match to be selected when a search is started, but prevent the selected
+       * search to move for each new keypress.  To do this, when a search is ended,
+       * the cursor is reversed, putting the head at the 'from' position.  When a new
+       * search is started, the cursor we want is at the 'from' position, so that the same
+       * match is selected when the next key is entered (if it is still a match).
+       *
+       * When toggling through a search normally, the cursor is always set in the forward
+       * direction, so head is always at the 'to' position.  That way, if reverse = false,
+       * the search proceeds from the 'to' position during normal toggling.  If reverse = true,
+       * the search always proceeds from the 'from' position.
+       */
+      const cursorToGet = reverse ? 'anchor' : 'head';
       const lastPosition = this._cm.getCursor(cursorToGet);
       const position = this._toEditorPos(lastPosition);
       let cursor: CodeMirror.SearchCursor = this._cm.getSearchCursor(

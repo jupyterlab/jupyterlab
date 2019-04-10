@@ -48,7 +48,7 @@ interface ISearchEntryProps {
   inputFocused: boolean;
   caseSensitive: boolean;
   useRegex: boolean;
-  inputText: string;
+  searchText: string;
   forceFocus: boolean;
 }
 
@@ -93,9 +93,9 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     return (
       <div className={wrapperClass}>
         <input
-          placeholder={this.props.inputText ? null : 'Find'}
+          placeholder={this.props.searchText ? null : 'Find'}
           className={INPUT_CLASS}
-          value={this.props.inputText}
+          value={this.props.searchText}
           onChange={e => this.props.onChange(e)}
           onKeyDown={e => this.props.onKeydown(e)}
           tabIndex={2}
@@ -244,9 +244,9 @@ class SearchOverlay extends React.Component<
   }
 
   private _onSearchChange(event: React.ChangeEvent) {
-    const inputText = (event.target as HTMLInputElement).value;
-    this.setState({ inputText });
-    this._debouncedStartSearch(true, inputText);
+    const searchText = (event.target as HTMLInputElement).value;
+    this.setState({ searchText: searchText });
+    this._debouncedStartSearch(true, searchText);
   }
 
   private _onReplaceChange(event: React.ChangeEvent) {
@@ -273,10 +273,10 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _executeSearch(goForward: boolean, inputText?: string) {
+  private _executeSearch(goForward: boolean, searchText?: string) {
     // execute search!
     let query;
-    const input = inputText ? inputText : this.state.inputText;
+    const input = searchText ? searchText : this.state.searchText;
     try {
       query = Private.parseQuery(
         input,
@@ -379,7 +379,7 @@ class SearchOverlay extends React.Component<
           onInputFocus={this._onSearchInputFocus.bind(this)}
           onInputBlur={this._onSearchInputBlur.bind(this)}
           inputFocused={this.state.searchInputFocused}
-          inputText={this.state.inputText}
+          searchText={this.state.searchText}
           forceFocus={this.props.overlayState.forceFocus}
         />
         <SearchIndices

@@ -108,7 +108,6 @@ export class SearchInstance implements IDisposable {
 
   private async _replaceCurrent(newText: string) {
     if (this._activeProvider && this._displayState.query && !!newText) {
-      console.log('calling on active provider with new text:', newText);
       await this._activeProvider.replaceCurrentMatch(newText);
       this.updateIndices();
     }
@@ -116,7 +115,6 @@ export class SearchInstance implements IDisposable {
 
   private async _replaceAll(newText: string) {
     if (this._activeProvider && this._displayState.query && !!newText) {
-      console.log('calling on active provider with new text:', newText);
       await this._activeProvider.replaceAllMatches(newText);
       this.updateIndices();
     }
@@ -196,7 +194,7 @@ export class SearchInstance implements IDisposable {
     totalMatches: 0,
     caseSensitive: false,
     useRegex: false,
-    inputText: '',
+    searchText: '',
     query: null,
     errorMessage: '',
     searchInputFocused: true,
