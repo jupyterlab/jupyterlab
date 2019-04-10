@@ -195,6 +195,8 @@ export class NotebookSearchProvider implements ISearchProvider {
       replaceOccurred = await provider.replaceCurrentMatch(newText);
       if (replaceOccurred) {
         this._currentMatch = provider.currentMatch;
+        // If there was a replacement and there is another match, then the CodeMirrorSearchProvider
+        // already highlighted the next match, so we can return early to avoid skipping a match.
         if (this._currentMatch) {
           return replaceOccurred;
         }
