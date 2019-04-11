@@ -7,13 +7,14 @@ import { IPoll, Poll } from '@jupyterlab/coreutils';
 
 import { sleep } from '@jupyterlab/testutils';
 
-class TestPoll<T = any, U = any> extends Poll<T, U> {
-  protected schedule(state: IPoll.State<T, U>): void {
-    super.schedule(state);
-    this.scheduled.push(state.phase);
+class TestPoll extends Poll {
+  schedule(
+    next: Partial<
+      IPoll.State & { cancel: ((last: IPoll.State) => boolean) }
+    > = {}
+  ): Promise<void> {
+    return super.schedule(next);
   }
-
-  scheduled: string[] = [];
 }
 
 describe('Poll', () => {
@@ -509,21 +510,57 @@ describe('Poll', () => {
       poll.dispose();
     });
 
-    it('should schedule a poll tick', async () => {
-      const expected = 'when-resolved stopped started resolved';
+    it('should schedule the next poll state', async () => {
       poll = new TestPoll({
-        name: '@jupyterlab/test-coreutils:Poll#schedule()-1',
+        factory: () => Promise.resolve(),
         frequency: { interval: 100 },
-        factory: () => Promise.resolve()
+        name: '@jupyterlab/test-coreutils:Poll#schedule()-1'
       });
       expect(poll.state.phase).to.equal('constructed');
-      await poll.stop();
-      expect(poll.state.phase).to.equal('stopped');
-      await poll.start();
-      expect(poll.state.phase).to.equal('started');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('when-resolved');
       await poll.tick;
       expect(poll.state.phase).to.equal('resolved');
-      expect(poll.scheduled.join(' ')).to.equal(expected);
+      await poll.schedule({ phase: 'refreshed' });
+      expect(poll.state.phase).to.equal('refreshed');
+      return;
+    });
+
+    it('should default to standby state', async () => {
+      poll = new TestPoll({
+        factory: () => Promise.resolve(),
+        frequency: { interval: 100 },
+        name: '@jupyterlab/test-coreutils:Poll#schedule()-2'
+      });
+      expect(poll.state.phase).to.equal('constructed');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('when-resolved');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
+      await poll.schedule();
+      expect(poll.state.phase).to.equal('standby');
+      return;
+    });
+
+    it('should support phase transition cancellation', async () => {
+      poll = new TestPoll({
+        factory: () => Promise.resolve(),
+        frequency: { interval: 100 },
+        name: '@jupyterlab/test-coreutils:Poll#schedule()-3'
+      });
+      expect(poll.state.phase).to.equal('constructed');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('when-resolved');
+      await poll.tick;
+      expect(poll.state.phase).to.equal('resolved');
+      await poll.schedule();
+      expect(poll.state.phase).to.equal('standby');
+      await poll.schedule({
+        cancel: last => last.phase === 'standby',
+        phase: 'refreshed'
+      });
+      expect(poll.state.phase).to.equal('standby');
+      return;
     });
   });
 });
