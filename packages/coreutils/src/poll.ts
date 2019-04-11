@@ -183,7 +183,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
           return;
         }
 
-        this._locked = false;
         return this.schedule({
           interval: Private.IMMEDIATE,
           phase: 'when-resolved'
@@ -196,7 +195,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
         console.warn(`Poll (${this.name}) started despite rejection.`, reason);
 
-        this._locked = false;
         return this.schedule({
           interval: Private.IMMEDIATE,
           phase: 'when-rejected'
@@ -297,7 +295,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    this._queue.length = 0;
     this._state = {
       ...Private.DISPOSED_STATE,
       timestamp: new Date().getTime()
@@ -370,31 +367,21 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
     }
 
     const pending = this._tick;
-    const queue = this._queue;
-    let last = this.state;
 
     // The `when` promise in the constructor options acts as a gate.
-    if (last.phase === 'constructed') {
+    if (this.state.phase === 'constructed') {
       if (next.phase !== 'when-rejected' && next.phase !== 'when-resolved') {
         await pending.promise;
       }
     }
 
-    // Update `last` after pending promise settles.
-    last = this.state;
-
-    // If scheduling is locked enqueue next state.
-    if (this._locked) {
-      queue.push(next);
-      return;
-    }
-
     // Check if the phase transition should be canceled.
-    if (next.cancel && next.cancel(last)) {
+    if (next.cancel && next.cancel(this.state)) {
       return;
     }
 
     // Update poll state.
+    const last = this.state;
     const scheduled = new PromiseDelegate<this>();
     const state: IPoll.State<T, U> = {
       interval: this.frequency.interval,
@@ -432,13 +419,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
         : state.interval === Private.NEVER
           ? -1
           : setTimeout(execute, state.interval);
-
-    this._locked = false;
-
-    // Unwind the queue if necessary.
-    if (queue.length) {
-      return this.schedule(queue.shift());
-    }
   }
 
   /**
@@ -489,8 +469,6 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   private _disposed = new Signal<this, void>(this);
   private _factory: Poll.Factory<T, U>;
   private _frequency: IPoll.Frequency;
-  private _locked = true;
-  private _queue = new Array<Partial<IPoll.State>>();
   private _standby: Poll.Standby | (() => boolean | Poll.Standby);
   private _state: IPoll.State<T, U>;
   private _tick = new PromiseDelegate<this>();

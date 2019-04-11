@@ -229,16 +229,16 @@ describe('Poll', () => {
       });
       const ticker: IPoll.Phase[] = [];
       const tocker: IPoll.Phase[] = [];
-      poll.ticked.connect((_, state) => {
+      poll.ticked.connect(async (_, state) => {
         ticker.push(state.phase);
         expect(ticker.length).to.equal(tocker.length + 1);
       });
-      const tock = (poll: IPoll) => {
+      const tock = async (poll: IPoll) => {
         tocker.push(poll.state.phase);
         expect(ticker.join(' ')).to.equal(tocker.join(' '));
         poll.tick.then(tock).catch(() => undefined);
       };
-      void poll.tick.then(tock);
+      await poll.tick.then(tock);
       await poll.stop();
       await poll.start();
       await poll.tick;
