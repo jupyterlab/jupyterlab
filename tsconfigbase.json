@@ -4,6 +4,7 @@
     "composite": true,
     "declaration": true,
     "esModuleInterop": true,
+    "incremental": true,
     "jsx": "react",
     "lib": ["dom", "es2015"],
     "module": "commonjs",
