@@ -104,7 +104,7 @@ export class InspectorPanel extends Panel
    * Print in iframe
    */
   [Printing.symbol]() {
-    return async () => Printing.printWidget(this);
+    return () => Printing.printWidget(this);
   }
 
   /**

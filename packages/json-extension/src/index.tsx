@@ -44,7 +44,7 @@ export class RenderedJSON extends Widget
   }
 
   [Printing.symbol]() {
-    return async () => Printing.printWidget(this);
+    return () => Printing.printWidget(this);
   }
 
   /**

@@ -69,7 +69,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    * Print in iframe.
    */
   [Printing.symbol]() {
-    return async () => Printing.printWidget(this);
+    return () => Printing.printWidget(this);
   }
 
   /**

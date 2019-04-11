@@ -149,7 +149,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         await this.context.save();
       }
 
-      Printing.printURL(
+      await Printing.printURL(
         PageConfig.getNBConvertURL({
           format: 'html',
           download: false,

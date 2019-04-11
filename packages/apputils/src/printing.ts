@@ -8,11 +8,8 @@
  * and copies the DOM nodes from your widget to that iframe and printing just that iframe.
  *
  * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
- *
- * See https://github.com/joseluisq/printd#print
  */
 
-import { Printd } from 'printd';
 import { Widget } from '@phosphor/widgets';
 
 export namespace Printing {
@@ -58,16 +55,11 @@ export namespace Printing {
   }
 
   /**
-   * Global print instance
-   */
-  let _PRINTD: Printd = new Printd();
-
-  /**
    * Prints a widget by copying it's DOM node
    * to a hidden iframe and printing that iframe.
    */
-  export function printWidget(widget: Widget) {
-    _PRINTD.print(widget.node);
+  export function printWidget(widget: Widget): Promise<void> {
+    return printContent(widget.node);
   }
 
   /**
@@ -75,7 +67,102 @@ export namespace Printing {
    *
    * @param url URL to load into an iframe.
    */
-  export function printURL(url: string) {
-    _PRINTD.printURL(url);
+  export function printURL(url: string): Promise<void> {
+    return printContent(url);
+  }
+
+  /**
+   * Prints a URL or an element in an iframe and then removes the iframe after printing.
+   */
+  async function printContent(urlOrEl: string | HTMLElement): Promise<void> {
+    const isURL = typeof urlOrEl === 'string';
+    const parent = window.document.body;
+    const iframe = createIFrame(isURL ? (urlOrEl as string) : 'about:blank');
+    parent.appendChild(iframe);
+
+    if (!isURL) {
+      setIFrameNode(iframe, urlOrEl as HTMLElement);
+    }
+
+    await resolveWhenLoaded(iframe.contentWindow);
+    launchPrint(iframe.contentWindow);
+
+    // parent.removeChild(iframe);
+  }
+
+  /**
+   * Creates a new hidden iframe and appends it to the document
+   *
+   * Modified from
+   * https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L24
+   *
+   * Made source a parameter
+   */
+  function createIFrame(src: string): HTMLIFrameElement {
+    const el = window.document.createElement('iframe');
+    const css =
+      'visibility:hidden;width:0;height:0;position:absolute;z-index:-9999;bottom:0;';
+
+    el.setAttribute('src', src);
+    el.setAttribute('style', css);
+    el.setAttribute('width', '0');
+    el.setAttribute('height', '0');
+    el.setAttribute('wmode', 'opaque');
+
+    return el;
+  }
+
+  /**
+   * Copies a node from the base document to the iframe.
+   */
+  function setIFrameNode(iframe: HTMLIFrameElement, node: HTMLElement) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/DOMImplementation/createHTMLDocument
+
+    // Create new document
+    const newDocument = iframe.contentDocument.implementation.createHTMLDocument(
+      'JupyterLab'
+    );
+    // Copy node into document
+    newDocument.body.appendChild(newDocument.importNode(node, true));
+
+    // Copy document node into iframe document.
+    iframe.contentDocument.replaceChild(
+      iframe.contentDocument.importNode(newDocument.documentElement, true),
+      iframe.contentDocument.documentElement
+    );
+  }
+
+  /**
+   * Promise that resolves when all resources are loaded in the window.
+   */
+  function resolveWhenLoaded(contentWindow: Window): Promise<void> {
+    // If document is already loaded, the load event won't be fired
+    // again, so just return immediately.
+    // if (contentWindow.document.readyState === 'complete') {
+    //   return Promise.resolve();
+    // }
+    return new Promise((resolve, reject) => {
+      contentWindow.addEventListener(
+        'load',
+        () => {
+          console.log('loaded');
+          resolve();
+        },
+        false
+      );
+    });
+  }
+
+  /**
+   * Prints a content window.
+   */
+  function launchPrint(contentWindow: Window) {
+    // execCommand works on all but firefox
+    //  https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L148
+    const result = contentWindow.document.execCommand('print', false, null);
+
+    if (!result) {
+      contentWindow.print();
+    }
   }
 }
