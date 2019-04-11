@@ -174,7 +174,8 @@ describe('rendermime/factories', () => {
       });
 
       it('should add header anchors', async () => {
-        const source = require('../../../examples/filebrowser/sample.md') as string;
+        const source = require('../../../examples/filebrowser/sample.md')
+          .default as string;
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
         const model = createModel(mimeType, source);
