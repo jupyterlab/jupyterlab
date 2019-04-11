@@ -312,22 +312,10 @@ export class DefaultSession implements Session.ISession {
    */
   protected setupKernel(kernel: Kernel.IKernel): void {
     this._kernel = kernel;
-    kernel.statusChanged.connect(
-      this.onKernelStatus,
-      this
-    );
-    kernel.unhandledMessage.connect(
-      this.onUnhandledMessage,
-      this
-    );
-    kernel.iopubMessage.connect(
-      this.onIOPubMessage,
-      this
-    );
-    kernel.anyMessage.connect(
-      this.onAnyMessage,
-      this
-    );
+    kernel.statusChanged.connect(this.onKernelStatus, this);
+    kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
+    kernel.iopubMessage.connect(this.onIOPubMessage, this);
+    kernel.anyMessage.connect(this.onAnyMessage, this);
   }
 
   /**

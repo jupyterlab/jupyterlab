@@ -114,10 +114,7 @@ export class Completer extends Widget {
     }
     this._model = model;
     if (this._model) {
-      this._model.stateChanged.connect(
-        this.onModelStateChanged,
-        this
-      );
+      this._model.stateChanged.connect(this.onModelStateChanged, this);
     }
   }
 

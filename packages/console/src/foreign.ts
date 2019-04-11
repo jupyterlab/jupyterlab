@@ -25,10 +25,7 @@ export class ForeignHandler implements IDisposable {
    */
   constructor(options: ForeignHandler.IOptions) {
     this.session = options.session;
-    this.session.iopubMessage.connect(
-      this.onIOPubMessage,
-      this
-    );
+    this.session.iopubMessage.connect(this.onIOPubMessage, this);
     this._parent = options.parent;
   }
 

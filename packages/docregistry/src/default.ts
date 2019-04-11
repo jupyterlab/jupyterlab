@@ -32,10 +32,7 @@ export class DocumentModel extends CodeEditor.Model
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(
-      this.triggerContentChange,
-      this
-    );
+    this.value.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -447,17 +444,11 @@ export class DocumentWidget<
     this.context = options.context;
 
     // Handle context path changes
-    this.context.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this.context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged(this.context, this.context.path);
 
     // Listen for changes in the dirty state.
-    this.context.model.stateChanged.connect(
-      this._onModelStateChanged,
-      this
-    );
+    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });

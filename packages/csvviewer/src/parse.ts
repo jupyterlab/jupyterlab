@@ -191,8 +191,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     rowDelimiter === '\r\n'
       ? [CRLF, 2]
       : rowDelimiter === '\r'
-        ? [CR, 1]
-        : [LF, 1];
+      ? [CR, 1]
+      : [LF, 1];
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;

@@ -200,10 +200,7 @@ export class Cell extends Widget {
       );
     }
 
-    model.metadata.changed.connect(
-      this.onMetadataChanged,
-      this
-    );
+    model.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -692,10 +689,7 @@ export class CodeCell extends Cell {
     if (model.outputs.length === 0) {
       this.addClass(NO_OUTPUTS_CLASS);
     }
-    output.outputLengthChanged.connect(
-      this._outputLengthHandler,
-      this
-    );
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(outputCollapser);
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
@@ -703,10 +697,7 @@ export class CodeCell extends Cell {
     this._outputPlaceholder = new OutputPlaceholder(() => {
       this.outputHidden = !this.outputHidden;
     });
-    model.stateChanged.connect(
-      this.onStateChanged,
-      this
-    );
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -1082,14 +1073,11 @@ export class MarkdownCell extends Cell {
       signal: this.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(
-      () => {
-        if (this._rendered) {
-          this.update();
-        }
-      },
-      this
-    );
+    this._monitor.activityStopped.connect(() => {
+      if (this._rendered) {
+        this.update();
+      }
+    }, this);
 
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);

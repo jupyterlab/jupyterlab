@@ -749,22 +749,19 @@ export async function testEmission<T, U, V>(
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
-  signal.connect(
-    (sender: T, args: U) => {
-      if (!options.find || options.find(sender, args)) {
-        try {
-          Signal.disconnectReceiver(object);
-          if (options.test) {
-            options.test(sender, args);
-          }
-        } catch (e) {
-          done.reject(e);
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
         }
-        done.resolve(options.value || undefined);
+      } catch (e) {
+        done.reject(e);
       }
-    },
-    object
-  );
+      done.resolve(options.value || undefined);
+    }
+  }, object);
   return done.promise;
 }
 

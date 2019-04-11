@@ -877,7 +877,7 @@ namespace Private {
       return (
         !!extender &&
         !!extender[toggled] &&
-        !!((extender[toggled] as any) as (w: Widget) => (() => boolean))(widget)
+        !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };
   }

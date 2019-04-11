@@ -134,14 +134,8 @@ export class CodeConsole extends Widget {
     });
 
     this._onKernelChanged();
-    this.session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
-    this.session.statusChanged.connect(
-      this._onKernelStatusChanged,
-      this
-    );
+    this.session.kernelChanged.connect(this._onKernelChanged, this);
+    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }
 
   /**
@@ -218,10 +212,7 @@ export class CodeConsole extends Widget {
       this._msgIds.set(msgId, cell);
       this._msgIdCells.set(cell, msgId);
     }
-    cell.disposed.connect(
-      this._onCellDisposed,
-      this
-    );
+    cell.disposed.connect(this._onCellDisposed, this);
     this.update();
   }
 
@@ -233,10 +224,7 @@ export class CodeConsole extends Widget {
       // An old banner just becomes a normal cell now.
       let cell = this._banner;
       this._cells.push(this._banner);
-      cell.disposed.connect(
-        this._onCellDisposed,
-        this
-      );
+      cell.disposed.connect(this._onCellDisposed, this);
     }
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
@@ -649,10 +637,7 @@ export class CodeConsole extends Widget {
       this.clear();
       return Promise.resolve(void 0);
     }
-    cell.model.contentChanged.connect(
-      this.update,
-      this
-    );
+    cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       if (this.isDisposed) {
         return;
