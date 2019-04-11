@@ -7,7 +7,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { TerminalSession } from '@jupyterlab/services/src/terminal';
+import { TerminalSession } from '@jupyterlab/services';
 
 import { handleRequest, testEmission } from '../utils';
 

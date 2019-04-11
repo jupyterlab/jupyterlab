@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu/src';
+import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu';
 
 import { delegateExecute } from './util';
 

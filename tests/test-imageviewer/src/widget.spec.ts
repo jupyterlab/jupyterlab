@@ -18,7 +18,7 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer/src';
+import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
 
 import { createFileContext } from '@jupyterlab/testutils';
 

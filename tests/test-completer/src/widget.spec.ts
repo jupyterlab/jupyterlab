@@ -15,7 +15,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import { Completer, CompleterModel } from '@jupyterlab/completer/src';
+import { Completer, CompleterModel } from '@jupyterlab/completer';
 
 import { framePromise, sleep } from '@jupyterlab/testutils';
 

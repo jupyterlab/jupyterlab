@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { URLExt } from '@jupyterlab/coreutils/src';
+import { URLExt } from '@jupyterlab/coreutils';
 
 describe('@jupyterlab/coreutils', () => {
   describe('URLExt', () => {

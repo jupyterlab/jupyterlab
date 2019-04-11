@@ -9,7 +9,7 @@ import {
   ServerConnection,
   TerminalSession,
   TerminalManager
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
 describe('terminal', () => {
   let manager: TerminalSession.IManager;

@@ -13,7 +13,7 @@ import {
   Context,
   DocumentRegistry,
   TextModelFactory
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 

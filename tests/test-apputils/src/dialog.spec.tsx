@@ -3,7 +3,7 @@
 
 // import { expect } from 'chai';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils/src';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { each } from '@phosphor/algorithm';
 

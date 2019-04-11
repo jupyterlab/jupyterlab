@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { CodeEditor } from '@jupyterlab/codeeditor/src';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;

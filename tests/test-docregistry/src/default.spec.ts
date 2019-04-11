@@ -18,7 +18,7 @@ import {
   IDocumentWidget,
   TextModelFactory,
   Context
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 

@@ -7,7 +7,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
 
-import { KernelManager, Kernel } from '@jupyterlab/services/src/kernel';
+import { KernelManager, Kernel } from '@jupyterlab/services';
 
 import {
   PYTHON_SPEC,

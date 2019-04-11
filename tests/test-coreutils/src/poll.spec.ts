@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IPoll, Poll } from '@jupyterlab/coreutils/src';
+import { IPoll, Poll } from '@jupyterlab/coreutils';
 
 import { sleep } from '@jupyterlab/testutils';
 

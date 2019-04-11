@@ -13,7 +13,7 @@ import {
   MimeContent,
   MimeDocument,
   MimeDocumentFactory
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
 

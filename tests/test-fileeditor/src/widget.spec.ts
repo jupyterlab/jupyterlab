@@ -29,7 +29,7 @@ import {
   FileEditor,
   FileEditorCodeWrapper,
   FileEditorFactory
-} from '@jupyterlab/fileeditor/src';
+} from '@jupyterlab/fileeditor';
 
 import { framePromise } from '@jupyterlab/testutils';
 

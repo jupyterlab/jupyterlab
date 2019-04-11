@@ -5,11 +5,7 @@ import { expect } from 'chai';
 
 import { SessionManager } from '@jupyterlab/services';
 
-import {
-  ClientSession,
-  Dialog,
-  IClientSession
-} from '@jupyterlab/apputils/src';
+import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
 
 import { UUID } from '@phosphor/coreutils';
 

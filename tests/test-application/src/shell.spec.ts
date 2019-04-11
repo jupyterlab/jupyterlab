@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { LabShell } from '@jupyterlab/application/src';
+import { LabShell } from '@jupyterlab/application';
 
 class ContentWidget extends Widget {
   activated = false;
