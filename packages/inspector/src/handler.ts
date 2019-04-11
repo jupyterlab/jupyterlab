@@ -77,10 +77,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       ];
       this._monitors = signals.map(s => {
         let m = new ActivityMonitor({ signal: s, timeout: 250 });
-        m.activityStopped.connect(
-          this.onEditorChange,
-          this
-        );
+        m.activityStopped.connect(this.onEditorChange, this);
         return m;
       });
     }

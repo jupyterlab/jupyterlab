@@ -120,8 +120,8 @@ export namespace NotebookWidgetFactory {
   export interface IOptions<T extends NotebookPanel>
     extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /*
-      * A rendermime instance.
-      */
+     * A rendermime instance.
+     */
     rendermime: RenderMimeRegistry;
 
     /**

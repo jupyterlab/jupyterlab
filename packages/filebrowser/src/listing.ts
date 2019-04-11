@@ -188,18 +188,9 @@ export class DirListing extends Widget {
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
-    this._model.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
-    this._model.refreshed.connect(
-      this._onModelRefreshed,
-      this
-    );
-    this._model.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this._model.fileChanged.connect(this._onFileChanged, this);
+    this._model.refreshed.connect(this._onModelRefreshed, this);
+    this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
@@ -207,10 +198,7 @@ export class DirListing extends Widget {
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
-    this._manager.activateRequested.connect(
-      this._onActivateRequested,
-      this
-    );
+    this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
   /**

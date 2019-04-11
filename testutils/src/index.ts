@@ -58,22 +58,19 @@ export function testEmission<T, U, V>(
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
-  signal.connect(
-    (sender: T, args: U) => {
-      if (!options.find || options.find(sender, args)) {
-        try {
-          Signal.disconnectReceiver(object);
-          if (options.test) {
-            options.test(sender, args);
-          }
-        } catch (e) {
-          done.reject(e);
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
         }
-        done.resolve(options.value || undefined);
+      } catch (e) {
+        done.reject(e);
       }
-    },
-    object
-  );
+      done.resolve(options.value || undefined);
+    }
+  }, object);
   return done.promise;
 }
 
@@ -90,7 +87,7 @@ export function signalToPromises<T, U>(
   numberValues: number
 ): Promise<[T, U]>[] {
   const values: Promise<[T, U]>[] = new Array(numberValues);
-  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+  const resolvers: Array<(value: [T, U]) => void> = new Array(numberValues);
 
   for (let i = 0; i < numberValues; i++) {
     values[i] = new Promise<[T, U]>(resolve => {

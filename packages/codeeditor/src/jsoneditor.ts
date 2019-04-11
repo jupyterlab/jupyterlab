@@ -77,10 +77,7 @@ export class JSONEditor extends Widget {
 
     model.value.text = 'No data!';
     model.mimeType = 'application/json';
-    model.value.changed.connect(
-      this._onValueChanged,
-      this
-    );
+    model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
@@ -132,10 +129,7 @@ export class JSONEditor extends Widget {
     this._source = value;
     this.editor.setOption('readOnly', value === null);
     if (value) {
-      value.changed.connect(
-        this._onSourceChanged,
-        this
-      );
+      value.changed.connect(this._onSourceChanged, this);
     }
     this._setValue();
   }

@@ -77,10 +77,7 @@ export class ObservableUndoableList<T> extends ObservableList<T>
   constructor(serializer: ISerializer<T>) {
     super();
     this._serializer = serializer;
-    this.changed.connect(
-      this._onListChanged,
-      this
-    );
+    this.changed.connect(this._onListChanged, this);
   }
 
   /**

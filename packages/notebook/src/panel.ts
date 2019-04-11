@@ -49,10 +49,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
-    this.context.session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
+    this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
     void this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.

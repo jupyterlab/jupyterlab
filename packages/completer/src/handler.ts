@@ -34,14 +34,8 @@ export class CompletionHandler implements IDisposable {
    */
   constructor(options: CompletionHandler.IOptions) {
     this.completer = options.completer;
-    this.completer.selected.connect(
-      this.onCompletionSelected,
-      this
-    );
-    this.completer.visibilityChanged.connect(
-      this.onVisibilityChanged,
-      this
-    );
+    this.completer.selected.connect(this.onCompletionSelected, this);
+    this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._connector = options.connector;
   }
 
@@ -108,14 +102,8 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       this._enabled = false;
-      model.selections.changed.connect(
-        this.onSelectionsChanged,
-        this
-      );
-      model.value.changed.connect(
-        this.onTextChanged,
-        this
-      );
+      model.selections.changed.connect(this.onSelectionsChanged, this);
+      model.value.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }

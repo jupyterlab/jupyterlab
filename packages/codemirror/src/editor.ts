@@ -137,18 +137,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(
-      this._onValueChanged,
-      this
-    );
-    model.mimeTypeChanged.connect(
-      this._onMimeTypeChanged,
-      this
-    );
-    model.selections.changed.connect(
-      this._onSelectionsChanged,
-      this
-    );
+    model.value.changed.connect(this._onValueChanged, this);
+    model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+    model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {

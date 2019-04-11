@@ -133,10 +133,7 @@ export class InstanceTracker<T extends Widget>
    */
   constructor(options: InstanceTracker.IOptions) {
     this.namespace = options.namespace;
-    this._tracker.currentChanged.connect(
-      this._onCurrentChanged,
-      this
-    );
+    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
   }
 
   /**
@@ -226,10 +223,7 @@ export class InstanceTracker<T extends Widget>
       return promise;
     }
 
-    widget.disposed.connect(
-      this._onWidgetDisposed,
-      this
-    );
+    widget.disposed.connect(this._onWidgetDisposed, this);
 
     // Handle widget state restoration.
     if (this._restore) {

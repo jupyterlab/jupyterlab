@@ -956,10 +956,7 @@ export class Settings implements ISettingRegistry.ISettings {
   constructor(options: Settings.IOptions) {
     this.id = options.plugin.id;
     this.registry = options.registry;
-    this.registry.pluginChanged.connect(
-      this._onPluginChanged,
-      this
-    );
+    this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
 
   /**

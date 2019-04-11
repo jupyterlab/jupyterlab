@@ -439,8 +439,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       state.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
         : state.interval === Private.NEVER
-          ? -1
-          : setTimeout(execute, state.interval);
+        ? -1
+        : setTimeout(execute, state.interval);
   }
 
   /**
@@ -453,8 +453,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       standby === 'never'
         ? false
         : standby === 'when-hidden'
-          ? !!(typeof document !== 'undefined' && document && document.hidden)
-          : true;
+        ? !!(typeof document !== 'undefined' && document && document.hidden)
+        : true;
 
     // If in standby mode schedule next tick without calling the factory.
     if (standby) {

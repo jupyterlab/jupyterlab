@@ -105,14 +105,8 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._onActiveNotebookPanelChanged,
       this
     );
-    this._tracker.activeCellChanged.connect(
-      this._onActiveCellChanged,
-      this
-    );
-    this._tracker.selectionChanged.connect(
-      this._onSelectionChanged,
-      this
-    );
+    this._tracker.activeCellChanged.connect(this._onActiveCellChanged, this);
+    this._tracker.selectionChanged.connect(this._onSelectionChanged, this);
     this._onActiveNotebookPanelChanged();
     this._onActiveCellChanged();
     this._onSelectionChanged();
@@ -481,14 +475,8 @@ export namespace NotebookTools {
       let factory = activeCell.contentFactory.editorFactory;
 
       let cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(
-        this._onValueChanged,
-        this
-      );
-      cellModel.mimeTypeChanged.connect(
-        this._onMimeTypeChanged,
-        this
-      );
+      cellModel.value.changed.connect(this._onValueChanged, this);
+      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
       this._model.value.text = cellModel.value.text.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
 

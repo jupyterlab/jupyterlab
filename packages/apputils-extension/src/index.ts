@@ -464,10 +464,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
         // Any time the local state database changes, save the workspace.
         if (workspace) {
-          db.changed.connect(
-            listener,
-            db
-          );
+          db.changed.connect(listener, db);
         }
 
         const immediate = true;

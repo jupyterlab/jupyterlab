@@ -255,10 +255,7 @@ export class CSVViewer extends Widget {
         signal: context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(
-        this._updateGrid,
-        this
-      );
+      this._monitor.activityStopped.connect(this._updateGrid, this);
     });
   }
 

@@ -385,18 +385,9 @@ export class StaticNotebook extends Widget {
     each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
-    cells.changed.connect(
-      this._onCellsChanged,
-      this
-    );
-    newValue.contentChanged.connect(
-      this.onModelContentChanged,
-      this
-    );
-    newValue.metadata.changed.connect(
-      this.onMetadataChanged,
-      this
-    );
+    cells.changed.connect(this._onCellsChanged, this);
+    newValue.contentChanged.connect(this.onModelContentChanged, this);
+    newValue.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
@@ -1425,10 +1416,7 @@ export class Notebook extends StaticNotebook {
         }
       });
     }
-    cell.editor.edgeRequested.connect(
-      this._onEdgeRequest,
-      this
-    );
+    cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =

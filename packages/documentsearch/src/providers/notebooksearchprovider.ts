@@ -37,10 +37,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
     const cellList = this._searchTarget.model.cells;
-    cellList.changed.connect(
-      this._restartQuery.bind(this),
-      this
-    );
+    cellList.changed.connect(this._restartQuery.bind(this), this);
 
     let indexTotal = 0;
     const allMatches: ISearchMatch[] = [];
@@ -88,10 +85,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       indexTotal += matchesFromCell.length;
 
       // search has been initialized, connect the changed signal
-      cmSearchProvider.changed.connect(
-        this._onCmSearchProviderChanged,
-        this
-      );
+      cmSearchProvider.changed.connect(this._onCmSearchProviderChanged, this);
 
       allMatches.concat(matchesFromCell);
 

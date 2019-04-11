@@ -100,10 +100,7 @@ export class SearchInstance implements IDisposable {
 
     // this signal should get injected when the widget is
     // created and hooked up to react!
-    this._activeProvider.changed.connect(
-      this.updateIndices,
-      this
-    );
+    this._activeProvider.changed.connect(this.updateIndices, this);
   }
 
   private async _replaceCurrent(newText: string) {

@@ -42,10 +42,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
       oldWidget.parent = null;
     }
     this._widget = widget;
-    widget.title.changed.connect(
-      this._onTitleChanged,
-      this
-    );
+    widget.title.changed.connect(this._onTitleChanged, this);
     this._onTitleChanged(widget.title);
     this._content.addWidget(widget);
   }
