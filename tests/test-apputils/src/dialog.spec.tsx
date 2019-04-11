@@ -53,7 +53,7 @@ class ValueWidget extends Widget {
 }
 
 describe('@jupyterlab/apputils', () => {
-  describe('Dialog', () => {
+  describe.skip('Dialog', () => {
     let dialog: TestDialog;
 
     beforeEach(() => {
