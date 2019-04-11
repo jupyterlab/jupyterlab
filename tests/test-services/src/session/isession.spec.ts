@@ -9,9 +9,9 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 import {
   expectFailure,

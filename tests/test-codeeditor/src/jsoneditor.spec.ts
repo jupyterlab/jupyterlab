@@ -7,7 +7,7 @@ import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
 import { ObservableJSON } from '@jupyterlab/observables';
 
-import { JSONEditor } from '@jupyterlab/codeeditor/src';
+import { JSONEditor } from '@jupyterlab/codeeditor';
 
 import { framePromise } from '@jupyterlab/testutils';
 

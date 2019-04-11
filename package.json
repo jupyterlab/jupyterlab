@@ -72,10 +72,10 @@
     "lint-staged": "^7.1.0",
     "opn-cli": "^4.0.0",
     "prettier": "^1.11.1",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.9.0",
-    "tslint-plugin-prettier": "^1.3.0",
-    "tslint-react": "^3.6.0",
+    "tslint": "^5.15.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "tslint-react": "^4.0.0",
     "yarn": "1.6.0"
   },
   "husky": {

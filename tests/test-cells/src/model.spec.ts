@@ -12,7 +12,7 @@ import {
   RawCellModel,
   MarkdownCellModel,
   CodeCellModel
-} from '@jupyterlab/cells/src';
+} from '@jupyterlab/cells';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 

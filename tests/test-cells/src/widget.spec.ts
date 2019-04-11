@@ -24,7 +24,7 @@ import {
   CellFooter,
   CellHeader,
   InputArea
-} from '@jupyterlab/cells/src';
+} from '@jupyterlab/cells';
 
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 

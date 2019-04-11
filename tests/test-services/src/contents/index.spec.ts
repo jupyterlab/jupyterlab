@@ -8,7 +8,7 @@ import {
   ContentsManager,
   Drive,
   ServerConnection
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
 import {
   DEFAULT_FILE,

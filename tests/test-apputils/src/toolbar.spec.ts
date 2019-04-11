@@ -8,7 +8,7 @@ import {
   Toolbar,
   ToolbarButton,
   CommandToolbarButton
-} from '@jupyterlab/apputils/src';
+} from '@jupyterlab/apputils';
 
 import { toArray } from '@phosphor/algorithm';
 

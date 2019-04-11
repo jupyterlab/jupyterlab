@@ -14,7 +14,7 @@ import {
   ServerConnection,
   SessionManager,
   Session
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
 import { KERNELSPECS, handleRequest, testEmission } from '../utils';
 

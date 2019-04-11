@@ -9,7 +9,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   expectFailure,

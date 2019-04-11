@@ -47,7 +47,7 @@
     "@types/react-json-tree": "^0.6.3",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.3.1"
+    "typescript": "~3.4.3"
   },
   "publishConfig": {
     "access": "public"

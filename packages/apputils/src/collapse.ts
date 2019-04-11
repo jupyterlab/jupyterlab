@@ -154,7 +154,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this._header.node.textContent = this._widget.title.label;
   }
 
-  private _collapseChanged = new Signal<Collapse, void>(this);
+  private _collapseChanged = new Signal<this, void>(this);
   private _collapsed: boolean;
   private _content: Panel;
   private _header: Widget;

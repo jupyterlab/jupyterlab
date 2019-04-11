@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu/src';
+import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
 
 class Wodget extends Widget {
   state: string;

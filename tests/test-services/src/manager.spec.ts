@@ -3,17 +3,17 @@
 
 import { expect } from 'chai';
 
-import { ContentsManager } from '@jupyterlab/services/src/contents';
+import { ContentsManager } from '@jupyterlab/services';
 
-import { ServiceManager } from '@jupyterlab/services/src/manager';
+import { ServiceManager } from '@jupyterlab/services';
 
-import { SessionManager } from '@jupyterlab/services/src/session';
+import { SessionManager } from '@jupyterlab/services';
 
-import { SettingManager } from '@jupyterlab/services/src/setting';
+import { SettingManager } from '@jupyterlab/services';
 
-import { TerminalManager } from '@jupyterlab/services/src/terminal';
+import { TerminalManager } from '@jupyterlab/services';
 
-import { WorkspaceManager } from '@jupyterlab/services/src/workspace';
+import { WorkspaceManager } from '@jupyterlab/services';
 
 describe('manager', () => {
   describe('ServiceManager', () => {
