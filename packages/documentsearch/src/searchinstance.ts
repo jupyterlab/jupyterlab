@@ -25,7 +25,10 @@ export class SearchInstance implements IDisposable {
       onHightlightNext: this._highlightNext.bind(this),
       onHighlightPrevious: this._highlightPrevious.bind(this),
       onStartQuery: this._startQuery.bind(this),
-      onEndSearch: this.dispose.bind(this)
+      onReplaceCurrent: this._replaceCurrent.bind(this),
+      onReplaceAll: this._replaceAll.bind(this),
+      onEndSearch: this.dispose.bind(this),
+      isReadOnly: this._activeProvider.isReadOnly
     });
 
     this._widget.disposed.connect(() => {
@@ -103,6 +106,20 @@ export class SearchInstance implements IDisposable {
     );
   }
 
+  private async _replaceCurrent(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      await this._activeProvider.replaceCurrentMatch(newText);
+      this.updateIndices();
+    }
+  }
+
+  private async _replaceAll(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      await this._activeProvider.replaceAllMatches(newText);
+      this.updateIndices();
+    }
+  }
+
   /**
    * Dispose of the resources held by the search instance.
    */
@@ -177,10 +194,14 @@ export class SearchInstance implements IDisposable {
     totalMatches: 0,
     caseSensitive: false,
     useRegex: false,
-    inputText: '',
+    searchText: '',
     query: null,
     errorMessage: '',
-    forceFocus: true
+    searchInputFocused: true,
+    replaceInputFocused: false,
+    forceFocus: true,
+    replaceText: '',
+    replaceEntryShown: false
   };
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;

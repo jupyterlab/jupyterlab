@@ -751,7 +751,19 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       // Only render selections if the start is not equal to the end.
       // In that case, we don't need to render the cursor.
       if (!JSONExt.deepEqual(selection.start, selection.end)) {
-        const { anchor, head } = this._toCodeMirrorSelection(selection);
+        // Selections only appear to render correctly if the anchor
+        // is before the head in the document. That is, reverse selections
+        // do not appear as intended.
+        let forward: boolean =
+          selection.start.line < selection.end.line ||
+          (selection.start.line === selection.end.line &&
+            selection.start.column <= selection.end.column);
+        let anchor = this._toCodeMirrorPosition(
+          forward ? selection.start : selection.end
+        );
+        let head = this._toCodeMirrorPosition(
+          forward ? selection.end : selection.start
+        );
         let markerOptions: CodeMirror.TextMarkerOptions;
         if (collaborator) {
           markerOptions = this._toTextMarkerOptions({
@@ -823,18 +835,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _toCodeMirrorSelection(
     selection: CodeEditor.IRange
   ): CodeMirror.Selection {
-    // Selections only appear to render correctly if the anchor
-    // is before the head in the document. That is, reverse selections
-    // do not appear as intended.
-    let forward: boolean =
-      selection.start.line < selection.end.line ||
-      (selection.start.line === selection.end.line &&
-        selection.start.column <= selection.end.column);
-    let anchor = forward ? selection.start : selection.end;
-    let head = forward ? selection.end : selection.start;
     return {
-      anchor: this._toCodeMirrorPosition(anchor),
-      head: this._toCodeMirrorPosition(head)
+      anchor: this._toCodeMirrorPosition(selection.start),
+      head: this._toCodeMirrorPosition(selection.end)
     };
   }
 
