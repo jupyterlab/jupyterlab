@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-terminal",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -16,9 +16,9 @@
     "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/services": "^4.0.0-alpha.4",
-    "@jupyterlab/terminal": "^1.0.0-alpha.4",
-    "@jupyterlab/testutils": "^1.0.0-alpha.4",
+    "@jupyterlab/services": "^4.0.0-alpha.5",
+    "@jupyterlab/terminal": "^1.0.0-alpha.5",
+    "@jupyterlab/testutils": "^1.0.0-alpha.5",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2"
