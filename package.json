@@ -99,6 +99,7 @@
     "buildutils/test-template",
     "tests",
     "tests/test-*",
-    "testutils"
+    "testutils",
+    "jupyterlab/tests/mock_packages/extension"
   ]
 }
