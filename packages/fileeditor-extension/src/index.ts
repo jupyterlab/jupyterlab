@@ -736,14 +736,12 @@ function activate(
       tracker,
       noun: 'Code',
       isEnabled: current =>
-        !!consoleTracker.find(
-          c => c.console.session.path === current.context.path
-        ),
+        !!consoleTracker.find(c => c.session.path === current.context.path),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
         const console = consoleTracker.find(
-          console => console.console.session.path === current.context.path
+          console => console.session.path === current.context.path
         );
         if (console) {
           return console.session.restart().then(restarted => {
