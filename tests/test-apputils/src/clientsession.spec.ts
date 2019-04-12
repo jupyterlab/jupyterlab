@@ -207,7 +207,8 @@ describe('@jupyterlab/apputils', () => {
         session = new ClientSession({ manager, kernelPreference });
         await session.initialize();
         expect(session.kernel.id).to.equal(other.kernel.id);
-        await other.shutdown();
+        // We don't call other.shutdown() here because that
+        // is handled by the afterEach() handler above.
         other.dispose();
       });
 
