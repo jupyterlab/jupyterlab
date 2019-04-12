@@ -364,12 +364,10 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       return;
     }
 
-    const pending = this._tick;
-
     // The `when` promise in the constructor options acts as a gate.
     if (this.state.phase === 'constructed') {
       if (next.phase !== 'when-rejected' && next.phase !== 'when-resolved') {
-        await pending.promise;
+        await this.tick;
       }
     }
 
@@ -380,6 +378,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
 
     // Update poll state.
     const last = this.state;
+    const pending = this._tick;
     const scheduled = new PromiseDelegate<this>();
     const state: IPoll.State<T, U> = {
       interval: this.frequency.interval,
