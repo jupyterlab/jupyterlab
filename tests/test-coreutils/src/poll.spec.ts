@@ -236,7 +236,9 @@ describe('Poll', () => {
         expect(ticker.join(' ')).to.equal(tocker.join(' '));
         poll.tick.then(tock).catch(() => undefined);
       };
-      await poll.tick.then(tock);
+      // Kick off the promise listener, but void its settlement to verify that
+      // the poll's internal sync of the promise and the signal is correct.
+      void poll.tick.then(tock);
       await poll.stop();
       await poll.start();
       await poll.tick;
