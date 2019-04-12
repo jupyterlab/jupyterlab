@@ -9,9 +9,7 @@ import { sleep } from '@jupyterlab/testutils';
 
 class TestPoll extends Poll {
   schedule(
-    next: Partial<
-      IPoll.State & { cancel: ((last: IPoll.State) => boolean) }
-    > = {}
+    next: Partial<IPoll.State & { cancel: (last: IPoll.State) => boolean }> = {}
   ): Promise<void> {
     return super.schedule(next);
   }

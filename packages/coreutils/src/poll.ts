@@ -358,9 +358,7 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * schedule poll ticks.
    */
   protected async schedule(
-    next: Partial<
-      IPoll.State & { cancel: ((last: IPoll.State) => boolean) }
-    > = {}
+    next: Partial<IPoll.State & { cancel: (last: IPoll.State) => boolean }> = {}
   ): Promise<void> {
     if (this.isDisposed) {
       return;
@@ -417,8 +415,8 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       state.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
         : state.interval === Private.NEVER
-          ? -1
-          : setTimeout(execute, state.interval);
+        ? -1
+        : setTimeout(execute, state.interval);
   }
 
   /**
