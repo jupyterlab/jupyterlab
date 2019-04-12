@@ -61,6 +61,5 @@
     "@types/node": "~8.0.47",
     "@types/webpack": "^4.4.27",
     "rimraf": "~2.6.2"
-  },
-  "gitHead": "1d16c024dc0016930319c975b7d1978656a99f91"
+  }
 }

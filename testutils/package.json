@@ -51,6 +51,5 @@
   "devDependencies": {
     "@types/node-fetch": "^2.1.2",
     "typescript": "~3.4.3"
-  },
-  "gitHead": "1d16c024dc0016930319c975b7d1978656a99f91"
+  }
 }

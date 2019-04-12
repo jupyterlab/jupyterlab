@@ -43,7 +43,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "1d16c024dc0016930319c975b7d1978656a99f91",
   "jupyterlab": {
     "extension": true
   }
