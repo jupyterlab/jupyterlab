@@ -11,7 +11,7 @@ VersionInfo = namedtuple('VersionInfo', [
     'serial'
 ])
 
-version_info = VersionInfo(1, 0, 0, 'alpha', 1)
+version_info = VersionInfo(1, 0, 0, 'alpha', 2)
 
 _specifier_ = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'final': ''}
 
