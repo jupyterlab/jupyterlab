@@ -9,13 +9,22 @@ built JavaScript files are properly installed.
 
 ## Creating a full release
 
-We publish the npm packages, a Python source package, and a Python universal binary wheel. We also publish a conda package on conda-forge (see below).
-See the Python docs on [package uploading](https://packaging.python.org/guides/tool-recommendations/)
-for twine setup instructions and for why twine is the recommended method.
+We publish the npm packages, a Python source package, and a Python universal
+binary wheel. We also publish a conda package on conda-forge (see below). See
+the Python docs on [package
+uploading](https://packaging.python.org/guides/tool-recommendations/) for twine
+setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
-For convenience, here are commands for getting a completely clean repo. This makes sure that we don't have any extra tags or commits in our repo (especially since we will push our tags later in the process), and that we are on the master branch.
+For convenience, here are commands for getting a completely clean repo. This
+makes sure that we don't have any extra tags or commits in our repo (especially
+since we will push our tags later in the process), and that we are on the master
+branch.
+
+Note that right now, we pin tornado to version 5 because there are some
+incompatibilities with tornado 6. See
+https://github.com/jupyterlab/jupyterlab/issues/6131.
 
 ```bash
 cd release
@@ -23,7 +32,7 @@ conda deactivate
 conda remove --all -y -n jlabrelease
 rm -rf jupyterlab
 
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
+conda create -c conda-forge -y -n jlabrelease notebook nodejs twine 'tornado<6'
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
@@ -32,16 +41,40 @@ pip install -ve .
 
 ### Publish the npm packages
 
-The command below ensures the latest dependencies and built files,
-then prompts you to select package versions. When one package has an
-effective major release, the packages that depend on it should also get a
-major release, to prevent consumers that are using the `^` semver
-requirement from getting a conflict. Note that we publish the
-JavaScript packages using the `next` tag until we are ready for the
-final release.
+The commands below ensure the latest dependencies and built files, then change
+package versions. When one package has an effective major release, the packages
+that depend on it should also get a major release, to prevent consumers that are
+using the `^` semver requirement from getting a conflict.
+
+This command prompts you for new version numbers. It then updates version
+numbers, commits, and tags the commit. It does not publish or push the commit to
+GitHub.
 
 ```bash
-jlpm run publish:next
+jlpm run version:choose
+```
+
+Updating each version to the next prerelease is tedious. This command, run
+instead of the one above, automatically updates each package to the next
+prerelease for that package.
+
+```bash
+jlpm run version:prerelease
+```
+
+Once the version is updated, you can inspect the HEAD commit to see the version
+bumps and tags (i.e., `from-git`). The next step is to publish to npm, based on
+these tags. Note that we publish the JavaScript packages using the `next` tag
+until we are ready for the final release.
+
+```bash
+jlpm run publish:next:from-git
+```
+
+And finally, we push this HEAD commit and tags to GitHub:
+
+```bash
+git push origin master --tags
 ```
 
 ### Publish the Python package

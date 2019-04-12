@@ -42,6 +42,7 @@
     "publish": "jlpm run pre-publish && lerna publish --force-publish=* -m \"Publish\"",
     "publish:next": "jlpm run pre-publish && lerna publish --npm-tag=next --force-publish=* -m \"Publish with 'next' tag\"",
     "publish:next:changed": "jlpm run pre-publish && lerna publish --npm-tag=next -m \"Publish with 'next' tag\"",
+    "publish:next:from-git": "jlpm run pre-publish && lerna publish from-git --npm-tag=next",
     "remove:dependency": "node buildutils/lib/remove-dependency.js",
     "remove:package": "node buildutils/lib/remove-package.js",
     "remove:sibling": "node buildutils/lib/remove-package.js",
@@ -57,6 +58,8 @@
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "update:dist-tag": "node buildutils/lib/update-dist-tag.js --lerna",
     "update:local": "node buildutils/lib/update-local.js",
+    "version:choose": "jlpm run pre-publish && lerna version --force-publish=* -m \"Prerelease version\" --no-push",
+    "version:prerelease": "jlpm run pre-publish && lerna version prerelease --force-publish=* -m \"Prerelease version\" --no-push",
     "watch": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
     "watch:packages": "python scripts/watch_packages.py"
