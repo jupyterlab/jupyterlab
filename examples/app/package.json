@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -15,7 +15,7 @@
     "@jupyterlab/codemirror-extension": "^1.0.0-alpha.6",
     "@jupyterlab/completer-extension": "^1.0.0-alpha.6",
     "@jupyterlab/console-extension": "^1.0.0-alpha.6",
-    "@jupyterlab/csvviewer-extension": "^1.0.0-alpha.6",
+    "@jupyterlab/csvviewer-extension": "^1.0.0-alpha.7",
     "@jupyterlab/docmanager-extension": "^1.0.0-alpha.6",
     "@jupyterlab/faq-extension": "^1.0.0-alpha.6",
     "@jupyterlab/filebrowser-extension": "^1.0.0-alpha.6",
