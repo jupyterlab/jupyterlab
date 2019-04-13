@@ -51,7 +51,7 @@ numbers, commits, and tags the commit. It does not publish or push the commit to
 GitHub.
 
 ```bash
-jlpm run version:choose
+jlpm run version:choose:all
 ```
 
 Updating each version to the next prerelease is tedious. This command, run
@@ -59,7 +59,7 @@ instead of the one above, automatically updates each package to the next
 prerelease for that package.
 
 ```bash
-jlpm run version:prerelease
+jlpm run version:prerelease:all
 ```
 
 Once the version is updated, you can inspect the HEAD commit to see the version
