@@ -74,8 +74,18 @@ Changes in 1.0.0a3
 * Improve Tab Icons In Left Panel (`#5920 <https://github.com/jupyterlab/jupyterlab/pull/5920>`__, `#5269 <https://github.com/jupyterlab/jupyterlab/issues/5269>`__)
 * Add Event Handling Support To Vdom-Extension (`#5670 <https://github.com/jupyterlab/jupyterlab/pull/5670>`__)
 
-Features
-^^^^^^^^
+Upgrades in 1.0.0a3
+^^^^^^^^^^^^^^^^^^^
+* Update Prettier, Lerna, And Other Top-Level Dependencies (`#6190 <https://github.com/jupyterlab/jupyterlab/pull/6190>`__)
+* Update Webpack (`#6189 <https://github.com/jupyterlab/jupyterlab/pull/6189>`__)
+* Update Yarn, Jest, And Typescript (`#6188 <https://github.com/jupyterlab/jupyterlab/pull/6188>`__)
+* Convert From Uglifyjs To Terser For Js Minification. (`#6193 <https://github.com/jupyterlab/jupyterlab/pull/6193>`__)
+* Update To Vega 5 (`#6133 <https://github.com/jupyterlab/jupyterlab/pull/6133>`__, `#6128 <https://github.com/jupyterlab/jupyterlab/issues/6128>`__)
+* Update React And React-Dom To Let Extensions Use React Hooks (`#6057 <https://github.com/jupyterlab/jupyterlab/pull/6057>`__)
+
+
+Features in 1.0.0a1
+^^^^^^^^^^^^^^^^^^^
 * Enable searching notebooks, code editors, and CSV files. (`#5795 <https://github.com/jupyterlab/jupyterlab/pull/5795>`__, `#5937 <https://github.com/jupyterlab/jupyterlab/pull/5937>`__)
 * Add Commands To Open The Main Menus So That They May Be Assigned Keyboard Shortcuts. (`#5910 <https://github.com/jupyterlab/jupyterlab/pull/5910>`__, `#3074 <https://github.com/jupyterlab/jupyterlab/issues/3074>`__)
 * Add Insertbefore And Insertafter To Toolbar (`#5896 <https://github.com/jupyterlab/jupyterlab/pull/5896>`__, `#5894 <https://github.com/jupyterlab/jupyterlab/issues/5894>`__)
@@ -107,8 +117,8 @@ Features
 * Add 'new Folder' Item To Filebrowser Context Menu (`#5447 <https://github.com/jupyterlab/jupyterlab/pull/5447>`__)
 
 
-Bugs Fixed
-^^^^^^^^^^
+Bugs Fixed in 1.0.0a1
+^^^^^^^^^^^^^^^^^^^^^
 * Fix Focus Issues When Focusing Away From A Notebook In Edit Mode. (`#5925 <https://github.com/jupyterlab/jupyterlab/pull/5925>`__)
 * Start A New Terminal If Connecting To An Old One Fails. (`#5917 <https://github.com/jupyterlab/jupyterlab/pull/5917>`__)
 * Remove Initialcommand From Args Of Terminal Creation. (`#5916 <https://github.com/jupyterlab/jupyterlab/pull/5916>`__)
@@ -151,21 +161,15 @@ Bugs Fixed
 * Replace Ansi_up With Code From Classic Notebook (`#5336 <https://github.com/jupyterlab/jupyterlab/pull/5336>`__, `#3773 <https://github.com/jupyterlab/jupyterlab/issues/3773>`__)
 
 
-Upgrades
-^^^^^^^^
+Upgrades in 1.0.0a1
+^^^^^^^^^^^^^^^^^^^
 * Update Xterm.js To 3.10.1 (`#5922 <https://github.com/jupyterlab/jupyterlab/pull/5922>`__, `#2581 <https://github.com/jupyterlab/jupyterlab/pull/2581>`__)
 * Update To Typescript 3.3 (`#5929 <https://github.com/jupyterlab/jupyterlab/pull/5929>`__)
 * Upgrade Codemirror From 5.39 To 5.42 (`#5692 <https://github.com/jupyterlab/jupyterlab/pull/5692>`__, `#5588 <https://github.com/jupyterlab/jupyterlab/issues/5588>`__)
 * Update Marked To 0.5.1 (`#5490 <https://github.com/jupyterlab/jupyterlab/pull/5490>`__, `#5375 <https://github.com/jupyterlab/jupyterlab/issues/5375>`__)
-* Update Prettier, Lerna, And Other Top-Level Dependencies (`#6190 <https://github.com/jupyterlab/jupyterlab/pull/6190>`__)
-* Update Webpack (`#6189 <https://github.com/jupyterlab/jupyterlab/pull/6189>`__)
-* Update Yarn, Jest, And Typescript (`#6188 <https://github.com/jupyterlab/jupyterlab/pull/6188>`__)
-* Convert From Uglifyjs To Terser For Js Minification. (`#6193 <https://github.com/jupyterlab/jupyterlab/pull/6193>`__)
-* Update To Vega 5 (`#6133 <https://github.com/jupyterlab/jupyterlab/pull/6133>`__, `#6128 <https://github.com/jupyterlab/jupyterlab/issues/6128>`__)
-* Update React And React-Dom To Let Extensions Use React Hooks (`#6057 <https://github.com/jupyterlab/jupyterlab/pull/6057>`__)
 
-For Developers
-^^^^^^^^^^^^^^
+Changes For Developers in 1.0.0a1
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Create Jupyterfrontend Class. (`#5845 <https://github.com/jupyterlab/jupyterlab/pull/5845>`__, `#5919 <https://github.com/jupyterlab/jupyterlab/pull/5919>`__)
 * Use ``markdowndocument`` As Document Widget For ``markdownviewer``. (`#5918 <https://github.com/jupyterlab/jupyterlab/pull/5918>`__)
 * Rewrite ``markdownviewer`` As A Standard Extension (`#5901 <https://github.com/jupyterlab/jupyterlab/pull/5901>`__, `#3940 <https://github.com/jupyterlab/jupyterlab/issues/3940>`__)
