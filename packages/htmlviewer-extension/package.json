@@ -24,7 +24,7 @@
     "url": "https://github.com/mflevine/jupyterlab_html.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
