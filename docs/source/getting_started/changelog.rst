@@ -83,6 +83,12 @@ Upgrades in 1.0.0a3
 * Update To Vega 5 (`#6133 <https://github.com/jupyterlab/jupyterlab/pull/6133>`__, `#6128 <https://github.com/jupyterlab/jupyterlab/issues/6128>`__)
 * Update React And React-Dom To Let Extensions Use React Hooks (`#6057 <https://github.com/jupyterlab/jupyterlab/pull/6057>`__)
 
+Upgrading extensions to support 1.0.0a3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are many backwards-incompatible changes in 1.0.0a3 for extension developers. Here are some hints for upgrading an extension to support 1.0.0a3.
+
+* We upgraded the Webpack raw file loader. The new version of the raw loader exports ES2015 modules, so this may require changes in extensions that import files using the raw loader. For example, if you did ``require('myfile.md')`` to get the content of `myfile.md` as a string, you now should import it using ES2015 `import` syntax, or use `require('myfile.md').default`.
+
 
 Features in 1.0.0a1
 ^^^^^^^^^^^^^^^^^^^
