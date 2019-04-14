@@ -27,14 +27,11 @@ namespace CommandIDs {
   export const show = 'extensionmanager:activate-main';
 }
 
-export const EXTENSION_MANAGER_PLUGIN_ID =
-  '@jupyterlab/extensionmanager-extension:plugin';
-
 /**
  * The extension manager plugin.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: EXTENSION_MANAGER_PLUGIN_ID,
+  id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
   requires: [ISettingRegistry],
   optional: [ILabShell, ILayoutRestorer, IMainMenu, ICommandPalette],
@@ -91,7 +88,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: 'Enable Extension Manager',
       execute: () => {
         if (registry) {
-          registry.set(EXTENSION_MANAGER_PLUGIN_ID, 'enabled', !enabled);
+          registry.set(plugin.id, 'enabled', !enabled);
         }
       },
       isToggled: () => enabled
