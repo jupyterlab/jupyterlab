@@ -8,7 +8,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
@@ -18,33 +18,35 @@ import { ExtensionView } from '@jupyterlab/extensionmanager';
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
-  export const enable = 'extensionmanager:enable';
+  export const toggle = 'extensionmanager:toggle';
 
   export const hide = 'extensionmanager:hide-main';
 
   export const show = 'extensionmanager:activate-main';
-
-  export const toggle = 'extensionmanager:toggle-main';
 }
+
+export const EXTENSION_MANAGER_PLUGIN_ID =
+  '@jupyterlab/extensionmanager-extension:plugin';
 
 /**
  * The extension manager plugin.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/extensionmanager-extension:plugin',
+  id: EXTENSION_MANAGER_PLUGIN_ID,
   autoStart: true,
   requires: [ISettingRegistry],
-  optional: [ILabShell, ILayoutRestorer],
+  optional: [ILabShell, ILayoutRestorer, ICommandPalette],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     labShell: ILabShell | null,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    palette: ICommandPalette | null
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { serviceManager, shell } = app;
+    const { commands, serviceManager, shell } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -82,6 +84,20 @@ const plugin: JupyterFrontEndPlugin<void> = {
       });
     });
 
+    commands.addCommand(CommandIDs.toggle, {
+      label: 'Toggle Extension Manager',
+      execute: () => {
+        if (registry) {
+          registry.set(EXTENSION_MANAGER_PLUGIN_ID, 'enabled', !enabled);
+        }
+      }
+    });
+
+    const category: string = 'Extension Manager';
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggle, category });
+    }
+
     addCommands(app, view, labShell);
   }
 };
@@ -107,16 +123,6 @@ function addCommands(
     execute: () => {
       if (labShell && !view.isHidden) {
         labShell.collapseLeft();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.toggle, {
-    execute: () => {
-      if (view.isHidden) {
-        return commands.execute(CommandIDs.show, undefined);
-      } else {
-        return commands.execute(CommandIDs.hide, undefined);
       }
     }
   });
