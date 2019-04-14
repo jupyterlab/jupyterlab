@@ -12,6 +12,8 @@ import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import { ExtensionView } from '@jupyterlab/extensionmanager';
 
 /**
@@ -35,12 +37,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: EXTENSION_MANAGER_PLUGIN_ID,
   autoStart: true,
   requires: [ISettingRegistry],
-  optional: [ILabShell, ILayoutRestorer, ICommandPalette],
+  optional: [ILabShell, ILayoutRestorer, IMainMenu, ICommandPalette],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
+    mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const settings = await registry.load(plugin.id);
@@ -90,12 +93,18 @@ const plugin: JupyterFrontEndPlugin<void> = {
         if (registry) {
           registry.set(EXTENSION_MANAGER_PLUGIN_ID, 'enabled', !enabled);
         }
-      }
+      },
+      isToggled: () => enabled
     });
 
-    const category: string = 'Extension Manager';
+    const category = 'Extension Manager';
+    const command = CommandIDs.toggle;
     if (palette) {
-      palette.addItem({ command: CommandIDs.toggle, category });
+      palette.addItem({ command, category });
+    }
+
+    if (mainMenu) {
+      mainMenu.settingsMenu.addGroup([{ command }], 100);
     }
 
     addCommands(app, view, labShell);
