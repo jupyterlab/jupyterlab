@@ -13,6 +13,12 @@ that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
+If you believe you’ve found a security vulnerability in JupyterLab or any
+Jupyter project, please report it to
+[security@ipython.org](security@ipython.org). If you prefer to encrypt your
+security reports, you can use [this PGP public
+key](https://jupyter-notebook.readthedocs.io/en/stable/_downloads/ipython_security.asc).
+
 ## Tag Issues with Labels
 
 Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
