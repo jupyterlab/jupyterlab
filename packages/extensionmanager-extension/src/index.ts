@@ -21,10 +21,6 @@ import { ExtensionView } from '@jupyterlab/extensionmanager';
  */
 namespace CommandIDs {
   export const toggle = 'extensionmanager:toggle';
-
-  export const hide = 'extensionmanager:hide-main';
-
-  export const show = 'extensionmanager:activate-main';
 }
 
 /**
@@ -103,38 +99,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     if (mainMenu) {
       mainMenu.settingsMenu.addGroup([{ command }], 100);
     }
-
-    addCommands(app, view, labShell);
   }
 };
-
-/**
- * Add the main file view commands to the application's command registry.
- */
-function addCommands(
-  app: JupyterFrontEnd,
-  view: ExtensionView,
-  labShell: ILabShell | null
-): void {
-  const { commands, shell } = app;
-
-  commands.addCommand(CommandIDs.show, {
-    label: 'Show Extension Manager',
-    execute: () => {
-      shell.activateById(view.id);
-    }
-  });
-
-  commands.addCommand(CommandIDs.hide, {
-    execute: () => {
-      if (labShell && !view.isHidden) {
-        labShell.collapseLeft();
-      }
-    }
-  });
-
-  // TODO: Also add to command palette.
-}
 
 /**
  * Export the plugin as the default.
