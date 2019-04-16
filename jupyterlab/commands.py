@@ -443,10 +443,18 @@ class _AppHandler(object):
         staging = pjoin(app_dir, 'staging')
 
         # Make sure packages are installed.
-        self._run(['node', YARN_PATH, 'install'], cwd=staging)
+        ret = self._run(['node', YARN_PATH, 'install', '--non-interactive'], cwd=staging)
+        if ret != 0:
+            msg = 'npm dependencies failed to install'
+            self.logger.error(msg)
+            raise RuntimeError(msg)
 
         # Build the app.
-        self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+        if ret != 0:
+            msg = 'JupyterLab failed to build'
+            self.logger.error(msg)
+            raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in
