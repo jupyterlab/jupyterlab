@@ -81,6 +81,20 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#removeItem()', () => {
+      it('should remove an item from the toolbar', () => {
+        const item = new Widget();
+        expect(widget.addItem('test', item)).to.equal(true);
+        expect(widget.removeItem('test')).to.equal(true);
+        expect(toArray(widget.names())).to.be.empty;
+      });
+
+      it('should return false if the item is not in the toolbar', () => {
+        widget.addItem('foo', new Widget());
+        expect(widget.removeItem('bar')).to.equal(false);
+      });
+    });
+
     describe('#insertItem()', () => {
       it('should insert the item into the toolbar', () => {
         widget.addItem('a', new Widget());
