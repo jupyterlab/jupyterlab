@@ -20,7 +20,10 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
+import {
+  ITerminalTracker,
+  ITerminal
+} from '@jupyterlab/terminal/lib/constants';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
@@ -361,7 +364,7 @@ export function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.toggleTheme, {
+  commands.addCommand(CommandIDs.setTheme, {
     label: args => {
       const theme = args['theme'] as string;
       const displayName = theme[0].toUpperCase() + theme.substring(1);
@@ -370,9 +373,9 @@ export function addCommands(
         : displayName;
     },
     caption: 'Set the terminal theme',
-    isToggled: args => args['theme'] === Terminal.defaultOptions.theme,
+    isToggled: args => args['theme'] === ITerminal.defaultOptions.theme,
     execute: async args => {
-      const theme = args['theme'] as Terminal.ITheme;
+      const theme = args['theme'] as ITerminal.Theme;
       try {
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.setTheme);

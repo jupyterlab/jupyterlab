@@ -10,7 +10,7 @@ import { DockPanel, Widget } from '@phosphor/widgets';
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import { Terminal } from '@jupyterlab/terminal/lib/widget';
+import { Terminal } from '@jupyterlab/terminal';
 
 function main(): void {
   let term1 = new Terminal({ theme: 'light' });

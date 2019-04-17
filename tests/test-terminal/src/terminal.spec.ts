@@ -9,7 +9,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { Terminal } from '@jupyterlab/terminal/lib/widget';
+import { Terminal } from '@jupyterlab/terminal';
 
 import { framePromise } from '@jupyterlab/testutils';
 
