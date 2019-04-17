@@ -226,11 +226,11 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    */
   removeItem(name: string): boolean {
-    let layout = this.layout as ToolbarLayout;
     const pos = toArray(this.names()).indexOf(name);
     if (pos === -1) {
       return false;
     }
+    let layout = this.layout as ToolbarLayout;
     layout.removeWidgetAt(pos);
     return true;
   }
