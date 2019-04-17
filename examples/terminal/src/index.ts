@@ -16,10 +16,10 @@ function main(): void {
   let term1 = new Terminal({ theme: 'light' });
   let term2 = new Terminal({ theme: 'dark' });
 
-  TerminalSession.startNew().then(session => {
+  void TerminalSession.startNew().then(session => {
     term1.session = session;
   });
-  TerminalSession.startNew().then(session => {
+  void TerminalSession.startNew().then(session => {
     term2.session = session;
   });
 

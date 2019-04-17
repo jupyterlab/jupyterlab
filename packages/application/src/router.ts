@@ -235,7 +235,7 @@ export class Router implements IRouter {
     // Because a `route()` call may still be in the stack after having received
     // a `stop` token, wait for the next stack frame before calling `route()`.
     requestAnimationFrame(() => {
-      this.route();
+      void this.route();
     });
   }
 

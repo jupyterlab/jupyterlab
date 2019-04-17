@@ -39,12 +39,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._options = { ...ITerminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
-    const { lightTheme, darkTheme } = Private;
-    const xtermTheme = theme === 'light' ? lightTheme : darkTheme;
-    const xtermOptions = { theme: xtermTheme, ...other };
+    const xtermOptions = { theme: Private.getXTermTheme(theme), ...other };
 
     this.addClass(TERMINAL_CLASS);
-    this.toggleClass('jp-mod-light', theme === 'light');
 
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
@@ -68,6 +65,20 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     if (value) {
       this.setSession(value);
     }
+    void value.ready.then(() => {
+      if (this.isDisposed || value !== this._session) {
+        return;
+      }
+      value.messageReceived.connect(this._onMessage, this);
+      this.title.label = `Terminal ${value.name}`;
+      this._setSessionSize();
+      if (this._options.initialCommand) {
+        this._session.send({
+          type: 'stdin',
+          content: [this._options.initialCommand + '\r']
+        });
+      }
+    });
   }
 
   /**
@@ -86,28 +97,28 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     option: K,
     value: ITerminal.IOptions[K]
   ): void {
-    if (this._options[option] === value) {
+    if (
+      option !== 'theme' &&
+      (this._options[option] === value || option === 'initialCommand')
+    ) {
       return;
     }
 
     this._options[option] = value;
 
     switch (option) {
-      case 'initialCommand':
-        return;
       case 'theme':
-        this.toggleClass('jp-mod-light', value === 'light');
         this._term.setOption(
           'theme',
-          value === 'light' ? Private.lightTheme : Private.darkTheme
+          Private.getXTermTheme(value as Terminal.ITheme)
         );
         break;
       default:
         this._term.setOption(option, value);
-        this._needsResize = true;
         break;
     }
 
+    this._needsResize = true;
     this.update();
   }
 
@@ -326,7 +337,82 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _termOpened = false;
   private _offsetWidth = -1;
   private _offsetHeight = -1;
-  private _options: ITerminal.IOptions;
+  private _options: Terminal.IOptions;
+}
+
+/**
+ * The namespace for `Terminal` class statics.
+ */
+export namespace Terminal {
+  /**
+   * Options for the terminal widget.
+   */
+  export interface IOptions {
+    /**
+     * The font family used to render text.
+     */
+    fontFamily: string | null;
+
+    /**
+     * The font size of the terminal in pixels.
+     */
+    fontSize: number;
+
+    /**
+     * The line height used to render text.
+     */
+    lineHeight: number | null;
+
+    /**
+     * The theme of the terminal.
+     */
+    theme: ITheme;
+
+    /**
+     * The amount of buffer scrollback to be used
+     * with the terminal
+     */
+    scrollback: number | null;
+
+    /**
+     * Whether to blink the cursor.  Can only be set at startup.
+     */
+    cursorBlink: boolean;
+
+    /**
+     * An optional command to run when the session starts.
+     */
+    initialCommand: string;
+  }
+
+  /**
+   * The default options used for creating terminals.
+   */
+  export const defaultOptions: IOptions = {
+    theme: 'inherit',
+    fontFamily: 'courier-new, courier, monospace',
+    fontSize: 13,
+    lineHeight: 1.0,
+    scrollback: 1000,
+    cursorBlink: true,
+    initialCommand: ''
+  };
+
+  /**
+   * A type for the terminal theme.
+   */
+  export type ITheme = 'light' | 'dark' | 'inherit';
+
+  /**
+   * A type for the terminal theme.
+   */
+  export interface IThemeObject {
+    foreground: string;
+    background: string;
+    cursor: string;
+    cursorAccent: string;
+    selection: string;
+  }
 }
 
 /**
@@ -341,7 +427,7 @@ namespace Private {
   /**
    * The light terminal theme.
    */
-  export const lightTheme = {
+  export const lightTheme: Terminal.IThemeObject = {
     foreground: '#000',
     background: '#fff',
     cursor: '#616161', // md-grey-700
@@ -352,11 +438,44 @@ namespace Private {
   /**
    * The dark terminal theme.
    */
-  export const darkTheme = {
+  export const darkTheme: Terminal.IThemeObject = {
     foreground: '#fff',
     background: '#000',
     cursor: '#fff',
     cursorAccent: '#000',
     selection: 'rgba(255, 255, 255, 0.3)'
   };
+
+  /**
+   * The current theme.
+   */
+  export const inheritTheme = (): Terminal.IThemeObject => ({
+    foreground: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color0'
+    ),
+    background: getComputedStyle(document.body).getPropertyValue(
+      '--jp-layout-color0'
+    ),
+    cursor: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color1'
+    ),
+    cursorAccent: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-inverse-font-color0'
+    ),
+    selection: getComputedStyle(document.body).getPropertyValue(
+      '--jp-ui-font-color3'
+    )
+  });
+
+  export function getXTermTheme(theme: Terminal.ITheme): Terminal.IThemeObject {
+    switch (theme) {
+      case 'light':
+        return lightTheme;
+      case 'dark':
+        return darkTheme;
+      case 'inherit':
+      default:
+        return inheritTheme();
+    }
+  }
 }

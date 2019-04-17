@@ -79,11 +79,8 @@ export class ConsoleHistory implements IConsoleHistory {
    */
   constructor(options: ConsoleHistory.IOptions) {
     this.session = options.session;
-    this._handleKernel();
-    this.session.kernelChanged.connect(
-      this._handleKernel,
-      this
-    );
+    void this._handleKernel();
+    this.session.kernelChanged.connect(this._handleKernel, this);
   }
 
   /**
@@ -111,14 +108,8 @@ export class ConsoleHistory implements IConsoleHistory {
     this._editor = value;
 
     if (value) {
-      value.edgeRequested.connect(
-        this.onEdgeRequest,
-        this
-      );
-      value.model.value.changed.connect(
-        this.onTextChange,
-        this
-      );
+      value.edgeRequested.connect(this.onEdgeRequest, this);
+      value.model.value.changed.connect(this.onTextChange, this);
     }
   }
 
@@ -265,7 +256,7 @@ export class ConsoleHistory implements IConsoleHistory {
     let source = model.value.text;
 
     if (location === 'top' || location === 'topLine') {
-      this.back(source).then(value => {
+      void this.back(source).then(value => {
         if (this.isDisposed || !value) {
           return;
         }
@@ -282,7 +273,7 @@ export class ConsoleHistory implements IConsoleHistory {
         editor.setCursorPosition({ line: 0, column: columnPos });
       });
     } else {
-      this.forward(source).then(value => {
+      void this.forward(source).then(value => {
         if (this.isDisposed) {
           return;
         }
@@ -303,14 +294,14 @@ export class ConsoleHistory implements IConsoleHistory {
   /**
    * Handle the current kernel changing.
    */
-  private _handleKernel(): void {
+  private async _handleKernel(): Promise<void> {
     let kernel = this.session.kernel;
     if (!kernel) {
       this._history.length = 0;
       return;
     }
 
-    kernel.requestHistory(Private.initialRequest).then(v => {
+    return kernel.requestHistory(Private.initialRequest).then(v => {
       this.onHistory(v);
     });
   }

@@ -207,7 +207,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
       });
     };
-    Session.listRunning().then(models => {
+    void Session.listRunning().then(models => {
       onRunningChanged(sessions, models);
     });
     sessions.runningChanged.connect(onRunningChanged);

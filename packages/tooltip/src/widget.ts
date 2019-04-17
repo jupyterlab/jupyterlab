@@ -74,7 +74,7 @@ export class Tooltip extends Widget {
     }
 
     this._content = this._rendermime.createRenderer(mimeType);
-    this._content.renderModel(model);
+    void this._content.renderModel(model);
     this._content.addClass(CONTENT_CLASS);
     layout.addWidget(this._content);
   }

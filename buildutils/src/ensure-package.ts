@@ -212,6 +212,10 @@ export async function ensurePackage(
     delete data.devDependencies;
   }
 
+  // Make sure there are no gitHead keys, which are only temporary keys used
+  // when a package is actually being published.
+  delete data.gitHead;
+
   if (utils.writePackageData(path.join(pkgPath, 'package.json'), data)) {
     messages.push('Updated package.json');
   }

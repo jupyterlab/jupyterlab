@@ -154,7 +154,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       };
       item.model!.config = config;
     };
-    Promise.all([
+    void Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
       app.restored
     ]).then(([settings]) => {
@@ -283,9 +283,9 @@ function activate(
 
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
-    tracker.add(widget);
+    void tracker.add(widget);
     updateWidget(widget.content);
   });
   app.docRegistry.addWidgetFactory(factory);
@@ -735,24 +735,22 @@ function activate(
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',
-      isEnabled: current => {
-        let found = false;
-        consoleTracker.forEach(console => {
-          if (console.console.session.path === current.context.path) {
-            found = true;
-          }
-        });
-        return found;
-      },
+      isEnabled: current =>
+        !!consoleTracker.find(c => c.session.path === current.context.path),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
-        return current.context.session.restart().then(restarted => {
-          if (restarted) {
-            commands.execute(CommandIDs.runAllCode);
-          }
-          return restarted;
-        });
+        const console = consoleTracker.find(
+          console => console.session.path === current.context.path
+        );
+        if (console) {
+          return console.session.restart().then(restarted => {
+            if (restarted) {
+              void commands.execute(CommandIDs.runAllCode);
+            }
+            return restarted;
+          });
+        }
       }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }

@@ -72,9 +72,29 @@ export class CSVSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query, true);
     return undefined;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    return false;
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    return false;
   }
 
   /**
@@ -93,6 +113,13 @@ export class CSVSearchProvider implements ISearchProvider {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null = null;
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = true;
 
   private _target: IDocumentWidget<CSVViewer>;
   private _query: RegExp;

@@ -214,10 +214,13 @@
       "path": "../ui-components"
     },
     {
+      "path": "../vdom"
+    },
+    {
       "path": "../vdom-extension"
     },
     {
-      "path": "../vega4-extension"
+      "path": "../vega5-extension"
     }
   ]
 }

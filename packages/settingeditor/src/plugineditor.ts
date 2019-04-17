@@ -57,10 +57,7 @@ export class PluginEditor extends Widget {
       rendermime
     });
     this.table = this._tableEditor = new TableEditor({ onSaveError });
-    this._rawEditor.handleMoved.connect(
-      this._onStateChanged,
-      this
-    );
+    this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
     layout.addWidget(this._rawEditor);
     layout.addWidget(this._tableEditor);
@@ -260,7 +257,7 @@ namespace Private {
   export function onSaveError(reason: any): void {
     console.error(`Saving setting editor value failed: ${reason.message}`);
 
-    showDialog({
+    void showDialog({
       title: 'Your changes were not saved.',
       body: reason.message,
       buttons: [Dialog.okButton()]

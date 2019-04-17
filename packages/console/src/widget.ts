@@ -134,14 +134,8 @@ export class CodeConsole extends Widget {
     });
 
     this._onKernelChanged();
-    this.session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
-    this.session.statusChanged.connect(
-      this._onKernelStatusChanged,
-      this
-    );
+    this.session.kernelChanged.connect(this._onKernelChanged, this);
+    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }
 
   /**
@@ -218,10 +212,7 @@ export class CodeConsole extends Widget {
       this._msgIds.set(msgId, cell);
       this._msgIdCells.set(cell, msgId);
     }
-    cell.disposed.connect(
-      this._onCellDisposed,
-      this
-    );
+    cell.disposed.connect(this._onCellDisposed, this);
     this.update();
   }
 
@@ -233,10 +224,7 @@ export class CodeConsole extends Widget {
       // An old banner just becomes a normal cell now.
       let cell = this._banner;
       this._cells.push(this._banner);
-      cell.disposed.connect(
-        this._onCellDisposed,
-        this
-      );
+      cell.disposed.connect(this._onCellDisposed, this);
     }
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
@@ -244,7 +232,7 @@ export class CodeConsole extends Widget {
     let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
-    }));
+    })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
@@ -460,14 +448,18 @@ export class CodeConsole extends Widget {
         event.clientY
       )
     ) {
-      this._startDrag(data.index, event.clientX, event.clientY);
+      void this._startDrag(data.index, event.clientX, event.clientY);
     }
   }
 
   /**
    * Start a drag event
    */
-  private _startDrag(index: number, clientX: number, clientY: number) {
+  private _startDrag(
+    index: number,
+    clientX: number,
+    clientY: number
+  ): Promise<void> {
     const cellModel = this._focusedCell.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
@@ -492,7 +484,7 @@ export class CodeConsole extends Widget {
 
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    this._drag.start(clientX, clientY).then(() => {
+    return this._drag.start(clientX, clientY).then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -645,10 +637,7 @@ export class CodeConsole extends Widget {
       this.clear();
       return Promise.resolve(void 0);
     }
-    cell.model.contentChanged.connect(
-      this.update,
-      this
-    );
+    cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       if (this.isDisposed) {
         return;
@@ -889,7 +878,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -903,7 +892,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 

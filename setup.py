@@ -133,14 +133,15 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
+    'tornado<6',
     'jupyterlab_server>=0.3.0,<0.4.0'
 ]
 
 setup_args['extras_require'] = {
     'test': [
-        'pytest==4.0',
-        'requests',
-        'pytest-check-links'
+        'pytest',
+        'pytest-check-links',
+        'requests'
     ],
     'docs': [
         'sphinx',

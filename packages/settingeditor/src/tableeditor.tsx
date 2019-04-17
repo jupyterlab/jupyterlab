@@ -44,10 +44,7 @@ export class TableEditor extends Widget {
     }
     this._settings = settings;
     if (this._settings) {
-      this._settings.changed.connect(
-        this._onSettingsChanged,
-        this
-      );
+      this._settings.changed.connect(this._onSettingsChanged, this);
     }
     this.update();
   }

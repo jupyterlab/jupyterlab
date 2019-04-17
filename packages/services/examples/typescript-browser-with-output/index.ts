@@ -31,7 +31,7 @@ function main() {
   const rendermime = new RenderMimeRegistry({ initialFactories });
   const outputArea = new OutputArea({ model, rendermime });
 
-  Kernel.startNew().then(kernel => {
+  void Kernel.startNew().then(kernel => {
     outputArea.future = kernel.requestExecute({ code });
     document.getElementById('outputarea').appendChild(outputArea.node);
   });

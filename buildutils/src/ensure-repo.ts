@@ -27,7 +27,7 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
 let pkgData: { [key: string]: any } = {};
@@ -268,5 +268,5 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  ensureIntegrity();
+  void ensureIntegrity();
 }

@@ -7,10 +7,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  ConfigSection,
-  ConfigWithDefaults
-} from '@jupyterlab/services/src/config';
+import { ConfigSection, ConfigWithDefaults } from '@jupyterlab/services';
 
 import {
   expectFailure,

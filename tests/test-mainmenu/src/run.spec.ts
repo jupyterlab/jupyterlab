@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu/src';
+import { RunMenu, IRunMenu } from '@jupyterlab/mainmenu';
 
 class Wodget extends Widget {
   state: string;
@@ -32,7 +32,7 @@ describe('@jupyterlab/mainmenu', () => {
       wodget = new Wodget();
       menu = new RunMenu({ commands });
       tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -67,11 +67,11 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.codeRunners.add(runner);
-        delegateExecute(wodget, menu.codeRunners, 'run');
+        void delegateExecute(wodget, menu.codeRunners, 'run');
         expect(wodget.state).to.equal('run');
-        delegateExecute(wodget, menu.codeRunners, 'runAll');
+        void delegateExecute(wodget, menu.codeRunners, 'runAll');
         expect(wodget.state).to.equal('runAll');
-        delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
+        void delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
         expect(wodget.state).to.equal('restartAndRunAll');
       });
     });

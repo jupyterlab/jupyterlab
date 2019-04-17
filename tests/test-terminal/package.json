@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-terminal",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.6",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,12 +13,12 @@
     "test:firefox": "python run-test.py --browsers=Firefox karma.conf.js",
     "test:ie": "python run-test.py  --browsers=IE karma.conf.js",
     "watch": "tsc -b --watch",
-    "watch:src": "tsp -p src --watch"
+    "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/services": "^4.0.0-alpha.3",
-    "@jupyterlab/terminal": "^1.0.0-alpha.3",
-    "@jupyterlab/testutils": "^1.0.0-alpha.3",
+    "@jupyterlab/services": "^4.0.0-alpha.6",
+    "@jupyterlab/terminal": "^1.0.0-alpha.6",
+    "@jupyterlab/testutils": "^1.0.0-alpha.6",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "chai": "~4.1.2"
@@ -29,6 +29,6 @@
     "karma-chrome-launcher": "~2.2.0",
     "puppeteer": "^1.5.0",
     "rimraf": "~2.6.2",
-    "typescript": "~3.3.1"
+    "typescript": "~3.4.3"
   }
 }

@@ -29,7 +29,7 @@ export function reportInstallError(name: string, errorMessage?: string) {
     );
   }
   let body = <div className="jp-extensionmanager-dialog">{entries}</div>;
-  showDialog({
+  void showDialog({
     title: 'Extension Installation Error',
     body,
     buttons: [Dialog.warnButton({ label: 'OK' })]

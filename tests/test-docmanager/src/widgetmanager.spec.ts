@@ -43,9 +43,9 @@ class LoggingManager extends DocumentWidgetManager {
     return super.messageHook(handler, msg);
   }
 
-  setCaption(widget: Widget): void {
+  setCaption(widget: Widget): Promise<void> {
     this.methods.push('setCaption');
-    super.setCaption(widget);
+    return super.setCaption(widget);
   }
 
   onClose(widget: Widget): Promise<boolean> {
@@ -70,7 +70,7 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   before(() => {
-    services = new ServiceManager();
+    services = new ServiceManager({ standby: 'never' });
   });
 
   beforeEach(() => {

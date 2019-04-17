@@ -75,10 +75,7 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    this._model.refreshed.connect(
-      this.update,
-      this
-    );
+    this._model.refreshed.connect(this.update, this);
   }
 
   /**
@@ -272,8 +269,8 @@ export class BreadCrumbs extends Widget {
       let newPath = PathExt.join(path, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
-    Promise.all(promises).catch(err => {
-      showErrorMessage('Move Error', err);
+    void Promise.all(promises).catch(err => {
+      return showErrorMessage('Move Error', err);
     });
   }
 

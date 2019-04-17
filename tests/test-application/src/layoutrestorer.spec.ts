@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ILabShell, LayoutRestorer } from '@jupyterlab/application/src';
+import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 

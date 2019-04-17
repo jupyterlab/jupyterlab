@@ -211,7 +211,7 @@ def install_extension(extension, app_dir=None, logger=None):
     return handler.install_extension(extension)
 
 
-def uninstall_extension(name, app_dir=None, logger=None):
+def uninstall_extension(name=None, app_dir=None, logger=None, all_=False):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
@@ -219,6 +219,8 @@ def uninstall_extension(name, app_dir=None, logger=None):
     logger = _ensure_logger(logger)
     _node_check(logger)
     handler = _AppHandler(app_dir, logger)
+    if all_ is True:
+        return handler.uninstall_all_extensions()
     return handler.uninstall_extension(name)
 
 
@@ -441,10 +443,18 @@ class _AppHandler(object):
         staging = pjoin(app_dir, 'staging')
 
         # Make sure packages are installed.
-        self._run(['node', YARN_PATH, 'install'], cwd=staging)
+        ret = self._run(['node', YARN_PATH, 'install', '--non-interactive'], cwd=staging)
+        if ret != 0:
+            msg = 'npm dependencies failed to install'
+            self.logger.error(msg)
+            raise RuntimeError(msg)
 
         # Build the app.
-        self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+        if ret != 0:
+            msg = 'JupyterLab failed to build'
+            self.logger.error(msg)
+            raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in
@@ -614,6 +624,17 @@ class _AppHandler(object):
 
         self.logger.warn('No labextension named "%s" installed' % name)
         return False
+
+    def uninstall_all_extensions(self):
+        """Uninstalls all extensions
+
+        Returns `True` if a rebuild is recommended, `False` otherwise
+        """
+        should_rebuild = False
+        for (extname, _) in self.info['extensions'].items():
+            uninstalled = self.uninstall_extension(extname)
+            should_rebuild = should_rebuild or uninstalled
+        return should_rebuild
 
     def update_all_extensions(self):
         """Update all non-local extensions.
@@ -1515,7 +1536,7 @@ def _validate_extension(data):
         return ['The `jupyterlab` key must be a JSON object']
     extension = jlab.get('extension', False)
     mime_extension = jlab.get('mimeExtension', False)
-    themeDir = jlab.get('themeDir', '')
+    themePath = jlab.get('themePath', '')
     schemaDir = jlab.get('schemaDir', '')
 
     messages = []
@@ -1547,8 +1568,8 @@ def _validate_extension(data):
     if mime_extension and mime_extension not in files:
         messages.append('Missing mimeExtension module "%s"' % mime_extension)
 
-    if themeDir and not any(f.startswith(themeDir) for f in files):
-        messages.append('themeDir is empty: "%s"' % themeDir)
+    if themePath and not any(f.startswith(themePath) for f in files):
+        messages.append('themePath is empty: "%s"' % themePath)
 
     if schemaDir and not any(f.startswith(schemaDir) for f in files):
         messages.append('schemaDir is empty: "%s"' % schemaDir)

@@ -189,20 +189,20 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           )}
           {entry.enabled && (
             <Button
-              onClick={() => props.performAction('enable', entry)}
-              minimal
-              small
-            >
-              Enable
-            </Button>
-          )}
-          {!entry.enabled && (
-            <Button
               onClick={() => props.performAction('disable', entry)}
               minimal
               small
             >
               Disable
+            </Button>
+          )}
+          {!entry.enabled && (
+            <Button
+              onClick={() => props.performAction('enable', entry)}
+              minimal
+              small
+            >
+              Enable
             </Button>
           )}
         </div>
@@ -344,10 +344,9 @@ export class CollapsibleSection extends React.Component<
         <header>
           <ToolbarButtonComponent
             iconClassName={
-              'jp-Icon jp-Icon-16 ' +
-              (this.state.isOpen
+              this.state.isOpen
                 ? 'jp-extensionmanager-expandIcon'
-                : 'jp-extensionmanager-collapseIcon')
+                : 'jp-extensionmanager-collapseIcon'
             }
             onClick={() => {
               this.handleCollapse();
@@ -475,7 +474,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     );
     const content = [];
     if (!model.initialized) {
-      model.initialize();
+      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list
@@ -539,7 +538,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             <ToolbarButtonComponent
               key="refresh-button"
               className="jp-extensionmanager-refresh"
-              iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+              iconClassName="jp-RefreshIcon"
               onClick={() => {
                 model.refreshInstalled();
               }}

@@ -105,8 +105,8 @@ describe('terminal/index', () => {
     });
 
     describe('#theme', () => {
-      it('should be dark by default', () => {
-        expect(widget.getOption('theme')).to.equal('dark');
+      it('should be set to inherit by default', () => {
+        expect(widget.getOption('theme')).to.equal('inherit');
       });
 
       it('should be light if we change it', () => {
@@ -180,7 +180,7 @@ describe('terminal/index', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         const style = window.getComputedStyle(widget.node);
-        expect(style.backgroundColor).to.equal('rgb(0, 0, 0)');
+        expect(style.backgroundColor).to.equal('rgba(0, 0, 0, 0)');
       });
     });
 

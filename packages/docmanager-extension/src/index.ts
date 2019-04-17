@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray, iter } from '@phosphor/algorithm';
+import { toArray, iter, some, map, each } from '@phosphor/algorithm';
 
 import { Widget, DockLayout } from '@phosphor/widgets';
 
@@ -520,36 +520,21 @@ function addCommands(
     label: () => 'Save All',
     caption: 'Save all open documents',
     isEnabled: () => {
-      const iterator = shell.widgets('main');
-      let widget = iterator.next();
-      while (widget) {
-        let context = docManager.contextForWidget(widget);
-        if (
-          context &&
-          context.contentsModel &&
-          context.contentsModel.writable
-        ) {
-          return true;
-        }
-        widget = iterator.next();
-      }
-      // disable saveAll if all of the widgets models
-      // have writable === false
-      return false;
+      return some(
+        map(shell.widgets('main'), w => docManager.contextForWidget(w)),
+        c => c && c.contentsModel && c.contentsModel.writable
+      );
     },
     execute: () => {
-      const iterator = shell.widgets('main');
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
-      let widget = iterator.next();
-      while (widget) {
+      each(shell.widgets('main'), widget => {
         const context = docManager.contextForWidget(widget);
         if (context && !context.model.readOnly && !paths.has(context.path)) {
           paths.add(context.path);
           promises.push(context.save());
         }
-        widget = iterator.next();
-      }
+      });
       return Promise.all(promises);
     }
   });
@@ -766,15 +751,15 @@ function addLabCommands(
   commands.addCommand(CommandIDs.showInFileBrowser, {
     label: () => `Show in File Browser`,
     isEnabled,
-    execute: () => {
+    execute: async () => {
       let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
 
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
-      commands.execute('filebrowser:activate', { path: context.path });
-      commands.execute('filebrowser:navigate', { path: context.path });
+      await commands.execute('filebrowser:activate', { path: context.path });
+      await commands.execute('filebrowser:navigate', { path: context.path });
     }
   });
 
@@ -835,7 +820,7 @@ function handleContext(
       }
     }
   };
-  context.ready.then(() => {
+  void context.ready.then(() => {
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
       disposable = status.setDirty();

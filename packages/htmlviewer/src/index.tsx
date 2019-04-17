@@ -75,24 +75,21 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     });
     this.content.addClass(CSS_CLASS);
 
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
         signal: this.context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(
-        this.update,
-        this
-      );
+      this._monitor.activityStopped.connect(this.update, this);
     });
 
     // Make a refresh button for the toolbar.
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+        iconClassName: 'jp-RefreshIcon',
         onClick: () => {
           this.content.url = this.content.url;
         },
@@ -155,7 +152,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
       return;
     }
     this._renderPending = true;
-    this._renderModel().then(() => (this._renderPending = false));
+    void this._renderModel().then(() => (this._renderPending = false));
   }
 
   /**

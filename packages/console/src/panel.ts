@@ -79,24 +79,15 @@ export class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    session.initialize().then(() => {
+    void session.initialize().then(() => {
       this._connected = new Date();
       this._updateTitle();
     });
 
-    this.console.executed.connect(
-      this._onExecuted,
-      this
-    );
+    this.console.executed.connect(this._onExecuted, this);
     this._updateTitle();
-    session.kernelChanged.connect(
-      this._updateTitle,
-      this
-    );
-    session.propertyChanged.connect(
-      this._updateTitle,
-      this
-    );
+    session.kernelChanged.connect(this._updateTitle, this);
+    session.propertyChanged.connect(this._updateTitle, this);
 
     this.title.icon = CONSOLE_ICON_CLASS;
     this.title.closable = true;

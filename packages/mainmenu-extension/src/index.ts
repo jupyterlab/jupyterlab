@@ -58,8 +58,6 @@ export namespace CommandIDs {
 
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export const persistAndSave = 'filemenu:persist-and-save';
-
   export const createConsole = 'filemenu:create-console';
 
   export const quit = 'filemenu:quit';
@@ -329,33 +327,6 @@ export function createFileMenu(
     )
   });
 
-  // Add a delegator command for persisting data then saving.
-  commands.addCommand(CommandIDs.persistAndSave, {
-    label: () => {
-      const action = Private.delegateLabel(
-        app,
-        menu.persistAndSavers,
-        'action'
-      );
-      const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
-      return `Save ${name} ${action || 'with Extras'}`;
-    },
-    isEnabled: args => {
-      return (
-        Private.delegateEnabled(
-          app,
-          menu.persistAndSavers,
-          'persistAndSave'
-        )() && commands.isEnabled('docmanager:save', args)
-      );
-    },
-    execute: Private.delegateExecute(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    )
-  });
-
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
@@ -375,7 +346,7 @@ export function createFileMenu(
     label: 'Quit',
     caption: 'Quit JupyterLab',
     execute: () => {
-      showDialog({
+      return showDialog({
         title: 'Quit confirmation',
         body: 'Please confirm you want to quit JupyterLab.',
         buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
@@ -383,14 +354,18 @@ export function createFileMenu(
         if (result.button.accept) {
           let setting = ServerConnection.makeSettings();
           let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
-          ServerConnection.makeRequest(apiURL, { method: 'POST' }, setting)
+          return ServerConnection.makeRequest(
+            apiURL,
+            { method: 'POST' },
+            setting
+          )
             .then(result => {
               if (result.ok) {
                 // Close this window if the shutdown request has been successful
                 let body = document.createElement('div');
                 body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
                   <p>To use JupyterLab again, you will need to relaunch it.</p>`;
-                showDialog({
+                void showDialog({
                   title: 'Server stopped',
                   body: new Widget({ node: body }),
                   buttons: []
@@ -433,7 +408,6 @@ export function createFileMenu(
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'filemenu:persist-and-save',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => {
@@ -524,7 +498,7 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
     execute: () => {
-      showDialog({
+      return showDialog({
         title: 'Shutdown All?',
         body: 'Shut down all kernels?',
         buttons: [
@@ -674,7 +648,6 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
-
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
@@ -762,7 +735,7 @@ export function createTabsMenu(
   });
 
   if (labShell) {
-    app.restored.then(() => {
+    void app.restored.then(() => {
       // Iterate over the current widgets in the
       // main area, and add them to the tab group
       // of the menu.
@@ -904,7 +877,7 @@ namespace Private {
       return (
         !!extender &&
         !!extender[toggled] &&
-        !!((extender[toggled] as any) as (w: Widget) => (() => boolean))(widget)
+        !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };
   }

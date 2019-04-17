@@ -91,14 +91,8 @@ export class FileBrowserModel implements IDisposable {
       options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
-    services.sessions.runningChanged.connect(
-      this._onRunningChanged,
-      this
-    );
+    services.contents.fileChanged.connect(this._onFileChanged, this);
+    services.sessions.runningChanged.connect(this._onRunningChanged, this);
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -280,8 +274,9 @@ export class FileBrowserModel implements IDisposable {
         this._pendingPath = null;
         if (oldValue !== newValue) {
           // If there is a state database and a unique key, save the new path.
+          // We don't need to wait on the save to continue.
           if (this._state && this._key) {
-            this._state.save(this._key, { path: newValue });
+            void this._state.save(this._key, { path: newValue });
           }
 
           this._pathChanged.emit({
@@ -321,7 +316,7 @@ export class FileBrowserModel implements IDisposable {
       let element = document.createElement('a');
       document.body.appendChild(element);
       element.setAttribute('href', url);
-      element.setAttribute('download', '');
+      element.setAttribute('target', '_blank');
       element.click();
       document.body.removeChild(element);
       return void 0;
@@ -586,8 +581,8 @@ export class FileBrowserModel implements IDisposable {
       oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-          ? newValue
-          : undefined;
+        ? newValue
+        : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -616,7 +611,7 @@ export class FileBrowserModel implements IDisposable {
   private _startTimer(): void {
     this._timeoutId = window.setInterval(() => {
       if (this._requested) {
-        this.refresh();
+        void this.refresh();
         return;
       }
       if (document.hidden) {
@@ -625,7 +620,7 @@ export class FileBrowserModel implements IDisposable {
       }
       let date = new Date().getTime();
       if (date - this._lastRefresh > this._refreshDuration) {
-        this.refresh();
+        void this.refresh();
       }
     }, MIN_REFRESH);
   }
@@ -636,7 +631,7 @@ export class FileBrowserModel implements IDisposable {
   private _scheduleUpdate(): void {
     let date = new Date().getTime();
     if (date - this._lastRefresh > MIN_REFRESH) {
-      this.refresh();
+      void this.refresh();
     } else {
       this._requested = true;
     }

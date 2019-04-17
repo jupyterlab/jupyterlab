@@ -14,9 +14,19 @@ import {
   ServerConnection,
   SessionManager,
   Session
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
 import { KERNELSPECS, handleRequest, testEmission } from '../utils';
+
+class TestManager extends SessionManager {
+  intercept: Kernel.ISpecModels | null = null;
+  protected async requestSpecs(): Promise<void> {
+    if (this.intercept) {
+      handleRequest(this, 200, this.intercept);
+    }
+    return super.requestSpecs();
+  }
+}
 
 /**
  * Start a new session on with a default name.
@@ -97,17 +107,18 @@ describe('session/manager', () => {
 
     describe('#specsChanged', () => {
       it('should be emitted when the specs change', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        specs.default = 'shell';
-        handleRequest(manager, 200, specs);
         let called = false;
-        manager.specsChanged.connect((sender, args) => {
-          expect(sender).to.equal(manager);
-          if (args.default === specs.default) {
-            called = true;
-          }
+        manager.specsChanged.connect(() => {
+          called = true;
         });
+        await manager.ready;
+        expect(manager.specs.default).to.equal('echo');
+        specs.default = 'shell';
+        manager.intercept = specs;
         await manager.refreshSpecs();
+        expect(manager.specs.default).to.equal('shell');
         expect(called).to.equal(true);
       });
     });
@@ -128,7 +139,6 @@ describe('session/manager', () => {
         let called = false;
         const s = await startNew(manager);
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await s.shutdown();
@@ -138,7 +148,6 @@ describe('session/manager', () => {
       it('should be emitted when a session is renamed', async () => {
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await session.setPath(UUID.uuid4());
@@ -149,7 +158,6 @@ describe('session/manager', () => {
       it('should be emitted when a session changes kernels', async () => {
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await session.changeKernel({ name: session.kernel.name });
@@ -169,12 +177,15 @@ describe('session/manager', () => {
     });
 
     describe('#refreshSpecs()', () => {
-      it('should refresh the specs', async () => {
+      it('should update list of kernel specs', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+        await manager.ready;
         specs.default = 'shell';
-        handleRequest(manager, 200, specs);
+        manager.intercept = specs;
+        expect(manager.specs.default).not.to.equal('shell');
         await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal(specs.default);
+        expect(manager.specs.default).to.equal('shell');
       });
     });
 

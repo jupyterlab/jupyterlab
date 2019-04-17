@@ -9,7 +9,7 @@ module.exports = function(name: string, baseDir: string) {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot|svg)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
-    setupTestFrameworkScriptFile: '@jupyterlab/testutils/lib/jest-script.js',
+    setupFilesAfterEnv: ['@jupyterlab/testutils/lib/jest-script.js'],
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/dev_mode/', '/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
@@ -21,10 +21,10 @@ module.exports = function(name: string, baseDir: string) {
     ],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
-    testRegex: `tests\/test-${name}\/src\/.*\.spec\.ts$`,
+    testRegex: `tests\/test-${name}\/src\/.*\.spec\.tsx?$`,
     globals: {
       'ts-jest': {
-        tsConfigFile: `tests/test-${name}/tsconfig.json`
+        tsConfig: `./tsconfig.json`
       }
     }
   };

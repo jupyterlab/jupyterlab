@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { SessionManager } from '@jupyterlab/services';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils/src';
+import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -19,6 +19,7 @@ describe('@jupyterlab/apputils', () => {
     beforeAll(() => manager.ready);
 
     beforeEach(() => {
+      Dialog.flush();
       session = new ClientSession({
         manager,
         kernelPreference: { name: manager.specs.default }
@@ -26,7 +27,12 @@ describe('@jupyterlab/apputils', () => {
     });
 
     afterEach(async () => {
-      await session.shutdown();
+      Dialog.flush();
+      try {
+        await session.shutdown();
+      } catch (error) {
+        console.warn('Session shutdown failed.', error);
+      }
       session.dispose();
     });
 
@@ -186,11 +192,13 @@ describe('@jupyterlab/apputils', () => {
 
         await session.initialize();
         expect(other.kernel.id).to.equal(session.kernel.id);
+        await other.shutdown();
         other.dispose();
       });
 
       it('should connect to an existing kernel', async () => {
-        // Dispose the session so it can be re-instantiated.
+        // Shut down and dispose the session so it can be re-instantiated.
+        await session.shutdown();
         session.dispose();
 
         const other = await manager.startNew({ path: UUID.uuid4() });
@@ -199,6 +207,8 @@ describe('@jupyterlab/apputils', () => {
         session = new ClientSession({ manager, kernelPreference });
         await session.initialize();
         expect(session.kernel.id).to.equal(other.kernel.id);
+        // We don't call other.shutdown() here because that
+        // is handled by the afterEach() handler above.
         other.dispose();
       });
 
@@ -302,26 +312,22 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restart()', () => {
-      it(
-        'should restart if the user accepts the dialog',
-        async () => {
-          let called = false;
+      it('should restart if the user accepts the dialog', async () => {
+        let called = false;
 
-          await session.initialize();
-          session.statusChanged.connect((sender, args) => {
-            if (args === 'restarting') {
-              called = true;
-            }
-          });
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
 
-          const restart = session.restart();
+        const restart = session.restart();
 
-          await acceptDialog();
-          expect(await restart).to.equal(true);
-          expect(called).to.equal(true);
-        },
-        30000
-      );
+        await acceptDialog();
+        expect(await restart).to.equal(true);
+        expect(called).to.equal(true);
+      }, 30000);
 
       it('should not restart if the user rejects the dialog', async () => {
         let called = false;
@@ -373,47 +379,39 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restartKernel()', () => {
-      it(
-        'should restart if the user accepts the dialog',
-        async () => {
-          let called = false;
+      it('should restart if the user accepts the dialog', async () => {
+        let called = false;
 
-          session.statusChanged.connect((sender, args) => {
-            if (args === 'restarting') {
-              called = true;
-            }
-          });
-          await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
+        await session.initialize();
 
-          const restart = ClientSession.restartKernel(session.kernel);
+        const restart = ClientSession.restartKernel(session.kernel);
 
-          await acceptDialog();
-          await restart;
-          expect(called).to.equal(true);
-        },
-        30000
-      ); // Allow for slower CI
+        await acceptDialog();
+        await restart;
+        expect(called).to.equal(true);
+      }, 30000); // Allow for slower CI
 
-      it(
-        'should not restart if the user rejects the dialog',
-        async () => {
-          let called = false;
+      it('should not restart if the user rejects the dialog', async () => {
+        let called = false;
 
-          await session.initialize();
-          session.statusChanged.connect((sender, args) => {
-            if (args === 'restarting') {
-              called = true;
-            }
-          });
+        await session.initialize();
+        session.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
 
-          const restart = ClientSession.restartKernel(session.kernel);
+        const restart = ClientSession.restartKernel(session.kernel);
 
-          await dismissDialog();
-          await restart;
-          expect(called).to.equal(false);
-        },
-        30000
-      ); // Allow for slower CI
+        await dismissDialog();
+        await restart;
+        expect(called).to.equal(false);
+      }, 30000); // Allow for slower CI
     });
 
     describe('.getDefaultKernel()', () => {

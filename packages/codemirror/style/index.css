@@ -43,11 +43,16 @@
 /* This causes https://github.com/jupyter/jupyterlab/issues/522 */
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
-  padding: var(--jp-code-padding);
+  padding: var(--jp-code-padding) 0;
 }
 
-.CodeMirror-linenumbers {
-  padding: 0 4px 0 4px;
+/* Set horizontal padding on line nodes for correct margins */
+pre.CodeMirror-line {
+  padding: 0 var(--jp-code-padding);
+}
+
+.CodeMirror-linenumber {
+  padding: 0 8px;
 }
 
 .jp-CodeMirrorEditor-static {
@@ -85,11 +90,7 @@
 
 .CodeMirror-gutters {
   border-right: 1px solid var(--jp-border-color2);
-  background-color: var(--jp-layout-color2);
-}
-
-.CodeMirror-gutter-wrapper {
-  margin-left: calc(-1 * var(--jp-code-padding));
+  background-color: var(--jp-layout-color0);
 }
 
 .jp-CollaboratorCursor {
@@ -100,6 +101,18 @@
   background-clip: content-box;
   margin-left: -5px;
   margin-right: -5px;
+}
+
+.CodeMirror-selectedtext.cm-searching {
+  background-color: var(--jp-search-selected-match-background-color) !important;
+  color: var(--jp-search-selected-match-color) !important;
+}
+
+.cm-searching {
+  background-color: var(
+    --jp-search-unselected-match-background-color
+  ) !important;
+  color: var(--jp-search-unselected-match-color) !important;
 }
 
 .CodeMirror-focused .CodeMirror-selected {
@@ -153,7 +166,7 @@
 }
 
 .cm-s-jupyter .CodeMirror-cursor {
-  border-left: 1.4px solid var(--jp-editor-cursor-color);
+  border-left: var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color);
 }
 .cm-s-jupyter span.cm-keyword {
   color: var(--jp-mirror-editor-keyword-color);

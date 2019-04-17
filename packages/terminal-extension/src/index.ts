@@ -12,6 +12,7 @@ import {
 import {
   ICommandPalette,
   InstanceTracker,
+  IThemeManager,
   MainAreaWidget
 } from '@jupyterlab/apputils';
 
@@ -23,6 +24,8 @@ import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
+
+import { Menu } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -38,7 +41,7 @@ namespace CommandIDs {
 
   export const decreaseFont = 'terminal:decrease-font';
 
-  export const toggleTheme = 'terminal:toggle-theme';
+  export const setTheme = 'terminal:set-theme';
 }
 
 /**
@@ -54,7 +57,13 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
   requires: [ISettingRegistry],
-  optional: [ICommandPalette, ILauncher, ILayoutRestorer, IMainMenu],
+  optional: [
+    ICommandPalette,
+    ILauncher,
+    ILayoutRestorer,
+    IMainMenu,
+    IThemeManager
+  ],
   autoStart: true
 };
 
@@ -72,9 +81,10 @@ function activate(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null
+  mainMenu: IMainMenu | null,
+  themeManager: IThemeManager
 ): ITerminalTracker {
-  const { serviceManager } = app;
+  const { serviceManager, commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
   const tracker = new InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>({
@@ -144,18 +154,48 @@ function activate(
     })
     .catch(Private.showErrorMessage);
 
+  // Subscribe to changes in theme.
+  themeManager.themeChanged.connect((sender, args) => {
+    tracker.forEach(widget => {
+      const terminal = widget.content;
+      if (terminal.getOption('theme') === 'inherit') {
+        terminal.setOption('theme', 'inherit');
+      }
+    });
+  });
+
   addCommands(app, tracker, settingRegistry);
 
   if (mainMenu) {
-    // Add some commands to the application view menu.
-    const viewGroup = [
-      CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
-    ].map(command => {
-      return { command };
+    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
+    const themeMenu = new Menu({ commands });
+    themeMenu.title.label = 'Terminal Theme';
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'inherit', isPalette: false }
     });
-    mainMenu.settingsMenu.addGroup(viewGroup, 40);
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'light', isPalette: false }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'dark', isPalette: false }
+    });
+    mainMenu.settingsMenu.addGroup(
+      [{ type: 'submenu', submenu: themeMenu }],
+      2
+    );
+
+    // Add some commands to the "View" menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.increaseFont },
+        { command: CommandIDs.decreaseFont },
+        { type: 'submenu', submenu: themeMenu }
+      ],
+      40
+    );
 
     // Add terminal creation to the file menu.
     mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
@@ -167,10 +207,24 @@ function activate(
       CommandIDs.createNew,
       CommandIDs.refresh,
       CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
+      CommandIDs.decreaseFont
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'inherit', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'light', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'dark', isPalette: true }
     });
   }
 
@@ -231,7 +285,7 @@ export function addCommands(
               .catch(() => serviceManager.terminals.startNew())
           : serviceManager.terminals.startNew());
 
-        tracker.add(main);
+        void tracker.add(main);
         app.shell.activateById(main.id);
 
         return main;
@@ -308,15 +362,20 @@ export function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleTheme, {
-    label: 'Use Dark Terminal Theme',
-    caption: 'Whether to use the dark terminal theme',
-    isToggled: () => ITerminal.defaultOptions.theme === 'dark',
-    execute: async () => {
-      let { theme } = ITerminal.defaultOptions;
-      theme = theme === 'dark' ? 'light' : 'dark';
+    label: args => {
+      const theme = args['theme'] as string;
+      const displayName = theme[0].toUpperCase() + theme.substring(1);
+      return args['isPalette']
+        ? `Use ${displayName} Terminal Theme`
+        : displayName;
+    },
+    caption: 'Set the terminal theme',
+    isToggled: args => args['theme'] === Terminal.defaultOptions.theme,
+    execute: async args => {
+      const theme = args['theme'] as Terminal.ITheme;
       try {
         await settingRegistry.set(plugin.id, 'theme', theme);
-        commands.notifyCommandChanged(CommandIDs.toggleTheme);
+        commands.notifyCommandChanged(CommandIDs.setTheme);
       } catch (err) {
         Private.showErrorMessage(err);
       }

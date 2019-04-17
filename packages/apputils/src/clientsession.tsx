@@ -523,7 +523,8 @@ export class ClientSession implements IClientSession {
         let session = manager.connectTo(model);
         this._handleNewSession(session);
       } catch (err) {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
+        return Promise.reject(err);
       }
     }
     await this._startIfNecessary();
@@ -641,7 +642,7 @@ export class ClientSession implements IClientSession {
         return this._handleNewSession(session);
       })
       .catch(err => {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
         return Promise.reject(err);
       });
   }
@@ -672,30 +673,12 @@ export class ClientSession implements IClientSession {
       this._propertyChanged.emit('type');
     }
 
-    session.terminated.connect(
-      this._onTerminated,
-      this
-    );
-    session.propertyChanged.connect(
-      this._onPropertyChanged,
-      this
-    );
-    session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
-    session.statusChanged.connect(
-      this._onStatusChanged,
-      this
-    );
-    session.iopubMessage.connect(
-      this._onIopubMessage,
-      this
-    );
-    session.unhandledMessage.connect(
-      this._onUnhandledMessage,
-      this
-    );
+    session.terminated.connect(this._onTerminated, this);
+    session.propertyChanged.connect(this._onPropertyChanged, this);
+    session.kernelChanged.connect(this._onKernelChanged, this);
+    session.statusChanged.connect(this._onStatusChanged, this);
+    session.iopubMessage.connect(this._onIopubMessage, this);
+    session.unhandledMessage.connect(this._onUnhandledMessage, this);
     this._prevKernelName = session.kernel.name;
 
     // The session kernel was disposed above when the session was disposed, so

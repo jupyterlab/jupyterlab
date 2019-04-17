@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IFrame } from '@jupyterlab/apputils/src';
+import { IFrame } from '@jupyterlab/apputils';
 
 describe('@jupyterlab/apputils', () => {
   describe('IFrame', () => {
